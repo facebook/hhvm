@@ -41,12 +41,11 @@ void EnumMetadata<::test::fixtures::python_capi::NormalDecentEnum>::gen(ThriftMe
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.MyStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::test::fixtures::python_capi::MyStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_MyStruct = res.first->second;
-  module_MyStruct.name() = "module.MyStruct";
+  ::apache::thrift::metadata::ThriftStruct& module_MyStruct = res.metadata;
   module_MyStruct.is_union() = false;
   static const auto* const
   module_MyStruct_fields = new std::array<EncodedThriftField, 8>{ {
@@ -60,16 +59,15 @@ StructMetadata<::test::fixtures::python_capi::MyStruct>::gen(ThriftMetadata& met
     field.structured_annotations() = f.structured_annotations;
     module_MyStruct.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::MyDataItem>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.MyDataItem", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::test::fixtures::python_capi::MyDataItem>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_MyDataItem = res.first->second;
-  module_MyDataItem.name() = "module.MyDataItem";
+  ::apache::thrift::metadata::ThriftStruct& module_MyDataItem = res.metadata;
   module_MyDataItem.is_union() = false;
   static const auto* const
   module_MyDataItem_fields = new std::array<EncodedThriftField, 1>{ {
@@ -83,29 +81,27 @@ StructMetadata<::test::fixtures::python_capi::MyDataItem>::gen(ThriftMetadata& m
     field.structured_annotations() = f.structured_annotations;
     module_MyDataItem.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::TransitiveDoubler>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.TransitiveDoubler", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::test::fixtures::python_capi::TransitiveDoubler>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_TransitiveDoubler = res.first->second;
-  module_TransitiveDoubler.name() = "module.TransitiveDoubler";
+  ::apache::thrift::metadata::ThriftStruct& module_TransitiveDoubler = res.metadata;
   module_TransitiveDoubler.is_union() = false;
   module_TransitiveDoubler.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::thrift::test::lib::StructDoubler") } }).cv_struct());
   module_TransitiveDoubler.structured_annotations()->push_back(*cvStruct("scope.Transitive", {  }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::detail::DoubledPair>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.DoubledPair", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::test::fixtures::python_capi::detail::DoubledPair>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_DoubledPair = res.first->second;
-  module_DoubledPair.name() = "module.DoubledPair";
+  ::apache::thrift::metadata::ThriftStruct& module_DoubledPair = res.metadata;
   module_DoubledPair.is_union() = false;
   static const auto* const
   module_DoubledPair_fields = new std::array<EncodedThriftField, 2>{ {
@@ -120,16 +116,15 @@ StructMetadata<::test::fixtures::python_capi::detail::DoubledPair>::gen(ThriftMe
     module_DoubledPair.fields()->push_back(std::move(field));
   }
   module_DoubledPair.structured_annotations()->push_back(*cvStruct("module.TransitiveDoubler", {  }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::StringPair>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.StringPair", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::test::fixtures::python_capi::StringPair>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_StringPair = res.first->second;
-  module_StringPair.name() = "module.StringPair";
+  ::apache::thrift::metadata::ThriftStruct& module_StringPair = res.metadata;
   module_StringPair.is_union() = false;
   static const auto* const
   module_StringPair_fields = new std::array<EncodedThriftField, 2>{ {
@@ -143,28 +138,26 @@ StructMetadata<::test::fixtures::python_capi::StringPair>::gen(ThriftMetadata& m
     field.structured_annotations() = f.structured_annotations;
     module_StringPair.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::VapidStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.EmptyStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::test::fixtures::python_capi::VapidStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_EmptyStruct = res.first->second;
-  module_EmptyStruct.name() = "module.EmptyStruct";
+  ::apache::thrift::metadata::ThriftStruct& module_EmptyStruct = res.metadata;
   module_EmptyStruct.is_union() = false;
   module_EmptyStruct.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("VapidStruct") } }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::PrimitiveStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.PrimitiveStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::test::fixtures::python_capi::PrimitiveStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_PrimitiveStruct = res.first->second;
-  module_PrimitiveStruct.name() = "module.PrimitiveStruct";
+  ::apache::thrift::metadata::ThriftStruct& module_PrimitiveStruct = res.metadata;
   module_PrimitiveStruct.is_union() = false;
   static const auto* const
   module_PrimitiveStruct_fields = new std::array<EncodedThriftField, 16>{ {
@@ -178,16 +171,15 @@ StructMetadata<::test::fixtures::python_capi::PrimitiveStruct>::gen(ThriftMetada
     field.structured_annotations() = f.structured_annotations;
     module_PrimitiveStruct.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::AdaptedFields>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.AdaptedFields", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::test::fixtures::python_capi::AdaptedFields>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_AdaptedFields = res.first->second;
-  module_AdaptedFields.name() = "module.AdaptedFields";
+  ::apache::thrift::metadata::ThriftStruct& module_AdaptedFields = res.metadata;
   module_AdaptedFields.is_union() = false;
   static const auto* const
   module_AdaptedFields_fields = new std::array<EncodedThriftField, 4>{ {
@@ -201,16 +193,15 @@ StructMetadata<::test::fixtures::python_capi::AdaptedFields>::gen(ThriftMetadata
     field.structured_annotations() = f.structured_annotations;
     module_AdaptedFields.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::ListStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.ListStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::test::fixtures::python_capi::ListStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_ListStruct = res.first->second;
-  module_ListStruct.name() = "module.ListStruct";
+  ::apache::thrift::metadata::ThriftStruct& module_ListStruct = res.metadata;
   module_ListStruct.is_union() = false;
   static const auto* const
   module_ListStruct_fields = new std::array<EncodedThriftField, 9>{ {
@@ -224,16 +215,15 @@ StructMetadata<::test::fixtures::python_capi::ListStruct>::gen(ThriftMetadata& m
     field.structured_annotations() = f.structured_annotations;
     module_ListStruct.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::SetStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.SetStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::test::fixtures::python_capi::SetStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_SetStruct = res.first->second;
-  module_SetStruct.name() = "module.SetStruct";
+  ::apache::thrift::metadata::ThriftStruct& module_SetStruct = res.metadata;
   module_SetStruct.is_union() = false;
   static const auto* const
   module_SetStruct_fields = new std::array<EncodedThriftField, 7>{ {
@@ -248,16 +238,15 @@ StructMetadata<::test::fixtures::python_capi::SetStruct>::gen(ThriftMetadata& me
     module_SetStruct.fields()->push_back(std::move(field));
   }
   module_SetStruct.structured_annotations()->push_back(*cvStruct("cpp.EnableCustomTypeOrdering", {  }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::MapStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.MapStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::test::fixtures::python_capi::MapStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_MapStruct = res.first->second;
-  module_MapStruct.name() = "module.MapStruct";
+  ::apache::thrift::metadata::ThriftStruct& module_MapStruct = res.metadata;
   module_MapStruct.is_union() = false;
   static const auto* const
   module_MapStruct_fields = new std::array<EncodedThriftField, 10>{ {
@@ -272,16 +261,15 @@ StructMetadata<::test::fixtures::python_capi::MapStruct>::gen(ThriftMetadata& me
     module_MapStruct.fields()->push_back(std::move(field));
   }
   module_MapStruct.structured_annotations()->push_back(*cvStruct("cpp.EnableCustomTypeOrdering", {  }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::ComposeStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.ComposeStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::test::fixtures::python_capi::ComposeStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_ComposeStruct = res.first->second;
-  module_ComposeStruct.name() = "module.ComposeStruct";
+  ::apache::thrift::metadata::ThriftStruct& module_ComposeStruct = res.metadata;
   module_ComposeStruct.is_union() = false;
   static const auto* const
   module_ComposeStruct_fields = new std::array<EncodedThriftField, 10>{ {
@@ -295,16 +283,15 @@ StructMetadata<::test::fixtures::python_capi::ComposeStruct>::gen(ThriftMetadata
     field.structured_annotations() = f.structured_annotations;
     module_ComposeStruct.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::Shallot>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.Onion", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::test::fixtures::python_capi::Shallot>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_Onion = res.first->second;
-  module_Onion.name() = "module.Onion";
+  ::apache::thrift::metadata::ThriftStruct& module_Onion = res.metadata;
   module_Onion.is_union() = true;
   static const auto* const
   module_Onion_fields = new std::array<EncodedThriftField, 7>{ {
@@ -319,16 +306,15 @@ StructMetadata<::test::fixtures::python_capi::Shallot>::gen(ThriftMetadata& meta
     module_Onion.fields()->push_back(std::move(field));
   }
   module_Onion.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("Shallot") } }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::SomeBinary>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.SomeBinary", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::test::fixtures::python_capi::SomeBinary>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_SomeBinary = res.first->second;
-  module_SomeBinary.name() = "module.SomeBinary";
+  ::apache::thrift::metadata::ThriftStruct& module_SomeBinary = res.metadata;
   module_SomeBinary.is_union() = true;
   static const auto* const
   module_SomeBinary_fields = new std::array<EncodedThriftField, 3>{ {
@@ -342,7 +328,7 @@ StructMetadata<::test::fixtures::python_capi::SomeBinary>::gen(ThriftMetadata& m
     field.structured_annotations() = f.structured_annotations;
     module_SomeBinary.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 
 } // namespace md

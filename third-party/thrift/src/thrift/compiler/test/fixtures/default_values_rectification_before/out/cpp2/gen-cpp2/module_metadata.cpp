@@ -28,23 +28,21 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.EmptyStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_EmptyStruct = res.first->second;
-  module_EmptyStruct.name() = "module.EmptyStruct";
+  ::apache::thrift::metadata::ThriftStruct& module_EmptyStruct = res.metadata;
   module_EmptyStruct.is_union() = false;
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.TestStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_TestStruct = res.first->second;
-  module_TestStruct.name() = "module.TestStruct";
+  ::apache::thrift::metadata::ThriftStruct& module_TestStruct = res.metadata;
   module_TestStruct.is_union() = false;
   static const auto* const
   module_TestStruct_fields = new std::array<EncodedThriftField, 8>{ {
@@ -58,7 +56,7 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values_rect
     field.structured_annotations() = f.structured_annotations;
     module_TestStruct.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 
 } // namespace md

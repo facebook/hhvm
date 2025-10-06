@@ -28,12 +28,11 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::Foo>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("simple.Foo", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::apache::thrift::test::Foo>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& simple_Foo = res.first->second;
-  simple_Foo.name() = "simple.Foo";
+  ::apache::thrift::metadata::ThriftStruct& simple_Foo = res.metadata;
   simple_Foo.is_union() = false;
   static const auto* const
   simple_Foo_fields = new std::array<EncodedThriftField, 4>{ {
@@ -47,16 +46,15 @@ StructMetadata<::apache::thrift::test::Foo>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     simple_Foo.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::LazyFoo>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("simple.LazyFoo", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::apache::thrift::test::LazyFoo>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& simple_LazyFoo = res.first->second;
-  simple_LazyFoo.name() = "simple.LazyFoo";
+  ::apache::thrift::metadata::ThriftStruct& simple_LazyFoo = res.metadata;
   simple_LazyFoo.is_union() = false;
   static const auto* const
   simple_LazyFoo_fields = new std::array<EncodedThriftField, 4>{ {
@@ -70,16 +68,15 @@ StructMetadata<::apache::thrift::test::LazyFoo>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     simple_LazyFoo.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::OptionalFoo>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("simple.OptionalFoo", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::apache::thrift::test::OptionalFoo>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& simple_OptionalFoo = res.first->second;
-  simple_OptionalFoo.name() = "simple.OptionalFoo";
+  ::apache::thrift::metadata::ThriftStruct& simple_OptionalFoo = res.metadata;
   simple_OptionalFoo.is_union() = false;
   static const auto* const
   simple_OptionalFoo_fields = new std::array<EncodedThriftField, 4>{ {
@@ -93,16 +90,15 @@ StructMetadata<::apache::thrift::test::OptionalFoo>::gen(ThriftMetadata& metadat
     field.structured_annotations() = f.structured_annotations;
     simple_OptionalFoo.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::OptionalLazyFoo>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("simple.OptionalLazyFoo", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::apache::thrift::test::OptionalLazyFoo>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& simple_OptionalLazyFoo = res.first->second;
-  simple_OptionalLazyFoo.name() = "simple.OptionalLazyFoo";
+  ::apache::thrift::metadata::ThriftStruct& simple_OptionalLazyFoo = res.metadata;
   simple_OptionalLazyFoo.is_union() = false;
   static const auto* const
   simple_OptionalLazyFoo_fields = new std::array<EncodedThriftField, 4>{ {
@@ -116,16 +112,15 @@ StructMetadata<::apache::thrift::test::OptionalLazyFoo>::gen(ThriftMetadata& met
     field.structured_annotations() = f.structured_annotations;
     simple_OptionalLazyFoo.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::OptionalBoxedLazyFoo>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("simple.OptionalBoxedLazyFoo", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::apache::thrift::test::OptionalBoxedLazyFoo>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& simple_OptionalBoxedLazyFoo = res.first->second;
-  simple_OptionalBoxedLazyFoo.name() = "simple.OptionalBoxedLazyFoo";
+  ::apache::thrift::metadata::ThriftStruct& simple_OptionalBoxedLazyFoo = res.metadata;
   simple_OptionalBoxedLazyFoo.is_union() = false;
   static const auto* const
   simple_OptionalBoxedLazyFoo_fields = new std::array<EncodedThriftField, 4>{ {
@@ -139,16 +134,15 @@ StructMetadata<::apache::thrift::test::OptionalBoxedLazyFoo>::gen(ThriftMetadata
     field.structured_annotations() = f.structured_annotations;
     simple_OptionalBoxedLazyFoo.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::LazyCppRef>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("simple.LazyCppRef", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::apache::thrift::test::LazyCppRef>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& simple_LazyCppRef = res.first->second;
-  simple_LazyCppRef.name() = "simple.LazyCppRef";
+  ::apache::thrift::metadata::ThriftStruct& simple_LazyCppRef = res.metadata;
   simple_LazyCppRef.is_union() = false;
   static const auto* const
   simple_LazyCppRef_fields = new std::array<EncodedThriftField, 4>{ {
@@ -162,16 +156,15 @@ StructMetadata<::apache::thrift::test::LazyCppRef>::gen(ThriftMetadata& metadata
     field.structured_annotations() = f.structured_annotations;
     simple_LazyCppRef.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::IndexedFoo>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("simple.IndexedFoo", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::apache::thrift::test::IndexedFoo>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& simple_IndexedFoo = res.first->second;
-  simple_IndexedFoo.name() = "simple.IndexedFoo";
+  ::apache::thrift::metadata::ThriftStruct& simple_IndexedFoo = res.metadata;
   simple_IndexedFoo.is_union() = false;
   static const auto* const
   simple_IndexedFoo_fields = new std::array<EncodedThriftField, 6>{ {
@@ -185,16 +178,15 @@ StructMetadata<::apache::thrift::test::IndexedFoo>::gen(ThriftMetadata& metadata
     field.structured_annotations() = f.structured_annotations;
     simple_IndexedFoo.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::OptionalIndexedFoo>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("simple.OptionalIndexedFoo", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::apache::thrift::test::OptionalIndexedFoo>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& simple_OptionalIndexedFoo = res.first->second;
-  simple_OptionalIndexedFoo.name() = "simple.OptionalIndexedFoo";
+  ::apache::thrift::metadata::ThriftStruct& simple_OptionalIndexedFoo = res.metadata;
   simple_OptionalIndexedFoo.is_union() = false;
   static const auto* const
   simple_OptionalIndexedFoo_fields = new std::array<EncodedThriftField, 6>{ {
@@ -208,18 +200,17 @@ StructMetadata<::apache::thrift::test::OptionalIndexedFoo>::gen(ThriftMetadata& 
     field.structured_annotations() = f.structured_annotations;
     simple_OptionalIndexedFoo.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::Empty>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("simple.Empty", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::apache::thrift::test::Empty>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& simple_Empty = res.first->second;
-  simple_Empty.name() = "simple.Empty";
+  ::apache::thrift::metadata::ThriftStruct& simple_Empty = res.metadata;
   simple_Empty.is_union() = false;
-  return res.first->second;
+  return res.metadata;
 }
 
 } // namespace md

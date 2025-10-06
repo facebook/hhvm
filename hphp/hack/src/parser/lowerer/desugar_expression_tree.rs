@@ -1206,24 +1206,11 @@ impl RewriteState {
                             ],
                             &pos,
                         );
-                        let virtual_expr = Expr(
-                            (),
-                            pos.clone(),
-                            Expr_::mk_call(ast::CallExpr {
-                                func: _virtualize_call(
-                                    static_meth_call(
-                                        visitor_name,
-                                        et::SYMBOL_TYPE,
-                                        vec![temp_variable],
-                                        &pos,
-                                    ),
-                                    false,
-                                    &pos,
-                                ),
-                                targs: vec![],
-                                args: build_args(virtual_args),
-                                unpacked_arg: None,
-                            }),
+                        let virtual_expr = virtualize_function_pointer(
+                            visitor_name,
+                            &pos,
+                            virtual_args,
+                            temp_variable.clone(),
                         );
                         RewriteResult {
                             virtual_expr,
@@ -2693,7 +2680,17 @@ fn handle_class_const(
     temp_variable: Expr,
 ) -> (Expr, Vec<Expr>) {
     let (virtual_args, desugar_args) = state.rewrite_exprs(args, visitor_name);
-    let virtual_expr = Expr(
+    let virtual_expr = virtualize_function_pointer(visitor_name, pos, virtual_args, temp_variable);
+    (virtual_expr, desugar_args)
+}
+
+fn virtualize_function_pointer(
+    visitor_name: &str,
+    pos: &Pos,
+    virtual_args: Vec<Expr>,
+    temp_variable: Expr,
+) -> Expr {
+    Expr(
         (),
         pos.clone(),
         Expr_::mk_call(ast::CallExpr {
@@ -2706,8 +2703,7 @@ fn handle_class_const(
             args: build_args(virtual_args),
             unpacked_arg: None,
         }),
-    );
-    (virtual_expr, desugar_args)
+    )
 }
 
 /**

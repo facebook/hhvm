@@ -760,6 +760,9 @@ prototype<t_function>::ptr t_whisker_generator::make_prototype_for_function(
   def.property("initial_response?", [](const t_function& self) {
     return !self.return_type()->is_void();
   });
+  def.property("stream_exceptions?", [](const t_function& self) {
+    return !get_elems(self.stream()->exceptions()).empty();
+  });
 
   return std::move(def).make();
 }

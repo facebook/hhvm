@@ -35,6 +35,7 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
 
         (output, err, retcode) = self.test_driver.run_check(
             options=[
+                "--autostart-server=false",
                 "--json",
                 "--find-my-tests-max-distance",
                 str(max_distance),
@@ -117,6 +118,17 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
                 "A_SuperTest.php",
                 "A_SiblingTest.php",
             ],
+        )
+
+    def test_distance_zero(self) -> None:
+        """Tests that if we ask about a test file itself, it is returned with distance 0
+
+        Uses files from the a/ subdirectory (all of which have prefix A_)
+        """
+
+        self.check_has_tests_with_distances(
+            symbols=["A_SubTest::target"],
+            expected_test_files=[("A_SubTest.php", 0)],
         )
 
     def test_indirection(self) -> None:

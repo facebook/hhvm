@@ -232,6 +232,22 @@ let get_references
   in
   List.fold_result search_results ~init:([], []) ~f:resolve_found_position
 
+let is_root_symbol_in_test_file ctx = function
+  | Method { class_name; method_name = _ } ->
+    (match Naming_provider.get_class_path ctx (Utils.add_ns class_name) with
+    | None ->
+      failwith
+        (Printf.sprintf
+           "Could not resolve class %s, even though it was given as part of a root"
+           class_name)
+    | Some relative_path ->
+      let nast = Ast_provider.get_ast ~full:true ctx relative_path in
+      let path = Relative_path.suffix relative_path in
+      if is_test_file ctx path nast then
+        Some path
+      else
+        None)
+
 let search
     ~(ctx : Provider_context.t)
     ~(genv : ServerEnv.genv)
@@ -245,10 +261,12 @@ let search
 
   List.iter roots ~f:(fun root_symbol ->
       let full_name = full_name_of_symbol_def root_symbol in
-      match Hash_set.strict_add seen_symbols full_name with
-      | Result.Ok () ->
-        Queue.enqueue queue { distance = 0; symbol_def = root_symbol }
-      | _ -> ());
+      let seen = Result.is_error (Hash_set.strict_add seen_symbols full_name) in
+      match is_root_symbol_in_test_file ctx root_symbol with
+      | Some test_file -> ignore (Hashtbl.add test_files ~key:test_file ~data:0)
+      | None ->
+        if not seen then
+          Queue.enqueue queue { distance = 0; symbol_def = root_symbol });
 
   let rec bfs () =
     match Queue.dequeue queue with

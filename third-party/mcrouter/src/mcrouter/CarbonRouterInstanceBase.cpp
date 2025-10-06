@@ -10,12 +10,17 @@
 #include <memory>
 
 #include <boost/filesystem/operations.hpp>
+#include <fmt/format.h>
 
+#include <folly/FileUtil.h>
 #include <folly/Singleton.h>
 
 #include "mcrouter/AsyncWriter.h"
+#include "mcrouter/McrouterLogFailure.h"
 #include "mcrouter/ProxyBase.h"
+#include "mcrouter/ProxyConfigBuilder.h"
 #include "mcrouter/lib/CompressionCodecManager.h"
+#include "mcrouter/lib/fbi/cpp/util.h"
 #include "mcrouter/stats.h"
 
 namespace facebook {
@@ -61,9 +66,58 @@ std::string statsUpdateFunctionName(folly::StringPiece routerName) {
       "carbon-stats-update-fn-", routerName, "-", uniqueId.fetch_add(1));
 }
 
+bool isDumpPreprocessedConfigEnabled(const McrouterOptions& opts) {
+  if (opts.dump_preprocessed_config_interval_sec == 0) {
+    return false;
+  }
+  if (opts.config_dump_root.empty()) {
+    return false;
+  }
+  if (opts.service_name.empty() || opts.router_name.empty()) {
+    return false;
+  }
+  LOG(WARNING) << "Dump preprocess config is enabled.";
+  return true;
+}
+
 McrouterOptions finalizeOpts(McrouterOptions&& opts) {
   facebook::memcache::mcrouter::finalizeOptions(opts);
   return std::move(opts);
+}
+
+boost::filesystem::path getBackupConfigDirectory(const McrouterOptions& opts) {
+  return boost::filesystem::path(opts.config_dump_root) / opts.service_name /
+      opts.router_name;
+}
+
+bool ensureConfigDirectoryExists(const boost::filesystem::path& directory) {
+  if (directory.empty() || boost::filesystem::exists(directory)) {
+    return true;
+  }
+  if (ensureConfigDirectoryExists(directory.parent_path())) {
+    auto result = ensureDirExistsAndWritableOrReturnError(directory.string());
+    if (!result.hasError()) {
+      return true;
+    }
+    LOG(WARNING) << "Failed to create directory '" << directory
+                 << "': " << result.error().what();
+  } else {
+    VLOG(1) << "Parent directory '" << directory.parent_path()
+            << "' does not exist.";
+  }
+  return false;
+}
+
+template <class Tag>
+void logFailureEveryN(
+    const McrouterOptions& opts,
+    const char* category,
+    const std::string& msg,
+    int n) {
+  static thread_local uint64_t count = 0;
+  if ((count++ % n) == 0) {
+    MC_LOG_FAILURE(opts, category, msg);
+  }
 }
 
 } // anonymous namespace
@@ -75,6 +129,10 @@ CarbonRouterInstanceBase::CarbonRouterInstanceBase(McrouterOptions inputOptions)
       rtVarsData_(std::make_shared<ObservableRuntimeVars>()),
       leaseTokenMap_(globalFunctionScheduler.try_get()),
       statsUpdateFunctionHandle_(statsUpdateFunctionName(opts_.router_name)),
+      preprocessedConfigDumpExecutor_(
+          isDumpPreprocessedConfigEnabled(opts_)
+              ? std::make_unique<folly::ScopedEventBaseThread>("mcr-ppc-dump")
+              : nullptr),
       statsApi_(gMakeStatsApiHook ? gMakeStatsApiHook(*this) : nullptr) {
   if (auto statsLogger = statsLogWriter()) {
     if (opts_.stats_async_queue_length) {
@@ -164,6 +222,17 @@ void CarbonRouterInstanceBase::deregisterForStatsUpdates() {
   }
 }
 
+void CarbonRouterInstanceBase::deregisterForPreprocessedConfigDumps() {
+  if (preprocessedConfigDumpExecutor_) {
+    preprocessedConfigDumpExecutor_->getEventBase()->runInEventBaseThread(
+        [this]() {
+          if (periodicTimeout_) {
+            periodicTimeout_->cancelTimeout();
+          }
+        });
+  }
+}
+
 void CarbonRouterInstanceBase::updateStats() {
   const int BIN_NUM =
       (MOVING_AVERAGE_WINDOW_SIZE_IN_SECOND /
@@ -221,6 +290,93 @@ int32_t CarbonRouterInstanceBase::getStatsEnabledPoolIndex(
   }
 
   return longestPrefixMatchIndex;
+}
+
+struct PreprocessedConfigDumpTag;
+struct PreprocessedConfigTouchTag;
+
+void CarbonRouterInstanceBase::registerForPreprocessedConfigDumps() {
+  if (!preprocessedConfigDumpExecutor_) {
+    return;
+  }
+
+  periodicTimeout_ = folly::AsyncTimeout::make(
+      *preprocessedConfigDumpExecutor_->getEventBase(), [&]() mutable noexcept {
+        try {
+          dumpPreprocessedConfigToDisk();
+        } catch (const std::exception& e) {
+          LOG(ERROR) << "Error dumping preprocessed config: " << e.what();
+        }
+        // Reschedule
+        periodicTimeout_->scheduleTimeout(
+            opts().dump_preprocessed_config_interval_sec * 1000);
+      });
+
+  // Schedule the first task
+  preprocessedConfigDumpExecutor_->getEventBase()->runInEventBaseThread(
+      [this]() {
+        periodicTimeout_->scheduleTimeout(
+            opts().dump_preprocessed_config_interval_sec * 1000);
+      });
+}
+
+void CarbonRouterInstanceBase::dumpPreprocessedConfigToDisk() {
+  std::string confFile;
+  std::string path;
+  if (!configApi_->getConfigFile(confFile, path)) {
+    LOG(WARNING) << "Can not load config from " << path
+                 << " for preprocessed config dump";
+
+    return;
+  }
+
+  try {
+    // Create ProxyConfigBuilder to get preprocessed config
+    ProxyConfigBuilder builder(
+        opts_, *configApi_, confFile, std::string(routerInfoName()));
+
+    const auto& preprocessedJson = builder.preprocessedConfig();
+    auto jsonContent = toPrettySortedJson(preprocessedJson);
+
+    auto directory = getBackupConfigDirectory(opts_);
+    auto filename = fmt::format(
+        "libmcrouter.{}.{}.ppc.json", opts_.service_name, opts_.flavor_name);
+    auto filePath = (directory / filename).string();
+
+    // Check if we need to rewrite
+    auto contentHash = Md5Hash(jsonContent);
+    if (contentHash != preprocessedConfigFileMD5Hash_) {
+      if (atomicallyWriteFileToDisk(jsonContent, filePath)) {
+        // Set proper permissions
+        ensureHasPermission(filePath, 0664);
+        preprocessedConfigFileMD5Hash_ = contentHash;
+        VLOG(1) << "Successfully dumped preprocessed config to: " << filePath;
+      } else {
+        logFailureEveryN<PreprocessedConfigDumpTag>(
+            opts_,
+            memcache::failure::Category::kOther,
+            fmt::format(
+                "Error while dumping preprocessed config to disk. "
+                "Failed to write file {}.",
+                filePath),
+            1000);
+        ensureConfigDirectoryExists(directory);
+      }
+    } else {
+      // Content hasn't changed, just touch the file
+      if (!touchFile(filePath)) {
+        logFailureEveryN<PreprocessedConfigTouchTag>(
+            opts_,
+            memcache::failure::Category::kOther,
+            fmt::format(
+                "Error while touching preprocessed config file {}", filePath),
+            1000);
+        ensureConfigDirectoryExists(directory);
+      }
+    }
+  } catch (const std::exception& e) {
+    LOG(ERROR) << "Error processing config for preprocessed dump: " << e.what();
+  }
 }
 
 } // namespace mcrouter

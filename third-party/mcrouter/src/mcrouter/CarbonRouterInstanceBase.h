@@ -8,6 +8,7 @@
 #pragma once
 
 #include <atomic>
+#include <chrono>
 #include <memory>
 #include <unordered_map>
 
@@ -17,8 +18,10 @@
 #include <folly/executors/FunctionScheduler.h>
 #include <folly/fibers/TimedMutex.h>
 #include <folly/io/async/EventBaseThread.h>
+#include <folly/io/async/ScopedEventBaseThread.h>
 #include <folly/synchronization/CallOnce.h>
 
+#include <folly/io/async/EventBase.h>
 #include "mcrouter/ConfigApi.h"
 #include "mcrouter/ExternalStatsHandler.h"
 #include "mcrouter/LeaseTokenMap.h"
@@ -289,6 +292,16 @@ class CarbonRouterInstanceBase {
    */
   void deregisterForStatsUpdates();
 
+  /**
+   * Register this instance for periodic preprocessed config dumps.
+   */
+  void registerForPreprocessedConfigDumps();
+
+  /**
+   * Deregister this instance for periodic preprocessed config dumps.
+   */
+  void deregisterForPreprocessedConfigDumps();
+
   const McrouterOptions opts_;
   const pid_t pid_;
   const std::unique_ptr<ConfigApi> configApi_;
@@ -350,6 +363,30 @@ class CarbonRouterInstanceBase {
 
   // Aggregates stats for all associated proxies. Should be called periodically.
   void updateStats();
+
+  // Setup preprocessed config dumping with executor thread (similar to
+  // ConfigAPI)
+  bool setupPreprocessedConfigDumping();
+
+  // Dumps preprocessed config to disk asynchronously
+  void dumpPreprocessedConfigAsync();
+
+  // Dumps preprocessed config to disk (actual implementation)
+  void dumpPreprocessedConfigToDisk();
+
+ public:
+  // Make dumpPreprocessedConfigToDisk public for testing
+  void dumpPreprocessedConfigToDiskForTesting() {
+    dumpPreprocessedConfigToDisk();
+  }
+
+ private:
+  // Executor for async preprocessed config dumping
+  std::unique_ptr<folly::ScopedEventBaseThread> preprocessedConfigDumpExecutor_;
+  std::unique_ptr<folly::AsyncTimeout> periodicTimeout_;
+
+  // Track preprocessed config files to avoid unnecessary rewrites
+  std::string preprocessedConfigFileMD5Hash_;
 
   /**
    * Opaque metadata used by SRRoute, to avoid circular dependency

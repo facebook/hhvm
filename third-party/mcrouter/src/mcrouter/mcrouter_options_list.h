@@ -951,6 +951,14 @@ MCROUTER_OPTION_TOGGLE(
     no_short,
     "Controls whether we delete the carbon instance upon failures or leak it")
 
+MCROUTER_OPTION_INTEGER(
+    uint32_t,
+    dump_preprocessed_config_interval_sec,
+    0,
+    "dump_preprocessed_config_interval_sec",
+    no_short,
+    "Periodically dump preprocessed config to disk for debugging (libmcrouter only) at the specified interval in seconds. 0 means disabled.")
+
 #ifdef ADDITIONAL_OPTIONS_FILE
 #include ADDITIONAL_OPTIONS_FILE
 #endif

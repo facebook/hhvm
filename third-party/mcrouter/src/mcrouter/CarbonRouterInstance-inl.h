@@ -457,6 +457,7 @@ void CarbonRouterInstance<RouterInfo>::spawnAuxiliaryThreads() {
   startObservingRuntimeVarsFile();
   registerOnUpdateCallbackForRxmits();
   registerForStatsUpdates();
+  registerForPreprocessedConfigDumps();
   spawnStatLoggerThread();
 }
 
@@ -515,6 +516,7 @@ void CarbonRouterInstance<RouterInfo>::joinAuxiliaryThreads() noexcept {
   }
 
   deregisterForStatsUpdates();
+  deregisterForPreprocessedConfigDumps();
 
   if (mcrouterLogger_) {
     mcrouterLogger_->stop();

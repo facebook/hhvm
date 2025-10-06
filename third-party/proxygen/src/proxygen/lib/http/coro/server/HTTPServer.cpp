@@ -170,46 +170,47 @@ void HTTPServer::startQuic(const KeepAliveEventBaseVec& keepAliveEvbs) {
 HTTPCoroAcceptor* HTTPServer::createAcceptor(
     folly::EventBase* evb,
     std::shared_ptr<const AcceptorConfiguration> acceptorConfig) {
-  return &acceptors_
-              .emplace(std::piecewise_construct,
-                       std::forward_as_tuple(evb),
-                       std::forward_as_tuple(std::move(acceptorConfig),
-                                             handler_,
-                                             &config_.newConnectionFilter))
-              .first->second;
+  auto [it, _] = acceptors_.try_emplace(evb, std::list<HTTPCoroAcceptor>());
+  return &(*it->second.emplace(it->second.end(),
+                               std::move(acceptorConfig),
+                               handler_,
+                               &config_.newConnectionFilter));
 }
 
 HTTPCoroAcceptor* FOLLY_NULLABLE
-HTTPServer::getAcceptor(folly::EventBase* evb) {
+HTTPServer::getQuicAcceptor(folly::EventBase* evb) {
   auto it = acceptors_.find(evb);
   if (it == acceptors_.end()) {
     return nullptr;
   }
-  return &it->second;
+  // For now, the quic implementation can still only support one acceptor.
+  XCHECK_EQ(it->second.size(), 1UL);
+  return &it->second.front();
 }
 
 void HTTPServer::startTcp(const KeepAliveEventBaseVec& keepAliveEvbs) {
-  serverSocket_.reset(new folly::AsyncServerSocket(&eventBase_));
+  auto serverSocket = folly::AsyncServerSocket::UniquePtr(
+      new folly::AsyncServerSocket(&eventBase_));
   try {
-    serverSocket_->setReusePortEnabled(setReusePortSocketOption_);
+    serverSocket->setReusePortEnabled(setReusePortSocketOption_);
     if (config_.preboundSocket.has_value()) {
-      serverSocket_->useExistingSocket(
+      serverSocket->useExistingSocket(
           folly::NetworkSocket::fromFd(config_.preboundSocket.value()));
     } else {
-      serverSocket_->bind(config_.socketConfig.bindAddress);
+      serverSocket->bind(config_.socketConfig.bindAddress);
     }
-    serverSocket_->listen(config_.socketConfig.acceptBacklog);
-    serverSocket_->startAccepting();
+    serverSocket->listen(config_.socketConfig.acceptBacklog);
+    serverSocket->startAccepting();
   } catch (const std::exception& ex) {
     XLOG(ERR) << "Failed to setup server socket ex=" << ex.what();
-    serverSocket_.reset();
     throw;
   }
   auto acceptorConfig = toAcceptorConfig(config_);
   for (auto& evb : keepAliveEvbs) {
     createAcceptor(evb.get(), acceptorConfig)
-        ->init(serverSocket_.get(), evb.get());
+        ->init(serverSocket.get(), evb.get());
   }
+  serverSockets_.emplace_back(std::move(serverSocket));
 }
 
 void HTTPServer::run(std::function<void()> onSuccess) {
@@ -305,9 +306,9 @@ void HTTPServer::onQuicTransportReady(
   tinfo.secure = true;
   // TODO: fill in other tinfo
   auto acceptor =
-      getAcceptor(quicSocket->getEventBase()
-                      ->getTypedEventBase<quic::FollyQuicEventBase>()
-                      ->getBackingEventBase());
+      getQuicAcceptor(quicSocket->getEventBase()
+                          ->getTypedEventBase<quic::FollyQuicEventBase>()
+                          ->getBackingEventBase());
   XCHECK(acceptor) << "QuicSocket in foreign EventBase";
   acceptor->onNewConnection(std::move(quicSocket), std::move(tinfo));
 }
@@ -319,12 +320,13 @@ void HTTPServer::drain() {
     eventBase_.runImmediatelyOrRunInEventBaseThread(
         [this] { globalDrainImpl(); });
     for (auto& it : acceptors_) {
-      auto evb = it.second.getEventBaseKeepalive();
-      auto acceptorPtr = &it.second;
-      if (evb) {
-        evb->runImmediatelyOrRunInEventBaseThread(
-            [this, acceptorPtr] { drainImpl(*acceptorPtr); });
-      } // else the acceptor already drained, maybe called after drain/forceStop
+      for (auto& acceptor : it.second) {
+        if (auto evb = acceptor.getEventBaseKeepalive()) {
+          evb->runImmediatelyOrRunInEventBaseThread(
+              [this, &acceptor] { drainImpl(acceptor); });
+        } // else the acceptor already drained, maybe called after
+          // drain/forceStop
+      }
     }
     eventBase_.runImmediatelyOrRunInEventBaseThread(
         [this] { unregisterSignalHandlers(); });
@@ -333,9 +335,11 @@ void HTTPServer::drain() {
 
 void HTTPServer::globalDrainImpl() {
   XLOG(DBG4) << __func__;
-  if (serverSocket_) {
-    serverSocket_->stopAccepting();
-  } else if (quicServer_) {
+  for (const auto& serverSocket : serverSockets_) {
+    XCHECK(serverSocket);
+    serverSocket->stopAccepting();
+  }
+  if (quicServer_) {
     quicServer_->rejectNewConnections([]() { return true; });
   }
 }
@@ -359,11 +363,13 @@ void HTTPServer::forceStop() {
   auto state = state_.load();
   if (state == State::RUNNING) {
     state_ = state = State::DRAINING;
-    if (serverSocket_) {
-      folly::ExecutorKeepAlive keepAlive(&eventBase_);
-      eventBase_.runImmediatelyOrRunInEventBaseThreadAndWait(
-          [this] { serverSocket_->stopAccepting(); });
-    }
+    folly::ExecutorKeepAlive keepAlive(&eventBase_);
+    eventBase_.runImmediatelyOrRunInEventBaseThread([this] {
+      for (const auto& serverSocket : serverSockets_) {
+        XCHECK(serverSocket);
+        serverSocket->stopAccepting();
+      }
+    });
     eventBase_.runImmediatelyOrRunInEventBaseThread(
         [this] { unregisterSignalHandlers(); });
   }
@@ -372,10 +378,11 @@ void HTTPServer::forceStop() {
       quicServer_->shutdown();
     }
     for (auto& it : acceptors_) {
-      auto evb = it.second.getEventBaseKeepalive();
-      if (evb) {
-        it.second.forceStop();
-      } // else, the acceptor already drained
+      for (auto& acceptor : it.second) {
+        if (acceptor.getEventBaseKeepalive()) {
+          acceptor.forceStop();
+        } // else, the acceptor already drained
+      }
     }
   }
 }
@@ -402,7 +409,8 @@ std::shared_ptr<const AcceptorConfiguration> HTTPServer::toAcceptorConfig(
 void HTTPServer::setHostId(uint32_t hostId) {
   hostId_ = hostId;
   if (quicServer_) {
-    // quicServer_ has been initialized. need to update hostId in quicServer_
+    // quicServer_ has been initialized. need to update hostId in
+    // quicServer_
     eventBase_.runImmediatelyOrRunInEventBaseThreadAndWait(
         [this] { quicServer_->setHostId(hostId_); });
   }

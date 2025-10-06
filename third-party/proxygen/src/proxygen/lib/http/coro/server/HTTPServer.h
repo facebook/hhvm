@@ -117,12 +117,17 @@ class HTTPServer : public quic::QuicHandshakeSocketHolder::Callback {
 
   /**
    * Get the address the server is listening on. Empty if sockets are not
-   * bound yet.
+   * bound yet. Almost every use cases of HttpServer only support one socket,
+   * so we keep this function for backwards compatibility as we migrate to
+   * support implementations that require multiple sockets.
    */
   std::optional<folly::SocketAddress> address() const {
-    if (serverSocket_) {
+    if (!serverSockets_.empty()) {
+      XCHECK_EQ(serverSockets_.size(), 1UL)
+          << "Attempt to use address() on an implementation that supports "
+             "multiple addresses";
       folly::SocketAddress address;
-      serverSocket_->getAddress(&address);
+      serverSockets_.front()->getAddress(&address);
       return address;
     } else if (quicServer_) {
       return quicServer_->getAddress();
@@ -187,7 +192,7 @@ class HTTPServer : public quic::QuicHandshakeSocketHolder::Callback {
   HTTPCoroAcceptor* createAcceptor(
       folly::EventBase* evb,
       std::shared_ptr<const AcceptorConfiguration> acceptorConfig);
-  HTTPCoroAcceptor* FOLLY_NULLABLE getAcceptor(folly::EventBase* evb);
+  HTTPCoroAcceptor* FOLLY_NULLABLE getQuicAcceptor(folly::EventBase* evb);
   void startTcp(const KeepAliveEventBaseVec& evbs);
   void startQuic(const KeepAliveEventBaseVec& vbs);
   void createQuicServer(const std::vector<folly::EventBase*>& evbs);
@@ -208,9 +213,9 @@ class HTTPServer : public quic::QuicHandshakeSocketHolder::Callback {
   std::shared_ptr<HTTPHandler> handler_;
   folly::F14FastSet<Observer*> observers_;
   folly::EventBase eventBase_;
-  folly::AsyncServerSocket::UniquePtr serverSocket_;
+  std::vector<folly::AsyncServerSocket::UniquePtr> serverSockets_;
   bool setReusePortSocketOption_{false};
-  folly::F14NodeMap<folly::EventBase*, HTTPCoroAcceptor> acceptors_;
+  folly::F14NodeMap<folly::EventBase*, std::list<HTTPCoroAcceptor>> acceptors_;
   std::shared_ptr<quic::QuicServer> quicServer_;
   enum class State : uint8_t {
     UNINIT = 0,

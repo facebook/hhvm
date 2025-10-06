@@ -370,7 +370,7 @@ let refresh_ctype renv v cty_orig =
   @@
   match deref_constraint_type cty_orig with
   | (r, Thas_member hm) ->
-    let { hm_type; hm_name = _; hm_class_id = _; hm_explicit_targs = _ } = hm in
+    let { hm_type; hm_name = _; hm_class_id = _; hm_method = _ } = hm in
     let (renv, hm_type, changed) = refresh_type renv inv hm_type in
     (renv, mk_constraint_type (r, Thas_member { hm with hm_type }), changed)
   | (r, Thas_type_member htm) ->

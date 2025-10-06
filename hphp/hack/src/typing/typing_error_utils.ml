@@ -5732,11 +5732,11 @@ end = struct
           hm_name = (_, name);
           hm_type = _;
           hm_class_id = _;
-          hm_explicit_targs = targs;
+          hm_method = method_info;
         } =
           hm
         in
-        (match targs with
+        (match method_info with
         | None -> Printf.sprintf "an object with property `%s`" name
         | Some _ -> Printf.sprintf "an object with method `%s`" name)
       | (_, Thas_type_member htm) ->

@@ -1743,9 +1743,7 @@ module M = struct
           unions [positive1; positive2; positive3],
           unions [negative1; negative2; negative3] )
       | (_, Thas_member hm) ->
-        let { hm_type; hm_name = _; hm_class_id = _; hm_explicit_targs = _ } =
-          hm
-        in
+        let { hm_type; hm_name = _; hm_class_id = _; hm_method = _ } = hm in
         get_tyvars env hm_type
       | (_, Thas_type_member htm) ->
         let { htm_id = _; htm_lower; htm_upper } = htm in

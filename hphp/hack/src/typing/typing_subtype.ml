@@ -166,11 +166,11 @@ end = struct
           hm_name = (_, name);
           hm_type = _;
           hm_class_id = _;
-          hm_explicit_targs = targs;
+          hm_method = method_info;
         } =
           hm
         in
-        (match targs with
+        (match method_info with
         | None -> Printf.sprintf "an object with property `%s`" name
         | Some _ -> Printf.sprintf "an object with method `%s`" name)
       | (_, Thas_type_member htm) ->
@@ -7983,11 +7983,15 @@ end = struct
       hm_name = (name_pos, name_) as member_id;
       hm_type = member_ty;
       hm_class_id = class_id;
-      hm_explicit_targs = explicit_targs;
+      hm_method = method_info;
     } =
       has_member_ty
     in
-    let is_method = Option.is_some explicit_targs in
+    let is_method = Option.is_some method_info in
+    let explicit_targs =
+      Option.map method_info ~f:(fun { hmm_explicit_targs; _ } ->
+          hmm_explicit_targs)
+    in
     let cty_super = mk_constraint_type (r, Thas_member has_member_ty) in
     let ity_super = ConstraintType cty_super in
     let (env, ty_sub) = Env.expand_type env ty_sub in

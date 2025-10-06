@@ -21,11 +21,17 @@ type destructure = {
 }
 [@@deriving show]
 
+type has_member_method = {
+  hmm_explicit_targs: Nast.targ list; [@opaque]
+  hmm_env_capability: locl_ty;
+}
+[@@deriving show]
+
 type has_member = {
   hm_name: Nast.sid;
   hm_type: locl_ty;
   hm_class_id: Nast.class_id_; [@opaque]
-  hm_explicit_targs: Nast.targ list option; [@opaque]
+  hm_method: has_member_method option; [@opaque]
 }
 [@@deriving show]
 
@@ -107,7 +113,7 @@ let has_member_compare ~normalize_lists hm1 hm2 =
     hm_name = (_, m1);
     hm_type = ty1;
     hm_class_id = cid1;
-    hm_explicit_targs = targs1;
+    hm_method = method1;
   } =
     hm1
   in
@@ -115,17 +121,24 @@ let has_member_compare ~normalize_lists hm1 hm2 =
     hm_name = (_, m2);
     hm_type = ty2;
     hm_class_id = cid2;
-    hm_explicit_targs = targs2;
+    hm_method = method2;
   } =
     hm2
   in
-  let targ_compare (_, (_, hint1)) (_, (_, hint2)) =
-    Aast_defs.compare_hint_ hint1 hint2
+  let method_compare method1 method2 =
+    match (method1, method2) with
+    | ( { hmm_explicit_targs = targs1; hmm_env_capability = cap1 },
+        { hmm_explicit_targs = targs2; hmm_env_capability = cap2 } ) ->
+      let targ_compare (_, (_, hint1)) (_, (_, hint2)) =
+        Aast_defs.compare_hint_ hint1 hint2
+      in
+      chain_compare (List.compare targ_compare targs1 targs2) (fun _ ->
+          ty_compare cap1 cap2)
   in
   chain_compare (String.compare m1 m2) (fun _ ->
       chain_compare (ty_compare ty1 ty2) (fun _ ->
           chain_compare (class_id_compare cid1 cid2) (fun _ ->
-              Option.compare (List.compare targ_compare) targs1 targs2)))
+              Option.compare method_compare method1 method2)))
 
 let can_index_compare ~normalize_lists ci1 ci2 =
   (* not comparing the ast because it is decided by expr_pos *)

@@ -4328,7 +4328,7 @@ end = struct
           ~name:m
           ~ty:mem_ty
           ~class_id:(CIexpr e1)
-          ~explicit_targs:None
+          ~methd:None
       in
       let ((env, ty_err_opt), result_ty, ty_mismatch_opt) =
         match nullflavor with
@@ -6333,7 +6333,13 @@ end = struct
           ~name:m
           ~ty:tfty
           ~class_id:(CIexpr e1)
-          ~explicit_targs:(Some [])
+          ~methd:
+            (Some
+               {
+                 hmm_explicit_targs = [];
+                 hmm_env_capability =
+                   MakeType.default_capability (Pos_or_decl.of_raw_pos p);
+               })
       in
       let (env, ty_err_opt) =
         Type.sub_type_i

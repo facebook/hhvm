@@ -394,9 +394,9 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
       | Thas_const { name; ty } -> this#on_Thas_const env r name ty
 
     method on_Thas_member env r hm =
-      let { hm_name; hm_type; hm_class_id; hm_explicit_targs } = hm in
+      let { hm_name; hm_type; hm_class_id; hm_method } = hm in
       let (env, hm_type) = this#on_type env hm_type in
-      let hm = { hm_name; hm_type; hm_class_id; hm_explicit_targs } in
+      let hm = { hm_name; hm_type; hm_class_id; hm_method } in
       (env, mk_constraint_type (r, Thas_member hm))
 
     method on_Thas_type_member env r htm =

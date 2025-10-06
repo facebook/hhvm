@@ -628,12 +628,10 @@ module Full = struct
         (fuel, Concat [Space; text "with"; Space; r_doc])
 
   let thas_member ~fuel k hm =
-    let { hm_name = (_, name); hm_type; hm_class_id = _; hm_explicit_targs } =
-      hm
-    in
+    let { hm_name = (_, name); hm_type; hm_class_id = _; hm_method } = hm in
     (* TODO: T71614503 print explicit type arguments appropriately *)
     let printed_explicit_targs =
-      match hm_explicit_targs with
+      match hm_method with
       | None -> text "None"
       | Some _ -> text "Some <targs>"
     in

@@ -36,6 +36,15 @@ type destructure = {
 }
 [@@deriving show]
 
+type has_member_method = {
+  hmm_explicit_targs: Nast.targ list; [@opaque]
+      (** he list of explicit type arguments provided to the method call *)
+  hmm_env_capability: locl_ty;
+      (** A type respresenting the capabilities provided by the environment at the
+          point of the call *)
+}
+[@@deriving show]
+
 type has_member = {
   hm_name: Nast.sid;
   hm_type: locl_ty;
@@ -43,16 +52,9 @@ type has_member = {
       (** This is required to check ambiguous object access, where sometimes
           HHVM would access the private member of a parent class instead of the
           one from the current class. *)
-  hm_explicit_targs: Nast.targ list option;
+  hm_method: has_member_method option;
       (* - For a "has-property" constraint, this is `None`
-       * - For a "has-method" constraint, this is `Some targs`, where targs
-       *   is the list of explicit type arguments provided to the method call.
-       *   Note that this list can be empty (i.e. `Some []`) in the case of a
-       *   method not taking type arguments, or when we leave them implicit
-       *
-       * We need to know if this is a "has-property" or "has-method" to pass
-       * the correct `is_method` parameter to `Typing_object_get.obj_get`.
-       *)
+       * - For a "has-method" constraint, this is `Some hmm` *)
 }
 [@@deriving show]
 

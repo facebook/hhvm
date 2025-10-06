@@ -483,9 +483,7 @@ class ['a] internal_type_visitor : ['a] internal_type_visitor_type =
     method on_thas_member acc r hm = this#on_has_member acc r hm
 
     method on_has_member acc _r hm =
-      let { hm_name = _; hm_type; hm_class_id = _; hm_explicit_targs = _ } =
-        hm
-      in
+      let { hm_name = _; hm_type; hm_class_id = _; hm_method = _ } = hm in
       this#on_locl_type acc hm_type
 
     method on_thas_type_member acc r htm = this#on_has_type_member acc r htm

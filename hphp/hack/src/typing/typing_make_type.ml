@@ -207,7 +207,7 @@ let function_ref r ty = mk (r, Tnewtype (SN.Classes.cFunctionRef, [ty], ty))
 let label r ty_in ty_out =
   mk (r, Tnewtype (SN.Classes.cEnumClassLabel, [ty_in; ty_out], mixed r))
 
-let has_member r ~name ~ty ~class_id ~explicit_targs =
+let has_member r ~name ~ty ~class_id ~methd =
   ConstraintType
     (mk_constraint_type
        ( r,
@@ -216,7 +216,7 @@ let has_member r ~name ~ty ~class_id ~explicit_targs =
              hm_name = name;
              hm_type = ty;
              hm_class_id = class_id;
-             hm_explicit_targs = explicit_targs;
+             hm_method = methd;
            } ))
 
 let list_destructure r tyl =

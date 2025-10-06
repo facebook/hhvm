@@ -14,6 +14,7 @@
 
 from collections import defaultdict
 from collections.abc import Iterable, Mapping, Sequence, Set as pySet, Sized
+from types import MappingProxyType
 import warnings
 
 from cpython cimport bool as pbool, int as pint, float as pfloat
@@ -2482,7 +2483,10 @@ class EnumMeta(type):
         # if no bases, it's creating Enum or Flag base class, no need to parse members.
         attrs = {
             # name -> arm
-            "__members__": {},
+            # NOTE: leading double underscore is used to preserve any previous
+            # application logic that directly inspected internal attributes of Thrift
+            # enum types and filtered out "private" members using them as a criterion.
+            "__member_map__": {},
             # value -> arm
             "__reversed_map__": {},
         }
@@ -2508,16 +2512,24 @@ class EnumMeta(type):
             arm = klass.__new__(klass, value)
             arm._fbthrift_name_ = name
             arm._fbthrift_value_ = value
-            klass.__members__[name] = arm
+            klass.__member_map__[name] = arm
             klass.__reversed_map__[value] = arm
             type.__setattr__(klass, name, arm)
         return klass
 
     def __len__(cls):
-        return len(cls.__members__)
+        return len(cls.__member_map__)
 
     def __getitem__(cls, attribute):
-        return cls.__members__[attribute]
+        return cls.__member_map__[attribute]
+
+    @property
+    def __members__(cls):
+        """
+        Returns a read-only mapping of all names to their instance for this Thrift enum
+        type.
+        """
+        return MappingProxyType(cls.__member_map__)
 
     def __contains__(cls, item):
         if isinstance(item, cls):
@@ -2538,10 +2550,10 @@ class EnumMeta(type):
         return item in cls.__reversed_map__
 
     def __iter__(cls):
-        return iter(cls.__members__.values())
+        return iter(cls.__member_map__.values())
 
     def __reversed__(cls):
-        return reversed(cls.__members__.values())
+        return reversed(cls.__member_map__.values())
 
     def __setattr__(cls, name, _):
         raise AttributeError(f"Thrift enum type '{cls.__qualname__}': cannot assign member ('{name}').")
@@ -2563,7 +2575,7 @@ class EnumMeta(type):
             ) from None
 
     def __dir__(cls):
-        return list(cls.__members__.keys()) + [
+        return list(cls.__member_map__.keys()) + [
             '__class__',
             '__doc__',
             '__members__',

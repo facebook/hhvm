@@ -9,6 +9,7 @@
 #include <proxygen/lib/utils/ParseURL.h>
 
 #include <algorithm>
+
 #include <folly/portability/Sockets.h>
 #include <proxygen/lib/utils/UtilInl.h>
 
@@ -48,8 +49,7 @@ static bool validateScheme(folly::StringPiece url) {
   }
 
   auto scheme = url.subpiece(0, schemeEnd);
-  return std::all_of(
-      scheme.begin(), scheme.end(), [](auto _) { return std::isalpha(_); });
+  return std::all_of(scheme.begin(), scheme.end(), isAlpha);
 }
 
 bool ParseURL::isSupportedScheme(folly::StringPiece location) {

@@ -26,13 +26,6 @@ TEST(CodecUtil, validateURL) {
       CodecUtil::validateURL(input("/foo\xff"), URLValidateMode::STRICT));
 }
 
-TEST(CodecUtil, isalpha) {
-  for (uint16_t c = 0; c <= 255; c++) {
-    EXPECT_EQ(bool(CodecUtil::isalpha(uint8_t(c))),
-              bool(::isalpha(uint8_t(c))));
-  }
-}
-
 TEST(CodecUtil, validateMethod) {
   EXPECT_TRUE(CodecUtil::validateMethod(input("GET")));
   EXPECT_TRUE(CodecUtil::validateMethod(input("CONNECT-UDP")));

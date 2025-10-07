@@ -6,23 +6,30 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <cctype>
 #include <proxygen/lib/http/structuredheaders/StructuredHeadersConstants.h>
 #include <proxygen/lib/http/structuredheaders/StructuredHeadersUtilities.h>
 
 namespace proxygen::StructuredHeaders {
 
+bool isAlpha(uint8_t c) {
+  return ((unsigned int)(c | 0x20) - 'a') < 26U;
+}
+
 bool isLcAlpha(char c) {
-  return c >= 0x61 && c <= 0x7A;
+  return c >= 'a' && c <= 'z';
+}
+
+bool isDigit(char c) {
+  return c >= '0' && c <= '9';
 }
 
 bool isValidIdentifierChar(char c) {
-  return isLcAlpha(c) || std::isdigit(c) || c == '_' || c == '-' || c == '*' ||
+  return isLcAlpha(c) || isDigit(c) || c == '_' || c == '-' || c == '*' ||
          c == '/';
 }
 
 bool isValidEncodedBinaryContentChar(char c) {
-  return std::isalpha(c) || std::isdigit(c) || c == '+' || c == '/' || c == '=';
+  return isAlpha(c) || isDigit(c) || c == '+' || c == '/' || c == '=';
 }
 
 bool isValidStringChar(char c) {

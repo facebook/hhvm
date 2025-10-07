@@ -9,6 +9,8 @@
 #include <folly/portability/GTest.h>
 #include <proxygen/lib/utils/UtilInl.h>
 
+#include <cctype>
+
 using namespace proxygen;
 
 TEST(UtilTest, CaseInsensitiveEqual) {
@@ -65,4 +67,11 @@ TEST(UtilTest, clamped) {
             std::numeric_limits<uint32_t>::max());
   EXPECT_EQ(clamped_downcast<uint32_t>(std::numeric_limits<uint64_t>::max()),
             std::numeric_limits<uint32_t>::max());
+}
+
+TEST(UtilTest, isAlpha) {
+  // Test is only valid in the "C" locale.
+  for (uint16_t c = 0; c <= 255; c++) {
+    EXPECT_EQ(bool(isAlpha(uint8_t(c))), bool(std::isalpha(uint8_t(c))));
+  }
 }

@@ -81,4 +81,9 @@ Tout clamped_downcast(Tin value) {
                static_cast<uint64_t>(std::numeric_limits<Tout>::max())));
 }
 
+// Like std::isalpha but independent of the current locale.
+inline bool isAlpha(uint8_t c) {
+  return ((unsigned int)(c | 0x20) - 'a') < 26U;
+}
+
 } // namespace proxygen

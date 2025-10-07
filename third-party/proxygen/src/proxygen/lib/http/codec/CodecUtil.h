@@ -45,27 +45,23 @@ class CodecUtil {
     return proxygen::validateURL(url, mode);
   }
 
-  static bool isalpha(uint8_t c) {
-    return ((unsigned int)(c | 32) - 97) < 26U;
-  }
-
   static bool validateMethod(folly::ByteRange method) {
     for (auto p = method.begin(); p != method.end(); p++) {
       // '-' is valid except for start and end
       if (*p == '-' && p != method.begin() && p != method.end()) {
         continue;
       }
-      if (!CodecUtil::isalpha(*p)) {
+      if (!isAlpha(*p)) {
         return false;
       }
     }
     return true;
   }
 
-  static bool validateScheme(folly::ByteRange method) {
-    for (auto p : method) {
-      if (!CodecUtil::isalpha(p)) {
-        // methods are all characters
+  static bool validateScheme(folly::ByteRange scheme) {
+    for (auto p : scheme) {
+      if (!isAlpha(p)) {
+        // scheme can only contain alphabetic characters
         return false;
       }
     }

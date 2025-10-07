@@ -43,6 +43,11 @@ class MetadataTypeInterface {
    */
   virtual void writeAndGenType(ThriftType& ty, ThriftMetadata& metadata) = 0;
   virtual ~MetadataTypeInterface() {}
+  MetadataTypeInterface() = default;
+  MetadataTypeInterface(const MetadataTypeInterface&) = delete;
+  MetadataTypeInterface& operator=(const MetadataTypeInterface&) = delete;
+  MetadataTypeInterface(MetadataTypeInterface&&) = delete;
+  MetadataTypeInterface& operator=(MetadataTypeInterface&&) = delete;
 };
 
 /**

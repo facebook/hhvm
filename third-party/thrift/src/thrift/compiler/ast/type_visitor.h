@@ -34,29 +34,29 @@ namespace apache::thrift::compiler::detail {
 template <typename... Visitors>
 decltype(auto) visit_type(const t_type& ty, Visitors&&... visitors) {
   auto f = overload(std::forward<Visitors>(visitors)...);
-  if (ty.is<t_typedef>()) {
-    return std::invoke(f, dynamic_cast<const t_typedef&>(ty));
-  } else if (ty.is<t_primitive_type>()) {
-    return std::invoke(f, dynamic_cast<const t_primitive_type&>(ty));
-  } else if (ty.is<t_list>()) {
-    return std::invoke(f, dynamic_cast<const t_list&>(ty));
-  } else if (ty.is<t_set>()) {
-    return std::invoke(f, dynamic_cast<const t_set&>(ty));
-  } else if (ty.is<t_map>()) {
-    return std::invoke(f, dynamic_cast<const t_map&>(ty));
-  } else if (ty.is<t_enum>()) {
-    return std::invoke(f, dynamic_cast<const t_enum&>(ty));
+  if (const t_typedef* typedef_ = ty.try_as<t_typedef>()) {
+    return std::invoke(f, *typedef_);
+  } else if (
+      const t_primitive_type* primitive_type = ty.try_as<t_primitive_type>()) {
+    return std::invoke(f, *primitive_type);
+  } else if (const t_list* list = ty.try_as<t_list>()) {
+    return std::invoke(f, *list);
+  } else if (const t_set* set = ty.try_as<t_set>()) {
+    return std::invoke(f, *set);
+  } else if (const t_map* map = ty.try_as<t_map>()) {
+    return std::invoke(f, *map);
+  } else if (const t_enum* enum_ = ty.try_as<t_enum>()) {
+    return std::invoke(f, *enum_);
+  } else if (const t_struct* struct_ = ty.try_as<t_struct>()) {
+    return std::invoke(f, *struct_);
+  } else if (const t_union* union_ = ty.try_as<t_union>()) {
+    return std::invoke(f, *union_);
+  } else if (const t_exception* exception = ty.try_as<t_exception>()) {
+    return std::invoke(f, *exception);
   } else if (ty.is<t_structured>()) {
-    if (const auto* s = ty.try_as<t_struct>()) {
-      return std::invoke(f, static_cast<const t_struct&>(*s));
-    } else if (const auto* u = ty.try_as<t_union>()) {
-      return std::invoke(f, static_cast<const t_union&>(*u));
-    } else if (const auto* ex = ty.try_as<t_exception>()) {
-      return std::invoke(f, static_cast<const t_exception&>(*ex));
-    }
     throw std::logic_error("Missing visitor specialization for t_structured");
-  } else if (ty.is<t_service>()) {
-    return std::invoke(f, dynamic_cast<const t_service&>(ty));
+  } else if (const t_service* service = ty.try_as<t_service>()) {
+    return std::invoke(f, *service);
   }
   abort();
 }

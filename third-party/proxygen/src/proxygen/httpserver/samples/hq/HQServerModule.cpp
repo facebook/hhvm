@@ -6,6 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <folly/portability/GFlags.h>
 #include <proxygen/httpserver/samples/hq/FizzContext.h>
 #include <proxygen/httpserver/samples/hq/H2Server.h>
 #include <proxygen/httpserver/samples/hq/HQServerModule.h>
@@ -71,7 +72,8 @@ void startServer(
     server.setStatsFactory(std::move(statsFactory));
   }
 
-  server.start();
+  folly::SocketAddress localAddress(params.host, params.port, true);
+  server.start(localAddress);
   // Wait until the quic server initializes
   server.getAddress();
   h2server.join();

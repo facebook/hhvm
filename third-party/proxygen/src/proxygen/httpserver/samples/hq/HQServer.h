@@ -13,6 +13,7 @@
 #include <vector>
 
 #include <folly/io/async/EventBaseLocal.h>
+#include <proxygen/httpserver/samples/hq/FizzContext.h>
 #include <proxygen/httpserver/samples/hq/HQParams.h>
 #include <proxygen/lib/http/session/HTTPTransaction.h>
 #include <quic/server/QuicHandshakeSocketHolder.h>
@@ -46,7 +47,8 @@ class HQServer {
            std::shared_ptr<const fizz::server::FizzServerContext> fizzCtx);
 
   // Starts the QUIC transport in background thread
-  void start(std::vector<folly::EventBase*> evbs = {});
+  void start(const folly::SocketAddress& localAddress,
+             std::vector<folly::EventBase*> evbs = {});
 
   // Returns the listening address of the server
   // NOTE: can block until the server has started
@@ -97,12 +99,14 @@ class ScopedHQServer {
  public:
   static std::unique_ptr<ScopedHQServer> start(
       const HQServerParams& params,
+      const folly::SocketAddress& localAddress,
       HTTPTransactionHandlerProvider handlerProvider,
       const std::string& certificateFilePath,
       const std::string& keyFilePath,
       fizz::server::ClientAuthMode clientAuth,
       const std::vector<std::string>& supportedAlpns) {
     return std::make_unique<ScopedHQServer>(params,
+                                            localAddress,
                                             std::move(handlerProvider),
                                             certificateFilePath,
                                             keyFilePath,
@@ -111,6 +115,7 @@ class ScopedHQServer {
   }
 
   ScopedHQServer(HQServerParams params,
+                 const folly::SocketAddress& localAddress,
                  HTTPTransactionHandlerProvider handlerProvider,
                  const std::string& certificateFilePath,
                  const std::string& keyFilePath,

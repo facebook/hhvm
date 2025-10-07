@@ -290,14 +290,8 @@ HQServer::HQServer(
       [](TransportKnobParamId transportKnobParamId) -> bool { return true; });
 }
 
-void HQServer::start(std::vector<folly::EventBase*> evbs) {
-  folly::SocketAddress localAddress;
-  if (params_.localAddress) {
-    localAddress = *params_.localAddress;
-  } else {
-    localAddress.setFromLocalPort(params_.port);
-  }
-
+void HQServer::start(const folly::SocketAddress& localAddress,
+                     std::vector<folly::EventBase*> evbs) {
   if (evbs.empty()) {
     server_->start(localAddress, params_.serverThreads);
   } else {
@@ -370,6 +364,7 @@ void HQServer::pauseRead() {
 }
 
 ScopedHQServer::ScopedHQServer(HQServerParams params,
+                               const folly::SocketAddress& localAddress,
                                HTTPTransactionHandlerProvider handlerProvider,
                                const std::string& certificateFilePath,
                                const std::string& keyFilePath,
@@ -381,7 +376,7 @@ ScopedHQServer::ScopedHQServer(HQServerParams params,
           nullptr,
           createFizzServerContext(
               supportedAlpns, clientAuth, certificateFilePath, keyFilePath)) {
-  server_.start();
+  server_.start(localAddress);
 }
 
 } // namespace quic::samples

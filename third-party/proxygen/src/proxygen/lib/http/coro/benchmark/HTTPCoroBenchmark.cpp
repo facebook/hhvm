@@ -283,8 +283,11 @@ class BenchmarkFixture {
       params.transportSettings.maxBatchSize = 48;
       params.transportSettings.writeConnectionDataPacketsLimit = 48;
       resp_ = makeBuf(respSize_);
+      folly::SocketAddress localAddress;
+      localAddress.setFromLocalPort(uint16_t(0));
       legacyQuicServer_ = ScopedHQServer::start(
           params,
+          localAddress,
           [this](HTTPMessage* msg) {
             return SizeHandler::makeHandler(msg, resp_->clone());
           },

@@ -45,6 +45,8 @@ struct HQToolServerParams : public HQServerParams {
   std::vector<std::string> supportedAlpns{
       quic::samples::kDefaultSupportedAlpns};
 
+  std::string host;
+  uint16_t port;
   uint16_t h2port;
   folly::Optional<folly::SocketAddress> localH2Address;
   size_t httpServerThreads;

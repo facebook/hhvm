@@ -38,9 +38,9 @@ HQClient::HQClient(const HQToolClientParams& params)
   }
 }
 
-int HQClient::start() {
+int HQClient::start(const folly::SocketAddress& localAddress) {
 
-  initializeQuicClient();
+  initializeQuicClient(*params_.remoteAddress, localAddress);
   initializeQLogger();
 
   // TODO: turn on cert verification
@@ -274,7 +274,8 @@ void HQClient::connectError(const quic::QuicError& error) {
   evb_.terminateLoopSoon();
 }
 
-void HQClient::initializeQuicClient() {
+void HQClient::initializeQuicClient(const folly::SocketAddress& remoteAddress,
+                                    const folly::SocketAddress& localAddress) {
   auto sock = std::make_unique<FollyQuicAsyncUDPSocket>(qEvb_);
   auto handshakeContextBuilder =
       quic::FizzClientQuicHandshakeContext::Builder()
@@ -301,10 +302,8 @@ void HQClient::initializeQuicClient() {
       params_.clientCidLength);
   client->setPacingTimer(pacingTimer_);
   client->setHostname(params_.host);
-  client->addNewPeerAddress(params_.remoteAddress.value());
-  if (params_.localAddress.has_value()) {
-    client->setLocalAddress(*params_.localAddress);
-  }
+  client->addNewPeerAddress(remoteAddress);
+  client->setLocalAddress(localAddress);
   client->setCongestionControllerFactory(
       std::make_shared<quic::DefaultCongestionControllerFactory>());
   client->setTransportSettings(params_.transportSettings);
@@ -330,7 +329,20 @@ void HQClient::initializeQLogger() {
 
 int startClient(const HQToolClientParams& params) {
   HQClient client(params);
-  return client.start();
+
+  folly::SocketAddress localAddr;
+  if (params.localAddress.has_value()) {
+    localAddr = *params.localAddress;
+  } else {
+    if (params.remoteAddress.has_value() &&
+        params.remoteAddress->getFamily() == AF_INET) {
+      localAddr = folly::SocketAddress("0.0.0.0", 0);
+    } else {
+      localAddr = folly::SocketAddress("::", 0);
+    }
+  }
+
+  return client.start(localAddr);
 }
 
 } // namespace quic::samples

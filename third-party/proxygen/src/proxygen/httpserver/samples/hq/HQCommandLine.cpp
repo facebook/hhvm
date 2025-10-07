@@ -196,10 +196,7 @@ void initializeCommonSettings(HQToolParams& hqParams) {
     hqParams.setMode(HQMode::SERVER);
     hqParams.logprefix = "server";
     auto& serverParams = boost::get<HQToolServerParams>(hqParams.params);
-    serverParams.port = FLAGS_port;
     serverParams.serverThreads = FLAGS_threads;
-    serverParams.localAddress =
-        folly::SocketAddress(FLAGS_host, serverParams.port, true);
   } else if (FLAGS_mode == "client") {
     hqParams.setMode(HQMode::CLIENT);
     hqParams.logprefix = "client";
@@ -346,9 +343,11 @@ void initializeHttpServerSettings(HQToolServerParams& hqParams) {
   // HTTP section
   // NOTE: handler factories are assigned by H2Server class
   // before starting.
+  hqParams.host = FLAGS_host;
+  hqParams.port = FLAGS_port;
   hqParams.h2port = FLAGS_h2port;
   hqParams.localH2Address =
-      folly::SocketAddress(FLAGS_host, hqParams.h2port, true);
+      folly::SocketAddress(hqParams.host, hqParams.h2port, true);
   hqParams.httpServerThreads = FLAGS_threads;
   hqParams.httpServerIdleTimeout = std::chrono::milliseconds(60000);
   hqParams.httpServerShutdownOn = {SIGINT, SIGTERM};

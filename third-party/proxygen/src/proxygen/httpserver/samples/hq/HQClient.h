@@ -31,7 +31,7 @@ class HQClient : private quic::QuicSocket::ConnectionSetupCallback {
 
   ~HQClient() override = default;
 
-  int start();
+  int start(const folly::SocketAddress& localAddress);
 
   void setOnBodyFunc(
       const std::function<void(const proxygen::HTTPMessage& request,
@@ -81,7 +81,8 @@ class HQClient : private quic::QuicSocket::ConnectionSetupCallback {
 
   void connectError(const quic::QuicError& error);
 
-  void initializeQuicClient();
+  void initializeQuicClient(const folly::SocketAddress& remoteAddress,
+                            const folly::SocketAddress& localAddress);
 
   void initializeQLogger();
 

@@ -232,7 +232,7 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 		return mono.Error(err)
 	}
 	rpcFuncName := metadata.GetName()
-	protocol, err := newProtocolBufferFromRequest(msg.Data(), metadata, s.observer, rpcFuncName)
+	protocol, err := newProtocolBufferFromRequest(msg.Data(), metadata, s.observer)
 	if err != nil {
 		// Notify observer that connection was dropped and task killed due to protocol buffer creation error
 		s.observer.ConnDropped()
@@ -313,7 +313,7 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 		return
 	}
 	rpcFuncName := metadata.GetName()
-	protocol, err := newProtocolBufferFromRequest(msg.Data(), metadata, s.observer, rpcFuncName)
+	protocol, err := newProtocolBufferFromRequest(msg.Data(), metadata, s.observer)
 	if err != nil {
 		// Notify observer that connection was dropped and task killed due to protocol buffer creation error
 		s.observer.ConnDropped()
@@ -360,13 +360,13 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 	return flux.Error(errors.New("not implemented"))
 }
 
-func newProtocolBufferFromRequest(payloadDataBytes []byte, metadata *rpcmetadata.RequestRpcMetadata, observer ServerObserver, functionName string) (*protocolBuffer, error) {
+func newProtocolBufferFromRequest(payloadDataBytes []byte, metadata *rpcmetadata.RequestRpcMetadata, observer ServerObserver) (*protocolBuffer, error) {
+	rpcFuncName := metadata.GetName()
 	dataBytes, err := rocket.MaybeDecompress(payloadDataBytes, metadata.GetCompression())
 	if err != nil {
 		return nil, fmt.Errorf("payload data bytes decompression failed: %w", err)
 	}
 
-	messageName := metadata.GetName()
 	protoID := types.ProtocolID(metadata.GetProtocol())
 	headersMap := rocket.GetRequestRpcMetadataHeaders(metadata)
 	messageType := types.CALL
@@ -379,7 +379,7 @@ func newProtocolBufferFromRequest(payloadDataBytes []byte, metadata *rpcmetadata
 		return nil, err
 	}
 	protocol.setResponseHeaders(headersMap)
-	if err := protocol.WriteMessageBegin(messageName, messageType, 0); err != nil {
+	if err := protocol.WriteMessageBegin(rpcFuncName, messageType, 0); err != nil {
 		return nil, err
 	}
 

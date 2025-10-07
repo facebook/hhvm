@@ -85,6 +85,9 @@ struct QueryContext : QueryContextBase {
       bool disableFreshInstance);
   QueryContext(const QueryContext&) = delete;
   QueryContext& operator=(const QueryContext&) = delete;
+  QueryContext(QueryContext&&) = delete;
+  QueryContext& operator=(QueryContext&&) = delete;
+  ~QueryContext() override = default;
 
   // Increment numWalked_ by the specified amount
   inline void bumpNumWalked(int64_t amount = 1) {

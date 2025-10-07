@@ -68,11 +68,11 @@ class URL {
     // can be true so long as the scheme is http(s).
   }
 
-  static std::string createUrl(const std::string& scheme,
-                               const std::string& hostAndPort,
-                               const std::string& path,
-                               const std::string& query,
-                               const std::string& fragment) noexcept {
+  static std::string createUrl(std::string_view scheme,
+                               std::string_view hostAndPort,
+                               std::string_view path,
+                               std::string_view query,
+                               std::string_view fragment) noexcept {
     std::ostringstream out;
     out << scheme << "://" << hostAndPort << '/' << path;
     if (!query.empty()) {

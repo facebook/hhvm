@@ -99,7 +99,7 @@ folly::Optional<std::string> ParseURL::getRedirectDestination(
 }
 
 void ParseURL::parse(bool strict) noexcept {
-  if (url_.size() == 1 && url_[0] == '/') {
+  if (url_ == "/") {
     path_ = url_;
     valid_ = true;
     return;

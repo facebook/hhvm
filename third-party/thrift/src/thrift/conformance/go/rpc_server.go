@@ -100,7 +100,7 @@ func (h *rpcConformanceServiceHandler) RequestResponseDeclaredException(ctx cont
 		SetRequest(request)
 	h.result = rpc.NewServerTestResult().
 		SetRequestResponseDeclaredException(requestValue)
-	return rpc.NewUserException().SetMsg(h.instruction.RequestResponseDeclaredException.UserException.Msg)
+	return h.instruction.RequestResponseDeclaredException.UserException
 }
 
 func (h *rpcConformanceServiceHandler) RequestResponseUndeclaredException(ctx context.Context, request *rpc.Request) error {

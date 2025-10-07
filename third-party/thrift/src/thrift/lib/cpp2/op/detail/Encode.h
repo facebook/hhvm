@@ -555,14 +555,6 @@ struct StructEncode {
       if (!should_write<Tag>(field)) {
         return;
       }
-      if constexpr (detail::pa::
-                        is_deprecated_terse_field<T, op::get_ident<T, Id>>) {
-        if (!detail::pa::
-                should_write_deprecated_terse_field<T, op::get_ident<T, Id>>(
-                    t)) {
-          return;
-        }
-      }
 
       s += prot.writeFieldBegin(
           &*op::get_name_v<T, Id>.begin(),

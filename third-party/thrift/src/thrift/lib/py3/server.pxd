@@ -34,7 +34,6 @@ from thrift.python.server_impl.async_processor cimport (
     AsyncProcessorFactory as Py3AsyncProcessorFactory,
 )
 from thrift.python.server_impl.interceptor.server_module cimport cServerModule
-from thrift.python.types cimport cServiceHealth, cServiceHealth_OK, cServiceHealth_ERROR
 
 
 cdef extern from "thrift/lib/cpp2/server/StatusServerInterface.h" \
@@ -99,13 +98,6 @@ cdef extern from "thrift/lib/cpp2/server/ThriftServer.h" \
         void addModule(unique_ptr[cServerModule] module)
         void setStreamExpireTime(milliseconds timeout)
 
-cdef extern from "thrift/lib/cpp2/server/ThriftServerInternals.h" \
-        namespace "apache::thrift::detail":
-    cdef cppclass cThriftServerInternals "apache::thrift::detail::ThriftServerInternals":
-        cThriftServerInternals(cThriftServer&) nogil except +
-        void disableServiceHealthPoller() nogil
-        void setServiceHealth(cServiceHealth health) nogil
-
 cdef extern from "folly/ssl/OpenSSLCertUtils.h" \
         namespace "folly::ssl":
     # I need a opque id for x509 structs
@@ -146,10 +138,6 @@ cdef class ThriftServer:
     cdef void add_routing_handler(self, unique_ptr[cTransportRoutingHandler] handler)
     # handler only set when initialized with thrift-python ServiceInterface
     cdef PythonServiceInterface handler
-    # Health polling members
-    cdef object _health_polling_task
-    cdef double _health_polling_interval
-    cdef cServiceHealth c_health
 
 
 cdef class StatusServerInterface:

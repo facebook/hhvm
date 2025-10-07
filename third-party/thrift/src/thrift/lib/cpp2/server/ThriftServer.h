@@ -2140,11 +2140,6 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
    * Thrift server's latest view of the running service's reported health.
    */
   std::atomic<ServiceHealth> cachedServiceHealth_{};
-  /**
-   * Tracks whether the C++ health poller has been disabled due to Python
-   * services directly setting their health status.
-   */
-  bool disabledPoller_{false};
 #endif
 
   struct ModulesSpecification {
@@ -3024,33 +3019,6 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   void allowProfilingInterface(bool value) { allowProfilingInterface_ = value; }
 
   bool allowProfilingInterface() const { return allowProfilingInterface_; }
-
-#if FOLLY_HAS_COROUTINES
-  /**
-   * Disable the service health poller. This should be called by Python services
-   * before serve() is called if they want to manage their own health status.
-   */
-  void disableServiceHealthPoller() { disabledPoller_ = true; }
-
-  /**
-   * Set the service health for Python services.
-   * This allows Python services to directly set their health status.
-   * The service health poller must already be disabled before calling this
-   * method.
-   */
-  void setServiceHealth(ServiceHealth health) {
-    CHECK(isServiceHealthPollerDisabled())
-        << "Service health poller must be disabled before setting service health. "
-           "Call disableServiceHealthPoller() first.";
-    cachedServiceHealth_.store(health, std::memory_order_relaxed);
-  }
-
-  /**
-   * Check if the service health poller has been disabled due to Python services
-   * directly setting their health status.
-   */
-  bool isServiceHealthPollerDisabled() const { return disabledPoller_; }
-#endif
 
  public:
   // ThriftServer by defaults uses a global ShutdownSocketSet, so all socket's

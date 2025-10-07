@@ -89,7 +89,7 @@ let indexer (t : t) (filter : string -> bool) : unit -> string list =
     let files = Watchman.get_all_files wenv in
     Bucket.make_list ~num_workers (List.filter ~f:filter files)
   | EdenfsFileWatcher { instance; num_workers; last_clock; _ } ->
-    let (files, new_clock) =
+    let (files, new_clock, _telemetry_opt) =
       Edenfs_watcher.get_all_files instance |> handle_edenfs_watcher_result
     in
     Hh_logger.debug
@@ -172,6 +172,7 @@ let init
       ServerLocalConfig.EdenfsFileWatcher.debug_logging;
       timeout_secs;
       throttle_time_ms;
+      report_telemetry;
       _;
     } =
       local_config.edenfs_file_watcher
@@ -183,6 +184,7 @@ let init
         debug_logging;
         timeout_secs;
         throttle_time_ms;
+        report_telemetry;
       }
     in
     match Edenfs_watcher.init init_settings with
@@ -464,12 +466,22 @@ let get_changes_sync (t : t) telemetry : SSet.t * clock option * Telemetry.t =
       ) else
         let start_time = Unix.gettimeofday () in
         (* Note that this will handle all errors by raising Exit_status *)
-        let (changes, new_clock) =
+        let (changes, new_clock, sync_telemetry_opt) =
           handle_edenfs_watcher_result
             (Edenfs_watcher.get_changes_sync instance)
         in
         let telemetry =
           Telemetry.add_duration ~key:"sync_watcher" ~start_time telemetry
+        in
+        let telemetry =
+          Option.value_map
+            ~default:telemetry
+            sync_telemetry_opt
+            ~f:(fun sync_telemetry ->
+              Telemetry.object_
+                ~key:"get_changes_sync"
+                ~value:sync_telemetry
+                telemetry)
         in
         last_clock := new_clock;
         let changes_set =
@@ -550,12 +562,22 @@ let get_changes_async (t : t) telemetry : changes * clock option * Telemetry.t =
       ) else
         let start_time = Unix.gettimeofday () in
         (* Note that this will handle all errors by raising Exit_status *)
-        let (changes, new_clock) =
+        let (changes, new_clock, async_telemetry_opt) =
           handle_edenfs_watcher_result
             (Edenfs_watcher.get_changes_async instance)
         in
         let telemetry =
           Telemetry.add_duration ~key:"async_watcher" ~start_time telemetry
+        in
+        let telemetry =
+          Option.value_map
+            ~default:telemetry
+            async_telemetry_opt
+            ~f:(fun async_telemetry ->
+              Telemetry.object_
+                ~key:"get_changes_async"
+                ~value:async_telemetry
+                telemetry)
         in
         last_clock := new_clock;
         let changes_set =

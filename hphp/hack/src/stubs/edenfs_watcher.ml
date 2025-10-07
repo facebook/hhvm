@@ -23,11 +23,11 @@ let init (_settings : Edenfs_watcher_types.settings) =
   failwith "not implemented"
 
 let get_changes_sync (_instance : instance) :
-    (changes list * clock, edenfs_watcher_error) result =
+    (changes list * clock * Telemetry.t option, edenfs_watcher_error) result =
   failwith "not implemented"
 
 let get_changes_async (_instance : instance) :
-    (changes list * clock, edenfs_watcher_error) result =
+    (changes list * clock * Telemetry.t option, edenfs_watcher_error) result =
   failwith "not implemented"
 
 let get_notification_fd (_instance : instance) :
@@ -35,7 +35,7 @@ let get_notification_fd (_instance : instance) :
   failwith "not implemented"
 
 let get_all_files (_instance : instance) :
-    (string list * clock, edenfs_watcher_error) result =
+    (string list * clock * Telemetry.t option, edenfs_watcher_error) result =
   failwith "not implemented"
 
 module Standalone = struct

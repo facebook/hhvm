@@ -94,6 +94,8 @@ module EdenfsFileWatcher = struct
         (** Value of throttle_time_ms parameter passed to Eden's stream_changes_since API.
             This means that this is the minimum period (in milliseconds) between each time
             Eden will send us a change notification. *)
+    report_telemetry: bool;
+        (** If true, will log additional telemetry collected from within Edenfs_watcher *)
   }
 
   let default =
@@ -103,6 +105,7 @@ module EdenfsFileWatcher = struct
       timeout_secs = 60;
       throttle_time_ms = 50;
       sync_queries_obey_deferral = true;
+      report_telemetry = false;
     }
 
   let load ~current_version ~default config =
@@ -139,12 +142,19 @@ module EdenfsFileWatcher = struct
         ~default:default.throttle_time_ms
         config
     in
+    let report_telemetry =
+      bool_
+        "edenfs_file_watcher_report_telemetry"
+        ~default:default.report_telemetry
+        config
+    in
     {
       debug_logging;
       enabled;
       timeout_secs;
       sync_queries_obey_deferral;
       throttle_time_ms;
+      report_telemetry;
     }
 end
 

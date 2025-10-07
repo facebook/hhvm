@@ -15,6 +15,7 @@ type settings = {
       (** Value of throttle_time_ms parameter passed to Eden's stream_changes_since API.
           This means that this is the minimum period (in milliseconds) between each time
           Eden will send us a change notification. *)
+  report_telemetry: bool;
 }
 
 type changes =

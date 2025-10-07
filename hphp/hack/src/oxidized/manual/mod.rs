@@ -10,6 +10,7 @@ pub mod ast_defs_impl;
 pub mod classish_positions_types_impl;
 pub mod custom_error_config_impl;
 pub mod direct_decl_parser;
+pub mod edenfs_watcher_types_impl;
 pub mod error_hash_set;
 pub mod errors_impl;
 pub mod experimental_features_impl;

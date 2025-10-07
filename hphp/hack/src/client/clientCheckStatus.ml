@@ -218,6 +218,7 @@ let go_streaming_on_fd
     (args : ClientEnv.client_check_env)
     (error_filter : Filter_errors.Filter.t)
     ~(partial_telemetry_ref : Telemetry.t option ref)
+    ~(initial_telemetry : Telemetry.t)
     ~(progress_callback : string option -> unit) :
     (Exit_status.t * Telemetry.t) Lwt.t =
   let ClientEnv.{ max_errors; error_format; _ } = args in
@@ -230,7 +231,7 @@ let go_streaming_on_fd
   (* This constructs a telemetry that we'll use for both partial-progress
      and completed events. *)
   let telemetry_so_far displayed_count =
-    !errors_file_telemetry
+    Telemetry.merge initial_telemetry !errors_file_telemetry
     |> Telemetry.bool_ ~key:"streaming" ~value:true
     |> Telemetry.int_opt ~key:"max_errors" ~value:max_errors
     |> Telemetry.float_opt
@@ -496,6 +497,7 @@ let edenfs_watcher_get_raw_updates_since ~root ~clock ~local_config =
     ServerLocalConfig.EdenfsFileWatcher.debug_logging;
     timeout_secs;
     throttle_time_ms;
+    report_telemetry;
     _;
   } =
     local_config.ServerLocalConfig.edenfs_file_watcher
@@ -507,6 +509,7 @@ let edenfs_watcher_get_raw_updates_since ~root ~clock ~local_config =
       debug_logging;
       timeout_secs;
       throttle_time_ms;
+      report_telemetry;
     }
   in
   let translate_changes list = function
@@ -516,9 +519,9 @@ let edenfs_watcher_get_raw_updates_since ~root ~clock ~local_config =
   in
 
   match Edenfs_watcher.Standalone.get_changes_since settings clock with
-  | Ok (changes, _clock) ->
+  | Ok (changes, _clock, telemetry) ->
     let changes = List.fold ~init:[] ~f:translate_changes changes in
-    Lwt.return_ok changes
+    Lwt.return_ok (changes, telemetry)
   | Error error ->
     Lwt.return_error (Edenfs_watcher_types.show_edenfs_watcher_error error)
 
@@ -532,30 +535,28 @@ let edenfs_watcher_get_raw_updates_since ~root ~clock ~local_config =
   the server wrote to the errors file.
   This way, we ensure to use the same file watcher as the server. *)
 let file_watcher_get_raw_updates_since ~root ~clock ~local_config :
-    (string list * bool, string) result Lwt.t =
-  let (changes, is_relative) =
-    match clock with
-    | ServerNotifier.Watchman clock ->
-      let watchman_sockname =
-        local_config.ServerLocalConfig.watchman.sockname
-      in
-      let changes =
-        watchman_get_raw_updates_since
-          ~root
-          ~clock
-          ~watchman_sockname
-          ~fail_on_new_instance:false
-          ~fail_during_state:false
-      in
-      (changes, true)
-    | ServerNotifier.Eden clock ->
-      let changes =
-        edenfs_watcher_get_raw_updates_since ~root ~clock ~local_config
-      in
-      (changes, false)
-  in
-  let%lwt changes = changes in
-  Lwt.return (Result.map changes ~f:(fun changes -> (changes, is_relative)))
+    (string list * Telemetry.t option * bool, string) result Lwt.t =
+  match clock with
+  | ServerNotifier.Watchman clock ->
+    let watchman_sockname = local_config.ServerLocalConfig.watchman.sockname in
+    let%lwt changes =
+      watchman_get_raw_updates_since
+        ~root
+        ~clock
+        ~watchman_sockname
+        ~fail_on_new_instance:false
+        ~fail_during_state:false
+    in
+    Lwt.return (Result.map changes ~f:(fun changes -> (changes, None, true)))
+  | ServerNotifier.Eden clock ->
+    let%lwt changes_and_telemetry =
+      edenfs_watcher_get_raw_updates_since ~root ~clock ~local_config
+    in
+    let result =
+      Result.map changes_and_telemetry ~f:(fun (changes, telemetry_opt) ->
+          (changes, telemetry_opt, false))
+    in
+    Lwt.return result
 
 module FileId : sig
   (** Identifier for a file, based on inode and ctime *)
@@ -663,7 +664,9 @@ let rec keep_trying_to_open
     ~(already_checked_file : FileId.t option)
     ~(progress_callback : string option -> unit)
     ~(deadline : float option)
-    ~(root : Path.t) : (int * Unix.file_descr) Lwt.t =
+    ~(opening_attempts : int)
+    ~(telemetry : Telemetry.t)
+    ~(root : Path.t) : (int * Unix.file_descr * Telemetry.t) Lwt.t =
   Option.iter deadline ~f:(fun deadline ->
       if Float.(Unix.gettimeofday () > deadline) then begin
         progress_callback None;
@@ -703,6 +706,8 @@ let rec keep_trying_to_open
       ~already_checked_file:None
       ~progress_callback
       ~deadline
+      ~opening_attempts:(opening_attempts + 1)
+      ~telemetry
       ~root
       ~local_config
   | Some fd -> begin
@@ -716,6 +721,8 @@ let rec keep_trying_to_open
         ~already_checked_file
         ~progress_callback
         ~deadline
+        ~opening_attempts:(opening_attempts + 1)
+        ~telemetry
         ~root
         ~local_config
     else
@@ -742,6 +749,8 @@ let rec keep_trying_to_open
           ~already_checked_file
           ~progress_callback
           ~deadline
+          ~opening_attempts:(opening_attempts + 1)
+          ~telemetry
           ~root
           ~local_config
       | Error (open_error, log_message) -> begin
@@ -772,7 +781,13 @@ let rec keep_trying_to_open
         Hh_logger.log
           "Errors-file: %s is present, without Watchman or Edenfs_watcher, so just going with it."
           (Sys_utils.show_inode fd);
-        Lwt.return (pid, fd)
+        let telemetry =
+          Telemetry.int_
+            telemetry
+            ~key:"opening_attempts"
+            ~value:opening_attempts
+        in
+        Lwt.return (pid, fd, telemetry)
       | Ok { Server_progress.ErrorsRead.pid; clock = Some clock; _ } -> begin
         Hh_logger.log
           "Errors-file: %s is present, was started at clock %s, so querying %s..."
@@ -793,8 +808,14 @@ let rec keep_trying_to_open
              If there has, hh_server will ultimately tell us with a restart sentinel, and we'll
              ask the user to re-run hh. This is sub-optimal UX, but still better UX than
              loudly failing now. *)
-          Lwt.return (pid, fd)
-        | Ok (raw_updates, paths_are_relative) ->
+          let telemetry =
+            Telemetry.int_
+              telemetry
+              ~key:"opening_attempts"
+              ~value:opening_attempts
+          in
+          Lwt.return (pid, fd, telemetry)
+        | Ok (raw_updates, file_watcher_telemetry_opt, paths_are_relative) ->
           let raw_updates =
             if paths_are_relative then
               raw_updates
@@ -809,6 +830,16 @@ let rec keep_trying_to_open
               ~root
               ~raw_updates
           in
+          let telemetry =
+            Option.value_map
+              ~default:telemetry
+              file_watcher_telemetry_opt
+              ~f:(fun file_watcher_telemetry ->
+                Telemetry.object_
+                  ~key:"file_watcher"
+                  ~value:file_watcher_telemetry
+                  telemetry)
+          in
           if Relative_path.Set.is_empty updates then begin
             (* If there was an existing errors.bin, and no files have changed since then,
                then use it! *)
@@ -817,7 +848,13 @@ let rec keep_trying_to_open
               (Sys_utils.show_inode fd)
               (ServerNotifierTypes.show_clock clock)
               (ServerNotifier.show_file_watcher_name clock);
-            Lwt.return (pid, fd)
+            let telemetry =
+              Telemetry.int_
+                telemetry
+                ~key:"opening_attempts"
+                ~value:opening_attempts
+            in
+            Lwt.return (pid, fd, telemetry)
           end else begin
             (* But if files have changed since the errors.bin, then we will keep spinning
                under trust that hh_server will eventually recognize those changes and create
@@ -838,6 +875,8 @@ let rec keep_trying_to_open
               ~already_checked_file
               ~progress_callback
               ~deadline
+              ~opening_attempts:(opening_attempts + 1)
+              ~telemetry
               ~root
               ~local_config
           end
@@ -862,15 +901,22 @@ let go_streaming
     progress_callback None;
     connect_then_close ()
   in
-  let%lwt (pid, fd) =
+  let telemetry = Telemetry.create () in
+  let start_time = Unix.gettimeofday () in
+  let%lwt (pid, fd, initial_telemetry) =
     keep_trying_to_open
       ~has_already_attempted_connect:false
       ~already_checked_file:None
       ~connect_then_close
       ~progress_callback
       ~deadline
+      ~opening_attempts:1
+      ~telemetry
       ~root
       ~local_config
+  in
+  let initial_telemetry =
+    Telemetry.duration initial_telemetry ~start_time ~key:"keep_trying_to_open"
   in
   go_streaming_on_fd
     ~pid
@@ -878,4 +924,5 @@ let go_streaming
     args
     error_filter
     ~partial_telemetry_ref
+    ~initial_telemetry
     ~progress_callback

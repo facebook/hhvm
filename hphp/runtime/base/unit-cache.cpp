@@ -1547,6 +1547,25 @@ Optional<std::string> getHashFromEden(const char* path,
   return std::string{xattr_buf, sizeof(xattr_buf)};
 }
 
+Optional<std::string> getDigestFromEden(const char* path,
+                                        Stream::Wrapper* wrapper) {
+  assertx(Cfg::Eval::UseEdenFS);
+  assertx(path);
+  if (wrapper) {
+    // We only allow normal file streams, which cannot re-enter
+    assertx(wrapper->isNormalFileStream());
+    auto const xattr = wrapper->getxattr(path, "user.digesthash");
+    if (!xattr || xattr->size() != SHA1::kStrLen) return std::nullopt;
+    return xattr;
+  }
+  // That's 64 bytes for the hash for you decimal peasants
+  char xattr_buf[0x40];
+  auto const ret = getxattr(path, "user.digesthash", xattr_buf, sizeof(xattr_buf));
+  if (ret != sizeof(xattr_buf)) return std::nullopt;
+  return std::string{xattr_buf, sizeof(xattr_buf)};
+}
+
+
 size_t numLoadedUnits() {
   if (Cfg::Repo::Authoritative) return s_repoUnitCache.size();
   return s_nonRepoUnitCache.size();

@@ -28,6 +28,11 @@ class CompressionFilter : public Filter {
   virtual ~CompressionFilter() override {
   }
 
+  CompressionFilter(const CompressionFilter&) = delete;
+  CompressionFilter& operator=(const CompressionFilter&) = delete;
+  CompressionFilter(CompressionFilter&&) = delete;
+  CompressionFilter& operator=(CompressionFilter&&) = delete;
+
   void sendHeaders(HTTPMessage& msg) noexcept override {
     DCHECK(compressor_ == nullptr);
     DCHECK(header_ == false);
@@ -151,6 +156,11 @@ class CompressionFilterFactory : public RequestHandlerFactory {
 
   virtual ~CompressionFilterFactory() {
   }
+
+  CompressionFilterFactory(const CompressionFilterFactory&) = delete;
+  CompressionFilterFactory& operator=(const CompressionFilterFactory&) = delete;
+  CompressionFilterFactory(CompressionFilterFactory&&) = delete;
+  CompressionFilterFactory& operator=(CompressionFilterFactory&&) = delete;
 
   void onServerStart(folly::EventBase* /*evb*/) noexcept override {
   }

@@ -59,8 +59,7 @@ using if_same_type_after_remove_cvref = std::enable_if_t<
 template <class PatchType>
 PatchType createPatchFromObject(Badge badge, Object obj) {
   PatchType patch;
-  if constexpr (__FBTHRIFT_IS_VALID(
-                    patch, patch.fromObject(badge, std::move(obj)))) {
+  if constexpr (requires { patch.fromObject(badge, std::move(obj)); }) {
     patch.fromObject(badge, std::move(obj));
   } else {
     if (!ProtocolValueToThriftValue<type::infer_tag<PatchType>>{}(obj, patch)) {
@@ -635,10 +634,10 @@ class DynamicPatch {
   static void customVisitImpl(Self&& self, detail::Badge badge, Visitor&& v) {
     std::forward<Self>(self).visitPatch([&](auto&& patch) {
       using PatchType = folly::remove_cvref_t<decltype(patch)>;
-      if constexpr (__FBTHRIFT_IS_VALID(
-                        patch,
-                        std::forward<PatchType>(patch).customVisit(
-                            badge, std::forward<Visitor>(v)))) {
+      if constexpr (requires {
+                      std::forward<PatchType>(patch).customVisit(
+                          badge, std::forward<Visitor>(v));
+                    }) {
         std::forward<PatchType>(patch).customVisit(
             badge, std::forward<Visitor>(v));
       } else {

@@ -199,8 +199,7 @@ std::optional<scope> ifDynamicPatch(
 OptionalTypeRef TypeFinder::findType(const syntax_graph::DefinitionNode& node) {
   OptionalTypeRef ret;
   node.visit([&](auto& syntaxGraphDef) {
-    if constexpr (__FBTHRIFT_IS_VALID(
-                      syntaxGraphDef, TypeRef::of(syntaxGraphDef))) {
+    if constexpr (requires { TypeRef::of(syntaxGraphDef); }) {
       ret = TypeRef::of(syntaxGraphDef);
     }
   });

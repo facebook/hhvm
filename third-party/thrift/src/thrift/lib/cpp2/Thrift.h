@@ -599,15 +599,6 @@ struct is_deprecated_terse_writes_with_custom_default_field : std::false_type {
 };
 } // namespace qualifier
 
-template <class T, class F>
-constexpr std::bool_constant<std::is_invocable_v<F&&, T&>> callable(F&&) {
-  return {};
-}
-
-// TODO: This is a legacy API that was developed when there was no concept.
-// Delete it.
-#define __FBTHRIFT_IS_VALID(VARIABLE, ...) requires { __VA_ARGS__; }
-
 /**
  * Specialization defn in _types.h / service.h
  */

@@ -383,7 +383,7 @@ bool DynamicPatch::isPatchTypeAmbiguous() const {
 bool DynamicPatch::empty() const {
   return std::visit(
       [&](auto&& v) {
-        if constexpr (__FBTHRIFT_IS_VALID(v, v.empty(badge))) {
+        if constexpr (requires { v.empty(badge); }) {
           return v.empty(badge);
         } else {
           return v.empty();
@@ -1693,8 +1693,9 @@ DynamicPatch::merge(Other&& other) {
         using L = folly::remove_cvref_t<decltype(l)>;
         using R = folly::remove_cvref_t<decltype(r)>;
         if constexpr (std::is_same_v<L, R>) {
-          if constexpr (__FBTHRIFT_IS_VALID(
-                            l, l.merge(badge, folly::forward_like<Other>(r)))) {
+          if constexpr (requires {
+                          l.merge(badge, folly::forward_like<Other>(r));
+                        }) {
             l.merge(badge, folly::forward_like<Other>(r));
           } else {
             l.merge(folly::forward_like<Other>(r));
@@ -2030,7 +2031,7 @@ DynamicPatch DynamicPatch::fromPatch(const type::AnyStruct& any) {
 template <typename Protocol>
 std::uint32_t DynamicPatch::encode(Protocol& prot) const {
   return visitPatch([&](const auto& patch) {
-    if constexpr (__FBTHRIFT_IS_VALID(patch, patch.encode(prot))) {
+    if constexpr (requires { patch.encode(prot); }) {
       return patch.encode(prot);
     } else {
       // TODO(dokwon): Provide direct encode from DynamicPatch.

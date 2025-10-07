@@ -49,12 +49,13 @@ export OCAML_BASE_NAME=ocaml-variants
 export OCAML_COMPILER_NAME="${OCAML_BASE_NAME}.${HACK_OCAML_VERSION}"
 
 UNAME=$(uname -s)
-if [ "$UNAME" != "Linux" ]; then
+ARCH=$(uname -m)
+if [ "$UNAME" != "Linux" ] || [ "$ARCH" == "aarch64" ]; then
   # Some variants are not supported on other platforms, so we use the base
   # version instead.
-  # +fp is known not to work on Macs, but other combinations have not been
+  # +fp is known not to work on Macs or on arm64, but other combinations have not been
   # tested.
-  echo 'Non linux platform detected, skipping +fp'
+  echo 'Platform is not Linux or is arm64, skipping +fp'
 else
   HACK_OPAM_DEPS+=(ocaml-option-fp)
   export HACK_OPAM_DEPS

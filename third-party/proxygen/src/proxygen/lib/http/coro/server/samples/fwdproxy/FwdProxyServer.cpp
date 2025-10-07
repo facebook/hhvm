@@ -55,7 +55,7 @@ class FwdProxyHandler : public proxygen::coro::HTTPHandler {
         co_return HTTPFixedSource::makeFixedResponse(400);
       }
       co_return co_await handleConnect(evb,
-                                       parseURL->host().str(),
+                                       std::string(parseURL->host()),
                                        parseURL->port(),
                                        std::move(*headerEvent),
                                        std::move(requestSource));

@@ -53,7 +53,7 @@ class URL {
     fragment_ = parseUrl.fragment().str();
     url_ = parseUrl.url().str();
 
-    setScheme(parseUrl.scheme().str(), secure);
+    setScheme(std::string(parseUrl.scheme()), secure);
 
     if (parseUrl.port()) {
       port_ = parseUrl.port();

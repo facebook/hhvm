@@ -49,7 +49,7 @@ static bool validateScheme(folly::StringPiece url) {
     return false;
   }
 
-  auto scheme = url.subpiece(0, schemeEnd);
+  auto scheme = url.substr(0, schemeEnd);
   return std::all_of(scheme.begin(), scheme.end(), isAlpha);
 }
 
@@ -61,7 +61,7 @@ bool ParseURL::isSupportedScheme(folly::StringPiece location) {
     // Location doesn't contain a scheme, so use the one from the original URL
     return true;
   }
-  auto scheme = location.subpiece(0, schemeEnd);
+  auto scheme = location.substr(0, schemeEnd);
 
   return std::find(kSupportedSchemes.begin(),
                    kSupportedSchemes.end(),
@@ -94,7 +94,7 @@ std::optional<std::string> ParseURL::getRedirectDestination(
     return fmt::format(
         "{}://{}{}", requestScheme, oldURL->hostAndPort(), location);
   } else {
-    return newUrl->url().str();
+    return std::string(newUrl->url());
   }
 }
 
@@ -120,27 +120,26 @@ void ParseURL::parse(bool strict) noexcept {
       // 0 and len = 0, we will get "" from this.  So no need to check field_set
       // before get field.
 
-      scheme_ = url_.subpiece(u.field_data[UF_SCHEMA].off,
-                              u.field_data[UF_SCHEMA].len);
+      scheme_ =
+          url_.substr(u.field_data[UF_SCHEMA].off, u.field_data[UF_SCHEMA].len);
 
       if (u.field_data[UF_HOST].off != 0 &&
           url_[u.field_data[UF_HOST].off - 1] == '[') {
         // special case: host: [::1]
-        host_ = url_.subpiece(u.field_data[UF_HOST].off - 1,
-                              u.field_data[UF_HOST].len + 2);
+        host_ = url_.substr(u.field_data[UF_HOST].off - 1,
+                            u.field_data[UF_HOST].len + 2);
       } else {
         host_ =
-            url_.subpiece(u.field_data[UF_HOST].off, u.field_data[UF_HOST].len);
+            url_.substr(u.field_data[UF_HOST].off, u.field_data[UF_HOST].len);
       }
 
       port_ = u.port;
 
-      path_ =
-          url_.subpiece(u.field_data[UF_PATH].off, u.field_data[UF_PATH].len);
+      path_ = url_.substr(u.field_data[UF_PATH].off, u.field_data[UF_PATH].len);
       query_ =
-          url_.subpiece(u.field_data[UF_QUERY].off, u.field_data[UF_QUERY].len);
-      fragment_ = url_.subpiece(u.field_data[UF_FRAGMENT].off,
-                                u.field_data[UF_FRAGMENT].len);
+          url_.substr(u.field_data[UF_QUERY].off, u.field_data[UF_QUERY].len);
+      fragment_ = url_.substr(u.field_data[UF_FRAGMENT].off,
+                              u.field_data[UF_FRAGMENT].len);
 
       authority_ = (port_) ? fmt::format("{}:{}", host_, port_) : host_;
     }
@@ -171,24 +170,24 @@ void ParseURL::parseNonFully(bool strict) noexcept {
   auto pathEnd = std::min(queryStart, hashStart);
   auto authorityEnd = std::min(pathStart, pathEnd);
 
-  authority_ = url_.subpiece(0, authorityEnd).str();
+  authority_ = url_.substr(0, authorityEnd);
 
   if (pathStart < pathEnd) {
-    path_ = url_.subpiece(pathStart, pathEnd - pathStart);
+    path_ = url_.substr(pathStart, pathEnd - pathStart);
   } else {
     // missing the '/', e.g. '?query=3'
     path_ = "";
   }
 
   if (queryStart < queryEnd) {
-    query_ = url_.subpiece(queryStart + 1, queryEnd - queryStart - 1);
+    query_ = url_.substr(queryStart + 1, queryEnd - queryStart - 1);
   } else if (queryStart != std::string::npos && hashStart < queryStart) {
     valid_ = false;
     return;
   }
 
   if (hashStart != std::string::npos) {
-    fragment_ = url_.subpiece(hashStart + 1, std::string::npos);
+    fragment_ = url_.substr(hashStart + 1);
   }
 
   if (!parseAuthority()) {
@@ -245,7 +244,7 @@ bool ParseURL::hostIsIPAddress() {
 void ParseURL::stripBrackets() noexcept {
   if (hostNoBrackets_.empty()) {
     if (!host_.empty() && host_.front() == '[' && host_.back() == ']') {
-      hostNoBrackets_ = host_.subpiece(1, host_.size() - 2);
+      hostNoBrackets_ = host_.substr(1, host_.size() - 2);
     } else {
       hostNoBrackets_ = host_;
     }

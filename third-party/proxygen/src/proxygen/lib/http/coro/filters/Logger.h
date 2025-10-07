@@ -140,20 +140,20 @@ class Logger {
     if (!reqFilter.url.empty()) {
       auto parseUrl = ParseURL::parseURL(reqFilter.url);
       if (parseUrl && parseUrl->hasHost()) {
-        return parseUrl->host().str();
+        return std::string(parseUrl->host());
       }
     }
-    return std::string();
+    return {};
   }
 
   std::string getPath() const {
     if (!reqFilter.url.empty()) {
       auto parseUrl = ParseURL::parseURL(reqFilter.url);
       if (parseUrl) {
-        return parseUrl->path().str();
+        return std::string(parseUrl->path());
       }
     }
-    return std::string();
+    return {};
   }
 
   class Filter : public HTTPSourceFilter {

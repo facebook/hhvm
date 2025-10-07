@@ -1,6 +1,6 @@
 ERROR: File "T142820007.php", line 7, characters 23-26:
 This type `this` cannot be used in an `extends` clause (Naming[2043])
-ERROR: File "T142820007.php", line 17, characters 3-17:
+ERROR: File "T142820007.php", line 17, characters 15-17:
 Invalid assignment (Typing[4110])
   File "T142820007.php", line 14, characters 15-17:
   Expected `int`
@@ -8,7 +8,7 @@ Invalid assignment (Typing[4110])
   But got `arraykey`
   File "T142820007.php", line 16, characters 15-22:
   This type argument to `C` must match exactly (it is invariant)
-ERROR: File "T142820007.php", line 18, characters 3-36:
+ERROR: File "T142820007.php", line 18, characters 34-36:
 Invalid assignment (Typing[4110])
   File "T142820007.php", line 15, characters 15-20:
   Expected `string`

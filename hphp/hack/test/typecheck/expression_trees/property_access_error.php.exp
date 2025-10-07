@@ -1,4 +1,4 @@
-ERROR: File "property_access_error.php", line 7, characters 5-25:
+ERROR: File "property_access_error.php", line 7, characters 19-25:
 Invalid assignment (Typing[4110])
   File "property_access_error.php", line 12, characters 10-19:
   Expected `int`

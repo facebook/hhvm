@@ -1,4 +1,4 @@
-ERROR: File "subtype_funs2.php", line 15, characters 5-17:
+ERROR: File "subtype_funs2.php", line 15, characters 16-17:
 Invalid assignment (Typing[4110])
   File "subtype_funs2.php", line 13, characters 24-26:
   Expected `int`

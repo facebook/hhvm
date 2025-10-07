@@ -12662,7 +12662,7 @@ end = struct
             ~is_method:false
             ~nullsafe
             ~meth_caller:false
-            ~coerce_from_ty:(Some (p, ur, ty2))
+            ~coerce_from_ty:(Some (pos2, ur, ty2))
             ~explicit_targs:[]
             ~class_id:(CIexpr e1)
             ~member_id:m
@@ -12780,7 +12780,7 @@ end = struct
             let env = { env with lenv = parent_lenv } in
             let env = might_throw ~join_pos:p env in
             let (env, te1, ty, _) =
-              assign_with_subtype_err_ p ur env e1 p1 ty1'
+              assign_with_subtype_err_ p ur env e1 pos2 ty1'
             in
             (* Update the actual type to that after assignment *)
             let arr_ty_mismatch_opt =
@@ -12866,7 +12866,7 @@ end = struct
             let env = { env with lenv = parent_lenv } in
             let env = might_throw ~join_pos:p env in
             let (env, te1, ty, _) =
-              assign_with_subtype_err_ p ur env e1 p1 ty1'
+              assign_with_subtype_err_ p ur env e1 pos2 ty1'
             in
             (* Update the actual type to that after assignment *)
             let arr_ty_mismatch_opt =

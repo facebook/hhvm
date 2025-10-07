@@ -271,13 +271,7 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 			return nil, err
 		}
 
-		// Notify observer that function processing completed successfully
-		s.observer.ProcessedFunction(rpcFuncName)
-
 		protocol.setRequestHeader(LoadHeaderKey, fmt.Sprintf("%d", loadFn(s.stats, s.totalActiveRequestCount)))
-
-		// Track time spent marshaling/writing response
-		writeStartTime := time.Now()
 
 		responseCompressionAlgo := rocket.CompressionAlgorithmFromCompressionConfig(metadata.GetCompressionConfig())
 		payload, err := rocket.EncodeResponsePayload(
@@ -287,14 +281,6 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 			responseCompressionAlgo,
 			protocol.Bytes(),
 		)
-
-		// Record time spent marshaling/writing response
-		s.observer.TimeWriteUsForFunction(rpcFuncName, time.Since(writeStartTime))
-
-		// Track bytes written during response serialization for function-level stats
-		if err == nil {
-			s.observer.BytesWrittenForFunction(rpcFuncName, len(payload.Data()))
-		}
 
 		// Track actual handler execution time
 		processTime := time.Since(processStartTime)
@@ -365,9 +351,6 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 		return
 	}
 
-	// Notify observer that function processing completed successfully
-	s.observer.ProcessedFunction(rpcFuncName)
-
 	// Track actual handler execution time
 	processTime := time.Since(processStartTime)
 	s.observer.ProcessTime(processTime)
@@ -378,15 +361,10 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 }
 
 func newProtocolBufferFromRequest(payloadDataBytes []byte, metadata *rpcmetadata.RequestRpcMetadata, observer ServerObserver, functionName string) (*protocolBuffer, error) {
-	readStartTime := time.Now()
-
 	dataBytes, err := rocket.MaybeDecompress(payloadDataBytes, metadata.GetCompression())
 	if err != nil {
 		return nil, fmt.Errorf("payload data bytes decompression failed: %w", err)
 	}
-
-	// Track the number of bytes read for this call
-	observer.BytesReadForFunction(functionName, len(dataBytes))
 
 	messageName := metadata.GetName()
 	protoID := types.ProtocolID(metadata.GetProtocol())
@@ -404,10 +382,6 @@ func newProtocolBufferFromRequest(payloadDataBytes []byte, metadata *rpcmetadata
 	if err := protocol.WriteMessageBegin(messageName, messageType, 0); err != nil {
 		return nil, err
 	}
-
-	// Record time spent reading/demarshaling
-	readDuration := time.Since(readStartTime)
-	observer.TimeReadUsForFunction(functionName, readDuration)
 
 	return protocol, nil
 }

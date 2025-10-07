@@ -139,8 +139,6 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 			// close connection on read failure
 			return readErr
 		}
-		// Track successful read/deserialization of function arguments
-		observer.ReceivedReadForFunction(name)
 	}
 
 	// Step 1c: Use Protocol interface to retrieve headers.
@@ -159,8 +157,6 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 		if runError != nil {
 			appException = maybeWrapApplicationException(runError)
 		}
-		// Record function-level process timing for stats collection
-		observer.TimeProcessUsForFunction(name, pfuncDuration)
 	}
 
 	// Often times oneway calls do not even have msgType ONEWAY.
@@ -188,7 +184,6 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 		}
 		// Track undeclared exception only after successful write
 		observer.UndeclaredException()
-		observer.UndeclaredExceptionForFunction(name)
 		observer.AnyExceptionForFunction(name)
 		return nil
 	}
@@ -200,7 +195,6 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 		}
 		// Track undeclared exception only after successful write
 		observer.UndeclaredException()
-		observer.UndeclaredExceptionForFunction(name)
 		observer.AnyExceptionForFunction(name)
 	} else {
 		if writeErr := sendWritableStruct(prot, name, types.REPLY, seqID, result); writeErr != nil {

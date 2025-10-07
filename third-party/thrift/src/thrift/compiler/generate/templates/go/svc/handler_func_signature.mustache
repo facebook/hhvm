@@ -31,7 +31,7 @@
 }}{{#else if function:sink?}}{{!
   }}NOT_IMPLEMENTED{{!
 }}{{#else if function:stream?}}{{!
-  }}({{#function:stream_first_response_type}}{{#type:structured?}}*{{/type:structured?}}{{> common/type}}, {{/function:stream_first_response_type}}<-chan {{#function:stream_elem_type}}{{#type:structured?}}*{{/type:structured?}}{{> common/type}}{{/function:stream_elem_type}} /* elem stream */, <-chan error /* stream err */, error){{!
+  }}({{#function:stream_first_response_type}}{{#type:structured?}}*{{/type:structured?}}{{> common/type}}, {{/function:stream_first_response_type}}func(context.Context, chan<- {{#function:stream_elem_type}}{{#type:structured?}}*{{/type:structured?}}{{> common/type}}{{/function:stream_elem_type}}) error, error){{!
 }}{{#else}}{{!
   }}({{#function:return_type}}{{^type:void?}}{{#type:structured?}}*{{/type:structured?}}{{> common/type}}, {{/type:void?}}{{/function:return_type}}error){{!
 }}{{/if function:oneway?}}

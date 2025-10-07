@@ -282,6 +282,7 @@ func (p *procFuncMyServicePing) RunContext(ctx context.Context, reqStruct thrift
     return result, nil
 }
 
+
 type procFuncMyServiceGetRandomData struct {
     handler MyService
 }
@@ -304,6 +305,7 @@ func (p *procFuncMyServiceGetRandomData) RunContext(ctx context.Context, reqStru
     result.Success = &retval
     return result, nil
 }
+
 
 type procFuncMyServiceHasDataById struct {
     handler MyService
@@ -329,6 +331,7 @@ func (p *procFuncMyServiceHasDataById) RunContext(ctx context.Context, reqStruct
     return result, nil
 }
 
+
 type procFuncMyServiceGoGetDataById struct {
     handler MyService
 }
@@ -353,6 +356,7 @@ func (p *procFuncMyServiceGoGetDataById) RunContext(ctx context.Context, reqStru
     return result, nil
 }
 
+
 type procFuncMyServicePutDataById struct {
     handler MyService
 }
@@ -376,6 +380,7 @@ func (p *procFuncMyServicePutDataById) RunContext(ctx context.Context, reqStruct
     return result, nil
 }
 
+
 type procFuncMyServiceLobDataById struct {
     handler MyService
 }
@@ -398,6 +403,7 @@ func (p *procFuncMyServiceLobDataById) RunContext(ctx context.Context, reqStruct
     return nil, nil
 }
 
+
 type procFuncMyServiceGoDoNothing struct {
     handler MyService
 }
@@ -419,6 +425,7 @@ func (p *procFuncMyServiceGoDoNothing) RunContext(ctx context.Context, reqStruct
 
     return result, nil
 }
+
 
 type MyServicePrioParent interface {
     Ping(ctx context.Context) (error)
@@ -545,6 +552,7 @@ func (p *procFuncMyServicePrioParentPing) RunContext(ctx context.Context, reqStr
     return result, nil
 }
 
+
 type procFuncMyServicePrioParentPong struct {
     handler MyServicePrioParent
 }
@@ -566,6 +574,7 @@ func (p *procFuncMyServicePrioParentPong) RunContext(ctx context.Context, reqStr
 
     return result, nil
 }
+
 
 type MyServicePrioChild interface {
     // Inherited/extended service
@@ -656,6 +665,7 @@ func (p *procFuncMyServicePrioChildPang) RunContext(ctx context.Context, reqStru
 
     return result, nil
 }
+
 
 type BadService interface {
     Bar(ctx context.Context) (int32, error)
@@ -765,6 +775,7 @@ func (p *procFuncBadServiceBar) RunContext(ctx context.Context, reqStruct thrift
     result.Success = &retval
     return result, nil
 }
+
 
 type FooBarBazService interface {
     FooStructured(ctx context.Context) (error)
@@ -908,6 +919,7 @@ func (p *procFuncFooBarBazServiceFooStructured) RunContext(ctx context.Context, 
     return result, nil
 }
 
+
 type procFuncFooBarBazServiceBarNonStructured struct {
     handler FooBarBazService
 }
@@ -930,6 +942,7 @@ func (p *procFuncFooBarBazServiceBarNonStructured) RunContext(ctx context.Contex
     return result, nil
 }
 
+
 type procFuncFooBarBazServiceBaz struct {
     handler FooBarBazService
 }
@@ -951,4 +964,5 @@ func (p *procFuncFooBarBazServiceBaz) RunContext(ctx context.Context, reqStruct 
 
     return result, nil
 }
+
 

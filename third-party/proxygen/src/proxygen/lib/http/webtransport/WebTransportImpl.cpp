@@ -13,6 +13,7 @@
 namespace {
 
 constexpr uint64_t kMaxWTIngressBuf = 65535;
+constexpr uint64_t kMaxWTStreams = 1ULL << 60;
 
 using StreamData = proxygen::WebTransport::StreamData;
 using ReadPromiseT = folly::Promise<StreamData>;
@@ -70,10 +71,23 @@ void WebTransportImpl::onMaxData(uint64_t maxData) noexcept {
   }
 }
 
+void WebTransportImpl::onMaxStreams(uint64_t maxStreams, bool isBidi) noexcept {
+  auto& flowControl = isBidi ? bidiStreamFlowControl_ : uniStreamFlowControl_;
+  if (maxStreams < flowControl.maxStreamID || maxStreams > kMaxWTStreams) {
+    // TODO(@joannajo): Return a protocol error once it's supported in the
+    // draft.
+    return;
+  }
+  flowControl.maxStreamID = maxStreams;
+}
+
 folly::Expected<WebTransport::StreamWriteHandle*, WebTransport::ErrorCode>
 WebTransportImpl::newWebTransportUniStream() {
   if (sessionCloseError_.has_value()) {
     return folly::makeUnexpected(WebTransport::ErrorCode::SESSION_TERMINATED);
+  }
+  if (!tp_.canCreateUniStream()) {
+    return folly::makeUnexpected(WebTransport::ErrorCode::BLOCKED);
   }
   auto id = tp_.newWebTransportUniStream();
   if (!id) {
@@ -91,6 +105,9 @@ folly::Expected<WebTransport::BidiStreamHandle, WebTransport::ErrorCode>
 WebTransportImpl::newWebTransportBidiStream() {
   if (sessionCloseError_.has_value()) {
     return folly::makeUnexpected(WebTransport::ErrorCode::SESSION_TERMINATED);
+  }
+  if (!tp_.canCreateBidiStream()) {
+    return folly::makeUnexpected(WebTransport::ErrorCode::BLOCKED);
   }
   auto id = tp_.newWebTransportBidiStream();
   if (!id) {

@@ -45,7 +45,8 @@ class WebTransport {
     STREAM_CREATION_ERROR,
     SEND_ERROR,
     STOP_SENDING,
-    SESSION_TERMINATED
+    SESSION_TERMINATED,
+    BLOCKED
   };
 
   static constexpr uint64_t kFirstErrorCode = 0x52e4a40fa8db;

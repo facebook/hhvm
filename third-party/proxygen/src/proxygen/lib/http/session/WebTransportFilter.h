@@ -213,6 +213,14 @@ class WebTransportFilter
     return folly::makeFuture(folly::unit);
   }
 
+  bool canCreateUniStream() override {
+    return (nextNewWTUniStream_ >> 2) < maxWTUniStreams_;
+  }
+
+  bool canCreateBidiStream() override {
+    return (nextNewWTBidiStream_ >> 2) < maxWTBidiStreams_;
+  }
+
   folly::Expected<folly::Unit, WebTransport::ErrorCode>
   notifyPendingWriteOnStream(HTTPCodec::StreamID /*id*/,
                              quic::StreamWriteCallback* /*wcb*/) override {
@@ -255,11 +263,19 @@ class WebTransportFilter
   void onWTMaxStreamDataCapsule(WTMaxStreamDataCapsule /*capsule*/) override {
     XLOG(DBG1) << __func__;
   }
-  void onWTMaxStreamsBidiCapsule(WTMaxStreamsCapsule /*capsule*/) override {
+  void onWTMaxStreamsBidiCapsule(WTMaxStreamsCapsule capsule) override {
     XLOG(DBG1) << __func__;
+    maxWTBidiStreams_ = capsule.maximumStreams;
+    if (wtImpl_) {
+      wtImpl_->onMaxStreams(capsule.maximumStreams, true);
+    }
   }
-  void onWTMaxStreamsUniCapsule(WTMaxStreamsCapsule /*capsule*/) override {
+  void onWTMaxStreamsUniCapsule(WTMaxStreamsCapsule capsule) override {
     XLOG(DBG1) << __func__;
+    maxWTUniStreams_ = capsule.maximumStreams;
+    if (wtImpl_) {
+      wtImpl_->onMaxStreams(capsule.maximumStreams, false);
+    }
   }
   void onWTDataBlockedCapsule(WTDataBlockedCapsule /*capsule*/) override {
     XLOG(DBG1) << __func__;
@@ -310,6 +326,8 @@ class WebTransportFilter
   std::unique_ptr<CapsuleCodec> codec_;
   uint64_t nextNewWTBidiStream_{0};
   uint64_t nextNewWTUniStream_{2};
+  uint64_t maxWTBidiStreams_{0};
+  uint64_t maxWTUniStreams_{0};
   folly::F14FastMap<HTTPCodec::StreamID, WebTransportImpl::StreamReadHandle*>
       readCallbacks_;
   struct WriteCallback {

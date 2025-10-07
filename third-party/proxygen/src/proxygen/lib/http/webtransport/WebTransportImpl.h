@@ -36,6 +36,10 @@ class WebTransportImpl : public WebTransport {
 
     virtual folly::SemiFuture<folly::Unit> awaitBidiStreamCredit() = 0;
 
+    virtual bool canCreateUniStream() = 0;
+
+    virtual bool canCreateBidiStream() = 0;
+
     virtual folly::Expected<FCState, WebTransport::ErrorCode>
     sendWebTransportStreamData(HTTPCodec::StreamID /*id*/,
                                std::unique_ptr<folly::IOBuf> /*data*/,
@@ -382,6 +386,9 @@ class WebTransportImpl : public WebTransport {
 
   void onWebTransportStopSending(HTTPCodec::StreamID id, uint32_t errorCode);
 
+  void onMaxData(uint64_t maxData) noexcept;
+  void onMaxStreams(uint64_t maxStreams, bool isBidi) noexcept;
+
   void maybeGrantFlowControl(uint64_t bytesRead);
   void maybeGrantStreamCredit(HTTPCodec::StreamID id,
                               bool closingReadHandle,
@@ -402,8 +409,6 @@ class WebTransportImpl : public WebTransport {
     sendFlowController_ = FlowController(sendWindow);
     recvFlowController_ = FlowController(recvWindow);
   }
-
-  void onMaxData(uint64_t maxData) noexcept;
 
   void setUniStreamFlowControl(uint64_t maxStreamId,
                                uint64_t targetConcurrentStreams) {

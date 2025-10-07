@@ -20,6 +20,7 @@
 #include <proxygen/lib/http/session/HTTPSession.h>
 #include <proxygen/lib/http/session/HTTPSessionStats.h>
 #include <proxygen/lib/http/session/HTTPTransaction.h>
+#include <proxygen/lib/http/session/WebTransportFilter.h>
 #include <proxygen/lib/http/webtransport/HTTPWebTransport.h>
 
 #include <folly/CppAttributes.h>
@@ -3916,6 +3917,32 @@ HQSession::HQStreamTransport::newWebTransportUniStream() {
         WebTransport::ErrorCode::STREAM_CREATION_ERROR);
   }
   return *id;
+}
+
+bool HQSession::HQStreamTransport::canCreateUniStream() {
+  if (session_.sock_->getNumOpenableUnidirectionalStreams() == 0) {
+    return false;
+  }
+
+  auto* wtTransportProvider = txn_.getWTTransportProvider();
+  auto* wtFilter = wtTransportProvider
+                       ? dynamic_cast<WebTransportFilter*>(wtTransportProvider)
+                       : nullptr;
+
+  return !wtFilter || wtFilter->canCreateUniStream();
+}
+
+bool HQSession::HQStreamTransport::canCreateBidiStream() {
+  if (session_.sock_->getNumOpenableBidirectionalStreams() == 0) {
+    return false;
+  }
+
+  auto* wtTransportProvider = txn_.getWTTransportProvider();
+  auto* wtFilter = wtTransportProvider
+                       ? dynamic_cast<WebTransportFilter*>(wtTransportProvider)
+                       : nullptr;
+
+  return !wtFilter || wtFilter->canCreateBidiStream();
 }
 
 folly::Expected<WebTransport::FCState, WebTransport::ErrorCode>

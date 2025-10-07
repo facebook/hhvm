@@ -78,6 +78,10 @@ class QuicWebTransport
 
   folly::SemiFuture<folly::Unit> awaitBidiStreamCredit() override;
 
+  bool canCreateUniStream() override;
+
+  bool canCreateBidiStream() override;
+
   folly::Expected<WebTransport::FCState, WebTransport::ErrorCode>
   sendWebTransportStreamData(
       HTTPCodec::StreamID /*id*/,

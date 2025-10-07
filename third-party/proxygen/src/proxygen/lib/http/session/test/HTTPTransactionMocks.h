@@ -233,6 +233,10 @@ class MockHTTPTransactionTransport : public HTTPTransaction::Transport {
   MOCK_METHOD((folly::Expected<HTTPCodec::StreamID, WebTransport::ErrorCode>),
               newWebTransportUniStream,
               ());
+
+  MOCK_METHOD(bool, canCreateUniStream, (), (override));
+  MOCK_METHOD(bool, canCreateBidiStream, (), (override));
+
   MOCK_METHOD((folly::Expected<WebTransport::FCState, WebTransport::ErrorCode>),
               sendWebTransportStreamData,
               (HTTPCodec::StreamID,

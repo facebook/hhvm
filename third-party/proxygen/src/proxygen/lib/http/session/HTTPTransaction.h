@@ -678,6 +678,16 @@ class HTTPTransaction
       folly::assume_unreachable();
     }
 
+    bool canCreateUniStream() override {
+      LOG(FATAL) << __func__ << " not supported";
+      folly::assume_unreachable();
+    }
+
+    bool canCreateBidiStream() override {
+      LOG(FATAL) << __func__ << " not supported";
+      folly::assume_unreachable();
+    }
+
     folly::Expected<WebTransport::FCState, WebTransport::ErrorCode>
     sendWebTransportStreamData(
         HTTPCodec::StreamID /*id*/,
@@ -1743,6 +1753,10 @@ class HTTPTransaction
 
   void setWTTransportProvider(WebTransportImpl::TransportProvider* tp) {
     wtTransportProvider_ = tp;
+  }
+
+  WebTransportImpl::TransportProvider* getWTTransportProvider() const {
+    return wtTransportProvider_;
   }
 
   static void setEgressBufferLimit(uint64_t limit) {

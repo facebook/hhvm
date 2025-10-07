@@ -196,3 +196,50 @@ TEST_F(WebTransportFilterTest, MultipleCapsulesInOneBody) {
 
   filter_->onBody(queue.move());
 }
+
+TEST_F(WebTransportFilterTest, StreamCreationLimits) {
+  auto filter =
+      std::make_unique<WebTransportFilter>(txn_.get(), CodecVersion::H3);
+
+  // Initially should NOT be able to create streams since maxStreams is 0
+  EXPECT_FALSE(filter->canCreateUniStream());
+  EXPECT_FALSE(filter->canCreateBidiStream());
+
+  WTMaxStreamsCapsule uniCapsule{2};
+  WTMaxStreamsCapsule bidiCapsule{3};
+  filter->onWTMaxStreamsUniCapsule(uniCapsule);
+  filter->onWTMaxStreamsBidiCapsule(bidiCapsule);
+  EXPECT_TRUE(filter->canCreateUniStream());
+  EXPECT_TRUE(filter->canCreateBidiStream());
+
+  // Create the first uni stream (stream ID will be 3)
+  auto uniResult1 = filter->newWebTransportUniStream();
+  EXPECT_TRUE(uniResult1.hasValue());
+  EXPECT_EQ(uniResult1.value(), 3);
+  EXPECT_TRUE(filter->canCreateUniStream());
+
+  // Create the second uni stream (stream ID will be 7)
+  auto uniResult2 = filter->newWebTransportUniStream();
+  EXPECT_TRUE(uniResult2.hasValue());
+  EXPECT_EQ(uniResult2.value(), 7);
+
+  // Now we've created 2 uni streams, limit reached, should not be able to
+  // create more
+  EXPECT_FALSE(filter->canCreateUniStream());
+
+  // Create the first bidi stream (stream ID will be 1)
+  auto bidiResult1 = filter->newWebTransportBidiStream();
+  EXPECT_TRUE(bidiResult1.hasValue());
+  EXPECT_EQ(bidiResult1.value(), 1);
+  EXPECT_TRUE(filter->canCreateBidiStream());
+
+  // Create the second and third bidi streams
+  auto bidiResult2 = filter->newWebTransportBidiStream();
+  auto bidiResult3 = filter->newWebTransportBidiStream();
+  EXPECT_TRUE(bidiResult2.hasValue());
+  EXPECT_TRUE(bidiResult3.hasValue());
+
+  // Now we've created 3 bidi streams, limit reached, should not be able to
+  // create more
+  EXPECT_FALSE(filter->canCreateBidiStream());
+}

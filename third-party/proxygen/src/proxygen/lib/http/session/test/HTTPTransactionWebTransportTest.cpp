@@ -7,6 +7,7 @@
  */
 
 #include <proxygen/lib/http/codec/test/TestUtils.h>
+#include <proxygen/lib/http/codec/webtransport/WebTransportFramer.h>
 #include <proxygen/lib/http/session/HTTPTransaction.h>
 #include <proxygen/lib/http/session/test/HTTPSessionMocks.h>
 #include <proxygen/lib/http/session/test/HTTPTransactionMocks.h>
@@ -35,6 +36,8 @@ class HTTPTransactionWebTransportTest : public testing::Test {
         .WillRepeatedly(Return(true));
     EXPECT_CALL(transport_, usesEncodedApplicationErrorCodes())
         .WillRepeatedly(Return(true));
+    EXPECT_CALL(transport_, canCreateUniStream()).WillRepeatedly(Return(true));
+    EXPECT_CALL(transport_, canCreateBidiStream()).WillRepeatedly(Return(true));
     if (withHandler) {
       handler_.expectTransaction();
       txn_->setHandler(&handler_);
@@ -1094,6 +1097,78 @@ TEST_F(HTTPTransactionWebTransportTest, BidiStreamCredit) {
 
   eventBase_.loopOnce();
   EXPECT_TRUE(fut.isReady());
+}
+
+TEST_F(HTTPTransactionWebTransportTest, MaxStreams) {
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+
+  // Set initial bidi stream flow control state where we need more stream credit
+  // maxStreamID = 1, targetConcurrentStreams = 4
+  // 1 - 0 = 1, and 4 / 2 = 2, so 1 < 2 is true (should grant credit)
+  wtImpl->setBidiStreamFlowControl(
+      /*maxStreamId=*/1,
+      /*targetConcurrentStreams=*/4);
+  EXPECT_TRUE(wtImpl->shouldGrantStreamCredit(true));
+
+  WTMaxStreamsCapsule capsule{10};
+  wtImpl->onMaxStreams(capsule.maximumStreams, true);
+
+  // After onMaxStreams, maxStreamID should be updated to 10
+  // Now: 10 - 0 = 10, and 4 / 2 = 2, so 10 > 2 (should NOT grant credit)
+  EXPECT_FALSE(wtImpl->shouldGrantStreamCredit(true));
+}
+
+TEST_F(HTTPTransactionWebTransportTest, MaxStreamsInvalid) {
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+
+  // Set initial bidi stream flow control state where we need more stream credit
+  // maxStreamID = 6, targetConcurrentStreams = 14
+  // 6 - 0 = 6, and 14 / 2 = 7, so 6 < 7 is true (should grant credit)
+  wtImpl->setBidiStreamFlowControl(
+      /*maxStreamId=*/6,
+      /*targetConcurrentStreams=*/14);
+  EXPECT_TRUE(wtImpl->shouldGrantStreamCredit(true));
+
+  WTMaxStreamsCapsule capsule{5};
+  wtImpl->onMaxStreams(capsule.maximumStreams, true);
+
+  // After onMaxStreams, maxStreamID will not be updated because maxStreamId >
+  // maximumStreams, so shouldGrantStreamCredit() should still return true
+  EXPECT_TRUE(wtImpl->shouldGrantStreamCredit(true));
+}
+
+TEST_F(HTTPTransactionWebTransportTest, NewBidiStreamFailsAtMaxStreamID) {
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+
+  wtImpl->setBidiStreamFlowControl(
+      /*maxStreamId=*/4,
+      /*targetConcurrentStreams=*/10);
+  EXPECT_CALL(transport_, newWebTransportBidiStream())
+      .WillOnce(Return(folly::makeUnexpected(
+          WebTransport::ErrorCode::STREAM_CREATION_ERROR)));
+
+  auto result = wt_->createBidiStream();
+  EXPECT_TRUE(result.hasError());
+  EXPECT_EQ(result.error(), WebTransport::ErrorCode::STREAM_CREATION_ERROR);
+}
+
+TEST_F(HTTPTransactionWebTransportTest, NewUniStreamFailsAtMaxStreamID) {
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+
+  wtImpl->setUniStreamFlowControl(
+      /*maxStreamId=*/4,
+      /*targetConcurrentStreams=*/10);
+  EXPECT_CALL(transport_, newWebTransportUniStream())
+      .WillOnce(Return(folly::makeUnexpected(
+          WebTransport::ErrorCode::STREAM_CREATION_ERROR)));
+
+  auto result = wt_->createUniStream();
+  EXPECT_TRUE(result.hasError());
+  EXPECT_EQ(result.error(), WebTransport::ErrorCode::STREAM_CREATION_ERROR);
 }
 
 } // namespace proxygen::test

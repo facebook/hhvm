@@ -262,6 +262,16 @@ folly::SemiFuture<folly::Unit> QuicWebTransport::awaitBidiStreamCredit() {
   return std::move(future);
 }
 
+bool QuicWebTransport::canCreateUniStream() {
+  XCHECK(quicSocket_);
+  return quicSocket_->getNumOpenableUnidirectionalStreams() > 0;
+}
+
+bool QuicWebTransport::canCreateBidiStream() {
+  XCHECK(quicSocket_);
+  return quicSocket_->getNumOpenableBidirectionalStreams() > 0;
+}
+
 void QuicWebTransport::onDatagramsAvailable() noexcept {
   XCHECK(quicSocket_);
   auto result = quicSocket_->readDatagramBufs();

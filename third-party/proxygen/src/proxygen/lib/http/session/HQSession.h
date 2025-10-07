@@ -1849,6 +1849,9 @@ class HQSession
     folly::Expected<HTTPCodec::StreamID, WebTransport::ErrorCode>
     newWebTransportUniStream() override;
 
+    bool canCreateUniStream() override;
+    bool canCreateBidiStream() override;
+
     folly::Expected<WebTransport::FCState, WebTransport::ErrorCode>
     sendWebTransportStreamData(
         HTTPCodec::StreamID /*id*/,

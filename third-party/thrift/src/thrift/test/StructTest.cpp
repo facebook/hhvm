@@ -861,16 +861,21 @@ TEST(StructTest, TerseFields) {
   EXPECT_FALSE(serializedField<ident::cpp_ref_struct_field>(terse));
   EXPECT_FALSE(serializedField<ident::cpp_ref_union_field>(terse));
   EXPECT_FALSE(serializedField<ident::cpp_ref_exception_field>(terse));
+}
 
+TEST(StructTest, DataCorruptionWhenContainerFieldsHaveDefaults) {
   // Round-tripping an empty container with custom default does not preserve the
   // value!
+  TerseFieldsWithCustomDefault terse;
+  apache::thrift::clear(terse);
   auto serialized = CompactSerializer::serialize<std::string>(terse);
-  CompactSerializer::deserialize(serialized, terse);
-  EXPECT_EQ(terse.list_field()->size(), 0);
-  EXPECT_EQ(terse.set_field()->size(), 0);
-  EXPECT_EQ(terse.map_field()->size(), 0);
-  EXPECT_EQ(terse.string_field(), "");
-  EXPECT_EQ(terse.binary_field(), "");
+  auto read =
+      CompactSerializer::deserialize<TerseFieldsWithCustomDefault>(serialized);
+  EXPECT_NE(read.list_field(), terse.list_field());
+  EXPECT_NE(read.set_field(), terse.set_field());
+  EXPECT_NE(read.map_field(), terse.map_field());
+  EXPECT_NE(read.string_field(), terse.string_field());
+  EXPECT_NE(read.binary_field(), terse.binary_field());
 }
 
 TEST(StructTest, TestInitListEmplaceContainers) {

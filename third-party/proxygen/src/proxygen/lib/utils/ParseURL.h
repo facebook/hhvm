@@ -8,13 +8,13 @@
 
 #pragma once
 
-#include <glog/logging.h>
-
-#include <folly/Conv.h>
-#include <folly/Range.h>
-#include <folly/String.h>
-#include <proxygen/lib/utils/Export.h>
+#include <optional>
 #include <string>
+#include <string_view>
+
+#include <fmt/format.h>
+#include <glog/logging.h>
+#include <proxygen/lib/utils/Export.h>
 
 namespace proxygen {
 
@@ -27,7 +27,7 @@ class ParseURL {
    * valid() == true.  If parsing fails, returns nothing. If you need the
    * partial parse results, use parseURLMaybeInvalid below.
    */
-  static std::optional<ParseURL> parseURL(folly::StringPiece urlVal,
+  static std::optional<ParseURL> parseURL(std::string_view urlVal,
                                           bool strict = false) noexcept {
     ParseURL parseUrl(urlVal, strict);
     if (parseUrl.valid()) {
@@ -39,21 +39,21 @@ class ParseURL {
   /* Parse a URL.  Returns a ParseURL object that may or may not be valid.
    * Caller should check valid()
    */
-  static ParseURL parseURLMaybeInvalid(folly::StringPiece urlVal,
+  static ParseURL parseURLMaybeInvalid(std::string_view urlVal,
                                        bool strict = false) noexcept {
     return ParseURL(urlVal, strict);
   }
 
-  static bool isSupportedScheme(folly::StringPiece location);
+  static bool isSupportedScheme(std::string_view location);
 
   static std::optional<std::string> getRedirectDestination(
-      folly::StringPiece url,
-      folly::StringPiece requestScheme,
-      folly::StringPiece location,
-      folly::StringPiece headerHost) noexcept;
+      std::string_view url,
+      std::string_view requestScheme,
+      std::string_view location,
+      std::string_view headerHost) noexcept;
 
   // Deprecated.  Will be removed soon
-  explicit ParseURL(folly::StringPiece urlVal, bool strict = true) noexcept {
+  explicit ParseURL(std::string_view urlVal, bool strict = true) noexcept {
     init(urlVal, strict);
   }
 
@@ -87,7 +87,7 @@ class ParseURL {
 
   ParseURL() = default;
 
-  void init(folly::StringPiece urlVal, bool strict = false) {
+  void init(std::string_view urlVal, bool strict = false) {
     CHECK(!initialized_);
     url_ = urlVal;
     parse(strict);
@@ -98,11 +98,11 @@ class ParseURL {
     return valid();
   }
 
-  [[nodiscard]] folly::StringPiece url() const {
+  [[nodiscard]] std::string_view url() const {
     return url_;
   }
 
-  [[nodiscard]] folly::StringPiece scheme() const {
+  [[nodiscard]] std::string_view scheme() const {
     return scheme_;
   }
 
@@ -114,7 +114,7 @@ class ParseURL {
     return valid() && !host_.empty();
   }
 
-  [[nodiscard]] folly::StringPiece host() const {
+  [[nodiscard]] std::string_view host() const {
     return host_;
   }
 
@@ -129,15 +129,15 @@ class ParseURL {
     return fmt::format("{}:{}", host_, port_);
   }
 
-  [[nodiscard]] folly::StringPiece path() const {
+  [[nodiscard]] std::string_view path() const {
     return path_;
   }
 
-  [[nodiscard]] folly::StringPiece query() const {
+  [[nodiscard]] std::string_view query() const {
     return query_;
   }
 
-  [[nodiscard]] folly::StringPiece fragment() const {
+  [[nodiscard]] std::string_view fragment() const {
     return fragment_;
   }
 
@@ -145,7 +145,7 @@ class ParseURL {
     return valid_;
   }
 
-  [[nodiscard]] folly::StringPiece hostNoBrackets() {
+  [[nodiscard]] std::string_view hostNoBrackets() {
     stripBrackets();
     return hostNoBrackets_;
   }
@@ -154,11 +154,11 @@ class ParseURL {
 
   FB_EXPORT void stripBrackets() noexcept;
 
-  [[nodiscard]] static std::optional<folly::StringPiece> getQueryParam(
-      folly::StringPiece query, const folly::StringPiece name) noexcept;
+  [[nodiscard]] static std::optional<std::string_view> getQueryParam(
+      std::string_view query, const std::string_view name) noexcept;
 
  private:
-  void moveHostAndAuthority(ParseURL&& goner) {
+  void moveHostAndAuthority(ParseURL&& goner) noexcept {
     if (!valid_) {
       return;
     }
@@ -183,12 +183,13 @@ class ParseURL {
           goner.hostNoBrackets_.data() - goner.authority_.data();
     }
     authority_ = std::move(goner.authority_);
+    std::string_view authority(authority_);
     if (hostOff >= 0) {
-      host_.reset(authority_.data() + hostOff, goner.host_.size());
+      host_ = authority.substr(hostOff, goner.host_.size());
     }
     if (hostNoBracketsOff >= 0) {
-      hostNoBrackets_.reset(authority_.data() + hostNoBracketsOff,
-                            goner.hostNoBrackets_.size());
+      hostNoBrackets_ =
+          authority.substr(hostNoBracketsOff, goner.hostNoBrackets_.size());
     }
   }
 
@@ -198,14 +199,14 @@ class ParseURL {
 
   bool parseAuthority() noexcept;
 
-  folly::StringPiece url_;
-  folly::StringPiece scheme_;
+  std::string_view url_;
+  std::string_view scheme_;
   std::string authority_;
-  folly::StringPiece host_;
-  folly::StringPiece hostNoBrackets_;
-  folly::StringPiece path_;
-  folly::StringPiece query_;
-  folly::StringPiece fragment_;
+  std::string_view host_;
+  std::string_view hostNoBrackets_;
+  std::string_view path_;
+  std::string_view query_;
+  std::string_view fragment_;
   uint16_t port_{0};
   bool valid_{false};
   bool initialized_{false};

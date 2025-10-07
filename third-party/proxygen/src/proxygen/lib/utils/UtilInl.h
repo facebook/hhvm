@@ -54,9 +54,9 @@ inline bool caseUnderscoreInsensitiveEqual(folly::StringPiece s,
 }
 
 enum class URLValidateMode { STRICT_COMPAT, STRICT };
-inline bool validateURL(folly::ByteRange url,
+inline bool validateURL(std::string_view url,
                         URLValidateMode mode = URLValidateMode::STRICT) {
-  for (auto p : url) {
+  for (uint8_t p : url) {
     if (p <= 0x20 || p == 0x7f ||
         (p > 0x7f && mode != URLValidateMode::STRICT_COMPAT)) {
       // no controls or unescaped spaces

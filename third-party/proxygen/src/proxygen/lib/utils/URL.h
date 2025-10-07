@@ -9,6 +9,9 @@
 #pragma once
 
 #include <sstream>
+#include <string>
+#include <string_view>
+#include <utility>
 
 #include <fmt/format.h>
 #include <folly/String.h>
@@ -34,7 +37,7 @@ class URL {
   URL() = default;
 
   enum class Mode { STRICT_COMPAT, STRICT };
-  explicit URL(folly::StringPiece url,
+  explicit URL(std::string_view url,
                bool secure = false,
                Mode strict = Mode::STRICT_COMPAT) noexcept
       : URL(ParseURL::parseURLMaybeInvalid(url, strict == Mode::STRICT),
@@ -44,15 +47,12 @@ class URL {
 
   explicit URL(ParseURL parseUrl,
                bool secure = false,
-               Mode strict = Mode::STRICT_COMPAT) noexcept {
-    valid_ = false;
-    scheme_ = parseUrl.scheme().str();
-    host_ = parseUrl.hostNoBrackets().str();
-    path_ = parseUrl.path().str();
-    query_ = parseUrl.query().str();
-    fragment_ = parseUrl.fragment().str();
-    url_ = parseUrl.url().str();
-
+               Mode strict = Mode::STRICT_COMPAT) noexcept
+      : host_(parseUrl.hostNoBrackets()),
+        path_(parseUrl.path()),
+        query_(parseUrl.query()),
+        fragment_(parseUrl.fragment()),
+        url_(parseUrl.url()) {
     setScheme(std::string(parseUrl.scheme()), secure);
 
     if (parseUrl.port()) {
@@ -84,18 +84,18 @@ class URL {
     return out.str();
   }
 
-  URL(const std::string& scheme,
-      const std::string& host,
+  URL(std::string scheme,
+      std::string host,
       uint16_t port = 0,
-      const std::string& path = "",
-      const std::string& query = "",
-      const std::string& fragment = "") noexcept
-      : host_(host),
+      std::string path = "",
+      std::string query = "",
+      std::string fragment = "") noexcept
+      : host_(std::move(host)),
         port_(port),
-        path_(path),
-        query_(query),
-        fragment_(fragment) {
-    setScheme(scheme, false);
+        path_(std::move(path)),
+        query_(std::move(query)),
+        fragment_(std::move(fragment)) {
+    setScheme(std::move(scheme), false);
     url_ = createUrl(scheme_, getHostAndPort(), path_, query_, fragment_);
 
     if (port_ == 0) {

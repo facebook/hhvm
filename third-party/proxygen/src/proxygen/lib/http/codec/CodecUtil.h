@@ -41,7 +41,7 @@ class CodecUtil {
   // namespace/class later
   static const std::array<char, 256> http_tokens;
 
-  static bool validateURL(folly::ByteRange url, URLValidateMode mode) {
+  static bool validateURL(std::string_view url, URLValidateMode mode) {
     return proxygen::validateURL(url, mode);
   }
 

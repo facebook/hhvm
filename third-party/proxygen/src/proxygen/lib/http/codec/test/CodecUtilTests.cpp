@@ -19,11 +19,10 @@ folly::ByteRange input(const char *str) {
 }
 
 TEST(CodecUtil, validateURL) {
-  EXPECT_TRUE(CodecUtil::validateURL(input("/foo"), URLValidateMode::STRICT));
-  EXPECT_TRUE(CodecUtil::validateURL(input("/foo\xff"),
-                                     URLValidateMode::STRICT_COMPAT));
-  EXPECT_FALSE(
-      CodecUtil::validateURL(input("/foo\xff"), URLValidateMode::STRICT));
+  EXPECT_TRUE(CodecUtil::validateURL("/foo", URLValidateMode::STRICT));
+  EXPECT_TRUE(
+      CodecUtil::validateURL("/foo\xff", URLValidateMode::STRICT_COMPAT));
+  EXPECT_FALSE(CodecUtil::validateURL("/foo\xff", URLValidateMode::STRICT));
 }
 
 TEST(CodecUtil, validateMethod) {

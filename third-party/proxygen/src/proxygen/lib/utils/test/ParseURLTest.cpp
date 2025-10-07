@@ -297,9 +297,9 @@ TEST(ParseURL, NotSupportedScheme) {
 }
 
 TEST(ParseURL, PortOverflow) {
-  std::string url("http://foo:12345");
-  auto u =
-      ParseURL::parseURL(folly::StringPiece(url.data(), url.size() - 4), true);
+  std::string_view url("http://foo:12345");
+  url.remove_suffix(4);
+  auto u = ParseURL::parseURL(url, true);
   EXPECT_EQ(u->port(), 1);
 }
 

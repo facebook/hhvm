@@ -9,6 +9,7 @@
 #include <proxygen/lib/utils/ParseURL.h>
 
 #include <algorithm>
+#include <charconv>
 
 #include <fmt/format.h>
 #include <folly/portability/Sockets.h>
@@ -43,9 +44,9 @@ namespace proxygen {
 // Helper function to check if URL has valid scheme.
 // http_parser only support full form scheme with double slash,
 // and the scheme must be all alphabetic charecter.
-static bool validateScheme(folly::StringPiece url) {
+static bool validateScheme(std::string_view url) {
   auto schemeEnd = url.find("://");
-  if (schemeEnd == std::string::npos || schemeEnd == 0) {
+  if (schemeEnd == std::string_view::npos || schemeEnd == 0) {
     return false;
   }
 
@@ -53,9 +54,9 @@ static bool validateScheme(folly::StringPiece url) {
   return std::all_of(scheme.begin(), scheme.end(), isAlpha);
 }
 
-bool ParseURL::isSupportedScheme(folly::StringPiece location) {
-  static constexpr std::array<folly::StringPiece, 2> kSupportedSchemes{"http",
-                                                                       "https"};
+bool ParseURL::isSupportedScheme(std::string_view location) {
+  static constexpr std::array<std::string_view, 2> kSupportedSchemes{"http",
+                                                                     "https"};
   auto schemeEnd = location.find("://");
   if (schemeEnd == std::string_view::npos) {
     // Location doesn't contain a scheme, so use the one from the original URL
@@ -69,10 +70,10 @@ bool ParseURL::isSupportedScheme(folly::StringPiece location) {
 }
 
 std::optional<std::string> ParseURL::getRedirectDestination(
-    folly::StringPiece url,
-    folly::StringPiece requestScheme,
-    folly::StringPiece location,
-    folly::StringPiece headerHost) noexcept {
+    std::string_view url,
+    std::string_view requestScheme,
+    std::string_view location,
+    std::string_view headerHost) noexcept {
   auto newUrl = ParseURL::parseURL(location);
   if (!newUrl) {
     DLOG(INFO) << "Unparsable location header=" << location;
@@ -166,7 +167,7 @@ void ParseURL::parseNonFully(bool strict) noexcept {
   auto queryStart = url_.find('?');
   auto hashStart = url_.find('#');
 
-  auto queryEnd = std::min(hashStart, std::string::npos);
+  auto queryEnd = std::min(hashStart, std::string_view::npos);
   auto pathEnd = std::min(queryStart, hashStart);
   auto authorityEnd = std::min(pathStart, pathEnd);
 
@@ -181,12 +182,12 @@ void ParseURL::parseNonFully(bool strict) noexcept {
 
   if (queryStart < queryEnd) {
     query_ = url_.substr(queryStart + 1, queryEnd - queryStart - 1);
-  } else if (queryStart != std::string::npos && hashStart < queryStart) {
+  } else if (queryStart != std::string_view::npos && hashStart < queryStart) {
     valid_ = false;
     return;
   }
 
-  if (hashStart != std::string::npos) {
+  if (hashStart != std::string_view::npos) {
     fragment_ = url_.substr(hashStart + 1);
   }
 
@@ -199,12 +200,14 @@ void ParseURL::parseNonFully(bool strict) noexcept {
 }
 
 bool ParseURL::parseAuthority() noexcept {
-  auto left = authority_.find('[');
-  auto right = authority_.find(']');
+  constexpr auto npos = std::string_view::npos;
+  std::string_view authority(authority_);
+  auto left = authority.find('[');
+  auto right = authority.find(']');
 
-  auto pos = authority_.find(':', right != std::string::npos ? right + 1 : 0);
-  if (pos != std::string::npos) {
-    auto port = folly::StringPiece(authority_, pos + 1);
+  auto pos = authority.find(':', right != npos ? right + 1 : 0);
+  if (pos != npos) {
+    auto port = authority.substr(pos + 1);
     auto end = port.data() + port.size();
     auto result = std::from_chars(port.data(), end, port_);
     if (result.ec != std::errc{} || result.ptr != end) {
@@ -212,13 +215,13 @@ bool ParseURL::parseAuthority() noexcept {
     }
   }
 
-  if (left == std::string::npos && right == std::string::npos) {
+  if (left == npos && right == npos) {
     // not a ipv6 literal
-    host_ = folly::StringPiece(authority_, 0, pos);
+    host_ = authority.substr(0, pos);
     return true;
-  } else if (left < right && right != std::string::npos) {
+  } else if (left < right && right != npos) {
     // a ipv6 literal
-    host_ = folly::StringPiece(authority_, left, right - left + 1);
+    host_ = authority.substr(left, right - left + 1);
     return true;
   } else {
     return false;
@@ -231,14 +234,14 @@ bool ParseURL::hostIsIPAddress() {
   }
 
   stripBrackets();
-  int af = hostNoBrackets_.find(':') == std::string::npos ? AF_INET : AF_INET6;
+  // we have to make a copy of hostNoBrackets_ since the string_view is not
+  // null-terminated
+  std::string hostNoBrackets(hostNoBrackets_);
+  int af = hostNoBrackets.find(':') == std::string::npos ? AF_INET : AF_INET6;
   char buf4[sizeof(in_addr)];
   char buf6[sizeof(in6_addr)];
-  // we have to make a copy of hostNoBrackets_ since the string piece is not
-  // null-terminated
-  return inet_pton(af,
-                   hostNoBrackets_.str().c_str(),
-                   af == AF_INET ? buf4 : buf6) == 1;
+  return inet_pton(af, hostNoBrackets.c_str(), af == AF_INET ? buf4 : buf6) ==
+         1;
 }
 
 void ParseURL::stripBrackets() noexcept {
@@ -251,17 +254,21 @@ void ParseURL::stripBrackets() noexcept {
   }
 }
 
-std::optional<folly::StringPiece> ParseURL::getQueryParam(
-    folly::StringPiece query, const folly::StringPiece name) noexcept {
+std::optional<std::string_view> ParseURL::getQueryParam(
+    std::string_view query, const std::string_view name) noexcept {
   while (!query.empty()) {
-    auto param = query.split_step('&');
-    if (!param.removePrefix(name)) {
+    std::string_view param = query.substr(0, query.find('&'));
+    query.remove_prefix(std::min(query.size(), param.size() + 1));
+    if (!param.starts_with(name)) {
       continue;
     }
-    if (!param.removePrefix('=') && !param.empty()) {
-      continue;
+    param.remove_prefix(name.size());
+    if (param.empty()) {
+      return param;
+    } else if (param.front() == '=') {
+      param.remove_prefix(1);
+      return param;
     }
-    return param;
   }
   return std::nullopt;
 }

@@ -33,6 +33,7 @@ abstract class ThriftClientBase implements IThriftClient {
   protected TClientAsyncHandler $asyncHandler_;
   protected TClientEventHandler $eventHandler_;
   protected ?RpcOptions $options_;
+  protected ?ThriftClientConfig $config_;
 
   protected int $seqid_ = 0;
   abstract const string THRIFT_SVC_NAME;
@@ -119,6 +120,13 @@ abstract class ThriftClientBase implements IThriftClient {
       'trying to set options twice on the same client at the same time',
     );
     $this->options_ = $rpc_options;
+    return $this;
+  }
+
+  public function setThriftClientConfig(
+    ThriftClientConfig $config,
+  )[write_props]: this {
+    $this->config_ = $config;
     return $this;
   }
 
@@ -395,6 +403,10 @@ abstract class ThriftClientBase implements IThriftClient {
     $out_transport->resetBuffer();
     list($result_msg, $_read_headers, $stream) =
       await $channel->genSendRequestStreamResponse($rpc_options, $msg);
+    $disable16kblimit = $this->config_?->getStreamDisable16KBLimit() ?? false;
+    if ($disable16kblimit) {
+      $stream->disable16KBBufferingPolicy();
+    }
 
     $stream_gen = $stream->gen<TStreamType>(
       ThriftStreamingSerializationHelpers::decodeStreamHelper(

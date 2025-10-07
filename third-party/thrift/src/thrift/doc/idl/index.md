@@ -302,11 +302,19 @@ The lexical structure of a package name is defined below.
 ```grammar
 package_name   ::=  '"' domain_path '"' | "'" domain_path "'"
 domain_path    ::=  domain "/" path
-domain         ::=  domain_segment ("." domain_segment)+
+domain         ::=  domain_prefix domain_tld
+domain_tld     ::=  "." domain_segment
+domain_prefix  ::=  domain_segment ("." domain_segment)*
 domain_segment ::=  ("a"..."z" | "0"..."9")+
 path           ::=  path_segment ("/" path_segment)*
 path_segment   ::=  ("a"..."z" | "0"..."9" | "_")+
 ```
+
+:::note
+The `domain_prefix` represents all components of the domain preceding the final `.` and `domain_segment`, which comprise the [top-level domain (TLD)](https://en.wikipedia.org/wiki/Top-level_domain) component `domain_tld`.
+
+The top-level domain differs from the concept of a [*public suffix*](https://publicsuffix.org/). Consider the domain `example.co.uk` - Thrift will treat `.uk` as the `domain_tld` component, and `example.co` as the `domain_prefix` component.
+:::
 
 Let `namespace_path` denote `path` where every `/` is replaced with `.` and `reverse(d)` denote the domain `d` with components in reverse order. Then the default namespaces are derived from the package name in the following way.
 

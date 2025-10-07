@@ -25,56 +25,58 @@ namespace apache::thrift {
 
 namespace {
 
-StreamTransformation<std::string, std::string>::Func makeTransformFunc() {
-  return [](folly::coro::AsyncGenerator<std::string&&> input)
-             -> folly::coro::AsyncGenerator<std::string&&> {
-    while (auto item = co_await input.next()) {
-      co_yield std::move(*item);
-    }
-  };
-}
+class BiDiServiceE2ETest : public Test {
+  using MakeChannelFunc = ScopedServerInterfaceThread::MakeChannelFunc;
 
-class TestBiDiServiceHandler
-    : public ServiceHandler<detail::test::TestBiDiService> {
  public:
-  folly::coro::Task<StreamTransformation<std::string, std::string>> co_echo()
-      override {
-    co_return StreamTransformation<std::string, std::string>{
-        makeTransformFunc()};
-  }
-
-  folly::coro::Task<
-      ResponseAndStreamTransformation<std::string, std::string, std::string>>
-  co_echoWithResponse(std::unique_ptr<std::string> initial) override {
-    co_return ResponseAndStreamTransformation<
-        std::string,
-        std::string,
-        std::string>{std::move(*initial), {makeTransformFunc()}};
-  }
-};
-
-class BiDiServiceTest : public Test {
- public:
-  BiDiServiceTest()
-      : server_{std::make_unique<ScopedServerInterfaceThread>(
-            std::make_shared<TestBiDiServiceHandler>())} {}
-
-  std::unique_ptr<Client<detail::test::TestBiDiService>> makeClient() {
-    return server_->newClient<Client<detail::test::TestBiDiService>>(
-        nullptr,
+  struct TestConfig {
+    std::shared_ptr<AsyncProcessorFactory> handler;
+    MakeChannelFunc channelFunc =
         [](folly::AsyncSocket::UniquePtr socket) -> RequestChannel::Ptr {
-          return RocketClientChannel::newChannel(std::move(socket));
+      return RocketClientChannel::newChannel(std::move(socket));
+    };
+  };
+
+  void testConfig(TestConfig&& config) {
+    server_ = std::make_unique<ScopedServerInterfaceThread>(
+        std::move(config.handler));
+    channelFunc_ = std::move(config.channelFunc);
+  }
+
+  template <typename ServiceTag>
+  std::unique_ptr<Client<ServiceTag>> makeClient() {
+    return server_->newClient<Client<ServiceTag>>(
+        /* callbackExecutor */ nullptr,
+        [&](folly::AsyncSocket::UniquePtr socket) -> RequestChannel::Ptr {
+          return channelFunc_(std::move(socket));
         });
   }
 
  private:
   std::unique_ptr<ScopedServerInterfaceThread> server_;
+  MakeChannelFunc channelFunc_;
 };
 
 } // namespace
 
-CO_TEST_F(BiDiServiceTest, BiDiNoResponse) {
-  auto client = makeClient();
+CO_TEST_F(BiDiServiceE2ETest, BasicStreamTransformation) {
+  struct Handler : public ServiceHandler<detail::test::TestBiDiService> {
+    folly::coro::Task<StreamTransformation<std::string, std::string>> co_echo()
+        override {
+      co_return StreamTransformation<std::string, std::string>{
+          [](folly::coro::AsyncGenerator<std::string&&> input)
+              -> folly::coro::AsyncGenerator<std::string&&> {
+            while (auto item = co_await input.next()) {
+              co_yield std::move(*item);
+            }
+          }};
+    }
+  };
+
+  testConfig({std::make_shared<Handler>()});
+
+  // Sink (input)
+  auto client = makeClient<detail::test::TestBiDiService>();
   BidirectionalStream<std::string, std::string> stream =
       co_await client->co_echo();
   auto sinkGen = folly::coro::co_invoke(
@@ -84,6 +86,7 @@ CO_TEST_F(BiDiServiceTest, BiDiNoResponse) {
       });
   co_await stream.sink.sink(std::move(sinkGen));
 
+  // Stream (output)
   auto streamGen = std::move(stream.stream).toAsyncGenerator();
   auto firstItem = co_await streamGen.next();
   EXPECT_TRUE(firstItem.has_value());
@@ -97,13 +100,32 @@ CO_TEST_F(BiDiServiceTest, BiDiNoResponse) {
   EXPECT_FALSE(exhausted.has_value());
 }
 
-CO_TEST_F(BiDiServiceTest, BiDiWithResponse) {
-  auto client = makeClient();
+CO_TEST_F(BiDiServiceE2ETest, BasicResponseAndStreamTransformation) {
+  struct Handler : public ServiceHandler<detail::test::TestBiDiService> {
+    folly::coro::Task<
+        ResponseAndStreamTransformation<std::string, std::string, std::string>>
+    co_echoWithResponse(std::unique_ptr<std::string> initial) override {
+      co_return ResponseAndStreamTransformation<
+          std::string,
+          std::string,
+          std::string>{
+          std::move(*initial),
+          {[](folly::coro::AsyncGenerator<std::string&&> input)
+               -> folly::coro::AsyncGenerator<std::string&&> {
+            while (auto item = co_await input.next()) {
+              co_yield std::move(*item);
+            }
+          }}};
+    }
+  };
+  testConfig({std::make_shared<Handler>()});
+
+  auto client = makeClient<detail::test::TestBiDiService>();
   ResponseAndBidirectionalStream<std::string, std::string, std::string> result =
       co_await client->co_echoWithResponse("Test");
-
   EXPECT_EQ(result.response, "Test");
 
+  // Sink (input)
   auto sinkGen = folly::coro::co_invoke(
       []() -> folly::coro::AsyncGenerator<std::string&&> {
         co_yield "Hello";
@@ -111,6 +133,7 @@ CO_TEST_F(BiDiServiceTest, BiDiWithResponse) {
       });
   co_await result.sink.sink(std::move(sinkGen));
 
+  // Stream (output)
   auto streamGen = std::move(result.stream).toAsyncGenerator();
   auto firstItem = co_await streamGen.next();
   EXPECT_TRUE(firstItem.has_value());

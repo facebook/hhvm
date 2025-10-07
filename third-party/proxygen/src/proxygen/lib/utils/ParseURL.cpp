@@ -55,16 +55,16 @@ static bool validateScheme(folly::StringPiece url) {
 bool ParseURL::isSupportedScheme(folly::StringPiece location) {
   static constexpr std::array<folly::StringPiece, 2> kSupportedSchemes{"http",
                                                                        "https"};
-  if (!location.contains("://")) {
+  auto schemeEnd = location.find("://");
+  if (schemeEnd == std::string_view::npos) {
     // Location doesn't contain a scheme, so use the one from the original URL
     return true;
   }
+  auto scheme = location.subpiece(0, schemeEnd);
 
-  return std::any_of(kSupportedSchemes.begin(),
-                     kSupportedSchemes.end(),
-                     [location](folly::StringPiece scheme) {
-                       return location.starts_with(scheme);
-                     });
+  return std::find(kSupportedSchemes.begin(),
+                   kSupportedSchemes.end(),
+                   scheme) != kSupportedSchemes.end();
 }
 
 folly::Optional<std::string> ParseURL::getRedirectDestination(

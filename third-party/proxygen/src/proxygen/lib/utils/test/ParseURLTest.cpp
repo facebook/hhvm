@@ -259,6 +259,31 @@ TEST(ParseURL, IsHostIPAddress) {
   testHostIsIpAddress("127.0.0.1:80/foo#bar?qqq", false);
 }
 
+TEST(ParseURL, SupportedScheme) {
+  // Valid URL with scheme
+  EXPECT_TRUE(ParseURL::isSupportedScheme("http://example.com"));
+  EXPECT_TRUE(ParseURL::isSupportedScheme("http://example.com/"));
+  EXPECT_TRUE(ParseURL::isSupportedScheme("https://example.com"));
+  EXPECT_TRUE(ParseURL::isSupportedScheme("https://example.com/"));
+
+  // Protocol-relative URL
+  EXPECT_TRUE(ParseURL::isSupportedScheme("//example.com"));
+
+  // Relative URL
+  EXPECT_TRUE(ParseURL::isSupportedScheme("/path"));
+}
+
+TEST(ParseURL, NotSupportedScheme) {
+  EXPECT_FALSE(ParseURL::isSupportedScheme("://"));
+  EXPECT_FALSE(ParseURL::isSupportedScheme("http ://example.com/"));
+  EXPECT_FALSE(ParseURL::isSupportedScheme("://example.com"));
+  EXPECT_FALSE(ParseURL::isSupportedScheme("HTTP://EXAMPLE.COM/"));
+  EXPECT_FALSE(ParseURL::isSupportedScheme("ftp://example.com"));
+  EXPECT_FALSE(ParseURL::isSupportedScheme("httpx://example.com/"));
+  EXPECT_FALSE(ParseURL::isSupportedScheme("shttp://example.com/"));
+  EXPECT_FALSE(ParseURL::isSupportedScheme("httpss://example.com/"));
+}
+
 TEST(ParseURL, PortOverflow) {
   std::string url("http://foo:12345");
   auto u =

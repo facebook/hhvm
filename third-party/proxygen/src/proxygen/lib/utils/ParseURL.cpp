@@ -10,6 +10,7 @@
 
 #include <algorithm>
 
+#include <fmt/format.h>
 #include <folly/portability/Sockets.h>
 #include <proxygen/lib/utils/UtilInl.h>
 
@@ -90,8 +91,8 @@ folly::Optional<std::string> ParseURL::getRedirectDestination(
         return folly::none;
       }
     } // else oldURL was absolute and has a host
-    return folly::to<std::string>(
-        requestScheme, "://", oldURL->hostAndPort(), location);
+    return fmt::format(
+        "{}://{}{}", requestScheme, oldURL->hostAndPort(), location);
   } else {
     return newUrl->url().str();
   }
@@ -141,8 +142,7 @@ void ParseURL::parse(bool strict) noexcept {
       fragment_ = url_.subpiece(u.field_data[UF_FRAGMENT].off,
                                 u.field_data[UF_FRAGMENT].len);
 
-      authority_ =
-          (port_) ? folly::to<std::string>(host_, ":", port_) : host_.str();
+      authority_ = (port_) ? fmt::format("{}:{}", host_, port_) : host_;
     }
   } else {
     parseNonFully(strict);
@@ -203,12 +203,12 @@ bool ParseURL::parseAuthority() noexcept {
   auto left = authority_.find('[');
   auto right = authority_.find(']');
 
-  auto pos = authority_.find(':', right != std::string::npos ? right : 0);
+  auto pos = authority_.find(':', right != std::string::npos ? right + 1 : 0);
   if (pos != std::string::npos) {
-    try {
-      port_ = folly::to<uint16_t>(
-          folly::StringPiece(authority_, pos + 1, std::string::npos));
-    } catch (...) {
+    auto port = folly::StringPiece(authority_, pos + 1);
+    auto end = port.data() + port.size();
+    auto result = std::from_chars(port.data(), end, port_);
+    if (result.ec != std::errc{} || result.ptr != end) {
       return false;
     }
   }

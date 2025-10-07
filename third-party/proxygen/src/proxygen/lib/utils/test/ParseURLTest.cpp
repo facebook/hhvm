@@ -102,6 +102,13 @@ TEST(ParseURL, FullyFormedURL) {
                "[2401:db00:2110:3051:face:0:3f:0]",
                0,
                "[2401:db00:2110:3051:face:0:3f:0]");
+  testParseURL("http://[2401:db00:2110:3051:face:0:3f:0]:8080/",
+               "http",
+               "/",
+               "",
+               "[2401:db00:2110:3051:face:0:3f:0]",
+               8080,
+               "[2401:db00:2110:3051:face:0:3f:0]:8080");
 }
 
 TEST(ParseURL, ValidNonHttpScheme) {
@@ -234,6 +241,11 @@ TEST(ParseURL, InvalidURL) {
   testParseURL("test\xff", "", "", "", "", 0, "", false, /*strict=*/true);
   testParseURL(
       "/test\xff", "", "/test\xff", "", "", 0, "", true, /*strict=*/false);
+  testParseURL("localhost:80abc", "", "", "", "", 0, "", false);
+  testParseURL("localhost:0x50", "", "", "", "", 0, "", false);
+  testParseURL("localhost:-80", "", "", "", "", 0, "", false);
+  testParseURL("localhost:+80", "", "", "", "", 0, "", false);
+  testParseURL("localhost:80.0", "", "", "", "", 0, "", false);
 }
 
 TEST(ParseURL, IsHostIPAddress) {

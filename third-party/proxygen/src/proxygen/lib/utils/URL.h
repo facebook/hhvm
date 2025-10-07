@@ -10,6 +10,7 @@
 
 #include <sstream>
 
+#include <fmt/format.h>
 #include <folly/String.h>
 #include <folly/portability/Windows.h> // for windows compatibility: STRICT maybe defined by some win headers
 #include <proxygen/lib/utils/ParseURL.h>
@@ -131,13 +132,13 @@ class URL {
   }
 
   std::string getHostAndPort() const noexcept {
-    return port_ ? folly::to<std::string>(host_, ":", port_) : host_;
+    return port_ ? fmt::format("{}:{}", host_, port_) : host_;
   }
 
   std::string getHostAndPortOmitDefault() const noexcept {
     return port_ && ((isSecure() && port_ != 443) ||
                      (!isSecure() && port_ != 80))
-               ? folly::to<std::string>(host_, ":", port_)
+               ? fmt::format("{}:{}", host_, port_)
                : host_;
   }
 
@@ -154,10 +155,10 @@ class URL {
   }
 
   std::string makeRelativeURL() const noexcept {
-    return folly::to<std::string>(
-        path_.empty() ? "/" : path_,
-        query_.empty() ? "" : folly::to<std::string>('?', query_),
-        fragment_.empty() ? "" : folly::to<std::string>('#', fragment_));
+    return fmt::format("{}{}{}",
+                       path_.empty() ? "/" : std::string_view(path_),
+                       query_.empty() ? "" : fmt::format("?{}", query_),
+                       fragment_.empty() ? "" : fmt::format("#{}", fragment_));
   }
 
   friend bool operator==(const URL& lhs, const URL& rhs) {
@@ -179,8 +180,8 @@ class URL {
       scheme_ = "https";
     } else {
       scheme_ = std::move(scheme);
+      folly::toLowerAscii(scheme_);
     }
-    folly::toLowerAscii(scheme_);
 
     valid_ = (scheme_ == "http" || scheme_ == "https");
   }

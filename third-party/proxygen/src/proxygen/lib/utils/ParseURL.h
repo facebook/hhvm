@@ -126,11 +126,10 @@ class ParseURL {
   }
 
   std::string hostAndPort() const {
-    std::string rc = host_.str();
-    if (port_ != 0) {
-      folly::toAppend(":", port_, &rc);
+    if (port_ == 0) {
+      return std::string(host_);
     }
-    return rc;
+    return fmt::format("{}:{}", host_, port_);
   }
 
   folly::StringPiece path() const {

@@ -58,12 +58,11 @@ void EnumMetadata<::facebook::ns::qwerty::AnEnumE>::gen(ThriftMetadata& metadata
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::ns::qwerty::SomeStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("enums.SomeStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::ns::qwerty::SomeStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& enums_SomeStruct = res.first->second;
-  enums_SomeStruct.name() = "enums.SomeStruct";
+  ::apache::thrift::metadata::ThriftStruct& enums_SomeStruct = res.metadata;
   enums_SomeStruct.is_union() = false;
   static const auto* const
   enums_SomeStruct_fields = new std::array<EncodedThriftField, 1>{ {
@@ -77,7 +76,7 @@ StructMetadata<::facebook::ns::qwerty::SomeStruct>::gen(ThriftMetadata& metadata
     field.structured_annotations() = f.structured_annotations;
     enums_SomeStruct.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 
 } // namespace md

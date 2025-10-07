@@ -28,12 +28,11 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::ComplexUnion>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.ComplexUnion", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::cpp2::ComplexUnion>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_ComplexUnion = res.first->second;
-  module_ComplexUnion.name() = "module.ComplexUnion";
+  ::apache::thrift::metadata::ThriftStruct& module_ComplexUnion = res.metadata;
   module_ComplexUnion.is_union() = true;
   static const auto* const
   module_ComplexUnion_fields = new std::array<EncodedThriftField, 6>{ {
@@ -47,16 +46,15 @@ StructMetadata<::cpp2::ComplexUnion>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_ComplexUnion.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::ListUnion>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.ListUnion", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::cpp2::ListUnion>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_ListUnion = res.first->second;
-  module_ListUnion.name() = "module.ListUnion";
+  ::apache::thrift::metadata::ThriftStruct& module_ListUnion = res.metadata;
   module_ListUnion.is_union() = true;
   static const auto* const
   module_ListUnion_fields = new std::array<EncodedThriftField, 2>{ {
@@ -70,16 +68,15 @@ StructMetadata<::cpp2::ListUnion>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_ListUnion.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::DataUnion>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.DataUnion", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::cpp2::DataUnion>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_DataUnion = res.first->second;
-  module_DataUnion.name() = "module.DataUnion";
+  ::apache::thrift::metadata::ThriftStruct& module_DataUnion = res.metadata;
   module_DataUnion.is_union() = true;
   static const auto* const
   module_DataUnion_fields = new std::array<EncodedThriftField, 2>{ {
@@ -93,16 +90,15 @@ StructMetadata<::cpp2::DataUnion>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_DataUnion.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Val>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.Val", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::cpp2::Val>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_Val = res.first->second;
-  module_Val.name() = "module.Val";
+  ::apache::thrift::metadata::ThriftStruct& module_Val = res.metadata;
   module_Val.is_union() = false;
   static const auto* const
   module_Val_fields = new std::array<EncodedThriftField, 3>{ {
@@ -116,16 +112,15 @@ StructMetadata<::cpp2::Val>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_Val.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::ValUnion>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.ValUnion", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::cpp2::ValUnion>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_ValUnion = res.first->second;
-  module_ValUnion.name() = "module.ValUnion";
+  ::apache::thrift::metadata::ThriftStruct& module_ValUnion = res.metadata;
   module_ValUnion.is_union() = true;
   static const auto* const
   module_ValUnion_fields = new std::array<EncodedThriftField, 2>{ {
@@ -139,16 +134,15 @@ StructMetadata<::cpp2::ValUnion>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_ValUnion.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::VirtualComplexUnion>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.VirtualComplexUnion", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::cpp2::VirtualComplexUnion>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_VirtualComplexUnion = res.first->second;
-  module_VirtualComplexUnion.name() = "module.VirtualComplexUnion";
+  ::apache::thrift::metadata::ThriftStruct& module_VirtualComplexUnion = res.metadata;
   module_VirtualComplexUnion.is_union() = true;
   static const auto* const
   module_VirtualComplexUnion_fields = new std::array<EncodedThriftField, 2>{ {
@@ -162,16 +156,15 @@ StructMetadata<::cpp2::VirtualComplexUnion>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_VirtualComplexUnion.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::NonCopyableStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.NonCopyableStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::cpp2::NonCopyableStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_NonCopyableStruct = res.first->second;
-  module_NonCopyableStruct.name() = "module.NonCopyableStruct";
+  ::apache::thrift::metadata::ThriftStruct& module_NonCopyableStruct = res.metadata;
   module_NonCopyableStruct.is_union() = false;
   static const auto* const
   module_NonCopyableStruct_fields = new std::array<EncodedThriftField, 1>{ {
@@ -185,16 +178,15 @@ StructMetadata<::cpp2::NonCopyableStruct>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_NonCopyableStruct.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::NonCopyableUnion>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.NonCopyableUnion", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::cpp2::NonCopyableUnion>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_NonCopyableUnion = res.first->second;
-  module_NonCopyableUnion.name() = "module.NonCopyableUnion";
+  ::apache::thrift::metadata::ThriftStruct& module_NonCopyableUnion = res.metadata;
   module_NonCopyableUnion.is_union() = true;
   static const auto* const
   module_NonCopyableUnion_fields = new std::array<EncodedThriftField, 1>{ {
@@ -208,7 +200,7 @@ StructMetadata<::cpp2::NonCopyableUnion>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_NonCopyableUnion.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 
 } // namespace md

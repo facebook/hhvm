@@ -34,12 +34,11 @@ void EnumMetadata<::cpp2::MyEnumA>::gen(ThriftMetadata& metadata) {
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::SmallStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.SmallStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::cpp2::SmallStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_SmallStruct = res.first->second;
-  module_SmallStruct.name() = "module.SmallStruct";
+  ::apache::thrift::metadata::ThriftStruct& module_SmallStruct = res.metadata;
   module_SmallStruct.is_union() = false;
   static const auto* const
   module_SmallStruct_fields = new std::array<EncodedThriftField, 2>{ {
@@ -53,16 +52,15 @@ StructMetadata<::cpp2::SmallStruct>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_SmallStruct.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::containerStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.containerStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::cpp2::containerStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_containerStruct = res.first->second;
-  module_containerStruct.name() = "module.containerStruct";
+  ::apache::thrift::metadata::ThriftStruct& module_containerStruct = res.metadata;
   module_containerStruct.is_union() = false;
   static const auto* const
   module_containerStruct_fields = new std::array<EncodedThriftField, 19>{ {
@@ -76,7 +74,7 @@ StructMetadata<::cpp2::containerStruct>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_containerStruct.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 
 } // namespace md

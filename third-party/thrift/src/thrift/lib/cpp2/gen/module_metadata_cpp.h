@@ -279,4 +279,12 @@ auto genEnumMetadata(metadata::ThriftMetadata& md) {
   return genEnumMetadata(md, getNodeWithLock<E>());
 }
 
+GenMetadataResult<metadata::ThriftStruct> genStructMetadata(
+    metadata::ThriftMetadata& md, const syntax_graph::StructuredNode& node);
+
+template <class T>
+auto genStructMetadata(metadata::ThriftMetadata& md) {
+  return genStructMetadata(md, getNodeWithLock<T>());
+}
+
 } // namespace apache::thrift::detail::md

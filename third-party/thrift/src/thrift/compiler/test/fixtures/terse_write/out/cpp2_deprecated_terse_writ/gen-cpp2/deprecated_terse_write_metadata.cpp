@@ -34,34 +34,31 @@ void EnumMetadata<::facebook::thrift::test::terse_write::deprecated::MyEnum>::ge
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::deprecated::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("deprecated_terse_write.MyStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::MyStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& deprecated_terse_write_MyStruct = res.first->second;
-  deprecated_terse_write_MyStruct.name() = "deprecated_terse_write.MyStruct";
+  ::apache::thrift::metadata::ThriftStruct& deprecated_terse_write_MyStruct = res.metadata;
   deprecated_terse_write_MyStruct.is_union() = false;
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::deprecated::MyUnion>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("deprecated_terse_write.MyUnion", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::MyUnion>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& deprecated_terse_write_MyUnion = res.first->second;
-  deprecated_terse_write_MyUnion.name() = "deprecated_terse_write.MyUnion";
+  ::apache::thrift::metadata::ThriftStruct& deprecated_terse_write_MyUnion = res.metadata;
   deprecated_terse_write_MyUnion.is_union() = true;
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("deprecated_terse_write.StructLevelTerseStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& deprecated_terse_write_StructLevelTerseStruct = res.first->second;
-  deprecated_terse_write_StructLevelTerseStruct.name() = "deprecated_terse_write.StructLevelTerseStruct";
+  ::apache::thrift::metadata::ThriftStruct& deprecated_terse_write_StructLevelTerseStruct = res.metadata;
   deprecated_terse_write_StructLevelTerseStruct.is_union() = false;
   static const auto* const
   deprecated_terse_write_StructLevelTerseStruct_fields = new std::array<EncodedThriftField, 15>{ {
@@ -76,16 +73,15 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::StructLevelTer
     deprecated_terse_write_StructLevelTerseStruct.fields()->push_back(std::move(field));
   }
   deprecated_terse_write_StructLevelTerseStruct.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {  }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("deprecated_terse_write.FieldLevelTerseStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& deprecated_terse_write_FieldLevelTerseStruct = res.first->second;
-  deprecated_terse_write_FieldLevelTerseStruct.name() = "deprecated_terse_write.FieldLevelTerseStruct";
+  ::apache::thrift::metadata::ThriftStruct& deprecated_terse_write_FieldLevelTerseStruct = res.metadata;
   deprecated_terse_write_FieldLevelTerseStruct.is_union() = false;
   static const auto* const
   deprecated_terse_write_FieldLevelTerseStruct_fields = new std::array<EncodedThriftField, 30>{ {
@@ -99,16 +95,15 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::FieldLevelTers
     field.structured_annotations() = f.structured_annotations;
     deprecated_terse_write_FieldLevelTerseStruct.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::deprecated::CppRefStructFields>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("deprecated_terse_write.CppRefStructFields", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::CppRefStructFields>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& deprecated_terse_write_CppRefStructFields = res.first->second;
-  deprecated_terse_write_CppRefStructFields.name() = "deprecated_terse_write.CppRefStructFields";
+  ::apache::thrift::metadata::ThriftStruct& deprecated_terse_write_CppRefStructFields = res.metadata;
   deprecated_terse_write_CppRefStructFields.is_union() = false;
   static const auto* const
   deprecated_terse_write_CppRefStructFields_fields = new std::array<EncodedThriftField, 2>{ {
@@ -122,16 +117,15 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::CppRefStructFi
     field.structured_annotations() = f.structured_annotations;
     deprecated_terse_write_CppRefStructFields.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("deprecated_terse_write.DeprecatedTerseWriteWithCustomDefault", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& deprecated_terse_write_DeprecatedTerseWriteWithCustomDefault = res.first->second;
-  deprecated_terse_write_DeprecatedTerseWriteWithCustomDefault.name() = "deprecated_terse_write.DeprecatedTerseWriteWithCustomDefault";
+  ::apache::thrift::metadata::ThriftStruct& deprecated_terse_write_DeprecatedTerseWriteWithCustomDefault = res.metadata;
   deprecated_terse_write_DeprecatedTerseWriteWithCustomDefault.is_union() = false;
   static const auto* const
   deprecated_terse_write_DeprecatedTerseWriteWithCustomDefault_fields = new std::array<EncodedThriftField, 13>{ {
@@ -145,16 +139,15 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTers
     field.structured_annotations() = f.structured_annotations;
     deprecated_terse_write_DeprecatedTerseWriteWithCustomDefault.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("deprecated_terse_write.DeprecatedTerseWriteWithRedundantCustomDefault", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& deprecated_terse_write_DeprecatedTerseWriteWithRedundantCustomDefault = res.first->second;
-  deprecated_terse_write_DeprecatedTerseWriteWithRedundantCustomDefault.name() = "deprecated_terse_write.DeprecatedTerseWriteWithRedundantCustomDefault";
+  ::apache::thrift::metadata::ThriftStruct& deprecated_terse_write_DeprecatedTerseWriteWithRedundantCustomDefault = res.metadata;
   deprecated_terse_write_DeprecatedTerseWriteWithRedundantCustomDefault.is_union() = false;
   static const auto* const
   deprecated_terse_write_DeprecatedTerseWriteWithRedundantCustomDefault_fields = new std::array<EncodedThriftField, 13>{ {
@@ -168,7 +161,7 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTers
     field.structured_annotations() = f.structured_annotations;
     deprecated_terse_write_DeprecatedTerseWriteWithRedundantCustomDefault.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 
 } // namespace md

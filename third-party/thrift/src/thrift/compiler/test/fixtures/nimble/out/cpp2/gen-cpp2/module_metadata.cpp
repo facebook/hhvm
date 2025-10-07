@@ -28,12 +28,11 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::BasicTypes>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.BasicTypes", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::cpp2::BasicTypes>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_BasicTypes = res.first->second;
-  module_BasicTypes.name() = "module.BasicTypes";
+  ::apache::thrift::metadata::ThriftStruct& module_BasicTypes = res.metadata;
   module_BasicTypes.is_union() = false;
   static const auto* const
   module_BasicTypes_fields = new std::array<EncodedThriftField, 4>{ {
@@ -47,7 +46,7 @@ StructMetadata<::cpp2::BasicTypes>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_BasicTypes.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 
 } // namespace md

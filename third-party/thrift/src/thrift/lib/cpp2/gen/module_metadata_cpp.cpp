@@ -88,7 +88,7 @@ static std::string getName(const Node& node) {
 GenMetadataResult<metadata::ThriftEnum> genEnumMetadata(
     metadata::ThriftMetadata& md, const syntax_graph::EnumNode& node) {
   auto name = getName(node);
-  auto res = md.enums()->emplace(name, metadata::ThriftEnum{});
+  auto res = md.enums()->try_emplace(name);
   GenMetadataResult<metadata::ThriftEnum> ret{!res.second, res.first->second};
   if (ret.preExists) {
     return ret;
@@ -97,6 +97,19 @@ GenMetadataResult<metadata::ThriftEnum> genEnumMetadata(
   for (const auto& value : node.values()) {
     ret.metadata.elements()[value.i32()] = value.name();
   }
+  return ret;
+}
+
+GenMetadataResult<metadata::ThriftStruct> genStructMetadata(
+    metadata::ThriftMetadata& md, const syntax_graph::StructuredNode& node) {
+  auto name = getName(node);
+  auto res = md.structs()->try_emplace(name);
+  GenMetadataResult<metadata::ThriftStruct> ret{!res.second, res.first->second};
+  if (ret.preExists) {
+    return ret;
+  }
+  ret.metadata.name() = std::move(name);
+  // TODO: add other information
   return ret;
 }
 

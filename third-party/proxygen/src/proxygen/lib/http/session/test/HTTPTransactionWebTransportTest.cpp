@@ -133,6 +133,15 @@ class MockDeliveryCallback : public WebTransport::ByteEventCallback {
 };
 
 TEST_F(HTTPTransactionWebTransportTest, CreateStreams) {
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+  wtImpl->setBidiStreamFlowControl(
+      /*maxStreamId=*/4,
+      /*targetConcurrentStreams=*/4);
+  wtImpl->setUniStreamFlowControl(
+      /*maxStreamId=*/4,
+      /*targetConcurrentStreams=*/4);
+
   EXPECT_CALL(transport_, newWebTransportBidiStream()).WillOnce(Return(0));
   EXPECT_CALL(transport_, initiateReadOnBidiStream(_, _))
       .WillOnce(Return(folly::unit));
@@ -142,20 +151,17 @@ TEST_F(HTTPTransactionWebTransportTest, CreateStreams) {
       .WillOnce(Return(folly::unit));
   EXPECT_EQ(res->writeHandle->getID(), 0);
   res->writeHandle->resetStream(WT_APP_ERROR_1);
-  EXPECT_CALL(transport_,
-              stopReadingWebTransportIngress(0, makeOpt(WT_APP_ERROR_2)))
-      .WillOnce(Return(folly::unit));
+  EXPECT_CALL(transport_, stopReadingWebTransportIngress(0, _))
+      .WillRepeatedly(Return(folly::unit));
   res->readHandle->stopSending(WT_APP_ERROR_2);
 
-  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(1));
+  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(2));
   auto res2 = wt_->createUniStream();
   EXPECT_TRUE(res2.hasValue());
   EXPECT_CALL(transport_,
-              sendWebTransportStreamData(1, testing::_, true, nullptr))
+              sendWebTransportStreamData(2, testing::_, true, nullptr))
       .WillOnce(Return(WTFCState::UNBLOCKED));
 
-  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
-  ASSERT_NE(wtImpl, nullptr);
   wtImpl->onMaxData(1000);
   res2.value()->writeStreamData(nullptr, true, nullptr);
 
@@ -228,8 +234,8 @@ TEST_F(HTTPTransactionWebTransportTest, ReadStream) {
   EXPECT_FALSE(fut.isReady());
 
   // it gets stopReadingWebTransportIngress when the EOF is read out
-  EXPECT_CALL(transport_,
-              stopReadingWebTransportIngress(0, folly::Optional<uint32_t>()));
+  EXPECT_CALL(transport_, stopReadingWebTransportIngress(0, _))
+      .WillRepeatedly(Return(folly::unit));
 
   implHandle->dataAvailable(nullptr, true);
   eventBase_.loopOnce();
@@ -237,11 +243,17 @@ TEST_F(HTTPTransactionWebTransportTest, ReadStream) {
 }
 
 TEST_F(HTTPTransactionWebTransportTest, ReadStreamBufferedError) {
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+  wtImpl->setUniStreamFlowControl(
+      /*maxStreamId=*/4,
+      /*targetConcurrentStreams=*/4);
+
   WebTransport::StreamReadHandle* readHandle{nullptr};
   EXPECT_CALL(handler_, onWebTransportUniStream(_, _))
       .WillOnce(SaveArg<1>(&readHandle));
 
-  auto implHandle = txn_->onWebTransportUniStream(0);
+  auto implHandle = txn_->onWebTransportUniStream(2);
   EXPECT_NE(readHandle, nullptr);
 
   implHandle->readError(implHandle->getID(),
@@ -261,11 +273,17 @@ TEST_F(HTTPTransactionWebTransportTest, ReadStreamBufferedError) {
 }
 
 TEST_F(HTTPTransactionWebTransportTest, ReadStreamError) {
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+  wtImpl->setUniStreamFlowControl(
+      /*maxStreamId=*/4,
+      /*targetConcurrentStreams=*/4);
+
   WebTransport::StreamReadHandle* readHandle{nullptr};
   EXPECT_CALL(handler_, onWebTransportUniStream(_, _))
       .WillOnce(SaveArg<1>(&readHandle));
 
-  auto implHandle = txn_->onWebTransportUniStream(0);
+  auto implHandle = txn_->onWebTransportUniStream(2);
   EXPECT_NE(readHandle, nullptr);
 
   // read with nothing queued
@@ -286,11 +304,17 @@ TEST_F(HTTPTransactionWebTransportTest, ReadStreamError) {
 }
 
 TEST_F(HTTPTransactionWebTransportTest, ReadStreamCancel) {
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+  wtImpl->setUniStreamFlowControl(
+      /*maxStreamId=*/4,
+      /*targetConcurrentStreams=*/4);
+
   WebTransport::StreamReadHandle* readHandle{nullptr};
   EXPECT_CALL(handler_, onWebTransportUniStream(_, _))
       .WillOnce(SaveArg<1>(&readHandle));
 
-  txn_->onWebTransportUniStream(0);
+  txn_->onWebTransportUniStream(2);
   EXPECT_NE(readHandle, nullptr);
 
   // Get the read future
@@ -299,7 +323,7 @@ TEST_F(HTTPTransactionWebTransportTest, ReadStreamCancel) {
   // Cancel the future, the transport will get a STOP_SENDING
   EXPECT_CALL(
       transport_,
-      stopReadingWebTransportIngress(0, makeOpt(WebTransport::kInternalError)))
+      stopReadingWebTransportIngress(2, makeOpt(WebTransport::kInternalError)))
       .WillOnce(Return(folly::unit));
   fut.cancel();
   EXPECT_TRUE(fut.isReady());
@@ -308,16 +332,20 @@ TEST_F(HTTPTransactionWebTransportTest, ReadStreamCancel) {
 }
 
 TEST_F(HTTPTransactionWebTransportTest, WriteFails) {
-  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(1));
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+  wtImpl->setUniStreamFlowControl(
+      /*maxStreamId=*/4,
+      /*targetConcurrentStreams=*/4);
+
+  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(2));
   auto res = wt_->createUniStream();
   EXPECT_TRUE(res.hasValue());
 
-  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
-  ASSERT_NE(wtImpl, nullptr);
   wtImpl->onMaxData(1000);
 
   EXPECT_CALL(transport_,
-              sendWebTransportStreamData(1, testing::_, false, nullptr))
+              sendWebTransportStreamData(2, testing::_, false, nullptr))
       .WillOnce(
           Return(folly::makeUnexpected(WebTransport::ErrorCode::SEND_ERROR)));
   EXPECT_EQ(res.value()->writeStreamData(makeBuf(10), false, nullptr).error(),
@@ -325,24 +353,28 @@ TEST_F(HTTPTransactionWebTransportTest, WriteFails) {
 }
 
 TEST_F(HTTPTransactionWebTransportTest, WriteStreamPauseStopSending) {
-  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(1));
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+  wtImpl->setUniStreamFlowControl(
+      /*maxStreamId=*/4,
+      /*targetConcurrentStreams=*/4);
+
+  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(2));
   auto writeHandle = wt_->createUniStream();
   EXPECT_FALSE(writeHandle.hasError());
 
   // Grant flow control space before any writes
-  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
-  ASSERT_NE(wtImpl, nullptr);
   wtImpl->onMaxData(1000);
 
   // Block write, then resume
   bool ready = false;
   quic::StreamWriteCallback* wcb{nullptr};
   EXPECT_CALL(transport_,
-              sendWebTransportStreamData(1, testing::_, false, nullptr))
+              sendWebTransportStreamData(2, testing::_, false, nullptr))
       .WillOnce(Return(WTFCState::BLOCKED));
   auto res = writeHandle.value()->writeStreamData(makeBuf(10), false, nullptr);
   EXPECT_TRUE(res.hasValue());
-  EXPECT_CALL(transport_, notifyPendingWriteOnStream(1, testing::_))
+  EXPECT_CALL(transport_, notifyPendingWriteOnStream(2, testing::_))
       .WillOnce(DoAll(SaveArg<1>(&wcb), Return(folly::unit)));
   writeHandle.value()
       ->awaitWritable()
@@ -353,18 +385,18 @@ TEST_F(HTTPTransactionWebTransportTest, WriteStreamPauseStopSending) {
         ready = true;
       });
   EXPECT_FALSE(ready);
-  wcb->onStreamWriteReady(0, 65536);
+  wcb->onStreamWriteReady(2, 65536);
   eventBase_.loopOnce();
   EXPECT_TRUE(ready);
 
   // Block write/stop sending
   ready = false;
   EXPECT_CALL(transport_,
-              sendWebTransportStreamData(1, testing::_, false, nullptr))
+              sendWebTransportStreamData(2, testing::_, false, nullptr))
       .WillOnce(Return(WTFCState::BLOCKED));
   auto res2 = writeHandle.value()->writeStreamData(makeBuf(10), false, nullptr);
   EXPECT_TRUE(res2.hasValue());
-  EXPECT_CALL(transport_, notifyPendingWriteOnStream(1, testing::_))
+  EXPECT_CALL(transport_, notifyPendingWriteOnStream(2, testing::_))
       .WillOnce(DoAll(SaveArg<1>(&wcb), Return(folly::unit)));
   writeHandle.value()
       ->awaitWritable()
@@ -375,24 +407,30 @@ TEST_F(HTTPTransactionWebTransportTest, WriteStreamPauseStopSending) {
             writeReady.withException([](const WebTransport::Exception& ex) {
               EXPECT_EQ(ex.error, WT_APP_ERROR_2);
             }));
-        EXPECT_CALL(transport_, resetWebTransportEgress(1, WT_APP_ERROR_1));
+        EXPECT_CALL(transport_, resetWebTransportEgress(2, WT_APP_ERROR_1));
         writeHandle.value()->resetStream(WT_APP_ERROR_1);
         ready = true;
       });
   EXPECT_FALSE(ready);
-  txn_->onWebTransportStopSending(1, WT_APP_ERROR_2);
+  txn_->onWebTransportStopSending(2, WT_APP_ERROR_2);
   eventBase_.loopOnce();
   EXPECT_TRUE(ready);
 }
 
 TEST_F(HTTPTransactionWebTransportTest, AwaitWritableCancel) {
-  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(1));
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+  wtImpl->setUniStreamFlowControl(
+      /*maxStreamId=*/4,
+      /*targetConcurrentStreams=*/4);
+
+  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(2));
   auto writeHandle = wt_->createUniStream();
   EXPECT_FALSE(writeHandle.hasError());
 
   // Block write
   quic::StreamWriteCallback* wcb{nullptr};
-  EXPECT_CALL(transport_, notifyPendingWriteOnStream(1, testing::_))
+  EXPECT_CALL(transport_, notifyPendingWriteOnStream(2, testing::_))
       .WillOnce(DoAll(SaveArg<1>(&wcb), Return(folly::unit)));
   // awaitWritable
   auto fut = writeHandle.value()->awaitWritable().value();
@@ -406,7 +444,7 @@ TEST_F(HTTPTransactionWebTransportTest, AwaitWritableCancel) {
 
   // awaitWritable again
   bool ready = false;
-  EXPECT_CALL(transport_, notifyPendingWriteOnStream(1, testing::_))
+  EXPECT_CALL(transport_, notifyPendingWriteOnStream(2, testing::_))
       .WillOnce(DoAll(SaveArg<1>(&wcb), Return(folly::unit)));
   writeHandle.value()
       ->awaitWritable()
@@ -414,22 +452,26 @@ TEST_F(HTTPTransactionWebTransportTest, AwaitWritableCancel) {
       .via(&eventBase_)
       .thenTry([&ready, &writeHandle, this](auto writeReady) {
         EXPECT_TRUE(writeReady.hasValue());
-        EXPECT_CALL(transport_, resetWebTransportEgress(1, WT_APP_ERROR_1));
+        EXPECT_CALL(transport_, resetWebTransportEgress(2, WT_APP_ERROR_1));
         writeHandle.value()->resetStream(WT_APP_ERROR_1);
         ready = true;
       });
   EXPECT_FALSE(ready);
 
   // Resume - only happens once because the reset, maybe?
-  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
-  ASSERT_NE(wtImpl, nullptr);
   wtImpl->onMaxData(1000);
-  wcb->onStreamWriteReady(0, 65536);
+  wcb->onStreamWriteReady(2, 65536);
   eventBase_.loopOnce();
   EXPECT_TRUE(ready);
 }
 
 TEST_F(HTTPTransactionWebTransportTest, BidiStreamEdgeCases) {
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+  wtImpl->setBidiStreamFlowControl(
+      /*maxStreamId=*/4,
+      /*targetConcurrentStreams=*/4);
+
   WebTransport::BidiStreamHandle streamHandle{};
   EXPECT_CALL(handler_, onWebTransportBidiStream(_, _))
       .WillOnce(SaveArg<1>(&streamHandle));
@@ -476,6 +518,12 @@ TEST_F(HTTPTransactionWebTransportTest, BidiStreamEdgeCases) {
 }
 
 TEST_F(HTTPTransactionWebTransportTest, StreamDetachWithOpenStreams) {
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+  wtImpl->setBidiStreamFlowControl(
+      /*maxStreamId=*/4,
+      /*targetConcurrentStreams=*/4);
+
   EXPECT_CALL(transport_, newWebTransportBidiStream()).WillOnce(Return(0));
   EXPECT_CALL(transport_, initiateReadOnBidiStream(_, _))
       .WillOnce(Return(folly::unit));
@@ -553,9 +601,8 @@ TEST_F(HTTPTransactionWebTransportTest, StreamIDAPIs) {
   EXPECT_TRUE(fut.isReady());
 
   // stopSending by ID
-  EXPECT_CALL(transport_,
-              stopReadingWebTransportIngress(0, makeOpt(WT_APP_ERROR_1)))
-      .WillOnce(Return(folly::unit));
+  EXPECT_CALL(transport_, stopReadingWebTransportIngress(0, _))
+      .WillRepeatedly(Return(folly::unit));
   wt_->stopSending(id, WT_APP_ERROR_1);
 
   // write by ID
@@ -625,9 +672,8 @@ TEST_F(HTTPTransactionWebTransportTest, StopSendingThenAbort) {
 
   txn_->onWebTransportUniStream(0);
   EXPECT_NE(readHandle, nullptr);
-  EXPECT_CALL(transport_,
-              stopReadingWebTransportIngress(0, makeOpt(WT_APP_ERROR_2)))
-      .WillOnce(Return(folly::unit));
+  EXPECT_CALL(transport_, stopReadingWebTransportIngress(0, _))
+      .WillRepeatedly(Return(folly::unit));
   readHandle->stopSending(WT_APP_ERROR_2);
   // there's no way to abort this stream anymore.  stopSending removes the
   // read callback.
@@ -639,26 +685,30 @@ TEST_F(HTTPTransactionWebTransportTest, StopSendingThenAbort) {
 }
 
 TEST_F(HTTPTransactionWebTransportTest, WriteBufferingBasic) {
-  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(1));
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+  wtImpl->setUniStreamFlowControl(
+      /*maxStreamId=*/4,
+      /*targetConcurrentStreams=*/4);
+
+  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(2));
   auto writeHandle = wt_->createUniStream();
   EXPECT_FALSE(writeHandle.hasError());
 
   // no flow control space initially, writes should be buffered
-  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
-  ASSERT_NE(wtImpl, nullptr);
   auto res = writeHandle.value()->writeStreamData(makeBuf(100), false, nullptr);
   EXPECT_TRUE(res.hasValue());
   EXPECT_EQ(*res, WTFCState::BLOCKED);
 
   // grant flow control and verify buffered data is flushed
   EXPECT_CALL(transport_,
-              sendWebTransportStreamData(1, testing::_, false, nullptr))
+              sendWebTransportStreamData(2, testing::_, false, nullptr))
       .WillOnce(Return(WTFCState::UNBLOCKED));
   wtImpl->onMaxData(1000);
 
   // write more data with available flow control, should send immediately
   EXPECT_CALL(transport_,
-              sendWebTransportStreamData(1, testing::_, false, nullptr))
+              sendWebTransportStreamData(2, testing::_, false, nullptr))
       .WillOnce(Return(WTFCState::UNBLOCKED));
   res = writeHandle.value()->writeStreamData(makeBuf(50), false, nullptr);
   EXPECT_TRUE(res.hasValue());
@@ -667,12 +717,15 @@ TEST_F(HTTPTransactionWebTransportTest, WriteBufferingBasic) {
 }
 
 TEST_F(HTTPTransactionWebTransportTest, WriteBufferingEOF) {
-  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(1));
-  auto writeHandle = wt_->createUniStream();
-  EXPECT_FALSE(writeHandle.hasError());
-
   auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
   ASSERT_NE(wtImpl, nullptr);
+  wtImpl->setUniStreamFlowControl(
+      /*maxStreamId=*/4,
+      /*targetConcurrentStreams=*/4);
+
+  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(2));
+  auto writeHandle = wt_->createUniStream();
+  EXPECT_FALSE(writeHandle.hasError());
 
   // write data with EOF but no flow control, should buffer
   auto res = writeHandle.value()->writeStreamData(makeBuf(100), true, nullptr);
@@ -681,18 +734,21 @@ TEST_F(HTTPTransactionWebTransportTest, WriteBufferingEOF) {
 
   // grant flow control, should flush buffered data with EOF
   EXPECT_CALL(transport_,
-              sendWebTransportStreamData(1, testing::_, true, nullptr))
+              sendWebTransportStreamData(2, testing::_, true, nullptr))
       .WillOnce(Return(WTFCState::UNBLOCKED));
   wtImpl->onMaxData(1000);
 }
 
 TEST_F(HTTPTransactionWebTransportTest, WriteBufferingPartialSend) {
-  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(1));
-  auto writeHandle = wt_->createUniStream();
-  EXPECT_FALSE(writeHandle.hasError());
-
   auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
   ASSERT_NE(wtImpl, nullptr);
+  wtImpl->setUniStreamFlowControl(
+      /*maxStreamId=*/4,
+      /*targetConcurrentStreams=*/4);
+
+  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(2));
+  auto writeHandle = wt_->createUniStream();
+  EXPECT_FALSE(writeHandle.hasError());
 
   // write large data without flow control, should buffer
   auto res =
@@ -702,25 +758,28 @@ TEST_F(HTTPTransactionWebTransportTest, WriteBufferingPartialSend) {
 
   // grant partial flow control, should flush partial data
   EXPECT_CALL(transport_,
-              sendWebTransportStreamData(1, testing::_, false, nullptr))
+              sendWebTransportStreamData(2, testing::_, false, nullptr))
       .WillOnce(Return(WTFCState::UNBLOCKED));
   wtImpl->onMaxData(500);
 
   // grant more flow control, should flush remaining buffered data
   EXPECT_CALL(transport_,
-              sendWebTransportStreamData(1, testing::_, false, nullptr))
+              sendWebTransportStreamData(2, testing::_, false, nullptr))
       .WillOnce(Return(WTFCState::UNBLOCKED));
   wtImpl->onMaxData(1000);
   EXPECT_CALL(transport_, resetWebTransportEgress(_, _));
 }
 
 TEST_F(HTTPTransactionWebTransportTest, StreamWriteReadyCallback) {
-  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(1));
-  auto writeHandle = wt_->createUniStream();
-  EXPECT_FALSE(writeHandle.hasError());
-
   auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
   ASSERT_NE(wtImpl, nullptr);
+  wtImpl->setUniStreamFlowControl(
+      /*maxStreamId=*/4,
+      /*targetConcurrentStreams=*/4);
+
+  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(2));
+  auto writeHandle = wt_->createUniStream();
+  EXPECT_FALSE(writeHandle.hasError());
 
   // write data without flow control, should buffer
   auto res = writeHandle.value()->writeStreamData(makeBuf(100), false, nullptr);
@@ -729,7 +788,7 @@ TEST_F(HTTPTransactionWebTransportTest, StreamWriteReadyCallback) {
 
   bool writeReady = false;
   quic::StreamWriteCallback* wcb{nullptr};
-  EXPECT_CALL(transport_, notifyPendingWriteOnStream(1, testing::_))
+  EXPECT_CALL(transport_, notifyPendingWriteOnStream(2, testing::_))
       .WillOnce(DoAll(SaveArg<1>(&wcb), Return(folly::unit)));
   writeHandle.value()
       ->awaitWritable()
@@ -744,22 +803,25 @@ TEST_F(HTTPTransactionWebTransportTest, StreamWriteReadyCallback) {
   // trigger onStreamWriteReady, should flush buffered writes and resolve
   // promise
   EXPECT_CALL(transport_,
-              sendWebTransportStreamData(1, testing::_, false, nullptr))
+              sendWebTransportStreamData(2, testing::_, false, nullptr))
       .WillOnce(Return(WTFCState::UNBLOCKED));
   wtImpl->onMaxData(1000);
-  wcb->onStreamWriteReady(1, 65536);
+  wcb->onStreamWriteReady(2, 65536);
   eventBase_.loopOnce();
   EXPECT_TRUE(writeReady);
   EXPECT_CALL(transport_, resetWebTransportEgress(_, _));
 }
 
 TEST_F(HTTPTransactionWebTransportTest, FlushBufferedWritesMultiple) {
-  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(1));
-  auto writeHandle = wt_->createUniStream();
-  EXPECT_FALSE(writeHandle.hasError());
-
   auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
   ASSERT_NE(wtImpl, nullptr);
+  wtImpl->setUniStreamFlowControl(
+      /*maxStreamId=*/4,
+      /*targetConcurrentStreams=*/4);
+
+  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(2));
+  auto writeHandle = wt_->createUniStream();
+  EXPECT_FALSE(writeHandle.hasError());
 
   auto dcb1 = std::make_unique<StrictMock<MockDeliveryCallback>>();
   auto dcb2 = std::make_unique<StrictMock<MockDeliveryCallback>>();
@@ -784,31 +846,34 @@ TEST_F(HTTPTransactionWebTransportTest, FlushBufferedWritesMultiple) {
 
   // grant flow control, should flush first buffered entry
   EXPECT_CALL(transport_,
-              sendWebTransportStreamData(1, testing::_, false, dcb1.get()))
+              sendWebTransportStreamData(2, testing::_, false, dcb1.get()))
       .WillOnce(Return(WTFCState::UNBLOCKED));
   wtImpl->onMaxData(100);
 
   // grant more flow control, should flush second buffered entry
   EXPECT_CALL(transport_,
-              sendWebTransportStreamData(1, testing::_, false, dcb2.get()))
+              sendWebTransportStreamData(2, testing::_, false, dcb2.get()))
       .WillOnce(Return(WTFCState::UNBLOCKED));
   wtImpl->onMaxData(300);
 
   // grant more flow control, should flush third buffered entry
   EXPECT_CALL(transport_,
-              sendWebTransportStreamData(1, testing::_, false, dcb3.get()))
+              sendWebTransportStreamData(2, testing::_, false, dcb3.get()))
       .WillOnce(Return(WTFCState::UNBLOCKED));
   wtImpl->onMaxData(500);
   EXPECT_CALL(transport_, resetWebTransportEgress(_, _));
 }
 
 TEST_F(HTTPTransactionWebTransportTest, CoalescedWrites) {
-  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(1));
-  auto writeHandle = wt_->createUniStream();
-  EXPECT_FALSE(writeHandle.hasError());
-
   auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
   ASSERT_NE(wtImpl, nullptr);
+  wtImpl->setUniStreamFlowControl(
+      /*maxStreamId=*/4,
+      /*targetConcurrentStreams=*/4);
+
+  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(2));
+  auto writeHandle = wt_->createUniStream();
+  EXPECT_FALSE(writeHandle.hasError());
 
   // write multiple chunks without flow control, should buffer all into one
   // coalesced entry because of no delivery callbacks
@@ -829,19 +894,22 @@ TEST_F(HTTPTransactionWebTransportTest, CoalescedWrites) {
 
   // grant flow control, should flush the entire buffered entry
   EXPECT_CALL(transport_,
-              sendWebTransportStreamData(1, testing::_, false, nullptr))
+              sendWebTransportStreamData(2, testing::_, false, nullptr))
       .WillOnce(Return(WTFCState::UNBLOCKED));
   wtImpl->onMaxData(1000);
   EXPECT_CALL(transport_, resetWebTransportEgress(_, _));
 }
 
 TEST_F(HTTPTransactionWebTransportTest, CoalescedWritesPartialFlowControl) {
-  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(1));
-  auto writeHandle = wt_->createUniStream();
-  EXPECT_FALSE(writeHandle.hasError());
-
   auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
   ASSERT_NE(wtImpl, nullptr);
+  wtImpl->setUniStreamFlowControl(
+      /*maxStreamId=*/4,
+      /*targetConcurrentStreams=*/4);
+
+  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(2));
+  auto writeHandle = wt_->createUniStream();
+  EXPECT_FALSE(writeHandle.hasError());
 
   auto res1 =
       writeHandle.value()->writeStreamData(makeBuf(100), false, nullptr);
@@ -861,12 +929,12 @@ TEST_F(HTTPTransactionWebTransportTest, CoalescedWritesPartialFlowControl) {
   // due to coalescing with nullptr callbacks, we expect only 2 transport calls
   // (not 3) when flow control is granted in non-aligned chunks
   EXPECT_CALL(transport_,
-              sendWebTransportStreamData(1, testing::_, false, nullptr))
+              sendWebTransportStreamData(2, testing::_, false, nullptr))
       .WillOnce(Return(WTFCState::UNBLOCKED));
   wtImpl->onMaxData(250);
 
   EXPECT_CALL(transport_,
-              sendWebTransportStreamData(1, testing::_, false, nullptr))
+              sendWebTransportStreamData(2, testing::_, false, nullptr))
       .WillOnce(Return(WTFCState::UNBLOCKED));
   wtImpl->onMaxData(450);
 
@@ -911,6 +979,121 @@ TEST_F(HTTPTransactionWebTransportTest, RecvFlowControlCloseSession) {
             WebTransport::ErrorCode::SESSION_TERMINATED);
   EXPECT_EQ(wt_->createBidiStream().error(),
             WebTransport::ErrorCode::SESSION_TERMINATED);
+}
+
+TEST_F(HTTPTransactionWebTransportTest, ClientUniStreamRst) {
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+
+  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(2));
+  auto writeHandle = wt_->createUniStream();
+  wtImpl->setUniStreamFlowControl(
+      /*maxStreamId=*/1,
+      /*targetConcurrentStreams=*/4);
+  EXPECT_FALSE(writeHandle.hasError());
+  EXPECT_TRUE(wtImpl->shouldGrantStreamCredit(false));
+
+  // For unidirectional egress streams (created by the client), we should NOT
+  // send MaxStreams when they close, as that's controlled by the peer.
+  // Only bidirectional streams and ingress unidirectional streams should
+  // trigger MaxStreams updates.
+  EXPECT_CALL(transport_, resetWebTransportEgress(2, _));
+  writeHandle.value()->resetStream(WebTransport::kInternalError);
+}
+
+TEST_F(HTTPTransactionWebTransportTest, UniStreamCredit) {
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+  wtImpl->setUniStreamFlowControl(
+      /*maxStreamId=*/1,
+      /*targetConcurrentStreams=*/4);
+  EXPECT_TRUE(wtImpl->shouldGrantStreamCredit(false));
+
+  // Create a peer-initiated ingress unidirectional stream
+  WebTransport::StreamReadHandle* readHandle{nullptr};
+  EXPECT_CALL(handler_, onWebTransportUniStream(_, _))
+      .WillOnce(SaveArg<1>(&readHandle));
+
+  // This simulates the peer opening a unidirectional stream to us (ingress)
+  txn_->onWebTransportUniStream(2);
+  EXPECT_NE(readHandle, nullptr);
+
+  // When we close this ingress stream, we should send MaxStreams
+  // The new maxStreamID should be: 1 + (4 / 2) = 3
+  EXPECT_CALL(transport_, sendWTMaxStreams(3, false))
+      .WillOnce(Return(folly::unit));
+  EXPECT_CALL(transport_, stopReadingWebTransportIngress(2, _))
+      .WillRepeatedly(Return(folly::unit));
+
+  auto implHandle =
+      dynamic_cast<WebTransportImpl::StreamReadHandle*>(readHandle);
+  ASSERT_NE(implHandle, nullptr);
+
+  // Simulate the application reading and abandoning the stream due to an error
+  // This triggers deliverReadError -> closeIngressStream ->
+  // maybeGrantStreamCredit -> sendWTMaxStreams
+  implHandle->deliverReadError(
+      WebTransport::Exception(WebTransport::kInternalError, "test error"));
+  auto fut = readHandle->readStreamData()
+                 .via(&eventBase_)
+                 .thenTry([](auto streamData) {
+                   EXPECT_TRUE(streamData.hasException());
+                 });
+
+  eventBase_.loopOnce();
+  EXPECT_TRUE(fut.isReady());
+}
+
+TEST_F(HTTPTransactionWebTransportTest, BidiStreamCredit) {
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+  wtImpl->setBidiStreamFlowControl(
+      /*maxStreamId=*/5,
+      /*targetConcurrentStreams=*/12);
+  EXPECT_TRUE(wtImpl->shouldGrantStreamCredit(true));
+
+  // Create a peer-initiated bidirectional stream
+  WebTransport::BidiStreamHandle bidiHandle{};
+  EXPECT_CALL(handler_, onWebTransportBidiStream(_, _))
+      .WillOnce(SaveArg<1>(&bidiHandle));
+
+  // This simulates the peer opening a bidirectional stream to us (ingress)
+  txn_->onWebTransportBidiStream(1);
+  EXPECT_NE(bidiHandle.readHandle, nullptr);
+  EXPECT_NE(bidiHandle.writeHandle, nullptr);
+
+  // For bidi streams, we need to close BOTH sides.
+  // Close the write side. This should NOT trigger MaxStreams yet
+  // (we need both sides closed for peer-initiated bidi streams)
+  EXPECT_CALL(transport_, resetWebTransportEgress(1, _));
+  bidiHandle.writeHandle->resetStream(WebTransport::kInternalError);
+
+  // Close the read side. This SHOULD trigger MaxStreams
+  // because both sides of the peer-initiated bidi stream are now closed
+  EXPECT_CALL(transport_, stopReadingWebTransportIngress(1, _))
+      .WillRepeatedly(Return(folly::unit));
+  // New maxStreamID should be: 5 + (12 / 2) = 11
+  EXPECT_CALL(transport_, sendWTMaxStreams(11, true))
+      .WillOnce(Return(folly::unit));
+
+  auto implHandle =
+      dynamic_cast<WebTransportImpl::StreamReadHandle*>(bidiHandle.readHandle);
+  ASSERT_NE(implHandle, nullptr);
+
+  // Simulate the application reading and abandoning the stream due to an error
+  // This triggers deliverReadError -> closeIngressStream ->
+  // maybeGrantStreamCredit -> sendWTMaxStreams (because the egress side was
+  // already closed above)
+  implHandle->deliverReadError(
+      WebTransport::Exception(WebTransport::kInternalError, "test error"));
+  auto fut = bidiHandle.readHandle->readStreamData()
+                 .via(&eventBase_)
+                 .thenTry([](auto streamData) {
+                   EXPECT_TRUE(streamData.hasException());
+                 });
+
+  eventBase_.loopOnce();
+  EXPECT_TRUE(fut.isReady());
 }
 
 } // namespace proxygen::test

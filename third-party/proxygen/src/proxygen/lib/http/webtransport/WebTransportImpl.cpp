@@ -8,6 +8,8 @@
 
 #include <proxygen/lib/http/webtransport/WebTransportImpl.h>
 
+#include <glog/logging.h>
+
 namespace {
 
 constexpr uint64_t kMaxWTIngressBuf = 65535;
@@ -149,7 +151,7 @@ WebTransportImpl::sendWebTransportStreamData(
     res = WebTransport::FCState::BLOCKED;
   }
   if (eof || res.hasError()) {
-    wtEgressStreams_.erase(id);
+    closeEgressStream(id);
   }
   sp_.refreshTimeout();
   return res;
@@ -159,7 +161,7 @@ folly::Expected<folly::Unit, WebTransport::ErrorCode>
 WebTransportImpl::resetWebTransportEgress(HTTPCodec::StreamID id,
                                           uint32_t errorCode) {
   auto res = tp_.resetWebTransportEgress(id, errorCode);
-  wtEgressStreams_.erase(id);
+  closeEgressStream(id);
   sp_.refreshTimeout();
   return res;
 }
@@ -168,7 +170,6 @@ folly::Expected<folly::Unit, WebTransport::ErrorCode>
 WebTransportImpl::stopReadingWebTransportIngress(
     HTTPCodec::StreamID id, folly::Optional<uint32_t> errorCode) {
   auto res = tp_.stopReadingWebTransportIngress(id, errorCode);
-  wtIngressStreams_.erase(id);
   sp_.refreshTimeout();
   return res;
 }
@@ -329,7 +330,7 @@ WebTransportImpl::StreamReadHandle::readStreamData() {
   CHECK(!readPromise_.valid()) << "One read at a time";
   if (error_) {
     auto ex = std::move(error_);
-    impl_.wtIngressStreams_.erase(getID());
+    impl_.closeIngressStream(getID());
     return folly::makeSemiFuture<StreamData>(std::move(ex));
   } else if (buf_.empty() && !eof_) {
     VLOG(4) << __func__ << " waiting for data";
@@ -372,7 +373,7 @@ void WebTransportImpl::StreamReadHandle::readAvailable(
     readError(id,
               quic::QuicError(quic::LocalErrorCode::INTERNAL_ERROR,
                               "sync read error"));
-    impl_.wtIngressStreams_.erase(getID());
+    impl_.closeIngressStream(id);
     return;
   }
   quic::BufPtr data = std::move(readRes.value().first);
@@ -453,7 +454,7 @@ void WebTransportImpl::StreamReadHandle::deliverReadError(
   if (readPromise_.valid()) {
     readPromise_.setException(ex);
     readPromise_ = emptyReadPromise();
-    impl_.wtIngressStreams_.erase(getID());
+    impl_.closeIngressStream(getID());
   } else {
     error_ = ex;
   }
@@ -468,9 +469,55 @@ void WebTransportImpl::maybeGrantFlowControl(uint64_t bytesRead) {
   }
 }
 
+void WebTransportImpl::maybeGrantStreamCredit(HTTPCodec::StreamID id,
+                                              bool closingReadHandle,
+                                              bool closingWriteHandle) {
+  if (isSessionTerminated()) {
+    return;
+  }
+  CHECK(closingReadHandle || closingWriteHandle);
+  bool isBidi = isBidirectional(id);
+  bool canGrantCredit = false;
+
+  if (isBidi) {
+    bool hasOppositeHandle = closingReadHandle ? wtEgressStreams_.contains(id)
+                                               : wtIngressStreams_.contains(id);
+    canGrantCredit = !hasOppositeHandle;
+  } else {
+    canGrantCredit = closingReadHandle && wtIngressStreams_.contains(id);
+  }
+
+  if (canGrantCredit) {
+    auto& streamLimits =
+        isBidi ? bidiStreamFlowControl_ : uniStreamFlowControl_;
+    streamLimits.numClosedStreams++;
+    if (shouldGrantStreamCredit(isBidi)) {
+      streamLimits.maxStreamID += streamLimits.targetConcurrentStreams / 2;
+      tp_.sendWTMaxStreams(streamLimits.maxStreamID, isBidi);
+    }
+  }
+}
+
 bool WebTransportImpl::shouldGrantFlowControl() const {
   auto bufferedBytes = recvFlowController_.getCurrentOffset() - bytesRead_;
   return bufferedBytes < kDefaultWTReceiveWindow / 2;
+}
+
+bool WebTransportImpl::shouldGrantStreamCredit(bool isBidi) const {
+  auto& streamLimits = isBidi ? bidiStreamFlowControl_ : uniStreamFlowControl_;
+  CHECK(streamLimits.numClosedStreams <= streamLimits.maxStreamID);
+  return streamLimits.maxStreamID - streamLimits.numClosedStreams <
+         (streamLimits.targetConcurrentStreams / 2);
+}
+
+void WebTransportImpl::closeEgressStream(HTTPCodec::StreamID id) {
+  maybeGrantStreamCredit(id, false, true);
+  wtEgressStreams_.erase(id);
+}
+
+void WebTransportImpl::closeIngressStream(HTTPCodec::StreamID id) {
+  maybeGrantStreamCredit(id, true, false);
+  wtIngressStreams_.erase(id);
 }
 
 } // namespace proxygen

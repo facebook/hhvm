@@ -14,6 +14,7 @@
 
 namespace {
 constexpr uint64_t kDefaultWTReceiveWindow = 1'048'576;
+constexpr uint64_t kDefaultTargetConcurrentStreams = 50;
 constexpr double kFlowControlThreshold = 0.5;
 } // namespace
 
@@ -339,7 +340,16 @@ class WebTransportImpl : public WebTransport {
   FlowController sendFlowController_{std::numeric_limits<size_t>::max()};
   FlowController recvFlowController_{std::numeric_limits<size_t>::max()};
   folly::Optional<uint32_t> sessionCloseError_;
-  uint64_t bytesRead_{0};
+  uint64_t bytesRead_{};
+
+  struct StreamFlowControl {
+    uint64_t maxStreamID{std::numeric_limits<uint64_t>::max()};
+    uint64_t numClosedStreams{};
+    uint64_t targetConcurrentStreams{kDefaultTargetConcurrentStreams};
+  };
+
+  StreamFlowControl uniStreamFlowControl_;
+  StreamFlowControl bidiStreamFlowControl_;
 
  public:
   [[nodiscard]] bool isSessionTerminated() const {
@@ -373,7 +383,18 @@ class WebTransportImpl : public WebTransport {
   void onWebTransportStopSending(HTTPCodec::StreamID id, uint32_t errorCode);
 
   void maybeGrantFlowControl(uint64_t bytesRead);
+  void maybeGrantStreamCredit(HTTPCodec::StreamID id,
+                              bool closingReadHandle,
+                              bool closingWriteHandle);
   [[nodiscard]] bool shouldGrantFlowControl() const;
+  [[nodiscard]] bool shouldGrantStreamCredit(bool isBidi) const;
+
+  void closeEgressStream(HTTPCodec::StreamID id);
+  void closeIngressStream(HTTPCodec::StreamID id);
+
+  bool isBidirectional(HTTPCodec::StreamID id) const {
+    return (id & 0b10) == 0;
+  }
 
   void setFlowControlLimits(
       size_t sendWindow = std::numeric_limits<size_t>::max(),
@@ -381,7 +402,20 @@ class WebTransportImpl : public WebTransport {
     sendFlowController_ = FlowController(sendWindow);
     recvFlowController_ = FlowController(recvWindow);
   }
+
   void onMaxData(uint64_t maxData) noexcept;
+
+  void setUniStreamFlowControl(uint64_t maxStreamId,
+                               uint64_t targetConcurrentStreams) {
+    uniStreamFlowControl_.maxStreamID = maxStreamId;
+    uniStreamFlowControl_.targetConcurrentStreams = targetConcurrentStreams;
+  }
+
+  void setBidiStreamFlowControl(uint64_t maxStreamId,
+                                uint64_t targetConcurrentStreams) {
+    bidiStreamFlowControl_.maxStreamID = maxStreamId;
+    bidiStreamFlowControl_.targetConcurrentStreams = targetConcurrentStreams;
+  }
 };
 
 } // namespace proxygen

@@ -24,6 +24,7 @@
 #include <boost/algorithm/string/split.hpp>
 #include <fmt/ranges.h>
 
+#include <thrift/common/universal_name.h>
 #include <thrift/compiler/ast/t_enum.h>
 #include <thrift/compiler/ast/t_enum_value.h>
 #include <thrift/compiler/ast/t_field.h>
@@ -915,6 +916,18 @@ void validate_uri_uniqueness(sema_context& ctx, const t_program& prog) {
     visit(*p);
   }
   visit(prog);
+}
+
+void validate_uri_value(sema_context& ctx, const t_named& node) {
+  if (node.uri().empty()) {
+    return;
+  }
+
+  try {
+    validate_universal_name(node.uri());
+  } catch (const std::exception& e) {
+    ctx.error(node.src_range().begin, "{}", e.what());
+  }
 }
 
 void validate_field_id(sema_context& ctx, const t_field& node) {
@@ -1823,6 +1836,7 @@ ast_validator standard_validator() {
   validator.add_program_visitor(&detail::validate_annotation_scopes<>);
 
   validator.add_root_definition_visitor(&detail::validate_annotation_scopes<>);
+  validator.add_root_definition_visitor(&validate_uri_value);
 
   validator.add_interface_visitor(&validate_interface_function_name_uniqueness);
   validator.add_interface_visitor(&validate_function_priority_annotation);

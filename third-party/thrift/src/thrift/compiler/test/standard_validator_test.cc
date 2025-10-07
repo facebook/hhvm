@@ -275,3 +275,22 @@ TEST(StandardValidatorTest, WarnProgramMissingPackage) {
     # expected-warning@-1: Thrift file should have a (non-empty) package. Packages will soon be required, at which point missing packages will trigger a Thrift compiler error. For more details, see https://fburl.com/thrift-uri-add-package
   )");
 }
+
+TEST(StandardValidatorTest, ErrorInvalidUri) {
+  check_compile(R"(
+    package "invalid/test"
+    # expected-error@-1: Invalid Thrift URI domain (Not enough domain components: expected at least 2, got 1).
+
+    struct S {}
+  )");
+
+  check_compile(R"(
+    package "facebook.com/thrift/test"
+
+    include "thrift/annotation/thrift.thrift"
+
+    @thrift.Uri{value = "invalid/test"}
+    struct S {}
+    # expected-error@-2: Not a valid Thrift URI: "invalid/test" (Not enough parts: expected at least 3, got: 2)
+  )");
+}

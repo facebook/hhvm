@@ -65,6 +65,11 @@ class H3DatagramAsyncSocket
     }
   }
 
+  H3DatagramAsyncSocket(const H3DatagramAsyncSocket&) = delete;
+  H3DatagramAsyncSocket& operator=(const H3DatagramAsyncSocket&) = delete;
+  H3DatagramAsyncSocket(H3DatagramAsyncSocket&&) = delete;
+  H3DatagramAsyncSocket& operator=(H3DatagramAsyncSocket&&) = delete;
+
   HTTPTransaction* getTransaction() {
     return txn_;
   }

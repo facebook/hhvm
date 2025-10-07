@@ -11,7 +11,6 @@
 #include <glog/logging.h>
 
 #include <folly/Conv.h>
-#include <folly/Optional.h>
 #include <folly/Portability.h>
 #include <folly/Range.h>
 #include <folly/String.h>
@@ -29,14 +28,13 @@ class ParseURL {
    * valid() == true.  If parsing fails, returns nothing. If you need the
    * partial parse results, use parseURLMaybeInvalid below.
    */
-  static folly::Expected<ParseURL, folly::Unit> parseURL(
-      folly::StringPiece urlVal, bool strict = false) noexcept {
+  static std::optional<ParseURL> parseURL(folly::StringPiece urlVal,
+                                          bool strict = false) noexcept {
     ParseURL parseUrl(urlVal, strict);
     if (parseUrl.valid()) {
       return parseUrl;
-    } else {
-      return folly::makeUnexpected(folly::Unit());
     }
+    return std::nullopt;
   }
 
   /* Parse a URL.  Returns a ParseURL object that may or may not be valid.
@@ -49,7 +47,7 @@ class ParseURL {
 
   static bool isSupportedScheme(folly::StringPiece location);
 
-  static folly::Optional<std::string> getRedirectDestination(
+  static std::optional<std::string> getRedirectDestination(
       folly::StringPiece url,
       folly::StringPiece requestScheme,
       folly::StringPiece location,
@@ -157,7 +155,7 @@ class ParseURL {
 
   FB_EXPORT void stripBrackets() noexcept;
 
-  FOLLY_NODISCARD static folly::Optional<folly::StringPiece> getQueryParam(
+  FOLLY_NODISCARD static std::optional<folly::StringPiece> getQueryParam(
       folly::StringPiece query, const folly::StringPiece name) noexcept;
 
  private:

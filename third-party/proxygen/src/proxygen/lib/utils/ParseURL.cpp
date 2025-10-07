@@ -68,7 +68,7 @@ bool ParseURL::isSupportedScheme(folly::StringPiece location) {
                    scheme) != kSupportedSchemes.end();
 }
 
-folly::Optional<std::string> ParseURL::getRedirectDestination(
+std::optional<std::string> ParseURL::getRedirectDestination(
     folly::StringPiece url,
     folly::StringPiece requestScheme,
     folly::StringPiece location,
@@ -76,11 +76,11 @@ folly::Optional<std::string> ParseURL::getRedirectDestination(
   auto newUrl = ParseURL::parseURL(location);
   if (!newUrl) {
     DLOG(INFO) << "Unparsable location header=" << location;
-    return folly::none;
+    return std::nullopt;
   }
   if (!newUrl->hasHost()) {
     // New URL is relative
-    folly::Expected<ParseURL, folly::Unit> oldURL = ParseURL::parseURL(url);
+    std::optional<ParseURL> oldURL = ParseURL::parseURL(url);
     if (!oldURL || !oldURL->hasHost()) {
       // Old URL was relative, try host header
       oldURL = ParseURL::parseURL(headerHost);
@@ -88,7 +88,7 @@ folly::Optional<std::string> ParseURL::getRedirectDestination(
         VLOG(2) << "Cannot determine destination for relative redirect "
                 << "location=" << location << " orig url=" << url
                 << " host=" << headerHost;
-        return folly::none;
+        return std::nullopt;
       }
     } // else oldURL was absolute and has a host
     return fmt::format(
@@ -252,7 +252,7 @@ void ParseURL::stripBrackets() noexcept {
   }
 }
 
-folly::Optional<folly::StringPiece> ParseURL::getQueryParam(
+std::optional<folly::StringPiece> ParseURL::getQueryParam(
     folly::StringPiece query, const folly::StringPiece name) noexcept {
   while (!query.empty()) {
     auto param = query.split_step('&');
@@ -264,7 +264,7 @@ folly::Optional<folly::StringPiece> ParseURL::getQueryParam(
     }
     return param;
   }
-  return {};
+  return std::nullopt;
 }
 
 } // namespace proxygen

@@ -74,6 +74,16 @@ target_link_libraries(
     concurrency
     thrift-core
     rpcmetadata
+    # We need to link to libthriftcpp2.a after libtransport.a because
+    # libtransport.a uses
+    # apache::thrift::rocket::CompressionManager::uncompressBuffer()
+    # that is defined in libthriftcpp2.a.
+    #
+    # We don't need this for libtransport.so because libthriftcpp2.so
+    # and libtransport.so are cyclic dependencies and libthriftcpp2.so
+    # has libtransport.so dependency. We can't link to
+    # libthriftcpp2.so from libtransport.so. It's not allowed.
+    $<$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>:$<INSTALL_INTERFACE:FBThrift::thriftcpp2>>
     Folly::folly
     ZLIB::ZLIB
     ${OPENSSL_LIBRARIES}

@@ -152,23 +152,19 @@ std::string mangle_program_path(
   return get_py3_namespace_with_name_and_prefix(program, prefix, "__");
 }
 
-/**
- * Map of template values related to adapters attached to a node.
- *
- * `singular_type_hint` determines whether type_hint should be enforced as a
- * singular element type (strips trailing `[]` from type hint, if present).
- */
+/** Map of template values related to adapters attached to a node. */
 whisker::object adapter_node(
     const whisker::prototype_database& proto,
-    const t_const* adapter_annotation,
-    const t_const* transitive_adapter_annotation,
-    bool singular_type_hint = true) {
+    const t_named& self,
+    const t_const* adapter_annotation) {
   if (adapter_annotation == nullptr) {
     return whisker::make::null;
   }
   auto type_hint = get_annotation_property(adapter_annotation, "typeHint");
   bool is_generic = type_hint.ends_with("[]");
-  if (singular_type_hint && is_generic) {
+  // For consts, we need to retain the `[]` suffix to indicate that the const is
+  // a container type
+  if (is_generic && dynamic_cast<const t_const*>(&self) == nullptr) {
     type_hint = type_hint.substr(0, type_hint.size() - 2);
   }
   whisker::map::raw node;
@@ -178,6 +174,9 @@ whisker::object adapter_node(
           get_annotation_property(adapter_annotation, "name")));
   node.emplace("type_hint", whisker::make::string(type_hint));
   node.emplace("is_generic?", is_generic);
+
+  const t_const* transitive_adapter_annotation =
+      get_transitive_annotation_of_adapter_or_null(self);
   node.emplace(
       "transitive_annotation",
       proto.create_nullable<t_const_value>(
@@ -838,22 +837,6 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     return globals;
   }
 
-  prototype<t_const>::ptr make_prototype_for_const(
-      const prototype_database& proto) const override {
-    auto base = t_whisker_generator::make_prototype_for_const(proto);
-    auto def = whisker::dsl::prototype_builder<h_const>::extends(base);
-
-    def.property("adapter", [&proto](const t_const& self) {
-      return adapter_node(
-          proto,
-          find_structured_adapter_annotation(self),
-          get_transitive_annotation_of_adapter_or_null(self),
-          /*singular_type_hint=*/false);
-    });
-
-    return std::move(def).make();
-  }
-
   prototype<t_const_value>::ptr make_prototype_for_const_value(
       const prototype_database& proto) const override {
     auto base = t_mstch_generator::make_prototype_for_const_value(proto);
@@ -938,12 +921,6 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
       return self.has_structured_annotation(kPythonSortSetOnSerializeUri) ||
           self.has_structured_annotation(kPythonKeySortMapOnSerializeUri);
     });
-    def.property("adapter", [&proto](const t_field& self) {
-      return adapter_node(
-          proto,
-          find_structured_adapter_annotation(self),
-          get_transitive_annotation_of_adapter_or_null(self));
-    });
 
     return std::move(def).make();
   }
@@ -973,8 +950,16 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     auto def = whisker::dsl::prototype_builder<h_named>::extends(base);
 
     def.property("py_name", &python::get_py3_name);
+
+    // NOTE: `t_type` has overrides for these adapter related properties, as it
+    // handles checking for adapters along a chain of typedefs using the
+    // `t_type` overload of `find_structured_adapter_annotation`
     def.property("has_adapter?", [](const t_named& self) {
       return find_structured_adapter_annotation(self) != nullptr;
+    });
+    def.property("adapter", [&proto](const t_named& self) {
+      return adapter_node(
+          proto, self, find_structured_adapter_annotation(self));
     });
 
     return std::move(def).make();
@@ -1085,10 +1070,6 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     def.property("should_generate_patch?", [](const t_structured& self) {
       return should_generate_patch(&self);
     });
-    def.property("adapter", [&proto](const t_structured& self) {
-      return adapter_node(
-          proto, find_structured_adapter_annotation(self), nullptr);
-    });
 
     return std::move(def).make();
   }
@@ -1161,22 +1142,7 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     def.property("adapter", [&proto](const t_type& self) {
       // Check for adapters on NON-RESOLVED type (i.e. including on typedefs)
       return adapter_node(
-          proto,
-          find_structured_adapter_annotation(self),
-          get_transitive_annotation_of_adapter_or_null(self));
-    });
-
-    return std::move(def).make();
-  }
-
-  prototype<t_typedef>::ptr make_prototype_for_typedef(
-      const prototype_database& proto) const override {
-    auto base = t_whisker_generator::make_prototype_for_typedef(proto);
-    auto def = whisker::dsl::prototype_builder<h_typedef>::extends(base);
-
-    def.property("adapter", [&proto](const t_typedef& self) {
-      return adapter_node(
-          proto, find_structured_adapter_annotation(self), nullptr);
+          proto, self, find_structured_adapter_annotation(self));
     });
 
     return std::move(def).make();

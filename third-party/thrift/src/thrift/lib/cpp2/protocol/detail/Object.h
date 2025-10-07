@@ -1130,7 +1130,7 @@ template <typename Tag, typename Struct, int16_t FieldId>
 struct ProtocolValueToThriftValue<
     type::field<Tag, FieldContext<Struct, FieldId>>> {
   template <typename ObjectOrValue, typename U>
-  bool operator()(const ObjectOrValue& value, U& m, Struct&) const {
+  bool operator()(const ObjectOrValue& value, U& m, Struct& /*unused*/) const {
     return ProtocolValueToThriftValue<Tag>{}(value, m);
   }
 };
@@ -1145,7 +1145,7 @@ struct ProtocolValueToThriftValue<
   template <typename ObjectOrValue, typename U, typename AdapterT = Adapter>
   constexpr adapt_detail::
       if_not_field_adapter<AdapterT, type::native_type<Tag>, Struct, bool>
-      operator()(const ObjectOrValue& value, U& m, Struct&) const {
+      operator()(const ObjectOrValue& value, U& m, Struct& /*unused*/) const {
     return ProtocolValueToThriftValue<type::adapted<Adapter, Tag>>{}(value, m);
   }
 

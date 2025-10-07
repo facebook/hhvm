@@ -43,7 +43,7 @@ class FwdProxyHandler : public proxygen::coro::HTTPHandler {
     }
     auto& request = headerEvent->headers;
     auto parseURL = ParseURL::parseURL(request->getURL());
-    if (!parseURL->valid() || !parseURL->hasHost()) {
+    if (!parseURL.hasValue() || !parseURL->hasHost()) {
       XLOG(ERR) << "Invalid url=" << request->getURL();
       co_return HTTPFixedSource::makeFixedResponse(400);
     }

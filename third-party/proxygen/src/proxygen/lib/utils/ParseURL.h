@@ -165,17 +165,17 @@ class ParseURL {
     }
     int64_t hostOff = -1;
     int64_t hostNoBracketsOff = -1;
-    if (goner.host_.empty() || (goner.host_.data() >= goner.url_.data() &&
-                                goner.host_.data() < goner.url_.end())) {
+    const auto isFromUrl = [url = goner.url_](std::string_view s) {
+      return s.data() >= url.data() && s.data() < url.data() + url.size();
+    };
+    if (goner.host_.empty() || isFromUrl(goner.host_)) {
       // relative url_
       host_ = goner.host_;
     } else {
       // relative authority_
       hostOff = goner.host_.data() - goner.authority_.data();
     }
-    if (goner.hostNoBrackets_.empty() ||
-        (goner.hostNoBrackets_.data() >= goner.url_.data() &&
-         goner.hostNoBrackets_.data() < goner.url_.end())) {
+    if (goner.hostNoBrackets_.empty() || isFromUrl(goner.hostNoBrackets_)) {
       // relative url_
       hostNoBrackets_ = goner.hostNoBrackets_;
     } else {

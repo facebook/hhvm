@@ -139,31 +139,35 @@ MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg/NeWSkmQEmaO2f0T
 VnFqMCnjdeFhc/LA6rx3ALn2jfDj9jQR0QGRouFA7NbYZFx7Uj3HOw0/
 -----END PRIVATE KEY-----
 )";
-} // namespace
 
-namespace quic::samples {
-FizzServerContextPtr createFizzServerContextInsecure(
-    const HQServerParams& params,
+quic::samples::FizzServerContextPtr createFizzServerContextImpl(
     const std::vector<std::string>& supportedAlpns,
     fizz::server::ClientAuthMode clientAuth,
     const std::string& certificateFilePath,
-    const std::string& keyFilePath) {
+    const std::string& keyFilePath,
+    bool insecureDefaultCert) {
 
-  std::string certData = kDefaultCertData;
+  std::string certData;
   if (!certificateFilePath.empty()) {
     folly::readFile(certificateFilePath.c_str(), certData);
   }
-  std::string keyData = kDefaultKeyData;
+  std::string keyData;
   if (!keyFilePath.empty()) {
     folly::readFile(keyFilePath.c_str(), keyData);
+  }
+  if (insecureDefaultCert && certData.empty() && keyData.empty()) {
+    certData = kDefaultCertData;
+    keyData = kDefaultKeyData;
   }
   auto cert = fizz::openssl::CertUtils::makeSelfCert(certData, keyData);
   auto certManager = std::make_shared<fizz::server::CertManager>();
   certManager->addCertAndSetDefault(std::move(cert));
 
-  auto cert2 = fizz::openssl::CertUtils::makeSelfCert(kPrime256v1CertData,
-                                                      kPrime256v1KeyData);
-  certManager->addCert(std::move(cert2));
+  if (insecureDefaultCert) {
+    auto cert2 = fizz::openssl::CertUtils::makeSelfCert(kPrime256v1CertData,
+                                                        kPrime256v1KeyData);
+    certManager->addCert(std::move(cert2));
+  }
 
   auto serverCtx = std::make_shared<fizz::server::FizzServerContext>();
   serverCtx->setCertManager(certManager);
@@ -191,6 +195,28 @@ FizzServerContextPtr createFizzServerContextInsecure(
   serverCtx->setEarlyDataSettings(true, tolerance, std::move(replayCache));
 
   return serverCtx;
+}
+
+} // namespace
+
+namespace quic::samples {
+
+FizzServerContextPtr createFizzServerContext(
+    const std::vector<std::string>& supportedAlpns,
+    fizz::server::ClientAuthMode clientAuth,
+    const std::string& certificateFilePath,
+    const std::string& keyFilePath) {
+  return createFizzServerContextImpl(
+      supportedAlpns, clientAuth, certificateFilePath, keyFilePath, false);
+}
+
+FizzServerContextPtr createFizzServerContextWithInsecureDefault(
+    const std::vector<std::string>& supportedAlpns,
+    fizz::server::ClientAuthMode clientAuth,
+    const std::string& certificateFilePath,
+    const std::string& keyFilePath) {
+  return createFizzServerContextImpl(
+      supportedAlpns, clientAuth, certificateFilePath, keyFilePath, true);
 }
 
 FizzClientContextPtr createFizzClientContext(

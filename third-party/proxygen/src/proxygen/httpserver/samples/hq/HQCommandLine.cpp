@@ -89,6 +89,9 @@ DEFINE_uint32(quic_batch_size,
               "Maximum number of packets that can be batched in Quic");
 DEFINE_string(cert, "", "Certificate file path");
 DEFINE_string(key, "", "Private key file path");
+DEFINE_bool(use_insecure_default_cert,
+            true,
+            "Use default certificate if cert/key is not provided");
 DEFINE_string(client_auth_mode, "none", "Client authentication mode");
 DEFINE_string(qlogger_path,
               "",
@@ -505,6 +508,8 @@ HQToolParamsBuilderFromCmdline::HQToolParamsBuilderFromCmdline(
     auto& serverParams = boost::get<HQToolServerParams>(hqParams_.params);
     serverParams.certificateFilePath = FLAGS_cert;
     serverParams.keyFilePath = FLAGS_key;
+    serverParams.useInsecureDefaultCertificate =
+        FLAGS_use_insecure_default_cert;
     // Set client auth mode on server params for tooling visibility
     if (FLAGS_client_auth_mode == std::string("optional")) {
       serverParams.clientAuth = fizz::server::ClientAuthMode::Optional;

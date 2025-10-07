@@ -237,19 +237,13 @@ HQServer::HQServer(
     HQServerParams params,
     HTTPTransactionHandlerProvider httpTransactionHandlerProvider,
     std::function<void(proxygen::HQSession*)> onTransportReadyFn,
-    const std::string& certificateFilePath,
-    const std::string& keyFilePath,
-    fizz::server::ClientAuthMode clientAuth,
-    const std::vector<std::string>& supportedAlpns)
+    std::shared_ptr<const fizz::server::FizzServerContext> fizzCtx)
     : HQServer(std::move(params),
                std::make_unique<HQServerTransportFactory>(
                    params_,
                    std::move(httpTransactionHandlerProvider),
                    std::move(onTransportReadyFn)),
-               certificateFilePath,
-               keyFilePath,
-               clientAuth,
-               supportedAlpns) {
+               std::move(fizzCtx)) {
 }
 
 HQServer::HQServer(HQServerParams params,
@@ -258,6 +252,17 @@ HQServer::HQServer(HQServerParams params,
                    const std::string& keyFilePath,
                    fizz::server::ClientAuthMode clientAuth,
                    const std::vector<std::string>& supportedAlpns)
+    : HQServer(
+          std::move(params),
+          std::move(factory),
+          createFizzServerContext(
+              supportedAlpns, clientAuth, certificateFilePath, keyFilePath)) {
+}
+
+HQServer::HQServer(
+    HQServerParams params,
+    std::unique_ptr<quic::QuicServerTransportFactory> factory,
+    std::shared_ptr<const fizz::server::FizzServerContext> fizzCtx)
     : params_(std::move(params)) {
   params_.transportSettings.datagramConfig.enabled = true;
   params_.transportSettings.advertisedKnobFrameSupport = true;
@@ -272,8 +277,8 @@ HQServer::HQServer(HQServerParams params,
       std::make_unique<QuicSharedUDPSocketFactory>());
   server_->setHealthCheckToken("health");
   server_->setSupportedVersion(params_.quicVersions);
-  server_->setFizzContext(createFizzServerContextInsecure(
-      params_, supportedAlpns, clientAuth, certificateFilePath, keyFilePath));
+  server_->setFizzContext(std::move(fizzCtx));
+
   if (params_.rateLimitPerThread) {
     server_->setRateLimit(
         [rateLimitPerThread = params_.rateLimitPerThread.value()]() {
@@ -362,6 +367,21 @@ void HQServer::startPacketForwarding(const folly::SocketAddress& addr) {
 
 void HQServer::pauseRead() {
   server_->pauseRead();
+}
+
+ScopedHQServer::ScopedHQServer(HQServerParams params,
+                               HTTPTransactionHandlerProvider handlerProvider,
+                               const std::string& certificateFilePath,
+                               const std::string& keyFilePath,
+                               fizz::server::ClientAuthMode clientAuth,
+                               const std::vector<std::string>& supportedAlpns)
+    : server_(
+          std::move(params),
+          std::move(handlerProvider),
+          nullptr,
+          createFizzServerContext(
+              supportedAlpns, clientAuth, certificateFilePath, keyFilePath)) {
+  server_.start();
 }
 
 } // namespace quic::samples

@@ -6,6 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <proxygen/httpserver/samples/hq/FizzContext.h>
 #include <proxygen/httpserver/samples/hq/H2Server.h>
 #include <proxygen/httpserver/samples/hq/HQServerModule.h>
 #include <proxygen/httpserver/samples/hq/SampleHandlers.h>
@@ -53,13 +54,19 @@ void startServer(
     };
   }
 
-  HQServer server(params,
-                  dispatchFn,
-                  std::move(onTransportReadyFn),
-                  params.certificateFilePath,
-                  params.keyFilePath,
-                  params.clientAuth,
-                  params.supportedAlpns);
+  auto ctx = params.useInsecureDefaultCertificate
+                 ? createFizzServerContextWithInsecureDefault(
+                       params.supportedAlpns,
+                       params.clientAuth,
+                       params.certificateFilePath,
+                       params.keyFilePath)
+                 : createFizzServerContext(params.supportedAlpns,
+                                           params.clientAuth,
+                                           params.certificateFilePath,
+                                           params.keyFilePath);
+
+  HQServer server(
+      params, dispatchFn, std::move(onTransportReadyFn), std::move(ctx));
   if (statsFactory) {
     server.setStatsFactory(std::move(statsFactory));
   }

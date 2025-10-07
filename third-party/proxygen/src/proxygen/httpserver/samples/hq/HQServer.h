@@ -32,10 +32,7 @@ class HQServer {
   HQServer(HQServerParams params,
            HTTPTransactionHandlerProvider httpTransactionHandlerProvider,
            std::function<void(proxygen::HQSession*)> onTransportReadyFn,
-           const std::string& certificateFilePath,
-           const std::string& keyFilePath,
-           fizz::server::ClientAuthMode clientAuth,
-           const std::vector<std::string>& supportedAlpns);
+           std::shared_ptr<const fizz::server::FizzServerContext> fizzCtx);
 
   HQServer(HQServerParams params,
            std::unique_ptr<quic::QuicServerTransportFactory> factory,
@@ -43,6 +40,10 @@ class HQServer {
            const std::string& keyFilePath,
            fizz::server::ClientAuthMode clientAuth,
            const std::vector<std::string>& supportedAlpns);
+
+  HQServer(HQServerParams params,
+           std::unique_ptr<quic::QuicServerTransportFactory> factory,
+           std::shared_ptr<const fizz::server::FizzServerContext> fizzCtx);
 
   // Starts the QUIC transport in background thread
   void start(std::vector<folly::EventBase*> evbs = {});
@@ -114,16 +115,7 @@ class ScopedHQServer {
                  const std::string& certificateFilePath,
                  const std::string& keyFilePath,
                  fizz::server::ClientAuthMode clientAuth,
-                 const std::vector<std::string>& supportedAlpns)
-      : server_(std::move(params),
-                std::move(handlerProvider),
-                nullptr,
-                certificateFilePath,
-                keyFilePath,
-                clientAuth,
-                supportedAlpns) {
-    server_.start();
-  }
+                 const std::vector<std::string>& supportedAlpns);
 
   ~ScopedHQServer() {
     server_.stop();

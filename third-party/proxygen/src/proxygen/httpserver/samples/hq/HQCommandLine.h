@@ -53,6 +53,7 @@ struct HQToolServerParams : public HQServerParams {
   bool httpServerEnableContentCompression;
   std::string certificateFilePath;
   std::string keyFilePath;
+  bool useInsecureDefaultCertificate{false};
   fizz::server::ClientAuthMode clientAuth{fizz::server::ClientAuthMode::None};
 };
 

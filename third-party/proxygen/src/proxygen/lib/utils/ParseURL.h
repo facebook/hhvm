@@ -11,7 +11,6 @@
 #include <glog/logging.h>
 
 #include <folly/Conv.h>
-#include <folly/Portability.h>
 #include <folly/Range.h>
 #include <folly/String.h>
 #include <proxygen/lib/utils/Export.h>
@@ -58,7 +57,7 @@ class ParseURL {
     init(urlVal, strict);
   }
 
-  ParseURL(ParseURL&& goner)
+  ParseURL(ParseURL&& goner) noexcept
       : url_(goner.url_),
         scheme_(goner.scheme_),
         path_(goner.path_),
@@ -70,7 +69,7 @@ class ParseURL {
     moveHostAndAuthority(std::move(goner));
   }
 
-  ParseURL& operator=(ParseURL&& goner) {
+  ParseURL& operator=(ParseURL&& goner) noexcept {
     url_ = goner.url_;
     scheme_ = goner.scheme_;
     path_ = goner.path_;
@@ -99,63 +98,63 @@ class ParseURL {
     return valid();
   }
 
-  folly::StringPiece url() const {
+  [[nodiscard]] folly::StringPiece url() const {
     return url_;
   }
 
-  folly::StringPiece scheme() const {
+  [[nodiscard]] folly::StringPiece scheme() const {
     return scheme_;
   }
 
-  std::string authority() const {
+  [[nodiscard]] std::string authority() const {
     return authority_;
   }
 
-  bool hasHost() const {
+  [[nodiscard]] bool hasHost() const {
     return valid() && !host_.empty();
   }
 
-  folly::StringPiece host() const {
+  [[nodiscard]] folly::StringPiece host() const {
     return host_;
   }
 
-  uint16_t port() const {
+  [[nodiscard]] uint16_t port() const {
     return port_;
   }
 
-  std::string hostAndPort() const {
+  [[nodiscard]] std::string hostAndPort() const {
     if (port_ == 0) {
       return std::string(host_);
     }
     return fmt::format("{}:{}", host_, port_);
   }
 
-  folly::StringPiece path() const {
+  [[nodiscard]] folly::StringPiece path() const {
     return path_;
   }
 
-  folly::StringPiece query() const {
+  [[nodiscard]] folly::StringPiece query() const {
     return query_;
   }
 
-  folly::StringPiece fragment() const {
+  [[nodiscard]] folly::StringPiece fragment() const {
     return fragment_;
   }
 
-  bool valid() const {
+  [[nodiscard]] bool valid() const {
     return valid_;
   }
 
-  folly::StringPiece hostNoBrackets() {
+  [[nodiscard]] folly::StringPiece hostNoBrackets() {
     stripBrackets();
     return hostNoBrackets_;
   }
 
-  bool hostIsIPAddress();
+  [[nodiscard]] bool hostIsIPAddress();
 
   FB_EXPORT void stripBrackets() noexcept;
 
-  FOLLY_NODISCARD static std::optional<folly::StringPiece> getQueryParam(
+  [[nodiscard]] static std::optional<folly::StringPiece> getQueryParam(
       folly::StringPiece query, const folly::StringPiece name) noexcept;
 
  private:

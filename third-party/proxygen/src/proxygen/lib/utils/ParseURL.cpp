@@ -105,7 +105,7 @@ void ParseURL::parse(bool strict) noexcept {
     return;
   }
   if (validateScheme(url_)) {
-    struct http_parser_url u;
+    struct http_parser_url u {};
     memset(&u, 0, sizeof(struct http_parser_url)); // init before used
     valid_ = !(http_parser_parse_url_options(
         url_.data(),

@@ -7,12 +7,6 @@ Invalid type argument due to disjoint types in a union (Warn[12017])
   File "idx.hhi", line 30, characters 38-39:
   This type parameter is marked with `__NoDisjointUnion` to indicate that disjoint unions are errors
 ERROR: File "idx_classname.php", line 12, characters 5-21:
-Invalid index type for this vec (Typing[4449])
-  File "idx_classname.php", line 5, characters 42-44:
-  This is an int because only `int` can be used to index into a `Vector` or `vec`.
-  File "idx_classname.php", line 9, characters 31-45:
-  It is incompatible with a classname string for this
-ERROR: File "idx_classname.php", line 12, characters 5-21:
 Typing error (Typing[4110])
   File "idx_classname.php", line 12, characters 5-13:
   Expected `int` because only `int` can be used to index into a `Vector` or `vec`.
@@ -22,3 +16,9 @@ Typing error (Typing[4110])
     by the definition of `classname`
   File "classname.hhi", line 14, characters 27-32:
     by the definition of `typename`
+ERROR: File "idx_classname.php", line 12, characters 15-20:
+Invalid index type for this vec (Typing[4449])
+  File "idx_classname.php", line 5, characters 42-44:
+  This is an int because only `int` can be used to index into a `Vector` or `vec`.
+  File "idx_classname.php", line 9, characters 31-45:
+  It is incompatible with a classname string for this

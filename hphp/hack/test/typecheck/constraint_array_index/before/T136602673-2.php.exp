@@ -1,4 +1,4 @@
-ERROR: File "T136602673-2.php", line 15, characters 31-40:
+ERROR: File "T136602673-2.php", line 15, characters 34-39:
 Invalid index type for this vec (Typing[4449])
   File "T136602673-2.php", line 15, characters 15-20:
   This is an int because only `int` can be used to index into a `Vector` or `vec`.

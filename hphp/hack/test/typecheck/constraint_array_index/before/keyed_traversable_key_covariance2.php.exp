@@ -1,4 +1,4 @@
-ERROR: File "keyed_traversable_key_covariance2.php", line 7, characters 14-23:
+ERROR: File "keyed_traversable_key_covariance2.php", line 7, characters 20-22:
 Invalid index type for this vec (Typing[4449])
   File "keyed_traversable_key_covariance2.php", line 5, characters 13-20:
   This is an int because only `int` can be used to index into a `Vector` or `vec`.

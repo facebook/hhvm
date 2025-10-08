@@ -8,13 +8,13 @@ Some type arguments violate their constraints (Typing[4323])
   Expected `arraykey`
   File "index_array_bad.php", line 8, characters 8-12:
   But got `mixed`
-ERROR: File "index_array_bad.php", line 15, characters 8-14:
+ERROR: File "index_array_bad.php", line 15, characters 11-13:
 Invalid index type for this dict (Typing[4449])
   File "index_array_bad.php", line 6, characters 8-10:
   This is an int
   File "index_array_bad.php", line 15, characters 11-13:
   It is incompatible with a string
-ERROR: File "index_array_bad.php", line 16, characters 8-15:
+ERROR: File "index_array_bad.php", line 16, characters 12-14:
 Invalid index type for this dict (Typing[4449])
   File "index_array_bad.php", line 7, characters 10-12:
   This is an int
@@ -26,13 +26,13 @@ Typing error (Typing[4110])
   Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
   File "index_array_bad.php", line 18, characters 13-17:
   But got `bool`
-ERROR: File "index_array_bad.php", line 19, characters 9-16:
+ERROR: File "index_array_bad.php", line 19, characters 13-15:
 Invalid index type for this KeyedContainer (Typing[4324])
   File "index_array_bad.php", line 9, characters 18-20:
   This is an int
   File "index_array_bad.php", line 19, characters 13-15:
   It is incompatible with a string
-ERROR: File "index_array_bad.php", line 20, characters 9-16:
+ERROR: File "index_array_bad.php", line 20, characters 13-15:
 Invalid index type for this ConstMap (Typing[4324])
   File "index_array_bad.php", line 10, characters 12-14:
   This is an int
@@ -74,7 +74,7 @@ Typing error (Typing[4110])
   Expected `~arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
   File "index_array_bad.php", line 12, characters 3-7:
   But got `mixed`
-ERROR: File "index_array_bad.php", line 32, characters 24-31:
+ERROR: File "index_array_bad.php", line 32, characters 28-30:
 Invalid index type for this KeyedContainer (Typing[4324])
   File "index_array_bad.php", line 9, characters 18-20:
   This is an int

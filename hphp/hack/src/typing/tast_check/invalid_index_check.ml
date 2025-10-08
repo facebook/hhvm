@@ -89,7 +89,7 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
           primary
           @@ Primary.Index_type_mismatch
                {
-                 pos = expr_pos;
+                 pos = index_pos;
                  msg_opt = Some (Reason.string_of_ureason reason);
                  reasons_opt;
                  is_covariant_container = is_covariant_index;

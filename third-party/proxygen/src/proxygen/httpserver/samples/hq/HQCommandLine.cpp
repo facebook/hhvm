@@ -403,19 +403,21 @@ void initializeQLogSettings(HQBaseParams& hqParams) {
 } // initializeQLogSettings
 
 void initializeFizzSettings(HQToolParams& toolParams) {
-  // Derive HQBaseParams from tool params
-  auto& hqParams = toolParams.baseParams();
-  hqParams.pskFilePath = FLAGS_psk_file;
-  if (!FLAGS_psk_file.empty()) {
-    hqParams.pskCache = std::make_shared<proxygen::PersistentQuicPskCache>(
-        FLAGS_psk_file,
-        wangle::PersistentCacheConfig::Builder()
-            .setCapacity(1000)
-            .setSyncInterval(std::chrono::seconds(1))
-            .build());
-  } else {
-    hqParams.pskCache =
-        std::make_shared<proxygen::SynchronizedLruQuicPskCache>(1000);
+  if (toolParams.mode == HQMode::CLIENT) {
+    auto& clientParams = boost::get<HQToolClientParams>(toolParams.params);
+    clientParams.pskFilePath = FLAGS_psk_file;
+    if (!FLAGS_psk_file.empty()) {
+      clientParams.pskCache =
+          std::make_shared<proxygen::PersistentQuicPskCache>(
+              FLAGS_psk_file,
+              wangle::PersistentCacheConfig::Builder()
+                  .setCapacity(1000)
+                  .setSyncInterval(std::chrono::seconds(1))
+                  .build());
+    } else {
+      clientParams.pskCache =
+          std::make_shared<proxygen::SynchronizedLruQuicPskCache>(1000);
+    }
   }
 
   // No longer set client auth on params; handled during server startup.

@@ -71,10 +71,6 @@ struct HQBaseParams {
   std::string qLoggerPath;
   bool prettyJson{false};
 
-  // Fizz options
-  std::string pskFilePath;
-  std::shared_ptr<quic::QuicPskCache> pskCache;
-
   // Transport knobs
   std::string transportKnobs;
 };
@@ -89,6 +85,9 @@ struct HQClientParams : public HQBaseParams {
   std::string host;
   uint8_t clientCidLength{0};
   folly::Optional<folly::SocketAddress> localAddress;
+
+  std::string pskFilePath;
+  std::shared_ptr<quic::QuicPskCache> pskCache;
 };
 
 struct HQInvalidParam {

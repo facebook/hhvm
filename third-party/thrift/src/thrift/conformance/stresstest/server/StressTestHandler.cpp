@@ -17,6 +17,7 @@
 #include <common/services/cpp/security/SecureThriftUtil.h>
 #include <thrift/conformance/stresstest/server/StressTestHandler.h>
 
+#include <fmt/format.h>
 #include <folly/coro/AsyncGenerator.h>
 #include <folly/coro/Collect.h>
 #include <folly/coro/Sleep.h>
@@ -220,8 +221,46 @@ folly::coro::Task<double> StressTestHandler::co_calculateSquares(
 
 void StressTestHandler::async_eb_aligned(
     HandlerCallbackPtr<std::unique_ptr<AlignedResponse>> callback,
-    std::unique_ptr<AlignedRequest> /*request*/) {
+    std::unique_ptr<AlignedRequest> request) {
   AlignedResponse resp;
+  auto& data = request->data_aligned_ref().value();
+  folly::IOBuf* curr = data.get();
+  int i = 0;
+  do {
+    // Page 0 must have 4 byte aligned address
+    if (curr == data.get() && ((uintptr_t)curr->data() & 0x3) > 0) {
+      LOG(ERROR) << fmt::format(
+          "IOBuf 0 address is not 4 byte aligned: {:#x}",
+          (uintptr_t)curr->data());
+      resp.aligned() = false;
+      callback->result(resp);
+      return;
+    }
+    // Pages 1..N must have 4K (page) aligned addresses
+    if (curr != data.get() && (((uintptr_t)curr->data() & 0xfff) > 0)) {
+      LOG(ERROR) << fmt::format("IOBuf {} address is not 4K aligned", i);
+      resp.aligned() = false;
+      callback->result(resp);
+      return;
+    }
+    // Pages 0..N-1 must end on a page boundary
+    if (curr != data->prev() && curr->tailroom() != 0) {
+      LOG(ERROR) << fmt::format("IOBuf {} not end on a page boundary", i);
+      resp.aligned() = false;
+      callback->result(resp);
+      return;
+    }
+    if (curr == data->prev() && (curr->length() & 0x3) > 0) {
+      LOG(ERROR) << "IOBuf N length is not 4 byte aligned";
+      resp.aligned() = false;
+      callback->result(resp);
+      return;
+    }
+    curr = curr->next();
+    i++;
+  } while (curr != data.get());
+
+  resp.aligned() = true;
   callback->result(resp);
 }
 

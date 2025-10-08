@@ -494,14 +494,10 @@ class ast_builder : public parser_actions {
     if (program_.package().is_explicit()) {
       diags_.error(range.begin, "Package already specified.");
     }
-    try {
-      auto package = name.empty() ? t_package(t_package::explicitly_empty_tag{})
-                                  : t_package(fmt::to_string(name));
-      package.set_src_range(range);
-      program_.set_package(std::move(package));
-    } catch (const std::exception& e) {
-      diags_.error(range.begin, "{}", e.what());
-    }
+    auto package = name.empty() ? t_package(t_package::explicitly_empty_tag{})
+                                : t_package(fmt::to_string(name));
+    package.set_src_range(range);
+    program_.set_package(std::move(package));
   }
 
   void on_include(

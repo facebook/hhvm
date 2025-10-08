@@ -426,14 +426,26 @@ void validate_python_namespaces(sema_context& ctx, const t_program& program) {
       "the only officially supported variant: thrift-python.");
 }
 
-void validate_program_has_package(sema_context& ctx, const t_program& program) {
-  if (program.package().empty()) {
+void validate_program_package(sema_context& ctx, const t_program& program) {
+  const t_package& package = program.package();
+  if (package.empty()) {
     ctx.report(
         program,
         validation_to_diagnostic_level(ctx.sema_parameters().missing_package),
         "Thrift file should have a (non-empty) package. Packages will soon be "
         "required, at which point missing packages will trigger a Thrift compiler error. "
         "For more details, see https://fburl.com/thrift-uri-add-package");
+    return;
+  }
+  try {
+    thrift::detail::check_univeral_name_domain(package.domain());
+  } catch (const std::exception& e) {
+    ctx.error(package.src_range().begin, "{}", e.what());
+  }
+  try {
+    thrift::detail::check_universal_name_path(package.path());
+  } catch (const std::exception& e) {
+    ctx.error(package.src_range().begin, "{}", e.what());
   }
 }
 
@@ -918,11 +930,15 @@ void validate_uri_uniqueness(sema_context& ctx, const t_program& prog) {
   visit(prog);
 }
 
-void validate_uri_value(sema_context& ctx, const t_named& node) {
-  if (node.uri().empty()) {
+void validate_explicit_uri_value(sema_context& ctx, const t_named& node) {
+  if (node.uri().empty() || !node.explicit_uri()) {
+    // Empty URIs are valid. If a URI is not explicit, we validate the package
+    // and emit errors on that if necessary. The compiler owns generating valid
+    // implicit URIs for valid packages.
+    // If we emit N errors for every implicit URI node in a file with an invalid
+    // package (which is already an error), it just creates unnecessary noise.
     return;
   }
-
   try {
     validate_universal_name(node.uri());
   } catch (const std::exception& e) {
@@ -1832,11 +1848,11 @@ ast_validator standard_validator() {
   validator.add_definition_visitor(&validate_identifier_is_not_reserved);
   validator.add_program_visitor(&validate_filename_is_not_reserved);
   validator.add_program_visitor(&validate_python_namespaces);
-  validator.add_program_visitor(&validate_program_has_package);
+  validator.add_program_visitor(&validate_program_package);
   validator.add_program_visitor(&detail::validate_annotation_scopes<>);
 
   validator.add_root_definition_visitor(&detail::validate_annotation_scopes<>);
-  validator.add_root_definition_visitor(&validate_uri_value);
+  validator.add_root_definition_visitor(&validate_explicit_uri_value);
 
   validator.add_interface_visitor(&validate_interface_function_name_uniqueness);
   validator.add_interface_visitor(&validate_function_priority_annotation);

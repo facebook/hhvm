@@ -276,21 +276,27 @@ TEST(StandardValidatorTest, WarnProgramMissingPackage) {
   )");
 }
 
-TEST(StandardValidatorTest, ErrorInvalidUri) {
+TEST(StandardValidatorTest, ErrorInvalidPackageAndUris) {
   check_compile(R"(
     package "invalid/test"
     # expected-error@-1: Invalid Thrift URI domain (Not enough domain components: expected at least 2, got 1).
 
-    struct S {}
-  )");
-
-  check_compile(R"(
-    package "facebook.com/thrift/test"
-
     include "thrift/annotation/thrift.thrift"
 
-    @thrift.Uri{value = "invalid/test"}
-    struct S {}
-    # expected-error@-2: Not a valid Thrift URI: "invalid/test" (Not enough parts: expected at least 3, got: 2)
+    // This type has an implicit (but still invalid) URI based on the package.
+    // We don't want a noisy error on this type, since we already emit an error on the package which is the root cause.
+    struct S1 {}
+
+    @thrift.Uri{value = "invalid/struct_s2"}
+    struct S2 {}
+    # expected-error@-2: Not a valid Thrift URI: "invalid/struct_s2" (Not enough parts: expected at least 3, got: 2)
+
+    @thrift.Uri{value = "invalid/explicit/struct_s3"}
+    struct S3 {}
+    # expected-error@-2: Not a valid Thrift URI: "invalid/explicit/struct_s3" (Not enough domain components: expected at least 2, got 1)
+
+    // No error for type with valid URI
+    @thrift.Uri{value = "facebook.com/thrift/test/ValidUriStruct"}
+    struct ValidUriStruct {}
   )");
 }

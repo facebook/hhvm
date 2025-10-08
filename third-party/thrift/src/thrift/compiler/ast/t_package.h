@@ -28,9 +28,7 @@ namespace apache::thrift::compiler {
 class t_package : public t_node {
  public:
   t_package() = default;
-  // Throws std::invalid_argument if an invalid package name is provided.
   explicit t_package(std::string name);
-  // Throws std::invalid_argument if an invalid package domain/path is provided.
   t_package(std::vector<std::string> domain, std::vector<std::string> path);
   // Explicit empty package (to hold annotations without doing anything else).
   struct explicitly_empty_tag {};

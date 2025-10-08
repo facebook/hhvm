@@ -49,15 +49,6 @@ TEST(PackageTest, Simple) {
   EXPECT_THAT(other.get_uri("hi"), "test.dev/foo/bar/hi");
 }
 
-TEST(PackageTest, Validation) {
-  t_package actual("foo.com/my");
-  EXPECT_EQ(actual, t_package(actual.domain(), actual.path()));
-  EXPECT_THROW(t_package({"bad!"}, actual.path()), std::invalid_argument);
-  EXPECT_THROW(t_package(actual.domain(), {"bad!"}), std::invalid_argument);
-
-  EXPECT_THROW(t_package("my"), std::invalid_argument);
-}
-
 TEST(TProgram, GetNamespace) {
   t_program program("", "");
 

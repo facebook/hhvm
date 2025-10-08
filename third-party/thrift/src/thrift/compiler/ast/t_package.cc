@@ -17,7 +17,6 @@
 #include <thrift/compiler/ast/t_package.h>
 
 #include <boost/algorithm/string/split.hpp>
-#include <thrift/common/universal_name.h>
 
 namespace apache::thrift::compiler {
 namespace {
@@ -48,7 +47,6 @@ std::vector<std::string> parse_domain(const std::string& domain) {
   std::vector<std::string> labels;
   boost::algorithm::split(
       labels, domain, [](auto ch) { return ch == DOMAIN_DELIM[0]; });
-  detail::check_univeral_name_domain(labels);
   return labels;
 }
 
@@ -58,13 +56,19 @@ t_package::t_package(std::string name)
     : uri_prefix_(std::move(name)), explicit_(true) {
   boost::algorithm::split(
       path_, uri_prefix_, [](auto ch) { return ch == PATH_DELIM[0]; });
-  if (path_.size() < 2) {
-    throw std::invalid_argument("invalid package name");
-  }
+  // The vector size is ideally length >=2 (domain and 1+ path segments) at this
+  // point, but MIGHT be 1 (the entirety of `name`) if the package is malformed.
+  // This will be validated in the standard_validator
   domain_ = parse_domain(path_.front());
   path_.erase(path_.begin());
-  detail::check_universal_name_path(path_);
-  uri_prefix_ += "/";
+  // There MIGHT already be a trailing slash in the input value (which is
+  // invalid) but validation is done in the standard_validator, so only add one
+  // if it's missing for now, so we don't generate unrelated noisy validations
+  // for invalid URIs based off this package name, but just one for invalid
+  // package
+  if (!uri_prefix_.empty() && !uri_prefix_.ends_with('/')) {
+    uri_prefix_ += '/';
+  }
 }
 
 std::string t_package::get_uri(const std::string& name) const {
@@ -77,8 +81,6 @@ std::string t_package::get_uri(const std::string& name) const {
 t_package::t_package(
     std::vector<std::string> domain, std::vector<std::string> path)
     : domain_(std::move(domain)), path_(std::move(path)), explicit_(true) {
-  detail::check_univeral_name_domain(domain_);
-  detail::check_universal_name_path(path_);
   uri_prefix_ = gen_prefix(domain_, path_);
 }
 

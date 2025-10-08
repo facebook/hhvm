@@ -34,21 +34,23 @@ void EnumMetadata<::apache::thrift::test::MyEnum>::gen(ThriftMetadata& metadata)
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::MyStruct>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("simple_deprecated_terse_writes.MyStruct", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& simple_deprecated_terse_writes_MyStruct = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& simple_deprecated_terse_writes_MyStruct = res.first->second;
+  simple_deprecated_terse_writes_MyStruct.name() = "simple_deprecated_terse_writes.MyStruct";
   simple_deprecated_terse_writes_MyStruct.is_union() = false;
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::EmptiableStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::EmptiableStruct>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("simple_deprecated_terse_writes.EmptiableStruct", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& simple_deprecated_terse_writes_EmptiableStruct = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& simple_deprecated_terse_writes_EmptiableStruct = res.first->second;
+  simple_deprecated_terse_writes_EmptiableStruct.name() = "simple_deprecated_terse_writes.EmptiableStruct";
   simple_deprecated_terse_writes_EmptiableStruct.is_union() = false;
   static const auto* const
   simple_deprecated_terse_writes_EmptiableStruct_fields = new std::array<EncodedThriftField, 14>{ {
@@ -62,15 +64,16 @@ StructMetadata<::apache::thrift::test::EmptiableStruct>::gen(ThriftMetadata& met
     field.structured_annotations() = f.structured_annotations;
     simple_deprecated_terse_writes_EmptiableStruct.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::NotEmptiableStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::NotEmptiableStruct>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("simple_deprecated_terse_writes.NotEmptiableStruct", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& simple_deprecated_terse_writes_NotEmptiableStruct = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& simple_deprecated_terse_writes_NotEmptiableStruct = res.first->second;
+  simple_deprecated_terse_writes_NotEmptiableStruct.name() = "simple_deprecated_terse_writes.NotEmptiableStruct";
   simple_deprecated_terse_writes_NotEmptiableStruct.is_union() = false;
   static const auto* const
   simple_deprecated_terse_writes_NotEmptiableStruct_fields = new std::array<EncodedThriftField, 14>{ {
@@ -84,7 +87,7 @@ StructMetadata<::apache::thrift::test::NotEmptiableStruct>::gen(ThriftMetadata& 
     field.structured_annotations() = f.structured_annotations;
     simple_deprecated_terse_writes_NotEmptiableStruct.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 
 } // namespace md

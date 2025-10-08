@@ -28,11 +28,12 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::TerseFoo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::TerseFoo>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("deprecated_terse_writes.TerseFoo", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& deprecated_terse_writes_TerseFoo = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& deprecated_terse_writes_TerseFoo = res.first->second;
+  deprecated_terse_writes_TerseFoo.name() = "deprecated_terse_writes.TerseFoo";
   deprecated_terse_writes_TerseFoo.is_union() = false;
   static const auto* const
   deprecated_terse_writes_TerseFoo_fields = new std::array<EncodedThriftField, 4>{ {
@@ -46,15 +47,16 @@ StructMetadata<::apache::thrift::test::TerseFoo>::gen(ThriftMetadata& metadata) 
     field.structured_annotations() = f.structured_annotations;
     deprecated_terse_writes_TerseFoo.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::TerseLazyFoo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::TerseLazyFoo>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("deprecated_terse_writes.TerseLazyFoo", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& deprecated_terse_writes_TerseLazyFoo = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& deprecated_terse_writes_TerseLazyFoo = res.first->second;
+  deprecated_terse_writes_TerseLazyFoo.name() = "deprecated_terse_writes.TerseLazyFoo";
   deprecated_terse_writes_TerseLazyFoo.is_union() = false;
   static const auto* const
   deprecated_terse_writes_TerseLazyFoo_fields = new std::array<EncodedThriftField, 4>{ {
@@ -68,15 +70,16 @@ StructMetadata<::apache::thrift::test::TerseLazyFoo>::gen(ThriftMetadata& metada
     field.structured_annotations() = f.structured_annotations;
     deprecated_terse_writes_TerseLazyFoo.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::TerseOptionalFoo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::TerseOptionalFoo>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("deprecated_terse_writes.TerseOptionalFoo", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& deprecated_terse_writes_TerseOptionalFoo = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& deprecated_terse_writes_TerseOptionalFoo = res.first->second;
+  deprecated_terse_writes_TerseOptionalFoo.name() = "deprecated_terse_writes.TerseOptionalFoo";
   deprecated_terse_writes_TerseOptionalFoo.is_union() = false;
   static const auto* const
   deprecated_terse_writes_TerseOptionalFoo_fields = new std::array<EncodedThriftField, 4>{ {
@@ -90,15 +93,16 @@ StructMetadata<::apache::thrift::test::TerseOptionalFoo>::gen(ThriftMetadata& me
     field.structured_annotations() = f.structured_annotations;
     deprecated_terse_writes_TerseOptionalFoo.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::TerseOptionalLazyFoo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::TerseOptionalLazyFoo>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("deprecated_terse_writes.TerseOptionalLazyFoo", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& deprecated_terse_writes_TerseOptionalLazyFoo = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& deprecated_terse_writes_TerseOptionalLazyFoo = res.first->second;
+  deprecated_terse_writes_TerseOptionalLazyFoo.name() = "deprecated_terse_writes.TerseOptionalLazyFoo";
   deprecated_terse_writes_TerseOptionalLazyFoo.is_union() = false;
   static const auto* const
   deprecated_terse_writes_TerseOptionalLazyFoo_fields = new std::array<EncodedThriftField, 4>{ {
@@ -112,7 +116,7 @@ StructMetadata<::apache::thrift::test::TerseOptionalLazyFoo>::gen(ThriftMetadata
     field.structured_annotations() = f.structured_annotations;
     deprecated_terse_writes_TerseOptionalLazyFoo.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 
 } // namespace md

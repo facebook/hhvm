@@ -34,11 +34,12 @@ void EnumMetadata<::facebook::thrift::test::Enum>::gen(ThriftMetadata& metadata)
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::Foo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::Foo>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.Foo", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_Foo = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_Foo = res.first->second;
+  module_Foo.name() = "module.Foo";
   module_Foo.is_union() = false;
   static const auto* const
   module_Foo_fields = new std::array<EncodedThriftField, 1>{ {
@@ -52,15 +53,16 @@ StructMetadata<::facebook::thrift::test::Foo>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_Foo.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::Bar>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::Bar>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.Bar", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_Bar = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_Bar = res.first->second;
+  module_Bar.name() = "module.Bar";
   module_Bar.is_union() = false;
   static const auto* const
   module_Bar_fields = new std::array<EncodedThriftField, 1>{ {
@@ -75,15 +77,16 @@ StructMetadata<::facebook::thrift::test::Bar>::gen(ThriftMetadata& metadata) {
     module_Bar.fields()->push_back(std::move(field));
   }
   module_Bar.structured_annotations()->push_back(*cvStruct("cpp.UseOpEncode", {  }).cv_struct());
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::Baz>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::Baz>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.Baz", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_Baz = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_Baz = res.first->second;
+  module_Baz.name() = "module.Baz";
   module_Baz.is_union() = false;
   static const auto* const
   module_Baz_fields = new std::array<EncodedThriftField, 2>{ {
@@ -97,15 +100,16 @@ StructMetadata<::facebook::thrift::test::Baz>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_Baz.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::OpEncodeStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::OpEncodeStruct>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.OpEncodeStruct", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_OpEncodeStruct = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_OpEncodeStruct = res.first->second;
+  module_OpEncodeStruct.name() = "module.OpEncodeStruct";
   module_OpEncodeStruct.is_union() = false;
   static const auto* const
   module_OpEncodeStruct_fields = new std::array<EncodedThriftField, 12>{ {
@@ -120,7 +124,7 @@ StructMetadata<::facebook::thrift::test::OpEncodeStruct>::gen(ThriftMetadata& me
     module_OpEncodeStruct.fields()->push_back(std::move(field));
   }
   module_OpEncodeStruct.structured_annotations()->push_back(*cvStruct("cpp.UseOpEncode", {  }).cv_struct());
-  return res.metadata;
+  return res.first->second;
 }
 
 } // namespace md

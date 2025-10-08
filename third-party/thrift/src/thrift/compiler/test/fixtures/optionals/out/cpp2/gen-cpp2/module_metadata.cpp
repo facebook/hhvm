@@ -34,11 +34,12 @@ void EnumMetadata<::cpp2::Animal>::gen(ThriftMetadata& metadata) {
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Color>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Color>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.Color", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_Color = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_Color = res.first->second;
+  module_Color.name() = "module.Color";
   module_Color.is_union() = false;
   static const auto* const
   module_Color_fields = new std::array<EncodedThriftField, 4>{ {
@@ -52,15 +53,16 @@ StructMetadata<::cpp2::Color>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_Color.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Vehicle>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Vehicle>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.Vehicle", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_Vehicle = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_Vehicle = res.first->second;
+  module_Vehicle.name() = "module.Vehicle";
   module_Vehicle.is_union() = false;
   static const auto* const
   module_Vehicle_fields = new std::array<EncodedThriftField, 5>{ {
@@ -74,15 +76,16 @@ StructMetadata<::cpp2::Vehicle>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_Vehicle.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Person>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Person>(metadata);
-  if (res.preExists) {
-    return res.metadata;
+  auto res = metadata.structs()->emplace("module.Person", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_Person = res.metadata;
+  ::apache::thrift::metadata::ThriftStruct& module_Person = res.first->second;
+  module_Person.name() = "module.Person";
   module_Person.is_union() = false;
   static const auto* const
   module_Person_fields = new std::array<EncodedThriftField, 10>{ {
@@ -96,7 +99,7 @@ StructMetadata<::cpp2::Person>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_Person.fields()->push_back(std::move(field));
   }
-  return res.metadata;
+  return res.first->second;
 }
 
 } // namespace md

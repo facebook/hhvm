@@ -63,6 +63,30 @@ class ThriftServerInternals {
     return server_.allowProfilingInterface();
   }
 
+  /**
+   * Disable the service health poller. This should be called by Python services
+   * before serve() is called if they want to manage their own health status.
+   */
+  void disableServiceHealthPoller() { server_.disableServiceHealthPoller(); }
+
+  /**
+   * Set the service health for Python services.
+   * This allows Python services to directly set their health status.
+   * The service health poller must already be disabled before calling this
+   * method.
+   */
+  void setServiceHealth(ThriftServer::ServiceHealth health) {
+    server_.setServiceHealth(health);
+  }
+
+  /**
+   * Check if the service health poller has been disabled due to Python services
+   * directly setting their health status.
+   */
+  bool isServiceHealthPollerDisabled() {
+    return server_.isServiceHealthPollerDisabled();
+  }
+
  private:
   ThriftServer& server_;
 };

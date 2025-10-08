@@ -16,8 +16,6 @@
 #include <quic/logging/FileQLogger.h>
 #include <quic/server/QuicSharedUDPSocketFactory.h>
 
-#include <algorithm>
-
 namespace proxygen::coro {
 
 namespace {
@@ -145,13 +143,12 @@ void HTTPServer::start(
 
 void HTTPServer::startQuic(const KeepAliveEventBaseVec& keepAliveEvbs) {
   std::vector<folly::EventBase*> evbs{keepAliveEvbs.size(), nullptr};
-  std::ranges::transform(
-      keepAliveEvbs,
-
-      evbs.begin(),
-      [](const folly::Executor::KeepAlive<folly::EventBase>& evb) {
-        return evb.get();
-      });
+  std::transform(keepAliveEvbs.begin(),
+                 keepAliveEvbs.end(),
+                 evbs.begin(),
+                 [](const folly::Executor::KeepAlive<folly::EventBase>& evb) {
+                   return evb.get();
+                 });
   createQuicServer(evbs);
   quicServer_->initialize(config_.socketConfig.bindAddress, evbs, true);
   quicServer_->waitUntilInitialized();

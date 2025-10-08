@@ -8,8 +8,6 @@
 
 #include "proxygen/lib/dns/NaiveResolutionCallback.h"
 
-#include <algorithm>
-
 namespace proxygen {
 
 using DNSAnswer = DNSResolver::Answer;
@@ -25,7 +23,7 @@ static bool isDNSAnswer(const DNSAnswer& a) {
 void NaiveResolutionCallback::resolutionSuccess(DNSAnswers answers) noexcept {
   folly::exception_wrapper ex;
 
-  bool have_answer = std::ranges::any_of(answers, isDNSAnswer);
+  bool have_answer = std::any_of(answers.begin(), answers.end(), isDNSAnswer);
   if (!have_answer) {
     auto err = DNSResolver::makeNoNameException();
     ex = std::move(err);

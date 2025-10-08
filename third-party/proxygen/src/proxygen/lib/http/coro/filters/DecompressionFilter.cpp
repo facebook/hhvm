@@ -9,8 +9,6 @@
 #include "proxygen/lib/http/coro/filters/DecompressionFilter.h"
 #include <proxygen/lib/utils/ZstdStreamDecompressor.h>
 
-#include <algorithm>
-
 namespace {
 
 #define DecompressionFailedError \
@@ -78,12 +76,11 @@ DecompressionIngressFilter::readHeaderEvent() {
     HTTPMessage& msg) {
   const auto& contentEncoding =
       msg.getHeaders().getSingleOrEmpty(HTTP_HEADER_CONTENT_ENCODING);
-  return std::ranges::any_of(
-      kSupportedCompressionTypes,
-
-      [&contentEncoding](const auto& supportedCompression) {
-        return supportedCompression.name == contentEncoding;
-      });
+  return std::any_of(kSupportedCompressionTypes.begin(),
+                     kSupportedCompressionTypes.end(),
+                     [&contentEncoding](const auto& supportedCompression) {
+                       return supportedCompression.name == contentEncoding;
+                     });
 }
 
 void DecompressionIngressFilter::initializeWithHTTPMessage(HTTPMessage& msg) {
@@ -92,12 +89,11 @@ void DecompressionIngressFilter::initializeWithHTTPMessage(HTTPMessage& msg) {
       headers.getSingleOrEmpty(HTTP_HEADER_CONTENT_ENCODING);
 
   // instantiate decompressor_ if supported compression type
-  auto it = std::ranges::find_if(
-      kSupportedCompressionTypes,
-
-      [&contentEncoding](const auto& supportedCompression) {
-        return supportedCompression.name == contentEncoding;
-      });
+  auto it = std::find_if(kSupportedCompressionTypes.begin(),
+                         kSupportedCompressionTypes.end(),
+                         [&contentEncoding](const auto& supportedCompression) {
+                           return supportedCompression.name == contentEncoding;
+                         });
   if (it != kSupportedCompressionTypes.end()) {
     headers.remove(HTTP_HEADER_CONTENT_LENGTH);
     headers.remove(HTTP_HEADER_CONTENT_ENCODING);

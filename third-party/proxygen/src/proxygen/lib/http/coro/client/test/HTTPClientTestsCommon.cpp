@@ -8,8 +8,6 @@
 
 #include "proxygen/lib/http/coro/client/test/HTTPClientTestsCommon.h"
 
-#include <algorithm>
-
 using folly::coro::co_nothrow;
 
 namespace {
@@ -139,7 +137,7 @@ folly::coro::Task<HTTPSourceHolder> TestHandler::handleRequest(
   }
   if (request->getPathAsStringPiece().find("/bodyError") == 0) {
     auto path = request->getPathAsStringPiece();
-    auto delimiter = std::ranges::find(path, '_');
+    auto delimiter = std::find(path.begin(), path.end(), '_');
     co_return new ErrorSource(
         std::string("super long response that can't fit in one frame"),
         false,

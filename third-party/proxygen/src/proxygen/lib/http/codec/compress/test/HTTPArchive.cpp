@@ -66,7 +66,7 @@ proxygen::HTTPMessage extractMessage(folly::dynamic& obj,
   auto& headersObj = obj["headers"];
   for (size_t i = 0; i < headersObj.size(); i++) {
     string name = headersObj[i]["name"].asString();
-    std::ranges::transform(name, name.begin(), ::tolower);
+    std::transform(name.begin(), name.end(), name.begin(), ::tolower);
     if (name[0] == ':') {
       if (name == ":host" || name == ":authority") {
         name = "host";
@@ -107,7 +107,7 @@ proxygen::HTTPMessage extractMessageFromPublic(folly::dynamic& obj) {
     for (auto& k : headerObj.keys()) {
       string name = k.asString();
       string value = headerObj[name].asString();
-      std::ranges::transform(name, name.begin(), ::tolower);
+      std::transform(name.begin(), name.end(), name.begin(), ::tolower);
       msg.getHeaders().add(name, value);
     }
   }

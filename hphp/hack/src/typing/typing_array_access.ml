@@ -187,70 +187,67 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
  * being a subtype of arraykey
  *)
 let check_arraykey_index error env pos container_ty index_ty =
-  if TypecheckerOptions.disallow_invalid_arraykey (Env.get_tcopt env) then (
-    let (env, container_ty) = Env.expand_type env container_ty in
-    let reason =
-      match get_node container_ty with
-      | Tclass ((_, cn), _, _) -> Reason.index_class cn
-      | _ -> Reason.index_array
-    in
-    let info_of_type ty = (get_pos ty, lazy (Typing_print.error env ty)) in
-    let container_info = info_of_type container_ty in
-    let index_info = info_of_type index_ty in
-    let ty_arraykey = MakeType.arraykey (Reason.idx_dict pos) in
-    (* If we have an error in coercion here, we will add a `Hole` indicating the
-       actual and expected type. The `Hole` may then be used in a codemod to
-       add a call to `UNSAFE_CAST` so we need to consider what type we expect.
-       There is a somewhat common pattern in older parts of www to do something like:
+  let (env, container_ty) = Env.expand_type env container_ty in
+  let reason =
+    match get_node container_ty with
+    | Tclass ((_, cn), _, _) -> Reason.index_class cn
+    | _ -> Reason.index_array
+  in
+  let info_of_type ty = (get_pos ty, lazy (Typing_print.error env ty)) in
+  let container_info = info_of_type container_ty in
+  let index_info = info_of_type index_ty in
+  let ty_arraykey = MakeType.arraykey (Reason.idx_dict pos) in
+  (* If we have an error in coercion here, we will add a `Hole` indicating the
+     actual and expected type. The `Hole` may then be used in a codemod to
+     add a call to `UNSAFE_CAST` so we need to consider what type we expect.
+     There is a somewhat common pattern in older parts of www to do something like:
 
-       ```
-       function keyset_issue(?string $x): keyset<string> {
-         $xs = keyset<string>[];
-         ...
-         /* HH_FIXME[4435] keyset values must be arraykeys */
-         $xs[] = $x;
-         return Keyset\filter_nulls($xs);
-       }
-       ```
-       (even though it is impossible for keysets to contain nulls).
+     ```
+     function keyset_issue(?string $x): keyset<string> {
+       $xs = keyset<string>[];
+       ...
+       /* HH_FIXME[4435] keyset values must be arraykeys */
+       $xs[] = $x;
+       return Keyset\filter_nulls($xs);
+     }
+     ```
+     (even though it is impossible for keysets to contain nulls).
 
-       If we were to add an expected type of 'arraykey' here it would be
-       correct but adding an `UNSAFE_CAST<?string,arraykey>($x)` means we
-       get cascading errors; here, we now have the wrong return type.
+     If we were to add an expected type of 'arraykey' here it would be
+     correct but adding an `UNSAFE_CAST<?string,arraykey>($x)` means we
+     get cascading errors; here, we now have the wrong return type.
 
-       To try and prevent this, if this is an optional type where the nonnull
-       part can be coerced to arraykey, we prefer that type as our expected type.
-    *)
-    let base_error = error pos container_info index_info in
-    let (ty_actual, is_option) =
-      match deref index_ty with
-      | (_, Toption inner_ty) -> (inner_ty, true)
-      | _ -> (index_ty, false)
-    in
-    let (env, e1) =
-      Typing_coercion.coerce_type
-        ~coerce_for_op:true
-        pos
-        reason
-        env
-        ty_actual
-        ty_arraykey
-        Enforced
-      @@ Typing_error.Callback.always base_error
-    in
-    let (ty_mismatch, e2) =
-      match e1 with
-      | None when is_option ->
-        (Error (index_ty, ty_actual), Some (Typing_error.primary base_error))
-      | None -> (Ok index_ty, None)
-      | Some _ -> (Error (index_ty, ty_arraykey), None)
-    in
-    Option.(
-      iter ~f:(Typing_error_utils.add_typing_error ~env)
-      @@ merge e1 e2 ~f:Typing_error.both);
-    (env, ty_mismatch)
-  ) else
-    (env, Ok index_ty)
+     To try and prevent this, if this is an optional type where the nonnull
+     part can be coerced to arraykey, we prefer that type as our expected type.
+  *)
+  let base_error = error pos container_info index_info in
+  let (ty_actual, is_option) =
+    match deref index_ty with
+    | (_, Toption inner_ty) -> (inner_ty, true)
+    | _ -> (index_ty, false)
+  in
+  let (env, e1) =
+    Typing_coercion.coerce_type
+      ~coerce_for_op:true
+      pos
+      reason
+      env
+      ty_actual
+      ty_arraykey
+      Enforced
+    @@ Typing_error.Callback.always base_error
+  in
+  let (ty_mismatch, e2) =
+    match e1 with
+    | None when is_option ->
+      (Error (index_ty, ty_actual), Some (Typing_error.primary base_error))
+    | None -> (Ok index_ty, None)
+    | Some _ -> (Error (index_ty, ty_arraykey), None)
+  in
+  Option.(
+    iter ~f:(Typing_error_utils.add_typing_error ~env)
+    @@ merge e1 e2 ~f:Typing_error.both);
+  (env, ty_mismatch)
 
 let check_arraykey_index_read =
   let mk_err pos (container_pos, container_ty_name) (key_pos, key_ty_name) =

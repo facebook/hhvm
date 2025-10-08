@@ -53,7 +53,6 @@ impl Default for GlobalOptions {
             tco_log_inference_constraints: false,
             tco_language_feature_logging: false,
             tco_timeout: 0,
-            tco_disallow_invalid_arraykey: false, // true in ocaml, true in .hhconfig
             tco_constraint_array_index: true,
             tco_constraint_array_index_assign: false,
             tco_constraint_method_call: false,

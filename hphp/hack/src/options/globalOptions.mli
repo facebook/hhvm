@@ -94,9 +94,6 @@ type t = {
         Currently used for lambdas. *)
   tco_timeout: int;
       (** If non-zero, give up type checking a class or function after this many seconds *)
-  tco_disallow_invalid_arraykey: bool;
-      (** Flag to disallow using values that get casted to array keys at runtime;
-        like bools, floats, or null; as array keys. *)
   tco_constraint_array_index: bool;
       (** Flag to enable the constraint solver to infer that a type can be indexed *)
   tco_constraint_array_index_assign: bool;
@@ -321,7 +318,6 @@ val set :
   ?so_naming_sqlite_path:string ->
   ?tco_language_feature_logging:bool ->
   ?tco_timeout:int ->
-  ?tco_disallow_invalid_arraykey:bool ->
   ?tco_constraint_array_index:bool ->
   ?tco_constraint_array_index_assign:bool ->
   ?tco_constraint_method_call:bool ->

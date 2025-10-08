@@ -11,12 +11,9 @@ open Hh_prelude
 open Aast
 open Typing_defs
 module Env = Tast_env
-module TCO = TypecheckerOptions
 module MakeType = Typing_make_type
 module SN = Naming_special_names
 open String.Replace_polymorphic_compare
-
-let should_enforce env = TCO.disallow_invalid_arraykey (Env.get_tcopt env)
 
 let equiv_ak_inter_dyn env ty_expect =
   let r = get_reason ty_expect in
@@ -60,7 +57,6 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
       )
       (* If the key is not even an arraykey, we've already produced an error *)
       || (not (Env.can_subtype env ty_have (MakeType.arraykey Reason.none)))
-         && should_enforce env
       (* Keytype of arraykey&dynamic happens when you assign a dynamic into a dict,
          but the above coercion doesn't work. *)
       || equiv_ak_inter_dyn env ty_expect

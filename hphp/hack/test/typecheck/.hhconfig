@@ -5,7 +5,6 @@ deregister_php_stdlib = true
 enable_xhp_class_modifier = false
 disable_xhp_element_mangling = false
 disable_xhp_children_declarations = false
-disallow_invalid_arraykey = true
 check_xhp_attribute = true
 disallow_silence = true
 check_redundant_generics = true

@@ -344,10 +344,6 @@ impl HhConfig {
             tco_log_inference_constraints: default.tco_log_inference_constraints,
             tco_language_feature_logging: default.tco_language_feature_logging,
             tco_timeout: hhconfig.get_int_or("timeout", default.tco_timeout)?,
-            tco_disallow_invalid_arraykey: hhconfig.get_bool_or(
-                "disallow_invalid_arraykey",
-                default.tco_disallow_invalid_arraykey,
-            )?,
             tco_constraint_array_index: hhconfig
                 .get_bool_or("constraint_array_index", default.tco_constraint_array_index)?,
             tco_constraint_array_index_assign: hhconfig.get_bool_or(

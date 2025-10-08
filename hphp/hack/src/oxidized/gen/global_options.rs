@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<09d7a09f844f0189eb598083b89bbc6e>>
+// @generated SignedSource<<5184475c9d375c70536f0d2c0622536d>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -189,9 +189,6 @@ pub struct GlobalOptions {
     pub tco_language_feature_logging: bool,
     /// If non-zero, give up type checking a class or function after this many seconds
     pub tco_timeout: isize,
-    /// Flag to disallow using values that get casted to array keys at runtime;
-    /// like bools, floats, or null; as array keys.
-    pub tco_disallow_invalid_arraykey: bool,
     /// Flag to enable the constraint solver to infer that a type can be indexed
     pub tco_constraint_array_index: bool,
     /// Flag to enable the constraint solver to infer that a type can be indexed then assigned

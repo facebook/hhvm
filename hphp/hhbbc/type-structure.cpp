@@ -939,12 +939,12 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
 
       auto const adjustTS = [&] (Builder&& b) -> Builder {
         auto const tv = ts->get(s_typevars);
-        if (tv.is_init()) b.set(s_typevars, tv);
-        else b.remove(s_typevars);
+        b.remove(s_typevars);
 
-        return b
-          .optCopy(s_alias, ts)
-          .optCopy(s_case_type, ts);
+        b.optCopy(s_alias, ts);
+        if (typevarTypes) b.set(s_typevar_types, *typevarTypes);
+        if (tv.is_init()) b.set(s_typevars, tv);
+        return b.optCopy(s_case_type, ts);
       };
 
       if (typeAlias->resolvedTypeStructure) {
@@ -968,7 +968,6 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
       return adjustTS(std::move(b));
     }();
 
-    if (typevarTypes) b.set(s_typevar_types, *typevarTypes);
     return b.copyModifiers(ts).finish();
   };
 

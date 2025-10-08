@@ -1,0 +1,16 @@
+dict(4) {
+  ["kind"]=>
+  int(1)
+  ["alias"]=>
+  string(2) "AA"
+  ["typevar_types"]=>
+  dict(1) {
+    ["Ta"]=>
+    dict(1) {
+      ["kind"]=>
+      int(3)
+    }
+  }
+  ["typevars"]=>
+  string(3) "Taa"
+}

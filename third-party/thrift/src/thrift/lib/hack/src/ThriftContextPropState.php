@@ -159,6 +159,21 @@ final class ThriftContextPropState {
     if ($skip_experiment_id_ingestion && $tfm->experiment_ids is nonnull) {
       $tfm->experiment_ids = vec[];
     }
+    // Make sure the user ids are valid (non-null, positive) and matches the type
+    $user_ids = $tfm->baggage?->user_ids;
+    if ($user_ids is nonnull) {
+      if ($user_ids->fb_user_id is nonnull) {
+        $user_ids->fb_user_id =
+          self::coerceId($user_ids->fb_user_id, UserIdCategory::FB);
+      }
+      if ($user_ids->ig_user_id is nonnull) {
+        $user_ids->ig_user_id =
+          self::coerceId($user_ids->ig_user_id, UserIdCategory::IG);
+      }
+    }
+    if ($tfm->baggage is nonnull) {
+      $tfm->baggage->user_ids = $user_ids;
+    }
 
     return $tfm;
 
@@ -462,18 +477,6 @@ final class ThriftContextPropState {
     }
     $ig_user_id = $user_ids->ig_user_id ?? 0;
     return ($ig_user_id as int);
-  }
-
-  // user id setters
-  private function setUserIds(
-    ?ContextProp\UserIds $user_ids,
-  )[write_props]: void {
-    $this->storage->baggage =
-      $this->storage->baggage ?? ContextProp\Baggage::withDefaultValues();
-
-    $baggage = $this->storage->baggage as nonnull;
-    $baggage->user_ids = $user_ids;
-    $this->dirty();
   }
 
   private function setFBUserId(?int $fb_user_id): void {

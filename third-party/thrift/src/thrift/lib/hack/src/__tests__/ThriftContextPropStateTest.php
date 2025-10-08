@@ -203,6 +203,7 @@ final class ThriftContextPropStateTest extends WWWTest {
 
   public async function testInitializationWithUserIds(
   )[defaults]: Awaitable<void> {
+    self::mockFunction(IgidUtils::isUserFbid<>)->mockReturn(true);
     $tfm = ThriftFrameworkMetadata::withDefaultValues();
     $tfm->baggage = ContextProp\Baggage::withDefaultValues();
     $tfm->baggage->user_ids = ContextProp\UserIds::fromShape(
@@ -253,6 +254,7 @@ final class ThriftContextPropStateTest extends WWWTest {
   public async function testInitializationWithBothTFMandVC(
   )[defaults]: Awaitable<void> {
     MockJustKnobs::setBool('meta_cp/www:enable_user_id_ctx_prop', true);
+    self::mockFunction(IgidUtils::isUserFbid<>)->mockReturn(true);
     $tfm = ThriftFrameworkMetadata::withDefaultValues();
     $tfm->baggage = ContextProp\Baggage::withDefaultValues();
     $tfm->baggage->user_ids = ContextProp\UserIds::fromShape(
@@ -309,6 +311,7 @@ final class ThriftContextPropStateTest extends WWWTest {
   public async function testUpdatedWithExplicitFBUserId(
   )[defaults]: Awaitable<void> {
     MockJustKnobs::setBool('meta_cp/www:enable_user_id_ctx_prop', true);
+    self::mockFunction(IgidUtils::isUserFbid<>)->mockReturn(true);
     $tfm = ThriftFrameworkMetadata::withDefaultValues();
     $tfm->baggage = ContextProp\Baggage::withDefaultValues();
     $tfm->baggage->user_ids = ContextProp\UserIds::fromShape(

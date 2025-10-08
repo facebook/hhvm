@@ -160,12 +160,8 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     def _to_py_deprecated(self):
         import importlib
         from thrift.util import converter
-        try:
-            py_deprecated_types = importlib.import_module("module.ttypes")
-            return converter.to_py_struct(py_deprecated_types.MyStruct, self)
-        except ModuleNotFoundError:
-            py_asyncio_types = importlib.import_module("module.ttypes")
-            return converter.to_py_struct(py_asyncio_types.MyStruct, self)
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return converter.to_py_struct(py_deprecated_types.MyStruct, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyStruct, MyStruct)
 _fbthrift_MyStruct = MyStruct
@@ -241,12 +237,8 @@ class Containers(metaclass=_fbthrift_python_types.StructMeta):
     def _to_py_deprecated(self):
         import importlib
         from thrift.util import converter
-        try:
-            py_deprecated_types = importlib.import_module("module.ttypes")
-            return converter.to_py_struct(py_deprecated_types.Containers, self)
-        except ModuleNotFoundError:
-            py_asyncio_types = importlib.import_module("module.ttypes")
-            return converter.to_py_struct(py_asyncio_types.Containers, self)
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return converter.to_py_struct(py_deprecated_types.Containers, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.Containers, Containers)
 _fbthrift_Containers = Containers
@@ -289,12 +281,8 @@ class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
     def _to_py_deprecated(self):
         import importlib
         from thrift.util import converter
-        try:
-            py_deprecated_types = importlib.import_module("module.ttypes")
-            return converter.to_py_struct(py_deprecated_types.MyDataItem, self)
-        except ModuleNotFoundError:
-            py_asyncio_types = importlib.import_module("module.ttypes")
-            return converter.to_py_struct(py_asyncio_types.MyDataItem, self)
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return converter.to_py_struct(py_deprecated_types.MyDataItem, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyDataItem, MyDataItem)
 _fbthrift_MyDataItem = MyDataItem
@@ -384,12 +372,8 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
     def _to_py_deprecated(self):
         import importlib
         from thrift.util import converter
-        try:
-            py_deprecated_types = importlib.import_module("module.ttypes")
-            return converter.to_py_struct(py_deprecated_types.MyUnion, self)
-        except ModuleNotFoundError:
-            py_asyncio_types = importlib.import_module("module.ttypes")
-            return converter.to_py_struct(py_asyncio_types.MyUnion, self)
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return converter.to_py_struct(py_deprecated_types.MyUnion, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyUnion, MyUnion)
 _fbthrift_MyUnion = MyUnion
@@ -479,12 +463,8 @@ class MyException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     def _to_py_deprecated(self):
         import importlib
         from thrift.util import converter
-        try:
-            py_deprecated_types = importlib.import_module("module.ttypes")
-            return converter.to_py_struct(py_deprecated_types.MyException, self)
-        except ModuleNotFoundError:
-            py_asyncio_types = importlib.import_module("module.ttypes")
-            return converter.to_py_struct(py_asyncio_types.MyException, self)
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return converter.to_py_struct(py_deprecated_types.MyException, self)
 _fbthrift_MyException = MyException
 
 class MyExceptionWithMessage(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
@@ -579,12 +559,8 @@ class MyExceptionWithMessage(metaclass=_fbthrift_python_exceptions.GeneratedErro
     def _to_py_deprecated(self):
         import importlib
         from thrift.util import converter
-        try:
-            py_deprecated_types = importlib.import_module("module.ttypes")
-            return converter.to_py_struct(py_deprecated_types.MyExceptionWithMessage, self)
-        except ModuleNotFoundError:
-            py_asyncio_types = importlib.import_module("module.ttypes")
-            return converter.to_py_struct(py_asyncio_types.MyExceptionWithMessage, self)
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return converter.to_py_struct(py_deprecated_types.MyExceptionWithMessage, self)
 _fbthrift_MyExceptionWithMessage = MyExceptionWithMessage
 
 class ReservedKeyword(metaclass=_fbthrift_python_types.StructMeta):
@@ -636,12 +612,8 @@ class ReservedKeyword(metaclass=_fbthrift_python_types.StructMeta):
     def _to_py_deprecated(self):
         import importlib
         from thrift.util import converter
-        try:
-            py_deprecated_types = importlib.import_module("module.ttypes")
-            return converter.to_py_struct(py_deprecated_types.ReservedKeyword, self)
-        except ModuleNotFoundError:
-            py_asyncio_types = importlib.import_module("module.ttypes")
-            return converter.to_py_struct(py_asyncio_types.ReservedKeyword, self)
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return converter.to_py_struct(py_deprecated_types.ReservedKeyword, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.ReservedKeyword, ReservedKeyword)
 _fbthrift_ReservedKeyword = ReservedKeyword
@@ -698,12 +670,8 @@ class UnionToBeRenamed(metaclass=_fbthrift_python_types.UnionMeta):
     def _to_py_deprecated(self):
         import importlib
         from thrift.util import converter
-        try:
-            py_deprecated_types = importlib.import_module("module.ttypes")
-            return converter.to_py_struct(py_deprecated_types.UnionToBeRenamed, self)
-        except ModuleNotFoundError:
-            py_asyncio_types = importlib.import_module("module.ttypes")
-            return converter.to_py_struct(py_asyncio_types.UnionToBeRenamed, self)
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return converter.to_py_struct(py_deprecated_types.UnionToBeRenamed, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.UnionToBeRenamed, UnionToBeRenamed)
 _fbthrift_UnionToBeRenamed = UnionToBeRenamed

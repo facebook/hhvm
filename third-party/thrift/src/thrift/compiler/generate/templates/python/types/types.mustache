@@ -184,14 +184,30 @@ class {{> structs/unadapted_name}}{{!
     {{/if (not (has_compiler_option? "auto_migrate"))}}
 
     def _to_py_deprecated(self):
+    {{#if (or (not (has_compiler_option? "does_not_have_py_deprecated")) (not (has_compiler_option? "does_not_have_py_deprecated_asyncio")))}}
         import importlib
         from thrift.util import converter
+        {{#if (not (has_compiler_option? "does_not_have_py_deprecated"))}}
+            {{#if (not (has_compiler_option? "does_not_have_py_deprecated_asyncio"))}}
         try:
             py_deprecated_types = importlib.import_module("{{program:py_deprecated_module_path}}.ttypes")
             return converter.to_py_struct(py_deprecated_types.{{> structs/unadapted_name}}, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("{{program:py_asyncio_module_path}}.ttypes")
             return converter.to_py_struct(py_asyncio_types.{{> structs/unadapted_name}}, self)
+            {{#else}}
+        py_deprecated_types = importlib.import_module("{{program:py_deprecated_module_path}}.ttypes")
+        return converter.to_py_struct(py_deprecated_types.{{> structs/unadapted_name}}, self)
+            {{/if (not (has_compiler_option? "does_not_have_py_deprecated_asyncio"))}}
+        {{#else}}
+            {{#if (not (has_compiler_option? "does_not_have_py_deprecated_asyncio"))}}
+        py_asyncio_types = importlib.import_module("{{program:py_asyncio_module_path}}.ttypes")
+        return converter.to_py_struct(py_asyncio_types.{{> structs/unadapted_name}}, self)
+            {{/if (not (has_compiler_option? "does_not_have_py_deprecated_asyncio"))}}
+        {{/if (not (has_compiler_option? "does_not_have_py_deprecated"))}}
+    {{#else}}
+        raise NotImplementedError("to_py_deprecated is not implemented")
+    {{/if (or (not (has_compiler_option? "does_not_have_py_deprecated")) (not (has_compiler_option? "does_not_have_py_deprecated_asyncio")))}}
     {{/struct:legacy_api?}}
 {{#python.enable_abstract_types?}}{{!
 TODO(T208096866)

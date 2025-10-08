@@ -24,6 +24,11 @@ import convertible.thrift_mutable_types as python_mutable_types
 import convertible.thrift_types as python_types
 import convertible.ttypes as py_deprecated_types
 import convertible.types as py3_types
+import testing.py_deprecated_asyncio_fallback_test.thrift_types
+import testing.py_deprecated_asyncio_fallback_test.ttypes
+import testing.py_deprecated_asyncio_test.thrift_types
+import testing.py_deprecated_asyncio_test.ttypes
+import testing.thrift_types as testing_types
 from thrift.python.converter import to_python_struct
 from thrift.python.mutable_converter import to_mutable_python_struct_or_union
 from thrift.python.types import BadEnum
@@ -547,3 +552,21 @@ class ToPyDeprecatedConverterTest(unittest.TestCase):
 
         python_enum_value = python_types.Color.RED
         takes_enum(python_enum_value._to_py_deprecated())
+
+    def test_converter_to_py_deprecated(self) -> None:
+        self.assertIsInstance(
+            python_types.Simple()._to_py_deprecated(),
+            py_deprecated_types.Simple,
+        )
+        self.assertIsInstance(
+            testing.py_deprecated_asyncio_test.thrift_types.PyDeprecatedAsyncioStruct()._to_py_deprecated(),
+            testing.py_deprecated_asyncio_test.ttypes.PyDeprecatedAsyncioStruct,
+        )
+        self.assertIsInstance(
+            testing.py_deprecated_asyncio_fallback_test.thrift_types.PyDeprecatedAsyncioFallbackStruct()._to_py_deprecated(),
+            testing.py_deprecated_asyncio_fallback_test.ttypes.PyDeprecatedAsyncioFallbackStruct,
+        )
+
+    def test_converter_to_py_deprecated_not_implemented(self) -> None:
+        with self.assertRaises(NotImplementedError):
+            testing_types.easy()._to_py_deprecated()

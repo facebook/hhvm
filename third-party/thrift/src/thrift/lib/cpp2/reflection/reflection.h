@@ -42,6 +42,7 @@
 #include <thrift/lib/cpp2/FieldRef.h>
 #include <thrift/lib/cpp2/FieldRefTraits.h>
 #include <thrift/lib/cpp2/TypeClass.h>
+#include <thrift/lib/cpp2/op/Get.h>
 
 #include <thrift/lib/cpp2/reflection/internal/reflection-inl-pre.h>
 
@@ -584,7 +585,8 @@ struct reflected_struct_data_member {
    *
    * @author: Marcelo Juchem <marcelo@fb.com>
    */
-  using type = typename Traits::type;
+  using type =
+      op::get_native_type<typename Traits::owner, typename Traits::tag>;
 
   /**
    * A tag type representing the name of this member.
@@ -620,7 +622,10 @@ struct reflected_struct_data_member {
    *
    * @author: Marcelo Juchem <marcelo@fb.com>
    */
-  using id = std::integral_constant<field_id_t, Traits::id>;
+  using id = std::integral_constant<
+      field_id_t,
+      static_cast<field_id_t>(
+          op::get_field_id_v<typename Traits::owner, typename Traits::tag>)>;
 
   /**
    * A `std::integral_constant` of type `optionality` representing whether a

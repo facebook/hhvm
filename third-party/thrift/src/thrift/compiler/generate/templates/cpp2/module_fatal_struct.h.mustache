@@ -111,9 +111,7 @@ class {{struct:cpp_name}}_struct_traits {
   struct __fbthrift_member_{{field:cpp_name}} {
     using owner = {{struct:cpp_fullname}};
     using name = __fbthrift_strings_{{program:name}}::{{field:name_hash}};
-    using type = {{field:cpp_type}};
     using tag = ::apache::thrift::ident::{{field:cpp_name}};
-    static constexpr ::apache::thrift::field_id_t id = {{field:id}};
     static constexpr auto optional = ::apache::thrift::optionality::{{field:fatal_required_qualifier}};
     {{#field:type}}
     using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::ident::{{field:cpp_name}}>;

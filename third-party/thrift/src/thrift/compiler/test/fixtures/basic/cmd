@@ -14,3 +14,6 @@ python: mstch_python src/module.thrift
 python_service: mstch_python src/service.thrift
 python_capi: mstch_python_capi src/module.thrift
 python_patch: python_patch src/module.thrift
+python_does_not_have_py_deprecated: mstch_python src/module.thrift
+python_does_not_have_py_deprecated_asyncio: mstch_python src/module.thrift
+python_has_neither_py_deprecated_nor_py_deprecated_asyncio: mstch_python src/module.thrift

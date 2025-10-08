@@ -115,7 +115,12 @@ type_system::SerializableRecord toSerializableRecord(
             return {
                 type_system::SerializableRecord::Float64(value.as_double())};
           case Primitive::STRING:
-            return {type_system::SerializableRecord::Text(value.as_string())};
+            if (value.is_string()) {
+              return {type_system::SerializableRecord::Text(value.as_string())};
+            } else {
+              return {type_system::SerializableRecord::Text(
+                  value.as_binary().toString())};
+            }
           case Primitive::BINARY:
             return {type_system::SerializableRecord::ByteArray(
                 value.as_binary().clone())};

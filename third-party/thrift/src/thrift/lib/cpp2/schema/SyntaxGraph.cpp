@@ -54,6 +54,76 @@ WithName::WithName(std::string_view name) : name_(name) {
       "name must be backed by a null-terminated string!");
 }
 
+type_system::SerializableRecord toSerializableRecord(
+    const TypeRef& type, const protocol::Value& value) {
+  return type.visit(
+      [&](const StructuredNode& node) -> type_system::SerializableRecord {
+        type_system::SerializableRecord::FieldSet s;
+        for (const auto& [fieldId, fieldValue] : value.as_object()) {
+          const FieldNode& field = node.at(FieldId{fieldId});
+          s.emplace(field.id(), toSerializableRecord(field.type(), fieldValue));
+        }
+        return {std::move(s)};
+      },
+      [&](const EnumNode&) -> type_system::SerializableRecord {
+        return {type_system::SerializableRecord::Int32(value.as_i32())};
+      },
+      [&](const TypedefNode& node) -> type_system::SerializableRecord {
+        return toSerializableRecord(node.targetType(), value);
+      },
+      [&](const List& node) {
+        type_system::SerializableRecord::List l;
+        l.reserve(value.as_list().size());
+        for (const auto& element : value.as_list()) {
+          l.push_back(toSerializableRecord(node.elementType(), element));
+        }
+        return type_system::SerializableRecord{std::move(l)};
+      },
+      [&](const Set& node) {
+        type_system::SerializableRecord::Set s;
+        s.reserve(value.as_set().size());
+        for (const auto& element : value.as_set()) {
+          s.insert(toSerializableRecord(node.elementType(), element));
+        }
+        return type_system::SerializableRecord{std::move(s)};
+      },
+      [&](const Map& node) {
+        type_system::SerializableRecord::Map m;
+        m.reserve(value.as_map().size());
+        for (const auto& [k, v] : value.as_map()) {
+          m.emplace(
+              toSerializableRecord(node.keyType(), k),
+              toSerializableRecord(node.valueType(), v));
+        }
+        return type_system::SerializableRecord{std::move(m)};
+      },
+      [&](const Primitive& node) -> type_system::SerializableRecord {
+        switch (node) {
+          case Primitive::BOOL:
+            return {type_system::SerializableRecord::Bool(value.as_bool())};
+          case Primitive::BYTE:
+            return {type_system::SerializableRecord::Int8(value.as_byte())};
+          case Primitive::I16:
+            return {type_system::SerializableRecord::Int16(value.as_i16())};
+          case Primitive::I32:
+            return {type_system::SerializableRecord::Int32(value.as_i32())};
+          case Primitive::I64:
+            return {type_system::SerializableRecord::Int64(value.as_i64())};
+          case Primitive::FLOAT:
+            return {type_system::SerializableRecord::Float32(value.as_float())};
+          case Primitive::DOUBLE:
+            return {
+                type_system::SerializableRecord::Float64(value.as_double())};
+          case Primitive::STRING:
+            return {type_system::SerializableRecord::Text(value.as_string())};
+          case Primitive::BINARY:
+            return {type_system::SerializableRecord::ByteArray(
+                value.as_binary().clone())};
+        }
+        folly::assume_unreachable();
+      });
+}
+
 } // namespace detail
 
 TypeRef FieldNode::type() const {
@@ -815,76 +885,6 @@ type_system::AnnotationsMap toTypeSystemAnnotations(
         toTypeSystemAnnotation(annotation.type(), annotation.value()));
   }
   return annotationsMap;
-}
-
-type_system::SerializableRecord toSerializableRecord(
-    const TypeRef& type, const protocol::Value& value) {
-  return type.visit(
-      [&](const StructuredNode& node) -> type_system::SerializableRecord {
-        type_system::SerializableRecord::FieldSet s;
-        for (const auto& [fieldId, fieldValue] : value.as_object()) {
-          const FieldNode& field = node.at(FieldId{fieldId});
-          s.emplace(field.id(), toSerializableRecord(field.type(), fieldValue));
-        }
-        return {std::move(s)};
-      },
-      [&](const EnumNode&) -> type_system::SerializableRecord {
-        return {type_system::SerializableRecord::Int32(value.as_i32())};
-      },
-      [&](const TypedefNode& node) -> type_system::SerializableRecord {
-        return toSerializableRecord(node.targetType(), value);
-      },
-      [&](const List& node) {
-        type_system::SerializableRecord::List l;
-        l.reserve(value.as_list().size());
-        for (const auto& element : value.as_list()) {
-          l.push_back(toSerializableRecord(node.elementType(), element));
-        }
-        return type_system::SerializableRecord{std::move(l)};
-      },
-      [&](const Set& node) {
-        type_system::SerializableRecord::Set s;
-        s.reserve(value.as_set().size());
-        for (const auto& element : value.as_set()) {
-          s.insert(toSerializableRecord(node.elementType(), element));
-        }
-        return type_system::SerializableRecord{std::move(s)};
-      },
-      [&](const Map& node) {
-        type_system::SerializableRecord::Map m;
-        m.reserve(value.as_map().size());
-        for (const auto& [k, v] : value.as_map()) {
-          m.emplace(
-              toSerializableRecord(node.keyType(), k),
-              toSerializableRecord(node.valueType(), v));
-        }
-        return type_system::SerializableRecord{std::move(m)};
-      },
-      [&](const Primitive& node) -> type_system::SerializableRecord {
-        switch (node) {
-          case Primitive::BOOL:
-            return {type_system::SerializableRecord::Bool(value.as_bool())};
-          case Primitive::BYTE:
-            return {type_system::SerializableRecord::Int8(value.as_byte())};
-          case Primitive::I16:
-            return {type_system::SerializableRecord::Int16(value.as_i16())};
-          case Primitive::I32:
-            return {type_system::SerializableRecord::Int32(value.as_i32())};
-          case Primitive::I64:
-            return {type_system::SerializableRecord::Int64(value.as_i64())};
-          case Primitive::FLOAT:
-            return {type_system::SerializableRecord::Float32(value.as_float())};
-          case Primitive::DOUBLE:
-            return {
-                type_system::SerializableRecord::Float64(value.as_double())};
-          case Primitive::STRING:
-            return {type_system::SerializableRecord::Text(value.as_string())};
-          case Primitive::BINARY:
-            return {type_system::SerializableRecord::ByteArray(
-                value.as_binary().clone())};
-        }
-        folly::assume_unreachable();
-      });
 }
 
 std::optional<type_system::SerializableRecord> toFieldCustomDefault(

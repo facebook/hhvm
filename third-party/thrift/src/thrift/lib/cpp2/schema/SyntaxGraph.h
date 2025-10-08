@@ -1822,6 +1822,9 @@ const T& Lazy<T>::operator*() const {
       [](const Resolved& resolved) -> const T& { return *resolved.value; });
 }
 
+type_system::SerializableRecord toSerializableRecord(
+    const TypeRef& type, const protocol::Value& value);
+
 } // namespace detail
 
 } // namespace apache::thrift::syntax_graph

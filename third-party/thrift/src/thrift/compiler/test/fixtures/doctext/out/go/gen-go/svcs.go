@@ -32,7 +32,6 @@ var _ = metadata.GoUnusedProtection__
 
 type C interface {
     F(ctx context.Context) (error)
-    Numbers(ctx context.Context) (func(context.Context, chan<- Number) error, error)
     Thing(ctx context.Context, a int32, b string, c []int32) (string, error)
 }
 
@@ -156,10 +155,8 @@ func NewCProcessor(handler C) *CProcessor {
         functionServiceMap:   make(map[string]string),
     }
     p.AddToProcessorFunctionMap("f", &procFuncCF{handler: handler})
-    p.AddToProcessorFunctionMap("numbers", &procFuncCNumbers{handler: handler})
     p.AddToProcessorFunctionMap("thing", &procFuncCThing{handler: handler})
     p.AddToFunctionServiceMap("f", "C")
-    p.AddToFunctionServiceMap("numbers", "C")
     p.AddToFunctionServiceMap("thing", "C")
 
     return p
@@ -216,22 +213,6 @@ func (p *procFuncCF) RunContext(ctx context.Context, reqStruct thrift.ReadableSt
     return result, nil
 }
 
-
-type procFuncCNumbers struct {
-    handler C
-}
-// Compile time interface enforcer
-var _ thrift.ProcessorFunction = (*procFuncCNumbers)(nil)
-
-func (p *procFuncCNumbers) NewReqArgs() thrift.ReadableStruct {
-    return newReqCNumbers()
-}
-
-func (p *procFuncCNumbers) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
-    return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
-}
-
-
 type procFuncCThing struct {
     handler C
 }
@@ -261,5 +242,4 @@ func (p *procFuncCThing) RunContext(ctx context.Context, reqStruct thrift.Readab
     result.Success = &retval
     return result, nil
 }
-
 

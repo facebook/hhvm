@@ -196,11 +196,6 @@ var serviceMetadatas = func() []*metadata.ThriftService {
                     ReturnType: premadeThriftType_void,
                 },
                 &metadata.ThriftFunction{
-                    Name:       "numbers",
-                    IsOneway:   false,
-                    ReturnType: premadeThriftType_void,
-                },
-                &metadata.ThriftFunction{
                     Name:       "thing",
                     IsOneway:   false,
                     ReturnType: premadeThriftType_string,

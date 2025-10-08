@@ -29,11 +29,6 @@ func (p *{{> svc/proc_func_name}}) NewReqArgs() thrift.ReadableStruct {
     return newReq{{service:go_name}}{{function:go_name}}()
 }
 
-{{#if function:stream?}}
-func (p *{{> svc/proc_func_name}}) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
-    return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
-}
-{{#else}}
 func (p *{{> svc/proc_func_name}}) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     {{#function:params.fields?}}
     args := reqStruct.(*req{{service:go_name}}{{function:go_name}})
@@ -80,4 +75,3 @@ func (p *{{> svc/proc_func_name}}) RunContext(ctx context.Context, reqStruct thr
     return result, nil
     {{/function:oneway?}}
 }
-{{/if function:stream?}}

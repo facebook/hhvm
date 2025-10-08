@@ -32,7 +32,6 @@ var _ = metadata.GoUnusedProtection__
 type MyInteraction interface {
     Frobnicate(ctx context.Context) (int32, error)
     Ping(ctx context.Context) (error)
-    Truthify(ctx context.Context) (func(context.Context, chan<- bool) error, error)
 }
 
 type MyInteractionClient interface {
@@ -135,7 +134,6 @@ func (c *myInteractionClientImpl) Truthify(ctx context.Context) (<-chan bool /* 
 type MyInteractionFast interface {
     Frobnicate(ctx context.Context) (int32, error)
     Ping(ctx context.Context) (error)
-    Truthify(ctx context.Context) (func(context.Context, chan<- bool) error, error)
 }
 
 type MyInteractionFastClient interface {
@@ -422,7 +420,6 @@ func (p *procFuncMyServiceFoo) RunContext(ctx context.Context, reqStruct thrift.
     return result, nil
 }
 
-
 type Factories interface {
     Foo(ctx context.Context) (error)
 }
@@ -530,7 +527,6 @@ func (p *procFuncFactoriesFoo) RunContext(ctx context.Context, reqStruct thrift.
 
     return result, nil
 }
-
 
 type Perform interface {
     Foo(ctx context.Context) (error)
@@ -640,7 +636,6 @@ func (p *procFuncPerformFoo) RunContext(ctx context.Context, reqStruct thrift.Re
     return result, nil
 }
 
-
 type InteractWithShared interface {
     DoSomeSimilarThings(ctx context.Context) (*shared.DoSomethingResult, error)
 }
@@ -749,7 +744,6 @@ func (p *procFuncInteractWithSharedDoSomeSimilarThings) RunContext(ctx context.C
     result.Success = retval
     return result, nil
 }
-
 
 type BoxService interface {
 }

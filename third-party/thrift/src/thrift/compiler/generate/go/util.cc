@@ -526,7 +526,7 @@ bool is_func_go_client_supported(const t_function* func) {
 }
 
 bool is_func_go_server_supported(const t_function* func) {
-  return !func->sink() && !func->interaction();
+  return !func->sink_or_stream() && !func->interaction();
 }
 
 bool is_go_reserved_word(const std::string& value) {

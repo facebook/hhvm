@@ -45,7 +45,10 @@ class PeriodicStats {
    * Underlying thread that updates locally cached Data is not
    * started yet.
    */
-  explicit PeriodicStats(T* data) : data_(data) {
+  explicit PeriodicStats(
+      T* data,
+      folly::rcu_domain* periodic_stats_domain = &folly::rcu_default_domain())
+      : data_(data), periodic_stats_domain_(periodic_stats_domain) {
   }
   virtual ~PeriodicStats() {
     stopRefresh();
@@ -128,7 +131,7 @@ class PeriodicStats {
    */
   virtual const T& getCurrentData() const {
     {
-      std::scoped_lock guard(folly::rcu_default_domain());
+      std::scoped_lock guard(*periodic_stats_domain_);
       auto* loadedData = data_.load();
       if (loadedData->getLastUpdateTime() != tlData_->getLastUpdateTime()) {
         // Should be fine using the default assignment operator the compiler
@@ -163,10 +166,10 @@ class PeriodicStats {
   void modifyData(T* newData, bool sync = false) {
     auto* oldData = data_.exchange(newData);
     if (sync) {
-      folly::rcu_synchronize();
+      folly::rcu_synchronize(*periodic_stats_domain_);
       delete oldData;
     } else {
-      folly::rcu_retire(oldData);
+      folly::rcu_retire(oldData, {}, *periodic_stats_domain_);
     }
   }
 
@@ -207,6 +210,10 @@ class PeriodicStats {
    * be read/set by the caller under the schedulerMutex_, it is also read
    * by the underlying function scheduler thread.
    *
+   * periodic_stats_domain is a custom RCU domain to ensure that related
+   * operations are not affected by other RCU usage that could cause
+   * concurrency related issues.
+   *
    * The refreshCb_, if specified, provides the caller the functionality to
    * execute an arbitrary function on refresh.
    */
@@ -214,6 +221,7 @@ class PeriodicStats {
   std::mutex schedulerMutex_;
   std::atomic<std::chrono::milliseconds> refreshPeriodMs_{
       std::chrono::milliseconds(0)};
+  folly::rcu_domain* periodic_stats_domain_;
   folly::Function<void()> refreshCb_;
 };
 

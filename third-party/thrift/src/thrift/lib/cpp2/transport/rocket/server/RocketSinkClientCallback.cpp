@@ -16,7 +16,6 @@
 
 #include <thrift/lib/cpp2/transport/rocket/server/RocketSinkClientCallback.h>
 
-#include <functional>
 #include <memory>
 #include <utility>
 
@@ -26,6 +25,7 @@
 #include <folly/Range.h>
 #include <folly/ScopeGuard.h>
 #include <folly/io/IOBufQueue.h>
+#include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBase.h>
 
 #include <thrift/lib/cpp/TApplicationException.h>
@@ -41,7 +41,9 @@ namespace apache::thrift::rocket {
 
 // RocketSinkClientCallback methods
 RocketSinkClientCallback::RocketSinkClientCallback(
-    StreamId streamId, RocketServerConnection& connection, uint32_t /*ignored*/)
+    StreamId streamId,
+    IRocketServerConnection& connection,
+    uint32_t /*ignored*/)
     : streamId_(streamId), connection_(connection) {}
 
 bool RocketSinkClientCallback::onFirstResponse(

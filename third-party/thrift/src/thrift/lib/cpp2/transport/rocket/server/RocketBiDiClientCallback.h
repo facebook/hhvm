@@ -16,14 +16,13 @@
 
 #pragma once
 
+#include <folly/io/async/AsyncSocket.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
-#include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
+#include <thrift/lib/cpp2/transport/rocket/server/IRocketServerConnection.h>
 
 namespace apache::thrift::rocket {
-
-class RocketServerConnection;
 
 class RocketBiDiClientCallback final : public BiDiClientCallback {
  private:
@@ -134,7 +133,7 @@ class RocketBiDiClientCallback final : public BiDiClientCallback {
  public:
   RocketBiDiClientCallback(
       StreamId streamId,
-      RocketServerConnection& connection,
+      IRocketServerConnection& connection,
       uint32_t initialTokens)
       : streamId_(streamId),
         connection_(connection),
@@ -207,7 +206,7 @@ class RocketBiDiClientCallback final : public BiDiClientCallback {
 
  private:
   const StreamId streamId_;
-  RocketServerConnection& connection_;
+  IRocketServerConnection& connection_;
   BiDiServerCallback* serverCallback_{nullptr};
 
   State state_;

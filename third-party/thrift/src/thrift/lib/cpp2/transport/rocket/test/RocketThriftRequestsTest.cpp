@@ -28,7 +28,7 @@ namespace detail {
 THRIFT_PLUGGABLE_FUNC_SET(
     void,
     onRocketThriftRequestReceived,
-    const RocketServerConnection& /* connection */,
+    const IRocketServerConnection& /* connection */,
     StreamId streamId,
     RpcKind rpcKind,
     const transport::THeader::StringToStringMap& headers) {

@@ -210,83 +210,6 @@ class RocketServerConnection final : public IRocketServerConnection {
 
   folly::AsyncSocket* getRawSocket() const override { return rawSocket_; }
 
-  using RocketServerConnectionObserverContainer = folly::ObserverContainer<
-      RocketServerConnectionObserver,
-      RocketServerConnection,
-      folly::ObserverContainerBasePolicyDefault<
-          RocketServerConnectionObserver::Events /* EventEnum */,
-          32 /* BitsetSize (max number of interface events) */>>;
-  using Observer = RocketServerConnectionObserverContainer::Observer;
-  using ManagedObserver =
-      RocketServerConnectionObserverContainer::ManagedObserver;
-
-  /**
-   * Adds an observer.
-   *
-   * If the observer is already added, this is a no-op.
-   *
-   * @param observer     Observer to add.
-   * @return             Whether the observer was added (fails if no list).
-   */
-  bool addObserver(Observer* observer) {
-    if (auto list = getObserverContainer()) {
-      list->addObserver(observer);
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Removes an observer.
-   *
-   * @param observer     Observer to remove.
-   * @return             Whether the observer was found and removed.
-   */
-  bool removeObserver(Observer* observer) {
-    if (auto list = getObserverContainer()) {
-      return list->removeObserver(observer);
-    }
-    return false;
-  }
-
-  /**
-   * Get the number of observers.
-   *
-   * @return             Number of observers.
-   */
-  size_t numObservers() const {
-    if (auto list = getObserverContainer()) {
-      return list->numObservers();
-    }
-    return 0;
-  }
-
-  /**
-   * Returns list of attached observers that are of type T.
-   *
-   * @return             Attached observers of type T.
-   */
-  template <typename T = Observer>
-  std::vector<T*> findObservers() const {
-    if (auto list = getObserverContainer()) {
-      return list->findObservers<T>();
-    }
-    return {};
-  }
-
- private:
-  /**
-   * Returns the RocketServerConnectionObserverContainer or nullptr if not
-   * available.
-   */
-  RocketServerConnectionObserverContainer* getObserverContainer() const {
-    if (enableObservers_) {
-      return const_cast<RocketServerConnectionObserverContainer*>(
-          &observerContainer_);
-    }
-    return nullptr;
-  }
-
  private:
   void startDrain(std::optional<DrainCompleteCode> drainCompleteCode);
 
@@ -590,14 +513,17 @@ class RocketServerConnection final : public IRocketServerConnection {
     }
   }
 
-  void incInflightRequests() { ++inflightRequests_; }
+  void pauseStreams();
+  void resumeStreams();
 
-  void decInflightRequests() {
+  void incInflightRequests() override { ++inflightRequests_; }
+
+  void decInflightRequests() override {
     --inflightRequests_;
     closeIfNeeded();
   }
 
-  void requestComplete() {
+  void requestComplete() override {
     if (!writeBatcher_.empty()) {
       writeBatcher_.enqueueRequestComplete();
       return;
@@ -609,19 +535,9 @@ class RocketServerConnection final : public IRocketServerConnection {
     frameHandler_->requestComplete();
   }
 
-  void pauseStreams();
-  void resumeStreams();
+  RocketServerHandler& getFrameHandler() override;
 
   friend class RocketServerFrameContext;
-
-  const bool enableObservers_;
-  // Container of observers for the RocketServerConnection.
-  //
-  // This member MUST be last in the list of members to ensure it is destroyed
-  // first, before any other members are destroyed. This ensures that observers
-  // can inspect any state available through public methods
-  // when destruction of the Rocket connection begins.
-  RocketServerConnectionObserverContainer observerContainer_;
 
  public:
   PayloadSerializer::Ptr getPayloadSerializer() override {

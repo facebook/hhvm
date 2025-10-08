@@ -31,6 +31,7 @@ class RequestResponseFrame;
 class RequestStreamFrame;
 class SetupFrame;
 
+class IRocketServerConnection;
 class RocketServerConnection;
 class RocketServerFrameContext;
 class RocketBiDiClientCallback;
@@ -41,7 +42,7 @@ class RocketServerHandler {
  public:
   virtual ~RocketServerHandler() = default;
 
-  virtual void handleSetupFrame(SetupFrame&&, RocketServerConnection&) {}
+  virtual void handleSetupFrame(SetupFrame&&, IRocketServerConnection&) {}
 
   virtual void handleRequestResponseFrame(
       RequestResponseFrame&& frame, RocketServerFrameContext&& context) = 0;

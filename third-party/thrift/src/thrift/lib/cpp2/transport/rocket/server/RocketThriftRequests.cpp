@@ -34,7 +34,7 @@
 #include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Flags.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
-#include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
+#include <thrift/lib/cpp2/transport/rocket/server/IRocketServerConnection.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketSinkClientCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketStreamClientCallback.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
@@ -413,7 +413,7 @@ namespace detail {
 THRIFT_PLUGGABLE_FUNC_REGISTER(
     void,
     onRocketThriftRequestReceived,
-    const RocketServerConnection&,
+    const IRocketServerConnection&,
     StreamId,
     RpcKind,
     const transport::THeader::StringToStringMap&) {}

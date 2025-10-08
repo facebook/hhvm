@@ -41,8 +41,8 @@
 #include <thrift/lib/cpp2/transport/rocket/compression/CustomCompressorRegistry.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/ErrorCode.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
+#include <thrift/lib/cpp2/transport/rocket/server/IRocketServerConnection.h>
 #include <thrift/lib/cpp2/transport/rocket/server/InteractionOverload.h>
-#include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerFrameContext.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketSinkClientCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketStreamClientCallback.h>
@@ -151,7 +151,7 @@ ThriftRocketServerHandler::shouldSample(const transport::THeader& header) {
 }
 
 void ThriftRocketServerHandler::handleSetupFrame(
-    SetupFrame&& frame, RocketServerConnection& connection) {
+    SetupFrame&& frame, IRocketServerConnection& connection) {
   if (!frame.payload().hasNonemptyMetadata()) {
     return connection.close(folly::make_exception_wrapper<RocketException>(
         ErrorCode::INVALID_SETUP, "Missing required metadata in SETUP frame"));
@@ -319,7 +319,7 @@ void ThriftRocketServerHandler::handleSetupFrame(
 folly::Expected<std::optional<CustomCompressionSetupResponse>, std::string>
 ThriftRocketServerHandler::handleSetupFrameCustomCompression(
     CompressionSetupRequest const& setupRequest,
-    RocketServerConnection& connection) {
+    IRocketServerConnection& connection) {
   if (!setupRequest.custom()) {
     return folly::makeUnexpected(
         "Cannot setup compression on server due to unrecognized request type");
@@ -518,7 +518,7 @@ void ThriftRocketServerHandler::handleRequestCommon(
     Payload&& payload,
     F&& makeRequest,
     RpcKind expectedKind,
-    RocketServerConnection& connection) {
+    IRocketServerConnection& connection) {
   std::chrono::steady_clock::time_point readEnd{
       std::chrono::steady_clock::now()};
   auto wiredPayloadSize = payload.metadataAndDataSize();
@@ -1043,7 +1043,7 @@ void ThriftRocketServerHandler::onBeforeHandleFrame() {
 }
 
 void ThriftRocketServerHandler::invokeServiceInterceptorsOnConnection(
-    RocketServerConnection& connection) noexcept {
+    IRocketServerConnection& connection) noexcept {
 #if FOLLY_HAS_COROUTINES
   auto* server = worker_->getServer();
   const auto& serviceInterceptors = server->getServiceInterceptors();

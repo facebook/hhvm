@@ -23,7 +23,7 @@
 
 namespace apache::thrift::rocket {
 
-class RocketServerConnection;
+class IRocketServerConnection;
 
 class RocketServerConnectionObserver {
  public:
@@ -61,7 +61,7 @@ class RocketServerConnectionObserver {
    * the underlying transport
    */
   virtual void writeStarting(
-      RocketServerConnection* /* connection */,
+      IRocketServerConnection* /* connection */,
       const WriteEvent& /* writeEvent */) {}
 
   /**
@@ -69,7 +69,7 @@ class RocketServerConnectionObserver {
    * written to the underlying transport
    */
   virtual void writeSuccess(
-      RocketServerConnection* /* connection */,
+      IRocketServerConnection* /* connection */,
       const WriteEvent& /* writeEvent */,
       const WriteEventBatchContext& /* writeEventBatchContext */) {}
 };

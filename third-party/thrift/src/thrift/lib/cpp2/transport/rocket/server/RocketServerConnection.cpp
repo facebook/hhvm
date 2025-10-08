@@ -97,7 +97,8 @@ RocketServerConnection::RocketServerConnection(
     MemoryTracker& egressMemoryTracker,
     StreamMetricCallback& streamMetricCallback,
     const Config& cfg)
-    : evb_(*socket->getEventBase()),
+    : IRocketServerConnection(),
+      evb_(*socket->getEventBase()),
       socket_(std::move(socket)),
       rawSocket_(
           socket_ ? socket_->getUnderlyingTransport<folly::AsyncSocket>()
@@ -117,9 +118,7 @@ RocketServerConnection::RocketServerConnection(
       socketDrainer_(*this),
       ingressMemoryTracker_(ingressMemoryTracker),
       egressMemoryTracker_(egressMemoryTracker),
-      streamMetricCallback_(streamMetricCallback),
-      enableObservers_(THRIFT_FLAG(enable_rocket_connection_observers)),
-      observerContainer_(this) {
+      streamMetricCallback_(streamMetricCallback) {
   CHECK(socket_);
   CHECK(frameHandler_);
 
@@ -146,6 +145,10 @@ RocketServerConnection::RocketServerConnection(
       }
     }
   }
+
+  // To prevent a C++ intialization error we need to initialize the the observer
+  // container after the vtable is fully created
+  this->initializeObserverContainer();
 }
 
 namespace {
@@ -283,12 +286,6 @@ void RocketServerConnection::send(
     MessageChannel::SendCallbackPtr cb,
     StreamId streamId,
     folly::SocketFds fds) {
-  evb_.dcheckIsInEventBaseThread();
-
-  if (state_ != ConnectionState::ALIVE && state_ != ConnectionState::DRAINING) {
-    return;
-  }
-
   writeBatcher_.enqueueWrite(
       std::move(data), std::move(cb), streamId, std::move(fds));
 }
@@ -1417,6 +1414,10 @@ bool RocketServerConnection::incMemoryUsage(uint32_t memSize) {
     return false;
   }
   return true;
+}
+
+RocketServerHandler& RocketServerConnection::getFrameHandler() {
+  return *frameHandler_;
 }
 
 } // namespace apache::thrift::rocket

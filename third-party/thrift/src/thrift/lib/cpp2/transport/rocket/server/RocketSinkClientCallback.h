@@ -25,7 +25,7 @@
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
-#include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
+#include <thrift/lib/cpp2/transport/rocket/server/IRocketServerConnection.h>
 
 namespace apache::thrift::rocket {
 
@@ -33,7 +33,7 @@ class RocketSinkClientCallback final : public SinkClientCallback {
  public:
   explicit RocketSinkClientCallback(
       StreamId streamId,
-      RocketServerConnection& connection,
+      IRocketServerConnection& connection,
       uint32_t /*ignored*/ = 0);
   ~RocketSinkClientCallback() override = default;
   bool onFirstResponse(
@@ -95,7 +95,7 @@ class RocketSinkClientCallback final : public SinkClientCallback {
   enum class State { BothOpen, StreamOpen };
   State state_{State::BothOpen};
   const StreamId streamId_;
-  RocketServerConnection& connection_;
+  IRocketServerConnection& connection_;
   static constexpr intptr_t kErrorFlag = 1;
   intptr_t serverCallbackOrError_{0};
   std::unique_ptr<TimeoutCallback> timeout_;

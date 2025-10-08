@@ -341,7 +341,7 @@ class RocketTestServer::RocketTestServerHandler : public RocketServerHandler {
       const MetadataOpaqueMap<std::string, std::string>& expectedSetupMetadata)
       : ioEvb_(ioEvb), expectedSetupMetadata_(expectedSetupMetadata) {}
   void handleSetupFrame(
-      SetupFrame&& frame, RocketServerConnection& connection) final {
+      SetupFrame&& frame, IRocketServerConnection& connection) final {
     folly::io::Cursor cursor(frame.payload().buffer());
     // Validate Rocket protocol key
     uint32_t protocolKey;

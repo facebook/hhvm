@@ -19,9 +19,11 @@
 #include <folly/ExceptionWrapper.h>
 #include <folly/io/async/HHWheelTimer.h>
 
+#include <thrift/lib/cpp/ContextStack.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
+#include <thrift/lib/cpp2/server/metrics/StreamMetricCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
-#include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
+#include <thrift/lib/cpp2/transport/rocket/server/IRocketServerConnection.h>
 
 namespace folly {
 class EventBase;
@@ -37,7 +39,7 @@ class RocketStreamClientCallback final : public StreamClientCallback {
  public:
   RocketStreamClientCallback(
       StreamId streamId,
-      RocketServerConnection& connection,
+      IRocketServerConnection& connection,
       uint32_t initialRequestN,
       StreamMetricCallback& streamMetricCallback);
   ~RocketStreamClientCallback() override = default;
@@ -78,11 +80,11 @@ class RocketStreamClientCallback final : public StreamClientCallback {
   }
   std::string_view getRpcMethodName() const { return rpcMethodName_; }
 
-  StreamId streamId() const { return streamId_; }
-
   void setContextStack(std::shared_ptr<ContextStack> contextStack) {
     contextStack_ = std::move(contextStack);
   }
+
+  StreamId streamId() const { return streamId_; }
 
  private:
   StreamServerCallback* serverCallback() const {
@@ -90,7 +92,7 @@ class RocketStreamClientCallback final : public StreamClientCallback {
   }
 
   const StreamId streamId_;
-  RocketServerConnection& connection_;
+  IRocketServerConnection& connection_;
   static constexpr intptr_t kCancelledFlag = 1;
   intptr_t serverCallbackOrCancelled_{0};
   uint64_t tokens_{0};

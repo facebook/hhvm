@@ -20,6 +20,7 @@
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/server/TransportRoutingHandler.h>
 #include <thrift/lib/cpp2/server/metrics/StreamMetricCallback.h>
+#include <thrift/lib/cpp2/transport/rocket/server/IRocketServerConnection.h>
 #include <thrift/lib/cpp2/transport/rocket/server/SetupFrameHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/SetupFrameInterceptor.h>
 
@@ -71,7 +72,7 @@ class RocketRoutingHandler : public TransportRoutingHandler {
       std::shared_ptr<Cpp2Worker> worker) override;
 
  protected:
-  virtual void onConnection(rocket::RocketServerConnection&) {}
+  virtual void onConnection(rocket::IRocketServerConnection&) {}
 
  private:
   std::atomic<bool> listening_{true};

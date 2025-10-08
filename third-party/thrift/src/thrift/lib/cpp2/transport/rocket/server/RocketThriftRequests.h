@@ -375,7 +375,7 @@ namespace detail {
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     void,
     onRocketThriftRequestReceived,
-    const RocketServerConnection&,
+    const IRocketServerConnection&,
     StreamId,
     RpcKind,
     const transport::THeader::StringToStringMap&);

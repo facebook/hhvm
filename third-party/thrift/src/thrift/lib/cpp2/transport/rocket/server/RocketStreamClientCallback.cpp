@@ -25,6 +25,7 @@
 #include <folly/Range.h>
 #include <folly/ScopeGuard.h>
 #include <folly/io/IOBufQueue.h>
+#include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBase.h>
 
 #include <thrift/lib/cpp/ContextStack.h>
@@ -36,7 +37,6 @@
 #include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/ErrorCode.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Flags.h>
-#include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
 
 THRIFT_FLAG_DEFINE_bool(rocket_server_disable_send_callback, false);
 
@@ -81,7 +81,7 @@ class TimeoutCallback : public folly::HHWheelTimer::Callback {
 
 RocketStreamClientCallback::RocketStreamClientCallback(
     StreamId streamId,
-    RocketServerConnection& connection,
+    IRocketServerConnection& connection,
     uint32_t initialRequestN,
     StreamMetricCallback& streamMetricCallback)
     : streamId_(streamId),

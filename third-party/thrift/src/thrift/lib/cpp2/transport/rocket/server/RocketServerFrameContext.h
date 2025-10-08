@@ -22,6 +22,7 @@
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Flags.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
+#include <thrift/lib/cpp2/transport/rocket/server/IRocketServerConnection.h>
 
 namespace folly {
 class EventBase;
@@ -38,7 +39,7 @@ class RocketStreamClientCallback;
 class RocketServerFrameContext {
  public:
   RocketServerFrameContext(
-      RocketServerConnection& connection, StreamId streamId);
+      IRocketServerConnection& connection, StreamId streamId);
   RocketServerFrameContext(RocketServerFrameContext&& other) noexcept;
   RocketServerFrameContext& operator=(RocketServerFrameContext&&) = delete;
   ~RocketServerFrameContext();
@@ -55,7 +56,7 @@ class RocketServerFrameContext {
 
   StreamId streamId() const { return streamId_; }
 
-  RocketServerConnection& connection() {
+  IRocketServerConnection& connection() {
     DCHECK(connection_);
     return *connection_;
   }
@@ -71,7 +72,7 @@ class RocketServerFrameContext {
   void onFullFrame(RequestChannelFrame&& fullFrame) &&;
 
  private:
-  RocketServerConnection* connection_{nullptr};
+  IRocketServerConnection* connection_{nullptr};
   const StreamId streamId_;
   bool markRequestComplete_{true};
 };

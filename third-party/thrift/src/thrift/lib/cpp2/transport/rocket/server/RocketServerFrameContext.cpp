@@ -23,14 +23,15 @@
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Flags.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
-#include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
+#include <thrift/lib/cpp2/transport/rocket/server/IRocketServerConnection.h>
+#include <thrift/lib/cpp2/transport/rocket/server/RocketServerHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketSinkClientCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketStreamClientCallback.h>
 
 namespace apache::thrift::rocket {
 
 RocketServerFrameContext::RocketServerFrameContext(
-    RocketServerConnection& connection, StreamId streamId)
+    IRocketServerConnection& connection, StreamId streamId)
     : connection_(&connection), streamId_(streamId) {
   connection_->incInflightRequests();
 }
@@ -74,19 +75,19 @@ void RocketServerFrameContext::sendError(
 
 void RocketServerFrameContext::onFullFrame(
     RequestResponseFrame&& fullFrame) && {
-  auto& frameHandler = *connection_->frameHandler_;
+  auto& frameHandler = connection_->getFrameHandler();
   frameHandler.handleRequestResponseFrame(
       std::move(fullFrame), std::move(*this));
 }
 
 void RocketServerFrameContext::onFullFrame(RequestFnfFrame&& fullFrame) && {
-  auto& frameHandler = *connection_->frameHandler_;
+  auto& frameHandler = connection_->getFrameHandler();
   frameHandler.handleRequestFnfFrame(std::move(fullFrame), std::move(*this));
 }
 
 void RocketServerFrameContext::onFullFrame(RequestStreamFrame&& fullFrame) && {
   auto& connection = *connection_;
-  auto& frameHandler = *connection.frameHandler_;
+  auto& frameHandler = connection_->getFrameHandler();
   if (auto clientCallback = connection.createStreamClientCallback(
           streamId_, connection, fullFrame.initialRequestN())) {
     frameHandler.handleRequestStreamFrame(
@@ -113,7 +114,7 @@ void RocketServerFrameContext::onFullFrame(RequestChannelFrame&& fullFrame) && {
   } else if (
       auto clientCallback = connection.createChannelClientCallback(
           streamId_, connection, fullFrame.initialRequestN())) {
-    auto& frameHandler = *connection.frameHandler_;
+    auto& frameHandler = connection_->getFrameHandler();
     frameHandler.handleRequestChannelFrame(
         std::move(fullFrame), std::move(*this), *clientCallback);
   } else {

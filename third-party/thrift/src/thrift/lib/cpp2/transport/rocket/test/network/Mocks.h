@@ -18,6 +18,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <thrift/lib/cpp2/transport/rocket/server/IRocketServerConnection.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
 
 namespace apache::thrift::rocket::test {
@@ -29,12 +30,12 @@ class MockRocketServerConnectionObserver
   MOCK_METHOD(
       void,
       writeStarting,
-      (RocketServerConnection*, const WriteEvent&),
+      (IRocketServerConnection*, const WriteEvent&),
       (override));
   MOCK_METHOD(
       void,
       writeSuccess,
-      (RocketServerConnection*,
+      (IRocketServerConnection*,
        const WriteEvent&,
        const WriteEventBatchContext&),
       (override));

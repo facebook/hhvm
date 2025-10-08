@@ -1372,10 +1372,10 @@ void TransportCompatibilityTest::TestOnWriteQuiescence() {
         : RocketRoutingHandler(server), state_(state) {}
 
    protected:
-    void onConnection(rocket::RocketServerConnection& connection) override {
+    void onConnection(rocket::IRocketServerConnection& connection) override {
       connection.setOnWriteQuiescenceCallback(
           [this,
-           callCounter = 0](rocket::RocketServerConnection::ReadPausableHandle
+           callCounter = 0](rocket::IRocketServerConnection::ReadPausableHandle
                                 handle) mutable {
             if (callCounter == 0) {
               ++callCounter;

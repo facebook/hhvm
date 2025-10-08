@@ -28,6 +28,7 @@
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/server/Overload.h>
 #include <thrift/lib/cpp2/server/RequestsRegistry.h>
+#include <thrift/lib/cpp2/transport/rocket/server/IRocketServerConnection.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/SetupFrameHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/SetupFrameInterceptor.h>
@@ -78,11 +79,11 @@ class ThriftRocketServerHandler : public RocketServerHandler {
   ~ThriftRocketServerHandler() override;
 
   void handleSetupFrame(
-      SetupFrame&& frame, RocketServerConnection& context) final;
+      SetupFrame&& frame, IRocketServerConnection& context) final;
   folly::Expected<std::optional<CustomCompressionSetupResponse>, std::string>
   handleSetupFrameCustomCompression(
       CompressionSetupRequest const& setupRequest,
-      RocketServerConnection& connection);
+      IRocketServerConnection& connection);
   void handleRequestResponseFrame(
       RequestResponseFrame&& frame, RocketServerFrameContext&& context) final;
   void handleRequestFnfFrame(
@@ -138,7 +139,7 @@ class ThriftRocketServerHandler : public RocketServerHandler {
   folly::once_flag setupLoggingFlag_;
 
   bool didExecuteServiceInterceptorsOnConnection_ = false;
-  void invokeServiceInterceptorsOnConnection(RocketServerConnection&) noexcept;
+  void invokeServiceInterceptorsOnConnection(IRocketServerConnection&) noexcept;
   void invokeServiceInterceptorsOnConnectionClosed() noexcept;
 
   template <class F>
@@ -146,7 +147,7 @@ class ThriftRocketServerHandler : public RocketServerHandler {
       Payload&& payload,
       F&& makeRequest,
       RpcKind expectedKind,
-      RocketServerConnection& connection);
+      IRocketServerConnection& connection);
 
   FOLLY_NOINLINE void handlePreprocessResult(
       ThriftRequestCoreUniquePtr request,

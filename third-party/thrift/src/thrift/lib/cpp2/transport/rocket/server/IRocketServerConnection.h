@@ -40,6 +40,9 @@ class RocketServerConnection;
 class RocketBiDiClientCallback;
 class RocketSinkClientCallback;
 class RocketStreamClientCallback;
+class RocketServerFrameContext;
+class RocketServerHandler;
+class RocketServerFrameContext;
 
 using ClientCallbackUniquePtr = std::variant<
     std::unique_ptr<RocketStreamClientCallback>,
@@ -97,9 +100,8 @@ class IRocketServerConnection : public ManagedConnectionIf,
   };
 
   IRocketServerConnection()
-      : enableObservers_(THRIFT_FLAG(enable_rocket_connection_observers)),
-        observerContainer_(this) {}
-  ~IRocketServerConnection() = default;
+      : enableObservers_(THRIFT_FLAG(enable_rocket_connection_observers)) {}
+  ~IRocketServerConnection() override = default;
 
   class ReadResumableHandle {
    public:
@@ -294,10 +296,11 @@ class IRocketServerConnection : public ManagedConnectionIf,
   }
 
   IRocketServerConnectionObserverContainer* getObserverContainer() const {
-    if (enableObservers_) {
+    if (enableObservers_ && observerContainer_.has_value()) {
       return const_cast<IRocketServerConnectionObserverContainer*>(
-          &observerContainer_);
+          &*observerContainer_);
     }
+
     return nullptr;
   }
 
@@ -308,17 +311,35 @@ class IRocketServerConnection : public ManagedConnectionIf,
 
  protected:
   const bool enableObservers_;
-  IRocketServerConnectionObserverContainer observerContainer_;
+
+  // Container of observers for the RocketServerConnection.
+  //
+  // This member MUST be last in the list of members to ensure it is destroyed
+  // first, before any other members are destroyed. This ensures that observers
+  // can inspect any state available through public methods
+  // when destruction of the Rocket connection begins.
+  std::optional<IRocketServerConnectionObserverContainer> observerContainer_;
+
+  void initializeObserverContainer() {
+    if (enableObservers_) {
+      observerContainer_.emplace(this);
+    }
+  }
 
  private:
   friend class ReadPausableHandle;
   friend class ReadResumableHandle;
+  friend class RocketServerFrameContext;
 
   virtual void closeIfNeeded() = 0;
   virtual void incrementActivePauseHandlers() = 0;
   virtual void decrementActivePauseHandlers() = 0;
   virtual void tryResumeSocketReading() = 0;
   virtual void pauseSocketReading() = 0;
+  virtual void incInflightRequests() = 0;
+  virtual void decInflightRequests() = 0;
+  virtual void requestComplete() = 0;
+  virtual RocketServerHandler& getFrameHandler() = 0;
 };
 
 inline IRocketServerConnection::ReadResumableHandle::ReadResumableHandle(

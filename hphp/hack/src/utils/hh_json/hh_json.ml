@@ -81,6 +81,8 @@ let rec to_yojson (t : json) : Yojson.Safe.t =
   | JSON_Array l -> `List (List.map l ~f:to_yojson)
   | JSON_Object l -> `Assoc (List.map l ~f:(fun (k, v) -> (k, to_yojson v)))
 
+let yojson_of_json = to_yojson
+
 let of_opt of_t t =
   match t with
   | None -> JSON_Null

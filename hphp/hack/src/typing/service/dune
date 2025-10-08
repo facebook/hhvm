@@ -60,6 +60,18 @@
  (preprocess (pps ppx_deriving.std ppx_yojson_conv)))
 
 (library
+ (name truthiness_collector)
+ (wrapped false)
+ (modules truthiness_collector)
+ (libraries
+  collections
+  provider_context
+  relative_path
+  typing_ast
+  tast_env)
+ (preprocess (pps ppx_deriving.std ppx_yojson_conv)))
+
+(library
  (name map_reduce_ffi)
  (wrapped false)
  (modules
@@ -67,6 +79,7 @@
  (libraries
   reason_collector
   refinement_counter
+  truthiness_collector
   tast_collector
   tast_hashes
   type_counter)

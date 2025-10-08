@@ -60,6 +60,7 @@ let module_blacklist =
     "string_utils";
     "utils";
     "pos::set";
+    "truthiness_collector::internal";
   ]
 
 (* HACK: These submodules are defined inline in another module. We don't convert

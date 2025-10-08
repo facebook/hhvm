@@ -27,6 +27,8 @@ val of_yojson_opt : Yojson.Safe.t option -> json
 
 val to_yojson : json -> Yojson.Safe.t
 
+val yojson_of_json : json -> Yojson.Safe.t
+
 val of_opt : ('a -> json) -> 'a option -> json
 
 (* A function conforming to `show`'s pretty printing signature;

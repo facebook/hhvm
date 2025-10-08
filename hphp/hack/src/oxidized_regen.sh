@@ -165,6 +165,7 @@ run_hh_oxidize \
   hphp/hack/src/search/utils/searchTypes.ml                                   \
   hphp/hack/src/typing/service/reason_collector.ml                            \
   hphp/hack/src/typing/service/refinement_counter.ml                           \
+  hphp/hack/src/typing/service/truthiness_collector.ml                         \
   hphp/hack/src/typing/service/tast_collector.ml                              \
   hphp/hack/src/typing/service/tast_hashes.ml                                 \
   hphp/hack/src/typing/service/type_counter.ml                                \

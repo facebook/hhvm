@@ -1,0 +1,76 @@
+{
+  "truthiness_collector": {
+    "test.php:12:12:15": {
+      "ty_json": "{\"src_pos\":{\"filename\":\"test.php\",\"line\":3,\"char_start\":26,\"char_end\":28},\"kind\":\"primitive\",\"name\":\"int\"}",
+      "when_called_dynamically": null,
+      "position_kind": "Do",
+      "position": "test.php:12:12:15"
+    },
+    "test.php:13:16:19": {
+      "ty_json": "{\"src_pos\":{\"filename\":\"test.php\",\"line\":3,\"char_start\":26,\"char_end\":28},\"kind\":\"primitive\",\"name\":\"int\"}",
+      "when_called_dynamically": null,
+      "position_kind": "For",
+      "position": "test.php:13:16:19"
+    },
+    "test.php:15:12:15": {
+      "ty_json": "{\"src_pos\":{\"filename\":\"test.php\",\"line\":3,\"char_start\":26,\"char_end\":28},\"kind\":\"primitive\",\"name\":\"int\"}",
+      "when_called_dynamically": null,
+      "position_kind": "&&",
+      "position": "test.php:15:12:15"
+    },
+    "test.php:16:3:6": {
+      "ty_json": "{\"src_pos\":{\"filename\":\"test.php\",\"line\":3,\"char_start\":26,\"char_end\":28},\"kind\":\"primitive\",\"name\":\"int\"}",
+      "when_called_dynamically": null,
+      "position_kind": "&&",
+      "position": "test.php:16:3:6"
+    },
+    "test.php:17:12:15": {
+      "ty_json": "{\"src_pos\":{\"filename\":\"test.php\",\"line\":3,\"char_start\":26,\"char_end\":28},\"kind\":\"primitive\",\"name\":\"int\"}",
+      "when_called_dynamically": null,
+      "position_kind": "||",
+      "position": "test.php:17:12:15"
+    },
+    "test.php:18:3:6": {
+      "ty_json": "{\"src_pos\":{\"filename\":\"test.php\",\"line\":3,\"char_start\":26,\"char_end\":28},\"kind\":\"primitive\",\"name\":\"int\"}",
+      "when_called_dynamically": null,
+      "position_kind": "||",
+      "position": "test.php:18:3:6"
+    },
+    "test.php:19:4:7": {
+      "ty_json": "{\"src_pos\":{\"filename\":\"test.php\",\"line\":3,\"char_start\":26,\"char_end\":28},\"kind\":\"primitive\",\"name\":\"int\"}",
+      "when_called_dynamically": null,
+      "position_kind": "!",
+      "position": "test.php:19:4:7"
+    },
+    "test.php:20:3:6": {
+      "ty_json": "{\"src_pos\":{\"filename\":\"test.php\",\"line\":3,\"char_start\":26,\"char_end\":28},\"kind\":\"primitive\",\"name\":\"int\"}",
+      "when_called_dynamically": null,
+      "position_kind": "Ternary",
+      "position": "test.php:20:3:6"
+    },
+    "test.php:21:3:6": {
+      "ty_json": "{\"src_pos\":{\"filename\":\"test.php\",\"line\":3,\"char_start\":26,\"char_end\":28},\"kind\":\"primitive\",\"name\":\"int\"}",
+      "when_called_dynamically": null,
+      "position_kind": "Ternary",
+      "position": "test.php:21:3:6"
+    },
+    "test.php:29:7:15": {
+      "ty_json": "{\"src_pos\":{\"filename\":\"test.php\",\"line\":25,\"char_start\":38,\"char_end\":38},\"kind\":\"union\",\"args\":[{\"src_pos\":{\"filename\":\"test.php\",\"line\":25,\"char_start\":38,\"char_end\":38},\"kind\":\"dynamic\"},{\"src_pos\":{\"filename\":\"test.php\",\"line\":28,\"char_start\":18,\"char_end\":20},\"kind\":\"primitive\",\"name\":\"int\"}]}",
+      "when_called_dynamically": "{\"src_pos\":{\"filename\":\"test.php\",\"line\":29,\"char_start\":11,\"char_end\":15},\"kind\":\"dynamic\"}",
+      "position_kind": "If",
+      "position": "test.php:29:7:15"
+    },
+    "test.php:6:7:10": {
+      "ty_json": "{\"src_pos\":{\"filename\":\"test.php\",\"line\":3,\"char_start\":26,\"char_end\":28},\"kind\":\"primitive\",\"name\":\"int\"}",
+      "when_called_dynamically": null,
+      "position_kind": "If",
+      "position": "test.php:6:7:10"
+    },
+    "test.php:8:10:13": {
+      "ty_json": "{\"src_pos\":{\"filename\":\"test.php\",\"line\":3,\"char_start\":26,\"char_end\":28},\"kind\":\"primitive\",\"name\":\"int\"}",
+      "when_called_dynamically": null,
+      "position_kind": "While",
+      "position": "test.php:8:10:13"
+    }
+  }
+}

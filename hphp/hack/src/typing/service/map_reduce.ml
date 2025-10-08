@@ -37,6 +37,7 @@ type map_reducer =
   | TypeCounter
   | ReasonCollector
   | RefinementCounter
+  | TruthinessCollector
 [@@deriving eq, ord, show, enum]
 
 [@@@warning "+32"]
@@ -48,6 +49,7 @@ type _ map_reducer_type =
   | TypeForTypeCounter : Type_counter.t map_reducer_type
   | TypeForReasonCollector : Reason_collector.t map_reducer_type
   | TypeForRefinementCounter : Refinement_counter.t map_reducer_type
+  | TypeForTruthinessCollector : Truthiness_collector.t map_reducer_type
 
 (** Existential wrapper around the type for a map-reducer. *)
 type any_map_reducer_type =
@@ -62,6 +64,7 @@ let type_for : map_reducer -> any_map_reducer_type = function
   | TypeCounter -> TypeForAny TypeForTypeCounter
   | ReasonCollector -> TypeForAny TypeForReasonCollector
   | RefinementCounter -> TypeForAny TypeForRefinementCounter
+  | TruthinessCollector -> TypeForAny TypeForTruthinessCollector
 
 (** A mapping from a map-reducer type to a compatible implementation operating
 on data for that type.
@@ -75,6 +78,7 @@ let implementation_for (type t) (mr : t map_reducer_type) :
   | TypeForTypeCounter -> (module Type_counter)
   | TypeForReasonCollector -> (module Reason_collector)
   | TypeForRefinementCounter -> (module Refinement_counter)
+  | TypeForTruthinessCollector -> (module Truthiness_collector)
 
 module MRMap = WrappedMap.Make (struct
   type t = map_reducer
@@ -107,6 +111,8 @@ let refine_map_reducer_result
   | (TypeForReasonCollector, _) -> None
   | (TypeForRefinementCounter, TypeForRefinementCounter) -> Some (xv, yv)
   | (TypeForRefinementCounter, _) -> None
+  | (TypeForTruthinessCollector, TypeForTruthinessCollector) -> Some (xv, yv)
+  | (TypeForTruthinessCollector, _) -> None
 
 let all_of_map_reducer : map_reducer list =
   List.init
@@ -184,6 +190,8 @@ let to_ffi xs =
       { s with reason_collector = Some reason_collector }
     | MapReducerResult (TypeForRefinementCounter, refinement_counter) ->
       { s with refinement_counter = Some refinement_counter }
+    | MapReducerResult (TypeForTruthinessCollector, truthiness_collector) ->
+      { s with truthiness_collector = Some truthiness_collector }
   in
   MRMap.fold f xs Map_reduce_ffi.empty
 
@@ -195,6 +203,7 @@ let of_ffi s =
           type_counter;
           reason_collector;
           refinement_counter;
+          truthiness_collector;
         } =
     s
   in
@@ -215,6 +224,10 @@ let of_ffi s =
         Option.map refinement_counter ~f:(fun refinement_counter ->
             ( RefinementCounter,
               MapReducerResult (TypeForRefinementCounter, refinement_counter) ));
+        Option.map truthiness_collector ~f:(fun truthiness_collector ->
+            ( TruthinessCollector,
+              MapReducerResult (TypeForTruthinessCollector, truthiness_collector)
+            ));
       ]
   in
   MRMap.of_list elems

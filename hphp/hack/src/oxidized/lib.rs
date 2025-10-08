@@ -121,6 +121,7 @@ pub use r#gen::search_types;
 pub use r#gen::shallow_decl_defs;
 pub use r#gen::tast_collector;
 pub use r#gen::tast_hashes;
+pub use r#gen::truthiness_collector;
 pub use r#gen::type_counter;
 pub use r#gen::type_parameter_env;
 pub use r#gen::typechecker_options;

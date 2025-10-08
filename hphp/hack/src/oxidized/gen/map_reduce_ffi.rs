@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9bffa98ad59558aefddd8a4339f55080>>
+// @generated SignedSource<<e7b81189886d35aaedea4eea24df8fa4>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -48,4 +48,6 @@ pub struct MapReduceFfi {
     pub reason_collector: Option<reason_collector::ReasonCollector>,
     #[rust_to_ocaml(attr = "yojson.option")]
     pub refinement_counter: Option<refinement_counter::RefinementCounter>,
+    #[rust_to_ocaml(attr = "yojson.option")]
+    pub truthiness_collector: Option<truthiness_collector::TruthinessCollector>,
 }

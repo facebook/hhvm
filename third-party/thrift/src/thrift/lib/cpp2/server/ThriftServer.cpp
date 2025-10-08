@@ -738,6 +738,10 @@ void ThriftServer::setup() {
     // the kernel.)
     ServerBootstrap::getSockets()[0]->getAddress(&addresses_.at(0));
 
+    // Log the port(s) that the server is listening on
+    XLOG_IF(INFO, infoLoggingEnabled_)
+        << "ThriftServer listening on address/port: " << getAddressAsString();
+
     // we enable zerocopy for the server socket if the
     // zeroCopyEnableFunc_ is valid
     bool useZeroCopy = !!zeroCopyEnableFunc_;

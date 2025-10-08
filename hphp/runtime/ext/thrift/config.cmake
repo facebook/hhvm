@@ -15,6 +15,7 @@ HHVM_DEFINE_EXTENSION("thrift"
     spec-holder.h
     transport.h
     type_wrapper.h
+    IOBufFreeCallBack.h
   DEPENDS
     libThrift
   SYSTEMLIB

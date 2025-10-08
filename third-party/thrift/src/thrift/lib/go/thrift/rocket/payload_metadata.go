@@ -21,6 +21,7 @@ import (
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/format"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 	"github.com/rsocket/rsocket-go/payload"
 )
 
@@ -37,4 +38,26 @@ func DecodePayloadMetadata(msg payload.Payload, result types.ReadableStruct) err
 	}
 
 	return nil
+}
+
+// EncodePayloadMetadataAndData encodes payload metadata and data.
+func EncodePayloadMetadataAndData(
+	metadata types.WritableStruct,
+	dataBytes []byte,
+	dataCompression rpcmetadata.CompressionAlgorithm,
+) (payload.Payload, error) {
+	metadataBytes, err := format.EncodeCompact(metadata)
+	if err != nil {
+		return nil, err
+	}
+
+	if dataBytes == nil {
+		return payload.New(nil, metadataBytes), nil
+	}
+
+	dataBytes, err = MaybeCompress(dataBytes, dataCompression)
+	if err != nil {
+		return nil, err
+	}
+	return payload.New(dataBytes, metadataBytes), nil
 }

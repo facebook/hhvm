@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"maps"
 
-	"github.com/facebook/fbthrift/thrift/lib/go/thrift/format"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 	"github.com/rsocket/rsocket-go/payload"
@@ -49,16 +48,7 @@ func EncodeRequestPayload(
 		SetCompression(&compression).
 		SetOtherMetadata(headersCopy)
 
-	metadataBytes, err := format.EncodeCompact(metadata)
-	if err != nil {
-		return nil, err
-	}
-	dataBytes, err = MaybeCompress(dataBytes, compression)
-	if err != nil {
-		return nil, err
-	}
-	pay := payload.New(dataBytes, metadataBytes)
-	return pay, nil
+	return EncodePayloadMetadataAndData(metadata, dataBytes, compression)
 }
 
 func GetRequestRpcMetadataHeaders(metadata *rpcmetadata.RequestRpcMetadata) map[string]string {

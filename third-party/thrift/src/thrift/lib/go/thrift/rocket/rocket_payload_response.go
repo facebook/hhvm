@@ -19,7 +19,6 @@ package rocket
 import (
 	"fmt"
 
-	"github.com/facebook/fbthrift/thrift/lib/go/thrift/format"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 	"github.com/rsocket/rsocket-go/payload"
@@ -91,19 +90,8 @@ func EncodeResponsePayload(
 		SetCompression(&compression).
 		SetPayloadMetadata(payloadMetadata)
 
-	metadataBytes, err := format.EncodeCompact(metadata)
-	if err != nil {
-		return nil, err
-	}
 	if messageType == types.EXCEPTION {
-		return payload.New(nil, metadataBytes), nil
+		return EncodePayloadMetadataAndData(metadata, nil /* dataBytes */, compression)
 	}
-
-	dataBytes, err = MaybeCompress(dataBytes, compression)
-	if err != nil {
-		return nil, err
-	}
-
-	pay := payload.New(dataBytes, metadataBytes)
-	return pay, nil
+	return EncodePayloadMetadataAndData(metadata, dataBytes, compression)
 }

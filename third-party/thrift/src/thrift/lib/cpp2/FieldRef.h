@@ -19,6 +19,7 @@
 #include <initializer_list>
 #include <memory>
 #include <optional>
+#include <string_view>
 #include <type_traits>
 #include <folly/CPortability.h>
 #include <folly/CppAttributes.h>
@@ -45,6 +46,10 @@ constexpr static bool has_value_type_v =
 
 [[noreturn]] void throw_on_bad_optional_field_access();
 [[noreturn]] void throw_on_bad_union_field_access();
+[[noreturn]] void throw_on_bad_union_field_access(
+    std::string_view union_name,
+    int16_t accessed_field_id,
+    int16_t active_field_id);
 [[noreturn]] void throw_on_nullptr_dereferencing();
 
 struct ensure_isset_unsafe_fn;
@@ -1783,8 +1788,12 @@ namespace detail {
 
 struct union_field_ref_owner_vtable {
   using reset_t = void(void*);
+  using get_active_field_t = int16_t(const void*);
+  using get_class_name_t = std::string_view();
 
   reset_t* reset;
+  get_active_field_t* get_active_field;
+  get_class_name_t* get_class_name;
 };
 
 struct union_field_ref_owner_vtable_impl {
@@ -1792,18 +1801,31 @@ struct union_field_ref_owner_vtable_impl {
   static void reset(void* obj) {
     apache::thrift::clear(*static_cast<T*>(obj));
   }
+  template <typename T>
+  static int16_t active_field(const void* obj) {
+    return static_cast<int16_t>(static_cast<const T*>(obj)->getType());
+  }
+  template <typename T>
+  static constexpr std::string_view class_name() {
+    return st::private_access::__fbthrift_get_class_name<T>();
+  }
 };
 
 template <typename T>
 inline constexpr union_field_ref_owner_vtable //
-    union_field_ref_owner_vtable_for{nullptr};
+    union_field_ref_owner_vtable_for{};
 template <typename T>
 inline constexpr union_field_ref_owner_vtable //
     union_field_ref_owner_vtable_for<T&>{
-        &union_field_ref_owner_vtable_impl::reset<T>};
+        &union_field_ref_owner_vtable_impl::reset<T>,
+        &union_field_ref_owner_vtable_impl::active_field<T>,
+        &union_field_ref_owner_vtable_impl::class_name<T>};
 template <typename T>
 inline constexpr union_field_ref_owner_vtable //
-    union_field_ref_owner_vtable_for<const T&>{nullptr};
+    union_field_ref_owner_vtable_for<const T&>{
+        nullptr,
+        &union_field_ref_owner_vtable_impl::active_field<T>,
+        &union_field_ref_owner_vtable_impl::class_name<T>};
 
 } // namespace detail
 
@@ -1943,7 +1965,10 @@ class union_field_ref {
  private:
   FOLLY_ERASE void throw_if_unset() const {
     if (!has_value()) {
-      apache::thrift::detail::throw_on_bad_union_field_access();
+      apache::thrift::detail::throw_on_bad_union_field_access(
+          vtable_.get_class_name(),
+          field_type_,
+          vtable_.get_active_field(owner_));
     }
   }
 

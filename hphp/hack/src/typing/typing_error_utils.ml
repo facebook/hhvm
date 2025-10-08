@@ -5499,6 +5499,9 @@ end = struct
         | Core.Either.First str -> str ^ acc
         | Either.Second (Custom_error_eval.Value.Name (_, nm)) ->
           Markdown_lite.md_codify nm ^ acc
+        | Either.Second (Custom_error_eval.Value.File rel_path) ->
+          let path = Relative_path.to_absolute rel_path in
+          Markdown_lite.md_codify path ^ acc
         | Either.Second (Custom_error_eval.Value.Ty ty) ->
           (Markdown_lite.md_codify
           @@ Typing_print.full_strip_ns_i ~hide_internals:true env

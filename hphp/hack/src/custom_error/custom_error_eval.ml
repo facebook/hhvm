@@ -17,6 +17,7 @@ module Value = struct
   type t =
     | Ty of (Ty.locl_ty[@compare.ignore] [@sexp.opaque])
     | Name of ((Pos_or_decl.t[@opaque]) * string)
+    | File of (Relative_path.t[@opaque])
   [@@deriving compare, sexp]
 end
 
@@ -72,10 +73,17 @@ module Env = struct
 
   let add_ty t ~lbl ~ty = add t ~lbl ~data:(Value.Ty ty)
 
+  let add_file t ~lbl ~file = add t ~lbl ~data:(Value.File file)
+
   let get (Env t) lbl = Map.find_exn t lbl
 end
 
 (* -- Helpers --------------------------------------------------------------- *)
+
+let match_opt match_with patt ~scrut ~env =
+  match scrut with
+  | None -> Match.matched env
+  | Some scrut -> match_with patt ~scrut ~env
 
 let match_exists patt ~matches ~scruts ~env =
   let rec aux = function
@@ -154,6 +162,7 @@ let matches_member_kind_static patt_kind ~scrut ~env =
 let matches_patt_string_help t ~scrut =
   let open Patt_string in
   let rec aux = function
+    | Wildcard -> true
     | Exactly str -> String.equal scrut str
     | Starts_with prefix -> String.is_prefix scrut ~prefix
     | Ends_with suffix -> String.is_suffix scrut ~suffix
@@ -166,7 +175,7 @@ let matches_patt_string_help t ~scrut =
 
 (* Since this pattern can never bind a variable we can't produce a match
    error. We use this invariant to simply the inner matching function *)
-let matches_string ?(env = Env.empty) t ~scrut =
+let matches_string t ~scrut ~env =
   if matches_patt_string_help t ~scrut then
     Match.matched env
   else
@@ -211,6 +220,53 @@ and matches_namespace patt_namespace ~scrut ~env =
       matches_string elt ~scrut:next ~env >>= fun _ ->
       matches_namespace prefix ~scrut:rest ~env)
   | _ -> Match.no_match
+
+(* -- Files ----------------------------------------------------------------- *)
+
+let rec matches_file_path t ~scrut ~env =
+  let open Patt_file in
+  match (t, scrut) with
+  | (Dot, []) -> Match.matched env
+  | (Dot, _) -> Match.no_match
+  | (Slash { prefix; segment }, next :: rest) ->
+    Match.(
+      matches_string segment ~scrut:next ~env >>= fun env ->
+      matches_file_path prefix ~scrut:rest ~env)
+  | (Slash _, []) -> Match.no_match
+
+let rec matches_file t ~(scrut : Relative_path.t) ~env =
+  let open Patt_file in
+  match t with
+  | Wildcard -> Match.matched env
+  | As { lbl; patt } ->
+    Match.(
+      matches_file patt ~scrut ~env
+      |> map_err ~f:(fun _ -> assert false)
+      |> map ~f:(Env.add_file ~lbl ~file:scrut))
+  | Invalid { errs; _ } -> Match.match_err errs
+  | Name { patt_file_path; patt_file_name; patt_file_extension } ->
+    let path = String.split ~on:'/' Relative_path.(suffix scrut) in
+    (match List.rev path with
+    | name :: scrut_path ->
+      let (scrut_name, scrut_extensionopt) =
+        match String.lsplit2 ~on:'.' name with
+        | Some (name, ext) -> (name, Some ext)
+        | None -> (name, None)
+      in
+      Match.(
+        matches_string patt_file_name ~scrut:scrut_name ~env >>= fun env ->
+        match_opt
+          matches_string
+          patt_file_extension
+          ~scrut:scrut_extensionopt
+          ~env
+        >>= fun env ->
+        Option.value_map
+          patt_file_path
+          ~default:(Match.matched env)
+          ~f:(fun patt_file_path ->
+            matches_file_path patt_file_path ~scrut:scrut_path ~env))
+    | _ -> Match.no_match)
 
 (* -- Types ----------------------------------------------------------------- *)
 
@@ -416,7 +472,7 @@ let matches_typing_error t ~scrut ~env =
   and aux_primary t err_prim ~env =
     match (t, err_prim) with
     | (Any_prim, _) -> Match.matched env
-    (* -- Member not found patterns ------------------------------------------ *)
+    (* -- Member not found patterns ----------------------------------------- *)
     | ( Member_not_found
           {
             patt_is_static;
@@ -449,6 +505,65 @@ let matches_typing_error t ~scrut ~env =
         matches_string patt_class_name ~scrut:class_name ~env >>= fun env ->
         matches_string patt_member_name ~scrut:member_name ~env)
     | (Member_not_found _, _) -> Match.no_match
+    (* -- Module / package errors ------------------------------------------- *)
+    | ( Module_cross_package_access
+          {
+            patt_use_file;
+            patt_decl_file;
+            patt_module_file;
+            patt_package_file;
+            patt_current_module;
+            patt_current_package;
+            patt_target_module;
+            patt_target_package;
+          },
+        Typing_error.Primary.Modules
+          (Typing_error.Primary.Modules.Module_cross_pkg_access
+            {
+              pos;
+              decl_pos;
+              module_pos;
+              package_pos;
+              current_module_opt;
+              current_package_opt;
+              target_module_opt;
+              target_package_opt;
+            }) ) ->
+      Match.(
+        matches_file patt_use_file ~scrut:(Pos.filename pos) ~env >>= fun env ->
+        matches_file patt_decl_file ~scrut:(Pos_or_decl.filename decl_pos) ~env
+        >>= fun env ->
+        matches_file
+          patt_module_file
+          ~scrut:(Pos_or_decl.filename module_pos)
+          ~env
+        >>= fun env ->
+        matches_file patt_package_file ~scrut:(Pos.filename package_pos) ~env
+        >>= fun env ->
+        match_opt
+          matches_string
+          patt_current_module
+          ~scrut:current_module_opt
+          ~env
+        >>= fun env ->
+        match_opt
+          matches_string
+          patt_current_package
+          ~scrut:current_package_opt
+          ~env
+        >>= fun env ->
+        match_opt
+          matches_string
+          patt_target_module
+          ~scrut:target_module_opt
+          ~env
+        >>= fun env ->
+        match_opt
+          matches_string
+          patt_target_package
+          ~scrut:target_package_opt
+          ~env)
+    | (Module_cross_package_access _, _) -> Match.no_match
   (* -- Secondary errors ---------------------------------------------------- *)
   and aux_secondary t err_snd ~env =
     match (t, err_snd) with

@@ -12,6 +12,7 @@ module Value : sig
   type t =
     | Ty of Typing_defs_core.locl_ty
     | Name of (Pos_or_decl.t * string)
+    | File of Relative_path.t
   [@@deriving compare, sexp]
 end
 

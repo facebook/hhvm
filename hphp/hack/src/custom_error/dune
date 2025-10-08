@@ -9,6 +9,7 @@
    error_message
    patt_binding_ty
    patt_error
+   patt_file
    patt_naming_error
    patt_typing_error
    patt_locl_ty

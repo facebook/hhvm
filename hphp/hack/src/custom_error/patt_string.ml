@@ -8,6 +8,7 @@
 open Core
 
 type t =
+  | Wildcard
   | Exactly of string
   | Starts_with of string
   | Ends_with of string

@@ -931,6 +931,78 @@ let test_member_complex_string_patterns _ =
     (Eval.eval_typing_error custom_config ~err)
     [[Either.First "React render method not found"]]
 
+(* ============================================================================ *)
+(* Module_cross_package_access Pattern Tests *)
+(* ============================================================================ *)
+
+let test_patt_use_file_pattern _ =
+  let open Typing_error in
+  let pos_file = Relative_path.from_root ~suffix:"foo/bar/baz.php" in
+  let pos =
+    Pos.make_from_lnum_bol_offset
+      ~pos_file
+      ~pos_start:(0, 0, 0)
+      ~pos_end:(0, 0, 0)
+  in
+  let prim_err =
+    Primary.Modules
+      (Primary.Modules.Module_cross_pkg_access
+         {
+           pos;
+           decl_pos = Pos_or_decl.none;
+           module_pos = Pos_or_decl.none;
+           package_pos = Pos.none;
+           current_module_opt = None;
+           current_package_opt = None;
+           target_module_opt = None;
+           target_package_opt = None;
+         })
+  in
+  let err = Typing_error.primary prim_err in
+  (* match 'foo/*' *)
+  let patt_file_path =
+    Some
+      Patt_file.(
+        Slash
+          {
+            prefix = Slash { prefix = Dot; segment = Patt_string.Exactly "foo" };
+            segment = Patt_string.Wildcard;
+          })
+  and patt_file_name = Patt_string.Starts_with "b"
+  and patt_file_extension = Patt_string.Exactly "php" in
+  let patt_use_file =
+    Patt_file.Name { patt_file_path; patt_file_name; patt_file_extension }
+  in
+  let patt_primary =
+    Patt_typing_error.Primary
+      (Patt_typing_error.Module_cross_package_access
+         {
+           patt_use_file;
+           patt_decl_file = Patt_file.Wildcard;
+           patt_module_file = Patt_file.Wildcard;
+           patt_package_file = Patt_file.Wildcard;
+           patt_current_module = Patt_string.Wildcard;
+           patt_current_package = Patt_string.Wildcard;
+           patt_target_module = Patt_string.Wildcard;
+           patt_target_package = Patt_string.Wildcard;
+         })
+  in
+  let patt = Custom_error.Error_v2 (Patt_error.Typing patt_primary) in
+
+  let error_message =
+    Custom_error.Message_v1 Error_message.{ message = [Lit "Boom"] }
+  in
+  let custom_err = Custom_error.{ name = "test"; patt; error_message } in
+  let custom_config =
+    Custom_error_config.{ valid = [custom_err]; invalid = [] }
+  in
+
+  let open Core in
+  assert_equal
+    ~cmp:[%compare.equal: (string, Eval.Value.t) Either.t list list]
+    (Eval.eval_typing_error custom_config ~err)
+    [[Either.First "Boom"]]
+
 (* ~~ Naming errors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
 let test_unbound_name_any_context _ =
@@ -1067,6 +1139,7 @@ let tests =
     >:: test_unbound_name_function_context_good;
     "test_unbound_name_function_context_bad"
     >:: test_unbound_name_function_context_bad;
+    "test_patt_use_file_pattern" >:: test_patt_use_file_pattern;
   ]
 
 let () = "custom_error_unit_tests" >::: tests |> run_test_tt_main

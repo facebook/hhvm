@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<456023d1a3d5d7ed7ed01f44f538f96e>>
+// @generated SignedSource<<5d4f9439bf9e6a3258857c1c47f503a8>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -36,6 +36,7 @@ use crate::*;
 #[rust_to_ocaml(attr = "deriving (compare, eq, sexp, show)")]
 #[repr(C, u8)]
 pub enum PattString {
+    Wildcard,
     Exactly(String),
     #[rust_to_ocaml(name = "Starts_with")]
     StartsWith(String),

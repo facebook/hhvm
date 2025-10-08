@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0d92673cf3de1b89e899d120a0e7f251>>
+// @generated SignedSource<<c7691cf4a16619c50db1cd035faa1029>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -89,6 +89,18 @@ pub enum Primary {
         class_name: patt_string::PattString,
         member_name: patt_string::PattString,
         visibility: Option<VisibilityPattern>,
+    },
+    #[rust_to_ocaml(prefix = "patt_")]
+    #[rust_to_ocaml(name = "Module_cross_package_access")]
+    ModuleCrossPackageAccess {
+        use_file: patt_file::PattFile,
+        decl_file: patt_file::PattFile,
+        module_file: patt_file::PattFile,
+        package_file: patt_file::PattFile,
+        current_module: patt_string::PattString,
+        current_package: patt_string::PattString,
+        target_module: patt_string::PattString,
+        target_package: patt_string::PattString,
     },
 }
 

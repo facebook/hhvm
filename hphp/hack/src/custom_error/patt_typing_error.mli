@@ -36,6 +36,17 @@ and primary =
       patt_member_name: Patt_string.t; (* Member name pattern *)
       patt_visibility: visibility_pattern option; (* Optional visibility *)
     }
+  (* Module / package errors *)
+  | Module_cross_package_access of {
+      patt_use_file: Patt_file.t; (* The file in which the error was raised *)
+      patt_decl_file: Patt_file.t; (* The accessed module/package is declared *)
+      patt_module_file: Patt_file.t;
+      patt_package_file: Patt_file.t;
+      patt_current_module: Patt_string.t;
+      patt_current_package: Patt_string.t;
+      patt_target_module: Patt_string.t;
+      patt_target_package: Patt_string.t;
+    }
 
 and static_pattern =
   | Static_only (* Match only static members *)

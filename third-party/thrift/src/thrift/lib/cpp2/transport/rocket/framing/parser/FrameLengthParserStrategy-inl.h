@@ -22,9 +22,7 @@
 #include <thrift/lib/cpp2/transport/rocket/framing/Util.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/FrameLengthParserStrategy.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 template <class T>
 FrameLengthParserStrategy<T>::~FrameLengthParserStrategy() {
@@ -128,6 +126,4 @@ void FrameLengthParserStrategy<T>::tryResize() {
   }
 }
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

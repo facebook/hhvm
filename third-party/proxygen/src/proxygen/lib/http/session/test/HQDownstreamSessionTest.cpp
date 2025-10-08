@@ -1300,7 +1300,7 @@ TEST_P(HQDownstreamSessionTest, WriteNonWritableStream) {
   });
   // Once the eof is written and no more bytes remain, we should never
   // call flow control methods.
-  EXPECT_EQ(socketDriver_->flowControlAccess_.contains(idh.first), 0);
+  EXPECT_FALSE(socketDriver_->flowControlAccess_.contains(idh.first));
   hqSession_->closeWhenIdle();
 }
 

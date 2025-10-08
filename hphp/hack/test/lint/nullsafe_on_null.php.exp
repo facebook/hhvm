@@ -1,0 +1,2 @@
+File "nullsafe_on_null.php", line 4, characters 8-20:
+You are using the `?->` operator but this value is always null. It's likely you did not intend this value to be always null. (Lint[5654])

@@ -118,4 +118,6 @@ module Codes = struct
   let cast_non_primitive = 5652
 
   let class_pointer_to_string = 5653
+
+  let nullsafe_on_null = 5654
 end

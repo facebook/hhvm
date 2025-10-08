@@ -38,6 +38,7 @@ let typed_linters tcopt =
     Linter_class_overrides_trait.handler;
     Linter_expr_tree_types.handler;
     Linter_nullsafe_not_needed.handler;
+    Linter_nullsafe_on_null.handler;
     Linter_loose_unsafe_cast.handler;
     Linter_redundant_cast.handler;
     Linter_pointless_booleans.handler;

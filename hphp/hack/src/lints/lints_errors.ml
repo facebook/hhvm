@@ -164,6 +164,13 @@ let nullsafe_not_needed pos =
   ^ Markdown_lite.md_codify "->"
   ^ " operator instead."
 
+let nullsafe_on_null pos =
+  Lints.add Codes.nullsafe_on_null Lint_warning pos
+  @@ "You are using the "
+  ^ Markdown_lite.md_codify "?->"
+  ^ " operator but this value is always null."
+  ^ " It's likely you did not intend this value to be always null."
+
 let parse_error code pos msg = Lints.add code Lint_error pos msg
 
 let rec prettify_class_list names =

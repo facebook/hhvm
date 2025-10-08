@@ -20,6 +20,9 @@
 #include <thrift/lib/python/types_api.h> // @manual
 
 #include <cstddef>
+#ifdef Py_GIL_DISABLED
+#include <mutex>
+#endif
 
 #include <folly/Indestructible.h>
 #include <folly/Range.h>
@@ -170,6 +173,10 @@ UniquePyObjectPtr getDefaultValueForImmutableField(
   static folly::Indestructible<
       folly::F14FastMap<const detail::TypeInfo*, PyObject*>>
       defaultValueCache;
+#ifdef Py_GIL_DISABLED
+  static std::recursive_mutex m;
+  std::lock_guard<std::recursive_mutex> guard(m);
+#endif
   auto cachedDefaultValueIt = defaultValueCache->find(typeInfo);
   if (cachedDefaultValueIt != defaultValueCache->end()) {
     UniquePyObjectPtr value(cachedDefaultValueIt->second);

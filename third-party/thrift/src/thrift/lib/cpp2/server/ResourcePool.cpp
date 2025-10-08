@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
+#include <chrono>
 #include <stdexcept>
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/executors/MeteredExecutor.h>
 #include <folly/executors/ThreadPoolExecutor.h>
 #include <folly/executors/VirtualExecutor.h>
+#include <folly/logging/xlog.h>
 #include <thrift/lib/cpp2/server/ResourcePool.h>
+
+using namespace std::chrono_literals;
 
 namespace apache::thrift {
 namespace {
@@ -95,9 +99,10 @@ void ResourcePool::stop() {
       // that the executor is stopped, but this ResourcePool was created with
       // joinExecutorOnStop = true.
       auto& exe = *executor_.get();
-      LOG(WARNING) << "ResourcePool \"" << name_
-                   << "\" could not join executor threads. Executor type: "
-                   << folly::demangle(typeid(exe)).toStdString();
+      XLOG_N_PER_MS(WARNING, 10, 1min)
+          << "ResourcePool \"" << name_
+          << "\" could not join executor threads. Executor type: "
+          << folly::demangle(typeid(exe)).toStdString();
     }
   }
 }

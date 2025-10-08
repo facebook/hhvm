@@ -53,7 +53,7 @@ def import_container_wrappers(flavor: Flavor) -> str:
 
 
 @click.pass_context
-def list_init_statement(ctx, flavor: Flavor) -> str:
+def int_list_init_statement(ctx, flavor: Flavor) -> str:
     size = ctx.params["size"]
     if flavor == Flavor.MUTABLE_PYTHON:
         return f"inst = MyStruct(val_list=to_thrift_list(list(range({size}))))"
@@ -62,12 +62,34 @@ def list_init_statement(ctx, flavor: Flavor) -> str:
 
 
 @click.pass_context
-def set_init_statement(ctx, flavor: Flavor) -> str:
+def str_list_init_statement(ctx, flavor: Flavor) -> str:
+    size = ctx.params["size"]
+    if flavor == Flavor.MUTABLE_PYTHON:
+        return (
+            f"inst = MyStruct(str_list=to_thrift_list([str(i) for i in range({size})]))"
+        )
+
+    return f"inst = MyStruct(str_list=[str(i) for i in range({size})])"
+
+
+@click.pass_context
+def int_set_init_statement(ctx, flavor: Flavor) -> str:
     size = ctx.params["size"]
     if flavor == Flavor.MUTABLE_PYTHON:
         return f"inst = MyStruct(val_set=to_thrift_set(set(range({size}))))"
 
     return f"inst = MyStruct(val_set=set(range({size})))"
+
+
+@click.pass_context
+def str_set_init_statement(ctx, flavor: Flavor) -> str:
+    size = ctx.params["size"]
+    if flavor == Flavor.MUTABLE_PYTHON:
+        return (
+            f"inst = MyStruct(str_set=to_thrift_set([str(i) for i in range({size})]))"
+        )
+
+    return f"inst = MyStruct(str_set=[str(i) for i in range({size})])"
 
 
 @click.pass_context
@@ -166,15 +188,27 @@ def deserialze_statement(flavor: Flavor) -> str:
 
 
 @click.pass_context
-def list_random_access_statement(ctx, flavor: Flavor) -> str:
+def int_list_random_access_statement(ctx, flavor: Flavor) -> str:
     size = ctx.params["size"]
     return f"_ = inst.val_list[{size//2}]"
 
 
 @click.pass_context
-def set_random_access_statement(ctx, flavor: Flavor) -> str:
+def str_list_random_access_statement(ctx, flavor: Flavor) -> str:
+    size = ctx.params["size"]
+    return f"_ = inst.str_list[{size//2}]"
+
+
+@click.pass_context
+def int_set_random_access_statement(ctx, flavor: Flavor) -> str:
     size = ctx.params["size"]
     return f"{size//2} in inst.val_set"
+
+
+@click.pass_context
+def str_set_random_access_statement(ctx, flavor: Flavor) -> str:
+    size = ctx.params["size"]
+    return f"{size//2} in inst.str_set"
 
 
 @click.pass_context
@@ -190,16 +224,30 @@ def nested_map_random_access_statement(ctx, flavor: Flavor) -> str:
     return f"_ = inst.val_map_structs[{size//2}].vals[{inner_size//2}]"
 
 
-def list_iterate_statement(flavor: Flavor) -> str:
+def int_list_iterate_statement(flavor: Flavor) -> str:
     return """
 for _ in inst.val_list:
     pass
 """
 
 
-def set_iterate_statement(flavor: Flavor) -> str:
+def str_list_iterate_statement(flavor: Flavor) -> str:
+    return """
+for _ in inst.str_list:
+    pass
+"""
+
+
+def int_set_iterate_statement(flavor: Flavor) -> str:
     return """
 for _ in inst.val_set:
+    pass
+"""
+
+
+def str_set_iterate_statement(flavor: Flavor) -> str:
+    return """
+for _ in inst.str_set:
     pass
 """
 
@@ -287,24 +335,46 @@ def benchmark_container(
 
 
 @click.pass_context
-def benchmark_list(ctx) -> None:
+def benchmark_int_list(ctx) -> None:
     size = ctx.params["size"]
     benchmark_container(
-        f"List ({size} elements)",
-        list_init_statement,
-        list_random_access_statement,
-        list_iterate_statement,
+        f"List<i64> ({size} elements)",
+        int_list_init_statement,
+        int_list_random_access_statement,
+        int_list_iterate_statement,
     )
 
 
 @click.pass_context
-def benchmark_set(ctx) -> None:
+def benchmark_str_list(ctx) -> None:
     size = ctx.params["size"]
     benchmark_container(
-        f"Set ({size} elements)",
-        set_init_statement,
-        set_random_access_statement,
-        set_iterate_statement,
+        f"List<string> ({size} elements)",
+        str_list_init_statement,
+        str_list_random_access_statement,
+        str_list_iterate_statement,
+    )
+
+
+@click.pass_context
+def benchmark_int_set(ctx) -> None:
+    size = ctx.params["size"]
+    benchmark_container(
+        f"Set<i32> ({size} elements)",
+        int_set_init_statement,
+        int_set_random_access_statement,
+        int_set_iterate_statement,
+    )
+
+
+@click.pass_context
+def benchmark_str_set(ctx) -> None:
+    size = ctx.params["size"]
+    benchmark_container(
+        f"Set<string> ({size} elements)",
+        str_set_init_statement,
+        str_set_random_access_statement,
+        str_set_iterate_statement,
     )
 
 
@@ -312,7 +382,7 @@ def benchmark_set(ctx) -> None:
 def benchmark_map(ctx) -> None:
     size = ctx.params["size"]
     benchmark_container(
-        f"Map ({size} elements)",
+        f"Map<i32, string> ({size} elements)",
         map_init_statement,
         map_random_access_statement,
         map_iterate_statement,
@@ -348,8 +418,10 @@ def benchmark_nested_map(ctx) -> None:
     help="Repeat each benchmark N times and take the minimum.",
 )
 def main(size, inner_size, repeat) -> int:
-    benchmark_list()
-    benchmark_set()
+    benchmark_int_list()
+    benchmark_str_list()
+    benchmark_int_set()
+    benchmark_str_set()
     benchmark_map()
     benchmark_nested_map()
     return 0

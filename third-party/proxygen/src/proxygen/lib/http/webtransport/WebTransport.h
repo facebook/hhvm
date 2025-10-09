@@ -235,8 +235,10 @@ class WebTransport {
 
   // Wait for credit to create a stream of the given type.  If stream credit
   // is available, will immediately return a ready SemiFuture.
-  virtual folly::SemiFuture<folly::Unit> awaitUniStreamCredit() = 0;
-  virtual folly::SemiFuture<folly::Unit> awaitBidiStreamCredit() = 0;
+  [[deprecated]] virtual folly::SemiFuture<folly::Unit>
+  awaitUniStreamCredit() = 0;
+  [[deprecated]] virtual folly::SemiFuture<folly::Unit>
+  awaitBidiStreamCredit() = 0;
 
   // API using stream IDs
   // These methods may be used if the app wants to manipulate open streams

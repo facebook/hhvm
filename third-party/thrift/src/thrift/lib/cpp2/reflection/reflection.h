@@ -706,12 +706,13 @@ struct reflected_struct_data_member {
    *
    * @author: Marcelo Juchem <marcelo@fb.com>
    */
-  using getter = typename Traits::getter;
+  using getter =
+      detail::reflection_impl::data_member_accessor<typename Traits::tag>;
 
   /**
    * Similar to getter, but return `(optional_)?field_ref` instead.
    */
-  using field_ref_getter = typename Traits::field_ref_getter;
+  using field_ref_getter = access_field_fn<typename Traits::tag>;
 
   /**
    * The type class for this member.

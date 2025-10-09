@@ -505,6 +505,10 @@ struct ShouldWrite {
     return true;
   }
   template <typename T>
+  bool operator()(intern_boxed_field_ref<T>) const {
+    return true;
+  }
+  template <typename T>
   bool operator()(optional_field_ref<T> opt) const {
     return opt.has_value();
   }
@@ -550,17 +554,18 @@ struct StructEncode {
       // should not be used in this function.
       using Id = type::field_id<detail::pa::field_ids_in_serialization_order<
           T>()[static_cast<size_t>(decltype(id)::value)]>;
-      using Tag = op::get_type_tag<T, Id>;
+      using TypeTag = op::get_type_tag<T, Id>;
+      using FieldTag = op::get_field_tag<T, Id>;
       auto&& field = op::get<Id>(t);
-      if (!should_write<Tag>(field)) {
+      if (!should_write<FieldTag>(field)) {
         return;
       }
 
       s += prot.writeFieldBegin(
           &*op::get_name_v<T, Id>.begin(),
-          typeTagToTType<Tag>,
+          typeTagToTType<TypeTag>,
           folly::to_underlying(Id::value));
-      s += Encode<Tag>{}(prot, *field);
+      s += Encode<TypeTag>{}(prot, *field);
       s += prot.writeFieldEnd();
     });
     s += prot.writeFieldStop();

@@ -136,7 +136,6 @@ let has_member_compare ~normalize_lists hm1 hm2 =
               Option.compare method_compare method1 method2)))
 
 let can_index_compare ~normalize_lists ci1 ci2 =
-  (* not comparing the ast because it is decided by expr_pos *)
   chain_compare (ty_compare ~normalize_lists ci1.ci_key ci2.ci_key) (fun _ ->
       chain_compare
         (ty_compare ~normalize_lists ci1.ci_val ci2.ci_val)
@@ -146,13 +145,11 @@ let can_index_compare ~normalize_lists ci1 ci2 =
                ci1.ci_lhs_of_null_coalesce
                ci2.ci_lhs_of_null_coalesce)
             (fun _ ->
-              chain_compare
-                (Aast.compare_pos ci1.ci_expr_pos ci2.ci_expr_pos)
-                (fun _ ->
-                  chain_compare
-                    (Aast.compare_pos ci1.ci_array_pos ci2.ci_array_pos)
-                    (fun _ ->
-                      Aast.compare_pos ci1.ci_index_pos ci2.ci_index_pos)))))
+              Aast.compare_expr
+                (fun _ _ -> 0)
+                (fun _ _ -> 0)
+                ci1.ci_index_expr
+                ci2.ci_index_expr)))
 
 let can_index_assign_compare ~normalize_lists cia1 cia2 =
   chain_compare
@@ -160,20 +157,7 @@ let can_index_assign_compare ~normalize_lists cia1 cia2 =
     (fun _ ->
       chain_compare
         (ty_compare ~normalize_lists cia1.cia_write cia2.cia_write)
-        (fun _ ->
-          chain_compare
-            (ty_compare ~normalize_lists cia1.cia_val cia2.cia_val)
-            (fun _ ->
-              chain_compare
-                (Aast.compare_pos cia1.cia_expr_pos cia2.cia_expr_pos)
-                (fun _ ->
-                  chain_compare
-                    (Aast.compare_pos cia1.cia_array_pos cia2.cia_array_pos)
-                    (fun _ ->
-                      chain_compare
-                        (Aast.compare_pos cia1.cia_index_pos cia2.cia_index_pos)
-                        (fun _ ->
-                          Aast.compare_pos cia1.cia_write_pos cia2.cia_write_pos))))))
+        (fun _ -> ty_compare ~normalize_lists cia1.cia_val cia2.cia_val))
 
 let can_traverse_compare ~normalize_lists ct1 ct2 =
   chain_compare

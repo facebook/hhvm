@@ -58,12 +58,13 @@ namespace {
 const StaticString SKIP_CHECKS_ATTR("ThriftDeprecatedSkipSerializerChecks");
 
 // Assumes that at least 10 bytes available in the input buffer
-static int64_t readVarintFast(const uint8_t **ptr) {
+static uint64_t readVarintFast(const uint8_t **ptr) {
   uint8_t byte;
   uint64_t result;
 
 #ifndef __AVX2__
 
+  // Byte 1
   byte = *((*ptr)++);
   result = (uint64_t)(byte & 0x7f);
   if ((byte & 0x80) == 0) goto ret;
@@ -79,33 +80,6 @@ static int64_t readVarintFast(const uint8_t **ptr) {
   byte = *((*ptr)++);
   result = result | (uint64_t)(byte & 0x7f) << 21;
   if ((byte & 0x80) == 0) goto ret;
-
-#else
-
-  // Optimization for single byte values
-  if (!(**ptr & 0x80)) {
-    return static_cast<int64_t>(*((*ptr)++));
-  }
-  uint64_t v;
-  memcpy(&v, *ptr, sizeof(uint64_t));
-  const size_t l = _tzcnt_u64(~v & 0x8080808080808080ULL) / 8;
-  if (l == 1) {
-    *ptr += 2;
-    return static_cast<int64_t>(_pext_u64(v, 0x7f7fULL));
-  }
-  if (l == 2) {
-    *ptr += 3;
-    return static_cast<int64_t>(_pext_u64(v, 0x7f7f7fULL));
-  }
-  if (l == 3) {
-    *ptr += 4;
-    return static_cast<int64_t>(_pext_u64(v, 0x7f7f7f7fULL));
-  }
-  *ptr += 4;
-  result = _pext_u64(v, 0x7f7f7f7fULL);
-
-#endif // __AVX2__
-
   // Byte 5
   byte = *((*ptr)++);
   result = result | (uint64_t)(byte & 0x7f) << 28;
@@ -122,6 +96,31 @@ static int64_t readVarintFast(const uint8_t **ptr) {
   byte = *((*ptr)++);
   result = result | (uint64_t)(byte & 0x7f) << 49;
   if ((byte & 0x80) == 0) goto ret;
+
+#else
+
+  // Optimization for single byte values
+  if (!(**ptr & 0x80)) {
+    return static_cast<uint64_t>(*((*ptr)++));
+  }
+
+  // Byte 1 - 8
+  uint64_t v;
+  memcpy(&v, *ptr, sizeof(uint64_t));
+
+  const size_t useful_bits = _tzcnt_u64(~v & 0x8080808080808080ULL);
+  if (useful_bits < 64) {
+    auto mask = ((1ULL << useful_bits) - 1) & 0x7f7f7f7f7f7f7f7fULL;
+    result = _pext_u64(v, mask);
+    *ptr += (useful_bits + 1) / 8;
+    return result;
+  }
+
+  result = _pext_u64(v, 0x7f7f7f7f7f7f7f7fULL);
+  *ptr += 8;
+
+#endif // __AVX2__
+
   // Byte 9
   byte = *((*ptr)++);
   result = result | (uint64_t)(byte & 0x7f) << 56;
@@ -1396,6 +1395,16 @@ struct CompactReader {
     }
 
     uint64_t readVarint(void) {
+      if (transport.length() >= 10) {
+        const uint8_t *startptr = transport.data();
+        const uint8_t *ptr = startptr;
+        auto res = readVarintFast(&ptr);
+        intptr_t skipLen = ptr - startptr;
+        assertx(skipLen <= transport.length());
+        transport.skipNoAdvance(skipLen);
+        return res;
+      }
+
       uint8_t byte = readUByte();
       uint64_t result = (uint64_t)(byte & 0x7f);
       if ((byte & 0x80) == 0) goto ret;

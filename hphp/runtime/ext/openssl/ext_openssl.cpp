@@ -1977,7 +1977,7 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const OptResource& key) {
   case EVP_PKEY_RSA2:
     {
       ktype = OPENSSL_KEYTYPE_RSA;
-      RSA *rsa = EVP_PKEY_get0_RSA(pkey);
+      auto rsa = EVP_PKEY_get0_RSA(pkey);
       assertx(rsa);
       const BIGNUM *n, *e, *d, *p, *q, *dmp1, *dmq1, *iqmp;
       RSA_get0_key(rsa, &n, &e, &d);
@@ -2000,7 +2000,7 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const OptResource& key) {
   case EVP_PKEY_DSA4:
     {
       ktype = OPENSSL_KEYTYPE_DSA;
-      DSA *dsa = EVP_PKEY_get0_DSA(pkey);
+      auto dsa = EVP_PKEY_get0_DSA(pkey);
       assertx(dsa);
       const BIGNUM *p, *q, *g, *pub_key, *priv_key;
       DSA_get0_pqg(dsa, &p, &q, &g);
@@ -2016,7 +2016,7 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const OptResource& key) {
   case EVP_PKEY_DH:
     {
       ktype = OPENSSL_KEYTYPE_DH;
-      DH *dh = EVP_PKEY_get0_DH(pkey);
+      auto dh = EVP_PKEY_get0_DH(pkey);
       assertx(dh);
       const BIGNUM *p, *q, *g, *pub_key, *priv_key;
       DH_get0_pqg(dh, &p, &q, &g);
@@ -2140,11 +2140,17 @@ bool HHVM_FUNCTION(openssl_private_decrypt, const String& data,
   switch (EVP_PKEY_id(pkey)) {
   case EVP_PKEY_RSA:
   case EVP_PKEY_RSA2:
-    cryptedlen = RSA_private_decrypt(data.size(),
-                                     (unsigned char *)data.data(),
-                                     cryptedbuf,
-                                     EVP_PKEY_get0_RSA(pkey),
-                                     padding);
+    {
+      auto rsa = EVP_PKEY_get1_RSA(pkey);
+      SCOPE_EXIT {
+        RSA_free(rsa);
+      };
+      cryptedlen = RSA_private_decrypt(data.size(),
+                                      (unsigned char *)data.data(),
+                                      cryptedbuf,
+                                      rsa,
+                                      padding);
+    }
     if (cryptedlen != -1) {
       successful = 1;
     }
@@ -2180,11 +2186,17 @@ bool HHVM_FUNCTION(openssl_private_encrypt, const String& data,
   switch (EVP_PKEY_id(pkey)) {
   case EVP_PKEY_RSA:
   case EVP_PKEY_RSA2:
-    successful = (RSA_private_encrypt(data.size(),
-                                      (unsigned char *)data.data(),
-                                      cryptedbuf,
-                                      EVP_PKEY_get0_RSA(pkey),
-                                      padding) == cryptedlen);
+    {
+      auto rsa = EVP_PKEY_get1_RSA(pkey);
+      SCOPE_EXIT {
+        RSA_free(rsa);
+      };
+      successful = (RSA_private_encrypt(data.size(),
+                                        (unsigned char *)data.data(),
+                                        cryptedbuf,
+                                        rsa,
+                                        padding) == cryptedlen);
+    }
     break;
   default:
     raise_warning("key type not supported");
@@ -2216,11 +2228,17 @@ bool HHVM_FUNCTION(openssl_public_decrypt, const String& data,
   switch (EVP_PKEY_id(pkey)) {
   case EVP_PKEY_RSA:
   case EVP_PKEY_RSA2:
-    cryptedlen = RSA_public_decrypt(data.size(),
-                                    (unsigned char *)data.data(),
-                                    cryptedbuf,
-                                    EVP_PKEY_get0_RSA(pkey),
-                                    padding);
+    {
+      auto rsa = EVP_PKEY_get1_RSA(pkey);
+      SCOPE_EXIT {
+        RSA_free(rsa);
+      };
+      cryptedlen = RSA_public_decrypt(data.size(),
+                                      (unsigned char *)data.data(),
+                                      cryptedbuf,
+                                      rsa,
+                                      padding);
+    }
     if (cryptedlen != -1) {
       successful = 1;
     }
@@ -2256,11 +2274,17 @@ bool HHVM_FUNCTION(openssl_public_encrypt, const String& data,
   switch (EVP_PKEY_id(pkey)) {
   case EVP_PKEY_RSA:
   case EVP_PKEY_RSA2:
-    successful = (RSA_public_encrypt(data.size(),
-                                     (unsigned char *)data.data(),
-                                     cryptedbuf,
-                                     EVP_PKEY_get0_RSA(pkey),
-                                     padding) == cryptedlen);
+    {
+      auto rsa = EVP_PKEY_get1_RSA(pkey);
+      SCOPE_EXIT {
+        RSA_free(rsa);
+      };
+      successful = (RSA_public_encrypt(data.size(),
+                                      (unsigned char *)data.data(),
+                                      cryptedbuf,
+                                      rsa,
+                                      padding) == cryptedlen);
+    }
     break;
   default:
     raise_warning("key type not supported");

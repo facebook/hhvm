@@ -121,6 +121,8 @@
 #include "hphp/zend/zend-string.h"
 #include "hphp/zend/zend-strtod.h"
 
+#include "roarjit/Init.h"
+
 #include <folly/CPortability.h>
 #include <folly/json/json.h>
 #include <folly/Portability.h>
@@ -1178,6 +1180,11 @@ static int start_server(const std::string &username) {
   BootStats::mark("pagein_self");
 
   set_execution_mode(ExecutionMode::SERVER);
+
+  // Initialize ROAR logging
+#ifdef __roar__
+  facebook::roar::initROARLogging();
+#endif
 
 #if !defined(SKIP_USER_CHANGE)
   if (!username.empty()) {

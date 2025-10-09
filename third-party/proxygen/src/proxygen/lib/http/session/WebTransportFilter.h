@@ -45,6 +45,16 @@ class WebTransportFilter
     }
   }
 
+  static std::unique_ptr<WebTransportFilter> make(HTTPTransaction* txn,
+                                                  CodecVersion version) {
+    auto filter = std::make_unique<WebTransportFilter>(txn, version);
+    if (auto* nextTxnHandler = txn->getHandler()) {
+      filter->setNextTransactionHandler(nextTxnHandler);
+    }
+    txn->setHandler(filter.get());
+    return filter;
+  }
+
   void clearTransaction() {
     txn_ = nullptr;
   }

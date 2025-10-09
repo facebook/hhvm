@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/unit-parser.h"
 
 #include <memory>
+#include <stdexcept>
 #include <string>
 
 #include <folly/compression/Zstd.h>
@@ -117,29 +118,34 @@ CompilerResult hackc_compile(
     }
   }
 
-  rust::Box<hackc::UnitWrapper> unit_wrapped = [&] {
-    tracing::Block _{
-      "hackc_translator",
-      [&] {
-        return tracing::Props{}
-          .add("filename", filename ? filename : "")
-          .add("code_size", code.size());
-      }
-    };
-    return hackc::compile_unit_from_text(
-        native_env,
-        {(const uint8_t*)code.data(), code.size()}
+  try {
+    rust::Box<hackc::UnitWrapper> unit_wrapped = [&] {
+      tracing::Block _{
+        "hackc_translator",
+        [&] {
+          return tracing::Props{}
+            .add("filename", filename ? filename : "")
+            .add("code_size", code.size());
+        }
+      };
+      return hackc::compile_unit_from_text(
+          native_env,
+          {(const uint8_t*)code.data(), code.size()}
+      );
+    }();
+
+    auto const bcSha1 = SHA1(hash_unit(*unit_wrapped));
+    const hackc::hhbc::Unit* unit = hackCUnitRaw(unit_wrapped);
+
+    auto hackCResult = unitEmitterFromHackCUnitHandleErrors(
+      *unit, filename, sha1, bcSha1, extension,
+      internal_error, mode, options.packageInfo()
     );
-  }();
-
-  auto const bcSha1 = SHA1(hash_unit(*unit_wrapped));
-  const hackc::hhbc::Unit* unit = hackCUnitRaw(unit_wrapped);
-
-  auto hackCResult = unitEmitterFromHackCUnitHandleErrors(
-    *unit, filename, sha1, bcSha1, extension,
-    internal_error, mode, options.packageInfo()
-  );
-  return hackCResult;
+    return hackCResult;
+  } catch (const std::exception& ex) {
+    // Report Rust errors from compile_unit_from_text().
+    return ex.what();
+  }
 }
 
 /// A simple UnitCompiler that invokes hackc in-process.

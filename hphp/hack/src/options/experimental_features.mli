@@ -62,7 +62,6 @@ type feature_name =
   | NoDisjointUnion
   | SimpliHack
   | PolymorphicFunctionHints
-  | ProtectedInternal
   | PolymorphicLambda
   | ExpressionTreeCoalesceOperator
   | ExpressionTreeNullsafeObjGet

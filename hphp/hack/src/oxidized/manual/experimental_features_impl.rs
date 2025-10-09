@@ -53,7 +53,6 @@ impl FeatureName {
             NoDisjointUnion => OngoingRelease,
             SimpliHack => Preview,
             PolymorphicFunctionHints => OngoingRelease,
-            ProtectedInternal => OngoingRelease,
             PolymorphicLambda => OngoingRelease,
             ExpressionTreeCoalesceOperator => OngoingRelease,
             ExpressionTreeNullsafeObjGet => OngoingRelease,

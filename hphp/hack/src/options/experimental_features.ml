@@ -68,7 +68,6 @@ type feature_name =
   | NoDisjointUnion
   | SimpliHack
   | PolymorphicFunctionHints
-  | ProtectedInternal
   | PolymorphicLambda
   | ExpressionTreeCoalesceOperator
   | ExpressionTreeNullsafeObjGet
@@ -117,7 +116,6 @@ let feature_name_map =
       ("no_disjoint_union", NoDisjointUnion);
       ("simpli_hack", SimpliHack);
       ("polymorphic_function_hints", PolymorphicFunctionHints);
-      ("protected_internal", ProtectedInternal);
       ("polymorphic_lambda", PolymorphicLambda);
       ("expression_tree_coalesce_operator", ExpressionTreeCoalesceOperator);
       ("expression_tree_nullsafe_obj_get", ExpressionTreeNullsafeObjGet);

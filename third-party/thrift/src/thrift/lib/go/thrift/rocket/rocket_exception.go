@@ -117,24 +117,32 @@ func newRocketException(exception *rpcmetadata.PayloadExceptionMetadataBase) *Ro
 }
 
 func newUnknownPayloadExceptionMetadataBase(name string, what string) *rpcmetadata.PayloadExceptionMetadataBase {
-	return newPayloadExceptionMetadataBase(&RocketException{
-		Name:          name,
-		What:          what,
-		ExceptionType: RocketExceptionUnknown,
-		Safety:        rpcmetadata.ErrorSafety_SAFE,
-		Kind:          rpcmetadata.ErrorKind_TRANSIENT,
-		Blame:         rpcmetadata.ErrorBlame_SERVER,
-	})
+	return NewPayloadExceptionMetadataBase(
+		name,
+		what,
+		RocketExceptionUnknown,
+		rpcmetadata.ErrorKind_TRANSIENT,
+		rpcmetadata.ErrorBlame_SERVER,
+		rpcmetadata.ErrorSafety_SAFE,
+	)
 }
 
-func newPayloadExceptionMetadataBase(err *RocketException) *rpcmetadata.PayloadExceptionMetadataBase {
+// NewPayloadExceptionMetadataBase creates a new PayloadExceptionMetadataBase.
+func NewPayloadExceptionMetadataBase(
+	name string,
+	what string,
+	exType RocketExceptionType,
+	kind rpcmetadata.ErrorKind,
+	blame rpcmetadata.ErrorBlame,
+	safety rpcmetadata.ErrorSafety,
+) *rpcmetadata.PayloadExceptionMetadataBase {
 	classification := rpcmetadata.NewErrorClassification().
-		SetKind(&err.Kind).
-		SetBlame(&err.Blame).
-		SetSafety(&err.Safety)
+		SetKind(&kind).
+		SetBlame(&blame).
+		SetSafety(&safety)
 
 	metadata := rpcmetadata.NewPayloadExceptionMetadata()
-	switch err.ExceptionType {
+	switch exType {
 	case RocketExceptionDeclared:
 		declared := rpcmetadata.NewPayloadDeclaredExceptionMetadata().
 			SetErrorClassification(classification)
@@ -153,8 +161,8 @@ func newPayloadExceptionMetadataBase(err *RocketException) *rpcmetadata.PayloadE
 	}
 
 	base := rpcmetadata.NewPayloadExceptionMetadataBase().
-		SetNameUTF8(&err.Name).
-		SetWhatUTF8(&err.What).
+		SetNameUTF8(&name).
+		SetWhatUTF8(&what).
 		SetMetadata(metadata)
 	return base
 }

@@ -36,6 +36,7 @@
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/mcgen-async.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/tc.h"
@@ -1090,6 +1091,20 @@ void cgStaticAnalysisError(IRLS& env, const IRInstruction* inst) {
     kVoidDest,
     SyncOptions::Sync,
     argGroup(env, inst)
+  );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void cgRetranslateOptAsync(IRLS& env, const IRInstruction* inst) {
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(mcgen::enqueueAsyncTranslateOptRequest),
+    kVoidDest,
+    SyncOptions::None,
+    argGroup(env, inst)
+      .imm(inst->marker().sk().func())
   );
 }
 

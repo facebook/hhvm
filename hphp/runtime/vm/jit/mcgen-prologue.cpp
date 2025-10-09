@@ -160,7 +160,7 @@ TranslationResult getFuncPrologue(Func* func, int nPassed) {
     TransKind::ProfPrologue : TransKind::LivePrologue;
   if (mcgen::isAsyncJitEnabled(kind)) {
     // We currently support async jit for live translations only
-    assertx(isLive(kind));
+    assertx(isLive(kind) || isProfiling(kind));
     FTRACE_MOD(Trace::async_jit, 2,
                "Attempting async prologue generation for func {}\n",
                func->name());
@@ -172,7 +172,7 @@ TranslationResult getFuncPrologue(Func* func, int nPassed) {
     }
     FTRACE_MOD(Trace::async_jit, 2,
                "Enqueueing func {} for prologue generation\n", func->name());
-    mcgen::enqueueAsyncPrologueRequest(func, nPassed);
+    mcgen::enqueueAsyncPrologueRequest(kind, func, nPassed);
     return TranslationResult::failTransiently();
   }
 

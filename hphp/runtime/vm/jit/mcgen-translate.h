@@ -64,4 +64,10 @@ bool retranslateAllComplete();
  */
 CompactVector<Trace::BumpRelease> unbumpFunctions();
 
+/*
+ * Optimizes func. The caller is responsible for ensuring that the function can
+ * be optimized and updating the optimized flag in profData.
+ */
+void optimizeFunc(Func* func);
+
 }}

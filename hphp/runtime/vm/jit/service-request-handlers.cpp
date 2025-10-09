@@ -153,8 +153,8 @@ TranslationResult getTranslation(SrcKey sk) {
 
   auto const ctx = getContext(args.sk, args.kind == TransKind::Profile);
   if (mcgen::isAsyncJitEnabled(args.kind)) {
-    assertx(isLive(args.kind));
-    mcgen::enqueueAsyncTranslateRequest(ctx, 0);
+    assertx(isLive(args.kind) || isProfiling(args.kind));
+    mcgen::enqueueAsyncTranslateRequest(args.kind, ctx, 0);
     return TranslationResult::failTransiently();
   }
 
@@ -275,7 +275,7 @@ TCA handleRetranslate(Offset bcOff, SBInvOffset spOff) noexcept {
   auto const kind = isProfile ? TransKind::Profile : TransKind::Live;
   auto const context = getContext(sk, isProfile);
   if (mcgen::isAsyncJitEnabled(kind)) {
-    assertx(isLive(kind));
+    assertx(isLive(kind) || isProfiling(kind));
     auto const res = shouldEnqueueForRetranslate(context);
     if (res != TranslationResult::Scope::Success) {
       FTRACE_MOD(Trace::async_jit, 2,
@@ -288,7 +288,7 @@ TCA handleRetranslate(Offset bcOff, SBInvOffset spOff) noexcept {
     FTRACE_MOD(Trace::async_jit, 2,
                "Enqueueing sk {} from handleRetranslate\n",
                show(context.sk));
-    mcgen::enqueueAsyncTranslateRequest(context, currNumTrans);
+    mcgen::enqueueAsyncTranslateRequest(kind, context, currNumTrans);
     return resume(sk, TranslationResult::failTransiently());
   }
   auto const transResult = mcgen::retranslate(TransArgs{sk}, context);
@@ -308,7 +308,7 @@ TCA handleRetranslateFuncEntry(uint32_t numArgs) noexcept {
   auto const kind = isProfile ? TransKind::Profile : TransKind::Live;
   auto const context = getContext(sk, isProfile);
   if (mcgen::isAsyncJitEnabled(kind)) {
-    assertx(isLive(kind));
+    assertx(isLive(kind) || isProfiling(kind));
     auto const res = shouldEnqueueForRetranslate(context);
     if (res != TranslationResult::Scope::Success) {
       FTRACE_MOD(Trace::async_jit, 2,
@@ -321,7 +321,7 @@ TCA handleRetranslateFuncEntry(uint32_t numArgs) noexcept {
     FTRACE_MOD(Trace::async_jit, 2,
                "Enqueueing sk {} from handleRetranslateFuncEntry\n",
                show(context.sk));
-    mcgen::enqueueAsyncTranslateRequest(context, currNumTrans);
+    mcgen::enqueueAsyncTranslateRequest(kind, context, currNumTrans);
     return resume(sk, TranslationResult::failTransiently());
   }
   auto const transResult = mcgen::retranslate(TransArgs{sk}, context);

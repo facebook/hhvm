@@ -491,6 +491,7 @@ bool canDCE(const IRInstruction& inst) {
   case ReqInterpBBNoTranslate:
   case ReqRetranslate:
   case ReqRetranslateOpt:
+  case RetranslateOptAsync:
   case IncRef:
   case DecRef:
   case DecRefNZ:

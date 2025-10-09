@@ -15,6 +15,8 @@
 */
 
 #include "hphp/runtime/base/init-fini-node.h"
+#include "hphp/runtime/vm/jit/mcgen-translate.h"
+#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/prof-data-sb.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/base/perf-warning.h"
@@ -280,26 +282,40 @@ SrcKeySet& enqueuedSKs() {
 }
 
 struct AsyncRegionTranslationContext {
-  AsyncRegionTranslationContext(const RegionContext& ctx,
+  AsyncRegionTranslationContext(TransKind kind,
+                                const RegionContext& ctx,
                                 int currNumTranslations)
-    : ctx(ctx)
+    : kind(kind)
+    , ctx(ctx)
     , currNumTranslations(currNumTranslations)
   {}
 
+  TransKind kind;
   RegionContext ctx;
   int currNumTranslations;
 };
 
 struct AsyncPrologueContext {
-  AsyncPrologueContext(FuncId funcId, int nPassed, bool forJumpstart)
-    : funcId(funcId)
+  AsyncPrologueContext(
+    TransKind kind,
+    FuncId funcId,
+    int nPassed,
+    bool forJumpstart
+  ) : kind(kind)
+    , funcId(funcId)
     , nPassed(nPassed)
     , forJumpstart(forJumpstart)
   {}
 
+  TransKind kind;
   FuncId funcId;
   int nPassed;
   bool forJumpstart;
+};
+
+struct AsyncOptimizeContext {
+  AsyncOptimizeContext(FuncId id) : funcId(id) {}
+  FuncId funcId;
 };
 
 namespace {
@@ -357,8 +373,11 @@ InitFiniNode s_logJitStats([]{
 }, InitFiniNode::When::RequestFini, "logJitStats");
 }
 
-using AsyncTranslationContext =
-  std::variant<AsyncRegionTranslationContext, AsyncPrologueContext>;
+using AsyncTranslationContext = std::variant<
+  AsyncRegionTranslationContext,
+  AsyncPrologueContext,
+  AsyncOptimizeContext
+>;
 
 constexpr int kIgnoreNumTrans = -1;
 
@@ -368,6 +387,22 @@ struct AsyncTranslationWorker
   AsyncTranslationWorker()
     : m_codeBuffer(std::make_unique<uint8_t[]>(initialSize))
   {}
+
+  void doAsyncOptimize(AsyncOptimizeContext& ctx) {
+    ProfileNonVMThread nonVM;
+    HphpSession hps{Treadmill::SessionKind::TranslateWorker};
+    VMProtect _;
+
+    if (!Func::isFuncIdValid(ctx.funcId)) return;
+    auto const func = const_cast<Func*>(Func::fromFuncId(ctx.funcId));
+    SCOPE_EXIT { func->atomicFlags().unset(Func::Flags::LockedForAsyncJit); };
+
+    if (!profData()) return;
+    assertx(!profData()->optimized(ctx.funcId));
+
+    profData()->setOptimized(ctx.funcId);
+    optimizeFunc(func);
+  }
 
   void doAsyncRegionTranslation(AsyncRegionTranslationContext& rctx) {
 
@@ -418,7 +453,7 @@ struct AsyncTranslationWorker
       return;
     }
 
-    tc::RegionTranslator translator(ctx.sk, TransKind::Live);
+    tc::RegionTranslator translator(ctx.sk, rctx.kind);
     translator.spOff = ctx.spOffset;
     translator.liveTypes = ctx.liveTypes;
     auto const noThreshold = ctxNumTrans == kIgnoreNumTrans;
@@ -428,7 +463,8 @@ struct AsyncTranslationWorker
       return;
     }
 
-    if (translator.exceededMaxLiveTranslations(numTrans)) {
+    if (isLive(translator.kind) &&
+        translator.exceededMaxLiveTranslations(numTrans)) {
       FTRACE(2, "Max translations reached for sk {}\n", show(ctx.sk));
       translator.setCachedForProcessFail();
       s_permFailTrans++;
@@ -499,7 +535,7 @@ struct AsyncTranslationWorker
       return;
     }
 
-    tc::PrologueTranslator translator(func, ctx.nPassed);
+    tc::PrologueTranslator translator(func, ctx.nPassed, ctx.kind);
 
     auto const tcAddr = translator.getCached();
     if (tcAddr) {
@@ -556,6 +592,8 @@ struct AsyncTranslationWorker
       doAsyncRegionTranslation(std::get<AsyncRegionTranslationContext>(ctx));
     } else if (std::holds_alternative<AsyncPrologueContext>(ctx)) {
       doAsyncPrologueGen(std::get<AsyncPrologueContext>(ctx));
+    } else if (std::holds_alternative<AsyncOptimizeContext>(ctx)) {
+      doAsyncOptimize(std::get<AsyncOptimizeContext>(ctx));
     } else {
       not_reached();
     }
@@ -595,7 +633,9 @@ void joinAsyncTranslationWorkerThreads() {
 }
 
 void enqueueAsyncTranslateRequestForJumpstart(const RegionContext& ctx) {
-  dispatcher().enqueue(AsyncRegionTranslationContext {ctx, kIgnoreNumTrans});
+  dispatcher().enqueue(AsyncRegionTranslationContext {
+    TransKind::Live, ctx, kIgnoreNumTrans
+  });
   FTRACE(2, "Enqueued sk {} for jitting in jumpstart\n", show(ctx.sk));
 }
 
@@ -658,7 +698,8 @@ void log(const RegionContext& ctx) {
 
 }
 
-void enqueueAsyncTranslateRequest(const RegionContext& ctx,
+void enqueueAsyncTranslateRequest(TransKind kind,
+                                  const RegionContext& ctx,
                                   int currNumTranslations) {
   if (!mayEnqueueAsyncTranslateRequest(ctx.sk)) {
     FTRACE(2,
@@ -667,7 +708,7 @@ void enqueueAsyncTranslateRequest(const RegionContext& ctx,
     );
   } else {
     dispatcher().enqueue(
-      AsyncRegionTranslationContext {ctx, currNumTranslations}
+      AsyncRegionTranslationContext {kind, ctx, currNumTranslations}
     );
     FTRACE(2, "Enqueued sk {} for jitting\n", show(ctx.sk));
     log(ctx);
@@ -676,11 +717,11 @@ void enqueueAsyncTranslateRequest(const RegionContext& ctx,
 
 namespace {
 template<bool forJumpstart>
-void enqueueAsyncPrologueRequestImpl(Func* func, int nPassed) {
+void enqueueAsyncPrologueRequestImpl(TransKind kind, Func* func, int nPassed) {
   if (forJumpstart ||
       !func->atomicFlags().set(Func::Flags::LockedForPrologueGen)) {
     dispatcher().enqueue(
-      AsyncPrologueContext {func->getFuncId(), nPassed, forJumpstart});
+      AsyncPrologueContext {kind, func->getFuncId(), nPassed, forJumpstart});
     FTRACE(2, "Enqueued func {} for prologue generation\n", func->name());
   } else {
     FTRACE(2,
@@ -691,13 +732,22 @@ void enqueueAsyncPrologueRequestImpl(Func* func, int nPassed) {
 }
 }
 
-void enqueueAsyncPrologueRequest(Func* func, int nPassed) {
-  enqueueAsyncPrologueRequestImpl<false>(func, nPassed);
+void enqueueAsyncPrologueRequest(TransKind kind, Func* func, int nPassed) {
+  enqueueAsyncPrologueRequestImpl<false>(kind, func, nPassed);
   log(func, nPassed);
 }
 
 void enqueueAsyncPrologueRequestForJumpstart(Func* func, int nPassed) {
-  enqueueAsyncPrologueRequestImpl<true>(func, nPassed);
+  enqueueAsyncPrologueRequestImpl<true>(TransKind::Live, func, nPassed);
+}
+
+void enqueueAsyncTranslateOptRequest(const Func* func) {
+  auto const id = func->getFuncId();
+  if (!profData() || profData()->optimized(id)) return;
+
+  if (!func->atomicFlags().set(Func::Flags::LockedForAsyncJit)) {
+    dispatcher().enqueue(AsyncOptimizeContext {id});
+  }
 }
 
 bool isAsyncJitEnabled(TransKind kind) {

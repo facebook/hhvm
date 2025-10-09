@@ -1934,6 +1934,12 @@ ReqBindJmp and CallFuncEntry.
   optimization gear. This instruction is used in exit traces that trigger
   profile-guided optimizations.
 
+| RetranslateOptAsync, ND, NA, NF
+
+  Trigger background optimization of the current function using profile-guided
+  optimizations. Optimization occurs in a background thread while execution can
+  continue on existing profile translations.
+
 | ReqInterpBBNoTranslate<target,invSPOff,irSPOff>, ND, S(StkPtr) S(FramePtr), T
 
   Jump to the `interpHelperNoTranslate' stub, which first interprets the basic

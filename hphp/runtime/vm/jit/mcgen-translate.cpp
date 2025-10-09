@@ -769,6 +769,13 @@ bool retranslateOpt(FuncId funcId) {
   return true;
 }
 
+void optimizeFunc(Func* func) {
+  tc::FuncMetaInfo info(func, tc::LocalTCBuffer());
+  optimize(info);
+  tc::publishOptFunc(std::move(info));
+  tc::checkFreeProfData();
+}
+
 bool retranslateAllEnabled() {
   return
     Cfg::Jit::PGO &&

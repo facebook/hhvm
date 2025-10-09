@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/jit/mcgen-async.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 
@@ -201,7 +202,18 @@ void incProfCounter(IRGS& env, TransID transId) {
 }
 
 void checkCold(IRGS& env, TransID transId) {
-  gen(env, CheckCold, makeExitOpt(env), TransIDData(transId));
+  if (mcgen::isAsyncJitEnabled(TransKind::Profile)) {
+    ifElse(
+      env,
+      [&] (Block* next) { gen(env, CheckCold, next, TransIDData(transId)); },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        gen(env, RetranslateOptAsync);
+      }
+    );
+  } else {
+    gen(env, CheckCold, makeExitOpt(env), TransIDData(transId));
+  }
 }
 
 void checkCoverage(IRGS& env) {

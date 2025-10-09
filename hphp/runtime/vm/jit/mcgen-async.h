@@ -20,10 +20,11 @@ namespace HPHP::jit::mcgen {
 bool isAsyncJitEnabled(TransKind kind);
 
 void enqueueAsyncTranslateRequest(
-  const RegionContext& ctx, int currNumTranslations);
-void enqueueAsyncPrologueRequest(Func* func, int nPassed);
+  TransKind kind, const RegionContext& ctx, int currNumTranslations);
+void enqueueAsyncPrologueRequest(TransKind kind, Func* func, int nPassed);
 void enqueueAsyncTranslateRequestForJumpstart(const RegionContext& ctx);
 void enqueueAsyncPrologueRequestForJumpstart(Func* func, int nPassed);
+void enqueueAsyncTranslateOptRequest(const Func* func);
 void joinAsyncTranslationWorkerThreads();
 
 }

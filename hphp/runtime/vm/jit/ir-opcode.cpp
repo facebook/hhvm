@@ -940,6 +940,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ReqRetranslate:
   case ReqRetranslateOpt:
   case ReserveVecNewElem:
+  case RetranslateOptAsync:
   case RetCtrl:
   case SameObj:
   case SameStr:

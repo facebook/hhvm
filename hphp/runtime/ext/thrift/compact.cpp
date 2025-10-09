@@ -1506,6 +1506,8 @@ Object compact_deserialize_from_string(
       options);
     reader.setReadVersion(version);
     return reader.readStruct(thrift_typename);
+  } catch (const Object&) {
+    throw;
   } catch (const std::out_of_range& e) {
     thrift_transport_error(e.what(), TTransportError::END_OF_FILE);
   } catch (const std::exception& e) {
@@ -1538,6 +1540,8 @@ String compact_serialize_to_string(const Object& thrift_struct,
     }
     ret.setSize(iobuf.length());
     return ret;
+  } catch (const Object&) {
+    throw;
   } catch (const std::exception& e) {
     thrift_error(e.what(), ERR_UNKNOWN);
   } catch (...) {

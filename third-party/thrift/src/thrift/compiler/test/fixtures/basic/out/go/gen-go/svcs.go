@@ -136,6 +136,7 @@ func (p *procFuncFooServiceSimpleRPC) RunContext(ctx context.Context, reqStruct 
     return result, nil
 }
 
+
 type FB303Service interface {
     SimpleRPC(ctx context.Context, intParameter int32) (*ReservedKeyword, error)
 }
@@ -246,6 +247,7 @@ func (p *procFuncFB303ServiceSimpleRPC) RunContext(ctx context.Context, reqStruc
     result.Success = retval
     return result, nil
 }
+
 
 type MyService interface {
     Ping(ctx context.Context) (error)
@@ -509,6 +511,7 @@ func (p *procFuncMyServicePing) RunContext(ctx context.Context, reqStruct thrift
     return result, nil
 }
 
+
 type procFuncMyServiceGetRandomData struct {
     handler MyService
 }
@@ -531,6 +534,7 @@ func (p *procFuncMyServiceGetRandomData) RunContext(ctx context.Context, reqStru
     result.Success = &retval
     return result, nil
 }
+
 
 type procFuncMyServiceSink struct {
     handler MyService
@@ -555,6 +559,7 @@ func (p *procFuncMyServiceSink) RunContext(ctx context.Context, reqStruct thrift
     return result, nil
 }
 
+
 type procFuncMyServicePutDataById struct {
     handler MyService
 }
@@ -577,6 +582,7 @@ func (p *procFuncMyServicePutDataById) RunContext(ctx context.Context, reqStruct
 
     return result, nil
 }
+
 
 type procFuncMyServiceHasDataById struct {
     handler MyService
@@ -602,6 +608,7 @@ func (p *procFuncMyServiceHasDataById) RunContext(ctx context.Context, reqStruct
     return result, nil
 }
 
+
 type procFuncMyServiceGetDataById struct {
     handler MyService
 }
@@ -626,6 +633,7 @@ func (p *procFuncMyServiceGetDataById) RunContext(ctx context.Context, reqStruct
     return result, nil
 }
 
+
 type procFuncMyServiceDeleteDataById struct {
     handler MyService
 }
@@ -649,6 +657,7 @@ func (p *procFuncMyServiceDeleteDataById) RunContext(ctx context.Context, reqStr
     return result, nil
 }
 
+
 type procFuncMyServiceLobDataById struct {
     handler MyService
 }
@@ -670,6 +679,7 @@ func (p *procFuncMyServiceLobDataById) RunContext(ctx context.Context, reqStruct
 
     return nil, nil
 }
+
 
 type procFuncMyServiceInvalidReturnForHack struct {
     handler MyService
@@ -694,6 +704,7 @@ func (p *procFuncMyServiceInvalidReturnForHack) RunContext(ctx context.Context, 
     return result, nil
 }
 
+
 type procFuncMyServiceRpcSkippedCodegen struct {
     handler MyService
 }
@@ -715,6 +726,7 @@ func (p *procFuncMyServiceRpcSkippedCodegen) RunContext(ctx context.Context, req
 
     return result, nil
 }
+
 
 type DbMixedStackArguments interface {
     GetDataByKey0(ctx context.Context, key string) ([]byte, error)
@@ -845,6 +857,7 @@ func (p *procFuncDbMixedStackArgumentsGetDataByKey0) RunContext(ctx context.Cont
     return result, nil
 }
 
+
 type procFuncDbMixedStackArgumentsGetDataByKey1 struct {
     handler DbMixedStackArguments
 }
@@ -868,4 +881,5 @@ func (p *procFuncDbMixedStackArgumentsGetDataByKey1) RunContext(ctx context.Cont
     result.Success = retval
     return result, nil
 }
+
 

@@ -108,6 +108,229 @@ var serviceMetadatas = func() []*metadata.ThriftService {
         &metadata.ThriftService{
             Name:      "module.PubSubStreamingService",
             Functions: []*metadata.ThriftFunction{
+                &metadata.ThriftFunction{
+                    Name:       "returnstream",
+                    IsOneway:   false,
+                    ReturnType: &metadata.ThriftType{
+                        TStream: &metadata.ThriftStreamType{
+                            ElemType: premadeThriftType_i32,
+                        },
+                    },
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "i32_from",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i32,
+                        },
+                        &metadata.ThriftField{
+                            Id:         2,
+                            Name:       "i32_to",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i32,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "streamthrows",
+                    IsOneway:   false,
+                    ReturnType: &metadata.ThriftType{
+                        TStream: &metadata.ThriftStreamType{
+                            ElemType: premadeThriftType_i32,
+                        },
+                    },
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "foo",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i32,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "servicethrows",
+                    IsOneway:   false,
+                    ReturnType: &metadata.ThriftType{
+                        TStream: &metadata.ThriftStreamType{
+                            ElemType: premadeThriftType_i32,
+                        },
+                    },
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "foo",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i32,
+                        },
+                    },
+                    Exceptions: []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "e",
+                            IsOptional: true,
+                            Type:       premadeThriftType_module_FooEx,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "servicethrows2",
+                    IsOneway:   false,
+                    ReturnType: &metadata.ThriftType{
+                        TStream: &metadata.ThriftStreamType{
+                            ElemType: premadeThriftType_i32,
+                        },
+                    },
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "foo",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i32,
+                        },
+                    },
+                    Exceptions: []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "e1",
+                            IsOptional: true,
+                            Type:       premadeThriftType_module_FooEx,
+                        },
+                        &metadata.ThriftField{
+                            Id:         2,
+                            Name:       "e2",
+                            IsOptional: true,
+                            Type:       premadeThriftType_module_FooEx2,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "boththrows",
+                    IsOneway:   false,
+                    ReturnType: &metadata.ThriftType{
+                        TStream: &metadata.ThriftStreamType{
+                            ElemType: premadeThriftType_i32,
+                        },
+                    },
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "foo",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i32,
+                        },
+                    },
+                    Exceptions: []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "e",
+                            IsOptional: true,
+                            Type:       premadeThriftType_module_FooEx,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "responseandstreamstreamthrows",
+                    IsOneway:   false,
+                    ReturnType: &metadata.ThriftType{
+                        TStream: &metadata.ThriftStreamType{
+                            ElemType: premadeThriftType_i32,
+                            InitialResponseType: premadeThriftType_i32,
+                        },
+                    },
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "foo",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i32,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "responseandstreamservicethrows",
+                    IsOneway:   false,
+                    ReturnType: &metadata.ThriftType{
+                        TStream: &metadata.ThriftStreamType{
+                            ElemType: premadeThriftType_i32,
+                            InitialResponseType: premadeThriftType_i32,
+                        },
+                    },
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "foo",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i32,
+                        },
+                    },
+                    Exceptions: []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "e",
+                            IsOptional: true,
+                            Type:       premadeThriftType_module_FooEx,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "responseandstreamboththrows",
+                    IsOneway:   false,
+                    ReturnType: &metadata.ThriftType{
+                        TStream: &metadata.ThriftStreamType{
+                            ElemType: premadeThriftType_i32,
+                            InitialResponseType: premadeThriftType_i32,
+                        },
+                    },
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "foo",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i32,
+                        },
+                    },
+                    Exceptions: []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "e",
+                            IsOptional: true,
+                            Type:       premadeThriftType_module_FooEx,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "returnstreamFast",
+                    IsOneway:   false,
+                    ReturnType: &metadata.ThriftType{
+                        TStream: &metadata.ThriftStreamType{
+                            ElemType: premadeThriftType_i32,
+                        },
+                    },
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "i32_from",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i32,
+                        },
+                        &metadata.ThriftField{
+                            Id:         2,
+                            Name:       "i32_to",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i32,
+                        },
+                    },
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "cpp.ProcessInEbThreadUnsafe",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                            },
+                        },
+                    },
+                },
             },
         },
     )

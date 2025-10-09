@@ -29,6 +29,15 @@ var _ = metadata.GoUnusedProtection__
 
 
 type PubSubStreamingService interface {
+    Returnstream(ctx context.Context, i32From int32, i32To int32) (func(context.Context, chan<- int32) error, error)
+    Streamthrows(ctx context.Context, foo int32) (func(context.Context, chan<- int32) error, error)
+    Servicethrows(ctx context.Context, foo int32) (func(context.Context, chan<- int32) error, error)
+    Servicethrows2(ctx context.Context, foo int32) (func(context.Context, chan<- int32) error, error)
+    Boththrows(ctx context.Context, foo int32) (func(context.Context, chan<- int32) error, error)
+    Responseandstreamstreamthrows(ctx context.Context, foo int32) (int32, func(context.Context, chan<- int32) error, error)
+    Responseandstreamservicethrows(ctx context.Context, foo int32) (int32, func(context.Context, chan<- int32) error, error)
+    Responseandstreamboththrows(ctx context.Context, foo int32) (int32, func(context.Context, chan<- int32) error, error)
+    ReturnstreamFast(ctx context.Context, i32From int32, i32To int32) (func(context.Context, chan<- int32) error, error)
 }
 
 type PubSubStreamingServiceClient interface {
@@ -573,6 +582,24 @@ func NewPubSubStreamingServiceProcessor(handler PubSubStreamingService) *PubSubS
         processorFunctionMap: make(map[string]thrift.ProcessorFunction),
         functionServiceMap:   make(map[string]string),
     }
+    p.AddToProcessorFunctionMap("returnstream", &procFuncPubSubStreamingServiceReturnstream{handler: handler})
+    p.AddToProcessorFunctionMap("streamthrows", &procFuncPubSubStreamingServiceStreamthrows{handler: handler})
+    p.AddToProcessorFunctionMap("servicethrows", &procFuncPubSubStreamingServiceServicethrows{handler: handler})
+    p.AddToProcessorFunctionMap("servicethrows2", &procFuncPubSubStreamingServiceServicethrows2{handler: handler})
+    p.AddToProcessorFunctionMap("boththrows", &procFuncPubSubStreamingServiceBoththrows{handler: handler})
+    p.AddToProcessorFunctionMap("responseandstreamstreamthrows", &procFuncPubSubStreamingServiceResponseandstreamstreamthrows{handler: handler})
+    p.AddToProcessorFunctionMap("responseandstreamservicethrows", &procFuncPubSubStreamingServiceResponseandstreamservicethrows{handler: handler})
+    p.AddToProcessorFunctionMap("responseandstreamboththrows", &procFuncPubSubStreamingServiceResponseandstreamboththrows{handler: handler})
+    p.AddToProcessorFunctionMap("returnstreamFast", &procFuncPubSubStreamingServiceReturnstreamFast{handler: handler})
+    p.AddToFunctionServiceMap("returnstream", "PubSubStreamingService")
+    p.AddToFunctionServiceMap("streamthrows", "PubSubStreamingService")
+    p.AddToFunctionServiceMap("servicethrows", "PubSubStreamingService")
+    p.AddToFunctionServiceMap("servicethrows2", "PubSubStreamingService")
+    p.AddToFunctionServiceMap("boththrows", "PubSubStreamingService")
+    p.AddToFunctionServiceMap("responseandstreamstreamthrows", "PubSubStreamingService")
+    p.AddToFunctionServiceMap("responseandstreamservicethrows", "PubSubStreamingService")
+    p.AddToFunctionServiceMap("responseandstreamboththrows", "PubSubStreamingService")
+    p.AddToFunctionServiceMap("returnstreamFast", "PubSubStreamingService")
 
     return p
 }
@@ -603,6 +630,141 @@ func (p *PubSubStreamingServiceProcessor) PackageName() string {
 
 func (p *PubSubStreamingServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.PubSubStreamingService")
+}
+
+
+type procFuncPubSubStreamingServiceReturnstream struct {
+    handler PubSubStreamingService
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncPubSubStreamingServiceReturnstream)(nil)
+
+func (p *procFuncPubSubStreamingServiceReturnstream) NewReqArgs() thrift.ReadableStruct {
+    return newReqPubSubStreamingServiceReturnstream()
+}
+
+func (p *procFuncPubSubStreamingServiceReturnstream) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
+}
+
+
+type procFuncPubSubStreamingServiceStreamthrows struct {
+    handler PubSubStreamingService
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncPubSubStreamingServiceStreamthrows)(nil)
+
+func (p *procFuncPubSubStreamingServiceStreamthrows) NewReqArgs() thrift.ReadableStruct {
+    return newReqPubSubStreamingServiceStreamthrows()
+}
+
+func (p *procFuncPubSubStreamingServiceStreamthrows) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
+}
+
+
+type procFuncPubSubStreamingServiceServicethrows struct {
+    handler PubSubStreamingService
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncPubSubStreamingServiceServicethrows)(nil)
+
+func (p *procFuncPubSubStreamingServiceServicethrows) NewReqArgs() thrift.ReadableStruct {
+    return newReqPubSubStreamingServiceServicethrows()
+}
+
+func (p *procFuncPubSubStreamingServiceServicethrows) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
+}
+
+
+type procFuncPubSubStreamingServiceServicethrows2 struct {
+    handler PubSubStreamingService
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncPubSubStreamingServiceServicethrows2)(nil)
+
+func (p *procFuncPubSubStreamingServiceServicethrows2) NewReqArgs() thrift.ReadableStruct {
+    return newReqPubSubStreamingServiceServicethrows2()
+}
+
+func (p *procFuncPubSubStreamingServiceServicethrows2) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
+}
+
+
+type procFuncPubSubStreamingServiceBoththrows struct {
+    handler PubSubStreamingService
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncPubSubStreamingServiceBoththrows)(nil)
+
+func (p *procFuncPubSubStreamingServiceBoththrows) NewReqArgs() thrift.ReadableStruct {
+    return newReqPubSubStreamingServiceBoththrows()
+}
+
+func (p *procFuncPubSubStreamingServiceBoththrows) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
+}
+
+
+type procFuncPubSubStreamingServiceResponseandstreamstreamthrows struct {
+    handler PubSubStreamingService
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncPubSubStreamingServiceResponseandstreamstreamthrows)(nil)
+
+func (p *procFuncPubSubStreamingServiceResponseandstreamstreamthrows) NewReqArgs() thrift.ReadableStruct {
+    return newReqPubSubStreamingServiceResponseandstreamstreamthrows()
+}
+
+func (p *procFuncPubSubStreamingServiceResponseandstreamstreamthrows) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
+}
+
+
+type procFuncPubSubStreamingServiceResponseandstreamservicethrows struct {
+    handler PubSubStreamingService
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncPubSubStreamingServiceResponseandstreamservicethrows)(nil)
+
+func (p *procFuncPubSubStreamingServiceResponseandstreamservicethrows) NewReqArgs() thrift.ReadableStruct {
+    return newReqPubSubStreamingServiceResponseandstreamservicethrows()
+}
+
+func (p *procFuncPubSubStreamingServiceResponseandstreamservicethrows) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
+}
+
+
+type procFuncPubSubStreamingServiceResponseandstreamboththrows struct {
+    handler PubSubStreamingService
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncPubSubStreamingServiceResponseandstreamboththrows)(nil)
+
+func (p *procFuncPubSubStreamingServiceResponseandstreamboththrows) NewReqArgs() thrift.ReadableStruct {
+    return newReqPubSubStreamingServiceResponseandstreamboththrows()
+}
+
+func (p *procFuncPubSubStreamingServiceResponseandstreamboththrows) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
+}
+
+
+type procFuncPubSubStreamingServiceReturnstreamFast struct {
+    handler PubSubStreamingService
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncPubSubStreamingServiceReturnstreamFast)(nil)
+
+func (p *procFuncPubSubStreamingServiceReturnstreamFast) NewReqArgs() thrift.ReadableStruct {
+    return newReqPubSubStreamingServiceReturnstreamFast()
+}
+
+func (p *procFuncPubSubStreamingServiceReturnstreamFast) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
 }
 
 

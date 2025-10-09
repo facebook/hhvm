@@ -471,6 +471,14 @@ class HQSession
     return sock_.get();
   }
 
+  struct SessionDropReason {
+    quic::QuicError quicError{quic::TransportErrorCode::NO_ERROR};
+    ProxygenError proxygenError{ProxygenError::kErrorNone};
+  };
+  const folly::Optional<SessionDropReason>& getSessionDropReason() const {
+    return sessionDropReason_;
+  }
+
   // Override HTTPSessionBase address getter functions
   const folly::SocketAddress& getLocalAddress() const noexcept override {
     return sock_ && sock_->good() ? sock_->getLocalAddress() : localAddr_;
@@ -945,7 +953,7 @@ class HQSession
   bool started_ : 1;
   bool dropping_ : 1;
   bool inLoopCallback_ : 1;
-  folly::Optional<std::pair<quic::QuicError, ProxygenError>> dropInNextLoop_;
+  folly::Optional<SessionDropReason> sessionDropReason_;
 
 #ifdef _MSC_VER
 #pragma warning(push)

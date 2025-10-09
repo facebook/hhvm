@@ -532,9 +532,12 @@ void HQSession::onConnectionError(quic::QuicError code) noexcept {
     }
   }
 
+  sessionDropReason_ = SessionDropReason{.quicError = std::move(code),
+                                         .proxygenError = proxygenErr};
   // force close all streams.
   // close with error won't invoke any connection callback, reentrancy safe
-  dropConnectionSync(std::move(code), proxygenErr);
+  dropConnectionSync(sessionDropReason_->quicError,
+                     sessionDropReason_->proxygenError);
 }
 
 bool HQSession::getCurrentTransportInfo(wangle::TransportInfo* tinfo) {
@@ -840,8 +843,9 @@ void HQSession::dropConnection(const std::string& errorMsg) {
 
 void HQSession::dropConnectionAsync(quic::QuicError errorCode,
                                     ProxygenError proxygenError) {
-  if (!dropInNextLoop_.has_value()) {
-    dropInNextLoop_ = std::make_pair(errorCode, proxygenError);
+  if (!sessionDropReason_.has_value()) {
+    sessionDropReason_ = SessionDropReason{.quicError = std::move(errorCode),
+                                           .proxygenError = proxygenError};
     scheduleLoopCallback(true);
   } else {
     VLOG(4) << "Session already scheduled to be dropped: sess=" << *this;
@@ -1086,8 +1090,9 @@ void HQSession::runLoopCallback() noexcept {
     inLoopCallback_ = false;
   });
 
-  if (dropInNextLoop_.has_value()) {
-    dropConnectionSync(dropInNextLoop_->first, dropInNextLoop_->second);
+  if (sessionDropReason_.has_value()) {
+    dropConnectionSync(sessionDropReason_->quicError,
+                       sessionDropReason_->proxygenError);
     return;
   }
 

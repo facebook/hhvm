@@ -19,6 +19,27 @@
 <<Oncalls('thrift')>>
 final class ThriftContextPropStateTest extends WWWTest {
   use ClassLevelTest;
+  public function testGetOriginIdResolver___DPRS_ACH_TEST(): void {
+    // Ensure a clean state
+    ThriftContextPropState::get()->clear();
+
+    // Initialize the instance and set an origin ID
+    $origin_id = 12345;
+    // Ensure the test ID is different from the fallback value
+    expect($origin_id)->toNotEqual(MCPProductID::UNKNOWN);
+    ThriftContextPropState::get()->setOriginId($origin_id);
+
+    // Get the resolver function
+    $resolver = ThriftContextPropState::getOriginIdResolver();
+
+    // Execute the resolver
+    $resolved_origin_id = $resolver();
+
+    // In the correct implementation, the resolver should return the set origin ID.
+    // In the mutated version, getReadonlyIfInitialized() returns null,
+    // so the resolver will fall back to MCPProductID::UNKNOWN, causing this to fail.
+    expect($resolved_origin_id)->toEqual($origin_id);
+  }
   public function testAddExperimentIdDirtiesCache___DPRS_ACH_TEST(): void {
     $tcps = ThriftContextPropState::get();
     $tcps->clear();

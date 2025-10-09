@@ -99,6 +99,13 @@ class ConnectionThread : public folly::ScopedEventBaseThread {
     getEventBase()->runInEventBaseThreadAndWait([&] { connection_.reset(); });
   }
 
+  ConnectionThread() = default;
+
+  ConnectionThread(const ConnectionThread&) = delete;
+  ConnectionThread& operator=(const ConnectionThread&) = delete;
+  ConnectionThread(ConnectionThread&&) = delete;
+  ConnectionThread& operator=(ConnectionThread&&) = delete;
+
   std::shared_ptr<AsyncClient> newSyncClient(
       const folly::SocketAddress& addr,
       folly::StringPiece transport,

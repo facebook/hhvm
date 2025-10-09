@@ -76,55 +76,46 @@ let trivial_check
     ~(never :
        Pos.t -> Typing_defs.locl_ty -> Typing_defs.locl_ty -> Env.env -> unit) :
     unit =
-  try
-    if Env.is_sub_type env lhs_ty nothing_ty then
-      (* If we have a nothing in our hands, there was a bigger problem
-         originating from earlier in the program. Don't flag it here, as it is
-         merely a symptom. *)
-      ()
-    else
-      let lhs_ty =
-        (* Don't strip the like if LHS is ~null because this commonly leads to
-           false positives. *)
-        if is_like_null env lhs_ty then
+  if Env.is_sub_type env lhs_ty nothing_ty then
+    (* If we have a nothing in our hands, there was a bigger problem
+       originating from earlier in the program. Don't flag it here, as it is
+       merely a symptom. *)
+    ()
+  else
+    let lhs_ty =
+      (* Don't strip the like if LHS is ~null because this commonly leads to
+         false positives. *)
+      if is_like_null env lhs_ty then
+        lhs_ty
+      else
+        Env.strip_dynamic env lhs_ty
+    in
+    let (env, lhs_ty) = Env.expand_type env lhs_ty in
+    match Env.is_disjoint ~is_dynamic_call:false env lhs_ty rhs_ty with
+    | Env.Disjoint -> never pos lhs_ty rhs_ty env
+    | DisjointIgnoringDynamic (lhs_ty, rhs_ty) -> never pos lhs_ty rhs_ty env
+    | NonDisjoint ->
+      (* We can't just use the `is_subtype` API which will discharge the
+         propositions with the fresh type variables. Instead, we use `sub_type`
+         which feedback the propositions against unconstrained type variables as
+         assumptions. *)
+      let Equal = Tast_env.eq_typing_env in
+      let ((env, _), lhs_ty) =
+        Typing_solver.expand_type_and_solve
+          env
+          ~description_of_expected:"a value"
+          Pos.none
           lhs_ty
-        else
-          Env.strip_dynamic env lhs_ty
       in
-      let (env, lhs_ty) = Env.expand_type env lhs_ty in
-      match Env.is_disjoint ~is_dynamic_call:false env lhs_ty rhs_ty with
-      | Env.Disjoint -> never pos lhs_ty rhs_ty env
-      | DisjointIgnoringDynamic (lhs_ty, rhs_ty) -> never pos lhs_ty rhs_ty env
-      | NonDisjoint ->
-        (* We can't just use the `is_subtype` API which will discharge the
-           propositions with the fresh type variables. Instead, we use `sub_type`
-           which feedback the propositions against unconstrained type variables as
-           assumptions. *)
-        let Equal = Tast_env.eq_typing_env in
-        let ((env, _), lhs_ty) =
-          Typing_solver.expand_type_and_solve
-            env
-            ~description_of_expected:"a value"
-            Pos.none
-            lhs_ty
-        in
-        let env = Typing_env.open_tyvars env pos in
-        let (env, rhs_ty) = replace_placeholders_with_tvars env pos rhs_ty in
-        let callback = Typing_error.Reasons_callback.unify_error_at pos in
-        let (env, err_opt1) =
-          Typing_utils.sub_type env lhs_ty rhs_ty (Some callback)
-        in
-        let (env, err_opt2) = Typing_solver.close_tyvars_and_solve env in
-        let err_opt = Option.merge err_opt1 err_opt2 ~f:Typing_error.both in
-        if Option.is_none err_opt then always pos lhs_ty rhs_ty env
-  with
-  | Typing_inference_env.InconsistentTypeVarState s ->
-    (* TODO(T235374244): delete this when issue resolved: Typing_inference_env.get_tyvar_constraints_exn *)
-    Errors.internal_error
-      pos
-      (Printf.sprintf
-         "Invariant violation:  please report this bug via `hh rage`. %s"
-         s)
+      let env = Typing_env.open_tyvars env pos in
+      let (env, rhs_ty) = replace_placeholders_with_tvars env pos rhs_ty in
+      let callback = Typing_error.Reasons_callback.unify_error_at pos in
+      let (env, err_opt1) =
+        Typing_utils.sub_type env lhs_ty rhs_ty (Some callback)
+      in
+      let (env, err_opt2) = Typing_solver.close_tyvars_and_solve env in
+      let err_opt = Option.merge err_opt1 err_opt2 ~f:Typing_error.both in
+      if Option.is_none err_opt then always pos lhs_ty rhs_ty env
 
 let handler ~as_lint =
   object

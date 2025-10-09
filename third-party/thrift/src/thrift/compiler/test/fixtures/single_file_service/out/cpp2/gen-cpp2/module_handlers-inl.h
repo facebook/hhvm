@@ -304,6 +304,10 @@ void AAsyncProcessor::executeRequest_I_interact(
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
+      if (ifacePtr == nullptr) {
+        cb->complete(folly::Try<void>(apache::thrift::detail::si::create_app_exn_bad_interaction_state("I", "interact")));
+        return;
+      }
       ifacePtr->async_tm_interact(std::move(cb));
     };
   };
@@ -1027,6 +1031,10 @@ void CAsyncProcessor::executeRequest_I_interact(
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
+      if (ifacePtr == nullptr) {
+        cb->complete(folly::Try<void>(apache::thrift::detail::si::create_app_exn_bad_interaction_state("I", "interact")));
+        return;
+      }
       ifacePtr->async_tm_interact(std::move(cb));
     };
   };

@@ -2385,6 +2385,10 @@ void FootprintTestServiceAsyncProcessor::executeRequest_Calculator_add(
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
+      if (ifacePtr == nullptr) {
+        cb->complete(folly::Try<::std::int32_t>(apache::thrift::detail::si::create_app_exn_bad_interaction_state("Calculator", "add")));
+        return;
+      }
       ifacePtr->async_tm_add(std::move(cb), args.uarg_a, args.uarg_b);
     };
   };

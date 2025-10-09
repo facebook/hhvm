@@ -59,6 +59,7 @@ class FOLLY_EXPORT TrustedServerException final : public std::runtime_error {
   static TrustedServerException requestParsingError(const char* message);
   static TrustedServerException unimplementedMethodError(const char* message);
   static TrustedServerException appOverloadError(const std::string& message);
+  static TrustedServerException badInteractionState(const std::string& message);
 
   TApplicationException toApplicationException() const {
     return TApplicationException(type_, std::string(what()));

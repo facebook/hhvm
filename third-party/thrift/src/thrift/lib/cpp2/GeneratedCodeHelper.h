@@ -1733,6 +1733,9 @@ inline void async_tm_coro(
 folly::exception_wrapper create_app_exn_unimplemented(const char* name);
 [[noreturn]] void throw_app_exn_unimplemented(const char* name);
 
+folly::exception_wrapper create_app_exn_bad_interaction_state(
+    std::string_view interactionName, std::string_view methodName);
+
 #if FOLLY_HAS_COROUTINES
 /**
  * Exception thrown from default generated ServiceHandler coroutine methods to

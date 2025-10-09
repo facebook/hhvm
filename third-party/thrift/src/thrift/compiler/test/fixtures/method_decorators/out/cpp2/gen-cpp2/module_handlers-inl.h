@@ -1334,6 +1334,10 @@ void DecoratedServiceAsyncProcessor::executeRequest_LegacyPerforms_perform(
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
+      if (ifacePtr == nullptr) {
+        cb->complete(folly::Try<void>(apache::thrift::detail::si::create_app_exn_bad_interaction_state("LegacyPerforms", "perform")));
+        return;
+      }
       ifacePtr->async_tm_perform(std::move(cb));
     };
   };
@@ -1511,6 +1515,10 @@ void DecoratedServiceAsyncProcessor::executeRequest_EchoInteraction_interactionE
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
+      if (ifacePtr == nullptr) {
+        cb->complete(folly::Try<std::unique_ptr<::std::string>>(apache::thrift::detail::si::create_app_exn_bad_interaction_state("EchoInteraction", "interactionEcho")));
+        return;
+      }
       ifacePtr->async_tm_interactionEcho(std::move(cb), std::move(args.uarg_text));
     };
   };

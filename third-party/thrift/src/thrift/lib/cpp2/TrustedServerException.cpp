@@ -40,4 +40,10 @@ TrustedServerException::unimplementedMethodError(const char* message) {
       TApplicationException::LOADSHEDDING, message, kAppOverloadedErrorCode};
 }
 
+/* static */ TrustedServerException TrustedServerException::badInteractionState(
+    const std::string& message) {
+  return TrustedServerException{
+      TApplicationException::UNKNOWN, message, kUnknownErrorCode};
+}
+
 } // namespace apache::thrift

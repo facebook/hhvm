@@ -248,6 +248,16 @@ TrustedServerException createUnimplementedMethodException(
   return TrustedServerException::unimplementedMethodError(
       fmt::format("Function {} is unimplemented", methodName).c_str());
 }
+
+TrustedServerException createBadInteractionStateException(
+    std::string_view interactionName, std::string_view methodName) {
+  return TrustedServerException::unimplementedMethodError(
+      fmt::format(
+          "Interaction {} is in bad state for method {}",
+          interactionName,
+          methodName)
+          .c_str());
+}
 } // namespace
 
 folly::exception_wrapper create_app_exn_unimplemented(const char* name) {
@@ -257,6 +267,12 @@ folly::exception_wrapper create_app_exn_unimplemented(const char* name) {
 
 [[noreturn]] void throw_app_exn_unimplemented(const char* const name) {
   throw createUnimplementedMethodException(name);
+}
+
+folly::exception_wrapper create_app_exn_bad_interaction_state(
+    std::string_view interactionName, std::string_view methodName) {
+  return folly::make_exception_wrapper<TrustedServerException>(
+      createBadInteractionStateException(interactionName, methodName));
 }
 } // namespace detail::si
 

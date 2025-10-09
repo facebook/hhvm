@@ -316,6 +316,10 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_frobnicate(
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
+      if (ifacePtr == nullptr) {
+        cb->complete(folly::Try<::std::int32_t>(apache::thrift::detail::si::create_app_exn_bad_interaction_state("MyInteraction", "frobnicate")));
+        return;
+      }
       ifacePtr->async_tm_frobnicate(std::move(cb));
     };
   };
@@ -492,6 +496,10 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_ping(
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
+      if (ifacePtr == nullptr) {
+        cb->complete(folly::Try<void>(apache::thrift::detail::si::create_app_exn_bad_interaction_state("MyInteraction", "ping")));
+        return;
+      }
       ifacePtr->async_tm_ping(std::move(cb));
     };
   };
@@ -633,6 +641,10 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_truthify(
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
+      if (ifacePtr == nullptr) {
+        cb->complete(folly::Try<::apache::thrift::ServerStream<bool>>(apache::thrift::detail::si::create_app_exn_bad_interaction_state("MyInteraction", "truthify")));
+        return;
+      }
       ifacePtr->async_tm_truthify(std::move(cb));
     };
   };
@@ -803,6 +815,10 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_encode(
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
+      if (ifacePtr == nullptr) {
+        cb->complete(folly::Try<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>>(apache::thrift::detail::si::create_app_exn_bad_interaction_state("MyInteraction", "encode")));
+        return;
+      }
       ifacePtr->async_tm_encode(std::move(cb));
     };
   };
@@ -997,6 +1013,10 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_init(
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
+      if (ifacePtr == nullptr) {
+        cb->complete(folly::Try<::std::int32_t>(apache::thrift::detail::si::create_app_exn_bad_interaction_state("SharedInteraction", "init")));
+        return;
+      }
       ifacePtr->async_tm_init(std::move(cb));
     };
   };
@@ -1165,6 +1185,10 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_do_somet
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
+      if (ifacePtr == nullptr) {
+        cb->complete(folly::Try<std::unique_ptr<::thrift::shared_interactions::DoSomethingResult>>(apache::thrift::detail::si::create_app_exn_bad_interaction_state("SharedInteraction", "do_something")));
+        return;
+      }
       ifacePtr->async_tm_do_something(std::move(cb));
     };
   };
@@ -1333,6 +1357,10 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_tear_dow
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
+      if (ifacePtr == nullptr) {
+        cb->complete(folly::Try<void>(apache::thrift::detail::si::create_app_exn_bad_interaction_state("SharedInteraction", "tear_down")));
+        return;
+      }
       ifacePtr->async_tm_tear_down(std::move(cb));
     };
   };

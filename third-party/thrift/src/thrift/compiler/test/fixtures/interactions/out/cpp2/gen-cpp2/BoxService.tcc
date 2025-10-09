@@ -308,6 +308,10 @@ void BoxServiceAsyncProcessor::executeRequest_BoxedInteraction_getABox(
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = &iface](auto&& cb, ArgsState args) mutable {
       (void)args;
+      if (ifacePtr == nullptr) {
+        cb->complete(folly::Try<std::unique_ptr<::cpp2::ShouldBeBoxed>>(apache::thrift::detail::si::create_app_exn_bad_interaction_state("BoxedInteraction", "getABox")));
+        return;
+      }
       ifacePtr->async_tm_getABox(std::move(cb));
     };
   };

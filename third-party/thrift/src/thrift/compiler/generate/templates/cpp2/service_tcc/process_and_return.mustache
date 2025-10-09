@@ -271,6 +271,12 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
   const auto makeExecuteHandler = [&] {
     return [ifacePtr = {{^service:interaction?}}iface_{{/service:interaction?}}{{#service:interaction?}}&iface{{/service:interaction?}}](auto&& cb, ArgsState args) mutable {
       (void)args;
+{{#if service:self.interaction?}}
+      if (ifacePtr == nullptr) {
+        cb->complete(folly::Try<{{> types/return_type_server}}>(apache::thrift::detail::si::create_app_exn_bad_interaction_state("{{service:name}}", "{{function:name}}")));
+        return;
+      }
+{{/if service:self.interaction?}}
       ifacePtr->{{#function:eb}}async_eb{{/function:eb}}{{^function:eb}}async_tm{{/function:eb}}_{{function:cpp_name}}(std::move(cb){{> service_tcc/get_args_ref}});
     };
   };

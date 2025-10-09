@@ -39,9 +39,6 @@ type destructure = {
 type has_member_method = {
   hmm_explicit_targs: Nast.targ list; [@opaque]
       (** he list of explicit type arguments provided to the method call *)
-  hmm_env_capability: locl_ty;
-      (** A type respresenting the capabilities provided by the environment at the
-          point of the call *)
 }
 [@@deriving show]
 

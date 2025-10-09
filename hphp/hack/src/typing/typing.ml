@@ -6320,7 +6320,15 @@ end = struct
               ft_tparams = [];
               ft_where_constraints = [];
               ft_params = List.map2_exn ~f:make_param arg_posl arg_tys;
-              ft_implicit_params = { capability = CapDefaults Pos_or_decl.none };
+              ft_implicit_params =
+                {
+                  capability =
+                    CapTy
+                      (Env.get_local_check_defined
+                         env
+                         (p, Typing_coeffects.capability_id))
+                        .Typing_local_types.ty;
+                };
               ft_ret = ty;
               ft_flags = Typing_defs_flags.Fun.default;
               ft_require_package = None;
@@ -6333,13 +6341,7 @@ end = struct
           ~name:m
           ~ty:tfty
           ~class_id:(CIexpr e1)
-          ~methd:
-            (Some
-               {
-                 hmm_explicit_targs = [];
-                 hmm_env_capability =
-                   MakeType.default_capability (Pos_or_decl.of_raw_pos p);
-               })
+          ~methd:(Some { hmm_explicit_targs = [] })
       in
       let (env, ty_err_opt) =
         Type.sub_type_i

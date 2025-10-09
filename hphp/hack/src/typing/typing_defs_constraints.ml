@@ -21,10 +21,7 @@ type destructure = {
 }
 [@@deriving show]
 
-type has_member_method = {
-  hmm_explicit_targs: Nast.targ list; [@opaque]
-  hmm_env_capability: locl_ty;
-}
+type has_member_method = { hmm_explicit_targs: Nast.targ list [@opaque] }
 [@@deriving show]
 
 type has_member = {
@@ -127,13 +124,11 @@ let has_member_compare ~normalize_lists hm1 hm2 =
   in
   let method_compare method1 method2 =
     match (method1, method2) with
-    | ( { hmm_explicit_targs = targs1; hmm_env_capability = cap1 },
-        { hmm_explicit_targs = targs2; hmm_env_capability = cap2 } ) ->
+    | ({ hmm_explicit_targs = targs1 }, { hmm_explicit_targs = targs2 }) ->
       let targ_compare (_, (_, hint1)) (_, (_, hint2)) =
         Aast_defs.compare_hint_ hint1 hint2
       in
-      chain_compare (List.compare targ_compare targs1 targs2) (fun _ ->
-          ty_compare cap1 cap2)
+      List.compare targ_compare targs1 targs2
   in
   chain_compare (String.compare m1 m2) (fun _ ->
       chain_compare (ty_compare ty1 ty2) (fun _ ->

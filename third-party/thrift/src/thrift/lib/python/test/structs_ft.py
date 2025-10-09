@@ -18,83 +18,17 @@ import copy
 import pickle
 import threading
 import unittest
-from contextlib import contextmanager
 
-from typing import Callable, TypeVar
+from typing import TypeVar
 
 from testing.thrift_types import easy, Integers, Nested1, Nested2, Nested3
+from thrift.lib.python.test.testing_utils import run_concurrently
 
 from thrift.python.serializer import deserialize, serialize
 from thrift.python.types import StructOrUnion
 
 
 T = TypeVar("T", bound=StructOrUnion)
-
-
-@contextmanager
-# pyre-ignore[2, 3]:
-def catch_thread_exception(*args, **kwds):
-    """
-    Context manager for threading.excepthook().
-    See the threading.excepthook() documentation for details.
-    """
-
-    class ExceptionContext:
-        def __init__(self):
-            self.exc_type = None
-            self.exc_value = None
-            self.exc_traceback = None
-            self.thread = None
-
-    # pyre-ignore[2]:
-    def scoped_excepthook(args, /) -> None:
-        context.exc_type = args.exc_type
-        context.exc_value = args.exc_value
-        context.exc_traceback = args.exc_traceback
-        context.thread = args.thread
-
-    old_hook = threading.excepthook
-    context: ExceptionContext = ExceptionContext()
-    threading.excepthook = scoped_excepthook
-    try:
-        yield context
-    finally:
-        threading.excepthook = old_hook
-
-
-def run_concurrently(
-    worker_func: Callable[..., None],
-    nthreads: int,
-    # pyre-ignore[2]:
-    args=(),
-    # pyre-ignore[2]:
-    kwargs={},  # noqa
-) -> None:
-    """
-    Run the `worker_func` concurrently
-    """
-    barrier: threading.Barrier = threading.Barrier(nthreads)
-
-    # pyre-ignore[2]: Parameters ...
-    def wrapper_func(*args, **kwargs) -> None:
-        # Wait for all threads to reach this point.
-        barrier.wait()
-        worker_func(*args, **kwargs)
-
-    with catch_thread_exception() as cm:
-        workers = [
-            threading.Thread(target=wrapper_func, args=args, kwargs=kwargs)
-            for _ in range(nthreads)
-        ]
-
-        for worker in workers:
-            worker.start()
-
-        for worker in workers:
-            worker.join()
-
-        if cm.exc_value is not None:
-            raise cm.exc_value
 
 
 def serialization_roundtrip(struct: T) -> T:

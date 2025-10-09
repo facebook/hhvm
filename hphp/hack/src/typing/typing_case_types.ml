@@ -676,6 +676,28 @@ end = struct
       let open Tag in
       let cycle_handler f = cycle_handler ~env ~f in
       let reason = DataTypeReason.(make NoSubreason trail) in
+      let handle_sealed_whitelist ~trail ~name ~pos ~default whitelist =
+        let trail =
+          DataTypeReason.sealed_interface
+            ~trail
+            (Reason.witness_from_decl pos)
+            name
+        in
+        SSet.fold
+          (fun whitelist_cls acc ->
+            cycle_handler ~trail ~default @@ fun env trail ->
+            Set.union acc
+            @@ to_datatypes
+                 ~safe_for_are_disjoint
+                 ~trail
+                 env
+                 whitelist_cls
+                 (* You cannot provide generics when sealing *)
+                 [])
+          whitelist
+          Set.empty
+        |> Set.inter (default ~reason)
+      in
       match cls with
       | cls when String.equal cls SN.Collections.cDict ->
         Set.singleton ~reason DictData
@@ -696,8 +718,19 @@ end = struct
                  Set.singleton ~reason
                  @@ InstanceOf { name; kind = FinalClass generics }
                | Cclass _ ->
-                 Set.singleton ~reason
-                 @@ InstanceOf { name; kind = Class generics }
+                 let default ~reason =
+                   Set.singleton ~reason
+                   @@ InstanceOf { name; kind = Class generics }
+                 in
+                 (match Cls.sealed_whitelist cls with
+                 | None -> default ~reason
+                 | Some whitelist ->
+                   handle_sealed_whitelist
+                     ~trail
+                     ~name
+                     ~pos:(Cls.pos cls)
+                     ~default
+                     whitelist)
                | Ctrait
                | Cinterface -> begin
                  let default ~reason =
@@ -741,26 +774,12 @@ end = struct
                                 [])
                        reqs
                  | Some whitelist ->
-                   let trail =
-                     DataTypeReason.sealed_interface
-                       ~trail
-                       (Reason.witness_from_decl (Cls.pos cls))
-                       name
-                   in
-                   SSet.fold
-                     (fun whitelist_cls acc ->
-                       cycle_handler ~trail ~default @@ fun env trail ->
-                       Set.union acc
-                       @@ to_datatypes
-                            ~safe_for_are_disjoint
-                            ~trail
-                            env
-                            whitelist_cls
-                            (* You cannot provide generics when sealing *)
-                            [])
+                   handle_sealed_whitelist
+                     ~trail
+                     ~name
+                     ~pos:(Cls.pos cls)
+                     ~default
                      whitelist
-                     Set.empty
-                   |> Set.inter (default ~reason)
                end
                | Cenum
                | Cenum_class _ ->

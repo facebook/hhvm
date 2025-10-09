@@ -121,7 +121,9 @@
 #include "hphp/zend/zend-string.h"
 #include "hphp/zend/zend-strtod.h"
 
+#ifdef HHVM_FACEBOOK
 #include "roarjit/Init.h"
+#endif
 
 #include <folly/CPortability.h>
 #include <folly/json/json.h>

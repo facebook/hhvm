@@ -311,16 +311,16 @@ cdef class ThriftServer:
         internals_ptr.get().setServiceHealth(c_health)
 
     def start_health_polling(self):
-        """Start periodic health polling if handler supports getServiceHealth"""
+        """Start periodic health polling if handler supports getStatus"""
         cdef unique_ptr[cThriftServerInternals] internals_ptr
         handler = None
         if (self.handler is not None and
-            # need to check if handler implements getServiceHealth.
-            hasattr(self.handler, 'getServiceHealth')):
+            # need to check if handler implements getStatus.
+            hasattr(self.handler, 'getStatus')):
             handler = self.handler
         elif (self.factory is not None and
             # this is for py3 async interface
-            hasattr(self.factory, 'getServiceHealth')):
+            hasattr(self.factory, 'getStatus')):
             handler = self.factory
 
         if handler is not None:
@@ -341,7 +341,7 @@ cdef class ThriftServer:
         try:
             while True:
                 try:
-                    health_status = await handler.getServiceHealth()
+                    health_status = await handler.getStatus()
                     # Poll the handler's health status and cache it
                     self.set_service_health(health_status)
 

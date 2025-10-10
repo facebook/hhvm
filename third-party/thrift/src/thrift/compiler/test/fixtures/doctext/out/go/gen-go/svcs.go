@@ -231,6 +231,50 @@ func (p *procFuncCNumbers) RunContext(ctx context.Context, reqStruct thrift.Read
     return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
 }
 
+func (p *procFuncCNumbers) RunStreamContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onStreamNext func(thrift.WritableStruct),
+    onStreamComplete func(),
+) {
+    firstResponse := newRespCNumbers()
+    elemProducerFunc, initialErr := p.handler.Numbers(ctx)
+    if initialErr != nil {
+        internalErr := fmt.Errorf("Internal error processing Numbers: %w", initialErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFirstResponse(x)
+        onStreamComplete()
+        return
+    }
+
+    onFirstResponse(firstResponse)
+
+    fbthriftElemChan := make(chan Number, thrift.DefaultStreamBufferSize)
+    var senderWg sync.WaitGroup
+    senderWg.Add(1)
+    // Sender goroutine (receives elements on the channel and sends them out via onStreamNext)
+    go func() {
+        defer senderWg.Done()
+        for elem := range fbthriftElemChan {
+            streamWrapStruct := newStreamCNumbers()
+            streamWrapStruct.Success = &elem
+            onStreamNext(streamWrapStruct)
+        }
+    }()
+
+    streamErr := elemProducerFunc(ctx, fbthriftElemChan)
+    // Stream is complete. Close the channel and wait for the sender goroutine to finish.
+    close(fbthriftElemChan)
+    senderWg.Wait()
+    if streamErr != nil {
+        internalErr := fmt.Errorf("Internal stream handler error Numbers: %w", streamErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onStreamNext(x)
+    }
+    onStreamComplete()
+}
+
 
 type procFuncCThing struct {
     handler C

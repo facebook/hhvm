@@ -647,6 +647,51 @@ func (p *procFuncPubSubStreamingServiceReturnstream) RunContext(ctx context.Cont
     return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
 }
 
+func (p *procFuncPubSubStreamingServiceReturnstream) RunStreamContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onStreamNext func(thrift.WritableStruct),
+    onStreamComplete func(),
+) {
+    args := reqStruct.(*reqPubSubStreamingServiceReturnstream)
+    firstResponse := newRespPubSubStreamingServiceReturnstream()
+    elemProducerFunc, initialErr := p.handler.Returnstream(ctx, args.I32From, args.I32To)
+    if initialErr != nil {
+        internalErr := fmt.Errorf("Internal error processing Returnstream: %w", initialErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFirstResponse(x)
+        onStreamComplete()
+        return
+    }
+
+    onFirstResponse(firstResponse)
+
+    fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
+    var senderWg sync.WaitGroup
+    senderWg.Add(1)
+    // Sender goroutine (receives elements on the channel and sends them out via onStreamNext)
+    go func() {
+        defer senderWg.Done()
+        for elem := range fbthriftElemChan {
+            streamWrapStruct := newStreamPubSubStreamingServiceReturnstream()
+            streamWrapStruct.Success = &elem
+            onStreamNext(streamWrapStruct)
+        }
+    }()
+
+    streamErr := elemProducerFunc(ctx, fbthriftElemChan)
+    // Stream is complete. Close the channel and wait for the sender goroutine to finish.
+    close(fbthriftElemChan)
+    senderWg.Wait()
+    if streamErr != nil {
+        internalErr := fmt.Errorf("Internal stream handler error Returnstream: %w", streamErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onStreamNext(x)
+    }
+    onStreamComplete()
+}
+
 
 type procFuncPubSubStreamingServiceStreamthrows struct {
     handler PubSubStreamingService
@@ -660,6 +705,58 @@ func (p *procFuncPubSubStreamingServiceStreamthrows) NewReqArgs() thrift.Readabl
 
 func (p *procFuncPubSubStreamingServiceStreamthrows) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
+}
+
+func (p *procFuncPubSubStreamingServiceStreamthrows) RunStreamContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onStreamNext func(thrift.WritableStruct),
+    onStreamComplete func(),
+) {
+    args := reqStruct.(*reqPubSubStreamingServiceStreamthrows)
+    firstResponse := newRespPubSubStreamingServiceStreamthrows()
+    elemProducerFunc, initialErr := p.handler.Streamthrows(ctx, args.Foo)
+    if initialErr != nil {
+        internalErr := fmt.Errorf("Internal error processing Streamthrows: %w", initialErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFirstResponse(x)
+        onStreamComplete()
+        return
+    }
+
+    onFirstResponse(firstResponse)
+
+    fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
+    var senderWg sync.WaitGroup
+    senderWg.Add(1)
+    // Sender goroutine (receives elements on the channel and sends them out via onStreamNext)
+    go func() {
+        defer senderWg.Done()
+        for elem := range fbthriftElemChan {
+            streamWrapStruct := newStreamPubSubStreamingServiceStreamthrows()
+            streamWrapStruct.Success = &elem
+            onStreamNext(streamWrapStruct)
+        }
+    }()
+
+    streamErr := elemProducerFunc(ctx, fbthriftElemChan)
+    // Stream is complete. Close the channel and wait for the sender goroutine to finish.
+    close(fbthriftElemChan)
+    senderWg.Wait()
+    if streamErr != nil {
+        streamWrapStruct := newStreamPubSubStreamingServiceStreamthrows()
+        switch v := streamErr.(type) {
+        case *FooStreamEx:
+            streamWrapStruct.E = v
+            onStreamNext(streamWrapStruct)
+        default:
+            internalErr := fmt.Errorf("Internal stream handler error Streamthrows: %w", streamErr)
+            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+            onStreamNext(x)
+        }
+    }
+    onStreamComplete()
 }
 
 
@@ -677,6 +774,57 @@ func (p *procFuncPubSubStreamingServiceServicethrows) RunContext(ctx context.Con
     return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
 }
 
+func (p *procFuncPubSubStreamingServiceServicethrows) RunStreamContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onStreamNext func(thrift.WritableStruct),
+    onStreamComplete func(),
+) {
+    args := reqStruct.(*reqPubSubStreamingServiceServicethrows)
+    firstResponse := newRespPubSubStreamingServiceServicethrows()
+    elemProducerFunc, initialErr := p.handler.Servicethrows(ctx, args.Foo)
+    if initialErr != nil {
+        switch v := initialErr.(type) {
+        case *FooEx:
+            firstResponse.E = v
+            onFirstResponse(firstResponse)
+        default:
+            internalErr := fmt.Errorf("Internal error processing Servicethrows: %w", initialErr)
+            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+            onFirstResponse(x)
+        }
+        onStreamComplete()
+        return
+    }
+
+    onFirstResponse(firstResponse)
+
+    fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
+    var senderWg sync.WaitGroup
+    senderWg.Add(1)
+    // Sender goroutine (receives elements on the channel and sends them out via onStreamNext)
+    go func() {
+        defer senderWg.Done()
+        for elem := range fbthriftElemChan {
+            streamWrapStruct := newStreamPubSubStreamingServiceServicethrows()
+            streamWrapStruct.Success = &elem
+            onStreamNext(streamWrapStruct)
+        }
+    }()
+
+    streamErr := elemProducerFunc(ctx, fbthriftElemChan)
+    // Stream is complete. Close the channel and wait for the sender goroutine to finish.
+    close(fbthriftElemChan)
+    senderWg.Wait()
+    if streamErr != nil {
+        internalErr := fmt.Errorf("Internal stream handler error Servicethrows: %w", streamErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onStreamNext(x)
+    }
+    onStreamComplete()
+}
+
 
 type procFuncPubSubStreamingServiceServicethrows2 struct {
     handler PubSubStreamingService
@@ -690,6 +838,60 @@ func (p *procFuncPubSubStreamingServiceServicethrows2) NewReqArgs() thrift.Reada
 
 func (p *procFuncPubSubStreamingServiceServicethrows2) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
+}
+
+func (p *procFuncPubSubStreamingServiceServicethrows2) RunStreamContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onStreamNext func(thrift.WritableStruct),
+    onStreamComplete func(),
+) {
+    args := reqStruct.(*reqPubSubStreamingServiceServicethrows2)
+    firstResponse := newRespPubSubStreamingServiceServicethrows2()
+    elemProducerFunc, initialErr := p.handler.Servicethrows2(ctx, args.Foo)
+    if initialErr != nil {
+        switch v := initialErr.(type) {
+        case *FooEx:
+            firstResponse.E1 = v
+            onFirstResponse(firstResponse)
+        case *FooEx2:
+            firstResponse.E2 = v
+            onFirstResponse(firstResponse)
+        default:
+            internalErr := fmt.Errorf("Internal error processing Servicethrows2: %w", initialErr)
+            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+            onFirstResponse(x)
+        }
+        onStreamComplete()
+        return
+    }
+
+    onFirstResponse(firstResponse)
+
+    fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
+    var senderWg sync.WaitGroup
+    senderWg.Add(1)
+    // Sender goroutine (receives elements on the channel and sends them out via onStreamNext)
+    go func() {
+        defer senderWg.Done()
+        for elem := range fbthriftElemChan {
+            streamWrapStruct := newStreamPubSubStreamingServiceServicethrows2()
+            streamWrapStruct.Success = &elem
+            onStreamNext(streamWrapStruct)
+        }
+    }()
+
+    streamErr := elemProducerFunc(ctx, fbthriftElemChan)
+    // Stream is complete. Close the channel and wait for the sender goroutine to finish.
+    close(fbthriftElemChan)
+    senderWg.Wait()
+    if streamErr != nil {
+        internalErr := fmt.Errorf("Internal stream handler error Servicethrows2: %w", streamErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onStreamNext(x)
+    }
+    onStreamComplete()
 }
 
 
@@ -707,6 +909,64 @@ func (p *procFuncPubSubStreamingServiceBoththrows) RunContext(ctx context.Contex
     return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
 }
 
+func (p *procFuncPubSubStreamingServiceBoththrows) RunStreamContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onStreamNext func(thrift.WritableStruct),
+    onStreamComplete func(),
+) {
+    args := reqStruct.(*reqPubSubStreamingServiceBoththrows)
+    firstResponse := newRespPubSubStreamingServiceBoththrows()
+    elemProducerFunc, initialErr := p.handler.Boththrows(ctx, args.Foo)
+    if initialErr != nil {
+        switch v := initialErr.(type) {
+        case *FooEx:
+            firstResponse.E = v
+            onFirstResponse(firstResponse)
+        default:
+            internalErr := fmt.Errorf("Internal error processing Boththrows: %w", initialErr)
+            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+            onFirstResponse(x)
+        }
+        onStreamComplete()
+        return
+    }
+
+    onFirstResponse(firstResponse)
+
+    fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
+    var senderWg sync.WaitGroup
+    senderWg.Add(1)
+    // Sender goroutine (receives elements on the channel and sends them out via onStreamNext)
+    go func() {
+        defer senderWg.Done()
+        for elem := range fbthriftElemChan {
+            streamWrapStruct := newStreamPubSubStreamingServiceBoththrows()
+            streamWrapStruct.Success = &elem
+            onStreamNext(streamWrapStruct)
+        }
+    }()
+
+    streamErr := elemProducerFunc(ctx, fbthriftElemChan)
+    // Stream is complete. Close the channel and wait for the sender goroutine to finish.
+    close(fbthriftElemChan)
+    senderWg.Wait()
+    if streamErr != nil {
+        streamWrapStruct := newStreamPubSubStreamingServiceBoththrows()
+        switch v := streamErr.(type) {
+        case *FooStreamEx:
+            streamWrapStruct.E = v
+            onStreamNext(streamWrapStruct)
+        default:
+            internalErr := fmt.Errorf("Internal stream handler error Boththrows: %w", streamErr)
+            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+            onStreamNext(x)
+        }
+    }
+    onStreamComplete()
+}
+
 
 type procFuncPubSubStreamingServiceResponseandstreamstreamthrows struct {
     handler PubSubStreamingService
@@ -720,6 +980,59 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamstreamthrows) NewReqArgs
 
 func (p *procFuncPubSubStreamingServiceResponseandstreamstreamthrows) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
+}
+
+func (p *procFuncPubSubStreamingServiceResponseandstreamstreamthrows) RunStreamContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onStreamNext func(thrift.WritableStruct),
+    onStreamComplete func(),
+) {
+    args := reqStruct.(*reqPubSubStreamingServiceResponseandstreamstreamthrows)
+    firstResponse := newRespPubSubStreamingServiceResponseandstreamstreamthrows()
+    retval, elemProducerFunc, initialErr := p.handler.Responseandstreamstreamthrows(ctx, args.Foo)
+    if initialErr != nil {
+        internalErr := fmt.Errorf("Internal error processing Responseandstreamstreamthrows: %w", initialErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFirstResponse(x)
+        onStreamComplete()
+        return
+    }
+
+    firstResponse.Success = &retval
+    onFirstResponse(firstResponse)
+
+    fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
+    var senderWg sync.WaitGroup
+    senderWg.Add(1)
+    // Sender goroutine (receives elements on the channel and sends them out via onStreamNext)
+    go func() {
+        defer senderWg.Done()
+        for elem := range fbthriftElemChan {
+            streamWrapStruct := newStreamPubSubStreamingServiceResponseandstreamstreamthrows()
+            streamWrapStruct.Success = &elem
+            onStreamNext(streamWrapStruct)
+        }
+    }()
+
+    streamErr := elemProducerFunc(ctx, fbthriftElemChan)
+    // Stream is complete. Close the channel and wait for the sender goroutine to finish.
+    close(fbthriftElemChan)
+    senderWg.Wait()
+    if streamErr != nil {
+        streamWrapStruct := newStreamPubSubStreamingServiceResponseandstreamstreamthrows()
+        switch v := streamErr.(type) {
+        case *FooStreamEx:
+            streamWrapStruct.E = v
+            onStreamNext(streamWrapStruct)
+        default:
+            internalErr := fmt.Errorf("Internal stream handler error Responseandstreamstreamthrows: %w", streamErr)
+            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+            onStreamNext(x)
+        }
+    }
+    onStreamComplete()
 }
 
 
@@ -737,6 +1050,58 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamservicethrows) RunContex
     return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
 }
 
+func (p *procFuncPubSubStreamingServiceResponseandstreamservicethrows) RunStreamContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onStreamNext func(thrift.WritableStruct),
+    onStreamComplete func(),
+) {
+    args := reqStruct.(*reqPubSubStreamingServiceResponseandstreamservicethrows)
+    firstResponse := newRespPubSubStreamingServiceResponseandstreamservicethrows()
+    retval, elemProducerFunc, initialErr := p.handler.Responseandstreamservicethrows(ctx, args.Foo)
+    if initialErr != nil {
+        switch v := initialErr.(type) {
+        case *FooEx:
+            firstResponse.E = v
+            onFirstResponse(firstResponse)
+        default:
+            internalErr := fmt.Errorf("Internal error processing Responseandstreamservicethrows: %w", initialErr)
+            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+            onFirstResponse(x)
+        }
+        onStreamComplete()
+        return
+    }
+
+    firstResponse.Success = &retval
+    onFirstResponse(firstResponse)
+
+    fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
+    var senderWg sync.WaitGroup
+    senderWg.Add(1)
+    // Sender goroutine (receives elements on the channel and sends them out via onStreamNext)
+    go func() {
+        defer senderWg.Done()
+        for elem := range fbthriftElemChan {
+            streamWrapStruct := newStreamPubSubStreamingServiceResponseandstreamservicethrows()
+            streamWrapStruct.Success = &elem
+            onStreamNext(streamWrapStruct)
+        }
+    }()
+
+    streamErr := elemProducerFunc(ctx, fbthriftElemChan)
+    // Stream is complete. Close the channel and wait for the sender goroutine to finish.
+    close(fbthriftElemChan)
+    senderWg.Wait()
+    if streamErr != nil {
+        internalErr := fmt.Errorf("Internal stream handler error Responseandstreamservicethrows: %w", streamErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onStreamNext(x)
+    }
+    onStreamComplete()
+}
+
 
 type procFuncPubSubStreamingServiceResponseandstreamboththrows struct {
     handler PubSubStreamingService
@@ -752,6 +1117,65 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamboththrows) RunContext(c
     return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
 }
 
+func (p *procFuncPubSubStreamingServiceResponseandstreamboththrows) RunStreamContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onStreamNext func(thrift.WritableStruct),
+    onStreamComplete func(),
+) {
+    args := reqStruct.(*reqPubSubStreamingServiceResponseandstreamboththrows)
+    firstResponse := newRespPubSubStreamingServiceResponseandstreamboththrows()
+    retval, elemProducerFunc, initialErr := p.handler.Responseandstreamboththrows(ctx, args.Foo)
+    if initialErr != nil {
+        switch v := initialErr.(type) {
+        case *FooEx:
+            firstResponse.E = v
+            onFirstResponse(firstResponse)
+        default:
+            internalErr := fmt.Errorf("Internal error processing Responseandstreamboththrows: %w", initialErr)
+            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+            onFirstResponse(x)
+        }
+        onStreamComplete()
+        return
+    }
+
+    firstResponse.Success = &retval
+    onFirstResponse(firstResponse)
+
+    fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
+    var senderWg sync.WaitGroup
+    senderWg.Add(1)
+    // Sender goroutine (receives elements on the channel and sends them out via onStreamNext)
+    go func() {
+        defer senderWg.Done()
+        for elem := range fbthriftElemChan {
+            streamWrapStruct := newStreamPubSubStreamingServiceResponseandstreamboththrows()
+            streamWrapStruct.Success = &elem
+            onStreamNext(streamWrapStruct)
+        }
+    }()
+
+    streamErr := elemProducerFunc(ctx, fbthriftElemChan)
+    // Stream is complete. Close the channel and wait for the sender goroutine to finish.
+    close(fbthriftElemChan)
+    senderWg.Wait()
+    if streamErr != nil {
+        streamWrapStruct := newStreamPubSubStreamingServiceResponseandstreamboththrows()
+        switch v := streamErr.(type) {
+        case *FooStreamEx:
+            streamWrapStruct.E = v
+            onStreamNext(streamWrapStruct)
+        default:
+            internalErr := fmt.Errorf("Internal stream handler error Responseandstreamboththrows: %w", streamErr)
+            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+            onStreamNext(x)
+        }
+    }
+    onStreamComplete()
+}
+
 
 type procFuncPubSubStreamingServiceReturnstreamFast struct {
     handler PubSubStreamingService
@@ -765,6 +1189,51 @@ func (p *procFuncPubSubStreamingServiceReturnstreamFast) NewReqArgs() thrift.Rea
 
 func (p *procFuncPubSubStreamingServiceReturnstreamFast) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
+}
+
+func (p *procFuncPubSubStreamingServiceReturnstreamFast) RunStreamContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onStreamNext func(thrift.WritableStruct),
+    onStreamComplete func(),
+) {
+    args := reqStruct.(*reqPubSubStreamingServiceReturnstreamFast)
+    firstResponse := newRespPubSubStreamingServiceReturnstreamFast()
+    elemProducerFunc, initialErr := p.handler.ReturnstreamFast(ctx, args.I32From, args.I32To)
+    if initialErr != nil {
+        internalErr := fmt.Errorf("Internal error processing ReturnstreamFast: %w", initialErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFirstResponse(x)
+        onStreamComplete()
+        return
+    }
+
+    onFirstResponse(firstResponse)
+
+    fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
+    var senderWg sync.WaitGroup
+    senderWg.Add(1)
+    // Sender goroutine (receives elements on the channel and sends them out via onStreamNext)
+    go func() {
+        defer senderWg.Done()
+        for elem := range fbthriftElemChan {
+            streamWrapStruct := newStreamPubSubStreamingServiceReturnstreamFast()
+            streamWrapStruct.Success = &elem
+            onStreamNext(streamWrapStruct)
+        }
+    }()
+
+    streamErr := elemProducerFunc(ctx, fbthriftElemChan)
+    // Stream is complete. Close the channel and wait for the sender goroutine to finish.
+    close(fbthriftElemChan)
+    senderWg.Wait()
+    if streamErr != nil {
+        internalErr := fmt.Errorf("Internal stream handler error ReturnstreamFast: %w", streamErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onStreamNext(x)
+    }
+    onStreamComplete()
 }
 
 

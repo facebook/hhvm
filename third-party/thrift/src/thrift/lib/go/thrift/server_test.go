@@ -733,4 +733,99 @@ func TestProcessorScenarios(t *testing.T) {
 		err := client.OnewayRPC(context.Background(), "hello")
 		require.NoError(t, err)
 	})
+	t.Run("stream", func(t *testing.T) {
+		client := dummyif.NewDummyChannelClient(channel)
+
+		streamCtx, streamCancel := context.WithCancel(context.Background())
+		defer streamCancel()
+		elemChan, elemErrChan, err := client.StreamOnly(streamCtx, 1, 10)
+		require.NoError(t, err)
+
+		responses := make([]int32, 0)
+		for elem := range elemChan {
+			responses = append(responses, elem)
+		}
+		require.Equal(t, []int32{1, 2, 3, 4, 5, 6, 7, 8, 9}, responses)
+
+		// Check if streaming encountered and error
+		streamErr := <-elemErrChan
+		require.NoError(t, streamErr)
+	})
+	t.Run("response_and_stream", func(t *testing.T) {
+		client := dummyif.NewDummyChannelClient(channel)
+
+		streamCtx, streamCancel := context.WithCancel(context.Background())
+		defer streamCancel()
+		firstResponse, elemChan, elemErrChan, err := client.ResponseAndStream(streamCtx, 1, 10)
+		require.NoError(t, err)
+		assert.EqualValues(t, 9, firstResponse)
+
+		responses := make([]int32, 0)
+		for elem := range elemChan {
+			responses = append(responses, elem)
+		}
+		require.Equal(t, []int32{1, 2, 3, 4, 5, 6, 7, 8, 9}, responses)
+
+		// Check if streaming encountered and error
+		streamErr := <-elemErrChan
+		require.NoError(t, streamErr)
+	})
+	t.Run("stream_with_declared_exception", func(t *testing.T) {
+		client := dummyif.NewDummyChannelClient(channel)
+
+		streamCtx, streamCancel := context.WithCancel(context.Background())
+		defer streamCancel()
+		elemChan, elemErrChan, err := client.StreamWithDeclaredException(streamCtx)
+		require.NoError(t, err)
+
+		responses := make([]int32, 0)
+		for elem := range elemChan {
+			responses = append(responses, elem)
+		}
+		require.Empty(t, responses)
+
+		// Check if streaming encountered and error
+		streamErr := <-elemErrChan
+		require.Error(t, streamErr)
+		var dummyEx *dummyif.DummyException
+		require.ErrorAs(t, streamErr, &dummyEx)
+	})
+	t.Run("stream_with_undeclared_exception", func(t *testing.T) {
+		client := dummyif.NewDummyChannelClient(channel)
+
+		streamCtx, streamCancel := context.WithCancel(context.Background())
+		defer streamCancel()
+		elemChan, elemErrChan, err := client.StreamWithUndeclaredException(streamCtx)
+		require.NoError(t, err)
+
+		responses := make([]int32, 0)
+		for elem := range elemChan {
+			responses = append(responses, elem)
+		}
+		require.Empty(t, responses)
+
+		// Check if streaming encountered and error
+		streamErr := <-elemErrChan
+		require.Error(t, streamErr)
+		require.ErrorContains(t, streamErr, "undeclared exception")
+	})
+	t.Run("response_and_stream_with_declared_exception", func(t *testing.T) {
+		client := dummyif.NewDummyChannelClient(channel)
+
+		streamCtx, streamCancel := context.WithCancel(context.Background())
+		defer streamCancel()
+		_, _, _, err := client.ResponseAndStreamWithDeclaredException(streamCtx)
+		require.Error(t, err)
+		var dummyEx *dummyif.DummyException
+		require.ErrorAs(t, err, &dummyEx)
+	})
+	t.Run("response_and_stream_with_undeclared_exception", func(t *testing.T) {
+		client := dummyif.NewDummyChannelClient(channel)
+
+		streamCtx, streamCancel := context.WithCancel(context.Background())
+		defer streamCancel()
+		_, _, _, err := client.ResponseAndStreamWithUndeclaredException(streamCtx)
+		require.Error(t, err)
+		require.ErrorContains(t, err, "undeclared exception")
+	})
 }

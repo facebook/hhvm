@@ -33,6 +33,98 @@ func (p *{{> svc/proc_func_name}}) NewReqArgs() thrift.ReadableStruct {
 func (p *{{> svc/proc_func_name}}) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
 }
+
+func (p *{{> svc/proc_func_name}}) RunStreamContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onStreamNext func(thrift.WritableStruct),
+    onStreamComplete func(),
+) {
+    {{#function:params.fields?}}
+    args := reqStruct.(*req{{service:go_name}}{{function:go_name}})
+    {{/function:params.fields?}}
+    firstResponse := newResp{{service:go_name}}{{function:go_name}}()
+    {{#function:stream_has_first_response?}}retval, {{/function:stream_has_first_response?}}elemProducerFunc, initialErr := p.handler.{{function:go_name}}({{!
+        }}ctx{{#if function:params.fields?}}, {{/if}}{{!
+        }}{{#function:args}}{{!
+          }}args.{{field:go_name}}{{!
+          }}{{^last?}}, {{/last?}}{{!
+        }}{{/function:args}})
+    if initialErr != nil {
+        {{#function:exceptions?}}
+        switch v := initialErr.(type) {
+        {{#function:exceptions}}
+        case *{{#field:type}}{{> common/type}}{{/field:type}}:
+            firstResponse.{{field:go_name}} = v
+            onFirstResponse(firstResponse)
+        {{/function:exceptions}}
+        default:
+            internalErr := fmt.Errorf("Internal error processing {{function:go_name}}: %w", initialErr)
+            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+            onFirstResponse(x)
+        }
+        {{/function:exceptions?}}
+        {{^function:exceptions?}}
+        internalErr := fmt.Errorf("Internal error processing {{function:go_name}}: %w", initialErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFirstResponse(x)
+        {{/function:exceptions?}}
+        onStreamComplete()
+        return
+    }
+
+    {{#function:stream_has_first_response?}}
+    {{#function:stream_first_response_type}}
+    firstResponse.{{function:retval_field_name}} = {{^type:nilable?}}&{{/type:nilable?}}retval
+    {{/function:stream_first_response_type}}
+    {{/function:stream_has_first_response?}}
+    onFirstResponse(firstResponse)
+
+    {{#function:stream_elem_type}}
+    fbthriftElemChan := make(chan {{#type:structured?}}*{{/type:structured?}}{{> common/type}}, thrift.DefaultStreamBufferSize)
+    {{/function:stream_elem_type}}
+    var senderWg sync.WaitGroup
+    senderWg.Add(1)
+    // Sender goroutine (receives elements on the channel and sends them out via onStreamNext)
+    go func() {
+        defer senderWg.Done()
+        for elem := range fbthriftElemChan {
+            streamWrapStruct := newStream{{service:go_name}}{{function:go_name}}()
+            {{#function:stream_elem_type}}
+            streamWrapStruct.{{function:retval_field_name}} = {{^type:nilable?}}&{{/type:nilable?}}elem
+            {{/function:stream_elem_type}}
+            onStreamNext(streamWrapStruct)
+        }
+    }()
+
+    streamErr := elemProducerFunc(ctx, fbthriftElemChan)
+    // Stream is complete. Close the channel and wait for the sender goroutine to finish.
+    close(fbthriftElemChan)
+    senderWg.Wait()
+    if streamErr != nil {
+        {{#function:stream_exceptions?}}
+        streamWrapStruct := newStream{{service:go_name}}{{function:go_name}}()
+        switch v := streamErr.(type) {
+        {{#function:stream_exceptions}}
+        case *{{#field:type}}{{> common/type}}{{/field:type}}:
+            streamWrapStruct.{{field:go_name}} = v
+            onStreamNext(streamWrapStruct)
+        {{/function:stream_exceptions}}
+        default:
+            internalErr := fmt.Errorf("Internal stream handler error {{function:go_name}}: %w", streamErr)
+            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+            onStreamNext(x)
+        }
+        {{/function:stream_exceptions?}}
+        {{^function:stream_exceptions?}}
+        internalErr := fmt.Errorf("Internal stream handler error {{function:go_name}}: %w", streamErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onStreamNext(x)
+        {{/function:stream_exceptions?}}
+    }
+    onStreamComplete()
+}
 {{#else}}
 func (p *{{> svc/proc_func_name}}) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     {{#function:params.fields?}}

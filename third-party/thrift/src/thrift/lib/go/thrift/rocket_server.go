@@ -18,10 +18,10 @@ package thrift
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math"
 	"net"
+	"strings"
 	"sync/atomic"
 	"time"
 
@@ -357,7 +357,157 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 }
 
 func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
-	return flux.Error(errors.New("not implemented"))
+	// TODO: this clone helps prevent a race-condition where the payload gets
+	// released by the underlying rsocket layer before we are done with it.
+	msg = payload.Clone(msg)
+
+	metadata := rpcmetadata.NewRequestRpcMetadata()
+	err := rocket.DecodePayloadMetadata(msg, metadata)
+	if err != nil {
+		s.observer.ConnDropped()
+		s.observer.TaskKilled()
+		return flux.Error(err)
+	}
+	rpcFuncName := metadata.GetName()
+	protocol, err := newProtocolBufferFromRequest(msg.Data(), metadata, s.observer)
+	if err != nil {
+		s.observer.ConnDropped()
+		s.observer.TaskKilled()
+		return flux.Error(err)
+	}
+
+	s.observer.ReceivedRequest()
+	s.observer.ReceivedRequestForFunction(rpcFuncName)
+
+	pfunc, exists := s.proc.ProcessorFunctionMap()[rpcFuncName]
+	if !exists {
+		return flux.Error(fmt.Errorf("no such function: %q", rpcFuncName))
+	}
+
+	type ProcessorFunctionStream interface {
+		RunStreamContext(
+			ctx context.Context,
+			args ReadableStruct,
+			onFirstResponse func(WritableStruct),
+			onStreamNext func(WritableStruct),
+			onStreamComplete func(),
+		)
+	}
+	pfuncStream, ok := pfunc.(ProcessorFunctionStream)
+	if !ok {
+		return flux.Error(fmt.Errorf("not a streaming function: %q", rpcFuncName))
+	}
+
+	argStruct := pfunc.NewReqArgs()
+	if err := argStruct.Read(protocol); err != nil {
+		return flux.Error(err)
+	}
+	if err := protocol.ReadMessageEnd(); err != nil {
+		return flux.Error(err)
+	}
+
+	return flux.Create(
+		func(ctx context.Context, sink flux.Sink) {
+			protoID := types.ProtocolID(metadata.GetProtocol())
+			responseCompressionAlgo := rocket.CompressionAlgorithmFromCompressionConfig(metadata.GetCompressionConfig())
+
+			onFirstResponse := func(respStruct WritableStruct) {
+				messageType := types.REPLY
+				if _, ok := respStruct.(*types.ApplicationException); ok {
+					messageType = types.EXCEPTION
+				}
+				protocol, err := newProtocolBuffer(protoID, nil)
+				if err != nil {
+					s.log("rocketServer requestStream newProtocolBuffer error: %v", err)
+					return
+				}
+				err = sendWritableStruct(protocol, rpcFuncName, messageType, 0, respStruct)
+				if err != nil {
+					s.log("rocketServer requestStream sendWritableStruct error: %v", err)
+					return
+				}
+				payload, err := rocket.EncodeResponsePayload(
+					rpcFuncName,
+					messageType,
+					protocol.getRequestHeaders(),
+					responseCompressionAlgo,
+					protocol.Bytes(),
+				)
+				if err != nil {
+					s.log("rocketServer requestStream EncodeResponsePayload error: %v", err)
+					return
+				}
+				sink.Next(payload)
+			}
+			onStreamNext := func(streamStruct WritableStruct) {
+				protocol, err := newProtocolBuffer(protoID, nil)
+				if err != nil {
+					s.log("rocketServer requestStream newProtocolBuffer error: %v", err)
+					return
+				}
+				err = sendWritableStruct(protocol, rpcFuncName, types.REPLY, 0, streamStruct)
+				if err != nil {
+					s.log("rocketServer requestStream sendWritableStruct error: %v", err)
+					return
+				}
+
+				dataBytes := protocol.Bytes()
+				payloadMetadata := rpcmetadata.NewPayloadMetadata()
+				var exceptionMetadataBase *rpcmetadata.PayloadExceptionMetadataBase
+				if appEx, ok := streamStruct.(*types.ApplicationException); ok {
+					exceptionMetadataBase = rocket.NewPayloadExceptionMetadataBase(
+						"ApplicationException",
+						appEx.Error(),
+						rocket.RocketExceptionAppUnknown,
+						rpcmetadata.ErrorKind_UNSPECIFIED,
+						rpcmetadata.ErrorBlame_UNSPECIFIED,
+						rpcmetadata.ErrorSafety_UNSPECIFIED,
+					)
+					// Response should be empty to adhere to spec
+					dataBytes = nil
+				} else if streamResult, ok := streamStruct.(types.WritableResult); ok && streamResult.Exception() != nil {
+					// TODO: implement support for getting this info from the underlying exception type
+					declaredErr := streamResult.Exception()
+					exType := fmt.Sprintf("%T", declaredErr)
+					lastDotIndex := strings.LastIndex(exType, ".")
+					if lastDotIndex != -1 && lastDotIndex < len(exType)-1 {
+						exType = exType[lastDotIndex+1:]
+					}
+					exceptionMetadataBase = rocket.NewPayloadExceptionMetadataBase(
+						exType,
+						declaredErr.Error(),
+						rocket.RocketExceptionDeclared,
+						rpcmetadata.ErrorKind_UNSPECIFIED,
+						rpcmetadata.ErrorBlame_UNSPECIFIED,
+						rpcmetadata.ErrorSafety_UNSPECIFIED,
+					)
+				}
+
+				if exceptionMetadataBase != nil {
+					payloadMetadata.SetExceptionMetadata(exceptionMetadataBase)
+				} else {
+					responseMetadata := rpcmetadata.NewPayloadResponseMetadata()
+					payloadMetadata.SetResponseMetadata(responseMetadata)
+				}
+
+				metadata := rpcmetadata.NewStreamPayloadMetadata().
+					SetOtherMetadata(protocol.getRequestHeaders()).
+					SetCompression(&responseCompressionAlgo).
+					SetPayloadMetadata(payloadMetadata)
+
+				payload, err := rocket.EncodePayloadMetadataAndData(metadata, dataBytes, responseCompressionAlgo)
+				if err != nil {
+					s.log("rocketServer requestStream EncodeStreamPayload error: %v", err)
+					return
+				}
+				sink.Next(payload)
+			}
+			onStreamComplete := func() {
+				sink.Complete()
+			}
+			pfuncStream.RunStreamContext(ctx, argStruct, onFirstResponse, onStreamNext, onStreamComplete)
+		},
+	)
 }
 
 func newProtocolBufferFromRequest(payloadDataBytes []byte, metadata *rpcmetadata.RequestRpcMetadata, observer ServerObserver) (*protocolBuffer, error) {

@@ -18,7 +18,7 @@ using folly::coro::co_awaitTry;
 namespace proxygen::coro::test {
 
 constexpr auto kWtSettings = {SettingsId::ENABLE_CONNECT_PROTOCOL,
-                              SettingsId::WEBTRANSPORT_MAX_SESSIONS};
+                              SettingsId::H2_WT_MAX_SESSIONS};
 
 class HttpWtUpstreamSessionTest : public HTTPCoroSessionTest {
  public:

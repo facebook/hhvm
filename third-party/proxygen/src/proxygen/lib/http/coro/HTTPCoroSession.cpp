@@ -705,7 +705,7 @@ void HTTPQuicCoroSession::applyEgressSettings() {
         case hq::SettingId::H3_DATAGRAM_RFC:
           break;
         case hq::SettingId::ENABLE_WEBTRANSPORT:
-        case hq::SettingId::WEBTRANSPORT_MAX_SESSIONS:
+        case hq::SettingId::H3_WT_MAX_SESSIONS:
         case hq::SettingId::WT_INITIAL_MAX_DATA:
           // TODO
           break;
@@ -1538,7 +1538,7 @@ void HTTPQuicCoroSession::onSettings(const SettingsList& settings) {
           }
           break;
         case hq::SettingId::ENABLE_WEBTRANSPORT:
-        case hq::SettingId::WEBTRANSPORT_MAX_SESSIONS:
+        case hq::SettingId::H3_WT_MAX_SESSIONS:
         case hq::SettingId::WT_INITIAL_MAX_DATA:
           // TODO
           break;
@@ -3715,7 +3715,7 @@ using WtReqResult = HTTPCoroSession::WtReqResult;
  */
 bool supportsWt(std::initializer_list<const HTTPSettings*> settings) {
   constexpr auto kEnableConnectProto = SettingsId::ENABLE_CONNECT_PROTOCOL;
-  constexpr auto kEnableWtMaxSess = SettingsId::WEBTRANSPORT_MAX_SESSIONS;
+  constexpr auto kEnableWtMaxSess = SettingsId::H2_WT_MAX_SESSIONS;
   return std::all_of(settings.begin(), settings.end(), [](auto* settings) {
     return settings &&
            settings->getSetting(kEnableConnectProto, /*defaultVal=*/0) &&

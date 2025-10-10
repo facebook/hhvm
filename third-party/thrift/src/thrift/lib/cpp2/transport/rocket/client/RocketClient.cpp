@@ -146,7 +146,7 @@ RocketClient::RocketClient(
     : evb_(&evb),
       writeLoopCallback_(*this),
       socket_(std::move(socket)),
-      parser_(*this, allocatorPtr),
+      parser_(*this, THRIFT_FLAG(rocket_frame_parser), allocatorPtr),
       detachableLoopCallback_(*this),
       closeLoopCallback_(*this),
       eventBaseDestructionCallback_(*this),

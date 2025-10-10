@@ -55,9 +55,10 @@ class Parser final : public folly::AsyncTransport::ReadCallback {
 
  public:
   explicit Parser(
-      T& owner, std::shared_ptr<ParserAllocatorType> alloc = nullptr)
-      : owner_(owner),
-        mode_(detail::stringToMode(THRIFT_FLAG(rocket_frame_parser))) {
+      T& owner,
+      std::string&& mode,
+      std::shared_ptr<ParserAllocatorType> alloc = nullptr)
+      : owner_(owner), mode_(detail::stringToMode(mode)) {
     switch (mode_) {
       case detail::ParserMode::STRATEGY: {
         parser_.template emplace<FrameLengthParser>(owner_);

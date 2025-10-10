@@ -159,7 +159,7 @@ void testServerOneInput(const uint8_t* Data, size_t Size) {
 
   folly::DelayedDestruction::DestructorGuard dg(connection);
   apache::thrift::rocket::Parser<apache::thrift::rocket::RocketServerConnection>
-      p(*connection);
+      p(*connection, THRIFT_FLAG(rocket_frame_parser));
   evb.runInEventBaseThread([&]() {
     size_t left = Size;
     while (left != 0) {

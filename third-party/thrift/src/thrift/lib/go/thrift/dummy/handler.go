@@ -63,3 +63,69 @@ func (h *DummyHandler) GetDeclaredException(_ context.Context) error {
 func (h *DummyHandler) GetUndeclaredException(_ context.Context) error {
 	return errors.New("undeclared exception")
 }
+
+func (h *DummyHandler) StreamOnly(_ context.Context, from int32, to int32) (func(context.Context, chan<- int32) error, error) {
+	if from >= to {
+		return nil, errors.New("'from' is greater than or equal to 'to'")
+	}
+
+	elemProducerFunc := func(ctx context.Context, elemChan chan<- int32) error {
+		for i := from; i < to; i++ {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case elemChan <- i:
+			}
+		}
+		return nil
+	}
+
+	return elemProducerFunc, nil
+}
+
+func (h *DummyHandler) ResponseAndStream(_ context.Context, from int32, to int32) (int32, func(context.Context, chan<- int32) error, error) {
+	if from >= to {
+		return 0, nil, errors.New("'from' is greater than or equal to 'to'")
+	}
+
+	elemProducerFunc := func(ctx context.Context, elemChan chan<- int32) error {
+		for i := from; i < to; i++ {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case elemChan <- i:
+			}
+		}
+		return nil
+	}
+
+	return to - from, elemProducerFunc, nil
+}
+
+func (h *DummyHandler) StreamWithDeclaredException(_ context.Context) (func(context.Context, chan<- int32) error, error) {
+	elemProducerFunc := func(_ context.Context, elemChan chan<- int32) error {
+		return dummy.NewDummyException().SetMessage("hello")
+	}
+	return elemProducerFunc, nil
+}
+
+func (h *DummyHandler) StreamWithUndeclaredException(_ context.Context) (func(context.Context, chan<- int32) error, error) {
+	elemProducerFunc := func(_ context.Context, elemChan chan<- int32) error {
+		return errors.New("undeclared exception")
+	}
+	return elemProducerFunc, nil
+}
+
+func (h *DummyHandler) ResponseAndStreamWithDeclaredException(_ context.Context) (int32, func(context.Context, chan<- int32) error, error) {
+	elemProducerFunc := func(_ context.Context, elemChan chan<- int32) error {
+		return nil
+	}
+	return 0, elemProducerFunc, dummy.NewDummyException().SetMessage("hello")
+}
+
+func (h *DummyHandler) ResponseAndStreamWithUndeclaredException(_ context.Context) (int32, func(context.Context, chan<- int32) error, error) {
+	elemProducerFunc := func(_ context.Context, elemChan chan<- int32) error {
+		return nil
+	}
+	return 0, elemProducerFunc, errors.New("undeclared exception")
+}

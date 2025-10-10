@@ -46,6 +46,15 @@ service Dummy {
   void Panic();
   void GetDeclaredException() throws (1: DummyException ex);
   void GetUndeclaredException();
+
+  stream<i32> StreamOnly(1: i32 from, 2: i32 to);
+  i32, stream<i32> ResponseAndStream(1: i32 from, 2: i32 to);
+  stream<i32 throws (1: DummyException ex)> StreamWithDeclaredException();
+  stream<i32> StreamWithUndeclaredException();
+  i32, stream<i32> ResponseAndStreamWithDeclaredException() throws (
+    1: DummyException ex,
+  );
+  i32, stream<i32> ResponseAndStreamWithUndeclaredException();
 }
 
 service DummyTwo {

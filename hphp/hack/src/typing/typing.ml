@@ -4074,7 +4074,7 @@ end = struct
         bop
         e1
         (Either.First e2)
-    | Pipe (e0, e1, e2) ->
+    | Pipe (e0, e1, e2, is_nullsafe) ->
       (* If it weren't for local variable assignment or refinement the pipe
        * expression e1 |> e2 could be typed using this rule (E is environment with
        * types for locals):
@@ -4083,9 +4083,17 @@ end = struct
        *    --------------------------------------
        *                E |- e1|>e2 : ty2
        *
+       * Null-safe version e1 |?> e2 could be typed using following rule:
+       *
+       *    E |- e1 : ty1    E[$$: ty1 & nonnull] |- e2 : ty2
+       *    -------------------------------------------------
+       *              E |- e1|>e2 : ty2 | null
+       *
        * The possibility of e2 changing the types of locals in E means that E
        * can evolve, and so we need to restore $$ to its original state.
        *)
+      let r = Reason.nullsafe_pipe_op p in
+      let ty_null = MakeType.null r and ty_nonnull = MakeType.nonnull r in
       let (env, te1, ty1) =
         expr
           ~expected:None
@@ -4099,6 +4107,12 @@ end = struct
               }
           env
           e1
+      in
+      let (env, ty1) =
+        if is_nullsafe then
+          Inter.intersect env ~r ty1 ty_nonnull
+        else
+          (env, ty1)
       in
       let dd_var = Local_id.make_unscoped SN.SpecialIdents.dollardollar in
       let dd_old_ty =
@@ -4125,6 +4139,12 @@ end = struct
           env
           e2
       in
+      let (env, ty2) =
+        if is_nullsafe then
+          Union.union env ty2 ty_null
+        else
+          (env, ty2)
+      in
       let env =
         match dd_old_ty with
         | None -> Env.unset_local env dd_var
@@ -4138,7 +4158,9 @@ end = struct
               local.ty
               local.pos)
       in
-      let (env, te, ty) = make_result env p (Aast.Pipe (e0, te1, te2)) ty2 in
+      let (env, te, ty) =
+        make_result env p (Aast.Pipe (e0, te1, te2, is_nullsafe)) ty2
+      in
       (env, te, ty)
     | Unop (uop, e) ->
       let (env, te, ty) =

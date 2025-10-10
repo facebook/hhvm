@@ -234,13 +234,15 @@ fn check_await_usage(expr: &Expr) -> AwaitUsage {
             Error(p) => Error(p),
         },
         // Seq
-        Expr_::Pipe(box (_, expr1, expr2)) => match check_await_usage(expr2) {
-            Error(p) => Error(p),
-            // If the rhs contains an await, then we need to finish the lhs
-            // prior to doing the await
-            ContainsAwait | ConcurrentAwait | Sequential => Sequential,
-            NoAwait => check_await_usage(expr1),
-        },
+        Expr_::Pipe(box (_, expr1, expr2, _)) => {
+            match check_await_usage(expr2) {
+                Error(p) => Error(p),
+                // If the rhs contains an await, then we need to finish the lhs
+                // prior to doing the await
+                ContainsAwait | ConcurrentAwait | Sequential => Sequential,
+                NoAwait => check_await_usage(expr1),
+            }
+        }
         // Can't have await in the branches (parse error)
         Expr_::Eif(box (cond, _, _)) => check_await_usage(cond),
         Expr_::ExpressionTree(box nast::ExpressionTree {
@@ -331,7 +333,7 @@ impl LiftAwait {
         tmps: &mut Vec<Lid>,
     ) {
         match e {
-            Expr_::Pipe(box (_, expr1, expr2)) => {
+            Expr_::Pipe(box (_, expr1, expr2, _)) => {
                 let mut con1 = vec![];
                 let mut seq1 = vec![];
                 let mut tmps1 = vec![];

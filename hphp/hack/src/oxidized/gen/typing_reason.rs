@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<74eb2542d0c690f5b60d4aab48387c8d>>
+// @generated SignedSource<<5bb2ab63c12f5e71af391114b610d1bf>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -474,6 +474,8 @@ pub enum WitnessLocl {
     UnpackParam(pos::Pos, pos_or_decl::PosOrDecl, isize),
     #[rust_to_ocaml(name = "Nullsafe_op")]
     NullsafeOp(pos::Pos),
+    #[rust_to_ocaml(name = "Nullsafe_pipe_op")]
+    NullsafePipeOp(pos::Pos),
     Predicated(pos::Pos, String),
     #[rust_to_ocaml(name = "Is_refinement")]
     IsRefinement(pos::Pos),

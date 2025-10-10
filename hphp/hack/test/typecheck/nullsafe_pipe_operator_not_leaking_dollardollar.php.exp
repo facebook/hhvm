@@ -1,0 +1,4 @@
+ERROR: File "nullsafe_pipe_operator_not_leaking_dollardollar.php", line 16, characters 14-15:
+Variable `$$` is undefined, or not always defined. (Naming[2050])
+  File "nullsafe_pipe_operator_not_leaking_dollardollar.php", line 13, characters 7-8:
+  Did you mean `$i` instead?

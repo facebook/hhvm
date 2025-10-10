@@ -247,6 +247,7 @@ let given_text_tokens =
     make_token_node "DotDotDot" "..." ();
     make_token_node "DollarDollar" "$$" ();
     make_token_node "BarGreaterThan" "|>" ();
+    make_token_node "BarQuestionGreaterThan" "|?>" ();
     make_token_node "SlashGreaterThan" "/>" ();
     make_token_node "LessThanSlash" "</" ();
     make_token_node "LessThanQuestion" "<?" ();

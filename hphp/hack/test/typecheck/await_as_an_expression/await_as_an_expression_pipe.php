@@ -7,4 +7,5 @@ async function f(): Awaitable<int> {
 
 async function g(): Awaitable<void> {
   await f() |> await f();
+  await f() |?> await f();
 }

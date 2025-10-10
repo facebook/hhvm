@@ -295,12 +295,12 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         // Unary operators are all primitive in result
         Unop(_) => Rty::Mutable,
         Pipe(p) => {
-            let (lid, left, _) = &**p;
+            let (lid, left, right, _) = &**p;
             // The only time the id number matters is for Dollardollar
             let (_, dollardollar) = &lid.1;
             let left_rty = rty_expr(context, left);
             context.add_local(dollardollar, left_rty);
-            rty_expr(context, &p.2)
+            rty_expr(context, right)
         }
         ExpressionTree(_) | EnumClassLabel(_) | ETSplice(_) => Rty::Mutable,
         Import(_) | Lplaceholder(_) => Rty::Mutable,
@@ -749,7 +749,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 }
             }
             aast::Expr_::Pipe(p) => {
-                let (lid, left, right) = &mut **p;
+                let (lid, left, right, _) = &mut **p;
                 // The only time the id number matters is for Dollardollar
                 let (_, dollardollar) = &lid.1;
                 // Go left first, get the readonlyness, then go right

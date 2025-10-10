@@ -728,7 +728,7 @@ let rec get_data_srcs_from_expr env ctx (tp, _, te) =
     DataSourceSet.union
       (get_data_srcs_from_expr env ctx lhs)
       (get_data_srcs_from_expr env ctx rhs)
-  | Pipe (_, _, e) -> get_data_srcs_from_expr env ctx e
+  | Pipe (_, _, e, _) -> get_data_srcs_from_expr env ctx e
   | Eif (_, e1, e2) ->
     DataSourceSet.union
       (match e1 with

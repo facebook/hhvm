@@ -192,6 +192,7 @@ type t =
   | DotDotDot
   | DollarDollar
   | BarGreaterThan
+  | BarQuestionGreaterThan
   | SlashGreaterThan
   | LessThanSlash
   | LessThanQuestion
@@ -406,6 +407,7 @@ let from_string keyword ~only_reserved =
   | "..." -> Some DotDotDot
   | "$$" -> Some DollarDollar
   | "|>" -> Some BarGreaterThan
+  | "|?>" -> Some BarQuestionGreaterThan
   | "/>" -> Some SlashGreaterThan
   | "</" -> Some LessThanSlash
   | "<?" -> Some LessThanQuestion
@@ -595,6 +597,7 @@ let to_string kind =
   | DotDotDot -> "..."
   | DollarDollar -> "$$"
   | BarGreaterThan -> "|>"
+  | BarQuestionGreaterThan -> "|?>"
   | SlashGreaterThan -> "/>"
   | LessThanSlash -> "</"
   | LessThanQuestion -> "<?"

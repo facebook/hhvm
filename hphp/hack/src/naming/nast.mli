@@ -338,7 +338,7 @@ module Visitor_DEPRECATED : sig
 
       method on_pattern : 'a -> Aast.pattern -> 'a
 
-      method on_pipe : 'a -> id -> expr -> expr -> 'a
+      method on_pipe : 'a -> id -> expr -> expr -> bool -> 'a
 
       method on_program : 'a -> program -> 'a
 

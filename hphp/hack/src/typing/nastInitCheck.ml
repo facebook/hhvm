@@ -627,7 +627,7 @@ and expr_ env acc p e =
   | Assign (e1, _, e2) ->
     let acc = expr acc e1 in
     expr acc e2
-  | Pipe (_, e1, e2) ->
+  | Pipe (_, e1, e2, _) ->
     let acc = expr acc e1 in
     expr acc e2
   | Eif (e1, None, e3) ->

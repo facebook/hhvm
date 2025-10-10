@@ -3064,6 +3064,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             | TokenKind::QuestionMinusGreaterThan
             | TokenKind::DollarDollar
             | TokenKind::BarGreaterThan
+            | TokenKind::BarQuestionGreaterThan
             | TokenKind::SlashGreaterThan
             | TokenKind::LessThanSlash
             | TokenKind::LessThanQuestion

@@ -183,7 +183,7 @@ let rec is_const_expr (_, _, expr_) =
   | Import (_, expr) ->
     is_const_expr expr
   | Obj_get (e1, e2, _, _)
-  | Pipe (_, e1, e2)
+  | Pipe (_, e1, e2, _)
   | Binop { bop = _; lhs = e1; rhs = e2 }
   | Pair (_, e1, e2) ->
     is_const_expr e1 && is_const_expr e2

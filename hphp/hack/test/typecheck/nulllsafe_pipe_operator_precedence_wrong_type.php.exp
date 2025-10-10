@@ -1,0 +1,6 @@
+ERROR: File "nulllsafe_pipe_operator_precedence_wrong_type.php", line 16, characters 44-45:
+Invalid argument (Typing[4110])
+  File "nulllsafe_pipe_operator_precedence_wrong_type.php", line 11, characters 17-22:
+  Expected `string`
+  File "nulllsafe_pipe_operator_precedence_wrong_type.php", line 16, characters 20-31:
+  But got `int` because this is the result of an integer arithmetic operation

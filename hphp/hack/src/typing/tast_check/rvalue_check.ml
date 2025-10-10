@@ -84,7 +84,7 @@ let visitor =
         this#disallow_non_returning (fun () -> this#on_expr env e1);
         Option.iter e2 ~f:(this#on_expr env);
         this#on_expr env e3
-      | Pipe (_, e1, e2) ->
+      | Pipe (_, e1, e2, _) ->
         this#disallow_non_returning (fun () -> this#on_expr env e1);
         this#on_expr env e2
       | List el -> List.iter el ~f:(this#on_expr env)

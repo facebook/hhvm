@@ -1428,6 +1428,7 @@ where
                         | TokenKind::GreaterThanGreaterThan
                         | TokenKind::Carat
                         | TokenKind::BarGreaterThan
+                        | TokenKind::BarQuestionGreaterThan
                         | TokenKind::QuestionColon
                         | TokenKind::QuestionQuestion
                         | TokenKind::QuestionQuestionEqual => {

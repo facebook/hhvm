@@ -592,7 +592,7 @@ fn print_expr(
         }
         Expr_::Pipe(p) => {
             print_expr(ctx, w, env, &p.1)?;
-            w.write_all(b" |> ")?;
+            w.write_all(if p.3 { b" |?> " } else { b" |> " })?;
             print_expr(ctx, w, env, &p.2)
         }
         Expr_::Is(i) => {

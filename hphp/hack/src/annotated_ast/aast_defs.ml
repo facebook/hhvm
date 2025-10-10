@@ -619,13 +619,17 @@ and ('ex, 'en) expr_ =
       ('ex, 'en) expr
       * (Ast_defs.bop[@transform.opaque]) option
       * ('ex, 'en) expr
-  | Pipe of lid * ('ex, 'en) expr * ('ex, 'en) expr
+  | Pipe of lid * ('ex, 'en) expr * ('ex, 'en) expr * bool
       (** Pipe expression. The lid is the ID of the $$ that is implicitly
        * declared by this pipe.
        *
        * See also Dollardollar.
        *
        *     foo() |> bar(1, $$) // equivalent: bar(1, foo())
+       *
+       * There is also null-safe pipe version:
+       *
+       *     foo() |?> bar(1, $$) // equivalent: foo() |> $$ is nonnull ? bar(1, $$) : null
        *
        * $$ is not required on the RHS of pipe expressions, but it's
        * pretty pointless to use pipes without $$.

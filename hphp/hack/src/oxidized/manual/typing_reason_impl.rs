@@ -39,6 +39,7 @@ impl WitnessLocl {
             | Self::VarParam(pos)
             | Self::UnpackParam(pos, _, _)
             | Self::NullsafeOp(pos)
+            | Self::NullsafePipeOp(pos)
             | Self::Predicated(pos, _)
             | Self::IsRefinement(pos)
             | Self::AsRefinement(pos)

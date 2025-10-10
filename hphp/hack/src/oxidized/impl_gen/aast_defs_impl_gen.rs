@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<86d90941412ca6e6a3d9ef1c7d56e784>>
+// @generated SignedSource<<bee8355cfa3b6cde1669ad278b1f4c9a>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -1051,8 +1051,8 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_assign(p0: Expr<Ex, En>, p1: Option<ast_defs::Bop>, p2: Expr<Ex, En>) -> Self {
         Expr_::Assign(Box::new((p0, p1, p2)))
     }
-    pub fn mk_pipe(p0: Lid, p1: Expr<Ex, En>, p2: Expr<Ex, En>) -> Self {
-        Expr_::Pipe(Box::new((p0, p1, p2)))
+    pub fn mk_pipe(p0: Lid, p1: Expr<Ex, En>, p2: Expr<Ex, En>, p3: bool) -> Self {
+        Expr_::Pipe(Box::new((p0, p1, p2, p3)))
     }
     pub fn mk_eif(p0: Expr<Ex, En>, p1: Option<Expr<Ex, En>>, p2: Expr<Ex, En>) -> Self {
         Expr_::Eif(Box::new((p0, p1, p2)))
@@ -1617,9 +1617,9 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_pipe(&self) -> Option<(&Lid, &Expr<Ex, En>, &Expr<Ex, En>)> {
+    pub fn as_pipe(&self) -> Option<(&Lid, &Expr<Ex, En>, &Expr<Ex, En>, &bool)> {
         match self {
-            Expr_::Pipe(p0) => Some((&p0.0, &p0.1, &p0.2)),
+            Expr_::Pipe(p0) => Some((&p0.0, &p0.1, &p0.2, &p0.3)),
             _ => None,
         }
     }
@@ -1952,9 +1952,11 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_pipe_mut(&mut self) -> Option<(&mut Lid, &mut Expr<Ex, En>, &mut Expr<Ex, En>)> {
+    pub fn as_pipe_mut(
+        &mut self,
+    ) -> Option<(&mut Lid, &mut Expr<Ex, En>, &mut Expr<Ex, En>, &mut bool)> {
         match self {
-            Expr_::Pipe(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
+            Expr_::Pipe(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2, &mut p0.3)),
             _ => None,
         }
     }
@@ -2286,9 +2288,9 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_pipe_into(self) -> Option<(Lid, Expr<Ex, En>, Expr<Ex, En>)> {
+    pub fn as_pipe_into(self) -> Option<(Lid, Expr<Ex, En>, Expr<Ex, En>, bool)> {
         match self {
-            Expr_::Pipe(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
+            Expr_::Pipe(p0) => Some(((*p0).0, (*p0).1, (*p0).2, (*p0).3)),
             _ => None,
         }
     }

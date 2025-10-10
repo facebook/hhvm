@@ -175,6 +175,7 @@ impl Operator {
             | TokenKind::Minus
             | TokenKind::Ampersand
             | TokenKind::BarGreaterThan
+            | TokenKind::BarQuestionGreaterThan
             | TokenKind::Question
             | TokenKind::QuestionQuestion
             | TokenKind::QuestionQuestionEqual
@@ -227,7 +228,7 @@ impl Operator {
 
     pub fn trailing_from_token(token: TokenKind) -> Operator {
         match token {
-            TokenKind::BarGreaterThan => PipeOperator,
+            TokenKind::BarGreaterThan | TokenKind::BarQuestionGreaterThan => PipeOperator,
             TokenKind::Question => ConditionalQuestionOperator,
             TokenKind::Colon => ConditionalColonOperator,
             TokenKind::QuestionQuestion => CoalesceOperator,
@@ -293,6 +294,7 @@ impl Operator {
             | TokenKind::Minus
             | TokenKind::Ampersand
             | TokenKind::BarGreaterThan
+            | TokenKind::BarQuestionGreaterThan
             | TokenKind::QuestionQuestion
             | TokenKind::QuestionQuestionEqual
             | TokenKind::QuestionColon

@@ -81,6 +81,7 @@ type feature_name =
   * function take((function(int, named int $b)) $f): void {}
   * ```
   *)
+  | NullsafePipe
 [@@deriving eq, ord, show]
 
 val feature_status_from_string : string -> feature_status option

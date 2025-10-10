@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2342ec22c82e06f4a9b47e7f2e61b117>>
+// @generated SignedSource<<a51b772c2a1f65c37a804be29633ffda>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -953,13 +953,14 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
         }
         #[inline]
         fn helper11<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node Box<(Lid, Expr<Ex, En>, Expr<Ex, En>)>,
+            a: &'node Box<(Lid, Expr<Ex, En>, Expr<Ex, En>, bool)>,
             c: &mut P::Context,
             v: &mut dyn Visitor<'node, Params = P>,
         ) -> Result<(), P::Error> {
             a.0.accept(c, v)?;
             a.1.accept(c, v)?;
-            a.2.accept(c, v)
+            a.2.accept(c, v)?;
+            a.3.accept(c, v)
         }
         #[inline]
         fn helper12<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(

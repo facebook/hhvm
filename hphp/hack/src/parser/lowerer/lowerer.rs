@@ -3028,7 +3028,12 @@ fn p_bop<'a>(
         Some(TK::BarGreaterThan) => {
             let lid =
                 ast::Lid::from_counter(pos, env.next_local_id(), special_idents::DOLLAR_DOLLAR);
-            Ok(Expr_::mk_pipe(lid, lhs, rhs))
+            Ok(Expr_::mk_pipe(lid, lhs, rhs, false))
+        }
+        Some(TK::BarQuestionGreaterThan) => {
+            let lid =
+                ast::Lid::from_counter(pos, env.next_local_id(), special_idents::DOLLAR_DOLLAR);
+            Ok(Expr_::mk_pipe(lid, lhs, rhs, true))
         }
         Some(TK::QuestionColon) => Ok(Expr_::mk_eif(lhs, None, rhs)),
         _ => missing_syntax("binary operator", node, env),

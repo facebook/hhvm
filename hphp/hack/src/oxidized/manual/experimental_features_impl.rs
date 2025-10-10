@@ -58,6 +58,7 @@ impl FeatureName {
             ExpressionTreeNullsafeObjGet => OngoingRelease,
             NamedParameters => Unstable,
             NamedParametersUse => Unstable,
+            NullsafePipe => OngoingRelease,
         }
     }
 

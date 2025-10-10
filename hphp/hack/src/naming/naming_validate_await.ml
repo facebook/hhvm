@@ -171,7 +171,7 @@ and check_await_usage expr =
       | ConcurrentAwait ->
         Sequential
       | Error p -> Error p)
-    | Pipe (_, expr1, expr2) ->
+    | Pipe (_, expr1, expr2, _) ->
       (match check_await_usage expr2 with
       | Error p -> Error p
       (* If the rhs contains an await, then we need to finish the lhs

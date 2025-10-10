@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<aa69579aa093ee005777a65c9e1e1286>>
+// @generated SignedSource<<1f9daf7e775a9534cfd6f4d844b5519b>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -140,6 +140,7 @@ pub enum FeatureName {
     /// function take((function(int, named int $b)) $f): void {}
     /// ```
     NamedParametersUse,
+    NullsafePipe,
 }
 impl TrivialDrop for FeatureName {}
 arena_deserializer::impl_deserialize_in_arena!(FeatureName);

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<298192f80b47bbabe4d7ddc39e557cdd>>
+// @generated SignedSource<<b2edcc0e952694e5def86ad25d6d3e85>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -967,12 +967,16 @@ pub enum Expr_<Ex, En> {
     ///
     ///     foo() |> bar(1, $$) // equivalent: bar(1, foo())
     ///
+    /// There is also null-safe pipe version:
+    ///
+    ///     foo() |?> bar(1, $$) // equivalent: foo() |> $$ is nonnull ? bar(1, $$) : null
+    ///
     /// $$ is not required on the RHS of pipe expressions, but it's
     /// pretty pointless to use pipes without $$.
     ///
     ///     foo() |> bar(); // equivalent: foo(); bar();
     #[rust_to_ocaml(inline_tuple)]
-    Pipe(Box<(Lid, Expr<Ex, En>, Expr<Ex, En>)>),
+    Pipe(Box<(Lid, Expr<Ex, En>, Expr<Ex, En>, bool)>),
     /// Ternary operator, or elvis operator.
     ///
     ///     $foo ? $bar : $baz // ternary

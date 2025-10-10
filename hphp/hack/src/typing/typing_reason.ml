@@ -347,6 +347,7 @@ type witness_locl =
   | Var_param of Pos.t
   | Unpack_param of Pos.t * (Pos_or_decl.t[@hash.ignore]) * int
   | Nullsafe_op of Pos.t
+  | Nullsafe_pipe_op of Pos.t
   | Predicated of Pos.t * string
   | Is_refinement of Pos.t
   | As_refinement of Pos.t
@@ -410,6 +411,7 @@ let witness_locl_to_raw_pos = function
   | Var_param pos
   | Unpack_param (pos, _, _)
   | Nullsafe_op pos
+  | Nullsafe_pipe_op pos
   | Predicated (pos, _)
   | Is_refinement pos
   | As_refinement pos
@@ -479,6 +481,7 @@ let map_pos_witness_locl pos pos_or_decl w =
   | Var_param p -> Var_param (pos p)
   | Unpack_param (p1, p2, i) -> Unpack_param (pos p1, pos_or_decl p2, i)
   | Nullsafe_op p -> Nullsafe_op (pos p)
+  | Nullsafe_pipe_op p -> Nullsafe_pipe_op (pos p)
   | Predicated (p, f) -> Predicated (pos p, f)
   | Is_refinement p -> Is_refinement (pos p)
   | As_refinement p -> As_refinement (pos p)
@@ -542,6 +545,7 @@ let constructor_string_of_witness_locl = function
   | Var_param _ -> "Rvar_param"
   | Unpack_param _ -> "Runpack_param"
   | Nullsafe_op _ -> "Rnullsafe_op"
+  | Nullsafe_pipe_op _ -> "Rnullsafe_pipe_op"
   | Predicated _ -> "Rpredicated"
   | Is_refinement _ -> "Ris_refinement"
   | As_refinement _ -> "Ras_refinement"
@@ -616,6 +620,7 @@ let pp_witness_locl fmt witness =
     | Unknown_class p
     | Var_param p
     | Nullsafe_op p
+    | Nullsafe_pipe_op p
     | Is_refinement p
     | As_refinement p
     | Equal p
@@ -742,6 +747,8 @@ let witness_locl_to_json witness =
         ])
   | Nullsafe_op pos ->
     Hh_json.(JSON_Object [("Nullsafe_op", JSON_Array [pos_to_json pos])])
+  | Nullsafe_pipe_op pos ->
+    Hh_json.(JSON_Object [("Nullsafe_pipe_op", JSON_Array [pos_to_json pos])])
   | Predicated (pos, str) ->
     Hh_json.(
       JSON_Object
@@ -932,6 +939,8 @@ let witness_locl_to_string prefix witness =
     (Pos_or_decl.of_raw_pos pos, prefix ^ " (it is unpacked with `...`)")
   | Nullsafe_op pos ->
     (Pos_or_decl.of_raw_pos pos, prefix ^ " (use of `?->` operator)")
+  | Nullsafe_pipe_op pos ->
+    (Pos_or_decl.of_raw_pos pos, prefix ^ " (use of `|?>` operator)")
   | Predicated (pos, f) ->
     ( Pos_or_decl.of_raw_pos pos,
       prefix ^ " from the argument to this " ^ f ^ " test" )
@@ -2720,6 +2729,8 @@ module Constructors = struct
   let expr_dep_type (r, p, d) = Expr_dep_type (r, p, d)
 
   let nullsafe_op p = from_witness_locl @@ Nullsafe_op p
+
+  let nullsafe_pipe_op p = from_witness_locl @@ Nullsafe_pipe_op p
 
   let tconst_no_cstr id = from_witness_decl @@ Tconst_no_cstr id
 

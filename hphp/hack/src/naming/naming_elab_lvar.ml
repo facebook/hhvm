@@ -21,9 +21,9 @@ let on_expr_ expr_ ~ctx =
         Aast.Lplaceholder pos
       else
         expr_
-    | Aast.Pipe ((pos, _), e1, e2) ->
+    | Aast.Pipe ((pos, _), e1, e2, is_nullsafe) ->
       let lid = (pos, Local_id.make_unscoped SN.SpecialIdents.dollardollar) in
-      Aast.Pipe (lid, e1, e2)
+      Aast.Pipe (lid, e1, e2, is_nullsafe)
     | _ -> expr_
   in
   (ctx, Ok expr_)

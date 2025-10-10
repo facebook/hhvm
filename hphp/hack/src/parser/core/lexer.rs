@@ -1570,20 +1570,24 @@ where
                     TokenKind::Carat
                 }
             }
-            '|' => match self.peek_char(1) {
-                '=' => {
+            '|' => match (self.peek_char(1), self.peek_char(2)) {
+                ('=', _) => {
                     self.advance(2);
                     TokenKind::BarEqual
                 }
-                '>' => {
+                ('>', _) => {
                     self.advance(2);
                     TokenKind::BarGreaterThan
                 }
-                '|' => {
+                ('?', '>') => {
+                    self.advance(3);
+                    TokenKind::BarQuestionGreaterThan
+                }
+                ('|', _) => {
                     self.advance(2);
                     TokenKind::BarBar
                 }
-                _ => {
+                (_, _) => {
                     self.advance(1);
                     TokenKind::Bar
                 }

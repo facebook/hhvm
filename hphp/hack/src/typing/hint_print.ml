@@ -402,8 +402,20 @@ and pp_expr_ ppf = function
     Fmt.(pair ~sep:sp pp_expr @@ pair ~sep:sp pp_assign pp_expr)
       ppf
       (lhs, (bop, rhs))
-  | Aast.Pipe (_lid, e1, e2) ->
-    Fmt.(pair ~sep:(const string " |> ") pp_expr pp_expr) ppf (e1, e2)
+  | Aast.Pipe (_lid, e1, e2, is_nullsafe) ->
+    Fmt.(
+      pair
+        ~sep:
+          (const
+             string
+             (if is_nullsafe then
+               " |?> "
+             else
+               " |> "))
+        pp_expr
+        pp_expr)
+      ppf
+      (e1, e2)
   | Aast.Eif (cond, Some texpr, fexpr) ->
     Fmt.(
       pair ~sep:(const string " ? ") pp_expr @@ pair ~sep:colon pp_expr pp_expr)

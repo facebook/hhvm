@@ -285,6 +285,9 @@ val expr_dep_type :
 (* ?-> operator is used *)
 val nullsafe_op : Pos.t -> t
 
+(* |?> operator is used *)
+val nullsafe_pipe_op : Pos.t -> t
+
 val tconst_no_cstr : pos_id -> 'phase t_
 
 val predicated : Pos.t * string -> t

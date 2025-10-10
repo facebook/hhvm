@@ -1092,7 +1092,8 @@ fn get_positions_binop_allows_await(t: S<'_>) -> BinopAllowsAwaitInPositions {
             | LessThanLessThan
             | GreaterThanGreaterThan
             | Carat
-            | BarGreaterThan => BinopAllowAwaitBoth,
+            | BarGreaterThan
+            | BarQuestionGreaterThan => BinopAllowAwaitBoth,
             _ => BinopAllowAwaitNone,
         },
     }
@@ -2943,7 +2944,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 // Special case the pipe operator error message
                 BinaryExpression(x)
                     if std::ptr::eq(node, &x.right_operand)
-                        && token_kind(&x.operator) == Some(TokenKind::BarGreaterThan) =>
+                        && (token_kind(&x.operator) == Some(TokenKind::BarGreaterThan)
+                            || token_kind(&x.operator)
+                                == Some(TokenKind::BarQuestionGreaterThan)) =>
                 {
                     let (feature, enabled) = self.is_pipe_await_enabled();
                     if !enabled {
@@ -5164,6 +5167,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 Some(TokenKind::BarGreaterThan) => {
                     err(self, errors::not_allowed_in_write("`|>` operator"))
                 }
+                Some(TokenKind::BarQuestionGreaterThan) => {
+                    err(self, errors::not_allowed_in_write("`|?>` operator"))
+                }
                 Some(TokenKind::Inout) => err(self, errors::not_allowed_in_write("`inout`")),
                 _ => {}
             },
@@ -5576,6 +5582,11 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             {
                 self.check_can_use_feature(node, &FeatureName::ExpressionTreeCoalesceOperator);
                 self.assignment_errors(node);
+            }
+            BinaryExpression(x)
+                if token_kind(&x.operator) == Some(TokenKind::BarQuestionGreaterThan) =>
+            {
+                self.check_can_use_feature(node, &FeatureName::NullsafePipe);
             }
             PostfixUnaryExpression(_)
             | BinaryExpression(_)

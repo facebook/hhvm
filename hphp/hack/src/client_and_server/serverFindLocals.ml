@@ -327,7 +327,7 @@ class local_finding_visitor =
       else
         localmap
 
-    method! on_pipe localmap _id left right =
+    method! on_pipe localmap _id left right _is_nullsafe =
       (*
       A pipe expression has a left side and a right side. It introduces a
       new scope on the right side only which defines a new magic local

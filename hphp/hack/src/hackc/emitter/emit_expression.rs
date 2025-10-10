@@ -5088,7 +5088,7 @@ fn emit_assign<'a, 'd>(
 fn emit_pipe<'a, 'd>(
     e: &mut Emitter,
     env: &Env<'a>,
-    (_, e1, e2): &(aast_defs::Lid, ast::Expr, ast::Expr),
+    (_, e1, e2, is_nullsafe): &(aast_defs::Lid, ast::Expr, ast::Expr, bool),
 ) -> Result<InstrSeq> {
     let lhs_instrs = emit_expr(e, env, e1)?;
     scope::with_unnamed_local(e, |e, local| {
@@ -5097,11 +5097,26 @@ fn emit_pipe<'a, 'd>(
         let mut pipe_env = env.clone();
         pipe_env.with_pipe_var(local);
         let rhs_instrs = emit_expr(e, &pipe_env, e2)?;
-        Ok((
-            InstrSeq::gather(vec![lhs_instrs, instr::pop_l(local)]),
-            rhs_instrs,
-            instr::empty(),
-        ))
+        if *is_nullsafe {
+            let end_label = e.label_gen_mut().next_regular();
+            Ok((
+                InstrSeq::gather(vec![
+                    lhs_instrs,
+                    instr::dup(),
+                    instr::is_type_c(IsTypeOp::Null),
+                    instr::jmp_nz(end_label),
+                    instr::pop_l(local),
+                ]),
+                rhs_instrs,
+                instr::label(end_label),
+            ))
+        } else {
+            Ok((
+                InstrSeq::gather(vec![lhs_instrs, instr::pop_l(local)]),
+                rhs_instrs,
+                instr::empty(),
+            ))
+        }
     })
 }
 

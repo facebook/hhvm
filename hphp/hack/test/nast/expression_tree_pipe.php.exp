@@ -60,9 +60,11 @@
                                                                     (
                                                                     (), [4:22-30],
                                                                     (
-                                                                    Pipe (([4:22-30], $$), ((), [4:22-24], (Lvar ([4:22-24], $0dollardollar))), ((), [4:28-30], (Dollardollar ([4:28-30], $$)))))),
-                                                                    (
-                                                                    (), [4:34-36], (Dollardollar ([4:34-36], $$)))))))
+                                                                    Pipe ((
+                                                                    [4:22-30], $$), (
+                                                                    (), [4:22-24], (Lvar ([4:22-24], $0dollardollar))), (
+                                                                    (), [4:28-30], (Dollardollar ([4:28-30], $$))), false))), (
+                                                                    (), [4:34-36], (Dollardollar ([4:34-36], $$))), false))))
                                                               ];
                                                             unpacked_arg = None }))
                                                       }))
@@ -199,8 +201,8 @@
                                    [((), ([4:22-36], $0splice0)); ((), ([4:34-36], $$))])));
                                targs = []; args = [(Anormal ((), [4:22-24], (Dollardollar ([4:22-24], $$))))]; 
                                unpacked_arg = None }));
-                         et_free_vars = None }))
-                   )))))
+                         et_free_vars = None })),
+                   false)))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-14], "__SupportDynamicType"); ua_params = [] }]; 

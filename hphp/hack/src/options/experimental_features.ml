@@ -73,6 +73,7 @@ type feature_name =
   | ExpressionTreeNullsafeObjGet
   | NamedParameters
   | NamedParametersUse
+  | NullsafePipe
 [@@deriving eq, ord, show]
 
 let feature_name_map =
@@ -121,6 +122,7 @@ let feature_name_map =
       ("expression_tree_nullsafe_obj_get", ExpressionTreeNullsafeObjGet);
       ("named_parameters", NamedParameters);
       ("named_parameters_use", NamedParametersUse);
+      ("nullsafe_pipe", NullsafePipe);
     ]
 
 let feature_name_from_string s = SMap.find_opt s feature_name_map

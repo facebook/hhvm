@@ -1,0 +1,2 @@
+ERROR: File "nullsafe_pipe_operator_containing_assignment.php", line 16, characters 14-15:
+Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8e0592de6d32fe2f3fa30cde5a746304>>
+// @generated SignedSource<<ffe829a9f7db170a6f8c6e7cc0187481>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -953,13 +953,14 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
         }
         #[inline]
         fn helper11<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node mut Box<(Lid, Expr<Ex, En>, Expr<Ex, En>)>,
+            a: &'node mut Box<(Lid, Expr<Ex, En>, Expr<Ex, En>, bool)>,
             c: &mut P::Context,
             v: &mut dyn VisitorMut<'node, Params = P>,
         ) -> Result<(), P::Error> {
             a.0.accept(c, v)?;
             a.1.accept(c, v)?;
-            a.2.accept(c, v)
+            a.2.accept(c, v)?;
+            a.3.accept(c, v)
         }
         #[inline]
         fn helper12<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(

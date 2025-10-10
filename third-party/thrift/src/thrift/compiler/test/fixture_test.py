@@ -62,6 +62,7 @@ class FixtureTest(unittest.TestCase):
         gen_code_path: Path,
         fixture_code_path: Path,
         cmd: typing.List[str],
+        cmd_working_dir: str,
     ) -> None:
         """
         Checks that the contents of the files under the two given paths are
@@ -94,7 +95,8 @@ class FixtureTest(unittest.TestCase):
                     lineterm="",
                 ):
                     msg.append(line)
-                msg.append("Command: {}".format(cmd))
+                msg.append("WORKDIR: {}".format(cmd_working_dir))
+                msg.append("COMMAND: {}".format(" ".join(cmd)))
                 self.fail("\n".join(msg))
         except Exception:
             print(self.MSG, file=sys.stderr)
@@ -107,51 +109,70 @@ class FixtureTest(unittest.TestCase):
         self.tmp_dir_abspath = Path(tmp).resolve(strict=True)
         self.maxDiff = None
 
-    def runTest(self, fixture_name: str) -> None:
-        repo_root_dir_abspath = Path.cwd() / "xplat"
-        fixture_dir_abspath = (
-            repo_root_dir_abspath / _FIXTURES_ROOT_DIR_RELPATH / fixture_name
-        )
-
+    def runTest(
+        self,
+        working_directory: Path,
+        fixture_dir_abspath: Path,
+        fixture_cmd: fixture_utils.FixtureCmd,
+    ) -> None:
         fixture_output_root_dir_abspath = self.tmp_dir_abspath / "out"
         fixture_output_root_dir_abspath.mkdir()
 
-        fixture_cmds = fixture_utils.parse_fixture_cmds(
-            repo_root_dir_abspath,
-            fixture_name,
-            fixture_dir_abspath,
-            fixture_output_root_dir_abspath,
-            _THRIFT_BIN_PATH,
-            _THRIFT2AST_BIN_PATH,
-        )
+        outdir = fixture_output_root_dir_abspath / fixture_cmd.unique_name
+        os.mkdir(outdir)
 
-        # Run thrift compiler and generate files
-        for fixture_cmd in fixture_cmds:
-            outdir = fixture_output_root_dir_abspath / fixture_cmd.unique_name
-            os.mkdir(outdir)
-
-            subprocess.check_call(
-                fixture_cmd.build_command_args,
-                close_fds=True,
-                cwd=repo_root_dir_abspath,
+        if fixture_cmd.output_directory_arg_pos is not None:
+            fixture_cmd.build_command_args[fixture_cmd.output_directory_arg_pos] = str(
+                outdir
             )
 
-            fixture_utils.apply_postprocessing(outdir)
+        subprocess.check_call(
+            fixture_cmd.build_command_args,
+            close_fds=True,
+            cwd=working_directory,
+        )
+
+        fixture_utils.apply_postprocessing(outdir)
 
         # Compare generated code to fixture code
         self._compare_code(
-            fixture_output_root_dir_abspath,
-            fixture_dir_abspath / "out",
+            fixture_output_root_dir_abspath / fixture_cmd.unique_name,
+            fixture_dir_abspath / "out" / fixture_cmd.unique_name,
             fixture_cmd.build_command_args,
+            str(working_directory),
         )
 
 
 def _add_fixture(klazz, fixture_name: str) -> None:
-    def test_method(self):
-        self.runTest(fixture_name)
+    repo_root_dir_abspath = Path.cwd() / "xplat"
+    fixture_dir_abspath = (
+        repo_root_dir_abspath / _FIXTURES_ROOT_DIR_RELPATH / fixture_name
+    )
+    fixture_cmds = fixture_utils.parse_fixture_cmds(
+        repo_root_dir_abspath=repo_root_dir_abspath,
+        fixture_name=fixture_name,
+        fixture_dir_abspath=fixture_dir_abspath,
+        # Use temp dir as output path during test discovery
+        # Replaced with an ephemeral directory by runTest during test execution
+        fixture_output_root_dir_abspath=Path(tempfile.gettempdir()),
+        thrift_bin_path=_THRIFT_BIN_PATH,
+        thrift2ast_bin_path=_THRIFT2AST_BIN_PATH,
+    )
 
-    test_method.__name__ = str("test_" + re.sub("[^0-9a-zA-Z]", "_", fixture_name))
-    setattr(klazz, test_method.__name__, test_method)
+    for fixture_cmd in fixture_cmds:
+
+        def test_method(self: FixtureTest, cmd=fixture_cmd):
+            self.runTest(
+                working_directory=repo_root_dir_abspath,
+                fixture_dir_abspath=fixture_dir_abspath,
+                fixture_cmd=cmd,
+            )
+
+        test_method.__name__ = "test_{fixture}_{cmd_name}".format(
+            fixture=re.sub("[^0-9a-zA-Z_]", "_", fixture_name),
+            cmd_name=re.sub("[^0-9a-zA-Z_]", "_", fixture_cmd.unique_name),
+        )
+        setattr(klazz, test_method.__name__, test_method)
 
 
 for fixture_name in fixture_utils.get_all_fixture_names(

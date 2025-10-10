@@ -33,6 +33,7 @@ import importlib_resources
 class FixtureCmd:
     unique_name: str
     build_command_args: typing.List[str]
+    output_directory_arg_pos: typing.Final[typing.Optional[int]]
 
 
 def _ascend_find_exe(path: Path, target: str) -> typing.Optional[Path]:
@@ -222,6 +223,8 @@ def _parse_fixture_cmd(
             fixture_output_root_dir_abspath / cmd_name,
             "--gen",
         ]
+        # Output directory is before '--gen' which is at current_len - 1
+        output_directory_arg_pos = len(base_args) - 2
 
         # Add include_prefix for mstch_cpp* generators
         if (
@@ -251,6 +254,7 @@ def _parse_fixture_cmd(
             build_command_args=[
                 str(x) for x in base_args + [generator_spec, target_file_relpath]
             ],
+            output_directory_arg_pos=output_directory_arg_pos,
         )
     except Exception as err:
         raise RuntimeError(
@@ -333,7 +337,7 @@ def validate_that_root_path_is_a_dir(root_path: Path) -> None:
                 Expected {root_path} to be a directory.
                 This usually means either an incorrect current directory
                 or an incorrect `--fixture-root` option.
-                
+
                 For complete help, run:
                 buck run xplat/thrift/compiler/test:build_fixtures -- --help
                 """

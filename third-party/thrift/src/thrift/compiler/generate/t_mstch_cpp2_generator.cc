@@ -95,12 +95,11 @@ bool same_types(const t_type* a, const t_type* b) {
   const auto* resolved_b = b->get_true_type();
 
   // Check if both types are the same kind and for primitives, the same type
-  if (resolved_a->is<t_primitive_type>() &&
-      resolved_b->is<t_primitive_type>()) {
+  if (const t_primitive_type *prim_a = resolved_a->try_as<t_primitive_type>(),
+      *prim_b = resolved_b->try_as<t_primitive_type>();
+      prim_a != nullptr && prim_b != nullptr) {
     // Both are primitives, check they are the same primitive type
-    const auto& prim_a = resolved_a->as<t_primitive_type>();
-    const auto& prim_b = resolved_b->as<t_primitive_type>();
-    if (prim_a.primitive_type() != prim_b.primitive_type()) {
+    if (prim_a->primitive_type() != prim_b->primitive_type()) {
       return false;
     }
   } else if (typeid(*resolved_a) != typeid(*resolved_b)) {
@@ -1763,10 +1762,9 @@ class cpp_mstch_struct : public mstch_struct {
         {"cpp.virtual", "cpp2.virtual"});
   }
   mstch::node message() {
-    if (!struct_->is<t_exception>()) {
-      return {};
-    }
-    const auto* message_field = struct_->as<t_exception>().get_message_field();
+    const t_exception* exception = struct_->try_as<t_exception>();
+    const t_field* message_field =
+        exception == nullptr ? nullptr : exception->get_message_field();
     if (!message_field) {
       return {};
     }
@@ -2506,14 +2504,13 @@ class cpp_mstch_field : public mstch_field {
     const auto& true_type = *type.get_true_type();
     if (true_type.is_binary() || true_type.is<t_structured>()) {
       return true;
-    } else if (true_type.is<t_list>()) {
-      return zero_copy_arg_impl(*true_type.as<t_list>().get_elem_type());
-    } else if (true_type.is<t_set>()) {
-      return zero_copy_arg_impl(*true_type.as<t_set>().get_elem_type());
-    } else if (true_type.is<t_map>()) {
-      const auto& m = true_type.as<t_map>();
-      return zero_copy_arg_impl(m.key_type().deref()) ||
-          zero_copy_arg_impl(m.val_type().deref());
+    } else if (const t_list* list = true_type.try_as<t_list>()) {
+      return zero_copy_arg_impl(*list->get_elem_type());
+    } else if (const t_set* set = true_type.try_as<t_set>()) {
+      return zero_copy_arg_impl(*set->get_elem_type());
+    } else if (const t_map* map = true_type.try_as<t_map>()) {
+      return zero_copy_arg_impl(map->key_type().deref()) ||
+          zero_copy_arg_impl(map->val_type().deref());
     }
     return false;
   }

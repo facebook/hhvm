@@ -17,6 +17,7 @@
 #include <thrift/compiler/generate/cpp/name_resolver.h>
 
 #include <stdexcept>
+#include <typeinfo>
 
 #include <fmt/ranges.h>
 #include <thrift/compiler/ast/t_function.h>
@@ -517,26 +518,20 @@ std::string cpp_name_resolver::gen_container_type(
   const auto& template_name =
       val ? *val : default_template(node.container_type());
 
-  switch (node.container_type()) {
-    case t_container::type::t_list:
-      return detail::gen_template_type(
-          template_name,
-          {resolve(resolve_fn, *node.as<t_list>().get_elem_type())});
-    case t_container::type::t_set:
-      return detail::gen_template_type(
-          template_name,
-          {resolve(resolve_fn, *node.as<t_set>().get_elem_type())});
-    case t_container::type::t_map: {
-      const auto& tmap = node.as<t_map>();
-      return detail::gen_template_type(
-          template_name,
-          {resolve(resolve_fn, *tmap.get_key_type()),
-           resolve(resolve_fn, *tmap.get_val_type())});
-    }
+  if (const t_list* list = node.try_as<t_list>()) {
+    return detail::gen_template_type(
+        template_name, {resolve(resolve_fn, *list->get_elem_type())});
+  } else if (const t_set* set = node.try_as<t_set>()) {
+    return detail::gen_template_type(
+        template_name, {resolve(resolve_fn, *set->get_elem_type())});
+  } else if (const t_map* tmap = node.try_as<t_map>()) {
+    return detail::gen_template_type(
+        template_name,
+        {resolve(resolve_fn, *tmap->get_key_type()),
+         resolve(resolve_fn, *tmap->get_val_type())});
   }
   throw std::runtime_error(
-      "unknown container type: " +
-      std::to_string(static_cast<int>(node.container_type())));
+      fmt::format("unknown container type: {}", typeid(node).name()));
 }
 
 std::string cpp_name_resolver::gen_adapted_type(
@@ -637,20 +632,17 @@ std::string cpp_name_resolver::gen_thrift_type_tag(
     return ns + "string_t";
   } else if (type.is_binary()) {
     return ns + "binary_t";
-  } else if (type.is<t_list>()) {
-    auto& list = type.as<t_list>();
-    auto& elem = *list.get_elem_type();
+  } else if (const t_list* list = type.try_as<t_list>()) {
+    auto& elem = *list->get_elem_type();
     auto elem_tag = gen_type_tag(elem);
     return ns + "list<" + elem_tag + ">";
-  } else if (type.is<t_set>()) {
-    auto& set = type.as<t_set>();
-    auto& elem = *set.get_elem_type();
+  } else if (const t_set* set = type.try_as<t_set>()) {
+    auto& elem = *set->get_elem_type();
     auto elem_tag = gen_type_tag(elem);
     return ns + "set<" + elem_tag + ">";
-  } else if (type.is<t_map>()) {
-    auto& map = type.as<t_map>();
-    auto& key = *map.get_key_type();
-    auto& val = *map.get_val_type();
+  } else if (const t_map* map = type.try_as<t_map>()) {
+    auto& key = *map->get_key_type();
+    auto& val = *map->get_val_type();
     auto key_tag = gen_type_tag(key);
     auto val_tag = gen_type_tag(val);
     return ns + "map<" + key_tag + ", " + val_tag + ">";

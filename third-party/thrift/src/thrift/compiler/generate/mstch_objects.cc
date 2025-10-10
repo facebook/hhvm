@@ -128,17 +128,17 @@ mstch::node mstch_type::get_set_type() {
 }
 
 mstch::node mstch_type::get_key_type() {
-  if (resolved_type_->is<t_map>()) {
+  if (const t_map* map = resolved_type_->try_as<t_map>()) {
     return context_.type_factory->make_mstch_object(
-        &resolved_type_->as<t_map>().key_type().deref(), context_, pos_);
+        &map->key_type().deref(), context_, pos_);
   }
   return mstch::node();
 }
 
 mstch::node mstch_type::get_value_type() {
-  if (resolved_type_->is<t_map>()) {
+  if (const t_map* map = resolved_type_->try_as<t_map>()) {
     return context_.type_factory->make_mstch_object(
-        &resolved_type_->as<t_map>().val_type().deref(), context_, pos_);
+        &map->val_type().deref(), context_, pos_);
   }
   return mstch::node();
 }

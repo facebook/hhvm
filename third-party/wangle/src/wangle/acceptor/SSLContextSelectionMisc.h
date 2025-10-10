@@ -49,7 +49,7 @@ struct dn_char_traits : public std::char_traits<char> {
   }
 
   static const char* find(const char* s, size_t n, char a) {
-    char la = ::tolower(a);
+    char la = static_cast<char>(::tolower(a));
     while (n--) {
       if (::tolower(*s) == la) {
         return s;

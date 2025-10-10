@@ -220,8 +220,9 @@ class ServerBootstrap {
    */
   void bind(int port) {
     CHECK(port >= 0);
+    CHECK(port <= 65535);
     folly::SocketAddress address;
-    address.setFromLocalPort(port);
+    address.setFromLocalPort(static_cast<uint16_t>(port));
     bindImpl(address);
   }
 

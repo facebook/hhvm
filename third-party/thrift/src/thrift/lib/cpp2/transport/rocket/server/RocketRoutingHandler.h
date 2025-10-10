@@ -50,6 +50,9 @@ THRIFT_PLUGGABLE_FUNC_DECLARE(
     std::unique_ptr<apache::thrift::rocket::SetupFrameInterceptor>,
     createSecuritySetupFrameInterceptor,
     apache::thrift::ThriftServer&);
+
+THRIFT_PLUGGABLE_FUNC_DECLARE(
+    std::string, getSocketParser, folly::AsyncTransport&);
 } // namespace detail
 
 class RocketRoutingHandler : public TransportRoutingHandler {

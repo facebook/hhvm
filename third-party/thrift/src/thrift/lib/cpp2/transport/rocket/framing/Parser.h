@@ -58,6 +58,12 @@ class Parser final : public folly::AsyncTransport::ReadCallback {
       T& owner,
       std::string&& mode,
       std::shared_ptr<ParserAllocatorType> alloc = nullptr)
+      : Parser(owner, mode, alloc) {}
+
+  explicit Parser(
+      T& owner,
+      const std::string& mode,
+      std::shared_ptr<ParserAllocatorType> alloc = nullptr)
       : owner_(owner), mode_(detail::stringToMode(mode)) {
     switch (mode_) {
       case detail::ParserMode::STRATEGY: {

@@ -208,14 +208,17 @@ class SerializerTests(unittest.TestCase):
     def test_from_thread_pool(self) -> None:
         # pyre-ignore[6]: TODO: Thrift-Container init
         control = self.easy(val=5, val_list=self.to_list([1, 2, 3, 4]))
-        loop = asyncio.get_event_loop()
-        coro = loop.run_in_executor(None, self.serializer.serialize, control)
-        encoded = loop.run_until_complete(coro)
-        coro = loop.run_in_executor(
-            None, self.serializer.deserialize, type(control), encoded
-        )
-        decoded = loop.run_until_complete(coro)
-        self.assertEqual(control, decoded)
+        loop = asyncio.new_event_loop()
+        try:
+            coro = loop.run_in_executor(None, self.serializer.serialize, control)
+            encoded = loop.run_until_complete(coro)
+            coro = loop.run_in_executor(
+                None, self.serializer.deserialize, type(control), encoded
+            )
+            decoded = loop.run_until_complete(coro)
+            self.assertEqual(control, decoded)
+        finally:
+            loop.close()
 
     def test_serialize_iobuf(self) -> None:
         # pyre-ignore[6]: TODO: Thrift-Container init

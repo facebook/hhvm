@@ -2914,8 +2914,8 @@ folly::coro::Task<void> HTTPQuicCoroSession::readLoop(
     auto streamRCB = std::make_shared<StreamRCB>(*this);
     std::weak_ptr<StreamRCB> weakStreamRCB(streamRCB);
     multiCodec_->setResumeHook(id, [weakStreamRCB, id] {
-      if (auto streamRCB = weakStreamRCB.lock()) {
-        streamRCB->resumeRead(id);
+      if (auto lockedStreamRCB = weakStreamRCB.lock()) {
+        lockedStreamRCB->resumeRead(id);
       }
     });
     auto rc = quicSocket_->setReadCallback(id, streamRCB.get(), std::nullopt);

@@ -2292,12 +2292,12 @@ void t_cocoa_generator::generate_deserialize_container(
 
   scope_up(out);
 
-  if (ttype->is<t_map>()) {
-    generate_deserialize_map_element(out, (t_map*)ttype, fieldName);
-  } else if (ttype->is<t_set>()) {
-    generate_deserialize_set_element(out, (t_set*)ttype, fieldName);
-  } else if (ttype->is<t_list>()) {
-    generate_deserialize_list_element(out, (t_list*)ttype, fieldName);
+  if (const t_map* map = ttype->try_as<t_map>()) {
+    generate_deserialize_map_element(out, map, fieldName);
+  } else if (const t_set* set = ttype->try_as<t_set>()) {
+    generate_deserialize_set_element(out, set, fieldName);
+  } else if (const t_list* list = ttype->try_as<t_list>()) {
+    generate_deserialize_list_element(out, list, fieldName);
   }
 
   scope_down(out);
@@ -2522,20 +2522,19 @@ void t_cocoa_generator::generate_serialize_container(
     std::ofstream& out, const t_type* ttype, const std::string& fieldName) {
   scope_up(out);
 
-  if (ttype->is<t_map>()) {
+  if (const t_map* map = ttype->try_as<t_map>()) {
     indent(out) << "[outProtocol writeMapBeginWithKeyType: "
-                << type_to_enum(&((t_map*)ttype)->key_type().deref())
-                << " valueType: "
-                << type_to_enum(&((t_map*)ttype)->val_type().deref())
+                << type_to_enum(&map->key_type().deref())
+                << " valueType: " << type_to_enum(&map->val_type().deref())
                 << " size: (int)[" << fieldName << " count]];" << std::endl;
-  } else if (ttype->is<t_set>()) {
+  } else if (const t_set* set = ttype->try_as<t_set>()) {
     indent(out) << "[outProtocol writeSetBeginWithElementType: "
-                << type_to_enum(((t_set*)ttype)->get_elem_type())
-                << " size: (int)[" << fieldName << " count]];" << std::endl;
-  } else if (ttype->is<t_list>()) {
+                << type_to_enum(set->get_elem_type()) << " size: (int)["
+                << fieldName << " count]];" << std::endl;
+  } else if (const t_list* list = ttype->try_as<t_list>()) {
     indent(out) << "[outProtocol writeListBeginWithElementType: "
-                << type_to_enum(((t_list*)ttype)->get_elem_type())
-                << " size: (int)[" << fieldName << " count]];" << std::endl;
+                << type_to_enum(list->get_elem_type()) << " size: (int)["
+                << fieldName << " count]];" << std::endl;
   }
 
   std::string iter = tmp("_iter");
@@ -2563,12 +2562,12 @@ void t_cocoa_generator::generate_serialize_container(
 
   scope_up(out);
 
-  if (ttype->is<t_map>()) {
-    generate_serialize_map_element(out, (t_map*)ttype, key, fieldName);
-  } else if (ttype->is<t_set>()) {
-    generate_serialize_set_element(out, (t_set*)ttype, key);
-  } else if (ttype->is<t_list>()) {
-    generate_serialize_list_element(out, (t_list*)ttype, key, fieldName);
+  if (const t_map* map = ttype->try_as<t_map>()) {
+    generate_serialize_map_element(out, map, key, fieldName);
+  } else if (const t_set* set = ttype->try_as<t_set>()) {
+    generate_serialize_set_element(out, set, key);
+  } else if (const t_list* list = ttype->try_as<t_list>()) {
+    generate_serialize_list_element(out, list, key, fieldName);
   }
 
   scope_down(out);
@@ -2757,8 +2756,7 @@ void t_cocoa_generator::print_const_value(
     out << name << " = " << render_const_value(out, type, value) << ";"
         << std::endl
         << std::endl;
-  } else if (type->is<t_structured>()) {
-    const auto* as_struct = static_cast<const t_structured*>(type);
+  } else if (const t_structured* as_struct = type->try_as<t_structured>()) {
     if (defval) {
       out << type_name(type) << " ";
     }
@@ -2784,9 +2782,9 @@ void t_cocoa_generator::print_const_value(
                   << std::endl;
     }
     out << std::endl;
-  } else if (type->is<t_map>()) {
-    const t_type* ktype = &((t_map*)type)->key_type().deref();
-    const t_type* vtype = &((t_map*)type)->val_type().deref();
+  } else if (const t_map* map = type->try_as<t_map>()) {
+    const t_type* ktype = &map->key_type().deref();
+    const t_type* vtype = &map->val_type().deref();
     const std::vector<std::pair<t_const_value*, t_const_value*>>& value_list =
         value->get_map();
     std::vector<std::pair<t_const_value*, t_const_value*>>::const_iterator
@@ -2808,8 +2806,8 @@ void t_cocoa_generator::print_const_value(
                   << "];" << std::endl;
     }
     out << std::endl;
-  } else if (type->is<t_list>()) {
-    const t_type* etype = ((t_list*)type)->get_elem_type();
+  } else if (const t_list* list = type->try_as<t_list>()) {
+    const t_type* etype = list->get_elem_type();
     const std::vector<t_const_value*>& value_list = value->get_list();
     std::vector<t_const_value*>::const_iterator v_iter;
     if (defval) {
@@ -2828,8 +2826,8 @@ void t_cocoa_generator::print_const_value(
       indent(out) << "[" << name << " addObject:" << val << "];" << std::endl;
     }
     out << std::endl;
-  } else if (type->is<t_set>()) {
-    const t_type* etype = ((t_set*)type)->get_elem_type();
+  } else if (const t_set* set = type->try_as<t_set>()) {
+    const t_type* etype = set->get_elem_type();
     const std::vector<t_const_value*>& value_list = value->get_list();
     std::vector<t_const_value*>::const_iterator v_iter;
     if (defval) {

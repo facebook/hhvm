@@ -293,8 +293,7 @@ void match_type_with_const_value(
             ctx, mctx, &map->val_type().deref(), map_val.second);
       }
     }
-  } else if (type->is<t_structured>()) {
-    const auto* structured = dynamic_cast<const t_structured*>(type);
+  } else if (const t_structured* structured = type->try_as<t_structured>()) {
     if (auto ttype = value->ttype()) {
       if (!ttype.resolved()) {
         ctx.error(
@@ -339,12 +338,11 @@ void match_type_with_const_value(
         match_type_with_const_value(ctx, mctx, field->get_type(), map_val);
       }
     }
-  } else if (type->is<t_enum>()) {
+  } else if (const t_enum* enm = type->try_as<t_enum>()) {
     // Set constant value types as enums when they are declared with integers
     // or identifiers.
     if (!value->is_enum()) {
       value->set_is_enum();
-      auto enm = dynamic_cast<const t_enum*>(type);
       value->set_enum(enm);
       if (value->kind() == t_const_value::CV_INTEGER) {
         if (const auto* enum_value = enm->find_value(value->get_integer())) {
@@ -533,10 +531,11 @@ void add_annotations_to_node_type(
     // This is a new type we can modify in place
     update_annotations(
         const_cast<t_type&>(*node_type), std::move(annotations), origin);
-  } else if (node_type->is<t_primitive_type>()) {
+  } else if (
+      const t_primitive_type* primitive =
+          node_type->try_as<t_primitive_type>()) {
     // Copy type as we don't handle unnamed typedefs to base types :(
-    auto unnamed = std::make_unique<t_primitive_type>(
-        *static_cast<const t_primitive_type*>(node_type));
+    auto unnamed = std::make_unique<t_primitive_type>(*primitive);
     for (auto& pair : annotations) {
       unnamed->set_unstructured_annotation(pair.first, pair.second, {}, origin);
     }

@@ -80,16 +80,13 @@ void report_missing(sema_context& ctx, const t_program* include) {
 void visit_type(sema_context& ctx, const t_named& src, const t_type& type) {
   if (type.program() != nullptr && !program_has_include(ctx, type.program())) {
     report_missing(ctx, type.program());
-  } else if (type.is<t_list>()) {
-    const auto& list = *dynamic_cast<const t_list*>(&type);
-    visit_type(ctx, src, *list.get_elem_type());
-  } else if (type.is<t_set>()) {
-    const auto& set = *dynamic_cast<const t_set*>(&type);
-    visit_type(ctx, src, *set.get_elem_type());
-  } else if (type.is<t_map>()) {
-    const auto& map = *dynamic_cast<const t_map*>(&type);
-    visit_type(ctx, src, map.key_type().deref());
-    visit_type(ctx, src, map.val_type().deref());
+  } else if (const t_list* list = type.try_as<t_list>()) {
+    visit_type(ctx, src, *list->get_elem_type());
+  } else if (const t_set* set = type.try_as<t_set>()) {
+    visit_type(ctx, src, *set->get_elem_type());
+  } else if (const t_map* map = type.try_as<t_map>()) {
+    visit_type(ctx, src, map->key_type().deref());
+    visit_type(ctx, src, map->val_type().deref());
   }
 }
 } // namespace

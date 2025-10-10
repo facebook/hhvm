@@ -107,16 +107,13 @@ bool same_types(const t_type* a, const t_type* b) {
     return false;
   }
 
-  if (resolved_a->is<t_list>()) {
-    const auto* list_a = static_cast<const t_list*>(resolved_a);
+  if (const t_list* list_a = resolved_a->try_as<t_list>()) {
     const auto* list_b = static_cast<const t_list*>(resolved_b);
     return same_types(list_a->get_elem_type(), list_b->get_elem_type());
-  } else if (resolved_a->is<t_set>()) {
-    const auto* set_a = static_cast<const t_set*>(resolved_a);
+  } else if (const t_set* set_a = resolved_a->try_as<t_set>()) {
     const auto* set_b = static_cast<const t_set*>(resolved_b);
     return same_types(set_a->get_elem_type(), set_b->get_elem_type());
-  } else if (resolved_a->is<t_map>()) {
-    const auto* map_a = static_cast<const t_map*>(resolved_a);
+  } else if (const t_map* map_a = resolved_a->try_as<t_map>()) {
     const auto* map_b = static_cast<const t_map*>(resolved_b);
     return same_types(&map_a->key_type().deref(), &map_b->key_type().deref()) &&
         same_types(&map_a->val_type().deref(), &map_b->val_type().deref());
@@ -1473,13 +1470,13 @@ class cpp_mstch_type : public mstch_type {
       if (!next->is<t_container>()) {
         continue;
       }
-      if (next->is<t_list>()) {
-        queue.push(static_cast<const t_list*>(next)->get_elem_type());
-      } else if (next->is<t_set>()) {
-        queue.push(static_cast<const t_set*>(next)->get_elem_type());
-      } else if (next->is<t_map>()) {
-        queue.push(&static_cast<const t_map*>(next)->key_type().deref());
-        queue.push(&static_cast<const t_map*>(next)->val_type().deref());
+      if (const t_list* list = next->try_as<t_list>()) {
+        queue.push(list->get_elem_type());
+      } else if (const t_set* set = next->try_as<t_set>()) {
+        queue.push(set->get_elem_type());
+      } else if (const t_map* map = next->try_as<t_map>()) {
+        queue.push(&map->key_type().deref());
+        queue.push(&map->val_type().deref());
       } else {
         assert(false);
       }

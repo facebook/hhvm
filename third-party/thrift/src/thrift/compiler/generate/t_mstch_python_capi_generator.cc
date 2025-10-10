@@ -290,16 +290,13 @@ std::string format_marshal_type_unadapted(
         cpp2::get_name(true_type),
         gen_capi_module_prefix(true_type->program()));
 
-  } else if (true_type->is<t_list>()) {
-    const auto* elem_type =
-        dynamic_cast<const t_list*>(true_type)->get_elem_type();
+  } else if (const t_list* list = true_type->try_as<t_list>()) {
+    const auto* elem_type = list->get_elem_type();
     return format_unary_type(node, elem_type, "list", type_override);
-  } else if (true_type->is<t_set>()) {
-    const auto* elem_type =
-        dynamic_cast<const t_set*>(true_type)->get_elem_type();
+  } else if (const t_set* set = true_type->try_as<t_set>()) {
+    const auto* elem_type = set->get_elem_type();
     return format_unary_type(node, elem_type, "set", type_override);
-  } else if (true_type->is<t_map>()) {
-    const auto* map = dynamic_cast<const t_map*>(true_type);
+  } else if (const t_map* map = true_type->try_as<t_map>()) {
     return format_map_type(
         node,
         &map->key_type().deref(),
@@ -446,8 +443,7 @@ class python_capi_mstch_program : public mstch_program {
     } else if (true_type->is<t_set>()) {
       visit_type_with_typedef(
           dynamic_cast<const t_set&>(*true_type).get_elem_type(), is_typedef);
-    } else if (true_type->is<t_map>()) {
-      const auto* map = dynamic_cast<const t_map*>(true_type);
+    } else if (const t_map* map = true_type->try_as<t_map>()) {
       visit_type_with_typedef(&map->key_type().deref(), is_typedef);
       visit_type_with_typedef(&map->val_type().deref(), is_typedef);
     }
@@ -564,8 +560,7 @@ class python_capi_mstch_struct : public mstch_struct {
              &dynamic_cast<const t_map*>(type)->val_type().deref()))) {
       return false;
     }
-    if (type->is<t_typedef>()) {
-      const t_typedef* tdef = dynamic_cast<const t_typedef*>(type);
+    if (const t_typedef* tdef = type->try_as<t_typedef>()) {
       return capi_eligible_type(tdef->get_type());
     }
     return true;

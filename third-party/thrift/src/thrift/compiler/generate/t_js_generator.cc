@@ -432,9 +432,9 @@ string t_js_generator::render_const_value(
     }
 
     out << "})";
-  } else if (type->is<t_map>()) {
-    const t_type* ktype = &((t_map*)type)->key_type().deref();
-    const t_type* vtype = &((t_map*)type)->val_type().deref();
+  } else if (const t_map* map = type->try_as<t_map>()) {
+    const t_type* ktype = &map->key_type().deref();
+    const t_type* vtype = &map->val_type().deref();
     out << "{";
 
     const vector<pair<t_const_value*, t_const_value*>>& val = value->get_map();
@@ -453,8 +453,8 @@ string t_js_generator::render_const_value(
     out << endl << "}";
   } else if (type->is<t_list>() || type->is<t_set>()) {
     const t_type* etype;
-    if (type->is<t_list>()) {
-      etype = ((t_list*)type)->get_elem_type();
+    if (const t_list* list = type->try_as<t_list>()) {
+      etype = list->get_elem_type();
     } else {
       etype = ((t_set*)type)->get_elem_type();
     }
@@ -1350,7 +1350,7 @@ void t_js_generator::generate_deserialize_container(
 
   scope_up(out);
 
-  if (ttype->is<t_map>()) {
+  if (const t_map* map = ttype->try_as<t_map>()) {
     if (!gen_node_) {
       out << indent() << "if (" << i << " > 0 ) {" << endl
           << indent()
@@ -1362,11 +1362,11 @@ void t_js_generator::generate_deserialize_container(
           << indent() << "}" << endl;
     }
 
-    generate_deserialize_map_element(out, (t_map*)ttype, prefix);
-  } else if (ttype->is<t_set>()) {
-    generate_deserialize_set_element(out, (t_set*)ttype, prefix);
-  } else if (ttype->is<t_list>()) {
-    generate_deserialize_list_element(out, (t_list*)ttype, prefix);
+    generate_deserialize_map_element(out, map, prefix);
+  } else if (const t_set* set = ttype->try_as<t_set>()) {
+    generate_deserialize_set_element(out, set, prefix);
+  } else if (const t_list* list = ttype->try_as<t_list>()) {
+    generate_deserialize_list_element(out, list, prefix);
   }
 
   scope_down(out);
@@ -1520,23 +1520,22 @@ void t_js_generator::generate_serialize_struct(
  */
 void t_js_generator::generate_serialize_container(
     ofstream& out, const t_type* ttype, string prefix) {
-  if (ttype->is<t_map>()) {
+  if (const t_map* map = ttype->try_as<t_map>()) {
     indent(out) << "output.writeMapBegin("
-                << type_to_enum(&((t_map*)ttype)->key_type().deref()) << ", "
-                << type_to_enum(&((t_map*)ttype)->val_type().deref()) << ", "
+                << type_to_enum(&map->key_type().deref()) << ", "
+                << type_to_enum(&map->val_type().deref()) << ", "
                 << "Thrift.objectLength(" << prefix << "));" << endl;
-  } else if (ttype->is<t_set>()) {
-    indent(out) << "output.writeSetBegin("
-                << type_to_enum(((t_set*)ttype)->get_elem_type()) << ", "
-                << prefix << ".length);" << endl;
+  } else if (const t_set* set = ttype->try_as<t_set>()) {
+    indent(out) << "output.writeSetBegin(" << type_to_enum(set->get_elem_type())
+                << ", " << prefix << ".length);" << endl;
 
-  } else if (ttype->is<t_list>()) {
+  } else if (const t_list* list = ttype->try_as<t_list>()) {
     indent(out) << "output.writeListBegin("
-                << type_to_enum(((t_list*)ttype)->get_elem_type()) << ", "
-                << prefix << ".length);" << endl;
+                << type_to_enum(list->get_elem_type()) << ", " << prefix
+                << ".length);" << endl;
   }
 
-  if (ttype->is<t_map>()) {
+  if (const t_map* map = ttype->try_as<t_map>()) {
     string kiter = tmp("kiter");
     string viter = tmp("viter");
     indent(out) << "for (var " << kiter << " in " << prefix << ")" << endl;
@@ -1546,11 +1545,11 @@ void t_js_generator::generate_serialize_container(
     scope_up(out);
     indent(out) << "var " << viter << " = " << prefix << "[" << kiter << "];"
                 << endl;
-    generate_serialize_map_element(out, (t_map*)ttype, kiter, viter);
+    generate_serialize_map_element(out, map, kiter, viter);
     scope_down(out);
     scope_down(out);
 
-  } else if (ttype->is<t_set>()) {
+  } else if (const t_set* set = ttype->try_as<t_set>()) {
     string iter = tmp("iter");
     indent(out) << "for (var " << iter << " in " << prefix << ")" << endl;
     scope_up(out);
@@ -1558,11 +1557,11 @@ void t_js_generator::generate_serialize_container(
                 << endl;
     scope_up(out);
     indent(out) << iter << " = " << prefix << "[" << iter << "];" << endl;
-    generate_serialize_set_element(out, (t_set*)ttype, iter);
+    generate_serialize_set_element(out, set, iter);
     scope_down(out);
     scope_down(out);
 
-  } else if (ttype->is<t_list>()) {
+  } else if (const t_list* list = ttype->try_as<t_list>()) {
     string iter = tmp("iter");
     indent(out) << "for (var " << iter << " in " << prefix << ")" << endl;
     scope_up(out);
@@ -1570,7 +1569,7 @@ void t_js_generator::generate_serialize_container(
                 << endl;
     scope_up(out);
     indent(out) << iter << " = " << prefix << "[" << iter << "];" << endl;
-    generate_serialize_list_element(out, (t_list*)ttype, iter);
+    generate_serialize_list_element(out, list, iter);
     scope_down(out);
     scope_down(out);
   }

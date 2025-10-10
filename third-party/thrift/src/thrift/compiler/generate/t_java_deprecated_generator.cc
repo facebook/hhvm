@@ -357,14 +357,14 @@ void t_java_deprecated_generator::print_const_value(
       indent(out) << "}" << endl;
     }
     out << endl;
-  } else if (type->is<t_map>()) {
+  } else if (const t_map* map = type->try_as<t_map>()) {
     out << name << " = new " << type_name(type, false, true) << "();" << endl;
     if (!in_static) {
       indent(out) << "static {" << endl;
       indent_up();
     }
-    const t_type* ktype = &((t_map*)type)->key_type().deref();
-    const t_type* vtype = &((t_map*)type)->val_type().deref();
+    const t_type* ktype = &map->key_type().deref();
+    const t_type* vtype = &map->val_type().deref();
     const vector<pair<t_const_value*, t_const_value*>>& val = value->get_map();
     vector<pair<t_const_value*, t_const_value*>>::const_iterator v_iter;
     for (v_iter = val.begin(); v_iter != val.end(); ++v_iter) {
@@ -384,8 +384,8 @@ void t_java_deprecated_generator::print_const_value(
       indent_up();
     }
     const t_type* etype;
-    if (type->is<t_list>()) {
-      etype = ((t_list*)type)->get_elem_type();
+    if (const t_list* list = type->try_as<t_list>()) {
+      etype = list->get_elem_type();
     } else {
       etype = ((t_set*)type)->get_elem_type();
     }
@@ -2266,8 +2266,8 @@ std::string t_java_deprecated_generator::get_java_type_string(
     return "TType.STRUCT";
   } else if (type->is<t_enum>()) {
     return "TType.I32";
-  } else if (type->is<t_typedef>()) {
-    return get_java_type_string(((t_typedef*)type)->get_type());
+  } else if (const t_typedef* typedef_ = type->try_as<t_typedef>()) {
+    return get_java_type_string(typedef_->get_type());
   } else if (const auto* primitive = type->try_as<t_primitive_type>()) {
     switch (primitive->primitive_type()) {
       case t_primitive_type::type::t_void:
@@ -2311,13 +2311,13 @@ void t_java_deprecated_generator::generate_field_value_meta_data(
     indent(out) << "new StructMetaData(TType.STRUCT, " << type_name(type)
                 << ".class";
   } else if (type->is<t_container>()) {
-    if (type->is<t_list>()) {
+    if (const t_list* list = type->try_as<t_list>()) {
       indent(out) << "new ListMetaData(TType.LIST, ";
-      const t_type* elem_type = ((t_list*)type)->get_elem_type();
+      const t_type* elem_type = list->get_elem_type();
       generate_field_value_meta_data(out, elem_type);
-    } else if (type->is<t_set>()) {
+    } else if (const t_set* set = type->try_as<t_set>()) {
       indent(out) << "new SetMetaData(TType.SET, ";
-      const t_type* elem_type = ((t_set*)type)->get_elem_type();
+      const t_type* elem_type = set->get_elem_type();
       generate_field_value_meta_data(out, elem_type);
     } else { // map
       indent(out) << "new MapMetaData(TType.MAP, ";
@@ -3226,8 +3226,8 @@ void t_java_deprecated_generator::generate_deserialize_field(
 
   string name = prefix + tfield->name();
 
-  if (type->is<t_structured>()) {
-    generate_deserialize_struct(out, (t_structured*)type, name);
+  if (const t_structured* structured = type->try_as<t_structured>()) {
+    generate_deserialize_struct(out, structured, name);
   } else if (type->is<t_container>()) {
     generate_deserialize_container(out, type, name);
   } else if (type->is<t_enum>()) {
@@ -3355,12 +3355,12 @@ void t_java_deprecated_generator::generate_deserialize_container(
 
   scope_up(out);
 
-  if (ttype->is<t_map>()) {
-    generate_deserialize_map_element(out, (t_map*)ttype, prefix);
-  } else if (ttype->is<t_set>()) {
-    generate_deserialize_set_element(out, (t_set*)ttype, prefix);
-  } else if (ttype->is<t_list>()) {
-    generate_deserialize_list_element(out, (t_list*)ttype, prefix);
+  if (const t_map* map = ttype->try_as<t_map>()) {
+    generate_deserialize_map_element(out, map, prefix);
+  } else if (const t_set* set = ttype->try_as<t_set>()) {
+    generate_deserialize_set_element(out, set, prefix);
+  } else if (const t_list* list = ttype->try_as<t_list>()) {
+    generate_deserialize_list_element(out, list, prefix);
   }
 
   scope_down(out);
@@ -3443,9 +3443,8 @@ void t_java_deprecated_generator::generate_serialize_field(
         tfield->name());
   }
 
-  if (type->is<t_structured>()) {
-    generate_serialize_struct(
-        out, (t_structured*)type, prefix + tfield->name());
+  if (const t_structured* structured = type->try_as<t_structured>()) {
+    generate_serialize_struct(out, structured, prefix + tfield->name());
   } else if (type->is<t_container>()) {
     generate_serialize_container(out, type, prefix + tfield->name());
   } else if (type->is<t_enum>()) {
@@ -3525,44 +3524,43 @@ void t_java_deprecated_generator::generate_serialize_container(
     ofstream& out, const t_type* ttype, string prefix) {
   scope_up(out);
 
-  if (ttype->is<t_map>()) {
+  if (const t_map* map = ttype->try_as<t_map>()) {
     indent(out) << "oprot.writeMapBegin(new TMap("
-                << type_to_enum(&((t_map*)ttype)->key_type().deref()) << ", "
-                << type_to_enum(&((t_map*)ttype)->val_type().deref()) << ", "
-                << prefix << ".size()));" << endl;
-  } else if (ttype->is<t_set>()) {
+                << type_to_enum(&map->key_type().deref()) << ", "
+                << type_to_enum(&map->val_type().deref()) << ", " << prefix
+                << ".size()));" << endl;
+  } else if (const t_set* set = ttype->try_as<t_set>()) {
     indent(out) << "oprot.writeSetBegin(new TSet("
-                << type_to_enum(((t_set*)ttype)->get_elem_type()) << ", "
-                << prefix << ".size()));" << endl;
-  } else if (ttype->is<t_list>()) {
+                << type_to_enum(set->get_elem_type()) << ", " << prefix
+                << ".size()));" << endl;
+  } else if (const t_list* list = ttype->try_as<t_list>()) {
     indent(out) << "oprot.writeListBegin(new TList("
-                << type_to_enum(((t_list*)ttype)->get_elem_type()) << ", "
-                << prefix << ".size()));" << endl;
+                << type_to_enum(list->get_elem_type()) << ", " << prefix
+                << ".size()));" << endl;
   }
 
   string iter = tmp("_iter");
-  if (ttype->is<t_map>()) {
+  if (const t_map* map = ttype->try_as<t_map>()) {
     indent(out) << "for (Map.Entry<"
-                << type_name(&((t_map*)ttype)->key_type().deref(), true, false)
-                << ", "
-                << type_name(&((t_map*)ttype)->val_type().deref(), true, false)
-                << "> " << iter << " : " << prefix << ".entrySet())";
-  } else if (ttype->is<t_set>()) {
-    indent(out) << "for (" << type_name(((t_set*)ttype)->get_elem_type()) << " "
-                << iter << " : " << prefix << ")";
-  } else if (ttype->is<t_list>()) {
-    indent(out) << "for (" << type_name(((t_list*)ttype)->get_elem_type())
-                << " " << iter << " : " << prefix << ")";
+                << type_name(&map->key_type().deref(), true, false) << ", "
+                << type_name(&map->val_type().deref(), true, false) << "> "
+                << iter << " : " << prefix << ".entrySet())";
+  } else if (const t_set* set = ttype->try_as<t_set>()) {
+    indent(out) << "for (" << type_name(set->get_elem_type()) << " " << iter
+                << " : " << prefix << ")";
+  } else if (const t_list* list = ttype->try_as<t_list>()) {
+    indent(out) << "for (" << type_name(list->get_elem_type()) << " " << iter
+                << " : " << prefix << ")";
   }
 
   scope_up(out);
 
-  if (ttype->is<t_map>()) {
-    generate_serialize_map_element(out, (t_map*)ttype, iter, prefix);
-  } else if (ttype->is<t_set>()) {
-    generate_serialize_set_element(out, (t_set*)ttype, iter);
-  } else if (ttype->is<t_list>()) {
-    generate_serialize_list_element(out, (t_list*)ttype, iter);
+  if (const t_map* map = ttype->try_as<t_map>()) {
+    generate_serialize_map_element(out, map, iter, prefix);
+  } else if (const t_set* set = ttype->try_as<t_set>()) {
+    generate_serialize_set_element(out, set, iter);
+  } else if (const t_list* list = ttype->try_as<t_list>()) {
+    generate_serialize_list_element(out, list, iter);
   }
 
   scope_down(out);
@@ -3623,8 +3621,8 @@ string t_java_deprecated_generator::type_name(
   if (auto* primitive = ttype->try_as<t_primitive_type>()) {
     return base_type_name(
         const_cast<t_primitive_type*>(primitive), in_container);
-  } else if (ttype->is<t_map>()) {
-    const t_map* tmap = (t_map*)ttype;
+  } else if (const t_map* map = ttype->try_as<t_map>()) {
+    const t_map* tmap = map;
     if (in_init) {
       prefix = "HashMap";
     } else {
@@ -3634,8 +3632,8 @@ string t_java_deprecated_generator::type_name(
         (skip_generic ? ""
                       : "<" + type_name(&tmap->key_type().deref(), true) + "," +
                  type_name(&tmap->val_type().deref(), true) + ">");
-  } else if (ttype->is<t_set>()) {
-    const t_set* tset = (t_set*)ttype;
+  } else if (const t_set* set = ttype->try_as<t_set>()) {
+    const t_set* tset = set;
     if (in_init) {
       prefix = "HashSet";
     } else {
@@ -3644,8 +3642,8 @@ string t_java_deprecated_generator::type_name(
     return prefix +
         (skip_generic ? ""
                       : "<" + type_name(tset->get_elem_type(), true) + ">");
-  } else if (ttype->is<t_list>()) {
-    const t_list* tlist = (t_list*)ttype;
+  } else if (const t_list* list = ttype->try_as<t_list>()) {
+    const t_list* tlist = list;
     if (in_init) {
       prefix = "ArrayList";
     } else {
@@ -4099,13 +4097,13 @@ bool t_java_deprecated_generator::is_comparable(
     bool ret = struct_has_all_comparable_fields((t_struct*)type, enclosing);
     enclosing->pop_back();
     return ret;
-  } else if (type->is<t_map>()) {
-    return is_comparable(&((t_map*)type)->key_type().deref(), enclosing) &&
-        is_comparable(&((t_map*)type)->val_type().deref(), enclosing);
-  } else if (type->is<t_set>()) {
-    return is_comparable(((t_set*)type)->get_elem_type(), enclosing);
-  } else if (type->is<t_list>()) {
-    return is_comparable(((t_list*)type)->get_elem_type(), enclosing);
+  } else if (const t_map* map = type->try_as<t_map>()) {
+    return is_comparable(&map->key_type().deref(), enclosing) &&
+        is_comparable(&map->val_type().deref(), enclosing);
+  } else if (const t_set* set = type->try_as<t_set>()) {
+    return is_comparable(set->get_elem_type(), enclosing);
+  } else if (const t_list* list = type->try_as<t_list>()) {
+    return is_comparable(list->get_elem_type(), enclosing);
   } else {
     throw std::runtime_error("Don't know how to handle this ttype");
   }
@@ -4133,13 +4131,13 @@ bool t_java_deprecated_generator::type_has_naked_binary(const t_type* type) {
     return false;
   } else if (type->is<t_structured>()) {
     return false;
-  } else if (type->is<t_map>()) {
-    return type_has_naked_binary(&((t_map*)type)->key_type().deref()) ||
-        type_has_naked_binary(&((t_map*)type)->val_type().deref());
-  } else if (type->is<t_set>()) {
-    return type_has_naked_binary(((t_set*)type)->get_elem_type());
-  } else if (type->is<t_list>()) {
-    return type_has_naked_binary(((t_list*)type)->get_elem_type());
+  } else if (const t_map* map = type->try_as<t_map>()) {
+    return type_has_naked_binary(&map->key_type().deref()) ||
+        type_has_naked_binary(&map->val_type().deref());
+  } else if (const t_set* set = type->try_as<t_set>()) {
+    return type_has_naked_binary(set->get_elem_type());
+  } else if (const t_list* list = type->try_as<t_list>()) {
+    return type_has_naked_binary(list->get_elem_type());
   } else {
     throw std::runtime_error("Don't know how to handle this ttype");
   }

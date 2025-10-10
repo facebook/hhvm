@@ -298,23 +298,19 @@ string t_json_generator::to_spec_args(const t_type* type) {
   } else if (
       type->is<t_structured>() || type->is<t_enum>() || type->is<t_typedef>()) {
     return to_spec_args_named(type);
-  } else if (type->is<t_map>()) {
+  } else if (const t_map* map = type->try_as<t_map>()) {
     return R"({ "key_type" : { "type_enum" : ")" +
-        to_string(&((t_map*)type)->key_type().deref()) +
-        R"(", "spec_args" : )" +
-        to_spec_args(&((t_map*)type)->key_type().deref()) +
+        to_string(&map->key_type().deref()) + R"(", "spec_args" : )" +
+        to_spec_args(&map->key_type().deref()) +
         R"( }, "val_type" : { "type_enum" : ")" +
-        to_string(&((t_map*)type)->val_type().deref()) +
-        R"(", "spec_args" : )" +
-        to_spec_args(&((t_map*)type)->val_type().deref()) + "} } ";
-  } else if (type->is<t_set>()) {
-    return R"({ "type_enum" : ")" + to_string(((t_set*)type)->get_elem_type()) +
-        R"(", "spec_args" : )" + to_spec_args(((t_set*)type)->get_elem_type()) +
-        "} ";
-  } else if (type->is<t_list>()) {
-    return R"({ "type_enum" : ")" +
-        to_string(((t_list*)type)->get_elem_type()) + R"(", "spec_args" : )" +
-        to_spec_args(((t_list*)type)->get_elem_type()) + "} ";
+        to_string(&map->val_type().deref()) + R"(", "spec_args" : )" +
+        to_spec_args(&map->val_type().deref()) + "} } ";
+  } else if (const t_set* set = type->try_as<t_set>()) {
+    return R"({ "type_enum" : ")" + to_string(set->get_elem_type()) +
+        R"(", "spec_args" : )" + to_spec_args(set->get_elem_type()) + "} ";
+  } else if (const t_list* list = type->try_as<t_list>()) {
+    return R"({ "type_enum" : ")" + to_string(list->get_elem_type()) +
+        R"(", "spec_args" : )" + to_spec_args(list->get_elem_type()) + "} ";
   }
 
   throw std::runtime_error("INVALID TYPE IN to_spec_args: " + type->name());

@@ -1067,8 +1067,8 @@ class mstch_java_field : public mstch_field {
     return default_value_for_type(field->get_type());
   }
   std::string default_value_for_type(const t_type* type) {
-    if (type->is<t_typedef>()) {
-      auto typedef_type = dynamic_cast<const t_typedef*>(type)->get_type();
+    if (const t_typedef* typedef_ = type->try_as<t_typedef>()) {
+      auto typedef_type = typedef_->get_type();
       return default_value_for_type(typedef_type);
     } else {
       if (type->is_byte() || type->is_i16() || type->is_i32()) {

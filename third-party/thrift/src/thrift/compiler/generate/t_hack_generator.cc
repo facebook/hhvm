@@ -2967,13 +2967,11 @@ void t_hack_generator::generate_php_type_spec(
     // Noop, type is all we need
   } else if (t->is<t_enum>()) {
     indent(out) << "'enum' => " << hack_name(t) << "::class,\n";
-  } else if (t->is<t_structured>()) {
+  } else if (const auto* tstruct = dynamic_cast<const t_structured*>(t)) {
     auto sname = hack_name(t);
-    if (const auto* tstruct = dynamic_cast<const t_structured*>(t)) {
-      auto [wrapper, name, ns] = find_hack_wrapper(tstruct);
-      if (wrapper) {
-        sname = hack_wrapped_type_name(name, ns);
-      }
+    auto [wrapper, name, ns] = find_hack_wrapper(tstruct);
+    if (wrapper) {
+      sname = hack_wrapped_type_name(name, ns);
     }
     indent(out) << "'class' => " << sname << "::class,\n";
   } else if (const auto* tmap = dynamic_cast<const t_map*>(t)) {
@@ -3218,8 +3216,8 @@ void t_hack_generator::generate_php_struct_shape_collection_value_lambda(
     }
   } else if (t->is<t_map>() || t->is<t_list>()) {
     const t_type* val_type = nullptr;
-    if (t->is<t_map>()) {
-      val_type = static_cast<const t_map*>(t)->get_val_type();
+    if (const t_map* map = t->try_as<t_map>()) {
+      val_type = map->get_val_type();
     } else {
       val_type = static_cast<const t_list*>(t)->get_elem_type();
     }
@@ -3339,18 +3337,15 @@ void t_hack_generator::generate_hack_array_from_shape_lambda(
 
 void t_hack_generator::generate_hack_array_from_shape_lambda(
     std::ostream& out, t_name_generator& namer, const t_type* t) {
-  if (t->is<t_map>()) {
-    generate_hack_array_from_shape_lambda(
-        out, namer, static_cast<const t_map*>(t));
-  } else if (t->is<t_list>()) {
-    generate_hack_array_from_shape_lambda(
-        out, namer, static_cast<const t_list*>(t));
+  if (const t_map* map = t->try_as<t_map>()) {
+    generate_hack_array_from_shape_lambda(out, namer, map);
+  } else if (const t_list* list = t->try_as<t_list>()) {
+    generate_hack_array_from_shape_lambda(out, namer, list);
   } else if (t->is<t_struct>() || t->is<t_union>()) {
     generate_hack_array_from_shape_lambda(
         out, namer, static_cast<const t_structured*>(t));
-  } else if (t->is<t_set>()) {
-    generate_hack_array_from_shape_lambda(
-        out, namer, static_cast<const t_set*>(t));
+  } else if (const t_set* set = t->try_as<t_set>()) {
+    generate_hack_array_from_shape_lambda(out, namer, set);
   }
 }
 
@@ -3368,8 +3363,8 @@ void t_hack_generator::generate_shape_from_hack_array_lambda(
   out << "($" << tmp << ") ==> $" << tmp;
 
   const t_type* val_type = nullptr;
-  if (t->is<t_map>()) {
-    val_type = static_cast<const t_map*>(t)->get_val_type();
+  if (const t_map* map = t->try_as<t_map>()) {
+    val_type = map->get_val_type();
   } else {
     val_type = static_cast<const t_list*>(t)->get_elem_type();
   }
@@ -3395,8 +3390,8 @@ bool t_hack_generator::type_has_nested_struct(const t_type* t) {
   bool has_struct = false;
   const t_type* val_type = t;
   while (true) {
-    if (val_type->is<t_map>()) {
-      val_type = static_cast<const t_map*>(val_type)->get_val_type();
+    if (const t_map* map = val_type->try_as<t_map>()) {
+      val_type = map->get_val_type();
     } else {
       val_type = static_cast<const t_list*>(val_type)->get_elem_type();
     }
@@ -3552,8 +3547,8 @@ void t_hack_generator::generate_php_struct_shape_methods(
       if (t->is<t_map>() || t->is<t_list>()) {
         if (hack_collections_) {
           const t_type* val_type = nullptr;
-          if (t->is<t_map>()) {
-            val_type = static_cast<const t_map*>(t)->get_val_type();
+          if (const t_map* map = t->try_as<t_map>()) {
+            val_type = map->get_val_type();
           } else {
             val_type = static_cast<const t_list*>(t)->get_elem_type();
           }
@@ -3683,13 +3678,10 @@ bool t_hack_generator::
     bool stringify_map_keys = false;
     const t_type* val_type = nullptr;
 
-    if (ttype->is<t_map>()) {
+    if (const t_map* map = ttype->try_as<t_map>()) {
       container_type = "Dict\\";
       if (shape_arraykeys_) {
-        const t_type* key_type = static_cast<const t_map*>(ttype)
-                                     ->key_type()
-                                     .deref()
-                                     .get_true_type();
+        const t_type* key_type = map->key_type().deref().get_true_type();
         if (is_shape_method && key_type->is<t_primitive_type>() &&
             key_type->is_string_or_binary()) {
           stringify_map_keys = true;
@@ -3701,7 +3693,7 @@ bool t_hack_generator::
         prefix = prefix + "new Map(";
         suffix = ")" + suffix;
       }
-      val_type = static_cast<const t_map*>(ttype)->get_val_type();
+      val_type = map->get_val_type();
     } else {
       container_type = "Vec\\";
       if (hack_collections_) {
@@ -3826,14 +3818,14 @@ bool t_hack_generator::generate_php_struct_async_toShape_method_helper(
     bool use_to_darray_conv = false;
     const t_type* val_type = nullptr;
 
-    if (ttype->is<t_map>()) {
+    if (const t_map* map = ttype->try_as<t_map>()) {
       container_prefix = "Dict\\";
       if (array_migration_ && hack_collections_) {
         use_to_darray_conv = true;
         indent_up();
         out << "ThriftUtil::toDArray(\n" << indent();
       }
-      val_type = static_cast<const t_map*>(ttype)->get_val_type();
+      val_type = map->get_val_type();
     } else {
       container_prefix = "Vec\\";
       val_type = static_cast<const t_list*>(ttype)->get_elem_type();
@@ -5000,8 +4992,7 @@ std::string t_hack_generator::render_service_metadata_response(
         continue;
       }
 
-      if (tstruct->is<t_exception>()) {
-        auto exception = static_cast<const t_exception*>(tstruct);
+      if (const t_exception* exception = tstruct->try_as<t_exception>()) {
         exceptions.push_back(exception);
       } else {
         structs.push_back(tstruct);

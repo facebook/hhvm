@@ -205,8 +205,7 @@ bool is_invariant_container_type(const t_type* type) {
   // Then, we recursively verify whether the map's value type, or the element
   // type of a list or set, contains any such mapping incompatibility.
   const t_type* true_type = type->get_true_type();
-  if (true_type->is<t_map>()) {
-    const t_map* map_type = dynamic_cast<const t_map*>(true_type);
+  if (const t_map* map_type = true_type->try_as<t_map>()) {
     const t_type* key_type = map_type->key_type().deref().get_true_type();
     const t_type* val_type = map_type->val_type().deref().get_true_type();
     return key_type->is<t_structured>() || key_type->is<t_container>() ||
@@ -215,12 +214,10 @@ bool is_invariant_container_type(const t_type* type) {
         is_invariant_container_type(val_type) ||
         is_invariant_adapter(
                find_structured_adapter_annotation(*val_type), val_type);
-  } else if (true_type->is<t_list>()) {
-    return is_invariant_container_type(
-        dynamic_cast<const t_list*>(true_type)->get_elem_type());
-  } else if (true_type->is<t_set>()) {
-    return is_invariant_container_type(
-        dynamic_cast<const t_set*>(true_type)->get_elem_type());
+  } else if (const t_list* list = true_type->try_as<t_list>()) {
+    return is_invariant_container_type(list->get_elem_type());
+  } else if (const t_set* set = true_type->try_as<t_set>()) {
+    return is_invariant_container_type(set->get_elem_type());
   }
 
   return false;

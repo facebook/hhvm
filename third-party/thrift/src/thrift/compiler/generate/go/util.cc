@@ -176,8 +176,7 @@ void codegen_data::add_to_thrift_metadata_types(
   }
 
   // Skip over a chain of "non-defined" typedefs.
-  if (type->is<t_typedef>()) {
-    auto typedef_ = dynamic_cast<const t_typedef*>(type);
+  if (const t_typedef* typedef_ = type->try_as<t_typedef>()) {
     if (typedef_->typedef_kind() != t_typedef::kind::defined) {
       auto underlying_type = typedef_->get_type();
       add_to_thrift_metadata_types(underlying_type, visited_type_names);
@@ -190,20 +189,16 @@ void codegen_data::add_to_thrift_metadata_types(
   // The recursion below is equivalent to post-order tree traversal.
   // It ensures that the types are recorded in the dependency order.
 
-  if (type->is<t_typedef>()) {
-    auto typedef_ = dynamic_cast<const t_typedef*>(type);
+  if (const t_typedef* typedef_ = type->try_as<t_typedef>()) {
     auto underlying_type = typedef_->get_type();
     add_to_thrift_metadata_types(underlying_type, visited_type_names);
-  } else if (type->is<t_list>()) {
-    auto list_type = dynamic_cast<const t_list*>(type);
+  } else if (const t_list* list_type = type->try_as<t_list>()) {
     auto elem_type = list_type->elem_type().get_type();
     add_to_thrift_metadata_types(elem_type, visited_type_names);
-  } else if (type->is<t_set>()) {
-    auto set_type = dynamic_cast<const t_set*>(type);
+  } else if (const t_set* set_type = type->try_as<t_set>()) {
     auto elem_type = set_type->elem_type().get_type();
     add_to_thrift_metadata_types(elem_type, visited_type_names);
-  } else if (type->is<t_map>()) {
-    auto map_type = dynamic_cast<const t_map*>(type);
+  } else if (const t_map* map_type = type->try_as<t_map>()) {
     auto key_type = map_type->key_type().get_type();
     auto val_type = map_type->val_type().get_type();
     add_to_thrift_metadata_types(key_type, visited_type_names);

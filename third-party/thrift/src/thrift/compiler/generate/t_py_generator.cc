@@ -405,10 +405,10 @@ void t_py_generator::generate_json_field(
 
   if (type->is<t_structured>()) {
     generate_json_struct(out, (t_struct*)type, name, prefix_json);
-  } else if (type->is<t_container>()) {
-    generate_json_container(out, (t_container*)type, name, prefix_json);
-  } else if (type->is<t_enum>()) {
-    generate_json_enum(out, (t_enum*)type, name, prefix_json);
+  } else if (const t_container* container = type->try_as<t_container>()) {
+    generate_json_container(out, container, name, prefix_json);
+  } else if (const t_enum* enum_ = type->try_as<t_enum>()) {
+    generate_json_enum(out, enum_, name, prefix_json);
   } else if (const auto* primitive = type->try_as<t_primitive_type>()) {
     string conversion_function;
     t_primitive_type::type tbase = primitive->primitive_type();
@@ -507,7 +507,7 @@ void t_py_generator::generate_json_container(
     const t_type* ttype,
     const string& prefix_thrift,
     const string& prefix_json) {
-  if (ttype->is<t_list>()) {
+  if (const t_list* list = ttype->try_as<t_list>()) {
     string e = tmp("_tmp_e");
     indent(out) << prefix_thrift << " = []" << endl;
 
@@ -515,29 +515,23 @@ void t_py_generator::generate_json_container(
     indent_up();
     generate_json_collection_element(
         out,
-        ((t_list*)ttype)->get_elem_type(),
+        list->get_elem_type(),
         prefix_thrift,
         e,
         ".append(",
         ")",
         prefix_json);
     indent_down();
-  } else if (ttype->is<t_set>()) {
+  } else if (const t_set* set = ttype->try_as<t_set>()) {
     string e = tmp("_tmp_e");
     indent(out) << prefix_thrift << " = set_cls()" << endl;
 
     indent(out) << "for " << e << " in " << prefix_json << ":" << endl;
     indent_up();
     generate_json_collection_element(
-        out,
-        ((t_set*)ttype)->get_elem_type(),
-        prefix_thrift,
-        e,
-        ".add(",
-        ")",
-        prefix_json);
+        out, set->get_elem_type(), prefix_thrift, e, ".add(", ")", prefix_json);
     indent_down();
-  } else if (ttype->is<t_map>()) {
+  } else if (const t_map* map = ttype->try_as<t_map>()) {
     string k = tmp("_tmp_k");
     string v = tmp("_tmp_v");
     string kp = tmp("_tmp_kp");
@@ -547,11 +541,11 @@ void t_py_generator::generate_json_container(
                 << ".items():" << endl;
     indent_up();
 
-    generate_json_map_key(out, &((t_map*)ttype)->key_type().deref(), kp, k);
+    generate_json_map_key(out, &map->key_type().deref(), kp, k);
 
     generate_json_collection_element(
         out,
-        &((t_map*)ttype)->val_type().deref(),
+        &map->val_type().deref(),
         prefix_thrift,
         v,
         "[" + kp + "] = ",
@@ -1221,9 +1215,9 @@ string t_py_generator::render_const_value(
     }
     indent_down();
     indent(out) << "})";
-  } else if (type->is<t_map>()) {
-    const t_type* ktype = &((t_map*)type)->key_type().deref();
-    const t_type* vtype = &((t_map*)type)->val_type().deref();
+  } else if (const t_map* map = type->try_as<t_map>()) {
+    const t_type* ktype = &map->key_type().deref();
+    const t_type* vtype = &map->val_type().deref();
     out << "{" << endl;
     indent_up();
     if (value->kind() == t_const_value::CV_MAP) {
@@ -1242,8 +1236,8 @@ string t_py_generator::render_const_value(
     indent(out) << "}";
   } else if (type->is<t_list>() || type->is<t_set>()) {
     const t_type* etype;
-    if (type->is<t_list>()) {
-      etype = ((t_list*)type)->get_elem_type();
+    if (const t_list* list = type->try_as<t_list>()) {
+      etype = list->get_elem_type();
     } else {
       etype = ((t_set*)type)->get_elem_type();
     }
@@ -3349,12 +3343,12 @@ void t_py_generator::generate_deserialize_container(
   indent_up();
   indent_up();
 
-  if (ttype->is<t_map>()) {
-    generate_deserialize_map_element(out, (t_map*)ttype, prefix, ktype, vtype);
-  } else if (ttype->is<t_set>()) {
-    generate_deserialize_set_element(out, (t_set*)ttype, prefix);
-  } else if (ttype->is<t_list>()) {
-    generate_deserialize_list_element(out, (t_list*)ttype, prefix);
+  if (const t_map* map = ttype->try_as<t_map>()) {
+    generate_deserialize_map_element(out, map, prefix, ktype, vtype);
+  } else if (const t_set* set = ttype->try_as<t_set>()) {
+    generate_deserialize_set_element(out, set, prefix);
+  } else if (const t_list* list = ttype->try_as<t_list>()) {
+    generate_deserialize_list_element(out, list, prefix);
   }
 
   indent_down();
@@ -3372,12 +3366,12 @@ void t_py_generator::generate_deserialize_container(
   indent_up();
   indent_up();
 
-  if (ttype->is<t_map>()) {
-    generate_deserialize_map_element(out, (t_map*)ttype, prefix, ktype, vtype);
-  } else if (ttype->is<t_set>()) {
-    generate_deserialize_set_element(out, (t_set*)ttype, prefix);
-  } else if (ttype->is<t_list>()) {
-    generate_deserialize_list_element(out, (t_list*)ttype, prefix);
+  if (const t_map* map = ttype->try_as<t_map>()) {
+    generate_deserialize_map_element(out, map, prefix, ktype, vtype);
+  } else if (const t_set* set = ttype->try_as<t_set>()) {
+    generate_deserialize_set_element(out, set, prefix);
+  } else if (const t_list* list = ttype->try_as<t_list>()) {
+    generate_deserialize_list_element(out, list, prefix);
   }
 
   indent_down();
@@ -3536,22 +3530,21 @@ void t_py_generator::generate_serialize_struct(
 
 void t_py_generator::generate_serialize_container(
     ofstream& out, const t_type* ttype, string prefix) {
-  if (ttype->is<t_map>()) {
+  if (const t_map* map = ttype->try_as<t_map>()) {
     indent(out) << "oprot.writeMapBegin("
-                << type_to_enum(&((t_map*)ttype)->key_type().deref()) << ", "
-                << type_to_enum(&((t_map*)ttype)->val_type().deref()) << ", "
-                << "len(" << prefix << "))" << endl;
-  } else if (ttype->is<t_set>()) {
-    indent(out) << "oprot.writeSetBegin("
-                << type_to_enum(((t_set*)ttype)->get_elem_type()) << ", "
-                << "len(" << prefix << "))" << endl;
-  } else if (ttype->is<t_list>()) {
+                << type_to_enum(&map->key_type().deref()) << ", "
+                << type_to_enum(&map->val_type().deref()) << ", " << "len("
+                << prefix << "))" << endl;
+  } else if (const t_set* set = ttype->try_as<t_set>()) {
+    indent(out) << "oprot.writeSetBegin(" << type_to_enum(set->get_elem_type())
+                << ", " << "len(" << prefix << "))" << endl;
+  } else if (const t_list* list = ttype->try_as<t_list>()) {
     indent(out) << "oprot.writeListBegin("
-                << type_to_enum(((t_list*)ttype)->get_elem_type()) << ", "
-                << "len(" << prefix << "))" << endl;
+                << type_to_enum(list->get_elem_type()) << ", " << "len("
+                << prefix << "))" << endl;
   }
 
-  if (ttype->is<t_map>()) {
+  if (const t_map* map = ttype->try_as<t_map>()) {
     string kiter = tmp("kiter");
     string viter = tmp("viter");
     if (sort_keys_) {
@@ -3567,9 +3560,9 @@ void t_py_generator::generate_serialize_container(
                   << ".items():" << endl;
     }
     indent_up();
-    generate_serialize_map_element(out, (t_map*)ttype, kiter, viter);
+    generate_serialize_map_element(out, map, kiter, viter);
     indent_down();
-  } else if (ttype->is<t_set>()) {
+  } else if (const t_set* set = ttype->try_as<t_set>()) {
     string iter = tmp("iter");
     if (sort_keys_) {
       indent(out) << "for " << iter << " in sorted(" << prefix << "):" << endl;
@@ -3577,13 +3570,13 @@ void t_py_generator::generate_serialize_container(
       indent(out) << "for " << iter << " in " << prefix << ":" << endl;
     }
     indent_up();
-    generate_serialize_set_element(out, (t_set*)ttype, iter);
+    generate_serialize_set_element(out, set, iter);
     indent_down();
-  } else if (ttype->is<t_list>()) {
+  } else if (const t_list* list = ttype->try_as<t_list>()) {
     string iter = tmp("iter");
     indent(out) << "for " << iter << " in " << prefix << ":" << endl;
     indent_up();
-    generate_serialize_list_element(out, (t_list*)ttype, iter);
+    generate_serialize_list_element(out, list, iter);
     indent_down();
   }
 
@@ -3858,20 +3851,19 @@ string t_py_generator::type_to_spec_args(const t_type* ttype) {
       ret += ", " + *adapter;
     }
     return ret + "]";
-  } else if (ttype->is<t_map>()) {
-    auto tmap = (t_map*)ttype;
+  } else if (const t_map* tmap = ttype->try_as<t_map>()) {
     return std::string("(") + type_to_enum(&tmap->key_type().deref()) + "," +
         type_to_spec_args(&tmap->key_type().deref()) + "," +
         type_to_enum(&tmap->val_type().deref()) + "," +
         type_to_spec_args(&tmap->val_type().deref()) + ")";
 
-  } else if (ttype->is<t_set>()) {
-    return "(" + type_to_enum(((t_set*)ttype)->get_elem_type()) + "," +
-        type_to_spec_args(((t_set*)ttype)->get_elem_type()) + ")";
+  } else if (const t_set* set = ttype->try_as<t_set>()) {
+    return "(" + type_to_enum(set->get_elem_type()) + "," +
+        type_to_spec_args(set->get_elem_type()) + ")";
 
-  } else if (ttype->is<t_list>()) {
-    return "(" + type_to_enum(((t_list*)ttype)->get_elem_type()) + "," +
-        type_to_spec_args(((t_list*)ttype)->get_elem_type()) + ")";
+  } else if (const t_list* list = ttype->try_as<t_list>()) {
+    return "(" + type_to_enum(list->get_elem_type()) + "," +
+        type_to_spec_args(list->get_elem_type()) + ")";
   }
 
   throw std::runtime_error(

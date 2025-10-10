@@ -150,8 +150,8 @@ bool can_derive_ord(const t_type* type) {
   if (type->has_structured_annotation(kRustOrdUri)) {
     return true;
   }
-  if (type->is<t_list>()) {
-    auto elem_type = dynamic_cast<const t_list*>(type)->get_elem_type();
+  if (const t_list* list = type->try_as<t_list>()) {
+    auto elem_type = list->get_elem_type();
     return elem_type && can_derive_ord(elem_type);
   }
   // We can implement Ord on BTreeMap (the default map type) if both the key and
@@ -357,41 +357,33 @@ bool node_has_adapter(const t_named& node) {
 
 bool type_has_transitive_adapter(
     const t_type* type, bool step_through_newtypes) {
-  if (type->is<t_typedef>()) {
-    auto typedef_type = dynamic_cast<const t_typedef*>(type);
-    if (typedef_type) {
-      // Currently the only "type" that can have an adapter is a typedef.
-      if (node_has_adapter(*typedef_type)) {
-        return true;
-      }
+  if (const t_typedef* typedef_type = type->try_as<t_typedef>()) {
+    // Currently the only "type" that can have an adapter is a typedef.
+    if (node_has_adapter(*typedef_type)) {
+      return true;
+    }
 
-      if (!step_through_newtypes && has_newtype_annotation(typedef_type)) {
-        return false;
-      }
+    if (!step_through_newtypes && has_newtype_annotation(typedef_type)) {
+      return false;
+    }
 
-      return type_has_transitive_adapter(
-          typedef_type->get_type(), step_through_newtypes);
-    }
-  } else if (type->is<t_list>()) {
-    auto list_type = dynamic_cast<const t_list*>(type);
-    if (list_type) {
-      return type_has_transitive_adapter(
-          list_type->get_elem_type(), step_through_newtypes);
-    }
-  } else if (type->is<t_set>()) {
-    auto set_type = dynamic_cast<const t_set*>(type);
-    if (set_type) {
-      return type_has_transitive_adapter(
-          set_type->get_elem_type(), step_through_newtypes);
-    }
-  } else if (type->is<t_map>()) {
-    auto map_type = dynamic_cast<const t_map*>(type);
-    if (map_type) {
-      return type_has_transitive_adapter(
-                 &map_type->key_type().deref(), step_through_newtypes) ||
-          type_has_transitive_adapter(
-                 &map_type->val_type().deref(), step_through_newtypes);
-    }
+    return type_has_transitive_adapter(
+        typedef_type->get_type(), step_through_newtypes);
+
+  } else if (const t_list* list_type = type->try_as<t_list>()) {
+    return type_has_transitive_adapter(
+        list_type->get_elem_type(), step_through_newtypes);
+
+  } else if (const t_set* set_type = type->try_as<t_set>()) {
+    return type_has_transitive_adapter(
+        set_type->get_elem_type(), step_through_newtypes);
+
+  } else if (const t_map* map_type = type->try_as<t_map>()) {
+    return type_has_transitive_adapter(
+               &map_type->key_type().deref(), step_through_newtypes) ||
+        type_has_transitive_adapter(
+               &map_type->val_type().deref(), step_through_newtypes);
+
   } else if (type->is<t_struct>() || type->is<t_union>()) {
     auto struct_type = dynamic_cast<const t_structured*>(type);
     if (struct_type) {

@@ -65,12 +65,10 @@ class mstch_starlark_type : public mstch_type {
     if (type->is<t_enum>()) {
       return true;
     }
-    if (type->is<t_list>()) {
-      return is_supported_type(
-          dynamic_cast<const t_list*>(type)->get_elem_type());
+    if (const t_list* list = type->try_as<t_list>()) {
+      return is_supported_type(list->get_elem_type());
     }
-    if (type->is<t_map>()) {
-      const t_map* map = dynamic_cast<const t_map*>(type);
+    if (const t_map* map = type->try_as<t_map>()) {
       return is_supported_type(&map->key_type().deref()) &&
           is_supported_type(&map->val_type().deref());
     }

@@ -102,23 +102,20 @@ std::string to_flat_type_name(const t_type* type) {
   const auto* true_type = type->get_true_type();
   assert(true_type != nullptr);
 
-  if (true_type->is<t_list>()) {
-    const auto* listType = dynamic_cast<const t_list*>(true_type);
+  if (const t_list* listType = true_type->try_as<t_list>()) {
     assert(listType != nullptr);
 
     return fmt::format(
         "List__{}", to_flat_type_name(listType->get_elem_type()));
   }
 
-  if (true_type->is<t_set>()) {
-    const auto* setType = dynamic_cast<const t_set*>(true_type);
+  if (const t_set* setType = true_type->try_as<t_set>()) {
     assert(setType != nullptr);
 
     return fmt::format("Set__{}", to_flat_type_name(setType->get_elem_type()));
   }
 
-  if (true_type->is<t_map>()) {
-    const auto* mapType = dynamic_cast<const t_map*>(true_type);
+  if (const t_map* mapType = true_type->try_as<t_map>()) {
     assert(mapType != nullptr);
 
     return fmt::format(
@@ -340,14 +337,13 @@ class pyi_mstch_program : public mstch_program {
       return;
     }
 
-    if (type->is<t_list>()) {
-      const auto* listType = dynamic_cast<const t_list*>(type)->get_elem_type();
+    if (const t_list* list = type->try_as<t_list>()) {
+      const auto* listType = list->get_elem_type();
       add_containers(visited, listType);
-    } else if (type->is<t_set>()) {
-      const auto* setType = dynamic_cast<const t_set*>(type)->get_elem_type();
+    } else if (const t_set* set = type->try_as<t_set>()) {
+      const auto* setType = set->get_elem_type();
       add_containers(visited, setType);
-    } else if (type->is<t_map>()) {
-      const auto* mapType = dynamic_cast<const t_map*>(type);
+    } else if (const t_map* mapType = type->try_as<t_map>()) {
       add_containers(visited, &mapType->key_type().deref());
       add_containers(visited, &mapType->val_type().deref());
     }

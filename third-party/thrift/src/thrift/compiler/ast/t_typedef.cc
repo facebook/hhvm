@@ -40,7 +40,7 @@ const t_const* t_typedef::get_first_structured_annotation_or_null(
 }
 
 t_typedef::kind t_typedef::typedef_kind() const {
-  if (dynamic_cast<const t_placeholder_typedef*>(this) != nullptr) {
+  if (this->is<t_placeholder_typedef>()) {
     assert(!unnamed_);
     return kind::placeholder;
   } else if (unnamed_) {

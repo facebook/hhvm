@@ -3159,8 +3159,7 @@ void t_hack_generator::generate_php_struct_shape_spec(
 
     std::string prefix = nullable || is_constructor_shape ? "?" : "";
 
-    if (dynamic_cast<const t_result_struct*>(tstruct) &&
-        field.name() == "success") {
+    if (tstruct->is<t_result_struct>() && field.name() == "success") {
       if (!is_async_field(field, false)) {
         typehint = "this::TResult";
       }
@@ -4270,8 +4269,7 @@ void t_hack_generator::generate_php_struct_fields(
         struct_hack_name_with_ns,
         nullable && !tstruct->is<t_union>() /* is_field_nullable */);
 
-    if (dynamic_cast<const t_result_struct*>(tstruct) &&
-        fieldName == "success") {
+    if (tstruct->is<t_result_struct>() && fieldName == "success") {
       typehint = "this::TResult";
     }
 
@@ -4489,7 +4487,7 @@ void t_hack_generator::generate_php_struct_methods(
   generate_json_reader(out, tstruct);
   generate_adapter_type_checks(out, tstruct);
 
-  if (dynamic_cast<const t_result_struct*>(tstruct)) {
+  if (tstruct->is<t_result_struct>()) {
     generate_exception_method(out, tstruct);
   }
 }
@@ -4687,8 +4685,7 @@ void t_hack_generator::generate_php_struct_constructor(
     } else {
       typehint = type_to_typehint(field.get_type());
     }
-    if (dynamic_cast<const t_result_struct*>(tstruct) &&
-        field.name() == "success") {
+    if (tstruct->is<t_result_struct>() && field.name() == "success") {
       typehint = "this::TResult";
     }
     out << delim << "?" << typehint << " $" << field.name() << " = null";

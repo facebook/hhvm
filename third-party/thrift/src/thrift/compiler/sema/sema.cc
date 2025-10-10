@@ -643,7 +643,7 @@ void normalize_return_type(
 
   // Check the (first) response type.
   const t_type* true_type = type->get_true_type();
-  if (dynamic_cast<const t_service*>(true_type)) {
+  if (true_type->is<t_service>()) {
     ctx.error("Invalid first response type: {}", type->get_full_name());
   }
 }

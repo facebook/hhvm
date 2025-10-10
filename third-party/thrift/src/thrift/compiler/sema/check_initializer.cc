@@ -102,9 +102,8 @@ class compatibility_checker {
     if (!category) {
       return;
     }
-    const std::string& type_name = dynamic_cast<const t_container*>(type)
-        ? type->get_full_name()
-        : type->name();
+    const std::string& type_name =
+        type->is<t_container>() ? type->get_full_name() : type->name();
     error(
         "cannot convert {} to `{}` in initialization of `{}`",
         category,
@@ -232,7 +231,7 @@ class compatibility_checker {
       return false;
     }
     const auto& map = value->get_map();
-    if (map.size() > 1 && dynamic_cast<const t_union*>(type)) {
+    if (map.size() > 1 && type->is<t_union>()) {
       error(
           "cannot initialize more than one field in union `{}`", type->name());
       return false;
@@ -346,13 +345,11 @@ class default_value_checker final {
     if (const auto* primitive_type =
             dynamic_cast<const t_primitive_type*>(&type_)) {
       return check_primitive_type(*primitive_type, value);
-    } else if (dynamic_cast<const t_enum*>(&type_)) {
+    } else if (type_.is<t_enum>()) {
       return check_enum(value);
-    } else if (dynamic_cast<const t_map*>(&type_)) {
+    } else if (type_.is<t_map>()) {
       return check_map(value);
-    } else if (
-        dynamic_cast<const t_list*>(&type_) ||
-        dynamic_cast<const t_set*>(&type_)) {
+    } else if (type_.is<t_list>() || type_.is<t_set>()) {
       return check_list_or_set(value);
     } else if (
         const auto* structured_type =

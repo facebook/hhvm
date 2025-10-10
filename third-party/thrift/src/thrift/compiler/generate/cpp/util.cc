@@ -185,7 +185,7 @@ gen_dependency_graph(
             // Transitively depend on true type if necessary, since typedefs
             // generally don't depend on their underlying types.
             add_dependency(typedf->get_true_type(), include_structured_types);
-          } else if (!(dynamic_cast<t_structured const*>(type) &&
+          } else if (!(type->is<t_structured>() &&
                        (include_structured_types ||
                         has_dependent_adapter(*type)))) {
             return;

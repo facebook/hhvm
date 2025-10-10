@@ -1392,10 +1392,10 @@ bool owns_annotations(const t_type* type) {
           })) {
     return false;
   }
-  if (dynamic_cast<const t_container*>(type)) {
+  if (type->is<t_container>()) {
     return true;
   }
-  if (dynamic_cast<const t_primitive_type*>(type)) {
+  if (type->is<t_primitive_type>()) {
     return true;
   }
   if (auto t = dynamic_cast<const t_typedef*>(type)) {

@@ -83,13 +83,45 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
   set(GDB_SUBOPTION)
 
   # Enable GCC/LLVM stack-smashing protection
-  if(ENABLE_SSP)
+  if(ENABLE_HARDENING)
     list(APPEND GENERAL_OPTIONS
+      # Enable stack protection and stack-clash protection.
       # This needs two dashes in the name, so put one here.
       "-param=ssp-buffer-size=4"
-      "pie"
-      "fPIC"
+      "fstack-protector-strong"
+      "fstack-clash-protection"
+
+      # Use hardened equivalents of various glibc functions
+      # to guard against buffer overflows.
+      "D_FORTIFY_SOURCE=3"
+
+      # https://isisblogs.poly.edu/2011/06/01/relro-relocation-read-only/
+      "Wl,-z,relro,-z,now"
+      # Mark stack as non-executable.
+      "Wl,-z,noexecstack"
+      # Separate ELF code into its own segment.
+      "Wl,-z,separate-code"
     )
+
+    # Enable control-flow / branch protection.
+    if (IS_X64)
+      list(APPEND GENERAL_OPTIONS "fcf-protection")
+    elseif (IS_AARCH64)
+      list(APPEND GENERAL_OPTIONS "mbranch-protection=standard")
+    endif()
+
+    # Enable C++ standard library assertions.
+    if (CLANG_FORCE_LIBCPP)
+      list(APPEND GENERAL_CXX_OPTIONS "D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_EXTENSIVE")
+    else()
+      list(APPEND GENERAL_CXX_OPTIONS "D_GLIBCXX_ASSERTIONS")
+    endif()
+  endif()
+
+  if (ENABLE_PIE)
+    list(APPEND GENERAL_OPTIONS "pie" "fPIC")
+  else()
+    list(APPEND GENERAL_OPTIONS "no-pie")
   endif()
 
   if (IS_X64)
@@ -109,13 +141,6 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
       "unknown-warning-option"
       "unused-command-line-argument"
     )
-
-    # Enabled GCC/LLVM stack-smashing protection
-    if(ENABLE_SSP)
-      list(APPEND GENERAL_OPTIONS "fstack-protector-strong")
-    else()
-      list(APPEND GENERAL_OPTIONS "no-pie")
-    endif()
 
     if(CLANG_FORCE_LIBCPP)
       list(APPEND GENERAL_CXX_OPTIONS "stdlib=libc++")
@@ -149,15 +174,6 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
       "-param=inline-unit-growth=200"
       "-param=large-unit-insns=10000"
     )
-
-    # Enabled GCC/LLVM stack-smashing protection
-    if(ENABLE_SSP)
-      if(LINUX)
-        # https://isisblogs.poly.edu/2011/06/01/relro-relocation-read-only/
-        list(APPEND GENERAL_OPTIONS "Wl,-z,relro,-z,now")
-      endif()
-      list(APPEND GENERAL_OPTIONS "fstack-protector-strong")
-    endif()
 
     # X64
     if(IS_X64)

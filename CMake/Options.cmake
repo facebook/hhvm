@@ -1,7 +1,8 @@
 #set(CMAKE_BUILD_TYPE Debug)
 
 option(ALWAYS_ASSERT "Enabled asserts in a release build" OFF)
-option(ENABLE_SSP "Enabled GCC/LLVM stack-smashing protection" OFF)
+option(ENABLE_HARDENING "Set hardening flags and definitions, e.g. stack-smashing protection" OFF)
+option(ENABLE_PIE "Produce position-independent executables" OFF)
 option(STATIC_CXX_LIB "Statically link libstd++ and libgcc." OFF)
 option(ENABLE_AARCH64_CRC "Enable the use of CRC instructions" OFF)
 option(ENABLE_FASTCGI "Enable the FastCGI interface." ON)

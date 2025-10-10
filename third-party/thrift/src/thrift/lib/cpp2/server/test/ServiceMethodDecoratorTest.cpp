@@ -486,7 +486,7 @@ CO_TEST_P(ServiceMethodDecoratorTestP, DecoratorDataPassed) {
 CO_TEST_P(ServiceMethodDecoratorTestP, AdaptedData) {
   struct TestState {
     std::vector<std::string> observedByHandler = {};
-    std::string responseObservedByDecoratorAfter = "";
+    std::string responseObservedByDecoratorAfter;
     std::vector<std::string> assetsObservedByDecoratorAfter = {};
   };
 

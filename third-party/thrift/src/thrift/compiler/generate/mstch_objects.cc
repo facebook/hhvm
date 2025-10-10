@@ -81,12 +81,11 @@ mstch::node mstch_enum::values() {
 }
 
 mstch::node mstch_type::get_structured() {
-  if (resolved_type_->is<t_structured>()) {
+  if (const t_structured* structured = resolved_type_->try_as<t_structured>()) {
     std::string id = program_cache_id(
         type_->program(), get_type_namespace(type_->program()));
     return make_mstch_array_cached(
-        std::vector<const t_structured*>{
-            dynamic_cast<const t_structured*>(resolved_type_)},
+        std::vector<const t_structured*>{structured},
         *context_.struct_factory,
         context_.struct_cache,
         id);
@@ -95,11 +94,11 @@ mstch::node mstch_type::get_structured() {
 }
 
 mstch::node mstch_type::get_enum() {
-  if (resolved_type_->is<t_enum>()) {
+  if (const t_enum* enum_ = resolved_type_->try_as<t_enum>()) {
     std::string id = program_cache_id(
         type_->program(), get_type_namespace(type_->program()));
     return make_mstch_array_cached(
-        std::vector<const t_enum*>{dynamic_cast<const t_enum*>(resolved_type_)},
+        std::vector<const t_enum*>{enum_},
         *context_.enum_factory,
         context_.enum_cache,
         id);
@@ -108,21 +107,17 @@ mstch::node mstch_type::get_enum() {
 }
 
 mstch::node mstch_type::get_list_type() {
-  if (resolved_type_->is<t_list>()) {
+  if (const t_list* list = resolved_type_->try_as<t_list>()) {
     return context_.type_factory->make_mstch_object(
-        dynamic_cast<const t_list*>(resolved_type_)->get_elem_type(),
-        context_,
-        pos_);
+        list->get_elem_type(), context_, pos_);
   }
   return mstch::node();
 }
 
 mstch::node mstch_type::get_set_type() {
-  if (resolved_type_->is<t_set>()) {
+  if (const t_set* set = resolved_type_->try_as<t_set>()) {
     return context_.type_factory->make_mstch_object(
-        dynamic_cast<const t_set*>(resolved_type_)->get_elem_type(),
-        context_,
-        pos_);
+        set->get_elem_type(), context_, pos_);
   }
   return mstch::node();
 }
@@ -144,17 +139,17 @@ mstch::node mstch_type::get_value_type() {
 }
 
 mstch::node mstch_type::get_typedef_type() {
-  if (type_->is<t_typedef>()) {
+  if (const t_typedef* typedef_ = type_->try_as<t_typedef>()) {
     return context_.type_factory->make_mstch_object(
-        dynamic_cast<const t_typedef*>(type_)->get_type(), context_, pos_);
+        typedef_->get_type(), context_, pos_);
   }
   return mstch::node();
 }
 
 mstch::node mstch_type::get_typedef() {
-  if (type_->is<t_typedef>()) {
+  if (const t_typedef* typedef_ = type_->try_as<t_typedef>()) {
     return context_.typedef_factory->make_mstch_object(
-        dynamic_cast<const t_typedef*>(type_), context_, pos_);
+        typedef_, context_, pos_);
   }
   return mstch::node();
 }
@@ -181,12 +176,10 @@ mstch::node mstch_const_value::list_elems() {
   if (type_ == cv::CV_LIST) {
     const t_type* expected_type = nullptr;
     if (expected_type_) {
-      if (expected_type_->is<t_list>()) {
-        expected_type =
-            dynamic_cast<const t_list*>(expected_type_)->get_elem_type();
-      } else if (expected_type_->is<t_set>()) {
-        expected_type =
-            dynamic_cast<const t_set*>(expected_type_)->get_elem_type();
+      if (const t_list* list = expected_type_->try_as<t_list>()) {
+        expected_type = list->get_elem_type();
+      } else if (const t_set* set = expected_type_->try_as<t_set>()) {
+        expected_type = set->get_elem_type();
       }
     }
     return make_mstch_consts(
@@ -200,9 +193,10 @@ mstch::node mstch_const_value::map_elems() {
     return mstch::node();
   }
   std::pair<const t_type*, const t_type*> expected_types;
-  if (expected_type_ && expected_type_->is<t_map>()) {
-    const auto* m = dynamic_cast<const t_map*>(expected_type_);
-    expected_types = {&m->key_type().deref(), &m->val_type().deref()};
+  if (const t_map* map =
+          expected_type_ == nullptr ? nullptr : expected_type_->try_as<t_map>();
+      map != nullptr) {
+    expected_types = {&map->key_type().deref(), &map->val_type().deref()};
   }
   return make_mstch_array(
       const_value_->get_map(),

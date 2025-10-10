@@ -526,19 +526,13 @@ class python_mstch_program : public mstch_program {
     if (is_typedef == TypeDef::HasTypedef) {
       add_typedef_namespace(true_type);
     }
-    if (true_type->is<t_list>()) {
-      visit_type_with_typedef(
-          dynamic_cast<const t_list&>(*true_type).get_elem_type(), is_typedef);
-    } else if (true_type->is<t_set>()) {
-      visit_type_with_typedef(
-          dynamic_cast<const t_set&>(*true_type).get_elem_type(), is_typedef);
-    } else if (true_type->is<t_map>()) {
-      visit_type_with_typedef(
-          &dynamic_cast<const t_map&>(*true_type).key_type().deref(),
-          is_typedef);
-      visit_type_with_typedef(
-          &dynamic_cast<const t_map&>(*true_type).val_type().deref(),
-          is_typedef);
+    if (const t_list* list = true_type->try_as<t_list>()) {
+      visit_type_with_typedef(list->get_elem_type(), is_typedef);
+    } else if (const t_set* set = true_type->try_as<t_set>()) {
+      visit_type_with_typedef(set->get_elem_type(), is_typedef);
+    } else if (const t_map* map = true_type->try_as<t_map>()) {
+      visit_type_with_typedef(&map->key_type().deref(), is_typedef);
+      visit_type_with_typedef(&map->val_type().deref(), is_typedef);
     }
   }
 

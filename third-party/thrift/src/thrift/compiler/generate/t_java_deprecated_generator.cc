@@ -325,8 +325,8 @@ void t_java_deprecated_generator::print_const_value(
     out << name << " = " << render_const_value(out, name, type, value) << ";"
         << endl
         << endl;
-  } else if (type->is<t_structured>()) {
-    const vector<t_field*>& fields = ((t_struct*)type)->get_members();
+  } else if (const t_structured* structured = type->try_as<t_structured>()) {
+    const vector<t_field*>& fields = structured->get_members();
     vector<t_field*>::const_iterator f_iter;
     const vector<pair<t_const_value*, t_const_value*>>& val = value->get_map();
     vector<pair<t_const_value*, t_const_value*>>::const_iterator v_iter;
@@ -1850,9 +1850,8 @@ void t_java_deprecated_generator::generate_reflection_getters(
   indent(out) << "case " << upcase_string(field_name) << ":" << endl;
   indent_up();
 
-  if (type->is<t_primitive_type>() && !type->is_string_or_binary()) {
-    t_primitive_type* base_type = (t_primitive_type*)type;
-
+  if (const t_primitive_type* base_type = type->try_as<t_primitive_type>();
+      base_type != nullptr && !base_type->is_string_or_binary()) {
     indent(out) << "return new " << type_name(type, true, false) << "("
                 << (base_type->is_bool() ? "is" : "get") << cap_name << "());"
                 << endl

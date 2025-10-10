@@ -3341,9 +3341,8 @@ void t_hack_generator::generate_hack_array_from_shape_lambda(
     generate_hack_array_from_shape_lambda(out, namer, map);
   } else if (const t_list* list = t->try_as<t_list>()) {
     generate_hack_array_from_shape_lambda(out, namer, list);
-  } else if (t->is<t_struct>() || t->is<t_union>()) {
-    generate_hack_array_from_shape_lambda(
-        out, namer, static_cast<const t_structured*>(t));
+  } else if (const t_structured* structured = t->try_as<t_structured>()) {
+    generate_hack_array_from_shape_lambda(out, namer, structured);
   } else if (const t_set* set = t->try_as<t_set>()) {
     generate_hack_array_from_shape_lambda(out, namer, set);
   }
@@ -4294,9 +4293,8 @@ void t_hack_generator::generate_php_struct_fields(
         throw std::runtime_error(
             tstruct->name() + "::code defined to be a non-integral type. " +
             "code fields for Exception classes must be integral");
-      } else if (
-          t->is<t_enum>() &&
-          static_cast<const t_enum*>(t)->get_enum_values().empty()) {
+      } else if (const t_enum* enum_ = t->try_as<t_enum>();
+                 enum_ != nullptr && enum_->get_enum_values().empty()) {
         throw std::runtime_error(
             "Enum " + t->name() + " is the type for the code property of " +
             tstruct->name() + ", but it has no values.");

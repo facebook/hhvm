@@ -156,8 +156,8 @@ bool can_derive_ord(const t_type* type) {
   }
   // We can implement Ord on BTreeMap (the default map type) if both the key and
   // value implement Eq.
-  if (type->is<t_map>() && !has_custom_type_annotation) {
-    auto map_type = dynamic_cast<const t_map*>(type);
+  if (const t_map* map_type = type->try_as<t_map>();
+      map_type != nullptr && !has_custom_type_annotation) {
     auto key_elem_type = &map_type->key_type().deref();
     auto val_elem_type = &map_type->val_type().deref();
 
@@ -384,35 +384,26 @@ bool type_has_transitive_adapter(
         type_has_transitive_adapter(
                &map_type->val_type().deref(), step_through_newtypes);
 
-  } else if (type->is<t_struct>() || type->is<t_union>()) {
-    auto struct_type = dynamic_cast<const t_structured*>(type);
-    if (struct_type) {
-      return node_has_adapter(*struct_type);
-    }
+  } else if (const t_structured* struct_type = type->try_as<t_structured>()) {
+    return node_has_adapter(*struct_type);
   }
 
   return false;
 }
 
 const t_type* step_through_typedefs(const t_type* t, bool break_on_adapter) {
-  while (t->is<t_typedef>()) {
-    auto typedef_type = dynamic_cast<const t_typedef*>(t);
-    if (!typedef_type) {
-      return t;
-    }
-
-    if (has_newtype_annotation(typedef_type)) {
-      return t;
-    }
-
-    if (break_on_adapter && node_has_adapter(*typedef_type)) {
-      return t;
-    }
-
-    t = typedef_type->get_type();
-  }
-
-  return t;
+  const t_type* stepped =
+      // Find first type which is:
+      // - not a typedef
+      // - typedef with the NewType annotation
+      // - typedef with an adapter, where break_on_adapter is true
+      t_typedef::find_type_if(t, [break_on_adapter](const t_type* type) {
+        const t_typedef* typedef_type = type->try_as<t_typedef>();
+        return typedef_type == nullptr ||
+            has_newtype_annotation(typedef_type) ||
+            (break_on_adapter && node_has_adapter(*typedef_type));
+      });
+  return stepped == nullptr ? t : stepped;
 }
 
 bool typedef_has_constructor_expression(const t_typedef* t) {
@@ -1903,18 +1894,12 @@ class mstch_rust_value : public mstch_base {
   }
   mstch::node list_elements() {
     const t_type* elem_type;
-    if (underlying_type_->is<t_set>()) {
-      auto set_type = dynamic_cast<const t_set*>(underlying_type_);
-      if (!set_type) {
-        return mstch::node();
-      }
+    if (const t_set* set_type = underlying_type_->try_as<t_set>()) {
       elem_type = set_type->get_elem_type();
-    } else {
-      auto list_type = dynamic_cast<const t_list*>(underlying_type_);
-      if (!list_type) {
-        return mstch::node();
-      }
+    } else if (const t_list* list_type = underlying_type_->try_as<t_list>()) {
       elem_type = list_type->get_elem_type();
+    } else {
+      return mstch::node();
     }
 
     mstch::array elements;

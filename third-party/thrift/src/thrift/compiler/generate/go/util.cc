@@ -572,8 +572,7 @@ bool is_type_go_comparable(
     return false;
   }
 
-  if (real_type->is<t_struct>() || real_type->is<t_union>()) {
-    const auto* as_struct = dynamic_cast<const t_structured*>(real_type);
+  if (const t_structured* as_struct = real_type->try_as<t_structured>()) {
     for (auto member : as_struct->get_members()) {
       auto member_type = member->type().get_type();
       auto member_name = member_type->get_full_name();

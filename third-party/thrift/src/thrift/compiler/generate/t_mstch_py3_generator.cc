@@ -72,26 +72,6 @@ std::vector<std::string> get_py3_namespace_with_name(const t_program* program) {
   return ns;
 }
 
-const t_type* get_list_elem_type(const t_type& type) {
-  assert(type.is<t_list>());
-  return dynamic_cast<const t_list&>(type).get_elem_type();
-}
-
-const t_type* get_set_elem_type(const t_type& type) {
-  assert(type.is<t_set>());
-  return dynamic_cast<const t_set&>(type).get_elem_type();
-}
-
-const t_type* get_map_key_type(const t_type& type) {
-  assert(type.is<t_map>());
-  return &dynamic_cast<const t_map&>(type).key_type().deref();
-}
-
-const t_type* get_map_val_type(const t_type& type) {
-  assert(type.is<t_map>());
-  return &dynamic_cast<const t_map&>(type).val_type().deref();
-}
-
 bool type_needs_convert(const t_type* type) {
   // NB: float32 has to be rounded by cython to maintain old py3 behavior
   return type->is<t_structured>() || type->is<t_container>() ||
@@ -783,24 +763,24 @@ class py3_mstch_type : public mstch_type {
   // type:list_elem_type etc. is defined in mstch_objects, so the returned
   // type node doesn't define type:needs_convert
   mstch::node element_needs_convert() {
-    if (type_->is<t_list>()) {
-      return type_needs_convert(get_list_elem_type(*type_));
-    } else if (type_->is<t_set>()) {
-      return type_needs_convert(get_set_elem_type(*type_));
+    if (const t_list* list = type_->try_as<t_list>()) {
+      return type_needs_convert(list->get_elem_type());
+    } else if (const t_set* set = type_->try_as<t_set>()) {
+      return type_needs_convert(set->get_elem_type());
     }
     return false;
   }
 
   mstch::node map_key_needs_convert() {
-    if (type_->is<t_map>()) {
-      return type_needs_convert(get_map_key_type(*type_));
+    if (const t_map* map = type_->try_as<t_map>()) {
+      return type_needs_convert(map->get_key_type());
     }
     return false;
   }
 
   mstch::node map_value_needs_convert() {
-    if (type_->is<t_map>()) {
-      return type_needs_convert(get_map_val_type(*type_));
+    if (const t_map* map = type_->try_as<t_map>()) {
+      return type_needs_convert(map->get_val_type());
     }
     return false;
   }
@@ -858,17 +838,17 @@ class py3_mstch_type : public mstch_type {
   bool is_number() const { return is_integer() || type_->is_floating_point(); }
 
   bool is_list_of_string() {
-    if (!type_->is<t_list>()) {
-      return false;
+    if (const t_list* list = type_->try_as<t_list>()) {
+      return list->elem_type()->is_string_or_binary();
     }
-    return get_list_elem_type(*type_)->is_string_or_binary();
+    return false;
   }
 
   bool is_set_of_string() {
-    if (!type_->is<t_set>()) {
-      return false;
+    if (const t_set* set = type_->try_as<t_set>()) {
+      return set->elem_type()->is_string_or_binary();
     }
-    return get_set_elem_type(*type_)->is_string_or_binary();
+    return false;
   }
 
   bool has_cython_type() const {
@@ -1270,16 +1250,13 @@ std::string py3_mstch_program::visit_type_impl(
   fromTypeDef = fromTypeDef || orig_type->is<t_typedef>();
   if (flatName.empty()) {
     std::string extra;
-    if (trueType->is<t_list>()) {
-      extra = "List__" +
-          visit_type_impl(get_list_elem_type(*trueType), fromTypeDef);
-    } else if (trueType->is<t_set>()) {
-      extra =
-          "Set__" + visit_type_impl(get_set_elem_type(*trueType), fromTypeDef);
-    } else if (trueType->is<t_map>()) {
-      extra = "Map__" +
-          visit_type_impl(get_map_key_type(*trueType), fromTypeDef) + "_" +
-          visit_type_impl(get_map_val_type(*trueType), fromTypeDef);
+    if (const t_list* list = trueType->try_as<t_list>()) {
+      extra = "List__" + visit_type_impl(list->get_elem_type(), fromTypeDef);
+    } else if (const t_set* set = trueType->try_as<t_set>()) {
+      extra = "Set__" + visit_type_impl(set->get_elem_type(), fromTypeDef);
+    } else if (const t_map* map = trueType->try_as<t_map>()) {
+      extra = "Map__" + visit_type_impl(map->get_key_type(), fromTypeDef) +
+          "_" + visit_type_impl(map->get_val_type(), fromTypeDef);
     } else if (trueType->is_binary()) {
       extra = "binary";
     } else {

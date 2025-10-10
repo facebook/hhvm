@@ -437,12 +437,10 @@ class python_capi_mstch_program : public mstch_program {
     if (is_typedef == TypeDef::HasTypedef) {
       add_typedef_namespace(true_type);
     }
-    if (true_type->is<t_list>()) {
-      visit_type_with_typedef(
-          dynamic_cast<const t_list&>(*true_type).get_elem_type(), is_typedef);
-    } else if (true_type->is<t_set>()) {
-      visit_type_with_typedef(
-          dynamic_cast<const t_set&>(*true_type).get_elem_type(), is_typedef);
+    if (const t_list* list = true_type->try_as<t_list>()) {
+      visit_type_with_typedef(list->get_elem_type(), is_typedef);
+    } else if (const t_set* set = true_type->try_as<t_set>()) {
+      visit_type_with_typedef(set->get_elem_type(), is_typedef);
     } else if (const t_map* map = true_type->try_as<t_map>()) {
       visit_type_with_typedef(&map->key_type().deref(), is_typedef);
       visit_type_with_typedef(&map->val_type().deref(), is_typedef);
@@ -543,21 +541,15 @@ class python_capi_mstch_struct : public mstch_struct {
                 {"cpp.type", "cpp2.type"})) {
       return is_type_iobuf(*type_anno);
     }
-    if (type->is<t_list>() &&
-        !capi_eligible_type(
-            dynamic_cast<const t_list*>(type)->get_elem_type())) {
+    if (const t_list* list = type->try_as<t_list>();
+        list != nullptr && !capi_eligible_type(list->get_elem_type())) {
       return false;
-    } else if (
-        type->is<t_set>() &&
-        !capi_eligible_type(
-            dynamic_cast<const t_set*>(type)->get_elem_type())) {
+    } else if (const t_set* set = type->try_as<t_set>();
+               set != nullptr && !capi_eligible_type(set->get_elem_type())) {
       return false;
-    } else if (
-        type->is<t_map>() &&
-        (!capi_eligible_type(
-             &dynamic_cast<const t_map*>(type)->key_type().deref()) ||
-         !capi_eligible_type(
-             &dynamic_cast<const t_map*>(type)->val_type().deref()))) {
+    } else if (const t_map* map = type->try_as<t_map>(); map != nullptr &&
+               (!capi_eligible_type(&map->key_type().deref()) ||
+                !capi_eligible_type(&map->val_type().deref()))) {
       return false;
     }
     if (const t_typedef* tdef = type->try_as<t_typedef>()) {

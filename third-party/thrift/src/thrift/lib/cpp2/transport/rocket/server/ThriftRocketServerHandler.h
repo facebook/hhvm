@@ -33,8 +33,6 @@
 #include <thrift/lib/cpp2/transport/rocket/server/SetupFrameHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/SetupFrameInterceptor.h>
 
-THRIFT_FLAG_DECLARE_bool(rocket_server_reset_connctx_userdata_on_close);
-
 namespace folly {
 class AsyncTransport;
 } // namespace folly
@@ -134,7 +132,6 @@ class ThriftRocketServerHandler : public RocketServerHandler {
 
   int32_t version_;
   std::chrono::milliseconds maxResponseWriteTime_;
-  bool resetConnCtxUserDataOnClose_;
 
   folly::once_flag setupLoggingFlag_;
 

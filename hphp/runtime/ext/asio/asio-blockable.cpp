@@ -166,29 +166,35 @@ c_WaitableWaitHandle* AsioBlockable::getWaitHandle() const {
 }
 
 void AsioBlockableChain::unblock() {
-  while (auto cur = m_lastParent) {
-    m_lastParent = cur->getPrevParent();
-    cur->updatePrevParent(nullptr);
-    // the onUnblocked handler may free cur
-    switch (cur->getKind()) {
-      case Kind::AsyncFunctionWaitHandleNode:
-        getAsyncFunctionWaitHandleNode(cur)->onUnblocked();
-        break;
-      case Kind::AsyncGeneratorWaitHandle:
-        getAsyncGeneratorWaitHandle(cur)->onUnblocked();
-        break;
-      case Kind::AwaitAllWaitHandleNode:
-        getAwaitAllWaitHandleNode(cur)->onUnblocked();
-        break;
-      case Kind::ConcurrentWaitHandleNode:
-        getConcurrentWaitHandleNode(cur)->onUnblocked();
-        break;
-      case Kind::ConditionWaitHandle:
-        getConditionWaitHandle(cur)->onUnblocked();
-        break;
-      case Kind::PriorityBridgeWaitHandle:
-        getPriorityBridgeWaitHandle(cur)->onUnblocked();
-        break;
+  std::vector<AsioBlockableChain> worklist = { *this };
+  while (!worklist.empty()) {
+    auto const lastParent = worklist.back().m_lastParent;
+    worklist.pop_back();
+
+    for (AsioBlockable* cur = lastParent, *next; cur; cur = next) {
+      next = cur->getPrevParent();
+      cur->updatePrevParent(nullptr);
+      // the onUnblocked handler may free cur
+      switch (cur->getKind()) {
+        case Kind::AsyncFunctionWaitHandleNode:
+          getAsyncFunctionWaitHandleNode(cur)->onUnblocked();
+          break;
+        case Kind::AsyncGeneratorWaitHandle:
+          getAsyncGeneratorWaitHandle(cur)->onUnblocked();
+          break;
+        case Kind::AwaitAllWaitHandleNode:
+          getAwaitAllWaitHandleNode(cur)->onUnblocked(worklist);
+          break;
+        case Kind::ConcurrentWaitHandleNode:
+          getConcurrentWaitHandleNode(cur)->onUnblocked(worklist);
+          break;
+        case Kind::ConditionWaitHandle:
+          getConditionWaitHandle(cur)->onUnblocked(worklist);
+          break;
+        case Kind::PriorityBridgeWaitHandle:
+          getPriorityBridgeWaitHandle(cur)->onUnblocked(worklist);
+          break;
+      }
     }
   }
 }

@@ -90,3 +90,13 @@ cdef api int invoke_server_sink_callback(
     cIOBufSinkGenerator cpp_gen,
     cFollyPromise[unique_ptr[cIOBuf]] cpp_promise,
 ) except -1
+
+cdef class ServerSinkGenerator:
+    cdef cIOBufSinkGenerator _cpp_gen
+    cdef cFollyExecutor* _executor
+
+    @staticmethod
+    cdef _fbthrift_create(
+        cIOBufSinkGenerator cpp_gen,
+        cFollyExecutor* executor,
+    )

@@ -229,9 +229,6 @@ async def invokeCallbackWithGenerator(
 
 
 cdef class ServerSinkGenerator:
-    cdef cIOBufSinkGenerator _cpp_gen
-    cdef cFollyExecutor* _executor
-
     @staticmethod
     cdef _fbthrift_create(
         cIOBufSinkGenerator cpp_gen,

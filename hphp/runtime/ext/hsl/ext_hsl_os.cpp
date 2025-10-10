@@ -25,6 +25,7 @@
 #include "hphp/runtime/server/cli-server-ext.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/light-process.h"
+#include "hphp/util/configs/server.h"
 
 #include <folly/functional/Invoke.h>
 #include <type_traits>
@@ -946,6 +947,11 @@ int64_t HHVM_FUNCTION(HSL_os_fork_and_execve,
                       const Array& envp,
                       const Array& fds,
                       const Array& options) {
+  if (!Cfg::Server::AllowExec) {
+    SystemLib::throwRuntimeExceptionObject(
+      "Process execution is disabled by the Server.AllowExec configuration"
+    );
+  }
   std::string cwd;
   int flags = Process::FORK_AND_EXECVE_FLAG_NONE;
   int pgid = 0;

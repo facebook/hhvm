@@ -39,6 +39,8 @@
 #include "hphp/runtime/ext/xreqsync/ext_xreqsync.h"
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/xbox-server.h"
+#include "hphp/util/configs/server.h"
+#include "hphp/system/systemlib.h"
 #include "hphp/util/hugetlb.h"
 #include "hphp/util/light-process.h"
 #include "hphp/util/logger.h"
@@ -136,6 +138,11 @@ void HHVM_FUNCTION(pcntl_exec,
                    const String& path,
                    const Array& args /* = null_array */,
                    const Array& envs /* = null_array */) {
+  if (!Cfg::Server::AllowExec) {
+    SystemLib::throwRuntimeExceptionObject(
+      "Process execution is disabled by the Server.AllowExec configuration"
+    );
+  }
   if (cantPrefork()) {
     raise_error("execing is disallowed in multi-threaded mode");
     return;

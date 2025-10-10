@@ -42,6 +42,8 @@
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/server/cli-server.h"
+#include "hphp/util/configs/server.h"
+#include "hphp/system/systemlib.h"
 
 # define MAYBE_WIFEXITED(var) if (WIFEXITED(var)) { var = WEXITSTATUS(var); }
 
@@ -129,6 +131,11 @@ private:
 
 Variant HHVM_FUNCTION(shell_exec,
                       const String& cmd) {
+  if (!Cfg::Server::AllowExec) {
+    SystemLib::throwRuntimeExceptionObject(
+      "Process execution is disabled by the Server.AllowExec configuration"
+    );
+  }
   ShellExecContext ctx;
   FILE *fp = ctx.exec(cmd);
   if (!fp) return init_null();
@@ -141,6 +148,11 @@ String HHVM_FUNCTION(exec,
                      const String& command,
                      Array& output,
                      int64_t& return_var) {
+  if (!Cfg::Server::AllowExec) {
+    SystemLib::throwRuntimeExceptionObject(
+      "Process execution is disabled by the Server.AllowExec configuration"
+    );
+  }
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command);
   if (!fp) return empty_string();
@@ -172,6 +184,11 @@ String HHVM_FUNCTION(exec,
 void HHVM_FUNCTION(passthru,
                    const String& command,
                    int64_t& return_var) {
+  if (!Cfg::Server::AllowExec) {
+    SystemLib::throwRuntimeExceptionObject(
+      "Process execution is disabled by the Server.AllowExec configuration"
+    );
+  }
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command);
   if (!fp) return;
@@ -192,6 +209,11 @@ void HHVM_FUNCTION(passthru,
 String HHVM_FUNCTION(system,
                      const String& command,
                      int64_t& return_var) {
+  if (!Cfg::Server::AllowExec) {
+    SystemLib::throwRuntimeExceptionObject(
+      "Process execution is disabled by the Server.AllowExec configuration"
+    );
+  }
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command);
   if (!fp) return empty_string();
@@ -501,6 +523,11 @@ HHVM_FUNCTION(proc_open, const String& cmd, const Array& descriptorspec,
               Array& pipes, const Variant& cwd /* = uninit_variant */,
               const Variant& env /* = uninit_variant */,
               const Variant& /*other_options*/ /* = uninit_variant */) {
+  if (!Cfg::Server::AllowExec) {
+    SystemLib::throwRuntimeExceptionObject(
+      "Process execution is disabled by the Server.AllowExec configuration"
+    );
+  }
   if (cmd.size() != strlen(cmd.c_str())) {
     raise_warning("NULL byte detected. Possible attack");
     return false;

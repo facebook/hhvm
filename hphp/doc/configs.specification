@@ -247,6 +247,10 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Allow running hhvm as root
 
+- bool Server.AllowExec = true, UNKNOWN
+
+  Allow process execution APIs like proc_open, system, exec, etc.
+
 - int64_t Server.RequestMemoryMaxBytes = 16LL << 30, UNKNOWN, staticdefault(INT64_MAX)
 - bool Server.RequestMemoryMaxBytesSet = false, UNKNOWN
 - int64_t Server.LowestMaxPostSize = INT64_MAX, UNKNOWN, nobind

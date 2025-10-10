@@ -78,6 +78,8 @@ class H2ClientConnection : public ClientConnectionIf,
 
   H2ClientConnection(const H2ClientConnection&) = delete;
   H2ClientConnection& operator=(const H2ClientConnection&) = delete;
+  H2ClientConnection(H2ClientConnection&&) = delete;
+  H2ClientConnection& operator=(H2ClientConnection&&) = delete;
 
   std::shared_ptr<ThriftChannelIf> getChannel() override;
   void setMaxPendingRequests(uint32_t num) override;

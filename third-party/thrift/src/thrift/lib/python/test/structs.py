@@ -20,6 +20,7 @@ from __future__ import annotations
 import copy
 import json
 import math
+import sys
 import types
 import unittest
 from typing import Callable, cast as typing_cast, Type, TypeVar
@@ -308,23 +309,27 @@ class StructTestsParameterized(unittest.TestCase):
 
     def test_call_replace(self) -> None:
         x = self.easy(val=1, an_int=self.Integers(small=300), name="foo")
-        y = x(name="bar")
-        self.assertNotEqual(x.name, y.name)
-        z = y(an_int=None, val=4)
-        self.assertNotEqual(x.an_int, z.an_int)
-        self.assertNotEqual(x.val, z.val)
-        self.assertIsNone(
-            z.an_int.value
-            if not self.is_mutable_run
-            else z.an_int.fbthrift_current_value
-        )
-        self.assertEqual(y.val, x.val)
-        self.assertEqual(y.an_int, x.an_int)
-        x = self.easy()
-        self.assertIsNotNone(x.val)
-        self.assertIsNotNone(x.val_list)
-        self.assertIsNone(x.name)
-        self.assertIsNotNone(x.an_int)
+        y1 = x(name="bar")
+        self.assertEqual(x.name, "foo")
+        self.assertEqual(y1.name, "bar")
+
+        if sys.version_info >= (3, 13):
+            y2 = copy.replace(x, name="bar")
+            self.assertEqual(x.name, "foo")
+            self.assertEqual(y2.name, "bar")
+
+        z1 = x(an_int=None, val=4)
+        self.assertEqual(x.an_int, self.Integers(small=300))
+        self.assertEqual(z1.an_int, self.Integers())
+        self.assertEqual(x.val, 1)
+        self.assertEqual(z1.val, 4)
+
+        if sys.version_info >= (3, 13):
+            z2 = copy.replace(x, an_int=None, val=4)
+            self.assertEqual(x.an_int, self.Integers(small=300))
+            self.assertEqual(z2.an_int, self.Integers())
+            self.assertEqual(x.val, 1)
+            self.assertEqual(z2.val, 4)
 
     def test_call_bad_key(self) -> None:
         x = self.easy()
@@ -335,6 +340,12 @@ class StructTestsParameterized(unittest.TestCase):
         ):
             # pyre-ignore[28]: bad key for test
             x = x(bad_key="foo")
+
+        if sys.version_info >= (3, 13):
+            with self.assertRaisesRegex(
+                err_type, "'easy' .*(attribute|initialization).* 'bad_key'"
+            ):
+                x = copy.replace(x, bad_key="foo")
 
     def test_reserved(self) -> None:
         # pyre-ignore[28]: proving the mangling is optional

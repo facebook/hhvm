@@ -366,6 +366,9 @@ cdef class MutableStruct(MutableStructOrUnion):
         cdef bytes buf = mutable_serializer.serialize(self, Protocol.BINARY)
         return mutable_serializer.deserialize(type(self), buf, Protocol.BINARY)
 
+    def __replace__(self, **kwargs):
+        return self(**kwargs)
+
     def fbthrift_copy_from(self, other):
         """
         Copies the content of `other` into the current struct.

@@ -1191,6 +1191,9 @@ cdef class Struct(StructOrUnion):
     def __deepcopy__(Struct self, _memo):
         return self
 
+    def __replace__(Struct self, **kwargs):
+        return self(**kwargs)
+
     def __eq__(Struct self, other):
         if type(other) != type(self):
             return False

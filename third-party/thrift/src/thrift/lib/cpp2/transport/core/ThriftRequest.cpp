@@ -118,6 +118,9 @@ ThriftRequestCore::ThriftRequestCore(
   if (auto loggingContext = metadata.loggingContext()) {
     header_.loggingContext() = std::move(*loggingContext);
   }
+  if (auto quotaReportConfig = metadata.quotaReportConfig()) {
+    header_.quotaReportConfig() = std::move(*quotaReportConfig);
+  }
   if (auto tenantId = metadata.tenantId()) {
     header_.setTenantId(*tenantId);
     header_.setReadHeader(transport::THeader::kTenantId, std::move(*tenantId));

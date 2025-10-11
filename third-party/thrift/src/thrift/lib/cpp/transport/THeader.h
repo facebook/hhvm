@@ -449,6 +449,13 @@ class THeader final {
   }
   std::optional<LoggingContext>& loggingContext() { return c_.loggingContext_; }
 
+  const std::optional<QuotaReportConfig>& quotaReportConfig() const {
+    return c_.quotaReportConfig_;
+  }
+  std::optional<QuotaReportConfig>& quotaReportConfig() {
+    return c_.quotaReportConfig_;
+  }
+
   bool isClientLoggingEnabled() const;
 
   folly::SocketFds fds; // No accessor, since this type **is** the API.
@@ -574,6 +581,7 @@ class THeader final {
     // We make this field optional to differentiate SR calls v.s raw thrift
     // calls. This field will always be set by SR.
     std::optional<LoggingContext> loggingContext_;
+    std::optional<QuotaReportConfig> quotaReportConfig_;
   };
 
   // Supports `copyOrDfatalIfReceived`.

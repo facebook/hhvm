@@ -54,44 +54,49 @@ template <typename ActionMoveVisitor, typename SM>
 void FizzClient<ActionMoveVisitor, SM>::visitActions(
     typename SM::CompletedActions& actions) {
   for (auto& action : actions) {
-    switch (action.type()) {
-      case Action::Type::DeliverAppData_E:
-        this->visitor_(*action.asDeliverAppData());
-        break;
-      case Action::Type::WriteToSocket_E:
-        this->visitor_(*action.asWriteToSocket());
-        break;
-      case Action::Type::ReportHandshakeSuccess_E:
-        this->visitor_(*action.asReportHandshakeSuccess());
-        break;
-      case Action::Type::ReportEarlyHandshakeSuccess_E:
-        this->visitor_(*action.asReportEarlyHandshakeSuccess());
-        break;
-      case Action::Type::ReportEarlyWriteFailed_E:
-        this->visitor_(*action.asReportEarlyWriteFailed());
-        break;
-      case Action::Type::ReportError_E:
-        this->visitor_(*action.asReportError());
-        break;
-      case Action::Type::EndOfData_E:
-        this->visitor_(*action.asEndOfData());
-        break;
-      case Action::Type::MutateState_E:
-        this->visitor_(*action.asMutateState());
-        break;
-      case Action::Type::WaitForData_E:
-        this->visitor_(*action.asWaitForData());
-        break;
-      case Action::Type::NewCachedPsk_E:
-        this->visitor_(*action.asNewCachedPsk());
-        break;
-      case Action::Type::SecretAvailable_E:
-        this->visitor_(*action.asSecretAvailable());
-        break;
-      case Action::Type::ECHRetryAvailable_E:
-        this->visitor_(*action.asECHRetryAvailable());
-        break;
-    }
+    FOLLY_EXHAUSTIVE_SWITCH({
+      switch (action.type()) {
+        case Action::Type::DeliverAppData_E:
+          this->visitor_(*action.asDeliverAppData());
+          break;
+        case Action::Type::WriteToSocket_E:
+          this->visitor_(*action.asWriteToSocket());
+          break;
+        case Action::Type::ReportHandshakeSuccess_E:
+          this->visitor_(*action.asReportHandshakeSuccess());
+          break;
+        case Action::Type::ReportEarlyHandshakeSuccess_E:
+          this->visitor_(*action.asReportEarlyHandshakeSuccess());
+          break;
+        case Action::Type::ReportEarlyWriteFailed_E:
+          this->visitor_(*action.asReportEarlyWriteFailed());
+          break;
+        case Action::Type::ReportError_E:
+          this->visitor_(*action.asReportError());
+          break;
+        case Action::Type::EndOfData_E:
+          this->visitor_(*action.asEndOfData());
+          break;
+        case Action::Type::MutateState_E:
+          this->visitor_(*action.asMutateState());
+          break;
+        case Action::Type::WaitForData_E:
+          this->visitor_(*action.asWaitForData());
+          break;
+        case Action::Type::NewCachedPsk_E:
+          this->visitor_(*action.asNewCachedPsk());
+          break;
+        case Action::Type::SecretAvailable_E:
+          this->visitor_(*action.asSecretAvailable());
+          break;
+        case Action::Type::ECHRetryAvailable_E:
+          this->visitor_(*action.asECHRetryAvailable());
+          break;
+        default:
+          folly::assume_unreachable();
+          break;
+      }
+    });
   }
 }
 } // namespace client

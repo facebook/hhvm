@@ -13,6 +13,7 @@
 #include <fizz/client/PskCache.h>
 #include <fizz/protocol/CertificateVerifier.h>
 #include <fizz/protocol/FizzBase.h>
+#include <folly/lang/Switch.h>
 
 namespace fizz {
 namespace client {

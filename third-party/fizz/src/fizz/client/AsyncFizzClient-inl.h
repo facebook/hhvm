@@ -449,32 +449,37 @@ void AsyncFizzClientT<SM>::deliverHandshakeError(folly::exception_wrapper ex) {
     cancelHandshakeTimeout();
     auto cb = callback_;
     callback_ = folly::none;
-    switch (cb->type()) {
-      case AsyncClientCallbackPtr::Type::HandshakeCallback:
-        if (cb->asHandshakeCallbackPtr()) {
-          cb->asHandshakeCallbackPtr()->fizzHandshakeError(this, std::move(ex));
-        }
-        break;
-      case AsyncClientCallbackPtr::Type::AsyncSocketConnCallback:
-        if (cb->asAsyncSocketConnCallbackPtr()) {
-          auto* callback = cb->asAsyncSocketConnCallbackPtr();
-          ex.handle(
-              [callback](const folly::AsyncSocketException& ase) {
-                callback->connectErr(ase);
-              },
-              [callback](const std::exception& stdEx) {
-                folly::AsyncSocketException ase(
-                    folly::AsyncSocketException::SSL_ERROR, stdEx.what());
-                callback->connectErr(ase);
-              },
-              [callback](...) {
-                folly::AsyncSocketException ase(
-                    folly::AsyncSocketException::SSL_ERROR, "unknown error");
-                callback->connectErr(ase);
-              });
+    FOLLY_EXHAUSTIVE_SWITCH({
+      switch (cb->type()) {
+        case AsyncClientCallbackPtr::Type::HandshakeCallback:
+          if (cb->asHandshakeCallbackPtr()) {
+            cb->asHandshakeCallbackPtr()->fizzHandshakeError(
+                this, std::move(ex));
+          }
           break;
-        }
-    }
+        case AsyncClientCallbackPtr::Type::AsyncSocketConnCallback:
+          if (cb->asAsyncSocketConnCallbackPtr()) {
+            auto* callback = cb->asAsyncSocketConnCallbackPtr();
+            ex.handle(
+                [callback](const folly::AsyncSocketException& ase) {
+                  callback->connectErr(ase);
+                },
+                [callback](const std::exception& stdEx) {
+                  folly::AsyncSocketException ase(
+                      folly::AsyncSocketException::SSL_ERROR, stdEx.what());
+                  callback->connectErr(ase);
+                },
+                [callback](...) {
+                  folly::AsyncSocketException ase(
+                      folly::AsyncSocketException::SSL_ERROR, "unknown error");
+                  callback->connectErr(ase);
+                });
+          }
+          break;
+        default: // unexpected
+          break;
+      }
+    });
   }
 }
 
@@ -504,45 +509,52 @@ void AsyncFizzClientT<SM>::ActionMoveVisitor::operator()(
   if (client_.callback_) {
     auto cb = client_.callback_;
     client_.callback_ = folly::none;
-    switch (cb->type()) {
-      case AsyncClientCallbackPtr::Type::HandshakeCallback:
-        if (cb->asHandshakeCallbackPtr()) {
-          cb->asHandshakeCallbackPtr()->fizzHandshakeSuccess(&client_);
-        }
-        break;
-      case AsyncClientCallbackPtr::Type::AsyncSocketConnCallback:
-        if (cb->asAsyncSocketConnCallbackPtr()) {
-          cb->asAsyncSocketConnCallbackPtr()->connectSuccess();
-        }
-        break;
-    }
+    FOLLY_EXHAUSTIVE_SWITCH({
+      switch (cb->type()) {
+        case AsyncClientCallbackPtr::Type::HandshakeCallback:
+          if (cb->asHandshakeCallbackPtr()) {
+            cb->asHandshakeCallbackPtr()->fizzHandshakeSuccess(&client_);
+          }
+          break;
+        case AsyncClientCallbackPtr::Type::AsyncSocketConnCallback:
+          if (cb->asAsyncSocketConnCallbackPtr()) {
+            cb->asAsyncSocketConnCallbackPtr()->connectSuccess();
+          }
+          break;
+        default: // unexpected
+          break;
+      }
+    });
   }
 }
 
 template <typename SM>
 folly::Optional<folly::AsyncSocketException>
 AsyncFizzClientT<SM>::handleEarlyReject() {
-  switch (earlyDataRejectionPolicy_) {
-    case EarlyDataRejectionPolicy::FatalConnectionError: {
-      return folly::AsyncSocketException(
-          folly::AsyncSocketException::EARLY_DATA_REJECTED,
-          "fizz early data rejected");
-    }
-    case EarlyDataRejectionPolicy::AutomaticResend: {
-      if (earlyParametersMatch(getState())) {
+  FOLLY_EXHAUSTIVE_SWITCH({
+    switch (earlyDataRejectionPolicy_) {
+      case EarlyDataRejectionPolicy::FatalConnectionError: {
+        return folly::AsyncSocketException(
+            folly::AsyncSocketException::EARLY_DATA_REJECTED,
+            "fizz early data rejected");
+      }
+      case EarlyDataRejectionPolicy::AutomaticResend: {
+        if (!earlyParametersMatch(getState())) {
+          return folly::AsyncSocketException(
+              folly::AsyncSocketException::EARLY_DATA_REJECTED,
+              "fizz early data rejected, could not be resent");
+        }
         if (!earlyDataState_->resendBuffer.empty()) {
           AppWrite resend;
           resend.data = earlyDataState_->resendBuffer.move();
           performAppWrite(std::move(resend));
         }
-      } else {
-        return folly::AsyncSocketException(
-            folly::AsyncSocketException::EARLY_DATA_REJECTED,
-            "fizz early data rejected, could not be resent");
+        break;
       }
-      break;
+      default: // unexpected
+        break;
     }
-  }
+  });
   return folly::none;
 }
 
@@ -598,19 +610,23 @@ void AsyncFizzClientT<SM>::ActionMoveVisitor::operator()(
   if (client_.callback_) {
     auto cb = client_.callback_;
     client_.callback_ = folly::none;
-    switch (cb->type()) {
-      case AsyncClientCallbackPtr::Type::HandshakeCallback:
-        if (cb->asHandshakeCallbackPtr()) {
-          cb->asHandshakeCallbackPtr()->fizzHandshakeSuccess(&client_);
-        }
-        break;
-      case AsyncClientCallbackPtr::Type::AsyncSocketConnCallback:
-        if (cb->asAsyncSocketConnCallbackPtr()) {
-          cb->asAsyncSocketConnCallbackPtr()->connectSuccess();
-        }
-        break;
+    FOLLY_EXHAUSTIVE_SWITCH({
+      switch (cb->type()) {
+        case AsyncClientCallbackPtr::Type::HandshakeCallback:
+          if (cb->asHandshakeCallbackPtr()) {
+            cb->asHandshakeCallbackPtr()->fizzHandshakeSuccess(&client_);
+          }
+          break;
+        case AsyncClientCallbackPtr::Type::AsyncSocketConnCallback:
+          if (cb->asAsyncSocketConnCallbackPtr()) {
+            cb->asAsyncSocketConnCallbackPtr()->connectSuccess();
+          }
+          break;
+        default: // unexpected
+          break;
+      }
     }
-  }
+  });
   if (client_.replaySafetyCallback_) {
     auto callback = client_.replaySafetyCallback_;
     client_.replaySafetyCallback_ = nullptr;

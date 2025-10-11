@@ -20,6 +20,10 @@ class HTTPCodecStatsFilter : public PassThroughHTTPCodecFilter {
   explicit HTTPCodecStatsFilter(HTTPCodecStats* counters,
                                 CodecProtocol protocol);
   ~HTTPCodecStatsFilter() override;
+  HTTPCodecStatsFilter(const HTTPCodecStatsFilter&) = delete;
+  HTTPCodecStatsFilter& operator=(const HTTPCodecStatsFilter&) = delete;
+  HTTPCodecStatsFilter(HTTPCodecStatsFilter&&) = delete;
+  HTTPCodecStatsFilter& operator=(HTTPCodecStatsFilter&&) = delete;
 
   void setCounters(HTTPCodecStats* counters) {
     counters_ = counters;

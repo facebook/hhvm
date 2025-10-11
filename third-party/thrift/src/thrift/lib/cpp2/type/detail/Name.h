@@ -124,7 +124,4 @@ struct GetName<service_t<T>> {
   }
 };
 
-template <typename Tag, FieldId Id>
-struct GetName<type::field_t<Id, Tag>> : GetName<Tag> {};
-
 } // namespace apache::thrift::type::detail

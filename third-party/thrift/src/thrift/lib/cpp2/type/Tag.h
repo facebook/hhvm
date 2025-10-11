@@ -106,9 +106,6 @@ struct cpp_type : Tag {};
 template <typename T> // the generated C++ type
 struct service_t : service_c {};
 
-template <FieldId Id, typename Tag>
-struct field_t;
-
 // TODO(ytj): ensure all arguments are field_t
 template <class... Tags>
 struct fields;

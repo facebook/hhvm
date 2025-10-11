@@ -30,7 +30,7 @@ namespace apache::thrift::op {
 /// For example:
 /// * create<type::i32_t>() -> 0
 /// * create<adapted<Adapter, type::i32_t>>() -> Adapted<int32_t>{}
-/// * create<field_t<FieldId, adapted<FieldAdapter, type::i32_t>>>(Struct)
+/// * create<field<adapted<FieldAdapter, type::i32_t>, FieldContext>>(Struct)
 ///    -> AdaptedWithContext<int32_t>{};
 template <typename Tag>
 inline constexpr detail::Create<Tag> create{};

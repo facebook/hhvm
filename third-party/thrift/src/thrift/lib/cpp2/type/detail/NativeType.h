@@ -231,11 +231,6 @@ struct NativeTypes<cpp_type<T, Tag>> : NativeTypes<Tag> {
 };
 
 // Traits for field type tag.
-//
-// TODO(dokwon): Remove this after field_t migration.
-template <typename Tag, FieldId Id>
-struct NativeTypes<field_t<Id, Tag>> : NativeTypes<Tag> {};
-
 template <typename Tag, typename Context>
 struct NativeTypes<field<Tag, Context>> : NativeTypes<Tag> {};
 

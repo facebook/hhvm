@@ -239,6 +239,11 @@ struct FdMetadata {
   2: optional i32 numFds; // Linux currently limits this to SCM_MAX_FD (253).
 }
 
+struct QuotaReportConfig {
+  1: i64 backendId;
+  2: list<string> reportingHierarchy;
+}
+
 struct LoggingContext {
   1: i64 logSampleRatio = 0;
   2: i64 logErrorSampleRatio = 0;
@@ -311,6 +316,8 @@ struct RequestRpcMetadata {
   26: optional bool checksumResponse;
   // FB303 metric name to allow SR to fetch secondary load.
   27: optional string secondaryLoadMetric;
+  // Quota report config
+  28: optional QuotaReportConfig quotaReportConfig;
 }
 
 struct ErrorClassification {

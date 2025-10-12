@@ -22,7 +22,7 @@ from libcpp.memory cimport unique_ptr
 from thrift.python.protocol cimport Protocol
 
 # Service health enum for server status
-cdef extern from "thrift/lib/cpp2/server/PolledServiceHealth.h" \
+cdef extern from "<thrift/lib/cpp2/server/PolledServiceHealth.h>" \
         namespace "apache::thrift":
     cpdef enum cServiceHealth "apache::thrift::PolledServiceHealth::ServiceHealth":
         cServiceHealth_OK "apache::thrift::PolledServiceHealth::ServiceHealth::OK"

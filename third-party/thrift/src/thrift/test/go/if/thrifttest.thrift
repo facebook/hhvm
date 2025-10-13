@@ -221,14 +221,9 @@ struct Maps {
   5: map<MapKey, string> struct2str;
 }
 
-struct WithAnnotations {
-  1: map<string, string> m1 (test.annotation = "none", test.hidden);
-  2: i32 m2;
-  3: string s1 (test.hidden = 3);
-} (
-  test.struct_annotation = "ok",
-  test.partial,
-  test.complex = "
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "test.complex": "
    public:
 
     bool empty() const {
@@ -237,7 +232,19 @@ struct WithAnnotations {
                __isset.s1);
     }
   ",
-)
+    "test.partial": "1",
+    "test.struct_annotation": "ok",
+  },
+}
+struct WithAnnotations {
+  @thrift.DeprecatedUnvalidatedAnnotations{
+    items = {"test.annotation": "none", "test.hidden": "1"},
+  }
+  1: map<string, string> m1;
+  2: i32 m2;
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"test.hidden": "3"}}
+  3: string s1;
+}
 
 // Test against failures where code is genereted differently when a struct
 // is used before it is defined in the thrift spec.

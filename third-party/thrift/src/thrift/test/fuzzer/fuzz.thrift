@@ -16,6 +16,8 @@
 
 namespace py3 thrift.test.fuzzer
 
+include "thrift/annotation/thrift.thrift"
+
 enum Color {
   RED = 0xFF0000,
   ORANGE = 0xFF6600,
@@ -103,11 +105,13 @@ service DerivedTestService extends TestService {
 
 union EmptyUnion {}
 
+@thrift.DeprecatedUnvalidatedAnnotations{items = {"final": "1"}}
 union NumberUnion {
   1: i32 my_integer;
   2: float my_float;
-} (final)
+}
 
+@thrift.DeprecatedUnvalidatedAnnotations{items = {"final": "1"}}
 struct NumberUnionStruct {
   1: NumberUnion nu = {'my_integer': 100};
-} (final)
+}

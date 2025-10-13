@@ -89,7 +89,6 @@ func (c *serialChannel) recvMsg(ctx context.Context, method string, seqID int32,
 			return err
 		}
 		responseHeaders := c.protocol.getResponseHeaders()
-		setResponseHeaders(ctx, responseHeaders)
 		if rpcOpts != nil {
 			rpcOpts.SetReadHeaders(responseHeaders)
 		}
@@ -103,7 +102,6 @@ func (c *serialChannel) recvMsg(ctx context.Context, method string, seqID int32,
 			return err
 		}
 		responseHeaders := c.protocol.getResponseHeaders()
-		setResponseHeaders(ctx, responseHeaders)
 		if rpcOpts != nil {
 			rpcOpts.SetReadHeaders(responseHeaders)
 		}

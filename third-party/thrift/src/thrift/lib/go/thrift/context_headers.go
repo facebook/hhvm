@@ -27,8 +27,6 @@ type headersKeyType int
 const (
 	// requestHeadersKey is a context key.
 	requestHeadersKey headersKeyType = 0
-	// responseHeadersKey is a context key.
-	responseHeadersKey headersKeyType = 1
 )
 
 // WithRequestHeader adds a header to the context, which will be sent as part of the request.
@@ -57,27 +55,6 @@ func SetHeaders(ctx context.Context, headers map[string]string) context.Context 
 	return context.WithValue(ctx, requestHeadersKey, headers)
 }
 
-// NewResponseHeadersContext returns a new context with the response headers value.
-func NewResponseHeadersContext(ctx context.Context) context.Context {
-	return context.WithValue(ctx, responseHeadersKey, make(map[string]string))
-}
-
-// GetResponseHeadersFromContext returns the response headers from the context.
-func GetResponseHeadersFromContext(ctx context.Context) map[string]string {
-	if ctx == nil {
-		return nil
-	}
-	responseHeaders := ctx.Value(responseHeadersKey)
-	if responseHeaders == nil {
-		return nil
-	}
-	responseHeadersMap, ok := responseHeaders.(map[string]string)
-	if !ok {
-		return nil
-	}
-	return responseHeadersMap
-}
-
 // GetRequestHeadersFromContext returns the request headers from the context.
 func GetRequestHeadersFromContext(ctx context.Context) map[string]string {
 	if ctx == nil {
@@ -92,20 +69,4 @@ func GetRequestHeadersFromContext(ctx context.Context) map[string]string {
 		return nil
 	}
 	return requestHeadersMap
-}
-
-func setResponseHeaders(ctx context.Context, responseHeaders map[string]string) {
-	if ctx == nil {
-		return
-	}
-	responseHeadersMapIf := ctx.Value(responseHeadersKey)
-	if responseHeadersMapIf == nil {
-		return
-	}
-	responseHeadersMap, ok := responseHeadersMapIf.(map[string]string)
-	if !ok {
-		return
-	}
-
-	maps.Copy(responseHeadersMap, responseHeaders)
 }

@@ -196,7 +196,6 @@ func (p *rocketClient) SendRequestResponse(ctx context.Context, messageName stri
 		return resultErr
 	}
 
-	setResponseHeaders(ctx, respHeaders)
 	if rpcOpts != nil {
 		rpcOpts.SetReadHeaders(respHeaders)
 	}
@@ -261,7 +260,6 @@ func (p *rocketClient) SendRequestStream(
 		return resultErr
 	}
 
-	setResponseHeaders(ctx, respHeaders)
 	if rpcOpts != nil {
 		rpcOpts.SetReadHeaders(respHeaders)
 	}

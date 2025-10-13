@@ -163,12 +163,13 @@ typedef binary IOBuf
 
 // We need (cpp.noncomparable) since the codegen version of comparison operators
 // won't work
+@thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.noncomparable": "1"}}
 @cpp.EnableCustomTypeOrdering
 struct ListIOBuf {
   1: list<IOBuf> field;
   @cpp.Type{template = "folly::F14FastMap"}
   2: map<string, IOBuf> field_2;
-} (cpp.noncomparable)
+}
 
 struct StructWithBinaryField {
   1: binary field;

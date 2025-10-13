@@ -16,6 +16,7 @@
 
 include "thrift/lib/cpp2/frozen/test/Helper.thrift"
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 
 namespace cpp2 apache.thrift.test
 
@@ -160,10 +161,13 @@ struct Big {
   5: string aString;
 }
 
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {"cpp.declare_equal_to": "1", "cpp.declare_hash": "1"},
+}
 struct User {
   1: i64 uid;
   2: string name;
-} (cpp.declare_hash, cpp.declare_equal_to)
+}
 
 struct TriviallyCopyableStruct {
   1: required i32 field;
@@ -186,7 +190,8 @@ struct TestFixedSizeString {
 
 struct Empty {}
 
-struct Excluded {} (cpp.frozen2_exclude)
+@thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.frozen2_exclude": "1"}}
+struct Excluded {}
 
 struct ContainsExcluded {
   1: optional Excluded excluded;

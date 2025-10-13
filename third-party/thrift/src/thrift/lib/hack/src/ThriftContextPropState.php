@@ -150,11 +150,11 @@ final class ThriftContextPropState {
     string $s,
     bool $skip_experiment_id_ingestion = true,
   ): ThriftFrameworkMetadata {
-    $transport = Base64::decode($s);
-    $buf = new TMemoryBuffer($transport);
-    $prot = new TCompactProtocolAccelerated($buf);
-    $tfm = ThriftFrameworkMetadata::withDefaultValues();
-    $tfm->read($prot);
+    $buffer = Base64::decode($s);
+    $tfm = TCompactSerializer::deserialize(
+      $buffer,
+      ThriftFrameworkMetadata::withDefaultValues(),
+    );
 
     if ($skip_experiment_id_ingestion && $tfm->experiment_ids is nonnull) {
       $tfm->experiment_ids = vec[];

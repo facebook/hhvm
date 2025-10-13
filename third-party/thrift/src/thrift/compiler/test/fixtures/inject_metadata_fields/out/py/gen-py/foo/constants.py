@@ -12,6 +12,8 @@ from thrift.Thrift import TType, TMessageType, TPriority, TRequestContext, TProc
 from thrift.protocol.TProtocol import TProtocolException
 
 
+import injected_field.ttypes
 
-from .ttypes import UTF8STRINGS, Fields
+
+from .ttypes import UTF8STRINGS, Fields, FieldsWithIncludedStruct
 

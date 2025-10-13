@@ -156,3 +156,90 @@ class Fields implements \IThriftSyncStruct, \IThriftStructMetadata {
 
 }
 
+/**
+ * Original thrift struct:-
+ * FieldsWithIncludedStruct
+ */
+class FieldsWithIncludedStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'injected_field',
+      'type' => \TType::STRUCT,
+      'class' => InjectedField::class,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'injected_field' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'injected_field' => ?InjectedField,
+  );
+
+  const int STRUCTURAL_ID = 4533588456027511395;
+  /**
+   * Original thrift field:-
+   * 1: injected_field.InjectedField injected_field
+   */
+  public ?InjectedField $injected_field;
+
+  public function __construct(?InjectedField $injected_field = null)[] {
+    $this->injected_field = $injected_field;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'injected_field'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'FieldsWithIncludedStruct';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "foo.FieldsWithIncludedStruct",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "injected_field.InjectedField",
+                    )
+                  ),
+                )
+              ),
+              "name" => "injected_field",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+

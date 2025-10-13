@@ -3,19 +3,19 @@
 // DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 //  @generated
 
-package module
+package inject_metadata_fields
 
 import (
     "fmt"
     "reflect"
 
-    foo "foo"
+    injectMetadataFields "test/fixtures/inject_metadata_fields"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
     metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
-var _ = foo.GoUnusedProtection__
+var _ = injectMetadataFields.GoUnusedProtection__
 var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
@@ -721,6 +721,189 @@ func (x *FieldsInjectedWithIncludedStruct) setDefaults() *FieldsInjectedWithIncl
 
 func (x *FieldsInjectedWithIncludedStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
     return premadeStructMetadata_FieldsInjectedWithIncludedStruct
+}
+
+type FieldsInjectedWithFieldsWithIncludedStruct struct {
+    InjectedField *injectMetadataFields.InjectedField `thrift:"injected_field,-1001" json:"injected_field" db:"injected_field"`
+    StringField string `thrift:"string_field,1" json:"string_field" db:"string_field"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*FieldsInjectedWithFieldsWithIncludedStruct)(nil)
+
+func NewFieldsInjectedWithFieldsWithIncludedStruct() *FieldsInjectedWithFieldsWithIncludedStruct {
+    return (&FieldsInjectedWithFieldsWithIncludedStruct{}).setDefaults()
+}
+
+func (x *FieldsInjectedWithFieldsWithIncludedStruct) GetInjectedField() *injectMetadataFields.InjectedField {
+    if !x.IsSetInjectedField() {
+        return nil
+    }
+    return x.InjectedField
+}
+
+func (x *FieldsInjectedWithFieldsWithIncludedStruct) GetStringField() string {
+    return x.StringField
+}
+
+func (x *FieldsInjectedWithFieldsWithIncludedStruct) SetInjectedFieldNonCompat(value *injectMetadataFields.InjectedField) *FieldsInjectedWithFieldsWithIncludedStruct {
+    x.InjectedField = value
+    return x
+}
+
+func (x *FieldsInjectedWithFieldsWithIncludedStruct) SetInjectedField(value *injectMetadataFields.InjectedField) *FieldsInjectedWithFieldsWithIncludedStruct {
+    x.InjectedField = value
+    return x
+}
+
+func (x *FieldsInjectedWithFieldsWithIncludedStruct) SetStringFieldNonCompat(value string) *FieldsInjectedWithFieldsWithIncludedStruct {
+    x.StringField = value
+    return x
+}
+
+func (x *FieldsInjectedWithFieldsWithIncludedStruct) SetStringField(value string) *FieldsInjectedWithFieldsWithIncludedStruct {
+    x.StringField = value
+    return x
+}
+
+func (x *FieldsInjectedWithFieldsWithIncludedStruct) IsSetInjectedField() bool {
+    return x != nil && x.InjectedField != nil
+}
+
+func (x *FieldsInjectedWithFieldsWithIncludedStruct) writeField_1001(p thrift.Encoder) error {  // InjectedField
+    if !x.IsSetInjectedField() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("injected_field", thrift.STRUCT, -1001); err != nil {
+        return thrift.PrependError("FieldsInjectedWithFieldsWithIncludedStruct write field begin error: ", err)
+    }
+
+    item := x.InjectedField
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("FieldsInjectedWithFieldsWithIncludedStruct write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *FieldsInjectedWithFieldsWithIncludedStruct) writeField1(p thrift.Encoder) error {  // StringField
+    if err := p.WriteFieldBegin("string_field", thrift.STRING, 1); err != nil {
+        return thrift.PrependError("FieldsInjectedWithFieldsWithIncludedStruct write field begin error: ", err)
+    }
+
+    item := x.StringField
+    if err := p.WriteString(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("FieldsInjectedWithFieldsWithIncludedStruct write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *FieldsInjectedWithFieldsWithIncludedStruct) readField_1001(p thrift.Decoder) error {  // InjectedField
+    result := injectMetadataFields.NewInjectedField()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.InjectedField = result
+    return nil
+}
+
+func (x *FieldsInjectedWithFieldsWithIncludedStruct) readField1(p thrift.Decoder) error {  // StringField
+    result, err := p.ReadString()
+    if err != nil {
+        return err
+    }
+
+    x.StringField = result
+    return nil
+}
+
+
+
+
+func (x *FieldsInjectedWithFieldsWithIncludedStruct) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("FieldsInjectedWithFieldsWithIncludedStruct"); err != nil {
+        return thrift.PrependError("FieldsInjectedWithFieldsWithIncludedStruct write struct begin error: ", err)
+    }
+
+    if err := x.writeField_1001(p); err != nil {
+        return err
+    }
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("FieldsInjectedWithFieldsWithIncludedStruct write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("FieldsInjectedWithFieldsWithIncludedStruct write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *FieldsInjectedWithFieldsWithIncludedStruct) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("FieldsInjectedWithFieldsWithIncludedStruct read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("FieldsInjectedWithFieldsWithIncludedStruct field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == -1001 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "injected_field")):  // injected_field
+            fieldReadErr = x.readField_1001(p)
+        case ((id == 1 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "string_field")):  // string_field
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("FieldsInjectedWithFieldsWithIncludedStruct read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *FieldsInjectedWithFieldsWithIncludedStruct) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *FieldsInjectedWithFieldsWithIncludedStruct) setDefaults() *FieldsInjectedWithFieldsWithIncludedStruct {
+    return x.
+        SetInjectedFieldNonCompat(injectMetadataFields.NewInjectedField()).
+        SetStringFieldNonCompat("")
+}
+
+func (x *FieldsInjectedWithFieldsWithIncludedStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_FieldsInjectedWithFieldsWithIncludedStruct
 }
 
 

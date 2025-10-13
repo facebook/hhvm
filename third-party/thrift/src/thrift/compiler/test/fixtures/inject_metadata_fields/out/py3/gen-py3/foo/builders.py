@@ -9,6 +9,7 @@ import typing as _typing
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.builder
 
+import injected_field.types as _injected_field_types
 
 import foo.types as _foo_types
 
@@ -26,4 +27,14 @@ class Fields_Builder(thrift.py3.builder.StructBuilder):
         yield "injected_field", self.injected_field
         yield "injected_structured_annotation_field", self.injected_structured_annotation_field
         yield "injected_unstructured_annotation_field", self.injected_unstructured_annotation_field
+
+_fbthrift_struct_type__FieldsWithIncludedStruct = _foo_types.FieldsWithIncludedStruct
+class FieldsWithIncludedStruct_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _fbthrift_struct_type__FieldsWithIncludedStruct
+
+    def __init__(self):
+        self.injected_field: _typing.Any = None
+
+    def __iter__(self):
+        yield "injected_field", self.injected_field
 

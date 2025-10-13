@@ -468,3 +468,120 @@ class FieldsInjectedWithIncludedStruct implements \IThriftSyncStruct, \IThriftSt
 
 }
 
+/**
+ * Original thrift struct:-
+ * FieldsInjectedWithFieldsWithIncludedStruct
+ */
+class FieldsInjectedWithFieldsWithIncludedStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'string_field',
+      'type' => \TType::STRING,
+    ),
+    -1001 => shape(
+      'var' => 'injected_field',
+      'type' => \TType::STRUCT,
+      'class' => InjectedField::class,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'string_field' => 1,
+    'injected_field' => -1001,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'string_field' => ?string,
+    ?'injected_field' => ?InjectedField,
+  );
+
+  const int STRUCTURAL_ID = 5297177205958428766;
+  /**
+   * Original thrift field:-
+   * 1: string string_field
+   */
+  public string $string_field;
+  /**
+   * Original thrift field:-
+   * -1001: injected_field.InjectedField injected_field
+   */
+  public ?InjectedField $injected_field;
+
+  public function __construct(?string $string_field = null, ?InjectedField $injected_field = null)[] {
+    $this->string_field = $string_field ?? '';
+    $this->injected_field = $injected_field;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'string_field'),
+      Shapes::idx($shape, 'injected_field'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'FieldsInjectedWithFieldsWithIncludedStruct';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.FieldsInjectedWithFieldsWithIncludedStruct",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                )
+              ),
+              "name" => "string_field",
+            )
+          ),
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => -1001,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "injected_field.InjectedField",
+                    )
+                  ),
+                )
+              ),
+              "name" => "injected_field",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\InjectMetadataFields' => \facebook\thrift\annotation\InjectMetadataFields::fromShape(
+          shape(
+            "type" => "foo.FieldsWithIncludedStruct",
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+

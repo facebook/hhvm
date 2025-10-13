@@ -3,15 +3,15 @@
 // DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 //  @generated
 
-package module
+package inject_metadata_fields
 
 import (
-    foo "foo"
+    injectMetadataFields "test/fixtures/inject_metadata_fields"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 // (needed to ensure safety because of naive import list construction)
-var _ = foo.GoUnusedProtection__
+var _ = injectMetadataFields.GoUnusedProtection__
 var _ = thrift.VOID
 
 // Premade codec specs
@@ -57,6 +57,15 @@ var (
                 ScopedName: "module.FieldsInjectedWithIncludedStruct",
                 IsUnion:    false,
                 NewFunc:    func() thrift.Struct { return NewFieldsInjectedWithIncludedStruct() },
+            },
+    }
+    premadeCodecTypeSpec_module_FieldsInjectedWithFieldsWithIncludedStruct = &thrift.TypeSpec{
+        FullName: "module.FieldsInjectedWithFieldsWithIncludedStruct",
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "module.FieldsInjectedWithFieldsWithIncludedStruct",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewFieldsInjectedWithFieldsWithIncludedStruct() },
             },
     }
 )
@@ -203,6 +212,41 @@ var (
                 "string_field": 3,
             },
         }
+    premadeStructSpec_FieldsInjectedWithFieldsWithIncludedStruct =
+        &thrift.StructSpec{
+            Name:                 "FieldsInjectedWithFieldsWithIncludedStruct",
+            ScopedName:           "module.FieldsInjectedWithFieldsWithIncludedStruct",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   -1001,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "injected_field",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        injectMetadataFields.GetCodecTypeSpec("injected_field.InjectedField"),
+                    MustBeSetToSerialize: true,
+                },
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRING,
+                    Name:                 "string_field",
+                    ReflectIndex:         1,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_string,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                -1001: 0,
+                1: 1,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "injected_field": 0,
+                "string_field": 1,
+            },
+        }
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
@@ -212,6 +256,7 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_FieldsInjectedToEmptyStruct.FullName] = premadeCodecTypeSpec_module_FieldsInjectedToEmptyStruct
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_FieldsInjectedToStruct.FullName] = premadeCodecTypeSpec_module_FieldsInjectedToStruct
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_FieldsInjectedWithIncludedStruct.FullName] = premadeCodecTypeSpec_module_FieldsInjectedWithIncludedStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_FieldsInjectedWithFieldsWithIncludedStruct.FullName] = premadeCodecTypeSpec_module_FieldsInjectedWithFieldsWithIncludedStruct
     return fbthriftTypeSpecsMap
 }()
 

@@ -3,7 +3,7 @@
 // DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 //  @generated
 
-package module
+package inject_metadata_fields
 
 import (
     "context"
@@ -13,13 +13,13 @@ import (
     "reflect"
     "sync"
 
-    foo "foo"
+    injectMetadataFields "test/fixtures/inject_metadata_fields"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
     metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
-var _ = foo.GoUnusedProtection__
+var _ = injectMetadataFields.GoUnusedProtection__
 var _ = context.Background
 var _ = errors.New
 var _ = fmt.Printf

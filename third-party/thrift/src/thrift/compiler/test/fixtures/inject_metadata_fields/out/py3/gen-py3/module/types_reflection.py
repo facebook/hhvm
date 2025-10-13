@@ -161,3 +161,37 @@ def get_reflection__FieldsInjectedWithIncludedStruct() -> __StructSpec:
         ),
     )
     return spec
+def get_reflection__FieldsInjectedWithFieldsWithIncludedStruct() -> __StructSpec:
+    spec: __StructSpec = __StructSpec._fbthrift_create(
+        name="FieldsInjectedWithFieldsWithIncludedStruct",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=1,
+            name="string_field",
+            py_name="string_field",
+            type=str,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=-1001,
+            name="injected_field",
+            py_name="injected_field",
+            type=_injected_field_types.InjectedField,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    return spec

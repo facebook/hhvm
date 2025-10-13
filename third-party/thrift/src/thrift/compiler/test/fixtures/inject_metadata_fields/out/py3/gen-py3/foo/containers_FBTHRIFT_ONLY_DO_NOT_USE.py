@@ -19,6 +19,7 @@ from collections.abc import Mapping, Sequence, Set
 _fbthrift__module_name__ = "foo.types"
 
 import foo.types as _foo_types
+import injected_field.types as _injected_field_types
 from thrift.py3.types import _ensure_py3_or_raise
 
 def get_types_reflection():

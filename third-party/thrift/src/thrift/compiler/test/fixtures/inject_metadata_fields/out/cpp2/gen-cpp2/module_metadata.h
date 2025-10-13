@@ -38,6 +38,11 @@ class StructMetadata<::cpp2::FieldsInjectedWithIncludedStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
+template <>
+class StructMetadata<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
 } // namespace md
 } // namespace detail
 } // namespace thrift

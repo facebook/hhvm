@@ -15,6 +15,7 @@ namespace cpp2 {
   ::apache::thrift::detail::md::StructMetadata<FieldsInjectedToEmptyStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<FieldsInjectedToStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<FieldsInjectedWithIncludedStruct>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<FieldsInjectedWithFieldsWithIncludedStruct>::gen(metadata);
   return metadata;
 }
 } // namespace cpp2

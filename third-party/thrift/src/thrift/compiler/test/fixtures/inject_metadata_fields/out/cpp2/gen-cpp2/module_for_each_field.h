@@ -48,6 +48,15 @@ struct ForEachField<::cpp2::FieldsInjectedWithIncludedStruct> {
     f(3, static_cast<T&&>(t).injected_unstructured_annotation_field_ref()...);
   }
 };
+
+template <>
+struct ForEachField<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct> {
+  template <typename F, typename... T>
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
+    f(0, static_cast<T&&>(t).string_field_ref()...);
+    f(1, static_cast<T&&>(t).injected_field_ref()...);
+  }
+};
 } // namespace detail
 } // namespace thrift
 } // namespace apache

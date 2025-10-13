@@ -62,3 +62,15 @@ class FieldsInjectedWithIncludedStruct_Builder(thrift.py3.builder.StructBuilder)
         yield "injected_structured_annotation_field", self.injected_structured_annotation_field
         yield "injected_unstructured_annotation_field", self.injected_unstructured_annotation_field
 
+_fbthrift_struct_type__FieldsInjectedWithFieldsWithIncludedStruct = _module_types.FieldsInjectedWithFieldsWithIncludedStruct
+class FieldsInjectedWithFieldsWithIncludedStruct_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _fbthrift_struct_type__FieldsInjectedWithFieldsWithIncludedStruct
+
+    def __init__(self):
+        self.string_field: _typing.Optional[str] = None
+        self.injected_field: _typing.Any = None
+
+    def __iter__(self):
+        yield "string_field", self.string_field
+        yield "injected_field", self.injected_field
+

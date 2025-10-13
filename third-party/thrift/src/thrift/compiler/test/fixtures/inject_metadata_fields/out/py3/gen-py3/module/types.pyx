@@ -551,4 +551,127 @@ cdef class FieldsInjectedWithIncludedStruct(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.FieldsInjectedWithIncludedStruct, self)
 
+@__cython.auto_pickle(False)
+@__cython.final
+cdef class FieldsInjectedWithFieldsWithIncludedStruct(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
+    def __init__(FieldsInjectedWithFieldsWithIncludedStruct self, **kwargs):
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cFieldsInjectedWithFieldsWithIncludedStruct]()
+        self._fields_setter = _fbthrift_types_fields.__FieldsInjectedWithFieldsWithIncludedStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
+        super().__init__(**kwargs)
+
+    def __call__(FieldsInjectedWithFieldsWithIncludedStruct self, **kwargs):
+        if not kwargs:
+            return self
+        cdef FieldsInjectedWithFieldsWithIncludedStruct __fbthrift_inst = FieldsInjectedWithFieldsWithIncludedStruct.__new__(FieldsInjectedWithFieldsWithIncludedStruct)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cFieldsInjectedWithFieldsWithIncludedStruct](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__FieldsInjectedWithFieldsWithIncludedStruct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
+        for __fbthrift_name, _fbthrift_value in kwargs.items():
+            (<thrift.py3.types.Struct>__fbthrift_inst)._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+        return __fbthrift_inst
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return _fbthrift_IsSet("FieldsInjectedWithFieldsWithIncludedStruct", {
+          "string_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).string_field_ref().has_value(),
+          "injected_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).injected_field_ref().has_value(),
+        })
+
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFieldsInjectedWithFieldsWithIncludedStruct] cpp_obj):
+        __fbthrift_inst = <FieldsInjectedWithFieldsWithIncludedStruct>FieldsInjectedWithFieldsWithIncludedStruct.__new__(FieldsInjectedWithFieldsWithIncludedStruct)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
+        return __fbthrift_inst
+
+    cdef inline string_field_impl(self):
+        return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).string_field_ref().value()).decode('UTF-8')
+
+    @property
+    def string_field(self):
+        return self.string_field_impl()
+
+    cdef inline injected_field_impl(self):
+        if self.__fbthrift_cached_injected_field is None:
+            self.__fbthrift_cached_injected_field = _injected_field_types.InjectedField._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).injected_field_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        return self.__fbthrift_cached_injected_field
+
+    @property
+    def injected_field(self):
+        return self.injected_field_impl()
+
+
+    def __hash__(FieldsInjectedWithFieldsWithIncludedStruct self):
+        return super().__hash__()
+
+    def __repr__(FieldsInjectedWithFieldsWithIncludedStruct self):
+        return super().__repr__()
+
+    def __str__(FieldsInjectedWithFieldsWithIncludedStruct self):
+        return super().__str__()
+
+
+    def __copy__(FieldsInjectedWithFieldsWithIncludedStruct self):
+        return self
+
+    def __richcmp__(self, other, int op):
+        r = self._fbthrift_cmp_sametype(other, op)
+        return __richcmp[_module_cbindings.cFieldsInjectedWithFieldsWithIncludedStruct](
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<FieldsInjectedWithFieldsWithIncludedStruct>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            op,
+        ) if r is None else r
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__FieldsInjectedWithFieldsWithIncludedStruct()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        _module_cbindings.StructMetadata[_module_cbindings.cFieldsInjectedWithFieldsWithIncludedStruct].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.FieldsInjectedWithFieldsWithIncludedStruct"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[_module_cbindings.cFieldsInjectedWithFieldsWithIncludedStruct](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 2
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(FieldsInjectedWithFieldsWithIncludedStruct self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[_module_cbindings.cFieldsInjectedWithFieldsWithIncludedStruct](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(FieldsInjectedWithFieldsWithIncludedStruct self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cFieldsInjectedWithFieldsWithIncludedStruct]()
+        with nogil:
+            needed = serializer.cdeserialize[_module_cbindings.cFieldsInjectedWithFieldsWithIncludedStruct](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+        return needed
+
+
+    def _to_python(self):
+        return thrift.python.converter.to_python_struct(
+            _fbthrift_python_types.FieldsInjectedWithFieldsWithIncludedStruct,
+            self,
+        )
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.FieldsInjectedWithFieldsWithIncludedStruct, self)
+
 

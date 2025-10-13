@@ -19,6 +19,7 @@ include "thrift/annotation/thrift.thrift"
 include "foo.thrift"
 
 namespace java.swift test.fixtures.injectMetadataFields
+namespace go test.fixtures.inject_metadata_fields
 
 struct Fields {
   100: string injected_field;
@@ -34,5 +35,10 @@ struct FieldsInjectedToStruct {
 
 @internal.InjectMetadataFields{type = "foo.Fields"}
 struct FieldsInjectedWithIncludedStruct {
+  1: string string_field;
+}
+
+@internal.InjectMetadataFields{type = "foo.FieldsWithIncludedStruct"}
+struct FieldsInjectedWithFieldsWithIncludedStruct {
   1: string string_field;
 }

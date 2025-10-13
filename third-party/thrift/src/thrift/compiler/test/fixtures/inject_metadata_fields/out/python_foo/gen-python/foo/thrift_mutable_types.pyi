@@ -18,6 +18,8 @@ import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
+import injected_field.thrift_mutable_types as _fbthrift__injected_field__thrift_mutable_types
+
 
 @_typing.final
 class Fields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.Fields):
@@ -55,3 +57,26 @@ class Fields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abst
     def _to_py3(self) -> "foo.types.Fields": ...  # type: ignore
     def _to_py_deprecated(self) -> "foo.ttypes.Fields": ...  # type: ignore
 _fbthrift_Fields = Fields
+
+@_typing.final
+class FieldsWithIncludedStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.FieldsWithIncludedStruct):
+    @property
+    def injected_field(self) -> _fbthrift__injected_field__thrift_mutable_types.InjectedField: ...
+    @injected_field.setter
+    def injected_field(self, value: _fbthrift__injected_field__thrift_mutable_types.InjectedField) -> None: ...
+
+    def __init__(
+        self, *,
+        injected_field: _typing.Optional[_fbthrift__injected_field__thrift_mutable_types._fbthrift_InjectedField]=...
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        injected_field: _typing.Optional[_fbthrift__injected_field__thrift_mutable_types._fbthrift_InjectedField]=...
+    ) -> _typing.Self: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[_fbthrift__injected_field__thrift_mutable_types.InjectedField]]]: ...
+    def _to_python(self) -> "foo.thrift_types.FieldsWithIncludedStruct": ...  # type: ignore
+    def _to_mutable_python(self) -> _typing.Self: ...
+    def _to_py3(self) -> "foo.types.FieldsWithIncludedStruct": ...  # type: ignore
+    def _to_py_deprecated(self) -> "foo.ttypes.FieldsWithIncludedStruct": ...  # type: ignore
+_fbthrift_FieldsWithIncludedStruct = FieldsWithIncludedStruct

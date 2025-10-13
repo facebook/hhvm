@@ -36,3 +36,9 @@ cdef cFieldsInjectedWithIncludedStruct FieldsInjectedWithIncludedStruct_convert_
 cdef object FieldsInjectedWithIncludedStruct_from_cpp(const cFieldsInjectedWithIncludedStruct& c_struct):
     return cpp_to_python[cFieldsInjectedWithIncludedStruct, _fbthrift__NamespaceTag](c_struct)
 
+cdef cFieldsInjectedWithFieldsWithIncludedStruct FieldsInjectedWithFieldsWithIncludedStruct_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cFieldsInjectedWithFieldsWithIncludedStruct, _fbthrift__NamespaceTag](inst))
+
+cdef object FieldsInjectedWithFieldsWithIncludedStruct_from_cpp(const cFieldsInjectedWithFieldsWithIncludedStruct& c_struct):
+    return cpp_to_python[cFieldsInjectedWithFieldsWithIncludedStruct, _fbthrift__NamespaceTag](c_struct)
+

@@ -12,5 +12,6 @@ class Fields;
 class FieldsInjectedToEmptyStruct;
 class FieldsInjectedToStruct;
 class FieldsInjectedWithIncludedStruct;
+class FieldsInjectedWithFieldsWithIncludedStruct;
 } // namespace cpp2
 // END forward_declare

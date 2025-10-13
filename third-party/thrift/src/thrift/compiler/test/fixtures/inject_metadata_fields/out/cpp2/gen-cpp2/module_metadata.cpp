@@ -121,6 +121,30 @@ StructMetadata<::cpp2::FieldsInjectedWithIncludedStruct>::gen(ThriftMetadata& me
   module_FieldsInjectedWithIncludedStruct.structured_annotations()->push_back(*cvStruct("internal.InjectMetadataFields", { {"type", cvString("foo.Fields") } }).cv_struct());
   return res.first->second;
 }
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.FieldsInjectedWithFieldsWithIncludedStruct", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_FieldsInjectedWithFieldsWithIncludedStruct = res.first->second;
+  module_FieldsInjectedWithFieldsWithIncludedStruct.name() = "module.FieldsInjectedWithFieldsWithIncludedStruct";
+  module_FieldsInjectedWithFieldsWithIncludedStruct.is_union() = false;
+  static const auto* const
+  module_FieldsInjectedWithFieldsWithIncludedStruct_fields = new std::array<EncodedThriftField, 2>{ {
+    { 1, "string_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { -1001, "injected_field", false, std::make_unique<Struct<::cpp2::InjectedField>>("injected_field.InjectedField"), std::vector<ThriftConstStruct>{ }},  }};
+  for (const auto& f : *module_FieldsInjectedWithFieldsWithIncludedStruct_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_FieldsInjectedWithFieldsWithIncludedStruct.fields()->push_back(std::move(field));
+  }
+  module_FieldsInjectedWithFieldsWithIncludedStruct.structured_annotations()->push_back(*cvStruct("internal.InjectMetadataFields", { {"type", cvString("foo.FieldsWithIncludedStruct") } }).cv_struct());
+  return res.first->second;
+}
 
 } // namespace md
 } // namespace detail

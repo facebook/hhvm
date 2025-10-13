@@ -3,18 +3,18 @@
 // DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 //  @generated
 
-package module
+package inject_metadata_fields
 
 import (
     "maps"
 
-    foo "foo"
+    injectMetadataFields "test/fixtures/inject_metadata_fields"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
     metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
-var _ = foo.GoUnusedProtection__
+var _ = injectMetadataFields.GoUnusedProtection__
 var _ = thrift.VOID
 var _ = maps.Copy[map[int]int, map[int]int]
 var _ = metadata.GoUnusedProtection__
@@ -52,6 +52,13 @@ var (
             TStruct:
                 &metadata.ThriftStructType{
                     Name: "module.FieldsInjectedWithIncludedStruct",
+                },
+        }
+    premadeThriftType_module_FieldsInjectedWithFieldsWithIncludedStruct =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.FieldsInjectedWithFieldsWithIncludedStruct",
                 },
         }
 )
@@ -173,6 +180,38 @@ var (
                 },
             },
         }
+    premadeStructMetadata_FieldsInjectedWithFieldsWithIncludedStruct =
+        &metadata.ThriftStruct{
+            Name:    "module.FieldsInjectedWithFieldsWithIncludedStruct",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         -1001,
+                    Name:       "injected_field",
+                    IsOptional: false,
+                    Type:       injectMetadataFields.GetMetadataThriftType("injected_field.InjectedField"),
+                },
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "string_field",
+                    IsOptional: false,
+                    Type:       premadeThriftType_string,
+                },
+            },
+            StructuredAnnotations: []*metadata.ThriftConstStruct{
+                &metadata.ThriftConstStruct{
+                    Type: &metadata.ThriftStructType{
+                        Name: "internal.InjectMetadataFields",
+                    },
+                    Fields: map[string]*metadata.ThriftConstValue{
+                        "type":
+                            &metadata.ThriftConstValue{
+                                CvString: thrift.Pointerize("foo.FieldsWithIncludedStruct"),
+                            },
+                    },
+                },
+            },
+        }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
@@ -182,6 +221,7 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap["module.FieldsInjectedToEmptyStruct"] = premadeThriftType_module_FieldsInjectedToEmptyStruct
     fbthriftThriftTypesMap["module.FieldsInjectedToStruct"] = premadeThriftType_module_FieldsInjectedToStruct
     fbthriftThriftTypesMap["module.FieldsInjectedWithIncludedStruct"] = premadeThriftType_module_FieldsInjectedWithIncludedStruct
+    fbthriftThriftTypesMap["module.FieldsInjectedWithFieldsWithIncludedStruct"] = premadeThriftType_module_FieldsInjectedWithFieldsWithIncludedStruct
     return fbthriftThriftTypesMap
 }()
 
@@ -191,6 +231,7 @@ var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults = append(fbthriftResults, premadeStructMetadata_FieldsInjectedToEmptyStruct)
     fbthriftResults = append(fbthriftResults, premadeStructMetadata_FieldsInjectedToStruct)
     fbthriftResults = append(fbthriftResults, premadeStructMetadata_FieldsInjectedWithIncludedStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_FieldsInjectedWithFieldsWithIncludedStruct)
     return fbthriftResults
 }()
 
@@ -235,7 +276,7 @@ var packageThriftMetadata = func() *metadata.ThriftMetadata {
 
     // Obtain Thrift metadatas from recursively included programs...
     var recursiveThriftMetadatas []*metadata.ThriftMetadata
-    recursiveThriftMetadatas = append(recursiveThriftMetadatas, foo.GetThriftMetadata())
+    recursiveThriftMetadatas = append(recursiveThriftMetadatas, injectMetadataFields.GetThriftMetadata())
 
     // ...now merge metadatas from recursively included programs.
     for _, thriftMetadata := range recursiveThriftMetadatas {

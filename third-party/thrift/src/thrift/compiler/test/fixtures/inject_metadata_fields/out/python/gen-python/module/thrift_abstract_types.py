@@ -101,3 +101,23 @@ class FieldsInjectedWithIncludedStruct(_abc.ABC):
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedWithIncludedStruct": ...  # type: ignore
 _fbthrift_FieldsInjectedWithIncludedStruct = FieldsInjectedWithIncludedStruct
+class FieldsInjectedWithFieldsWithIncludedStruct(_abc.ABC):
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
+    @_abc.abstractmethod
+    def injected_field(self) -> _fbthrift__injected_field__thrift_abstract_types.InjectedField: ...
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
+    @_abc.abstractmethod
+    def string_field(self) -> builtins.str: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[_fbthrift__injected_field__thrift_abstract_types.InjectedField, builtins.str]]]: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.FieldsInjectedWithFieldsWithIncludedStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "module.thrift_types.FieldsInjectedWithFieldsWithIncludedStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "module.types.FieldsInjectedWithFieldsWithIncludedStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedWithFieldsWithIncludedStruct": ...  # type: ignore
+_fbthrift_FieldsInjectedWithFieldsWithIncludedStruct = FieldsInjectedWithFieldsWithIncludedStruct

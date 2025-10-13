@@ -18,3 +18,9 @@ cdef cFields Fields_convert_to_cpp(object inst) except *:
 cdef object Fields_from_cpp(const cFields& c_struct):
     return cpp_to_python[cFields, _fbthrift__NamespaceTag](c_struct)
 
+cdef cFieldsWithIncludedStruct FieldsWithIncludedStruct_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cFieldsWithIncludedStruct, _fbthrift__NamespaceTag](inst))
+
+cdef object FieldsWithIncludedStruct_from_cpp(const cFieldsWithIncludedStruct& c_struct):
+    return cpp_to_python[cFieldsWithIncludedStruct, _fbthrift__NamespaceTag](c_struct)
+

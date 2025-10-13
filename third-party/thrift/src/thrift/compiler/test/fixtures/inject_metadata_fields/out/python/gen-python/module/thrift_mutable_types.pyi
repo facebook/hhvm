@@ -140,3 +140,33 @@ class FieldsInjectedWithIncludedStruct(_fbthrift_python_mutable_types.MutableStr
     def _to_py3(self) -> "module.types.FieldsInjectedWithIncludedStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedWithIncludedStruct": ...  # type: ignore
 _fbthrift_FieldsInjectedWithIncludedStruct = FieldsInjectedWithIncludedStruct
+
+@_typing.final
+class FieldsInjectedWithFieldsWithIncludedStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.FieldsInjectedWithFieldsWithIncludedStruct):
+    @property
+    def injected_field(self) -> _fbthrift__injected_field__thrift_mutable_types.InjectedField: ...
+    @injected_field.setter
+    def injected_field(self, value: _fbthrift__injected_field__thrift_mutable_types.InjectedField) -> None: ...
+
+    @property
+    def string_field(self) -> builtins.str: ...
+    @string_field.setter
+    def string_field(self, value: builtins.str) -> None: ...
+
+    def __init__(
+        self, *,
+        injected_field: _typing.Optional[_fbthrift__injected_field__thrift_mutable_types._fbthrift_InjectedField]=...,
+        string_field: _typing.Optional[builtins.str]=...
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        injected_field: _typing.Optional[_fbthrift__injected_field__thrift_mutable_types._fbthrift_InjectedField]=...,
+        string_field: _typing.Optional[builtins.str]=...
+    ) -> _typing.Self: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[_fbthrift__injected_field__thrift_mutable_types.InjectedField, builtins.str]]]: ...
+    def _to_python(self) -> "module.thrift_types.FieldsInjectedWithFieldsWithIncludedStruct": ...  # type: ignore
+    def _to_mutable_python(self) -> _typing.Self: ...
+    def _to_py3(self) -> "module.types.FieldsInjectedWithFieldsWithIncludedStruct": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedWithFieldsWithIncludedStruct": ...  # type: ignore
+_fbthrift_FieldsInjectedWithFieldsWithIncludedStruct = FieldsInjectedWithFieldsWithIncludedStruct

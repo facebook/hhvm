@@ -274,3 +274,30 @@ class MetadataTests(unittest.TestCase):
             field.id: field.name for field in gen_metadata(Complex).fields
         }
         self.assertEqual(complex_field_to_name[7], "val_enum")
+
+    def test_inject_metadata_fields_import(self) -> None:
+        """Test that reproduces the external namespace import issue for @internal.InjectMetadataFields."""
+
+        def inject_metadata_fields() -> None:
+            from testing.test_inject_metadata_fields.thrift_types import (
+                TestInjectMetadataFields,
+            )
+
+            # Verify the type can be instantiated (main test - this would fail with import errors before D77504507)
+            test_instance = TestInjectMetadataFields(name="test", value=42)
+            self.assertEqual(test_instance.name, "test")
+            self.assertEqual(test_instance.value, 42)
+
+            # Verify metadata generation includes injected fields
+            meta = gen_metadata(TestInjectMetadataFields)
+            field_names = [field.name for field in meta.fields]
+
+            # Assert exact field names including injected policy field
+            self.assertEqual(
+                field_names, ["injected_field", "name", "value"]
+            )  # Injected by @policy_annotation.TThriftStructHasDynamicFieldPolicy
+
+        # For now, this test expects a NameError due to missing external namespace imports.
+        # Remove this expectation along with the fix that resolves this NameError.
+        with self.assertRaises(NameError):
+            inject_metadata_fields()

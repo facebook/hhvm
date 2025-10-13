@@ -16,6 +16,8 @@ import foo.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
+import injected_field.thrift_types as _fbthrift__injected_field__thrift_types
+
 
 @_typing.final
 class Fields(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.Fields):
@@ -41,3 +43,22 @@ class Fields(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.Fiel
     def _to_py3(self) -> "foo.types.Fields": ...  # type: ignore
     def _to_py_deprecated(self) -> "foo.ttypes.Fields": ...  # type: ignore
 _fbthrift_Fields = Fields
+
+@_typing.final
+class FieldsWithIncludedStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.FieldsWithIncludedStruct):
+    injected_field: _typing.Final[_fbthrift__injected_field__thrift_types.InjectedField] = ...
+    def __init__(
+        self, *,
+        injected_field: _typing.Optional[_fbthrift__injected_field__thrift_types._fbthrift_InjectedField]=...
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        injected_field: _typing.Optional[_fbthrift__injected_field__thrift_types._fbthrift_InjectedField]=...
+    ) -> _typing.Self: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[_fbthrift__injected_field__thrift_types.InjectedField]]]: ...
+    def _to_python(self) -> _typing.Self: ...
+    def _to_mutable_python(self) -> "foo.thrift_mutable_types.FieldsWithIncludedStruct": ...  # type: ignore
+    def _to_py3(self) -> "foo.types.FieldsWithIncludedStruct": ...  # type: ignore
+    def _to_py_deprecated(self) -> "foo.ttypes.FieldsWithIncludedStruct": ...  # type: ignore
+_fbthrift_FieldsWithIncludedStruct = FieldsWithIncludedStruct

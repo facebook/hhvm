@@ -18,6 +18,9 @@ import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 
 
+import injected_field.thrift_mutable_types
+import injected_field.thrift_mutable_types as _fbthrift__injected_field__thrift_mutable_types
+
 
 class Fields(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
@@ -97,6 +100,62 @@ class Fields(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.Fields, Fields)
 _fbthrift_Fields = Fields
 
+class FieldsWithIncludedStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "injected_field",  # name
+            "injected_field",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(_fbthrift__injected_field__thrift_mutable_types.InjectedField),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "foo.FieldsWithIncludedStruct"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return None
+
+    @staticmethod
+    def __get_metadata__():
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
+
+
+    def _to_python(self):
+        from thrift.python import converter
+        import importlib
+        immutable_types = importlib.import_module("foo.thrift_types")
+        return converter.to_python_struct(immutable_types.FieldsWithIncludedStruct, self)
+
+    def _to_mutable_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("foo.types")
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.FieldsWithIncludedStruct, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        from thrift.util import converter
+        try:
+            py_deprecated_types = importlib.import_module("foo.ttypes")
+            return converter.to_py_struct(py_deprecated_types.FieldsWithIncludedStruct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("foo.ttypes")
+            return converter.to_py_struct(py_asyncio_types.FieldsWithIncludedStruct, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.FieldsWithIncludedStruct, FieldsWithIncludedStruct)
+_fbthrift_FieldsWithIncludedStruct = FieldsWithIncludedStruct
+
 
 _fbthrift_all_enums = [
 ]
@@ -104,5 +163,6 @@ _fbthrift_all_enums = [
 
 _fbthrift_all_structs = [
     Fields,
+    FieldsWithIncludedStruct,
 ]
 _fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)

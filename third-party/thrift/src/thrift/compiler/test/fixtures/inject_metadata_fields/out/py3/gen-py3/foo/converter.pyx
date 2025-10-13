@@ -26,4 +26,12 @@ cdef shared_ptr[_fbthrift_cbindings.cFields] Fields_convert_to_cpp(object inst) 
 cdef object Fields_from_cpp(const shared_ptr[_fbthrift_cbindings.cFields]& c_struct):
     return _fbthrift_ctypes.Fields._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
+cdef shared_ptr[_fbthrift_cbindings.cFieldsWithIncludedStruct] FieldsWithIncludedStruct_convert_to_cpp(object inst) except*:
+    return make_shared[_fbthrift_cbindings.cFieldsWithIncludedStruct](deref(
+        (<_fbthrift_ctypes.FieldsWithIncludedStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    ))
+
+cdef object FieldsWithIncludedStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cFieldsWithIncludedStruct]& c_struct):
+    return _fbthrift_ctypes.FieldsWithIncludedStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+
 

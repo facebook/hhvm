@@ -20,6 +20,8 @@ struct string_field;
 struct injected_field;
 struct injected_structured_annotation_field;
 struct injected_unstructured_annotation_field;
+struct string_field;
+struct injected_field;
 } // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_injected_field
@@ -54,6 +56,14 @@ APACHE_THRIFT_DEFINE_ACCESSOR(injected_structured_annotation_field);
 #define APACHE_THRIFT_ACCESSOR_injected_unstructured_annotation_field
 APACHE_THRIFT_DEFINE_ACCESSOR(injected_unstructured_annotation_field);
 #endif
+#ifndef APACHE_THRIFT_ACCESSOR_string_field
+#define APACHE_THRIFT_ACCESSOR_string_field
+APACHE_THRIFT_DEFINE_ACCESSOR(string_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_injected_field
+#define APACHE_THRIFT_ACCESSOR_injected_field
+APACHE_THRIFT_DEFINE_ACCESSOR(injected_field);
+#endif
 } // namespace detail
 } // namespace apache::thrift
 
@@ -65,6 +75,7 @@ class Fields;
 class FieldsInjectedToEmptyStruct;
 class FieldsInjectedToStruct;
 class FieldsInjectedWithIncludedStruct;
+class FieldsInjectedWithFieldsWithIncludedStruct;
 } // namespace cpp2
 // END forward_declare
 namespace apache::thrift::detail::annotation {
@@ -874,27 +885,235 @@ unsigned long FieldsInjectedWithIncludedStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/inject_metadata_fields/src/module.thrift", "name": "FieldsInjectedWithFieldsWithIncludedStruct", "kind": "struct" } */
+class FieldsInjectedWithFieldsWithIncludedStruct final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
+  static constexpr std::size_t __fbthrift_num_fields = 2;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,-1001};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
+    ::apache::thrift::ident::string_field,
+    ::apache::thrift::ident::injected_field
+  >;
+
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::struct_t<::cpp2::InjectedField>
+  >;
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = FieldsInjectedWithFieldsWithIncludedStruct;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
+
+
+ public:
+
+  FieldsInjectedWithFieldsWithIncludedStruct();
+
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  FieldsInjectedWithFieldsWithIncludedStruct(apache::thrift::FragileConstructor, ::std::string string_field__arg, ::cpp2::InjectedField injected_field__arg);
+
+  FieldsInjectedWithFieldsWithIncludedStruct(FieldsInjectedWithFieldsWithIncludedStruct&&) noexcept;
+
+  FieldsInjectedWithFieldsWithIncludedStruct(const FieldsInjectedWithFieldsWithIncludedStruct& src);
+
+
+  FieldsInjectedWithFieldsWithIncludedStruct& operator=(FieldsInjectedWithFieldsWithIncludedStruct&&) noexcept;
+  FieldsInjectedWithFieldsWithIncludedStruct& operator=(const FieldsInjectedWithFieldsWithIncludedStruct& src);
+
+  ~FieldsInjectedWithFieldsWithIncludedStruct();
+
+ private:
+  ::std::string __fbthrift_field_string_field;
+ private:
+  ::cpp2::InjectedField __fbthrift_field_injected_field;
+ private:
+  apache::thrift::detail::isset_bitset<2, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+
+ public:
+
+  bool operator==(const FieldsInjectedWithFieldsWithIncludedStruct&) const;
+  bool operator<(const FieldsInjectedWithFieldsWithIncludedStruct&) const;
+
+  /** Glean { "field": "string_field" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> string_field_ref() const& {
+    return {this->__fbthrift_field_string_field, __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "string_field" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> string_field_ref() & {
+    return {this->__fbthrift_field_string_field, __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "string_field" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> string_field_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_string_field), __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "string_field" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> string_field() const& {
+    return {this->__fbthrift_field_string_field, __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "string_field" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> string_field() & {
+    return {this->__fbthrift_field_string_field, __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "string_field" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> string_field() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_string_field), __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "injected_field" } */
+  template <typename..., typename fbthrift_T = ::cpp2::InjectedField>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> injected_field_ref() const& {
+    return {this->__fbthrift_field_injected_field, __isset.at(1), __isset.bit(1)};
+  }
+
+  /** Glean { "field": "injected_field" } */
+  template <typename..., typename fbthrift_T = ::cpp2::InjectedField>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> injected_field_ref() & {
+    return {this->__fbthrift_field_injected_field, __isset.at(1), __isset.bit(1)};
+  }
+
+  /** Glean { "field": "injected_field" } */
+  template <typename..., typename fbthrift_T = ::cpp2::InjectedField>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> injected_field_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_injected_field), __isset.at(1), __isset.bit(1)};
+  }
+
+  /** Glean { "field": "injected_field" } */
+  template <typename..., typename fbthrift_T = ::cpp2::InjectedField>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> injected_field() const& {
+    return {this->__fbthrift_field_injected_field, __isset.at(1), __isset.bit(1)};
+  }
+
+  /** Glean { "field": "injected_field" } */
+  template <typename..., typename fbthrift_T = ::cpp2::InjectedField>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> injected_field() & {
+    return {this->__fbthrift_field_injected_field, __isset.at(1), __isset.bit(1)};
+  }
+
+  /** Glean { "field": "injected_field" } */
+  template <typename..., typename fbthrift_T = ::cpp2::InjectedField>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> injected_field() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_injected_field), __isset.at(1), __isset.bit(1)};
+  }
+
+  /** Glean { "field": "string_field" } */
+  [[deprecated("Use `FOO.string_field().value()` instead of `FOO.get_string_field()`")]]
+  const ::std::string& get_string_field() const& {
+    return __fbthrift_field_string_field;
+  }
+
+  /** Glean { "field": "string_field" } */
+  [[deprecated("Use `FOO.string_field().value()` instead of `FOO.get_string_field()`")]]
+  ::std::string get_string_field() && {
+    return static_cast<::std::string&&>(__fbthrift_field_string_field);
+  }
+
+  /** Glean { "field": "string_field" } */
+  template <typename T_FieldsInjectedWithFieldsWithIncludedStruct_string_field_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.string_field() = BAR` instead of `FOO.set_string_field(BAR)`")]]
+  ::std::string& set_string_field(T_FieldsInjectedWithFieldsWithIncludedStruct_string_field_struct_setter&& string_field_) {
+    string_field_ref() = std::forward<T_FieldsInjectedWithFieldsWithIncludedStruct_string_field_struct_setter>(string_field_);
+    return __fbthrift_field_string_field;
+  }
+
+  /** Glean { "field": "injected_field" } */
+  [[deprecated("Use `FOO.injected_field().value()` instead of `FOO.get_injected_field()`")]]
+  const ::cpp2::InjectedField& get_injected_field() const&;
+
+  /** Glean { "field": "injected_field" } */
+  [[deprecated("Use `FOO.injected_field().value()` instead of `FOO.get_injected_field()`")]]
+  ::cpp2::InjectedField get_injected_field() &&;
+
+  /** Glean { "field": "injected_field" } */
+  template <typename T_FieldsInjectedWithFieldsWithIncludedStruct_injected_field_struct_setter = ::cpp2::InjectedField>
+  [[deprecated("Use `FOO.injected_field() = BAR` instead of `FOO.set_injected_field(BAR)`")]]
+  ::cpp2::InjectedField& set_injected_field(T_FieldsInjectedWithFieldsWithIncludedStruct_injected_field_struct_setter&& injected_field_) {
+    injected_field_ref() = std::forward<T_FieldsInjectedWithFieldsWithIncludedStruct_injected_field_struct_setter>(injected_field_);
+    return __fbthrift_field_injected_field;
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<FieldsInjectedWithFieldsWithIncludedStruct>;
+  friend void swap(FieldsInjectedWithFieldsWithIncludedStruct& a, FieldsInjectedWithFieldsWithIncludedStruct& b);
+};
+
+template <class Protocol_>
+unsigned long FieldsInjectedWithFieldsWithIncludedStruct::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
 } // namespace cpp2
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::cpp2::Fields, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 3380809768853499127;
-  static constexpr ::std::string_view definitionKey = {"\xd9\xfa\xa6\x42\xc2\x97\xef\xd7\xfc\xde\xb7\x26\x79\xad\xb1\x8f", 16};
+  static constexpr int64_t programId = -3025931788156609158;
+  static constexpr ::std::string_view definitionKey = {"\x86\xd9\x6e\x8e\x55\xcf\x44\x41\x30\x2b\x7a\x30\x74\x03\x16\xca", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::FieldsInjectedToEmptyStruct, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 3380809768853499127;
-  static constexpr ::std::string_view definitionKey = {"\x6c\x11\xa0\x4f\xbd\x5e\x18\x01\x02\x61\x49\xc0\xac\x5f\xad\x53", 16};
+  static constexpr int64_t programId = -3025931788156609158;
+  static constexpr ::std::string_view definitionKey = {"\x4f\xcd\x69\xfd\x67\xd3\xf0\x59\x2b\xc4\x43\x13\x1e\x7f\xec\xdf", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::FieldsInjectedToStruct, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 3380809768853499127;
-  static constexpr ::std::string_view definitionKey = {"\x4a\x82\x8f\x14\x9d\x0b\x93\x16\x0f\x00\x20\x5e\xb0\x6b\x7e\x88", 16};
+  static constexpr int64_t programId = -3025931788156609158;
+  static constexpr ::std::string_view definitionKey = {"\xa4\x8b\x01\xb0\x0d\x99\xc8\x41\x1a\xfd\x0e\x15\xd9\x44\xef\x41", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::FieldsInjectedWithIncludedStruct, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 3380809768853499127;
-  static constexpr ::std::string_view definitionKey = {"\xf2\x83\x60\x77\xff\xdf\x2c\x98\xc1\x92\x4b\x2e\xad\x43\xc3\xfb", 16};
+  static constexpr int64_t programId = -3025931788156609158;
+  static constexpr ::std::string_view definitionKey = {"\x10\x23\x9f\xc4\xbe\x17\xdf\x16\xc3\xa8\xf0\x8c\xd4\x51\xec\x87", 16};
+};
+template <> struct TSchemaAssociation<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -3025931788156609158;
+  static constexpr ::std::string_view definitionKey = {"\x55\xa7\x46\x7b\x3f\xba\x0b\xbc\xd5\xd4\xb4\x3e\x47\x5e\x7e\x2c", 16};
 };
 } // namespace apache::thrift::detail

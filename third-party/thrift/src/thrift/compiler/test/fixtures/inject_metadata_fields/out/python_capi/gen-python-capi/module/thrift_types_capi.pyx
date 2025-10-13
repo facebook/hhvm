@@ -47,3 +47,10 @@ cdef api int can_extract__module__FieldsInjectedWithIncludedStruct(object __obj)
 cdef api object init__module__FieldsInjectedWithIncludedStruct(object data):
     return __thrift_types.FieldsInjectedWithIncludedStruct._fbthrift_from_internal_data(data)
 
+cdef api int can_extract__module__FieldsInjectedWithFieldsWithIncludedStruct(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.FieldsInjectedWithFieldsWithIncludedStruct) else 0
+
+
+cdef api object init__module__FieldsInjectedWithFieldsWithIncludedStruct(object data):
+    return __thrift_types.FieldsInjectedWithFieldsWithIncludedStruct._fbthrift_from_internal_data(data)
+

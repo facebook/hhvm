@@ -303,6 +303,92 @@ void swap([[maybe_unused]] FieldsInjectedWithIncludedStruct& a, [[maybe_unused]]
 
 } // namespace cpp2
 
+
+namespace cpp2 {
+
+std::string_view FieldsInjectedWithFieldsWithIncludedStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<FieldsInjectedWithFieldsWithIncludedStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+std::string_view FieldsInjectedWithFieldsWithIncludedStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<FieldsInjectedWithFieldsWithIncludedStruct>::name;
+}
+
+FieldsInjectedWithFieldsWithIncludedStruct::FieldsInjectedWithFieldsWithIncludedStruct(const FieldsInjectedWithFieldsWithIncludedStruct&) = default;
+FieldsInjectedWithFieldsWithIncludedStruct& FieldsInjectedWithFieldsWithIncludedStruct::operator=(const FieldsInjectedWithFieldsWithIncludedStruct&) = default;
+FieldsInjectedWithFieldsWithIncludedStruct::FieldsInjectedWithFieldsWithIncludedStruct() {
+}
+
+
+FieldsInjectedWithFieldsWithIncludedStruct::~FieldsInjectedWithFieldsWithIncludedStruct() {}
+
+FieldsInjectedWithFieldsWithIncludedStruct::FieldsInjectedWithFieldsWithIncludedStruct([[maybe_unused]] FieldsInjectedWithFieldsWithIncludedStruct&& other) noexcept :
+    __fbthrift_field_string_field(std::move(other.__fbthrift_field_string_field)),
+    __fbthrift_field_injected_field(std::move(other.__fbthrift_field_injected_field)),
+    __isset(other.__isset) {
+}
+
+FieldsInjectedWithFieldsWithIncludedStruct& FieldsInjectedWithFieldsWithIncludedStruct::operator=([[maybe_unused]] FieldsInjectedWithFieldsWithIncludedStruct&& other) noexcept {
+    this->__fbthrift_field_string_field = std::move(other.__fbthrift_field_string_field);
+    this->__fbthrift_field_injected_field = std::move(other.__fbthrift_field_injected_field);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+FieldsInjectedWithFieldsWithIncludedStruct::FieldsInjectedWithFieldsWithIncludedStruct(apache::thrift::FragileConstructor, ::std::string string_field__arg, ::cpp2::InjectedField injected_field__arg) :
+    __fbthrift_field_string_field(std::move(string_field__arg)),
+    __fbthrift_field_injected_field(std::move(injected_field__arg)) { 
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+}
+
+void FieldsInjectedWithFieldsWithIncludedStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_string_field = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  __isset = {};
+}
+
+void FieldsInjectedWithFieldsWithIncludedStruct::__fbthrift_clear_terse_fields() {
+}
+
+bool FieldsInjectedWithFieldsWithIncludedStruct::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool FieldsInjectedWithFieldsWithIncludedStruct::operator==([[maybe_unused]] const FieldsInjectedWithFieldsWithIncludedStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+bool FieldsInjectedWithFieldsWithIncludedStruct::operator<([[maybe_unused]] const FieldsInjectedWithFieldsWithIncludedStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+
+const ::cpp2::InjectedField& FieldsInjectedWithFieldsWithIncludedStruct::get_injected_field() const& {
+  return __fbthrift_field_injected_field;
+}
+
+::cpp2::InjectedField FieldsInjectedWithFieldsWithIncludedStruct::get_injected_field() && {
+  return static_cast<::cpp2::InjectedField&&>(__fbthrift_field_injected_field);
+}
+
+void swap([[maybe_unused]] FieldsInjectedWithFieldsWithIncludedStruct& a, [[maybe_unused]] FieldsInjectedWithFieldsWithIncludedStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_string_field, b.__fbthrift_field_string_field);
+  swap(a.__fbthrift_field_injected_field, b.__fbthrift_field_injected_field);
+  swap(a.__isset, b.__isset);
+}
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        FieldsInjectedWithFieldsWithIncludedStruct,
+        ::apache::thrift::type_class::structure,
+        ::cpp2::InjectedField>,
+    "inconsistent use of json option");
+
+} // namespace cpp2
+
 namespace cpp2 { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }

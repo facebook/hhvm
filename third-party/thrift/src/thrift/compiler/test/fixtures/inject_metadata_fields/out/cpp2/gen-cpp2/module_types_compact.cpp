@@ -28,4 +28,9 @@ template uint32_t FieldsInjectedWithIncludedStruct::write<>(apache::thrift::Comp
 template uint32_t FieldsInjectedWithIncludedStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t FieldsInjectedWithIncludedStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+template void FieldsInjectedWithFieldsWithIncludedStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t FieldsInjectedWithFieldsWithIncludedStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t FieldsInjectedWithFieldsWithIncludedStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t FieldsInjectedWithFieldsWithIncludedStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
 } // namespace cpp2

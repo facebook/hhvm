@@ -17,6 +17,7 @@
 namespace py3 testing
 
 include "thrift/lib/python/test/sub_dependency.thrift"
+include "thrift/lib/python/test/injected_field.thrift"
 
 struct IncludedStruct {
   1: sub_dependency.Basic val;
@@ -25,4 +26,8 @@ struct IncludedStruct {
   4: list<sub_dependency.Basic> basic_list;
   5: set<sub_dependency.IncludedColour> color_set;
   6: map<sub_dependency.IncludedColour, sub_dependency.Basic> color_map;
+}
+
+struct FieldsWithIncludedStruct {
+  1: injected_field.InjectedField injected_field;
 }

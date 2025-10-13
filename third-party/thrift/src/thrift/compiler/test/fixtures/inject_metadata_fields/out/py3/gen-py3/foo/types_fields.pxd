@@ -39,6 +39,8 @@ from thrift.py3.types cimport (
 from thrift.python.protocol cimport Protocol as __Protocol
 from folly.optional cimport cOptional as __cOptional
 
+cimport injected_field.types as _injected_field_types
+cimport injected_field.cbindings as _injected_field_cbindings
 
 cimport foo.types as _foo_types
 cimport foo.cbindings as _foo_cbindings
@@ -56,4 +58,15 @@ cdef class __Fields_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *
     cdef void _set_field_1(self, _fbthrift_value) except *
     cdef void _set_field_2(self, _fbthrift_value) except *
+
+
+ctypedef void (*__FieldsWithIncludedStruct_FieldsSetterFunc)(__FieldsWithIncludedStruct_FieldsSetter, object) except *
+
+cdef class __FieldsWithIncludedStruct_FieldsSetter(__StructFieldsSetter):
+    cdef _foo_cbindings.cFieldsWithIncludedStruct* _struct_cpp_obj
+    cdef cumap[__cstring_view, __FieldsWithIncludedStruct_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __FieldsWithIncludedStruct_FieldsSetter _fbthrift_create(_foo_cbindings.cFieldsWithIncludedStruct* struct_cpp_obj)
+    cdef void _set_field_0(self, _fbthrift_value) except *
 

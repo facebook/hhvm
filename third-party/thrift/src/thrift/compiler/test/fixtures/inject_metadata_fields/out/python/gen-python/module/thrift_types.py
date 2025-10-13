@@ -299,6 +299,76 @@ class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_types.StructMe
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.FieldsInjectedWithIncludedStruct, FieldsInjectedWithIncludedStruct)
 _fbthrift_FieldsInjectedWithIncludedStruct = FieldsInjectedWithIncludedStruct
 
+class FieldsInjectedWithFieldsWithIncludedStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            -1001,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "injected_field",  # name
+            "injected_field",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.StructTypeInfo(_fbthrift__injected_field__thrift_types.InjectedField),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "string_field",  # name
+            "string_field",  # python name (from @python.Name annotation)
+            _fbthrift_python_types.typeinfo_string,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.FieldsInjectedWithFieldsWithIncludedStruct"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return None
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_FieldsInjectedWithFieldsWithIncludedStruct()
+
+    def _to_python(self):
+        return self
+
+    def _to_mutable_python(self):
+        from thrift.python import mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return mutable_converter.to_mutable_python_struct_or_union(mutable_types.FieldsInjectedWithFieldsWithIncludedStruct, self)
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.FieldsInjectedWithFieldsWithIncludedStruct, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        from thrift.util import converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return converter.to_py_struct(py_deprecated_types.FieldsInjectedWithFieldsWithIncludedStruct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return converter.to_py_struct(py_asyncio_types.FieldsInjectedWithFieldsWithIncludedStruct, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.FieldsInjectedWithFieldsWithIncludedStruct, FieldsInjectedWithFieldsWithIncludedStruct)
+_fbthrift_FieldsInjectedWithFieldsWithIncludedStruct = FieldsInjectedWithFieldsWithIncludedStruct
+
 # This unfortunately has to be down here to prevent circular imports
 import module.thrift_metadata as _fbthrift__module__thrift_metadata
 
@@ -322,10 +392,15 @@ def _fbthrift_metadata__struct_FieldsInjectedWithIncludedStruct():
     return _fbthrift__module__thrift_metadata.gen_metadata_struct_FieldsInjectedWithIncludedStruct()
 
 
+def _fbthrift_metadata__struct_FieldsInjectedWithFieldsWithIncludedStruct():
+    return _fbthrift__module__thrift_metadata.gen_metadata_struct_FieldsInjectedWithFieldsWithIncludedStruct()
+
+
 _fbthrift_all_structs = [
     Fields,
     FieldsInjectedToEmptyStruct,
     FieldsInjectedToStruct,
     FieldsInjectedWithIncludedStruct,
+    FieldsInjectedWithFieldsWithIncludedStruct,
 ]
 _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)

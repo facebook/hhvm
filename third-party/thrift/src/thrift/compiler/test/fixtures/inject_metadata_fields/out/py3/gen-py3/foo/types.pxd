@@ -42,6 +42,8 @@ from thrift.python.common cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+cimport injected_field.types as _injected_field_types
+cimport injected_field.cbindings as _injected_field_cbindings
 
 cimport foo.types as _fbthrift_types
 cimport foo.types_fields as _fbthrift_types_fields
@@ -61,6 +63,17 @@ cdef class Fields(thrift.py3.types.Struct):
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_foo_cbindings.cFields])
+
+
+
+cdef class FieldsWithIncludedStruct(thrift.py3.types.Struct):
+    cdef shared_ptr[_foo_cbindings.cFieldsWithIncludedStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef _fbthrift_types_fields.__FieldsWithIncludedStruct_FieldsSetter _fields_setter
+    cdef inline object injected_field_impl(self)
+    cdef _injected_field_types.InjectedField __fbthrift_cached_injected_field
+
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_foo_cbindings.cFieldsWithIncludedStruct])
 
 
 

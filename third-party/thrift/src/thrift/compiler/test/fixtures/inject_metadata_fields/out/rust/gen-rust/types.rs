@@ -55,6 +55,18 @@ pub struct FieldsInjectedWithIncludedStruct {
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
 
+#[derive(Clone, PartialEq)]
+pub struct FieldsInjectedWithFieldsWithIncludedStruct {
+    pub string_field: ::std::string::String,
+    pub injected_field: injected_field__types::InjectedField,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::Fields {
     fn default() -> Self {
@@ -638,6 +650,151 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldsInjectedWithIncludedStruc
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+            },
+            _ => {}
+        }
+
+        ::std::option::Option::None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::FieldsInjectedWithFieldsWithIncludedStruct {
+    fn default() -> Self {
+        Self {
+            string_field: ::std::default::Default::default(),
+            injected_field: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::FieldsInjectedWithFieldsWithIncludedStruct {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("FieldsInjectedWithFieldsWithIncludedStruct")
+            .field("string_field", &self.string_field)
+            .field("injected_field", &self.injected_field)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::FieldsInjectedWithFieldsWithIncludedStruct {}
+unsafe impl ::std::marker::Sync for self::FieldsInjectedWithFieldsWithIncludedStruct {}
+impl ::std::marker::Unpin for self::FieldsInjectedWithFieldsWithIncludedStruct {}
+impl ::std::panic::RefUnwindSafe for self::FieldsInjectedWithFieldsWithIncludedStruct {}
+impl ::std::panic::UnwindSafe for self::FieldsInjectedWithFieldsWithIncludedStruct {}
+
+impl ::fbthrift::GetTType for self::FieldsInjectedWithFieldsWithIncludedStruct {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetTypeNameType for self::FieldsInjectedWithFieldsWithIncludedStruct {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::FieldsInjectedWithFieldsWithIncludedStruct
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("FieldsInjectedWithFieldsWithIncludedStruct");
+        p.write_field_begin("string_field", ::fbthrift::TType::String, 1);
+        ::fbthrift::Serialize::rs_thrift_write(&self.string_field, p);
+        p.write_field_end();
+        p.write_field_begin("injected_field", ::fbthrift::TType::Struct, -1001);
+        ::fbthrift::Serialize::rs_thrift_write(&self.injected_field, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::FieldsInjectedWithFieldsWithIncludedStruct
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("injected_field", ::fbthrift::TType::Struct, -1001),
+            ::fbthrift::Field::new("string_field", ::fbthrift::TType::String, 1),
+        ];
+
+        #[allow(unused_mut)]
+        let mut output = FieldsInjectedWithFieldsWithIncludedStruct::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a FieldsInjectedWithFieldsWithIncludedStruct")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
+        let fallback  = 'fastpath: {
+            if (fty, fid) == (::fbthrift::TType::String, 1) {
+                output.string_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "string_field", strct: "FieldsInjectedWithFieldsWithIncludedStruct"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            if (fty, fid) == (::fbthrift::TType::Struct, -1001) {
+                output.injected_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "injected_field", strct: "FieldsInjectedWithFieldsWithIncludedStruct"})?;
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+
+            fty != ::fbthrift::TType::Stop
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::String, 1) => output.string_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "string_field", strct: "FieldsInjectedWithFieldsWithIncludedStruct"})?,
+                    (::fbthrift::TType::Struct, -1001) => output.injected_field = ::anyhow::Context::context(::fbthrift::Deserialize::rs_thrift_read(p), ::fbthrift::errors::DeserializingFieldError { field: "injected_field", strct: "FieldsInjectedWithFieldsWithIncludedStruct"})?,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            }
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for FieldsInjectedWithFieldsWithIncludedStruct {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        if type_id == ::std::any::TypeId::of::<internal__types::InjectMetadataFields>() {
+            let mut tmp = ::std::option::Option::Some(internal__types::InjectMetadataFields {
+                r#type: "foo.FieldsWithIncludedStruct".to_owned(),
+                ..::std::default::Default::default()
+            });
+            let r: &mut dyn ::std::any::Any = &mut tmp;
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+            return r.take();
+        }
+
+        ::std::option::Option::None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: ::std::primitive::i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+            },
+            -1001 => {
             },
             _ => {}
         }

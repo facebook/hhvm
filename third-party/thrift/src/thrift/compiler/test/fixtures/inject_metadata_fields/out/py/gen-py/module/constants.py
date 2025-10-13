@@ -15,5 +15,5 @@ from thrift.protocol.TProtocol import TProtocolException
 import foo.ttypes
 
 
-from .ttypes import UTF8STRINGS, Fields, FieldsInjectedToEmptyStruct, FieldsInjectedToStruct, FieldsInjectedWithIncludedStruct
+from .ttypes import UTF8STRINGS, Fields, FieldsInjectedToEmptyStruct, FieldsInjectedToStruct, FieldsInjectedWithIncludedStruct, FieldsInjectedWithFieldsWithIncludedStruct
 

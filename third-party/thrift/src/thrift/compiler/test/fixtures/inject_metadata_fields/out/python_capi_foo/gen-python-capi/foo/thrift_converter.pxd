@@ -10,7 +10,12 @@
 cdef extern from "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/foo_types.h":
     cdef cppclass cFields "::cpp2::Fields":
         cFields()
+    cdef cppclass cFieldsWithIncludedStruct "::cpp2::FieldsWithIncludedStruct":
+        cFieldsWithIncludedStruct()
 
 cdef cFields Fields_convert_to_cpp(object inst) except*
 cdef object Fields_from_cpp(const cFields& c_struct)
+
+cdef cFieldsWithIncludedStruct FieldsWithIncludedStruct_convert_to_cpp(object inst) except*
+cdef object FieldsWithIncludedStruct_from_cpp(const cFieldsWithIncludedStruct& c_struct)
 

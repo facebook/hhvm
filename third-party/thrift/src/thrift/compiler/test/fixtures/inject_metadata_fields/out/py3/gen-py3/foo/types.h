@@ -35,8 +35,28 @@ inline void reset_field<::cpp2::Fields>(
 }
 
 template<>
+inline void reset_field<::cpp2::FieldsWithIncludedStruct>(
+    ::cpp2::FieldsWithIncludedStruct& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.injected_field_ref().copy_from(default_inst<::cpp2::FieldsWithIncludedStruct>().injected_field_ref());
+      return;
+  }
+}
+
+template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::Fields>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::cpp2::FieldsWithIncludedStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

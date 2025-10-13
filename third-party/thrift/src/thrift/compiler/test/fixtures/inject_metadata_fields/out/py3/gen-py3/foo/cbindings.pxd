@@ -33,6 +33,7 @@ from thrift.py3.types cimport (
 )
 from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
 
+cimport injected_field.cbindings as _injected_field_cbindings
 
 
 cdef extern from "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/foo_metadata.h" namespace "apache::thrift::detail::md":
@@ -57,4 +58,16 @@ cdef extern from "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/
         __field_ref[string] injected_field_ref "injected_field_ref" ()
         __optional_field_ref[string] injected_structured_annotation_field_ref "injected_structured_annotation_field_ref" ()
         __optional_field_ref[string] injected_unstructured_annotation_field_ref "injected_unstructured_annotation_field_ref" ()
+
+
+    cdef cppclass cFieldsWithIncludedStruct "::cpp2::FieldsWithIncludedStruct":
+        cFieldsWithIncludedStruct() except +
+        cFieldsWithIncludedStruct(const cFieldsWithIncludedStruct&) except +
+        bint operator==(cFieldsWithIncludedStruct&)
+        bint operator!=(cFieldsWithIncludedStruct&)
+        bint operator<(cFieldsWithIncludedStruct&)
+        bint operator>(cFieldsWithIncludedStruct&)
+        bint operator<=(cFieldsWithIncludedStruct&)
+        bint operator>=(cFieldsWithIncludedStruct&)
+        __field_ref[_injected_field_cbindings.cInjectedField] injected_field_ref "injected_field_ref" ()
 

@@ -28,4 +28,9 @@ template uint32_t FieldsInjectedWithIncludedStruct::write<>(apache::thrift::Bina
 template uint32_t FieldsInjectedWithIncludedStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t FieldsInjectedWithIncludedStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
 
+template void FieldsInjectedWithFieldsWithIncludedStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t FieldsInjectedWithFieldsWithIncludedStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t FieldsInjectedWithFieldsWithIncludedStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t FieldsInjectedWithFieldsWithIncludedStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+
 } // namespace cpp2

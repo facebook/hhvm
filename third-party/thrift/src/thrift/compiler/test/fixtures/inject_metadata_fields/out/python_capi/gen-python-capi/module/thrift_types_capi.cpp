@@ -35,6 +35,9 @@ bool ensure_module_imported() {
   static constexpr std::int16_t _fbthrift__FieldsInjectedWithIncludedStruct__tuple_pos[4] = {
     4, 3, 2, 1
   };
+  static constexpr std::int16_t _fbthrift__FieldsInjectedWithFieldsWithIncludedStruct__tuple_pos[2] = {
+    2, 1
+  };
 } // namespace
 
 ExtractorResult<::cpp2::Fields>
@@ -417,6 +420,99 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
           *fbthrift_data,
           _fbthrift__FieldsInjectedWithIncludedStruct__tuple_pos[3],
           *_fbthrift__injected_unstructured_annotation_field) == -1) {
+    return nullptr;
+  }
+  return std::move(fbthrift_data).release();
+}
+
+
+ExtractorResult<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct, ::module::NamespaceTag>>::operator()(PyObject* obj) {
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a FieldsInjectedWithFieldsWithIncludedStruct");
+      }
+      return extractorError<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct>(
+          "Marshal error: FieldsInjectedWithFieldsWithIncludedStruct");
+  }
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::cpp2::FieldsInjectedWithFieldsWithIncludedStruct, ::module::NamespaceTag>>{}(*fbThriftData);
+}
+
+ExtractorResult<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct>
+Extractor<::apache::thrift::python::capi::ComposedStruct<
+    ::cpp2::FieldsInjectedWithFieldsWithIncludedStruct, ::module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
+  ::cpp2::FieldsInjectedWithFieldsWithIncludedStruct cpp;
+  std::optional<std::string_view> error;
+  Extractor<::apache::thrift::python::capi::FallibleString>{}.extractInto(
+      cpp.string_field_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__FieldsInjectedWithFieldsWithIncludedStruct__tuple_pos[0]),
+      error);
+  Extractor<::apache::thrift::python::capi::ComposedStruct<::cpp2::InjectedField, ::injected_field::NamespaceTag>>{}.extractInto(
+      cpp.injected_field_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__FieldsInjectedWithFieldsWithIncludedStruct__tuple_pos[1]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
+  }
+  return cpp;
+}
+
+
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct, ::module::NamespaceTag>>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module module import error");
+  }
+  int result =
+      can_extract__module__FieldsInjectedWithFieldsWithIncludedStruct(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: FieldsInjectedWithFieldsWithIncludedStruct");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct, ::module::NamespaceTag>>::operator()(
+    const ::cpp2::FieldsInjectedWithFieldsWithIncludedStruct& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::cpp2::FieldsInjectedWithFieldsWithIncludedStruct, ::module::NamespaceTag>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
+  }
+  return init__module__FieldsInjectedWithFieldsWithIncludedStruct(*fbthrift_data);
+}
+
+PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::cpp2::FieldsInjectedWithFieldsWithIncludedStruct, ::module::NamespaceTag>>::operator()(
+    [[maybe_unused]] const ::cpp2::FieldsInjectedWithFieldsWithIncludedStruct& val) {
+  StrongRef fbthrift_data(createStructTuple(2));
+  StrongRef _fbthrift__string_field(
+    Constructor<::apache::thrift::python::capi::FallibleString>{}
+    .constructFrom(val.string_field_ref()));
+  if (!_fbthrift__string_field ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__FieldsInjectedWithFieldsWithIncludedStruct__tuple_pos[0],
+          *_fbthrift__string_field) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__injected_field(
+    Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::InjectedField, ::injected_field::NamespaceTag>>{}
+    .constructFrom(val.injected_field_ref()));
+  if (!_fbthrift__injected_field ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__FieldsInjectedWithFieldsWithIncludedStruct__tuple_pos[1],
+          *_fbthrift__injected_field) == -1) {
     return nullptr;
   }
   return std::move(fbthrift_data).release();

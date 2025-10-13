@@ -145,4 +145,35 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
   PyObject* operator()(const ::cpp2::FieldsInjectedWithIncludedStruct& val);
 };
 
+template <>
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct, ::module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct, ::module::NamespaceTag>> {
+  static const bool kUsingMarshal = true;
+  ExtractorResult<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::cpp2::FieldsInjectedWithFieldsWithIncludedStruct, ::module::NamespaceTag >>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::cpp2::FieldsInjectedWithFieldsWithIncludedStruct, ::module::NamespaceTag>> {
+  ExtractorResult<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct> operator()(PyObject* obj);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct, ::module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct, ::module::NamespaceTag>> {
+  static const bool kUsingMarshal = true;
+  PyObject* operator()(const ::cpp2::FieldsInjectedWithFieldsWithIncludedStruct& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::cpp2::FieldsInjectedWithFieldsWithIncludedStruct, ::module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::cpp2::FieldsInjectedWithFieldsWithIncludedStruct, ::module::NamespaceTag>> {
+  PyObject* operator()(const ::cpp2::FieldsInjectedWithFieldsWithIncludedStruct& val);
+};
+
 } // namespace apache::thrift::python::capi

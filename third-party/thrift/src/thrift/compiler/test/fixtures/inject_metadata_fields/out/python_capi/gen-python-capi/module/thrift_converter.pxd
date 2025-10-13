@@ -16,6 +16,8 @@ cdef extern from "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/
         cFieldsInjectedToStruct()
     cdef cppclass cFieldsInjectedWithIncludedStruct "::cpp2::FieldsInjectedWithIncludedStruct":
         cFieldsInjectedWithIncludedStruct()
+    cdef cppclass cFieldsInjectedWithFieldsWithIncludedStruct "::cpp2::FieldsInjectedWithFieldsWithIncludedStruct":
+        cFieldsInjectedWithFieldsWithIncludedStruct()
 
 cdef cFields Fields_convert_to_cpp(object inst) except*
 cdef object Fields_from_cpp(const cFields& c_struct)
@@ -28,4 +30,7 @@ cdef object FieldsInjectedToStruct_from_cpp(const cFieldsInjectedToStruct& c_str
 
 cdef cFieldsInjectedWithIncludedStruct FieldsInjectedWithIncludedStruct_convert_to_cpp(object inst) except*
 cdef object FieldsInjectedWithIncludedStruct_from_cpp(const cFieldsInjectedWithIncludedStruct& c_struct)
+
+cdef cFieldsInjectedWithFieldsWithIncludedStruct FieldsInjectedWithFieldsWithIncludedStruct_convert_to_cpp(object inst) except*
+cdef object FieldsInjectedWithFieldsWithIncludedStruct_from_cpp(const cFieldsInjectedWithFieldsWithIncludedStruct& c_struct)
 

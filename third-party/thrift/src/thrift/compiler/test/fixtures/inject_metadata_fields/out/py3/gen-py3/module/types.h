@@ -71,6 +71,19 @@ inline void reset_field<::cpp2::FieldsInjectedWithIncludedStruct>(
 }
 
 template<>
+inline void reset_field<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct>(
+    ::cpp2::FieldsInjectedWithFieldsWithIncludedStruct& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.string_field_ref().copy_from(default_inst<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct>().string_field_ref());
+      return;
+    case 1:
+      obj.injected_field_ref().copy_from(default_inst<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct>().injected_field_ref());
+      return;
+  }
+}
+
+template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::Fields>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
@@ -103,6 +116,16 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::FieldsInjectedWithIncludedStruct>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::cpp2::FieldsInjectedWithFieldsWithIncludedStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

@@ -97,3 +97,16 @@ cdef extern from "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/
         __optional_field_ref[string] injected_structured_annotation_field_ref "injected_structured_annotation_field_ref" ()
         __optional_field_ref[string] injected_unstructured_annotation_field_ref "injected_unstructured_annotation_field_ref" ()
 
+
+    cdef cppclass cFieldsInjectedWithFieldsWithIncludedStruct "::cpp2::FieldsInjectedWithFieldsWithIncludedStruct":
+        cFieldsInjectedWithFieldsWithIncludedStruct() except +
+        cFieldsInjectedWithFieldsWithIncludedStruct(const cFieldsInjectedWithFieldsWithIncludedStruct&) except +
+        bint operator==(cFieldsInjectedWithFieldsWithIncludedStruct&)
+        bint operator!=(cFieldsInjectedWithFieldsWithIncludedStruct&)
+        bint operator<(cFieldsInjectedWithFieldsWithIncludedStruct&)
+        bint operator>(cFieldsInjectedWithFieldsWithIncludedStruct&)
+        bint operator<=(cFieldsInjectedWithFieldsWithIncludedStruct&)
+        bint operator>=(cFieldsInjectedWithFieldsWithIncludedStruct&)
+        __field_ref[string] string_field_ref "string_field_ref" ()
+        __field_ref[_injected_field_cbindings.cInjectedField] injected_field_ref "injected_field_ref" ()
+

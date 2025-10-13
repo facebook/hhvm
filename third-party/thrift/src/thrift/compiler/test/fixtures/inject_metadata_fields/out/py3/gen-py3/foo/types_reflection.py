@@ -19,6 +19,7 @@ from thrift.py3.reflection import (
     FieldSpec as __FieldSpec,
 )
 
+import injected_field.types as _injected_field_types
 
 import foo.types as _foo_types
 
@@ -65,6 +66,27 @@ def get_reflection__Fields() -> __StructSpec:
             type=str,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.OPTIONAL,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    return spec
+def get_reflection__FieldsWithIncludedStruct() -> __StructSpec:
+    spec: __StructSpec = __StructSpec._fbthrift_create(
+        name="FieldsWithIncludedStruct",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=1,
+            name="injected_field",
+            py_name="injected_field",
+            type=_injected_field_types.InjectedField,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={
             },

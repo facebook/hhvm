@@ -50,4 +50,12 @@ cdef shared_ptr[_fbthrift_cbindings.cFieldsInjectedWithIncludedStruct] FieldsInj
 cdef object FieldsInjectedWithIncludedStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cFieldsInjectedWithIncludedStruct]& c_struct):
     return _fbthrift_ctypes.FieldsInjectedWithIncludedStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
+cdef shared_ptr[_fbthrift_cbindings.cFieldsInjectedWithFieldsWithIncludedStruct] FieldsInjectedWithFieldsWithIncludedStruct_convert_to_cpp(object inst) except*:
+    return make_shared[_fbthrift_cbindings.cFieldsInjectedWithFieldsWithIncludedStruct](deref(
+        (<_fbthrift_ctypes.FieldsInjectedWithFieldsWithIncludedStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    ))
+
+cdef object FieldsInjectedWithFieldsWithIncludedStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cFieldsInjectedWithFieldsWithIncludedStruct]& c_struct):
+    return _fbthrift_ctypes.FieldsInjectedWithFieldsWithIncludedStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+
 

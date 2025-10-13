@@ -26,3 +26,10 @@ cdef api int can_extract__foo__Fields(object __obj) except -1:
 cdef api object init__foo__Fields(object data):
     return __thrift_types.Fields._fbthrift_from_internal_data(data)
 
+cdef api int can_extract__foo__FieldsWithIncludedStruct(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.FieldsWithIncludedStruct) else 0
+
+
+cdef api object init__foo__FieldsWithIncludedStruct(object data):
+    return __thrift_types.FieldsWithIncludedStruct._fbthrift_from_internal_data(data)
+

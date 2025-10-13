@@ -18,3 +18,8 @@ cdef api int can_extract__foo__Fields(object) except -1
 
 cdef api object init__foo__Fields(object data)
 
+cdef api int can_extract__foo__FieldsWithIncludedStruct(object) except -1
+
+
+cdef api object init__foo__FieldsWithIncludedStruct(object data)
+

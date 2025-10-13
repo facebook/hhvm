@@ -12,6 +12,8 @@ from thrift.Thrift import TType, TMessageType, TPriority, TRequestContext, TProc
 from thrift.protocol.TProtocol import TProtocolException
 
 
+import injected_field.ttypes
+
 
 import pprint
 import warnings
@@ -48,7 +50,7 @@ class ThriftEnumWrapper(int):
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'Fields']
+__all__ = ['UTF8STRINGS', 'Fields', 'FieldsWithIncludedStruct']
 
 class Fields:
   r"""
@@ -177,6 +179,104 @@ class Fields:
   def _to_py_deprecated(self):
     return self
 
+class FieldsWithIncludedStruct:
+  r"""
+  Attributes:
+   - injected_field
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRUCT:
+          self.injected_field = injected_field.ttypes.InjectedField()
+          self.injected_field.read(iprot)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('FieldsWithIncludedStruct')
+    if self.injected_field != None:
+      oprot.writeFieldBegin('injected_field', TType.STRUCT, 1)
+      self.injected_field.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.injected_field is not None:
+      value = pprint.pformat(self.injected_field, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    injected_field=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'injected_field',
+    )
+
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("foo.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.FieldsWithIncludedStruct, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("foo.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.FieldsWithIncludedStruct, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("foo.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.FieldsWithIncludedStruct, self)
+
+  def _to_py_deprecated(self):
+    return self
+
 all_structs.append(Fields)
 Fields.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (100, TType.STRING, 'injected_field', True, None, 2, ), # 100
@@ -204,6 +304,28 @@ def Fields__setstate__(self, state):
 
 Fields.__getstate__ = lambda self: self.__dict__.copy()
 Fields.__setstate__ = Fields__setstate__
+
+all_structs.append(FieldsWithIncludedStruct)
+FieldsWithIncludedStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+  (1, TType.STRUCT, 'injected_field', [injected_field.ttypes.InjectedField, injected_field.ttypes.InjectedField.thrift_spec, False], None, 2, ), # 1
+)))
+
+FieldsWithIncludedStruct.thrift_struct_annotations = {
+}
+FieldsWithIncludedStruct.thrift_field_annotations = {
+}
+
+def FieldsWithIncludedStruct__init__(self, injected_field=None,):
+  self.injected_field = injected_field
+
+FieldsWithIncludedStruct.__init__ = FieldsWithIncludedStruct__init__
+
+def FieldsWithIncludedStruct__setstate__(self, state):
+  state.setdefault('injected_field', None)
+  self.__dict__ = state
+
+FieldsWithIncludedStruct.__getstate__ = lambda self: self.__dict__.copy()
+FieldsWithIncludedStruct.__setstate__ = FieldsWithIncludedStruct__setstate__
 
 fix_spec(all_structs)
 del all_structs

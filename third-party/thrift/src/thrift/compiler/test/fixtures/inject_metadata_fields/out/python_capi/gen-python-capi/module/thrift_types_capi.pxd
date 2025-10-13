@@ -33,3 +33,8 @@ cdef api int can_extract__module__FieldsInjectedWithIncludedStruct(object) excep
 
 cdef api object init__module__FieldsInjectedWithIncludedStruct(object data)
 
+cdef api int can_extract__module__FieldsInjectedWithFieldsWithIncludedStruct(object) except -1
+
+
+cdef api object init__module__FieldsInjectedWithFieldsWithIncludedStruct(object data)
+

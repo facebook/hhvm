@@ -15,6 +15,9 @@
  */
 
 include "thrift/annotation/thrift.thrift"
+include "injected_field.thrift"
+
+namespace go test.fixtures.inject_metadata_fields
 
 struct Fields {
   100: string injected_field;
@@ -22,4 +25,8 @@ struct Fields {
   101: optional string injected_structured_annotation_field;
   @thrift.Box
   102: optional string injected_unstructured_annotation_field;
+}
+
+struct FieldsWithIncludedStruct {
+  1: injected_field.InjectedField injected_field;
 }

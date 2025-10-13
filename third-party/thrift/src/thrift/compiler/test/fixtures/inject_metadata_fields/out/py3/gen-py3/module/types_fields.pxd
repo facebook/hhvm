@@ -94,3 +94,15 @@ cdef class __FieldsInjectedWithIncludedStruct_FieldsSetter(__StructFieldsSetter)
     cdef void _set_field_2(self, _fbthrift_value) except *
     cdef void _set_field_3(self, _fbthrift_value) except *
 
+
+ctypedef void (*__FieldsInjectedWithFieldsWithIncludedStruct_FieldsSetterFunc)(__FieldsInjectedWithFieldsWithIncludedStruct_FieldsSetter, object) except *
+
+cdef class __FieldsInjectedWithFieldsWithIncludedStruct_FieldsSetter(__StructFieldsSetter):
+    cdef _module_cbindings.cFieldsInjectedWithFieldsWithIncludedStruct* _struct_cpp_obj
+    cdef cumap[__cstring_view, __FieldsInjectedWithFieldsWithIncludedStruct_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __FieldsInjectedWithFieldsWithIncludedStruct_FieldsSetter _fbthrift_create(_module_cbindings.cFieldsInjectedWithFieldsWithIncludedStruct* struct_cpp_obj)
+    cdef void _set_field_0(self, _fbthrift_value) except *
+    cdef void _set_field_1(self, _fbthrift_value) except *
+

@@ -72,6 +72,21 @@ struct VisitByFieldId<::cpp2::FieldsInjectedWithIncludedStruct> {
     }
   }
 };
+
+template <>
+struct VisitByFieldId<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).string_field_ref());
+    case -1001:
+      return f(1, static_cast<T&&>(t).injected_field_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::cpp2::FieldsInjectedWithFieldsWithIncludedStruct");
+    }
+  }
+};
 } // namespace detail
 } // namespace thrift
 } // namespace apache

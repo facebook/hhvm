@@ -13,6 +13,9 @@ import foo.thrift_enums as _fbthrift_current_module_enums
 import foo.thrift_enums
 
 
+import injected_field.thrift_enums
+import injected_field.thrift_metadata as _fbthrift__injected_field__thrift_metadata
+
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
 # instead of re-generating thrift structs
 def _fbthrift_gen_metadata_struct_Fields(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
@@ -45,9 +48,34 @@ def _fbthrift_gen_metadata_struct_Fields(metadata_struct: _fbthrift_metadata.Thr
 def gen_metadata_struct_Fields() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_Fields(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
 
+# TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
+# instead of re-generating thrift structs
+def _fbthrift_gen_metadata_struct_FieldsWithIncludedStruct(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "foo.FieldsWithIncludedStruct"
+
+    if qualified_name in metadata_struct.structs:
+        return metadata_struct
+    fields = [
+        _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="injected_field.InjectedField")), name="injected_field", is_optional=False, structured_annotations=[
+        ]),
+    ]
+    struct_dict = dict(metadata_struct.structs)
+    struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
+        is_union=False,
+        structured_annotations=[
+        ])
+    new_struct = metadata_struct(structs=struct_dict)
+
+    # injected_field
+    new_struct = injected_field.thrift_metadata._fbthrift_gen_metadata_struct_InjectedField(new_struct)
+    return new_struct
+def gen_metadata_struct_FieldsWithIncludedStruct() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_struct_FieldsWithIncludedStruct(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
+
 
 
 def getThriftModuleMetadata() -> _fbthrift_metadata.ThriftMetadata:
     meta = _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
     meta = _fbthrift_gen_metadata_struct_Fields(meta)
+    meta = _fbthrift_gen_metadata_struct_FieldsWithIncludedStruct(meta)
     return meta

@@ -19,6 +19,7 @@ import builtins
 
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
+import injected_field.thrift_abstract_types as _fbthrift__injected_field__thrift_abstract_types
 
 class Fields(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
@@ -44,3 +45,19 @@ class Fields(_abc.ABC):
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "foo.ttypes.Fields": ...  # type: ignore
 _fbthrift_Fields = Fields
+class FieldsWithIncludedStruct(_abc.ABC):
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
+    @_abc.abstractmethod
+    def injected_field(self) -> _fbthrift__injected_field__thrift_abstract_types.InjectedField: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[_fbthrift__injected_field__thrift_abstract_types.InjectedField]]]: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "foo.thrift_mutable_types.FieldsWithIncludedStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "foo.thrift_types.FieldsWithIncludedStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "foo.types.FieldsWithIncludedStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "foo.ttypes.FieldsWithIncludedStruct": ...  # type: ignore
+_fbthrift_FieldsWithIncludedStruct = FieldsWithIncludedStruct

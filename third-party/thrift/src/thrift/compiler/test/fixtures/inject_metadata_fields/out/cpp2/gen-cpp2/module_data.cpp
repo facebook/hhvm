@@ -84,7 +84,26 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 4> TStructDataStorage<:
   -1,
 }};
 
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct>::name = "FieldsInjectedWithFieldsWithIncludedStruct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 2> TStructDataStorage<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct>::fields_names = { {
+  "string_field"sv,
+  "injected_field"sv,
+}};
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 2> TStructDataStorage<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct>::fields_ids = { {
+  1,
+  -1001,
+}};
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct>::fields_types = { {
+  TType::T_STRING,
+  TType::T_STRUCT,
+}};
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 2> TStructDataStorage<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct>::isset_indexes = { {
+  0,
+  1,
+}};
+
 namespace detail {
+
 
 
 

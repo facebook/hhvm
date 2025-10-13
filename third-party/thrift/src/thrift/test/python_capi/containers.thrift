@@ -53,6 +53,7 @@ typedef list<fbvector_string> fbvector_fbvector_string
  * Containers we can support but don't currently work:
  * - std::list (need to switch constructor to forward iterator)
  */
+@thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.noncomparable": "1"}}
 struct TemplateLists {
   // @cpp.Type{template = "std::forward_list"}
   // 2: optional list<i64> intz;
@@ -67,7 +68,7 @@ struct TemplateLists {
   5: list<fbvector_fbvector_string> small_vector_tensor;
   // @cpp.Type{template = "std::list"}
   // 6: list<string> list_string;
-} (cpp.noncomparable)
+}
 
 @cpp.EnableCustomTypeOrdering
 struct TemplateSets {
@@ -130,9 +131,10 @@ typedef list<CppWrapper> VecOfWrapped
 
 // Should also not be marshaled
 // Opted-out automatically due to "no-op" cpp.Type
+@thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.noncomparable": "1"}}
 struct IndirectionB {
   1: VecOfWrapped lst;
-} (cpp.noncomparable)
+}
 
 @thrift.AllowLegacyTypedefUri
 typedef ListOfWrapped ListOfWrappedAlias

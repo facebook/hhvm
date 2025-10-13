@@ -18,6 +18,7 @@ namespace py3 thrift.test.py
 namespace py thrift.test.py.adapter
 
 include "thrift/test/py/adapter_bar.thrift"
+include "thrift/annotation/thrift.thrift"
 
 struct Foo {
   1: Bar_6216 structField;
@@ -32,11 +33,17 @@ struct FooWithoutAdapters {
 }
 
 // The following were automatically generated and may benefit from renaming.
-typedef adapter_bar.Bar (
-  py.adapter = "thrift.test.py.adapter_for_tests.AdapterTestStructToDict",
-) Bar_1448
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "py.adapter": "thrift.test.py.adapter_for_tests.AdapterTestStructToDict",
+  },
+}
+typedef adapter_bar.Bar Bar_1448
 
 // The following were automatically generated and may benefit from renaming.
-typedef adapter_bar.Bar (
-  py.adapter = "thrift.test.py.adapter_for_tests.AdapterTestStructToDict",
-) Bar_6216
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "py.adapter": "thrift.test.py.adapter_for_tests.AdapterTestStructToDict",
+  },
+}
+typedef adapter_bar.Bar Bar_6216

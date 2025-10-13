@@ -134,6 +134,7 @@ struct AdaptedFields {
   4: id.ExternId inline_adapted_int;
 }
 
+@thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.noncopyable": "1"}}
 struct ListStruct {
   1: list<bool> boolz;
   2: optional list<i64> intz;
@@ -149,7 +150,7 @@ struct ListStruct {
   @cpp.Type{name = "folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>"}
   8: list<list<list<signed_byte>>> voxels;
   9: list<IOBufPtr> buf_ptrs;
-} (cpp.noncopyable)
+}
 @thrift.AllowLegacyTypedefUri
 typedef ListStruct ListAlias
 
@@ -186,6 +187,7 @@ struct MapStruct {
   10: map<ui64, list<ui64>> unsigned_list_map;
 }
 
+@thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.noncopyable": "1"}}
 struct ComposeStruct {
   1: MyEnum enum_;
   2: AnnoyingEnum renamed_;
@@ -199,7 +201,7 @@ struct ComposeStruct {
   7: list<thrift_dep.DepStruct> friends;
   9: serialized_dep.SerializedUnion serial_union;
   10: serialized_dep.SerializedError serial_error;
-} (cpp.noncopyable)
+}
 
 @cpp.Name{value = "Shallot"}
 union Onion {

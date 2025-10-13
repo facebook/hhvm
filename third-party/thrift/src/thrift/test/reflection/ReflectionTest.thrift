@@ -16,15 +16,20 @@
 
 namespace cpp2 apache.thrift.test
 
+include "thrift/annotation/thrift.thrift"
+
 struct ReflectionTestStruct1 {
   3: i32 c;
   1: required i32 a;
   2: optional i32 b;
-  4: string d (
-    some.field.annotation = "hello",
-    some.other.annotation = 1,
-    annotation.without.value,
-  );
+  @thrift.DeprecatedUnvalidatedAnnotations{
+    items = {
+      "annotation.without.value": "1",
+      "some.field.annotation": "hello",
+      "some.other.annotation": "1",
+    },
+  }
+  4: string d;
 }
 
 enum ReflectionTestEnum {

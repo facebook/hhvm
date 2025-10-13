@@ -61,6 +61,7 @@ pub struct HhConfig {
     pub eden_fetch_parallelism: usize,
     pub use_distc_crawl_dircache: bool,
     pub distc_no_dynamic_tracing: bool,
+    pub distc_no_unnecessary_saved_state_work: bool,
 }
 
 impl HhConfig {
@@ -654,6 +655,9 @@ impl HhConfig {
                 "distc_no_dynamic_tracing" => {
                     c.distc_no_dynamic_tracing = parse_json(&value)?;
                 }
+                "distc_no_unnecessary_saved_state_work" => {
+                    c.distc_no_unnecessary_saved_state_work = parse_json(&value)?;
+                }
                 _ => {}
             }
         }
@@ -665,6 +669,7 @@ impl HhConfig {
             "eden_fetch_parallelism": self.eden_fetch_parallelism,
             "use_distc_crawl_dircache": self.use_distc_crawl_dircache,
             "distc_no_dynamic_tracing": self.distc_no_dynamic_tracing,
+            "distc_no_unnecessary_saved_state_work": self.distc_no_unnecessary_saved_state_work,
         });
         experiments.to_string()
     }

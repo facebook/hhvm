@@ -50,7 +50,6 @@ type RequestContext struct {
 type requestContextKey int
 
 const (
-	rpcOptionsKey requestContextKey = 1
 	reqContextKey requestContextKey = 2
 )
 

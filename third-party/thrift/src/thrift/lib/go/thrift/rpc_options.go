@@ -38,20 +38,6 @@ type RPCOptions struct {
 	contextHeaders
 }
 
-// WithRPCOptions sets the RPCOptions in a client request go context
-func WithRPCOptions(ctx context.Context, opts *RPCOptions) context.Context {
-	return context.WithValue(ctx, rpcOptionsKey, opts)
-}
-
-// GetRPCOptions returns the RPCOptions in a go context, or nil if there is nothing
-func GetRPCOptions(ctx context.Context) *RPCOptions {
-	v := ctx.Value(rpcOptionsKey)
-	if v == nil {
-		return nil
-	}
-	return v.(*RPCOptions)
-}
-
 // Priority maps to C++ apache::thrift::concurrency::PRIORITY
 type Priority uint8
 
@@ -135,4 +121,24 @@ func (c *contextHeaders) GetReadHeader(k string) (string, bool) {
 	defer c.readHeaderLock.Unlock()
 	v, ok := c.readHeaders[k]
 	return v, ok
+}
+
+type rpcOptionsKeyType int
+
+const (
+	rpcOptionsKey rpcOptionsKeyType = 1
+)
+
+// WithRPCOptions sets the RPCOptions in a client request go context
+func WithRPCOptions(ctx context.Context, opts *RPCOptions) context.Context {
+	return context.WithValue(ctx, rpcOptionsKey, opts)
+}
+
+// GetRPCOptions returns the RPCOptions in a go context, or nil if there is nothing
+func GetRPCOptions(ctx context.Context) *RPCOptions {
+	v := ctx.Value(rpcOptionsKey)
+	if v == nil {
+		return nil
+	}
+	return v.(*RPCOptions)
 }

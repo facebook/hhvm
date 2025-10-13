@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 
 cpp_include "folly/io/IOBuf.h"
 
@@ -30,7 +31,8 @@ struct simple {
 service StackService {
   list<i32> add_to(1: list<i32> lst, 2: i32 value);
   simple get_simple();
-  simple get_simple_no_sa() (cpp.stack_arguments = "0");
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.stack_arguments": "0"}}
+  simple get_simple_no_sa();
   void take_simple(1: simple smpl);
   IOBuf get_iobuf();
   void take_iobuf(1: IOBuf val);

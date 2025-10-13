@@ -16,6 +16,8 @@
 
 namespace py3 thrift.test
 
+include "thrift/annotation/thrift.thrift"
+
 struct AStruct {
   1: required string aString;
   2: i32 anInteger;
@@ -56,6 +58,9 @@ struct StructWithUnion {
 
 struct NegativeFieldId {
   -1: i32 anInteger;
-  0: string aString (cpp.deprecated_allow_zero_as_field_id);
+  @thrift.DeprecatedUnvalidatedAnnotations{
+    items = {"cpp.deprecated_allow_zero_as_field_id": "1"},
+  }
+  0: string aString;
   5: double aDouble;
 }

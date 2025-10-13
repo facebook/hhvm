@@ -16,6 +16,9 @@
 
 namespace cpp2 apache.thrift.test
 
+include "thrift/annotation/thrift.thrift"
+
+@thrift.Uri{value = "facebook.com/thrift/test/AnyTestUnion"}
 union AnyTestUnion {
   1: i32 foo;
-} (thrift.uri = "facebook.com/thrift/test/AnyTestUnion")
+}

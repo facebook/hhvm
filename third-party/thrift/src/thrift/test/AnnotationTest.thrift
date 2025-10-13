@@ -17,23 +17,29 @@
 cpp_include "<list>"
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 
 @cpp.Type{template = "std::list"}
 typedef list<i32> int_linked_list
 
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "cpp.methods": "public: void manuallyDefinedDummyMethod() {}",
+    "java.final": "",
+    "python.type": "DenseFoo",
+  },
+}
 struct foo {
   1: i32 bar;
   2: i32 baz;
   3: i32 qux;
   4: i32 bop;
-} (
-  python.type = "DenseFoo",
-  java.final = "",
-  cpp.methods = "public: void manuallyDefinedDummyMethod() {}",
-)
+}
 
-typedef string (unicode.encoding = "UTF-16") non_latin_string
+@thrift.DeprecatedUnvalidatedAnnotations{items = {"unicode.encoding": "UTF-16"}}
+typedef string non_latin_string
 typedef list<double_7102> tiny_float_list
 
 // The following were automatically generated and may benefit from renaming.
-typedef double (cpp.fixed_point = "16") double_7102
+@thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.fixed_point": "16"}}
+typedef double double_7102

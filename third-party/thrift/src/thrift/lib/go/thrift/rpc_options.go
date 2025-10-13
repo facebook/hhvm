@@ -18,6 +18,7 @@ package thrift
 
 import (
 	"context"
+	"maps"
 	"sync"
 	"time"
 )
@@ -63,9 +64,7 @@ func (c *contextHeaders) ReadHeaders() map[string]string {
 	c.readHeaderLock.Lock()
 	defer c.readHeaderLock.Unlock()
 	res := map[string]string{}
-	for k, v := range c.readHeaders {
-		res[k] = v
-	}
+	maps.Copy(res, c.readHeaders)
 	return res
 }
 
@@ -73,9 +72,7 @@ func (c *contextHeaders) WriteHeaders() map[string]string {
 	c.writeHeaderLock.Lock()
 	defer c.writeHeaderLock.Unlock()
 	res := map[string]string{}
-	for k, v := range c.writeHeaders {
-		res[k] = v
-	}
+	maps.Copy(res, c.writeHeaders)
 	return res
 }
 

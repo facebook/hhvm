@@ -62,6 +62,7 @@ pub struct HhConfig {
     pub use_distc_crawl_dircache: bool,
     pub distc_no_dynamic_tracing: bool,
     pub distc_no_unnecessary_saved_state_work: bool,
+    pub distc_write_trace_during_save_state_creation_only: bool,
 }
 
 impl HhConfig {
@@ -658,6 +659,9 @@ impl HhConfig {
                 "distc_no_unnecessary_saved_state_work" => {
                     c.distc_no_unnecessary_saved_state_work = parse_json(&value)?;
                 }
+                "distc_write_trace_during_save_state_creation_only" => {
+                    c.distc_write_trace_during_save_state_creation_only = parse_json(&value)?;
+                }
                 _ => {}
             }
         }
@@ -670,6 +674,7 @@ impl HhConfig {
             "use_distc_crawl_dircache": self.use_distc_crawl_dircache,
             "distc_no_dynamic_tracing": self.distc_no_dynamic_tracing,
             "distc_no_unnecessary_saved_state_work": self.distc_no_unnecessary_saved_state_work,
+            "distc_write_trace_during_save_state_creation_only": self.distc_write_trace_during_save_state_creation_only
         });
         experiments.to_string()
     }

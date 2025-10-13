@@ -54,31 +54,30 @@ const (
 )
 
 type contextHeaders struct {
-	writeHeaders    map[string]string
-	readHeaders     map[string]string
-	writeHeaderLock sync.Mutex
-	readHeaderLock  sync.Mutex
+	mutex        sync.RWMutex
+	writeHeaders map[string]string
+	readHeaders  map[string]string
 }
 
 func (c *contextHeaders) GetReadHeaders() map[string]string {
-	c.readHeaderLock.Lock()
-	defer c.readHeaderLock.Unlock()
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
 	res := map[string]string{}
 	maps.Copy(res, c.readHeaders)
 	return res
 }
 
 func (c *contextHeaders) GetWriteHeaders() map[string]string {
-	c.writeHeaderLock.Lock()
-	defer c.writeHeaderLock.Unlock()
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
 	res := map[string]string{}
 	maps.Copy(res, c.writeHeaders)
 	return res
 }
 
 func (c *contextHeaders) SetWriteHeader(k, v string) {
-	c.writeHeaderLock.Lock()
-	defer c.writeHeaderLock.Unlock()
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
 	if c.writeHeaders == nil {
 		c.writeHeaders = map[string]string{}
 	}
@@ -86,8 +85,8 @@ func (c *contextHeaders) SetWriteHeader(k, v string) {
 }
 
 func (c *contextHeaders) SetReadHeader(k, v string) {
-	c.readHeaderLock.Lock()
-	defer c.readHeaderLock.Unlock()
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
 	if c.readHeaders == nil {
 		c.readHeaders = map[string]string{}
 	}
@@ -95,27 +94,27 @@ func (c *contextHeaders) SetReadHeader(k, v string) {
 }
 
 func (c *contextHeaders) SetWriteHeaders(headers map[string]string) {
-	c.writeHeaderLock.Lock()
-	defer c.writeHeaderLock.Unlock()
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
 	c.writeHeaders = headers
 }
 
 func (c *contextHeaders) SetReadHeaders(headers map[string]string) {
-	c.readHeaderLock.Lock()
-	defer c.readHeaderLock.Unlock()
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
 	c.readHeaders = headers
 }
 
 func (c *contextHeaders) GetWriteHeader(k string) (string, bool) {
-	c.writeHeaderLock.Lock()
-	defer c.writeHeaderLock.Unlock()
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
 	v, ok := c.writeHeaders[k]
 	return v, ok
 }
 
 func (c *contextHeaders) GetReadHeader(k string) (string, bool) {
-	c.readHeaderLock.Lock()
-	defer c.readHeaderLock.Unlock()
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
 	v, ok := c.readHeaders[k]
 	return v, ok
 }

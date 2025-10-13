@@ -33,8 +33,12 @@
 #include "hphp/system/systemlib.h"
 
 #include "hphp/util/abi-cxx.h"
+#include "hphp/util/roar.h"
 
 #include <utility>
+
+extern "C" __attribute__((weak))
+int __roar_api_flag_safe_function_pointer_site(void*, void*);
 
 namespace HPHP {
 
@@ -168,6 +172,10 @@ RawDestructors computeDestructors() {
   }
   auto const set = [&](auto const type, auto const destructor) {
     result[typeToDestrIdx(type)] = (RawDestructor)destructor;
+    if (use_roar && __roar_api_flag_safe_function_pointer_site) {
+      __roar_api_flag_safe_function_pointer_site(
+          &result[typeToDestrIdx(type)], reinterpret_cast<void*>(destructor));
+    }
   };
   set(KindOfVec,      &vecReleaseWrapper<false>);
   set(KindOfDict,     &dictReleaseWrapper<false>);
@@ -190,6 +198,11 @@ void specializeVanillaDestructors() {
   auto const specialize = [](auto const type, auto const destructor) {
     if (allowBespokeArrayLikes() && arrayTypeCouldBeBespoke(type)) return;
     g_destructors[typeToDestrIdx(type)] = (RawDestructor)destructor;
+    if (use_roar && __roar_api_flag_safe_function_pointer_site) {
+      __roar_api_flag_safe_function_pointer_site(
+          &g_destructors[typeToDestrIdx(type)],
+          reinterpret_cast<void*>(destructor));
+    }
   };
   specialize(KindOfVec,    &vecReleaseWrapper<true>);
   specialize(KindOfDict,   &dictReleaseWrapper<true>);

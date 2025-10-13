@@ -18,6 +18,7 @@ namespace cpp thrift.test.debug
 namespace py thrift.test.UnionTest
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 
 @cpp.Type{name = "folly::IOBuf"}
 typedef binary IOBuf
@@ -67,15 +68,19 @@ struct StructWithAUnion {
   1: TestUnion test_union;
 }
 
+@thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.noncopyable": "1"}}
 struct NonCopyableStruct {
   1: i64 num;
-} (cpp.noncopyable)
+}
 
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {"cpp.noncomparable": "1", "cpp.noncopyable": "1"},
+}
 union NonCopyableUnion {
   1: i32 a;
   2: IOBuf buf;
   3: NonCopyableStruct ncs;
-} (cpp.noncopyable, cpp.noncomparable)
+}
 
 union NoExceptMoveUnion {
   1: string string_field;

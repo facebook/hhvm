@@ -46,23 +46,17 @@ abstract final class ThriftFrameworkMetadataUtils {
   public static function decodeFrameworkMetadataOnResponse(
     string $encoded_response_tfm,
   ): ThriftFrameworkMetadataOnResponse {
-    $tfmr = ThriftFrameworkMetadataOnResponse::withDefaultValues();
-    $tfmr->read(
-      new TCompactProtocolAccelerated(
-        new TMemoryBuffer(Base64::decode($encoded_response_tfm)),
-      ),
+    return TCompactSerializer::deserialize(
+      Base64::decode($encoded_response_tfm),
+      ThriftFrameworkMetadataOnResponse::withDefaultValues(),
     );
-    return $tfmr;
   }
 
-  <<__Memoize(#KeyedByIC)>>
   public static function encodeThriftFrameworkMetadata(
     ThriftFrameworkMetadata $tfm,
   )[globals, zoned_shallow]: string {
-    $buf = new TMemoryBuffer();
-    $proto = new TCompactProtocolAccelerated($buf);
-    $tfm->write($proto);
-    return Base64::encode($buf->getBuffer());
+    $buffer = TCompactSerializer::serialize($tfm);
+    return Base64::encode($buffer);
   }
 
 }

@@ -60,7 +60,7 @@ type contextHeaders struct {
 	readHeaderLock  sync.Mutex
 }
 
-func (c *contextHeaders) ReadHeaders() map[string]string {
+func (c *contextHeaders) GetReadHeaders() map[string]string {
 	c.readHeaderLock.Lock()
 	defer c.readHeaderLock.Unlock()
 	res := map[string]string{}
@@ -68,7 +68,7 @@ func (c *contextHeaders) ReadHeaders() map[string]string {
 	return res
 }
 
-func (c *contextHeaders) WriteHeaders() map[string]string {
+func (c *contextHeaders) GetWriteHeaders() map[string]string {
 	c.writeHeaderLock.Lock()
 	defer c.writeHeaderLock.Unlock()
 	res := map[string]string{}

@@ -48,7 +48,7 @@ func TestParallelReadHeader(t *testing.T) {
 
 	err := eg.Wait()
 	require.NoError(t, err)
-	assert.Len(t, ctxHeader.ReadHeaders(), 100)
+	assert.Len(t, ctxHeader.GetReadHeaders(), 100)
 	// Test single threaded correction
 	for i := 0; i < 100; i++ {
 		key := fmt.Sprintf("KEY-%d", i)
@@ -81,7 +81,7 @@ func TestParallelReadHeader(t *testing.T) {
 		value := fmt.Sprintf("VALUE-%d", i)
 		expectedReadHeaderMap[key] = value
 	}
-	actualReadHeaderMap := ctxHeader.ReadHeaders()
+	actualReadHeaderMap := ctxHeader.GetReadHeaders()
 	assert.Len(t, actualReadHeaderMap, len(expectedReadHeaderMap))
 	for expectedKey, expectedValue := range expectedReadHeaderMap {
 		assert.Equal(t, expectedValue, actualReadHeaderMap[expectedKey])
@@ -115,7 +115,7 @@ func TestParallelWriteHeader(t *testing.T) {
 
 	err := eg.Wait()
 	require.NoError(t, err)
-	assert.Len(t, ctxHeader.WriteHeaders(), 100)
+	assert.Len(t, ctxHeader.GetWriteHeaders(), 100)
 	// Test single threaded correction
 	for i := 0; i < 100; i++ {
 		key := fmt.Sprintf("KEY-%d", i)
@@ -148,7 +148,7 @@ func TestParallelWriteHeader(t *testing.T) {
 		value := fmt.Sprintf("VALUE-%d", i)
 		expectedWriteHeaderMap[key] = value
 	}
-	actualWriteHeaderMap := ctxHeader.WriteHeaders()
+	actualWriteHeaderMap := ctxHeader.GetWriteHeaders()
 	assert.Len(t, actualWriteHeaderMap, len(expectedWriteHeaderMap))
 	for expectedKey, expectedValue := range expectedWriteHeaderMap {
 		assert.Equal(t, expectedValue, actualWriteHeaderMap[expectedKey])

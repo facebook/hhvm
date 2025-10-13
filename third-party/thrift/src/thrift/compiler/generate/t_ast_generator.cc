@@ -562,4 +562,12 @@ static bool register_schema_generation = []() {
 }();
 } // namespace
 
+namespace detail {
+type::Schema gen_schema(
+    schematizer::options& schema_opts,
+    source_manager& source_mgr,
+    const t_program& root_program) {
+  return t_ast_generator::gen_schema(schema_opts, source_mgr, root_program);
+}
+} // namespace detail
 } // namespace apache::thrift::compiler

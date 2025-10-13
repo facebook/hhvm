@@ -169,13 +169,3 @@ func TestRequestContext(t *testing.T) {
 	reqCtxPrime = GetRequestContext(context.TODO())
 	require.Nil(t, reqCtxPrime)
 }
-
-func TestRPCOptions(t *testing.T) {
-	rpcOpts := &RPCOptions{}
-	ctx := WithRPCOptions(context.TODO(), rpcOpts)
-	rpcOptsPrime := GetRPCOptions(ctx)
-	require.Equal(t, rpcOpts, rpcOptsPrime)
-
-	rpcOptsPrime = GetRPCOptions(context.TODO())
-	require.Nil(t, rpcOptsPrime)
-}

@@ -62,7 +62,8 @@ struct StructUsingOtherNamespace {
 }
 
 struct StructUsingAnnotation {
-  1: optional MyField field (cpp.box);
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.box": "1"}}
+  1: optional MyField field;
 }
 
 struct StructUsingThriftBox {

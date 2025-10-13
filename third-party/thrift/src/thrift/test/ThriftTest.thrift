@@ -23,6 +23,7 @@ namespace csharp Thrift.Test
 namespace json thrift.test
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 
 enum Numberz {
   ONE = 1,
@@ -199,14 +200,9 @@ struct Maps {
   4: map<string, Insanity> str2struct;
 }
 
-struct WithAnnotations {
-  1: map<string, string> m1 (test.annotation = "none", test.hidden);
-  2: i32 m2;
-  3: string s1 (test.hidden = 3);
-} (
-  test.struct_annotation = "ok",
-  test.partial,
-  test.complex = "
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "test.complex": "
    public:
 
     bool empty() const {
@@ -215,7 +211,19 @@ struct WithAnnotations {
                __isset.s1);
     }
   ",
-)
+    "test.partial": "1",
+    "test.struct_annotation": "ok",
+  },
+}
+struct WithAnnotations {
+  @thrift.DeprecatedUnvalidatedAnnotations{
+    items = {"test.annotation": "none", "test.hidden": "1"},
+  }
+  1: map<string, string> m1;
+  2: i32 m2;
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"test.hidden": "3"}}
+  3: string s1;
+}
 
 // The following were automatically generated and may benefit from renaming.
 @cpp.Type{template = "std::unordered_map"}

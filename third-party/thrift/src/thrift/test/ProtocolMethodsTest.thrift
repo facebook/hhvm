@@ -19,11 +19,15 @@ namespace cpp2 apache.thrift.test
 cpp_include "thrift/test/ProtocolMethodsTestCustomTypes.h"
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {"no_default_comparators": "1"},
+}
 struct MyStruct {
   1: i32_7453 num;
   2: string_9131 str;
-} (no_default_comparators)
+}
 
 // The following were automatically generated and may benefit from renaming.
 @cpp.Type{name = "MyInt"}

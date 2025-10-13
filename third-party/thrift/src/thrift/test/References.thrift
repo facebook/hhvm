@@ -112,7 +112,8 @@ struct ReferringStructWithBaseTypeFields {
   @cpp.Ref{type = cpp.RefType.Shared}
   @cpp.AllowLegacyNonOptionalRef
   12: required i64 req_shared_const_field;
-  13: optional i64 opt_box_field (cpp.box);
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.box": "1"}}
+  13: optional i64 opt_box_field;
 }
 
 struct ReferringStructWithStringFields {
@@ -185,7 +186,8 @@ struct ReferringStructWithListFields {
   @cpp.Ref{type = cpp.RefType.Shared}
   @cpp.AllowLegacyNonOptionalRef
   12: required list<i32> req_shared_const_field;
-  13: optional list<i32> opt_box_field (cpp.box);
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.box": "1"}}
+  13: optional list<i32> opt_box_field;
 }
 
 struct ReferringStructWithSetFields {
@@ -221,7 +223,8 @@ struct ReferringStructWithSetFields {
   @cpp.Ref{type = cpp.RefType.Shared}
   @cpp.AllowLegacyNonOptionalRef
   12: required set<i32> req_shared_const_field;
-  13: optional set<i32> opt_box_field (cpp.box);
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.box": "1"}}
+  13: optional set<i32> opt_box_field;
 }
 
 struct ReferringStructWithMapFields {
@@ -257,7 +260,8 @@ struct ReferringStructWithMapFields {
   @cpp.Ref{type = cpp.RefType.Shared}
   @cpp.AllowLegacyNonOptionalRef
   12: required map<i32, i32> req_shared_const_field;
-  13: optional map<i32, i32> opt_box_field (cpp.box);
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.box": "1"}}
+  13: optional map<i32, i32> opt_box_field;
 }
 
 struct TypeAdapterRefStruct {
@@ -412,9 +416,12 @@ union ReferringUnionWithCppRef {
 }
 
 union ReferringUnion {
-  1: string box_string (cpp.box);
-  2: PlainStruct box_plain (cpp.box);
-  3: ReferringUnion box_self (cpp.box);
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.box": "1"}}
+  1: string box_string;
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.box": "1"}}
+  2: PlainStruct box_plain;
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.box": "1"}}
+  3: ReferringUnion box_self;
 }
 
 union NonTriviallyDestructibleUnion {

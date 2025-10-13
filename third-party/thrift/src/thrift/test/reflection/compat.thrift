@@ -24,6 +24,7 @@ namespace py3 test_py.cpp_compat
 cpp_include "thrift/test/reflection/fatal_custom_types.h"
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 
 enum compat_enum1 {
   field0 = 0,
@@ -37,18 +38,21 @@ enum compat_enum2 {
   field2_2 = 2,
 }
 
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "_now.with.an.underscore": "_now.with.an.underscore",
+    "another.there": ".",
+    "duplicate_id_annotation_1": "duplicate id annotation",
+    "duplicate_id_annotation_2": "duplicate.id.annotation",
+    "one.here": "with some value associated",
+    "yet.another": "and yet more text - it's that easy",
+  },
+}
 enum compat_enum3 {
   field0_3 = 0,
   field1_3 = 1,
   field2_3 = 2,
-} (
-  one.here = "with some value associated",
-  another.there = ".",
-  yet.another = "and yet more text - it's that easy",
-  duplicate_id_annotation_1 = "duplicate id annotation",
-  duplicate_id_annotation_2 = "duplicate.id.annotation",
-  _now.with.an.underscore = "_now.with.an.underscore",
-)
+}
 
 union compat_union1 {
   1: i32 ui;
@@ -79,24 +83,36 @@ struct compat_structA {
 @cpp.Type{name = "test_cpp_reflection::custom_compat_structA"}
 typedef compat_structA my_compat_structA
 
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "another.annotation": "some more text",
+    "sample.annotation": "some text here",
+  },
+}
 union compat_unionA {
   1: i32 i;
   2: double d;
   3: string s;
   4: compat_enum1 e;
   5: compat_structA a;
-} (sample.annotation = "some text here", another.annotation = "some more text")
+}
 
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "some.annotation": "this is its value",
+    "some.other.annotation": "this is its other value",
+  },
+}
 struct compat_structB {
   1: double c;
-  2: bool d (
-    some.annotation = "some value",
-    another.annotation = "another value",
-  );
-} (
-  some.annotation = "this is its value",
-  some.other.annotation = "this is its other value",
-)
+  @thrift.DeprecatedUnvalidatedAnnotations{
+    items = {
+      "another.annotation": "another value",
+      "some.annotation": "some value",
+    },
+  }
+  2: bool d;
+}
 
 struct compat_structC {
   1: i32 a;

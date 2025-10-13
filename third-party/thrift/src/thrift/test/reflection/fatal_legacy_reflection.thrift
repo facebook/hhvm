@@ -55,7 +55,8 @@ struct SampleStruct {
   18: list<double> list_double_field;
   19: list<float> list_float_field;
   20: list<binary> list_binary_field;
-  21: string annotated_string_field (ann_key = 'ann_value');
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"ann_key": "ann_value"}}
+  21: string annotated_string_field;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   23: SampleSubStruct struct_ref_field;

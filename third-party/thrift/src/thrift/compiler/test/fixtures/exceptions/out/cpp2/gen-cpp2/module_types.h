@@ -134,8 +134,6 @@ class FOLLY_EXPORT Fiery : public virtual apache::thrift::TException {
   using __fbthrift_cpp2_type = Fiery;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -289,8 +287,6 @@ class FOLLY_EXPORT Serious : public virtual apache::thrift::TException {
  public:
   using __fbthrift_cpp2_type = Serious;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -447,8 +443,6 @@ class FOLLY_EXPORT ComplexFieldNames : public virtual apache::thrift::TException
  public:
   using __fbthrift_cpp2_type = ComplexFieldNames;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -666,8 +660,6 @@ class FOLLY_EXPORT CustomFieldNames : public virtual apache::thrift::TException 
   using __fbthrift_cpp2_type = CustomFieldNames;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -884,8 +876,6 @@ class FOLLY_EXPORT ExceptionWithPrimitiveField : public virtual apache::thrift::
   using __fbthrift_cpp2_type = ExceptionWithPrimitiveField;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -1090,8 +1080,6 @@ class FOLLY_EXPORT ExceptionWithStructuredAnnotation : public virtual apache::th
   using __fbthrift_cpp2_type = ExceptionWithStructuredAnnotation;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -1291,8 +1279,6 @@ class FOLLY_EXPORT Banal : public virtual apache::thrift::TException {
  public:
   using __fbthrift_cpp2_type = Banal;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 

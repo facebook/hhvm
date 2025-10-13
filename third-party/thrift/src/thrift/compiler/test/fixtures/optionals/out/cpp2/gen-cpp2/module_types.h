@@ -225,8 +225,6 @@ class Color final  {
   using __fbthrift_cpp2_type = Color;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -507,8 +505,6 @@ class Vehicle final  {
  public:
   using __fbthrift_cpp2_type = Vehicle;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -888,8 +884,6 @@ class Person final  {
  public:
   using __fbthrift_cpp2_type = Person;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 

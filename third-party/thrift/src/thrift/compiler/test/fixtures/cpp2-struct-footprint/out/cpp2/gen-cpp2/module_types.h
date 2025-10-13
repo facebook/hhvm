@@ -121,8 +121,6 @@ class SimpleStruct final  {
   using __fbthrift_cpp2_type = SimpleStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -254,8 +252,6 @@ class ComplexStruct final  {
  public:
   using __fbthrift_cpp2_type = ComplexStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -394,8 +390,6 @@ class Struct1 final  {
   using __fbthrift_cpp2_type = Struct1;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -476,8 +470,6 @@ class Struct2 final  {
  public:
   using __fbthrift_cpp2_type = Struct2;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -560,8 +552,6 @@ class Struct3 final  {
   using __fbthrift_cpp2_type = Struct3;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -643,8 +633,6 @@ class Struct4 final  {
   using __fbthrift_cpp2_type = Struct4;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -725,8 +713,6 @@ class Struct5 final  {
  public:
   using __fbthrift_cpp2_type = Struct5;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -816,8 +802,6 @@ class FOLLY_EXPORT ExStruct : public virtual apache::thrift::TException {
  public:
   using __fbthrift_cpp2_type = ExStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -970,8 +954,6 @@ class TestUnion final  {
   using __fbthrift_cpp2_type = TestUnion;
   static constexpr bool __fbthrift_cpp2_is_union =
     true;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:

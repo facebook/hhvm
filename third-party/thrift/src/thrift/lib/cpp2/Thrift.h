@@ -114,10 +114,6 @@ struct struct_private_access {
   __fbthrift_cpp2_gen_json();
 
   template <typename T>
-  static std::bool_constant<T::__fbthrift_cpp2_uses_op_encode> //
-  __fbthrift_cpp2_uses_op_encode();
-
-  template <typename T>
   static std::bool_constant<T::__fbthrift_cpp2_is_runtime_annotation> //
   __fbthrift_cpp2_is_runtime_annotation();
 

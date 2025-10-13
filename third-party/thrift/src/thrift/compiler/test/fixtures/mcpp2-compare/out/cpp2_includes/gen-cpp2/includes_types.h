@@ -133,8 +133,6 @@ class AStruct final  {
   using __fbthrift_cpp2_type = AStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -266,8 +264,6 @@ class AStructB final  {
  public:
   using __fbthrift_cpp2_type = AStructB;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 

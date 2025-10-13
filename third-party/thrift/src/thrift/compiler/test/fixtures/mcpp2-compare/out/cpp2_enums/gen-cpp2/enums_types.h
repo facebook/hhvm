@@ -276,8 +276,6 @@ class SomeStruct final  {
   using __fbthrift_cpp2_type = SomeStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:

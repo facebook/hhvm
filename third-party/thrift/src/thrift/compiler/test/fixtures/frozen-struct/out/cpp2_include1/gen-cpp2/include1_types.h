@@ -84,8 +84,6 @@ class IncludedA final  {
   using __fbthrift_cpp2_type = IncludedA;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:

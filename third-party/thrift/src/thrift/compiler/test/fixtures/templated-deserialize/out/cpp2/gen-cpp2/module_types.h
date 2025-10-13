@@ -228,8 +228,6 @@ class SmallStruct final  {
   using __fbthrift_cpp2_type = SmallStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -444,8 +442,6 @@ class containerStruct final  {
  public:
   using __fbthrift_cpp2_type = containerStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 

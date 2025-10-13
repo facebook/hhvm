@@ -527,8 +527,6 @@ class SimpleStruct final  {
   using __fbthrift_cpp2_type = SimpleStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -1203,8 +1201,6 @@ class AdaptedUnion final  {
   using __fbthrift_cpp2_type = AdaptedUnion;
   static constexpr bool __fbthrift_cpp2_is_union =
     true;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -1450,8 +1446,6 @@ class FOLLY_EXPORT SimpleException : public virtual apache::thrift::TException {
   using __fbthrift_cpp2_type = SimpleException;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -1588,8 +1582,6 @@ class OptionalRefStruct final  {
  public:
   using __fbthrift_cpp2_type = OptionalRefStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -1737,8 +1729,6 @@ class HiddenTypeFieldsStruct final  {
   using __fbthrift_cpp2_type = HiddenTypeFieldsStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    true;
 
 
  public:
@@ -1977,8 +1967,6 @@ class FOLLY_EXPORT HiddenException : public virtual apache::thrift::TException {
   using __fbthrift_cpp2_type = HiddenException;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -2131,8 +2119,6 @@ class ComplexStruct final  {
  public:
   using __fbthrift_cpp2_type = ComplexStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -2711,8 +2697,6 @@ class BinaryUnion final  {
   using __fbthrift_cpp2_type = BinaryUnion;
   static constexpr bool __fbthrift_cpp2_is_union =
     true;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -2928,8 +2912,6 @@ class BinaryUnionStruct final  {
   using __fbthrift_cpp2_type = BinaryUnionStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -3080,8 +3062,6 @@ class CustomFields final  {
  public:
   using __fbthrift_cpp2_type = CustomFields;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -3656,8 +3636,6 @@ class CustomTypedefFields final  {
   using __fbthrift_cpp2_type = CustomTypedefFields;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -4231,8 +4209,6 @@ class AdaptedTypedefFields final  {
   using __fbthrift_cpp2_type = AdaptedTypedefFields;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    true;
 
 
  public:

@@ -119,6 +119,8 @@ void testSerializedSize() {
   Foo foo;
   foo.field() = 3;
   auto adaptedFoo = test::TemplatedTestAdapter::fromThrift(foo);
+  bazWithUseOpEncode.adapted_field() = adaptedFoo;
+  baz.adapted_field() = adaptedFoo;
   bazWithUseOpEncode.list_field().emplace().push_back(adaptedFoo);
   baz.list_field().emplace().push_back(foo);
   bazWithUseOpEncode.map_field().emplace()[3] = adaptedFoo;
@@ -145,23 +147,5 @@ TEST(UseOpEncodeTest, ProgramScopeAnnotation) {
   auto b = apache::thrift::CompactSerializer::deserialize<FooList>(
       apache::thrift::CompactSerializer::serialize<std::string>(a));
   EXPECT_EQ(b.adapted_list_field()->value.at(0).value.field(), 42);
-}
-
-template <class T>
-constexpr bool kStructUsesOpEncode =
-    decltype(apache::thrift::detail::st::struct_private_access::
-                 __fbthrift_cpp2_uses_op_encode<T>())::value;
-
-TEST(UseOpEncodeTest, StructUsesOpEncode) {
-  static_assert(!kStructUsesOpEncode<Foo>);
-  static_assert(kStructUsesOpEncode<Bar>);
-  static_assert(!kStructUsesOpEncode<FooUnion>);
-  static_assert(kStructUsesOpEncode<BarUnion>);
-  static_assert(!kStructUsesOpEncode<Baz>);
-  static_assert(kStructUsesOpEncode<BazWithUseOpEncode>);
-  static_assert(!kStructUsesOpEncode<BarWrapper1>);
-  static_assert(!kStructUsesOpEncode<BarWrapper2>);
-  static_assert(!kStructUsesOpEncode<BarWrapper3>);
-  static_assert(!kStructUsesOpEncode<BarWrapper4>);
 }
 } // namespace apache::thrift::test

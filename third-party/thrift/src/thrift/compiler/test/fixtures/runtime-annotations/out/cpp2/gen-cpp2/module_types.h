@@ -151,8 +151,6 @@ class MyAnnotation final  {
   using __fbthrift_cpp2_type = MyAnnotation;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -247,8 +245,6 @@ class MyStruct final  {
  public:
   using __fbthrift_cpp2_type = MyStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -393,8 +389,6 @@ class MyUnion final  {
  public:
   using __fbthrift_cpp2_type = MyUnion;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -545,8 +539,6 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
  public:
   using __fbthrift_cpp2_type = MyException;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 

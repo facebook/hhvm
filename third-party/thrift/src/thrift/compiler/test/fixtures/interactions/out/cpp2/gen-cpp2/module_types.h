@@ -90,8 +90,6 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
   using __fbthrift_cpp2_type = CustomException;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -240,8 +238,6 @@ class ShouldBeBoxed final  {
  public:
   using __fbthrift_cpp2_type = ShouldBeBoxed;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 

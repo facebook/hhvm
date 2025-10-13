@@ -229,8 +229,6 @@ class TemplateLists final  {
   using __fbthrift_cpp2_type = TemplateLists;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -599,8 +597,6 @@ class TemplateSets final  {
  public:
   using __fbthrift_cpp2_type = TemplateSets;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -1080,8 +1076,6 @@ class TemplateMaps final  {
   using __fbthrift_cpp2_type = TemplateMaps;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -1550,8 +1544,6 @@ class TWrapped final  {
   using __fbthrift_cpp2_type = TWrapped;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -1756,8 +1748,6 @@ class IndirectionA final  {
   using __fbthrift_cpp2_type = IndirectionA;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -1900,8 +1890,6 @@ class IndirectionB final  {
   using __fbthrift_cpp2_type = IndirectionB;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -2043,8 +2031,6 @@ class IndirectionC final  {
  public:
   using __fbthrift_cpp2_type = IndirectionC;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 

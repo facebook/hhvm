@@ -91,8 +91,6 @@ class Request final  {
   using __fbthrift_cpp2_type = Request;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -238,8 +236,6 @@ class AdaptedRequest final  {
  public:
   using __fbthrift_cpp2_type = AdaptedRequest;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -388,8 +384,6 @@ class Response final  {
  public:
   using __fbthrift_cpp2_type = Response;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 

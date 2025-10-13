@@ -330,8 +330,6 @@ class MyStruct final  {
   using __fbthrift_cpp2_type = MyStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -440,8 +438,6 @@ class EmptiableStruct final  {
  public:
   using __fbthrift_cpp2_type = EmptiableStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -1308,8 +1304,6 @@ class EmptiableTerseStruct final  {
   using __fbthrift_cpp2_type = EmptiableTerseStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -1952,8 +1946,6 @@ class NotEmptiableStruct final  {
  public:
   using __fbthrift_cpp2_type = NotEmptiableStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 

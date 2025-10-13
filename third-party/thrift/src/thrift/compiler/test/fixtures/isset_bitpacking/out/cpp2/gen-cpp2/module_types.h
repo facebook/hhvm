@@ -161,8 +161,6 @@ class Default final  {
   using __fbthrift_cpp2_type = Default;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -467,8 +465,6 @@ class NonAtomic final  {
  public:
   using __fbthrift_cpp2_type = NonAtomic;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -775,8 +771,6 @@ class Atomic final  {
   using __fbthrift_cpp2_type = Atomic;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -1081,8 +1075,6 @@ class AtomicFoo final  {
  public:
   using __fbthrift_cpp2_type = AtomicFoo;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 

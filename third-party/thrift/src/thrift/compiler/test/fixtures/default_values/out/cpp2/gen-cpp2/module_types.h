@@ -140,8 +140,6 @@ class TrivialStruct final  {
   using __fbthrift_cpp2_type = TrivialStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -284,8 +282,6 @@ class StructWithNoCustomDefaultValues final  {
  public:
   using __fbthrift_cpp2_type = StructWithNoCustomDefaultValues;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -693,8 +689,6 @@ class StructWithCustomDefaultValues final  {
  public:
   using __fbthrift_cpp2_type = StructWithCustomDefaultValues;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 

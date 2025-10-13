@@ -112,8 +112,6 @@ class EmptyStruct final  {
   using __fbthrift_cpp2_type = EmptyStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -211,8 +209,6 @@ class TestStruct final  {
  public:
   using __fbthrift_cpp2_type = TestStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 

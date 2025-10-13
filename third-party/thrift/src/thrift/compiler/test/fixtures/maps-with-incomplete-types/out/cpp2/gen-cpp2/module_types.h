@@ -83,8 +83,6 @@ class B final  {
   using __fbthrift_cpp2_type = B;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -222,8 +220,6 @@ class A final  {
  public:
   using __fbthrift_cpp2_type = A;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 

@@ -174,8 +174,6 @@ class SerializedStruct final  {
   using __fbthrift_cpp2_type = SerializedStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -484,8 +482,6 @@ class SerializedUnion final  {
   using __fbthrift_cpp2_type = SerializedUnion;
   static constexpr bool __fbthrift_cpp2_is_union =
     true;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -790,8 +786,6 @@ class FOLLY_EXPORT SerializedError : public virtual apache::thrift::TException {
   using __fbthrift_cpp2_type = SerializedError;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -1061,8 +1055,6 @@ class MarshalStruct final  {
  public:
   using __fbthrift_cpp2_type = MarshalStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -1372,8 +1364,6 @@ class MarshalUnion final  {
   using __fbthrift_cpp2_type = MarshalUnion;
   static constexpr bool __fbthrift_cpp2_is_union =
     true;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -1677,8 +1667,6 @@ class FOLLY_EXPORT MarshalError : public virtual apache::thrift::TException {
  public:
   using __fbthrift_cpp2_type = MarshalError;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 

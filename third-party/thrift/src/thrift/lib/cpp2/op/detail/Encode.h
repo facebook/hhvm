@@ -702,19 +702,19 @@ struct MapEncode {
         return (*a).first < (*b).first;
       });
       for (auto it : iters) {
-        xfer += apache::thrift::detail::pm::writeMapValueBegin(prot, true);
+        xfer += apache::thrift::detail::pm::writeMapValueBegin(prot);
         xfer += Encode<Key>{}(prot, (*it).first);
         xfer += Encode<Value>{}(prot, (*it).second);
-        xfer += apache::thrift::detail::pm::writeMapValueEnd(prot, true);
+        xfer += apache::thrift::detail::pm::writeMapValueEnd(prot);
       }
     } else {
       // Support containers with defined but non-FIFO iteration order.
       for (const auto& elem_pair :
            folly::order_preserving_reinsertion_view_or_default(map)) {
-        xfer += apache::thrift::detail::pm::writeMapValueBegin(prot, true);
+        xfer += apache::thrift::detail::pm::writeMapValueBegin(prot);
         xfer += Encode<Key>{}(prot, elem_pair.first);
         xfer += Encode<Value>{}(prot, elem_pair.second);
-        xfer += apache::thrift::detail::pm::writeMapValueEnd(prot, true);
+        xfer += apache::thrift::detail::pm::writeMapValueEnd(prot);
       }
     }
 

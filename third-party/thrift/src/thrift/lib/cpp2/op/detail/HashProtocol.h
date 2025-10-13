@@ -128,8 +128,8 @@ class HashProtocol {
   uint32_t writeMapBegin(protocol::TType, protocol::TType, uint32_t size) {
     return (beginContainer(acc_, size), acc_.beginUnordered(), 0);
   }
-  uint32_t writeMapValueBegin(bool) { return (acc_.beginOrdered(), 0); }
-  uint32_t writeMapValueEnd(bool) { return (acc_.endOrdered(), 0); }
+  uint32_t writeMapValueBegin() { return (acc_.beginOrdered(), 0); }
+  uint32_t writeMapValueEnd() { return (acc_.endOrdered(), 0); }
   uint32_t writeMapEnd() { return (acc_.endUnordered(), endContainer(acc_)); }
   uint32_t writeListBegin(protocol::TType, uint32_t size) {
     return (beginContainer(acc_, size), acc_.beginOrdered(), 0);

@@ -78,8 +78,6 @@ class RefUnion final  {
   using __fbthrift_cpp2_type = RefUnion;
   static constexpr bool __fbthrift_cpp2_is_union =
     true;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    true;
 
 
  public:

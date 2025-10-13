@@ -25,18 +25,10 @@ struct Foo {
   1: i32 field;
 }
 
-union FooUnion {
-  1: i32 field;
-}
-
 @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
 typedef Foo AdaptedFoo
 
 struct Bar {
-  1: list<AdaptedFoo> list_field;
-}
-
-union BarUnion {
   1: list<AdaptedFoo> list_field;
 }
 
@@ -94,6 +86,7 @@ struct OpEncodeStruct {
 struct Baz {
   1: i32 int_field;
   2: Enum enum_field;
+  3: AdaptedFoo adapted_field;
   4: list<Foo> list_field;
   5: map<i32, Foo> map_field;
   @cpp.Ref{type = cpp.RefType.Shared}
@@ -104,23 +97,9 @@ struct Baz {
 struct BazWithUseOpEncode {
   1: i32 int_field;
   2: Enum enum_field;
+  3: AdaptedFoo adapted_field;
   4: list<AdaptedFoo> list_field;
   5: map<i32, AdaptedFoo> map_field;
   @cpp.Ref{type = cpp.RefType.Shared}
   6: optional list<AdaptedFoo> list_shared_ptr_field;
-}
-
-struct BarWrapper1 {
-  1: Bar bar;
-}
-struct BarWrapper2 {
-  1: list<Bar> bar;
-}
-struct BarWrapper3 {
-  1: set<Bar> bar;
-}
-struct BarWrapper4 {
-  1: i32 i; // Make sure it checks not only the first but all fields.
-  @cpp.Type{template = "std::unordered_map"}
-  2: map<i32, Bar> bar;
 }

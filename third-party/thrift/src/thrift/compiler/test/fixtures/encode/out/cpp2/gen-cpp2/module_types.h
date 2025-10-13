@@ -209,8 +209,6 @@ class Foo final  {
   using __fbthrift_cpp2_type = Foo;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -346,8 +344,6 @@ class Bar final  {
   using __fbthrift_cpp2_type = Bar;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    true;
 
 
  public:
@@ -492,8 +488,6 @@ class Baz final  {
   using __fbthrift_cpp2_type = Baz;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    true;
 
 
  public:
@@ -712,8 +706,6 @@ class OpEncodeStruct final  {
   using __fbthrift_cpp2_type = OpEncodeStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    true;
 
 
  public:

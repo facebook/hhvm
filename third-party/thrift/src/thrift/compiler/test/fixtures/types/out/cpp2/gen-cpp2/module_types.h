@@ -640,8 +640,6 @@ class empty_struct final  {
   using __fbthrift_cpp2_type = empty_struct;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -725,8 +723,6 @@ class decorated_struct final  {
  public:
   using __fbthrift_cpp2_type = decorated_struct;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -887,8 +883,6 @@ class ContainerStruct final  {
  public:
   using __fbthrift_cpp2_type = ContainerStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -1410,8 +1404,6 @@ class CppTypeStruct final  {
   using __fbthrift_cpp2_type = CppTypeStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -1554,8 +1546,6 @@ class VirtualStruct  {
   using __fbthrift_cpp2_type = VirtualStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -1692,8 +1682,6 @@ class MyStructWithForwardRefEnum final  {
  public:
   using __fbthrift_cpp2_type = MyStructWithForwardRefEnum;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -1877,8 +1865,6 @@ class TrivialNumeric final  {
   using __fbthrift_cpp2_type = TrivialNumeric;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -2060,8 +2046,6 @@ class TrivialNestedWithDefault final  {
  public:
   using __fbthrift_cpp2_type = TrivialNestedWithDefault;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -2252,8 +2236,6 @@ class ComplexString final  {
  public:
   using __fbthrift_cpp2_type = ComplexString;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -2456,8 +2438,6 @@ class ComplexNestedWithDefault final  {
  public:
   using __fbthrift_cpp2_type = ComplexNestedWithDefault;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -2666,8 +2646,6 @@ class MinPadding final  {
  public:
   using __fbthrift_cpp2_type = MinPadding;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -2995,8 +2973,6 @@ class MinPaddingWithCustomType final  {
   using __fbthrift_cpp2_type = MinPaddingWithCustomType;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    true;
 
 
  public:
@@ -3273,8 +3249,6 @@ class MyDataItem final  {
   using __fbthrift_cpp2_type = MyDataItem;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -3361,8 +3335,6 @@ class MyStruct final  {
  public:
   using __fbthrift_cpp2_type = MyStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -3653,8 +3625,6 @@ class Renamed final  {
   using __fbthrift_cpp2_type = Renamed;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -3789,8 +3759,6 @@ class AnnotatedTypes final  {
  public:
   using __fbthrift_cpp2_type = AnnotatedTypes;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -3992,8 +3960,6 @@ class ForwardUsageStruct final  {
   using __fbthrift_cpp2_type = ForwardUsageStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -4121,8 +4087,6 @@ class ForwardUsageRoot final  {
  public:
   using __fbthrift_cpp2_type = ForwardUsageRoot;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -4308,8 +4272,6 @@ class ForwardUsageByRef final  {
   using __fbthrift_cpp2_type = ForwardUsageByRef;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -4435,8 +4397,6 @@ class IncompleteMap final  {
  public:
   using __fbthrift_cpp2_type = IncompleteMap;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -4580,8 +4540,6 @@ class IncompleteMapDep final  {
   using __fbthrift_cpp2_type = IncompleteMapDep;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -4663,8 +4621,6 @@ class CompleteMapDep final  {
  public:
   using __fbthrift_cpp2_type = CompleteMapDep;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -4749,8 +4705,6 @@ class CompleteMap final  {
  public:
   using __fbthrift_cpp2_type = CompleteMap;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -4896,8 +4850,6 @@ class IncompleteList final  {
   using __fbthrift_cpp2_type = IncompleteList;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -5040,8 +4992,6 @@ class IncompleteListDep final  {
   using __fbthrift_cpp2_type = IncompleteListDep;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -5123,8 +5073,6 @@ class CompleteListDep final  {
  public:
   using __fbthrift_cpp2_type = CompleteListDep;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -5209,8 +5157,6 @@ class CompleteList final  {
  public:
   using __fbthrift_cpp2_type = CompleteList;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -5356,8 +5302,6 @@ class AdaptedList final  {
   using __fbthrift_cpp2_type = AdaptedList;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    true;
 
 
  public:
@@ -5503,8 +5447,6 @@ class AdaptedListDep final  {
   using __fbthrift_cpp2_type = AdaptedListDep;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -5646,8 +5588,6 @@ class DependentAdaptedListDep final  {
   using __fbthrift_cpp2_type = DependentAdaptedListDep;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -5775,8 +5715,6 @@ class DependentAdaptedList final  {
   using __fbthrift_cpp2_type = DependentAdaptedList;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    true;
 
 
  public:
@@ -5932,8 +5870,6 @@ class AllocatorAware final  {
  public:
   using __fbthrift_cpp2_type = AllocatorAware;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
  public:
@@ -6381,8 +6317,6 @@ class AllocatorAware2 final  {
   using __fbthrift_cpp2_type = AllocatorAware2;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
  public:
   using allocator_type = some_allocator;
@@ -6566,8 +6500,6 @@ class TypedefStruct final  {
  public:
   using __fbthrift_cpp2_type = TypedefStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 
@@ -6794,8 +6726,6 @@ class StructWithDoubleUnderscores final  {
  public:
   using __fbthrift_cpp2_type = StructWithDoubleUnderscores;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 

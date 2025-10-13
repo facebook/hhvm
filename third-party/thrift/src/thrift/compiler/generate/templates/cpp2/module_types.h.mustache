@@ -191,8 +191,6 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
   using __fbthrift_cpp2_type = {{struct:cpp_underlying_name}};
   static constexpr bool __fbthrift_cpp2_is_union =
     {{#struct:union?}}true{{/struct:union?}}{{^struct:union?}}false{{/struct:union?}};
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    {{#struct:use_op_encode?}}true{{/struct:use_op_encode?}}{{^struct:use_op_encode?}}false{{/struct:use_op_encode?}};
 
 {{#struct:cpp_allocator}}
  public:

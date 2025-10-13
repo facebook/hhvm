@@ -83,8 +83,6 @@ class EchoRequest final  {
   using __fbthrift_cpp2_type = EchoRequest;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -229,8 +227,6 @@ class EchoResponse final  {
  public:
   using __fbthrift_cpp2_type = EchoResponse;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 

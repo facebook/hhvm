@@ -78,8 +78,6 @@ class FOLLY_EXPORT FooStreamEx : public virtual apache::thrift::TException {
   using __fbthrift_cpp2_type = FooStreamEx;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -173,8 +171,6 @@ class FOLLY_EXPORT FooEx : public virtual apache::thrift::TException {
   using __fbthrift_cpp2_type = FooEx;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
-    false;
 
 
  public:
@@ -267,8 +263,6 @@ class FOLLY_EXPORT FooEx2 : public virtual apache::thrift::TException {
  public:
   using __fbthrift_cpp2_type = FooEx2;
   static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-  static constexpr bool __fbthrift_cpp2_uses_op_encode =
     false;
 
 

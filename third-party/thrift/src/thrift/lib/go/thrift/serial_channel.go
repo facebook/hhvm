@@ -65,6 +65,7 @@ func (c *serialChannel) sendMsg(ctx context.Context, method string, request Writ
 }
 
 func (c *serialChannel) recvMsg(ctx context.Context, method string, seqID int32, response ReadableStruct) error {
+	rpcOpts := GetRPCOptions(ctx)
 	// TODO: Implement per-call cancellation for a serialChannel
 	recvMethod, mTypeID, msgSeqID, err := c.protocol.ReadMessageBegin()
 	if err != nil {
@@ -89,6 +90,9 @@ func (c *serialChannel) recvMsg(ctx context.Context, method string, seqID int32,
 		}
 		responseHeaders := c.protocol.getResponseHeaders()
 		setResponseHeaders(ctx, responseHeaders)
+		if rpcOpts != nil {
+			rpcOpts.SetReadHeaders(responseHeaders)
+		}
 		return nil
 	case EXCEPTION:
 		appException := NewApplicationException(UNKNOWN_APPLICATION_EXCEPTION, "Unknown exception")
@@ -100,6 +104,9 @@ func (c *serialChannel) recvMsg(ctx context.Context, method string, seqID int32,
 		}
 		responseHeaders := c.protocol.getResponseHeaders()
 		setResponseHeaders(ctx, responseHeaders)
+		if rpcOpts != nil {
+			rpcOpts.SetReadHeaders(responseHeaders)
+		}
 		return appException
 	default:
 		return NewApplicationException(INVALID_MESSAGE_TYPE_EXCEPTION, fmt.Sprintf("%s failed: invalid message type", method))

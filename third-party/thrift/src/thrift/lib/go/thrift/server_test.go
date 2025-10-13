@@ -358,13 +358,14 @@ func TestUexHeaderFunctionality(t *testing.T) {
 		)
 		require.NoError(t, err)
 		client := dummyif.NewDummyChannelClient(channel)
-		ctx := NewResponseHeadersContext(context.Background())
+		rpcOpts := RPCOptions{}
+		ctx := WithRPCOptions(context.Background(), &rpcOpts)
 		err = client.GetDeclaredException(ctx)
 		require.Error(t, err)
 		err = client.Close()
 		require.NoError(t, err)
 
-		responseHeaders := GetResponseHeadersFromContext(ctx)
+		responseHeaders := rpcOpts.GetReadHeaders()
 		// read uex header for the exception
 		require.Contains(t, responseHeaders, "uex")
 		require.Contains(t, responseHeaders, "uexw")
@@ -559,10 +560,11 @@ func TestLoadHeader(t *testing.T) {
 	const concurrentCalls = 100
 
 	makeRequest := func() {
-		ctx := NewResponseHeadersContext(context.Background())
+		rpcOpts := RPCOptions{}
+		ctx := WithRPCOptions(context.Background(), &rpcOpts)
 		err := client.Sleep(ctx, 10 /* ms */)
 		assert.NoError(t, err)
-		responseHeaders := GetResponseHeadersFromContext(ctx)
+		responseHeaders := rpcOpts.GetReadHeaders()
 		assert.Contains(t, responseHeaders, "load")
 		loadStr := responseHeaders["load"]
 		loadVal, err := strconv.ParseInt(loadStr, 10, 64)

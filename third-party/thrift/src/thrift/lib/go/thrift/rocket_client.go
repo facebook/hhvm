@@ -173,6 +173,7 @@ func (p *rocketClient) SendRequestNoResponse(ctx context.Context, messageName st
 }
 
 func (p *rocketClient) SendRequestResponse(ctx context.Context, messageName string, request WritableStruct, response ReadableStruct) error {
+	rpcOpts := GetRPCOptions(ctx)
 	dataBytes, err := encodeRequest(p.protoID, request)
 	if err != nil {
 		return err
@@ -196,6 +197,9 @@ func (p *rocketClient) SendRequestResponse(ctx context.Context, messageName stri
 	}
 
 	setResponseHeaders(ctx, respHeaders)
+	if rpcOpts != nil {
+		rpcOpts.SetReadHeaders(respHeaders)
+	}
 	err = decodeResponse(p.protoID, resultData, response)
 	if err != nil {
 		return err
@@ -216,6 +220,7 @@ func (p *rocketClient) SendRequestStream(
 		// We require that the context is cancellable, to prevent goroutine leaks.
 		return errors.New("context does not support cancellation")
 	}
+	rpcOpts := GetRPCOptions(ctx)
 
 	dataBytes, err := encodeRequest(p.protoID, request)
 	if err != nil {
@@ -257,6 +262,9 @@ func (p *rocketClient) SendRequestStream(
 	}
 
 	setResponseHeaders(ctx, respHeaders)
+	if rpcOpts != nil {
+		rpcOpts.SetReadHeaders(respHeaders)
+	}
 	err = decodeResponse(p.protoID, resultData, response)
 	if err != nil {
 		return err

@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 
 cpp_include "thrift/lib/py3/test/BinaryTypes.h"
 
@@ -30,9 +31,10 @@ typedef binary fbstring_type
 @cpp.Type{name = "test::Buffer"}
 typedef binary Buffer
 
+@thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.noncomparable": "1"}}
 union BinaryUnion {
   1: IOBuf iobuf_val;
-} (cpp.noncomparable)
+}
 
 struct Binaries {
   1: binary no_special_type;

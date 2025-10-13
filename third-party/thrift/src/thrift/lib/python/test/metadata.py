@@ -297,7 +297,4 @@ class MetadataTests(unittest.TestCase):
                 field_names, ["injected_field", "name", "value"]
             )  # Injected by @policy_annotation.TThriftStructHasDynamicFieldPolicy
 
-        # For now, this test expects a NameError due to missing external namespace imports.
-        # Remove this expectation along with the fix that resolves this NameError.
-        with self.assertRaises(NameError):
-            inject_metadata_fields()
+        inject_metadata_fields()

@@ -20,6 +20,7 @@ import builtins
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
 import foo.thrift_abstract_types as _fbthrift__foo__thrift_abstract_types
+import injected_field.thrift_abstract_types as _fbthrift__injected_field__thrift_abstract_types
 
 class Fields(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.

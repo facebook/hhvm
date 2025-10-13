@@ -20,6 +20,8 @@ import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
 import foo.thrift_mutable_types as _fbthrift__foo__thrift_mutable_types
 
+import injected_field.thrift_mutable_types as _fbthrift__injected_field__thrift_mutable_types
+
 
 @_typing.final
 class Fields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.Fields):

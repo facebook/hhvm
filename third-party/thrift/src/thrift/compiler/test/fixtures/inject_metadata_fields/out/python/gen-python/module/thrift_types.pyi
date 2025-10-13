@@ -18,6 +18,8 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 import foo.thrift_types as _fbthrift__foo__thrift_types
 
+import injected_field.thrift_types as _fbthrift__injected_field__thrift_types
+
 
 @_typing.final
 class Fields(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.Fields):

@@ -16,6 +16,9 @@ import module.thrift_enums
 import foo.thrift_enums
 import foo.thrift_metadata as _fbthrift__foo__thrift_metadata
 
+import injected_field.thrift_enums
+import injected_field.thrift_metadata as _fbthrift__injected_field__thrift_metadata
+
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
 # instead of re-generating thrift structs
 def _fbthrift_gen_metadata_struct_Fields(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:

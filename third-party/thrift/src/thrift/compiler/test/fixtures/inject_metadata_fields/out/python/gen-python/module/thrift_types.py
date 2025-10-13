@@ -18,6 +18,9 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 import foo.thrift_types
 import foo.thrift_types as _fbthrift__foo__thrift_types
 
+import injected_field.thrift_types
+import injected_field.thrift_types as _fbthrift__injected_field__thrift_types
+
 
 class Fields(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (

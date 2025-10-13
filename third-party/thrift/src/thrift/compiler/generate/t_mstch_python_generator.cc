@@ -395,7 +395,14 @@ class python_mstch_program : public mstch_program {
     }
   }
 
-  void add_typedef_namespace(const t_type* type) {
+  /**
+   * In addition to typedefs that can result in a type's namespace
+   * different from the current program, @internal.InjectMetadataFields
+   * may also pull in a namespace that is not in the current program.
+   * This function includes namespaces for any type whose program
+   * is different from the current program.
+   */
+  void add_type_namespace(const t_type* type) {
     auto prog = type->program();
     if (prog && prog != program_) {
       const auto& path = prog->path();
@@ -520,12 +527,9 @@ class python_mstch_program : public mstch_program {
           adapter_type_hint_modules_);
     }
     auto true_type = orig_type->get_true_type();
-    is_typedef = is_typedef == TypeDef::HasTypedef || orig_type->is<t_typedef>()
-        ? TypeDef::HasTypedef
-        : TypeDef::NoTypedef;
-    if (is_typedef == TypeDef::HasTypedef) {
-      add_typedef_namespace(true_type);
-    }
+    // See the description of add_type_namespace
+    // for the reason for this call.
+    add_type_namespace(true_type);
     if (const t_list* list = true_type->try_as<t_list>()) {
       visit_type_with_typedef(list->get_elem_type(), is_typedef);
     } else if (const t_set* set = true_type->try_as<t_set>()) {

@@ -209,9 +209,9 @@ class ObjectWriter : public BaseObjectAdapter {
     return 0;
   }
 
-  uint32_t writeFieldEnd() { return 0; }
+  static uint32_t writeFieldEnd() { return 0; }
 
-  uint32_t writeFieldStop() { return 0; }
+  static uint32_t writeFieldStop() { return 0; }
 
   uint32_t writeMapBegin(
       const TType /*keyType*/, TType /*valType*/, uint32_t size) {

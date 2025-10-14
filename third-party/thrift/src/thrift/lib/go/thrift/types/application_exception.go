@@ -62,11 +62,6 @@ func (e *ApplicationException) TypeID() int32 {
 	return e.exceptionType
 }
 
-// DoNotUseButEnsureInterfaceMatch - do not call this method ever.
-func (e *ApplicationException) DoNotUseButEnsureInterfaceMatch() {
-	panic("do not call this method")
-}
-
 // Read reads an ApplicationException from the protocol
 func (e *ApplicationException) Read(prot Decoder) error {
 	_, err := prot.ReadStructBegin()

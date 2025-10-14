@@ -107,6 +107,10 @@ void FizzAcceptorHandshakeHelper::fizzHandshakeSuccess(
       std::chrono::steady_clock::now() - acceptTime_);
   tinfo_.echStatus =
       fizz::server::toString(transport->getState().echStatus()).str();
+  if (transport->getState().group().has_value()) {
+    tinfo_.keyExchange = std::make_shared<std::string>(
+        fizz::toString(*transport->getState().group()));
+  }
 
   if (tokenBindingExtension_ &&
       tokenBindingExtension_->getNegotiatedKeyParam().has_value()) {

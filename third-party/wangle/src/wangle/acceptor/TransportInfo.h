@@ -288,6 +288,12 @@ struct TransportInfo {
   uint16_t sslCertSize{0};
 
   /*
+   * The key exchange algorithm used by the TLS connection (e.g., X25519,
+   * P-256, X25519MLKEM768).
+   */
+  std::shared_ptr<std::string> keyExchange{nullptr};
+
+  /*
    * The SSL mode for the transaction's transport: new session,
    * resumed session, or neither (non-SSL).
    */

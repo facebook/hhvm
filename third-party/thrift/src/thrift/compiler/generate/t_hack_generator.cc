@@ -5641,7 +5641,7 @@ void t_hack_generator::_generate_sendImplHelper(
     const t_service* tservice) {
   std::string long_name = php_servicename_mangle(mangled_services_, tservice);
   const std::string& tservice_name =
-      (tservice->is_interaction()
+      (tservice->is<t_interaction>()
            ? "\"" + service_name_ + "\""
            : long_name + "StaticMetadata::THRIFT_SVC_NAME");
   out << "$this->sendImplHelper($args, " << "\"" << find_hack_name(tfunction)
@@ -6946,7 +6946,7 @@ void t_hack_generator::_generate_current_seq_id(
     std::ofstream& out,
     const t_service* tservice,
     const t_function* tfunction) {
-  if (tservice->is_interaction()) {
+  if (tservice->is<t_interaction>()) {
     indent(out) << "$currentseqid = $this->sendImpl_" << tfunction->name()
                 << "(";
 
@@ -6970,7 +6970,7 @@ void t_hack_generator::_generate_sendImpl(
   const std::string& rpc_function_name =
       generate_rpc_function_name(tservice, tfunction);
   const std::string& tservice_name =
-      (tservice->is_interaction() ? service_name_ : tservice->name());
+      (tservice->is<t_interaction>() ? service_name_ : tservice->name());
 
   if (nullable_everything_) {
     indent(out) << "protected function sendImpl_" << funname << "("
@@ -7199,7 +7199,7 @@ void t_hack_generator::_generate_service_client_child_fn(
       find_hack_name(tfunction) + (legacy_arrays ? "__LEGACY_ARRAYS" : "");
   std::string long_name = php_servicename_mangle(mangled_services_, tservice);
   const std::string& tservice_name =
-      (tservice->is_interaction()
+      (tservice->is<t_interaction>()
            ? "\"" + service_name_ + "\""
            : long_name + "StaticMetadata::THRIFT_SVC_NAME");
   std::string return_typehint =
@@ -7246,11 +7246,11 @@ void t_hack_generator::_generate_service_client_child_fn(
   }
 
   indent(out) << "$rpc_options = $this->getAndResetOptions() ?? "
-              << (tservice->is_interaction()
+              << (tservice->is<t_interaction>()
                       ? "new \\RpcOptions()"
                       : "\\ThriftClientBase::defaultOptions()")
               << ";\n";
-  if (tservice->is_interaction()) {
+  if (tservice->is<t_interaction>()) {
     indent(out) << "$rpc_options = "
                    "$rpc_options->setInteractionId($this->interactionId);\n";
   }
@@ -7308,7 +7308,7 @@ void t_hack_generator::_generate_service_client_stream_child_fn(
   std::string funname =
       tfunction->name() + (legacy_arrays ? "__LEGACY_ARRAYS" : "");
   const std::string& tservice_name =
-      (tservice->is_interaction() ? service_name_ : tservice->name());
+      (tservice->is<t_interaction>() ? service_name_ : tservice->name());
   std::string return_typehint = get_stream_function_return_typehint(tfunction);
 
   generate_php_docstring(out, tfunction);
@@ -7327,11 +7327,11 @@ void t_hack_generator::_generate_service_client_stream_child_fn(
   indent(out) << "}\n";
 
   indent(out) << "$rpc_options = $this->getAndResetOptions() ?? "
-              << (tservice->is_interaction()
+              << (tservice->is<t_interaction>()
                       ? "new \\RpcOptions()"
                       : "\\ThriftClientBase::defaultOptions()")
               << ";\n";
-  if (tservice->is_interaction()) {
+  if (tservice->is<t_interaction>()) {
     indent(out) << "$rpc_options = "
                    "$rpc_options->setInteractionId($this->interactionId);\n";
   }
@@ -7367,7 +7367,7 @@ void t_hack_generator::_generate_service_client_sink_child_fn(
   std::string funname =
       tfunction->name() + (legacy_arrays ? "__LEGACY_ARRAYS" : "");
   const std::string& tservice_name =
-      (tservice->is_interaction() ? service_name_ : tservice->name());
+      (tservice->is<t_interaction>() ? service_name_ : tservice->name());
 
   generate_php_docstring(out, tfunction);
   std::string return_typehint = get_sink_function_return_typehint(tfunction);
@@ -7386,11 +7386,11 @@ void t_hack_generator::_generate_service_client_sink_child_fn(
   indent(out) << "}\n";
 
   indent(out) << "$rpc_options = $this->getAndResetOptions() ?? "
-              << (tservice->is_interaction()
+              << (tservice->is<t_interaction>()
                       ? "new \\RpcOptions()"
                       : "\\ThriftClientBase::defaultOptions()")
               << ";\n";
-  if (tservice->is_interaction()) {
+  if (tservice->is<t_interaction>()) {
     out << "$rpc_options->setInteractionId($this->interactionId);\n";
   }
 
@@ -7551,7 +7551,8 @@ std::string t_hack_generator::argument_list(
  */
 std::string t_hack_generator::generate_rpc_function_name(
     const t_service* tservice, const t_function* tfunction) const {
-  std::string prefix = tservice->is_interaction() ? tservice->name() + "." : "";
+  std::string prefix =
+      tservice->is<t_interaction>() ? tservice->name() + "." : "";
   return prefix + find_hack_name(tfunction);
 }
 
@@ -7564,7 +7565,7 @@ std::string t_hack_generator::generate_function_helper_name(
     const t_function* tfunction,
     PhpFunctionNameSuffix suffix) {
   std::string prefix;
-  if (tservice->is_interaction()) {
+  if (tservice->is<t_interaction>()) {
     prefix = hack_name(service_name_, program_) + "_" + tservice->name();
   } else {
     prefix = hack_name(tservice);

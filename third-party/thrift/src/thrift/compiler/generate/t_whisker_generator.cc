@@ -772,7 +772,9 @@ prototype<t_interface>::ptr t_whisker_generator::make_prototype_for_interface(
   auto def = prototype_builder<h_interface>::extends(proto.of<t_type>());
   def.property(
       "functions", mem_fn(&t_interface::functions, proto.of<t_function>()));
-  def.property("interaction?", mem_fn(&t_interface::is_interaction));
+  def.property("interaction?", [](const t_interface& self) {
+    return self.is<t_interaction>();
+  });
   return std::move(def).make();
 }
 

@@ -210,7 +210,7 @@ bool has_schema(source_manager& sm, const t_program& program) {
 }
 
 bool generate_reduced_client(const t_interface& i) {
-  return i.is_interaction();
+  return i.is<t_interaction>();
 }
 
 // Compute the set of types that appear anywhere in the service
@@ -1309,7 +1309,7 @@ class cpp_mstch_function : public mstch_function {
 
   mstch::node prefixed_name() {
     const std::string& name = cpp2::get_name(function_);
-    return interface().is_interaction()
+    return interface().is<t_interaction>()
         ? fmt::format("{}_{}", interface().name(), name)
         : name;
   }

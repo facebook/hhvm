@@ -35,10 +35,6 @@ void t_interface::add_function(std::unique_ptr<t_function> func) {
   functions_.push_back(std::move(func));
 }
 
-bool t_interface::is_interaction() const {
-  return this->is<t_interaction>();
-}
-
 t_interface::~t_interface() = default;
 
 } // namespace apache::thrift::compiler

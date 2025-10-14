@@ -57,8 +57,6 @@ class t_interface : public t_type {
   const std::vector<t_function*>& get_functions() const {
     return old_functions_raw_;
   }
-
-  bool is_interaction() const;
 };
 
 } // namespace apache::thrift::compiler

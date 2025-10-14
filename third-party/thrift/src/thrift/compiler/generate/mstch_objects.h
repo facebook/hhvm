@@ -465,7 +465,7 @@ class mstch_service : public mstch_base {
       : mstch_base(ctx, pos),
         service_(s),
         containing_service_(containing_service) {
-    assert(containing_service_ == nullptr || service_->is_interaction());
+    assert(containing_service_ == nullptr || service_->is<t_interaction>());
 
     register_methods(
         this,
@@ -553,7 +553,7 @@ class mstch_service : public mstch_base {
   mstch::node structured_annotations() {
     return mstch_base::structured_annotations(service_);
   }
-  mstch::node is_interaction() { return service_->is_interaction(); }
+  mstch::node is_interaction() { return service_->is<t_interaction>(); }
 
   ~mstch_service() override = default;
 
@@ -570,7 +570,7 @@ class mstch_service : public mstch_base {
     return service_->get_functions();
   }
   const t_service* parent_service() const {
-    return service_->is_interaction() ? containing_service_ : service_;
+    return service_->is<t_interaction>() ? containing_service_ : service_;
   }
 };
 

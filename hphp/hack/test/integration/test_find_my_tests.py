@@ -21,6 +21,7 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
 
     def check_has_tests_with_distances(
         self,
+        prefix: str,
         expected_test_files: List[Tuple[str, Optional[int]]],
         symbols: List[str],
         max_distance: int = 1,
@@ -52,11 +53,14 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
 
         result = json.loads(output)
 
-        actual_tests_dict = {
-            os.path.basename(test["file_path"]): test["distance"] for test in result
-        }
+        actual_tests_dict = {test["file_path"]: test["distance"] for test in result}
 
-        expected_tests_dict = dict(expected_test_files)
+        absolute_expected_test_files = [
+            (os.path.join(prefix, file), distance)
+            for (file, distance) in expected_test_files
+        ]
+
+        expected_tests_dict = dict(absolute_expected_test_files)
 
         print(
             self.test_driver.get_all_logs(self.test_driver.repo_dir).current_server_log
@@ -71,6 +75,7 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
 
     def check_has_tests(
         self,
+        prefix: str,
         expected_test_files: List[str],
         symbols: List[str],
         max_distance: int = 1,
@@ -79,6 +84,7 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
             (file, None) for file in expected_test_files
         ]
         self.check_has_tests_with_distances(
+            prefix=prefix,
             symbols=symbols,
             expected_test_files=expected_test_files_no_distances,
             max_distance=max_distance,
@@ -90,9 +96,13 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
         Uses files from the a/ subdirectory (all of which have prefix A_)
         """
 
+        prefix = os.path.join(self.test_driver.repo_dir, "a", "__tests__")
+
         # Crucially, this does not include A_NotATest.php or A_AlsoNotATest.php
         self.check_has_tests(
-            symbols=["A_Sub::target"], expected_test_files=["A_SubTest.php"]
+            prefix=prefix,
+            symbols=["A_Sub::target"],
+            expected_test_files=["A_SubTest.php"],
         )
 
     def test_overrides(self) -> None:
@@ -101,7 +111,10 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
         Uses files from the a/ subdirectory (all of which have prefix A_)
         """
 
+        prefix = os.path.join(self.test_driver.repo_dir, "a", "__tests__")
+
         self.check_has_tests(
+            prefix=prefix,
             symbols=["A_Middle::target"],
             expected_test_files=[
                 "A_SubTest.php",
@@ -110,6 +123,7 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
             ],
         )
         self.check_has_tests(
+            prefix=prefix,
             symbols=["A_Super::target"],
             expected_test_files=[
                 "A_SubTest.php",
@@ -126,7 +140,10 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
         Uses files from the a/ subdirectory (all of which have prefix A_)
         """
 
+        prefix = os.path.join(self.test_driver.repo_dir, "a", "__tests__")
+
         self.check_has_tests_with_distances(
+            prefix=prefix,
             symbols=["A_SubTest::target"],
             expected_test_files=[("A_SubTest.php", 0)],
         )
@@ -136,6 +153,8 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
 
         Uses files from b/ subdirectory
         """
+
+        prefix = os.path.join(self.test_driver.repo_dir, "b", "__tests__")
 
         for max_distance in range(1, 5):
             # Our test files are set up such that B_UsesDistNTest.php
@@ -148,6 +167,7 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
             print(f"Expected test files {expected_tests}")
 
             self.check_has_tests_with_distances(
+                prefix=prefix,
                 symbols=["B_Def::foo"],
                 expected_test_files=expected_tests,
                 max_distance=max_distance,

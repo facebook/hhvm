@@ -240,11 +240,12 @@ let is_root_symbol_in_test_file ctx = function
         (Printf.sprintf
            "Could not resolve class %s, even though it was given as part of a root"
            class_name)
-    | Some relative_path ->
-      let nast = Ast_provider.get_ast ~full:true ctx relative_path in
-      let path = Relative_path.suffix relative_path in
-      if is_test_file ctx path nast then
-        Some path
+    | Some path ->
+      let nast = Ast_provider.get_ast ~full:true ctx path in
+      let relative_path = Relative_path.suffix path in
+      if is_test_file ctx relative_path nast then
+        let absolute_path = Relative_path.to_absolute path in
+        Some absolute_path
       else
         None)
 

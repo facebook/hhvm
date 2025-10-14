@@ -50,6 +50,8 @@ const int OPENSSL_CIPHER_RC2_64;
 const int OPENSSL_CIPHER_DES;
 const int OPENSSL_CIPHER_3DES;
 
+final class OpenSSLException extends Exception {}
+
 <<__PHPStdLib>>
 function openssl_csr_export_to_file(
   HH\FIXME\MISSING_PARAM_TYPE $csr,
@@ -87,6 +89,14 @@ function openssl_csr_sign(
   HH\FIXME\MISSING_PARAM_TYPE $configargs = null,
   int $serial = 0,
 ): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function openssl_csr_get_dns_names(
+  HH\FIXME\MISSING_PARAM_TYPE $csr,
+): vec<string>;
+<<__PHPStdLib>>
+function openssl_csr_get_upn(
+  HH\FIXME\MISSING_PARAM_TYPE $csr,
+): string;
 <<__PHPStdLib>>
 function openssl_error_string(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -258,6 +268,10 @@ function openssl_x509_checkpurpose(
   varray<mixed> $cainfo = vec[],
   string $untrustedfile = "",
 ): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function openssl_x509_get_upn(
+  HH\FIXME\MISSING_PARAM_TYPE $certificate,
+): string;
 <<__PHPStdLib>>
 function openssl_x509_export_to_file(
   HH\FIXME\MISSING_PARAM_TYPE $x509,

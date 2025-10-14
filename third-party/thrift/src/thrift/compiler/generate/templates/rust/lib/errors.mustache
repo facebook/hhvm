@@ -33,6 +33,20 @@ pub mod {{service:snake}} {
                 }
             {{/rust_exception_function:function}}
             {{/rust_exception:functions}}
+            {{#rust_exception:streams}}
+            {{#rust_exception_function:function}}
+                if let ::std::option::Option::Some({{function:upcamel}}StreamError::{{#rust_exception_function:field}}{{field:rust_name}}{{/rust_exception_function:field}}(e)) = cause.downcast_ref::<{{function:upcamel}}StreamError>() {
+                    return ::std::option::Option::Some(e);
+                }
+            {{/rust_exception_function:function}}
+            {{/rust_exception:streams}}
+            {{#rust_exception:sinks}}
+            {{#rust_exception_function:function}}
+                if let ::std::option::Option::Some({{function:upcamel}}SinkError::{{#rust_exception_function:field}}{{field:rust_name}}{{/rust_exception_function:field}}(e)) = cause.downcast_ref::<{{function:upcamel}}SinkError>() {
+                    return ::std::option::Option::Some(e);
+                }
+            {{/rust_exception_function:function}}
+            {{/rust_exception:sinks}}
             }
             ::std::option::Option::None
         }
@@ -401,6 +415,15 @@ pub mod {{service:snake}} {
         fn from(exn: {{#field:type}}{{> lib/type}}{{/field:type}}) -> Self {
             Self::{{field:rust_name}}(exn)
         }
+    }
+
+    impl As{{#field:type}}{{type:rust_name}}{{/field:type}} for {{function:upcamel}}SinkError {
+        fn as_{{#field:type}}{{type:rust_name_snake}}{{/field:type}}(&self) -> ::std::option::Option<&{{#field:type}}{{> lib/type}}{{/field:type}}> {
+            match self {
+                Self::{{field:rust_name}}(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
+            }
+        }
     }{{!
     }}{{/function:uniqueSinkExceptions}}
 
@@ -747,6 +770,15 @@ pub mod {{service:snake}} {
     impl ::std::convert::From<{{#field:type}}{{> lib/type}}{{/field:type}}> for {{function:upcamel}}StreamError {
         fn from(e: {{#field:type}}{{> lib/type}}{{/field:type}}) -> Self {
             Self::{{field:rust_name}}(e)
+        }
+    }
+
+    impl As{{#field:type}}{{type:rust_name}}{{/field:type}} for {{function:upcamel}}StreamError {
+        fn as_{{#field:type}}{{type:rust_name_snake}}{{/field:type}}(&self) -> ::std::option::Option<&{{#field:type}}{{> lib/type}}{{/field:type}}> {
+            match self {
+                Self::{{field:rust_name}}(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
+            }
         }
     }
 

@@ -2416,39 +2416,76 @@ mstch::node rust_mstch_service::rust_all_exceptions() {
       return lhs->get_scoped_name() < rhs->get_scoped_name();
     }
   };
-  using fields_t = std::vector<const t_field*>;
-  using functions_t = std::vector<const t_function*>;
-  using field_map_t = std::map<const t_type*, fields_t>;
-  using function_map_t = std::map<const t_type*, functions_t, name_less>;
+  enum exception_source_enum {
+    FUNCTION = 1,
+    SINK = 2,
+    STREAM = 3,
+  };
+  struct exception_source {
+    exception_source_enum source_enum;
+    const t_function* function;
+    const t_field* field;
+  };
+  using sources_t = std::vector<exception_source>;
+  using source_map_t = std::map<const t_type*, sources_t, name_less>;
 
-  field_map_t field_map;
-  function_map_t function_map;
+  source_map_t source_map;
+
   for (const auto& fun : service_->functions()) {
     for (const t_field& fld : get_elems(fun.exceptions())) {
-      function_map[&fld.type().deref()].push_back(&fun);
-      field_map[&fld.type().deref()].push_back(&fld);
+      source_map[&fld.type().deref()].push_back(exception_source{
+          .source_enum = exception_source_enum::FUNCTION,
+          .function = &fun,
+          .field = &fld});
+    }
+    if (fun.stream()) {
+      for (const t_field& fld : get_elems(fun.stream()->exceptions())) {
+        source_map[&fld.type().deref()].push_back(exception_source{
+            .source_enum = exception_source_enum::STREAM,
+            .function = &fun,
+            .field = &fld});
+      }
+    }
+    if (fun.sink()) {
+      for (const t_field& fld : get_elems(fun.sink()->sink_exceptions())) {
+        source_map[&fld.type().deref()].push_back(exception_source{
+            .source_enum = exception_source_enum::SINK,
+            .function = &fun,
+            .field = &fld});
+      }
     }
   }
 
+  auto functionFactory = rust_mstch_function_factory();
   mstch::array output;
-  for (const auto& funcs : function_map) {
+  for (const auto& sources : source_map) {
     mstch::map data;
     data["rust_exception:type"] =
-        context_.type_factory->make_mstch_object(funcs.first, context_, {});
-
-    auto functions = make_mstch_array(
-        funcs.second, rust_mstch_function_factory(), function_upcamel_names_);
-    auto fields = make_mstch_fields(field_map[funcs.first]);
+        context_.type_factory->make_mstch_object(sources.first, context_, {});
 
     mstch::array function_data;
-    for (size_t i = 0; i < fields.size(); i++) {
+    mstch::array stream_data;
+    mstch::array sink_data;
+    for (const auto& source : sources.second) {
       mstch::map inner;
-      inner["rust_exception_function:function"] = std::move(functions[i]);
-      inner["rust_exception_function:field"] = std::move(fields[i]);
-      function_data.emplace_back(std::move(inner));
+      inner["rust_exception_function:function"] =
+          functionFactory.make_mstch_object(
+              source.function, context_, {}, function_upcamel_names_);
+      inner["rust_exception_function:field"] =
+          context_.field_factory->make_mstch_object(source.field, context_);
+
+      if (source.source_enum == exception_source_enum::FUNCTION) {
+        function_data.emplace_back(std::move(inner));
+      } else if (source.source_enum == exception_source_enum::STREAM) {
+        stream_data.emplace_back(std::move(inner));
+      } else if (source.source_enum == exception_source_enum::SINK) {
+        sink_data.emplace_back(std::move(inner));
+      }
     }
 
     data["rust_exception:functions"] = std::move(function_data);
+    data["rust_exception:streams"] = std::move(stream_data);
+    data["rust_exception:sinks"] = std::move(sink_data);
     output.emplace_back(data);
   }
 

@@ -65,6 +65,21 @@ pub use self::my_interaction::*;
 /// Error definitions for `MyService`.
 pub mod my_service {
 
+    pub trait AsMyException {
+        fn as_my_exception(&self) -> ::std::option::Option<&crate::types::MyException>;
+    }
+
+    impl AsMyException for ::anyhow::Error {
+        fn as_my_exception(&self) -> ::std::option::Option<&crate::types::MyException> {
+            for cause in self.chain() {
+                if let ::std::option::Option::Some(StreamByIdWithExceptionStreamError::e(e)) = cause.downcast_ref::<StreamByIdWithExceptionStreamError>() {
+                    return ::std::option::Option::Some(e);
+                }
+            }
+            ::std::option::Option::None
+        }
+    }
+
     pub type PingError = ::fbthrift::NonthrowingFunctionError;
 
 
@@ -599,6 +614,15 @@ pub mod my_service {
     impl ::std::convert::From<crate::types::MyException> for StreamByIdWithExceptionStreamError {
         fn from(e: crate::types::MyException) -> Self {
             Self::e(e)
+        }
+    }
+
+    impl AsMyException for StreamByIdWithExceptionStreamError {
+        fn as_my_exception(&self) -> ::std::option::Option<&crate::types::MyException> {
+            match self {
+                Self::e(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
+            }
         }
     }
 

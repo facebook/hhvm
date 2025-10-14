@@ -21,6 +21,24 @@ pub mod sink_service {
         }
     }
 
+    pub trait AsSinkException1 {
+        fn as_sink_exception1(&self) -> ::std::option::Option<&crate::types::SinkException1>;
+    }
+
+    impl AsSinkException1 for ::anyhow::Error {
+        fn as_sink_exception1(&self) -> ::std::option::Option<&crate::types::SinkException1> {
+            for cause in self.chain() {
+                if let ::std::option::Option::Some(MethodSinkThrowSinkError::ex(e)) = cause.downcast_ref::<MethodSinkThrowSinkError>() {
+                    return ::std::option::Option::Some(e);
+                }
+                if let ::std::option::Option::Some(MethodBothThrowSinkError::ex(e)) = cause.downcast_ref::<MethodBothThrowSinkError>() {
+                    return ::std::option::Option::Some(e);
+                }
+            }
+            ::std::option::Option::None
+        }
+    }
+
     pub type MethodError = ::fbthrift::NonthrowingFunctionError;
 
 
@@ -1304,6 +1322,15 @@ pub mod sink_service {
         }
     }
 
+    impl AsSinkException1 for MethodSinkThrowSinkError {
+        fn as_sink_exception1(&self) -> ::std::option::Option<&crate::types::SinkException1> {
+            match self {
+                Self::ex(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
+            }
+        }
+    }
+
     impl ::std::convert::From<::fbthrift::ApplicationException> for MethodSinkThrowSinkError {
         fn from(exn: ::fbthrift::ApplicationException) -> Self {
             Self::ApplicationException(exn)
@@ -2029,6 +2056,15 @@ pub mod sink_service {
     impl ::std::convert::From<crate::types::SinkException1> for MethodBothThrowSinkError {
         fn from(exn: crate::types::SinkException1) -> Self {
             Self::ex(exn)
+        }
+    }
+
+    impl AsSinkException1 for MethodBothThrowSinkError {
+        fn as_sink_exception1(&self) -> ::std::option::Option<&crate::types::SinkException1> {
+            match self {
+                Self::ex(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
+            }
         }
     }
 

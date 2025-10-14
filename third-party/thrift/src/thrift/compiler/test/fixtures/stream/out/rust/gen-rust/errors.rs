@@ -48,6 +48,30 @@ pub mod pub_sub_streaming_service {
         }
     }
 
+    pub trait AsFooStreamEx {
+        fn as_foo_stream_ex(&self) -> ::std::option::Option<&crate::types::FooStreamEx>;
+    }
+
+    impl AsFooStreamEx for ::anyhow::Error {
+        fn as_foo_stream_ex(&self) -> ::std::option::Option<&crate::types::FooStreamEx> {
+            for cause in self.chain() {
+                if let ::std::option::Option::Some(StreamthrowsStreamError::e(e)) = cause.downcast_ref::<StreamthrowsStreamError>() {
+                    return ::std::option::Option::Some(e);
+                }
+                if let ::std::option::Option::Some(BoththrowsStreamError::e(e)) = cause.downcast_ref::<BoththrowsStreamError>() {
+                    return ::std::option::Option::Some(e);
+                }
+                if let ::std::option::Option::Some(ResponseandstreamstreamthrowsStreamError::e(e)) = cause.downcast_ref::<ResponseandstreamstreamthrowsStreamError>() {
+                    return ::std::option::Option::Some(e);
+                }
+                if let ::std::option::Option::Some(ResponseandstreamboththrowsStreamError::e(e)) = cause.downcast_ref::<ResponseandstreamboththrowsStreamError>() {
+                    return ::std::option::Option::Some(e);
+                }
+            }
+            ::std::option::Option::None
+        }
+    }
+
     pub type ReturnstreamError = ::fbthrift::NonthrowingFunctionError;
 
 
@@ -264,6 +288,15 @@ pub mod pub_sub_streaming_service {
     impl ::std::convert::From<crate::types::FooStreamEx> for StreamthrowsStreamError {
         fn from(e: crate::types::FooStreamEx) -> Self {
             Self::e(e)
+        }
+    }
+
+    impl AsFooStreamEx for StreamthrowsStreamError {
+        fn as_foo_stream_ex(&self) -> ::std::option::Option<&crate::types::FooStreamEx> {
+            match self {
+                Self::e(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
+            }
         }
     }
 
@@ -1044,6 +1077,15 @@ pub mod pub_sub_streaming_service {
         }
     }
 
+    impl AsFooStreamEx for BoththrowsStreamError {
+        fn as_foo_stream_ex(&self) -> ::std::option::Option<&crate::types::FooStreamEx> {
+            match self {
+                Self::e(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
+            }
+        }
+    }
+
     impl ::std::convert::From<::anyhow::Error> for BoththrowsStreamError {
         fn from(err: ::anyhow::Error) -> Self {
             Self::ThriftError(err)
@@ -1242,6 +1284,15 @@ pub mod pub_sub_streaming_service {
     impl ::std::convert::From<crate::types::FooStreamEx> for ResponseandstreamstreamthrowsStreamError {
         fn from(e: crate::types::FooStreamEx) -> Self {
             Self::e(e)
+        }
+    }
+
+    impl AsFooStreamEx for ResponseandstreamstreamthrowsStreamError {
+        fn as_foo_stream_ex(&self) -> ::std::option::Option<&crate::types::FooStreamEx> {
+            match self {
+                Self::e(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
+            }
         }
     }
 
@@ -1778,6 +1829,15 @@ pub mod pub_sub_streaming_service {
     impl ::std::convert::From<crate::types::FooStreamEx> for ResponseandstreamboththrowsStreamError {
         fn from(e: crate::types::FooStreamEx) -> Self {
             Self::e(e)
+        }
+    }
+
+    impl AsFooStreamEx for ResponseandstreamboththrowsStreamError {
+        fn as_foo_stream_ex(&self) -> ::std::option::Option<&crate::types::FooStreamEx> {
+            match self {
+                Self::e(inner) => ::std::option::Option::Some(inner),
+                _ => ::std::option::Option::None,
+            }
         }
     }
 

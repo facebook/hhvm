@@ -52,17 +52,18 @@ func TestSetHeadersDoesOverride(t *testing.T) {
 }
 
 func TestGetRequestHeadersFromContext(t *testing.T) {
-	// Case: nil context
-	headers := GetRequestHeadersFromContext(nil)
-	require.Nil(t, headers)
-
-	// Case: empty context
-	headers = GetRequestHeadersFromContext(context.TODO())
-	require.Nil(t, headers)
-
-	// Case: context with headers
-	headersMap := map[string]string{"foo": "bar"}
-	ctxWithHeaders := WithRequestHeaders(context.TODO(), headersMap)
-	headers = GetRequestHeadersFromContext(ctxWithHeaders)
-	require.Equal(t, headersMap, headers)
+	t.Run("nil context", func(t *testing.T) {
+		headers := GetRequestHeadersFromContext(nil)
+		require.Nil(t, headers)
+	})
+	t.Run("empty context", func(t *testing.T) {
+		headers := GetRequestHeadersFromContext(context.TODO())
+		require.Nil(t, headers)
+	})
+	t.Run("context with existing headers", func(t *testing.T) {
+		headers := map[string]string{"foo": "bar"}
+		ctxWithHeaders := WithRequestHeaders(context.TODO(), headers)
+		headersFromContext := GetRequestHeadersFromContext(ctxWithHeaders)
+		require.Equal(t, headers, headersFromContext)
+	})
 }

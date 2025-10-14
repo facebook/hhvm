@@ -29,14 +29,28 @@ func TestWithRequestHeaders(t *testing.T) {
 
 	input1 := map[string]string{"key1": "value1"}
 	ctx = WithRequestHeaders(ctx, input1)
+	// Ensure that modifying the original map
+	// does not affect the context headers.
+	input1["key999"] = "value999"
 	output1 := GetRequestHeadersFromContext(ctx)
-	assert.Equal(t, input1, output1)
+	expected := map[string]string{"key1": "value1"}
+	assert.Equal(t, expected, output1)
 
 	input2 := map[string]string{"key2": "value2"}
 	ctx = WithRequestHeaders(ctx, input2)
+	// Ensure that modifying the original map
+	// does not affect the context headers.
+	input2["key999"] = "value999"
 	output2 := GetRequestHeadersFromContext(ctx)
-	expected := map[string]string{"key1": "value1", "key2": "value2"}
+	expected = map[string]string{"key1": "value1", "key2": "value2"}
 	assert.Equal(t, expected, output2)
+
+	// Ensure new headers override existing ones.
+	input3 := map[string]string{"key1": "value123"}
+	ctx = WithRequestHeaders(ctx, input3)
+	output3 := GetRequestHeadersFromContext(ctx)
+	expected = map[string]string{"key1": "value123", "key2": "value2"}
+	assert.Equal(t, expected, output3)
 }
 
 func TestSetHeadersDoesOverride(t *testing.T) {

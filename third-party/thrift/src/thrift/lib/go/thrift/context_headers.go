@@ -38,13 +38,15 @@ func WithRequestHeader(ctx context.Context, key string, value string) context.Co
 
 // WithRequestHeaders attaches thrift headers to a ctx.
 func WithRequestHeaders(ctx context.Context, headers map[string]string) context.Context {
-	storedHeaders := ctx.Value(requestHeadersKey)
-	if storedHeaders == nil {
-		return context.WithValue(ctx, requestHeadersKey, headers)
+	// Create a fresh map to copy headers into. This ensures
+	// that the contents cannot be modified from the outside.
+	allHeaders := make(map[string]string)
+	if existingHeaders := ctx.Value(requestHeadersKey); existingHeaders != nil {
+		maps.Copy(allHeaders, existingHeaders.(map[string]string))
 	}
-	headersMap := storedHeaders.(map[string]string)
-	maps.Copy(headersMap, headers)
-	return context.WithValue(ctx, requestHeadersKey, headersMap)
+	// Copy new headers last. They take precedence in case of a collision.
+	maps.Copy(allHeaders, headers)
+	return context.WithValue(ctx, requestHeadersKey, allHeaders)
 }
 
 // SetHeaders replaces all the current headers.

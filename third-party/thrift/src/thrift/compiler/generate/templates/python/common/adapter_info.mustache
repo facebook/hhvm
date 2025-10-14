@@ -19,17 +19,20 @@ A tuple of:
   1. adapter class,
   2. a lambda that returns transitive annotation (if the adapter is applied via transitive annotation, else None.)
 if the node has an adapter, else None.
-}}{{#pragma ignore-newlines}}
-{{#if self.has_adapter?}}
-{{#let adapter = self.adapter}}
+}}
+{{#let export partial adapter_info |node|}}
+  {{#pragma ignore-newlines}}
+  {{#if node.has_adapter?}}
+    {{#let adapter = node.adapter}}
 (
 {{adapter.name}}, lambda: {{!preserve trailing space}}
-{{#if (object.notnull? adapter.transitive_annotation)}}
+    {{#if (object.notnull? adapter.transitive_annotation)}}
 {{!   }}{{#adapter.transitive_annotation}}{{> types/constant_value }}{{/adapter.transitive_annotation}}
-{{#else}}
+    {{#else}}
 {{!   }}None
-{{/if (object.notnull? adapter.transitive_annotation)}}
+    {{/if (object.notnull? adapter.transitive_annotation)}}
 )
-{{#else}}
+  {{#else}}
 None
-{{/if self.has_adapter?}}
+  {{/if node.has_adapter?}}
+{{/let partial}}

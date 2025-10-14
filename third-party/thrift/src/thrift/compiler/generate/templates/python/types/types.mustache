@@ -17,6 +17,7 @@
 }}{{!
 Generated Python classes for Thrift types
 }}
+{{#import "common/adapter_info" as m_adapter_info }}
 {{> common/auto_generated_py}}
 
 {{#if (not (or python.generate_immutable_types? python.generate_mutable_types?))}}
@@ -90,7 +91,7 @@ class {{> structs/unadapted_name}}{{!
               {{#else}}
             None,  # default value
               {{/if (object.notnull? default_val)}}
-            {{> common/adapter_info }},  # adapter info
+            {{#partial m_adapter_info.adapter_info node=field:self}},  # adapter info
             {{#field:type}}{{> types/is_primitive }}{{/field:type}}, # field type is primitive
             {{field:idl_type}}, # IDL type (see BaseTypeEnum)
         ),

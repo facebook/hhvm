@@ -24,15 +24,6 @@ in a different thrift file, or defined in the same thrift file but this is
 in the client or server source rather than the type definition source.
 
 }}{{#pragma ignore-newlines}}
-{{#if (not (object.is? this type="native_handle"))}}
-  {{! If we're dealing with a mstch object, recurse this template with its
-      Whisker prototype as the context. }}
-  {{#type:self}}
-{{> types/typeinfo }}
-  {{/type:self}}
-
-{{#else}}
-  {{! We're dealing with a native handle (Whisker prototype). !}}
   {{#if type:has_adapter?}}
     {{! If the type has an adapter, open AdaptedTypeInfo wrapper }}
 _fbthrift_python_types.AdaptedTypeInfo(
@@ -110,5 +101,3 @@ None
     {{/if (object.notnull? adapter.transitive_annotation)}}
 )
   {{/if type:has_adapter?}}
-
-{{/if (not (object.is? this type="native_handle"))}}

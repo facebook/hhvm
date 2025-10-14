@@ -646,28 +646,6 @@ void validate_no_reserved_key_in_namespace(
   }
 }
 
-class python_mstch_function : public mstch_function {
- public:
-  python_mstch_function(
-      const t_function* f, mstch_context& ctx, mstch_element_position pos)
-      : mstch_function(f, ctx, pos) {
-    register_methods(
-        this,
-        {
-            {"function:regular_response_type",
-             &python_mstch_function::regular_response_type},
-        });
-  }
-
-  mstch::node regular_response_type() {
-    if (function_->qualifier() == t_function_qualifier::oneway) {
-      return {};
-    }
-    const t_type* rettype = function_->return_type()->get_true_type();
-    return context_.type_factory->make_mstch_object(rettype, context_, pos_);
-  }
-};
-
 class python_mstch_struct : public mstch_struct {
  public:
   python_mstch_struct(
@@ -1267,7 +1245,6 @@ void t_mstch_python_generator::set_mstch_factories() {
   mstch_context_.add<python_mstch_program>();
   mstch_context_.add<python_mstch_service>();
   mstch_context_.add<python_mstch_interaction>();
-  mstch_context_.add<python_mstch_function>();
   mstch_context_.add<python_mstch_struct>();
 }
 

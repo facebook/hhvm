@@ -37,15 +37,16 @@ class {{> types/function_args_type}}({{> types/struct_base }}):
 
 
 class _fbthrift_{{service:name}}_{{function:name}}_result({{> types/struct_base }}):
-   {{#function:regular_response_type}}
+   {{#let regular_response_type = (if function:oneway? null function:self.return_type.true_type)}}
+   {{#regular_response_type}}
     success: _typing.Final[{{> types/pep484_type }}]
-   {{/function:regular_response_type}}
+   {{/regular_response_type}}
     {{#function:exceptions}}
     {{field:py_name}}: _typing.Final[{{#field:type}}{{> types/pep484_type}}{{/field:type}}]
     {{/function:exceptions}}
 
     def __init__(
-        self, *, success: _typing.Optional[{{#function:regular_response_type}}{{> types/pep484_type }}{{/function:regular_response_type}}] = ...{{!
+        self, *, success: _typing.Optional[{{#regular_response_type}}{{> types/pep484_type }}{{/regular_response_type}}] = ...{{!
         }}{{#function:exceptions}}{{!
         }}, {{> fields/exception_field_name }}: _typing.Optional[{{#field:type}}{{> types/pep484_type}}{{/field:type}}]=...{{!
         }}{{/function:exceptions}}
@@ -54,7 +55,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result({{> types/struct_base 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            {{#function:regular_response_type}}{{> types/pep484_type }}{{/function:regular_response_type}},
+            {{#regular_response_type}}{{> types/pep484_type }}{{/regular_response_type}},
             {{#function:exceptions}}
             {{#field:type}}{{> types/pep484_type}}{{/field:type}},
             {{/function:exceptions}}

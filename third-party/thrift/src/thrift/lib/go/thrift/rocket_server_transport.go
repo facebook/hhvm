@@ -98,9 +98,6 @@ func (r *rocketServerTransport) acceptLoop(ctx context.Context) error {
 				return fmt.Errorf("listener.Accept failed in rocketServerTransport.acceptLoop: %w", err)
 			}
 		}
-		if conn == nil {
-			continue
-		}
 
 		// Notify observer that connection was successfully accepted
 		r.observer.ConnAccepted()

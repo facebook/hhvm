@@ -42,10 +42,7 @@ func WithRequestHeaders(ctx context.Context, headers map[string]string) context.
 	if storedHeaders == nil {
 		return context.WithValue(ctx, requestHeadersKey, headers)
 	}
-	headersMap, ok := storedHeaders.(map[string]string)
-	if !ok {
-		return context.WithValue(ctx, requestHeadersKey, headers)
-	}
+	headersMap := storedHeaders.(map[string]string)
 	maps.Copy(headersMap, headers)
 	return context.WithValue(ctx, requestHeadersKey, headersMap)
 }
@@ -64,9 +61,5 @@ func GetRequestHeadersFromContext(ctx context.Context) map[string]string {
 	if requestHeaders == nil {
 		return nil
 	}
-	requestHeadersMap, ok := requestHeaders.(map[string]string)
-	if !ok {
-		return nil
-	}
-	return requestHeadersMap
+	return requestHeaders.(map[string]string)
 }

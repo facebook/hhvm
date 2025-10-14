@@ -24,17 +24,19 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestWithRequestHeadersDoNotOverride(t *testing.T) {
+func TestWithRequestHeaders(t *testing.T) {
 	ctx := context.Background()
+
 	input1 := map[string]string{"key1": "value1"}
-	input2 := map[string]string{"key2": "value2"}
-	want := map[string]string{"key1": "value1", "key2": "value2"}
-	ctx = WithRequestHeader(ctx, "key1", "value1")
+	ctx = WithRequestHeaders(ctx, input1)
 	output1 := GetRequestHeadersFromContext(ctx)
 	assert.Equal(t, input1, output1)
+
+	input2 := map[string]string{"key2": "value2"}
 	ctx = WithRequestHeaders(ctx, input2)
 	output2 := GetRequestHeadersFromContext(ctx)
-	assert.Equal(t, want, output2)
+	expected := map[string]string{"key1": "value1", "key2": "value2"}
+	assert.Equal(t, expected, output2)
 }
 
 func TestSetHeadersDoesOverride(t *testing.T) {
@@ -63,9 +65,4 @@ func TestGetRequestHeadersFromContext(t *testing.T) {
 	ctxWithHeaders := WithRequestHeaders(context.TODO(), headersMap)
 	headers = GetRequestHeadersFromContext(ctxWithHeaders)
 	require.Equal(t, headersMap, headers)
-
-	// Case: context with invalid headers type
-	ctxWithInvalidHeadersType := context.WithValue(context.TODO(), requestHeadersKey, 1234)
-	headers = GetRequestHeadersFromContext(ctxWithInvalidHeadersType)
-	require.Nil(t, headers)
 }

@@ -585,6 +585,13 @@ bool HQSession::getCurrentTransportInfoWithoutUpdate(
     tinfo->totalPackets = static_cast<int64_t>(quicInfo.totalPacketsSent);
     tinfo->totalPacketsLost =
         static_cast<int64_t>(quicInfo.totalPacketsMarkedLost);
+
+    // Populate key exchange algorithm if available
+    auto tlsSummary = sock_->getTLSSummary();
+    if (tlsSummary && !tlsSummary->namedGroup.empty()) {
+      tinfo->keyExchange =
+          std::make_shared<std::string>(tlsSummary->namedGroup);
+    }
   }
   // TODO: fill up other properties.
   return true;

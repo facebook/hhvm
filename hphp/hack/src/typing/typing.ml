@@ -3665,23 +3665,11 @@ end = struct
           let fty =
             { ftype with ft_params = local_obj_fp :: ftype.ft_params }
           in
-          let caller =
-            {
-              ft_tparams = fty.ft_tparams;
-              ft_where_constraints = fty.ft_where_constraints;
-              ft_params = fty.ft_params;
-              ft_implicit_params = fty.ft_implicit_params;
-              ft_ret = fty.ft_ret;
-              ft_flags = fty.ft_flags;
-              ft_require_package = fty.ft_require_package;
-              ft_instantiated = fty.ft_instantiated;
-            }
-          in
           let ty =
             Typing_dynamic.maybe_wrap_with_supportdyn
               ~should_wrap:supportdyn
               reason
-              caller
+              fty
           in
           (* The function type itself is readonly because we don't capture any values *)
           let (env, ty) = set_capture_only_readonly env ty in

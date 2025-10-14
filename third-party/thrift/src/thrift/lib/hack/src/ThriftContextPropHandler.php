@@ -83,10 +83,8 @@ final class ThriftContextPropHandler extends TClientEventHandler {
       ),
     );
 
-    $buf = new TMemoryBuffer();
-    $prot = new TCompactProtocolAccelerated($buf);
-    $tfmr->write($prot);
-    $encoded = Base64::encode($buf->getBuffer());
+    $buffer = TCompactSerializer::serialize($tfmr);
+    $encoded = Base64::encode($buffer);
     return $encoded;
   }
 

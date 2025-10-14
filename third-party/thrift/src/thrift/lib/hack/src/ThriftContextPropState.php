@@ -105,11 +105,8 @@ final class ThriftContextPropState {
   private static function serialize(
     ThriftFrameworkMetadata $tfm,
   )[write_props, zoned_shallow]: string {
-    $buf = new TMemoryBuffer();
-    $prot = new TCompactProtocolAccelerated($buf);
-    $tfm->write($prot);
-    $s = $buf->getBuffer();
-    return Base64::encode($s);
+    $buffer = TCompactSerializer::serialize($tfm);
+    return Base64::encode($buffer);
   }
 
   /**

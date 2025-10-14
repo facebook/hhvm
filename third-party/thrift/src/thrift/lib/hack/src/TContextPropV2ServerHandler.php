@@ -97,10 +97,8 @@ final class TContextPropV2ServerHandler extends TProcessorEventHandler {
     }
 
     // encode tfmr and add header
-    $buf = new TMemoryBuffer();
-    $prot = new TCompactProtocolAccelerated($buf);
-    $mutable_tfmr->write($prot);
-    $encoded_response_tfm = Base64::encode($buf->getBuffer());
+    $buffer = TCompactSerializer::serialize($mutable_tfmr);
+    $encoded_response_tfm = Base64::encode($buffer);
 
     $this->thriftServer->addHTTPHeader(
       HTTPResponseHeader::THRIFT_FRAMEWORK_METADATA_RESPONSE,

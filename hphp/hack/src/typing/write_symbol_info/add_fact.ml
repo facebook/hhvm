@@ -743,3 +743,15 @@ let hack_to_thrift hack thrift fa =
 let container_decl decl_pred name fa =
   let qname = Util.make_qname name in
   container_decl_qname decl_pred qname fa
+
+let file_package ~path package_ has_package_override fa =
+  let json =
+    FilePackage.(
+      {
+        file = File.Key path;
+        package_;
+        hasPackageOverride = has_package_override;
+      }
+      |> to_json_key)
+  in
+  Fact_acc.add_fact Predicate.(Hack FilePackage) json fa

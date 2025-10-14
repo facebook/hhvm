@@ -7,38 +7,57 @@
  *)
 
 (** Indexing a Hack file consists in three distinct passes
-  1. Indexing source text (regex matching for extracting gencode info from comments)
+  1. Indexing source text (regex matching for extracting gencode info from comments
+     and package information)
   2. Indexing declarations, done in [index_decls]
   3. Indexing xrefs and filecalls, done in [index_refs] *)
 
 open Hh_prelude
 module Fact_acc = Predicate.Fact_acc
 
+let strip_root_if_possible path root =
+  let root_len = String.length root in
+  if not (String.is_prefix path ~prefix:root) then
+    path
+  else
+    String.sub path ~pos:(root_len + 1) ~len:(String.length path - root_len - 1)
+
 (* side-effect: updates the generated status in [Fact_acc.t] *)
-let process_source_text _ctx fa File_info.{ path; source_text; _ } =
+let process_source_text ctx fa File_info.{ path; root_path; source_text; _ } =
   Fact_acc.set_generated_from fa None;
   let text = Full_fidelity_source_text.text source_text in
-  match Gencode_utils.get_gencode_status text with
-  | Gencode_utils.
-      {
-        is_generated = true;
-        fully_generated;
-        source;
-        command;
-        class_;
-        signature;
-      } ->
-    Fact_acc.set_generated_from fa source;
-    Add_fact.gen_code
-      ~path
-      ~fully_generated
-      ~signature
-      ~source
-      ~command
-      ~class_
-      fa
-    |> snd
-  | _ -> fa
+  let fa =
+    match Gencode_utils.get_gencode_status text with
+    | Gencode_utils.
+        {
+          is_generated = true;
+          fully_generated;
+          source;
+          command;
+          class_;
+          signature;
+        } ->
+      Fact_acc.set_generated_from fa source;
+      Add_fact.gen_code
+        ~path
+        ~fully_generated
+        ~signature
+        ~source
+        ~command
+        ~class_
+        fa
+      |> snd
+    | _ -> fa
+  in
+  let (package, has_package_override) =
+    Package_utils.get_package ctx (strip_root_if_possible path root_path) text
+  in
+  Add_fact.file_package
+    ~path
+    (Hack.Package_.Key package)
+    has_package_override
+    fa
+  |> snd
 
 let build_json ctx files_info ~ownership =
   let index_file fa file_info =

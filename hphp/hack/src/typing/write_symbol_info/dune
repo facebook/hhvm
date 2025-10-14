@@ -4,6 +4,7 @@
  (modules
   sym_def
   gencode_utils
+  package_utils
   indexable
   file_info
   add_fact

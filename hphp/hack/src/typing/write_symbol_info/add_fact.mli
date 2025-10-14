@@ -207,3 +207,10 @@ val indexerInputsHash :
 
 val hack_to_thrift :
   Declaration.t -> Fbthrift.Declaration.t -> Fact_acc.t -> Fact_acc.t
+
+val file_package :
+  path:Src.File.key ->
+  Package_.t ->
+  bool ->
+  Fact_acc.t ->
+  Fact_id.t * Fact_acc.t

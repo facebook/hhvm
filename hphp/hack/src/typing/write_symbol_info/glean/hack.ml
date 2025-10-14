@@ -1165,6 +1165,117 @@ end = struct
 
 end
 
+and Package_: sig
+  type t =
+    | Id of Fact_id.t
+    | Key of key
+  [@@deriving ord]
+
+  and key = string
+  [@@deriving ord]
+
+  val to_json: t -> json
+
+  val to_json_key: key -> json
+
+end = struct
+  type t =
+    | Id of Fact_id.t
+    | Key of key
+  [@@deriving ord]
+
+  and key = string
+  [@@deriving ord]
+
+  let rec to_json = function
+    | Id f -> Util.id f
+    | Key t -> Util.key (to_json_key t)
+
+  and to_json_key x = JSON_String x
+end
+
+and FilePackage: sig
+  type t =
+    | Id of Fact_id.t
+    | Key of key
+  [@@deriving ord]
+
+  and key = {
+    file: Src.File.t;
+    package_: Package_.t;
+    hasPackageOverride: bool;
+  }
+  [@@deriving ord]
+
+  val to_json: t -> json
+
+  val to_json_key: key -> json
+
+end = struct
+  type t =
+    | Id of Fact_id.t
+    | Key of key
+  [@@deriving ord]
+
+  and key = {
+    file: Src.File.t;
+    package_: Package_.t;
+    hasPackageOverride: bool;
+  }
+  [@@deriving ord]
+
+  let rec to_json = function
+    | Id f -> Util.id f
+    | Key t -> Util.key (to_json_key t)
+
+  and to_json_key {file; package_; hasPackageOverride} =
+    let fields = [
+      ("file", Src.File.to_json file);
+      ("package_", Package_.to_json package_);
+      ("hasPackageOverride", JSON_Bool hasPackageOverride)
+    ] in
+    JSON_Object fields
+
+end
+
+and FileHasPackageOverride: sig
+  type t =
+    | Id of Fact_id.t
+    | Key of key
+  [@@deriving ord]
+
+  and key = {
+    file: Src.File.t;
+  }
+  [@@deriving ord]
+
+  val to_json: t -> json
+
+  val to_json_key: key -> json
+
+end = struct
+  type t =
+    | Id of Fact_id.t
+    | Key of key
+  [@@deriving ord]
+
+  and key = {
+    file: Src.File.t;
+  }
+  [@@deriving ord]
+
+  let rec to_json = function
+    | Id f -> Util.id f
+    | Key t -> Util.key (to_json_key t)
+
+  and to_json_key {file} =
+    let fields = [
+      ("file", Src.File.to_json file);
+    ] in
+    JSON_Object fields
+
+end
+
 and NamespaceQName: sig
   type t =
     | Id of Fact_id.t
@@ -1238,7 +1349,6 @@ end = struct
     uses: Src.RelByteSpan.t list;
   }
   [@@deriving ord]
-
   let rec to_json = function
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)

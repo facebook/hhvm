@@ -23,6 +23,7 @@ type hack =
   | EnumDefinition
   | Enumerator
   | FileDeclarations
+  | FilePackage
   | FileXRefs
   | FunctionDeclaration
   | FunctionDefinition
@@ -83,6 +84,7 @@ let hack_to_string = function
   | EnumDefinition -> "EnumDefinition"
   | Enumerator -> "Enumerator"
   | FileDeclarations -> "FileDeclarations"
+  | FilePackage -> "FilePackage"
   | FileXRefs -> "FileXRefs"
   | FunctionDeclaration -> "FunctionDeclaration"
   | FunctionDefinition -> "FunctionDefinition"
@@ -154,6 +156,7 @@ let ordered_all =
     Hack MethodOverrides;
     Hack FileXRefs;
     Hack FileDeclarations;
+    Hack FilePackage;
     Hack FileCall;
     Hack GlobalNamespaceAlias;
     Hack IndexerInputsHash;

@@ -21,6 +21,7 @@ type hack =
   | EnumDefinition
   | Enumerator
   | FileDeclarations
+  | FilePackage
   | FileXRefs
   | FunctionDeclaration
   | FunctionDefinition

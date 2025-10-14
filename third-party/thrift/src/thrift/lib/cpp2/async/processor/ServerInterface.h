@@ -44,51 +44,52 @@ class ServerInterface : public virtual AsyncProcessorFactory,
   }
   virtual std::string_view getGeneratedName() const = 0;
 
-  [[deprecated("Replaced by getRequestContext")]] Cpp2RequestContext*
-  getConnectionContext() const {
+  [[deprecated("Replaced by getRequestContext")]] static Cpp2RequestContext*
+  getConnectionContext() {
     return requestParams_.requestContext_;
   }
 
-  Cpp2RequestContext* getRequestContext() const {
+  static Cpp2RequestContext* getRequestContext() {
     return requestParams_.requestContext_;
   }
 
-  [[deprecated("Replaced by setRequestContext")]] void setConnectionContext(
-      Cpp2RequestContext* c) {
+  [[deprecated("Replaced by setRequestContext")]] static void
+  setConnectionContext(Cpp2RequestContext* c) {
     requestParams_.requestContext_ = c;
   }
 
-  void setRequestContext(Cpp2RequestContext* c) {
+  static void setRequestContext(Cpp2RequestContext* c) {
     requestParams_.requestContext_ = c;
   }
 
-  void setThreadManager(concurrency::ThreadManager* tm) {
+  static void setThreadManager(concurrency::ThreadManager* tm) {
     requestParams_.threadManager_ = tm;
   }
 
   // For cases where caller only needs the folly::Executor* interface.
   // These calls can be replaced with getHandlerExecutor.
-  [[deprecated("Use getHandlerExecutor")]] folly::Executor* getThreadManager() {
+  [[deprecated("Use getHandlerExecutor")]] static folly::Executor*
+  getThreadManager() {
     return getHandlerExecutor();
   }
 
   // For cases where the caller needs the ThreadManager interface. Caller
   // needs to be refactored to replace these calls with getHandlerExecutor.
-  [[deprecated("Use getHandlerExecutor")]] concurrency::ThreadManager*
+  [[deprecated("Use getHandlerExecutor")]] static concurrency::ThreadManager*
   getThreadManager_deprecated() {
     return requestParams_.threadManager_;
   }
 
-  void setHandlerExecutor(folly::Executor* executor) {
+  static void setHandlerExecutor(folly::Executor* executor) {
     requestParams_.handlerExecutor_ = executor;
   }
 
-  folly::Executor* getHandlerExecutor() {
+  static folly::Executor* getHandlerExecutor() {
     return requestParams_.handlerExecutor_ ? requestParams_.handlerExecutor_
                                            : requestParams_.threadManager_;
   }
 
-  folly::Executor::KeepAlive<> getBlockingThreadManager() {
+  static folly::Executor::KeepAlive<> getBlockingThreadManager() {
     if (requestParams_.threadManager_) {
       return BlockingThreadManager::create(requestParams_.threadManager_);
     } else {
@@ -108,9 +109,9 @@ class ServerInterface : public virtual AsyncProcessorFactory,
 
   void setEventBase(folly::EventBase* eb);
 
-  folly::EventBase* getEventBase() { return requestParams_.eventBase_; }
+  static folly::EventBase* getEventBase() { return requestParams_.eventBase_; }
 
-  void clearRequestParams() { requestParams_ = RequestParams(); }
+  static void clearRequestParams() { requestParams_ = RequestParams(); }
 
   virtual concurrency::PRIORITY getRequestPriority(
       Cpp2RequestContext* ctx, concurrency::PRIORITY prio);

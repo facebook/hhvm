@@ -117,8 +117,9 @@ class type_ref_resolver {
         [&](sema_context&, mutator_context&, t_field& node) {
           node.set_type(resolve(node.type()));
 
-          if (auto* dflt = node.get_default_value()) {
-            resolve_const_value(*dflt, resolve_const_value);
+          if (auto* dflt = node.default_value()) {
+            resolve_const_value(
+                const_cast<t_const_value&>(*dflt), resolve_const_value);
           }
         });
 
@@ -383,7 +384,10 @@ void match_const_type_with_value(
 void match_field_type_with_default_value(
     sema_context& ctx, mutator_context& mctx, t_field& field_node) {
   maybe_match_type_with_const_value(
-      ctx, mctx, field_node.get_type(), field_node.get_default_value());
+      ctx,
+      mctx,
+      field_node.get_type(),
+      const_cast<t_const_value*>(field_node.default_value()));
 }
 
 static void match_annotation_types_with_const_values(

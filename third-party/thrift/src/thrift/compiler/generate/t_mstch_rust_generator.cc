@@ -2120,7 +2120,7 @@ class mstch_rust_struct_field : public mstch_base {
     return mstch::node();
   }
   mstch::node rust_default() {
-    if (auto default_value = field_->get_value()) {
+    if (auto default_value = field_->default_value()) {
       return std::make_shared<mstch_rust_value>(
           default_value, field_->get_type(), depth_, context_, pos_, options_);
     }
@@ -2285,7 +2285,7 @@ class rust_mstch_field : public mstch_field {
   }
   mstch::node rust_rename() { return field_->name() != mangle(field_->name()); }
   mstch::node rust_default() {
-    auto value = field_->get_value();
+    auto value = field_->default_value();
     if (value) {
       unsigned depth = 2; // impl Default + fn default
       auto type = field_->get_type();

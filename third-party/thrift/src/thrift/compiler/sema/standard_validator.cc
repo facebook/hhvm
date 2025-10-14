@@ -663,7 +663,7 @@ void validate_boxed_field_attributes(sema_context& ctx, const t_field& node) {
         "The `@thrift.InternBox` annotation can only be used with a struct field.");
     // TODO(dokwon): Add support for custom defaults and remove this check.
     ctx.check(
-        !node.get_value(),
+        !node.default_value(),
         "The `@thrift.InternBox` annotation currently does not support a field with custom default.");
     ctx.check(
         node.qualifier() == t_field_qualifier::none ||

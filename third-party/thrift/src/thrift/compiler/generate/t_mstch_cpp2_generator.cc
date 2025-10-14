@@ -1640,12 +1640,12 @@ class cpp_mstch_struct : public mstch_struct {
       }
       if (type->is<t_enum>() ||
           (type->is<t_primitive_type>() && !type->is_string_or_binary()) ||
-          (type->is_string_or_binary() && field->get_value() != nullptr) ||
-          (type->is<t_container>() && field->get_value() != nullptr &&
-           !field->get_value()->is_empty()) ||
+          (type->is_string_or_binary() && field->default_value() != nullptr) ||
+          (type->is<t_container>() && field->default_value() != nullptr &&
+           !field->default_value()->is_empty()) ||
           ((type->is<t_struct>() || type->is<t_union>()) &&
            (struct_ != type->try_as<t_struct>()) &&
-           ((field->get_value() && !field->get_value()->is_empty()) ||
+           ((field->default_value() && !field->default_value()->is_empty()) ||
             (cpp2::is_explicit_ref(field) &&
              field->get_req() != t_field::e_req::optional))) ||
           (type->is<t_container>() && cpp2::is_explicit_ref(field) &&

@@ -976,7 +976,7 @@ class mstch_java_field : public mstch_field {
       // default values are ignored for optional fields
       return false;
     }
-    return !!field_->get_value();
+    return !!field_->default_value();
   }
   mstch::node get_nested_depth() { return nestedDepth; }
   mstch::node preceding_nested_depth() { return (nestedDepth - 1); }

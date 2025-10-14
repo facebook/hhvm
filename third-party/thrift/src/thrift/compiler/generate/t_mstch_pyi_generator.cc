@@ -377,7 +377,7 @@ class pyi_mstch_field : public mstch_field {
     bool is_required = (field_type == t_field::e_req::required);
     bool is_optional = (field_type == t_field::e_req::optional);
     bool is_unqualified = !is_required && !is_optional;
-    bool has_value = (mstch_field::field_->get_value() != nullptr);
+    bool has_value = (mstch_field::field_->default_value() != nullptr);
     bool has_default_value = has_value || is_unqualified;
 
     this->require_value_ = is_required && !has_default_value;

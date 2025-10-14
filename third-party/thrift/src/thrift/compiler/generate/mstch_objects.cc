@@ -155,11 +155,11 @@ mstch::node mstch_type::get_typedef() {
 }
 
 mstch::node mstch_field::value() {
-  if (!field_->get_value()) {
+  if (!field_->default_value()) {
     return mstch::node();
   }
   return context_.const_value_factory->make_mstch_object(
-      field_->get_value(), context_, pos_, nullptr, nullptr);
+      field_->default_value(), context_, pos_, nullptr, nullptr);
 }
 
 mstch::node mstch_const_map_element::element_key() {

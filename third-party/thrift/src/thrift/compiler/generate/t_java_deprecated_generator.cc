@@ -1106,12 +1106,12 @@ void t_java_deprecated_generator::generate_java_constructor_using_builder(
   if (!useDefaultConstructor) {
     for (m_iter = fields.begin(); m_iter != fields.end(); ++m_iter) {
       const t_type* t = (*m_iter)->get_type()->get_true_type();
-      if ((*m_iter)->get_value() != nullptr) {
+      if ((*m_iter)->default_value() != nullptr) {
         print_const_value(
             indent(out),
             "this." + (*m_iter)->name(),
             t,
-            (*m_iter)->get_value(),
+            (*m_iter)->default_value(),
             true,
             true);
       }
@@ -1304,12 +1304,12 @@ void t_java_deprecated_generator::generate_java_struct_definition(
     indent_up();
     for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
       const t_type* t = (*m_iter)->get_type()->get_true_type();
-      if ((*m_iter)->get_value() != nullptr) {
+      if ((*m_iter)->default_value() != nullptr) {
         print_const_value(
             out,
             "this." + (*m_iter)->name(),
             t,
-            (*m_iter)->get_value(),
+            (*m_iter)->default_value(),
             true,
             true);
       }
@@ -1419,12 +1419,12 @@ void t_java_deprecated_generator::construct_constant_fields(
   auto& members = tstruct->get_members();
   for (auto m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
     const t_type* t = (*m_iter)->get_type()->get_true_type();
-    if ((*m_iter)->get_value() != nullptr) {
+    if ((*m_iter)->default_value() != nullptr) {
       print_const_value(
           out,
           "this." + (*m_iter)->name(),
           t,
-          (*m_iter)->get_value(),
+          (*m_iter)->default_value(),
           true,
           true);
     }
@@ -3721,10 +3721,11 @@ string t_java_deprecated_generator::declare_field(
   string result = type_name(tfield->get_type()) + " " + tfield->name();
   if (init) {
     const t_type* ttype = tfield->get_type()->get_true_type();
-    if (ttype->is<t_primitive_type>() && tfield->get_value() != nullptr) {
+    if (ttype->is<t_primitive_type>() && tfield->default_value() != nullptr) {
       ofstream dummy;
       result += " = " +
-          render_const_value(dummy, tfield->name(), ttype, tfield->get_value());
+          render_const_value(
+                    dummy, tfield->name(), ttype, tfield->default_value());
     } else if (const auto* primitive = ttype->try_as<t_primitive_type>()) {
       t_primitive_type::type tbase = primitive->primitive_type();
       switch (tbase) {

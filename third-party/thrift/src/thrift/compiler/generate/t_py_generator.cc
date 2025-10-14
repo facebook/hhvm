@@ -1604,7 +1604,7 @@ void t_py_generator::generate_py_thrift_spec(
                     << " = kwargs.pop(\n";
         indent(out) << "  \"" << rename_reserved_keywords(member->name())
                     << "\",\n";
-        if (member->get_value() != nullptr) {
+        if (member->default_value() != nullptr) {
           indent(out) << "  " << rename_reserved_keywords(tstruct->name())
                       << ".thrift_spec[" << get_thrift_spec_key(tstruct, member)
                       << "][4],\n";
@@ -1642,7 +1642,7 @@ void t_py_generator::generate_py_thrift_spec(
         // Initialize fields
         const t_type* type = (*m_iter)->get_type();
         if (!type->is<t_primitive_type>() && !type->is<t_enum>() &&
-            (*m_iter)->get_value() != nullptr) {
+            (*m_iter)->default_value() != nullptr) {
           indent(out) << "if " << rename_reserved_keywords((*m_iter)->name())
                       << " is self.thrift_spec["
                       << get_thrift_spec_key(tstruct, *m_iter)
@@ -2127,7 +2127,7 @@ void t_py_generator::generate_py_struct_writer(
     indent(out) << "if self." << rename_reserved_keywords((*f_iter)->name())
                 << " != None";
     if ((*f_iter)->get_req() == t_field::e_req::optional &&
-        (*f_iter)->get_value() != nullptr) {
+        (*f_iter)->default_value() != nullptr) {
       // An optional field with a value set should not be serialized if
       // the value equals the default value
       out << " and self." << rename_reserved_keywords((*f_iter)->name())
@@ -3715,7 +3715,7 @@ string t_py_generator::declare_argument(
     const t_structured* tstruct, const t_field* tfield) {
   std::ostringstream result;
   result << rename_reserved_keywords(tfield->name()) << "=";
-  if (tfield->get_value() != nullptr) {
+  if (tfield->default_value() != nullptr) {
     result << rename_reserved_keywords(tstruct->name()) << ".thrift_spec["
            << get_thrift_spec_key(tstruct, tfield) << "][4]";
   } else {
@@ -3731,8 +3731,8 @@ string t_py_generator::declare_argument(
  */
 string t_py_generator::render_field_default_value(const t_field* tfield) {
   const t_type* type = tfield->get_type()->get_true_type();
-  if (tfield->get_value() != nullptr) {
-    return render_const_value(type, tfield->get_value());
+  if (tfield->default_value() != nullptr) {
+    return render_const_value(type, tfield->default_value());
   } else {
     return "None";
   }

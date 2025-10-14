@@ -135,15 +135,6 @@ class t_field final : public t_named {
     terse = 3,
   };
 
-  void set_value(std::unique_ptr<t_const_value> value) {
-    set_default_value(std::move(value));
-  }
-
-  const t_const_value* get_default_value() const { return value_.get(); }
-  t_const_value* get_default_value() { return value_.get(); }
-  const t_const_value* get_value() const { return get_default_value(); }
-  t_const_value* get_value() { return get_default_value(); }
-
   void set_req(e_req req) {
     switch (req) {
       case e_req::opt_in_req_out:

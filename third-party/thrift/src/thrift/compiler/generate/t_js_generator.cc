@@ -545,8 +545,9 @@ void t_js_generator::generate_js_struct_definition(
   for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
     string dval = declare_field(*m_iter, false, true);
     const t_type* t = (*m_iter)->get_type()->get_true_type();
-    if ((*m_iter)->get_value() != nullptr && !(t->is<t_structured>())) {
-      dval = render_const_value((*m_iter)->get_type(), (*m_iter)->get_value());
+    if ((*m_iter)->default_value() != nullptr && !(t->is<t_structured>())) {
+      dval =
+          render_const_value((*m_iter)->get_type(), (*m_iter)->default_value());
       out << indent() << "this." << (*m_iter)->name() << " = " << dval << ";"
           << endl;
     } else {
@@ -558,9 +559,9 @@ void t_js_generator::generate_js_struct_definition(
   if (members.size() > 0) {
     for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
       const t_type* t = (*m_iter)->get_type()->get_true_type();
-      if ((*m_iter)->get_value() != nullptr && (t->is<t_structured>())) {
+      if ((*m_iter)->default_value() != nullptr && (t->is<t_structured>())) {
         indent(out) << "this." << (*m_iter)->name() << " = "
-                    << render_const_value(t, (*m_iter)->get_value()) << ";"
+                    << render_const_value(t, (*m_iter)->default_value()) << ";"
                     << endl;
       }
     }

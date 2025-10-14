@@ -982,7 +982,7 @@ class py3_mstch_struct : public mstch_struct {
       return false;
     }
     for (const auto& field : py3_fields_) {
-      if (field->get_value()) {
+      if (field->default_value()) {
         return true;
       }
     }
@@ -1054,17 +1054,17 @@ class py3_mstch_field : public mstch_field {
 
   bool has_default_value() {
     return !is_ref() &&
-        (field_->get_value() != nullptr ||
+        (field_->default_value() != nullptr ||
          field_->qualifier() != t_field_qualifier::optional);
   }
 
   bool has_optional_default_value() {
     return field_->qualifier() == t_field_qualifier::optional &&
-        field_->get_value() != nullptr;
+        field_->default_value() != nullptr;
   }
 
   mstch::node user_default_value() {
-    const t_const_value* value = field_->get_value();
+    const t_const_value* value = field_->default_value();
     if (!value) {
       return mstch::node();
     }

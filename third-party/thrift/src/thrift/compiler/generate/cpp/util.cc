@@ -164,11 +164,11 @@ gen_dependency_graph(
 
           if (auto map = dynamic_cast<t_map const*>(type)) {
             add_dependency(
-                map->get_key_type(),
+                map->key_type().get_type(),
                 include_structured_types &&
                     !container_supports_incomplete_params(*map));
             return add_dependency(
-                map->get_val_type(),
+                map->val_type().get_type(),
                 include_structured_types &&
                     !container_supports_incomplete_params(*map));
           } else if (auto set = dynamic_cast<t_set const*>(type)) {
@@ -268,8 +268,8 @@ bool field_transitively_refers_to_unique(const t_field* field) {
     } else if (const t_set* set = type->try_as<t_set>()) {
       queue.push(set->elem_type().get_type());
     } else if (const t_map* map = type->try_as<t_map>()) {
-      queue.push(map->get_key_type());
-      queue.push(map->get_val_type());
+      queue.push(map->key_type().get_type());
+      queue.push(map->val_type().get_type());
     }
   }
   return false;

@@ -774,14 +774,14 @@ class py3_mstch_type : public mstch_type {
 
   mstch::node map_key_needs_convert() {
     if (const t_map* map = type_->try_as<t_map>()) {
-      return type_needs_convert(map->get_key_type());
+      return type_needs_convert(map->key_type().get_type());
     }
     return false;
   }
 
   mstch::node map_value_needs_convert() {
     if (const t_map* map = type_->try_as<t_map>()) {
-      return type_needs_convert(map->get_val_type());
+      return type_needs_convert(map->val_type().get_type());
     }
     return false;
   }
@@ -1258,8 +1258,9 @@ std::string py3_mstch_program::visit_type_impl(
       extra =
           "Set__" + visit_type_impl(set->elem_type().get_type(), fromTypeDef);
     } else if (const t_map* map = trueType->try_as<t_map>()) {
-      extra = "Map__" + visit_type_impl(map->get_key_type(), fromTypeDef) +
-          "_" + visit_type_impl(map->get_val_type(), fromTypeDef);
+      extra = "Map__" +
+          visit_type_impl(map->key_type().get_type(), fromTypeDef) + "_" +
+          visit_type_impl(map->val_type().get_type(), fromTypeDef);
     } else if (trueType->is_binary()) {
       extra = "binary";
     } else {

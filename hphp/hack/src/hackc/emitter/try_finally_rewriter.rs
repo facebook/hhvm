@@ -252,14 +252,14 @@ pub(super) fn emit_break_or_continue<'a>(
     }
 }
 
-pub(super) fn emit_finally_epilogue<'a, 'd>(
+pub(super) fn emit_finally_epilogue<'a>(
     e: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
     jump_instrs: JumpInstructions<'_>,
     finally_end: Label,
 ) -> Result<InstrSeq> {
-    fn emit_instr<'a, 'd>(
+    fn emit_instr<'a>(
         e: &mut Emitter,
         env: &mut Env<'a>,
         pos: &Pos,

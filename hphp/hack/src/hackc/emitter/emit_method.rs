@@ -33,7 +33,7 @@ use crate::emit_memoize_helpers;
 use crate::emit_native_opcode;
 use crate::emit_param;
 
-pub fn from_asts<'a, 'd>(
+pub fn from_asts<'a>(
     emitter: &mut Emitter,
     class: &'a ast::Class_,
     methods: &'a [ast::Method_],

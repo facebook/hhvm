@@ -355,7 +355,7 @@ mod inout_locals {
     }
 } //mod inout_locals
 
-pub(crate) fn get_type_structure_for_hint<'d>(
+pub(crate) fn get_type_structure_for_hint(
     e: &mut Emitter,
     tparams: &[&str],
     targ_map: &IndexSet<&str>,
@@ -440,7 +440,7 @@ enum ArrayGetBase {
     },
 }
 
-pub fn emit_nameof<'a, 'd>(
+pub fn emit_nameof<'a>(
     emitter: &mut Emitter,
     env: &Env<'a>,
     class_id: &ast::ClassId,
@@ -464,7 +464,7 @@ pub fn emit_nameof<'a, 'd>(
     }
 }
 
-pub fn emit_expr<'a, 'd>(
+pub fn emit_expr<'a>(
     emitter: &mut Emitter,
     env: &Env<'a>,
     expression: &ast::Expr,
@@ -556,7 +556,7 @@ pub fn emit_expr<'a, 'd>(
     })
 }
 
-fn emit_exprs_and_error_on_inout_or_named<'a, 'd>(
+fn emit_exprs_and_error_on_inout_or_named<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     exprs: &[ast::Argument],
@@ -594,7 +594,7 @@ fn emit_exprs_and_error_on_inout_or_named<'a, 'd>(
     }
 }
 
-fn emit_exprs<'a, 'd>(e: &mut Emitter, env: &Env<'a>, exprs: &[&ast::Expr]) -> Result<InstrSeq> {
+fn emit_exprs<'a>(e: &mut Emitter, env: &Env<'a>, exprs: &[&ast::Expr]) -> Result<InstrSeq> {
     if exprs.is_empty() {
         Ok(instr::empty())
     } else {
@@ -607,7 +607,7 @@ fn emit_exprs<'a, 'd>(e: &mut Emitter, env: &Env<'a>, exprs: &[&ast::Expr]) -> R
     }
 }
 
-fn emit_id<'a, 'd>(emitter: &mut Emitter, env: &Env<'a>, id: &ast::Sid) -> Result<InstrSeq> {
+fn emit_id<'a>(emitter: &mut Emitter, env: &Env<'a>, id: &ast::Sid) -> Result<InstrSeq> {
     let ast_defs::Id(p, s) = id;
     match s.as_str() {
         pseudo_consts::G__FILE__ => Ok(instr::instr(Instruct::Opcode(Opcode::File))),
@@ -639,7 +639,7 @@ fn emit_id<'a, 'd>(emitter: &mut Emitter, env: &Env<'a>, id: &ast::Sid) -> Resul
     }
 }
 
-fn emit_exit<'a, 'd>(
+fn emit_exit<'a>(
     emitter: &mut Emitter,
     env: &Env<'a>,
     expr_opt: Option<&ast::Expr>,
@@ -650,12 +650,7 @@ fn emit_exit<'a, 'd>(
     ]))
 }
 
-fn emit_yield<'a, 'd>(
-    e: &mut Emitter,
-    env: &Env<'a>,
-    pos: &Pos,
-    af: &ast::Afield,
-) -> Result<InstrSeq> {
+fn emit_yield<'a>(e: &mut Emitter, env: &Env<'a>, pos: &Pos, af: &ast::Afield) -> Result<InstrSeq> {
     Ok(match af {
         ast::Afield::AFvalue(v) => {
             InstrSeq::gather(vec![emit_expr(e, env, v)?, emit_pos(pos), instr::yield_()])
@@ -743,7 +738,7 @@ fn text_of_prop(prop: &ast::ClassGetExpr) -> String {
     }
 }
 
-fn emit_import<'a, 'd>(
+fn emit_import<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -774,7 +769,7 @@ fn emit_import<'a, 'd>(
     ]))
 }
 
-fn emit_string2<'a, 'd>(
+fn emit_string2<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -853,14 +848,14 @@ fn emit_string2<'a, 'd>(
     }
 }
 
-fn emit_clone<'a, 'd>(e: &mut Emitter, env: &Env<'a>, expr: &ast::Expr) -> Result<InstrSeq> {
+fn emit_clone<'a>(e: &mut Emitter, env: &Env<'a>, expr: &ast::Expr) -> Result<InstrSeq> {
     Ok(InstrSeq::gather(vec![
         emit_expr(e, env, expr)?,
         instr::clone(),
     ]))
 }
 
-fn emit_lambda<'a, 'd>(
+fn emit_lambda<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     ids: &[ast::CaptureLid],
@@ -910,7 +905,7 @@ fn emit_lambda<'a, 'd>(
     ]))
 }
 
-pub fn emit_await<'a, 'd>(
+pub fn emit_await<'a>(
     emitter: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -957,7 +952,7 @@ pub fn emit_await<'a, 'd>(
     }
 }
 
-fn emit_await_impl<'a, 'd>(
+fn emit_await_impl<'a>(
     emitter: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -982,7 +977,7 @@ fn emit_await_impl<'a, 'd>(
     ]))
 }
 
-fn inline_map_async_call<'a, 'd>(
+fn inline_map_async_call<'a>(
     emitter: &mut Emitter,
     env: &Env<'a>,
     traversable: &ast::Expr,
@@ -1180,7 +1175,7 @@ fn extract_shape_field_name_pstring<'a>(
     })
 }
 
-fn emit_shape<'a, 'd>(
+fn emit_shape<'a>(
     emitter: &mut Emitter,
     env: &Env<'a>,
     expr: &ast::Expr,
@@ -1212,7 +1207,7 @@ fn emit_shape<'a, 'd>(
     )
 }
 
-fn emit_vec_collection<'a, 'd>(
+fn emit_vec_collection<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -1229,7 +1224,7 @@ fn emit_vec_collection<'a, 'd>(
     }
 }
 
-fn emit_named_collection<'a, 'd>(
+fn emit_named_collection<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -1274,7 +1269,7 @@ fn emit_named_collection<'a, 'd>(
     }
 }
 
-fn emit_named_collection_str<'a, 'd>(
+fn emit_named_collection_str<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     expr: &ast::Expr,
@@ -1313,7 +1308,7 @@ fn mk_afvalues(es: &[ast::Expr]) -> Vec<ast::Afield> {
     es.iter().cloned().map(ast::Afield::mk_afvalue).collect()
 }
 
-fn emit_collection<'a, 'd>(
+fn emit_collection<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     expr: &ast::Expr,
@@ -1347,7 +1342,7 @@ fn emit_static_collection<'a>(
     ]))
 }
 
-fn expr_and_new<'a, 'd>(
+fn expr_and_new<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -1368,7 +1363,7 @@ fn expr_and_new<'a, 'd>(
     }
 }
 
-fn emit_container<'a, 'd>(
+fn emit_container<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -1400,7 +1395,7 @@ fn emit_container<'a, 'd>(
     ]))
 }
 
-fn emit_keyvalue_collection<'a, 'd>(
+fn emit_keyvalue_collection<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -1423,7 +1418,7 @@ fn emit_keyvalue_collection<'a, 'd>(
     )
 }
 
-fn emit_array<'a, 'd>(
+fn emit_array<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -1521,7 +1516,7 @@ fn non_numeric(s: &[u8]) -> bool {
     int_from_str(&s).is_err() && float_from_str(&s).is_err()
 }
 
-fn is_struct_init<'d>(
+fn is_struct_init(
     e: &mut Emitter,
     env: &Env<'_>,
     fields: &[ast::Afield],
@@ -1554,7 +1549,7 @@ fn is_struct_init<'d>(
         && num_keys != 0)
 }
 
-fn emit_struct_array<'a, 'd>(
+fn emit_struct_array<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -1591,7 +1586,7 @@ fn emit_struct_array<'a, 'd>(
     ]))
 }
 
-fn emit_dynamic_collection<'a, 'd>(
+fn emit_dynamic_collection<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     expr: &ast::Expr,
@@ -1663,7 +1658,7 @@ fn emit_dynamic_collection<'a, 'd>(
     }
 }
 
-fn emit_value_only_collection<'a, 'd, F: FnOnce(u32) -> Instruct>(
+fn emit_value_only_collection<'a, F: FnOnce(u32) -> Instruct>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -1703,7 +1698,7 @@ fn emit_value_only_collection<'a, 'd, F: FnOnce(u32) -> Instruct>(
     })
 }
 
-fn emit_call_isset_expr<'a, 'd>(
+fn emit_call_isset_expr<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     outer_pos: &Pos,
@@ -1771,7 +1766,7 @@ fn emit_call_isset_expr<'a, 'd>(
     ]))
 }
 
-fn emit_call_isset_exprs<'a, 'd>(
+fn emit_call_isset_exprs<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -1812,7 +1807,7 @@ fn emit_call_isset_exprs<'a, 'd>(
     }
 }
 
-fn emit_tag_provenance_here<'a, 'd>(
+fn emit_tag_provenance_here<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -1830,7 +1825,7 @@ fn emit_tag_provenance_here<'a, 'd>(
     ]))
 }
 
-fn emit_array_mark_legacy<'a, 'd>(
+fn emit_array_mark_legacy<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -1855,7 +1850,7 @@ fn emit_array_mark_legacy<'a, 'd>(
     ]))
 }
 
-fn emit_idx<'a, 'd>(
+fn emit_idx<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -1874,7 +1869,7 @@ fn emit_idx<'a, 'd>(
     ]))
 }
 
-fn emit_call<'a, 'd>(
+fn emit_call<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -1916,7 +1911,7 @@ fn emit_call<'a, 'd>(
     }
 }
 
-fn emit_call_default<'a, 'd>(
+fn emit_call_default<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -2049,14 +2044,14 @@ fn from_ast_null_flavor(nullflavor: ast::OgNullFlavor) -> ObjMethodOp {
     }
 }
 
-fn emit_object_expr<'a, 'd>(e: &mut Emitter, env: &Env<'a>, expr: &ast::Expr) -> Result<InstrSeq> {
+fn emit_object_expr<'a>(e: &mut Emitter, env: &Env<'a>, expr: &ast::Expr) -> Result<InstrSeq> {
     match &expr.2 {
         ast::Expr_::Lvar(x) if is_local_this(env, &x.1) => Ok(instr::this()),
         _ => emit_expr(e, env, expr),
     }
 }
 
-fn emit_call_lhs_and_fcall<'a, 'd>(
+fn emit_call_lhs_and_fcall<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     call_pos: &Pos,
@@ -2430,7 +2425,7 @@ fn get_reified_var_cexpr<'a>(
     ]))
 }
 
-fn emit_args_inout_setters<'a, 'd>(
+fn emit_args_inout_setters<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     args: &[ast::Argument],
@@ -2440,7 +2435,7 @@ fn emit_args_inout_setters<'a, 'd>(
     } else {
         inout_locals::new_alias_info_map()
     };
-    fn emit_arg_and_inout_setter<'a, 'd>(
+    fn emit_arg_and_inout_setter<'a>(
         e: &mut Emitter,
         env: &Env<'a>,
         i: usize,
@@ -2655,7 +2650,7 @@ fn has_inout_arg(es: &[ast::Argument]) -> bool {
 
 /// Should be kept in sync with Naming_special_names.SpecialFunctions for
 /// functions exposed in HHI
-fn emit_special_function<'a, 'd>(
+fn emit_special_function<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -3074,7 +3069,7 @@ fn emit_special_function<'a, 'd>(
     }
 }
 
-fn emit_class_meth_native<'a, 'd>(
+fn emit_class_meth_native<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -3146,7 +3141,7 @@ fn get_call_builtin_func_info(e: &mut Emitter, id: impl AsRef<str>) -> Option<(u
     }
 }
 
-fn emit_function_pointer<'a, 'd>(
+fn emit_function_pointer<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -3167,7 +3162,7 @@ fn emit_function_pointer<'a, 'd>(
     Ok(emit_pos_then(pos, instrs))
 }
 
-fn emit_hh_fun<'a, 'd>(
+fn emit_hh_fun<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -3186,11 +3181,11 @@ fn emit_hh_fun<'a, 'd>(
     }
 }
 
-fn emit_is<'a, 'd>(e: &mut Emitter, env: &Env<'a>, pos: &Pos, h: &ast::Hint) -> Result<InstrSeq> {
+fn emit_is<'a>(e: &mut Emitter, env: &Env<'a>, pos: &Pos, h: &ast::Hint) -> Result<InstrSeq> {
     emit_is_with_kind(e, env, pos, h, hhbc::TypeStructEnforceKind::Deep)
 }
 
-fn emit_is_shallow<'a, 'd>(
+fn emit_is_shallow<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -3199,7 +3194,7 @@ fn emit_is_shallow<'a, 'd>(
     emit_is_with_kind(e, env, pos, h, hhbc::TypeStructEnforceKind::Shallow)
 }
 
-fn hint_to_type_op<'d>(e: &Emitter, h: &ast::Hint) -> Option<IsTypeOp> {
+fn hint_to_type_op(e: &Emitter, h: &ast::Hint) -> Option<IsTypeOp> {
     use aast_defs::Hint_::*;
     use aast_defs::Tprim;
 
@@ -3229,7 +3224,7 @@ fn hint_to_type_op<'d>(e: &Emitter, h: &ast::Hint) -> Option<IsTypeOp> {
     }
 }
 
-fn emit_is_with_kind<'a, 'd>(
+fn emit_is_with_kind<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -3311,12 +3306,7 @@ fn is_isexp_op(lower_fq_id: impl AsRef<str>) -> Option<ast::Hint> {
     }
 }
 
-fn emit_eval<'a, 'd>(
-    e: &mut Emitter,
-    env: &Env<'a>,
-    pos: &Pos,
-    expr: &ast::Expr,
-) -> Result<InstrSeq> {
+fn emit_eval<'a>(e: &mut Emitter, env: &Env<'a>, pos: &Pos, expr: &ast::Expr) -> Result<InstrSeq> {
     Ok(InstrSeq::gather(vec![
         emit_expr(e, env, expr)?,
         emit_pos(pos),
@@ -3336,7 +3326,7 @@ fn has_reified_types<'a>(env: &Env<'a>) -> bool {
     false
 }
 
-fn emit_lvar<'a, 'd>(
+fn emit_lvar<'a>(
     emitter: &mut Emitter,
     env: &Env<'a>,
     _pos: &Pos,
@@ -3350,7 +3340,7 @@ fn emit_lvar<'a, 'd>(
     ]))
 }
 
-fn emit_lit<'a, 'd>(
+fn emit_lit<'a>(
     emitter: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -3364,7 +3354,7 @@ fn emit_lit<'a, 'd>(
     ))
 }
 
-fn emit_is_expr<'a, 'd>(
+fn emit_is_expr<'a>(
     emitter: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -3375,7 +3365,7 @@ fn emit_is_expr<'a, 'd>(
     Ok(InstrSeq::gather(vec![emit_expr(emitter, env, e)?, is]))
 }
 
-fn emit_array_get_expr<'a, 'd>(
+fn emit_array_get_expr<'a>(
     emitter: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -3396,7 +3386,7 @@ fn emit_array_get_expr<'a, 'd>(
     .0)
 }
 
-fn emit_pair<'a, 'd>(
+fn emit_pair<'a>(
     emitter: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -3408,7 +3398,7 @@ fn emit_pair<'a, 'd>(
     emit_named_collection(emitter, env, pos, expression, &fields, CollectionType::Pair)
 }
 
-fn emit_keyval_collection_expr<'a, 'd>(
+fn emit_keyval_collection_expr<'a>(
     emitter: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -3436,7 +3426,7 @@ fn emit_keyval_collection_expr<'a, 'd>(
     emit_named_collection(emitter, env, pos, expression, &fields, collection_typ)
 }
 
-fn emit_val_collection<'a, 'd>(
+fn emit_val_collection<'a>(
     emitter: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -3458,7 +3448,7 @@ fn emit_val_collection<'a, 'd>(
     emit_named_collection(emitter, env, pos, expression, &fields, collection_typ)
 }
 
-fn emit_class_get_expr<'a, 'd>(
+fn emit_class_get_expr<'a>(
     emitter: &mut Emitter,
     env: &Env<'a>,
     _pos: &Pos,
@@ -3475,7 +3465,7 @@ fn emit_class_get_expr<'a, 'd>(
     )
 }
 
-fn emit_obj_get_expr<'a, 'd>(
+fn emit_obj_get_expr<'a>(
     emitter: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -3500,7 +3490,7 @@ fn emit_obj_get_expr<'a, 'd>(
     .0)
 }
 
-fn emit_label<'a, 'd>(
+fn emit_label<'a>(
     _emitter: &mut Emitter,
     _env: &Env<'a>,
     pos: &Pos,
@@ -3687,7 +3677,7 @@ fn emit_known_class_id(e: &mut Emitter, id: &ast_defs::Id) -> InstrSeq {
     instr::resolve_class(cid)
 }
 
-fn emit_load_class_ref<'a, 'd>(
+fn emit_load_class_ref<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -3721,7 +3711,7 @@ enum NewObjOpInfo<'a> {
     NewObjS(hhbc::SpecialClsRef),
 }
 
-fn emit_new<'a, 'd>(
+fn emit_new<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -3863,7 +3853,7 @@ fn emit_new<'a, 'd>(
     }
 }
 
-fn emit_new_obj_reified_instrs<'a, 'd>(
+fn emit_new_obj_reified_instrs<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -3987,7 +3977,7 @@ fn emit_new_obj_reified_instrs<'a, 'd>(
     })
 }
 
-fn emit_obj_get<'a, 'd>(
+fn emit_obj_get<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -4086,7 +4076,7 @@ fn emit_obj_get<'a, 'd>(
 // Get the member key for a property, and return any instructions and
 // the size of the stack in the case that the property cannot be
 // placed inline in the instruction.
-fn emit_prop_expr<'a, 'd>(
+fn emit_prop_expr<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     nullflavor: &ast_defs::OgNullFlavor,
@@ -4153,7 +4143,7 @@ fn emit_prop_expr<'a, 'd>(
     })
 }
 
-fn emit_xhp_obj_get<'a, 'd>(
+fn emit_xhp_obj_get<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -4186,7 +4176,7 @@ fn emit_xhp_obj_get<'a, 'd>(
     emit_call(e, env, pos, &f, &[], &args[..], None, None, false)
 }
 
-fn emit_array_get<'a, 'd>(
+fn emit_array_get<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     outer_pos: &Pos,
@@ -4215,7 +4205,7 @@ fn emit_array_get<'a, 'd>(
     }
 }
 
-fn emit_array_get_<'a, 'd>(
+fn emit_array_get_<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     outer_pos: &Pos,
@@ -4430,7 +4420,7 @@ fn is_special_class_constant_accessed_with_class_id(
     string_utils::is_class(id) && class_id_is_class_expr_id(e, env, cname)
 }
 
-fn emit_elem<'a, 'd>(
+fn emit_elem<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     elem: Option<&ast::Expr>,
@@ -4467,7 +4457,7 @@ fn emit_elem<'a, 'd>(
     })
 }
 
-fn get_elem_member_key<'a, 'd>(
+fn get_elem_member_key<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     stack_index: StackIndex,
@@ -4545,7 +4535,7 @@ fn get_elem_member_key<'a, 'd>(
     }
 }
 
-fn emit_store_for_simple_base<'a, 'd>(
+fn emit_store_for_simple_base<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -4589,7 +4579,7 @@ fn get_querym_op_mode(query_op: &QueryMOp) -> MOpMode {
     }
 }
 
-fn emit_class_get<'a, 'd>(
+fn emit_class_get<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     query_op: QueryMOp,
@@ -4614,7 +4604,7 @@ fn emit_class_get<'a, 'd>(
     ]))
 }
 
-fn emit_conditional_expr<'a, 'd>(
+fn emit_conditional_expr<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -4671,7 +4661,7 @@ fn emit_conditional_expr<'a, 'd>(
     })
 }
 
-fn emit_local<'a, 'd>(
+fn emit_local<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     notice: BareThisOp,
@@ -4689,7 +4679,7 @@ fn emit_local<'a, 'd>(
     )
 }
 
-fn emit_class_const<'a, 'd>(
+fn emit_class_const<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -4723,7 +4713,7 @@ fn emit_class_const<'a, 'd>(
     }
 }
 
-fn emit_unop<'a, 'd>(
+fn emit_unop<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -4800,7 +4790,7 @@ fn binop_to_setopop(op: &ast_defs::Bop) -> Option<SetOpOp> {
     }
 }
 
-fn optimize_null_checks<'d>(e: &Emitter) -> bool {
+fn optimize_null_checks(e: &Emitter) -> bool {
     e.options().compiler_flags.optimize_null_checks
 }
 
@@ -4841,7 +4831,7 @@ fn from_binop(op: &ast_defs::Bop) -> Result<InstrSeq> {
     })
 }
 
-fn emit_first_expr<'a, 'd>(
+fn emit_first_expr<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     expr: &ast::Expr,
@@ -4859,7 +4849,7 @@ fn emit_first_expr<'a, 'd>(
     })
 }
 
-pub fn emit_two_exprs<'a, 'd>(
+pub fn emit_two_exprs<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     outer_pos: &Pos,
@@ -4882,7 +4872,7 @@ pub fn emit_two_exprs<'a, 'd>(
     }))
 }
 
-fn emit_readonly_expr<'a, 'd>(
+fn emit_readonly_expr<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -4900,7 +4890,7 @@ fn emit_readonly_expr<'a, 'd>(
     }
 }
 
-fn emit_quiet_expr<'a, 'd>(
+fn emit_quiet_expr<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -4938,7 +4928,7 @@ fn emit_quiet_expr<'a, 'd>(
     }
 }
 
-fn emit_null_coalesce_assignment<'a, 'd>(
+fn emit_null_coalesce_assignment<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -4975,7 +4965,7 @@ fn emit_null_coalesce_assignment<'a, 'd>(
     ]))
 }
 
-fn emit_short_circuit_op<'a, 'd>(
+fn emit_short_circuit_op<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -5009,12 +4999,7 @@ fn emit_short_circuit_op<'a, 'd>(
     })
 }
 
-fn emit_binop<'a, 'd>(
-    e: &mut Emitter,
-    env: &Env<'a>,
-    pos: &Pos,
-    expr: &ast::Expr,
-) -> Result<InstrSeq> {
+fn emit_binop<'a>(e: &mut Emitter, env: &Env<'a>, pos: &Pos, expr: &ast::Expr) -> Result<InstrSeq> {
     let ast::Binop {
         bop: op,
         lhs: e1,
@@ -5065,7 +5050,7 @@ fn emit_binop<'a, 'd>(
     }
 }
 
-fn emit_assign<'a, 'd>(
+fn emit_assign<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -5084,7 +5069,7 @@ fn emit_assign<'a, 'd>(
     }
 }
 
-fn emit_pipe<'a, 'd>(
+fn emit_pipe<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     (_, e1, e2, is_nullsafe): &(aast_defs::Lid, ast::Expr, ast::Expr, bool),
@@ -5119,7 +5104,7 @@ fn emit_pipe<'a, 'd>(
     })
 }
 
-fn emit_checked_unsafe_cast<'a, 'd>(
+fn emit_checked_unsafe_cast<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     expr: &ast::Expr,
@@ -5140,7 +5125,7 @@ fn emit_checked_unsafe_cast<'a, 'd>(
     Ok(verify_instrs)
 }
 
-fn emit_as<'a, 'd>(e: &mut Emitter, env: &Env<'a>, pos: &Pos, as_: &ast::As_) -> Result<InstrSeq> {
+fn emit_as<'a>(e: &mut Emitter, env: &Env<'a>, pos: &Pos, as_: &ast::As_) -> Result<InstrSeq> {
     let ast::As_ {
         expr,
         hint,
@@ -5235,7 +5220,7 @@ fn emit_as<'a, 'd>(e: &mut Emitter, env: &Env<'a>, pos: &Pos, as_: &ast::As_) ->
     })
 }
 
-fn emit_cast<'a, 'd>(
+fn emit_cast<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -5268,11 +5253,7 @@ fn emit_cast<'a, 'd>(
     ]))
 }
 
-pub fn emit_unset_expr<'a, 'd>(
-    e: &mut Emitter,
-    env: &Env<'a>,
-    expr: &ast::Expr,
-) -> Result<InstrSeq> {
+pub fn emit_unset_expr<'a>(e: &mut Emitter, env: &Env<'a>, expr: &ast::Expr) -> Result<InstrSeq> {
     emit_lval_op_nonlist(
         e,
         env,
@@ -5286,7 +5267,7 @@ pub fn emit_unset_expr<'a, 'd>(
     )
 }
 
-pub fn emit_set_range_expr<'a, 'd>(
+pub fn emit_set_range_expr<'a>(
     e: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
@@ -5377,7 +5358,7 @@ pub fn emit_set_range_expr<'a, 'd>(
 ///   Dim Warn EI:3
 ///   # Section 3, indexing the array using the value at stack position 0 (EC:0)
 ///   QueryM 1 CGet EC:0
-fn emit_base<'a, 'd>(
+fn emit_base<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     expr: &ast::Expr,
@@ -5454,7 +5435,7 @@ fn get_local_temp_kind<'a>(
     }
 }
 
-fn emit_base_<'a, 'd>(
+fn emit_base_<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     expr: &ast::Expr,
@@ -5843,7 +5824,7 @@ fn emit_base_<'a, 'd>(
     }
 }
 
-pub fn emit_ignored_exprs<'a, 'd>(
+pub fn emit_ignored_exprs<'a>(
     emitter: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -5856,7 +5837,7 @@ pub fn emit_ignored_exprs<'a, 'd>(
         .map(InstrSeq::gather)
 }
 
-pub fn emit_ignored_expr<'a, 'd>(
+pub fn emit_ignored_expr<'a>(
     emitter: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -5868,7 +5849,7 @@ pub fn emit_ignored_expr<'a, 'd>(
     ]))
 }
 
-fn emit_lval_op<'a, 'd>(
+fn emit_lval_op<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,
@@ -6126,7 +6107,7 @@ impl<'a> VecDictIndex<'a> {
 //  this is necessary to handle cases like:
 //  list($a[$f()]) = b();
 //  here f() should be invoked before b()
-pub fn emit_lval_op_list<'a, 'd>(
+pub fn emit_lval_op_list<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     outer_pos: &Pos,
@@ -6231,7 +6212,7 @@ pub fn emit_lval_op_list<'a, 'd>(
     }
 }
 
-pub fn emit_lval_op_nonlist<'a, 'd>(
+pub fn emit_lval_op_nonlist<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     outer_pos: &Pos,
@@ -6308,7 +6289,7 @@ fn emit_final_static_op(
     })
 }
 
-pub fn emit_lval_op_nonlist_steps<'a, 'd>(
+pub fn emit_lval_op_nonlist_steps<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     outer_pos: &Pos,
@@ -6523,7 +6504,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'd>(
     }
 }
 
-fn emit_class_expr<'a, 'd>(
+fn emit_class_expr<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     cexpr: ClassExpr,
@@ -6666,7 +6647,7 @@ fn fixup_type_arg<'a, 'b>(
     }
 }
 
-pub fn emit_reified_arg<'b, 'd>(
+pub fn emit_reified_arg<'b>(
     e: &mut Emitter,
     env: &Env<'b>,
     pos: &Pos,
@@ -6766,7 +6747,7 @@ pub fn emit_reified_arg<'b, 'd>(
     }
 }
 
-pub fn get_local<'a, 'd>(e: &mut Emitter, env: &Env<'a>, pos: &Pos, s: &str) -> Result<Local> {
+pub fn get_local<'a>(e: &mut Emitter, env: &Env<'a>, pos: &Pos, s: &str) -> Result<Local> {
     if s == special_idents::DOLLAR_DOLLAR {
         match &env.pipe_var {
             None => Err(Error::fatal_runtime(
@@ -6782,7 +6763,7 @@ pub fn get_local<'a, 'd>(e: &mut Emitter, env: &Env<'a>, pos: &Pos, s: &str) -> 
     }
 }
 
-pub fn emit_is_null<'a, 'd>(e: &mut Emitter, env: &Env<'a>, expr: &ast::Expr) -> Result<InstrSeq> {
+pub fn emit_is_null<'a>(e: &mut Emitter, env: &Env<'a>, expr: &ast::Expr) -> Result<InstrSeq> {
     if let Some(ast::Lid(pos, id)) = expr.2.as_lvar() {
         if !is_local_this(env, id) {
             return Ok(instr::is_type_l(
@@ -6798,7 +6779,7 @@ pub fn emit_is_null<'a, 'd>(e: &mut Emitter, env: &Env<'a>, expr: &ast::Expr) ->
     ]))
 }
 
-pub fn emit_jmpnz<'a, 'd>(
+pub fn emit_jmpnz<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     expr: &ast::Expr,
@@ -6939,7 +6920,7 @@ pub fn emit_jmpnz<'a, 'd>(
     )
 }
 
-pub fn emit_jmpz<'a, 'd>(
+pub fn emit_jmpz<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     expr: &ast::Expr,

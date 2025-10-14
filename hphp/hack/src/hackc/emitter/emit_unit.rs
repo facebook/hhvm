@@ -153,7 +153,7 @@ where
     }
 }
 
-fn emit_unit_<'d>(
+fn emit_unit_(
     emitter: &mut Emitter,
     namespace: Arc<namespace_env::Env>,
     prog: ast::Program,

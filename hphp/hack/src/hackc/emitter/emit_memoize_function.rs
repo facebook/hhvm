@@ -68,7 +68,7 @@ pub(crate) fn get_attrs_for_fun(
     attrs
 }
 
-pub(crate) fn emit_wrapper_function<'a, 'd>(
+pub(crate) fn emit_wrapper_function<'a>(
     emitter: &mut Emitter,
     original_id: hhbc::FunctionName,
     renamed_id: hhbc::FunctionName,
@@ -160,7 +160,7 @@ pub(crate) fn emit_wrapper_function<'a, 'd>(
     })
 }
 
-fn make_memoize_function_code<'a, 'd>(
+fn make_memoize_function_code<'a>(
     e: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
@@ -201,7 +201,7 @@ fn make_memoize_function_code<'a, 'd>(
     Ok((emit_pos_then(pos, fun), decl_vars))
 }
 
-fn make_memoize_function_with_params_code<'a, 'd>(
+fn make_memoize_function_with_params_code<'a>(
     e: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
@@ -324,7 +324,7 @@ fn make_memoize_function_with_params_code<'a, 'd>(
     Ok((instrs, decl_vars))
 }
 
-fn make_memoize_function_no_params_code<'a, 'd>(
+fn make_memoize_function_no_params_code<'a>(
     e: &mut Emitter,
     env: &mut Env<'a>,
     deprecation_info: Option<&[TypedValue]>,
@@ -389,7 +389,7 @@ fn make_memoize_function_no_params_code<'a, 'd>(
     Ok((instrs, Vec::new()))
 }
 
-fn make_wrapper_body<'a, 'd>(
+fn make_wrapper_body<'a>(
     emitter: &mut Emitter,
     env: Env<'a>,
     return_type: TypeInfo,

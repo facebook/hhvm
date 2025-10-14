@@ -25,7 +25,7 @@ use crate::emit_memoize_function;
 use crate::emit_memoize_helpers;
 use crate::emit_param;
 
-pub fn emit_function<'a, 'd>(e: &mut Emitter, fd: &'a ast::FunDef) -> Result<Vec<Function>> {
+pub fn emit_function<'a>(e: &mut Emitter, fd: &'a ast::FunDef) -> Result<Vec<Function>> {
     use ast_defs::FunKind;
     use hhbc::FunctionFlags;
 
@@ -180,7 +180,7 @@ pub fn emit_function<'a, 'd>(e: &mut Emitter, fd: &'a ast::FunDef) -> Result<Vec
     })
 }
 
-pub fn emit_functions_from_program<'a, 'd>(
+pub fn emit_functions_from_program<'a>(
     e: &mut Emitter,
     ast: &'a [ast::Def],
 ) -> Result<Vec<Function>> {

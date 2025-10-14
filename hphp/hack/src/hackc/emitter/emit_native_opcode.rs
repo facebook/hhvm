@@ -22,7 +22,7 @@ use oxidized::pos::Pos;
 use crate::emit_body;
 use crate::emit_param;
 
-pub fn emit_body<'a, 'd>(
+pub fn emit_body<'a>(
     emitter: &mut Emitter,
     scope: &Scope<'a>,
     class_name: &ast::Sid,

@@ -90,7 +90,7 @@ impl<'s> Env<'s> {
         Env::default(Arc::clone(&class.namespace)).with_scope(scope)
     }
 
-    pub fn do_in_loop_body<'a, R, F>(
+    pub fn do_in_loop_body<R, F>(
         &mut self,
         e: &mut Emitter,
         label_break: Label,
@@ -107,7 +107,7 @@ impl<'s> Env<'s> {
         self.run_and_release_ids(e, |env, e| f(env, e, b))
     }
 
-    pub fn do_in_switch_body<'a, R, F>(
+    pub fn do_in_switch_body<R, F>(
         &mut self,
         e: &mut Emitter,
         end_label: Label,
@@ -122,7 +122,7 @@ impl<'s> Env<'s> {
         self.run_and_release_ids(e, |env, e| f(env, e, cases, dfl))
     }
 
-    pub fn do_in_try_catch_body<'a, R, F>(
+    pub fn do_in_try_catch_body<R, F>(
         &mut self,
         e: &mut Emitter,
         finally_label: Label,
@@ -137,7 +137,7 @@ impl<'s> Env<'s> {
         self.run_and_release_ids(e, |env, e| f(env, e, try_block, catch_block))
     }
 
-    pub fn do_in_try_body<'a, R, F>(
+    pub fn do_in_try_body<R, F>(
         &mut self,
         e: &mut Emitter,
         finally_label: Label,
@@ -151,7 +151,7 @@ impl<'s> Env<'s> {
         self.run_and_release_ids(e, |env, e| f(env, e, block))
     }
 
-    pub fn do_in_finally_body<'a, R, F>(&mut self, e: &mut Emitter, block: &[ast::Stmt], f: F) -> R
+    pub fn do_in_finally_body<R, F>(&mut self, e: &mut Emitter, block: &[ast::Stmt], f: F) -> R
     where
         F: FnOnce(&mut Self, &mut Emitter, &[ast::Stmt]) -> R,
     {
@@ -159,7 +159,7 @@ impl<'s> Env<'s> {
         self.run_and_release_ids(e, |env, e| f(env, e, block))
     }
 
-    pub fn do_in_using_body<'a, R, F>(
+    pub fn do_in_using_body<R, F>(
         &mut self,
         e: &mut Emitter,
         finally_label: Label,
@@ -173,7 +173,7 @@ impl<'s> Env<'s> {
         self.run_and_release_ids(e, |env, e| f(env, e, block))
     }
 
-    pub fn do_function<'a, R, F>(&mut self, e: &mut Emitter, defs: &[ast::Stmt], f: F) -> R
+    pub fn do_function<R, F>(&mut self, e: &mut Emitter, defs: &[ast::Stmt], f: F) -> R
     where
         F: FnOnce(&mut Self, &mut Emitter, &[ast::Stmt]) -> R,
     {
@@ -181,7 +181,7 @@ impl<'s> Env<'s> {
         self.run_and_release_ids(e, |env, e| f(env, e, defs))
     }
 
-    fn run_and_release_ids<'a, R, F>(&mut self, e: &mut Emitter, f: F) -> R
+    fn run_and_release_ids<R, F>(&mut self, e: &mut Emitter, f: F) -> R
     where
         F: FnOnce(&mut Self, &mut Emitter) -> R,
     {

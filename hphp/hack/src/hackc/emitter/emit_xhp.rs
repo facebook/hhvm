@@ -19,7 +19,7 @@ use crate::emit_method;
 use crate::emit_property;
 use crate::xhp_attribute::XhpAttribute;
 
-pub fn properties_for_cache<'a, 'd>(
+pub fn properties_for_cache<'a>(
     emitter: &mut Emitter,
     class: &'a Class_,
     class_is_const: bool,
@@ -46,7 +46,7 @@ pub fn properties_for_cache<'a, 'd>(
     )
 }
 
-pub fn from_attribute_declaration<'a, 'd>(
+pub fn from_attribute_declaration<'a>(
     emitter: &mut Emitter,
     class: &'a Class_,
     xal: &[XhpAttribute<'_>],
@@ -94,7 +94,7 @@ pub fn from_attribute_declaration<'a, 'd>(
     )
 }
 
-pub fn from_children_declaration<'a, 'd>(
+pub fn from_children_declaration<'a>(
     emitter: &mut Emitter,
     ast_class: &'a Class_,
     (pos, children): &(&ast_defs::Pos, Vec<&XhpChild>),
@@ -117,7 +117,7 @@ pub fn from_children_declaration<'a, 'd>(
     )
 }
 
-pub fn from_category_declaration<'a, 'd>(
+pub fn from_category_declaration<'a>(
     emitter: &mut Emitter,
     ast_class: &'a Class_,
     (pos, categories): &(&ast_defs::Pos, Vec<&String>),
@@ -360,7 +360,7 @@ fn emit_xhp_attribute_array(xal: &[XhpAttribute<'_>]) -> Result<Expr> {
     )))))
 }
 
-fn from_xhp_attribute_declaration_method<'a, 'd>(
+fn from_xhp_attribute_declaration_method<'a>(
     emitter: &mut Emitter,
     class: &'a Class_,
     pos: Option<Pos>,

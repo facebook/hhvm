@@ -83,7 +83,7 @@ bitflags! {
     }
 }
 
-pub fn emit_body<'b, 'd>(
+pub fn emit_body<'b>(
     emitter: &mut Emitter,
     namespace: Arc<namespace_env::Env>,
     body: &'b [ast::Stmt],
@@ -194,7 +194,7 @@ pub fn emit_body<'b, 'd>(
     ))
 }
 
-fn make_body_instrs<'a, 'd>(
+fn make_body_instrs<'a>(
     emitter: &mut Emitter,
     env: &mut Env<'a>,
     params: &[(Param, Option<(Label, ast::Expr)>)],
@@ -238,7 +238,7 @@ fn make_body_instrs<'a, 'd>(
     Ok(instrs)
 }
 
-fn make_header_content<'a, 'd>(
+fn make_header_content<'a>(
     emitter: &mut Emitter,
     env: &mut Env<'a>,
     params: &[(Param, Option<(Label, ast::Expr)>)],
@@ -287,7 +287,7 @@ fn make_header_content<'a, 'd>(
     ]))
 }
 
-fn make_decl_vars<'a, 'd>(
+fn make_decl_vars<'a>(
     emitter: &mut Emitter,
     scope: &Scope<'a>,
     immediate_tparams: &[ast::Tparam],
@@ -371,7 +371,7 @@ pub fn make_env<'a>(
     env
 }
 
-fn make_params<'a, 'd>(
+fn make_params<'a>(
     emitter: &mut Emitter,
     tp_names: &mut Vec<&str>,
     ast_params: &[ast::FunParam],
@@ -382,7 +382,7 @@ fn make_params<'a, 'd>(
     emit_param::from_asts(emitter, tp_names, generate_defaults, scope, ast_params)
 }
 
-pub fn make_body<'a, 'd>(
+pub fn make_body<'a>(
     emitter: &mut Emitter,
     mut instrs: InstrSeq,
     decl_vars: Vec<StringId>,
@@ -485,7 +485,7 @@ pub fn has_type_constraint<'a>(
     }
 }
 
-pub fn emit_method_prolog<'a, 'd>(
+pub fn emit_method_prolog<'a>(
     emitter: &mut Emitter,
     env: &mut Env<'a>,
     pos: &Pos,
@@ -642,7 +642,7 @@ pub fn emit_deprecation_info<'a>(
     })
 }
 
-fn set_emit_statement_state<'d>(
+fn set_emit_statement_state(
     emitter: &mut Emitter,
     default_return_value: InstrSeq,
     params: &[(Param, Option<(Label, ast::Expr)>)],

@@ -663,7 +663,7 @@ pub fn fold_expr<'a>(
     visit_mut(&mut FolderVisitor::new(e, scope), &mut (), expr)
 }
 
-pub fn fold_program<'d>(p: &mut ast::Program, e: &mut Emitter) -> Result<(), Error> {
+pub fn fold_program(p: &mut ast::Program, e: &mut Emitter) -> Result<(), Error> {
     visit_mut(
         &mut FolderVisitorMut::new(e, &mut ast_scope::Scope::default()),
         &mut (),
@@ -671,7 +671,7 @@ pub fn fold_program<'d>(p: &mut ast::Program, e: &mut Emitter) -> Result<(), Err
     )
 }
 
-pub fn literals_from_exprs<'d>(
+pub fn literals_from_exprs(
     exprs: &mut [ast::Expr],
     scope: &Scope<'_>,
     e: &mut Emitter,

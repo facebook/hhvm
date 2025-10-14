@@ -46,7 +46,7 @@ pub fn has_splat(params: &[ParamEntry]) -> bool {
     params.iter().rev().any(|p| p.param.is_splat)
 }
 
-pub fn from_asts<'a, 'd>(
+pub fn from_asts<'a>(
     emitter: &mut Emitter,
     tparams: &mut Vec<&str>,
     generate_defaults: bool,
@@ -96,7 +96,7 @@ fn rename_params(
     params.into_iter().collect()
 }
 
-fn from_ast<'a, 'd>(
+fn from_ast<'a>(
     emitter: &mut Emitter,
     tparams: &mut Vec<&str>,
     generate_defaults: bool,
@@ -197,7 +197,7 @@ fn from_ast<'a, 'd>(
     )))
 }
 
-pub fn emit_param_default_value_setter<'a, 'd>(
+pub fn emit_param_default_value_setter<'a>(
     emitter: &mut Emitter,
     env: &Env<'a>,
     pos: &Pos,

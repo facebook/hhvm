@@ -167,7 +167,7 @@ void ServerStats::Clear() {
 std::string ServerStats::GetKeys() {
   // special keys that don't come from slots
   std::set<std::string> allKeys {
-    "hit", "load", "idle", "queued"
+    "hit", "load", "load-pct", "idle", "queued"
   };
 
   VisitAllSlots(
@@ -302,6 +302,9 @@ ServerStats::CounterMap ServerStats::ReportImpl(const KeyMap& wantedKeys) {
     auto const load = server->getActiveWorker();
     if (wantAll || wantedKeys.find("load") != wantedKeys.end()) {
       values["load"] = load;
+    }
+    if (wantAll || wantedKeys.find("load-pct") != wantedKeys.end()) {
+      values["load-pct"] = load * 100 / server->getMaxThreadCount();
     }
     if (wantAll || wantedKeys.find("idle") != wantedKeys.end()) {
       values["idle"] = server->getMaxThreadCount() - load;

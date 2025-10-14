@@ -135,9 +135,10 @@ the same key.
 
 8. Special Keys:
 
-hit:   page hit
-load:  number of active worker threads
-idle:  number of idle worker threads
+hit:      page hit
+load:     number of active worker threads
+load-pct: integer percentage of number active worker threads / total
+idle:     number of idle worker threads
 
 
 <h2>Example URL</h2>

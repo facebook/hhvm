@@ -55,7 +55,7 @@ namespace go thrift.lib.thrift.schema
  */
 @thrift.AllowLegacyTypedefUri
 @python.Py3Hidden
-@thrift.Experimental // TODO(afuller): Adapt!
+@thrift.Experimental
 typedef set<id.ValueId> AnnotationIds
 
 /**
@@ -87,10 +87,9 @@ struct StructuredAnnotation {
  *
  * Changing the order of definitions is always backward compatible.
  */
-// TODO(afuller): Add conformance tests to make sure this is true.
 @thrift.AllowLegacyTypedefUri
 @python.Py3Hidden
-@thrift.Experimental // TODO(afuller): Adapt!
+@thrift.Experimental
 typedef list<id.DefinitionId> DefinitionIds
 
 /**
@@ -98,10 +97,9 @@ typedef list<id.DefinitionId> DefinitionIds
  *
  * Changing the order of include is always backwards compatible.
  */
-// TODO(afuller): Add conformance tests to make sure this is true.
 @thrift.AllowLegacyTypedefUri
 @python.Py3Hidden
-@thrift.Experimental // TODO(afuller): Adapt!
+@thrift.Experimental
 typedef list<id.ProgramId> IncludeIds
 
 /**
@@ -145,7 +143,6 @@ struct DefinitionAttrs {
    *  - YAML parsers.
    *  - Protocols deprecated in v1+, e.g. JSON and SimpleJson.
    */
-  // TODO(afuller): Support aliases to help with renaming.
   1: string name;
 
   /**
@@ -165,7 +162,6 @@ struct DefinitionAttrs {
    * This means that value previously serialized in an Any with the old
    * URI can no longer be deserialized.
    */
-  // TODO(afuller): Support aliases to help with renaming.
   2: string uri;
 
   /**
@@ -246,8 +242,6 @@ struct EnumValue {
    *
    * Changing value is always backward *incompatible*.
    */
-  // TODO(afuller): Consider adding support for specifying aliases by specifying
-  // multiple definitions for the same value in the IDL.
   2: i32 value;
 }
 
@@ -297,11 +291,9 @@ struct Field {
   1: id.FieldId id;
 
   /** The qualifier for the field. */
-  // TODO(afuller): Document compatibility semantics, and add conformance tests.
   2: FieldQualifier qualifier;
 
   /** The type of the field. */
-  // TODO(afuller): Document compatibility semantics, and add conformance tests.
   3: type.Type type;
 
   /** The definition attributes. */
@@ -313,7 +305,6 @@ struct Field {
    *
    * If no value is set, the intrinsic default for the field type is used.
    */
-  // TODO(afuller): Document compatibility semantics, and add conformance tests.
   5: id.ValueId customDefault;
 }
 
@@ -322,11 +313,9 @@ struct Field {
  *
  * Changing the order of fields is always backward compatible.
  */
-// TODO(afuller): Add native wrappers that provide O(1) access to fields by id,
-// name, type, etc.
 @thrift.AllowLegacyTypedefUri
 @python.Py3Hidden
-@thrift.Experimental // TODO: Adapt!
+@thrift.Experimental
 typedef list<Field> Fields
 
 /**
@@ -432,14 +421,12 @@ struct Exception {
  */
 @thrift.AllowLegacyTypedefUri
 @python.Py3Hidden
-@thrift.Experimental // TODO: Adapt!
+@thrift.Experimental
 typedef list<Field> Exceptions
 
 /**
  * A Thrift Param list. A param list is unnamed.
  */
-// TODO(dokwon): Ensure a param list is unnamed.
-// TODO(dokwon): Consider replacing (or removing) 'Paramlist' with 'Fields'.
 @python.Py3Hidden
 struct Paramlist {
   /**
@@ -539,7 +526,6 @@ typedef list<ReturnType> ReturnTypes
 @hack.Name{name = "TFunction"}
 struct Function {
   /** The qualifier for the function. */
-  // TODO(dokwon): Document compatibility semantics, and add conformance tests.
   1: FunctionQualifier qualifier;
 
   /** DEPRECATED (T161963504): a list containing `returnType` if present. */
@@ -572,7 +558,7 @@ struct Function {
  */
 @thrift.AllowLegacyTypedefUri
 @python.Py3Hidden
-@thrift.Experimental // TODO: Adapt!
+@thrift.Experimental
 typedef list<Function> Functions
 
 /**
@@ -751,11 +737,8 @@ typedef id.ValueId ValueKey
  * A Thrift schema represented as a collection of Thrift programs and associated
  * schema values.
  */
-// TODO(afuller): Add native wrappers/adapters that 'index' all the stored
-// information and maybe even converts stored `ExternId`s into pointers to the
-// values owned by the schema.
 @python.Py3Hidden
-@thrift.Experimental // TODO(afuller): Adapt!
+@thrift.Experimental
 @cpp.UseOpEncode
 struct Schema {
   /**

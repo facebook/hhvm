@@ -16,6 +16,8 @@
 
 namespace cpp2 metadata.test.nested_structs
 
+include "thrift/annotation/thrift.thrift"
+
 enum Continent {
   NorthAmerica = 1,
   SouthAmerica = 2,
@@ -27,7 +29,10 @@ enum Continent {
 }
 
 struct Country {
-  1: string name (field_foo, field_bar = "field_baz");
+  @thrift.DeprecatedUnvalidatedAnnotations{
+    items = {"field_bar": "field_baz", "field_foo": "1"},
+  }
+  1: string name;
   2: Continent continent;
   3: optional string capital;
   4: double population;

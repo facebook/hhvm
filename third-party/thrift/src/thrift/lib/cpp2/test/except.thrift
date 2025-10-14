@@ -20,9 +20,14 @@ namespace cpp apache.thrift.test
 # MyArgs(2) struct, they let us test that all arguments are read from the
 # input even if deserializing some of them throw an exception
 
+include "thrift/annotation/thrift.thrift"
+
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {"no_default_comparators": "true"},
+}
 struct Inner {
   1: required i32 i;
-} (no_default_comparators = "true")
+}
 
 struct MyArgs {
   1: required string s;
@@ -40,9 +45,12 @@ service SampleService {
 
 # These versions are identical, but the fields are optional
 # See comment at the top of ProcessorExceptions.cpp for the reason
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {"no_default_comparators": "true"},
+}
 struct Inner2 {
   1: optional i32 i;
-} (no_default_comparators = "true")
+}
 
 struct MyArgs2 {
   1: optional string s;

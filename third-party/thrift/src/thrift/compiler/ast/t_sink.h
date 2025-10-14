@@ -33,8 +33,7 @@ namespace apache::thrift::compiler {
 class t_sink : public t_node {
  public:
   explicit t_sink(t_type_ref elem_type, t_type_ref final_response_type)
-      : elem_type_(std::move(elem_type)),
-        final_response_type_(std::move(final_response_type)) {}
+      : elem_type_(elem_type), final_response_type_(final_response_type) {}
 
   const t_type_ref& elem_type() const { return elem_type_; }
   const t_type_ref& final_response_type() const { return final_response_type_; }

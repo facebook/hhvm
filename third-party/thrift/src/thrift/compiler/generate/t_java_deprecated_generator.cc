@@ -24,6 +24,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 using namespace std;
@@ -1846,8 +1847,8 @@ void t_java_deprecated_generator::generate_reflection_getters(
     ostringstream& out,
     const t_type* type,
     string field_name,
-    string cap_name) {
-  indent(out) << "case " << upcase_string(field_name) << ":" << endl;
+    const string& cap_name) {
+  indent(out) << "case " << upcase_string(std::move(field_name)) << ":" << endl;
   indent_up();
 
   if (const t_primitive_type* base_type = type->try_as<t_primitive_type>();
@@ -1866,8 +1867,8 @@ void t_java_deprecated_generator::generate_reflection_getters(
 void t_java_deprecated_generator::generate_reflection_setters(
     ostringstream& out,
     const t_type* type,
-    string field_name,
-    string cap_name) {
+    const string& field_name,
+    const string& cap_name) {
   indent(out) << "case " << upcase_string(field_name) << ":" << endl;
   indent_up();
   indent(out) << "if (__value == null) {" << endl;
@@ -3214,7 +3215,7 @@ void t_java_deprecated_generator::generate_process_function(
  * @param prefix The variable name or container for this field
  */
 void t_java_deprecated_generator::generate_deserialize_field(
-    ofstream& out, const t_field* tfield, string prefix) {
+    ofstream& out, const t_field* tfield, const string& prefix) {
   const t_type* type = tfield->get_type()->get_true_type();
 
   if (type->is_void()) {
@@ -3286,7 +3287,7 @@ void t_java_deprecated_generator::generate_deserialize_field(
  * Generates an unserializer for a struct, invokes read()
  */
 void t_java_deprecated_generator::generate_deserialize_struct(
-    ofstream& out, const t_structured* tstruct, string prefix) {
+    ofstream& out, const t_structured* tstruct, const string& prefix) {
   if (generate_immutable_structs_ && !tstruct->is<t_union>()) {
     out << indent() << prefix << " = " << type_name(tstruct)
         << ".deserialize(iprot);" << endl;
@@ -3301,7 +3302,7 @@ void t_java_deprecated_generator::generate_deserialize_struct(
  * Deserializes a container by reading its size and then iterating
  */
 void t_java_deprecated_generator::generate_deserialize_container(
-    ofstream& out, const t_type* ttype, string prefix) {
+    ofstream& out, const t_type* ttype, const string& prefix) {
   scope_up(out);
 
   string obj;
@@ -3380,7 +3381,7 @@ void t_java_deprecated_generator::generate_deserialize_container(
  * Generates code to deserialize a map
  */
 void t_java_deprecated_generator::generate_deserialize_map_element(
-    ofstream& out, const t_map* tmap, string prefix) {
+    ofstream& out, const t_map* tmap, const string& prefix) {
   string key = tmp("_key");
   string val = tmp("_val");
   t_field fkey(tmap->key_type().deref(), key);
@@ -3399,7 +3400,7 @@ void t_java_deprecated_generator::generate_deserialize_map_element(
  * Deserializes a set element
  */
 void t_java_deprecated_generator::generate_deserialize_set_element(
-    ofstream& out, const t_set* tset, string prefix) {
+    ofstream& out, const t_set* tset, const string& prefix) {
   string elem = tmp("_elem");
   t_field felem(*tset->get_elem_type(), elem);
 
@@ -3414,7 +3415,7 @@ void t_java_deprecated_generator::generate_deserialize_set_element(
  * Deserializes a list element
  */
 void t_java_deprecated_generator::generate_deserialize_list_element(
-    ofstream& out, const t_list* tlist, string prefix) {
+    ofstream& out, const t_list* tlist, const string& prefix) {
   string elem = tmp("_elem");
   t_field felem(*tlist->get_elem_type(), elem);
 
@@ -3432,7 +3433,7 @@ void t_java_deprecated_generator::generate_deserialize_list_element(
  * @param prefix Name to prepend to field name
  */
 void t_java_deprecated_generator::generate_serialize_field(
-    ofstream& out, const t_field* tfield, string prefix) {
+    ofstream& out, const t_field* tfield, const string& prefix) {
   const t_type* type = tfield->get_type()->get_true_type();
 
   // Do nothing for void types
@@ -3509,7 +3510,7 @@ void t_java_deprecated_generator::generate_serialize_field(
  * @param prefix  String prefix to attach to all fields
  */
 void t_java_deprecated_generator::generate_serialize_struct(
-    ofstream& out, const t_structured* /*tstruct*/, string prefix) {
+    ofstream& out, const t_structured* /*tstruct*/, const string& prefix) {
   out << indent() << prefix << ".write(oprot);" << endl;
 }
 
@@ -3520,7 +3521,7 @@ void t_java_deprecated_generator::generate_serialize_struct(
  * @param prefix String prefix for fields
  */
 void t_java_deprecated_generator::generate_serialize_container(
-    ofstream& out, const t_type* ttype, string prefix) {
+    ofstream& out, const t_type* ttype, const string& prefix) {
   scope_up(out);
 
   if (const t_map* map = ttype->try_as<t_map>()) {
@@ -3579,7 +3580,10 @@ void t_java_deprecated_generator::generate_serialize_container(
  * Serializes the members of a map.
  */
 void t_java_deprecated_generator::generate_serialize_map_element(
-    ofstream& out, const t_map* tmap, string iter, string /*map*/) {
+    ofstream& out,
+    const t_map* tmap,
+    const string& iter,
+    const string& /*map*/) {
   t_field kfield(tmap->key_type().deref(), iter + ".getKey()");
   generate_serialize_field(out, &kfield, "");
   t_field vfield(tmap->val_type().deref(), iter + ".getValue()");
@@ -3591,7 +3595,7 @@ void t_java_deprecated_generator::generate_serialize_map_element(
  */
 void t_java_deprecated_generator::generate_serialize_set_element(
     ofstream& out, const t_set* tset, string iter) {
-  t_field efield(*tset->get_elem_type(), iter);
+  t_field efield(*tset->get_elem_type(), std::move(iter));
   generate_serialize_field(out, &efield, "");
 }
 
@@ -3600,7 +3604,7 @@ void t_java_deprecated_generator::generate_serialize_set_element(
  */
 void t_java_deprecated_generator::generate_serialize_list_element(
     ofstream& out, const t_list* tlist, string iter) {
-  t_field efield(*tlist->get_elem_type(), iter);
+  t_field efield(*tlist->get_elem_type(), std::move(iter));
   generate_serialize_field(out, &efield, "");
 }
 
@@ -3763,7 +3767,7 @@ string t_java_deprecated_generator::declare_field(
  * @return String of rendered function definition
  */
 string t_java_deprecated_generator::function_signature(
-    const t_function* tfunction, string prefix) {
+    const t_function* tfunction, const string& prefix) {
   const t_type* type = tfunction->return_type().get_type();
   std::string result = type_name(type) + " " + prefix + tfunction->name() +
       "(" + argument_list(tfunction->params()) + ") throws ";
@@ -3784,9 +3788,9 @@ string t_java_deprecated_generator::function_signature_async(
     const t_function* tfunction,
     string result_handler_symbol,
     bool use_base_method,
-    string prefix) {
+    const string& prefix) {
   std::string arglist = async_function_call_arglist(
-      tfunction, result_handler_symbol, use_base_method, true);
+      tfunction, std::move(result_handler_symbol), use_base_method, true);
   std::string result =
       prefix + "void " + tfunction->name() + "(" + arglist + ")";
   return result;
@@ -3794,7 +3798,7 @@ string t_java_deprecated_generator::function_signature_async(
 
 string t_java_deprecated_generator::async_function_call_arglist(
     const t_function* tfunc,
-    string result_handler_symbol,
+    const string& result_handler_symbol,
     bool /*use_base_method*/,
     bool include_types) {
   std::string arglist;
@@ -3837,7 +3841,7 @@ string t_java_deprecated_generator::argument_list(
 string t_java_deprecated_generator::async_argument_list(
     const t_function* /*tfunct*/,
     const t_paramlist& tparamlist,
-    string result_handler_symbol,
+    const string& result_handler_symbol,
     bool include_types) {
   string result;
   const vector<t_field*>& fields = tparamlist.get_members();
@@ -3939,7 +3943,7 @@ string t_java_deprecated_generator::constant_name(string name) {
 }
 
 void t_java_deprecated_generator::generate_java_docstring_comment(
-    ofstream& out, string contents) {
+    ofstream& out, const string& contents) {
   generate_docstring_comment(out, "/**\n", " * ", contents, " */\n");
 }
 
@@ -3996,7 +4000,8 @@ std::string t_java_deprecated_generator::generate_isset_check(
 
 std::string t_java_deprecated_generator::generate_isset_check(
     std::string field_name) {
-  return "is" + get_cap_name("set") + get_cap_name(field_name) + "()";
+  return "is" + get_cap_name("set") + get_cap_name(std::move(field_name)) +
+      "()";
 }
 
 std::string t_java_deprecated_generator::generate_setfield_check(
@@ -4006,7 +4011,7 @@ std::string t_java_deprecated_generator::generate_setfield_check(
 
 std::string t_java_deprecated_generator::generate_setfield_check(
     std::string field_name) {
-  return "getSetField() == " + upcase_string(field_name);
+  return "getSetField() == " + upcase_string(std::move(field_name));
 }
 
 void t_java_deprecated_generator::generate_isset_set(

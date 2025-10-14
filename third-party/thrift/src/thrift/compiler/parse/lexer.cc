@@ -181,7 +181,7 @@ lexer::lexer(
     : source_(src.text),
       start_(src.start),
       diags_(&diags),
-      on_doc_comment_(on_doc_comment) {
+      on_doc_comment_(std::move(on_doc_comment)) {
   ptr_ = source_.data();
   token_start_ = ptr_;
 }

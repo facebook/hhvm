@@ -27,6 +27,7 @@
 #include <sstream>
 #include <string>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include <thrift/compiler/ast/t_typedef.h>
@@ -172,37 +173,43 @@ class t_py_generator : public t_concat_generator {
   void generate_deserialize_field(
       std::ofstream& out,
       const t_field* tfield,
-      std::string prefix = "",
+      const std::string& prefix = "",
       bool inclass = false,
-      std::string actual_type = "");
+      const std::string& actual_type = "");
 
   void generate_deserialize_struct(
-      std::ofstream& out, const t_struct* tstruct, std::string prefix = "");
+      std::ofstream& out,
+      const t_struct* tstruct,
+      const std::string& prefix = "");
 
   void generate_deserialize_container(
-      std::ofstream& out, const t_type* ttype, std::string prefix = "");
+      std::ofstream& out, const t_type* ttype, const std::string& prefix = "");
 
   void generate_deserialize_set_element(
-      std::ofstream& out, const t_set* tset, std::string prefix = "");
+      std::ofstream& out, const t_set* tset, const std::string& prefix = "");
 
   void generate_deserialize_map_element(
       std::ofstream& out,
       const t_map* tmap,
-      std::string prefix = "",
+      const std::string& prefix = "",
       std::string key_actual_type = "",
       std::string value_actual_type = "");
 
   void generate_deserialize_list_element(
-      std::ofstream& out, const t_list* tlist, std::string prefix = "");
+      std::ofstream& out, const t_list* tlist, const std::string& prefix = "");
 
   void generate_serialize_field(
-      std::ofstream& out, const t_field* tfield, std::string prefix = "");
+      std::ofstream& out,
+      const t_field* tfield,
+      const std::string& prefix = "");
 
   void generate_serialize_struct(
-      std::ofstream& out, const t_struct* tstruct, std::string prefix = "");
+      std::ofstream& out,
+      const t_struct* tstruct,
+      const std::string& prefix = "");
 
   void generate_serialize_container(
-      std::ofstream& out, const t_type* ttype, std::string prefix = "");
+      std::ofstream& out, const t_type* ttype, const std::string& prefix = "");
 
   void generate_serialize_map_element(
       std::ofstream& out,
@@ -265,7 +272,7 @@ class t_py_generator : public t_concat_generator {
    */
 
   std::string py_autogen_comment();
-  std::string py_par_warning(string service_tool_name);
+  std::string py_par_warning(const string& service_tool_name);
   std::string py_imports();
   std::string rename_reserved_keywords(const std::string& value);
   std::string render_includes();
@@ -279,9 +286,11 @@ class t_py_generator : public t_concat_generator {
         rename_reserved_keywords(service->name());
   }
   std::string function_signature(
-      const t_function* tfunction, std::string prefix = "");
+      const t_function* tfunction, const std::string& prefix = "");
   std::string function_signature_if(
-      const t_function* tfunction, bool with_context, std::string prefix = "");
+      const t_function* tfunction,
+      bool with_context,
+      const std::string& prefix = "");
   std::string argument_list(const t_paramlist& tparamlist);
   std::string type_to_enum(const t_type* ttype);
   std::string type_to_spec_args(const t_type* ttype);
@@ -954,7 +963,7 @@ string t_py_generator::py_autogen_comment() {
 /**
  * Print out warning message in the case a *.py is running instead of *.par
  */
-string t_py_generator::py_par_warning(string service_tool_name) {
+string t_py_generator::py_par_warning(const string& service_tool_name) {
   return "if (not sys.argv[0].endswith(\"par\") and\n"
          "    not sys.argv[0].endswith(\"xar\") and\n"
          "    os.getenv('PAR_UNPACK_TMP') == None):\n"
@@ -1409,7 +1418,7 @@ void t_py_generator::generate_py_union(
       continue;
     }
     auto t = type_to_enum(member->get_type());
-    auto n = member->name();
+    const auto& n = member->name();
     auto k = member->get_key();
     indent(out) << (first ? "" : "el") << "if fid == " << k << ":" << endl;
     indent_up();
@@ -1449,7 +1458,7 @@ void t_py_generator::generate_py_union(
       continue;
     }
     auto t = type_to_enum(member->get_type());
-    auto n = member->name();
+    const auto& n = member->name();
     auto k = member->get_key();
 
     indent(out) << (first ? "" : "el") << "if self.field == " << k << ":"
@@ -1488,7 +1497,7 @@ void t_py_generator::generate_py_union(
       if (is_hidden(*member)) {
         continue;
       }
-      auto n = member->name();
+      const auto& n = member->name();
       indent(out) << "if '" << n << "' in obj:" << endl;
       indent_up();
       generate_json_field(
@@ -2093,7 +2102,7 @@ void t_py_generator::generate_py_struct_reader(
 
 void t_py_generator::generate_py_struct_writer(
     ofstream& out, const t_structured* tstruct) {
-  string name = tstruct->name();
+  const string& name = tstruct->name();
   const vector<t_field*>& fields = tstruct->get_sorted_members();
   vector<t_field*>::const_iterator f_iter;
 
@@ -3218,9 +3227,9 @@ void t_py_generator::generate_process_function(
 void t_py_generator::generate_deserialize_field(
     ofstream& out,
     const t_field* tfield,
-    string prefix,
+    const string& prefix,
     bool /*inclass*/,
-    string /* actual_type */) {
+    const string& /* actual_type */) {
   const t_type* type = tfield->get_type()->get_true_type();
 
   if (type->is_void()) {
@@ -3298,7 +3307,7 @@ void t_py_generator::generate_deserialize_field(
  * Generates an unserializer for a struct, calling read()
  */
 void t_py_generator::generate_deserialize_struct(
-    ofstream& out, const t_struct* tstruct, string prefix) {
+    ofstream& out, const t_struct* tstruct, const string& prefix) {
   out << indent() << prefix << " = " << type_name(tstruct) << "()" << endl
       << indent() << prefix << ".read(iprot)" << endl;
 }
@@ -3308,7 +3317,7 @@ void t_py_generator::generate_deserialize_struct(
  * data and then a footer.
  */
 void t_py_generator::generate_deserialize_container(
-    ofstream& out, const t_type* ttype, string prefix) {
+    ofstream& out, const t_type* ttype, const string& prefix) {
   string size = tmp("_size");
   string ktype = tmp("_ktype");
   string vtype = tmp("_vtype");
@@ -3393,7 +3402,7 @@ void t_py_generator::generate_deserialize_container(
 void t_py_generator::generate_deserialize_map_element(
     ofstream& out,
     const t_map* tmap,
-    string prefix,
+    const string& prefix,
     string key_actual_type,
     string value_actual_type) {
   string key = tmp("_key");
@@ -3401,8 +3410,9 @@ void t_py_generator::generate_deserialize_map_element(
   t_field fkey(tmap->key_type().deref(), key);
   t_field fval(tmap->val_type().deref(), val);
 
-  generate_deserialize_field(out, &fkey, "", false, key_actual_type);
-  generate_deserialize_field(out, &fval, "", false, value_actual_type);
+  generate_deserialize_field(out, &fkey, "", false, std::move(key_actual_type));
+  generate_deserialize_field(
+      out, &fval, "", false, std::move(value_actual_type));
 
   indent(out) << prefix << "[" << key << "] = " << val << endl;
 }
@@ -3411,7 +3421,7 @@ void t_py_generator::generate_deserialize_map_element(
  * Write a set element
  */
 void t_py_generator::generate_deserialize_set_element(
-    ofstream& out, const t_set* tset, string prefix) {
+    ofstream& out, const t_set* tset, const string& prefix) {
   string elem = tmp("_elem");
   t_field felem(*tset->get_elem_type(), elem);
 
@@ -3424,7 +3434,7 @@ void t_py_generator::generate_deserialize_set_element(
  * Write a list element
  */
 void t_py_generator::generate_deserialize_list_element(
-    ofstream& out, const t_list* tlist, string prefix) {
+    ofstream& out, const t_list* tlist, const string& prefix) {
   string elem = tmp("_elem");
   t_field felem(*tlist->get_elem_type(), elem);
 
@@ -3440,7 +3450,7 @@ void t_py_generator::generate_deserialize_list_element(
  * @param prefix Name to prepend to field name
  */
 void t_py_generator::generate_serialize_field(
-    ofstream& out, const t_field* tfield, string prefix) {
+    ofstream& out, const t_field* tfield, const string& prefix) {
   const t_type* type = tfield->get_type()->get_true_type();
 
   // Do nothing for void types
@@ -3524,12 +3534,12 @@ void t_py_generator::generate_serialize_field(
  * @param prefix  String prefix to attach to all fields
  */
 void t_py_generator::generate_serialize_struct(
-    ofstream& out, const t_struct* /*tstruct*/, string prefix) {
+    ofstream& out, const t_struct* /*tstruct*/, const string& prefix) {
   indent(out) << prefix << ".write(oprot)" << endl;
 }
 
 void t_py_generator::generate_serialize_container(
-    ofstream& out, const t_type* ttype, string prefix) {
+    ofstream& out, const t_type* ttype, const string& prefix) {
   if (const t_map* map = ttype->try_as<t_map>()) {
     indent(out) << "oprot.writeMapBegin("
                 << type_to_enum(&map->key_type().deref()) << ", "
@@ -3595,10 +3605,10 @@ void t_py_generator::generate_serialize_container(
  */
 void t_py_generator::generate_serialize_map_element(
     ofstream& out, const t_map* tmap, string kiter, string viter) {
-  t_field kfield(tmap->key_type().deref(), kiter);
+  t_field kfield(tmap->key_type().deref(), std::move(kiter));
   generate_serialize_field(out, &kfield, "");
 
-  t_field vfield(tmap->val_type().deref(), viter);
+  t_field vfield(tmap->val_type().deref(), std::move(viter));
   generate_serialize_field(out, &vfield, "");
 }
 
@@ -3607,7 +3617,7 @@ void t_py_generator::generate_serialize_map_element(
  */
 void t_py_generator::generate_serialize_set_element(
     ofstream& out, const t_set* tset, string iter) {
-  t_field efield(*tset->get_elem_type(), iter);
+  t_field efield(*tset->get_elem_type(), std::move(iter));
   generate_serialize_field(out, &efield, "");
 }
 
@@ -3616,7 +3626,7 @@ void t_py_generator::generate_serialize_set_element(
  */
 void t_py_generator::generate_serialize_list_element(
     ofstream& out, const t_list* tlist, string iter) {
-  t_field efield(*tlist->get_elem_type(), iter);
+  t_field efield(*tlist->get_elem_type(), std::move(iter));
   generate_serialize_field(out, &efield, "");
 }
 
@@ -3728,7 +3738,7 @@ string t_py_generator::render_field_default_value(const t_field* tfield) {
  * @return String of rendered function definition
  */
 string t_py_generator::function_signature(
-    const t_function* tfunction, string prefix) {
+    const t_function* tfunction, const string& prefix) {
   // TODO(mcslee): Nitpicky, no ',' if argument_list is empty
   return prefix + rename_reserved_keywords(tfunction->name()) + "(self, " +
       argument_list(tfunction->params()) + ")";
@@ -3741,7 +3751,7 @@ string t_py_generator::function_signature(
  * @return String of rendered function definition
  */
 string t_py_generator::function_signature_if(
-    const t_function* tfunction, bool with_context, string prefix) {
+    const t_function* tfunction, bool with_context, const string& prefix) {
   // TODO(mcslee): Nitpicky, no ',' if argument_list is empty
   string signature = prefix + rename_reserved_keywords(tfunction->name()) + "(";
   signature += "self, ";

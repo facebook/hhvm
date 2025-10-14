@@ -17,6 +17,7 @@
 #include "thrift/compiler/test/parser_test_helpers.h"
 
 #include <fstream>
+#include <utility>
 #include <glog/logging.h>
 #include <folly/Memory.h>
 #include <folly/String.h>
@@ -26,11 +27,11 @@
 std::shared_ptr<t_program> dedent_and_parse_to_program(
     source_manager& sm,
     std::string source,
-    parsing_params params,
+    const parsing_params& params,
     sema_params sparams) {
   auto temp_file = std::make_shared<const folly::test::TemporaryFile>();
   const auto path = temp_file->path().string();
-  std::ofstream(path) << folly::stripLeftMargin(source);
+  std::ofstream(path) << folly::stripLeftMargin(std::move(source));
   diagnostics_engine diags = diagnostics_engine::ignore_all(sm);
   auto bundle = folly::to_shared_ptr(
       apache::thrift::compiler::parse_ast(sm, diags, path, params, &sparams));

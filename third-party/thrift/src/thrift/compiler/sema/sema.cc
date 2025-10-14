@@ -176,9 +176,9 @@ class type_ref_resolver {
 };
 
 const t_const* try_resolve_enum_by_id(
-    const scope::identifier id, const t_const_value& value) {
+    const scope::identifier& id, const t_const_value& value) {
   const auto resolve_enum_alias =
-      [&](const scope::identifier enum_or_alias) -> const t_enum* {
+      [&](const scope::identifier& enum_or_alias) -> const t_enum* {
     const t_named* enum_ty = value.program().find(enum_or_alias);
     if (const auto* enum_typedef = ast_detail::as<t_typedef>(enum_ty)) {
       return ast_detail::as<t_enum>(enum_typedef->get_true_type());
@@ -187,12 +187,12 @@ const t_const* try_resolve_enum_by_id(
   };
 
   const auto resolve_value =
-      [&](const scope::identifier value_id) -> const t_const* {
+      [&](const scope::identifier& value_id) -> const t_const* {
     return value.program().find<t_const>(value_id);
   };
 
   const auto resolve_maybe_aliased_enum_with_value =
-      [&](const scope::identifier enum_alias,
+      [&](const scope::identifier& enum_alias,
           const std::string_view value_name) -> const t_const* {
     if (const t_enum* enum_node = resolve_enum_alias(enum_alias)) {
       return enum_node->find_const_by_name(value_name);
@@ -489,7 +489,7 @@ void mutate_inject_metadata_fields(
 // Strips haskell annotations and optionally inserts new annotations.
 void update_annotations(
     t_named& node,
-    std::map<std::string, std::string> new_annotations = {},
+    const std::map<std::string, std::string>& new_annotations = {},
     deprecated_annotation_value::origin new_annotation_origin = {}) {
   auto annotations = node.unstructured_annotations();
   // First strip any haskell annotations

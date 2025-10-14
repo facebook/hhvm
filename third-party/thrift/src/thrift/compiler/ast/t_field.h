@@ -61,7 +61,7 @@ class t_field final : public t_named {
    */
   t_field(t_type_ref type, std::string name, std::optional<t_field_id> id = {})
       : t_named(nullptr, std::move(name)),
-        type_(std::move(type)),
+        type_(type),
         id_(id.value_or(0)),
         explicit_id_(id) {}
 

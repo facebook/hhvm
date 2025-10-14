@@ -200,7 +200,7 @@ class RenderTest : public testing::Test {
   static sources_by_path sources(
       std::initializer_list<std::pair<const std::string, std::string>>
           entries) {
-    return {std::unordered_map<std::string, std::string>{std::move(entries)}};
+    return {std::unordered_map<std::string, std::string>{entries}};
   }
 
   struct globals_by_name {
@@ -212,7 +212,7 @@ class RenderTest : public testing::Test {
 
   static globals_by_name globals(
       std::initializer_list<std::pair<const std::string, object>> entries) {
-    return {map::raw{std::move(entries)}};
+    return {map::raw{entries}};
   }
 
   std::optional<std::string> render(

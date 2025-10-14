@@ -213,7 +213,7 @@ inline protocol::Value const_to_value(const t_const_value& val) {
       break;
     }
     case t_type::type::t_set: {
-      auto valList = val.get_list_or_empty_map();
+      const auto& valList = val.get_list_or_empty_map();
       auto& set = ret.emplace_set();
       set.reserve(valList.size());
       for (const auto& list_elem : val.get_list_or_empty_map()) {

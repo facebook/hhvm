@@ -30,8 +30,8 @@ TEST(ParserTest, type_resolution) {
     }
   )");
   auto diag = std::optional<diagnostic>();
-  auto diags =
-      diagnostics_engine(source_mgr, [&diag](diagnostic d) { diag = d; });
+  auto diags = diagnostics_engine(
+      source_mgr, [&diag](const diagnostic& d) { diag = d; });
 
   // Types must be resolved in parse_ast.
   auto programs = parse_ast(source_mgr, diags, "test.thrift", {});
@@ -51,7 +51,7 @@ TEST(ParserTest, missing_includes) {
 
   {
     int count = 0;
-    auto diags = diagnostics_engine(source_mgr, [&count](diagnostic d) {
+    auto diags = diagnostics_engine(source_mgr, [&count](const diagnostic& d) {
       EXPECT_EQ(d.level(), diagnostic_level::error);
       EXPECT_EQ(d.message(), "Could not find include file nonexist.thrift");
       ++count;
@@ -63,7 +63,7 @@ TEST(ParserTest, missing_includes) {
   }
   {
     int count = 0;
-    auto diags = diagnostics_engine(source_mgr, [&count](diagnostic d) {
+    auto diags = diagnostics_engine(source_mgr, [&count](const diagnostic& d) {
       EXPECT_EQ(d.level(), diagnostic_level::warning);
       // We should get both errors since we did not end parsing on first error.
       if (count == 0) {
@@ -96,8 +96,8 @@ TEST(ParserTest, include_paths) {
     include "some/path/test.thrift"
   )");
   auto diag = std::optional<diagnostic>();
-  auto diags =
-      diagnostics_engine(source_mgr, [&diag](diagnostic d) { diag = d; });
+  auto diags = diagnostics_engine(
+      source_mgr, [&diag](const diagnostic& d) { diag = d; });
 
   parsing_params params;
   params.incl_searchpath.emplace_back("some/path/");
@@ -126,8 +126,8 @@ TEST(ParserTest, struct_doc) {
     }
   )");
   auto diag = std::optional<diagnostic>();
-  auto diags =
-      diagnostics_engine(source_mgr, [&diag](diagnostic d) { diag = d; });
+  auto diags = diagnostics_engine(
+      source_mgr, [&diag](const diagnostic& d) { diag = d; });
 
   // No parsing errors
   auto programs = parse_ast(source_mgr, diags, "test.thrift", {});
@@ -155,8 +155,8 @@ TEST(ParserTest, enum_doc) {
     }
   )");
   auto diag = std::optional<diagnostic>();
-  auto diags =
-      diagnostics_engine(source_mgr, [&diag](diagnostic d) { diag = d; });
+  auto diags = diagnostics_engine(
+      source_mgr, [&diag](const diagnostic& d) { diag = d; });
 
   // No parsing errors
   auto programs = parse_ast(source_mgr, diags, "test.thrift", {});
@@ -182,8 +182,8 @@ TEST(ParserTest, struct_annotation) {
     }
   )");
   auto diag = std::optional<diagnostic>();
-  auto diags =
-      diagnostics_engine(source_mgr, [&diag](diagnostic d) { diag = d; });
+  auto diags = diagnostics_engine(
+      source_mgr, [&diag](const diagnostic& d) { diag = d; });
 
   parsing_params params;
   if (auto* includes = std::getenv("IMPLICIT_INCLUDES")) {
@@ -275,7 +275,8 @@ TEST(ParserTest, unresolved_include_circular_references) {
     const list<Foo> MY_CONSTANT = test.MY_CONSTANT;
   )");
   std::optional<diagnostic> diag;
-  diagnostics_engine diags(source_mgr, [&diag](diagnostic d) { diag = d; });
+  diagnostics_engine diags(
+      source_mgr, [&diag](const diagnostic& d) { diag = d; });
 
   parsing_params pparams;
   pparams.allow_missing_includes = true;

@@ -57,6 +57,7 @@ class hoist_annotated_types {
     }
     auto len = sm_.get_file(prog_.path())->text.size() - 1;
     std::vector<std::string> typedefs;
+    typedefs.reserve(typedefs_.size());
     for (const auto& [k, v] : typedefs_) {
       typedefs.push_back(
           fmt::format("{}typedef {} {}", v.structured, v.type, k));

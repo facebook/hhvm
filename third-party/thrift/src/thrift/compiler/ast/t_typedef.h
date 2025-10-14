@@ -38,7 +38,7 @@ class t_typedef : public t_type {
   };
 
   t_typedef(const t_program* program, std::string name, t_type_ref type)
-      : t_type(program, std::move(name)), type_(std::move(type)) {}
+      : t_type(program, std::move(name)), type_(type) {}
 
   const t_type_ref& type() const { return type_; }
 

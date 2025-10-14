@@ -47,8 +47,8 @@ struct codemod_parsing_options {
 [[nodiscard]] int run_codemod(
     int argc,
     char** argv,
-    codemod_parsing_options,
-    std::function<void(source_manager&, t_program_bundle&)> codemod);
+    const codemod_parsing_options&,
+    const std::function<void(source_manager&, t_program_bundle&)>& codemod);
 
 // DO_BEFORE(aristidis,20250609) Consolidate run_codemod overloads.
 [[nodiscard]] inline int run_codemod(

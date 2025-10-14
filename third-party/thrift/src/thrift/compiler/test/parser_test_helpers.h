@@ -73,5 +73,5 @@ inline std::unique_ptr<t_enum> create_fake_enum(
 std::shared_ptr<t_program> dedent_and_parse_to_program(
     source_manager& sm,
     std::string source,
-    parsing_params params,
+    const parsing_params& params,
     sema_params sparams);

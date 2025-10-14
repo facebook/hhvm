@@ -119,13 +119,13 @@ class t_java_deprecated_generator : public t_concat_generator {
   void generate_reflection_setters(
       std::ostringstream& out,
       const t_type* type,
-      std::string field_name,
-      std::string cap_name);
+      const std::string& field_name,
+      const std::string& cap_name);
   void generate_reflection_getters(
       std::ostringstream& out,
       const t_type* type,
       std::string field_name,
-      std::string cap_name);
+      const std::string& cap_name);
   void generate_generic_field_getters_setters(
       std::ofstream& out, const t_structured* tstruct);
   void generate_java_bean_boilerplate(
@@ -175,34 +175,45 @@ class t_java_deprecated_generator : public t_concat_generator {
    */
 
   void generate_deserialize_field(
-      std::ofstream& out, const t_field* tfield, std::string prefix = "");
+      std::ofstream& out,
+      const t_field* tfield,
+      const std::string& prefix = "");
 
   void generate_deserialize_struct(
-      std::ofstream& out, const t_structured* tstruct, std::string prefix = "");
+      std::ofstream& out,
+      const t_structured* tstruct,
+      const std::string& prefix = "");
 
   void generate_deserialize_container(
-      std::ofstream& out, const t_type* ttype, std::string prefix = "");
+      std::ofstream& out, const t_type* ttype, const std::string& prefix = "");
 
   void generate_deserialize_set_element(
-      std::ofstream& out, const t_set* tset, std::string prefix = "");
+      std::ofstream& out, const t_set* tset, const std::string& prefix = "");
 
   void generate_deserialize_map_element(
-      std::ofstream& out, const t_map* tmap, std::string prefix = "");
+      std::ofstream& out, const t_map* tmap, const std::string& prefix = "");
 
   void generate_deserialize_list_element(
-      std::ofstream& out, const t_list* tlist, std::string prefix = "");
+      std::ofstream& out, const t_list* tlist, const std::string& prefix = "");
 
   void generate_serialize_field(
-      std::ofstream& out, const t_field* tfield, std::string prefix = "");
+      std::ofstream& out,
+      const t_field* tfield,
+      const std::string& prefix = "");
 
   void generate_serialize_struct(
-      std::ofstream& out, const t_structured* tstruct, std::string prefix = "");
+      std::ofstream& out,
+      const t_structured* tstruct,
+      const std::string& prefix = "");
 
   void generate_serialize_container(
-      std::ofstream& out, const t_type* ttype, std::string prefix = "");
+      std::ofstream& out, const t_type* ttype, const std::string& prefix = "");
 
   void generate_serialize_map_element(
-      std::ofstream& out, const t_map* tmap, std::string iter, std::string map);
+      std::ofstream& out,
+      const t_map* tmap,
+      const std::string& iter,
+      const std::string& map);
 
   void generate_serialize_set_element(
       std::ofstream& out, const t_set* tmap, std::string iter);
@@ -245,23 +256,23 @@ class t_java_deprecated_generator : public t_concat_generator {
       t_primitive_type* tbase, bool in_container = false);
   std::string declare_field(const t_field* tfield, bool init = false);
   std::string function_signature(
-      const t_function* tfunction, std::string prefix = "");
+      const t_function* tfunction, const std::string& prefix = "");
   std::string function_signature_async(
       const t_function* tfunction,
       std::string result_handler_symbol,
       bool use_base_method = false,
-      std::string prefix = "");
+      const std::string& prefix = "");
   std::string argument_list(
       const t_paramlist& tparamlist, bool include_types = true);
   std::string async_function_call_arglist(
       const t_function* tfunc,
-      std::string result_handler_symbol,
+      const std::string& result_handler_symbol,
       bool use_base_method = true,
       bool include_types = true);
   std::string async_argument_list(
       const t_function* tfunct,
       const t_paramlist& tparamlist,
-      std::string result_handler_symbol,
+      const std::string& result_handler_symbol,
       bool include_types = false);
   std::string type_to_enum(const t_type* ttype);
   std::string get_enum_class_name(const t_type* type);
@@ -316,7 +327,7 @@ class t_java_deprecated_generator : public t_concat_generator {
   void generate_java_doc(std::ofstream& out, const t_function* tdoc);
 
   void generate_java_docstring_comment(
-      std::ofstream& out, std::string contents);
+      std::ofstream& out, const std::string& contents);
 };
 
 } // namespace apache::thrift::compiler

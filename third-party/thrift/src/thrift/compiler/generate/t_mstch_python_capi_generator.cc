@@ -337,6 +337,7 @@ class python_capi_mstch_program : public mstch_program {
 
   mstch::node capi_includes() {
     std::vector<const CapiInclude*> namespaces;
+    namespaces.reserve(capi_includes_.size());
     for (const auto& it : capi_includes_) {
       namespaces.push_back(&it.second);
     }

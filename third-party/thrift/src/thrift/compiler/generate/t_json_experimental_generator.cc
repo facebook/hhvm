@@ -23,7 +23,7 @@ namespace apache::thrift::compiler {
 namespace {
 
 std::string get_filepath(
-    const t_node& node, source_manager& sm, std::string compiler_path) {
+    const t_node& node, source_manager& sm, const std::string& compiler_path) {
   std::string path = sm.resolve_location(node.src_range().begin).file_name();
   if (auto full_path = sm.found_include_file(path)) {
     path = std::move(*full_path);

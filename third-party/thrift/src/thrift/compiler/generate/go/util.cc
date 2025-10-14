@@ -15,6 +15,7 @@
  */
 
 #include <cctype>
+#include <utility>
 #include <boost/algorithm/string.hpp>
 #include <fmt/core.h>
 #include <thrift/compiler/ast/t_type.h>
@@ -344,7 +345,7 @@ std::string get_go_package_name(
 
 std::string get_go_package_dir(
     const t_program* program, std::string name_override) {
-  auto go_package = get_go_package_name(program, name_override);
+  auto go_package = get_go_package_name(program, std::move(name_override));
   if (go_package.find('/') != std::string::npos) {
     return go_package;
   }
@@ -353,7 +354,7 @@ std::string get_go_package_dir(
 
 std::string get_go_package_base_name(
     const t_program* program, std::string name_override) {
-  auto go_package = get_go_package_name(program, name_override);
+  auto go_package = get_go_package_name(program, std::move(name_override));
   std::vector<std::string> parts;
   // The go package name can be separated by slashes or dots.
   // Slashes can only be used if it was quoted, for example `namespace go

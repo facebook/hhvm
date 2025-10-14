@@ -589,7 +589,7 @@ class parser {
   type_throws_spec parse_type_throws() {
     auto type = parse_type();
     auto throws = try_parse_throws();
-    return {std::move(type), std::move(throws)};
+    return {type, std::move(throws)};
   }
 
   // throws: "throws" "(" field* ")"
@@ -609,7 +609,7 @@ class parser {
     auto name = parse_identifier();
     try_parse_deprecated_annotations(attrs);
     try_consume_token(';');
-    actions_.on_typedef(range, std::move(attrs), std::move(type), name);
+    actions_.on_typedef(range, std::move(attrs), type, name);
   }
 
   // struct:
@@ -767,7 +767,7 @@ class parser {
         std::move(attrs),
         field_id,
         qual,
-        std::move(type),
+        type,
         name,
         std::move(value),
         std::move(doc));
@@ -804,7 +804,7 @@ class parser {
         auto element_type = parse_type();
         expect_and_consume('>');
         return actions_.on_list_type(
-            range, std::move(element_type), try_parse_deprecated_annotations());
+            range, element_type, try_parse_deprecated_annotations());
       }
       case tok::kw_set: {
         consume_token();
@@ -812,7 +812,7 @@ class parser {
         auto key_type = parse_type();
         expect_and_consume('>');
         return actions_.on_set_type(
-            range, std::move(key_type), try_parse_deprecated_annotations());
+            range, key_type, try_parse_deprecated_annotations());
       }
       case tok::kw_map: {
         consume_token();
@@ -822,10 +822,7 @@ class parser {
         auto value_type = parse_type();
         expect_and_consume('>');
         return actions_.on_map_type(
-            range,
-            std::move(key_type),
-            std::move(value_type),
-            try_parse_deprecated_annotations());
+            range, key_type, value_type, try_parse_deprecated_annotations());
       }
       case tok::kw_void:
         report_error("`void` cannot be used as a data type");

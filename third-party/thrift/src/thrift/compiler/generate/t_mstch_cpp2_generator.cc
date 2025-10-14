@@ -21,6 +21,7 @@
 #include <queue>
 #include <set>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include <boost/algorithm/string/replace.hpp>
@@ -122,7 +123,7 @@ bool same_types(const t_type* a, const t_type* b) {
 }
 
 std::vector<t_annotation> get_fatal_annotations(
-    deprecated_annotation_map annotations) {
+    const deprecated_annotation_map& annotations) {
   std::vector<t_annotation> fatal_annotations;
   for (const auto& iter : annotations) {
     if (is_annotation_blacklisted_in_fatal(iter.first)) {
@@ -362,7 +363,7 @@ class cpp2_generator_context {
       field_context_map_;
 };
 
-int checked_stoi(const std::string& s, std::string msg) {
+int checked_stoi(const std::string& s, const std::string& msg) {
   std::size_t pos = 0;
   int ret = std::stoi(s, &pos);
   if (pos != s.size()) {
@@ -694,7 +695,7 @@ class cpp_mstch_program : public mstch_program {
       std::optional<std::vector<t_structured*>> split_structs = std::nullopt)
       : mstch_program(program, ctx, pos),
         split_id_(split_id),
-        split_structs_(split_structs),
+        split_structs_(std::move(split_structs)),
         sm_(sm) {
     register_methods(
         this,
@@ -2988,7 +2989,7 @@ t_mstch_cpp2_generator::get_client_name_to_split_count() const {
     return {};
   }
   std::unordered_map<std::string, int> ret;
-  for (auto kv : split(map, ',')) {
+  for (const auto& kv : split(map, ',')) {
     auto a = split(kv, ':');
     if (a.size() != 2) {
       throw std::runtime_error(

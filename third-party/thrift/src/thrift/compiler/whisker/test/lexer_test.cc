@@ -52,7 +52,7 @@ struct token_description {
               to_string(desc.kind),
               detail::escape(value));
         });
-    return out << std::move(str);
+    return out << str;
   }
 
   friend bool operator==(const token_description& lhs, const token& rhs) {

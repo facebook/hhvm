@@ -96,9 +96,7 @@ class t_named : public t_node {
    * Sets the range, in the source Thrift IDL code, corresponding to this
    * instance's `name()`.
    */
-  void set_name_range(source_range name_range) {
-    name_range_ = std::move(name_range);
-  }
+  void set_name_range(source_range name_range) { name_range_ = name_range; }
 
  protected:
   explicit t_named(const t_program* program = nullptr, std::string name = "");

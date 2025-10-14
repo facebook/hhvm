@@ -337,7 +337,7 @@ enum class parse_control : bool { stop, more };
 // If there is no value, `value` will be empty string.
 void parse_generator_options(
     const std::string& option_string,
-    std::function<parse_control(std::string, std::string)> callback) {
+    const std::function<parse_control(std::string, std::string)>& callback) {
   std::vector<std::string> parts;
   bool inside_braces = false;
   boost::algorithm::split(parts, option_string, [&inside_braces](char c) {
@@ -588,13 +588,14 @@ std::string get_include_path(
     }
 
     const auto lang_args = target.substr(colon_pos + 1);
-    parse_generator_options(lang_args, [&](std::string k, std::string v) {
-      if (k.find("include_prefix") != std::string::npos) {
-        include_prefix = std::move(v);
-        return parse_control::stop;
-      }
-      return parse_control::more;
-    });
+    parse_generator_options(
+        lang_args, [&](const std::string& k, std::string v) {
+          if (k.find("include_prefix") != std::string::npos) {
+            include_prefix = std::move(v);
+            return parse_control::stop;
+          }
+          return parse_control::more;
+        });
   }
 
   // infer cpp include prefix from the filename passed in if none specified.
@@ -1020,21 +1021,21 @@ std::pair<std::unique_ptr<t_program_bundle>, diagnostic_results>
 parse_and_mutate_program(
     source_manager& sm,
     const std::string& filename,
-    parsing_params params,
+    const parsing_params& params,
     diagnostic_params dparams) {
   diagnostic_results results;
-  diagnostics_engine diags(sm, results, std::move(dparams));
-  return {parse_ast(sm, diags, filename, std::move(params)), results};
+  diagnostics_engine diags(sm, results, dparams);
+  return {parse_ast(sm, diags, filename, params), results};
 }
 
 std::unique_ptr<t_program_bundle> parse_and_dump_diagnostics(
     const std::string& filename,
     source_manager& sm,
-    parsing_params pparams,
+    const parsing_params& pparams,
     diagnostic_params dparams) {
   diagnostic_results results;
-  diagnostics_engine diags(sm, results, std::move(dparams));
-  auto programs = parse_ast(sm, diags, filename, std::move(pparams));
+  diagnostics_engine diags(sm, results, dparams);
+  auto programs = parse_ast(sm, diags, filename, pparams);
   for (const auto& diag : results.diagnostics()) {
     fmt::print(stderr, "{}\n", diag);
   }
@@ -1121,8 +1122,8 @@ void record_invocation_params(
 }
 
 compile_result compile_with_options(
-    parsing_params pparams,
-    gen_params gparams,
+    const parsing_params& pparams,
+    const gen_params& gparams,
     diagnostic_params dparams,
     sema_params sparams,
     const std::string& input_filename,
@@ -1132,8 +1133,8 @@ compile_result compile_with_options(
   if (input_filename.empty()) {
     return result;
   }
-  sema_context ctx(source_mgr, result.detail, std::move(dparams));
-  ctx.sema_parameters() = std::move(sparams);
+  sema_context ctx(source_mgr, result.detail, dparams);
+  ctx.sema_parameters() = sparams;
   record_invocation_params(
       pparams, gparams, ctx.sema_parameters(), input_filename, ctx.metrics());
 

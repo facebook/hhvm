@@ -27,7 +27,7 @@ namespace apache::thrift::compiler {
 class t_map final : public t_container {
  public:
   t_map(t_type_ref key_type, t_type_ref val_type)
-      : key_type_(std::move(key_type)), val_type_(std::move(val_type)) {}
+      : key_type_(key_type), val_type_(val_type) {}
 
   const t_type_ref& key_type() const { return key_type_; }
   const t_type_ref& val_type() const { return val_type_; }

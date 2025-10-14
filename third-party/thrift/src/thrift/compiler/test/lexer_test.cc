@@ -35,7 +35,7 @@ class LexerTest : public testing::Test {
         [this](std::string_view text, source_range) { doc_comment = text; }};
   }
 
-  LexerTest() : diags(source_mgr, [](diagnostic) {}) {}
+  LexerTest() : diags(source_mgr, [](const diagnostic&) {}) {}
 };
 
 TEST_F(LexerTest, move) {
@@ -54,7 +54,7 @@ TEST_F(LexerTest, eof) {
 TEST_F(LexerTest, identifier) {
   auto lexer = make_lexer("foo _ bar42 foo.bar");
   const std::string values[] = {"foo", "_", "bar42", "foo.bar"};
-  for (auto value : values) {
+  for (const auto& value : values) {
     auto token = lexer.get_next_token();
     EXPECT_EQ(token.kind, tok::identifier);
     EXPECT_EQ(token.string_value(), value);
@@ -105,7 +105,7 @@ TEST_F(LexerTest, float_literal) {
 TEST_F(LexerTest, string_literal) {
   auto lexer = make_lexer("\"foo\" 'bar' \"multi\nline\nstring\"");
   const std::string values[] = {"\"foo\"", "'bar'", "\"multi\nline\nstring\""};
-  for (auto value : values) {
+  for (const auto& value : values) {
     auto token = lexer.get_next_token();
     EXPECT_EQ(token.kind, tok::string_literal);
     EXPECT_EQ(token.string_value(), value);

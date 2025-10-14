@@ -140,7 +140,7 @@ class outputter {
   void writeln_to_sink() {
     assert(current_line_.has_value());
     assert(!current_line_->buffer.empty());
-    sink_ << current_line_->indent << std::move(current_line_->buffer);
+    sink_ << current_line_->indent << current_line_->buffer;
     current_line_ = std::nullopt;
   }
 
@@ -255,8 +255,8 @@ class source_stack {
      */
     bool ignore_newlines = false;
 
-    explicit frame(frame* prev, eval_context ctx, reason cause)
-        : prev(prev), context(std::move(ctx)), cause(std::move(cause)) {}
+    explicit frame(frame* prev, const eval_context& ctx, reason cause)
+        : prev(prev), context(ctx), cause(std::move(cause)) {}
   };
 
   /**
@@ -272,14 +272,14 @@ class source_stack {
    * applications.
    */
   auto make_frame_guard(
-      eval_context eval_ctx,
+      const eval_context& eval_ctx,
       frame::reason reason,
       source_location jumped_from) {
     class frame_guard {
      public:
       explicit frame_guard(
           source_stack& stack,
-          eval_context eval_ctx,
+          const eval_context& eval_ctx,
           frame::reason&& reason,
           source_location jumped_from)
           : stack_(stack) {
@@ -307,8 +307,7 @@ class source_stack {
      private:
       source_stack& stack_;
     };
-    return frame_guard{
-        *this, std::move(eval_ctx), std::move(reason), jumped_from};
+    return frame_guard{*this, eval_ctx, std::move(reason), jumped_from};
   }
 
   struct backtrace_frame {
@@ -813,7 +812,7 @@ class module_importer {
 
     eval_context eval_ctx = vm_.stack().top()->context.make_derived();
     auto frame_guard = vm_.stack().make_frame_guard(
-        std::move(eval_ctx),
+        eval_ctx,
         source_stack::frame::for_import{},
         import_statement.loc.begin);
 
@@ -974,7 +973,7 @@ class render_engine {
           std::move(root_context),
           std::exchange(opts_.globals, {}));
       auto source_frame_guard = vm_.stack().make_frame_guard(
-          std::move(eval_ctx), frame::for_root{}, source_location());
+          eval_ctx, frame::for_root{}, source_location());
       visit(root.header_elements);
       visit(root.body_elements);
       return true;
@@ -1388,7 +1387,7 @@ class render_engine {
     }
 
     auto source_frame_guard = vm_.stack().make_frame_guard(
-        std::move(derived_ctx), partial, partial_statement.loc.begin);
+        derived_ctx, partial, partial_statement.loc.begin);
     auto indent_guard = out_.make_indent_guard(
         partial_statement.standalone_indentation_within_line);
     visit(partial->bodies);

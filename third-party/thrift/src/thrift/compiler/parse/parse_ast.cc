@@ -426,7 +426,7 @@ class ast_builder : public parser_actions {
 
   // Creates a reference to a named type.
   t_type_ref new_type_ref(
-      std::string name,
+      const std::string& name,
       std::unique_ptr<deprecated_annotations> annotations,
       const source_range& range) {
     t_type_ref result = global_scope_->ref_type(program_, name, range);
@@ -556,8 +556,8 @@ class ast_builder : public parser_actions {
   std::unique_ptr<t_const> on_structured_annotation(
       source_range range, std::unique_ptr<t_const_value> value) override {
     auto ttype = value->ttype(); // Copy the t_type_ref.
-    auto result = std::make_unique<t_const>(
-        &program_, std::move(ttype), "", std::move(value));
+    auto result =
+        std::make_unique<t_const>(&program_, ttype, "", std::move(value));
     result->set_src_range(range);
     return result;
   }
@@ -685,7 +685,7 @@ class ast_builder : public parser_actions {
 
   std::unique_ptr<t_stream> on_stream(
       source_range range, type_throws_spec spec) override {
-    auto stream = std::make_unique<t_stream>(std::move(spec.type));
+    auto stream = std::make_unique<t_stream>(spec.type);
     stream->set_src_range(range);
     stream->set_exceptions(std::move(spec.throws));
     return stream;
@@ -696,9 +696,7 @@ class ast_builder : public parser_actions {
       t_type_ref element_type,
       std::unique_ptr<deprecated_annotations> annotations) override {
     return new_type_ref(
-        range,
-        std::make_unique<t_list>(std::move(element_type)),
-        std::move(annotations));
+        range, std::make_unique<t_list>(element_type), std::move(annotations));
   }
 
   t_type_ref on_set_type(
@@ -706,9 +704,7 @@ class ast_builder : public parser_actions {
       t_type_ref key_type,
       std::unique_ptr<deprecated_annotations> annotations) override {
     return new_type_ref(
-        range,
-        std::make_unique<t_set>(std::move(key_type)),
-        std::move(annotations));
+        range, std::make_unique<t_set>(key_type), std::move(annotations));
   }
 
   t_type_ref on_map_type(
@@ -718,7 +714,7 @@ class ast_builder : public parser_actions {
       std::unique_ptr<deprecated_annotations> annotations) override {
     return new_type_ref(
         range,
-        std::make_unique<t_map>(std::move(key_type), std::move(value_type)),
+        std::make_unique<t_map>(key_type, value_type),
         std::move(annotations));
   }
 
@@ -747,8 +743,8 @@ class ast_builder : public parser_actions {
       std::unique_ptr<attributes> attrs,
       t_type_ref type,
       const identifier& name) override {
-    auto typedef_node = std::make_unique<t_typedef>(
-        &program_, fmt::to_string(name.str), std::move(type));
+    auto typedef_node =
+        std::make_unique<t_typedef>(&program_, fmt::to_string(name.str), type);
     typedef_node->set_name_range(name.range());
     set_attributes(*typedef_node, std::move(attrs), range);
     add_definition(std::move(typedef_node));
@@ -810,8 +806,8 @@ class ast_builder : public parser_actions {
       std::optional<comment> doc) override {
     auto valid_id = id ? narrow_int<t_field_id>(range.begin, *id, "field ids")
                        : std::optional<t_field_id>();
-    auto field = std::make_unique<t_field>(
-        std::move(type), fmt::to_string(name.str), valid_id);
+    auto field =
+        std::make_unique<t_field>(type, fmt::to_string(name.str), valid_id);
     field->set_name_range(name.range());
     field->set_qualifier(qual);
     field->set_default_value(std::move(value));
@@ -885,7 +881,7 @@ class ast_builder : public parser_actions {
       const identifier& name,
       std::unique_ptr<t_const_value> value) override {
     auto constant = std::make_unique<t_const>(
-        &program_, std::move(type), fmt::to_string(name.str), std::move(value));
+        &program_, type, fmt::to_string(name.str), std::move(value));
     constant->set_name_range(name.range());
     set_attributes(*constant, std::move(attrs), range);
     add_definition(std::move(constant));

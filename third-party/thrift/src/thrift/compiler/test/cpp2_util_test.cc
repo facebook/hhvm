@@ -364,7 +364,8 @@ TEST(UtilTest, get_internal_injected_field_id) {
 TEST(UtilTest, gen_adapter_dependency_graph) {
   t_program p("path/to/program.thrift", "path/to/program.thrift");
   std::mt19937 gen;
-  auto test = [&](std::string name, std::vector<const t_type*> expected) {
+  auto test = [&](const std::string& name,
+                  std::vector<const t_type*> expected) {
     constexpr int kIters = 42;
     for (int iter = 0; iter < kIters; iter++) {
       std::vector<const t_type*> objects = expected;

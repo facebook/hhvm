@@ -118,7 +118,7 @@ struct lexed_token {
    */
   [[nodiscard]] token advance_to_token(detail::lexer_scan_window* scan) && {
     assert(scan);
-    *scan = std::move(new_head_);
+    *scan = new_head_;
     return std::move(value_);
   }
 
@@ -639,7 +639,7 @@ lexer::state_text::result lexer::state_text::next(lexer& lex) {
       std::vector<token> tokens = std::move(buffer).to_tokens(scan);
       tokens.emplace_back(std::move(open_token));
       // Move up the scan_window to the '!'
-      scan = std::move(scan_within);
+      scan = scan_within;
       return {std::move(tokens), std::move(transition)};
     }
     buffer.consume_one(&scan);
@@ -652,7 +652,7 @@ lexer::state_text::result lexer::state_text::next(lexer& lex) {
 }
 
 lexer::lexer(source source, diagnostics_engine& diags)
-    : source_(std::move(source)),
+    : source_(source),
       diags_(diags),
       scan_window_(source_, source_.text.begin()),
       state_(std::make_unique<state_text>()) {}

@@ -148,7 +148,7 @@ struct parsed_object {
    */
   [[nodiscard]] T consume_and_advance(parser_scan_window* scan) && {
     assert(scan);
-    *scan = std::move(new_head_);
+    *scan = new_head_;
     return std::move(value_);
   }
 
@@ -2055,7 +2055,7 @@ class parser {
 } // namespace
 
 std::optional<ast::root> parse(source src, diagnostics_engine& diags) {
-  auto tokens = lexer(std::move(src), diags).tokenize_all();
+  auto tokens = lexer(src, diags).tokenize_all();
   auto standalone_scanner_result = standalone_lines_scanner::mark(tokens);
   return parser(std::move(tokens), diags, std::move(standalone_scanner_result))
       .parse();

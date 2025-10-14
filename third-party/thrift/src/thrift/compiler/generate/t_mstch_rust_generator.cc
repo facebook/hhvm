@@ -661,14 +661,14 @@ class t_mstch_rust_generator : public t_mstch_generator {
       std::sort(variants.begin(), variants.end(), [](auto a, auto b) {
         return a->name() < b->name();
       });
-      return to_array(std::move(variants), proto.of<t_enum_value>());
+      return to_array(variants, proto.of<t_enum_value>());
     });
     def.property("variants_by_number", [&proto](const t_enum& self) {
       std::vector<const t_enum_value*> variants = self.values().copy();
       std::sort(variants.begin(), variants.end(), [](auto a, auto b) {
         return a->get_value() < b->get_value();
       });
-      return to_array(std::move(variants), proto.of<t_enum_value>());
+      return to_array(variants, proto.of<t_enum_value>());
     });
     return std::move(def).make();
   }

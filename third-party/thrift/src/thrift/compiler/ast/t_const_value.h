@@ -185,7 +185,7 @@ class t_const_value {
 
   std::optional<source_range> src_range() const { return src_range_; }
 
-  void set_src_range(source_range range) { src_range_ = std::move(range); }
+  void set_src_range(source_range range) { src_range_ = range; }
 
   t_const_value_kind kind() const { return kind_; }
 
@@ -208,7 +208,7 @@ class t_const_value {
   t_const* get_owner() const { return owner_; }
 
   const t_type_ref& ttype() const { return ttype_; }
-  void set_ttype(t_type_ref type) { ttype_ = std::move(type); }
+  void set_ttype(t_type_ref type) { ttype_ = type; }
 
   void set_is_enum(bool value = true) { is_enum_ = value; }
 

@@ -50,7 +50,7 @@ class t_const final : public t_named {
       std::string name,
       std::unique_ptr<t_const_value> value)
       : t_named(program, std::move(name)),
-        type_ref_(std::move(type_ref)),
+        type_ref_(type_ref),
         value_(std::move(value)) {
     // value->get_owner() is set when rhs is referencing another constant.
     if (value_ && value_->get_owner() == nullptr) {

@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <utility>
 
 #include <fmt/core.h>
 
@@ -131,7 +132,7 @@ eval_context::eval_context(diagnostics_engine& diags, map::raw globals)
 /* static */ eval_context eval_context::with_root_scope(
     diagnostics_engine& diags, object root_scope, map::raw globals) {
   eval_context result{diags, std::move(globals)};
-  result.push_scope(root_scope);
+  result.push_scope(std::move(root_scope));
   return result;
 }
 

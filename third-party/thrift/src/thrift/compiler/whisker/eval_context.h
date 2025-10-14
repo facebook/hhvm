@@ -26,6 +26,7 @@
 #include <functional>
 #include <string>
 #include <type_traits>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -256,7 +257,7 @@ class eval_context {
      */
     object parent;
     static lookup_result without_parent(object found) {
-      return lookup_result{found, whisker::make::null};
+      return lookup_result{std::move(found), whisker::make::null};
     }
   };
   using lookup_error =

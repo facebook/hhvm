@@ -32,7 +32,7 @@ class SemaTest : public ::testing::Test {
       diagnostic_params params = diagnostic_params::keep_all()) {
     source_manager source_mgr;
     diagnostic_results results;
-    sema_context ctx(source_mgr, results, std::move(params));
+    sema_context ctx(source_mgr, results, params);
     sema(false).run(ctx, program_bundle_);
     return std::move(results).diagnostics();
   }

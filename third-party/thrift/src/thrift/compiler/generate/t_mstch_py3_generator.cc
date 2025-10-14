@@ -268,6 +268,7 @@ class py3_mstch_program : public mstch_program {
 
   mstch::node getStreamExceptions() {
     std::vector<const t_type*> types;
+    types.reserve(streamExceptions_.size());
     for (const auto& kvp : streamExceptions_) {
       types.push_back(kvp.second);
     }
@@ -1262,7 +1263,7 @@ std::string py3_mstch_program::visit_type_impl(
     } else {
       extra = trueType->name();
     }
-    type->set_flat_name(std::move(extra));
+    type->set_flat_name(extra);
   }
   assert(!flatName.empty());
   // If this type or a parent of this type is a typedef,

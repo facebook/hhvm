@@ -1490,7 +1490,6 @@ void t_hack_generator::generate_json_reader(
   }
   t_name_generator namer;
 
-  std::string name = tstruct->name();
   indent(out) << "public function readFromJson(string $jsonText): void {\n";
   indent_up();
   if (tstruct->is<t_union>()) {
@@ -1838,7 +1837,7 @@ void t_hack_generator::generate_enum(const t_enum* tenum) {
  */
 void t_hack_generator::generate_const(const t_const* tconst) {
   const t_type* type = tconst->type();
-  std::string name = tconst->name();
+  const std::string& name = tconst->name();
   const t_const_value* value = tconst->value();
 
   indent_up();
@@ -5523,7 +5522,7 @@ void t_hack_generator::
         << "->_type = " << union_field_to_enum(&field, struct_hack_name_with_ns)
         << ";\n";
   }
-  auto name = field.name();
+  const auto& name = field.name();
 
   bool is_async = false;
   std::string source_str;

@@ -666,13 +666,13 @@ TEST_F(RenderTest, and_or_short_circuit) {
 TEST_F(RenderTest, builtin_ternary) {
   {
     auto result = render(
-        "{{(if cond? \"Yes\" \"No\")}}", w::map({{"cond?", w::true_value}}));
+        R"({{(if cond? "Yes" "No")}})", w::map({{"cond?", w::true_value}}));
     EXPECT_THAT(diagnostics(), testing::IsEmpty());
     EXPECT_EQ(*result, "Yes");
   }
   {
     auto result = render(
-        "{{(if cond? \"Yes\" \"No\")}}", w::map({{"cond?", w::false_value}}));
+        R"({{(if cond? "Yes" "No")}})", w::map({{"cond?", w::false_value}}));
     EXPECT_THAT(diagnostics(), testing::IsEmpty());
     EXPECT_EQ(*result, "No");
   }

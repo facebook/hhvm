@@ -26,7 +26,7 @@ namespace apache::thrift::compiler {
  */
 class t_set final : public t_container {
  public:
-  explicit t_set(t_type_ref elem_type) : elem_type_(std::move(elem_type)) {}
+  explicit t_set(t_type_ref elem_type) : elem_type_(elem_type) {}
 
   const t_type_ref& elem_type() const { return elem_type_; }
   t_type_ref& elem_type() { return elem_type_; }

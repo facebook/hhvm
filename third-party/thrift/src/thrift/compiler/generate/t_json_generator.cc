@@ -605,7 +605,7 @@ void t_json_generator::generate_consts(vector<t_const*> consts) {
  * Generates a constant value
  */
 void t_json_generator::generate_const(const t_const* tconst) {
-  string name = tconst->name();
+  const string& name = tconst->name();
   indent(f_out_) << "\"" << name << "\" : {" << endl;
   indent_up();
   print_lineno(*tconst);

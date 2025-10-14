@@ -442,7 +442,6 @@ class t_mstch_java_generator : public t_mstch_generator {
       // Only generate Constants.java if we actually have constants
       return;
     }
-    auto name = program->name();
     const auto& prog = cached_program(program);
 
     auto raw_package_dir = std::filesystem::path{
@@ -479,7 +478,7 @@ class t_mstch_java_generator : public t_mstch_generator {
         ? "data-type" / raw_package_dir
         : raw_package_dir;
 
-    auto program_name = program->name();
+    const auto& program_name = program->name();
     type_list_hash = toHex(hash(program_name + java_namespace + str_type_list));
 
     std::string file_name = "__fbthrift_TypeList_" + type_list_hash + ".java";

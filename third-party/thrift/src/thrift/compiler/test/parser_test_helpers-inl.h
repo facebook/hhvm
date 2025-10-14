@@ -29,7 +29,7 @@ template <typename ArgType>
 class func_signature_helper {
  public:
   static std::unique_ptr<t_type> get_type() {
-    return get_type(dummy<typename std::decay<ArgType>::type>());
+    return get_type(dummy<std::decay_t<ArgType>>());
   }
 
  private:

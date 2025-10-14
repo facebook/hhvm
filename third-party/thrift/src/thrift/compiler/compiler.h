@@ -98,7 +98,7 @@ std::string parse_args(
 std::unique_ptr<t_program_bundle> parse_and_dump_diagnostics(
     const std::string& filename,
     source_manager& sm,
-    parsing_params pparams,
+    const parsing_params& pparams,
     diagnostic_params dparams = {});
 
 /**
@@ -110,7 +110,7 @@ std::pair<std::unique_ptr<t_program_bundle>, diagnostic_results>
 parse_and_mutate_program(
     source_manager& sm,
     const std::string& filename,
-    parsing_params params,
+    const parsing_params& params,
     diagnostic_params dparams = {});
 
 /**
@@ -118,8 +118,8 @@ parse_and_mutate_program(
  * The parameters can be parsed from the command line arguments using `compile`.
  */
 compile_result compile_with_options(
-    parsing_params pparams,
-    gen_params gparams,
+    const parsing_params& pparams,
+    const gen_params& gparams,
     diagnostic_params dparams,
     sema_params sparams,
     const std::string& input_filename,

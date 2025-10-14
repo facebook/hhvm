@@ -74,7 +74,7 @@ std::unordered_set<const t_type*> collect_types(const t_structured* strct) {
   return types;
 }
 
-std::string program_cache_id(const t_program* prog, std::string ns) {
+std::string program_cache_id(const t_program* prog, const std::string& ns) {
   // DEVNOTE: Don't use the program name as part of the cache id, as
   // program names (i.e. the .thrift filename without the extension) are
   // not unique within a thrift compiler run. Instead, rely on the

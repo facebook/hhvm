@@ -91,7 +91,7 @@ inline std::string get_escaped_string(std::string_view str) {
 }
 
 // Generates a unique cache id for a given program and namespace.
-std::string program_cache_id(const t_program* prog, std::string ns);
+std::string program_cache_id(const t_program* prog, const std::string& ns);
 
 // Checks if the given named entity is directly annotated with
 // @thrift.RuntimeAnnotation, indicating it should be available at runtime.

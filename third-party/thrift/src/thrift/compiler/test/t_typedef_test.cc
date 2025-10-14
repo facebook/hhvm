@@ -35,7 +35,7 @@ TEST(TypedefTest, bad_true_type) {
       2: MissingType second;
     }
   )");
-  auto diags = diagnostics_engine(source_mgr, [](diagnostic) {});
+  auto diags = diagnostics_engine(source_mgr, [](const diagnostic&) {});
   auto programs = parse_ast(source_mgr, diags, "test.thrift", {});
   auto program = programs->root_program();
 

@@ -56,7 +56,7 @@ class fixit {
   fixit(std::string original, std::string replacement, source_location loc = {})
       : original_(std::move(original)),
         replacement_(std::move(replacement)),
-        loc_(std::move(loc)) {}
+        loc_(loc) {}
 
   fixit(std::string original, std::string replacement, int line, int column)
       : original_(std::move(original)),
@@ -238,10 +238,11 @@ struct diagnostic_params {
 struct diagnostic_location {
   source_location loc;
 
-  diagnostic_location(source_location l) : loc(l) {}
+  /*implicit*/ diagnostic_location(source_location l) : loc(l) {}
 
   template <typename T>
-  diagnostic_location(const T& locatable) : loc(locatable.src_range().begin) {}
+  /*implicit*/ diagnostic_location(const T& locatable)
+      : loc(locatable.src_range().begin) {}
 };
 
 // A class used by the Thrift compiler to report diagnostics.
@@ -251,9 +252,7 @@ class diagnostics_engine {
       source_manager& sm,
       std::function<void(diagnostic)> report_cb,
       diagnostic_params params = {})
-      : source_mgr_(&sm),
-        report_cb_(std::move(report_cb)),
-        params_(std::move(params)) {}
+      : source_mgr_(&sm), report_cb_(std::move(report_cb)), params_(params) {}
   explicit diagnostics_engine(
       source_manager& sm,
       diagnostic_results& results,
@@ -261,7 +260,7 @@ class diagnostics_engine {
       : diagnostics_engine(
             sm,
             [&results](diagnostic diag) { results.add(std::move(diag)); },
-            std::move(params)) {}
+            params) {}
 
   static diagnostics_engine ignore_all(source_manager& sm) {
     return diagnostics_engine(

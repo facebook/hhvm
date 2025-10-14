@@ -177,6 +177,10 @@ RequestRpcMetadata makeRequestRpcMetadata(
     metadata.loggingContext() = *loggingContext;
   }
 
+  if (const auto& quotaReportConfig = header.quotaReportConfig()) {
+    metadata.quotaReportConfig() = *quotaReportConfig;
+  }
+
   if (std::holds_alternative<InteractionCreate>(interactionHandle)) {
     metadata.interactionCreate() =
         std::get<InteractionCreate>(interactionHandle);

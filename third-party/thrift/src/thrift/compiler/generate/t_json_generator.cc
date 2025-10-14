@@ -306,11 +306,13 @@ string t_json_generator::to_spec_args(const t_type* type) {
         to_string(&map->val_type().deref()) + R"(", "spec_args" : )" +
         to_spec_args(&map->val_type().deref()) + "} } ";
   } else if (const t_set* set = type->try_as<t_set>()) {
-    return R"({ "type_enum" : ")" + to_string(set->get_elem_type()) +
-        R"(", "spec_args" : )" + to_spec_args(set->get_elem_type()) + "} ";
+    return R"({ "type_enum" : ")" + to_string(set->elem_type().get_type()) +
+        R"(", "spec_args" : )" + to_spec_args(set->elem_type().get_type()) +
+        "} ";
   } else if (const t_list* list = type->try_as<t_list>()) {
-    return R"({ "type_enum" : ")" + to_string(list->get_elem_type()) +
-        R"(", "spec_args" : )" + to_spec_args(list->get_elem_type()) + "} ";
+    return R"({ "type_enum" : ")" + to_string(list->elem_type().get_type()) +
+        R"(", "spec_args" : )" + to_spec_args(list->elem_type().get_type()) +
+        "} ";
   }
 
   throw std::runtime_error("INVALID TYPE IN to_spec_args: " + type->name());

@@ -115,11 +115,11 @@ bool type_contains_patch(const t_type* type) {
   }
 
   if (auto set = dynamic_cast<t_set const*>(type)) {
-    return type_contains_patch(set->get_elem_type());
+    return type_contains_patch(set->elem_type().get_type());
   }
 
   if (auto list = dynamic_cast<t_list const*>(type)) {
-    return type_contains_patch(list->get_elem_type());
+    return type_contains_patch(list->elem_type().get_type());
   }
 
   return is_patch_program(type->program());

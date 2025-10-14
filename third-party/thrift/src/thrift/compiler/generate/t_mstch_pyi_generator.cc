@@ -106,13 +106,14 @@ std::string to_flat_type_name(const t_type* type) {
     assert(listType != nullptr);
 
     return fmt::format(
-        "List__{}", to_flat_type_name(listType->get_elem_type()));
+        "List__{}", to_flat_type_name(listType->elem_type().get_type()));
   }
 
   if (const t_set* setType = true_type->try_as<t_set>()) {
     assert(setType != nullptr);
 
-    return fmt::format("Set__{}", to_flat_type_name(setType->get_elem_type()));
+    return fmt::format(
+        "Set__{}", to_flat_type_name(setType->elem_type().get_type()));
   }
 
   if (const t_map* mapType = true_type->try_as<t_map>()) {
@@ -338,10 +339,10 @@ class pyi_mstch_program : public mstch_program {
     }
 
     if (const t_list* list = type->try_as<t_list>()) {
-      const auto* listType = list->get_elem_type();
+      const auto* listType = list->elem_type().get_type();
       add_containers(visited, listType);
     } else if (const t_set* set = type->try_as<t_set>()) {
-      const auto* setType = set->get_elem_type();
+      const auto* setType = set->elem_type().get_type();
       add_containers(visited, setType);
     } else if (const t_map* mapType = type->try_as<t_map>()) {
       add_containers(visited, &mapType->key_type().deref());

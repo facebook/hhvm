@@ -173,12 +173,12 @@ gen_dependency_graph(
                     !container_supports_incomplete_params(*map));
           } else if (auto set = dynamic_cast<t_set const*>(type)) {
             return add_dependency(
-                set->get_elem_type(),
+                set->elem_type().get_type(),
                 include_structured_types &&
                     !container_supports_incomplete_params(*set));
           } else if (auto list = dynamic_cast<t_list const*>(type)) {
             return add_dependency(
-                list->get_elem_type(),
+                list->elem_type().get_type(),
                 include_structured_types &&
                     !container_supports_incomplete_params(*list));
           } else if (auto typedf = dynamic_cast<t_typedef const*>(type)) {
@@ -264,9 +264,9 @@ bool field_transitively_refers_to_unique(const t_field* field) {
       return true;
     }
     if (const t_list* list = type->try_as<t_list>()) {
-      queue.push(list->get_elem_type());
+      queue.push(list->elem_type().get_type());
     } else if (const t_set* set = type->try_as<t_set>()) {
-      queue.push(set->get_elem_type());
+      queue.push(set->elem_type().get_type());
     } else if (const t_map* map = type->try_as<t_map>()) {
       queue.push(map->get_key_type());
       queue.push(map->get_val_type());

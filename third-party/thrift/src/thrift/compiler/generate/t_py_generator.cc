@@ -524,7 +524,7 @@ void t_py_generator::generate_json_container(
     indent_up();
     generate_json_collection_element(
         out,
-        list->get_elem_type(),
+        list->elem_type().get_type(),
         prefix_thrift,
         e,
         ".append(",
@@ -538,7 +538,13 @@ void t_py_generator::generate_json_container(
     indent(out) << "for " << e << " in " << prefix_json << ":" << endl;
     indent_up();
     generate_json_collection_element(
-        out, set->get_elem_type(), prefix_thrift, e, ".add(", ")", prefix_json);
+        out,
+        set->elem_type().get_type(),
+        prefix_thrift,
+        e,
+        ".add(",
+        ")",
+        prefix_json);
     indent_down();
   } else if (const t_map* map = ttype->try_as<t_map>()) {
     string k = tmp("_tmp_k");
@@ -1246,9 +1252,9 @@ string t_py_generator::render_const_value(
   } else if (type->is<t_list>() || type->is<t_set>()) {
     const t_type* etype;
     if (const t_list* list = type->try_as<t_list>()) {
-      etype = list->get_elem_type();
+      etype = list->elem_type().get_type();
     } else {
-      etype = ((t_set*)type)->get_elem_type();
+      etype = ((t_set*)type)->elem_type().get_type();
     }
     if (type->is<t_set>()) {
       out << "set(";
@@ -3546,11 +3552,12 @@ void t_py_generator::generate_serialize_container(
                 << type_to_enum(&map->val_type().deref()) << ", " << "len("
                 << prefix << "))" << endl;
   } else if (const t_set* set = ttype->try_as<t_set>()) {
-    indent(out) << "oprot.writeSetBegin(" << type_to_enum(set->get_elem_type())
-                << ", " << "len(" << prefix << "))" << endl;
+    indent(out) << "oprot.writeSetBegin("
+                << type_to_enum(set->elem_type().get_type()) << ", " << "len("
+                << prefix << "))" << endl;
   } else if (const t_list* list = ttype->try_as<t_list>()) {
     indent(out) << "oprot.writeListBegin("
-                << type_to_enum(list->get_elem_type()) << ", " << "len("
+                << type_to_enum(list->elem_type().get_type()) << ", " << "len("
                 << prefix << "))" << endl;
   }
 
@@ -3868,12 +3875,12 @@ string t_py_generator::type_to_spec_args(const t_type* ttype) {
         type_to_spec_args(&tmap->val_type().deref()) + ")";
 
   } else if (const t_set* set = ttype->try_as<t_set>()) {
-    return "(" + type_to_enum(set->get_elem_type()) + "," +
-        type_to_spec_args(set->get_elem_type()) + ")";
+    return "(" + type_to_enum(set->elem_type().get_type()) + "," +
+        type_to_spec_args(set->elem_type().get_type()) + ")";
 
   } else if (const t_list* list = ttype->try_as<t_list>()) {
-    return "(" + type_to_enum(list->get_elem_type()) + "," +
-        type_to_spec_args(list->get_elem_type()) + ")";
+    return "(" + type_to_enum(list->elem_type().get_type()) + "," +
+        type_to_spec_args(list->elem_type().get_type()) + ")";
   }
 
   throw std::runtime_error(

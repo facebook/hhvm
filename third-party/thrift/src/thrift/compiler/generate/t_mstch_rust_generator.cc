@@ -151,7 +151,7 @@ bool can_derive_ord(const t_type* type) {
     return true;
   }
   if (const t_list* list = type->try_as<t_list>()) {
-    auto elem_type = list->get_elem_type();
+    auto elem_type = list->elem_type().get_type();
     return elem_type && can_derive_ord(elem_type);
   }
   // We can implement Ord on BTreeMap (the default map type) if both the key and
@@ -372,11 +372,11 @@ bool type_has_transitive_adapter(
 
   } else if (const t_list* list_type = type->try_as<t_list>()) {
     return type_has_transitive_adapter(
-        list_type->get_elem_type(), step_through_newtypes);
+        list_type->elem_type().get_type(), step_through_newtypes);
 
   } else if (const t_set* set_type = type->try_as<t_set>()) {
     return type_has_transitive_adapter(
-        set_type->get_elem_type(), step_through_newtypes);
+        set_type->elem_type().get_type(), step_through_newtypes);
 
   } else if (const t_map* map_type = type->try_as<t_map>()) {
     return type_has_transitive_adapter(
@@ -584,10 +584,11 @@ mstch::node structured_annotations_node(
 std::string get_resolved_name(const t_type* t) {
   t = t->get_true_type();
   if (auto c = dynamic_cast<const t_list*>(t)) {
-    return fmt::format("list<{}>", get_resolved_name(c->get_elem_type()));
+    return fmt::format(
+        "list<{}>", get_resolved_name(c->elem_type().get_type()));
   }
   if (auto c = dynamic_cast<const t_set*>(t)) {
-    return fmt::format("set<{}>", get_resolved_name(c->get_elem_type()));
+    return fmt::format("set<{}>", get_resolved_name(c->elem_type().get_type()));
   }
   if (auto c = dynamic_cast<const t_map*>(t)) {
     return fmt::format(
@@ -1156,9 +1157,9 @@ class rust_mstch_program : public mstch_program {
     }
     // Recursively check container types
     else if (const t_list* list_type = dynamic_cast<const t_list*>(type)) {
-      dependent = generate_reference_set(list_type->get_elem_type());
+      dependent = generate_reference_set(list_type->elem_type().get_type());
     } else if (const t_set* set_type = dynamic_cast<const t_set*>(type)) {
-      dependent = generate_reference_set(set_type->get_elem_type());
+      dependent = generate_reference_set(set_type->elem_type().get_type());
     } else if (const t_map* map_type = dynamic_cast<const t_map*>(type)) {
       bool dependent_map_key =
           generate_reference_set(&map_type->key_type().deref());
@@ -1895,9 +1896,9 @@ class mstch_rust_value : public mstch_base {
   mstch::node list_elements() {
     const t_type* elem_type;
     if (const t_set* set_type = underlying_type_->try_as<t_set>()) {
-      elem_type = set_type->get_elem_type();
+      elem_type = set_type->elem_type().get_type();
     } else if (const t_list* list_type = underlying_type_->try_as<t_list>()) {
-      elem_type = list_type->get_elem_type();
+      elem_type = list_type->elem_type().get_type();
     } else {
       return mstch::node();
     }

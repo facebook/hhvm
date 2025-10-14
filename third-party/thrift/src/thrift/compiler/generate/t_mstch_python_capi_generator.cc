@@ -291,10 +291,10 @@ std::string format_marshal_type_unadapted(
         gen_capi_module_prefix(true_type->program()));
 
   } else if (const t_list* list = true_type->try_as<t_list>()) {
-    const auto* elem_type = list->get_elem_type();
+    const auto* elem_type = list->elem_type().get_type();
     return format_unary_type(node, elem_type, "list", type_override);
   } else if (const t_set* set = true_type->try_as<t_set>()) {
-    const auto* elem_type = set->get_elem_type();
+    const auto* elem_type = set->elem_type().get_type();
     return format_unary_type(node, elem_type, "set", type_override);
   } else if (const t_map* map = true_type->try_as<t_map>()) {
     return format_map_type(
@@ -439,9 +439,9 @@ class python_capi_mstch_program : public mstch_program {
       add_typedef_namespace(true_type);
     }
     if (const t_list* list = true_type->try_as<t_list>()) {
-      visit_type_with_typedef(list->get_elem_type(), is_typedef);
+      visit_type_with_typedef(list->elem_type().get_type(), is_typedef);
     } else if (const t_set* set = true_type->try_as<t_set>()) {
-      visit_type_with_typedef(set->get_elem_type(), is_typedef);
+      visit_type_with_typedef(set->elem_type().get_type(), is_typedef);
     } else if (const t_map* map = true_type->try_as<t_map>()) {
       visit_type_with_typedef(&map->key_type().deref(), is_typedef);
       visit_type_with_typedef(&map->val_type().deref(), is_typedef);
@@ -543,10 +543,10 @@ class python_capi_mstch_struct : public mstch_struct {
       return is_type_iobuf(*type_anno);
     }
     if (const t_list* list = type->try_as<t_list>();
-        list != nullptr && !capi_eligible_type(list->get_elem_type())) {
+        list != nullptr && !capi_eligible_type(list->elem_type().get_type())) {
       return false;
-    } else if (const t_set* set = type->try_as<t_set>();
-               set != nullptr && !capi_eligible_type(set->get_elem_type())) {
+    } else if (const t_set* set = type->try_as<t_set>(); set != nullptr &&
+               !capi_eligible_type(set->elem_type().get_type())) {
       return false;
     } else if (const t_map* map = type->try_as<t_map>(); map != nullptr &&
                (!capi_eligible_type(&map->key_type().deref()) ||

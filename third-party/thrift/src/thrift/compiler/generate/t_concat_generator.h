@@ -102,9 +102,9 @@ class t_concat_generator : public t_generator {
         return "map<" + thrift_type_name(tmap->get_key_type()) + ", " +
             thrift_type_name(tmap->get_val_type()) + ">";
       } else if (const t_set* tset = ttype->try_as<t_set>()) {
-        return "set<" + thrift_type_name(tset->get_elem_type()) + ">";
+        return "set<" + thrift_type_name(tset->elem_type().get_type()) + ">";
       } else if (const t_list* tlist = ttype->try_as<t_list>()) {
-        return "list<" + thrift_type_name(tlist->get_elem_type()) + ">";
+        return "list<" + thrift_type_name(tlist->elem_type().get_type()) + ">";
       }
     }
 

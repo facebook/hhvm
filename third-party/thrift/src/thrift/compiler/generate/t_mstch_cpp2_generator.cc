@@ -110,10 +110,12 @@ bool same_types(const t_type* a, const t_type* b) {
 
   if (const t_list* list_a = resolved_a->try_as<t_list>()) {
     const auto* list_b = static_cast<const t_list*>(resolved_b);
-    return same_types(list_a->get_elem_type(), list_b->get_elem_type());
+    return same_types(
+        list_a->elem_type().get_type(), list_b->elem_type().get_type());
   } else if (const t_set* set_a = resolved_a->try_as<t_set>()) {
     const auto* set_b = static_cast<const t_set*>(resolved_b);
-    return same_types(set_a->get_elem_type(), set_b->get_elem_type());
+    return same_types(
+        set_a->elem_type().get_type(), set_b->elem_type().get_type());
   } else if (const t_map* map_a = resolved_a->try_as<t_map>()) {
     const auto* map_b = static_cast<const t_map*>(resolved_b);
     return same_types(&map_a->key_type().deref(), &map_b->key_type().deref()) &&
@@ -1472,9 +1474,9 @@ class cpp_mstch_type : public mstch_type {
         continue;
       }
       if (const t_list* list = next->try_as<t_list>()) {
-        queue.push(list->get_elem_type());
+        queue.push(list->elem_type().get_type());
       } else if (const t_set* set = next->try_as<t_set>()) {
-        queue.push(set->get_elem_type());
+        queue.push(set->elem_type().get_type());
       } else if (const t_map* map = next->try_as<t_map>()) {
         queue.push(&map->key_type().deref());
         queue.push(&map->val_type().deref());

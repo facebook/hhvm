@@ -56,9 +56,9 @@ void visit_type(const t_type* type, F&& visitor) {
     visit_type(tmap->get_key_type(), std::forward<F>(visitor));
     visit_type(tmap->get_val_type(), std::forward<F>(visitor));
   } else if (const auto* tlist = dynamic_cast<const t_list*>(true_type)) {
-    visit_type(tlist->get_elem_type(), std::forward<F>(visitor));
+    visit_type(tlist->elem_type().get_type(), std::forward<F>(visitor));
   } else if (const auto* tset = dynamic_cast<const t_set*>(true_type)) {
-    visit_type(tset->get_elem_type(), std::forward<F>(visitor));
+    visit_type(tset->elem_type().get_type(), std::forward<F>(visitor));
   }
 }
 

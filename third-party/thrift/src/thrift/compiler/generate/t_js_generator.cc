@@ -461,9 +461,9 @@ string t_js_generator::render_const_value(
   } else if (type->is<t_list>() || type->is<t_set>()) {
     const t_type* etype;
     if (const t_list* list = type->try_as<t_list>()) {
-      etype = list->get_elem_type();
+      etype = list->elem_type().get_type();
     } else {
-      etype = ((t_set*)type)->get_elem_type();
+      etype = ((t_set*)type)->elem_type().get_type();
     }
     out << "[";
     const vector<t_const_value*>& val = value->get_list();
@@ -1533,12 +1533,13 @@ void t_js_generator::generate_serialize_container(
                 << type_to_enum(&map->val_type().deref()) << ", "
                 << "Thrift.objectLength(" << prefix << "));" << endl;
   } else if (const t_set* set = ttype->try_as<t_set>()) {
-    indent(out) << "output.writeSetBegin(" << type_to_enum(set->get_elem_type())
-                << ", " << prefix << ".length);" << endl;
+    indent(out) << "output.writeSetBegin("
+                << type_to_enum(set->elem_type().get_type()) << ", " << prefix
+                << ".length);" << endl;
 
   } else if (const t_list* list = ttype->try_as<t_list>()) {
     indent(out) << "output.writeListBegin("
-                << type_to_enum(list->get_elem_type()) << ", " << prefix
+                << type_to_enum(list->elem_type().get_type()) << ", " << prefix
                 << ".length);" << endl;
   }
 

@@ -293,7 +293,7 @@ class adapter_or_wrapper_checker {
         if (const auto* map = dynamic_cast<const t_map*>(type)) {
           type = &map->val_type().deref();
         } else if (const auto* list = dynamic_cast<const t_list*>(type)) {
-          type = list->get_elem_type();
+          type = list->elem_type().get_type();
         } else {
           break;
         }

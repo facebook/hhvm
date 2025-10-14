@@ -386,9 +386,9 @@ void t_java_deprecated_generator::print_const_value(
     }
     const t_type* etype;
     if (const t_list* list = type->try_as<t_list>()) {
-      etype = list->get_elem_type();
+      etype = list->elem_type().get_type();
     } else {
-      etype = ((t_set*)type)->get_elem_type();
+      etype = ((t_set*)type)->elem_type().get_type();
     }
     const vector<t_const_value*>& val = value->get_list();
     vector<t_const_value*>::const_iterator v_iter;
@@ -2313,11 +2313,11 @@ void t_java_deprecated_generator::generate_field_value_meta_data(
   } else if (type->is<t_container>()) {
     if (const t_list* list = type->try_as<t_list>()) {
       indent(out) << "new ListMetaData(TType.LIST, ";
-      const t_type* elem_type = list->get_elem_type();
+      const t_type* elem_type = list->elem_type().get_type();
       generate_field_value_meta_data(out, elem_type);
     } else if (const t_set* set = type->try_as<t_set>()) {
       indent(out) << "new SetMetaData(TType.SET, ";
-      const t_type* elem_type = set->get_elem_type();
+      const t_type* elem_type = set->elem_type().get_type();
       generate_field_value_meta_data(out, elem_type);
     } else { // map
       indent(out) << "new MapMetaData(TType.MAP, ";
@@ -3531,11 +3531,11 @@ void t_java_deprecated_generator::generate_serialize_container(
                 << ".size()));" << endl;
   } else if (const t_set* set = ttype->try_as<t_set>()) {
     indent(out) << "oprot.writeSetBegin(new TSet("
-                << type_to_enum(set->get_elem_type()) << ", " << prefix
+                << type_to_enum(set->elem_type().get_type()) << ", " << prefix
                 << ".size()));" << endl;
   } else if (const t_list* list = ttype->try_as<t_list>()) {
     indent(out) << "oprot.writeListBegin(new TList("
-                << type_to_enum(list->get_elem_type()) << ", " << prefix
+                << type_to_enum(list->elem_type().get_type()) << ", " << prefix
                 << ".size()));" << endl;
   }
 
@@ -3546,11 +3546,11 @@ void t_java_deprecated_generator::generate_serialize_container(
                 << type_name(&map->val_type().deref(), true, false) << "> "
                 << iter << " : " << prefix << ".entrySet())";
   } else if (const t_set* set = ttype->try_as<t_set>()) {
-    indent(out) << "for (" << type_name(set->get_elem_type()) << " " << iter
-                << " : " << prefix << ")";
+    indent(out) << "for (" << type_name(set->elem_type().get_type()) << " "
+                << iter << " : " << prefix << ")";
   } else if (const t_list* list = ttype->try_as<t_list>()) {
-    indent(out) << "for (" << type_name(list->get_elem_type()) << " " << iter
-                << " : " << prefix << ")";
+    indent(out) << "for (" << type_name(list->elem_type().get_type()) << " "
+                << iter << " : " << prefix << ")";
   }
 
   scope_up(out);
@@ -3643,8 +3643,9 @@ string t_java_deprecated_generator::type_name(
       prefix = "Set";
     }
     return prefix +
-        (skip_generic ? ""
-                      : "<" + type_name(tset->get_elem_type(), true) + ">");
+        (skip_generic
+             ? ""
+             : "<" + type_name(tset->elem_type().get_type(), true) + ">");
   } else if (const t_list* list = ttype->try_as<t_list>()) {
     const t_list* tlist = list;
     if (in_init) {
@@ -3653,8 +3654,9 @@ string t_java_deprecated_generator::type_name(
       prefix = "List";
     }
     return prefix +
-        (skip_generic ? ""
-                      : "<" + type_name(tlist->get_elem_type(), true) + ">");
+        (skip_generic
+             ? ""
+             : "<" + type_name(tlist->elem_type().get_type(), true) + ">");
   }
 
   // Check for namespacing
@@ -4105,9 +4107,9 @@ bool t_java_deprecated_generator::is_comparable(
     return is_comparable(&map->key_type().deref(), enclosing) &&
         is_comparable(&map->val_type().deref(), enclosing);
   } else if (const t_set* set = type->try_as<t_set>()) {
-    return is_comparable(set->get_elem_type(), enclosing);
+    return is_comparable(set->elem_type().get_type(), enclosing);
   } else if (const t_list* list = type->try_as<t_list>()) {
-    return is_comparable(list->get_elem_type(), enclosing);
+    return is_comparable(list->elem_type().get_type(), enclosing);
   } else {
     throw std::runtime_error("Don't know how to handle this ttype");
   }
@@ -4139,9 +4141,9 @@ bool t_java_deprecated_generator::type_has_naked_binary(const t_type* type) {
     return type_has_naked_binary(&map->key_type().deref()) ||
         type_has_naked_binary(&map->val_type().deref());
   } else if (const t_set* set = type->try_as<t_set>()) {
-    return type_has_naked_binary(set->get_elem_type());
+    return type_has_naked_binary(set->elem_type().get_type());
   } else if (const t_list* list = type->try_as<t_list>()) {
-    return type_has_naked_binary(list->get_elem_type());
+    return type_has_naked_binary(list->elem_type().get_type());
   } else {
     throw std::runtime_error("Don't know how to handle this ttype");
   }

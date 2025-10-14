@@ -2390,7 +2390,7 @@ void t_cocoa_generator::generate_deserialize_map_element(
 void t_cocoa_generator::generate_deserialize_set_element(
     std::ofstream& out, const t_set* tset, const std::string& fieldName) {
   std::string elem = tmp("_elem");
-  const t_type* type = tset->get_elem_type();
+  const t_type* type = tset->elem_type().get_type();
   t_field felem(*type, elem);
 
   generate_deserialize_field(out, &felem, elem);
@@ -2413,7 +2413,7 @@ void t_cocoa_generator::generate_deserialize_set_element(
 void t_cocoa_generator::generate_deserialize_list_element(
     std::ofstream& out, const t_list* tlist, const std::string& fieldName) {
   std::string elem = tmp("_elem");
-  const t_type* type = tlist->get_elem_type();
+  const t_type* type = tlist->elem_type().get_type();
   t_field felem(*type, elem);
 
   generate_deserialize_field(out, &felem, elem);
@@ -2529,11 +2529,11 @@ void t_cocoa_generator::generate_serialize_container(
                 << " size: (int)[" << fieldName << " count]];" << std::endl;
   } else if (const t_set* set = ttype->try_as<t_set>()) {
     indent(out) << "[outProtocol writeSetBeginWithElementType: "
-                << type_to_enum(set->get_elem_type()) << " size: (int)["
+                << type_to_enum(set->elem_type().get_type()) << " size: (int)["
                 << fieldName << " count]];" << std::endl;
   } else if (const t_list* list = ttype->try_as<t_list>()) {
     indent(out) << "[outProtocol writeListBeginWithElementType: "
-                << type_to_enum(list->get_elem_type()) << " size: (int)["
+                << type_to_enum(list->elem_type().get_type()) << " size: (int)["
                 << fieldName << " count]];" << std::endl;
   }
 
@@ -2807,7 +2807,7 @@ void t_cocoa_generator::print_const_value(
     }
     out << std::endl;
   } else if (const t_list* list = type->try_as<t_list>()) {
-    const t_type* etype = list->get_elem_type();
+    const t_type* etype = list->elem_type().get_type();
     const std::vector<t_const_value*>& value_list = value->get_list();
     std::vector<t_const_value*>::const_iterator v_iter;
     if (defval) {
@@ -2827,7 +2827,7 @@ void t_cocoa_generator::print_const_value(
     }
     out << std::endl;
   } else if (const t_set* set = type->try_as<t_set>()) {
-    const t_type* etype = set->get_elem_type();
+    const t_type* etype = set->elem_type().get_type();
     const std::vector<t_const_value*>& value_list = value->get_list();
     std::vector<t_const_value*>::const_iterator v_iter;
     if (defval) {

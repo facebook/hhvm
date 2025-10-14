@@ -85,9 +85,9 @@ bool container_needs_convert(const t_type* type) {
     return container_needs_convert(&map_type->key_type().deref()) ||
         container_needs_convert(&map_type->val_type().deref());
   } else if (const t_list* list_type = dynamic_cast<const t_list*>(true_type)) {
-    return container_needs_convert(list_type->get_elem_type());
+    return container_needs_convert(list_type->elem_type().get_type());
   } else if (const t_set* set_type = dynamic_cast<const t_set*>(true_type)) {
-    return container_needs_convert(set_type->get_elem_type());
+    return container_needs_convert(set_type->elem_type().get_type());
   } else if (true_type->is<t_structured>()) {
     return true;
   }
@@ -765,9 +765,9 @@ class py3_mstch_type : public mstch_type {
   // type node doesn't define type:needs_convert
   mstch::node element_needs_convert() {
     if (const t_list* list = type_->try_as<t_list>()) {
-      return type_needs_convert(list->get_elem_type());
+      return type_needs_convert(list->elem_type().get_type());
     } else if (const t_set* set = type_->try_as<t_set>()) {
-      return type_needs_convert(set->get_elem_type());
+      return type_needs_convert(set->elem_type().get_type());
     }
     return false;
   }
@@ -1252,9 +1252,11 @@ std::string py3_mstch_program::visit_type_impl(
   if (flatName.empty()) {
     std::string extra;
     if (const t_list* list = trueType->try_as<t_list>()) {
-      extra = "List__" + visit_type_impl(list->get_elem_type(), fromTypeDef);
+      extra =
+          "List__" + visit_type_impl(list->elem_type().get_type(), fromTypeDef);
     } else if (const t_set* set = trueType->try_as<t_set>()) {
-      extra = "Set__" + visit_type_impl(set->get_elem_type(), fromTypeDef);
+      extra =
+          "Set__" + visit_type_impl(set->elem_type().get_type(), fromTypeDef);
     } else if (const t_map* map = trueType->try_as<t_map>()) {
       extra = "Map__" + visit_type_impl(map->get_key_type(), fromTypeDef) +
           "_" + visit_type_impl(map->get_val_type(), fromTypeDef);

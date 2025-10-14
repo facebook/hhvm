@@ -109,7 +109,7 @@ mstch::node mstch_type::get_enum() {
 mstch::node mstch_type::get_list_type() {
   if (const t_list* list = resolved_type_->try_as<t_list>()) {
     return context_.type_factory->make_mstch_object(
-        list->get_elem_type(), context_, pos_);
+        list->elem_type().get_type(), context_, pos_);
   }
   return mstch::node();
 }
@@ -117,7 +117,7 @@ mstch::node mstch_type::get_list_type() {
 mstch::node mstch_type::get_set_type() {
   if (const t_set* set = resolved_type_->try_as<t_set>()) {
     return context_.type_factory->make_mstch_object(
-        set->get_elem_type(), context_, pos_);
+        set->elem_type().get_type(), context_, pos_);
   }
   return mstch::node();
 }
@@ -177,9 +177,9 @@ mstch::node mstch_const_value::list_elems() {
     const t_type* expected_type = nullptr;
     if (expected_type_) {
       if (const t_list* list = expected_type_->try_as<t_list>()) {
-        expected_type = list->get_elem_type();
+        expected_type = list->elem_type().get_type();
       } else if (const t_set* set = expected_type_->try_as<t_set>()) {
-        expected_type = set->get_elem_type();
+        expected_type = set->elem_type().get_type();
       }
     }
     return make_mstch_consts(

@@ -66,7 +66,7 @@ class mstch_starlark_type : public mstch_type {
       return true;
     }
     if (const t_list* list = type->try_as<t_list>()) {
-      return is_supported_type(list->get_elem_type());
+      return is_supported_type(list->elem_type().get_type());
     }
     if (const t_map* map = type->try_as<t_map>()) {
       return is_supported_type(&map->key_type().deref()) &&

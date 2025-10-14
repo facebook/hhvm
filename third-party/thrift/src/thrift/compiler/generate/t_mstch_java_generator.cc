@@ -1264,15 +1264,15 @@ class mstch_java_const : public mstch_const {
     }
     if (const_->type()->is<t_list>()) {
       t_list* list = (t_list*)const_->type();
-      if (list->get_elem_type()->is<t_enum>()) {
-        return list->get_elem_type()->has_unstructured_annotation(
+      if (list->elem_type().get_type()->is<t_enum>()) {
+        return list->elem_type().get_type()->has_unstructured_annotation(
             "java.swift.skip_enum_name_map");
       }
     }
     if (const_->type()->is<t_set>()) {
       t_set* set = (t_set*)const_->type();
-      if (set->get_elem_type()->is<t_enum>()) {
-        return set->get_elem_type()->has_unstructured_annotation(
+      if (set->elem_type().get_type()->is<t_enum>()) {
+        return set->elem_type().get_type()->has_unstructured_annotation(
             "java.swift.skip_enum_name_map");
       }
     }

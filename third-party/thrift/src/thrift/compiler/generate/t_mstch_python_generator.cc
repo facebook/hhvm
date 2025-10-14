@@ -215,9 +215,9 @@ bool is_invariant_container_type(const t_type* type) {
         is_invariant_adapter(
                find_structured_adapter_annotation(*val_type), val_type);
   } else if (const t_list* list = true_type->try_as<t_list>()) {
-    return is_invariant_container_type(list->get_elem_type());
+    return is_invariant_container_type(list->elem_type().get_type());
   } else if (const t_set* set = true_type->try_as<t_set>()) {
-    return is_invariant_container_type(set->get_elem_type());
+    return is_invariant_container_type(set->elem_type().get_type());
   }
 
   return false;
@@ -531,9 +531,9 @@ class python_mstch_program : public mstch_program {
     // for the reason for this call.
     add_type_namespace(true_type);
     if (const t_list* list = true_type->try_as<t_list>()) {
-      visit_type_with_typedef(list->get_elem_type(), is_typedef);
+      visit_type_with_typedef(list->elem_type().get_type(), is_typedef);
     } else if (const t_set* set = true_type->try_as<t_set>()) {
-      visit_type_with_typedef(set->get_elem_type(), is_typedef);
+      visit_type_with_typedef(set->elem_type().get_type(), is_typedef);
     } else if (const t_map* map = true_type->try_as<t_map>()) {
       visit_type_with_typedef(&map->key_type().deref(), is_typedef);
       visit_type_with_typedef(&map->val_type().deref(), is_typedef);

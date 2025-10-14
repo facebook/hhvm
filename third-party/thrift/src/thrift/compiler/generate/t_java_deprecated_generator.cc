@@ -4054,7 +4054,7 @@ void t_java_deprecated_generator::generate_field_descs(
                 << constant_name((*m_iter)->name())
                 << "_FIELD_DESC = new TField(\"" << (*m_iter)->name() << "\", "
                 << type_to_enum((*m_iter)->get_type()) << ", " << "(short)"
-                << (*m_iter)->get_key();
+                << (*m_iter)->id();
     if (is_field_sensitive(*m_iter)) {
       out << ", new HashMap<String, Object>() {{ put(\"sensitive\", true); }}";
     }
@@ -4070,8 +4070,8 @@ void t_java_deprecated_generator::generate_field_name_constants(
 
   for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
     indent(out) << "public static final int "
-                << upcase_string((*m_iter)->name()) << " = "
-                << (*m_iter)->get_key() << ";" << endl;
+                << upcase_string((*m_iter)->name()) << " = " << (*m_iter)->id()
+                << ";" << endl;
   }
 }
 

@@ -4630,8 +4630,7 @@ void t_hack_generator::generate_php_struct_constructor_field_assignment(
       out << indent() << "$this->" << field_name << " = " << *field_wrapper
           << "::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<" << (nullable ? "?" : "")
           << hack_typehint << ", " << struct_hack_name_with_ns << ">("
-          << (nullable ? null : dval) << ", " << field.get_key()
-          << ", $this);\n";
+          << (nullable ? null : dval) << ", " << field.id() << ", $this);\n";
     } else if (!nullable || skip_custom_default) {
       out << indent() << "$this->" << field_name << " = " << dval << ";\n";
     }
@@ -5581,7 +5580,7 @@ void t_hack_generator::
       }
       out << type_to_typehint(field.get_type()) << ", "
           << struct_hack_name_with_ns << ">(" << source_str << ", "
-          << field.get_key() << ", " << obj_ref << ");\n";
+          << field.id() << ", " << obj_ref << ");\n";
     } else {
       if (uses_thrift_only_methods) {
         out << indent() << obj_ref << "->get_" << name
@@ -6387,7 +6386,7 @@ void t_hack_generator::generate_php_docstring(
     indent(out) << " * \n";
   }
   indent(out) << " * " << "Original thrift field:-\n";
-  indent(out) << " * " << tfield->get_key() << ": "
+  indent(out) << " * " << tfield->id() << ": "
               << tfield->get_type()->get_full_name() << " " << tfield->name()
               << "\n";
   indent(out) << " */\n";

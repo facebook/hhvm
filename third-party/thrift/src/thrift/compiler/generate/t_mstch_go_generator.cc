@@ -371,10 +371,10 @@ class mstch_go_field : public mstch_field {
   }
   mstch::node key_str() {
     // Legacy schemas may have negative tags - replace minus with an underscore.
-    if (field_->get_key() < 0) {
-      return "_" + std::to_string(-field_->get_key());
+    if (field_->id() < 0) {
+      return "_" + std::to_string(-field_->id());
     } else {
-      return std::to_string(field_->get_key());
+      return std::to_string(field_->id());
     }
   }
   mstch::node has_go_tag() {

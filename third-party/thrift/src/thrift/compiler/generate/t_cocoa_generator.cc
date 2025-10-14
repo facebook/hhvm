@@ -1846,7 +1846,7 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
           << fieldName
           << "\""
              " type: "
-          << type_to_enum(param.get_type()) << " fieldID: " << param.get_key()
+          << type_to_enum(param.get_type()) << " fieldID: " << param.id()
           << "];" << std::endl;
 
       generate_serialize_field(out, &param, fieldName);

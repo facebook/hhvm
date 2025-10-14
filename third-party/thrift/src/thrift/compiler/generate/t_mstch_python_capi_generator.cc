@@ -477,7 +477,7 @@ class python_capi_mstch_struct : public mstch_struct {
     std::vector<std::pair<int, int>> index_keys;
     size_t cpp_index = 0;
     for (const auto& f : struct_->fields()) {
-      index_keys.emplace_back(f.get_key(), cpp_index++);
+      index_keys.emplace_back(f.id(), cpp_index++);
     }
     // sort by key to match thrift-python tuple ordering
     std::sort(index_keys.begin(), index_keys.end());

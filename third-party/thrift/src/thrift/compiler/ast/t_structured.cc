@@ -59,7 +59,7 @@ bool t_structured::try_append_field(std::unique_ptr<t_field>& field) {
 void t_structured::append_field(std::unique_ptr<t_field> field) {
   if (!try_append_field(field)) {
     throw std::runtime_error(
-        "Field identifier " + std::to_string(field->get_key()) + " for \"" +
+        "Field identifier " + std::to_string(field->id()) + " for \"" +
         field->name() + "\" has already been used");
   }
 }
@@ -74,9 +74,9 @@ void t_structured::append(std::unique_ptr<t_field> field) {
     return;
   }
 
-  if (field->get_key() != 0) {
+  if (field->id() != 0) {
     throw std::runtime_error(
-        "Field identifier " + std::to_string(field->get_key()) + " for \"" +
+        "Field identifier " + std::to_string(field->id()) + " for \"" +
         field->name() + "\" has already been used");
   }
 

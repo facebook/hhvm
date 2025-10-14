@@ -1058,7 +1058,7 @@ class mstch_java_field : public mstch_field {
         "true" ||
         field_->has_structured_annotation(kJavaRecursiveUri);
   }
-  mstch::node is_negative_id() { return field_->get_key() < 0; }
+  mstch::node is_negative_id() { return field_->id() < 0; }
   std::string default_value_for_field(const t_field* field) {
     if (field_->get_req() == t_field::e_req::optional) {
       return "null";

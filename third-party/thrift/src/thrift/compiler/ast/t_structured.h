@@ -116,7 +116,7 @@ class t_structured : public t_type {
   }
 
   bool validate_field(t_field* field) {
-    return get_field_by_id(field->get_key()) == nullptr;
+    return get_field_by_id(field->id()) == nullptr;
   }
 
  protected:

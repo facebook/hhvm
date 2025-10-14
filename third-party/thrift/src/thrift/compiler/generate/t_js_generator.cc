@@ -648,7 +648,7 @@ void t_js_generator::generate_js_struct_reader(
 
     // Generate deserialization code for known cases
     for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
-      indent(out) << "case " << (*f_iter)->get_key() << ":" << endl;
+      indent(out) << "case " << (*f_iter)->id() << ":" << endl;
       indent(out) << "if (ftype == " << type_to_enum((*f_iter)->get_type())
                   << ") {" << endl;
 
@@ -711,7 +711,7 @@ void t_js_generator::generate_js_struct_writer(
 
     indent(out) << "output.writeFieldBegin(" << "'" << (*f_iter)->name()
                 << "', " << type_to_enum((*f_iter)->get_type()) << ", "
-                << (*f_iter)->get_key() << ");" << endl;
+                << (*f_iter)->id() << ");" << endl;
 
     // Write field contents
     generate_serialize_field(out, *f_iter, "this.");

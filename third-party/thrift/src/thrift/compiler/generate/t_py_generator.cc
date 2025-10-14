@@ -1341,8 +1341,7 @@ void t_py_generator::generate_py_union(
     if (is_hidden(*member)) {
       continue;
     }
-    indent(out) << uppercase(member->name()) << " = " << member->get_key()
-                << endl;
+    indent(out) << uppercase(member->name()) << " = " << member->id() << endl;
   }
   indent(out) << endl;
 
@@ -1357,7 +1356,7 @@ void t_py_generator::generate_py_union(
       continue;
     }
     indent(out) << "def get_" << member->name() << "(self):" << endl;
-    indent(out) << "  assert self.field == " << member->get_key() << endl;
+    indent(out) << "  assert self.field == " << member->id() << endl;
     indent(out) << "  return self.value" << endl << endl;
   }
 
@@ -1367,7 +1366,7 @@ void t_py_generator::generate_py_union(
       continue;
     }
     indent(out) << "def set_" << member->name() << "(self, value):" << endl;
-    indent(out) << "  self.field = " << member->get_key() << endl;
+    indent(out) << "  self.field = " << member->id() << endl;
     indent(out) << "  self.value = value" << endl << endl;
   }
 
@@ -1385,7 +1384,7 @@ void t_py_generator::generate_py_union(
       continue;
     }
     auto key = rename_reserved_keywords(member->name());
-    out << indent() << "  if self.field == " << member->get_key() << ":" << endl
+    out << indent() << "  if self.field == " << member->id() << ":" << endl
         << indent() << "    padding = ' ' * " << key.size() + 1 << endl
         << indent() << "    value = padding.join(value.splitlines(True))"
         << endl
@@ -1425,7 +1424,7 @@ void t_py_generator::generate_py_union(
     }
     auto t = type_to_enum(member->get_type());
     const auto& n = member->name();
-    auto k = member->get_key();
+    auto k = member->id();
     indent(out) << (first ? "" : "el") << "if fid == " << k << ":" << endl;
     indent_up();
     indent(out) << "if ftype == " << t << ":" << endl;
@@ -1465,7 +1464,7 @@ void t_py_generator::generate_py_union(
     }
     auto t = type_to_enum(member->get_type());
     const auto& n = member->name();
-    auto k = member->get_key();
+    auto k = member->id();
 
     indent(out) << (first ? "" : "el") << "if self.field == " << k << ":"
                 << endl;
@@ -1563,13 +1562,13 @@ void t_py_generator::generate_py_thrift_spec(
     if (is_hidden(**m_iter)) {
       continue;
     }
-    indent(out) << "(" << (*m_iter)->get_key() << ", "
+    indent(out) << "(" << (*m_iter)->id() << ", "
                 << type_to_enum((*m_iter)->get_type()) << ", " << "'"
                 << rename_reserved_keywords((*m_iter)->name()) << "'" << ", "
                 << type_to_spec_args((*m_iter)->get_type()) << ", "
                 << render_field_default_value(*m_iter) << ", "
                 << static_cast<int>((*m_iter)->get_req()) << ", )," << " # "
-                << (*m_iter)->get_key() << endl;
+                << (*m_iter)->id() << endl;
   }
 
   indent_down();
@@ -1630,7 +1629,7 @@ void t_py_generator::generate_py_thrift_spec(
                     << " is not None:" << endl;
         indent(out) << "  assert self.field == 0 and self.value is None"
                     << endl;
-        indent(out) << "  self.field = " << member->get_key() << endl;
+        indent(out) << "  self.field = " << member->id() << endl;
         indent(out) << "  self.value = "
                     << rename_reserved_keywords(member->name()) << endl;
       }
@@ -1722,7 +1721,7 @@ void t_py_generator::generate_py_annotations(
     if (field->unstructured_annotations().empty()) {
       continue;
     }
-    indent(out) << field->get_key() << ": {" << endl;
+    indent(out) << field->id() << ": {" << endl;
     generate_py_annotation_dict(out, field->unstructured_annotations());
     indent(out) << "}," << endl;
   }
@@ -2079,7 +2078,7 @@ void t_py_generator::generate_py_struct_reader(
     } else {
       out << indent() << "elif ";
     }
-    out << "fid == " << (*f_iter)->get_key() << ":" << endl;
+    out << "fid == " << (*f_iter)->id() << ":" << endl;
     indent_up();
     indent(out) << "if ftype == " << type_to_enum((*f_iter)->get_type()) << ":"
                 << endl;
@@ -2138,7 +2137,7 @@ void t_py_generator::generate_py_struct_writer(
     indent_up();
     indent(out) << "oprot.writeFieldBegin(" << "'" << (*f_iter)->name() << "', "
                 << type_to_enum((*f_iter)->get_type()) << ", "
-                << (*f_iter)->get_key() << ")" << endl;
+                << (*f_iter)->id() << ")" << endl;
 
     // Write field contents
     generate_serialize_field(out, *f_iter, "self.");
@@ -3945,9 +3944,9 @@ int32_t t_py_generator::get_thrift_spec_key(
   //
   // In this case, to get thrift_spec of corresponding field, we need to add
   // offset to field id: `thrift_spec[id + offset]`
-  const int32_t smallest_id = s->get_sorted_members()[0]->get_key();
+  const int32_t smallest_id = s->get_sorted_members()[0]->id();
   const int32_t offset = -std::min(smallest_id, 0);
-  return f->get_key() + offset;
+  return f->id() + offset;
 }
 
 THRIFT_REGISTER_GENERATOR(

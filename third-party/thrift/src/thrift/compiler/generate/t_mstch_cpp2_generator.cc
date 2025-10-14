@@ -2388,13 +2388,13 @@ class cpp_mstch_field : public mstch_field {
     const cpp2_field_generator_context* field_context =
         cpp_context_->get_field_context(field_);
     assert(field_context && field_context->serialization_prev);
-    return field_context->serialization_prev->get_key();
+    return field_context->serialization_prev->id();
   }
   mstch::node serialization_next_field_key() {
     const cpp2_field_generator_context* field_context =
         cpp_context_->get_field_context(field_);
     assert(field_context && field_context->serialization_next);
-    return field_context->serialization_next->get_key();
+    return field_context->serialization_next->id();
   }
   mstch::node serialization_next_field_type() {
     const cpp2_field_generator_context* field_context =
@@ -2444,7 +2444,7 @@ class cpp_mstch_field : public mstch_field {
   mstch::node visibility() { return is_private() ? "private" : "public"; }
 
   mstch::node metadata_name() {
-    auto key = field_->get_key();
+    auto key = field_->id();
     auto suffix = key >= 0 ? std::to_string(key) : "_" + std::to_string(-key);
     return field_->name() + "_" + suffix;
   }

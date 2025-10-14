@@ -28,7 +28,7 @@ type Identity struct {
 	Data string
 }
 
-// RequestContext is a mirror of C++ apache::thrift::RPCOptions
+// RequestContext is a mirror of C++ apache::thrift::RequestContext
 // Not all options are guaranteed to be implemented by a client
 type RequestContext struct {
 	RequestTimeout time.Duration

@@ -223,8 +223,8 @@ static const struct {
 
   /*** 7. Mutator instructions ***/
 
+  { OpPopG,        {StackTop2,        None,         OutNone          }},
   { OpSetL,        {Stack1|Local,     Stack1|Local, OutSameAsInput1  }},
-  { OpSetG,        {StackTop2,        Stack1,       OutSameAsInput1  }},
   { OpSetS,        {StackTop3,        Stack1,       OutSameAsInput1  }},
   { OpSetOpL,      {Stack1|Local,     Stack1|Local, OutSetOp        }},
   { OpSetOpS,      {StackTop3|DontGuardAny,

@@ -1188,7 +1188,7 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext, func: &Func, hhbc: &Hhbc) ->
         Hhbc::SelfCls(_) => {
             write!(w, "self")?;
         }
-        Hhbc::SetG([target, value], _) => {
+        Hhbc::PopG([target, value], _) => {
             write!(
                 w,
                 "set_global {}, {}",

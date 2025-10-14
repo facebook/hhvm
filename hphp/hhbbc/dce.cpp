@@ -1682,7 +1682,7 @@ void dce(Env& env, const bc::ResolveMethCaller& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ResolveRFunc& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Select& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SetImplicitContextByValue& op) { no_dce(env, op); }
-void dce(Env& env, const bc::SetG& op) { no_dce(env, op); }
+void dce(Env& env, const bc::PopG& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SetOpS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SetRangeM& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SetS& op) { no_dce(env, op); }

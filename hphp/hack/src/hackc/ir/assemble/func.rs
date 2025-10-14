@@ -1444,7 +1444,7 @@ impl FunctionParser<'_> {
             "ret_c_suspended" => I::Terminator(T::RetCSuspended(self.vid(tok)?, loc)),
             "select" => parse_instr!(tok, I::Special(Special::Select(p0, p1)), <p1:parse_u32> "from" <p0:self.vid>),
             "self" => I::Hhbc(H::SelfCls(loc)),
-            "set_global" => I::Hhbc(H::SetG(self.vid2(tok)?, loc)),
+            "set_global" => I::Hhbc(H::PopG(self.vid2(tok)?, loc)),
             "set_implicit_context_by_value" => I::Hhbc(H::SetImplicitContextByValue(self.vid(tok)?, loc)),
             "set_local" => parse_instr!(tok, I::Hhbc(H::SetL(p0, p1, loc)), <p1:self.lid> "," <p0:self.vid>),
             "set_op_local" => parse_instr!(tok, I::Hhbc(H::SetOpL(p0, p1, p2, loc)), <p1:self.lid> <p2:parse_set_op_op> <p0:self.vid>),

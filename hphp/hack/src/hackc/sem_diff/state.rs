@@ -1415,6 +1415,7 @@ fn is_checkpoint_instr(instr: &NodeInstr) -> bool {
             | Opcode::NewVec(..)
             | Opcode::Not
             | Opcode::OODeclExists(..)
+            | Opcode::PopG
             | Opcode::PopU
             | Opcode::PopU2
             | Opcode::Pow
@@ -1441,7 +1442,6 @@ fn is_checkpoint_instr(instr: &NodeInstr) -> bool {
             | Opcode::RetM(..)
             | Opcode::SSwitch { .. }
             | Opcode::Select
-            | Opcode::SetG
             | Opcode::SetImplicitContextByValue
             | Opcode::SetM(..)
             | Opcode::SetOpL(..)
@@ -1590,6 +1590,7 @@ fn clean_opcode(opcode: &Opcode) -> Opcode {
         | Opcode::NullUninit
         | Opcode::ParentCls
         | Opcode::PopC
+        | Opcode::PopG
         | Opcode::PopU
         | Opcode::PopU2
         | Opcode::Pow
@@ -1604,7 +1605,6 @@ fn clean_opcode(opcode: &Opcode) -> Opcode {
         | Opcode::Same
         | Opcode::Select
         | Opcode::SelfCls
-        | Opcode::SetG
         | Opcode::SetImplicitContextByValue
         | Opcode::Shl
         | Opcode::Shr

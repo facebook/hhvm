@@ -346,7 +346,7 @@ where
             | Opcode::Same
             | Opcode::Select
             | Opcode::SelfCls
-            | Opcode::SetG
+            | Opcode::PopG
             | Opcode::SetImplicitContextByValue
             | Opcode::SetL(..)
             | Opcode::SetM(..)

@@ -2860,8 +2860,7 @@ fn emit_special_function<'a, 'd>(
                 emit_expr(e, env, error::expect_normal_paramkind(gkey)?)?,
                 emit_expr(e, env, error::expect_normal_paramkind(gvalue)?)?,
                 emit_pos(pos),
-                instr::set_g(),
-                instr::pop_c(),
+                instr::pop_g(),
                 instr::null(),
             ]))),
             _ => Err(Error::fatal_runtime(

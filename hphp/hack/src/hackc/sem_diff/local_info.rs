@@ -196,6 +196,7 @@ impl LocalInfo {
             | Opcode::OODeclExists(..)
             | Opcode::ParentCls
             | Opcode::PopC
+            | Opcode::PopG
             | Opcode::PopU
             | Opcode::PopU2
             | Opcode::Pow
@@ -223,7 +224,6 @@ impl LocalInfo {
             | Opcode::Same
             | Opcode::Select
             | Opcode::SelfCls
-            | Opcode::SetG
             | Opcode::SetImplicitContextByValue
             | Opcode::SetM(..)
             | Opcode::SetOpM(..)

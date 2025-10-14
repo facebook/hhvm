@@ -420,6 +420,7 @@ fn is_cow_instr(instr: &NodeInstr) -> bool {
             | Opcode::NewStructDict(..)
             | Opcode::NewVec(..)
             | Opcode::OODeclExists(..)
+            | Opcode::PopG
             | Opcode::QueryM(..)
             | Opcode::RaiseClassStringConversionNotice
             | Opcode::RecordReifiedGeneric
@@ -437,7 +438,6 @@ fn is_cow_instr(instr: &NodeInstr) -> bool {
             | Opcode::ResolveRClsMethodS(..)
             | Opcode::ResolveRFunc(..)
             | Opcode::SelfCls
-            | Opcode::SetG
             | Opcode::SetImplicitContextByValue
             | Opcode::SetM(..)
             | Opcode::SetOpL(..)

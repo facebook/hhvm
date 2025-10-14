@@ -527,6 +527,7 @@ pub enum Hhbc {
     #[has_locals(none)]
     OODeclExists([ValueId; 2], OODeclExistsOp, LocId),
     ParentCls(LocId),
+    PopG([ValueId; 2], LocId),
     Pow([ValueId; 2], LocId),
     Print(ValueId, LocId),
     RaiseClassStringConversionNotice(LocId),
@@ -546,7 +547,6 @@ pub enum Hhbc {
     ResolveRFunc(ValueId, FunctionName, LocId),
     ResolveMethCaller(FunctionName, LocId),
     SelfCls(LocId),
-    SetG([ValueId; 2], LocId),
     SetImplicitContextByValue(ValueId, LocId),
     SetL(ValueId, LocalId, LocId),
     SetOpL(ValueId, LocalId, SetOpOp, LocId),

@@ -3292,15 +3292,15 @@ OPTBLD_INLINE void iopSetL(tv_lval to) {
   tvSet(*fr, to);
 }
 
-OPTBLD_INLINE void iopSetG() {
+OPTBLD_INLINE void iopPopG() {
   StringData* name;
   TypedValue* fr = vmStack().topC();
   TypedValue* tv2 = vmStack().indTV(1);
   auto const to = lookupd_gbl(vmfp(), name, tv2);
   SCOPE_EXIT { decRefStr(name); };
   assertx(to);
-  tvSet(*fr, to);
-  memcpy((void*)tv2, (void*)fr, sizeof(TypedValue));
+  tvMove(*fr, to);
+  vmStack().discard();
   vmStack().discard();
 }
 

@@ -571,7 +571,7 @@ impl<'b> InstrEmitter<'b> {
             }
             Hhbc::ResolveRFunc(_, func, _) => Opcode::ResolveRFunc(func),
             Hhbc::SelfCls(_) => Opcode::SelfCls,
-            Hhbc::SetG(_, _) => Opcode::SetG,
+            Hhbc::PopG(_, _) => Opcode::PopG,
             Hhbc::SetImplicitContextByValue(..) => Opcode::SetImplicitContextByValue,
             Hhbc::SetL(_, lid, _) => {
                 let local = self.lookup_local(lid);

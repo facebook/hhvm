@@ -1054,7 +1054,7 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         Opcode::Same => simple!(Hhbc::CmpOp, CmpOp::Same),
         Opcode::Select => todo!(),
         Opcode::SelfCls => simple!(Hhbc::SelfCls),
-        Opcode::SetG => simple!(Hhbc::SetG),
+        Opcode::PopG => simple!(Hhbc::PopG),
         Opcode::SetL => simple!(Hhbc::SetL),
         Opcode::SetImplicitContextByValue => simple!(Hhbc::SetImplicitContextByValue),
         Opcode::SetOpL => simple!(Hhbc::SetOpL),

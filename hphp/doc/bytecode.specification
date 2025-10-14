@@ -1461,17 +1461,16 @@ IsTypeL  <local variable id> <op>     []  ->  [C:Bool]
 7. Mutator instructions
 -----------------------
 
+PopG    [C C]  ->  []
+
+  Set global. This instruction marks the global variable named (string)$2 as
+  defined, assigns the value $1 to the global variable.
+
 SetL <local variable id>    [C]  ->  [C]
 
   Set local. This instruction marks the local variable given by %1 as defined,
   stores the value $1 into the local variable, and then pushes $1 onto the
   stack.
-
-SetG    [C C]  ->  [C]
-
-  Set global. This instruction marks the global variable named (string)$2 as
-  defined, assigns the value $1 to the global variable, and then pushes $1 onto
-  the stack.
 
 SetS <readonly op>   [C C:Class C]  ->  [C]
 

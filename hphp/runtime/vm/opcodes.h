@@ -146,7 +146,7 @@ namespace HPHP {
   O(AssertRATL,      TWO(ILA,RATA),    NOV,             NOV,        NF) \
   O(AssertRATStk,    TWO(IVA,RATA),    NOV,             NOV,        NF) \
   O(SetL,            ONE(LA),          ONE(CV),         ONE(CV),    NF) \
-  O(SetG,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
+  O(PopG,            NA,               TWO(CV,CV),      NOV,        NF) \
   O(SetS,            ONE(OA(ReadonlyOp)),                               \
                                        THREE(CV,CV,CV), ONE(CV),    NF) \
   O(SetOpL,          TWO(LA,                                            \

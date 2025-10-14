@@ -33,9 +33,9 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-void bindMem(IRGS& env, SSATmp* ptr, SSATmp* src, Type prevTy) {
+void bindMem(IRGS& env, SSATmp* ptr, SSATmp* src, Type prevTy, bool copySrc = true) {
   auto const prevValue = gen(env, LdMem, prevTy, ptr);
-  pushIncRef(env, src);
+  if (copySrc) pushIncRef(env, src);
   gen(env, StMem, ptr, src);
   decRef(env, prevValue);
 }
@@ -448,9 +448,9 @@ void emitCGetG(IRGS& env) {
   push(env, ret);
 }
 
-void emitSetG(IRGS& env) {
+void emitPopG(IRGS& env) {
   auto const name = topC(env, BCSPRelOffset{1});
-  if (!name->isA(TStr)) PUNT(SetG-NameNotStr);
+  if (!name->isA(TStr)) PUNT(PopG-NameNotStr);
   auto const value = topC(env, BCSPRelOffset{0}, DataTypeGeneric);
 
   auto const ptr = profiledGlobalAccess(
@@ -464,7 +464,7 @@ void emitSetG(IRGS& env) {
 
   discard(env);
   destroyName(env, name);
-  bindMem(env, ptr, value, TCell);
+  bindMem(env, ptr, value, TCell, false);
 }
 
 void emitIssetG(IRGS& env) {

@@ -3383,10 +3383,9 @@ void in(ISS& env, const bc::SetL& op) {
   }
 }
 
-void in(ISS& env, const bc::SetG&) {
-  auto t1 = popC(env);
+void in(ISS& env, const bc::PopG&) {
   popC(env);
-  push(env, std::move(t1));
+  popC(env);
 }
 
 void in(ISS& env, const bc::SetS& op) {

@@ -32,6 +32,7 @@
 #include <thrift/lib/cpp2/server/ThriftServerInternals.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/FrameType.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
+#include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnectionFactory.h>
 #include <thrift/lib/cpp2/transport/rocket/server/ThriftRocketServerHandler.h>
 
 THRIFT_FLAG_DEFINE_bool(rocket_set_idle_connection_timeout, true);
@@ -153,7 +154,7 @@ void RocketRoutingHandler::handleConnection(
 
   auto* const server = worker->getServer();
 
-  rocket::RocketServerConnection::Config cfg;
+  rocket::IRocketServerConnection::Config cfg;
   cfg.socketWriteTimeout = server->getSocketWriteTimeout();
   cfg.streamStarvationTimeout = server->getStreamExpireTime();
   cfg.writeBatchingInterval = server->getWriteBatchingInterval();
@@ -169,7 +170,7 @@ void RocketRoutingHandler::handleConnection(
   const std::string& securotyProtocol = sock->getSecurityProtocol();
 
   auto* const sockPtr = sock.get();
-  auto* const connection = new rocket::RocketServerConnection(
+  auto connection = rocket::RocketServerConnectionFactory::create(
       std::move(sock),
       std::make_unique<rocket::ThriftRocketServerHandler>(
           worker,
@@ -181,9 +182,10 @@ void RocketRoutingHandler::handleConnection(
       worker->getEgressMemoryTracker(),
       streamMetricCallback_,
       cfg);
-  onConnection(*connection);
+  auto* const connectionPtr = connection.release();
+  onConnection(*connectionPtr);
   connectionManager->addConnection(
-      connection,
+      connectionPtr,
       THRIFT_FLAG(rocket_set_idle_connection_timeout),
       /* connectionAgeTimeout */ true);
 

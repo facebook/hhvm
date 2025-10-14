@@ -97,6 +97,7 @@ class IRocketServerConnection : public ManagedConnectionIf,
     double egressBufferBackpressureRecoveryFactor{0.0};
     const folly::SocketOptionMap* socketOptions{nullptr};
     std::shared_ptr<rocket::ParserAllocatorType> parserAllocator{nullptr};
+    std::string parserStrategy;
   };
 
   IRocketServerConnection()

@@ -80,4 +80,15 @@ func TestGetRequestHeadersFromContext(t *testing.T) {
 		headersFromContext := GetRequestHeadersFromContext(ctxWithHeaders)
 		require.Equal(t, headers, headersFromContext)
 	})
+	t.Run("ensure map copy", func(t *testing.T) {
+		// Ensure that the user can't modify the map returned from the context
+		originalHeaders := map[string]string{"foo": "bar"}
+		ctxWithHeaders := WithRequestHeaders(context.TODO(), originalHeaders)
+		// Get headers map and modify it
+		headersFromContext1 := GetRequestHeadersFromContext(ctxWithHeaders)
+		headersFromContext1["foo"] = "123"
+		headersFromContext1["bar"] = "123"
+		headersFromContext2 := GetRequestHeadersFromContext(ctxWithHeaders)
+		require.Equal(t, originalHeaders, headersFromContext2)
+	})
 }

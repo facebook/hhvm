@@ -59,9 +59,11 @@ func GetRequestHeadersFromContext(ctx context.Context) map[string]string {
 	if ctx == nil {
 		return nil
 	}
-	requestHeaders := ctx.Value(requestHeadersKey)
-	if requestHeaders == nil {
+	existingHeaders := ctx.Value(requestHeadersKey)
+	if existingHeaders == nil {
 		return nil
 	}
-	return requestHeaders.(map[string]string)
+	result := make(map[string]string)
+	maps.Copy(result, existingHeaders.(map[string]string))
+	return result
 }

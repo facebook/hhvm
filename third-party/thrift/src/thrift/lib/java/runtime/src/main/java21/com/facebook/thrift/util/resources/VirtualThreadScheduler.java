@@ -62,7 +62,7 @@ import reactor.core.scheduler.Schedulers;
  * <p>The VirtualThreadScheduler can be configured with the following flags:
  *
  * <pre>
- *     (boolean) -Dthrift.virtual-thread-scheduler
+ *     (string) -Dthrift.off-loop-scheduler(=virtual-thread)
  *     (boolean)-Dthrift.virtual-thread-limit-concurrency
  *     (int) -Dthrift.virtual-thread-max-concurrency
  * </pre>
@@ -121,7 +121,7 @@ public final class VirtualThreadScheduler implements ThriftScheduler {
     ThreadFactory threadFactory =
         Thread.ofVirtual()
             .inheritInheritableThreadLocals(true)
-            .name("thrift-virtual-scheduler", 0)
+            .name("thrift-virtual-scheduler-", 0)
             .uncaughtExceptionHandler(
                 (t, e) -> LOGGER.error("Uncaught exception on thread {}", t.getName(), e))
             .factory();

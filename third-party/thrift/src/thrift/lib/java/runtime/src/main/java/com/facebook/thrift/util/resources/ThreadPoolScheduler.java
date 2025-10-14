@@ -55,6 +55,7 @@ final class ThreadPoolScheduler extends AtomicBoolean implements ThriftScheduler
   private final Scheduler scheduler;
 
   public ThreadPoolScheduler(
+      String type,
       int minNumThreads,
       int maxNumThreads,
       int maxPendingTasks,
@@ -69,7 +70,7 @@ final class ThreadPoolScheduler extends AtomicBoolean implements ThriftScheduler
 
     ThreadPoolSchedulerThreadFactory threadFactory =
         new ThreadPoolSchedulerThreadFactory(
-            "thrift-offloop",
+            String.format("thrift-%s-offloop", type),
             executionTime,
             perThreadExecutionTimes,
             (t, e) -> LOGGER.error("uncaught exception on thread {}", t.getName(), e));
@@ -86,7 +87,11 @@ final class ThreadPoolScheduler extends AtomicBoolean implements ThriftScheduler
     this.worker = new ThreadPoolSchedulerWorker();
     this.scheduler =
         Schedulers.newBoundedElastic(
-            Integer.MAX_VALUE, Integer.MAX_VALUE, "thrift-offloop-scheduler", 60, true);
+            Integer.MAX_VALUE,
+            Integer.MAX_VALUE,
+            String.format("thrift-%s-offloop-scheduler", type),
+            60,
+            true);
 
     scheduler.schedulePeriodically(this::captureThreadPoolExecutorMetrics, 1, 1, TimeUnit.SECONDS);
   }

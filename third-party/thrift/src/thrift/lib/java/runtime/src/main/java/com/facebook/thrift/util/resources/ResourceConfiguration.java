@@ -21,21 +21,42 @@ import reactor.util.concurrent.Queues;
 final class ResourceConfiguration {
   private ResourceConfiguration() {}
 
-  static final boolean enableForkJoinPool =
-      System.getProperty("thrift.separate-forkjoin-scheduler", "false").equalsIgnoreCase("true");
+  /**
+   * System property to control the type of off loop scheduler used to execute thrift requests.
+   *
+   * <ol>
+   *   <li>thread-pool (default)
+   *   <li>fork-join-pool
+   *   <li>virtual-thread
+   * </ol>
+   *
+   * <p>Thread pool scheduler, backed by ThreadPoolExecutor, has the lowest scalability of all
+   * options but is the default for legacy compatibly reasons. Enqueued work is serviced by a single
+   * LinkedBlockingQueue for tasks which increase contention across threads.
+   *
+   * <p>Fork Join Pool Scheduler, backed by a fork join pool has increased scalability due to work
+   * stealing algorithm where each thread has its own queue but can steal from other queues when its
+   * own is empty. This reduces contention across threads.
+   *
+   * <p>Virtual Thread Scheduler, backed by a Virtual Thread Per Task Executor is available on Java
+   * 19+. This can increase scalability over the fork join pool and thread pool executor by allowing
+   * progress even when blocking (network/io) or locking. Virtual threads are psychically backed by
+   * a system-wide fork join pool, but are able to unmount when blocking/locking allowing other work
+   * to be done.
+   */
+  static final String thriftOffLoopScheduler =
+      System.getProperty("thrift.off-loop-scheduler", "thread-pool").toLowerCase();
 
-  static final boolean enableVirtualThreadScheduler =
-      System.getProperty("thrift.virtual-thread-scheduler", "false").equalsIgnoreCase("true");
-
+  /**
+   * When true enables us to limit the concurrency of the Virtual Thread Scheduler. By default,
+   * virtual threads are run on a system-wide fork join pool that has `n` platform threads, one for
+   * each CPU core. To avoid having to tune the JVM's system-wide fork join pool we'll employ a
+   * semaphore for all work submitted to the thrift scheduler. This is a lightweight way of limiting
+   * how much work can be done concurrently.
+   */
   static final boolean limitVirtualThreadConcurrency =
       System.getProperty("thrift.virtual-thread-limit-concurrency", "false")
           .equalsIgnoreCase("true");
-
-  static final int virtualThreadMaxConcurrency =
-      Math.max(
-          1,
-          Integer.getInteger(
-              "thrift.virtual-thread-max-concurrency", Runtime.getRuntime().availableProcessors()));
 
   static final boolean enableOperatorFusion =
       System.getProperty("thrift.operator-fusion", "true").equalsIgnoreCase("true");
@@ -58,24 +79,55 @@ final class ResourceConfiguration {
           Integer.getInteger(
               "thrift.eventloop-threads.count", Runtime.getRuntime().availableProcessors()));
 
-  static final int numThreadsForOffLoop =
+  /**
+   * Target concurrency level for the off loop scheduler, will cap the number of threads used by
+   * either the thread pool or fork join pool, can be used to limit concurrency of the virtual
+   * thread scheduler if used with -Dthrift.virtual-thread-limit-concurrency=true
+   */
+  static final int targetConcurrency =
       Math.max(
           numThreadsForEventLoop,
+          /* Legacy defaults for cutover purposes
+           * TODO: @Jbahr to remove after all configs after cutover
+           * Checks are done in following order
+           * -> thrift.scheduler-concurrency.count
+           *   -> thrift.executor-threads.count (legacy thread pool)
+           *     -> thrift.forkjoin-threads.count (legacy FJP)
+           *       -> (default) Runtime.getRuntime().availableProcessors() * 4
+           */
           Integer.getInteger(
-              "thrift.executor-threads.count", Runtime.getRuntime().availableProcessors() * 4));
+              "thrift.scheduler-concurrency.count",
+              Integer.getInteger(
+                  "thrift.executor-threads.count",
+                  Integer.getInteger(
+                      "thrift.forkjoin-threads.count",
+                      Runtime.getRuntime().availableProcessors() * 4))));
 
-  static final int forkJoinPoolThreads =
+  /**
+   * Target concurrency level for the client off loop scheduler, will cap the number of threads used
+   * by either the thread pool or fork join pool
+   *
+   * <p>Note: Virtual threads will only use one scheduler and not intended ot be used with client
+   * scheduler, thus we don't check for limitVirtualThreadConcurrency
+   */
+  static final int targetClientConcurrency =
       Math.max(
           numThreadsForEventLoop,
+          /* Legacy defaults for cutover purposes
+           * TODO: @Jbahr to remove after all configs after cutover
+           * Checks are done in following order
+           * -> thrift.client-scheduler-concurrency.count
+           *   -> thrift.executor-threads.count (legacy thread pool)
+           *     -> thrift.forkjoin-client-threads.count (legacy FJP)
+           *       -> (default) Runtime.getRuntime().availableProcessors() * 4
+           */
           Integer.getInteger(
-              "thrift.forkjoin-threads.count", Runtime.getRuntime().availableProcessors() * 4));
-
-  static final int forkJoinPoolClientThreads =
-      Math.max(
-          numThreadsForEventLoop,
-          Integer.getInteger(
-              "thrift.forkjoin-client-threads.count",
-              Runtime.getRuntime().availableProcessors() * 4));
+              "thrift.client-scheduler-concurrency.count",
+              Integer.getInteger(
+                  "thrift.executor-threads.count",
+                  Integer.getInteger(
+                      "thrift.forkjoin-client-threads.count",
+                      Runtime.getRuntime().availableProcessors() * 4))));
 
   static final boolean capForkJoinThreads =
       System.getProperty("thrift.enforce-forkjoin-parallelism-limit", "true")

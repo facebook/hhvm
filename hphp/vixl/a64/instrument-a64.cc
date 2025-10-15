@@ -207,7 +207,7 @@ void Instrument::HandleInstrumentationEvent(unsigned event) {
 
 
 void Instrument::DumpEventMarker(unsigned marker) {
-  // Dumpan event marker to the output stream as a specially formatted comment
+  // Dump an event marker to the output stream as a specially formatted comment
   // line.
   static Counter* counter = GetCounter("Instruction");
 

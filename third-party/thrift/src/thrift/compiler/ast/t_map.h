@@ -45,12 +45,6 @@ class t_map final : public t_container {
  private:
   t_type_ref key_type_;
   t_type_ref val_type_;
-
-  // TODO(T227540797): Delete everything below here. It is only provided for
-  // backwards compatibility.
- public:
-  const t_type* get_key_type() const { return key_type().get_type(); }
-  const t_type* get_val_type() const { return val_type().get_type(); }
 };
 
 } // namespace apache::thrift::compiler

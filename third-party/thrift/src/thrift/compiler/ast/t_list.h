@@ -40,11 +40,6 @@ class t_list final : public t_container {
 
  private:
   t_type_ref elem_type_;
-
-  // TODO(T227540797): Delete everything below here. It is only provided for
-  // backwards compatibility.
- public:
-  const t_type* get_elem_type() const { return elem_type().get_type(); }
 };
 
 } // namespace apache::thrift::compiler

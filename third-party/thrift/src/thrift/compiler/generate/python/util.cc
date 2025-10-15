@@ -62,12 +62,10 @@ static void get_needed_includes_by_patch_impl(
     return;
   }
   if (const t_list* asList = type.try_as<t_list>()) {
-    get_needed_includes_by_patch_impl(
-        root, *asList->get_elem_type(), seen, result);
+    get_needed_includes_by_patch_impl(root, *asList->elem_type(), seen, result);
   }
   if (const t_set* asSet = type.try_as<t_set>()) {
-    get_needed_includes_by_patch_impl(
-        root, *asSet->get_elem_type(), seen, result);
+    get_needed_includes_by_patch_impl(root, *asSet->elem_type(), seen, result);
   }
   if (const t_map* asMap = type.try_as<t_map>()) {
     get_needed_includes_by_patch_impl(

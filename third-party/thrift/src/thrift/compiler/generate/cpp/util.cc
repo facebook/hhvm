@@ -402,11 +402,11 @@ std::string get_gen_type_class(t_type const& type) {
   } else if (ttype.is_binary()) {
     return tc + "binary";
   } else if (const t_list* list = ttype.try_as<t_list>()) {
-    auto& elem = *list->get_elem_type();
+    auto& elem = *list->elem_type();
     auto elem_tc = get_gen_type_class(elem);
     return tc + "list<" + elem_tc + ">";
   } else if (const t_set* set = ttype.try_as<t_set>()) {
-    auto& elem = *set->get_elem_type();
+    auto& elem = *set->elem_type();
     auto elem_tc = get_gen_type_class(elem);
     return tc + "set<" + elem_tc + ">";
   } else if (const t_map* map = ttype.try_as<t_map>()) {

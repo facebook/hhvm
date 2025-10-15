@@ -2495,9 +2495,9 @@ class cpp_mstch_field : public mstch_field {
     if (true_type.is_binary() || true_type.is<t_structured>()) {
       return true;
     } else if (const t_list* list = true_type.try_as<t_list>()) {
-      return zero_copy_arg_impl(*list->get_elem_type());
+      return zero_copy_arg_impl(*list->elem_type());
     } else if (const t_set* set = true_type.try_as<t_set>()) {
-      return zero_copy_arg_impl(*set->get_elem_type());
+      return zero_copy_arg_impl(*set->elem_type());
     } else if (const t_map* map = true_type.try_as<t_map>()) {
       return zero_copy_arg_impl(map->key_type().deref()) ||
           zero_copy_arg_impl(map->val_type().deref());

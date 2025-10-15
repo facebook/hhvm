@@ -2639,7 +2639,7 @@ void t_cocoa_generator::generate_serialize_map_element(
  */
 void t_cocoa_generator::generate_serialize_set_element(
     std::ofstream& out, const t_set* tset, const std::string& elementName) {
-  t_field efield(*tset->get_elem_type(), elementName);
+  t_field efield(*tset->elem_type(), elementName);
   generate_serialize_field(out, &efield, decontainerize(&efield, elementName));
 }
 
@@ -2652,8 +2652,7 @@ void t_cocoa_generator::generate_serialize_list_element(
     const std::string& index,
     const std::string& listName) {
   t_field efield(
-      *tlist->get_elem_type(),
-      "[" + listName + " objectAtIndex: " + index + "]");
+      *tlist->elem_type(), "[" + listName + " objectAtIndex: " + index + "]");
   generate_serialize_field(
       out, &efield, decontainerize(&efield, efield.name()));
 }

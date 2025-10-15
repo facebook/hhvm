@@ -127,7 +127,7 @@ bool type_is_orderable_walk(
   } else if (const t_list* asList = type.try_as<t_list>()) {
     return result = type_is_orderable_walk(
                memo,
-               *asList->get_elem_type(),
+               *asList->elem_type(),
                &type,
                context,
                forceCustomTypeOrderable);
@@ -161,7 +161,7 @@ bool type_is_orderable_walk(
     return result = !has_disqualifying_annotation &&
         type_is_orderable_walk(
                memo,
-               *asSet->get_elem_type(),
+               *asSet->elem_type(),
                &type,
                context,
                forceCustomTypeOrderable);
@@ -272,12 +272,12 @@ bool has_custom_set_or_map(
     // Examples:
     // 1: list<CustomSet1> foo;
     // In this case the structure is still not orderable.
-    return has_custom_set_or_map(*asList->get_elem_type(), seen);
+    return has_custom_set_or_map(*asList->elem_type(), seen);
   }
   if (const t_set* asSet = type.try_as<t_set>()) {
     // Examples:
     // 1: set<CustomSet1> foo;
-    return has_custom_set_or_map(*asSet->get_elem_type(), seen);
+    return has_custom_set_or_map(*asSet->elem_type(), seen);
   }
   if (const t_map* asMap = type.try_as<t_map>()) {
     // Examples:

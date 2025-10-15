@@ -1426,7 +1426,7 @@ void t_hack_generator::generate_json_list_element(
     const std::string& value,
     const std::string& prefix_thrift) {
   std::string elem = namer("$_elem");
-  t_field felem(*tlist->get_elem_type(), elem);
+  t_field felem(*tlist->elem_type(), elem);
   indent(out) << declare_field(&felem, true, true, true).substr(1) << "\n";
   generate_json_field(out, namer, &felem, "", "", value);
   indent(out) << prefix_thrift << " []= " << elem << ";\n";
@@ -1439,7 +1439,7 @@ void t_hack_generator::generate_json_set_element(
     const std::string& value,
     const std::string& prefix_thrift) {
   std::string elem = namer("$_elem");
-  t_field felem(*tset->get_elem_type(), elem);
+  t_field felem(*tset->elem_type(), elem);
   indent(out) << declare_field(&felem, true, true, true).substr(1) << "\n";
   generate_json_field(out, namer, &felem, "", "", value);
   if (arraysets_) {

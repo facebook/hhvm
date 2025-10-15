@@ -520,10 +520,10 @@ std::string cpp_name_resolver::gen_container_type(
 
   if (const t_list* list = node.try_as<t_list>()) {
     return detail::gen_template_type(
-        template_name, {resolve(resolve_fn, *list->get_elem_type())});
+        template_name, {resolve(resolve_fn, *list->elem_type())});
   } else if (const t_set* set = node.try_as<t_set>()) {
     return detail::gen_template_type(
-        template_name, {resolve(resolve_fn, *set->get_elem_type())});
+        template_name, {resolve(resolve_fn, *set->elem_type())});
   } else if (const t_map* tmap = node.try_as<t_map>()) {
     return detail::gen_template_type(
         template_name,
@@ -633,11 +633,11 @@ std::string cpp_name_resolver::gen_thrift_type_tag(
   } else if (type.is_binary()) {
     return ns + "binary_t";
   } else if (const t_list* list = type.try_as<t_list>()) {
-    auto& elem = *list->get_elem_type();
+    auto& elem = *list->elem_type();
     auto elem_tag = gen_type_tag(elem);
     return ns + "list<" + elem_tag + ">";
   } else if (const t_set* set = type.try_as<t_set>()) {
-    auto& elem = *set->get_elem_type();
+    auto& elem = *set->elem_type();
     auto elem_tag = gen_type_tag(elem);
     return ns + "set<" + elem_tag + ">";
   } else if (const t_map* map = type.try_as<t_map>()) {

@@ -3428,7 +3428,7 @@ void t_py_generator::generate_deserialize_map_element(
 void t_py_generator::generate_deserialize_set_element(
     ofstream& out, const t_set* tset, const string& prefix) {
   string elem = tmp("_elem");
-  t_field felem(*tset->get_elem_type(), elem);
+  t_field felem(*tset->elem_type(), elem);
 
   generate_deserialize_field(out, &felem);
 
@@ -3441,7 +3441,7 @@ void t_py_generator::generate_deserialize_set_element(
 void t_py_generator::generate_deserialize_list_element(
     ofstream& out, const t_list* tlist, const string& prefix) {
   string elem = tmp("_elem");
-  t_field felem(*tlist->get_elem_type(), elem);
+  t_field felem(*tlist->elem_type(), elem);
 
   generate_deserialize_field(out, &felem);
 
@@ -3623,7 +3623,7 @@ void t_py_generator::generate_serialize_map_element(
  */
 void t_py_generator::generate_serialize_set_element(
     ofstream& out, const t_set* tset, string iter) {
-  t_field efield(*tset->get_elem_type(), std::move(iter));
+  t_field efield(*tset->elem_type(), std::move(iter));
   generate_serialize_field(out, &efield, "");
 }
 
@@ -3632,7 +3632,7 @@ void t_py_generator::generate_serialize_set_element(
  */
 void t_py_generator::generate_serialize_list_element(
     ofstream& out, const t_list* tlist, string iter) {
-  t_field efield(*tlist->get_elem_type(), std::move(iter));
+  t_field efield(*tlist->elem_type(), std::move(iter));
   generate_serialize_field(out, &efield, "");
 }
 

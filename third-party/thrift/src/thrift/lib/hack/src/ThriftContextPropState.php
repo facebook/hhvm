@@ -260,12 +260,23 @@ final class ThriftContextPropState {
       $user_id = $vc->getAccountID();
     }
 
-    if ($user_id !== ZERO_FBID && self::updateFBUserId($user_id, $src)) {
+    if (self::updateFBUserId($user_id, $src)) {
       return true;
     }
 
     $user_id = LoginState::getInstance()->getLoggedInAccount();
-    return self::updateFBUserId($user_id, $src);
+    if (self::updateFBUserId($user_id, $src)) {
+      return true;
+    }
+
+    $user_ids = PerfExperiments::getUserIDsForLogging();
+    if (!C\is_empty($user_ids)) {
+      $user_id = C\first($user_ids);
+      if (self::updateFBUserId($user_id, $src)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private static function updateIGUserIdFromVC(

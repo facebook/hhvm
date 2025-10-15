@@ -29,5 +29,9 @@ type E2EHandler struct{}
 var _ service.E2E = (*E2EHandler)(nil)
 
 func (h *E2EHandler) EchoHeaders(ctx context.Context) (map[string]string, error) {
-	return thrift.GetRequestHeadersFromContext(ctx), nil
+	reqCtx := thrift.GetRequestContext(ctx)
+	if reqCtx == nil {
+		return make(map[string]string), nil
+	}
+	return reqCtx.GetReadHeaders(), nil
 }

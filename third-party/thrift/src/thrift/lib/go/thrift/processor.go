@@ -142,7 +142,12 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 	}
 
 	// Step 1c: Use Protocol interface to retrieve headers.
-	ctx = WithRequestHeaders(ctx, prot.getResponseHeaders())
+	requestHeaders := prot.getResponseHeaders()
+	ctx = WithRequestHeaders(ctx, requestHeaders)
+
+	reqCtx := RequestContext{}
+	reqCtx.SetReadHeaders(requestHeaders)
+	ctx = WithRequestContext(ctx, &reqCtx)
 
 	// Step 2: Processing the message without using the Protocol.
 	var result types.WritableStruct

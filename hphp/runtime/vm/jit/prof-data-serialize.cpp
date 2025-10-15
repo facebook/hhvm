@@ -2535,7 +2535,8 @@ std::string deserializeSBProfData(const std::string& root,
 
       // read extra data offset. See above comment in serializeSBProfData, but for
       // SB profiles, we can ignore this value for now.
-      auto const _ = read_raw<off_t>(des);
+      auto const extraDataOffset = read_raw<off_t>(des);
+      des.setExtraDataOffset(extraDataOffset);
 
       // TODO: repo-schema
       read_units_preload(des, root);

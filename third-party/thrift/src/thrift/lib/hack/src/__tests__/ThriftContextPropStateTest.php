@@ -19,6 +19,35 @@
 <<Oncalls('thrift')>>
 final class ThriftContextPropStateTest extends WWWTest {
   use ClassLevelTest;
+  public function testClearDoesNotClearSerializedCache___DPRS_ACH_TEST(): void {
+    $tcps = ThriftContextPropState::get();
+    $tcps->clear();
+
+    // Set some state and serialize it to populate the cache
+    $tcps->setRequestId('test_request_id');
+    $serialized_before_clear = $tcps->getSerialized();
+
+    // Clear the state
+    $tcps->clear();
+
+    // Get the serialized state again
+    $serialized_after_clear = $tcps->getSerialized();
+
+    // In the correct implementation, clear() also clears the serialized cache,
+    // so the new serialized string would represent an empty state and be
+    // different from the one before clearing.
+    // In the mutated version, the cache is not cleared, so getSerialized()
+    // returns the stale data from before the clear() call. This assertion
+    // will fail for the mutant.
+    expect($serialized_before_clear)->toNotEqual($serialized_after_clear);
+
+    // Additionally, the serialized state after clearing should be equal to
+    // the serialized state of a newly cleared instance.
+    $fresh_tcps = ThriftContextPropState::get();
+    $fresh_tcps->clear();
+    $serialized_empty = $fresh_tcps->getSerialized();
+    expect($serialized_after_clear)->toEqual($serialized_empty);
+  }
   public function testGetOriginIdResolver___DPRS_ACH_TEST(): void {
     // Ensure a clean state
     ThriftContextPropState::get()->clear();

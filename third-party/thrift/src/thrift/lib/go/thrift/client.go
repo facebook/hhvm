@@ -124,21 +124,13 @@ func WithTLS(addr string, dialTimeout time.Duration, tlsConfig *tls.Config) Clie
 	}
 }
 
-func newDefaultPersistentHeaders() map[string]string {
-	// set Identity Headers
-	return map[string]string{
-		IDVersionHeader: IDVersion,
-		IdentityHeader:  "",
-	}
-}
-
 // newClientConfig creates a new client config object and inits it
 func newClientConfig(opts ...ClientOption) *clientConfig {
 	res := &clientConfig{
 		protocol:          types.ProtocolIDCompact,
 		transport:         TransportIDUnknown,
 		ioTimeout:         NoTimeout,
-		persistentHeaders: newDefaultPersistentHeaders(),
+		persistentHeaders: make(map[string]string),
 	}
 	for _, opt := range opts {
 		opt(res)
@@ -150,7 +142,14 @@ func newClientConfig(opts ...ClientOption) *clientConfig {
 // Effectively, this is an open thrift connection to a server.
 // A thrift client can use this connection to communicate with a server.
 func NewClient(opts ...ClientOption) (RequestChannel, error) {
-	config := newClientConfig(opts...)
+	defaultOpts := []ClientOption{
+		// Default identity headers
+		WithPersistentHeader(IDVersionHeader, IDVersion),
+		WithPersistentHeader(IdentityHeader, ""),
+	}
+	clientOpts := append(defaultOpts, opts...)
+
+	config := newClientConfig(clientOpts...)
 
 	if config.transport == TransportIDUnknown {
 		panic(types.NewTransportException(types.NOT_SUPPORTED, "no transport specified! Please use thrift.WithHeader() or thrift.WithUpgradeToRocket() in the thrift.NewClient call"))

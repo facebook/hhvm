@@ -34,14 +34,16 @@ type httpProtocol struct {
 var _ Protocol = (*httpProtocol)(nil)
 
 // NewHTTPRequestChannel creates a Protocol from a format that serializes directly to an HTTPClient.
-func NewHTTPRequestChannel(url string) (RequestChannel, error) {
+func NewHTTPRequestChannel(url string, opts ...ClientOption) (RequestChannel, error) {
+	config := newClientConfig(opts...)
+
 	httpClient, err := newHTTPPostClient(url)
 	if err != nil {
 		return nil, err
 	}
 	p := &httpProtocol{
 		transport:         httpClient,
-		persistentHeaders: make(map[string]string),
+		persistentHeaders: config.persistentHeaders,
 		protoID:           types.ProtocolIDCompact,
 	}
 	p.setRequestHeader("User-Agent", "Go/THttpClient")

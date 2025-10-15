@@ -12,6 +12,7 @@
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/AsyncSocketException.h>
 #include <folly/io/async/EventBase.h>
+#include <vector>
 
 using folly::AsyncSocketException;
 using folly::AsyncTimeout;
@@ -284,7 +285,7 @@ void TestAsyncTransport::writeChain(AsyncTransport::WriteCallback* callback,
                                     std::unique_ptr<folly::IOBuf>&& iob,
                                     WriteFlags flags) {
   size_t count = iob->countChainElements();
-  iovec vec[count];
+  std::vector<iovec> vec(count);
   const IOBuf* head = iob.get();
   const IOBuf* next = head;
   unsigned i = 0;
@@ -293,7 +294,7 @@ void TestAsyncTransport::writeChain(AsyncTransport::WriteCallback* callback,
     vec[i++].iov_len = next->length();
     next = next->next();
   } while (next != head);
-  this->writev(callback, vec, count, flags);
+  this->writev(callback, vec.data(), count, flags);
 }
 
 void TestAsyncTransport::close() {

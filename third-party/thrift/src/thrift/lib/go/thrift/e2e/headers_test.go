@@ -77,7 +77,9 @@ func runHeaderTest(t *testing.T, serverTransport thrift.TransportID) {
 	require.NoError(t, err)
 	client := service.NewE2EChannelClient(channel)
 	defer client.Close()
-	ctx := thrift.WithRequestHeaders(context.Background(), map[string]string{rpcHeaderKey: rpcHeaderValue})
+	rpcOpts := thrift.RPCOptions{}
+	rpcOpts.SetWriteHeaders(map[string]string{rpcHeaderKey: rpcHeaderValue})
+	ctx := thrift.WithRPCOptions(context.Background(), &rpcOpts)
 	echoedHeaders, err := client.EchoHeaders(ctx)
 	require.NoError(t, err)
 	require.Equal(t, echoedHeaders[persistentHeaderKey], persistentHeaderValue)
@@ -113,7 +115,9 @@ func TestHeadersUnderConcurrency(t *testing.T) {
 		clientsWG.Go(
 			func() {
 				rpcHeaderValue := fmt.Sprintf("rpcHeaderValue-%d", i)
-				ctx := thrift.WithRequestHeaders(context.Background(), map[string]string{rpcHeaderKey: rpcHeaderValue})
+				rpcOpts := thrift.RPCOptions{}
+				rpcOpts.SetWriteHeaders(map[string]string{rpcHeaderKey: rpcHeaderValue})
+				ctx := thrift.WithRPCOptions(context.Background(), &rpcOpts)
 				echoedHeaders, err := client.EchoHeaders(ctx)
 				assert.NoError(t, err)
 				assert.Equal(t, echoedHeaders[persistentHeaderKey], persistentHeaderValue)

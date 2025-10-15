@@ -152,6 +152,7 @@ func (p *rocketClient) Flush() error {
 }
 
 func (p *rocketClient) SendRequestNoResponse(ctx context.Context, messageName string, request WritableStruct) error {
+	rpcOpts := GetRPCOptions(ctx)
 	dataBytes, err := encodeRequest(p.protoID, request)
 	if err != nil {
 		return err
@@ -167,8 +168,13 @@ func (p *rocketClient) SendRequestNoResponse(ctx context.Context, messageName st
 	if err != nil {
 		return err
 	}
+
+	var writeHeaders map[string]string
+	if rpcOpts != nil {
+		writeHeaders = rpcOpts.GetWriteHeaders()
+	}
 	reqHeaders := GetRequestHeadersFromContext(ctx)
-	headers := unionMaps(reqHeaders, p.persistentHeaders)
+	headers := unionMaps(writeHeaders, reqHeaders, p.persistentHeaders)
 	return p.client.FireAndForget(messageName, p.protoID, headers, dataBytes)
 }
 
@@ -189,8 +195,13 @@ func (p *rocketClient) SendRequestResponse(ctx context.Context, messageName stri
 	if err != nil {
 		return err
 	}
+
+	var writeHeaders map[string]string
+	if rpcOpts != nil {
+		writeHeaders = rpcOpts.GetWriteHeaders()
+	}
 	reqHeaders := GetRequestHeadersFromContext(ctx)
-	headers := unionMaps(reqHeaders, p.persistentHeaders)
+	headers := unionMaps(writeHeaders, reqHeaders, p.persistentHeaders)
 	respHeaders, resultData, resultErr := p.client.RequestResponse(ctx, messageName, p.protoID, headers, dataBytes)
 	if resultErr != nil {
 		return resultErr
@@ -253,8 +264,13 @@ func (p *rocketClient) SendRequestStream(
 		}
 		return onStreamNextFn(decoder)
 	}
+
+	var writeHeaders map[string]string
+	if rpcOpts != nil {
+		writeHeaders = rpcOpts.GetWriteHeaders()
+	}
 	reqHeaders := GetRequestHeadersFromContext(ctx)
-	headers := unionMaps(reqHeaders, p.persistentHeaders)
+	headers := unionMaps(writeHeaders, reqHeaders, p.persistentHeaders)
 	respHeaders, resultData, resultErr := p.client.RequestStream(ctx, messageName, p.protoID, headers, dataBytes, onStreamNextWrapperFn, onStreamErrorFn, onStreamCompleteFn)
 	if resultErr != nil {
 		return resultErr

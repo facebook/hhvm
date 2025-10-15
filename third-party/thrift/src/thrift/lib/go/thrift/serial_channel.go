@@ -44,6 +44,13 @@ func (c *serialChannel) sendMsg(ctx context.Context, method string, request Writ
 	c.seqID++
 	seqID := c.seqID
 
+	rpcOpts := GetRPCOptions(ctx)
+	if rpcOpts != nil {
+		for k, v := range rpcOpts.GetWriteHeaders() {
+			c.protocol.setRequestHeader(k, v)
+		}
+	}
+
 	requestHeadersMap := GetRequestHeadersFromContext(ctx)
 	for k, v := range requestHeadersMap {
 		c.protocol.setRequestHeader(k, v)

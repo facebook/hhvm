@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_resumable-wait-handle.h"
 
@@ -49,7 +51,7 @@ public:
   }
 
   String getName();
-  void onUnblocked();
+  void onUnblocked(std::vector<AsioBlockableChain>& worklist);
   c_WaitableWaitHandle* getChild();
 
   // Prioritize the child of this PBWH. Will lift the child into the object's

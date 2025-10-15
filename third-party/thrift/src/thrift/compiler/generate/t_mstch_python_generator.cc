@@ -1399,7 +1399,11 @@ THRIFT_REGISTER_GENERATOR(
     "    include_prefix:  Use full include paths in generated files.\n"
     "    disable_abstract_types:\n"
     "      Disable the use of abstract types with thrift-python"
-    "      immutable and mutable types.\n");
+    "      immutable and mutable types.\n"
+    "    does_not_have_py_deprecated:\n"
+    "      Specify that the generated code does not have thrift-py-deprecated.\n"
+    "    does_not_have_py_deprecated_asyncio:\n"
+    "      Specify that the generated code does not have thrift-py-deprecated-asyncio.\n");
 
 namespace patch {
 THRIFT_REGISTER_GENERATOR(

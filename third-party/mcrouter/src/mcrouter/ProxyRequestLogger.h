@@ -38,15 +38,19 @@ class ProxyRequestLogger {
   template <class Request>
   void logDurationByRequestType(
       uint64_t durationUs,
-      carbon::GetLikeT<Request> = 0);
+      carbon::GetLikeT<Request> /*unused*/ = 0);
   template <class Request>
   void logDurationByRequestType(
       uint64_t durationUs,
-      carbon::UpdateLikeT<Request> = 0);
+      carbon::UpdateLikeT<Request> /*unused*/ = 0);
   template <class Request>
   void logDurationByRequestType(
       uint64_t durationUs,
-      carbon::OtherThanT<Request, carbon::GetLike<>, carbon::UpdateLike<>> = 0);
+      carbon::OtherThanT<
+          Request,
+          carbon::GetLike<>,
+          carbon::UpdateLike<>> /*unused*/
+      = 0);
 
   int64_t loggerCreatedTimeUs_ = 0;
 };

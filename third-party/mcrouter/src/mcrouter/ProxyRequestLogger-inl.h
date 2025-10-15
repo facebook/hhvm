@@ -44,7 +44,7 @@ template <class RouterInfo>
 template <class Request>
 void ProxyRequestLogger<RouterInfo>::logDurationByRequestType(
     uint64_t durationUs,
-    carbon::GetLikeT<Request>) {
+    carbon::GetLikeT<Request> /*unused*/) {
   proxy_.stats().durationGetUs().insertSample(durationUs);
 }
 
@@ -52,7 +52,7 @@ template <class RouterInfo>
 template <class Request>
 void ProxyRequestLogger<RouterInfo>::logDurationByRequestType(
     uint64_t durationUs,
-    carbon::UpdateLikeT<Request>) {
+    carbon::UpdateLikeT<Request> /*unused*/) {
   proxy_.stats().durationUpdateUs().insertSample(durationUs);
 }
 
@@ -60,7 +60,10 @@ template <class RouterInfo>
 template <class Request>
 void ProxyRequestLogger<RouterInfo>::logDurationByRequestType(
     uint64_t /* durationUs */,
-    carbon::OtherThanT<Request, carbon::GetLike<>, carbon::UpdateLike<>>) {}
+    carbon::OtherThanT<
+        Request,
+        carbon::GetLike<>,
+        carbon::UpdateLike<>> /*unused*/) {}
 
 #define REQUEST_CLASS_ERROR_STATS(proxy, ERROR, reqClass)     \
   do {                                                        \

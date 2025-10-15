@@ -23,18 +23,18 @@ namespace carbon {
 class NoopAdditionalLogger {
  public:
   explicit NoopAdditionalLogger(
-      const facebook::memcache::mcrouter::ProxyRequestContext&) {}
+      const facebook::memcache::mcrouter::ProxyRequestContext& /*unused*/) {}
 
   template <class Request>
   void logBeforeRequestSent(
-      const Request&,
-      const facebook::memcache::mcrouter::RequestLoggerContext&) {}
+      const Request& /*unused*/,
+      const facebook::memcache::mcrouter::RequestLoggerContext& /*unused*/) {}
 
   template <class Request>
   void log(
-      const Request&,
-      const typename Request::reply_type&,
-      const facebook::memcache::mcrouter::RequestLoggerContext&) {}
+      const Request& /*unused*/,
+      const typename Request::reply_type& /*unused*/,
+      const facebook::memcache::mcrouter::RequestLoggerContext& /*unused*/) {}
 
   template <class KeyType>
   bool mayLog(
@@ -49,13 +49,13 @@ class NoopAdditionalLogger {
 class NoopNoBeforeAdditionalLogger {
  public:
   explicit NoopNoBeforeAdditionalLogger(
-      const facebook::memcache::mcrouter::ProxyRequestContext&) {}
+      const facebook::memcache::mcrouter::ProxyRequestContext& /*unused*/) {}
 
   template <class Request>
   void log(
-      const Request&,
-      const typename Request::reply_type&,
-      const facebook::memcache::mcrouter::RequestLoggerContext&) {}
+      const Request& /*unused*/,
+      const typename Request::reply_type& /*unused*/,
+      const facebook::memcache::mcrouter::RequestLoggerContext& /*unused*/) {}
 
   template <class KeyType>
   bool mayLog(

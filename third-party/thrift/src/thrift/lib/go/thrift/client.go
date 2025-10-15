@@ -25,8 +25,8 @@ import (
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
-// clientOptions thrift and connectivity options for the thrift client
-type clientOptions struct {
+// clientConfig contains a config for the thrift client
+type clientConfig struct {
 	transport         TransportID
 	protocol          types.ProtocolID
 	ioTimeout         time.Duration // Read/Write timeout
@@ -36,14 +36,14 @@ type clientOptions struct {
 }
 
 // ClientOption is a single configuration setting for the thrift client
-type ClientOption func(*clientOptions)
+type ClientOption func(*clientConfig)
 
 // NoTimeout is a special value for WithIoTimeout that disables timeouts.
 const NoTimeout = time.Duration(0)
 
 // WithProtocolID sets protocol to given protocolID
 func WithProtocolID(id types.ProtocolID) ClientOption {
-	return func(opts *clientOptions) {
+	return func(opts *clientConfig) {
 		opts.protocol = id
 	}
 }
@@ -51,42 +51,42 @@ func WithProtocolID(id types.ProtocolID) ClientOption {
 // WithHeader sets the transport to Header, protocol Header is implied here.
 // Deprecated: use WithUpgradeToRocket() instead.
 func WithHeader() ClientOption {
-	return func(opts *clientOptions) {
+	return func(opts *clientConfig) {
 		opts.transport = TransportIDHeader
 	}
 }
 
 // WithUpgradeToRocket sets the protocol UpgradeToRocket is implied here.
 func WithUpgradeToRocket() ClientOption {
-	return func(opts *clientOptions) {
+	return func(opts *clientConfig) {
 		opts.transport = TransportIDUpgradeToRocket
 	}
 }
 
 // WithRocket sets the transport to Rocket.
 func WithRocket() ClientOption {
-	return func(opts *clientOptions) {
+	return func(opts *clientConfig) {
 		opts.transport = TransportIDRocket
 	}
 }
 
 // WithPersistentHeader adds a persistent header to the client.
 func WithPersistentHeader(name, value string) ClientOption {
-	return func(opts *clientOptions) {
+	return func(opts *clientConfig) {
 		opts.persistentHeaders[name] = value
 	}
 }
 
 // WithPersistentHeaders adds persistent headers to the client.
 func WithPersistentHeaders(headers map[string]string) ClientOption {
-	return func(opts *clientOptions) {
+	return func(opts *clientConfig) {
 		maps.Copy(opts.persistentHeaders, headers)
 	}
 }
 
 // WithIdentity sets the Header identity field
 func WithIdentity(name string) ClientOption {
-	return func(opts *clientOptions) {
+	return func(opts *clientConfig) {
 		opts.persistentHeaders[IdentityHeader] = name
 	}
 }
@@ -94,7 +94,7 @@ func WithIdentity(name string) ClientOption {
 // WithDialer specifies the remote connection that the thrift
 // client should connect to should be resolved via the given function
 func WithDialer(d func() (net.Conn, error)) ClientOption {
-	return func(opts *clientOptions) {
+	return func(opts *clientConfig) {
 		opts.dialerFn = d
 	}
 }
@@ -104,7 +104,7 @@ func WithDialer(d func() (net.Conn, error)) ClientOption {
 // this timeout is not a connection timeout as it is
 // not honored during Dial operation.
 func WithIoTimeout(ioTimeout time.Duration) ClientOption {
-	return func(opts *clientOptions) {
+	return func(opts *clientConfig) {
 		opts.ioTimeout = ioTimeout
 	}
 }
@@ -112,7 +112,7 @@ func WithIoTimeout(ioTimeout time.Duration) ClientOption {
 // WithTLS is a creates a TLS connection to the given address, including ALPN for thrift.
 func WithTLS(addr string, dialTimeout time.Duration, tlsConfig *tls.Config) ClientOption {
 	clonedTLSConfig := tlsConfig.Clone()
-	return func(opts *clientOptions) {
+	return func(opts *clientConfig) {
 		opts.tlsConfig = clonedTLSConfig
 		opts.dialerFn = func() (net.Conn, error) {
 			conn, err := net.DialTimeout("tcp", addr, dialTimeout)
@@ -132,9 +132,9 @@ func newDefaultPersistentHeaders() map[string]string {
 	}
 }
 
-// newOptions creates a new options objects and inits it
-func newOptions(opts ...ClientOption) *clientOptions {
-	res := &clientOptions{
+// newClientConfig creates a new client config object and inits it
+func newClientConfig(opts ...ClientOption) *clientConfig {
+	res := &clientConfig{
 		protocol:          types.ProtocolIDCompact,
 		transport:         TransportIDUnknown,
 		ioTimeout:         NoTimeout,
@@ -150,29 +150,29 @@ func newOptions(opts ...ClientOption) *clientOptions {
 // Effectively, this is an open thrift connection to a server.
 // A thrift client can use this connection to communicate with a server.
 func NewClient(opts ...ClientOption) (RequestChannel, error) {
-	options := newOptions(opts...)
+	config := newClientConfig(opts...)
 
-	if options.transport == TransportIDUnknown {
+	if config.transport == TransportIDUnknown {
 		panic(types.NewTransportException(types.NOT_SUPPORTED, "no transport specified! Please use thrift.WithHeader() or thrift.WithUpgradeToRocket() in the thrift.NewClient call"))
 	}
 
 	// Important: TLS config must be modified *before* the dialerFn below is called.
-	if options.tlsConfig != nil {
+	if config.tlsConfig != nil {
 		// Set ALPN based on transport
-		switch options.transport {
+		switch config.transport {
 		case TransportIDRocket:
-			options.tlsConfig.NextProtos = []string{"rs"}
+			config.tlsConfig.NextProtos = []string{"rs"}
 		case TransportIDUpgradeToRocket:
-			options.tlsConfig.NextProtos = []string{"rs" /* preferred */, "thrift" /* fallback */}
+			config.tlsConfig.NextProtos = []string{"rs" /* preferred */, "thrift" /* fallback */}
 		default:
-			options.tlsConfig.NextProtos = []string{"thrift"}
+			config.tlsConfig.NextProtos = []string{"thrift"}
 		}
 	}
 
 	var conn net.Conn
 	var connErr error
-	if options.dialerFn != nil {
-		conn, connErr = options.dialerFn()
+	if config.dialerFn != nil {
+		conn, connErr = config.dialerFn()
 		if connErr != nil {
 			return nil, connErr
 		}
@@ -180,13 +180,13 @@ func NewClient(opts ...ClientOption) (RequestChannel, error) {
 
 	var protocol Protocol
 	var protocolErr error
-	switch options.transport {
+	switch config.transport {
 	case TransportIDHeader:
-		protocol, protocolErr = newHeaderProtocol(conn, options.protocol, options.ioTimeout, options.persistentHeaders)
+		protocol, protocolErr = newHeaderProtocol(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
 	case TransportIDRocket:
-		protocol, protocolErr = newRocketClient(conn, options.protocol, options.ioTimeout, options.persistentHeaders)
+		protocol, protocolErr = newRocketClient(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
 	case TransportIDUpgradeToRocket:
-		protocol, protocolErr = newUpgradeToRocketClient(conn, options.protocol, options.ioTimeout, options.persistentHeaders)
+		protocol, protocolErr = newUpgradeToRocketClient(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
 	default:
 		panic("framed and unframed transport are not supported")
 	}

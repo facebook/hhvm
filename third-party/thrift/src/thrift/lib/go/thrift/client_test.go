@@ -33,14 +33,14 @@ import (
 
 func TestWithPersistentHeader(t *testing.T) {
 	opts := []ClientOption{WithRocket(), WithPersistentHeader("foo", "bar")}
-	clientOptions := newOptions(opts...)
-	require.Subset(t, clientOptions.persistentHeaders, map[string]string{"foo": "bar"})
+	config := newClientConfig(opts...)
+	require.Subset(t, config.persistentHeaders, map[string]string{"foo": "bar"})
 }
 
 func TestWithPersistentHeaders(t *testing.T) {
 	opts := []ClientOption{WithRocket(), WithPersistentHeaders(map[string]string{"foo": "123", "bar": "456"})}
-	clientOptions := newOptions(opts...)
-	require.Subset(t, clientOptions.persistentHeaders, map[string]string{"foo": "123", "bar": "456"})
+	config := newClientConfig(opts...)
+	require.Subset(t, config.persistentHeaders, map[string]string{"foo": "123", "bar": "456"})
 }
 
 func TestNewClientConnectionScenarios(t *testing.T) {

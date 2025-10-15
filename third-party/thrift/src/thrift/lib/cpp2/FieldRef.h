@@ -59,14 +59,6 @@ struct move_to_unique_ptr_fn;
 struct assign_from_unique_ptr_fn;
 struct union_value_unsafe_fn;
 struct is_non_optional_field_set_manually_or_by_serializer_fn;
-template <typename value_type, typename return_type = value_type>
-using EnableIfConst =
-    std::enable_if_t<std::is_const_v<value_type>, return_type>;
-
-template <typename value_type, typename return_type = value_type>
-using EnableIfNonConst =
-    std::enable_if_t<!std::is_const_v<value_type>, return_type>;
-
 template <typename T, typename U>
 using EnableIfImplicit = std::enable_if_t<
     std::is_same<
@@ -1064,14 +1056,14 @@ class intern_boxed_field_ref {
     bitref_ = false;
   }
 
-  template <typename U = value_type>
-  FOLLY_ERASE apache::thrift::detail::EnableIfNonConst<U, reference_type>
-  value() {
+  FOLLY_ERASE reference_type value()
+    requires(!std::is_const_v<value_type>)
+  {
     return static_cast<reference_type>(value_.mut());
   }
-  template <typename U = value_type>
-  FOLLY_ERASE apache::thrift::detail::EnableIfConst<U, reference_type> value()
-      const {
+  FOLLY_ERASE reference_type value() const
+    requires(std::is_const_v<value_type>)
+  {
     return static_cast<reference_type>(value_.value());
   }
 
@@ -1275,14 +1267,14 @@ class terse_intern_boxed_field_ref {
     value_ = boxed_value_type::fromStaticConstant(&get_default_());
   }
 
-  template <typename U = value_type>
-  FOLLY_ERASE apache::thrift::detail::EnableIfNonConst<U, reference_type>
-  value() {
+  FOLLY_ERASE reference_type value()
+    requires(!std::is_const_v<value_type>)
+  {
     return static_cast<reference_type>(value_.mut());
   }
-  template <typename U = value_type>
-  FOLLY_ERASE apache::thrift::detail::EnableIfConst<U, reference_type> value()
-      const {
+  FOLLY_ERASE reference_type value() const
+    requires(std::is_const_v<value_type>)
+  {
     return static_cast<reference_type>(value_.value());
   }
 

@@ -410,8 +410,8 @@ std::string get_gen_type_class(t_type const& type) {
     auto elem_tc = get_gen_type_class(elem);
     return tc + "set<" + elem_tc + ">";
   } else if (const t_map* map = ttype.try_as<t_map>()) {
-    auto& key = *map->get_key_type();
-    auto& val = *map->get_val_type();
+    auto& key = *map->key_type();
+    auto& val = *map->val_type();
     auto key_tc = get_gen_type_class(key);
     auto val_tc = get_gen_type_class(val);
     return tc + "map<" + key_tc + ", " + val_tc + ">";

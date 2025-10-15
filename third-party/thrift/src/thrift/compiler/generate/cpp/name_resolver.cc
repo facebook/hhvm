@@ -527,8 +527,8 @@ std::string cpp_name_resolver::gen_container_type(
   } else if (const t_map* tmap = node.try_as<t_map>()) {
     return detail::gen_template_type(
         template_name,
-        {resolve(resolve_fn, *tmap->get_key_type()),
-         resolve(resolve_fn, *tmap->get_val_type())});
+        {resolve(resolve_fn, *tmap->key_type()),
+         resolve(resolve_fn, *tmap->val_type())});
   }
   throw std::runtime_error(
       fmt::format("unknown container type: {}", typeid(node).name()));
@@ -641,8 +641,8 @@ std::string cpp_name_resolver::gen_thrift_type_tag(
     auto elem_tag = gen_type_tag(elem);
     return ns + "set<" + elem_tag + ">";
   } else if (const t_map* map = type.try_as<t_map>()) {
-    auto& key = *map->get_key_type();
-    auto& val = *map->get_val_type();
+    auto& key = *map->key_type();
+    auto& val = *map->val_type();
     auto key_tag = gen_type_tag(key);
     auto val_tag = gen_type_tag(val);
     return ns + "map<" + key_tag + ", " + val_tag + ">";

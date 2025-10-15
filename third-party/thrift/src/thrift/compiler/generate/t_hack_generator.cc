@@ -1477,7 +1477,7 @@ void t_hack_generator::generate_json_map_element(
     }
   }
   std::string _value = namer("$_value");
-  t_field vfelem(*tmap->get_val_type(), _value);
+  t_field vfelem(*tmap->val_type(), _value);
   indent(out) << declare_field(&vfelem, true, true, true).substr(1) << "\n";
   generate_json_field(out, namer, &vfelem, "", "", value);
   indent(out) << prefix_thrift << "[" << key << "] = " << _value << ";\n";

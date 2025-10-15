@@ -789,7 +789,7 @@ protocol_value_builder::protocol_value_builder() : ty_{nullptr} {}
       [&](const t_map& map) {
         // Maps are not restricted to string-based field keys, so we should
         // extend the look-up to any sealed key type.
-        return protocol_value_builder{*map.get_val_type()};
+        return protocol_value_builder{*map.val_type()};
       },
       [&](const t_struct& strct) {
         assert(

@@ -17,6 +17,11 @@ FOLLY_CLANG_DISABLE_WARNING("-Wignored-optimization-argument")
 namespace apache {
 namespace thrift {
 namespace detail {
+template <> struct TSchemaAssociation<::cpp2::SinkService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = 6375583463617712746;
+  static constexpr ::std::string_view definitionKey = {"\x54\xf9\xfd\x63\x56\xb0\x57\x39\x39\xed\xda\xe3\xd2\xd8\xfb\x99", 16};
+};
 namespace md {
 using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
 using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
@@ -322,8 +327,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_SinkService;
-  module_SinkService.name() = "module.SinkService";
+  ::apache::thrift::metadata::ThriftService module_SinkService = genServiceMetadata<::cpp2::SinkService>();
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_method,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_methodAndReponse,

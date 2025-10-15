@@ -100,4 +100,12 @@ GenMetadataResult<metadata::ThriftEnum> genEnumMetadata(
   return ret;
 }
 
+metadata::ThriftService genServiceMetadata(
+    const syntax_graph::ServiceNode& node) {
+  metadata::ThriftService ret;
+  ret.name() = getName(node);
+  // TODO: add other information
+  return ret;
+}
+
 } // namespace apache::thrift::detail::md

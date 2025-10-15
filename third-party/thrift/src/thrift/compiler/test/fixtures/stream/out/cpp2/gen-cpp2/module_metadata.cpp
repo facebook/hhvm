@@ -17,6 +17,11 @@ FOLLY_CLANG_DISABLE_WARNING("-Wignored-optimization-argument")
 namespace apache {
 namespace thrift {
 namespace detail {
+template <> struct TSchemaAssociation<::cpp2::PubSubStreamingService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -1919409225605397371;
+  static constexpr ::std::string_view definitionKey = {"\x75\x57\x18\xb2\xff\x13\x49\xec\xe9\x98\x34\xbf\xeb\xa0\xe7\x29", 16};
+};
 namespace md {
 using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
 using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
@@ -294,8 +299,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingSer
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_PubSubStreamingService;
-  module_PubSubStreamingService.name() = "module.PubSubStreamingService";
+  ::apache::thrift::metadata::ThriftService module_PubSubStreamingService = genServiceMetadata<::cpp2::PubSubStreamingService>();
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_returnstream,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_streamthrows,

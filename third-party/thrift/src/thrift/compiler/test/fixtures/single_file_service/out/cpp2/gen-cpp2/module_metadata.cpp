@@ -17,6 +17,21 @@ FOLLY_CLANG_DISABLE_WARNING("-Wignored-optimization-argument")
 namespace apache {
 namespace thrift {
 namespace detail {
+template <> struct TSchemaAssociation<::cpp2::A, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -7283581240934668548;
+  static constexpr ::std::string_view definitionKey = {"\x17\xa8\x53\xd5\x98\xc7\x14\x67\xf7\x7b\x70\xbf\xfd\x06\xcf\xce", 16};
+};
+template <> struct TSchemaAssociation<::cpp2::B, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -7283581240934668548;
+  static constexpr ::std::string_view definitionKey = {"\x46\x40\x1e\x86\xac\xfc\xa8\x93\xd7\xb5\xb9\xbe\x1e\x1b\x5d\x4d", 16};
+};
+template <> struct TSchemaAssociation<::cpp2::C, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -7283581240934668548;
+  static constexpr ::std::string_view definitionKey = {"\x33\xd4\xc1\x6b\x55\x68\xb4\x68\x3d\x36\x71\xe1\x99\x01\xf4\x09", 16};
+};
 namespace md {
 using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
 using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
@@ -70,8 +85,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::A>>::gen(::apache:
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::A>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_A;
-  module_A.name() = "module.A";
+  ::apache::thrift::metadata::ThriftService module_A = genServiceMetadata<::cpp2::A>();
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::A>>::gen_foo,
   };
@@ -132,8 +146,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen(::apache:
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_B;
-  module_B.name() = "module.B";
+  ::apache::thrift::metadata::ThriftService module_B = genServiceMetadata<::cpp2::B>();
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen_bar,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen_stream_stuff,
@@ -167,8 +180,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::gen(::apache:
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_C;
-  module_C.name() = "module.C";
+  ::apache::thrift::metadata::ThriftService module_C = genServiceMetadata<::cpp2::C>();
   static const ThriftFunctionGenerator functions[] = {
   };
   for (auto& function_gen : functions) {

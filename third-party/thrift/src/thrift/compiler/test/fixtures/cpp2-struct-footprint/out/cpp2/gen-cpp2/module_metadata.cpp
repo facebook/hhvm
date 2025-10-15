@@ -17,6 +17,16 @@ FOLLY_CLANG_DISABLE_WARNING("-Wignored-optimization-argument")
 namespace apache {
 namespace thrift {
 namespace detail {
+template <> struct TSchemaAssociation<::cpp2_struct_footprint::FootprintTestService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -2016535262471784061;
+  static constexpr ::std::string_view definitionKey = {"\xc5\x02\x98\x08\x5e\x2a\xc5\x07\xd6\x51\xe6\xd7\x0b\x48\x29\x80", 16};
+};
+template <> struct TSchemaAssociation<::cpp2_struct_footprint::ExtendedFootprintService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -2016535262471784061;
+  static constexpr ::std::string_view definitionKey = {"\x87\x7f\xce\xad\xc6\x08\x35\xe8\xc9\x7d\xe6\x96\xad\x65\xa6\xf4", 16};
+};
 namespace md {
 using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
 using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
@@ -366,8 +376,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::F
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_FootprintTestService;
-  module_FootprintTestService.name() = "module.FootprintTestService";
+  ::apache::thrift::metadata::ThriftService module_FootprintTestService = genServiceMetadata<::cpp2_struct_footprint::FootprintTestService>();
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>>::gen_processIOBuf,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>>::gen_getStruct,
@@ -417,8 +426,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::E
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::ExtendedFootprintService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_ExtendedFootprintService;
-  module_ExtendedFootprintService.name() = "module.ExtendedFootprintService";
+  ::apache::thrift::metadata::ThriftService module_ExtendedFootprintService = genServiceMetadata<::cpp2_struct_footprint::ExtendedFootprintService>();
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::ExtendedFootprintService>>::gen_getComplexMap,
   };

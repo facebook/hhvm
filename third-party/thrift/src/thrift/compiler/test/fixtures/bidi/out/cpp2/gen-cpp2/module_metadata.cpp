@@ -17,6 +17,11 @@ FOLLY_CLANG_DISABLE_WARNING("-Wignored-optimization-argument")
 namespace apache {
 namespace thrift {
 namespace detail {
+template <> struct TSchemaAssociation<::cpp2::BiDiService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = 469164823722770924;
+  static constexpr ::std::string_view definitionKey = {"\xc0\x56\x46\x64\xbe\xe2\xa6\xd1\x27\xc6\x36\x25\xc4\x5a\xed\x87", 16};
+};
 namespace md {
 using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
 using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
@@ -55,8 +60,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_BiDiService;
-  module_BiDiService.name() = "module.BiDiService";
+  ::apache::thrift::metadata::ThriftService module_BiDiService = genServiceMetadata<::cpp2::BiDiService>();
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen_simple,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen_response,

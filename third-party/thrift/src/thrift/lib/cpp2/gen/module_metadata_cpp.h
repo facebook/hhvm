@@ -270,6 +270,12 @@ const auto& getNodeWithLock() {
   return SchemaRegistry::get().getNode<T>();
 }
 
+template <class T>
+const auto& getDefinitionNodeWithLock() {
+  std::lock_guard lock(schemaRegistryMutex());
+  return SchemaRegistry::get().getDefinitionNode<T>();
+}
+
 // Generate metadata of `node` inside `md`, return the generated metadata.
 GenMetadataResult<metadata::ThriftEnum> genEnumMetadata(
     metadata::ThriftMetadata& md, const syntax_graph::EnumNode& node);
@@ -277,6 +283,14 @@ GenMetadataResult<metadata::ThriftEnum> genEnumMetadata(
 template <class E>
 auto genEnumMetadata(metadata::ThriftMetadata& md) {
   return genEnumMetadata(md, getNodeWithLock<E>());
+}
+
+metadata::ThriftService genServiceMetadata(
+    const syntax_graph::ServiceNode& node);
+
+template <class Tag>
+metadata::ThriftService genServiceMetadata() {
+  return genServiceMetadata(getDefinitionNodeWithLock<Tag>().asService());
 }
 
 } // namespace apache::thrift::detail::md

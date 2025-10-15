@@ -17,6 +17,31 @@ FOLLY_CLANG_DISABLE_WARNING("-Wignored-optimization-argument")
 namespace apache {
 namespace thrift {
 namespace detail {
+template <> struct TSchemaAssociation<::cpp2::MyService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = 5752107916518885951;
+  static constexpr ::std::string_view definitionKey = {"\x57\x4c\xec\xbc\xf7\x3d\xb7\x35\xa4\x7e\x74\x0c\xd9\x9e\x91\xa4", 16};
+};
+template <> struct TSchemaAssociation<::cpp2::MyServicePrioParent, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = 5752107916518885951;
+  static constexpr ::std::string_view definitionKey = {"\x0c\xa0\x3c\xda\x6a\x09\xbe\xfb\x37\xc2\x73\x0a\x4f\xd7\x63\xa1", 16};
+};
+template <> struct TSchemaAssociation<::cpp2::MyServicePrioChild, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = 5752107916518885951;
+  static constexpr ::std::string_view definitionKey = {"\x4a\x05\x70\xd2\xda\xca\x0a\xc4\x93\x02\xc9\xac\xe2\x80\x7f\xa5", 16};
+};
+template <> struct TSchemaAssociation<::cpp2::GoodService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = 5752107916518885951;
+  static constexpr ::std::string_view definitionKey = {"\x9f\x37\xc4\xd4\xa4\x30\xdc\x92\x05\xda\xf0\xef\xd9\xe9\xea\x12", 16};
+};
+template <> struct TSchemaAssociation<::cpp2::FooBarBazService, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = 5752107916518885951;
+  static constexpr ::std::string_view definitionKey = {"\xad\x36\xb0\xbf\x3e\x48\x12\xde\x1a\x6a\xb8\xcd\x2c\x57\xb0\x2e", 16};
+};
 namespace md {
 using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
 using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
@@ -266,8 +291,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen(:
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_MyService;
-  module_MyService.name() = "module.MyService";
+  ::apache::thrift::metadata::ThriftService module_MyService = genServiceMetadata<::cpp2::MyService>();
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_ping,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_getRandomData,
@@ -321,8 +345,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioParen
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_MyServicePrioParent;
-  module_MyServicePrioParent.name() = "module.MyServicePrioParent";
+  ::apache::thrift::metadata::ThriftService module_MyServicePrioParent = genServiceMetadata<::cpp2::MyServicePrioParent>();
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>>::gen_ping,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>>::gen_pong,
@@ -362,8 +385,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioChild
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioChild>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_MyServicePrioChild;
-  module_MyServicePrioChild.name() = "module.MyServicePrioChild";
+  ::apache::thrift::metadata::ThriftService module_MyServicePrioChild = genServiceMetadata<::cpp2::MyServicePrioChild>();
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioChild>>::gen_pang,
   };
@@ -403,8 +425,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::GoodService>>::gen
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::GoodService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_BadService;
-  module_BadService.name() = "module.BadService";
+  ::apache::thrift::metadata::ThriftService module_BadService = genServiceMetadata<::cpp2::GoodService>();
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::GoodService>>::gen_bar,
   };
@@ -461,8 +482,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>>
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_FooBarBazService;
-  module_FooBarBazService.name() = "module.FooBarBazService";
+  ::apache::thrift::metadata::ThriftService module_FooBarBazService = genServiceMetadata<::cpp2::FooBarBazService>();
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>>::gen_foo,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>>::gen_bar,

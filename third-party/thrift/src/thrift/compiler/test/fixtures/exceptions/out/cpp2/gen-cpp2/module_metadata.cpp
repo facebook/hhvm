@@ -17,6 +17,11 @@ FOLLY_CLANG_DISABLE_WARNING("-Wignored-optimization-argument")
 namespace apache {
 namespace thrift {
 namespace detail {
+template <> struct TSchemaAssociation<::cpp2::Raiser, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = -4294775116102366513;
+  static constexpr ::std::string_view definitionKey = {"\x75\x1a\x2c\xda\xc4\xdb\xff\x78\x5d\xcd\xcc\x07\x4e\x97\x5c\x23", 16};
+};
 namespace md {
 using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
 using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
@@ -390,8 +395,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Raiser>>::gen(::ap
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Raiser>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_Raiser;
-  module_Raiser.name() = "module.Raiser";
+  ::apache::thrift::metadata::ThriftService module_Raiser = genServiceMetadata<::cpp2::Raiser>();
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Raiser>>::gen_doBland,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Raiser>>::gen_doRaise,

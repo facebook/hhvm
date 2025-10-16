@@ -172,9 +172,9 @@ TEST(TypeIdTest, Hash) {
 
   auto testFn = [&](auto val) {
     set.insert(val);
-    EXPECT_EQ(set.contains(val), 1);
+    EXPECT_TRUE(set.contains(val));
     set.erase(val);
-    EXPECT_EQ(set.contains(val), 0);
+    EXPECT_FALSE(set.contains(val));
   };
 
   testFn(t::Bool);

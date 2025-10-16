@@ -716,7 +716,7 @@ const TypeInfo TypeToInfo<
     ::test::fixtures::tablebased::ExampleEnum>::typeInfo = {
     /* .type */ protocol::TType::T_I32,
     /* .get */ get<int32_t, ::test::fixtures::tablebased::ExampleEnum>,
-    /* .set */ reinterpret_cast<VoidPtrFuncPtr>(set<::test::fixtures::tablebased::ExampleEnum, int32_t>),
+    /* .set */ eraseFuncPtr(set<::test::fixtures::tablebased::ExampleEnum, int32_t>),
     /* .typeExt */ nullptr,
 };
 const TypeInfo TypeToInfo<

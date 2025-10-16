@@ -42,12 +42,9 @@ namespace apache::thrift::detail {
 
 using FieldID = std::int16_t;
 
-// MSVC cannot reinterpret_cast an overloaded function to another function
-// pointer, but piping the function through an identity function before
-// reinterpret_cast works.
 template <typename T>
-FOLLY_ERASE constexpr T identity(T t) {
-  return t;
+FOLLY_ERASE constexpr VoidPtrFuncPtr eraseFuncPtr(T t) {
+  return reinterpret_cast<VoidPtrFuncPtr>(t);
 }
 
 template <typename T, typename U = void>
@@ -750,7 +747,7 @@ template <typename ElemTypeClass, typename T>
 const TypeInfo TypeToInfo<type_class::set<ElemTypeClass>, T>::typeInfo = {
     /* .type */ protocol::TType::T_SET,
     /* .get */ getDerefFuncPtr<T>(),
-    /* .set */ reinterpret_cast<VoidPtrFuncPtr>(set<T>),
+    /* .set */ eraseFuncPtr(set<T>),
     /* .typeExt */
     &TypeToInfo<type_class::set<ElemTypeClass>, T>::ext,
 };
@@ -776,7 +773,7 @@ template <typename ElemTypeClass, typename T>
 const TypeInfo TypeToInfo<type_class::list<ElemTypeClass>, T>::typeInfo = {
     /* .type */ protocol::TType::T_LIST,
     /* .get */ getDerefFuncPtr<T>(),
-    /* .set */ reinterpret_cast<VoidPtrFuncPtr>(set<T>),
+    /* .set */ eraseFuncPtr(set<T>),
     /* .typeExt */ &ext,
 };
 
@@ -805,7 +802,7 @@ const TypeInfo
     TypeToInfo<type_class::map<KeyTypeClass, ValTypeClass>, T>::typeInfo = {
         /* .type */ protocol::TType::T_MAP,
         /* .get */ getDerefFuncPtr<T>(),
-        /* .set */ reinterpret_cast<VoidPtrFuncPtr>(set<T>),
+        /* .set */ eraseFuncPtr(set<T>),
         /* .typeExt */ &ext,
 };
 
@@ -824,7 +821,7 @@ const TypeInfo
       enable_if_smart_ptr_t<T>>::typeInfo = {                             \
       TypeToInfo<type_class::TypeClass, struct_type>::typeInfo.type,      \
       get<T>,                                                             \
-      reinterpret_cast<VoidPtrFuncPtr>(set<T>),                           \
+      eraseFuncPtr(set<T>),                                               \
       TypeToInfo<type_class::TypeClass, struct_type>::typeInfo.typeExt,   \
   }
 
@@ -849,7 +846,7 @@ THRIFT_DEFINE_STRUCT_PTR_TYPE_INFO(variant);
           typeInfo = {                                                        \
               TypeToInfo<type_class::TypeClass, numeric_type>::typeInfo.type, \
               get<underlying_type, T>,                                        \
-              reinterpret_cast<VoidPtrFuncPtr>(set<T, underlying_type>),      \
+              eraseFuncPtr(set<T, underlying_type>),                          \
               nullptr,                                                        \
   }
 

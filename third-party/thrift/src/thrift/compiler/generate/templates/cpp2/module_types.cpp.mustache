@@ -239,7 +239,7 @@ const TypeInfo TypeToInfo<
     ::{{program:qualified_namespace}}::{{enum:cpp_name}}>::typeInfo = {
     /* .type */ protocol::TType::T_I32,
     /* .get */ get<int32_t, ::{{program:qualified_namespace}}::{{enum:cpp_name}}>,
-    /* .set */ reinterpret_cast<VoidPtrFuncPtr>(set<::{{program:qualified_namespace}}::{{enum:cpp_name}}, int32_t>),
+    /* .set */ eraseFuncPtr(set<::{{program:qualified_namespace}}::{{enum:cpp_name}}, int32_t>),
     /* .typeExt */ nullptr,
 };
 {{/program:split_enums}}

@@ -23,13 +23,13 @@
 
 namespace apache::thrift::detail {
 
-#define THRIFT_DEFINE_PRIMITIVE_TYPE_TO_INFO(                            \
-    TypeClass, Type, ThriftType, TTypeValue)                             \
-  const TypeInfo TypeToInfo<type_class::TypeClass, Type>::typeInfo = {   \
-      protocol::TType::TTypeValue,                                       \
-      get<ThriftType, Type>,                                             \
-      reinterpret_cast<VoidPtrFuncPtr>(identity(set<Type, ThriftType>)), \
-      nullptr,                                                           \
+#define THRIFT_DEFINE_PRIMITIVE_TYPE_TO_INFO(                          \
+    TypeClass, Type, ThriftType, TTypeValue)                           \
+  const TypeInfo TypeToInfo<type_class::TypeClass, Type>::typeInfo = { \
+      protocol::TType::TTypeValue,                                     \
+      get<ThriftType, Type>,                                           \
+      eraseFuncPtr(set<Type, ThriftType>),                             \
+      nullptr,                                                         \
   }
 
 // Specialization for numbers.

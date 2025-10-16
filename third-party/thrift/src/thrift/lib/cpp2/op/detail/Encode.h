@@ -729,9 +729,12 @@ struct Encode<type::map<Key, Value>> : MapEncode<Key, Value> {};
 
 template <typename T, typename Tag>
 struct CppTypeEncode {
+  static constexpr bool requestedBypass =
+      requires { typename T::__fbthrift_use_protocol_methods; };
   template <class Protocol, class U>
   static constexpr bool directlyEncodable =
-      requires(Protocol& prot, const U& u) { Encode<Tag>{}(prot, u); };
+      requires(Protocol& prot, const U& u) { Encode<Tag>{}(prot, u); } &&
+      !requestedBypass;
 
   template <class Protocol, class U>
     requires directlyEncodable<Protocol, U>

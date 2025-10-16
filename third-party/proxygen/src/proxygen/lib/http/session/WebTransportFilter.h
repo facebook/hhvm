@@ -310,13 +310,8 @@ class WebTransportFilter
     XLOG(DBG1) << __func__ << " errorCode=" << capsule.applicationErrorCode
                << " message=" << capsule.applicationErrorMessage;
 
-    if (txn_) {
-      auto* wt = txn_->getWebTransport();
-      if (wt) {
-        auto* wtImpl = static_cast<WebTransportImpl*>(wt);
-        wtImpl->terminateSession(capsule.applicationErrorCode);
-      }
-
+    if (wtImpl_) {
+      wtImpl_->terminateSession(capsule.applicationErrorCode);
       sessionClosed_ = true;
       closeErrorCode_ = capsule.applicationErrorCode;
       closeErrorMessage_ = capsule.applicationErrorMessage;

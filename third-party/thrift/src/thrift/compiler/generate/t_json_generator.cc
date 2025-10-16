@@ -657,8 +657,9 @@ void t_json_generator::generate_struct(const t_structured* tstruct) {
     print_spec((*mem_iter)->get_type());
     f_out_ << "," << endl
            << indent() << "\"required\" : "
-           << ((*mem_iter)->get_req() != t_field::e_req::optional ? "true"
-                                                                  : "false");
+           << ((*mem_iter)->qualifier() != t_field_qualifier::optional
+                   ? "true"
+                   : "false");
     const t_const_value* default_val = (*mem_iter)->default_value();
     if (default_val != nullptr) {
       f_out_ << "," << endl << indent() << "\"default_value\" : ";

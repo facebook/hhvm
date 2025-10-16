@@ -128,27 +128,6 @@ class t_field final : public t_named {
   // TODO(T227540797): Delete everything below here. It is only provided for
   // backwards compatibility.
  public:
-  enum class e_req {
-    opt_in_req_out = 0,
-    required = 1,
-    optional = 2,
-    terse = 3,
-  };
-
-  e_req get_req() const {
-    switch (qual_) {
-      case t_field_qualifier::none:
-        return e_req::opt_in_req_out;
-      case t_field_qualifier::required:
-        return e_req::required;
-      case t_field_qualifier::optional:
-        return e_req::optional;
-      case t_field_qualifier::terse:
-        return e_req::terse;
-    }
-    return {};
-  }
-
   const t_type* get_type() const { return type().get_type(); }
   void set_type(t_type_ref type) { type_ = type; }
 };

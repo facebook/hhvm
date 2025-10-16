@@ -702,8 +702,8 @@ void t_cocoa_generator::generate_cocoa_struct_initializer_signature(
     out << ": (";
     if (nullability_ && type_can_be_null((field.get_type()))) {
       out
-          << (field.get_req() == t_field::e_req::required ? "nonnull "
-                                                          : "nullable ");
+          << (field.qualifier() == t_field_qualifier::required ? "nonnull "
+                                                               : "nullable ");
     }
     out << type_name(field.get_type()) << ") " << field.name();
     first = false;
@@ -1301,7 +1301,7 @@ void t_cocoa_generator::generate_cocoa_struct_validator(
 
   out << indent() << "// check for required fields" << std::endl;
   for (const auto& field : tstruct->fields()) {
-    if (field.get_req() == t_field::e_req::required) {
+    if (field.qualifier() == t_field_qualifier::required) {
       out << indent() << "if (!" << kFieldPrefix << field.name() << kSetPostfix
           << ") {" << std::endl
           << indent()
@@ -2926,8 +2926,9 @@ std::string t_cocoa_generator::declare_property(const t_field* tfield) {
     render << ", retain";
     if (nullability_) {
       render
-          << (tfield->get_req() == t_field::e_req::required ? ", nonnull"
-                                                            : ", nullable");
+          << (tfield->qualifier() == t_field_qualifier::required
+                  ? ", nonnull"
+                  : ", nullable");
     }
   }
   render

@@ -2142,7 +2142,7 @@ void t_py_generator::generate_py_struct_writer(
     // Write field header
     indent(out) << "if self." << rename_reserved_keywords((*f_iter)->name())
                 << " != None";
-    if ((*f_iter)->get_req() == t_field::e_req::optional &&
+    if ((*f_iter)->qualifier() == t_field_qualifier::optional &&
         (*f_iter)->default_value() != nullptr) {
       // An optional field with a value set should not be serialized if
       // the value equals the default value

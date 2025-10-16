@@ -972,7 +972,7 @@ class mstch_java_field : public mstch_field {
   }
 
   mstch::node has_initial_value() {
-    if (field_->get_req() == t_field::e_req::optional) {
+    if (field_->qualifier() == t_field_qualifier::optional) {
       // default values are ignored for optional fields
       return false;
     }
@@ -1002,7 +1002,7 @@ class mstch_java_field : public mstch_field {
   }
 
   mstch::node is_nullable_or_optional_not_enum() {
-    if (field_->get_req() == t_field::e_req::optional) {
+    if (field_->qualifier() == t_field_qualifier::optional) {
       return true;
     }
     const t_type* field_type = field_->get_type()->get_true_type();
@@ -1060,7 +1060,7 @@ class mstch_java_field : public mstch_field {
   }
   mstch::node is_negative_id() { return field_->id() < 0; }
   std::string default_value_for_field(const t_field* field) {
-    if (field_->get_req() == t_field::e_req::optional) {
+    if (field_->qualifier() == t_field_qualifier::optional) {
       return "null";
     }
     return default_value_for_type(field->get_type());

@@ -661,38 +661,38 @@ std::string cpp_name_resolver::gen_reference_type(const t_field& node) {
   const std::string ns = "::apache::thrift::";
 
   if (gen::cpp::find_ref_type(node) == cpp_reference_type::boxed) {
-    switch (node.get_req()) {
-      case t_field::e_req::optional:
+    switch (node.qualifier()) {
+      case t_field_qualifier::optional:
         return ns + "optional_boxed_field_ref";
-      case t_field::e_req::opt_in_req_out:
-      case t_field::e_req::terse:
-      case t_field::e_req::required:
+      case t_field_qualifier::none:
+      case t_field_qualifier::terse:
+      case t_field_qualifier::required:
       default:
         throw std::runtime_error("unsupported boxed field");
     }
   }
 
   if (gen::cpp::find_ref_type(node) == cpp_reference_type::boxed_intern) {
-    switch (node.get_req()) {
-      case t_field::e_req::opt_in_req_out:
+    switch (node.qualifier()) {
+      case t_field_qualifier::none:
         return ns + "intern_boxed_field_ref";
-      case t_field::e_req::terse:
+      case t_field_qualifier::terse:
         return ns + "terse_intern_boxed_field_ref";
-      case t_field::e_req::required:
-      case t_field::e_req::optional:
+      case t_field_qualifier::required:
+      case t_field_qualifier::optional:
       default:
         throw std::runtime_error("unsupported intern boxed field");
     }
   }
 
-  switch (node.get_req()) {
-    case t_field::e_req::required:
+  switch (node.qualifier()) {
+    case t_field_qualifier::required:
       return ns + "required_field_ref";
-    case t_field::e_req::optional:
+    case t_field_qualifier::optional:
       return ns + "optional_field_ref";
-    case t_field::e_req::opt_in_req_out:
+    case t_field_qualifier::none:
       return ns + "field_ref";
-    case t_field::e_req::terse:
+    case t_field_qualifier::terse:
       return ns + "terse_field_ref";
     default:
       throw std::runtime_error("unknown qualifier");

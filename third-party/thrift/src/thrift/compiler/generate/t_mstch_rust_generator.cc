@@ -1638,7 +1638,7 @@ class rust_mstch_struct : public mstch_struct {
   mstch::node is_exception_message_optional() {
     if (const auto* message_field =
             dynamic_cast<const t_exception&>(*struct_).get_message_field()) {
-      return message_field->get_req() == t_field::e_req::optional;
+      return message_field->qualifier() == t_field_qualifier::optional;
     }
     return {};
   }
@@ -1660,7 +1660,7 @@ class rust_mstch_struct : public mstch_struct {
   mstch::node rust_generated_struct() { return (*struct_).generated(); }
   mstch::node rust_all_optional() {
     for (const auto& field : struct_->fields()) {
-      if (field.get_req() != t_field::e_req::optional) {
+      if (field.qualifier() != t_field_qualifier::optional) {
         return false;
       }
     }

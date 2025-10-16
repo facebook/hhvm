@@ -1049,7 +1049,7 @@ class py3_mstch_field : public mstch_field {
   mstch::node isSet() {
     auto ref_type = get_ref_type();
     return (ref_type == RefType::NotRef || ref_type == RefType::IOBuf) &&
-        field_->get_req() != t_field::e_req::required;
+        field_->qualifier() != t_field_qualifier::required;
   }
 
   bool has_default_value() {

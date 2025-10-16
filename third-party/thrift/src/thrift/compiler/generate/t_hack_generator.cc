@@ -1525,7 +1525,7 @@ void t_hack_generator::generate_json_reader(
     }
     indent_down();
     indent(out) << "}";
-    if (tf.get_req() == t_field::e_req::required) {
+    if (tf.qualifier() == t_field_qualifier::required) {
       out << " else {\n";
       indent_up();
       indent(out) << "throw new \\TProtocolException(\"Required field "
@@ -2448,7 +2448,7 @@ std::unique_ptr<t_const_value> t_hack_generator::field_to_tmeta(
       std::make_unique<t_const_value>("name"),
       std::make_unique<t_const_value>(field->name()));
 
-  if (field->get_req() == t_field::e_req::optional) {
+  if (field->qualifier() == t_field_qualifier::optional) {
     auto is_optional = std::make_unique<t_const_value>();
     is_optional->set_bool(true);
     tmeta_ThriftField->add_map(
@@ -3377,9 +3377,9 @@ bool t_hack_generator::field_is_nullable(
   }
 
   return (dval == "null") || tstruct->is<t_union>() ||
-      (field->get_req() == t_field::e_req::optional &&
+      (field->qualifier() == t_field_qualifier::optional &&
        field->default_value() == nullptr) ||
-      (t->is<t_enum>() && field->get_req() != t_field::e_req::required);
+      (t->is<t_enum>() && field->qualifier() != t_field_qualifier::required);
 }
 
 void t_hack_generator::generate_php_struct_stringifyMapKeys_method(
@@ -4413,7 +4413,7 @@ void t_hack_generator::generate_php_struct_methods(
       out << indent() << "<<__Override>>\n"
           << indent() << "public function getMessage()[]: string {\n";
       out << indent() << "  return $this->" << message_field->name();
-      if (message_field->get_req() != t_field::e_req::required) {
+      if (message_field->qualifier() != t_field_qualifier::required) {
         out << " ?? ''";
       }
       out << ";\n" << indent() << "}\n\n";
@@ -4562,7 +4562,7 @@ void t_hack_generator::generate_php_struct_constructor_field_assignment(
   bool nullable = type == ThriftStructType::RESULT ||
       (!(is_exception && is_base_exception_property(&field)) &&
        (dval == "null" ||
-        (field.get_req() == t_field::e_req::optional &&
+        (field.qualifier() == t_field_qualifier::optional &&
          field.default_value() == nullptr)));
 
   const std::string& field_name = field.name();
@@ -5386,7 +5386,7 @@ void t_hack_generator::_generate_args(
         bool nullable = nullable_everything_ || !no_nullables_ ||
             (ftype->is<t_enum>() &&
              (field.default_value() == nullptr ||
-              field.get_req() != t_field::e_req::required));
+              field.qualifier() != t_field_qualifier::required));
         if (nullable) {
           out << indent() << "if ($" << name << " !== null) {\n";
           indent_up();

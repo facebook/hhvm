@@ -1635,7 +1635,7 @@ class cpp_mstch_struct : public mstch_struct {
       const t_type* type = field->get_type()->get_true_type();
       // Filter out all optional references.
       if (cpp2::is_explicit_ref(field) &&
-          field->get_req() == t_field::e_req::optional) {
+          field->qualifier() == t_field_qualifier::optional) {
         continue;
       }
       if (type->is<t_enum>() ||
@@ -1647,11 +1647,11 @@ class cpp_mstch_struct : public mstch_struct {
            (struct_ != type->try_as<t_struct>()) &&
            ((field->default_value() && !field->default_value()->is_empty()) ||
             (cpp2::is_explicit_ref(field) &&
-             field->get_req() != t_field::e_req::optional))) ||
+             field->qualifier() != t_field_qualifier::optional))) ||
           (type->is<t_container>() && cpp2::is_explicit_ref(field) &&
-           field->get_req() != t_field::e_req::optional) ||
+           field->qualifier() != t_field_qualifier::optional) ||
           (type->is<t_primitive_type>() && cpp2::is_explicit_ref(field) &&
-           field->get_req() != t_field::e_req::optional)) {
+           field->qualifier() != t_field_qualifier::optional)) {
         filtered_fields.push_back(field);
       }
     }
@@ -1930,8 +1930,8 @@ class cpp_mstch_struct : public mstch_struct {
           return (!enabled_terse_write ||
                   !cpp2::deprecated_terse_writes(&field)) &&
               !field.has_structured_annotation(kCppDeprecatedTerseWriteUri) &&
-              field.get_req() != t_field::e_req::optional &&
-              field.get_req() != t_field::e_req::terse;
+              field.qualifier() != t_field_qualifier::optional &&
+              field.qualifier() != t_field_qualifier::terse;
         });
   }
   mstch::node has_fields_with_runtime_annotation() {
@@ -2265,20 +2265,20 @@ class cpp_mstch_field : public mstch_field {
         !cpp_name_resolver::find_first_adapter(*field_) &&
         !cpp_name_resolver::find_field_interceptor(*field_) &&
         !has_option("no_getters_setters") &&
-        field_->get_req() != t_field::e_req::terse;
+        field_->qualifier() != t_field_qualifier::terse;
   }
   mstch::node cpp_ref() { return cpp2::is_explicit_ref(field_); }
   mstch::node opt_cpp_ref() {
     return cpp2::is_explicit_ref(field_) &&
-        field_->get_req() == t_field::e_req::optional;
+        field_->qualifier() == t_field_qualifier::optional;
   }
   mstch::node non_opt_cpp_ref() {
     return cpp2::is_explicit_ref(field_) &&
-        field_->get_req() != t_field::e_req::optional;
+        field_->qualifier() != t_field_qualifier::optional;
   }
   mstch::node terse_cpp_ref() {
     return cpp2::is_explicit_ref(field_) &&
-        field_->get_req() == t_field::e_req::terse;
+        field_->qualifier() == t_field_qualifier::terse;
   }
   mstch::node lazy() { return cpp2::is_lazy(field_); }
   mstch::node lazy_ref() { return cpp2::is_lazy_ref(field_); }
@@ -2428,14 +2428,14 @@ class cpp_mstch_field : public mstch_field {
         get_fatal_annotations(field_->unstructured_annotations()));
   }
   mstch::node fatal_required_qualifier() {
-    switch (field_->get_req()) {
-      case t_field::e_req::required:
+    switch (field_->qualifier()) {
+      case t_field_qualifier::required:
         return "required";
-      case t_field::e_req::optional:
+      case t_field_qualifier::optional:
         return "optional";
-      case t_field::e_req::opt_in_req_out:
+      case t_field_qualifier::none:
         return "required_of_writer";
-      case t_field::e_req::terse:
+      case t_field_qualifier::terse:
         return "terse";
     }
     throw std::runtime_error("unknown required qualifier");
@@ -2506,13 +2506,13 @@ class cpp_mstch_field : public mstch_field {
   }
 
   bool is_private() const {
-    auto req = field_->get_req();
+    auto req = field_->qualifier();
     bool isPrivate = true;
     if (cpp2::is_lazy(field_)) {
       // Lazy field has to be private.
     } else if (cpp2::is_ref(field_)) {
       // cpp.ref field is always private
-    } else if (req == t_field::e_req::required) {
+    } else if (req == t_field_qualifier::required) {
       isPrivate = !has_option("deprecated_public_required_fields");
     }
     return isPrivate;

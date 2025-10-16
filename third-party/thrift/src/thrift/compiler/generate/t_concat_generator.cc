@@ -132,7 +132,7 @@ std::string t_concat_generator::generate_structural_id(
   for (const auto& field : tstruct->fields()) {
     std::stringstream ss_field;
     ss_field << field.id() << delim << field.name() << delim
-             << field.type()->name() << delim << (int)(field.get_req());
+             << field.type()->name() << delim << (int)(field.qualifier());
     fields_str.push_back(ss_field.str());
   }
 

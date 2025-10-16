@@ -373,9 +373,9 @@ class pyi_mstch_field : public mstch_field {
             {"field:py_name", &pyi_mstch_field::get_filtered_name},
         });
 
-    auto field_type = mstch_field::field_->get_req();
-    bool is_required = (field_type == t_field::e_req::required);
-    bool is_optional = (field_type == t_field::e_req::optional);
+    auto field_type = mstch_field::field_->qualifier();
+    bool is_required = (field_type == t_field_qualifier::required);
+    bool is_optional = (field_type == t_field_qualifier::optional);
     bool is_unqualified = !is_required && !is_optional;
     bool has_value = (mstch_field::field_->default_value() != nullptr);
     bool has_default_value = has_value || is_unqualified;

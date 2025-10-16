@@ -36,7 +36,21 @@
         },
     },
     {{#else if function:sink?}}
-    NOT IMPLEMENTED
+    ReturnType: &{{program:metadata_qualifier}}ThriftType{
+        TSink: &{{program:metadata_qualifier}}ThriftSinkType{
+            {{#function:sink_elem_type}}
+            ElemType: {{type:metadata_thrift_type_getter}},
+            {{/function:sink_elem_type}}
+            {{#function:sink_final_response_type}}
+            FinalResponseType: {{type:metadata_thrift_type_getter}},
+            {{/function:sink_final_response_type}}
+            {{#function:sink_has_first_response?}}
+            {{#function:sink_first_response_type}}
+            InitialResponseType: {{type:metadata_thrift_type_getter}},
+            {{/function:sink_first_response_type}}
+            {{/function:sink_has_first_response?}}
+        },
+    },
     {{#else}}
     {{#function:return_type}}
     ReturnType: {{type:metadata_thrift_type_getter}},

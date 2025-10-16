@@ -332,6 +332,7 @@ mod ffi {
         pub modules: Vec<ModuleFacts>,
         pub file_attributes: Vec<AttrFacts>,
         pub module_membership: String, // Empty means none. Cannot use Option in ffi.
+        pub package_membership: String, // Empty means none. Cannot use Option in ffi.
         pub sha1sum: String,
     }
 

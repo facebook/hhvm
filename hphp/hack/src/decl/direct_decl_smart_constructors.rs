@@ -133,7 +133,7 @@ pub struct Impl<'o, 't> {
     under_no_auto_likes: bool,
     inside_no_auto_dynamic_class: bool,
     pub module: Option<Id>,
-    package: Option<nast::PackageMembership>,
+    pub package: Option<nast::PackageMembership>,
 }
 
 impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {

@@ -126,6 +126,7 @@ pub struct Facts {
     pub file_attributes: Attributes,
     pub modules: ModuleFactsByName,
     pub module_membership: Option<String>,
+    pub package_membership: Option<String>,
 }
 
 // This must keep in sync with hack/src/facebook/hh_distc/facts/facts_sqlite.rs.
@@ -189,6 +190,7 @@ impl Facts {
             file_attributes,
             modules,
             module_membership: parsed_file.module_membership.clone(),
+            package_membership: parsed_file.package_membership.clone(),
         }
     }
 

@@ -7,6 +7,7 @@ use std::sync::Arc;
 
 use direct_decl_smart_constructors::DirectDeclSmartConstructors;
 use mode_parser::parse_mode;
+use oxidized::ast::PackageMembership;
 pub use oxidized::decl_parser_options::DeclParserOptions;
 pub use oxidized::direct_decl_parser::Decls;
 pub use oxidized::direct_decl_parser::ParsedFile;
@@ -80,5 +81,9 @@ fn parse_script<'o, 't>(
         disable_xhp_element_mangling: opts.disable_xhp_element_mangling,
         has_first_pass_parse_errors: !errors.is_empty(),
         module_membership: sc_state.module.map(|id| id.1),
+        package_membership: sc_state.package.map(|pkg| match pkg {
+            PackageMembership::PackageOverride(_, package) => package,
+            PackageMembership::PackageConfigAssignment(package) => package,
+        }),
     }
 }

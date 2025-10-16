@@ -42,6 +42,9 @@ pub struct ParsedFile {
 
     /// The module this file is a part of, if any.
     pub module_membership: Option<String>,
+
+    // The package this file is part of
+    pub package_membership: Option<String>,
 }
 
 /// This is a store of decls. It allows iteration of decls in forward lexical order,

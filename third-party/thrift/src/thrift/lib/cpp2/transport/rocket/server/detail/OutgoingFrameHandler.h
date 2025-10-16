@@ -20,7 +20,6 @@
 #include <thrift/lib/cpp2/transport/rocket/core/FrameUtil.h>
 #include <thrift/lib/cpp2/transport/rocket/core/RingBuffer.h>
 #include <thrift/lib/cpp2/transport/rocket/core/StreamUtil.h>
-#include <thrift/lib/cpp2/transport/rocket/core/server/ConnectionState.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/FrameType.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 
@@ -31,16 +30,18 @@ namespace detail::out_going_frame_handler {
 using namespace apache::thrift::rocket::stream_util;
 using namespace apache::thrift::rocket::frame_util;
 
+template <typename ConnectionT, template <typename> class ConnectionAdapter>
 struct SerializationEvent {
+  using Connection = ConnectionAdapter<ConnectionT>;
   SerializationEvent() = default;
 
-  template <typename Frame, typename Connection>
+  template <typename Frame>
   SerializationEvent(
       Frame&& frame,
       Connection* connection,
       folly::DelayedDestruction::DestructorGuard&& guard)
       : container(std::forward<Frame>(frame)),
-        state(state),
+        connection(connection),
         guard(std::move(guard)) {}
 
   SerializationEvent(SerializationEvent&& other) = delete;
@@ -83,10 +84,11 @@ struct WriteBatch {
  *
  * Default batch size is 64, but specified in log size - so 1 << 6.
  */
-template <typename Connection>
+template <typename ConnectionT, template <typename> class ConnectionAdapter>
 class OutgoingFrameHandler : public folly::EventBase::LoopCallback {
-  using SerializationEvent =
-      detail::out_going_frame_handler::SerializationEvent;
+  using Connection = ConnectionAdapter<ConnectionT>;
+  using SerializationEvent = detail::out_going_frame_handler::
+      SerializationEvent<ConnectionT, ConnectionAdapter>;
   using WriteBatch = detail::out_going_frame_handler::WriteBatch;
 
  public:
@@ -98,13 +100,13 @@ class OutgoingFrameHandler : public folly::EventBase::LoopCallback {
         batches_(batchLogSize) {}
 
   template <typename T>
-  FOLLY_ALWAYS_INLINE void handle(T&& t, Connection& state) {
+  FOLLY_ALWAYS_INLINE void handle(T&& t, Connection& connection) {
     evb_.dcheckIsInEventBaseThread();
-    state.getConnectionMetrics().incrNumOutgoingFrames();
     bool ret = queue_.emplace_back(
         std::move(t),
-        &state,
-        folly::DelayedDestruction::DestructorGuard(&state));
+        &connection,
+        folly::DelayedDestruction::DestructorGuard(
+            connection.getWrappedConnection()));
     FOLLY_SAFE_DCHECK(ret, "queue is full");
     tryForceDrainOrSchedule();
   }
@@ -117,7 +119,7 @@ class OutgoingFrameHandler : public folly::EventBase::LoopCallback {
   const size_t batchSize_;
   folly::EventBase& evb_;
   RingBuffer<SerializationEvent> queue_;
-  folly::F14NodeMap<ConnectionState*, WriteBatch> batches_;
+  folly::F14NodeMap<Connection*, WriteBatch> batches_;
 
   FOLLY_ERASE void dcheckSerializedEvent(SerializationEvent& event) {
     if constexpr (folly::kIsDebug) {
@@ -132,8 +134,7 @@ class OutgoingFrameHandler : public folly::EventBase::LoopCallback {
 
   void processWriteBatches() {
     for (auto it = batches_.begin(); it != batches_.end(); ++it) {
-      it->first->write(std::move(it->second.chain));
-      it->first->getConnectionMetrics().decrNumOutgoingFrames();
+      it->first->handleSerializedFrame(std::move(it->second.chain));
     }
     batches_.clear();
   }
@@ -145,12 +146,13 @@ class OutgoingFrameHandler : public folly::EventBase::LoopCallback {
           dcheckSerializedEvent(event);
           Connection* connection = event.connection;
           auto serialized = event.container.serialize();
-          auto it = batches_.find(state);
+          auto it = batches_.find(connection);
           if (it == batches_.end()) {
             batches_.try_emplace(
-                state, // key
+                connection, // key
                 std::move(serialized),
-                folly::DelayedDestructionBase::DestructorGuard(state));
+                folly::DelayedDestructionBase::DestructorGuard(
+                    connection->getWrappedConnection()));
           } else {
             it->second.chain->appendToChain(std::move(serialized));
           }

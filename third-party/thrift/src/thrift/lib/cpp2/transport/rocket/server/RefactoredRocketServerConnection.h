@@ -20,7 +20,6 @@
 #include <deque>
 #include <memory>
 #include <ostream>
-#include <unordered_map>
 #include <utility>
 #include <variant>
 
@@ -72,6 +71,10 @@ class RocketStreamClientCallback;
 
 namespace rocket {
 
+// Forward declaration for OutgoingFrameHandler
+template <typename ConnectionT, template <typename> class ConnectionAdapter>
+class OutgoingFrameHandler;
+
 class RefactoredRocketServerConnection final : public IRocketServerConnection {
  public:
   using DestructorGuard = folly::DelayedDestruction::DestructorGuard;
@@ -94,6 +97,27 @@ class RefactoredRocketServerConnection final : public IRocketServerConnection {
     double egressBufferBackpressureRecoveryFactor{0.0};
     const folly::SocketOptionMap* socketOptions{nullptr};
     std::shared_ptr<rocket::ParserAllocatorType> parserAllocator{nullptr};
+
+    // OutgoingFrameHandler configuration
+    // Maps writeBatchingSize to OutgoingFrameHandler batch size
+    size_t getOutgoingFrameHandlerBatchLogSize() const {
+      // Convert writeBatchingSize to log2 batch size for OutgoingFrameHandler
+      // If writeBatchingSize is 0 or 1, use default batch size of 16 (log2 = 4)
+      if (writeBatchingSize <= 1) {
+        return 4; // Default: 1 << 4 = 16 frames
+      }
+
+      // Find the log2 of writeBatchingSize, rounding up to next power of 2
+      size_t logSize = 0;
+      size_t size = writeBatchingSize - 1;
+      while (size > 0) {
+        size >>= 1;
+        logSize++;
+      }
+
+      // Cap at reasonable maximum (1 << 10 = 1024 frames)
+      return std::min(logSize, size_t{10});
+    }
   };
 
   RefactoredRocketServerConnection(
@@ -145,7 +169,6 @@ class RefactoredRocketServerConnection final : public IRocketServerConnection {
 
   folly::EventBase& getEventBase() const override { return evb_; }
   size_t getNumStreams() const override { return streams_.size(); }
-
   void sendPayload(
       StreamId streamId,
       Payload&& payload,
@@ -159,6 +182,7 @@ class RefactoredRocketServerConnection final : public IRocketServerConnection {
   void sendCancel(StreamId streamId) override;
   void sendMetadataPush(std::unique_ptr<folly::IOBuf> metadata) override;
 
+ public:
   void freeStream(StreamId streamId, bool markRequestComplete) override;
 
   void scheduleStreamTimeout(folly::HHWheelTimer::Callback*) override;
@@ -325,6 +349,7 @@ class RefactoredRocketServerConnection final : public IRocketServerConnection {
   MemoryTracker& ingressMemoryTracker_;
   MemoryTracker& egressMemoryTracker_;
   StreamMetricCallback& streamMetricCallback_;
+  const Config cfg_;
 
   ~RefactoredRocketServerConnection() override;
 
@@ -357,6 +382,9 @@ class RefactoredRocketServerConnection final : public IRocketServerConnection {
   void timeoutExpired() noexcept final;
   void describe(std::ostream&) const final {}
   bool isBusy() const final;
+
+  // Helper method to check if OutgoingFrameHandler has pending frames
+  bool isOutgoingFrameHandlerBusy() const;
   void notifyPendingShutdown() final;
   void closeWhenIdle() final;
   void dropConnection(const std::string& errorMsg = "") final;
@@ -479,6 +507,12 @@ class RefactoredRocketServerConnection final : public IRocketServerConnection {
       apache::thrift::rocket::ConnectionAdapter<
           RefactoredRocketServerConnection>>;
   folly::EventBaseLocal<IncomingFrameBatcher> batcher_;
+
+  // OutgoingFrameHandler for frame-level batching across connections
+  folly::EventBaseLocal<apache::thrift::rocket::OutgoingFrameHandler<
+      RefactoredRocketServerConnection,
+      apache::thrift::rocket::ConnectionAdapter>>
+      outgoingFrameHandler_;
 };
 
 } // namespace rocket

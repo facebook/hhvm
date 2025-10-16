@@ -110,6 +110,11 @@ class ConnectionAdapter {
         std::move(writes), std::move(context), std::move(fdsAndOffsets));
   }
 
+  // Method for OutgoingFrameHandler to send serialized frame data
+  void handleSerializedFrame(std::unique_ptr<folly::IOBuf> serializedFrame) {
+    connection_->send(std::move(serializedFrame));
+  }
+
  private:
   AdaptedConnectionT* connection_;
 };

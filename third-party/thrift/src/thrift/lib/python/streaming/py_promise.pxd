@@ -14,11 +14,16 @@
 
 from libcpp.memory cimport unique_ptr
 from libcpp.optional cimport optional
+from cpython.ref cimport PyObject
 
 from folly cimport cFollyPromise
 from folly.iobuf cimport cIOBuf, IOBuf
 from thrift.python.exceptions cimport cTApplicationException
 from thrift.python.streaming.python_user_exception cimport cPythonUserException
+
+# cython doesn't support * in template parameters
+# Make a typedef to workaround this.
+ctypedef PyObject* PyObjPtr
 
 cdef class Promise_Py:
     cdef error_ta(Promise_Py self, cTApplicationException err)
@@ -45,6 +50,18 @@ cdef class Promise_IOBuf(Promise_Py):
     @staticmethod
     cdef create(cFollyPromise[unique_ptr[cIOBuf]] cPromise)
 
+cdef class Promise_PyObject(Promise_Py):
+    cdef cFollyPromise[PyObjPtr]* cPromise
 
-cdef void genNextStreamValue(object generator, cFollyPromise[optional[unique_ptr[cIOBuf]]] promise) noexcept
+    cdef error_ta(Promise_PyObject self, cTApplicationException err)
+    cdef error_py(Promise_PyObject self, cPythonUserException err)
+    cdef error_py_object(Promise_PyObject self, object ex)
+    cdef complete(Promise_PyObject self, object pyobj)
+
+    @staticmethod
+    cdef create(cFollyPromise[PyObjPtr] promise)
+
+# Make this API usable from Cython for bidi
+cdef api void genNextStreamValue(object generator, cFollyPromise[optional[unique_ptr[cIOBuf]]] promise) noexcept
+
 cdef void genNextSinkValue(object generator, cFollyPromise[optional[unique_ptr[cIOBuf]]] promise) noexcept

@@ -89,6 +89,37 @@ cdef class Promise_Optional_IOBuf(Promise_Py):
         inst.cPromise[0] = cmove(promise)
         return inst
 
+# A promise useful for returning PyObjPtr, such as Python async generators
+# for bidirectional stream transformations.
+cdef class Promise_PyObject(Promise_Py):
+
+    def __cinit__(self):
+        self.cPromise = new cFollyPromise[PyObjPtr](cFollyPromise[PyObjPtr].makeEmpty())
+
+    def __dealloc__(self):
+        del self.cPromise
+
+    cdef error_ta(Promise_PyObject self, cTApplicationException err):
+        self.cPromise.setException(err)
+
+    cdef error_py(Promise_PyObject self, cPythonUserException err):
+        self.cPromise.setException(cmove(err))
+
+    cdef error_py_object(Promise_PyObject self, object ex):
+        cdef str ex_msg = repr(ex)
+        self.cPromise.setException(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, ex_msg.encode('UTF-8')
+        ))
+
+    cdef complete(Promise_PyObject self, object pyobj):
+        self.cPromise.setValue(<PyObjPtr>pyobj)
+
+    @staticmethod
+    cdef create(cFollyPromise[PyObjPtr] promise):
+        cdef Promise_PyObject inst = Promise_PyObject.__new__(Promise_PyObject)
+        inst.cPromise[0] = cmove(promise)
+        return inst
+
 
 cdef str SERVER_ERR_MSG = "server stream handler"
 cdef str SINK_ERR_MSG = "client sink generator"
@@ -118,7 +149,7 @@ async def runGenerator(
         msg = f"Application was cancelled on the {blame} with message: {str(ex)}"
         promise.error_ta(
             cTApplicationException(
-                cTApplicationExceptionType__UNKNOWN, 
+                cTApplicationExceptionType__UNKNOWN,
                 msg.encode('UTF-8'),
             )
         )
@@ -135,7 +166,7 @@ async def runGenerator(
     else:
         promise.complete(item)
 
-cdef void genNextStreamValue(object generator, cFollyPromise[optional[unique_ptr[cIOBuf]]] promise) noexcept:
+cdef api void genNextStreamValue(object generator, cFollyPromise[optional[unique_ptr[cIOBuf]]] promise) noexcept:
     cdef Promise_Optional_IOBuf __promise = Promise_Optional_IOBuf.create(cmove(promise))
     asyncio.get_event_loop().create_task(
         runGenerator(

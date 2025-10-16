@@ -552,7 +552,10 @@ static constexpr bool should_process_as_arithmetic_vector_v =
     is_supported_arithmetic_elem_type_v<
         typename ContainerType::value_type,
         elem_ttype> &&
-    folly::is_contiguous_range_v<ContainerType>;
+    folly::is_contiguous_range_v<ContainerType> &&
+    requires(typename ContainerType::value_type* v, size_t len) {
+      Protocol::writeArithmeticVector(v, len);
+    };
 /*
  * List Specialization
  */

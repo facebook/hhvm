@@ -33,6 +33,7 @@
 #include <thrift/lib/cpp2/protocol/detail/protocol_methods.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
 #include <thrift/lib/cpp2/type/Tag.h>
+#include <thrift/lib/cpp2/type/detail/TypeClassFromTypeTag.h>
 
 namespace apache::thrift {
 
@@ -729,12 +730,33 @@ struct Encode<type::map<Key, Value>> : MapEncode<Key, Value> {};
 template <typename T, typename Tag>
 struct CppTypeEncode {
   template <class Protocol, class U>
+  static constexpr bool directlyEncodable =
+      requires(Protocol& prot, const U& u) { Encode<Tag>{}(prot, u); };
+
+  template <class Protocol, class U>
+    requires directlyEncodable<Protocol, U>
   uint32_t operator()(Protocol& prot, const U& m) const {
-    if constexpr (kIsStrongType<U, Tag>) {
-      return Encode<Tag>{}(prot, static_cast<type::native_type<Tag>>(m));
-    } else {
-      return Encode<Tag>{}(prot, m);
-    }
+    return Encode<Tag>{}(prot, m);
+  }
+
+  template <class Protocol, class U>
+    requires(
+        std::convertible_to<U, type::standard_type<Tag>> &&
+        !directlyEncodable<Protocol, U>)
+  uint32_t operator()(Protocol& prot, const U& m) const {
+    return Encode<Tag>{}(prot, static_cast<type::standard_type<Tag>>(m));
+  }
+
+  using TC = type_class::from_type_tag_t<Tag>;
+  template <class Protocol, class U>
+  uint32_t operator()(Protocol& prot, const U& m) const
+    requires(
+        requires {
+          apache::thrift::detail::pm::protocol_methods<TC, T>::write(prot, m);
+        } && !std::convertible_to<U, type::standard_type<Tag>> &&
+        !directlyEncodable<Protocol, U>)
+  {
+    return apache::thrift::detail::pm::protocol_methods<TC, T>::write(prot, m);
   }
 };
 

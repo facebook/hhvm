@@ -681,12 +681,12 @@ TEST_F(CppNameResolverTest, basic_qualifier) {
   EXPECT_EQ(get_reference_type(default_i32), "::apache::thrift::field_ref");
 
   t_field optional_i32 = t_field(t_primitive_type::t_i32(), "i32");
-  optional_i32.set_req(t_field::e_req::optional);
+  optional_i32.set_qualifier(t_field_qualifier::optional);
   EXPECT_EQ(
       get_reference_type(optional_i32), "::apache::thrift::optional_field_ref");
 
   t_field terse_i32 = t_field(t_primitive_type::t_i32(), "i32");
-  terse_i32.set_req(t_field::e_req::terse);
+  terse_i32.set_qualifier(t_field_qualifier::terse);
   EXPECT_EQ(get_reference_type(terse_i32), "::apache::thrift::terse_field_ref");
 }
 

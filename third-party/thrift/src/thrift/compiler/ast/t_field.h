@@ -135,22 +135,6 @@ class t_field final : public t_named {
     terse = 3,
   };
 
-  void set_req(e_req req) {
-    switch (req) {
-      case e_req::opt_in_req_out:
-        set_qualifier(t_field_qualifier::none);
-        break;
-      case e_req::required:
-        set_qualifier(t_field_qualifier::required);
-        break;
-      case e_req::optional:
-        set_qualifier(t_field_qualifier::optional);
-        break;
-      case e_req::terse:
-        set_qualifier(t_field_qualifier::terse);
-        break;
-    }
-  }
   e_req get_req() const {
     switch (qual_) {
       case t_field_qualifier::none:

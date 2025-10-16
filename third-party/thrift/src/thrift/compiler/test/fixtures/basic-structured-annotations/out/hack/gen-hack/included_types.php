@@ -27,7 +27,7 @@ class structured_annotation_included implements \IThriftSyncStruct, \IThriftStru
     ?'name' => ?string,
   );
 
-  const int STRUCTURAL_ID = 2593878277785201336;
+  const int STRUCTURAL_ID = 7068917836668558637;
   /**
    * Original thrift field:-
    * 1: string name

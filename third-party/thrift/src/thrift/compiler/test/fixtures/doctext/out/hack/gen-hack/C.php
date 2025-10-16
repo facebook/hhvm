@@ -345,7 +345,7 @@ class C_numbers_StreamResponse extends \ThriftSyncStructWithResult implements \I
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 1815418233987567820;
+  const int STRUCTURAL_ID = 9202174441314111365;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -506,7 +506,7 @@ class C_thing_args implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'c' => ?Set<int>,
   );
 
-  const int STRUCTURAL_ID = 5152653522450717322;
+  const int STRUCTURAL_ID = 2419136005429463288;
   public int $a;
   public string $b;
   public Set<int> $c;
@@ -625,7 +625,7 @@ class C_thing_result extends \ThriftSyncStructWithResult implements \IThriftStru
     ?'bang' => ?Bang,
   );
 
-  const int STRUCTURAL_ID = 8456199022957829086;
+  const int STRUCTURAL_ID = 8409042388961426766;
   public ?this::TResult $success;
   public ?Bang $bang;
 

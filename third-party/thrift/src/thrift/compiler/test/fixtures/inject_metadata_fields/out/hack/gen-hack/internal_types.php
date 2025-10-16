@@ -30,7 +30,7 @@ class InjectMetadataFields implements \IThriftSyncStruct, \IThriftStructMetadata
     ?'type' => ?string,
   );
 
-  const int STRUCTURAL_ID = 75466648195691209;
+  const int STRUCTURAL_ID = 8832434107693274988;
   /**
    * Original thrift field:-
    * 1: string type

@@ -76,7 +76,7 @@ class Union implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion
     ?'intValue' => ?int,
     ?'stringValue' => ?string,
   );
-  const int STRUCTURAL_ID = 7430801321277306554;
+  const int STRUCTURAL_ID = 1654230974129777770;
   /**
    * Original thrift field:-
    * 1: i64 intValue
@@ -266,7 +266,7 @@ class A implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   const type TShape = shape(
     'a' => string,
   );
-  const int STRUCTURAL_ID = 7939807933046472325;
+  const int STRUCTURAL_ID = 7586222194834317394;
   /**
    * Original thrift field:-
    * 1: string a
@@ -884,7 +884,7 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
     'list_of_string_with_default_value' => vec<string>,
     'map_of_string_to_list_of_i32_with_default_value' => dict<string, vec<int>>,
   );
-  const int STRUCTURAL_ID = 7290621384819644133;
+  const int STRUCTURAL_ID = 2448391187553077911;
   /**
    * Original thrift field:-
    * 1: module.A just_an_A

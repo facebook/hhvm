@@ -178,7 +178,7 @@ class TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation_result ex
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 3865318819874171525;
+  const int STRUCTURAL_ID = 413702039226145291;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {

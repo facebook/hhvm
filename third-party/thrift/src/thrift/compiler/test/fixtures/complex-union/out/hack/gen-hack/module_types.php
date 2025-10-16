@@ -92,7 +92,7 @@ class ComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
     ?'stringRef' => ?string,
   );
 
-  const int STRUCTURAL_ID = 1260275021738383280;
+  const int STRUCTURAL_ID = 3142369433262331789;
   /**
    * Original thrift field:-
    * 1: i64 intValue
@@ -585,7 +585,7 @@ class ListUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftP
     ?'stringListValue' => ?Vector<string>,
   );
 
-  const int STRUCTURAL_ID = 3965946011249022525;
+  const int STRUCTURAL_ID = 4827948821745821572;
   /**
    * Original thrift field:-
    * 2: list<i64> intListValue
@@ -822,7 +822,7 @@ class DataUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftP
     ?'stringData' => ?string,
   );
 
-  const int STRUCTURAL_ID = 5914600782954619153;
+  const int STRUCTURAL_ID = 1673443488006701058;
   /**
    * Original thrift field:-
    * 1: binary binaryData
@@ -1035,7 +1035,7 @@ class Val implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'typedefValue' => ?Map<int, string>,
   );
 
-  const int STRUCTURAL_ID = 7250696402099336501;
+  const int STRUCTURAL_ID = 8964062515462109207;
   /**
    * Original thrift field:-
    * 1: string strVal
@@ -1221,7 +1221,7 @@ class ValUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftPr
     ?'v2' => ?Val,
   );
 
-  const int STRUCTURAL_ID = 7355268417298249876;
+  const int STRUCTURAL_ID = 1922754063261319561;
   /**
    * Original thrift field:-
    * 1: module.Val v1
@@ -1441,7 +1441,7 @@ class VirtualComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata,
     ?'thingTwo' => ?string,
   );
 
-  const int STRUCTURAL_ID = 8657642278595798833;
+  const int STRUCTURAL_ID = 4196014604098845355;
   /**
    * Original thrift field:-
    * 1: string thingOne
@@ -1633,7 +1633,7 @@ class NonCopyableStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'num' => ?int,
   );
 
-  const int STRUCTURAL_ID = 7064950569513307469;
+  const int STRUCTURAL_ID = 2749206082480809903;
   /**
    * Original thrift field:-
    * 1: i64 num
@@ -1734,7 +1734,7 @@ class NonCopyableUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \I
     ?'s' => ?NonCopyableStruct,
   );
 
-  const int STRUCTURAL_ID = 5595426780316201025;
+  const int STRUCTURAL_ID = 2391352750489533043;
   /**
    * Original thrift field:-
    * 1: module.NonCopyableStruct s

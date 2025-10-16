@@ -35,7 +35,7 @@ class StructWithWrapper implements \IThriftSyncStruct, \IThriftStructMetadata, \
     const type TShape = shape(
       'int_field' => int,
     );
-    const int STRUCTURAL_ID = 8549930382776002541;
+    const int STRUCTURAL_ID = 1240300156842032777;
     /**
      * Original thrift field:-
      * 1: i64 int_field

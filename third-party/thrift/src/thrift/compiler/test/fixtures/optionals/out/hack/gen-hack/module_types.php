@@ -78,7 +78,7 @@ class Color implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'alpha' => ?float,
   );
 
-  const int STRUCTURAL_ID = 5495510740722957663;
+  const int STRUCTURAL_ID = 4950668652134585623;
   /**
    * Original thrift field:-
    * 1: double red
@@ -239,7 +239,7 @@ class Vehicle implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'hasAC' => ?bool,
   );
 
-  const int STRUCTURAL_ID = 2222890000100114781;
+  const int STRUCTURAL_ID = 5839324579427713090;
   /**
    * Original thrift field:-
    * 1: module.Color color
@@ -487,7 +487,7 @@ class Person implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'vehicles' => ?Vector<Vehicle>,
   );
 
-  const int STRUCTURAL_ID = 5615342512964403351;
+  const int STRUCTURAL_ID = 1834085044065603382;
   /**
    * Original thrift field:-
    * 1: module.PersonID id

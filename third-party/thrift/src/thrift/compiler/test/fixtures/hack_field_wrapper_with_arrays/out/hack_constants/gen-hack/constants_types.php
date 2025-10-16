@@ -110,7 +110,7 @@ class Internship implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThrif
     ?'school' => ?string,
     'intern_id' => \detail\i64WithWrapper,
   );
-  const int STRUCTURAL_ID = 2043029874796299989;
+  const int STRUCTURAL_ID = 1166460288596299590;
   /**
    * Original thrift field:-
    * 1: i32 weeks
@@ -454,7 +454,7 @@ class SWE implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
     ?'employer' => ?Company,
     ?'compensation' => ?float,
   );
-  const int STRUCTURAL_ID = 1922683334218183646;
+  const int STRUCTURAL_ID = 33035853090158733;
   /**
    * Original thrift field:-
    * 1: constants.Company employer

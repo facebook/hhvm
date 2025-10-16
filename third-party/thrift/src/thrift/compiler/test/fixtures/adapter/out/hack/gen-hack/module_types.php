@@ -149,7 +149,7 @@ class MyAnnotation implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
     'signature' => string,
     ?'color' => ?\facebook\thrift\test\Color,
   );
-  const int STRUCTURAL_ID = 4648320388473985046;
+  const int STRUCTURAL_ID = 1642806001896435573;
   /**
    * Original thrift field:-
    * 1: string signature
@@ -483,7 +483,7 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
     'adapted_map' => dict<string, int>,
     'adapted_list_nested' => vec<vec<dict<int, int>>>,
   );
-  const int STRUCTURAL_ID = 1255284922922059296;
+  const int STRUCTURAL_ID = 8313661192777597433;
   /**
    * Original thrift field:-
    * 1: module.i32_5137 intField
@@ -1830,7 +1830,7 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
     ?'binaryField' => ?\Adapter1::THackType,
     ?'longField' => ?int,
   );
-  const int STRUCTURAL_ID = 1906005273047242984;
+  const int STRUCTURAL_ID = 6631145563830871395;
   /**
    * Original thrift field:-
    * 1: module.i32_5137 intField
@@ -2592,7 +2592,7 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
     ?'adaptedStructField' => ?\facebook\thrift\test\DirectlyAdapted::TShape,
     'structListFieldWithTypedef' => vec<\facebook\thrift\test\Foo::TShape>,
   );
-  const int STRUCTURAL_ID = 3169215708272312197;
+  const int STRUCTURAL_ID = 1496700097428223925;
   /**
    * Original thrift field:-
    * 1: module.Foo_6868 structField
@@ -3229,7 +3229,7 @@ class DirectlyAdapted implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
   const type TShape = shape(
     'field' => int,
   );
-  const int STRUCTURAL_ID = 7035499037608086885;
+  const int STRUCTURAL_ID = 7989308273674627306;
   /**
    * Original thrift field:-
    * 1: i32 field
@@ -3355,7 +3355,7 @@ class IndependentDirectlyAdapted implements \IThriftSyncStruct, \IThriftStructMe
   const type TShape = shape(
     'field' => int,
   );
-  const int STRUCTURAL_ID = 7035499037608086885;
+  const int STRUCTURAL_ID = 7989308273674627306;
   /**
    * Original thrift field:-
    * 1: i32 field
@@ -3497,7 +3497,7 @@ class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftStructMetada
     ?'opt_shared_field' => ?int,
     ?'opt_boxed_field' => ?int,
   );
-  const int STRUCTURAL_ID = 1940453594051247312;
+  const int STRUCTURAL_ID = 73349064084838095;
   /**
    * Original thrift field:-
    * 1: i32 field
@@ -4034,7 +4034,7 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   const type TShape = shape(
     ?'a' => ?\facebook\thrift\test\A::TShape,
   );
-  const int STRUCTURAL_ID = 1135805466744601735;
+  const int STRUCTURAL_ID = 9205210590124948365;
   /**
    * Original thrift field:-
    * 1: module.AdaptedA a
@@ -4250,7 +4250,7 @@ class Config implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShap
   const type TShape = shape(
     'path' => string,
   );
-  const int STRUCTURAL_ID = 4266277309871357727;
+  const int STRUCTURAL_ID = 4026849337099622505;
   /**
    * Original thrift field:-
    * 1: string path
@@ -4392,7 +4392,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     'field' => int,
     'set_string' => \facebook\thrift\test\SetWithAdapter,
   );
-  const int STRUCTURAL_ID = 5903652997290634247;
+  const int STRUCTURAL_ID = 479306714091177610;
   /**
    * Original thrift field:-
    * 1: i32 field
@@ -4657,7 +4657,7 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
     'double_wrapped_integer' => int,
     'binary_data' => string,
   );
-  const int STRUCTURAL_ID = 1886811565365098978;
+  const int STRUCTURAL_ID = 660519187639668320;
   /**
    * Original thrift field:-
    * 1: module.DurationMs delay
@@ -5340,7 +5340,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
     'adaptedMapDefault' => dict<int, int>,
     'doubleTypedefBool' => bool,
   );
-  const int STRUCTURAL_ID = 1552800196824590900;
+  const int STRUCTURAL_ID = 8404281923958960819;
   /**
    * Original thrift field:-
    * 1: module.AdaptedBool adaptedBool
@@ -6520,7 +6520,7 @@ class AdaptTemplatedNestedTestStruct implements \IThriftSyncStruct, \IThriftStru
   const type TShape = shape(
     ?'adaptedStruct' => ?\facebook\thrift\test\AdaptTemplatedTestStruct::TShape,
   );
-  const int STRUCTURAL_ID = 7684145159661226586;
+  const int STRUCTURAL_ID = 5166444474962890937;
   /**
    * Original thrift field:-
    * 1: module.AdaptTemplatedTestStruct adaptedStruct
@@ -6652,7 +6652,7 @@ class AdaptTestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     ?'delay' => ?int,
     ?'custom' => ?string,
   );
-  const int STRUCTURAL_ID = 7327808847999377042;
+  const int STRUCTURAL_ID = 1100427994770521228;
   /**
    * Original thrift field:-
    * 1: module.DurationMs delay
@@ -6922,7 +6922,7 @@ class AdaptedStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
   const type TShape = shape(
     'data' => int,
   );
-  const int STRUCTURAL_ID = 3905817191290553362;
+  const int STRUCTURAL_ID = 1759386943592118861;
   /**
    * Original thrift field:-
    * 1: i64 data
@@ -7037,7 +7037,7 @@ class DirectlyAdaptedStruct implements \IThriftSyncStruct, \IThriftStructMetadat
   const type TShape = shape(
     'data' => int,
   );
-  const int STRUCTURAL_ID = 3905817191290553362;
+  const int STRUCTURAL_ID = 1759386943592118861;
   /**
    * Original thrift field:-
    * 1: i64 data
@@ -7177,7 +7177,7 @@ class StructFieldAdaptedStruct implements \IThriftSyncStruct, \IThriftStructMeta
     ?'directlyAdapted' => ?\facebook\thrift\test\DirectlyAdaptedStruct::TShape,
     ?'typedefOfAdapted' => ?\facebook\thrift\test\DirectlyAdaptedStruct::TShape,
   );
-  const int STRUCTURAL_ID = 3653783318222631819;
+  const int STRUCTURAL_ID = 4981284427740561560;
   /**
    * Original thrift field:-
    * 1: module.AdaptedStruct adaptedStruct
@@ -7451,7 +7451,7 @@ class CircularAdaptee implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
   const type TShape = shape(
     ?'field' => ?\facebook\thrift\test\CircularStruct::TShape,
   );
-  const int STRUCTURAL_ID = 6453901709117171539;
+  const int STRUCTURAL_ID = 1646887748378279811;
   /**
    * Original thrift field:-
    * 1: module.CircularStruct field
@@ -7568,7 +7568,7 @@ class CircularStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
   const type TShape = shape(
     ?'field' => ?\facebook\thrift\test\CircularAdaptee::TShape,
   );
-  const int STRUCTURAL_ID = 7977518433842367675;
+  const int STRUCTURAL_ID = 7102646879863324559;
   /**
    * Original thrift field:-
    * 1: module.AdaptedCircularAdaptee field
@@ -7716,7 +7716,7 @@ class ReorderedStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
   const type TShape = shape(
     ?'reordered_dependent_adapted' => ?\facebook\thrift\test\DeclaredAfterStruct::TShape,
   );
-  const int STRUCTURAL_ID = 2416271555865439268;
+  const int STRUCTURAL_ID = 224945899335477603;
   /**
    * Original thrift field:-
    * 1: module.DeclaredAfterStruct reordered_dependent_adapted
@@ -7935,7 +7935,7 @@ class RenamedStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
   const type TShape = shape(
     'data' => int,
   );
-  const int STRUCTURAL_ID = 3905817191290553362;
+  const int STRUCTURAL_ID = 1759386943592118861;
   /**
    * Original thrift field:-
    * 1: i64 data
@@ -8051,7 +8051,7 @@ class SameNamespaceStruct implements \IThriftSyncStruct, \IThriftStructMetadata,
   const type TShape = shape(
     'data' => int,
   );
-  const int STRUCTURAL_ID = 3905817191290553362;
+  const int STRUCTURAL_ID = 1759386943592118861;
   /**
    * Original thrift field:-
    * 1: i64 data
@@ -8253,7 +8253,7 @@ class MoveOnly implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   const type TShape = shape(
     ?'ptr' => ?\facebook\thrift\test\HeapAllocated::TShape,
   );
-  const int STRUCTURAL_ID = 1105592653371346642;
+  const int STRUCTURAL_ID = 3132381198351363337;
   /**
    * Original thrift field:-
    * 1: module.HeapAllocated ptr
@@ -8380,7 +8380,7 @@ class AlsoMoveOnly implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
   const type TShape = shape(
     'ptr' => int,
   );
-  const int STRUCTURAL_ID = 6708492965690058109;
+  const int STRUCTURAL_ID = 5344070877424661407;
   /**
    * Original thrift field:-
    * 1: i64 ptr
@@ -8683,7 +8683,7 @@ class CountingStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     ?'countingInt' => ?int,
     ?'regularString' => ?string,
   );
-  const int STRUCTURAL_ID = 1297891124769241261;
+  const int STRUCTURAL_ID = 7306085358251081042;
   /**
    * Original thrift field:-
    * 1: i64 regularInt
@@ -8884,7 +8884,7 @@ class Person implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShap
   const type TShape = shape(
     'name' => string,
   );
-  const int STRUCTURAL_ID = 2593878277785201336;
+  const int STRUCTURAL_ID = 7068917836668558637;
   /**
    * Original thrift field:-
    * 1: string name
@@ -9003,7 +9003,7 @@ class Person2 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
   const type TShape = shape(
     'name' => string,
   );
-  const int STRUCTURAL_ID = 2593878277785201336;
+  const int STRUCTURAL_ID = 7068917836668558637;
   /**
    * Original thrift field:-
    * 1: string name
@@ -9112,7 +9112,7 @@ class RenamedStructWithStructAdapterAndFieldAdapter implements \IThriftSyncStruc
   const type TShape = shape(
     'field' => int,
   );
-  const int STRUCTURAL_ID = 7035499037608086885;
+  const int STRUCTURAL_ID = 7989308273674627306;
   /**
    * Original thrift field:-
    * 1: i32 field

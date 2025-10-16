@@ -112,7 +112,7 @@ class Internship implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'employer' => ?\test\fixtures\lazy_constants\Company,
   );
 
-  const int STRUCTURAL_ID = 749038867953722654;
+  const int STRUCTURAL_ID = 6447491740864231852;
   /**
    * Original thrift field:-
    * 1: i32 weeks
@@ -241,7 +241,7 @@ class Range implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'max' => ?int,
   );
 
-  const int STRUCTURAL_ID = 6850388386457434767;
+  const int STRUCTURAL_ID = 4625650683701730027;
   /**
    * Original thrift field:-
    * 1: i32 min

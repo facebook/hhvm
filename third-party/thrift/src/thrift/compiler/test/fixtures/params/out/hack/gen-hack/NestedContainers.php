@@ -334,7 +334,7 @@ class NestedContainers_mapList_args implements \IThriftSyncStruct, \IThriftStruc
     'foo' => dict<int, vec<int>>,
     ...
   );
-  const int STRUCTURAL_ID = 860610040470759468;
+  const int STRUCTURAL_ID = 3942033392589518601;
   public Map<int, Vector<int>> $foo;
 
   public function __construct(?Map<int, Vector<int>> $foo = null)[] {
@@ -517,7 +517,7 @@ class NestedContainers_mapSet_args implements \IThriftSyncStruct, \IThriftStruct
     'foo' => dict<int, dict<int, bool>>,
     ...
   );
-  const int STRUCTURAL_ID = 860610040470759468;
+  const int STRUCTURAL_ID = 3942033392589518601;
   public Map<int, Set<int>> $foo;
 
   public function __construct(?Map<int, Set<int>> $foo = null)[] {
@@ -701,7 +701,7 @@ class NestedContainers_listMap_args implements \IThriftSyncStruct, \IThriftStruc
     'foo' => vec<dict<int, int>>,
     ...
   );
-  const int STRUCTURAL_ID = 860610040470759468;
+  const int STRUCTURAL_ID = 3942033392589518601;
   public Vector<Map<int, int>> $foo;
 
   public function __construct(?Vector<Map<int, int>> $foo = null)[] {
@@ -880,7 +880,7 @@ class NestedContainers_listSet_args implements \IThriftSyncStruct, \IThriftStruc
     'foo' => vec<dict<int, bool>>,
     ...
   );
-  const int STRUCTURAL_ID = 860610040470759468;
+  const int STRUCTURAL_ID = 3942033392589518601;
   public Vector<Set<int>> $foo;
 
   public function __construct(?Vector<Set<int>> $foo = null)[] {
@@ -1078,7 +1078,7 @@ class NestedContainers_turtles_args implements \IThriftSyncStruct, \IThriftStruc
     'foo' => vec<vec<dict<int, dict<int, dict<int, bool>>>>>,
     ...
   );
-  const int STRUCTURAL_ID = 860610040470759468;
+  const int STRUCTURAL_ID = 3942033392589518601;
   public Vector<Vector<Map<int, Map<int, Set<int>>>>> $foo;
 
   public function __construct(?Vector<Vector<Map<int, Map<int, Set<int>>>>> $foo = null)[] {

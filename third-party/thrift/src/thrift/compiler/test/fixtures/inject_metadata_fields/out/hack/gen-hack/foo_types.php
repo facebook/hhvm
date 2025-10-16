@@ -39,7 +39,7 @@ class Fields implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'injected_unstructured_annotation_field' => ?string,
   );
 
-  const int STRUCTURAL_ID = 1725960953533133382;
+  const int STRUCTURAL_ID = 1996379853474128385;
   /**
    * Original thrift field:-
    * 100: string injected_field
@@ -178,7 +178,7 @@ class FieldsWithIncludedStruct implements \IThriftSyncStruct, \IThriftStructMeta
     ?'injected_field' => ?InjectedField,
   );
 
-  const int STRUCTURAL_ID = 4533588456027511395;
+  const int STRUCTURAL_ID = 4121980159395411107;
   /**
    * Original thrift field:-
    * 1: injected_field.InjectedField injected_field

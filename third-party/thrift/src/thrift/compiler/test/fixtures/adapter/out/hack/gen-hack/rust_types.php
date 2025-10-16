@@ -35,7 +35,7 @@ class Name implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
   const type TShape = shape(
     'name' => string,
   );
-  const int STRUCTURAL_ID = 2593878277785201336;
+  const int STRUCTURAL_ID = 7068917836668558637;
   /**
    * Original thrift field:-
    * 1: string name
@@ -939,7 +939,7 @@ class Type implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
   const type TShape = shape(
     'name' => string,
   );
-  const int STRUCTURAL_ID = 2593878277785201336;
+  const int STRUCTURAL_ID = 7068917836668558637;
   /**
    * Original thrift field:-
    * 1: string name
@@ -1064,7 +1064,7 @@ class Serde implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapi
   const type TShape = shape(
     'enabled' => bool,
   );
-  const int STRUCTURAL_ID = 4995308257187856564;
+  const int STRUCTURAL_ID = 1438995989483609107;
   /**
    * Original thrift field:-
    * 1: bool enabled
@@ -1189,7 +1189,7 @@ class Mod implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
   const type TShape = shape(
     'name' => string,
   );
-  const int STRUCTURAL_ID = 2593878277785201336;
+  const int STRUCTURAL_ID = 7068917836668558637;
   /**
    * Original thrift field:-
    * 1: string name
@@ -1352,7 +1352,7 @@ class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
   const type TShape = shape(
     'name' => string,
   );
-  const int STRUCTURAL_ID = 2593878277785201336;
+  const int STRUCTURAL_ID = 7068917836668558637;
   /**
    * Original thrift field:-
    * 1: string name
@@ -1503,7 +1503,7 @@ class Derive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShap
   const type TShape = shape(
     'derives' => vec<string>,
   );
-  const int STRUCTURAL_ID = 365218803088477774;
+  const int STRUCTURAL_ID = 5860103287133771975;
   /**
    * Original thrift field:-
    * 1: list<string> derives
@@ -1697,7 +1697,7 @@ class ServiceExn implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
   const type TShape = shape(
     'anyhow_to_application_exn' => bool,
   );
-  const int STRUCTURAL_ID = 7965253136079409026;
+  const int STRUCTURAL_ID = 5217888484714777977;
   /**
    * Original thrift field:-
    * 1: bool anyhow_to_application_exn

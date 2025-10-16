@@ -85,7 +85,7 @@ class MyThriftStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'baz' => ?string,
   );
 
-  const int STRUCTURAL_ID = 6671455975178405100;
+  const int STRUCTURAL_ID = 2895166325270265964;
   /**
    * Original thrift field:-
    * 1: string foo
@@ -238,7 +238,7 @@ class MySecondThriftStruct implements \IThriftSyncStruct, \IThriftStructMetadata
     ?'baz' => ?int,
   );
 
-  const int STRUCTURAL_ID = 2800971917864580212;
+  const int STRUCTURAL_ID = 2398087311251635977;
   /**
    * Original thrift field:-
    * 1: module1.MyThriftEnum foo
@@ -390,7 +390,7 @@ class MyThirdThriftStruct implements \IThriftSyncStruct, \IThriftStructMetadata 
     ?'foo' => ?int,
   );
 
-  const int STRUCTURAL_ID = 4302560019326481254;
+  const int STRUCTURAL_ID = 6372467642553120222;
   /**
    * Original thrift field:-
    * 1: i32 foo
@@ -509,7 +509,7 @@ class UnionTesting implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
     ?'bar' => ?int,
   );
 
-  const int STRUCTURAL_ID = 4708174399727259919;
+  const int STRUCTURAL_ID = 7673004901362192117;
   /**
    * Original thrift field:-
    * 1: string foo
@@ -706,7 +706,7 @@ class UnionTestingStructured implements \IThriftSyncStruct, \IThriftStructMetada
     ?'bar' => ?int,
   );
 
-  const int STRUCTURAL_ID = 4708174399727259919;
+  const int STRUCTURAL_ID = 7673004901362192117;
   /**
    * Original thrift field:-
    * 1: string foo

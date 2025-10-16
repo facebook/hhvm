@@ -65,7 +65,7 @@ class MyException1 extends \TException implements \IThriftSyncStruct, \IThriftEx
     ?'code' => ?MyEnum,
   );
 
-  const int STRUCTURAL_ID = 7711048519845400283;
+  const int STRUCTURAL_ID = 9142322768531286237;
   /**
    * Original thrift field:-
    * 1: string message
@@ -185,7 +185,7 @@ class MyException2 extends \TException implements \IThriftSyncStruct, \IThriftEx
     ?'code' => ?MyEnum,
   );
 
-  const int STRUCTURAL_ID = 3067783023341493113;
+  const int STRUCTURAL_ID = 8601524679154512698;
   /**
    * Original thrift field:-
    * 1: string message
@@ -304,7 +304,7 @@ class MyException3 extends \TException implements \IThriftSyncStruct, \IThriftEx
     ?'code' => ?MyEnum,
   );
 
-  const int STRUCTURAL_ID = 3517193566312570591;
+  const int STRUCTURAL_ID = 7434290439006024283;
   /**
    * Original thrift field:-
    * 1: string message
@@ -423,7 +423,7 @@ class MyException4 extends \TException implements \IThriftSyncStruct, \IThriftEx
     ?'code' => ?MyEnum,
   );
 
-  const int STRUCTURAL_ID = 3517193566312570591;
+  const int STRUCTURAL_ID = 7434290439006024283;
   /**
    * Original thrift field:-
    * 1: string message
@@ -541,7 +541,7 @@ class MyException5 extends \TException implements \IThriftSyncStruct, \IThriftEx
     ?'code' => ?int,
   );
 
-  const int STRUCTURAL_ID = 7335721753390449361;
+  const int STRUCTURAL_ID = 3472828638897913541;
   /**
    * Original thrift field:-
    * 1: string message

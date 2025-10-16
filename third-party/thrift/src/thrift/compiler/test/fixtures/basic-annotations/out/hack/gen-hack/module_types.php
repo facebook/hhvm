@@ -77,7 +77,7 @@ class MyStructNestedAnnotation implements \IThriftSyncStruct, \IThriftStructMeta
     'name' => string,
     ...
   );
-  const int STRUCTURAL_ID = 2593878277785201336;
+  const int STRUCTURAL_ID = 7068917836668558637;
   /**
    * Original thrift field:-
    * 1: string name
@@ -433,7 +433,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     ?'my_union' => ?MyUnion::TShape,
     ...
   );
-  const int STRUCTURAL_ID = 6499124985014267111;
+  const int STRUCTURAL_ID = 1421508158406580179;
   /**
    * Original thrift field:-
    * 2: i64 major
@@ -861,7 +861,7 @@ class SecretStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
     'password' => string,
     ...
   );
-  const int STRUCTURAL_ID = 7563936987719176841;
+  const int STRUCTURAL_ID = 6511985905915326171;
   /**
    * Original thrift field:-
    * 1: i64 id

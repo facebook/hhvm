@@ -132,7 +132,7 @@ class Bar_baz_args implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'b' => ?vec<dict<int, keyset<string>>>,
   );
 
-  const int STRUCTURAL_ID = 5283012534631553068;
+  const int STRUCTURAL_ID = 8947752064448274665;
   public keyset<int> $a;
   public vec<dict<int, keyset<string>>> $b;
 
@@ -259,7 +259,7 @@ class Bar_baz_result extends \ThriftSyncStructWithResult implements \IThriftStru
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 1365128170602685579;
+  const int STRUCTURAL_ID = 4189911915654962654;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {

@@ -813,7 +813,7 @@ class MyService_MyInteraction_frobnicate_result extends \ThriftSyncStructWithRes
     ?'ex' => ?CustomException,
   );
 
-  const int STRUCTURAL_ID = 7122595353333880010;
+  const int STRUCTURAL_ID = 183699341556999437;
   public ?this::TResult $success;
   public ?CustomException $ex;
 
@@ -1025,7 +1025,7 @@ class MyService_MyInteraction_truthify_StreamResponse extends \ThriftSyncStructW
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 8594383818423018844;
+  const int STRUCTURAL_ID = 365925050253362406;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -1210,7 +1210,7 @@ class MyService_MyInteraction_encode_FirstResponse extends \ThriftSyncStructWith
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 5594803499509360192;
+  const int STRUCTURAL_ID = 6500005841072239021;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -1294,7 +1294,7 @@ class MyService_MyInteraction_encode_SinkPayload extends \ThriftSyncStructWithRe
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 1365128170602685579;
+  const int STRUCTURAL_ID = 4189911915654962654;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -1371,7 +1371,7 @@ class MyService_MyInteraction_encode_FinalResponse extends \ThriftSyncStructWith
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 8919842120251162628;
+  const int STRUCTURAL_ID = 8467513154566137012;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -1499,7 +1499,7 @@ class MyService_MyInteractionFast_frobnicate_result extends \ThriftSyncStructWit
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 3865318819874171525;
+  const int STRUCTURAL_ID = 413702039226145291;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -1679,7 +1679,7 @@ class MyService_MyInteractionFast_truthify_StreamResponse extends \ThriftSyncStr
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 8594383818423018844;
+  const int STRUCTURAL_ID = 365925050253362406;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -1864,7 +1864,7 @@ class MyService_MyInteractionFast_encode_FirstResponse extends \ThriftSyncStruct
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 5594803499509360192;
+  const int STRUCTURAL_ID = 6500005841072239021;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -1948,7 +1948,7 @@ class MyService_MyInteractionFast_encode_SinkPayload extends \ThriftSyncStructWi
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 1365128170602685579;
+  const int STRUCTURAL_ID = 4189911915654962654;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -2025,7 +2025,7 @@ class MyService_MyInteractionFast_encode_FinalResponse extends \ThriftSyncStruct
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 8919842120251162628;
+  const int STRUCTURAL_ID = 8467513154566137012;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {

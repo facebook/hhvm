@@ -69,7 +69,7 @@ class Limits implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'min_byte_field' => ?int,
   );
 
-  const int STRUCTURAL_ID = 2407456192555467304;
+  const int STRUCTURAL_ID = 8308118154293904907;
   /**
    * Original thrift field:-
    * 1: i64 max_i64_field

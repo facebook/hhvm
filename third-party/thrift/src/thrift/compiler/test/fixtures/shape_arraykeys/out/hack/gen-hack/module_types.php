@@ -60,7 +60,7 @@ class A implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
     'a' => string,
     ...
   );
-  const int STRUCTURAL_ID = 7939807933046472325;
+  const int STRUCTURAL_ID = 7586222194834317394;
   /**
    * Original thrift field:-
    * 1: string a
@@ -569,7 +569,7 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
     ?'optional_enum' => ?Enum,
     ...
   );
-  const int STRUCTURAL_ID = 5253870888365642604;
+  const int STRUCTURAL_ID = 5646668493477822281;
   /**
    * Original thrift field:-
    * 1: module.A just_an_A

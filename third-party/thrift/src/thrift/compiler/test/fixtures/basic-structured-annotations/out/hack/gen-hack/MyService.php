@@ -182,7 +182,7 @@ class MyService_first_result extends \ThriftSyncStructWithResult implements \ITh
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 8648204672360810467;
+  const int STRUCTURAL_ID = 4125632820025939579;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -284,7 +284,7 @@ class MyService_second_args implements \IThriftSyncStruct, \IThriftStructMetadat
     ?'count' => ?int,
   );
 
-  const int STRUCTURAL_ID = 6887469671700782815;
+  const int STRUCTURAL_ID = 2916432844831955011;
   public int $count;
 
   public function __construct(?int $count = null)[] {
@@ -370,7 +370,7 @@ class MyService_second_result extends \ThriftSyncStructWithResult implements \IT
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 8594383818423018844;
+  const int STRUCTURAL_ID = 365925050253362406;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {

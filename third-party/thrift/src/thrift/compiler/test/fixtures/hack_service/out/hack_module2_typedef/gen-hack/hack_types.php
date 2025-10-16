@@ -38,7 +38,7 @@ class FieldWrapper implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'name' => ?string,
   );
 
-  const int STRUCTURAL_ID = 2593878277785201336;
+  const int STRUCTURAL_ID = 7068917836668558637;
   /**
    * The name of a Hack wrapper class used to wrap the field
    * 
@@ -148,7 +148,7 @@ class Wrapper implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'extraNamespace' => ?string,
   );
 
-  const int STRUCTURAL_ID = 1284986773698322040;
+  const int STRUCTURAL_ID = 5120081447960950563;
   /**
    * The name of a Hack wrapper class used to wrap the field
    * 
@@ -322,7 +322,7 @@ class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'name' => ?string,
   );
 
-  const int STRUCTURAL_ID = 2593878277785201336;
+  const int STRUCTURAL_ID = 7068917836668558637;
   /**
    * The name of a Hack adapter class that implements IThriftAdapter
    * 
@@ -416,7 +416,7 @@ class SkipCodegen implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'reason' => ?string,
   );
 
-  const int STRUCTURAL_ID = 3707764047816594739;
+  const int STRUCTURAL_ID = 8764363268396101679;
   /**
    * Original thrift field:-
    * 1: string reason
@@ -523,7 +523,7 @@ class Name implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'reason' => ?string,
   );
 
-  const int STRUCTURAL_ID = 4844827548325959202;
+  const int STRUCTURAL_ID = 4158255655709139116;
   /**
    * Original thrift field:-
    * 1: string name
@@ -636,7 +636,7 @@ class UnionEnumAttributes implements \IThriftSyncStruct, \IThriftStructMetadata 
     ?'attributes' => ?Vector<string>,
   );
 
-  const int STRUCTURAL_ID = 4379867690114498379;
+  const int STRUCTURAL_ID = 277352896725886887;
   /**
    * Original thrift field:-
    * 1: list<string> attributes
@@ -734,7 +734,7 @@ class StructTrait implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'name' => ?string,
   );
 
-  const int STRUCTURAL_ID = 2593878277785201336;
+  const int STRUCTURAL_ID = 7068917836668558637;
   /**
    * Original thrift field:-
    * 1: string name
@@ -875,7 +875,7 @@ class Attributes implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'attributes' => ?Vector<string>,
   );
 
-  const int STRUCTURAL_ID = 4379867690114498379;
+  const int STRUCTURAL_ID = 277352896725886887;
   /**
    * Original thrift field:-
    * 1: list<string> attributes

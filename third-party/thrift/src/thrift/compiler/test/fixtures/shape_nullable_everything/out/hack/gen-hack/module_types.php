@@ -47,7 +47,7 @@ class A implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
     ?'map_of_string_to_string' => ?dict<string, string>,
     ...
   );
-  const int STRUCTURAL_ID = 3181416921594932928;
+  const int STRUCTURAL_ID = 5085337089187926119;
   /**
    * Original thrift field:-
    * 1: string a
@@ -354,7 +354,7 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
     ?'list_of_map_of_string_to_list_of_A' => ?vec<dict<string, vec<A::TShape>>>,
     ...
   );
-  const int STRUCTURAL_ID = 924423330915405193;
+  const int STRUCTURAL_ID = 1427596387338859140;
   /**
    * Original thrift field:-
    * 1: map<string, string> map_of_string_to_string
@@ -1062,7 +1062,7 @@ class C implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
     ?'list_of_map_of_string_to_list_of_A' => ?vec<dict<string, vec<A::TShape>>>,
     ...
   );
-  const int STRUCTURAL_ID = 1457869504541452190;
+  const int STRUCTURAL_ID = 924423330915405193;
   /**
    * Original thrift field:-
    * 1: map<string, string> map_of_string_to_string

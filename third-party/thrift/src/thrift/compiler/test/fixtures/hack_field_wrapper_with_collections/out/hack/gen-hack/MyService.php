@@ -144,7 +144,7 @@ class MyService_func_args implements \IThriftSyncStruct, \IThriftStructMetadata,
     'arg1' => string,
     ?'arg2' => ?MyStruct::TShape,
   );
-  const int STRUCTURAL_ID = 6560600906529955702;
+  const int STRUCTURAL_ID = 5113154721078696023;
   public string $arg1;
   public ?MyStruct $arg2;
 
@@ -282,7 +282,7 @@ class MyService_func_result extends \ThriftSyncStructWithResult implements \IThr
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 7307096097859369800;
+  const int STRUCTURAL_ID = 2706035461382806164;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -386,7 +386,7 @@ class MyService_func1_args implements \IThriftSyncStruct, \IThriftStructMetadata
     'arg1' => string,
     ?'arg2' => ?MyStruct::TShape,
   );
-  const int STRUCTURAL_ID = 6560600906529955702;
+  const int STRUCTURAL_ID = 5113154721078696023;
   public string $arg1;
   public ?MyStruct $arg2;
 
@@ -524,7 +524,7 @@ class MyService_func1_result extends \ThriftSyncStructWithResult implements \ITh
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 7307096097859369800;
+  const int STRUCTURAL_ID = 2706035461382806164;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {

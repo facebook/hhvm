@@ -121,7 +121,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   const type TShape = shape(
     ?'nested_struct' => ?MyNestedStruct::TShape,
   );
-  const int STRUCTURAL_ID = 6466034702854646588;
+  const int STRUCTURAL_ID = 5415834595764232248;
   /**
    * Original thrift field:-
    * 1: module.MyNestedStruct nested_struct
@@ -265,7 +265,7 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
     'annotated_field' => int,
     'adapted_type' => \MyAdapter::THackType,
   );
-  const int STRUCTURAL_ID = 3672151039112827748;
+  const int STRUCTURAL_ID = 755458384797391804;
   /**
    * Original thrift field:-
    * 1: i64 wrapped_field
@@ -610,7 +610,7 @@ class MyComplexStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \I
     'list_of_map_of_string_to_list_of_MyStruct' => vec<dict<arraykey, vec<MyStruct::TShape>>>,
     'list_of_map_of_string_to_MyStruct' => vec<dict<arraykey, MyStruct::TShape>>,
   );
-  const int STRUCTURAL_ID = 8703607584527805207;
+  const int STRUCTURAL_ID = 3801994958626838124;
   /**
    * Original thrift field:-
    * 1: map<string, module.MyStruct> map_of_string_to_MyStruct

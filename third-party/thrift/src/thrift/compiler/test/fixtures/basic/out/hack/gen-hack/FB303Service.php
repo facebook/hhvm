@@ -136,7 +136,7 @@ class FB303Service_renamed_rpc implements \IThriftSyncStruct, \IThriftStructMeta
     'int_parameter' => int,
     ...
   );
-  const int STRUCTURAL_ID = 3607165688153615571;
+  const int STRUCTURAL_ID = 138772844981904493;
   public int $int_parameter;
 
   public function __construct(?int $int_parameter = null)[] {
@@ -251,7 +251,7 @@ class FB303Service_renamed_rpc_result extends \ThriftSyncStructWithResult implem
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 7443966475393398575;
+  const int STRUCTURAL_ID = 8131681939721614094;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {

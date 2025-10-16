@@ -67,7 +67,7 @@ class A implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
     ?'just_an_enum' => ?Enum,
     'a' => string,
   );
-  const int STRUCTURAL_ID = 4307695496151664311;
+  const int STRUCTURAL_ID = 409981532285313194;
   /**
    * Original thrift field:-
    * 1: module.Enum just_an_enum
@@ -462,7 +462,7 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
     'set_of_i32' => keyset<int>,
     'set_of_string' => keyset<string>,
   );
-  const int STRUCTURAL_ID = 4382244206701168633;
+  const int STRUCTURAL_ID = 1559640707695694219;
   /**
    * Original thrift field:-
    * 1: map<string, string> map_of_string_to_string
@@ -1516,7 +1516,7 @@ class C implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
     ?'set_of_i32' => ?keyset<int>,
     ?'set_of_string' => ?keyset<string>,
   );
-  const int STRUCTURAL_ID = 7779248235937077517;
+  const int STRUCTURAL_ID = 1861855136228763552;
   /**
    * Original thrift field:-
    * 1: module.A just_an_A

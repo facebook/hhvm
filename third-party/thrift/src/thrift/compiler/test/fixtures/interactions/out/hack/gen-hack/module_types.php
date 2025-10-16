@@ -27,7 +27,7 @@ class CustomException extends \TException implements \IThriftSyncStruct, \IThrif
     ?'message' => ?string,
   );
 
-  const int STRUCTURAL_ID = 2427562471238739676;
+  const int STRUCTURAL_ID = 1438368398389181198;
   /**
    * Original thrift field:-
    * 1: string message
@@ -109,7 +109,7 @@ class ShouldBeBoxed implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'sessionId' => ?string,
   );
 
-  const int STRUCTURAL_ID = 7843423589419529766;
+  const int STRUCTURAL_ID = 8694280344694011952;
   /**
    * Original thrift field:-
    * 1: string sessionId

@@ -111,7 +111,7 @@ class ExtendedService_init_args implements \IThriftSyncStruct, \IThriftStructMet
     ?'param1' => ?int,
   );
 
-  const int STRUCTURAL_ID = 4426064482866805446;
+  const int STRUCTURAL_ID = 6761775133478352856;
   public int $param0;
   public int $param1;
 
@@ -201,7 +201,7 @@ class ExtendedService_init_result extends \ThriftSyncStructWithResult implements
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 5548670328188446575;
+  const int STRUCTURAL_ID = 3715007529104411015;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {

@@ -289,7 +289,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     ?'struct_field' => ?\facebook\thrift\test\terse_write\MyStruct::TShape,
     ...
   );
-  const int STRUCTURAL_ID = 878411005740611333;
+  const int STRUCTURAL_ID = 5963440583402393530;
   /**
    * Original thrift field:-
    * 1: bool bool_field
@@ -1241,7 +1241,7 @@ class MyStructWithCustomDefault implements \IThriftSyncStruct, \IThriftStructMet
     'field1' => int,
     ...
   );
-  const int STRUCTURAL_ID = 1037618795438567400;
+  const int STRUCTURAL_ID = 7926890193214088283;
   /**
    * Original thrift field:-
    * 1: i64 field1
@@ -2304,7 +2304,7 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
     ?'union_field' => ?\facebook\thrift\test\terse_write\MyUnion::TShape,
     ...
   );
-  const int STRUCTURAL_ID = 4716677455425185180;
+  const int STRUCTURAL_ID = 3364463154269576460;
   /**
    * Original thrift field:-
    * 1: bool terse_bool_field

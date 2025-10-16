@@ -33,7 +33,7 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'b' => ?string,
   );
 
-  const int STRUCTURAL_ID = 5526046231048010857;
+  const int STRUCTURAL_ID = 2536681654245537161;
   /**
    * Original thrift field:-
    * 1: i64 a

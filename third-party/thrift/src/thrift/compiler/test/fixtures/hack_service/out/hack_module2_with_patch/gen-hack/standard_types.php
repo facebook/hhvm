@@ -132,7 +132,7 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
     ?'definitionKey' => ?string,
   );
 
-  const int STRUCTURAL_ID = 6832884661302265451;
+  const int STRUCTURAL_ID = 250594927984312086;
   /**
    * The universal name of this type, sometimes referred to as a Thrift URI.
    * Usually preferred when the name is shorter or has the same length as the
@@ -635,7 +635,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
     ?'mapType' => ?apache_thrift_type_standard_Void,
   );
 
-  const int STRUCTURAL_ID = 2966511906547332991;
+  const int STRUCTURAL_ID = 2093061997174531447;
   /**
    * True(1) or False(0)
    * 

@@ -30,7 +30,7 @@ class TrivialStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'int_value' => ?int,
   );
 
-  const int STRUCTURAL_ID = 7142053658162825934;
+  const int STRUCTURAL_ID = 5905563853376581712;
   /**
    * Original thrift field:-
    * 1: i32 int_value
@@ -146,7 +146,7 @@ class StructWithNoCustomDefaultValues implements \IThriftSyncStruct, \IThriftStr
     ?'required_struct' => ?\facebook\thrift\compiler\test\fixtures\default_values\TrivialStruct,
   );
 
-  const int STRUCTURAL_ID = 1916556515070891094;
+  const int STRUCTURAL_ID = 8772051469260393608;
   /**
    * Original thrift field:-
    * 1: i32 unqualified_integer
@@ -366,7 +366,7 @@ class StructWithCustomDefaultValues implements \IThriftSyncStruct, \IThriftStruc
     ?'required_struct' => ?\facebook\thrift\compiler\test\fixtures\default_values\TrivialStruct,
   );
 
-  const int STRUCTURAL_ID = 1916556515070891094;
+  const int STRUCTURAL_ID = 8772051469260393608;
   /**
    * Original thrift field:-
    * 1: i32 unqualified_integer

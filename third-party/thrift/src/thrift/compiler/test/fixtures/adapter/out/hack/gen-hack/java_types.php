@@ -119,7 +119,7 @@ class Annotation implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
   const type TShape = shape(
     'java_annotation' => string,
   );
-  const int STRUCTURAL_ID = 763961079324172604;
+  const int STRUCTURAL_ID = 7371189936716642802;
   /**
    * Original thrift field:-
    * 1: string java_annotation
@@ -338,7 +338,7 @@ class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
     'adapterClassName' => string,
     'typeClassName' => string,
   );
-  const int STRUCTURAL_ID = 257715266218410746;
+  const int STRUCTURAL_ID = 7765793649752740717;
   /**
    * Original thrift field:-
    * 1: string adapterClassName
@@ -490,7 +490,7 @@ class Wrapper implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
     'wrapperClassName' => string,
     'typeClassName' => string,
   );
-  const int STRUCTURAL_ID = 8397972237530040802;
+  const int STRUCTURAL_ID = 8702949847276752337;
   /**
    * Original thrift field:-
    * 1: string wrapperClassName

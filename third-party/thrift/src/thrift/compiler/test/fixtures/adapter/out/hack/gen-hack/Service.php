@@ -128,7 +128,7 @@ class Service_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, \
     'arg2' => string,
     ?'arg3' => ?\facebook\thrift\test\Foo::TShape,
   );
-  const int STRUCTURAL_ID = 2523845110818656514;
+  const int STRUCTURAL_ID = 1046416542439785068;
   public \facebook\thrift\test\StringWithAdapter_7208 $arg1;
   public \facebook\thrift\test\StringWithCppAdapter $arg2;
   public ?\facebook\thrift\test\Foo $arg3;
@@ -345,7 +345,7 @@ class Service_func_result extends \ThriftSyncStructWithResult implements \IThrif
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 1013885591449640654;
+  const int STRUCTURAL_ID = 2382831208219127663;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {

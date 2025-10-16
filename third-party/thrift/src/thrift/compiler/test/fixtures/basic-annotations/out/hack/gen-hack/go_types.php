@@ -34,7 +34,7 @@ class Name implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
     'name' => string,
     ...
   );
-  const int STRUCTURAL_ID = 2593878277785201336;
+  const int STRUCTURAL_ID = 7068917836668558637;
   /**
    * Original thrift field:-
    * 1: string name
@@ -165,7 +165,7 @@ class Tag implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
     'tag' => string,
     ...
   );
-  const int STRUCTURAL_ID = 8112474785430409245;
+  const int STRUCTURAL_ID = 1325139935411991549;
   /**
    * Original thrift field:-
    * 1: string tag

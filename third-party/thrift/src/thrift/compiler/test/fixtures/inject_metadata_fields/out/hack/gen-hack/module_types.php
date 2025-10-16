@@ -27,7 +27,7 @@ class Fields implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'injected_field' => ?string,
   );
 
-  const int STRUCTURAL_ID = 8264058527515912971;
+  const int STRUCTURAL_ID = 6812976114645114078;
   /**
    * Original thrift field:-
    * 100: string injected_field
@@ -109,7 +109,7 @@ class FieldsInjectedToEmptyStruct implements \IThriftSyncStruct, \IThriftStructM
     ?'injected_field' => ?string,
   );
 
-  const int STRUCTURAL_ID = 4521072312993129309;
+  const int STRUCTURAL_ID = 7501435468956792236;
   /**
    * Original thrift field:-
    * -1100: string injected_field
@@ -203,7 +203,7 @@ class FieldsInjectedToStruct implements \IThriftSyncStruct, \IThriftStructMetada
     ?'injected_field' => ?string,
   );
 
-  const int STRUCTURAL_ID = 6883092442816482656;
+  const int STRUCTURAL_ID = 3270924721098379896;
   /**
    * Original thrift field:-
    * 1: string string_field
@@ -327,7 +327,7 @@ class FieldsInjectedWithIncludedStruct implements \IThriftSyncStruct, \IThriftSt
     ?'injected_unstructured_annotation_field' => ?string,
   );
 
-  const int STRUCTURAL_ID = 1871478197671938632;
+  const int STRUCTURAL_ID = 7620265780906024146;
   /**
    * Original thrift field:-
    * 1: string string_field
@@ -496,7 +496,7 @@ class FieldsInjectedWithFieldsWithIncludedStruct implements \IThriftSyncStruct, 
     ?'injected_field' => ?InjectedField,
   );
 
-  const int STRUCTURAL_ID = 5297177205958428766;
+  const int STRUCTURAL_ID = 9034979142389613270;
   /**
    * Original thrift field:-
    * 1: string string_field

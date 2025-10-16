@@ -30,7 +30,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   const type TShape = shape(
     'int_field' => int,
   );
-  const int STRUCTURAL_ID = 8549930382776002541;
+  const int STRUCTURAL_ID = 1240300156842032777;
   /**
    * Original thrift field:-
    * 1: i64 int_field
@@ -165,7 +165,7 @@ class MyUnion implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThriftUn
     ?'union_annotated_field' => ?int,
     ?'union_adapted_type' => ?\AdapterTestIntToString::THackType,
   );
-  const int STRUCTURAL_ID = 4654710099560546823;
+  const int STRUCTURAL_ID = 5876282500887056521;
   /**
    * Original thrift field:-
    * 1: i64 union_annotated_field
@@ -433,7 +433,7 @@ class MyException extends \TException implements \IThriftAsyncStruct, \IThriftEx
     ?'annotated_message' => ?string,
   );
 
-  const int STRUCTURAL_ID = 5996584748207663461;
+  const int STRUCTURAL_ID = 1003122686678547914;
   /**
    * Original thrift field:-
    * 1: i64 code

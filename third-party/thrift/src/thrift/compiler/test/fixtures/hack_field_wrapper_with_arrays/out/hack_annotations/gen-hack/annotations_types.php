@@ -101,7 +101,7 @@ class structured_annotation_with_default implements \IThriftSyncStruct, \IThrift
   const type TShape = shape(
     'count' => int,
   );
-  const int STRUCTURAL_ID = 1502749363246025945;
+  const int STRUCTURAL_ID = 5419792152402660384;
   /**
    * Original thrift field:-
    * 1: i32 count
@@ -266,7 +266,7 @@ class structured_annotation_recursive implements \IThriftAsyncStruct, \IThriftSt
     'recurse_map' => dict<arraykey, structured_annotation_recursive::TShape>,
     'int_field' => \thrift_adapted_types\i64WithWrapper,
   );
-  const int STRUCTURAL_ID = 3145177041506723998;
+  const int STRUCTURAL_ID = 7765278923274777933;
   /**
    * Original thrift field:-
    * 1: string name
@@ -625,7 +625,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     'annotated_recursive' => string,
     'annotated_struct_wrapper' => string,
   );
-  const int STRUCTURAL_ID = 589959247947768145;
+  const int STRUCTURAL_ID = 2043346783576159038;
   /**
    * Original thrift field:-
    * 1: string annotated_recursive

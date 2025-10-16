@@ -67,6 +67,23 @@ string prefix_temporary(const string& name) {
 bool is_hidden(const t_field& field) {
   return field.has_structured_annotation(kPythonPyDeprecatedHiddenUri);
 }
+
+/**
+ * Mapping to legacy enum integer values, to preserve Thrift spec
+ * compatibility.
+ */
+int get_thrift_spec_req(t_field_qualifier qualifier) {
+  switch (qualifier) {
+    case t_field_qualifier::none:
+      return 2;
+    case t_field_qualifier::required:
+      return 0;
+    case t_field_qualifier::optional:
+      return 1;
+    case t_field_qualifier::terse:
+      return 3;
+  }
+}
 } // namespace
 
 /**
@@ -1567,8 +1584,8 @@ void t_py_generator::generate_py_thrift_spec(
                 << rename_reserved_keywords((*m_iter)->name()) << "'" << ", "
                 << type_to_spec_args((*m_iter)->get_type()) << ", "
                 << render_field_default_value(*m_iter) << ", "
-                << static_cast<int>((*m_iter)->get_req()) << ", )," << " # "
-                << (*m_iter)->id() << endl;
+                << get_thrift_spec_req((*m_iter)->qualifier()) << ", ),"
+                << " # " << (*m_iter)->id() << endl;
   }
 
   indent_down();

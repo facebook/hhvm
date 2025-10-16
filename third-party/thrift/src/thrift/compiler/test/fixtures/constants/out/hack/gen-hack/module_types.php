@@ -153,7 +153,7 @@ class Internship implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'school' => ?string,
   );
 
-  const int STRUCTURAL_ID = 5601694484190969969;
+  const int STRUCTURAL_ID = 6166859076234998005;
   /**
    * Original thrift field:-
    * 1: i32 weeks
@@ -320,7 +320,7 @@ class Range implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'max' => ?int,
   );
 
-  const int STRUCTURAL_ID = 6850388386457434767;
+  const int STRUCTURAL_ID = 4625650683701730027;
   /**
    * Original thrift field:-
    * 1: i32 min
@@ -426,7 +426,7 @@ class struct1 implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'b' => ?string,
   );
 
-  const int STRUCTURAL_ID = 7783381726179123112;
+  const int STRUCTURAL_ID = 6085801341191136252;
   /**
    * Original thrift field:-
    * 1: i32 a
@@ -550,7 +550,7 @@ class struct2 implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'d' => ?Vector<int>,
   );
 
-  const int STRUCTURAL_ID = 6352184485829261382;
+  const int STRUCTURAL_ID = 4731059489102764683;
   /**
    * Original thrift field:-
    * 1: i32 a
@@ -711,7 +711,7 @@ class struct3 implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'c' => ?struct2,
   );
 
-  const int STRUCTURAL_ID = 8770775784736740409;
+  const int STRUCTURAL_ID = 7591822000765385976;
   /**
    * Original thrift field:-
    * 1: string a
@@ -845,7 +845,7 @@ class struct4 implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'c' => ?int,
   );
 
-  const int STRUCTURAL_ID = 3152965649269433242;
+  const int STRUCTURAL_ID = 5950980171662695056;
   /**
    * Original thrift field:-
    * 1: i32 a
@@ -979,7 +979,7 @@ class union1 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnio
     ?'d' => ?float,
   );
 
-  const int STRUCTURAL_ID = 3529312341790331108;
+  const int STRUCTURAL_ID = 3603095658992688815;
   /**
    * Original thrift field:-
    * 1: i32 i
@@ -1185,7 +1185,7 @@ class union2 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnio
     ?'u' => ?union1,
   );
 
-  const int STRUCTURAL_ID = 1639711719709684790;
+  const int STRUCTURAL_ID = 6154085399184136651;
   /**
    * Original thrift field:-
    * 1: i32 i

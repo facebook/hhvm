@@ -59,7 +59,7 @@ class TestStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'str_value' => ?string,
   );
 
-  const int STRUCTURAL_ID = 7258556236863001185;
+  const int STRUCTURAL_ID = 4273296550303641235;
   /**
    * Original thrift field:-
    * 1: string str_value

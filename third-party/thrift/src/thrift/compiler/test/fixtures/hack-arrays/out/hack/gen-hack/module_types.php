@@ -57,7 +57,7 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'b' => ?dict<string, vec<keyset<int>>>,
   );
 
-  const int STRUCTURAL_ID = 4230744283513012869;
+  const int STRUCTURAL_ID = 5978858879326392608;
   /**
    * Original thrift field:-
    * 1: list<string> a

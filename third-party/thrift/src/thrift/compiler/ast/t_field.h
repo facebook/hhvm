@@ -32,10 +32,10 @@ namespace apache::thrift::compiler {
 class t_struct;
 
 enum class t_field_qualifier {
-  none,
-  required,
-  optional,
-  terse,
+  none = 0,
+  required = 1,
+  optional = 2,
+  terse = 3,
 };
 
 using t_field_id = int16_t;
@@ -129,9 +129,9 @@ class t_field final : public t_named {
   // backwards compatibility.
  public:
   enum class e_req {
-    required = 0,
-    optional = 1,
-    opt_in_req_out = 2,
+    opt_in_req_out = 0,
+    required = 1,
+    optional = 2,
     terse = 3,
   };
 

@@ -44,7 +44,7 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
     'field2' => int,
     'field3' => int,
   );
-  const int STRUCTURAL_ID = 1700330082146725318;
+  const int STRUCTURAL_ID = 3742769736710486823;
   /**
    * Original thrift field:-
    * 3: i32 field1
@@ -232,7 +232,7 @@ class Foo2 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
     'field2' => int,
     'field3' => int,
   );
-  const int STRUCTURAL_ID = 1700330082146725318;
+  const int STRUCTURAL_ID = 3742769736710486823;
   /**
    * Original thrift field:-
    * 3: i32 field1

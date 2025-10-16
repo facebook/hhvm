@@ -29,7 +29,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'foo' => ?string,
   );
 
-  const int STRUCTURAL_ID = 5005397852709472361;
+  const int STRUCTURAL_ID = 2543313131770479784;
   /**
    * Original thrift field:-
    * 1: string foo
@@ -118,7 +118,7 @@ class MySecondStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'foo' => ?string,
   );
 
-  const int STRUCTURAL_ID = 5005397852709472361;
+  const int STRUCTURAL_ID = 2543313131770479784;
   /**
    * Original thrift field:-
    * 1: string foo
@@ -207,7 +207,7 @@ class MyThirdStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'foo' => ?string,
   );
 
-  const int STRUCTURAL_ID = 5005397852709472361;
+  const int STRUCTURAL_ID = 2543313131770479784;
   /**
    * Original thrift field:-
    * 1: string foo
@@ -297,7 +297,7 @@ class MyFourthStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'foo' => ?string,
   );
 
-  const int STRUCTURAL_ID = 5005397852709472361;
+  const int STRUCTURAL_ID = 2543313131770479784;
   /**
    * Original thrift field:-
    * 1: string foo
@@ -386,7 +386,7 @@ class MyFifthStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'foo' => ?string,
   );
 
-  const int STRUCTURAL_ID = 5005397852709472361;
+  const int STRUCTURAL_ID = 2543313131770479784;
   /**
    * Original thrift field:-
    * 1: string foo
@@ -471,7 +471,7 @@ trait MySixthStructTrait implements \IThriftSyncStruct, \IThriftStructMetadata {
   );
 
   static function getStructuralID()[]: int {
-    return 5005397852709472361;
+    return 2543313131770479784;
   }
   /**
    * Original thrift field:-
@@ -556,7 +556,7 @@ trait MySeventhStructTrait implements \IThriftSyncStruct, \IThriftStructMetadata
   );
 
   static function getStructuralID()[]: int {
-    return 5005397852709472361;
+    return 2543313131770479784;
   }
   /**
    * Original thrift field:-

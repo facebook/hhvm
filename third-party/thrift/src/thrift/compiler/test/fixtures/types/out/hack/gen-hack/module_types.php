@@ -198,7 +198,7 @@ class decorated_struct implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'field' => ?string,
   );
 
-  const int STRUCTURAL_ID = 6158382972310209096;
+  const int STRUCTURAL_ID = 2542322577191578450;
   /**
    * Original thrift field:-
    * 1: string field
@@ -383,7 +383,7 @@ class ContainerStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'fieldH' => ?Map<int, string>,
   );
 
-  const int STRUCTURAL_ID = 7915479604049708983;
+  const int STRUCTURAL_ID = 5936966951925394191;
   /**
    * Original thrift field:-
    * 12: list<i32> fieldA
@@ -914,7 +914,7 @@ class CppTypeStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'fieldA' => ?Vector<int>,
   );
 
-  const int STRUCTURAL_ID = 9369458949141941;
+  const int STRUCTURAL_ID = 2777673087455693716;
   /**
    * Original thrift field:-
    * 1: list<i32> fieldA
@@ -1039,7 +1039,7 @@ class VirtualStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'MyIntField' => ?int,
   );
 
-  const int STRUCTURAL_ID = 7014352813131039231;
+  const int STRUCTURAL_ID = 6205033074510652062;
   /**
    * Original thrift field:-
    * 1: i64 MyIntField
@@ -1142,7 +1142,7 @@ class MyStructWithForwardRefEnum implements \IThriftSyncStruct, \IThriftStructMe
     ?'b' => ?\apache\thrift\fixtures\types\MyForwardRefEnum,
   );
 
-  const int STRUCTURAL_ID = 6098225215594902198;
+  const int STRUCTURAL_ID = 3558905979934405465;
   /**
    * Original thrift field:-
    * 1: module.MyForwardRefEnum a
@@ -1272,7 +1272,7 @@ class TrivialNumeric implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'b' => ?bool,
   );
 
-  const int STRUCTURAL_ID = 3920068475021763685;
+  const int STRUCTURAL_ID = 602717827603261434;
   /**
    * Original thrift field:-
    * 1: i32 a
@@ -1400,7 +1400,7 @@ class TrivialNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMeta
     ?'n' => ?\apache\thrift\fixtures\types\TrivialNumeric,
   );
 
-  const int STRUCTURAL_ID = 5012136746274172257;
+  const int STRUCTURAL_ID = 4658716334712874536;
   /**
    * Original thrift field:-
    * 1: i32 z
@@ -1543,7 +1543,7 @@ class ComplexString implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'b' => ?Map<string, int>,
   );
 
-  const int STRUCTURAL_ID = 5460740530481786095;
+  const int STRUCTURAL_ID = 2986587429846313093;
   /**
    * Original thrift field:-
    * 1: string a
@@ -1691,7 +1691,7 @@ class ComplexNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMeta
     ?'n' => ?\apache\thrift\fixtures\types\ComplexString,
   );
 
-  const int STRUCTURAL_ID = 2913723608362321564;
+  const int STRUCTURAL_ID = 6525266393337893135;
   /**
    * Original thrift field:-
    * 1: string z
@@ -1838,7 +1838,7 @@ class MinPadding implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'tiny' => ?int,
   );
 
-  const int STRUCTURAL_ID = 723753448680843528;
+  const int STRUCTURAL_ID = 8169541757957041639;
   /**
    * Original thrift field:-
    * 1: byte small
@@ -2330,7 +2330,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'data' => ?\apache\thrift\fixtures\types\MyDataItem,
   );
 
-  const int STRUCTURAL_ID = 2472338421128341558;
+  const int STRUCTURAL_ID = 5098339715764100678;
   /**
    * Original thrift field:-
    * 1: i64 MyIntField
@@ -2561,7 +2561,7 @@ class Renaming implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'foo' => ?int,
   );
 
-  const int STRUCTURAL_ID = 2811793053530639830;
+  const int STRUCTURAL_ID = 8448648598339135578;
   /**
    * Original thrift field:-
    * 1: i64 foo
@@ -2693,7 +2693,7 @@ class AnnotatedTypes implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'list_field' => ?Vector<Map<int, string>>,
   );
 
-  const int STRUCTURAL_ID = 1512355088623263223;
+  const int STRUCTURAL_ID = 5909269774598598513;
   /**
    * Original thrift field:-
    * 1: module.TBinary_8623 binary_field
@@ -2938,7 +2938,7 @@ class ForwardUsageRoot implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'ForwardUsageByRef' => ?\apache\thrift\fixtures\types\ForwardUsageByRef,
   );
 
-  const int STRUCTURAL_ID = 839155360071855827;
+  const int STRUCTURAL_ID = 8214132411640750029;
   /**
    * Original thrift field:-
    * 1: module.ForwardUsageStruct ForwardUsageStruct
@@ -3081,7 +3081,7 @@ class ForwardUsageStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'foo' => ?\apache\thrift\fixtures\types\ForwardUsageRoot,
   );
 
-  const int STRUCTURAL_ID = 7148256645166217470;
+  const int STRUCTURAL_ID = 6600861629155822847;
   /**
    * Original thrift field:-
    * 1: module.ForwardUsageRoot foo
@@ -3195,7 +3195,7 @@ class ForwardUsageByRef implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'foo' => ?\apache\thrift\fixtures\types\ForwardUsageRoot,
   );
 
-  const int STRUCTURAL_ID = 7148256645166217470;
+  const int STRUCTURAL_ID = 6600861629155822847;
   /**
    * Original thrift field:-
    * 1: module.ForwardUsageRoot foo
@@ -3318,7 +3318,7 @@ class IncompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'field' => ?Map<int, \apache\thrift\fixtures\types\IncompleteMapDep>,
   );
 
-  const int STRUCTURAL_ID = 8146873538067102953;
+  const int STRUCTURAL_ID = 8673751290545530282;
   /**
    * Original thrift field:-
    * 1: map<i32, module.IncompleteMapDep> field
@@ -3517,7 +3517,7 @@ class CompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'field' => ?Map<int, \apache\thrift\fixtures\types\CompleteMapDep>,
   );
 
-  const int STRUCTURAL_ID = 8146873538067102953;
+  const int STRUCTURAL_ID = 8673751290545530282;
   /**
    * Original thrift field:-
    * 1: map<i32, module.CompleteMapDep> field
@@ -3727,7 +3727,7 @@ class IncompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'field' => ?Vector<\apache\thrift\fixtures\types\IncompleteListDep>,
   );
 
-  const int STRUCTURAL_ID = 8146873538067102953;
+  const int STRUCTURAL_ID = 8673751290545530282;
   /**
    * Original thrift field:-
    * 1: list<module.IncompleteListDep> field
@@ -3927,7 +3927,7 @@ class CompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'field' => ?Vector<\apache\thrift\fixtures\types\CompleteListDep>,
   );
 
-  const int STRUCTURAL_ID = 8146873538067102953;
+  const int STRUCTURAL_ID = 8673751290545530282;
   /**
    * Original thrift field:-
    * 1: list<module.CompleteListDep> field
@@ -4127,7 +4127,7 @@ class AdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'field' => ?Vector<\apache\thrift\fixtures\types\AdaptedListDep>,
   );
 
-  const int STRUCTURAL_ID = 8146873538067102953;
+  const int STRUCTURAL_ID = 8673751290545530282;
   /**
    * Original thrift field:-
    * 1: list<module.AdaptedListDep> field
@@ -4246,7 +4246,7 @@ class AdaptedListDep implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'field' => ?\apache\thrift\fixtures\types\AdaptedList,
   );
 
-  const int STRUCTURAL_ID = 4190573964717330521;
+  const int STRUCTURAL_ID = 3975783283551594508;
   /**
    * Original thrift field:-
    * 1: module.AdaptedList field
@@ -4361,7 +4361,7 @@ class DependentAdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata
     ?'field' => ?Vector<\apache\thrift\fixtures\types\DependentAdaptedListDep>,
   );
 
-  const int STRUCTURAL_ID = 8146873538067102953;
+  const int STRUCTURAL_ID = 8673751290545530282;
   /**
    * Original thrift field:-
    * 1: list<module.DependentAdaptedListDep> field
@@ -4479,7 +4479,7 @@ class DependentAdaptedListDep implements \IThriftSyncStruct, \IThriftStructMetad
     ?'field' => ?int,
   );
 
-  const int STRUCTURAL_ID = 4533421093368234312;
+  const int STRUCTURAL_ID = 5835410523167603455;
   /**
    * Original thrift field:-
    * 1: i16 field
@@ -4650,7 +4650,7 @@ class AllocatorAware implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'aa_shared' => ?int,
   );
 
-  const int STRUCTURAL_ID = 6091982818879931050;
+  const int STRUCTURAL_ID = 8493199907928342656;
   /**
    * Original thrift field:-
    * 1: module.list_i32_9187 aa_list
@@ -5085,7 +5085,7 @@ class AllocatorAware2 implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'box_field' => ?int,
   );
 
-  const int STRUCTURAL_ID = 8535397751218300194;
+  const int STRUCTURAL_ID = 7357076922945536923;
   /**
    * Original thrift field:-
    * 1: i32 not_a_container
@@ -5233,7 +5233,7 @@ class TypedefStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'UintTypedef_field' => ?int,
   );
 
-  const int STRUCTURAL_ID = 9104074718450007174;
+  const int STRUCTURAL_ID = 2285725370845264471;
   /**
    * Original thrift field:-
    * 1: i32 i32_field
@@ -5444,7 +5444,7 @@ class StructWithDoubleUnderscores implements \IThriftSyncStruct, \IThriftStructM
     ?'__field' => ?int,
   );
 
-  const int STRUCTURAL_ID = 8209484534723602012;
+  const int STRUCTURAL_ID = 5470127385043660041;
   /**
    * Original thrift field:-
    * 1: i32 __field

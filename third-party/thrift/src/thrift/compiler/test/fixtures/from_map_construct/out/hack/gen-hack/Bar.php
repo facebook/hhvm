@@ -193,7 +193,7 @@ class Bar_baz_args implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'e' => ?int,
   );
 
-  const int STRUCTURAL_ID = 7865027497865509792;
+  const int STRUCTURAL_ID = 924709280084883562;
   public Set<int> $a;
   public Vector<Map<int, Set<string>>> $b;
   public int $c;
@@ -376,7 +376,7 @@ class Bar_baz_result extends \ThriftSyncStructWithResult implements \IThriftStru
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 1365128170602685579;
+  const int STRUCTURAL_ID = 4189911915654962654;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {

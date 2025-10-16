@@ -133,7 +133,7 @@ class PyDeprecatedHidden implements \IThriftSyncStruct, \IThriftStructMetadata, 
   const type TShape = shape(
     'reason' => string,
   );
-  const int STRUCTURAL_ID = 3707764047816594739;
+  const int STRUCTURAL_ID = 8764363268396101679;
   /**
    * Original thrift field:-
    * 1: string reason
@@ -329,7 +329,7 @@ class Name implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
   const type TShape = shape(
     'name' => string,
   );
-  const int STRUCTURAL_ID = 2593878277785201336;
+  const int STRUCTURAL_ID = 7068917836668558637;
   /**
    * Original thrift field:-
    * 1: string name
@@ -482,7 +482,7 @@ class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
     'name' => string,
     'typeHint' => string,
   );
-  const int STRUCTURAL_ID = 8465306397732997722;
+  const int STRUCTURAL_ID = 4097712627775983104;
   /**
    * Fully qualified name of a Python adapter class, which should inherit from thrift.python.adapter.Adapter
    * 
@@ -638,7 +638,7 @@ class UseCAPI implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
   const type TShape = shape(
     'serialize' => bool,
   );
-  const int STRUCTURAL_ID = 1251623031795142618;
+  const int STRUCTURAL_ID = 7609034054625979820;
   /**
    * Original thrift field:-
    * 1: bool serialize

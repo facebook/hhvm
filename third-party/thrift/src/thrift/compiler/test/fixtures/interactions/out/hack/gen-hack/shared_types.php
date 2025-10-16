@@ -33,7 +33,7 @@ class DoSomethingResult implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'i_res' => ?int,
   );
 
-  const int STRUCTURAL_ID = 3390715959935043756;
+  const int STRUCTURAL_ID = 4959007126407660429;
   /**
    * Original thrift field:-
    * 1: string s_res

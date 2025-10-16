@@ -31,7 +31,7 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
   const type TShape = shape(
     'MyInt' => int,
   );
-  const int STRUCTURAL_ID = 2232659903239944098;
+  const int STRUCTURAL_ID = 6265836331550986399;
   /**
    * Original thrift field:-
    * 1: i64 MyInt

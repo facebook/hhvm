@@ -66,7 +66,7 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'str_field' => ?string,
   );
 
-  const int STRUCTURAL_ID = 7422449121106253639;
+  const int STRUCTURAL_ID = 4823667318037070351;
   /**
    * Original thrift field:-
    * 1: i32 i_field
@@ -194,7 +194,7 @@ class FooUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUn
     ?'str_field' => ?string,
   );
 
-  const int STRUCTURAL_ID = 3905905529819142594;
+  const int STRUCTURAL_ID = 1061465918605691615;
   /**
    * Original thrift field:-
    * 1: i32 int_field

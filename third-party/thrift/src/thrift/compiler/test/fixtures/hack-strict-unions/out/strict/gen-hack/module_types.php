@@ -68,7 +68,7 @@ class Primitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
     ?'float3_' => ?float,
   );
 
-  const int STRUCTURAL_ID = 6436806283605753098;
+  const int STRUCTURAL_ID = 689593533909440138;
   /**
    * Original thrift field:-
    * 1: i64 i64_
@@ -444,7 +444,7 @@ class OtherPrimitive implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     ?'float3_' => ?float,
   );
 
-  const int STRUCTURAL_ID = 6436806283605753098;
+  const int STRUCTURAL_ID = 689593533909440138;
   /**
    * Original thrift field:-
    * 1: i64 i64_
@@ -778,7 +778,7 @@ class Primitive1 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
     ?'i64_' => ?int,
   );
 
-  const int STRUCTURAL_ID = 8977798922771317429;
+  const int STRUCTURAL_ID = 7532030531268178802;
   /**
    * Original thrift field:-
    * 1: i64 i64_
@@ -910,7 +910,7 @@ class Primitive2 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
     ?'i64_' => ?int,
   );
 
-  const int STRUCTURAL_ID = 8977798922771317429;
+  const int STRUCTURAL_ID = 7532030531268178802;
   /**
    * Original thrift field:-
    * 1: i64 i64_
@@ -1042,7 +1042,7 @@ class Primitive3 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
     ?'i64_' => ?int,
   );
 
-  const int STRUCTURAL_ID = 8977798922771317429;
+  const int STRUCTURAL_ID = 7532030531268178802;
   /**
    * Original thrift field:-
    * 1: i64 i64_
@@ -1174,7 +1174,7 @@ class Primitive4 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
     ?'i64_' => ?int,
   );
 
-  const int STRUCTURAL_ID = 8977798922771317429;
+  const int STRUCTURAL_ID = 7532030531268178802;
   /**
    * Original thrift field:-
    * 1: i64 i64_

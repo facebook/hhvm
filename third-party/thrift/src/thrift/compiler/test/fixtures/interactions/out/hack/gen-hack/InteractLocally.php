@@ -304,7 +304,7 @@ class InteractLocally_SharedInteraction_init_result extends \ThriftSyncStructWit
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 3865318819874171525;
+  const int STRUCTURAL_ID = 413702039226145291;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -433,7 +433,7 @@ class InteractLocally_SharedInteraction_do_something_result extends \ThriftSyncS
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 1665402448780378721;
+  const int STRUCTURAL_ID = 3505983262678804197;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {

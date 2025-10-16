@@ -364,7 +364,7 @@ class Raiser_doRaise_result extends \ThriftSyncStructWithoutResult implements \I
     ?'s' => ?Serious,
   );
 
-  const int STRUCTURAL_ID = 1991614683033939916;
+  const int STRUCTURAL_ID = 2485078746203739724;
   public ?Banal $b;
   public ?Fiery $f;
   public ?Serious $s;
@@ -560,7 +560,7 @@ class Raiser_get200_result extends \ThriftSyncStructWithResult implements \IThri
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 1365128170602685579;
+  const int STRUCTURAL_ID = 4189911915654962654;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -709,7 +709,7 @@ class Raiser_get500_result extends \ThriftSyncStructWithResult implements \IThri
     ?'s' => ?Serious,
   );
 
-  const int STRUCTURAL_ID = 6147773747560615508;
+  const int STRUCTURAL_ID = 4016671979848925958;
   public ?this::TResult $success;
   public ?Fiery $f;
   public ?Banal $b;

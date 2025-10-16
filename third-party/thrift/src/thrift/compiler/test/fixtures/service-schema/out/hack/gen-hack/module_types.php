@@ -71,7 +71,7 @@ class CustomException extends \TException implements \IThriftSyncStruct, \IThrif
     ?'result' => ?\facebook\thrift\test\Result,
   );
 
-  const int STRUCTURAL_ID = 457716634004981248;
+  const int STRUCTURAL_ID = 669503619523194995;
   /**
    * Original thrift field:-
    * 1: string name

@@ -65,7 +65,7 @@ class MyException extends \TException implements \IThriftSyncStruct, \IThriftExc
     ?'code' => ?MyEnum,
   );
 
-  const int STRUCTURAL_ID = 3517193566312570591;
+  const int STRUCTURAL_ID = 7434290439006024283;
   /**
    * Original thrift field:-
    * 1: string message

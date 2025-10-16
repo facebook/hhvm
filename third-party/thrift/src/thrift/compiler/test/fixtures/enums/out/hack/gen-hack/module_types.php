@@ -325,7 +325,7 @@ class SomeStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
     'tags' => dict<int, bool>,
     ...
   );
-  const int STRUCTURAL_ID = 8159017183734005742;
+  const int STRUCTURAL_ID = 5698439653847819609;
   /**
    * Original thrift field:-
    * 1: module.Metasyntactic reasonable
@@ -562,7 +562,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     ?'me1_t2' => ?\test\fixtures\enums\MyEnum1,
     ...
   );
-  const int STRUCTURAL_ID = 8234221749727407461;
+  const int STRUCTURAL_ID = 5491470755808031510;
   /**
    * Original thrift field:-
    * 1: module.MyEnum2 me2_3

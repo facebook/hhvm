@@ -141,7 +141,7 @@ class TestStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'optional_struct_field' => ?\facebook\thrift\compiler\test\fixtures\default_values_rectification\EmptyStruct,
   );
 
-  const int STRUCTURAL_ID = 7991153564712628734;
+  const int STRUCTURAL_ID = 3868425414146542049;
   /**
    * Original thrift field:-
    * 1: i32 unqualified_int_field

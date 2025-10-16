@@ -42,7 +42,7 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'i_field3' => ?int,
   );
 
-  const int STRUCTURAL_ID = 4166182619516796800;
+  const int STRUCTURAL_ID = 631752310987865105;
   /**
    * Original thrift field:-
    * 1: include.MyI32 i_field

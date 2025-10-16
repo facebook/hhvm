@@ -174,7 +174,7 @@ class PrimitivesService_init_args implements \IThriftSyncStruct, \IThriftStructM
     ?'param1' => ?int,
   );
 
-  const int STRUCTURAL_ID = 4426064482866805446;
+  const int STRUCTURAL_ID = 6761775133478352856;
   public int $param0;
   public int $param1;
 
@@ -264,7 +264,7 @@ class PrimitivesService_init_result extends \ThriftSyncStructWithResult implemen
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 5548670328188446575;
+  const int STRUCTURAL_ID = 3715007529104411015;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -400,7 +400,7 @@ class PrimitivesService_method_that_throws_result extends \ThriftSyncStructWithR
     ?'e' => ?\facebook\thrift\test\CustomException,
   );
 
-  const int STRUCTURAL_ID = 8885166390166279584;
+  const int STRUCTURAL_ID = 8052915316395929815;
   public ?this::TResult $success;
   public ?\facebook\thrift\test\CustomException $e;
 
@@ -517,7 +517,7 @@ class PrimitivesService_return_void_method_args implements \IThriftSyncStruct, \
     ?'i' => ?\I,
   );
 
-  const int STRUCTURAL_ID = 3392731265008629035;
+  const int STRUCTURAL_ID = 9169453415850936429;
   public int $id;
   public ?\I $i;
 

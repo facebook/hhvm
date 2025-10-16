@@ -74,7 +74,7 @@ class FBStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'struct_value' => ?\foo_php_ns_TestStruct,
   );
 
-  const int STRUCTURAL_ID = 3033845145268312663;
+  const int STRUCTURAL_ID = 3310738380971623822;
   /**
    * Original thrift field:-
    * 1: string str_value

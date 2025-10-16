@@ -152,7 +152,7 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
     ?'optional_map_of_map_of_sets' => ?dict<int, dict<int, dict<string, bool>>>,
     ...
   );
-  const int STRUCTURAL_ID = 6419322044061300149;
+  const int STRUCTURAL_ID = 6937505964039314823;
   /**
    * Original thrift field:-
    * 1: i32 just_int

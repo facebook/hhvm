@@ -150,7 +150,7 @@ class structured_annotation_inline implements \IThriftSyncStruct, \IThriftStruct
     ?'name' => ?string,
   );
 
-  const int STRUCTURAL_ID = 4972386806027895704;
+  const int STRUCTURAL_ID = 7478872783437424877;
   /**
    * Original thrift field:-
    * 1: i64 count
@@ -251,7 +251,7 @@ class structured_annotation_with_default implements \IThriftSyncStruct, \IThrift
     ?'name' => ?string,
   );
 
-  const int STRUCTURAL_ID = 2593878277785201336;
+  const int STRUCTURAL_ID = 7068917836668558637;
   /**
    * Original thrift field:-
    * 1: string name
@@ -348,7 +348,7 @@ class structured_annotation_recursive implements \IThriftSyncStruct, \IThriftStr
     ?'forward' => ?\test\fixtures\basic_structured_annotations\structured_annotation_forward,
   );
 
-  const int STRUCTURAL_ID = 2762967868033251423;
+  const int STRUCTURAL_ID = 593851884584327297;
   /**
    * Original thrift field:-
    * 1: string name
@@ -486,7 +486,7 @@ class structured_annotation_forward implements \IThriftSyncStruct, \IThriftStruc
     ?'count' => ?int,
   );
 
-  const int STRUCTURAL_ID = 6887469671700782815;
+  const int STRUCTURAL_ID = 2916432844831955011;
   /**
    * Original thrift field:-
    * 1: i64 count
@@ -576,7 +576,7 @@ class structured_annotation_nested implements \IThriftSyncStruct, \IThriftStruct
     ?'nest' => ?\test\fixtures\basic_structured_annotations\structured_annotation_with_default,
   );
 
-  const int STRUCTURAL_ID = 6161284296844090840;
+  const int STRUCTURAL_ID = 8296255473021238826;
   /**
    * Original thrift field:-
    * 1: string name
@@ -699,7 +699,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'annotated_nested' => ?int,
   );
 
-  const int STRUCTURAL_ID = 3348150936040517721;
+  const int STRUCTURAL_ID = 5370755337924657150;
   /**
    * Original thrift field:-
    * 1: i64 annotated_field
@@ -943,7 +943,7 @@ class MyException extends \TException implements \IThriftSyncStruct, \IThriftExc
     ?'context' => ?string,
   );
 
-  const int STRUCTURAL_ID = 4527164319056566576;
+  const int STRUCTURAL_ID = 235471356607518527;
   /**
    * Original thrift field:-
    * 1: string context
@@ -1055,7 +1055,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     ?'second' => ?int,
   );
 
-  const int STRUCTURAL_ID = 1597178699879920243;
+  const int STRUCTURAL_ID = 898907342440630784;
   /**
    * Original thrift field:-
    * 1: module.annotated_inline_string first

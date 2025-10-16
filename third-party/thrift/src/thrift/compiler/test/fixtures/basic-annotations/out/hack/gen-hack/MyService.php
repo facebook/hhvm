@@ -477,7 +477,7 @@ class MyService_ping_result extends \ThriftSyncStructWithoutResult implements \I
     ?'myExcept' => ?MyException,
   );
 
-  const int STRUCTURAL_ID = 7189959854181053156;
+  const int STRUCTURAL_ID = 342784749255449123;
   public ?MyException $myExcept;
 
   public function __construct(?MyException $myExcept = null)[] {
@@ -674,7 +674,7 @@ class MyService_getRandomData_result extends \ThriftSyncStructWithResult impleme
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 1365128170602685579;
+  const int STRUCTURAL_ID = 4189911915654962654;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -764,7 +764,7 @@ class MyService_hasDataById_args implements \IThriftSyncStruct, \IThriftStructMe
     'id' => int,
     ...
   );
-  const int STRUCTURAL_ID = 3807211151619655933;
+  const int STRUCTURAL_ID = 7860695874385833996;
   public int $id;
 
   public function __construct(?int $id = null)[] {
@@ -863,7 +863,7 @@ class MyService_hasDataById_result extends \ThriftSyncStructWithResult implement
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 8594383818423018844;
+  const int STRUCTURAL_ID = 365925050253362406;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -953,7 +953,7 @@ class MyService_getDataById_args implements \IThriftSyncStruct, \IThriftStructMe
     'id' => int,
     ...
   );
-  const int STRUCTURAL_ID = 3807211151619655933;
+  const int STRUCTURAL_ID = 7860695874385833996;
   public int $id;
 
   public function __construct(?int $id = null)[] {
@@ -1052,7 +1052,7 @@ class MyService_getDataById_result extends \ThriftSyncStructWithResult implement
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 1365128170602685579;
+  const int STRUCTURAL_ID = 4189911915654962654;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -1149,7 +1149,7 @@ class MyService_putDataById_args implements \IThriftSyncStruct, \IThriftStructMe
     'data' => string,
     ...
   );
-  const int STRUCTURAL_ID = 1055685087985327657;
+  const int STRUCTURAL_ID = 7854634254635448669;
   public int $id;
   public string $data;
 
@@ -1347,7 +1347,7 @@ class MyService_lobDataById_args implements \IThriftSyncStruct, \IThriftStructMe
     'data' => string,
     ...
   );
-  const int STRUCTURAL_ID = 1055685087985327657;
+  const int STRUCTURAL_ID = 7854634254635448669;
   public int $id;
   public string $data;
 

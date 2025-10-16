@@ -27,7 +27,7 @@ class InitialResponse implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'content' => ?string,
   );
 
-  const int STRUCTURAL_ID = 921480878768501242;
+  const int STRUCTURAL_ID = 2263673519637190182;
   /**
    * Original thrift field:-
    * 1: string content
@@ -109,7 +109,7 @@ class FinalResponse implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'content' => ?string,
   );
 
-  const int STRUCTURAL_ID = 921480878768501242;
+  const int STRUCTURAL_ID = 2263673519637190182;
   /**
    * Original thrift field:-
    * 1: string content
@@ -191,7 +191,7 @@ class SinkPayload implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'content' => ?string,
   );
 
-  const int STRUCTURAL_ID = 921480878768501242;
+  const int STRUCTURAL_ID = 2263673519637190182;
   /**
    * Original thrift field:-
    * 1: string content
@@ -273,7 +273,7 @@ class CompatibleWithKeywordSink implements \IThriftSyncStruct, \IThriftStructMet
     ?'sink' => ?string,
   );
 
-  const int STRUCTURAL_ID = 3905273354198769243;
+  const int STRUCTURAL_ID = 2141290531817724852;
   /**
    * Original thrift field:-
    * 1: string sink
@@ -355,7 +355,7 @@ class InitialException extends \TException implements \IThriftSyncStruct, \IThri
     ?'reason' => ?string,
   );
 
-  const int STRUCTURAL_ID = 3707764047816594739;
+  const int STRUCTURAL_ID = 8764363268396101679;
   /**
    * Original thrift field:-
    * 1: string reason
@@ -437,7 +437,7 @@ class SinkException1 extends \TException implements \IThriftSyncStruct, \IThrift
     ?'reason' => ?string,
   );
 
-  const int STRUCTURAL_ID = 3707764047816594739;
+  const int STRUCTURAL_ID = 8764363268396101679;
   /**
    * Original thrift field:-
    * 1: string reason
@@ -519,7 +519,7 @@ class SinkException2 extends \TException implements \IThriftSyncStruct, \IThrift
     ?'reason' => ?int,
   );
 
-  const int STRUCTURAL_ID = 989028245140918602;
+  const int STRUCTURAL_ID = 5049872546840732862;
   /**
    * Original thrift field:-
    * 1: i64 reason

@@ -27,7 +27,7 @@ class Fiery extends \TException implements \IThriftSyncStruct, \IThriftException
     ?'message' => ?string,
   );
 
-  const int STRUCTURAL_ID = 1438368398389181198;
+  const int STRUCTURAL_ID = 546500496397478593;
   /**
    * Original thrift field:-
    * 1: string message
@@ -118,7 +118,7 @@ class Serious extends \TException implements \IThriftSyncStruct, \IThriftExcepti
     ?'sonnet' => ?string,
   );
 
-  const int STRUCTURAL_ID = 7572301088987666687;
+  const int STRUCTURAL_ID = 3760812267820589102;
   /**
    * Original thrift field:-
    * 1: string sonnet
@@ -226,7 +226,7 @@ class ComplexFieldNames extends \TException implements \IThriftSyncStruct, \IThr
     ?'internal_error_message' => ?string,
   );
 
-  const int STRUCTURAL_ID = 4419960994551853385;
+  const int STRUCTURAL_ID = 5147929468641865420;
   /**
    * Original thrift field:-
    * 1: string error_message
@@ -346,7 +346,7 @@ class CustomFieldNames extends \TException implements \IThriftSyncStruct, \IThri
     ?'internal_error_message' => ?string,
   );
 
-  const int STRUCTURAL_ID = 4419960994551853385;
+  const int STRUCTURAL_ID = 5147929468641865420;
   /**
    * Original thrift field:-
    * 1: string error_message
@@ -466,7 +466,7 @@ class ExceptionWithPrimitiveField extends \TException implements \IThriftSyncStr
     ?'error_code' => ?int,
   );
 
-  const int STRUCTURAL_ID = 2746197671326593349;
+  const int STRUCTURAL_ID = 1212104309639911820;
   /**
    * Original thrift field:-
    * 1: string message
@@ -581,7 +581,7 @@ class ExceptionWithStructuredAnnotation extends \TException implements \IThriftS
     ?'error_code' => ?int,
   );
 
-  const int STRUCTURAL_ID = 267833845416100769;
+  const int STRUCTURAL_ID = 5761664269392928861;
   /**
    * Original thrift field:-
    * 1: string message_field

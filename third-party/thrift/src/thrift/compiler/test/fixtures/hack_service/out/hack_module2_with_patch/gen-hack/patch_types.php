@@ -316,7 +316,7 @@ class BoolPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
     ?'invert' => ?bool,
   );
 
-  const int STRUCTURAL_ID = 6587786969423386652;
+  const int STRUCTURAL_ID = 4543684046420081269;
   /**
    * Assigns to a (set) value.
    * 
@@ -474,7 +474,7 @@ class BytePatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
     ?'add' => ?int,
   );
 
-  const int STRUCTURAL_ID = 353839682464366106;
+  const int STRUCTURAL_ID = 7034890011919469390;
   /**
    * Assigns to a (set) value.
    * 
@@ -632,7 +632,7 @@ class I16Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSt
     ?'add' => ?int,
   );
 
-  const int STRUCTURAL_ID = 218422147056489009;
+  const int STRUCTURAL_ID = 753949836966478457;
   /**
    * Assigns to a (set) value.
    * 
@@ -790,7 +790,7 @@ class I32Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSt
     ?'add' => ?int,
   );
 
-  const int STRUCTURAL_ID = 8147514463397038431;
+  const int STRUCTURAL_ID = 4278579508041671903;
   /**
    * Assigns to a (set) value.
    * 
@@ -948,7 +948,7 @@ class I64Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSt
     ?'add' => ?int,
   );
 
-  const int STRUCTURAL_ID = 3463481380739863248;
+  const int STRUCTURAL_ID = 4809101170284383840;
   /**
    * Assigns to a (set) value.
    * 
@@ -1106,7 +1106,7 @@ class FloatPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
     ?'add' => ?float,
   );
 
-  const int STRUCTURAL_ID = 2148458437976210697;
+  const int STRUCTURAL_ID = 6960242705142297001;
   /**
    * Assigns to a (set) value.
    * 
@@ -1264,7 +1264,7 @@ class DoublePatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
     ?'add' => ?float,
   );
 
-  const int STRUCTURAL_ID = 5393538735552286670;
+  const int STRUCTURAL_ID = 2259367171895306265;
   /**
    * Assigns to a (set) value.
    * 
@@ -1429,7 +1429,7 @@ class StringPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
     ?'append' => ?string,
   );
 
-  const int STRUCTURAL_ID = 4803569377705535564;
+  const int STRUCTURAL_ID = 6139553007545130555;
   /**
    * Assigns to a (set) value.
    * 
@@ -1618,7 +1618,7 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
     ?'append' => ?string,
   );
 
-  const int STRUCTURAL_ID = 3833420858319564148;
+  const int STRUCTURAL_ID = 2693121754075950935;
   /**
    * Assigns to a (set) value.
    * 

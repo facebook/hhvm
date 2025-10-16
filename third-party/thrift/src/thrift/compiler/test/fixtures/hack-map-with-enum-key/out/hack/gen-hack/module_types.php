@@ -86,7 +86,7 @@ class BarStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
     's' => dict<FooEnum, bool>,
     ...
   );
-  const int STRUCTURAL_ID = 2986314503120154076;
+  const int STRUCTURAL_ID = 9007275181165525894;
   /**
    * Original thrift field:-
    * 1: map<module.FooEnum, module.FooEnum> e

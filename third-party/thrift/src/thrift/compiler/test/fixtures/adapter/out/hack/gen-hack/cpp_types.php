@@ -136,7 +136,7 @@ class Name implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
   const type TShape = shape(
     'value' => string,
   );
-  const int STRUCTURAL_ID = 4244314491070478042;
+  const int STRUCTURAL_ID = 7890627744707884767;
   /**
    * Original thrift field:-
    * 1: string value
@@ -272,7 +272,7 @@ class Type implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
     'name' => string,
     'template' => string,
   );
-  const int STRUCTURAL_ID = 6389487468753271119;
+  const int STRUCTURAL_ID = 1931557339649512761;
   /**
    * Original thrift field:-
    * 1: string name
@@ -434,7 +434,7 @@ class Ref implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
   const type TShape = shape(
     ?'type' => ?\facebook\thrift\annotation\cpp\RefType,
   );
-  const int STRUCTURAL_ID = 8496209332976516665;
+  const int STRUCTURAL_ID = 9199455418205459382;
   /**
    * Original thrift field:-
    * 1: cpp.RefType type
@@ -568,7 +568,7 @@ class Lazy implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
   const type TShape = shape(
     'ref' => bool,
   );
-  const int STRUCTURAL_ID = 2641839514020242314;
+  const int STRUCTURAL_ID = 8263607926442937418;
   /**
    * Original thrift field:-
    * 1: bool ref
@@ -808,7 +808,7 @@ class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
     'extraNamespace' => string,
     'moveOnly' => bool,
   );
-  const int STRUCTURAL_ID = 8180344078447403329;
+  const int STRUCTURAL_ID = 1598934288211608189;
   /**
    * The name of a C++ adapter type used to convert between Thrift and native
    * C++ representation.
@@ -1068,7 +1068,7 @@ class PackIsset implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
   const type TShape = shape(
     'atomic' => bool,
   );
-  const int STRUCTURAL_ID = 1587553453134051231;
+  const int STRUCTURAL_ID = 246594944080831905;
   /**
    * Original thrift field:-
    * 1: bool atomic
@@ -1396,7 +1396,7 @@ class FieldInterceptor implements \IThriftSyncStruct, \IThriftStructMetadata, \I
     'name' => string,
     'noinline' => bool,
   );
-  const int STRUCTURAL_ID = 8132831456632900275;
+  const int STRUCTURAL_ID = 3876858574008868465;
   /**
    * The name of a field interceptor.
    * 
@@ -1656,7 +1656,7 @@ class EnumType implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   const type TShape = shape(
     ?'type' => ?\facebook\thrift\annotation\cpp\EnumUnderlyingType,
   );
-  const int STRUCTURAL_ID = 1724537317047809370;
+  const int STRUCTURAL_ID = 8371848154551322037;
   /**
    * Original thrift field:-
    * 1: cpp.EnumUnderlyingType type

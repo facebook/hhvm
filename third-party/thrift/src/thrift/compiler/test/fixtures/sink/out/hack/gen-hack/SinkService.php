@@ -394,7 +394,7 @@ class SinkService_method_SinkPayload extends \ThriftSyncStructWithResult impleme
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 5047864711357047518;
+  const int STRUCTURAL_ID = 2061965463233345982;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -475,7 +475,7 @@ class SinkService_method_FinalResponse extends \ThriftSyncStructWithResult imple
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 7640464975912492398;
+  const int STRUCTURAL_ID = 6459559006703256418;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -608,7 +608,7 @@ class SinkService_methodAndReponse_FirstResponse extends \ThriftSyncStructWithRe
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 1156060868779247352;
+  const int STRUCTURAL_ID = 2765960861946854477;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -689,7 +689,7 @@ class SinkService_methodAndReponse_SinkPayload extends \ThriftSyncStructWithResu
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 5047864711357047518;
+  const int STRUCTURAL_ID = 2061965463233345982;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -770,7 +770,7 @@ class SinkService_methodAndReponse_FinalResponse extends \ThriftSyncStructWithRe
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 7640464975912492398;
+  const int STRUCTURAL_ID = 6459559006703256418;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -901,7 +901,7 @@ class SinkService_methodThrow_FirstResponse extends \ThriftSyncStructWithoutResu
     ?'ex' => ?InitialException,
   );
 
-  const int STRUCTURAL_ID = 5881917388606205109;
+  const int STRUCTURAL_ID = 5405346433692610102;
   public ?InitialException $ex;
 
   public function __construct(?InitialException $ex = null)[] {
@@ -996,7 +996,7 @@ class SinkService_methodThrow_SinkPayload extends \ThriftSyncStructWithResult im
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 5047864711357047518;
+  const int STRUCTURAL_ID = 2061965463233345982;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -1077,7 +1077,7 @@ class SinkService_methodThrow_FinalResponse extends \ThriftSyncStructWithResult 
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 7640464975912492398;
+  const int STRUCTURAL_ID = 6459559006703256418;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -1269,7 +1269,7 @@ class SinkService_methodSinkThrow_SinkPayload extends \ThriftSyncStructWithResul
     ?'ex' => ?SinkException1,
   );
 
-  const int STRUCTURAL_ID = 8919728181176611439;
+  const int STRUCTURAL_ID = 3251618991305912277;
   public ?this::TResult $success;
   public ?SinkException1 $ex;
 
@@ -1382,7 +1382,7 @@ class SinkService_methodSinkThrow_FinalResponse extends \ThriftSyncStructWithRes
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 7640464975912492398;
+  const int STRUCTURAL_ID = 6459559006703256418;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -1567,7 +1567,7 @@ class SinkService_methodFinalThrow_SinkPayload extends \ThriftSyncStructWithResu
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 5047864711357047518;
+  const int STRUCTURAL_ID = 2061965463233345982;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -1655,7 +1655,7 @@ class SinkService_methodFinalThrow_FinalResponse extends \ThriftSyncStructWithRe
     ?'ex' => ?SinkException2,
   );
 
-  const int STRUCTURAL_ID = 1352924921392902231;
+  const int STRUCTURAL_ID = 7136450258561667982;
   public ?this::TResult $success;
   public ?SinkException2 $ex;
 
@@ -1879,7 +1879,7 @@ class SinkService_methodBothThrow_SinkPayload extends \ThriftSyncStructWithResul
     ?'ex' => ?SinkException1,
   );
 
-  const int STRUCTURAL_ID = 8919728181176611439;
+  const int STRUCTURAL_ID = 3251618991305912277;
   public ?this::TResult $success;
   public ?SinkException1 $ex;
 
@@ -1999,7 +1999,7 @@ class SinkService_methodBothThrow_FinalResponse extends \ThriftSyncStructWithRes
     ?'ex' => ?SinkException2,
   );
 
-  const int STRUCTURAL_ID = 1352924921392902231;
+  const int STRUCTURAL_ID = 7136450258561667982;
   public ?this::TResult $success;
   public ?SinkException2 $ex;
 
@@ -2216,7 +2216,7 @@ class SinkService_methodFast_SinkPayload extends \ThriftSyncStructWithResult imp
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 5047864711357047518;
+  const int STRUCTURAL_ID = 2061965463233345982;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -2297,7 +2297,7 @@ class SinkService_methodFast_FinalResponse extends \ThriftSyncStructWithResult i
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 7640464975912492398;
+  const int STRUCTURAL_ID = 6459559006703256418;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {

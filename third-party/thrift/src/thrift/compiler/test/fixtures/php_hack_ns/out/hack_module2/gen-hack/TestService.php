@@ -101,7 +101,7 @@ class TestService_ping_args implements \IThriftSyncStruct, \IThriftStructMetadat
     ?'str_arg' => ?string,
   );
 
-  const int STRUCTURAL_ID = 5542358918184482101;
+  const int STRUCTURAL_ID = 2424582534794194067;
   public string $str_arg;
 
   public function __construct(?string $str_arg = null)[] {
@@ -177,7 +177,7 @@ class TestService_ping_result extends \ThriftSyncStructWithResult implements \IT
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 3865318819874171525;
+  const int STRUCTURAL_ID = 413702039226145291;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {

@@ -156,7 +156,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     'idempotent' => bool,
     ...
   );
-  const int STRUCTURAL_ID = 5227179801175427619;
+  const int STRUCTURAL_ID = 6508395632048181872;
   /**
    * Original thrift field:-
    * 1: i64 MyIntField
@@ -466,7 +466,7 @@ class Containers implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
     'StringToI64Map' => dict<string, int>,
     ...
   );
-  const int STRUCTURAL_ID = 1445076769012556226;
+  const int STRUCTURAL_ID = 9211069908004905466;
   /**
    * Original thrift field:-
    * 1: list<i32> I32List
@@ -782,7 +782,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
     ?'myDataItem' => ?\test\fixtures\basic\MyDataItem::TShape,
     ...
   );
-  const int STRUCTURAL_ID = 4300912820644046400;
+  const int STRUCTURAL_ID = 2676418211271787525;
   /**
    * Original thrift field:-
    * 1: module.MyEnumAlias myEnum
@@ -1098,7 +1098,7 @@ class MyException extends \TException implements \IThriftSyncStruct, \IThriftExc
     ?'myUnion' => ?\test\fixtures\basic\MyUnion,
   );
 
-  const int STRUCTURAL_ID = 6170249099518146787;
+  const int STRUCTURAL_ID = 7017108444552600161;
   /**
    * Original thrift field:-
    * 1: i64 MyIntField
@@ -1290,7 +1290,7 @@ class MyExceptionWithMessage extends \TException implements \IThriftSyncStruct, 
     ?'myUnion' => ?\test\fixtures\basic\MyUnion,
   );
 
-  const int STRUCTURAL_ID = 6170249099518146787;
+  const int STRUCTURAL_ID = 7017108444552600161;
   /**
    * Original thrift field:-
    * 1: i64 MyIntField
@@ -1480,7 +1480,7 @@ class MyRenamedStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
     'reserved_field' => int,
     ...
   );
-  const int STRUCTURAL_ID = 9144321583101923955;
+  const int STRUCTURAL_ID = 8561786471646640378;
   /**
    * Original thrift field:-
    * 1: i32 reserved_field
@@ -1617,7 +1617,7 @@ class MyRenamedUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     ?'reserved_field' => ?int,
     ...
   );
-  const int STRUCTURAL_ID = 9144321583101923955;
+  const int STRUCTURAL_ID = 8561786471646640378;
   /**
    * Original thrift field:-
    * 1: i32 reserved_field

@@ -119,7 +119,7 @@ class TestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
     ?'struct_foo' => ?Foo,
   );
 
-  const int STRUCTURAL_ID = 872350750526219001;
+  const int STRUCTURAL_ID = 5586164257476618285;
   /**
    * Original thrift field:-
    * 1: i32 int_value
@@ -558,7 +558,7 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'str_value' => ?string,
   );
 
-  const int STRUCTURAL_ID = 5952652426480946901;
+  const int STRUCTURAL_ID = 1891191752164371053;
   /**
    * Original thrift field:-
    * 1: list<string> a
@@ -815,7 +815,7 @@ class TestStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'list_of_struct_self' => ?Vector<TestStruct>,
   );
 
-  const int STRUCTURAL_ID = 6681594433718475023;
+  const int STRUCTURAL_ID = 2225604567905030243;
   /**
    * Original thrift field:-
    * 1: module.Foo foo_struct
@@ -1064,7 +1064,7 @@ class Baz extends \TException implements \IThriftSyncStruct, \IThriftExceptionMe
     ?'code' => ?int,
   );
 
-  const int STRUCTURAL_ID = 1663976252517274137;
+  const int STRUCTURAL_ID = 4039751046430742079;
   /**
    * Original thrift field:-
    * 1: string message
@@ -1212,7 +1212,7 @@ class OptBaz extends \TException implements \IThriftSyncStruct, \IThriftExceptio
     ?'message' => ?string,
   );
 
-  const int STRUCTURAL_ID = 546500496397478593;
+  const int STRUCTURAL_ID = 2427562471238739676;
   /**
    * Original thrift field:-
    * 1: string message

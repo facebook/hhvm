@@ -63,7 +63,7 @@ class A implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'useless_field' => ?int,
   );
 
-  const int STRUCTURAL_ID = 4169556808001627706;
+  const int STRUCTURAL_ID = 6290600727879514290;
   /**
    * Field doctext.
    * 
@@ -163,7 +163,7 @@ class U implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<UEn
     ?'s' => ?string,
   );
 
-  const int STRUCTURAL_ID = 3963907419268179345;
+  const int STRUCTURAL_ID = 6078650768849135788;
   /**
    * i32 field i
    * 
@@ -343,7 +343,7 @@ class Bang extends \TException implements \IThriftSyncStruct, \IThriftExceptionM
     ?'message' => ?string,
   );
 
-  const int STRUCTURAL_ID = 2427562471238739676;
+  const int STRUCTURAL_ID = 1438368398389181198;
   /**
    * All explosions can be explained away
    * 

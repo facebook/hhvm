@@ -410,7 +410,7 @@ class PubSubStreamingService_returnstream_args implements \IThriftSyncStruct, \I
     ?'i32_to' => ?int,
   );
 
-  const int STRUCTURAL_ID = 6851224626875989960;
+  const int STRUCTURAL_ID = 5158204245021981897;
   public int $i32_from;
   public int $i32_to;
 
@@ -500,7 +500,7 @@ class PubSubStreamingService_returnstream_StreamResponse extends \ThriftSyncStru
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 3865318819874171525;
+  const int STRUCTURAL_ID = 413702039226145291;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -626,7 +626,7 @@ class PubSubStreamingService_streamthrows_args implements \IThriftSyncStruct, \I
     ?'foo' => ?int,
   );
 
-  const int STRUCTURAL_ID = 4302560019326481254;
+  const int STRUCTURAL_ID = 6372467642553120222;
   public int $foo;
 
   public function __construct(?int $foo = null)[] {
@@ -709,7 +709,7 @@ class PubSubStreamingService_streamthrows_StreamResponse extends \ThriftSyncStru
     ?'e' => ?FooStreamEx,
   );
 
-  const int STRUCTURAL_ID = 7900894693871902695;
+  const int STRUCTURAL_ID = 3185672421400760041;
   public ?this::TResult $success;
   public ?FooStreamEx $e;
 
@@ -867,7 +867,7 @@ class PubSubStreamingService_servicethrows_args implements \IThriftSyncStruct, \
     ?'foo' => ?int,
   );
 
-  const int STRUCTURAL_ID = 4302560019326481254;
+  const int STRUCTURAL_ID = 6372467642553120222;
   public int $foo;
 
   public function __construct(?int $foo = null)[] {
@@ -943,7 +943,7 @@ class PubSubStreamingService_servicethrows_StreamResponse extends \ThriftSyncStr
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 3865318819874171525;
+  const int STRUCTURAL_ID = 413702039226145291;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -1018,7 +1018,7 @@ class PubSubStreamingService_servicethrows_FirstResponse extends \ThriftSyncStru
     ?'e' => ?FooEx,
   );
 
-  const int STRUCTURAL_ID = 1166333131961181261;
+  const int STRUCTURAL_ID = 3411536202247504493;
   public ?FooEx $e;
 
   public function __construct(?FooEx $e = null)[] {
@@ -1110,7 +1110,7 @@ class PubSubStreamingService_servicethrows2_args implements \IThriftSyncStruct, 
     ?'foo' => ?int,
   );
 
-  const int STRUCTURAL_ID = 4302560019326481254;
+  const int STRUCTURAL_ID = 6372467642553120222;
   public int $foo;
 
   public function __construct(?int $foo = null)[] {
@@ -1186,7 +1186,7 @@ class PubSubStreamingService_servicethrows2_StreamResponse extends \ThriftSyncSt
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 3865318819874171525;
+  const int STRUCTURAL_ID = 413702039226145291;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -1268,7 +1268,7 @@ class PubSubStreamingService_servicethrows2_FirstResponse extends \ThriftSyncStr
     ?'e2' => ?FooEx2,
   );
 
-  const int STRUCTURAL_ID = 5404057405652507927;
+  const int STRUCTURAL_ID = 394668583356460991;
   public ?FooEx $e1;
   public ?FooEx2 $e2;
 
@@ -1385,7 +1385,7 @@ class PubSubStreamingService_boththrows_args implements \IThriftSyncStruct, \ITh
     ?'foo' => ?int,
   );
 
-  const int STRUCTURAL_ID = 4302560019326481254;
+  const int STRUCTURAL_ID = 6372467642553120222;
   public int $foo;
 
   public function __construct(?int $foo = null)[] {
@@ -1468,7 +1468,7 @@ class PubSubStreamingService_boththrows_StreamResponse extends \ThriftSyncStruct
     ?'e' => ?FooStreamEx,
   );
 
-  const int STRUCTURAL_ID = 7900894693871902695;
+  const int STRUCTURAL_ID = 3185672421400760041;
   public ?this::TResult $success;
   public ?FooStreamEx $e;
 
@@ -1575,7 +1575,7 @@ class PubSubStreamingService_boththrows_FirstResponse extends \ThriftSyncStructW
     ?'e' => ?FooEx,
   );
 
-  const int STRUCTURAL_ID = 1166333131961181261;
+  const int STRUCTURAL_ID = 3411536202247504493;
   public ?FooEx $e;
 
   public function __construct(?FooEx $e = null)[] {
@@ -1667,7 +1667,7 @@ class PubSubStreamingService_responseandstreamstreamthrows_args implements \IThr
     ?'foo' => ?int,
   );
 
-  const int STRUCTURAL_ID = 4302560019326481254;
+  const int STRUCTURAL_ID = 6372467642553120222;
   public int $foo;
 
   public function __construct(?int $foo = null)[] {
@@ -1750,7 +1750,7 @@ class PubSubStreamingService_responseandstreamstreamthrows_StreamResponse extend
     ?'e' => ?FooStreamEx,
   );
 
-  const int STRUCTURAL_ID = 7900894693871902695;
+  const int STRUCTURAL_ID = 3185672421400760041;
   public ?this::TResult $success;
   public ?FooStreamEx $e;
 
@@ -1858,7 +1858,7 @@ class PubSubStreamingService_responseandstreamstreamthrows_FirstResponse extends
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 3865318819874171525;
+  const int STRUCTURAL_ID = 413702039226145291;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -1932,7 +1932,7 @@ class PubSubStreamingService_responseandstreamservicethrows_args implements \ITh
     ?'foo' => ?int,
   );
 
-  const int STRUCTURAL_ID = 4302560019326481254;
+  const int STRUCTURAL_ID = 6372467642553120222;
   public int $foo;
 
   public function __construct(?int $foo = null)[] {
@@ -2008,7 +2008,7 @@ class PubSubStreamingService_responseandstreamservicethrows_StreamResponse exten
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 3865318819874171525;
+  const int STRUCTURAL_ID = 413702039226145291;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -2091,7 +2091,7 @@ class PubSubStreamingService_responseandstreamservicethrows_FirstResponse extend
     ?'e' => ?FooEx,
   );
 
-  const int STRUCTURAL_ID = 7792945036684644137;
+  const int STRUCTURAL_ID = 4400265013811827387;
   public ?this::TResult $success;
   public ?FooEx $e;
 
@@ -2197,7 +2197,7 @@ class PubSubStreamingService_responseandstreamboththrows_args implements \IThrif
     ?'foo' => ?int,
   );
 
-  const int STRUCTURAL_ID = 4302560019326481254;
+  const int STRUCTURAL_ID = 6372467642553120222;
   public int $foo;
 
   public function __construct(?int $foo = null)[] {
@@ -2280,7 +2280,7 @@ class PubSubStreamingService_responseandstreamboththrows_StreamResponse extends 
     ?'e' => ?FooStreamEx,
   );
 
-  const int STRUCTURAL_ID = 7900894693871902695;
+  const int STRUCTURAL_ID = 3185672421400760041;
   public ?this::TResult $success;
   public ?FooStreamEx $e;
 
@@ -2395,7 +2395,7 @@ class PubSubStreamingService_responseandstreamboththrows_FirstResponse extends \
     ?'e' => ?FooEx,
   );
 
-  const int STRUCTURAL_ID = 7792945036684644137;
+  const int STRUCTURAL_ID = 4400265013811827387;
   public ?this::TResult $success;
   public ?FooEx $e;
 
@@ -2507,7 +2507,7 @@ class PubSubStreamingService_returnstreamFast_args implements \IThriftSyncStruct
     ?'i32_to' => ?int,
   );
 
-  const int STRUCTURAL_ID = 6851224626875989960;
+  const int STRUCTURAL_ID = 5158204245021981897;
   public int $i32_from;
   public int $i32_to;
 
@@ -2597,7 +2597,7 @@ class PubSubStreamingService_returnstreamFast_StreamResponse extends \ThriftSync
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 3865318819874171525;
+  const int STRUCTURAL_ID = 413702039226145291;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {

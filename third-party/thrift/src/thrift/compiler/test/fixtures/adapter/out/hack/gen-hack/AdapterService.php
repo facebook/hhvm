@@ -203,7 +203,7 @@ class AdapterService_count_result extends \ThriftSyncStructWithResult implements
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 361061362707289990;
+  const int STRUCTURAL_ID = 2185451796446683741;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -300,7 +300,7 @@ class AdapterService_adaptedTypes_args implements \IThriftSyncStruct, \IThriftSt
   const type TShape = shape(
     ?'arg' => ?\facebook\thrift\test\HeapAllocated::TShape,
   );
-  const int STRUCTURAL_ID = 270071957836224163;
+  const int STRUCTURAL_ID = 992428035330363413;
   public ?\facebook\thrift\test\HeapAllocated $arg;
 
   public function __construct(?\facebook\thrift\test\HeapAllocated $arg = null)[] {
@@ -418,7 +418,7 @@ class AdapterService_adaptedTypes_result extends \ThriftSyncStructWithResult imp
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 8969067960420042186;
+  const int STRUCTURAL_ID = 4974608069773454437;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {

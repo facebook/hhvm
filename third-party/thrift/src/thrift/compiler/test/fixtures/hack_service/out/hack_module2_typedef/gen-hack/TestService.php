@@ -186,7 +186,7 @@ class TestService_ping_args implements \IThriftSyncStruct, \IThriftStructMetadat
     ?'str_arg' => ?string,
   );
 
-  const int STRUCTURAL_ID = 5542358918184482101;
+  const int STRUCTURAL_ID = 2424582534794194067;
   public string $str_arg;
 
   public function __construct(?string $str_arg = null)[] {
@@ -269,7 +269,7 @@ class TestService_ping_result extends \ThriftSyncStructWithResult implements \IT
     ?'ex' => ?\foo\hack_ns\ExTypedef,
   );
 
-  const int STRUCTURAL_ID = 8023834040554497270;
+  const int STRUCTURAL_ID = 3540871888719668487;
   public ?this::TResult $success;
   public ?\foo\hack_ns\ExTypedef $ex;
 

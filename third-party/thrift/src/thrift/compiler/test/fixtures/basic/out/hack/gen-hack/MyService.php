@@ -658,7 +658,7 @@ class MyService_getRandomData_result extends \ThriftSyncStructWithResult impleme
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 1365128170602685579;
+  const int STRUCTURAL_ID = 4189911915654962654;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -748,7 +748,7 @@ class MyService_sink_args implements \IThriftSyncStruct, \IThriftStructMetadata,
     'sink' => int,
     ...
   );
-  const int STRUCTURAL_ID = 7104007081489563250;
+  const int STRUCTURAL_ID = 5897770234009405816;
   public int $sink;
 
   public function __construct(?int $sink = null)[] {
@@ -917,7 +917,7 @@ class MyService_putDataById_args implements \IThriftSyncStruct, \IThriftStructMe
     'data' => string,
     ...
   );
-  const int STRUCTURAL_ID = 1055685087985327657;
+  const int STRUCTURAL_ID = 7854634254635448669;
   public int $id;
   public string $data;
 
@@ -1098,7 +1098,7 @@ class MyService_hasDataById_args implements \IThriftSyncStruct, \IThriftStructMe
     'id' => int,
     ...
   );
-  const int STRUCTURAL_ID = 3807211151619655933;
+  const int STRUCTURAL_ID = 7860695874385833996;
   public int $id;
 
   public function __construct(?int $id = null)[] {
@@ -1197,7 +1197,7 @@ class MyService_hasDataById_result extends \ThriftSyncStructWithResult implement
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 8594383818423018844;
+  const int STRUCTURAL_ID = 365925050253362406;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -1287,7 +1287,7 @@ class MyService_getDataById_args implements \IThriftSyncStruct, \IThriftStructMe
     'id' => int,
     ...
   );
-  const int STRUCTURAL_ID = 3807211151619655933;
+  const int STRUCTURAL_ID = 7860695874385833996;
   public int $id;
 
   public function __construct(?int $id = null)[] {
@@ -1386,7 +1386,7 @@ class MyService_getDataById_result extends \ThriftSyncStructWithResult implement
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 1365128170602685579;
+  const int STRUCTURAL_ID = 4189911915654962654;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -1476,7 +1476,7 @@ class MyService_deleteDataById_args implements \IThriftSyncStruct, \IThriftStruc
     'id' => int,
     ...
   );
-  const int STRUCTURAL_ID = 3807211151619655933;
+  const int STRUCTURAL_ID = 7860695874385833996;
   public int $id;
 
   public function __construct(?int $id = null)[] {
@@ -1645,7 +1645,7 @@ class MyService_lobDataById_args implements \IThriftSyncStruct, \IThriftStructMe
     'data' => string,
     ...
   );
-  const int STRUCTURAL_ID = 1055685087985327657;
+  const int STRUCTURAL_ID = 7854634254635448669;
   public int $id;
   public string $data;
 

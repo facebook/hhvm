@@ -134,7 +134,7 @@ class TestService_init_args implements \IThriftSyncStruct, \IThriftStructMetadat
   const type TShape = shape(
     'int1' => int,
   );
-  const int STRUCTURAL_ID = 975124300794717332;
+  const int STRUCTURAL_ID = 394766402660996987;
   public int $int1;
 
   public function __construct(?int $int1 = null)[] {
@@ -233,7 +233,7 @@ class TestService_init_result extends \ThriftSyncStructWithResult implements \IT
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 5548670328188446575;
+  const int STRUCTURAL_ID = 3715007529104411015;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {

@@ -199,7 +199,7 @@ class ReserveIds implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
     'ids' => vec<int>,
     'id_ranges' => dict<int, int>,
   );
-  const int STRUCTURAL_ID = 4105998268635615653;
+  const int STRUCTURAL_ID = 4665198673228223823;
   /**
    * Individual ids that cannot be used.
    * 
@@ -397,7 +397,7 @@ class RequiresBackwardCompatibility implements \IThriftSyncStruct, \IThriftStruc
   const type TShape = shape(
     'field_name' => bool,
   );
-  const int STRUCTURAL_ID = 4755373036761315562;
+  const int STRUCTURAL_ID = 3074662629815674951;
   /**
    * Original thrift field:-
    * 1: bool field_name
@@ -1274,7 +1274,7 @@ class Uri implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
   const type TShape = shape(
     'value' => string,
   );
-  const int STRUCTURAL_ID = 4244314491070478042;
+  const int STRUCTURAL_ID = 7890627744707884767;
   /**
    * Original thrift field:-
    * 1: string value
@@ -1399,7 +1399,7 @@ class Priority implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   const type TShape = shape(
     ?'level' => ?\facebook\thrift\annotation\RpcPriority,
   );
-  const int STRUCTURAL_ID = 3544896248719410700;
+  const int STRUCTURAL_ID = 7623942673364156200;
   /**
    * Original thrift field:-
    * 1: thrift.RpcPriority level
@@ -1528,7 +1528,7 @@ class DeprecatedUnvalidatedAnnotations implements \IThriftSyncStruct, \IThriftSt
   const type TShape = shape(
     'items' => dict<string, string>,
   );
-  const int STRUCTURAL_ID = 9153190129039526940;
+  const int STRUCTURAL_ID = 5891271976553537251;
   /**
    * Original thrift field:-
    * 1: map<string, string> items

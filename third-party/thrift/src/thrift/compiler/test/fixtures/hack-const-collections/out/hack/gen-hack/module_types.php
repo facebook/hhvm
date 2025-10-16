@@ -69,7 +69,7 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'d' => ?bool,
   );
 
-  const int STRUCTURAL_ID = 3946809642153193229;
+  const int STRUCTURAL_ID = 6864766002274479832;
   /**
    * Original thrift field:-
    * 1: list<string> a
@@ -253,7 +253,7 @@ class Baz extends \TException implements \IThriftSyncStruct, \IThriftExceptionMe
     ?'message' => ?string,
   );
 
-  const int STRUCTURAL_ID = 2427562471238739676;
+  const int STRUCTURAL_ID = 1438368398389181198;
   /**
    * Original thrift field:-
    * 1: string message

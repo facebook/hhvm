@@ -692,7 +692,6 @@ func (p *procFuncPubSubStreamingServiceReturnstream) RunStreamContext(
     onStreamComplete()
 }
 
-
 type procFuncPubSubStreamingServiceStreamthrows struct {
     handler PubSubStreamingService
 }
@@ -759,7 +758,6 @@ func (p *procFuncPubSubStreamingServiceStreamthrows) RunStreamContext(
     onStreamComplete()
 }
 
-
 type procFuncPubSubStreamingServiceServicethrows struct {
     handler PubSubStreamingService
 }
@@ -824,7 +822,6 @@ func (p *procFuncPubSubStreamingServiceServicethrows) RunStreamContext(
     }
     onStreamComplete()
 }
-
 
 type procFuncPubSubStreamingServiceServicethrows2 struct {
     handler PubSubStreamingService
@@ -893,7 +890,6 @@ func (p *procFuncPubSubStreamingServiceServicethrows2) RunStreamContext(
     }
     onStreamComplete()
 }
-
 
 type procFuncPubSubStreamingServiceBoththrows struct {
     handler PubSubStreamingService
@@ -967,7 +963,6 @@ func (p *procFuncPubSubStreamingServiceBoththrows) RunStreamContext(
     onStreamComplete()
 }
 
-
 type procFuncPubSubStreamingServiceResponseandstreamstreamthrows struct {
     handler PubSubStreamingService
 }
@@ -1035,7 +1030,6 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamstreamthrows) RunStreamC
     onStreamComplete()
 }
 
-
 type procFuncPubSubStreamingServiceResponseandstreamservicethrows struct {
     handler PubSubStreamingService
 }
@@ -1101,7 +1095,6 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamservicethrows) RunStream
     }
     onStreamComplete()
 }
-
 
 type procFuncPubSubStreamingServiceResponseandstreamboththrows struct {
     handler PubSubStreamingService
@@ -1176,7 +1169,6 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamboththrows) RunStreamCon
     onStreamComplete()
 }
 
-
 type procFuncPubSubStreamingServiceReturnstreamFast struct {
     handler PubSubStreamingService
 }
@@ -1235,5 +1227,4 @@ func (p *procFuncPubSubStreamingServiceReturnstreamFast) RunStreamContext(
     }
     onStreamComplete()
 }
-
 

@@ -162,7 +162,6 @@ func (p *procFuncMyServiceQuery) RunContext(ctx context.Context, reqStruct thrif
     return result, nil
 }
 
-
 type procFuncMyServiceHasArgDocs struct {
     handler MyService
 }
@@ -185,5 +184,4 @@ func (p *procFuncMyServiceHasArgDocs) RunContext(ctx context.Context, reqStruct 
 
     return result, nil
 }
-
 

@@ -422,7 +422,6 @@ func (p *procFuncMyServiceFoo) RunContext(ctx context.Context, reqStruct thrift.
     return result, nil
 }
 
-
 type Factories interface {
     Foo(ctx context.Context) (error)
 }
@@ -530,7 +529,6 @@ func (p *procFuncFactoriesFoo) RunContext(ctx context.Context, reqStruct thrift.
 
     return result, nil
 }
-
 
 type Perform interface {
     Foo(ctx context.Context) (error)
@@ -640,7 +638,6 @@ func (p *procFuncPerformFoo) RunContext(ctx context.Context, reqStruct thrift.Re
     return result, nil
 }
 
-
 type InteractWithShared interface {
     DoSomeSimilarThings(ctx context.Context) (*shared.DoSomethingResult, error)
 }
@@ -749,7 +746,6 @@ func (p *procFuncInteractWithSharedDoSomeSimilarThings) RunContext(ctx context.C
     result.Success = retval
     return result, nil
 }
-
 
 type BoxService interface {
 }

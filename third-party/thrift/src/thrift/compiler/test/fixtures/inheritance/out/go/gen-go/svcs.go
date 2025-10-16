@@ -136,7 +136,6 @@ func (p *procFuncMyRootDoRoot) RunContext(ctx context.Context, reqStruct thrift.
     return result, nil
 }
 
-
 type MyNode interface {
     // Inherited/extended service
     MyRoot
@@ -227,7 +226,6 @@ func (p *procFuncMyNodeDoMid) RunContext(ctx context.Context, reqStruct thrift.R
     return result, nil
 }
 
-
 type MyLeaf interface {
     // Inherited/extended service
     MyNode
@@ -317,5 +315,4 @@ func (p *procFuncMyLeafDoLeaf) RunContext(ctx context.Context, reqStruct thrift.
 
     return result, nil
 }
-
 

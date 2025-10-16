@@ -216,7 +216,6 @@ func (p *procFuncCF) RunContext(ctx context.Context, reqStruct thrift.ReadableSt
     return result, nil
 }
 
-
 type procFuncCNumbers struct {
     handler C
 }
@@ -275,7 +274,6 @@ func (p *procFuncCNumbers) RunStreamContext(
     onStreamComplete()
 }
 
-
 type procFuncCThing struct {
     handler C
 }
@@ -305,5 +303,4 @@ func (p *procFuncCThing) RunContext(ctx context.Context, reqStruct thrift.Readab
     result.Success = &retval
     return result, nil
 }
-
 

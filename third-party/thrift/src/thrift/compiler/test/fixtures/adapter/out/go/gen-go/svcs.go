@@ -141,7 +141,6 @@ func (p *procFuncServiceFunc) RunContext(ctx context.Context, reqStruct thrift.R
     return result, nil
 }
 
-
 type AdapterService interface {
     Count(ctx context.Context) (*CountingStruct, error)
     AdaptedTypes(ctx context.Context, arg *HeapAllocated) (*HeapAllocated, error)
@@ -269,7 +268,6 @@ func (p *procFuncAdapterServiceCount) RunContext(ctx context.Context, reqStruct 
     return result, nil
 }
 
-
 type procFuncAdapterServiceAdaptedTypes struct {
     handler AdapterService
 }
@@ -293,5 +291,4 @@ func (p *procFuncAdapterServiceAdaptedTypes) RunContext(ctx context.Context, req
     result.Success = retval
     return result, nil
 }
-
 

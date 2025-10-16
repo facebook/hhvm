@@ -2509,7 +2509,7 @@ class EnumMeta(type):
             type.__setattr__(klass, "__eq__", Enum.__int__eq__)
 
         for name, value in dct.items():
-            if not isinstance(value, int):
+            if not isinstance(value, int) or name == "__firstlineno__":
                 continue
             # pass value to int parent class constructor
             arm = klass.__new__(klass, value)

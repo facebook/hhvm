@@ -2474,10 +2474,10 @@ std::unique_ptr<t_const_value> t_hack_generator::function_to_tmeta(
     auto sink_tmeta = t_const_value::make_map();
     sink_tmeta->add_map(
         std::make_unique<t_const_value>("elemType"),
-        type_to_tmeta(sink->get_elem_type()));
+        type_to_tmeta(sink->elem_type().get_type()));
     sink_tmeta->add_map(
         std::make_unique<t_const_value>("finalResponseType"),
-        type_to_tmeta(sink->get_final_response_type()));
+        type_to_tmeta(sink->final_response_type().get_type()));
     if (!function->has_void_initial_response()) {
       sink_tmeta->add_map(
           std::make_unique<t_const_value>("initialResponseType"),
@@ -4994,9 +4994,9 @@ std::string t_hack_generator::render_service_metadata_response(
       queue.push(ttypedef->get_type());
     } else if (const auto* fun = dynamic_cast<const t_function*>(next)) {
       if (const t_sink* sink = fun->sink()) {
-        queue.push(sink->get_elem_type());
+        queue.push(sink->elem_type().get_type());
         queue.push(fun->return_type().get_type());
-        queue.push(sink->get_final_response_type());
+        queue.push(sink->final_response_type().get_type());
       } else {
         queue.push(fun->stream()->elem_type().get_type());
         queue.push(fun->return_type().get_type());
@@ -6218,7 +6218,7 @@ void t_hack_generator::generate_php_sink_function_helpers(
 
   generate_php_function_result_helpers(
       function,
-      sink->get_elem_type(),
+      sink->elem_type().get_type(),
       sink->sink_exceptions(),
       prefix,
       "_SinkPayload",
@@ -6226,7 +6226,7 @@ void t_hack_generator::generate_php_sink_function_helpers(
 
   generate_php_function_result_helpers(
       function,
-      sink->get_final_response_type(),
+      sink->final_response_type().get_type(),
       sink->final_response_exceptions(),
       prefix,
       "_FinalResponse",
@@ -6328,10 +6328,10 @@ void t_hack_generator::generate_php_docstring(
     } else {
       out << "void, ";
     }
-    out << "sink<" << thrift_type_name(sink->get_elem_type());
+    out << "sink<" << thrift_type_name(sink->elem_type().get_type());
     generate_php_docstring_stream_exceptions(out, sink->sink_exceptions());
 
-    out << ", " << thrift_type_name(sink->get_final_response_type());
+    out << ", " << thrift_type_name(sink->final_response_type().get_type());
     generate_php_docstring_stream_exceptions(
         out, sink->final_response_exceptions());
     out << ">\n";
@@ -6742,8 +6742,8 @@ std::string t_hack_generator::get_sink_function_return_typehint(
     const t_function* function) {
   // Finally, the function declaration.
   const t_sink* sink = function->sink();
-  std::string return_typehint = type_to_typehint(sink->get_elem_type()) + ", " +
-      type_to_typehint(sink->get_final_response_type()) + ">";
+  std::string return_typehint = type_to_typehint(sink->elem_type().get_type()) +
+      ", " + type_to_typehint(sink->final_response_type().get_type()) + ">";
 
   if (function->has_void_initial_response()) {
     return "\\ResponseAndClientSink<null, " + return_typehint;

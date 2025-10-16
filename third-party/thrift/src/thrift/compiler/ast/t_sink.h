@@ -66,14 +66,6 @@ class t_sink : public t_node {
   std::unique_ptr<t_throws> sink_exceptions_;
   t_type_ref final_response_type_;
   std::unique_ptr<t_throws> final_response_exceptions_;
-
- public:
-  // TODO(T227540797): Delete everything below here. It is only provided for
-  // backwards compatibility.
-  const t_type* get_elem_type() const { return elem_type().get_type(); }
-  const t_type* get_final_response_type() const {
-    return final_response_type().get_type();
-  }
 };
 
 } // namespace apache::thrift::compiler

@@ -142,12 +142,12 @@ const std::string& cpp_name_resolver::get_return_type(const t_function& fun) {
         return detail::gen_template_type(
             "::apache::thrift::ResponseAndStreamTransformation",
             {resolve(resolve_fn, *fun.return_type().get_type()),
-             resolve(resolve_fn, *sink->get_elem_type()),
+             resolve(resolve_fn, *sink->elem_type()),
              resolve(resolve_fn, *stream->elem_type().get_type())});
       }
       return detail::gen_template_type(
           "::apache::thrift::StreamTransformation",
-          {resolve(resolve_fn, *sink->get_elem_type()),
+          {resolve(resolve_fn, *sink->elem_type()),
            resolve(resolve_fn, *stream->elem_type().get_type())});
     });
   }
@@ -158,13 +158,13 @@ const std::string& cpp_name_resolver::get_return_type(const t_function& fun) {
         return detail::gen_template_type(
             "::apache::thrift::ResponseAndSinkConsumer",
             {resolve(resolve_fn, *fun.return_type().get_type()),
-             resolve(resolve_fn, *sink->get_elem_type()),
-             resolve(resolve_fn, *sink->get_final_response_type())});
+             resolve(resolve_fn, *sink->elem_type()),
+             resolve(resolve_fn, *sink->final_response_type())});
       }
       return detail::gen_template_type(
           "::apache::thrift::SinkConsumer",
-          {resolve(resolve_fn, *sink->get_elem_type()),
-           resolve(resolve_fn, *sink->get_final_response_type())});
+          {resolve(resolve_fn, *sink->elem_type()),
+           resolve(resolve_fn, *sink->final_response_type())});
     });
   }
 

@@ -898,24 +898,114 @@ void RefactoredRocketServerConnection::sendError(
     StreamId streamId,
     RocketException&& rex,
     apache::thrift::MessageChannel::SendCallbackPtr cb) {
-  send(
-      ErrorFrame(streamId, std::move(rex)).serialize(),
-      std::move(cb),
-      streamId);
+  if (THRIFT_FLAG(rocket_use_outgoing_frame_handler)) {
+    // New path: Use OutgoingFrameHandler for frame-level batching
+    evb_.dcheckIsInEventBaseThread();
+    if (state_ != ConnectionState::ALIVE &&
+        state_ != ConnectionState::DRAINING) {
+      return;
+    }
+
+    // Get or create OutgoingFrameHandler for this EventBase
+    auto* handler = outgoingFrameHandler_.get(evb_);
+    if (FOLLY_UNLIKELY(handler == nullptr)) {
+      outgoingFrameHandler_.emplace(
+          evb_, evb_, cfg_.getOutgoingFrameHandlerBatchLogSize());
+      handler = outgoingFrameHandler_.get(evb_);
+    }
+
+    // Use OutgoingFrameHandler for non-FD frames (ErrorFrame has no FDs)
+    handler->handle(
+        ErrorFrame(streamId, std::move(rex)),
+        connectionAdapter_,
+        std::move(cb));
+  } else {
+    // Existing path: Use WriteBatcher directly
+    send(
+        ErrorFrame(streamId, std::move(rex)).serialize(),
+        std::move(cb),
+        streamId);
+  }
 }
 
 void RefactoredRocketServerConnection::sendRequestN(
     StreamId streamId, int32_t n) {
-  send(RequestNFrame(streamId, n).serialize(), nullptr, streamId);
+  if (THRIFT_FLAG(rocket_use_outgoing_frame_handler)) {
+    // New path: Use OutgoingFrameHandler for frame-level batching
+    evb_.dcheckIsInEventBaseThread();
+    if (state_ != ConnectionState::ALIVE &&
+        state_ != ConnectionState::DRAINING) {
+      return;
+    }
+
+    // Get or create OutgoingFrameHandler for this EventBase
+    auto* handler = outgoingFrameHandler_.get(evb_);
+    if (FOLLY_UNLIKELY(handler == nullptr)) {
+      outgoingFrameHandler_.emplace(
+          evb_, evb_, cfg_.getOutgoingFrameHandlerBatchLogSize());
+      handler = outgoingFrameHandler_.get(evb_);
+    }
+
+    // Use OutgoingFrameHandler for non-FD frames (RequestNFrame has no FDs)
+    handler->handle(RequestNFrame(streamId, n), connectionAdapter_, nullptr);
+  } else {
+    // Existing path: Use WriteBatcher directly
+    send(RequestNFrame(streamId, n).serialize(), nullptr, streamId);
+  }
 }
 
 void RefactoredRocketServerConnection::sendCancel(StreamId streamId) {
-  send(CancelFrame(streamId).serialize(), nullptr, streamId);
+  if (THRIFT_FLAG(rocket_use_outgoing_frame_handler)) {
+    // New path: Use OutgoingFrameHandler for frame-level batching
+    evb_.dcheckIsInEventBaseThread();
+    if (state_ != ConnectionState::ALIVE &&
+        state_ != ConnectionState::DRAINING) {
+      return;
+    }
+
+    // Get or create OutgoingFrameHandler for this EventBase
+    auto* handler = outgoingFrameHandler_.get(evb_);
+    if (FOLLY_UNLIKELY(handler == nullptr)) {
+      outgoingFrameHandler_.emplace(
+          evb_, evb_, cfg_.getOutgoingFrameHandlerBatchLogSize());
+      handler = outgoingFrameHandler_.get(evb_);
+    }
+
+    // Use OutgoingFrameHandler for non-FD frames (CancelFrame has no FDs)
+    handler->handle(CancelFrame(streamId), connectionAdapter_, nullptr);
+  } else {
+    // Existing path: Use WriteBatcher directly
+    send(CancelFrame(streamId).serialize(), nullptr, streamId);
+  }
 }
 
 void RefactoredRocketServerConnection::sendMetadataPush(
     std::unique_ptr<folly::IOBuf> metadata) {
-  send(MetadataPushFrame::makeFromMetadata(std::move(metadata)).serialize());
+  if (THRIFT_FLAG(rocket_use_outgoing_frame_handler)) {
+    // New path: Use OutgoingFrameHandler for frame-level batching
+    evb_.dcheckIsInEventBaseThread();
+    if (state_ != ConnectionState::ALIVE &&
+        state_ != ConnectionState::DRAINING) {
+      return;
+    }
+
+    // Get or create OutgoingFrameHandler for this EventBase
+    auto* handler = outgoingFrameHandler_.get(evb_);
+    if (FOLLY_UNLIKELY(handler == nullptr)) {
+      outgoingFrameHandler_.emplace(
+          evb_, evb_, cfg_.getOutgoingFrameHandlerBatchLogSize());
+      handler = outgoingFrameHandler_.get(evb_);
+    }
+
+    // Use OutgoingFrameHandler for non-FD frames (MetadataPushFrame has no FDs)
+    handler->handle(
+        MetadataPushFrame::makeFromMetadata(std::move(metadata)),
+        connectionAdapter_,
+        nullptr);
+  } else {
+    // Existing path: Use WriteBatcher directly
+    send(MetadataPushFrame::makeFromMetadata(std::move(metadata)).serialize());
+  }
 }
 
 void RefactoredRocketServerConnection::freeStream(

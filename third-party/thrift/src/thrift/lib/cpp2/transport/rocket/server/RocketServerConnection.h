@@ -55,6 +55,7 @@
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketSinkClientCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketStreamClientCallback.h>
+#include <thrift/lib/cpp2/transport/rocket/server/detail/WriteBatchTypes.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::rocket {
@@ -240,16 +241,6 @@ class RocketServerConnection final : public IRocketServerConnection {
   size_t inflightRequests_{0};
 
   // Context for each inflight write to the underlying transport.
-  struct WriteBatchContext {
-    // the counts of completed requests in each inflight write
-    size_t requestCompleteCount{0};
-    // the counts of valid sendCallbacks in each inflight write
-    std::vector<apache::thrift::MessageChannel::SendCallbackPtr> sendCallbacks;
-    // the WriteEvent objects associated with each write in the batch
-    std::vector<RocketServerConnectionObserver::WriteEvent> writeEvents;
-    // the raw byte offset at the beginning and end of the inflight write
-    RocketServerConnectionObserver::WriteEventBatchContext writeEventsContext;
-  };
   // The size of the queue is equal to the total number of inflight writes to
   // the underlying transport, i.e., writes for which the
   // writeSuccess()/writeErr() has not yet been called.
@@ -278,8 +269,6 @@ class RocketServerConnection final : public IRocketServerConnection {
   const size_t egressBufferBackpressureThreshold_;
   const size_t egressBufferRecoverySize_;
   bool streamsPaused_{false};
-
-  using FdsAndOffsets = std::vector<std::pair<folly::SocketFds, size_t>>;
 
   class WriteBatcher : private folly::EventBase::LoopCallback,
                        private folly::HHWheelTimer::Callback {

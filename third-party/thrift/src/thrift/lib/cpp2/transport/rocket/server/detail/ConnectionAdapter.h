@@ -19,6 +19,7 @@
 #include <utility>
 #include <folly/io/async/EventBase.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
+#include <thrift/lib/cpp2/transport/rocket/server/detail/WriteBatchTypes.h>
 
 // Forward declarations to avoid circular dependencies
 namespace folly {
@@ -26,10 +27,6 @@ class exception_wrapper;
 }
 
 namespace apache::thrift::rocket {
-
-// Forward declarations for WriteBatcher types
-using FdsAndOffsets = std::vector<std::pair<folly::SocketFds, size_t>>;
-struct WriteBatchContext;
 
 /**
  * Adaptor between RocketServerConnection
@@ -99,13 +96,14 @@ class ConnectionAdapter {
   size_t numObservers() { return connection_->numObservers(); }
   folly::EventBase& getEventBase() { return connection_->getEventBase(); }
   void flushWrites(
-      std::unique_ptr<folly::IOBuf> writes, WriteBatchContext&& context) {
+      std::unique_ptr<folly::IOBuf> writes,
+      apache::thrift::rocket::WriteBatchContext&& context) {
     connection_->flushWrites(std::move(writes), std::move(context));
   }
   void flushWritesWithFds(
       std::unique_ptr<folly::IOBuf> writes,
-      WriteBatchContext&& context,
-      FdsAndOffsets&& fdsAndOffsets) {
+      apache::thrift::rocket::WriteBatchContext&& context,
+      apache::thrift::rocket::FdsAndOffsets&& fdsAndOffsets) {
     connection_->flushWritesWithFds(
         std::move(writes), std::move(context), std::move(fdsAndOffsets));
   }

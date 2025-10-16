@@ -28,25 +28,12 @@
 #include <thrift/lib/cpp2/async/MessageChannel.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnectionObserver.h>
+#include <thrift/lib/cpp2/transport/rocket/server/detail/WriteBatchTypes.h>
 
 namespace apache::thrift::rocket {
 
 // Forward declaration to avoid circular dependency
 class RocketServerConnection;
-
-// Types that were previously nested in RocketServerConnection
-using FdsAndOffsets = std::vector<std::pair<folly::SocketFds, size_t>>;
-
-struct WriteBatchContext {
-  // the counts of completed requests in each inflight write
-  size_t requestCompleteCount{0};
-  // the counts of valid sendCallbacks in each inflight write
-  std::vector<apache::thrift::MessageChannel::SendCallbackPtr> sendCallbacks;
-  // the WriteEvent objects associated with each write in the batch
-  std::vector<RocketServerConnectionObserver::WriteEvent> writeEvents;
-  // the raw byte offset at the beginning and end of the inflight write
-  RocketServerConnectionObserver::WriteEventBatchContext writeEventsContext;
-};
 
 /**
  * WriteBatcher handles batching of writes for performance optimization.
@@ -158,13 +145,18 @@ class WriteBatcher : private folly::EventBase::LoopCallback,
       // Fast path: no FDs, write as one batch.
       connection_.flushWrites(
           std::move(bufferedWrites_),
-          std::exchange(bufferedWritesContext_, WriteBatchContext{}));
+          std::exchange(
+              bufferedWritesContext_,
+              apache::thrift::rocket::WriteBatchContext{}));
     } else {
       // Slow path: each set of FDs is split into its own batch.
       connection_.flushWritesWithFds(
           std::move(bufferedWrites_),
-          std::exchange(bufferedWritesContext_, WriteBatchContext{}),
-          std::exchange(fdsAndOffsets_, FdsAndOffsets{}));
+          std::exchange(
+              bufferedWritesContext_,
+              apache::thrift::rocket::WriteBatchContext{}),
+          std::exchange(
+              fdsAndOffsets_, apache::thrift::rocket::FdsAndOffsets{}));
     }
   }
 
@@ -177,9 +169,9 @@ class WriteBatcher : private folly::EventBase::LoopCallback,
   size_t bufferedWritesCount_{0};
   size_t totalBytesBuffered_{0};
   bool earlyFlushRequested_{false};
-  WriteBatchContext bufferedWritesContext_;
+  apache::thrift::rocket::WriteBatchContext bufferedWritesContext_;
   // Offset in `bufferedWrites_` before which these FDs must be sent.
-  FdsAndOffsets fdsAndOffsets_;
+  apache::thrift::rocket::FdsAndOffsets fdsAndOffsets_;
 };
 
 } // namespace apache::thrift::rocket

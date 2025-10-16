@@ -39,6 +39,8 @@ type destructure = {
 type has_member_method = {
   hmm_explicit_targs: Nast.targ list; [@opaque]
       (** he list of explicit type arguments provided to the method call *)
+  hmm_args_pos: Pos.t list;
+      (** A list of the primary positions of the arguments, for error messages *)
 }
 [@@deriving show]
 

@@ -2387,6 +2387,7 @@ and Reasons_callback : sig
     | Retain of t * component
     | Incoming_reasons of t * op
     | With_code of t * Error_code.t
+    | With_claim of t * Pos.t Message.t Lazy.t
     | With_reasons of t * Pos_or_decl.t Message.t list Lazy.t
     | Add_quickfixes of t * Pos.t Quickfix.t list
     | Add_reason of t * op * Pos_or_decl.t Message.t Lazy.t
@@ -2519,6 +2520,7 @@ end = struct
     | Retain of t * component
     | Incoming_reasons of t * op
     | With_code of t * Error_code.t
+    | With_claim of t * Pos.t Message.t Lazy.t
     | With_reasons of t * Pos_or_decl.t Message.t list Lazy.t
     | Add_quickfixes of t * Pos.t Quickfix.t list
     | Add_reason of t * op * Pos_or_decl.t Message.t Lazy.t

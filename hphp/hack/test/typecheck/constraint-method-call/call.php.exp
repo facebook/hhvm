@@ -1,11 +1,11 @@
-ERROR: File "call.php", line 29, characters 34-46:
-Invalid argument (Typing[4110])
+ERROR: File "call.php", line 29, characters 10-47:
+Typing error (Typing[4110])
   File "call.php", line 29, characters 27-28:
   Expected `int` because this is used in an arithmetic operation
   File "call.php", line 29, characters 38-40:
   But got `float`
-ERROR: File "call.php", line 31, characters 25-37:
-Invalid argument (Typing[4110])
+ERROR: File "call.php", line 31, characters 10-38:
+Typing error (Typing[4110])
   File "call.php", line 30, characters 17-18:
   Expected `int` because this is used in an arithmetic operation
   File "call.php", line 31, characters 29-31:

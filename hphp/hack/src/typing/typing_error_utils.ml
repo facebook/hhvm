@@ -6955,6 +6955,9 @@ end = struct
     let with_code t code_opt =
       { t with code_opt = Option.first_some t.code_opt code_opt }
 
+    let with_claim t claim_opt =
+      { t with claim_opt = Option.first_some t.claim_opt claim_opt }
+
     let prepend_secondary
         { claim_opt; reasons_opt; quickfixes_opt; _ } snd_err ~env ~current_span
         =
@@ -7065,6 +7068,9 @@ end = struct
           (Eval_error.of_eval_secondary_opt ctx current_span eval_snd)
       | With_code (err, code) ->
         let st = Error_state.with_code st @@ Some code in
+        aux err st
+      | With_claim (err, claim) ->
+        let st = Error_state.with_claim st @@ Some claim in
         aux err st
       | With_reasons (err, reasons) ->
         aux err Error_state.{ st with reasons_opt = Some reasons }

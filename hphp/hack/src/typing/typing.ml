@@ -6351,21 +6351,14 @@ end = struct
           ~name:m
           ~ty:tfty
           ~class_id:(CIexpr e1)
-          ~methd:(Some { hmm_explicit_targs = [] })
+          ~methd:(Some { hmm_explicit_targs = []; hmm_args_pos = arg_posl })
       in
       let (env, ty_err_opt) =
-        Type.sub_type_i
-          p
-          Reason.URparam
+        Typing_utils.sub_type_i
           env
           (LoclType ty1)
           has_member_ty
-          Typing_error.Callback.unify_error
-      in
-      let ty_err_opt =
-        Option.map
-          ty_err_opt
-          ~f:(Typing_error_utils.update_error_for_method_call ~arg_posl)
+          (Some (Typing_error.Reasons_callback.unify_error_at p))
       in
       Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
       let ty_mismatch_opt =

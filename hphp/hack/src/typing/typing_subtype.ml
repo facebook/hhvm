@@ -232,6 +232,7 @@ module Subtype_env = struct
         (** is_dynamic_aware indicates whether subtyping should allow
           types that implement dynamic are considered sub-types of dynamic. *)
     on_error: Typing_error.Reasons_callback.t option;
+    has_member_arg_posl: Pos.t list option;
     tparam_constraints: (Pos_or_decl.t * Typing_defs.pos_id) list;
         (** This is used for better error reporting to flag violated
           constraints on type parameters, if any. *)
@@ -275,6 +276,7 @@ module Subtype_env = struct
       ?(in_transitive_closure = false)
       ?(ignore_likes = false)
       ?(check_rank = false)
+      ?(has_member_arg_posl = None)
       ~class_sub_classname
       ~(log_level : int)
       on_error =
@@ -288,6 +290,7 @@ module Subtype_env = struct
       is_dynamic_aware;
       is_coeffect;
       on_error;
+      has_member_arg_posl;
       tparam_constraints = [];
       log_level;
       in_transitive_closure;
@@ -2123,6 +2126,7 @@ end = struct
 
   and simplify_subtype_params
       ~(subtype_env : Subtype_env.t)
+      ~arg_posl
       ~for_override
       (r_sub, idx_sub, fn_params_sub, variadic_sub_ty)
       (r_super, idx_super, fn_params_super, variadic_super_ty)
@@ -2131,7 +2135,7 @@ end = struct
        * Below we match using two separate strategies: by name (for named params) and by position
     *)
     let simplify_subtype_for_matching_parameters
-        subtype_env fn_param_sub fn_param_super env =
+        ~arg_pos subtype_env fn_param_sub fn_param_super env =
       let { fp_type = ty_sub; _ } = fn_param_sub
       and { fp_type = ty_super; _ } = fn_param_super in
 
@@ -2147,6 +2151,16 @@ end = struct
           | Tdynamic when for_override ->
             Subtype_env.set_is_dynamic_aware subtype_env true
           | _ -> subtype_env
+        in
+        let subtype_env_for_param =
+          match (subtype_env_for_param.on_error, arg_pos) with
+          | (Some cb, Some pos) ->
+            Subtype_env.set_on_error
+              subtype_env_for_param
+              (Some
+                 (Typing_error.Reasons_callback.With_claim
+                    (cb, lazy (pos, "Invalid argument"))))
+          | _ -> subtype_env_for_param
         in
         (* Construct the contravariant subtype proposition *)
         let subty_prop_contra is_inout =
@@ -2252,6 +2266,7 @@ end = struct
              (* we can safely ignore when no matching named parameter is found, since arity checks happen elsewhere *)
              (env, prop)
              &&& simplify_subtype_for_matching_parameters
+                   ~arg_pos:None
                    subtype_env
                    fp_sub
                    fp_super)
@@ -2340,14 +2355,23 @@ end = struct
     | ([], _) -> valid
     | (_, []) -> valid
     | (fn_param_sub :: fn_params_sub, fn_param_super :: fn_params_super) ->
+      let (arg_pos, arg_posl) =
+        match arg_posl with
+        | None
+        | Some [] ->
+          (None, None)
+        | Some (p :: ps) -> (Some p, Some ps)
+      in
       fun env ->
         simplify_subtype_for_matching_parameters
+          ~arg_pos
           subtype_env
           fn_param_sub
           fn_param_super
           env
         &&& simplify_subtype_params
               ~subtype_env
+              ~arg_posl
               ~for_override
               (r_sub, idx_sub + 1, fn_params_sub, variadic_sub_ty)
               (r_super, idx_super + 1, fn_params_super, variadic_super_ty)
@@ -2377,6 +2401,10 @@ end = struct
       else
         ()
     in
+    let arg_posl = subtype_env.Subtype_env.has_member_arg_posl in
+    let subtype_env =
+      { subtype_env with Subtype_env.has_member_arg_posl = None }
+    in
     (* First apply checks on attributes and variadic arity *)
     let simplify_subtype_implicit_params_help =
       simplify_subtype_implicit_params ~subtype_env
@@ -2390,6 +2418,7 @@ end = struct
     begin
       simplify_subtype_params
         ~subtype_env
+        ~arg_posl
         ~for_override
         (r_sub, 0, ft_sub.ft_params, get_ft_variadic ft_sub)
         (r_super, 0, ft_super.ft_params, get_ft_variadic ft_super)
@@ -7896,6 +7925,7 @@ end = struct
       ~member_id
       ~explicit_targs
       ~member_ty
+      ~has_member
       ty_sub
       env =
     let (explicit_targs, is_method) =
@@ -7925,19 +7955,28 @@ end = struct
         let on_error =
           add_obj_get_quickfixes ty_err subtype_env.Subtype_env.on_error
         in
-        (* TODO - this needs to somehow(?) account for the fact that the old
-           code considered FIXMEs in this position *)
+        let discard_outermost (err : Typing_error.t) : Typing_error.t =
+          match err with
+          | Apply_reasons (_, Of_error err) when is_method -> err
+          | _ -> err
+        in
         let fail =
           Option.map
             on_error
             ~f:
               Typing_error.(
                 fun on_error ->
-                  apply_reasons ~on_error @@ Secondary.Of_error ty_err)
+                  discard_outermost
+                    (apply_reasons ~on_error @@ Secondary.Of_error ty_err))
         in
         invalid env ~fail
     in
-
+    let subtype_env =
+      match has_member with
+      | None -> subtype_env
+      | Some has_member ->
+        { subtype_env with has_member_arg_posl = Some has_member.hmm_args_pos }
+    in
     prop
     &&& Subtype.(
           simplify
@@ -8079,6 +8118,7 @@ end = struct
           ~member_id
           ~explicit_targs
           ~member_ty
+          ~has_member:has_member_ty.hm_method
           ty_sub
           env)
     | (r1, Tnewtype (n, tyargs, _)) ->
@@ -8123,6 +8163,7 @@ end = struct
         ~member_id
         ~explicit_targs
         ~member_ty
+        ~has_member:has_member_ty.hm_method
         ty_sub
         env
 end

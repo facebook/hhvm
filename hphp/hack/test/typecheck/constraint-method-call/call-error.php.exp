@@ -18,10 +18,8 @@ No instance method `missing` in `C` (Typing[4053])
   This is why I think it is an object of type C
   File "call-error.php", line 7, characters 7-7:
   Declaration of `C` is here
-ERROR: File "call-error.php", line 25, characters 8-12:
-Invalid argument (Typing[4053])
-  File "call-error.php", line 24, characters 21-27:
-  No instance method `missing` in `C`
+ERROR: File "call-error.php", line 24, characters 21-27:
+No instance method `missing` in `C` (Typing[4053])
   File "call-error.php", line 10, characters 19-19:
   Did you mean `g` instead?
   File "call-error.php", line 7, characters 7-7:
@@ -34,8 +32,8 @@ Invalid argument (Typing[4110])
   Expected `int`
   File "call-error.php", line 28, characters 37-42:
   But got `string`
-ERROR: File "call-error.php", line 39, characters 14-17:
-Invalid argument (Typing[4323])
+ERROR: File "call-error.php", line 39, characters 5-18:
+Typing error (Typing[4323])
   File "call-error.php", line 35, characters 21-21:
   `T` is a constrained type parameter
   File "call-error.php", line 35, characters 26-33:
@@ -44,8 +42,8 @@ Invalid argument (Typing[4323])
   Expected `arraykey`
   File "call-error.php", line 39, characters 14-17:
   But got `bool`
-ERROR: File "call-error.php", line 46, characters 14-14:
-Invalid argument (Typing[4323])
+ERROR: File "call-error.php", line 46, characters 5-15:
+Typing error (Typing[4323])
   File "call-error.php", line 42, characters 21-21:
   `T` is a constrained type parameter
   File "call-error.php", line 42, characters 26-31:
@@ -54,8 +52,8 @@ Invalid argument (Typing[4323])
   Expected `string`
   File "call-error.php", line 46, characters 14-14:
   But got `int`
-ERROR: File "call-error.php", line 53, characters 15-20:
-Invalid argument (Typing[4323])
+ERROR: File "call-error.php", line 53, characters 5-21:
+Typing error (Typing[4323])
   File "call-error.php", line 49, characters 22-22:
   `T` is a constrained type parameter
   File "call-error.php", line 49, characters 27-37:
@@ -65,7 +63,7 @@ Invalid argument (Typing[4323])
   File "call-error.php", line 53, characters 19-19:
   But got `int`
 ERROR: File "call-error.php", line 59, characters 5-23:
-Invalid argument (Typing[4110])
+Typing error (Typing[4110])
   File "call-error.php", line 56, characters 33-38:
   Expected `string`
   File "call-error.php", line 59, characters 21-21:

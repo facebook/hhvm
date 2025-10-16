@@ -72,7 +72,7 @@ func TestGetRequestHeadersFromContext(t *testing.T) {
 	})
 	t.Run("empty context", func(t *testing.T) {
 		headers := GetRequestHeadersFromContext(context.TODO())
-		require.Nil(t, headers)
+		require.Empty(t, headers)
 	})
 	t.Run("context with existing headers", func(t *testing.T) {
 		headers := map[string]string{"foo": "bar"}

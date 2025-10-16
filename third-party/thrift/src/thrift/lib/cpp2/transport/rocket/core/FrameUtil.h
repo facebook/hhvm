@@ -66,9 +66,13 @@ struct FrameTraitsImpl {
   static constexpr bool isStreamFrame() { return IsStream; }
   static constexpr bool isStreamZeroFrame() { return IsStreamZero; }
   static void construct(FrameVariant& u, Framing&& f) {
-    new (std::get<Frame>(u)) Framing(std::move(f));
+    u.emplace<Frame>(std::move(f));
   }
-  static void destruct(FrameVariant& u) { std::get<Frame>(u).~Framing(); }
+  static void destruct(FrameVariant& u) {
+    if (u.index() != std::variant_npos && std::holds_alternative<Frame>(u)) {
+      std::get<Frame>(u).~Framing();
+    }
+  }
   static std::unique_ptr<folly::IOBuf> serialize(Framing& f) {
     auto& serializer = folly::SingletonThreadLocal<Serializer>::get();
     std::move(f).serialize(serializer);
@@ -76,6 +80,8 @@ struct FrameTraitsImpl {
   }
   static FOLLY_ALWAYS_INLINE std::unique_ptr<folly::IOBuf> serialize(
       FrameVariant& u) {
+    DCHECK(u.index() != std::variant_npos && std::holds_alternative<Frame>(u))
+        << "Variant is valueless or has wrong type";
     return serialize(std::get<Frame>(u));
   }
   static Framing deserialize(std::unique_ptr<folly::IOBuf> frame) {

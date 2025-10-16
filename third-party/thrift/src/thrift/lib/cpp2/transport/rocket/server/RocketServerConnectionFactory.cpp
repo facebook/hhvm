@@ -19,6 +19,7 @@
 #include <stdexcept>
 
 #include <thrift/lib/cpp2/Flags.h>
+#include <thrift/lib/cpp2/transport/rocket/server/RefactoredRocketServerConnection.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
 
 THRIFT_FLAG_DEFINE_bool(rocket_use_factored_server_connection, false);
@@ -33,10 +34,14 @@ std::unique_ptr<IRocketServerConnection> RocketServerConnectionFactory::create(
     StreamMetricCallback& streamMetricCallback,
     const IRocketServerConnection::Config& cfg) {
   if (THRIFT_FLAG(rocket_use_factored_server_connection)) {
-    throw std::runtime_error(
-        "RefactoredRocketServerConnection implementation is not yet available. "
-        "This flag is for prework only. Please set "
-        "rocket_use_factored_server_connection=false");
+    auto* connection = new RefactoredRocketServerConnection(
+        std::move(socket),
+        std::move(frameHandler),
+        ingressMemoryTracker,
+        egressMemoryTracker,
+        streamMetricCallback,
+        cfg);
+    return std::unique_ptr<IRocketServerConnection>(connection);
   }
 
   // Convert Config from interface type to concrete type

@@ -561,9 +561,8 @@ namespace {
 
 /*
  * Very simple check to see if the top level class is reified or not
- * If not we can reduce a VerifyTypeTS to a regular VerifyType
  */
-bool shouldReduceToNonReifiedVerifyType(ISS& env, SArray ts) {
+bool shouldRemoveVerifyTypeTS(ISS& env, SArray ts) {
   if (get_ts_kind(ts) != TypeStructure::Kind::T_unresolved) return false;
   auto const clsName = get_ts_classname(ts);
   auto const lookup = env.index.lookup_class_or_type_alias(clsName);
@@ -5260,7 +5259,7 @@ void in(ISS& env, const bc::VerifyParamTypeTS& op) {
       reduce(env, bc::VerifyParamTypeTS { op.loc1 });
       return;
     }
-    if (shouldReduceToNonReifiedVerifyType(env, inputTS->m_data.parr)) {
+    if (shouldRemoveVerifyTypeTS(env, inputTS->m_data.parr)) {
       return reduce(env, bc::PopC {});
     }
   }
@@ -5268,7 +5267,7 @@ void in(ISS& env, const bc::VerifyParamTypeTS& op) {
     if (last->op == Op::CombineAndResolveTypeStruct) {
       if (auto const last2 = last_op(env, 1)) {
         if (last2->op == Op::Dict &&
-            shouldReduceToNonReifiedVerifyType(env, last2->Dict.arr1)) {
+            shouldRemoveVerifyTypeTS(env, last2->Dict.arr1)) {
           return reduce(env, bc::PopC {});
         }
       }
@@ -5279,11 +5278,9 @@ void in(ISS& env, const bc::VerifyParamTypeTS& op) {
 }
 
 void verifyRetImpl(ISS& env, const TypeIntersectionConstraint& tcs,
-                   bool reduce_nullonly, bool ts_flavor) {
+                   bool reduce_nullonly) {
   assertx(!tcs.isTop());
-  // If it is the ts flavor, then second thing on the stack, otherwise
-  // first.
-  auto stackT = topC(env, (int)ts_flavor);
+  auto stackT = topC(env);
 
   auto refined = TInitCell;
   auto remove = true;
@@ -5300,7 +5297,6 @@ void verifyRetImpl(ISS& env, const TypeIntersectionConstraint& tcs,
     }
 
     if (!stackT.couldBe(type.upper)) {
-      if (ts_flavor) popC(env);
       popC(env);
       push(env, TBottom);
       return unreachable(env);
@@ -5308,9 +5304,7 @@ void verifyRetImpl(ISS& env, const TypeIntersectionConstraint& tcs,
 
     remove = false;
     if (nullonly) {
-      nullonly =
-        (!ts_flavor || tc.isThis()) &&
-        unopt(stackT).moreRefined(type.lower);
+      nullonly = unopt(stackT).moreRefined(type.lower);
     }
 
     auto result = intersection_of(stackT, type.upper);
@@ -5319,9 +5313,8 @@ void verifyRetImpl(ISS& env, const TypeIntersectionConstraint& tcs,
       assertx(type.upper.couldBe(BStr | BCls | BLazyCls));
       if (result.couldBe(BCls | BLazyCls)) {
         result = promote_classish(std::move(result));
-        if (effectFree && (ts_flavor ||
-                           Cfg::Eval::ClassStringHintNoticesSampleRate > 0 ||
-                           !promote_classish(stackT).moreRefined(type.lower))) {
+        if (effectFree && (Cfg::Eval::ClassStringHintNoticesSampleRate > 0 ||
+              !promote_classish(stackT).moreRefined(type.lower))) {
           effectFree = false;
         }
       } else {
@@ -5336,7 +5329,6 @@ void verifyRetImpl(ISS& env, const TypeIntersectionConstraint& tcs,
 
     refined = intersection_of(std::move(refined), result);
     if (refined.is(BBottom)) {
-      if (ts_flavor) popC(env);
       popC(env);
       push(env, TBottom);
       return unreachable(env);
@@ -5344,15 +5336,6 @@ void verifyRetImpl(ISS& env, const TypeIntersectionConstraint& tcs,
   }
 
   if (remove) {
-    if (ts_flavor) {
-      // We wouldn't get here if reified types were definitely not
-      // involved, so just bail.
-      auto const stackEquiv = topStkEquiv(env, 1);
-      popC(env);
-      popC(env);
-      push(env, std::move(stackT), stackEquiv);
-      return;
-    }
     return reduce(env);
   }
 
@@ -5360,7 +5343,6 @@ void verifyRetImpl(ISS& env, const TypeIntersectionConstraint& tcs,
   // type-constraint if it was not InitNull, we can lower to a
   // non-null check.
   if (nullonly) {
-    if (ts_flavor) return reduce(env, bc::PopC {}, bc::VerifyRetNonNullC {});
     return reduce(env, bc::VerifyRetNonNullC {});
   }
 
@@ -5369,18 +5351,17 @@ void verifyRetImpl(ISS& env, const TypeIntersectionConstraint& tcs,
     constprop(env);
   }
 
-  if (ts_flavor) popC(env);
   popC(env);
   push(env, std::move(refined));
 }
 
 void in(ISS& env, const bc::VerifyOutType& op) {
   auto const& pinfo = env.ctx.func->params[op.loc1];
-  verifyRetImpl(env, pinfo.typeConstraints, false, false);
+  verifyRetImpl(env, pinfo.typeConstraints, false);
 }
 
 void in(ISS& env, const bc::VerifyRetTypeC& /*op*/) {
-  verifyRetImpl(env, env.ctx.func->retTypeConstraints, true, false);
+  verifyRetImpl(env, env.ctx.func->retTypeConstraints, true);
 }
 
 void in(ISS& env, const bc::VerifyRetTypeTS& /*op*/) {
@@ -5396,7 +5377,7 @@ void in(ISS& env, const bc::VerifyRetTypeTS& /*op*/) {
   if (!env.ctx.func->isReified &&
       (!env.ctx.cls || !env.ctx.cls->hasReifiedGenerics) &&
       !couldHaveReifiedType(env, retTypeConstraints)) {
-    return reduce(env, bc::PopC {}, bc::VerifyRetTypeC {});
+    return reduce(env, bc::PopC {});
   }
   if (auto const inputTS = tv(a)) {
     if (!isValidTSType(*inputTS, false)) {
@@ -5412,21 +5393,21 @@ void in(ISS& env, const bc::VerifyRetTypeTS& /*op*/) {
       reduce(env, bc::VerifyRetTypeTS {});
       return;
     }
-    if (shouldReduceToNonReifiedVerifyType(env, inputTS->m_data.parr)) {
-      return reduce(env, bc::PopC {}, bc::VerifyRetTypeC {});
+    if (shouldRemoveVerifyTypeTS(env, inputTS->m_data.parr)) {
+      return reduce(env, bc::PopC {});
     }
   }
   if (auto const last = last_op(env)) {
     if (last->op == Op::CombineAndResolveTypeStruct) {
       if (auto const last2 = last_op(env, 1)) {
         if (last2->op == Op::Dict &&
-            shouldReduceToNonReifiedVerifyType(env, last2->Dict.arr1)) {
-          return reduce(env, bc::PopC {}, bc::VerifyRetTypeC {});
+            shouldRemoveVerifyTypeTS(env, last2->Dict.arr1)) {
+          return reduce(env, bc::PopC {});
         }
       }
     }
   }
-  verifyRetImpl(env, env.ctx.func->retTypeConstraints, true, true);
+  popC(env);
 }
 
 void in(ISS& env, const bc::VerifyTypeTS& /*op*/) {

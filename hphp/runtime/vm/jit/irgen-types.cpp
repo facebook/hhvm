@@ -1662,7 +1662,6 @@ void emitVerifyRetTypeC(IRGS& env) {
 }
 
 void emitVerifyRetTypeTS(IRGS& env) {
-  verifyRetTypeImpl(env, TypeConstraint::ReturnId, 1, false);
   auto const ts = popC(env);
   auto const cell = topC(env);
   auto const reified = tcCouldBeReified(curFunc(env), TypeConstraint::ReturnId);

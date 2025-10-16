@@ -139,6 +139,7 @@ pub(super) fn emit_return<'a>(
                                 &h,
                             )?,
                             instr::verify_ret_type_ts(),
+                            instr::verify_ret_type_c(),
                         ])),
                         ReificationLevel::Definitely => {
                             let check = InstrSeq::gather(vec![
@@ -151,7 +152,10 @@ pub(super) fn emit_return<'a>(
                                 &Pos::NONE,
                                 check,
                                 &h,
-                                instr::verify_ret_type_ts(),
+                                InstrSeq::gather(vec![
+                                    instr::verify_ret_type_ts(),
+                                    instr::verify_ret_type_c(),
+                                ]),
                             )
                         }
                     }

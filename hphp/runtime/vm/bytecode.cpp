@@ -4629,7 +4629,6 @@ OPTBLD_INLINE void iopVerifyRetTypeC() {
 }
 
 OPTBLD_INLINE void iopVerifyRetTypeTS() {
-  verifyRetTypeImpl(1); // TypedValue is the second element on the stack
   auto const ts = vmStack().topC();
   assertx(tvIsDict(ts));
   auto const cell = vmStack().indC(1);

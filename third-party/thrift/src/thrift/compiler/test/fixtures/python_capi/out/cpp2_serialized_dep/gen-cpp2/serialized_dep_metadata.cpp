@@ -172,12 +172,11 @@ StructMetadata<::test::fixtures::python_capi::MarshalError>::gen(ThriftMetadata&
 }
 
 void ExceptionMetadata<::test::fixtures::python_capi::SerializedError>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("serialized_dep.SerializedError", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::test::fixtures::python_capi::SerializedError>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& serialized_dep_SerializedError = res.first->second;
-  serialized_dep_SerializedError.name() = "serialized_dep.SerializedError";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& serialized_dep_SerializedError = res.metadata;
   static const auto* const
   serialized_dep_SerializedError_fields = new std::array<EncodedThriftField, 3>{ {
     { 1, "msg", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "os", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "rs", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -192,12 +191,11 @@ void ExceptionMetadata<::test::fixtures::python_capi::SerializedError>::gen(Thri
   serialized_dep_SerializedError.structured_annotations()->push_back(*cvStruct("python.UseCAPI", { {"serialize", cvBool(true) } }).cv_struct());
 }
 void ExceptionMetadata<::test::fixtures::python_capi::MarshalError>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("serialized_dep.MarshalError", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::test::fixtures::python_capi::MarshalError>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& serialized_dep_MarshalError = res.first->second;
-  serialized_dep_MarshalError.name() = "serialized_dep.MarshalError";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& serialized_dep_MarshalError = res.metadata;
   static const auto* const
   serialized_dep_MarshalError_fields = new std::array<EncodedThriftField, 3>{ {
     { 1, "msg", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "os", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "rs", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};

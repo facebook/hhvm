@@ -186,12 +186,11 @@ StructMetadata<::facebook::thrift::test::terse_write::TerseException>::gen(Thrif
 }
 
 void ExceptionMetadata<::facebook::thrift::test::terse_write::TerseException>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("terse_write.TerseException", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::facebook::thrift::test::terse_write::TerseException>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& terse_write_TerseException = res.first->second;
-  terse_write_TerseException.name() = "terse_write.TerseException";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& terse_write_TerseException = res.metadata;
   static const auto* const
   terse_write_TerseException_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "msg", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct(), }},  }};

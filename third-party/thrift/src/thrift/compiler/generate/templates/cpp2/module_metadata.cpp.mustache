@@ -94,12 +94,11 @@ StructMetadata<{{struct:cpp_fullname}}>::gen(ThriftMetadata& metadata) {
 {{#program:structs}}
 {{#struct:exception?}}
 void ExceptionMetadata<{{struct:cpp_fullname}}>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("{{program:name}}.{{struct:name}}", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<{{struct:cpp_fullname}}>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& {{struct:metadata_name}} = res.first->second;
-  {{struct:metadata_name}}.name() = "{{program:name}}.{{struct:name}}";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& {{struct:metadata_name}} = res.metadata;
 {{#struct:fields?}}
   static const auto* const
   {{struct:metadata_name}}_fields = new std::array<EncodedThriftField, {{struct:num_fields}}>{ {

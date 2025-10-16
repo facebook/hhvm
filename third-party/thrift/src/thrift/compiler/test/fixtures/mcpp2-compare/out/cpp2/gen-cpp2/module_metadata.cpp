@@ -402,12 +402,11 @@ StructMetadata<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct>::gen(ThriftM
 }
 
 void ExceptionMetadata<::some::valid::ns::AnException>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("module.AnException", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::some::valid::ns::AnException>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& module_AnException = res.first->second;
-  module_AnException.name() = "module.AnException";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_AnException = res.metadata;
   static const auto* const
   module_AnException_fields = new std::array<EncodedThriftField, 17>{ {
     { 1, "code", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 101, "req_code", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "message2", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct(), }},    { 102, "req_message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "exception_list", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 4, "exception_set", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{ }},    { 5, "exception_map", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 105, "req_exception_map", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 6, "enum_field", false, std::make_unique<Enum<::some::valid::ns::MyEnumA>>("module.MyEnumA"), std::vector<ThriftConstStruct>{ }},    { 7, "enum_container", false, std::make_unique<List>(std::make_unique<Enum<::some::valid::ns::MyEnumA>>("module.MyEnumA")), std::vector<ThriftConstStruct>{ }},    { 8, "a_struct", false, std::make_unique<Struct<::some::valid::ns::MyStruct>>("module.MyStruct"), std::vector<ThriftConstStruct>{ }},    { 9, "a_set_struct", false, std::make_unique<Set>(std::make_unique<Struct<::some::valid::ns::MyStruct>>("module.MyStruct")), std::vector<ThriftConstStruct>{ }},    { 10, "a_union_list", false, std::make_unique<List>(std::make_unique<Union<::some::valid::ns::SimpleUnion>>("module.SimpleUnion")), std::vector<ThriftConstStruct>{ }},    { 11, "union_typedef", false, std::make_unique<Typedef>("module.unionTypeDef", std::make_unique<Set>(std::make_unique<Union<::some::valid::ns::SimpleUnion>>("module.SimpleUnion")), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},    { 19, "a_union_typedef_list", false, std::make_unique<List>(std::make_unique<Typedef>("module.unionTypeDef", std::make_unique<Set>(std::make_unique<Union<::some::valid::ns::SimpleUnion>>("module.SimpleUnion")), std::vector<ThriftConstStruct>{  })), std::vector<ThriftConstStruct>{ }},    { 20, "MyCustomField", false, std::make_unique<Typedef>("module.CustomProtocolType", std::make_unique<Typedef>("module.IOBuf", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("folly::IOBuf") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::CustomProtocolAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 21, "MyOptCustomField", true, std::make_unique<Typedef>("module.CustomProtocolType", std::make_unique<Typedef>("module.IOBuf", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("folly::IOBuf") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::CustomProtocolAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},  }};
@@ -421,12 +420,11 @@ void ExceptionMetadata<::some::valid::ns::AnException>::gen(ThriftMetadata& meta
   }
 }
 void ExceptionMetadata<::some::valid::ns::AnotherException>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("module.AnotherException", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::some::valid::ns::AnotherException>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& module_AnotherException = res.first->second;
-  module_AnotherException.name() = "module.AnotherException";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_AnotherException = res.metadata;
   static const auto* const
   module_AnotherException_fields = new std::array<EncodedThriftField, 3>{ {
     { 1, "code", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 101, "req_code", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};

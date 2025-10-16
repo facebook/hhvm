@@ -185,12 +185,11 @@ StructMetadata<::cpp2_struct_footprint::TestUnion>::gen(ThriftMetadata& metadata
 }
 
 void ExceptionMetadata<::cpp2_struct_footprint::ExStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("module.ExStruct", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::cpp2_struct_footprint::ExStruct>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& module_ExStruct = res.first->second;
-  module_ExStruct.name() = "module.ExStruct";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_ExStruct = res.metadata;
   static const auto* const
   module_ExStruct_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};

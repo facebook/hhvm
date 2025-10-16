@@ -98,12 +98,11 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>::
 }
 
 void ExceptionMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("module.MyException", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& module_MyException = res.first->second;
-  module_MyException.name() = "module.MyException";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_MyException = res.metadata;
   static const auto* const
   module_MyException_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "myString", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};

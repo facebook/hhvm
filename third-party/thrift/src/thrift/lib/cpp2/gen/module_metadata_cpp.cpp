@@ -100,6 +100,31 @@ GenMetadataResult<metadata::ThriftEnum> genEnumMetadata(
   return ret;
 }
 
+template <class Metadata>
+static auto genStructuredInMetadataMap(
+    const syntax_graph::StructuredNode& node,
+    std::map<std::string, Metadata>& metadataMap) {
+  auto name = getName(node);
+  auto res = metadataMap.try_emplace(name);
+  GenMetadataResult<Metadata> ret{!res.second, res.first->second};
+  if (ret.preExists) {
+    return ret;
+  }
+  ret.metadata.name() = std::move(name);
+  // TODO: add other information
+  return ret;
+}
+
+GenMetadataResult<metadata::ThriftStruct> genStructMetadata(
+    metadata::ThriftMetadata& md, const syntax_graph::StructuredNode& node) {
+  return genStructuredInMetadataMap(node, *md.structs());
+}
+
+GenMetadataResult<metadata::ThriftException> genExceptionMetadata(
+    metadata::ThriftMetadata& md, const syntax_graph::ExceptionNode& node) {
+  return genStructuredInMetadataMap(node, *md.exceptions());
+}
+
 metadata::ThriftService genServiceMetadata(
     const syntax_graph::ServiceNode& node) {
   metadata::ThriftService ret;

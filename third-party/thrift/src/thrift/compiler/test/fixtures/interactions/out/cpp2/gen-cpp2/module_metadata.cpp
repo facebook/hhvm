@@ -99,12 +99,11 @@ StructMetadata<::cpp2::ShouldBeBoxed>::gen(ThriftMetadata& metadata) {
 }
 
 void ExceptionMetadata<::cpp2::CustomException>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("module.CustomException", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::cpp2::CustomException>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& module_CustomException = res.first->second;
-  module_CustomException.name() = "module.CustomException";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_CustomException = res.metadata;
   static const auto* const
   module_CustomException_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};

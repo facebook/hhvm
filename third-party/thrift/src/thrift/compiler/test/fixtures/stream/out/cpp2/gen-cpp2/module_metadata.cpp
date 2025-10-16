@@ -66,28 +66,25 @@ StructMetadata<::cpp2::FooEx2>::gen(ThriftMetadata& metadata) {
 }
 
 void ExceptionMetadata<::cpp2::FooStreamEx>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("module.FooStreamEx", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::cpp2::FooStreamEx>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& module_FooStreamEx = res.first->second;
-  module_FooStreamEx.name() = "module.FooStreamEx";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_FooStreamEx = res.metadata;
 }
 void ExceptionMetadata<::cpp2::FooEx>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("module.FooEx", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::cpp2::FooEx>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& module_FooEx = res.first->second;
-  module_FooEx.name() = "module.FooEx";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_FooEx = res.metadata;
 }
 void ExceptionMetadata<::cpp2::FooEx2>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("module.FooEx2", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::cpp2::FooEx2>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& module_FooEx2 = res.first->second;
-  module_FooEx2.name() = "module.FooEx2";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_FooEx2 = res.metadata;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_returnstream([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;

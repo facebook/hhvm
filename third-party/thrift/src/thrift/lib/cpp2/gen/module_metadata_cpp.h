@@ -285,6 +285,22 @@ auto genEnumMetadata(metadata::ThriftMetadata& md) {
   return genEnumMetadata(md, getNodeWithLock<E>());
 }
 
+GenMetadataResult<metadata::ThriftStruct> genStructMetadata(
+    metadata::ThriftMetadata& md, const syntax_graph::StructuredNode& node);
+
+template <class T>
+auto genStructMetadata(metadata::ThriftMetadata& md) {
+  return genStructMetadata(md, getNodeWithLock<T>());
+}
+
+GenMetadataResult<metadata::ThriftException> genExceptionMetadata(
+    metadata::ThriftMetadata& md, const syntax_graph::ExceptionNode& node);
+
+template <class T>
+auto genExceptionMetadata(metadata::ThriftMetadata& md) {
+  return genExceptionMetadata(md, getNodeWithLock<T>());
+}
+
 metadata::ThriftService genServiceMetadata(
     const syntax_graph::ServiceNode& node);
 

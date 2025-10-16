@@ -255,36 +255,32 @@ StructMetadata<::cpp2::StreamItem>::gen(ThriftMetadata& metadata) {
 }
 
 void ExceptionMetadata<::cpp2::FooStreamEx>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("module.FooStreamEx", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::cpp2::FooStreamEx>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& module_FooStreamEx = res.first->second;
-  module_FooStreamEx.name() = "module.FooStreamEx";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_FooStreamEx = res.metadata;
 }
 void ExceptionMetadata<::cpp2::FooEx>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("module.FooEx", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::cpp2::FooEx>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& module_FooEx = res.first->second;
-  module_FooEx.name() = "module.FooEx";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_FooEx = res.metadata;
 }
 void ExceptionMetadata<::cpp2::FooEx2>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("module.FooEx2", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::cpp2::FooEx2>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& module_FooEx2 = res.first->second;
-  module_FooEx2.name() = "module.FooEx2";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_FooEx2 = res.metadata;
 }
 void ExceptionMetadata<::cpp2::InitialException>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("module.InitialException", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::cpp2::InitialException>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& module_InitialException = res.first->second;
-  module_InitialException.name() = "module.InitialException";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_InitialException = res.metadata;
   static const auto* const
   module_InitialException_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "reason", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -298,12 +294,11 @@ void ExceptionMetadata<::cpp2::InitialException>::gen(ThriftMetadata& metadata) 
   }
 }
 void ExceptionMetadata<::cpp2::SinkException1>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("module.SinkException1", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::cpp2::SinkException1>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& module_SinkException1 = res.first->second;
-  module_SinkException1.name() = "module.SinkException1";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_SinkException1 = res.metadata;
   static const auto* const
   module_SinkException1_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "reason", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -317,12 +312,11 @@ void ExceptionMetadata<::cpp2::SinkException1>::gen(ThriftMetadata& metadata) {
   }
 }
 void ExceptionMetadata<::cpp2::SinkException2>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("module.SinkException2", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::cpp2::SinkException2>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& module_SinkException2 = res.first->second;
-  module_SinkException2.name() = "module.SinkException2";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_SinkException2 = res.metadata;
   static const auto* const
   module_SinkException2_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "reason", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},  }};

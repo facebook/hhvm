@@ -378,20 +378,18 @@ StructMetadata<::cpp2::Containers>::gen(ThriftMetadata& metadata) {
 }
 
 void ExceptionMetadata<::cpp2::emptyXcep>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("module.emptyXcep", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::cpp2::emptyXcep>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& module_emptyXcep = res.first->second;
-  module_emptyXcep.name() = "module.emptyXcep";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_emptyXcep = res.metadata;
 }
 void ExceptionMetadata<::cpp2::reqXcep>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("module.reqXcep", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::cpp2::reqXcep>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& module_reqXcep = res.first->second;
-  module_reqXcep.name() = "module.reqXcep";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_reqXcep = res.metadata;
   static const auto* const
   module_reqXcep_fields = new std::array<EncodedThriftField, 2>{ {
     { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "errorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -405,12 +403,11 @@ void ExceptionMetadata<::cpp2::reqXcep>::gen(ThriftMetadata& metadata) {
   }
 }
 void ExceptionMetadata<::cpp2::optXcep>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("module.optXcep", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::cpp2::optXcep>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& module_optXcep = res.first->second;
-  module_optXcep.name() = "module.optXcep";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_optXcep = res.metadata;
   static const auto* const
   module_optXcep_fields = new std::array<EncodedThriftField, 2>{ {
     { 1, "message", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "errorCode", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -424,12 +421,11 @@ void ExceptionMetadata<::cpp2::optXcep>::gen(ThriftMetadata& metadata) {
   }
 }
 void ExceptionMetadata<::cpp2::complexException>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("module.complexException", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::cpp2::complexException>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& module_complexException = res.first->second;
-  module_complexException.name() = "module.complexException";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_complexException = res.metadata;
   static const auto* const
   module_complexException_fields = new std::array<EncodedThriftField, 6>{ {
     { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "listStrings", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ }},    { 3, "errorEnum", false, std::make_unique<Enum<::cpp2::MyEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{ }},    { 4, "unionError", true, std::make_unique<Union<::cpp2::MyUnion>>("module.MyUnion"), std::vector<ThriftConstStruct>{ }},    { 5, "structError", false, std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct"), std::vector<ThriftConstStruct>{ }},    { 6, "lsMap", false, std::make_unique<Typedef>("module.map_i64_string_5732", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},  }};

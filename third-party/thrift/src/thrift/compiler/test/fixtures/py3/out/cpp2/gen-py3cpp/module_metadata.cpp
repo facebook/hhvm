@@ -340,12 +340,11 @@ StructMetadata<::py3::simple::AdaptedTypedefFields>::gen(ThriftMetadata& metadat
 }
 
 void ExceptionMetadata<::py3::simple::SimpleException>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("module.SimpleException", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::py3::simple::SimpleException>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& module_SimpleException = res.first->second;
-  module_SimpleException.name() = "module.SimpleException";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_SimpleException = res.metadata;
   static const auto* const
   module_SimpleException_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "err_code", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -359,12 +358,11 @@ void ExceptionMetadata<::py3::simple::SimpleException>::gen(ThriftMetadata& meta
   }
 }
 void ExceptionMetadata<::py3::simple::HiddenException>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("module.HiddenException", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::py3::simple::HiddenException>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& module_HiddenException = res.first->second;
-  module_HiddenException.name() = "module.HiddenException";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_HiddenException = res.metadata;
   static const auto* const
   module_HiddenException_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "test", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{ }},  }};

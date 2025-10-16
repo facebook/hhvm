@@ -235,12 +235,11 @@ StructMetadata<::test::fixtures::basic::UnionToBeRenamed>::gen(ThriftMetadata& m
 }
 
 void ExceptionMetadata<::test::fixtures::basic::MyException>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("module.MyException", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::test::fixtures::basic::MyException>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& module_MyException = res.first->second;
-  module_MyException.name() = "module.MyException";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_MyException = res.metadata;
   static const auto* const
   module_MyException_fields = new std::array<EncodedThriftField, 4>{ {
     { 1, "MyIntField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "MyStringField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "myStruct", false, std::make_unique<Struct<::test::fixtures::basic::MyStruct>>("module.MyStruct"), std::vector<ThriftConstStruct>{ }},    { 4, "myUnion", false, std::make_unique<Union<::test::fixtures::basic::MyUnion>>("module.MyUnion"), std::vector<ThriftConstStruct>{ }},  }};
@@ -254,12 +253,11 @@ void ExceptionMetadata<::test::fixtures::basic::MyException>::gen(ThriftMetadata
   }
 }
 void ExceptionMetadata<::test::fixtures::basic::MyExceptionWithMessage>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("module.MyExceptionWithMessage", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::test::fixtures::basic::MyExceptionWithMessage>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& module_MyExceptionWithMessage = res.first->second;
-  module_MyExceptionWithMessage.name() = "module.MyExceptionWithMessage";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_MyExceptionWithMessage = res.metadata;
   static const auto* const
   module_MyExceptionWithMessage_fields = new std::array<EncodedThriftField, 4>{ {
     { 1, "MyIntField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "MyStringField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct(), }},    { 3, "myStruct", false, std::make_unique<Struct<::test::fixtures::basic::MyStruct>>("module.MyStruct"), std::vector<ThriftConstStruct>{ }},    { 4, "myUnion", false, std::make_unique<Union<::test::fixtures::basic::MyUnion>>("module.MyUnion"), std::vector<ThriftConstStruct>{ }},  }};

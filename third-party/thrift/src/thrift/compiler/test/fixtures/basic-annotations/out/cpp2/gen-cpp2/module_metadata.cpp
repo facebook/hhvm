@@ -158,12 +158,11 @@ StructMetadata<::cpp2::SecretStruct>::gen(ThriftMetadata& metadata) {
 }
 
 void ExceptionMetadata<::cpp2::detail::YourException>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("module.MyException", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::cpp2::detail::YourException>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& module_MyException = res.first->second;
-  module_MyException.name() = "module.MyException";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_MyException = res.metadata;
   module_MyException.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("YourException") } }).cv_struct());
   module_MyException.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::StaticCast") } }).cv_struct());
 }

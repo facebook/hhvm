@@ -27,7 +27,7 @@ void t_enum::set_values(t_enum_value_list values) {
   value_map_.clear();
   unused_ = t_enum::default_unused;
   for (auto& value : values) {
-    append(std::move(value));
+    append_value(std::move(value));
   }
 }
 

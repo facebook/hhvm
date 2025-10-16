@@ -73,11 +73,6 @@ class t_enum : public t_type {
    */
   void update_unused(int32_t val);
 
-  // TODO(T227540797): These methods are only provided for backwards
-  // compatibility. Update all references and remove everything below.
-  std::vector<t_enum_value*> values_raw_;
-
- public:
   void append(
       std::unique_ptr<t_enum_value> enum_value,
       std::unique_ptr<t_const> constant) {
@@ -88,10 +83,12 @@ class t_enum : public t_type {
     values_.push_back(std::move(enum_value));
     constants_.push_back(std::move(constant));
   }
-  void append(std::unique_ptr<t_enum_value> enum_value) {
-    append_value(std::move(enum_value));
-  }
 
+  // TODO(T227540797): These methods are only provided for backwards
+  // compatibility. Update all references and remove everything below.
+  std::vector<t_enum_value*> values_raw_;
+
+ public:
   const std::vector<t_enum_value*>& get_enum_values() const {
     return values_raw_;
   }

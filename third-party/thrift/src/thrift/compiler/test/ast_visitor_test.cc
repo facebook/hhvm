@@ -379,7 +379,7 @@ TYPED_TEST(AstVisitorTest, enum) {
   EXPECT_CALL(this->mock_, visit_named(tenum_value.get()));
   EXPECT_CALL(this->overload_mock_, visit_enum_value(tenum_value.get()))
       .Times(2);
-  tenum->append(std::move(tenum_value));
+  tenum->append_value(std::move(tenum_value));
 
   EXPECT_CALL(this->mock_, visit_enum(tenum.get()));
   // Matches: root definition, definition, named

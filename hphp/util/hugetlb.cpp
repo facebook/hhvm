@@ -157,7 +157,7 @@ bool find_hugetlbfs_path() {
 }
 
 HugePageInfo read_hugepage_info(size_t pagesize, int node /* = -1 */) {
-  unsigned nr_huge = 0, free_huge = 0;
+  unsigned nr_huge = 0, free_huge = 0, nr_overcommit = 0;
   if (pagesize != size2m && pagesize != size1g) { // only 2M and 1G supported
     return HugePageInfo{0, 0};
   }
@@ -216,7 +216,11 @@ HugePageInfo read_hugepage_info(size_t pagesize, int node /* = -1 */) {
     assert(strlen("free_hugepages") == 14); // extra \0 byte
     free_huge = readNumFrom(fileName);
 
-    return HugePageInfo{nr_huge, free_huge};
+    memcpy(p, "nr_overcommit_hugepages", 24);
+    assert(strlen("nr_overcommit_hugepages") == 23); // extra \0 byte
+    nr_overcommit = readNumFrom(fileName);
+
+    return HugePageInfo{nr_huge, free_huge + nr_overcommit};
   }
   // All nodes
 #ifdef HAVE_NUMA

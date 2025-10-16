@@ -1039,8 +1039,6 @@ bool process(CompilerOptions &po) {
   sample.setStr("features_file", Option::ExternWorkerFeaturesFile);
   sample.setStr("worker_path", Option::ExternWorkerPath);
   sample.setInt("use_rich_client", Option::ExternWorkerUseRichClient);
-  sample.setInt("use_zippy_rich_client",
-      Option::ExternWorkerUseZippyRichClient);
   sample.setInt("use_p2p", Option::ExternWorkerUseP2P);
   sample.setInt("cas_connection_count", Option::ExternWorkerCasConnectionCount);
   sample.setInt("engine_connection_count", Option::ExternWorkerEngineConnectionCount);
@@ -1115,11 +1113,11 @@ bool process(CompilerOptions &po) {
     );
   }
 
-  /** To efficiently query which package contains a given file, we preprocess the 
+  /** To efficiently query which package contains a given file, we preprocess the
     * packages definition.  All the paths listed in include_paths clauses,
     * together with a boolean recording if files under that path are included
-    * in the active deployment or not, are stored in the pathsInDeployment list.  
-    * The list of paths is stored in anti-lexicographic order so a simple linear 
+    * in the active deployment or not, are stored in the pathsInDeployment list.
+    * The list of paths is stored in anti-lexicographic order so a simple linear
     * search returns the most precise path that includes a given file.
     */
   std::vector<std::pair<std::string, DeployKind>> pathsInDeployment;
@@ -1190,7 +1188,7 @@ bool process(CompilerOptions &po) {
     auto const deployed =
       deployedByPackages(ue->m_filepath, ue->getPackageOverride());
     ue->m_softDeployedRepoOnly = deployed == DeployKind::Soft;
-  
+
     assertx(Option::GenerateBinaryHHBC ||
             Option::GenerateTextHHBC ||
             Option::GenerateHhasHHBC);
@@ -1373,7 +1371,7 @@ bool process(CompilerOptions &po) {
           return FileInBuildReason::fromIncludeDir;
         }
       }
-      
+
       auto const deployed = deployedByPackages(p.m_filepath, p.m_packageOverride);
       if (emitPass == EmitPass::SymbolRefsOnDemandFiles)  {
         if (deployed != DeployKind::NotDeployed) {

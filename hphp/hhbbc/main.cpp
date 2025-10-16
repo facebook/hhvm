@@ -149,7 +149,6 @@ void parse_options(int argc, char** argv) {
     ("extern-worker-use-exec-cache",           po::value(&options.ExternWorkerUseExecCache))
     ("extern-worker-cleanup",                  po::value(&options.ExternWorkerCleanup))
     ("extern-worker-use-rich-client",          po::value(&options.ExternWorkerUseRichClient))
-    ("extern-worker-use-zippy-rich-client",    po::value(&options.ExternWorkerUseZippyRichClient))
     ("extern-worker-use-p2p",                  po::value(&options.ExternWorkerUseP2P))
     ("extern-worker-verbose-logging",          po::value(&options.ExternWorkerVerboseLogging))
     ("extern-worker-async-cleanup",            po::value(&options.ExternWorkerAsyncCleanup))
@@ -466,7 +465,6 @@ void compile_repo() {
   sample.setStr("use_case", options.ExternWorkerUseCase);
   sample.setStr("platform", options.ExternWorkerPlatform);
   sample.setInt("use_rich_client", options.ExternWorkerUseRichClient);
-  sample.setInt("use_zippy_rich_client", options.ExternWorkerUseZippyRichClient);
   sample.setInt("use_p2p", options.ExternWorkerUseP2P);
   sample.setInt("force_subprocess", options.ExternWorkerForceSubprocess);
   sample.setInt("use_exec_cache", options.ExternWorkerUseExecCache);

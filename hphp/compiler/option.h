@@ -117,7 +117,6 @@ struct Option {
   static bool ExternWorkerUseExecCache;
   static bool ExternWorkerCleanup;
   static bool ExternWorkerUseRichClient;
-  static bool ExternWorkerUseZippyRichClient;
   static bool ExternWorkerUseP2P;
   static int ExternWorkerCasConnectionCount;
   static int ExternWorkerEngineConnectionCount;

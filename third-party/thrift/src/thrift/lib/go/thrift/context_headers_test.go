@@ -20,21 +20,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-func TestSetHeadersDoesOverride(t *testing.T) {
-	ctx := context.Background()
-	input1 := map[string]string{"key1": "value1"}
-	input2 := map[string]string{"key2": "value2"}
-	ctx = SetHeaders(ctx, input1)
-	output1 := GetRequestHeadersFromContext(ctx)
-	assert.Equal(t, input1, output1)
-	ctx = SetHeaders(ctx, input2)
-	output2 := GetRequestHeadersFromContext(ctx)
-	assert.Equal(t, input2, output2)
-}
 
 func TestGetRequestHeadersFromContext(t *testing.T) {
 	t.Run("nil context", func(t *testing.T) {
@@ -47,14 +34,18 @@ func TestGetRequestHeadersFromContext(t *testing.T) {
 	})
 	t.Run("context with existing headers", func(t *testing.T) {
 		headers := map[string]string{"foo": "bar"}
-		ctxWithHeaders := SetHeaders(context.TODO(), headers)
+		reqCtx := &RequestContext{}
+		reqCtx.SetReadHeaders(headers)
+		ctxWithHeaders := WithRequestContext(context.TODO(), reqCtx)
 		headersFromContext := GetRequestHeadersFromContext(ctxWithHeaders)
 		require.Equal(t, headers, headersFromContext)
 	})
 	t.Run("ensure map copy", func(t *testing.T) {
 		// Ensure that the user can't modify the map returned from the context
 		originalHeaders := map[string]string{"foo": "bar"}
-		ctxWithHeaders := SetHeaders(context.TODO(), originalHeaders)
+		reqCtx := &RequestContext{}
+		reqCtx.SetReadHeaders(originalHeaders)
+		ctxWithHeaders := WithRequestContext(context.TODO(), reqCtx)
 		// Get headers map and modify it
 		headersFromContext1 := GetRequestHeadersFromContext(ctxWithHeaders)
 		headersFromContext1["foo"] = "123"

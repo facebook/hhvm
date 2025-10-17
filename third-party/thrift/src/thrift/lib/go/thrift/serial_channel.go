@@ -51,11 +51,6 @@ func (c *serialChannel) sendMsg(ctx context.Context, method string, request Writ
 		}
 	}
 
-	requestHeadersMap := internalClientGetRequestHeadersFromContext(ctx)
-	for k, v := range requestHeadersMap {
-		c.protocol.setRequestHeader(k, v)
-	}
-
 	if err := c.protocol.WriteMessageBegin(method, msgType, seqID); err != nil {
 		return seqID, err
 	}

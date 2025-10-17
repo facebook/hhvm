@@ -21,19 +21,6 @@ import (
 	"maps"
 )
 
-// The headersKeyType type is unexported to prevent collisions with context keys.
-type headersKeyType int
-
-const (
-	// requestHeadersKey is a context key.
-	requestHeadersKey headersKeyType = 0
-)
-
-// SetHeaders replaces all the current headers.
-func SetHeaders(ctx context.Context, headers map[string]string) context.Context {
-	return context.WithValue(ctx, requestHeadersKey, headers)
-}
-
 // GetRequestHeadersFromContext returns the request headers from the context.
 func GetRequestHeadersFromContext(ctx context.Context) map[string]string {
 	if ctx == nil {
@@ -45,22 +32,5 @@ func GetRequestHeadersFromContext(ctx context.Context) map[string]string {
 		maps.Copy(result, reqCtx.GetReadHeaders())
 	}
 
-	if existingHeadersAny := ctx.Value(requestHeadersKey); existingHeadersAny != nil {
-		maps.Copy(result, existingHeadersAny.(map[string]string))
-	}
-
-	return result
-}
-
-func internalClientGetRequestHeadersFromContext(ctx context.Context) map[string]string {
-	if ctx == nil {
-		return nil
-	}
-	existingHeaders := ctx.Value(requestHeadersKey)
-	if existingHeaders == nil {
-		return nil
-	}
-	result := make(map[string]string)
-	maps.Copy(result, existingHeaders.(map[string]string))
 	return result
 }

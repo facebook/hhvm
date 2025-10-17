@@ -1113,10 +1113,18 @@ TEST(SyntaxGraphTest, getSchemaMerge) {
 
 TEST(SyntaxGraphTest, anyField) {
   auto& registry = SchemaRegistry::get();
-  const auto& s = registry.getNode<test::StructWithAny>();
-  const auto& f = s.fields()[0];
-  const auto& anyStruct = f.type().trueType();
-  EXPECT_EQ(anyStruct.asStruct().uri(), "facebook.com/thrift/type/Any");
+  {
+    const auto& s = registry.getNode<test::StructWithAny>();
+    const auto& f = s.fields()[0];
+    const auto& anyStruct = f.type().trueType();
+    EXPECT_EQ(anyStruct.asStruct().uri(), "facebook.com/thrift/type/Any");
+  }
+
+  {
+    const auto& s = registry.getTypeSystemNode<test::StructWithAny>();
+    const auto& f = s.fields()[0];
+    EXPECT_TRUE(f.type().isAny());
+  }
 }
 
 TEST(SyntaxGraphTest, StructWithCustomDefault) {

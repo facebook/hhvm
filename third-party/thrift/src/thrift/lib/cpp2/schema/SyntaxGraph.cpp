@@ -35,6 +35,10 @@ using apache::thrift::util::enumNameSafe;
 
 namespace apache::thrift::syntax_graph {
 
+namespace {
+constexpr std::string_view kAnyStructUri = "facebook.com/thrift/type/Any";
+} // namespace
+
 namespace detail {
 
 const DefinitionNode& lookUpDefinition(
@@ -1103,7 +1107,7 @@ class TypeSystemFacade final : public type_system::SourceIndexedTypeSystem {
       populationQueue.pop();
       TSDefinition& tsDef = cache_.at(sgDef);
       auto makeFields = [&](const auto& s) {
-        bool isUnion = std::is_same_v<decltype(s), UnionNode const&>;
+        constexpr bool isUnion = std::is_same_v<decltype(s), UnionNode const&>;
         std::vector<type_system::FieldDefinition> fields;
         fields.reserve(s.fields().size());
         for (const auto& field : s.fields()) {
@@ -1180,6 +1184,17 @@ class TypeSystemFacade final : public type_system::SourceIndexedTypeSystem {
           }
         },
         [&](const StructNode& s) {
+          if (s.uri() == kAnyStructUri) {
+            /**
+             * Currently in Thrift IDL, the "any" built-in type is defined as a
+             * struct.
+             *
+             * When we create a TypeSystem facade over a SyntaxGraph, we need
+             * ensure that the "structiness" is abstracted away. That is, a
+             * field of type AnyStruct should become a TypeId of Any.
+             */
+            return type_system::TypeSystem::Any();
+          }
           return type_system::TypeRef{
               std::get<type_system::StructNode>(cache_.at(&s.definition()))};
         },

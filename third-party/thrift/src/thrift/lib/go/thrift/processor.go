@@ -143,7 +143,10 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 
 	// Step 1c: Use Protocol interface to retrieve headers.
 	requestHeaders := prot.getResponseHeaders()
-	reqCtx := RequestContext{}
+	reqCtx := RequestContext{
+		Method:     name,
+		SequenceID: seqID,
+	}
 	reqCtx.SetReadHeaders(requestHeaders)
 	ctx = WithRequestContext(ctx, &reqCtx)
 

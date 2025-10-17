@@ -70,6 +70,8 @@ class t_field final : public t_named {
   t_field& operator=(t_field&&) = delete;
 
   const t_type_ref& type() const { return type_; }
+  void set_type(t_type_ref type) { type_ = type; }
+
   t_field_id id() const { return id_; }
   std::optional<t_field_id> explicit_id() const { return explicit_id_; }
   bool is_injected() const { return injected_; }
@@ -129,7 +131,6 @@ class t_field final : public t_named {
   // backwards compatibility.
  public:
   const t_type* get_type() const { return type().get_type(); }
-  void set_type(t_type_ref type) { type_ = type; }
 };
 
 using t_field_list = node_list<t_field>;

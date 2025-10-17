@@ -41,6 +41,7 @@ class t_typedef : public t_type {
       : t_type(program, std::move(name)), type_(type) {}
 
   const t_type_ref& type() const { return type_; }
+  void set_type(t_type_ref type) { type_ = type; }
 
   kind typedef_kind() const;
 
@@ -100,7 +101,6 @@ class t_typedef : public t_type {
   // backwards compatibility.
  public:
   const t_type* get_type() const { return type_.get_type(); }
-  void set_type(t_type_ref type) { type_ = type; }
 
   t_type::type get_type_value() const override {
     return get_type()->get_type_value();

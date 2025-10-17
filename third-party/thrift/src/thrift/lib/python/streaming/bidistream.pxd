@@ -13,9 +13,12 @@
 # limitations under the License.
 
 from libcpp.memory cimport unique_ptr
+from cpython.ref cimport PyObject
 
+from folly cimport cFollyExecutor, cFollyPromise
 from thrift.python.protocol cimport Protocol
-from thrift.python.streaming.sink cimport ClientSink, cIOBufClientSink
+from folly.iobuf cimport cIOBuf
+from thrift.python.streaming.sink cimport ClientSink, cIOBufClientSink, cIOBufSinkGenerator
 from thrift.python.streaming.stream cimport ClientBufferedStream, cIOBufClientBufferedStream
 
 cdef extern from "thrift/lib/cpp2/async/BiDiStream.h" namespace "::apache::thrift":
@@ -35,6 +38,20 @@ cdef extern from "thrift/lib/cpp2/async/BiDiStream.h" namespace "::apache::thrif
 
     cdef cppclass cStreamTransformation "::apache::thrift::StreamTransformation"[TSinkElement, TStreamElement]:
         pass
+
+
+cdef extern from "thrift/lib/python/streaming/bidistream.h" namespace "::apache::thrift::python":
+    cResponseAndStreamTransformation[TResponse, TSinkChunk, TStreamChunk] \
+    createResponseAndStreamTransformation[TResponse, TSinkChunk, TStreamChunk](
+        TResponse response,
+        cStreamTransformation[TSinkChunk, TStreamChunk] bidi
+    ) noexcept
+
+    unique_ptr[cStreamTransformation[unique_ptr[cIOBuf], unique_ptr[cIOBuf]]] \
+    createIOBufStreamTransformation(
+        object bidi,
+        cFollyExecutor* executor,
+    ) noexcept
 
 
 cdef class BidirectionalStream:
@@ -70,3 +87,10 @@ cdef class ResponseAndBidirectionalStream:
         stream_elem_cls,
         Protocol protocol,
     )
+
+cdef api int invoke_server_bidi_callback(
+    object bidi_callback,
+    cFollyExecutor* executor,
+    cIOBufSinkGenerator cpp_input_gen,
+    cFollyPromise[PyObject*] cpp_promise,
+) except -1

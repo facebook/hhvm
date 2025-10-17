@@ -76,6 +76,8 @@ from thrift.python.streaming.sink cimport (
 from thrift.python.streaming.bidistream cimport (
     cStreamTransformation,
     cResponseAndStreamTransformation,
+    createIOBufStreamTransformation,
+    createResponseAndStreamTransformation,
 )
 from cpython.contextvars cimport PyContextVar_Set, PyContextVar_Reset
 
@@ -220,9 +222,9 @@ cdef class StreamTransformation_IOBuf:
     cdef unique_ptr[cStreamTransformation[UniqueIOBuf, UniqueIOBuf]] _cBidi
 
     @staticmethod
-    cdef _fbthrift_create(object sink_callback, object stream):
+    cdef _fbthrift_create(object bidi):
         cdef StreamTransformation_IOBuf inst = StreamTransformation_IOBuf.__new__(StreamTransformation_IOBuf)
-        # TODO: Just bind the struct for now and create function to set instances
+        inst._cBidi = createIOBufStreamTransformation(bidi, get_executor())
         return inst
 
 cdef class ResponseAndStreamTransformation:
@@ -231,7 +233,12 @@ cdef class ResponseAndStreamTransformation:
     @staticmethod
     cdef _fbthrift_create(object val, object bidi):
         cdef ResponseAndStreamTransformation inst = ResponseAndStreamTransformation.__new__(ResponseAndStreamTransformation)
-        # TODO: Just bind the struct for now and create function to set instances
+        inst._cResponseBidi = make_unique[BiDiResponse](
+            createResponseAndStreamTransformation[UniqueIOBuf, UniqueIOBuf, UniqueIOBuf](
+                cmove((<IOBuf>val)._ours),
+                cmove(dereference((<StreamTransformation_IOBuf>bidi)._cBidi))
+            )
+        )
         return inst
 
 cdef class Promise_BiDi(Promise_Py):
@@ -271,8 +278,8 @@ async def serverCallback_coro(object callFunc, str funcName, Promise_Py promise,
             sink = ServerSink_IOBuf._fbthrift_create(sink)
             val = ResponseAndSinkConsumer._fbthrift_create(val, sink)
         elif kind is RpcKind.BIDIRECTIONAL_STREAM:
-            val, sink, stream = await callFunc(buf, prot)
-            bidi = StreamTransformation_IOBuf._fbthrift_create(sink, stream)
+            val, bidi = await callFunc(buf, prot)
+            bidi = StreamTransformation_IOBuf._fbthrift_create(bidi)
             val = ResponseAndStreamTransformation._fbthrift_create(val.response, bidi)
         else:
             val = await callFunc(buf, prot)

@@ -12,12 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
 from libcpp.memory cimport unique_ptr
 from libcpp.utility cimport move as cmove
+from folly cimport cFollyPromise
 
 from thrift.python.protocol cimport Protocol
-from thrift.python.streaming.sink cimport ClientSink, cIOBufClientSink
+from thrift.python.streaming.sink cimport ServerSinkGenerator, ClientSink, cIOBufClientSink
 from thrift.python.streaming.stream cimport ClientBufferedStream, cIOBufClientBufferedStream
+from thrift.python.streaming.py_promise cimport Promise_PyObject
 
 
 cdef class BidirectionalStream:
@@ -100,3 +103,45 @@ cdef class ResponseAndBidirectionalStream:
     @property
     def stream(self):
         return self._stream
+
+async def invokeBidiTransformCallback(
+    bidi_callback,
+    ServerSinkGenerator input_gen,
+    Promise_PyObject promise,
+):
+    """
+    Invoke bidi callback with input generator and return output generator.
+    bidi_callback should be Callable[AsyncGenerator, AsyncGenerator]
+    """
+    async def invoke_cpp_iobuf_gen():
+        async for elem in input_gen:
+            yield elem
+
+    try:
+        input_gen_wrapper = invoke_cpp_iobuf_gen()
+        output_gen = bidi_callback(input_gen_wrapper)
+        # Store the output generator in the promise for later retrieval
+        promise.complete(output_gen)
+    except Exception as ex:
+        promise.error_py_object(ex)
+
+
+cdef api int invoke_server_bidi_callback(
+    object bidi_callback,
+    cFollyExecutor* executor,
+    cIOBufSinkGenerator cpp_input_gen,
+    cFollyPromise[PyObject*] cpp_promise,
+) except -1:
+    input_gen = ServerSinkGenerator._fbthrift_create(
+        cmove(cpp_input_gen),
+        executor,
+    )
+    cdef Promise_PyObject promise = Promise_PyObject.create(cmove(cpp_promise))
+    asyncio.get_event_loop().create_task(
+        invokeBidiTransformCallback(
+            bidi_callback,
+            input_gen,
+            promise,
+        ),
+    )
+    return 0

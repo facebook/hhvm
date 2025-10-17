@@ -24,40 +24,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestWithRequestHeaders(t *testing.T) {
-	ctx := context.Background()
-
-	input1 := map[string]string{"key1": "value1"}
-	ctx = WithRequestHeaders(ctx, input1)
-	// Ensure that modifying the original map
-	// does not affect the context headers.
-	input1["key999"] = "value999"
-	output1 := GetRequestHeadersFromContext(ctx)
-	expected := map[string]string{"key1": "value1"}
-	assert.Equal(t, expected, output1)
-
-	input2 := map[string]string{"key2": "value2"}
-	ctx = WithRequestHeaders(ctx, input2)
-	// Ensure that modifying the original map
-	// does not affect the context headers.
-	input2["key999"] = "value999"
-	output2 := GetRequestHeadersFromContext(ctx)
-	expected = map[string]string{"key1": "value1", "key2": "value2"}
-	assert.Equal(t, expected, output2)
-
-	// Ensure new headers override existing ones.
-	input3 := map[string]string{"key1": "value123"}
-	ctx = WithRequestHeaders(ctx, input3)
-	output3 := GetRequestHeadersFromContext(ctx)
-	expected = map[string]string{"key1": "value123", "key2": "value2"}
-	assert.Equal(t, expected, output3)
-}
-
 func TestSetHeadersDoesOverride(t *testing.T) {
 	ctx := context.Background()
 	input1 := map[string]string{"key1": "value1"}
 	input2 := map[string]string{"key2": "value2"}
-	ctx = WithRequestHeader(ctx, "key1", "value1")
+	ctx = SetHeaders(ctx, input1)
 	output1 := GetRequestHeadersFromContext(ctx)
 	assert.Equal(t, input1, output1)
 	ctx = SetHeaders(ctx, input2)
@@ -76,14 +47,14 @@ func TestGetRequestHeadersFromContext(t *testing.T) {
 	})
 	t.Run("context with existing headers", func(t *testing.T) {
 		headers := map[string]string{"foo": "bar"}
-		ctxWithHeaders := WithRequestHeaders(context.TODO(), headers)
+		ctxWithHeaders := SetHeaders(context.TODO(), headers)
 		headersFromContext := GetRequestHeadersFromContext(ctxWithHeaders)
 		require.Equal(t, headers, headersFromContext)
 	})
 	t.Run("ensure map copy", func(t *testing.T) {
 		// Ensure that the user can't modify the map returned from the context
 		originalHeaders := map[string]string{"foo": "bar"}
-		ctxWithHeaders := WithRequestHeaders(context.TODO(), originalHeaders)
+		ctxWithHeaders := SetHeaders(context.TODO(), originalHeaders)
 		// Get headers map and modify it
 		headersFromContext1 := GetRequestHeadersFromContext(ctxWithHeaders)
 		headersFromContext1["foo"] = "123"

@@ -29,26 +29,6 @@ const (
 	requestHeadersKey headersKeyType = 0
 )
 
-// WithRequestHeader adds a header to the context, which will be sent as part of the request.
-// WithRequestHeader can be called multiple times to add multiple headers.
-// These headers are not persistent and will only be sent with the current request.
-func WithRequestHeader(ctx context.Context, key string, value string) context.Context {
-	return WithRequestHeaders(ctx, map[string]string{key: value})
-}
-
-// WithRequestHeaders attaches thrift headers to a ctx.
-func WithRequestHeaders(ctx context.Context, headers map[string]string) context.Context {
-	// Create a fresh map to copy headers into. This ensures
-	// that the contents cannot be modified from the outside.
-	allHeaders := make(map[string]string)
-	if existingHeaders := ctx.Value(requestHeadersKey); existingHeaders != nil {
-		maps.Copy(allHeaders, existingHeaders.(map[string]string))
-	}
-	// Copy new headers last. They take precedence in case of a collision.
-	maps.Copy(allHeaders, headers)
-	return context.WithValue(ctx, requestHeadersKey, allHeaders)
-}
-
 // SetHeaders replaces all the current headers.
 func SetHeaders(ctx context.Context, headers map[string]string) context.Context {
 	return context.WithValue(ctx, requestHeadersKey, headers)

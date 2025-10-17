@@ -87,10 +87,14 @@ struct TestStructuredAnnotationWithoutUri {
   1: i64 field1;
 }
 
+@thrift.Uri{value = "meta.com/thrift_test/TestException"}
 @TestStructuredAnnotationWithoutUri{field1 = 3}
+@TestStructuredAnnotation{field1 = 4}
 exception TestException {
   @TestStructuredAnnotation
   1: binary blob;
+  @TestStructuredAnnotation
+  2: TestRecursiveStruct s;
 }
 
 const TestStruct testConst = TestStruct{field1 = 2, field2 = VALUE_1};

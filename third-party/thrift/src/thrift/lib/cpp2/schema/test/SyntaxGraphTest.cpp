@@ -364,18 +364,29 @@ TEST_F(ServiceSchemaTest, Exception) {
   EXPECT_EQ(testException->kind(), DefinitionNode::Kind::EXCEPTION);
   EXPECT_EQ(testException->name(), "TestException");
   const ExceptionNode& e = testException->asException();
+  EXPECT_EQ(e.uri(), "meta.com/thrift_test/TestException");
 
-  EXPECT_EQ(e.fields().size(), 1);
+  EXPECT_EQ(e.fields().size(), 2);
 
   EXPECT_EQ(e.fields()[0].id(), FieldId{1});
   EXPECT_EQ(e.fields()[0].name(), "blob");
   EXPECT_EQ(e.fields()[0].type().asPrimitive(), Primitive::BINARY);
 
+  EXPECT_EQ(e.fields()[1].id(), FieldId{2});
+  EXPECT_EQ(e.fields()[1].name(), "s");
+  EXPECT_EQ(
+      e.fields()[1].type().asStruct().definition().name(),
+      "TestRecursiveStruct");
+
   EXPECT_EQ(
       e.toDebugString(),
       "ExceptionNode 'TestException'\n"
-      "╰─ FieldNode (id=1, presence=UNQUALIFIED, name='blob')\n"
-      "   ╰─ type = BINARY\n");
+      "├─ FieldNode (id=1, presence=UNQUALIFIED, name='blob')\n"
+      "│  ╰─ type = BINARY\n"
+      "╰─ FieldNode (id=2, presence=UNQUALIFIED, name='s')\n"
+      "   ╰─ type = StructNode 'TestRecursiveStruct'\n"
+      "      ╰─ FieldNode (id=1, presence=OPTIONAL, name='myself')\n"
+      "         ╰─ type = StructNode 'TestRecursiveStruct'\n");
 }
 
 TEST_F(ServiceSchemaTest, Constant) {
@@ -526,8 +537,10 @@ TEST_F(ServiceSchemaTest, Service) {
       "      │              ╰─ exceptions\n"
       "      │                 ╰─ FunctionNode::Exception (id=1, name='ex')\n"
       "      │                    ╰─ type = ExceptionNode 'TestException'\n"
-      "      │                       ╰─ FieldNode (id=1, presence=UNQUALIFIED, name='blob')\n"
-      "      │                          ╰─ type = BINARY\n"
+      "      │                       ├─ FieldNode (id=1, presence=UNQUALIFIED, name='blob')\n"
+      "      │                       │  ╰─ type = BINARY\n"
+      "      │                       ╰─ FieldNode (id=2, presence=UNQUALIFIED, name='s')\n"
+      "      │                          ╰─ type = StructNode 'TestRecursiveStruct'\n"
       "      ├─ FunctionNode (name='createStream')\n"
       "      │  ╰─ FunctionNode::Response\n"
       "      │     ├─ returnType = I32\n"
@@ -582,8 +595,10 @@ TEST_F(ServiceSchemaTest, Interaction) {
       "      ╰─ exceptions\n"
       "         ╰─ FunctionNode::Exception (id=1, name='ex')\n"
       "            ╰─ type = ExceptionNode 'TestException'\n"
-      "               ╰─ FieldNode (id=1, presence=UNQUALIFIED, name='blob')\n"
-      "                  ╰─ type = BINARY\n");
+      "               ├─ FieldNode (id=1, presence=UNQUALIFIED, name='blob')\n"
+      "               │  ╰─ type = BINARY\n"
+      "               ╰─ FieldNode (id=2, presence=UNQUALIFIED, name='s')\n"
+      "                  ╰─ type = StructNode 'TestRecursiveStruct'\n");
 }
 
 void checkAnnotationsOnTestUnion(const UnionNode& node) {
@@ -630,7 +645,7 @@ TEST_F(ServiceSchemaTest, StructuredAnnotationWithoutUri) {
       program.definitionsByName().at("TestException");
 
   const auto& annotations = testException->annotations();
-  EXPECT_EQ(annotations.size(), 1);
+  EXPECT_EQ(annotations.size(), 2);
   EXPECT_EQ(
       &annotations[0].type().asStruct(),
       &program.definitionsByName()
@@ -828,7 +843,7 @@ TEST_F(ServiceSchemaTest, asTypeSystem) {
   ASSERT_EQ(def->asStruct().uri(), uri);
 
   auto& typeSystem = syntaxGraph.asTypeSystem();
-  EXPECT_EQ(typeSystem.getKnownUris()->size(), 6);
+  EXPECT_EQ(typeSystem.getKnownUris()->size(), 7);
 
   const auto& ref = typeSystem.getUserDefinedTypeOrThrow(uri);
   const type_system::StructNode& structNode = ref.asStruct();
@@ -959,6 +974,20 @@ TEST_F(ServiceSchemaTest, asTypeSystem) {
   const auto& sgEnumNode = syntaxGraph.asSyntaxGraphEnumNode(enumNode);
   EXPECT_EQ(
       &mainProgram.definitionsByName().at("TestEnum")->asEnum(), &sgEnumNode);
+
+  uri = "meta.com/thrift_test/TestException";
+  const type_system::StructNode& exceptionStructNode =
+      typeSystem.getUserDefinedTypeOrThrow(uri).asStruct();
+  EXPECT_EQ(exceptionStructNode.uri(), uri);
+  EXPECT_EQ(exceptionStructNode.fields().size(), 2);
+  EXPECT_EQ(exceptionStructNode.fields()[0].identity().name(), "blob");
+  EXPECT_TRUE(exceptionStructNode.fields()[0].type().isBinary());
+  EXPECT_EQ(exceptionStructNode.fields()[0].identity().id(), FieldId{1});
+  EXPECT_EQ(exceptionStructNode.fields()[1].identity().name(), "s");
+  EXPECT_EQ(
+      exceptionStructNode.fields()[1].type().asStruct().uri(),
+      "meta.com/thrift_test/TestRecursiveStruct");
+  EXPECT_EQ(exceptionStructNode.fields()[1].identity().id(), FieldId{2});
 }
 
 TEST_F(ServiceSchemaTest, asTypeSystemTypeRef) {

@@ -1058,9 +1058,13 @@ class TypeSystemFacade final : public type_system::SourceIndexedTypeSystem {
                 &std::get<type_system::UnionNode>(entry->second), sgDef);
             processStructuredType(s);
           },
-          [](const ExceptionNode&) {
-            folly::throw_exception<std::runtime_error>(
-                "Exceptions aren't supported by TypeSystem");
+          [&](const ExceptionNode& e) {
+            // SyntaxGraph exceptions are converted into TypeSystem structs
+            auto [entry, _] =
+                cache_.emplace(sgDef, type_system::StructNode{{}, {}, {}, {}});
+            reverseCache_.emplace(
+                &std::get<type_system::StructNode>(entry->second), sgDef);
+            processStructuredType(e);
           },
           [&](const EnumNode& e) {
             // Enums can be populated immediately.
@@ -1131,6 +1135,14 @@ class TypeSystemFacade final : public type_system::SourceIndexedTypeSystem {
                 false,
                 toTypeSystemAnnotations(s.definition().annotations())};
           },
+          [&](const ExceptionNode& e) {
+            // SyntaxGraph exceptions are converted into TypeSystem structs
+            std::get<type_system::StructNode>(tsDef) = type_system::StructNode{
+                type_system::Uri(e.uri()),
+                makeFields(e),
+                false,
+                toTypeSystemAnnotations(e.definition().annotations())};
+          },
           [](const auto& n) {
             folly::throw_exception<std::logic_error>(fmt::format(
                 "Encountered unexpected node type `{}`",
@@ -1175,9 +1187,9 @@ class TypeSystemFacade final : public type_system::SourceIndexedTypeSystem {
           return type_system::TypeRef{
               std::get<type_system::UnionNode>(cache_.at(&u.definition()))};
         },
-        [&](const ExceptionNode&) -> type_system::TypeRef {
-          folly::throw_exception<std::runtime_error>(
-              "Exceptions aren't supported by TypeSystem");
+        [&](const ExceptionNode& e) -> type_system::TypeRef {
+          return type_system::TypeRef{
+              std::get<type_system::StructNode>(cache_.at(&e.definition()))};
         },
         [&](const EnumNode& e) {
           return type_system::TypeRef{

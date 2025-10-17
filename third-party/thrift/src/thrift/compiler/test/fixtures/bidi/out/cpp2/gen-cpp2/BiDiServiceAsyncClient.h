@@ -36,7 +36,9 @@ struct ServiceMethodTypesFootprint<::cpp2::BiDiService> {
   void,
   ::std::int32_t,
   ::std::int16_t,
-  ::std::string>;
+  ::std::string,
+  ::cpp2::BiDiMethodException,
+  ::std::int64_t>;
 };
 } // namespace detail
 
@@ -90,6 +92,26 @@ class Client<::cpp2::BiDiService> : public apache::thrift::GeneratedAsyncClient 
   template <typename RpcOptions>
   void fbthrift_send_response(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::BiDiClientCallback* callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> responseCtx(apache::thrift::RpcOptions* rpcOptions);
+ public:
+ protected:
+  void fbthrift_serialize_and_send_canThrow(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::BiDiClientCallback* callback, bool stealRpcOptions = false);
+ public:
+#if FOLLY_HAS_COROUTINES
+  /** Glean {"file": "thrift/compiler/test/fixtures/bidi/src/module.thrift", "service": "BiDiService", "function": "canThrow"} */
+  folly::coro::Task<apache::thrift::BidirectionalStream<::std::int64_t, ::std::int64_t>> co_canThrow();
+  /** Glean {"file": "thrift/compiler/test/fixtures/bidi/src/module.thrift", "service": "BiDiService", "function": "canThrow"} */
+  folly::coro::Task<apache::thrift::BidirectionalStream<::std::int64_t, ::std::int64_t>> co_canThrow(apache::thrift::RpcOptions& rpcOptions);
+#endif // FOLLY_HAS_COROUTINES
+
+  /** Glean {"file": "thrift/compiler/test/fixtures/bidi/src/module.thrift", "service": "BiDiService", "function": "canThrow"} */
+  static folly::exception_wrapper recv_wrapped_canThrow(apache::thrift::BidirectionalStream<::std::int64_t, ::std::int64_t>& _return, ::apache::thrift::ClientReceiveState& state);
+  /** Glean {"file": "thrift/compiler/test/fixtures/bidi/src/module.thrift", "service": "BiDiService", "function": "canThrow"} */
+  static apache::thrift::BidirectionalStream<::std::int64_t, ::std::int64_t> recv_canThrow(::apache::thrift::ClientReceiveState& state);
+ private:
+  apache::thrift::SerializedRequest fbthrift_serialize_canThrow(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack);
+  template <typename RpcOptions>
+  void fbthrift_send_canThrow(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::BiDiClientCallback* callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> canThrowCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
 };
 

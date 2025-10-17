@@ -12,6 +12,45 @@
 namespace apache {
 namespace thrift {
 namespace detail {
+
+template <>
+struct VisitByFieldId<::cpp2::BiDiSinkException> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).message_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::cpp2::BiDiSinkException");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::cpp2::BiDiStreamException> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).message_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::cpp2::BiDiStreamException");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::cpp2::BiDiMethodException> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).message_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::cpp2::BiDiMethodException");
+    }
+  }
+};
 } // namespace detail
 } // namespace thrift
 } // namespace apache

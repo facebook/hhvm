@@ -23,6 +23,12 @@ typedef apache::thrift::ThriftPResultBiDi<
     apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int32_t*>>,
     apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int16_t*>>
     > BiDiService_response_presult;
+typedef apache::thrift::ThriftPresult<false> BiDiService_canThrow_pargs;
+typedef apache::thrift::ThriftPResultBiDi<
+    apache::thrift::ThriftPresult<true, apache::thrift::FieldData<1, ::apache::thrift::type_class::structure, ::cpp2::BiDiMethodException>>,
+    apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int64_t*>, apache::thrift::FieldData<1, ::apache::thrift::type_class::structure, ::cpp2::BiDiSinkException>>,
+    apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int64_t*>, apache::thrift::FieldData<1, ::apache::thrift::type_class::structure, ::cpp2::BiDiStreamException>>
+    > BiDiService_canThrow_presult;
 //
 // Service Methods
 //
@@ -369,6 +375,195 @@ void BiDiServiceAsyncProcessor::throw_wrapped_response(
 }
 //
 // End of Method 'response'
+//
+
+//
+// Method 'canThrow'
+//
+template <typename ProtocolIn_, typename ProtocolOut_>
+void BiDiServiceAsyncProcessor::setUpAndProcess_canThrow(
+    apache::thrift::ResponseChannelRequest::UniquePtr req,
+    apache::thrift::SerializedCompressedRequest&& serializedRequest,
+    apache::thrift::Cpp2RequestContext* ctx,
+    folly::EventBase* eb,
+    [[maybe_unused]] apache::thrift::concurrency::ThreadManager* tm) {
+  if (!setUpRequestProcessing(
+          req, ctx, eb, tm, apache::thrift::RpcKind::BIDIRECTIONAL_STREAM, iface_)) {
+    return;
+  }
+  auto scope = iface_->getRequestExecutionScope(
+      ctx, apache::thrift::concurrency::NORMAL);
+  ctx->setRequestExecutionScope(std::move(scope));
+  processInThread(
+      std::move(req),
+      std::move(serializedRequest),
+      ctx,
+      eb,
+      tm,
+      apache::thrift::RpcKind::BIDIRECTIONAL_STREAM,
+      &BiDiServiceAsyncProcessor::
+          executeRequest_canThrow<ProtocolIn_, ProtocolOut_>,
+      this);
+}
+
+template <typename ProtocolIn_, typename ProtocolOut_>
+void BiDiServiceAsyncProcessor::executeRequest_canThrow(
+    apache::thrift::ServerRequest&& serverRequest) {
+  // make sure getRequestContext is null
+  // so async calls don't accidentally use it
+  iface_->setRequestContext(nullptr);
+  struct ArgsState {
+    BiDiService_canThrow_pargs pargs() {
+      BiDiService_canThrow_pargs args;
+      return args;
+    }
+
+    auto asTupleOfRefs() & {
+      return std::tie(
+      );
+    }
+  } args;
+
+  auto ctxStack = apache::thrift::ContextStack::create(
+      this->getEventHandlersSharedPtr(),
+      this->getServiceName(),
+      "BiDiService.canThrow",
+      serverRequest.requestContext());
+  try {
+    auto pargs = args.pargs();
+    deserializeRequest<ProtocolIn_>(
+        pargs,
+        "canThrow",
+        apache::thrift::detail::ServerRequestHelper::compressedRequest(
+            std::move(serverRequest))
+            .uncompress(),
+        ctxStack.get());
+  } catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
+    apache::thrift::detail::ap::process_handle_exn_deserialization<
+        ProtocolOut_>(
+        ew,
+        apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest)),
+            serverRequest.requestContext(),
+        apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest),
+        "canThrow");
+    return;
+  }
+  auto requestPileNotification =
+      apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(
+          serverRequest);
+  auto concurrencyControllerNotification =
+      apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(
+          serverRequest);
+  apache::thrift::HandlerCallbackBase::MethodNameInfo methodNameInfo{
+      /* .serviceName =*/ this->getServiceName(),
+      /* .definingServiceName =*/ "BiDiService",
+      /* .methodName =*/ "canThrow",
+      /* .qualifiedMethodName =*/ "BiDiService.canThrow"};
+  apache::thrift::HandlerCallback<::apache::thrift::StreamTransformation<::std::int64_t, ::std::int64_t>>::DecoratorAfterCallback decoratorCallback{
+    static_cast<void*>(iface_),
+    apache::thrift::ServiceHandler<::cpp2::BiDiService>::fbthrift_invoke_decorator_after_canThrow};
+ auto callback =
+      apache::thrift::HandlerCallbackPtr<::apache::thrift::StreamTransformation<::std::int64_t, ::std::int64_t>>::make(
+          apache::thrift::detail::ServerRequestHelper::request(
+              std::move(serverRequest)),
+          std::move(ctxStack),
+          std::move(methodNameInfo),
+          return_canThrow<ProtocolIn_, ProtocolOut_>,
+          throw_wrapped_canThrow<ProtocolIn_, ProtocolOut_>,
+          serverRequest.requestContext()->getProtoSeqId(),
+          apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest),
+          apache::thrift::detail::ServerRequestHelper::executor(serverRequest),
+          serverRequest.requestContext(),
+          requestPileNotification,
+          concurrencyControllerNotification,
+          std::move(serverRequest.requestData()),
+          apache::thrift::TilePtr(),
+          std::move(decoratorCallback));
+  // Execute method decorator before_canThrow.
+  iface_->fbthrift_execute_decorators_before_canThrow(*serverRequest.requestContext());
+
+  const auto makeExecuteHandler = [&] {
+    return [ifacePtr = iface_](auto&& cb, ArgsState args) mutable {
+      (void)args;
+      ifacePtr->async_tm_canThrow(std::move(cb));
+    };
+  };
+#if FOLLY_HAS_COROUTINES
+  if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
+          *callback)) {
+    [](auto callback, auto executeHandler, ArgsState args)
+        -> folly::coro::Task<void> {
+      auto argRefs = args.asTupleOfRefs();
+      co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
+          *callback,
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+              argRefs));
+      executeHandler(std::move(callback), std::move(args));
+    }(std::move(callback), makeExecuteHandler(), std::move(args))
+               .scheduleOn(
+                   apache::thrift::detail::ServerRequestHelper::executor(
+                       serverRequest))
+               .startInlineUnsafe();
+  } else {
+    makeExecuteHandler()(std::move(callback), std::move(args));
+  }
+#else
+  makeExecuteHandler()(std::move(callback), std::move(args));
+#endif // FOLLY_HAS_COROUTINES
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+/* static */ apache::thrift::ResponseAndServerBiDiStreamFactory BiDiServiceAsyncProcessor::return_canThrow(
+    apache::thrift::ContextStack* ctx,
+    folly::Executor::KeepAlive<> executor,
+    ::apache::thrift::StreamTransformation<::std::int64_t, ::std::int64_t>&& _return) {
+  ProtocolOut_ prot;
+  BiDiService_canThrow_presult::InitialResponsePResultType result;
+  using SinkPResultType = BiDiService_canThrow_presult::SinkPResultType;
+  using StreamPResultType = BiDiService_canThrow_presult::StreamPResultType;
+  auto bidiStreamFactory = apache::thrift::detail::ap::encode_server_bidi_stream<
+    ProtocolIn_, SinkPResultType, ProtocolOut_, StreamPResultType>(
+      std::move(_return), std::move(executor));
+  return {serializeResponse("canThrow", &prot, ctx, result), std::move(bidiStreamFactory)};
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+void BiDiServiceAsyncProcessor::throw_wrapped_canThrow(
+    apache::thrift::ResponseChannelRequest::UniquePtr req,
+    [[maybe_unused]] int32_t protoSeqId,
+    apache::thrift::ContextStack* ctx,
+    folly::exception_wrapper ew,
+    apache::thrift::Cpp2RequestContext* reqCtx) {
+  if (!ew) {
+    return;
+  }
+  ::cpp2::BiDiService_canThrow_presult::InitialResponsePResultType result;
+  constexpr bool kHasReturnType = false;
+  if (!::apache::thrift::detail::ap::insert_exn<kHasReturnType>(result, ew, [&]<typename Ex>(Ex&){
+    if (ctx) {
+      ctx->userExceptionWrapped(true, ew);
+    }
+    ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
+    ::apache::thrift::util::appendErrorClassificationToHeader<Ex>(ew, *reqCtx);
+  })) {
+    apache::thrift::detail::ap::process_throw_wrapped_handler_error<
+        ProtocolOut_>(ew, std::move(req), reqCtx, ctx, "canThrow");
+    return;
+  }
+  ProtocolOut_ prot;
+  auto response = serializeResponse("canThrow", &prot, ctx, result);
+  auto payload = std::move(response).extractPayload(
+      req->includeEnvelope(),
+      prot.protocolType(),
+      protoSeqId,
+      apache::thrift::MessageType::T_REPLY,
+      "canThrow");
+  payload.transform(reqCtx->getHeader()->getWriteTransforms());
+  req->sendStreamReply(std::move(payload), apache::thrift::detail::ServerStreamFactory{nullptr});
+}
+//
+// End of Method 'canThrow'
 //
 
 //

@@ -12,6 +12,30 @@
 namespace apache {
 namespace thrift {
 namespace detail {
+
+template <>
+struct ForEachField<::cpp2::BiDiSinkException> {
+  template <typename F, typename... T>
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
+    f(0, static_cast<T&&>(t).message_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::cpp2::BiDiStreamException> {
+  template <typename F, typename... T>
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
+    f(0, static_cast<T&&>(t).message_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::cpp2::BiDiMethodException> {
+  template <typename F, typename... T>
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
+    f(0, static_cast<T&&>(t).message_ref()...);
+  }
+};
 } // namespace detail
 } // namespace thrift
 } // namespace apache

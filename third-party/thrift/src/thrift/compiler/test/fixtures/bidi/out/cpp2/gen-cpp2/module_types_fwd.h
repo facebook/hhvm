@@ -7,4 +7,9 @@
 #pragma once
 
 // BEGIN forward_declare
+namespace cpp2 {
+class BiDiSinkException;
+class BiDiStreamException;
+class BiDiMethodException;
+} // namespace cpp2
 // END forward_declare

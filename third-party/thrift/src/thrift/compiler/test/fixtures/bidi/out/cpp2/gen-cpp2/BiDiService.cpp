@@ -322,6 +322,152 @@ determineInvocationType:
 //
 
 //
+// Method 'canThrow'
+//
+
+::apache::thrift::StreamTransformation<::std::int64_t, ::std::int64_t> apache::thrift::ServiceHandler<::cpp2::BiDiService>::canThrow() {
+  apache::thrift::detail::si::throw_app_exn_unimplemented("canThrow");
+}
+
+::apache::thrift::StreamTransformation<::std::int64_t, ::std::int64_t> apache::thrift::ServiceHandler<::cpp2::BiDiService>::sync_canThrow() {
+  return canThrow();
+}
+
+folly::SemiFuture<::apache::thrift::StreamTransformation<::std::int64_t, ::std::int64_t>>
+apache::thrift::ServiceHandler<::cpp2::BiDiService>::semifuture_canThrow() {
+  auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
+  __fbthrift_invocation_canThrow.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Sync,
+      std::memory_order_relaxed);
+  return sync_canThrow();
+}
+
+folly::Future<::apache::thrift::StreamTransformation<::std::int64_t, ::std::int64_t>>
+apache::thrift::ServiceHandler<::cpp2::BiDiService>::future_canThrow() {
+  auto expected{apache::thrift::detail::si::InvocationType::Future};
+  __fbthrift_invocation_canThrow.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::SemiFuture,
+      std::memory_order_relaxed);
+  return apache::thrift::detail::si::future(
+      semifuture_canThrow(),
+      getInternalKeepAlive());
+}
+
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<::apache::thrift::StreamTransformation<::std::int64_t, ::std::int64_t>>
+apache::thrift::ServiceHandler<::cpp2::BiDiService>::co_canThrow() {
+  auto expected{apache::thrift::detail::si::InvocationType::Coro};
+  __fbthrift_invocation_canThrow.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Future,
+      std::memory_order_relaxed);
+  folly::throw_exception(apache::thrift::detail::si::UnimplementedCoroMethod::
+                             withCapturedArgs<>());
+}
+
+folly::coro::Task<::apache::thrift::StreamTransformation<::std::int64_t, ::std::int64_t>> apache::thrift::ServiceHandler<::cpp2::BiDiService>::co_canThrow(
+    apache::thrift::RequestParams /* params */) {
+  auto expected{apache::thrift::detail::si::InvocationType::CoroParam};
+  __fbthrift_invocation_canThrow.compare_exchange_strong(
+      expected,
+      apache::thrift::detail::si::InvocationType::Coro,
+      std::memory_order_relaxed);
+  return co_canThrow();
+}
+#endif // FOLLY_HAS_COROUTINES
+
+void apache::thrift::ServiceHandler<::cpp2::BiDiService>::async_tm_canThrow(
+    apache::thrift::HandlerCallbackPtr<::apache::thrift::StreamTransformation<::std::int64_t, ::std::int64_t>> callback) {
+  // It's possible the coroutine versions will delegate to a future-based
+  // version. If that happens, we need the RequestParams arguments to be
+  // available to the future through the thread-local backchannel, so we create
+  // a RAII object that sets up RequestParams and clears them on destruction.
+  apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+#if FOLLY_HAS_COROUTINES
+determineInvocationType:
+#endif // FOLLY_HAS_COROUTINES
+  auto invocationType =
+      __fbthrift_invocation_canThrow.load(std::memory_order_relaxed);
+  try {
+    switch (invocationType) {
+      case apache::thrift::detail::si::InvocationType::AsyncTm: {
+#if FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_canThrow.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::CoroParam,
+            std::memory_order_relaxed);
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
+        auto task = co_canThrow(params);
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
+        return;
+#else // FOLLY_HAS_COROUTINES
+        __fbthrift_invocation_canThrow.compare_exchange_strong(
+            invocationType,
+            apache::thrift::detail::si::InvocationType::Future,
+            std::memory_order_relaxed);
+        [[fallthrough]];
+#endif // FOLLY_HAS_COROUTINES
+      }
+      case apache::thrift::detail::si::InvocationType::Future: {
+        auto fut = future_canThrow();
+        apache::thrift::detail::si::async_tm_future(
+            std::move(callback), std::move(fut));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::SemiFuture: {
+        auto fut = semifuture_canThrow();
+        apache::thrift::detail::si::async_tm_semifuture(
+            std::move(callback), std::move(fut));
+        return;
+      }
+#if FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::CoroParam: {
+        apache::thrift::RequestParams params{
+            callback->getRequestContext(),
+            callback->getThreadManager_deprecated(),
+            callback->getEventBase(),
+            callback->getHandlerExecutor()};
+        auto task = co_canThrow(params);
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Coro: {
+        auto task = co_canThrow();
+        apache::thrift::detail::si::async_tm_coro(
+            std::move(callback), std::move(task));
+        return;
+      }
+#endif // FOLLY_HAS_COROUTINES
+      case apache::thrift::detail::si::InvocationType::Sync: {
+        callback->result(sync_canThrow());
+        return;
+      }
+      default: {
+        folly::assume_unreachable();
+      }
+    }
+#if FOLLY_HAS_COROUTINES
+  } catch (apache::thrift::detail::si::UnimplementedCoroMethod& ex) {
+    std::tie() = std::move(ex).restoreArgs<>();
+    goto determineInvocationType;
+#endif // FOLLY_HAS_COROUTINES
+  } catch (...) {
+    callback->exception(std::current_exception());
+  }
+}
+//
+// End of Method 'canThrow'
+//
+
+//
 // End of Service Methods
 //
 
@@ -360,6 +506,11 @@ const BiDiServiceAsyncProcessor::ProcessMap BiDiServiceAsyncProcessor::kOwnProce
      &BiDiServiceAsyncProcessor::setUpAndProcess_response<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
      &BiDiServiceAsyncProcessor::executeRequest_response<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
      &BiDiServiceAsyncProcessor::executeRequest_response<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"canThrow",
+    {&BiDiServiceAsyncProcessor::setUpAndProcess_canThrow<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &BiDiServiceAsyncProcessor::setUpAndProcess_canThrow<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
+     &BiDiServiceAsyncProcessor::executeRequest_canThrow<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &BiDiServiceAsyncProcessor::executeRequest_canThrow<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
 };
 
 apache::thrift::ServiceRequestInfoMap const& BiDiServiceServiceInfoHolder::requestInfoMap() const {
@@ -380,6 +531,13 @@ apache::thrift::ServiceRequestInfoMap BiDiServiceServiceInfoHolder::staticReques
     { false,
      apache::thrift::RpcKind::BIDIRECTIONAL_STREAM,
      "BiDiService.response",
+     std::nullopt,
+     apache::thrift::concurrency::NORMAL,
+     std::nullopt}},
+  {"canThrow",
+    { false,
+     apache::thrift::RpcKind::BIDIRECTIONAL_STREAM,
+     "BiDiService.canThrow",
      std::nullopt,
      apache::thrift::concurrency::NORMAL,
      std::nullopt}},

@@ -21,6 +21,36 @@ namespace detail {
 namespace md {
 
 template <>
+class StructMetadata<::cpp2::BiDiSinkException> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::cpp2::BiDiStreamException> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::cpp2::BiDiMethodException> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class ExceptionMetadata<::cpp2::BiDiSinkException> {
+ public:
+  static void gen(ThriftMetadata& metadata);
+};
+template <>
+class ExceptionMetadata<::cpp2::BiDiStreamException> {
+ public:
+  static void gen(ThriftMetadata& metadata);
+};
+template <>
+class ExceptionMetadata<::cpp2::BiDiMethodException> {
+ public:
+  static void gen(ThriftMetadata& metadata);
+};
+template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>> {
  public:
   static void gen(ThriftServiceMetadataResponse& response);
@@ -32,6 +62,7 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>> {
 
   static void gen_simple(ThriftMetadata& metadata, ThriftService& context);
   static void gen_response(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_canThrow(ThriftMetadata& metadata, ThriftService& context);
 };
 } // namespace md
 } // namespace detail

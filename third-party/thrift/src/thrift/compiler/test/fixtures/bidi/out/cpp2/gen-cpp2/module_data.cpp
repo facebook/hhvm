@@ -15,12 +15,57 @@ class BiDiService;
 } // namespace cpp2
 namespace apache::thrift {
 
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::cpp2::BiDiSinkException>::name = "BiDiSinkException";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::cpp2::BiDiSinkException>::fields_names = { {
+  "message"sv,
+}};
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::cpp2::BiDiSinkException>::fields_ids = { {
+  1,
+}};
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::BiDiSinkException>::fields_types = { {
+  TType::T_STRING,
+}};
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::cpp2::BiDiSinkException>::isset_indexes = { {
+  0,
+}};
+
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::cpp2::BiDiStreamException>::name = "BiDiStreamException";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::cpp2::BiDiStreamException>::fields_names = { {
+  "message"sv,
+}};
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::cpp2::BiDiStreamException>::fields_ids = { {
+  1,
+}};
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::BiDiStreamException>::fields_types = { {
+  TType::T_STRING,
+}};
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::cpp2::BiDiStreamException>::isset_indexes = { {
+  0,
+}};
+
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::cpp2::BiDiMethodException>::name = "BiDiMethodException";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 1> TStructDataStorage<::cpp2::BiDiMethodException>::fields_names = { {
+  "message"sv,
+}};
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 1> TStructDataStorage<::cpp2::BiDiMethodException>::fields_ids = { {
+  1,
+}};
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::BiDiMethodException>::fields_types = { {
+  TType::T_STRING,
+}};
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<::cpp2::BiDiMethodException>::isset_indexes = { {
+  0,
+}};
+
 namespace detail {
+
+
+
 
 template <> struct TSchemaAssociation<::cpp2::BiDiService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 469164823722770924;
-  static constexpr ::std::string_view definitionKey = {"\xc0\x56\x46\x64\xbe\xe2\xa6\xd1\x27\xc6\x36\x25\xc4\x5a\xed\x87", 16};
+  static constexpr int64_t programId = 7103640828824929647;
+  static constexpr ::std::string_view definitionKey = {"\xf0\xc6\x9e\xea\xa9\x6d\x69\xad\x36\x5a\xac\xc8\xf3\x43\x0e\xc3", 16};
 };
 } // namespace detail
 } // namespace apache::thrift

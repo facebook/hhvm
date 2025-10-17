@@ -71,10 +71,20 @@ class ServiceHandler<::cpp2::BiDiService> : public apache::thrift::ServerInterfa
   virtual folly::coro::Task<::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>> co_response(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_response(apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>> callback);
+  virtual ::apache::thrift::StreamTransformation<::std::int64_t, ::std::int64_t> sync_canThrow();
+  [[deprecated("Use sync_canThrow instead")]] virtual ::apache::thrift::StreamTransformation<::std::int64_t, ::std::int64_t> canThrow();
+  virtual folly::Future<::apache::thrift::StreamTransformation<::std::int64_t, ::std::int64_t>> future_canThrow();
+  virtual folly::SemiFuture<::apache::thrift::StreamTransformation<::std::int64_t, ::std::int64_t>> semifuture_canThrow();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::apache::thrift::StreamTransformation<::std::int64_t, ::std::int64_t>> co_canThrow();
+  virtual folly::coro::Task<::apache::thrift::StreamTransformation<::std::int64_t, ::std::int64_t>> co_canThrow(apache::thrift::RequestParams params);
+#endif
+  virtual void async_tm_canThrow(apache::thrift::HandlerCallbackPtr<::apache::thrift::StreamTransformation<::std::int64_t, ::std::int64_t>> callback);
  private:
   static ::cpp2::BiDiServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_simple{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_response{apache::thrift::detail::si::InvocationType::AsyncTm};
+  std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_canThrow{apache::thrift::detail::si::InvocationType::AsyncTm};
  public:
 
   virtual void fbthrift_execute_decorators_before_simple(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
@@ -87,13 +97,18 @@ class ServiceHandler<::cpp2::BiDiService> : public apache::thrift::ServerInterfa
   static void fbthrift_invoke_decorator_after_response(void* iface, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::detail::DecoratorReturnType<::apache::thrift::ResponseAndStreamTransformation<::std::string, ::std::int32_t, ::std::int16_t>>::type result) {
     static_cast<ServiceHandler<::cpp2::BiDiService>*>(iface)->fbthrift_execute_decorators_after_response(*ctx, result);
   }
+  virtual void fbthrift_execute_decorators_before_canThrow(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  virtual void fbthrift_execute_decorators_after_canThrow(apache::thrift::Cpp2RequestContext& /*requestCtx*/) {}
+  static void fbthrift_invoke_decorator_after_canThrow(void* iface, apache::thrift::Cpp2RequestContext* ctx) {
+    static_cast<ServiceHandler<::cpp2::BiDiService>*>(iface)->fbthrift_execute_decorators_after_canThrow(*ctx);
+  }
 };
 
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::BiDiService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 469164823722770924;
-  static constexpr ::std::string_view definitionKey = {"\xc0\x56\x46\x64\xbe\xe2\xa6\xd1\x27\xc6\x36\x25\xc4\x5a\xed\x87", 16};
+  static constexpr int64_t programId = 7103640828824929647;
+  static constexpr ::std::string_view definitionKey = {"\xf0\xc6\x9e\xea\xa9\x6d\x69\xad\x36\x5a\xac\xc8\xf3\x43\x0e\xc3", 16};
 };
 }
 } // namespace apache::thrift
@@ -197,6 +212,45 @@ class BiDiServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcess
       apache::thrift::Cpp2RequestContext* reqCtx);
   //
   // End of Method 'response'
+  //
+
+  //
+  // End of Service Methods
+  //
+  //
+  // Service Methods
+  //
+
+  //
+  // Method 'canThrow'
+  //
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void setUpAndProcess_canThrow(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      apache::thrift::SerializedCompressedRequest&& serializedRequest,
+      apache::thrift::Cpp2RequestContext* ctx,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager* tm);
+
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void executeRequest_canThrow(apache::thrift::ServerRequest&& serverRequest);
+
+  template <class ProtocolIn_, class ProtocolOut_>
+  static apache::thrift::ResponseAndServerBiDiStreamFactory
+  return_canThrow(
+    apache::thrift::ContextStack* ctx,
+    folly::Executor::KeepAlive<> executor,
+    ::apache::thrift::StreamTransformation<::std::int64_t, ::std::int64_t>&& _return);
+
+  template <class ProtocolIn_, class ProtocolOut_>
+  static void throw_wrapped_canThrow(
+      apache::thrift::ResponseChannelRequest::UniquePtr req,
+      int32_t protoSeqId,
+      apache::thrift::ContextStack* ctx,
+      folly::exception_wrapper ew,
+      apache::thrift::Cpp2RequestContext* reqCtx);
+  //
+  // End of Method 'canThrow'
   //
 
   //

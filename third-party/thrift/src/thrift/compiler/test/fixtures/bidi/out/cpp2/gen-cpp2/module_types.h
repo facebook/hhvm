@@ -9,9 +9,36 @@
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
+namespace apache::thrift {
+namespace ident {
+struct message;
+struct message;
+struct message;
+} // namespace ident
+namespace detail {
+#ifndef APACHE_THRIFT_ACCESSOR_message
+#define APACHE_THRIFT_ACCESSOR_message
+APACHE_THRIFT_DEFINE_ACCESSOR(message);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_message
+#define APACHE_THRIFT_ACCESSOR_message
+APACHE_THRIFT_DEFINE_ACCESSOR(message);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_message
+#define APACHE_THRIFT_ACCESSOR_message
+APACHE_THRIFT_DEFINE_ACCESSOR(message);
+#endif
+} // namespace detail
+} // namespace apache::thrift
+
 // BEGIN declare_enums
 // END declare_enums
 // BEGIN forward_declare
+namespace cpp2 {
+class BiDiSinkException;
+class BiDiStreamException;
+class BiDiMethodException;
+} // namespace cpp2
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
@@ -28,7 +55,487 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/bidi/src/module.thrift", "name": "BiDiSinkException", "kind": "exception" } */
+class FOLLY_EXPORT BiDiSinkException : public virtual apache::thrift::TException {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
+  static constexpr std::size_t __fbthrift_num_fields = 1;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
+    ::apache::thrift::ident::message
+  >;
+
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::string_t
+  >;
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+  static constexpr ::apache::thrift::ExceptionKind __fbthrift_cpp2_gen_exception_kind =
+         ::apache::thrift::ExceptionKind::UNSPECIFIED;
+  static constexpr ::apache::thrift::ExceptionSafety __fbthrift_cpp2_gen_exception_safety =
+         ::apache::thrift::ExceptionSafety::UNSPECIFIED;
+  static constexpr ::apache::thrift::ExceptionBlame __fbthrift_cpp2_gen_exception_blame =
+         ::apache::thrift::ExceptionBlame::UNSPECIFIED;
+
+ public:
+  using __fbthrift_cpp2_type = BiDiSinkException;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  BiDiSinkException();
+
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  BiDiSinkException(apache::thrift::FragileConstructor, ::std::string message__arg);
+
+  BiDiSinkException(BiDiSinkException&&) noexcept;
+
+  BiDiSinkException(const BiDiSinkException& src);
+
+
+  BiDiSinkException& operator=(BiDiSinkException&&) noexcept;
+  BiDiSinkException& operator=(const BiDiSinkException& src);
+
+  ~BiDiSinkException() override;
+
+ private:
+  ::std::string __fbthrift_field_message;
+ private:
+  apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+
+ public:
+
+  bool operator==(const BiDiSinkException&) const;
+  bool operator<(const BiDiSinkException&) const;
+
+  /** Glean { "field": "message" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> message_ref() const& {
+    return {this->__fbthrift_field_message, __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "message" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> message_ref() & {
+    return {this->__fbthrift_field_message, __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "message" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> message_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_message), __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "message" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> message() const& {
+    return {this->__fbthrift_field_message, __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "message" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> message() & {
+    return {this->__fbthrift_field_message, __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "message" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> message() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_message), __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "message" } */
+  [[deprecated("Use `FOO.message().value()` instead of `FOO.get_message()`")]]
+  const ::std::string& get_message() const& {
+    return __fbthrift_field_message;
+  }
+
+  /** Glean { "field": "message" } */
+  [[deprecated("Use `FOO.message().value()` instead of `FOO.get_message()`")]]
+  ::std::string get_message() && {
+    return static_cast<::std::string&&>(__fbthrift_field_message);
+  }
+
+  /** Glean { "field": "message" } */
+  template <typename T_BiDiSinkException_message_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.message() = BAR` instead of `FOO.set_message(BAR)`")]]
+  ::std::string& set_message(T_BiDiSinkException_message_struct_setter&& message_) {
+    message_ref() = std::forward<T_BiDiSinkException_message_struct_setter>(message_);
+    return __fbthrift_field_message;
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+  const char* what() const noexcept override {
+    return "::cpp2::BiDiSinkException";
+  }
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<BiDiSinkException>;
+  friend void swap(BiDiSinkException& a, BiDiSinkException& b);
+};
+
+template <class Protocol_>
+unsigned long BiDiSinkException::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
+/** Glean {"file": "thrift/compiler/test/fixtures/bidi/src/module.thrift", "name": "BiDiStreamException", "kind": "exception" } */
+class FOLLY_EXPORT BiDiStreamException : public virtual apache::thrift::TException {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
+  static constexpr std::size_t __fbthrift_num_fields = 1;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
+    ::apache::thrift::ident::message
+  >;
+
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::string_t
+  >;
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+  static constexpr ::apache::thrift::ExceptionKind __fbthrift_cpp2_gen_exception_kind =
+         ::apache::thrift::ExceptionKind::UNSPECIFIED;
+  static constexpr ::apache::thrift::ExceptionSafety __fbthrift_cpp2_gen_exception_safety =
+         ::apache::thrift::ExceptionSafety::UNSPECIFIED;
+  static constexpr ::apache::thrift::ExceptionBlame __fbthrift_cpp2_gen_exception_blame =
+         ::apache::thrift::ExceptionBlame::UNSPECIFIED;
+
+ public:
+  using __fbthrift_cpp2_type = BiDiStreamException;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  BiDiStreamException();
+
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  BiDiStreamException(apache::thrift::FragileConstructor, ::std::string message__arg);
+
+  BiDiStreamException(BiDiStreamException&&) noexcept;
+
+  BiDiStreamException(const BiDiStreamException& src);
+
+
+  BiDiStreamException& operator=(BiDiStreamException&&) noexcept;
+  BiDiStreamException& operator=(const BiDiStreamException& src);
+
+  ~BiDiStreamException() override;
+
+ private:
+  ::std::string __fbthrift_field_message;
+ private:
+  apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+
+ public:
+
+  bool operator==(const BiDiStreamException&) const;
+  bool operator<(const BiDiStreamException&) const;
+
+  /** Glean { "field": "message" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> message_ref() const& {
+    return {this->__fbthrift_field_message, __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "message" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> message_ref() & {
+    return {this->__fbthrift_field_message, __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "message" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> message_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_message), __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "message" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> message() const& {
+    return {this->__fbthrift_field_message, __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "message" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> message() & {
+    return {this->__fbthrift_field_message, __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "message" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> message() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_message), __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "message" } */
+  [[deprecated("Use `FOO.message().value()` instead of `FOO.get_message()`")]]
+  const ::std::string& get_message() const& {
+    return __fbthrift_field_message;
+  }
+
+  /** Glean { "field": "message" } */
+  [[deprecated("Use `FOO.message().value()` instead of `FOO.get_message()`")]]
+  ::std::string get_message() && {
+    return static_cast<::std::string&&>(__fbthrift_field_message);
+  }
+
+  /** Glean { "field": "message" } */
+  template <typename T_BiDiStreamException_message_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.message() = BAR` instead of `FOO.set_message(BAR)`")]]
+  ::std::string& set_message(T_BiDiStreamException_message_struct_setter&& message_) {
+    message_ref() = std::forward<T_BiDiStreamException_message_struct_setter>(message_);
+    return __fbthrift_field_message;
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+  const char* what() const noexcept override {
+    return "::cpp2::BiDiStreamException";
+  }
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<BiDiStreamException>;
+  friend void swap(BiDiStreamException& a, BiDiStreamException& b);
+};
+
+template <class Protocol_>
+unsigned long BiDiStreamException::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
+/** Glean {"file": "thrift/compiler/test/fixtures/bidi/src/module.thrift", "name": "BiDiMethodException", "kind": "exception" } */
+class FOLLY_EXPORT BiDiMethodException : public virtual apache::thrift::TException {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
+  static constexpr std::size_t __fbthrift_num_fields = 1;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
+    ::apache::thrift::ident::message
+  >;
+
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::string_t
+  >;
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+  static constexpr ::apache::thrift::ExceptionKind __fbthrift_cpp2_gen_exception_kind =
+         ::apache::thrift::ExceptionKind::UNSPECIFIED;
+  static constexpr ::apache::thrift::ExceptionSafety __fbthrift_cpp2_gen_exception_safety =
+         ::apache::thrift::ExceptionSafety::UNSPECIFIED;
+  static constexpr ::apache::thrift::ExceptionBlame __fbthrift_cpp2_gen_exception_blame =
+         ::apache::thrift::ExceptionBlame::UNSPECIFIED;
+
+ public:
+  using __fbthrift_cpp2_type = BiDiMethodException;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  BiDiMethodException();
+
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  BiDiMethodException(apache::thrift::FragileConstructor, ::std::string message__arg);
+
+  BiDiMethodException(BiDiMethodException&&) noexcept;
+
+  BiDiMethodException(const BiDiMethodException& src);
+
+
+  BiDiMethodException& operator=(BiDiMethodException&&) noexcept;
+  BiDiMethodException& operator=(const BiDiMethodException& src);
+
+  ~BiDiMethodException() override;
+
+ private:
+  ::std::string __fbthrift_field_message;
+ private:
+  apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+
+ public:
+
+  bool operator==(const BiDiMethodException&) const;
+  bool operator<(const BiDiMethodException&) const;
+
+  /** Glean { "field": "message" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> message_ref() const& {
+    return {this->__fbthrift_field_message, __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "message" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> message_ref() & {
+    return {this->__fbthrift_field_message, __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "message" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> message_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_message), __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "message" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> message() const& {
+    return {this->__fbthrift_field_message, __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "message" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> message() & {
+    return {this->__fbthrift_field_message, __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "message" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> message() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_message), __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "message" } */
+  [[deprecated("Use `FOO.message().value()` instead of `FOO.get_message()`")]]
+  const ::std::string& get_message() const& {
+    return __fbthrift_field_message;
+  }
+
+  /** Glean { "field": "message" } */
+  [[deprecated("Use `FOO.message().value()` instead of `FOO.get_message()`")]]
+  ::std::string get_message() && {
+    return static_cast<::std::string&&>(__fbthrift_field_message);
+  }
+
+  /** Glean { "field": "message" } */
+  template <typename T_BiDiMethodException_message_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.message() = BAR` instead of `FOO.set_message(BAR)`")]]
+  ::std::string& set_message(T_BiDiMethodException_message_struct_setter&& message_) {
+    message_ref() = std::forward<T_BiDiMethodException_message_struct_setter>(message_);
+    return __fbthrift_field_message;
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+  const char* what() const noexcept override {
+    return "::cpp2::BiDiMethodException";
+  }
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<BiDiMethodException>;
+  friend void swap(BiDiMethodException& a, BiDiMethodException& b);
+};
+
+template <class Protocol_>
+unsigned long BiDiMethodException::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
 } // namespace cpp2
 
 namespace apache::thrift::detail {
+template <> struct TSchemaAssociation<::cpp2::BiDiSinkException, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = 7103640828824929647;
+  static constexpr ::std::string_view definitionKey = {"\x6e\x0f\xe9\xf9\x70\xb6\x5e\x83\x65\x1a\x5d\x55\x7a\x9d\x6f\xb8", 16};
+};
+template <> struct TSchemaAssociation<::cpp2::BiDiStreamException, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = 7103640828824929647;
+  static constexpr ::std::string_view definitionKey = {"\xf6\x30\xa7\xcf\xbb\xa6\xec\x06\x1b\x90\x1e\x32\xeb\xac\x96\x69", 16};
+};
+template <> struct TSchemaAssociation<::cpp2::BiDiMethodException, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = 7103640828824929647;
+  static constexpr ::std::string_view definitionKey = {"\xd7\x4d\x99\x58\x30\x24\xa5\xe8\x19\xbd\xed\x96\x4b\x4a\xec\xb2", 16};
+};
 } // namespace apache::thrift::detail

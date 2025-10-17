@@ -8,4 +8,19 @@
 
 namespace cpp2 {
 
+template void BiDiSinkException::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t BiDiSinkException::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t BiDiSinkException::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t BiDiSinkException::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+
+template void BiDiStreamException::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t BiDiStreamException::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t BiDiStreamException::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t BiDiStreamException::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+
+template void BiDiMethodException::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t BiDiMethodException::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t BiDiMethodException::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t BiDiMethodException::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+
 } // namespace cpp2

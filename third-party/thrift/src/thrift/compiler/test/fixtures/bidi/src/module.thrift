@@ -14,7 +14,22 @@
  * limitations under the License.
  */
 
+exception BiDiSinkException {
+  1: string message;
+}
+
+exception BiDiStreamException {
+  1: string message;
+}
+
+exception BiDiMethodException {
+  1: string message;
+}
+
 service BiDiService {
   sink<i32>, stream<i16> simple();
   string, sink<i32>, stream<i16> response();
+  sink<i64 throws (1: BiDiSinkException ex)>, stream<
+    i64 throws (1: BiDiStreamException ex)
+  > canThrow() throws (1: BiDiMethodException ex);
 }

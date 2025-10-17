@@ -22,6 +22,12 @@ typedef apache::thrift::ThriftPResultBiDi<
     apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int32_t*>>,
     apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int16_t*>>
     > BiDiService_response_presult;
+typedef apache::thrift::ThriftPresult<false> BiDiService_canThrow_pargs;
+typedef apache::thrift::ThriftPResultBiDi<
+    apache::thrift::ThriftPresult<true, apache::thrift::FieldData<1, ::apache::thrift::type_class::structure, ::cpp2::BiDiMethodException>>,
+    apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int64_t*>, apache::thrift::FieldData<1, ::apache::thrift::type_class::structure, ::cpp2::BiDiSinkException>>,
+    apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int64_t*>, apache::thrift::FieldData<1, ::apache::thrift::type_class::structure, ::cpp2::BiDiStreamException>>
+    > BiDiService_canThrow_presult;
 } // namespace cpp2
 template <typename RpcOptions>
 void apache::thrift::Client<::cpp2::BiDiService>::fbthrift_send_simple(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::BiDiClientCallback* callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata) {
@@ -40,6 +46,17 @@ void apache::thrift::Client<::cpp2::BiDiService>::fbthrift_send_response(apache:
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "response",
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "BiDiService");
+  apache::thrift::clientSendT<apache::thrift::RpcKind::BIDIRECTIONAL_STREAM>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), std::move(interceptorFrameworkMetadata));
+}
+
+template <typename RpcOptions>
+void apache::thrift::Client<::cpp2::BiDiService>::fbthrift_send_canThrow(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::BiDiClientCallback* callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata) {
+
+  static ::apache::thrift::MethodMetadata::Data* methodMetadata =
+        new ::apache::thrift::MethodMetadata::Data(
+                "canThrow",
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "BiDiService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::BIDIRECTIONAL_STREAM>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), std::move(interceptorFrameworkMetadata));
@@ -304,6 +321,138 @@ folly::exception_wrapper apache::thrift::Client<::cpp2::BiDiService>::recv_wrapp
 apache::thrift::ResponseAndBidirectionalStream<::std::string, ::std::int32_t, ::std::int16_t> apache::thrift::Client<::cpp2::BiDiService>::recv_response(::apache::thrift::ClientReceiveState& state) {
   apache::thrift::ResponseAndBidirectionalStream<::std::string, ::std::int32_t, ::std::int16_t> _return;
   auto ew = recv_wrapped_response(_return, state);
+  if (ew) {
+    ew.throw_exception();
+  }
+  return _return;
+}
+
+
+apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::BiDiService>::fbthrift_serialize_canThrow(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack) {
+  return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
+    using ProtocolWriter = std::decay_t<decltype(prot)>;
+    ::cpp2::BiDiService_canThrow_pargs args;
+    const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
+    const auto writer = [&](ProtocolWriter* p) { args.write(p); };
+    return apache::thrift::preprocessSendT<ProtocolWriter>(
+        &prot,
+        rpcOptions,
+        contextStack,
+        header,
+        "canThrow",
+        writer,
+        sizer,
+        channel_->getChecksumSamplingRate());
+  });
+}
+
+void apache::thrift::Client<::cpp2::BiDiService>::fbthrift_serialize_and_send_canThrow(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::BiDiClientCallback* callback, bool stealRpcOptions) {
+  apache::thrift::SerializedRequest request = fbthrift_serialize_canThrow(rpcOptions, *header, contextStack);
+  std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
+  if (contextStack != nullptr) {
+    interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
+  }
+  if (stealRpcOptions) {
+    fbthrift_send_canThrow(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback), std::move(interceptorFrameworkMetadata));
+  } else {
+    fbthrift_send_canThrow(std::move(request), rpcOptions, std::move(header), std::move(callback), std::move(interceptorFrameworkMetadata));
+  }
+}
+
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::cpp2::BiDiService>::canThrowCtx(apache::thrift::RpcOptions* rpcOptions) {
+  auto header = std::make_shared<apache::thrift::transport::THeader>(
+      apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
+  header->setProtocolId(channel_->getProtocolId());
+  if (rpcOptions) {
+    header->setHeaders(rpcOptions->releaseWriteHeaders());
+  }
+
+  auto ctx = apache::thrift::ContextStack::createWithClientContext(
+      handlers_,
+      interceptors_,
+      getServiceName(),
+      "BiDiService.canThrow",
+      *header);
+
+  return {std::move(ctx), std::move(header)};
+}
+
+
+#if FOLLY_HAS_COROUTINES
+folly::coro::Task<apache::thrift::BidirectionalStream<::std::int64_t, ::std::int64_t>> apache::thrift::Client<::cpp2::BiDiService>::co_canThrow() {
+  ::apache::thrift::RpcOptions rpcOptions;
+  co_return co_await co_canThrow(rpcOptions);
+}
+folly::coro::Task<apache::thrift::BidirectionalStream<::std::int64_t, ::std::int64_t>> apache::thrift::Client<::cpp2::BiDiService>::co_canThrow(apache::thrift::RpcOptions& rpcOptions) {
+  const folly::CancellationToken& cancelToken =
+        co_await folly::coro::co_current_cancellation_token;
+  const bool cancellable = cancelToken.canBeCancelled();
+  apache::thrift::ClientReceiveState returnState;
+  apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
+  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto [ctx, header] = canThrowCtx(&rpcOptions);
+  using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
+  auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
+  auto wrappedCallback = apache::thrift::createBiDiClientCallback(
+    apache::thrift::RequestClientCallback::Ptr(apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback)));
+
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
+  }
+
+  fbthrift_serialize_and_send_canThrow(rpcOptions, std::move(header), ctx.get(), wrappedCallback);
+
+  if (cancellable) {
+    folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
+    co_await callback.co_waitUntilDone();
+  } else {
+    co_await callback.co_waitUntilDone();
+  }
+
+  if (ctx != nullptr) {
+    ctx->processClientInterceptorsOnResponse(returnState.header(), returnState.exception()).throwUnlessValue();
+  }
+  if (returnState.isException()) {
+    co_yield folly::coro::co_error(std::move(returnState.exception()));
+  }
+  returnState.resetProtocolId(protocolId);
+  returnState.resetCtx(std::move(ctx));
+  co_return recv_canThrow(returnState);
+}
+#endif // FOLLY_HAS_COROUTINES
+folly::exception_wrapper apache::thrift::Client<::cpp2::BiDiService>::recv_wrapped_canThrow(apache::thrift::BidirectionalStream<::std::int64_t, ::std::int64_t>& _return, ::apache::thrift::ClientReceiveState& state) {
+  if (state.isException()) {
+    return std::move(state.exception());
+  }
+  if (!state.hasResponseBuffer()) {
+    return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
+  }
+
+  using result = ::cpp2::BiDiService_canThrow_presult;
+  switch (state.protocolId()) {
+    case apache::thrift::protocol::T_BINARY_PROTOCOL:
+    {
+      apache::thrift::BinaryProtocolReader reader;
+      return apache::thrift::detail::ac::recv_wrapped<result>(
+          &reader, state, _return);
+    }
+    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
+    {
+      apache::thrift::CompactProtocolReader reader;
+      return apache::thrift::detail::ac::recv_wrapped<result>(
+          &reader, state, _return);
+    }
+    default:
+    {
+    }
+  }
+  return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
+}
+
+apache::thrift::BidirectionalStream<::std::int64_t, ::std::int64_t> apache::thrift::Client<::cpp2::BiDiService>::recv_canThrow(::apache::thrift::ClientReceiveState& state) {
+  apache::thrift::BidirectionalStream<::std::int64_t, ::std::int64_t> _return;
+  auto ew = recv_wrapped_canThrow(_return, state);
   if (ew) {
     ew.throw_exception();
   }

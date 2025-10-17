@@ -13,6 +13,207 @@
 [[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
 
+
+namespace cpp2 {
+
+std::string_view BiDiSinkException::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<BiDiSinkException>::fields_names[folly::to_underlying(ord) - 1];
+}
+std::string_view BiDiSinkException::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<BiDiSinkException>::name;
+}
+
+BiDiSinkException::BiDiSinkException(const BiDiSinkException&) = default;
+BiDiSinkException& BiDiSinkException::operator=(const BiDiSinkException&) = default;
+BiDiSinkException::BiDiSinkException() {
+}
+
+
+BiDiSinkException::~BiDiSinkException() {}
+
+BiDiSinkException::BiDiSinkException([[maybe_unused]] BiDiSinkException&& other) noexcept :
+    __fbthrift_field_message(std::move(other.__fbthrift_field_message)),
+    __isset(other.__isset) {
+}
+
+BiDiSinkException& BiDiSinkException::operator=([[maybe_unused]] BiDiSinkException&& other) noexcept {
+    this->__fbthrift_field_message = std::move(other.__fbthrift_field_message);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+BiDiSinkException::BiDiSinkException(apache::thrift::FragileConstructor, ::std::string message__arg) :
+    __fbthrift_field_message(std::move(message__arg)) { 
+  __isset.set(folly::index_constant<0>(), true);
+}
+
+void BiDiSinkException::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_message = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  __isset = {};
+}
+
+void BiDiSinkException::__fbthrift_clear_terse_fields() {
+}
+
+bool BiDiSinkException::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool BiDiSinkException::operator==([[maybe_unused]] const BiDiSinkException& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+bool BiDiSinkException::operator<([[maybe_unused]] const BiDiSinkException& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+
+void swap([[maybe_unused]] BiDiSinkException& a, [[maybe_unused]] BiDiSinkException& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_message, b.__fbthrift_field_message);
+  swap(a.__isset, b.__isset);
+}
+
+
+} // namespace cpp2
+
+
+namespace cpp2 {
+
+std::string_view BiDiStreamException::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<BiDiStreamException>::fields_names[folly::to_underlying(ord) - 1];
+}
+std::string_view BiDiStreamException::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<BiDiStreamException>::name;
+}
+
+BiDiStreamException::BiDiStreamException(const BiDiStreamException&) = default;
+BiDiStreamException& BiDiStreamException::operator=(const BiDiStreamException&) = default;
+BiDiStreamException::BiDiStreamException() {
+}
+
+
+BiDiStreamException::~BiDiStreamException() {}
+
+BiDiStreamException::BiDiStreamException([[maybe_unused]] BiDiStreamException&& other) noexcept :
+    __fbthrift_field_message(std::move(other.__fbthrift_field_message)),
+    __isset(other.__isset) {
+}
+
+BiDiStreamException& BiDiStreamException::operator=([[maybe_unused]] BiDiStreamException&& other) noexcept {
+    this->__fbthrift_field_message = std::move(other.__fbthrift_field_message);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+BiDiStreamException::BiDiStreamException(apache::thrift::FragileConstructor, ::std::string message__arg) :
+    __fbthrift_field_message(std::move(message__arg)) { 
+  __isset.set(folly::index_constant<0>(), true);
+}
+
+void BiDiStreamException::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_message = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  __isset = {};
+}
+
+void BiDiStreamException::__fbthrift_clear_terse_fields() {
+}
+
+bool BiDiStreamException::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool BiDiStreamException::operator==([[maybe_unused]] const BiDiStreamException& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+bool BiDiStreamException::operator<([[maybe_unused]] const BiDiStreamException& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+
+void swap([[maybe_unused]] BiDiStreamException& a, [[maybe_unused]] BiDiStreamException& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_message, b.__fbthrift_field_message);
+  swap(a.__isset, b.__isset);
+}
+
+
+} // namespace cpp2
+
+
+namespace cpp2 {
+
+std::string_view BiDiMethodException::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<BiDiMethodException>::fields_names[folly::to_underlying(ord) - 1];
+}
+std::string_view BiDiMethodException::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<BiDiMethodException>::name;
+}
+
+BiDiMethodException::BiDiMethodException(const BiDiMethodException&) = default;
+BiDiMethodException& BiDiMethodException::operator=(const BiDiMethodException&) = default;
+BiDiMethodException::BiDiMethodException() {
+}
+
+
+BiDiMethodException::~BiDiMethodException() {}
+
+BiDiMethodException::BiDiMethodException([[maybe_unused]] BiDiMethodException&& other) noexcept :
+    __fbthrift_field_message(std::move(other.__fbthrift_field_message)),
+    __isset(other.__isset) {
+}
+
+BiDiMethodException& BiDiMethodException::operator=([[maybe_unused]] BiDiMethodException&& other) noexcept {
+    this->__fbthrift_field_message = std::move(other.__fbthrift_field_message);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+BiDiMethodException::BiDiMethodException(apache::thrift::FragileConstructor, ::std::string message__arg) :
+    __fbthrift_field_message(std::move(message__arg)) { 
+  __isset.set(folly::index_constant<0>(), true);
+}
+
+void BiDiMethodException::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_message = apache::thrift::StringTraits<::std::string>::fromStringLiteral("");
+  __isset = {};
+}
+
+void BiDiMethodException::__fbthrift_clear_terse_fields() {
+}
+
+bool BiDiMethodException::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool BiDiMethodException::operator==([[maybe_unused]] const BiDiMethodException& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+bool BiDiMethodException::operator<([[maybe_unused]] const BiDiMethodException& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+
+void swap([[maybe_unused]] BiDiMethodException& a, [[maybe_unused]] BiDiMethodException& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_message, b.__fbthrift_field_message);
+  swap(a.__isset, b.__isset);
+}
+
+
+} // namespace cpp2
+
 namespace cpp2 { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }

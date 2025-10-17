@@ -8,4 +8,19 @@
 
 namespace cpp2 {
 
+template void BiDiSinkException::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t BiDiSinkException::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t BiDiSinkException::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t BiDiSinkException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+template void BiDiStreamException::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t BiDiStreamException::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t BiDiStreamException::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t BiDiStreamException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+template void BiDiMethodException::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t BiDiMethodException::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t BiDiMethodException::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t BiDiMethodException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
 } // namespace cpp2

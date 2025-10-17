@@ -675,7 +675,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
         m_constantStmts{m_db},
         m_validateSmts{m_db},
         m_moduleStmts{m_db},
-        m_moduleMembershipStmts{std::make_unique<ModuleMembershipStmts>(m_db)},
+        m_moduleMembershipStmts{m_db},
         m_clockStmts{m_db} {}
 
   // We can't move `m_db` unless it has no outstanding
@@ -1356,7 +1356,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
       const std::filesystem::path& path,
       std::string_view module) override {
     assertx(path.is_relative());
-    auto query = m_txn.query(m_moduleMembershipStmts->m_insert);
+    auto query = m_txn.query(m_moduleMembershipStmts.m_insert);
     query.bindString("@path", path.native());
     query.bindString("@module_name", module);
     XLOGF(DBG9, "Running {}", query.sql());
@@ -1366,8 +1366,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
   std::optional<std::string> getPathModuleMembership(
       const std::filesystem::path& path) override {
     std::optional<std::string> result;
-    auto query =
-        m_txn.query(m_moduleMembershipStmts->m_getPathModuleMembership);
+    auto query = m_txn.query(m_moduleMembershipStmts.m_getPathModuleMembership);
     query.bindString("@path", path.native());
     XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
@@ -1380,7 +1379,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
   std::vector<std::filesystem::path> getModuleMembers(
       std::string_view module) override {
     std::vector<fs::path> results;
-    auto query = m_txn.query(m_moduleMembershipStmts->m_getModuleMembers);
+    auto query = m_txn.query(m_moduleMembershipStmts.m_getModuleMembers);
     query.bindString("@module_name", module);
     XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
@@ -1449,7 +1448,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
   ConstantStmts m_constantStmts;
   ValidateStmts m_validateSmts;
   ModuleStmts m_moduleStmts;
-  std::unique_ptr<ModuleMembershipStmts> m_moduleMembershipStmts;
+  ModuleMembershipStmts m_moduleMembershipStmts;
   ClockStmts m_clockStmts;
 };
 

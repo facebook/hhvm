@@ -881,7 +881,7 @@ template<class Target> Target read_opcode_arg(AsmState& as) {
   auto const result = folly::tryTo<Target>(strVal);
   if (result.hasError()) {
     as.error("couldn't convert input argument (" + strVal + ") to "
-             "proper type");
+             "proper type (" + folly::demangle(typeid(Target).name()).toStdString() + ")");
   }
   return result.value();
 }

@@ -4276,11 +4276,11 @@ TEST_F(ClientProtocolTest, TestCertificateExtensions) {
   auto ext = std::make_shared<MockClientExtensions>();
   EXPECT_CALL(*ext, getClientHelloExtensions())
       .WillOnce(InvokeWithoutArgs([]() {
-        Extension ext;
-        ext.extension_type = static_cast<fizz::ExtensionType>(0xbeef);
-        ext.extension_data = folly::IOBuf::create(0);
+        Extension extension;
+        extension.extension_type = static_cast<fizz::ExtensionType>(0xbeef);
+        extension.extension_data = folly::IOBuf::create(0);
         std::vector<Extension> exts;
-        exts.push_back(std::move(ext));
+        exts.push_back(std::move(extension));
         return exts;
       }));
   state_.extensions() = ext;
@@ -4306,12 +4306,12 @@ TEST_F(ClientProtocolTest, TestCertificateUnrequestedExtensions) {
   auto ext = std::make_shared<MockClientExtensions>();
   EXPECT_CALL(*ext, getClientHelloExtensions())
       .WillOnce(InvokeWithoutArgs([]() {
-        Extension ext;
+        Extension extension;
         // Different type here
-        ext.extension_type = static_cast<fizz::ExtensionType>(0xface);
-        ext.extension_data = folly::IOBuf::create(0);
+        extension.extension_type = static_cast<fizz::ExtensionType>(0xface);
+        extension.extension_data = folly::IOBuf::create(0);
         std::vector<Extension> exts;
-        exts.push_back(std::move(ext));
+        exts.push_back(std::move(extension));
         return exts;
       }));
   state_.extensions() = ext;

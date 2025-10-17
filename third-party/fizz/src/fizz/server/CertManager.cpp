@@ -152,5 +152,9 @@ bool CertManager::hasCerts() const {
   return !certs_.empty();
 }
 
+const std::unordered_map<std::string, CertManager::SigSchemeMap>&
+CertManager::getCertificatesByIdentity() const {
+  return certs_;
+}
 } // namespace server
 } // namespace fizz

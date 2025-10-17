@@ -22,6 +22,8 @@ namespace server {
 namespace test {
 
 static const std::vector<SignatureScheme> kRsa{SignatureScheme::rsa_pss_sha256};
+static const std::vector<SignatureScheme> kEcdsa{
+    SignatureScheme::ecdsa_secp256r1_sha256};
 
 class CertManagerTest : public Test {
  protected:
@@ -216,6 +218,22 @@ TEST_F(CertManagerTest, TestDN) {
   manager_.addCert(cert);
   EXPECT_EQ(manager_.getCert("OU=Test Organization, O=Test"), cert);
 }
+
+TEST_F(CertManagerTest, TestGetCertificatesByIdentity) {
+  auto cert1 = getCert("foo.test.com", {}, kRsa);
+  auto cert2 = getCert("foo.test.com", {}, kEcdsa);
+  manager_.addCert(cert1);
+  manager_.addCert(cert2);
+
+  auto certs = manager_.getCertificatesByIdentity();
+  EXPECT_EQ(certs.size(), 1);
+  auto it = certs.find("foo.test.com");
+  EXPECT_TRUE(it != certs.end());
+  EXPECT_EQ(it->second.size(), 2);
+  EXPECT_EQ(it->second.count(SignatureScheme::rsa_pss_sha256), 1);
+  EXPECT_EQ(it->second.count(SignatureScheme::ecdsa_secp256r1_sha256), 1);
+}
+
 } // namespace test
 } // namespace server
 } // namespace fizz

@@ -43,6 +43,9 @@ class CertManager : public CertManagerBase {
 
   bool hasCerts() const;
 
+  const std::unordered_map<std::string, SigSchemeMap>&
+  getCertificatesByIdentity() const;
+
  protected:
   CertMatch findCert(
       const std::string& key,

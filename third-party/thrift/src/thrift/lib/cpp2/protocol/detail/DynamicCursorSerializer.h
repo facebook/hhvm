@@ -97,8 +97,8 @@ class StructuredDynamicCursorReader : detail::BaseCursorReader<ProtocolReader> {
     }
 
     auto numBytes = end - begin;
-    auto ret = folly::IOBuf::create(numBytes);
-    begin.clone(*ret, numBytes);
+    std::unique_ptr<folly::IOBuf> ret;
+    begin.clone(ret, numBytes);
     afterReadField();
     return ret;
   }
@@ -268,8 +268,8 @@ class ContainerDynamicCursorReader : detail::BaseCursorReader<ProtocolReader> {
     auto end = protocol_->getCursor();
 
     auto numBytes = end - begin;
-    auto ret = folly::IOBuf::create(numBytes);
-    begin.clone(*ret, numBytes);
+    std::unique_ptr<folly::IOBuf> ret;
+    begin.clone(ret, numBytes);
     advance();
     return ret;
   }

@@ -27,7 +27,6 @@
 #include <thrift/lib/cpp2/transport/core/ThriftClientCallback.h>
 #include <thrift/lib/cpp2/transport/core/testutil/CoreTestFixture.h>
 #include <thrift/lib/cpp2/transport/http2/client/H2ClientConnection.h>
-#include <thrift/lib/cpp2/transport/http2/common/SingleRpcChannel.h>
 #include <thrift/lib/cpp2/transport/http2/common/testutil/ChannelTestFixture.h>
 #include <thrift/lib/cpp2/transport/http2/common/testutil/FakeProcessors.h>
 

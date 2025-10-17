@@ -16,7 +16,6 @@
 
 #include <deque>
 #include <memory>
-#include <vector>
 
 #include <folly/Benchmark.h>
 #include <folly/init/Init.h>

@@ -16,7 +16,6 @@
 
 #include <gtest/gtest.h>
 #include <folly/io/Cursor.h>
-#include <thrift/lib/cpp/protocol/TProtocolException.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/SimpleJSONProtocol.h>

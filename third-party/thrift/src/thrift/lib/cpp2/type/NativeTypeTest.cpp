@@ -22,7 +22,6 @@
 
 #include <gtest/gtest.h>
 #include <thrift/lib/cpp2/type/Tag.h>
-#include <thrift/lib/cpp2/type/Testing.h>
 #include <thrift/lib/cpp2/type/detail/Wrap.h>
 
 namespace apache::thrift::type {

@@ -43,15 +43,12 @@
 
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
-#include <thrift/lib/cpp2/server/LoggingEventTransportMetadata.h>
 #include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
-#include <thrift/lib/cpp2/transport/rocket/framing/Util.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketBiDiClientCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnectionPlugins.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerFrameContext.h>
-#include <thrift/lib/cpp2/transport/rocket/server/RocketServerHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketSinkClientCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketStreamClientCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/OutgoingFrameHandler.h>

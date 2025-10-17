@@ -269,13 +269,6 @@ final class ThriftContextPropState {
       return true;
     }
 
-    $user_ids = PerfExperiments::getUserIDsForLogging();
-    if (!C\is_empty($user_ids)) {
-      $user_id = C\first($user_ids);
-      if (self::updateFBUserId($user_id, $src)) {
-        return true;
-      }
-    }
     return false;
   }
 

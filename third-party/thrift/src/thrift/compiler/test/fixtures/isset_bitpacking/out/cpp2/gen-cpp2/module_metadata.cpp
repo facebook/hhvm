@@ -28,12 +28,11 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Default>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.Default", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::cpp2::Default>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_Default = res.first->second;
-  module_Default.name() = "module.Default";
+  ::apache::thrift::metadata::ThriftStruct& module_Default = res.metadata;
   module_Default.is_union() = false;
   static const auto* const
   module_Default_fields = new std::array<EncodedThriftField, 4>{ {
@@ -48,16 +47,15 @@ StructMetadata<::cpp2::Default>::gen(ThriftMetadata& metadata) {
     module_Default.fields()->push_back(std::move(field));
   }
   module_Default.structured_annotations()->push_back(*cvStruct("cpp.PackIsset", {  }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::NonAtomic>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.NonAtomic", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::cpp2::NonAtomic>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_NonAtomic = res.first->second;
-  module_NonAtomic.name() = "module.NonAtomic";
+  ::apache::thrift::metadata::ThriftStruct& module_NonAtomic = res.metadata;
   module_NonAtomic.is_union() = false;
   static const auto* const
   module_NonAtomic_fields = new std::array<EncodedThriftField, 4>{ {
@@ -72,16 +70,15 @@ StructMetadata<::cpp2::NonAtomic>::gen(ThriftMetadata& metadata) {
     module_NonAtomic.fields()->push_back(std::move(field));
   }
   module_NonAtomic.structured_annotations()->push_back(*cvStruct("cpp.PackIsset", { {"atomic", cvBool(false) } }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Atomic>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.Atomic", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::cpp2::Atomic>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_Atomic = res.first->second;
-  module_Atomic.name() = "module.Atomic";
+  ::apache::thrift::metadata::ThriftStruct& module_Atomic = res.metadata;
   module_Atomic.is_union() = false;
   static const auto* const
   module_Atomic_fields = new std::array<EncodedThriftField, 4>{ {
@@ -96,16 +93,15 @@ StructMetadata<::cpp2::Atomic>::gen(ThriftMetadata& metadata) {
     module_Atomic.fields()->push_back(std::move(field));
   }
   module_Atomic.structured_annotations()->push_back(*cvStruct("cpp.PackIsset", { {"atomic", cvBool(true) } }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::AtomicFoo>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.AtomicFoo", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::cpp2::AtomicFoo>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_AtomicFoo = res.first->second;
-  module_AtomicFoo.name() = "module.AtomicFoo";
+  ::apache::thrift::metadata::ThriftStruct& module_AtomicFoo = res.metadata;
   module_AtomicFoo.is_union() = false;
   static const auto* const
   module_AtomicFoo_fields = new std::array<EncodedThriftField, 4>{ {
@@ -120,7 +116,7 @@ StructMetadata<::cpp2::AtomicFoo>::gen(ThriftMetadata& metadata) {
     module_AtomicFoo.fields()->push_back(std::move(field));
   }
   module_AtomicFoo.structured_annotations()->push_back(*cvStruct("cpp.PackIsset", { {"atomic", cvBool(true) } }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 
 } // namespace md

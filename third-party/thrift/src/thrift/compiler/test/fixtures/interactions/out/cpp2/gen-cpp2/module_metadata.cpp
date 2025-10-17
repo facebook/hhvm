@@ -53,12 +53,11 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::CustomException>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.CustomException", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::cpp2::CustomException>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_CustomException = res.first->second;
-  module_CustomException.name() = "module.CustomException";
+  ::apache::thrift::metadata::ThriftStruct& module_CustomException = res.metadata;
   module_CustomException.is_union() = false;
   static const auto* const
   module_CustomException_fields = new std::array<EncodedThriftField, 1>{ {
@@ -72,16 +71,15 @@ StructMetadata<::cpp2::CustomException>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_CustomException.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::ShouldBeBoxed>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.ShouldBeBoxed", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::cpp2::ShouldBeBoxed>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_ShouldBeBoxed = res.first->second;
-  module_ShouldBeBoxed.name() = "module.ShouldBeBoxed";
+  ::apache::thrift::metadata::ThriftStruct& module_ShouldBeBoxed = res.metadata;
   module_ShouldBeBoxed.is_union() = false;
   static const auto* const
   module_ShouldBeBoxed_fields = new std::array<EncodedThriftField, 1>{ {
@@ -95,7 +93,7 @@ StructMetadata<::cpp2::ShouldBeBoxed>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_ShouldBeBoxed.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 
 void ExceptionMetadata<::cpp2::CustomException>::gen(ThriftMetadata& metadata) {

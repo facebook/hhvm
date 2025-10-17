@@ -28,12 +28,11 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Foo>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.Foo", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::cpp2::Foo>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_Foo = res.first->second;
-  module_Foo.name() = "module.Foo";
+  ::apache::thrift::metadata::ThriftStruct& module_Foo = res.metadata;
   module_Foo.is_union() = false;
   static const auto* const
   module_Foo_fields = new std::array<EncodedThriftField, 3>{ {
@@ -48,16 +47,15 @@ StructMetadata<::cpp2::Foo>::gen(ThriftMetadata& metadata) {
     module_Foo.fields()->push_back(std::move(field));
   }
   module_Foo.structured_annotations()->push_back(*cvStruct("thrift.SerializeInFieldIdOrder", {  }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Foo2>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.Foo2", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::cpp2::Foo2>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_Foo2 = res.first->second;
-  module_Foo2.name() = "module.Foo2";
+  ::apache::thrift::metadata::ThriftStruct& module_Foo2 = res.metadata;
   module_Foo2.is_union() = false;
   static const auto* const
   module_Foo2_fields = new std::array<EncodedThriftField, 3>{ {
@@ -71,7 +69,7 @@ StructMetadata<::cpp2::Foo2>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_Foo2.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 
 } // namespace md

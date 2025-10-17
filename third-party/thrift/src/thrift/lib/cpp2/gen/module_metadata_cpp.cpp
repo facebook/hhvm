@@ -88,7 +88,7 @@ static std::string getName(const Node& node) {
 GenMetadataResult<metadata::ThriftEnum> genEnumMetadata(
     metadata::ThriftMetadata& md, const syntax_graph::EnumNode& node) {
   auto name = getName(node);
-  auto res = md.enums()->emplace(name, metadata::ThriftEnum{});
+  auto res = md.enums()->try_emplace(name);
   GenMetadataResult<metadata::ThriftEnum> ret{!res.second, res.first->second};
   if (ret.preExists) {
     return ret;

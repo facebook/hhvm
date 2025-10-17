@@ -35,25 +35,23 @@ void EnumMetadata<::facebook::thrift::test::MyEnum>::gen(ThriftMetadata& metadat
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::MyAnnotation>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.MyAnnotation", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::MyAnnotation>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_MyAnnotation = res.first->second;
-  module_MyAnnotation.name() = "module.MyAnnotation";
+  ::apache::thrift::metadata::ThriftStruct& module_MyAnnotation = res.metadata;
   module_MyAnnotation.is_union() = false;
   module_MyAnnotation.structured_annotations()->push_back(*cvStruct("scope.Definition", {  }).cv_struct());
   module_MyAnnotation.structured_annotations()->push_back(*cvStruct("thrift.RuntimeAnnotation", {  }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.MyStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::MyStruct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_MyStruct = res.first->second;
-  module_MyStruct.name() = "module.MyStruct";
+  ::apache::thrift::metadata::ThriftStruct& module_MyStruct = res.metadata;
   module_MyStruct.is_union() = false;
   static const auto* const
   module_MyStruct_fields = new std::array<EncodedThriftField, 1>{ {
@@ -68,16 +66,15 @@ StructMetadata<::facebook::thrift::test::MyStruct>::gen(ThriftMetadata& metadata
     module_MyStruct.fields()->push_back(std::move(field));
   }
   module_MyStruct.structured_annotations()->push_back(*cvStruct("module.MyAnnotation", {  }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::MyUnion>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.MyUnion", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::MyUnion>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_MyUnion = res.first->second;
-  module_MyUnion.name() = "module.MyUnion";
+  ::apache::thrift::metadata::ThriftStruct& module_MyUnion = res.metadata;
   module_MyUnion.is_union() = false;
   static const auto* const
   module_MyUnion_fields = new std::array<EncodedThriftField, 1>{ {
@@ -92,16 +89,15 @@ StructMetadata<::facebook::thrift::test::MyUnion>::gen(ThriftMetadata& metadata)
     module_MyUnion.fields()->push_back(std::move(field));
   }
   module_MyUnion.structured_annotations()->push_back(*cvStruct("module.MyAnnotation", {  }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::MyException>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.MyException", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::facebook::thrift::test::MyException>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_MyException = res.first->second;
-  module_MyException.name() = "module.MyException";
+  ::apache::thrift::metadata::ThriftStruct& module_MyException = res.metadata;
   module_MyException.is_union() = false;
   static const auto* const
   module_MyException_fields = new std::array<EncodedThriftField, 1>{ {
@@ -116,7 +112,7 @@ StructMetadata<::facebook::thrift::test::MyException>::gen(ThriftMetadata& metad
     module_MyException.fields()->push_back(std::move(field));
   }
   module_MyException.structured_annotations()->push_back(*cvStruct("module.MyAnnotation", {  }).cv_struct());
-  return res.first->second;
+  return res.metadata;
 }
 
 void ExceptionMetadata<::facebook::thrift::test::MyException>::gen(ThriftMetadata& metadata) {

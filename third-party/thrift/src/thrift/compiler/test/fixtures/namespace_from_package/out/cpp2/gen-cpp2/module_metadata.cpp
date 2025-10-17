@@ -33,12 +33,11 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::namespace_from_package::module::Foo>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.Foo", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::test::namespace_from_package::module::Foo>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_Foo = res.first->second;
-  module_Foo.name() = "module.Foo";
+  ::apache::thrift::metadata::ThriftStruct& module_Foo = res.metadata;
   module_Foo.is_union() = false;
   static const auto* const
   module_Foo_fields = new std::array<EncodedThriftField, 1>{ {
@@ -52,7 +51,7 @@ StructMetadata<::test::namespace_from_package::module::Foo>::gen(ThriftMetadata&
     field.structured_annotations() = f.structured_annotations;
     module_Foo.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::test::namespace_from_package::module::TestService>>::gen_init([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {

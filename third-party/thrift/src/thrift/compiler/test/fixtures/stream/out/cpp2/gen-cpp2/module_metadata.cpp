@@ -33,36 +33,33 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::FooStreamEx>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.FooStreamEx", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::cpp2::FooStreamEx>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_FooStreamEx = res.first->second;
-  module_FooStreamEx.name() = "module.FooStreamEx";
+  ::apache::thrift::metadata::ThriftStruct& module_FooStreamEx = res.metadata;
   module_FooStreamEx.is_union() = false;
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::FooEx>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.FooEx", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::cpp2::FooEx>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_FooEx = res.first->second;
-  module_FooEx.name() = "module.FooEx";
+  ::apache::thrift::metadata::ThriftStruct& module_FooEx = res.metadata;
   module_FooEx.is_union() = false;
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::FooEx2>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.FooEx2", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::cpp2::FooEx2>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_FooEx2 = res.first->second;
-  module_FooEx2.name() = "module.FooEx2";
+  ::apache::thrift::metadata::ThriftStruct& module_FooEx2 = res.metadata;
   module_FooEx2.is_union() = false;
-  return res.first->second;
+  return res.metadata;
 }
 
 void ExceptionMetadata<::cpp2::FooStreamEx>::gen(ThriftMetadata& metadata) {

@@ -58,12 +58,11 @@ void EnumMetadata<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::gen(Thr
 {{#program:structs}}
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<{{struct:cpp_fullname}}>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("{{program:name}}.{{struct:name}}", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<{{struct:cpp_fullname}}>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& {{struct:metadata_name}} = res.first->second;
-  {{struct:metadata_name}}.name() = "{{program:name}}.{{struct:name}}";
+  ::apache::thrift::metadata::ThriftStruct& {{struct:metadata_name}} = res.metadata;
   {{struct:metadata_name}}.is_union() = {{struct:union?}};
 {{#struct:fields?}}
   static const auto* const
@@ -87,7 +86,7 @@ StructMetadata<{{struct:cpp_fullname}}>::gen(ThriftMetadata& metadata) {
   {{struct:metadata_name}}.structured_annotations()->push_back({{> metadata/const_struct}});
 {{/constant:type.self.structured?}}
 {{/struct:structured_annotations}}
-  return res.first->second;
+  return res.metadata;
 }
 {{/program:structs}}
 

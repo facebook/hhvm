@@ -2551,23 +2551,6 @@ service EdenService extends fb303_core.BaseService {
   );
 
   /**
-   * Get the status of the working directory against the specified commit.
-   *
-   * Note: this internally synchronize the working copy and thus the returned
-   * data is guaranteed to return be the set of files that changed prior to
-   * calling this method.
-   *
-   * DEPRECATED: Prefer using getScmStatusV2() in new code.  Callers may still
-   * need to fall back to getScmStatus() if talking to an older edenfs daemon
-   * that does not support getScmStatusV2() yet.
-   */
-  ScmStatus getScmStatus(
-    1: PathString mountPoint,
-    2: bool listIgnored,
-    3: ThriftRootId commit,
-  ) throws (1: EdenError ex);
-
-  /**
    * Computes the status between two specified revisions.
    * This does not care about the state of the working copy.
    *

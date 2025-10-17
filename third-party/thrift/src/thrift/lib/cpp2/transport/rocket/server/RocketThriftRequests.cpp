@@ -652,12 +652,9 @@ ThriftServerRequestStream::ThriftServerRequestStream(
 }
 
 void ThriftServerRequestStream::sendThriftResponse(
-    ResponseRpcMetadata&& meta,
+    ResponseRpcMetadata&&,
     std::unique_ptr<folly::IOBuf> buf,
     apache::thrift::MessageChannel::SendCallbackPtr) noexcept {
-  for (auto& [k, v] : *meta.otherMetadata()) {
-    LOG(ERROR) << "Key: " << k << " Value: " << v;
-  }
   LOG(ERROR) << "Serialized Payload: " << buf->moveToFbString().toStdString();
   LOG(FATAL) << "Stream requests must respond via sendStreamThriftResponse";
 }

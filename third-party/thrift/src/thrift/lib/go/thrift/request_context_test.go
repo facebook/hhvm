@@ -169,3 +169,35 @@ func TestRequestContext(t *testing.T) {
 	reqCtxPrime = GetRequestContext(context.TODO())
 	require.Nil(t, reqCtxPrime)
 }
+
+func TestGetRequestHeadersFromContext(t *testing.T) {
+	t.Run("nil context", func(t *testing.T) {
+		headers := GetRequestHeadersFromContext(nil)
+		require.Nil(t, headers)
+	})
+	t.Run("empty context", func(t *testing.T) {
+		headers := GetRequestHeadersFromContext(context.TODO())
+		require.Empty(t, headers)
+	})
+	t.Run("context with existing headers", func(t *testing.T) {
+		headers := map[string]string{"foo": "bar"}
+		reqCtx := &RequestContext{}
+		reqCtx.SetReadHeaders(headers)
+		ctxWithHeaders := WithRequestContext(context.TODO(), reqCtx)
+		headersFromContext := GetRequestHeadersFromContext(ctxWithHeaders)
+		require.Equal(t, headers, headersFromContext)
+	})
+	t.Run("ensure map copy", func(t *testing.T) {
+		// Ensure that the user can't modify the map returned from the context
+		originalHeaders := map[string]string{"foo": "bar"}
+		reqCtx := &RequestContext{}
+		reqCtx.SetReadHeaders(originalHeaders)
+		ctxWithHeaders := WithRequestContext(context.TODO(), reqCtx)
+		// Get headers map and modify it
+		headersFromContext1 := GetRequestHeadersFromContext(ctxWithHeaders)
+		headersFromContext1["foo"] = "123"
+		headersFromContext1["bar"] = "123"
+		headersFromContext2 := GetRequestHeadersFromContext(ctxWithHeaders)
+		require.Equal(t, originalHeaders, headersFromContext2)
+	})
+}

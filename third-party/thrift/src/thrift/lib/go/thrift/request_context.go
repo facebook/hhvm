@@ -18,6 +18,7 @@ package thrift
 
 import (
 	"context"
+	"maps"
 	"net"
 	"time"
 )
@@ -65,4 +66,18 @@ func GetRequestContext(ctx context.Context) *RequestContext {
 // WithRequestContext sets the RequestContext in a given go context
 func WithRequestContext(ctx context.Context, reqCtx *RequestContext) context.Context {
 	return context.WithValue(ctx, reqContextKey, reqCtx)
+}
+
+// GetRequestHeadersFromContext returns the request headers from the context.
+func GetRequestHeadersFromContext(ctx context.Context) map[string]string {
+	if ctx == nil {
+		return nil
+	}
+
+	result := make(map[string]string)
+	if reqCtx := GetRequestContext(ctx); reqCtx != nil {
+		maps.Copy(result, reqCtx.GetReadHeaders())
+	}
+
+	return result
 }

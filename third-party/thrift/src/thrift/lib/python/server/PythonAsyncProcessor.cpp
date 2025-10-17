@@ -592,6 +592,45 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequest(
           kind,
           std::move(callback));
     }
+    case apache::thrift::RpcKind::BIDIRECTIONAL_STREAM: {
+      auto return_bidistream = protocol ==
+              apache::thrift::protocol::PROTOCOL_TYPES::T_BINARY_PROTOCOL
+          ? &detail::return_bidistream<
+                apache::thrift::BinaryProtocolReader,
+                apache::thrift::BinaryProtocolWriter>
+          : &detail::return_bidistream<
+                apache::thrift::CompactProtocolReader,
+                apache::thrift::CompactProtocolWriter>;
+      auto callback = apache::thrift::HandlerCallback<
+          ::apache::thrift::ResponseAndStreamTransformation<
+              std::unique_ptr<::folly::IOBuf>,
+              std::unique_ptr<::folly::IOBuf>,
+              std::unique_ptr<::folly::IOBuf>>>::Ptr::
+          make(
+              std::move(req),
+              std::move(ctxStack),
+              apache::thrift::HandlerCallbackBase::MethodNameInfo{
+                  .serviceName = serviceName,
+                  .definingServiceName = serviceName,
+                  .methodName = methodName,
+                  .qualifiedMethodName =
+                      fmt::format("{}.{}", serviceName, methodName)},
+              return_bidistream,
+              get_throw_wrapped(protocol),
+              ctx->getProtoSeqId(),
+              eb,
+              executor,
+              ctx,
+              nullptr,
+              nullptr,
+              requestData);
+      return dispatchRequestBidi(
+          protocol,
+          ctx,
+          std::move(serializedRequest),
+          kind,
+          std::move(callback));
+    }
     default: {
       auto return_serialized = protocol ==
               apache::thrift::protocol::PROTOCOL_TYPES::T_BINARY_PROTOCOL

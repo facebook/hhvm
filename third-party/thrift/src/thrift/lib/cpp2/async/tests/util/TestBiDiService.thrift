@@ -17,6 +17,22 @@
 namespace cpp2 apache.thrift.detail.test
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+exception BiDiSinkException {
+  @thrift.ExceptionMessage
+  1: string message;
+}
+
+exception BiDiStreamException {
+  @thrift.ExceptionMessage
+  1: string message;
+}
+
+exception BiDiMethodException {
+  @thrift.ExceptionMessage
+  1: string message;
+}
 
 service TestBiDiService {
   // @lint-ignore THRIFTCHECKS new unreleased feature
@@ -27,4 +43,9 @@ service TestBiDiService {
 
   // @lint-ignore THRIFTCHECKS new unreleased feature
   sink<i64>, stream<i64> intStream();
+
+  // @lint-ignore THRIFTCHECKS new unreleased feature
+  sink<i64 throws (1: BiDiSinkException sinkEx)>, stream<
+    i64 throws (1: BiDiStreamException sinkEx)
+  > canThrow() throws (1: BiDiMethodException methodEx);
 }

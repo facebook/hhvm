@@ -112,6 +112,7 @@ class ServerCallbackStapler : public BiDiServerCallback,
 
   void onFinalResponse(StreamPayload&&) override {
     DeletionGuard guard(this);
+    std::ignore = clientCb_->onSinkCancel();
     sink_ = nullptr;
   }
 

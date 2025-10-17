@@ -53,11 +53,17 @@ class ServerBiDiSinkBridge
     auto payload = rex
         ? folly::Try<StreamPayload>(EncodedError(rex->moveErrorData()))
         : folly::Try<StreamPayload>(std::move(ew));
+    // We set this to null because the transport side must be aware of the
+    // cancellation already
+    clientCb_ = nullptr;
     clientPush(std::move(payload));
     clientClose();
   }
 
   bool onSinkComplete() override {
+    // We set this to null because the transport side must be aware of the
+    // cancellation already
+    clientCb_ = nullptr;
     clientPush(/* empty Try */ {});
     clientClose();
     return true;
@@ -77,7 +83,21 @@ class ServerBiDiSinkBridge
     evb_->runInEventBaseThread([this] { processClientMessages(); });
   }
 
-  void canceled() { decref(); }
+  void canceled() {
+    // Note that canceled() is actually called on the thread that destroys
+    // the input AsyncGenerator, which generally shouldn't be IOThread.
+    // The sending of cancellation and the decref MUST happen on the IOThread
+    // (i.e EventBase) or you risk a data race. You'll get a TSAN failure if you
+    // get rid of evb_->add here.
+    evb_->add([this]() {
+      // This cancels the sink if its open
+      if (clientCb_ != nullptr) {
+        clientCb_->onFinalResponse(
+            StreamPayload{nullptr, StreamPayloadMetadata{}});
+      }
+      decref();
+    });
+  }
   //
   // end of TwoWayBridge methods
   //
@@ -85,44 +105,79 @@ class ServerBiDiSinkBridge
   template <typename In>
   static folly::coro::AsyncGenerator<In&&> getInput(
       ServerBiDiSinkBridge::Ptr bridge, SinkElementDecoder<In>* decode) {
-    SCOPE_EXIT {
-      bridge->serverClose();
+    /**
+     * Cleanup is the destructor guard for the input async generator.
+     * SCOPE_EXIT in the body of the async generator is insufficient since it
+     * would never run if the generator is never co_awaited.
+     */
+    struct Cleanup {
+      explicit Cleanup(ServerBiDiSinkBridge::Ptr bridge)
+          : bridge{std::move(bridge)} {}
+      ~Cleanup() {
+        if (bridge != nullptr) {
+          bridge->serverClose();
+          // If the client is already closed, then the ClientCallback must
+          // already be aware that the server sink side is complete so we
+          // don't need to do anything. Otherwise, we need to close the client
+          if (!bridge->isClientClosed()) {
+            bridge->clientClose(); // Also cancels
+          }
+        }
+      }
+      Cleanup(const Cleanup&) = delete;
+      Cleanup(Cleanup&& other) noexcept { bridge = std::move(other.bridge); }
+      Cleanup& operator=(const Cleanup&) = delete;
+      Cleanup& operator=(Cleanup&& other) noexcept {
+        bridge = std::move(other.bridge);
+        return *this;
+      }
+
+      ServerBiDiSinkBridge::Ptr bridge;
     };
 
-    uint64_t creditsUsed{0};
-    while (true) {
-      CoroConsumer c;
-      if (bridge->serverWait(&c)) {
-        co_await c.wait();
-      }
+    auto bridgePtr = bridge->copy();
+    return folly::coro::co_invoke(
+        [cleanup = Cleanup(std::move(bridgePtr))](
+            ServerBiDiSinkBridge::Ptr bridge,
+            SinkElementDecoder<In>* decode) mutable
+        -> folly::coro::AsyncGenerator<In&&> {
+          uint64_t creditsUsed{0};
+          while (true) {
+            CoroConsumer c;
+            if (bridge->serverWait(&c)) {
+              co_await c.wait();
+            }
 
-      for (auto messages = bridge->serverGetMessages(); !messages.empty();
-           messages.pop()) {
-        auto payloadTry = std::move(messages.front());
-        if (!payloadTry.hasValue() && !payloadTry.hasException()) {
-          // Empty Try means sink completion
-          co_return;
-        }
+            for (auto messages = bridge->serverGetMessages(); !messages.empty();
+                 messages.pop()) {
+              auto payloadTry = std::move(messages.front());
+              if (!payloadTry.hasValue() && !payloadTry.hasException()) {
+                // Empty Try means sink completion
+                co_return;
+              }
 
-        if (payloadTry.hasException()) {
-          // TODO(sazonovk): Is this the right way to handle errors? NO
-          payloadTry.exception().throw_exception();
-        }
+              if (payloadTry.hasException()) {
+                // TODO(sazonovk): Is this the right way to handle errors? NO
+                payloadTry.exception().throw_exception();
+              }
 
-        auto decodedTry = (*decode)(std::move(payloadTry));
-        if (decodedTry.hasException()) {
-          // TODO(sazonovk): Is this the right way to handle errors? NO
-          decodedTry.exception().throw_exception();
-        }
+              auto decodedTry = (*decode)(std::move(payloadTry));
+              if (decodedTry.hasException()) {
+                // TODO(sazonovk): Is this the right way to handle errors? NO
+                decodedTry.exception().throw_exception();
+              }
 
-        co_yield std::move(decodedTry.value());
+              co_yield std::move(decodedTry.value());
 
-        if (++creditsUsed > bridge->bufferSize_ / 2) {
-          bridge->serverPush(uint64_t(creditsUsed));
-          creditsUsed = 0;
-        }
-      }
-    }
+              if (++creditsUsed > bridge->bufferSize_ / 2) {
+                bridge->serverPush(uint64_t(creditsUsed));
+                creditsUsed = 0;
+              }
+            }
+          }
+        },
+        std::move(bridge),
+        decode);
   }
 
   void processClientMessages() {
@@ -146,6 +201,8 @@ class ServerBiDiSinkBridge
   using TwoWayBridge::serverPush;
 
  private:
+  // Note that we use the property of clientCb_ being null to indicate that
+  // the transport side is already aware of the closure.
   SinkClientCallback* clientCb_{nullptr};
   folly::EventBase* evb_{nullptr};
 

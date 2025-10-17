@@ -70,6 +70,9 @@ void RocketBiDiClientCallback::onFirstResponseError(
 }
 
 bool RocketBiDiClientCallback::onSinkCancel() {
+  if (!state_.isSinkOpen()) {
+    return state_.isAlive();
+  }
   state_.onSinkCancel();
   connection_.sendCancel(streamId_);
 

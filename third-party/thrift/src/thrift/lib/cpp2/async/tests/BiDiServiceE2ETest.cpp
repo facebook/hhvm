@@ -15,6 +15,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <folly/coro/Collect.h>
 #include <folly/coro/GtestHelpers.h>
 #include <thrift/lib/cpp2/async/tests/util/gen-cpp2/TestBiDiService.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
@@ -145,6 +146,55 @@ CO_TEST_F(BiDiServiceE2ETest, BasicResponseAndStreamTransformation) {
 
   auto exhausted = co_await streamGen.next();
   EXPECT_FALSE(exhausted.has_value());
+}
+
+CO_TEST_F(BiDiServiceE2ETest, IgnoreInputProduceOutput) {
+  constexpr int64_t kTestLimit = 100;
+
+  struct Handler : public ServiceHandler<detail::test::TestBiDiService> {
+    folly::coro::Task<StreamTransformation<int64_t, int64_t>> co_intStream()
+        override {
+      co_return StreamTransformation<int64_t, int64_t>{
+          [this](folly::coro::AsyncGenerator<int64_t&&>)
+              -> folly::coro::AsyncGenerator<int64_t&&> {
+            for (int64_t i = 0; i < kTestLimit; ++i) {
+              co_yield std::move(i);
+            }
+          }};
+    }
+  };
+
+  testConfig({std::make_shared<Handler>()});
+
+  auto client = makeClient<detail::test::TestBiDiService>();
+  BidirectionalStream<int64_t, int64_t> stream =
+      co_await client->co_intStream();
+
+  auto sinkGen =
+      folly::coro::co_invoke([]() -> folly::coro::AsyncGenerator<int64_t&&> {
+        int64_t counter = 0;
+        while (true) {
+          co_yield counter++;
+        }
+      });
+
+  auto streamTask = folly::coro::co_invoke(
+      [&, streamGen = std::move(stream.stream).toAsyncGenerator()]() mutable
+      -> folly::coro::Task<void> {
+        for (int64_t i = 0; i < kTestLimit; ++i) {
+          auto next = co_await streamGen.next();
+          if (!next) {
+            CO_FAIL() << fmt::format(
+                "Did not receive all stream elements, expected 100 but got {}",
+                i);
+          }
+        }
+
+        EXPECT_FALSE(co_await streamGen.next());
+      });
+
+  co_await folly::coro::collectAll(
+      stream.sink.sink(std::move(sinkGen)), std::move(streamTask));
 }
 
 } // namespace apache::thrift

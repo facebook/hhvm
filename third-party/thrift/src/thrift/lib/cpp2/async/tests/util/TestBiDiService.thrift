@@ -24,4 +24,7 @@ service TestBiDiService {
 
   // @lint-ignore THRIFTCHECKS new unreleased feature
   string, sink<string>, stream<string> echoWithResponse(1: string initial);
+
+  // @lint-ignore THRIFTCHECKS new unreleased feature
+  sink<i64>, stream<i64> intStream();
 }

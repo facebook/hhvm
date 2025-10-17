@@ -33,12 +33,11 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::BiDiSinkException>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.BiDiSinkException", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::cpp2::BiDiSinkException>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_BiDiSinkException = res.first->second;
-  module_BiDiSinkException.name() = "module.BiDiSinkException";
+  ::apache::thrift::metadata::ThriftStruct& module_BiDiSinkException = res.metadata;
   module_BiDiSinkException.is_union() = false;
   static const auto* const
   module_BiDiSinkException_fields = new std::array<EncodedThriftField, 1>{ {
@@ -52,16 +51,15 @@ StructMetadata<::cpp2::BiDiSinkException>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_BiDiSinkException.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::BiDiStreamException>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.BiDiStreamException", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::cpp2::BiDiStreamException>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_BiDiStreamException = res.first->second;
-  module_BiDiStreamException.name() = "module.BiDiStreamException";
+  ::apache::thrift::metadata::ThriftStruct& module_BiDiStreamException = res.metadata;
   module_BiDiStreamException.is_union() = false;
   static const auto* const
   module_BiDiStreamException_fields = new std::array<EncodedThriftField, 1>{ {
@@ -75,16 +73,15 @@ StructMetadata<::cpp2::BiDiStreamException>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_BiDiStreamException.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::BiDiMethodException>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.BiDiMethodException", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
+  auto res = genStructMetadata<::cpp2::BiDiMethodException>(metadata);
+  if (res.preExists) {
+    return res.metadata;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_BiDiMethodException = res.first->second;
-  module_BiDiMethodException.name() = "module.BiDiMethodException";
+  ::apache::thrift::metadata::ThriftStruct& module_BiDiMethodException = res.metadata;
   module_BiDiMethodException.is_union() = false;
   static const auto* const
   module_BiDiMethodException_fields = new std::array<EncodedThriftField, 1>{ {
@@ -98,16 +95,15 @@ StructMetadata<::cpp2::BiDiMethodException>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_BiDiMethodException.fields()->push_back(std::move(field));
   }
-  return res.first->second;
+  return res.metadata;
 }
 
 void ExceptionMetadata<::cpp2::BiDiSinkException>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("module.BiDiSinkException", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::cpp2::BiDiSinkException>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& module_BiDiSinkException = res.first->second;
-  module_BiDiSinkException.name() = "module.BiDiSinkException";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_BiDiSinkException = res.metadata;
   static const auto* const
   module_BiDiSinkException_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -121,12 +117,11 @@ void ExceptionMetadata<::cpp2::BiDiSinkException>::gen(ThriftMetadata& metadata)
   }
 }
 void ExceptionMetadata<::cpp2::BiDiStreamException>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("module.BiDiStreamException", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::cpp2::BiDiStreamException>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& module_BiDiStreamException = res.first->second;
-  module_BiDiStreamException.name() = "module.BiDiStreamException";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_BiDiStreamException = res.metadata;
   static const auto* const
   module_BiDiStreamException_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -140,12 +135,11 @@ void ExceptionMetadata<::cpp2::BiDiStreamException>::gen(ThriftMetadata& metadat
   }
 }
 void ExceptionMetadata<::cpp2::BiDiMethodException>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.exceptions()->emplace("module.BiDiMethodException", ::apache::thrift::metadata::ThriftException{});
-  if (!res.second) {
+  auto res = genExceptionMetadata<::cpp2::BiDiMethodException>(metadata);
+  if (res.preExists) {
     return;
   }
-  ::apache::thrift::metadata::ThriftException& module_BiDiMethodException = res.first->second;
-  module_BiDiMethodException.name() = "module.BiDiMethodException";
+  [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_BiDiMethodException = res.metadata;
   static const auto* const
   module_BiDiMethodException_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};

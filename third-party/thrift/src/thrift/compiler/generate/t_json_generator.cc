@@ -569,8 +569,8 @@ void t_json_generator::generate_enum(const t_enum* tenum) {
       /*add_trailing_comma=*/true);
   indent(f_out_) << "\"constants\" : {" << endl;
   indent_up();
-  vector<t_enum_value*> values = tenum->get_enum_values();
-  vector<t_enum_value*>::iterator val_iter;
+  node_list_view<const t_enum_value> values = tenum->values();
+  node_list_view<const t_enum_value>::iterator val_iter;
   for (val_iter = values.begin(); val_iter != values.end(); ++val_iter) {
     if (val_iter != values.begin()) {
       f_out_ << "," << endl;
@@ -580,8 +580,8 @@ void t_json_generator::generate_enum(const t_enum* tenum) {
     // approach of compartmentalization, but may be backwards-incompatible.
     // Adding annotations as a separate top-level enum list/map would go
     // against this general approach.
-    indent(f_out_) << "\"" << (*val_iter)->name() << "\"" << " : "
-                   << (*val_iter)->get_value();
+    indent(f_out_) << "\"" << (*val_iter).name() << "\"" << " : "
+                   << (*val_iter).get_value();
   }
   f_out_ << endl;
   indent_down();

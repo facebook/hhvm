@@ -22,7 +22,6 @@ namespace apache::thrift::compiler {
 
 void t_enum::set_values(t_enum_value_list values) {
   values_.clear();
-  values_raw_.clear();
   constants_.clear();
   value_map_.clear();
   unused_ = t_enum::default_unused;

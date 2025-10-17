@@ -970,8 +970,8 @@ class cpp_mstch_program : public mstch_program {
     for (const auto* enm : program_->enums()) {
       collect_fatal_string_annotated(unique_names, enm);
       unique_names.emplace(get_fatal_string_short_id(enm), enm->name());
-      for (const auto& i : enm->get_enum_values()) {
-        collect_fatal_string_annotated(unique_names, i);
+      for (const auto& i : enm->values()) {
+        collect_fatal_string_annotated(unique_names, &i);
       }
     }
     // structs, unions and exceptions

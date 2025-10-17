@@ -1113,13 +1113,13 @@ void t_py_generator::generate_enum(const t_enum* tenum) {
   names_list << "(" << endl;
   values_list << "(" << endl;
 
-  vector<t_enum_value*> constants = tenum->get_enum_values();
-  vector<t_enum_value*>::iterator c_iter;
+  node_list_view<const t_enum_value> constants = tenum->values();
+  node_list_view<const t_enum_value>::iterator c_iter;
   for (c_iter = constants.begin(); c_iter != constants.end(); ++c_iter) {
-    int32_t value = (*c_iter)->get_value();
+    int32_t value = (*c_iter).get_value();
 
     // Build up lists of values and names to avoid large dict literals
-    names_list << indent(2) << "\"" << (*c_iter)->name() << "\"," << endl;
+    names_list << indent(2) << "\"" << (*c_iter).name() << "\"," << endl;
     values_list << indent(2) << value << "," << endl;
   }
   names_list << ")";

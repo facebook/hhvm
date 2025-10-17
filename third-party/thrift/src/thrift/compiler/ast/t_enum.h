@@ -19,8 +19,6 @@
 #include <cstdint>
 #include <map>
 #include <memory>
-#include <stdexcept>
-#include <vector>
 
 #include <thrift/compiler/ast/node_list.h>
 #include <thrift/compiler/ast/t_const.h>
@@ -77,7 +75,6 @@ class t_enum : public t_type {
       std::unique_ptr<t_enum_value> enum_value,
       std::unique_ptr<t_const> constant) {
     update_unused(enum_value->get_value());
-    values_raw_.push_back(enum_value.get());
     value_map_.emplace(enum_value->get_value(), enum_value.get());
     consts_by_name_.emplace(enum_value->name(), constant.get());
     values_.push_back(std::move(enum_value));
@@ -86,13 +83,7 @@ class t_enum : public t_type {
 
   // TODO(T227540797): These methods are only provided for backwards
   // compatibility. Update all references and remove everything below.
-  std::vector<t_enum_value*> values_raw_;
-
  public:
-  const std::vector<t_enum_value*>& get_enum_values() const {
-    return values_raw_;
-  }
-
   type get_type_value() const override { return type::t_enum; }
 };
 

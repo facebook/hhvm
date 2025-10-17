@@ -700,8 +700,8 @@ bool validate_enum(sema_context& ctx, const t_enum& enm) {
   auto predicate = [](const auto& pyname) {
     return pyname == "name" || pyname == "value";
   };
-  for (const t_enum_value* ev : enm.get_enum_values()) {
-    validate(ev, ev->name(), ctx, predicate);
+  for (const t_enum_value& ev : enm.values()) {
+    validate(&ev, ev.name(), ctx, predicate);
   }
   return true;
 }

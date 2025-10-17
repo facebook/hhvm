@@ -1207,7 +1207,7 @@ class mstch_java_enum : public mstch_enum {
   mstch::node java_skip_enum_name_map() {
     return enum_->has_unstructured_annotation("java.swift.skip_enum_name_map");
   }
-  mstch::node num_values() { return enum_->get_enum_values().size(); }
+  mstch::node num_values() { return enum_->values().size(); }
   mstch::node use_intrinsic_default() {
     if (enum_->has_structured_annotation(kJavaUseIntrinsicDefaultUri)) {
       if (enum_->find_value(0) == nullptr) {

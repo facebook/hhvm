@@ -1746,14 +1746,14 @@ void t_hack_generator::generate_enum(const t_enum* tenum) {
 
   indent_up();
 
-  for (const t_enum_value* enum_value : tenum->get_enum_values()) {
-    int32_t value = enum_value->get_value();
+  for (const t_enum_value& enum_value : tenum->values()) {
+    int32_t value = enum_value.get_value();
 
-    generate_php_docstring(f_types_, enum_value);
+    generate_php_docstring(f_types_, &enum_value);
     if (!hack_enum) {
       indent(f_types_) << "const " << typehint << " ";
     }
-    indent(f_types_) << find_hack_name(enum_value) << " = " << value << ";\n";
+    indent(f_types_) << find_hack_name(&enum_value) << " = " << value << ";\n";
   }
 
   indent_down();
@@ -1805,13 +1805,13 @@ void t_hack_generator::generate_enum(const t_enum* tenum) {
                   << ",\n";
   annotations_out << indent() << "'constants' => dict[\n";
   indent_up();
-  for (const t_enum_value* constant : tenum->get_enum_values()) {
-    if (constant->structured_annotations().empty()) {
+  for (const t_enum_value& constant : tenum->values()) {
+    if (constant.structured_annotations().empty()) {
       continue;
     }
-    annotations_out << indent() << "'" << constant->name() << "' => "
+    annotations_out << indent() << "'" << constant.name() << "' => "
                     << render_structured_annotations(
-                           constant->structured_annotations(),
+                           constant.structured_annotations(),
                            annotations_temp_var_initializations_out,
                            namer)
                     << ",\n";
@@ -2586,14 +2586,14 @@ std::unique_ptr<t_const_value> t_hack_generator::enum_to_tmeta(
       std::make_unique<t_const_value>("name"),
       std::make_unique<t_const_value>(tenum->get_scoped_name()));
 
-  auto const& enum_values = tenum->get_enum_values();
+  auto const& enum_values = tenum->values();
   if (!enum_values.empty()) {
     auto tmeta_elements = t_const_value::make_map();
 
-    for (const auto& constant : tenum->get_enum_values()) {
+    for (const auto& constant : tenum->values()) {
       tmeta_elements->add_map(
-          std::make_unique<t_const_value>(constant->get_value()),
-          std::make_unique<t_const_value>(constant->name()));
+          std::make_unique<t_const_value>(constant.get_value()),
+          std::make_unique<t_const_value>(constant.name()));
     }
 
     tmeta_ThriftEnum->add_map(
@@ -4244,7 +4244,7 @@ void t_hack_generator::generate_php_struct_fields(
             tstruct->name() + "::code defined to be a non-integral type. " +
             "code fields for Exception classes must be integral");
       } else if (const t_enum* enum_ = t->try_as<t_enum>();
-                 enum_ != nullptr && enum_->get_enum_values().empty()) {
+                 enum_ != nullptr && enum_->values().empty()) {
         throw std::runtime_error(
             "Enum " + t->name() + " is the type for the code property of " +
             tstruct->name() + ", but it has no values.");
@@ -4538,8 +4538,7 @@ void t_hack_generator::generate_php_struct_constructor_field_assignment(
     } else {
       // just use the lowest value
       const t_enum* tenum = static_cast<const t_enum*>(t);
-      dval =
-          hack_name(tenum) + "::" + (*tenum->get_enum_values().begin())->name();
+      dval = hack_name(tenum) + "::" + (*tenum->values().begin()).name();
     }
   } else if (
       is_exception && (field.name() == "message" || field.name() == "file")) {

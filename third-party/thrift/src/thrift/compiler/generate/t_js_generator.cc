@@ -343,11 +343,11 @@ void t_js_generator::generate_enum(const t_enum* tenum) {
   f_types_ << js_type_namespace(tenum->program()) << tenum->name() << " = {"
            << endl;
 
-  vector<t_enum_value*> constants = tenum->get_enum_values();
-  vector<t_enum_value*>::iterator c_iter;
+  node_list_view<const t_enum_value> constants = tenum->values();
+  node_list_view<const t_enum_value>::iterator c_iter;
   for (c_iter = constants.begin(); c_iter != constants.end(); ++c_iter) {
-    int value = (*c_iter)->get_value();
-    f_types_ << "'" << (*c_iter)->name() << "' : " << value;
+    int value = (*c_iter).get_value();
+    f_types_ << "'" << (*c_iter).name() << "' : " << value;
     if (c_iter != constants.end() - 1) {
       f_types_ << ",";
     }

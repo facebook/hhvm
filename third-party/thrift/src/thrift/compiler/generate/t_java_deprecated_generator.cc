@@ -187,15 +187,15 @@ void t_java_deprecated_generator::generate_enum(const t_enum* tenum) {
          << " implements com.facebook.thrift.TEnum ";
   scope_up(f_enum);
 
-  const auto& enums = tenum->get_enum_values();
+  node_list_view<const t_enum_value> enums = tenum->values();
   bool first = true;
-  for (auto t_enum_value : enums) {
-    auto value = t_enum_value->get_value();
+  for (const t_enum_value& t_enum_value : enums) {
+    auto value = t_enum_value.get_value();
     if (!first) {
       f_enum << ",\n";
     }
-    generate_java_doc(f_enum, t_enum_value);
-    indent(f_enum) << t_enum_value->name() << "(" << value << ")";
+    generate_java_doc(f_enum, &t_enum_value);
+    indent(f_enum) << t_enum_value.name() << "(" << value << ")";
     first = false;
   }
   f_enum << ";" << endl << endl;
@@ -249,10 +249,10 @@ void t_java_deprecated_generator::generate_enum(const t_enum* tenum) {
     indent(f_enum) << "switch (value) {" << endl;
     indent_up();
 
-    for (auto t_enum_value : enums) {
-      auto value = t_enum_value->get_value();
+    for (const t_enum_value& t_enum_value : enums) {
+      auto value = t_enum_value.get_value();
       indent(f_enum) << "case " << value << ":" << endl;
-      indent(f_enum) << "  return " << t_enum_value->name() << ";" << endl;
+      indent(f_enum) << "  return " << t_enum_value.name() << ";" << endl;
     }
 
     indent(f_enum) << "default:" << endl;

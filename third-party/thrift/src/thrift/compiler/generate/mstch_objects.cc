@@ -77,7 +77,7 @@ mstch_factories::mstch_factories() {
 }
 
 mstch::node mstch_enum::values() {
-  return make_mstch_enum_values(enum_->get_enum_values());
+  return make_mstch_enum_values(enum_->values());
 }
 
 mstch::node mstch_type::get_structured() {

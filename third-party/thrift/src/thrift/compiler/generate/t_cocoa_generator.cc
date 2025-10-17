@@ -389,8 +389,8 @@ void t_cocoa_generator::generate_enum(const t_enum* tenum) {
             << tenum->name() << ") {" << std::endl;
   indent_up();
 
-  std::vector<t_enum_value*> constants = tenum->get_enum_values();
-  std::vector<t_enum_value*>::iterator c_iter;
+  node_list_view<const t_enum_value> constants = tenum->values();
+  node_list_view<const t_enum_value>::iterator c_iter;
   bool first = true;
   for (c_iter = constants.begin(); c_iter != constants.end(); ++c_iter) {
     if (first) {
@@ -399,8 +399,8 @@ void t_cocoa_generator::generate_enum(const t_enum* tenum) {
       f_header_ << "," << std::endl;
     }
     f_header_ << indent() << cocoa_prefix_ << tenum->name() << "_"
-              << (*c_iter)->name();
-    f_header_ << " = " << (*c_iter)->get_value();
+              << (*c_iter).name();
+    f_header_ << " = " << (*c_iter).get_value();
   }
 
   indent_down();
@@ -424,7 +424,7 @@ void t_cocoa_generator::generate_enum(const t_enum* tenum) {
   indent_up();
   for (c_iter = constants.begin(); c_iter != constants.end(); ++c_iter) {
     std::string itemName =
-        cocoa_prefix_ + tenum->name() + "_" + (*c_iter)->name();
+        cocoa_prefix_ + tenum->name() + "_" + (*c_iter).name();
     f_impl_ << indent() << "case " << itemName
             << ": return @\"" + itemName + "\";" << std::endl;
   }
@@ -471,11 +471,9 @@ void t_cocoa_generator::generate_enum_from_string_function(
 
   indent_up();
 
-  for (auto constant = tenum->get_enum_values().begin();
-       constant != tenum->get_enum_values().end();
-       ++constant) {
+  for (const t_enum_value& constant : tenum->values()) {
     std::string namespacedConstantName =
-        cocoa_prefix_ + tenum->name() + "_" + (*constant)->name();
+        cocoa_prefix_ + tenum->name() + "_" + constant.name();
     f_impl_ << indent() << "@\"" << namespacedConstantName << "\": @("
             << namespacedConstantName << ")," << std::endl;
   }

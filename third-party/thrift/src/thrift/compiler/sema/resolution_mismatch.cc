@@ -67,8 +67,8 @@ const t_enum_value* try_as_enum_value(const t_named& named) {
 const t_enum* find_enum_of_value(
     const t_program& prog, const t_enum_value& val) {
   for (const auto* enum_ : prog.enums()) {
-    for (const auto* enum_val : enum_->get_enum_values()) {
-      if (enum_val == &val) {
+    for (const auto& enum_val : enum_->values()) {
+      if (&enum_val == &val) {
         return enum_;
       }
     }

@@ -62,7 +62,6 @@ class structA_struct_traits {
       member::a,
       member::b
   >;
-  using members_annotations = __fbthrift_annotations::members;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
       static_cast<::apache::thrift::legacy_type_id_t>(16040306389268712140ull)
@@ -149,7 +148,6 @@ class structB_struct_traits {
       member::c,
       member::d
   >;
-  using members_annotations = __fbthrift_annotations::members;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
       static_cast<::apache::thrift::legacy_type_id_t>(17011230197513777036ull)
@@ -505,7 +503,6 @@ class structC_struct_traits {
       member::o2,
       member::o3
   >;
-  using members_annotations = __fbthrift_annotations::members;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
       static_cast<::apache::thrift::legacy_type_id_t>(15703963988028277228ull)
@@ -597,7 +594,6 @@ class struct1_struct_traits {
       member::field4,
       member::field5
   >;
-  using members_annotations = __fbthrift_annotations::members;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
       static_cast<::apache::thrift::legacy_type_id_t>(16486839729778550796ull)
@@ -700,7 +696,6 @@ class struct2_struct_traits {
       member::fieldF,
       member::fieldG
   >;
-  using members_annotations = __fbthrift_annotations::members;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
       static_cast<::apache::thrift::legacy_type_id_t>(2030839855051909900ull)
@@ -924,7 +919,6 @@ class struct3_struct_traits {
       member::fieldQ,
       member::fieldR
   >;
-  using members_annotations = __fbthrift_annotations::members;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
       static_cast<::apache::thrift::legacy_type_id_t>(8845469880920676204ull)
@@ -994,7 +988,6 @@ class struct4_struct_traits {
       member::field2,
       member::field3
   >;
-  using members_annotations = __fbthrift_annotations::members;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
       static_cast<::apache::thrift::legacy_type_id_t>(8628553040095454508ull)
@@ -1092,7 +1085,6 @@ class struct5_struct_traits {
       member::field3,
       member::field4
   >;
-  using members_annotations = __fbthrift_annotations::members;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
       static_cast<::apache::thrift::legacy_type_id_t>(7967269041282488716ull)
@@ -1129,7 +1121,6 @@ class struct_binary_struct_traits {
   using members = ::fatal::list<
       member::bi
   >;
-  using members_annotations = __fbthrift_annotations::members;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
       static_cast<::apache::thrift::legacy_type_id_t>(15392351242833807340ull)
@@ -1188,7 +1179,6 @@ class dep_A_struct_struct_traits {
       member::c,
       member::i_a
   >;
-  using members_annotations = __fbthrift_annotations::members;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
       static_cast<::apache::thrift::legacy_type_id_t>(8602591000426722284ull)
@@ -1247,7 +1237,6 @@ class dep_B_struct_struct_traits {
       member::c,
       member::i_a
   >;
-  using members_annotations = __fbthrift_annotations::members;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
       static_cast<::apache::thrift::legacy_type_id_t>(8784116305731192876ull)
@@ -1368,7 +1357,6 @@ class annotated_struct_traits {
   using members = ::fatal::list<
       member::a
   >;
-  using members_annotations = __fbthrift_annotations::members;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
       static_cast<::apache::thrift::legacy_type_id_t>(13050506750255744236ull)
@@ -1702,7 +1690,6 @@ class struct_with_special_names_struct_traits {
       member::field,
       member::fields
   >;
-  using members_annotations = __fbthrift_annotations::members;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
       static_cast<::apache::thrift::legacy_type_id_t>(1059263577269097804ull)
@@ -1739,7 +1726,6 @@ class StructWithFieldAdapter_struct_traits {
   using members = ::fatal::list<
       member::field
   >;
-  using members_annotations = __fbthrift_annotations::members;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
       static_cast<::apache::thrift::legacy_type_id_t>(12839341089809937516ull)

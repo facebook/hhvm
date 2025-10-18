@@ -387,7 +387,6 @@ FATAL_S(structBd_annotation2v, "some value");
 TEST(fatal_struct, member_annotations) {
   using info = apache::thrift::reflect_struct<structB>;
 
-  EXPECT_SAME<fatal::list<>, info::members_annotations::c::map>();
   EXPECT_SAME<
       fatal::list<>,
       fatal::get<info::members, info::member::c::name, fatal::get_type::name>::
@@ -400,21 +399,7 @@ TEST(fatal_struct, member_annotations) {
       apache::thrift::annotation<structBd_annotation1k, structBd_annotation1v>,
       apache::thrift::annotation<structBd_annotation2k, structBd_annotation2v>>;
 
-  EXPECT_SAME<expected_d_map, info::members_annotations::d::map>();
   EXPECT_SAME<expected_d_map, annotations_d::map>();
-
-  EXPECT_SAME<
-      structBd_annotation1k,
-      info::members_annotations::d::keys::another_annotation>();
-  EXPECT_SAME<
-      structBd_annotation1v,
-      info::members_annotations::d::values::another_annotation>();
-  EXPECT_SAME<
-      structBd_annotation2k,
-      info::members_annotations::d::keys::some_annotation>();
-  EXPECT_SAME<
-      structBd_annotation2v,
-      info::members_annotations::d::values::some_annotation>();
 
   EXPECT_SAME<structBd_annotation1k, annotations_d::keys::another_annotation>();
   EXPECT_SAME<
@@ -504,44 +489,6 @@ FATAL_S(annotated_v_m_mixed_list, "[\"a\", 1, \"b\", 2]");
 FATAL_S(annotated_v_m_int_map, "{\"a\": 1, \"b\": -2, \"c\": -3}");
 FATAL_S(annotated_v_m_str_map, "{\"a\": \"A\", \"b\": \"B\", \"c\": \"C\"}");
 FATAL_S(annotated_v_m_mixed_map, "{\"a\": -2, \"b\": \"B\", \"c\": 3}");
-
-TEST(fatal_struct, structured_member_annotations) {
-  using info =
-      apache::thrift::reflect_struct<annotated>::members_annotations::a;
-
-  using bf =
-      apache::thrift::annotation<annotated_m_b_false, annotated_v_m_b_false>;
-  using bt =
-      apache::thrift::annotation<annotated_m_b_true, annotated_v_m_b_true>;
-  using i = apache::thrift::annotation<annotated_m_int, annotated_v_m_int>;
-  using s =
-      apache::thrift::annotation<annotated_m_string, annotated_v_m_string>;
-  using il =
-      apache::thrift::annotation<annotated_m_int_list, annotated_v_m_int_list>;
-  using sl =
-      apache::thrift::annotation<annotated_m_str_list, annotated_v_m_str_list>;
-  using ml = apache::thrift::
-      annotation<annotated_m_mixed_list, annotated_v_m_mixed_list>;
-  using im =
-      apache::thrift::annotation<annotated_m_int_map, annotated_v_m_int_map>;
-  using sm =
-      apache::thrift::annotation<annotated_m_str_map, annotated_v_m_str_map>;
-  using mm = apache::thrift::
-      annotation<annotated_m_mixed_map, annotated_v_m_mixed_map>;
-
-  EXPECT_SAME<bf, fatal::get<info::map, info::keys::m_b_false>>();
-  EXPECT_SAME<bt, fatal::get<info::map, info::keys::m_b_true>>();
-  EXPECT_SAME<i, fatal::get<info::map, info::keys::m_int>>();
-  EXPECT_SAME<s, fatal::get<info::map, info::keys::m_string>>();
-  EXPECT_SAME<il, fatal::get<info::map, info::keys::m_int_list>>();
-  EXPECT_SAME<sl, fatal::get<info::map, info::keys::m_str_list>>();
-  EXPECT_SAME<ml, fatal::get<info::map, info::keys::m_mixed_list>>();
-  EXPECT_SAME<im, fatal::get<info::map, info::keys::m_int_map>>();
-  EXPECT_SAME<sm, fatal::get<info::map, info::keys::m_str_map>>();
-  EXPECT_SAME<mm, fatal::get<info::map, info::keys::m_mixed_map>>();
-
-  EXPECT_SAME<fatal::list<bf, bt, i, il, im, ml, mm, sl, sm, s>, info::map>();
-}
 
 TEST(fatal_struct, set_methods) {
   using info = apache::thrift::reflect_struct<struct4>;

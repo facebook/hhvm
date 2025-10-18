@@ -25,7 +25,9 @@ class FileQLogger;
 
 namespace samples {
 
-class HQClient : private quic::QuicSocket::ConnectionSetupCallback {
+class HQClient
+    : private quic::QuicSocket::ConnectionSetupCallback
+    , private quic::QuicPathManager::PathValidationCallback {
  public:
   explicit HQClient(const HQToolClientParams& params);
 
@@ -44,6 +46,9 @@ class HQClient : private quic::QuicSocket::ConnectionSetupCallback {
   void onConnectionSetupError(quic::QuicError code) noexcept override;
   void onTransportReady() noexcept override;
   void onReplaySafe() noexcept override;
+
+  // Path validation callback
+  void onPathValidationResult(const PathInfo& pathInfo) override;
 
   proxygen::HTTPTransaction* newTransaction(
       proxygen::HTTPTransactionHandler* handler);

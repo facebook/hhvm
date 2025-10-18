@@ -164,9 +164,13 @@ void HQClient::sendRequests(bool closeSession, uint64_t numOpenableStreams) {
   // will keep scheduling itself until there are no more requests.
   if (params_.sendRequestsSequentially && !httpPaths_.empty()) {
     auto callSendRequestsAfterADelay = [&]() {
-      if (params_.migrateClient) {
-        quicClient_->onNetworkSwitch(
-            std::make_unique<FollyQuicAsyncUDPSocket>(qEvb_));
+      if (params_.migrateClient && httpPaths_.size() % 2 == 0) {
+        auto newSock = std::make_unique<FollyQuicAsyncUDPSocket>(qEvb_);
+        auto bindRes = newSock->bind(folly::SocketAddress("::", 0));
+        CHECK(!bindRes.hasError());
+        auto startProbeRes =
+            quicClient_->startPathProbe(std::move(newSock), this);
+        CHECK(!startProbeRes.hasError()) << startProbeRes.error();
       }
       std::chrono::milliseconds gap = requestGaps_.front();
       requestGaps_.pop_front();
@@ -325,6 +329,28 @@ void HQClient::initializeQLogger() {
   auto qLogger = std::make_shared<HQLoggerHelper>(
       params_.qLoggerPath, params_.prettyJson, quic::VantagePoint::Client);
   quicClient_->setQLogger(std::move(qLogger));
+}
+
+void HQClient::onPathValidationResult(const PathInfo& pathInfo) {
+  if (pathInfo.status == PathStatus::Validated) {
+    LOG(INFO) << fmt::format(
+        "Path probe successful. Migrating connection to: local address = {}, "
+        "peer address = {}",
+        pathInfo.localAddress.describe(),
+        pathInfo.peerAddress.describe());
+    auto migrationRes = quicClient_->migrateConnection(pathInfo.id);
+    if (migrationRes.hasError()) {
+      LOG(ERROR) << "Failed to migrate connection: " << migrationRes.error();
+    }
+  } else {
+    LOG(ERROR) << "Path probe timed out. Deleting the path.";
+    auto removeRes = quicClient_->removePath(pathInfo.id);
+    if (removeRes.hasError()) {
+      LOG(ERROR) << "Failed to remove path: " << removeRes.error();
+      failed_ = true;
+      evb_.terminateLoopSoon();
+    }
+  }
 }
 
 int startClient(const HQToolClientParams& params) {

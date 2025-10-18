@@ -59,12 +59,11 @@ struct move_to_unique_ptr_fn;
 struct assign_from_unique_ptr_fn;
 struct union_value_unsafe_fn;
 struct is_non_optional_field_set_manually_or_by_serializer_fn;
-template <typename T, typename U>
-using EnableIfImplicit = std::enable_if_t<
-    std::is_same<
-        std::add_const_t<std::remove_reference_t<U>>,
-        std::remove_reference_t<T>>{} &&
-    !(std::is_rvalue_reference<T>{} && std::is_lvalue_reference<U>{})>;
+template <typename U, typename T>
+concept ImplicitlyBindableTo = std::is_same_v<
+                                   std::add_const_t<std::remove_reference_t<U>>,
+                                   std::remove_reference_t<T>> &&
+    !(std::is_rvalue_reference_v<T> && std::is_lvalue_reference_v<U>);
 
 } // namespace detail
 
@@ -102,9 +101,7 @@ class field_ref {
       const uint8_t bit_index = 0) noexcept
       : value_(value), bitref_(is_set, bit_index) {}
 
-  template <
-      typename U,
-      typename = apache::thrift::detail::EnableIfImplicit<T, U>>
+  template <detail::ImplicitlyBindableTo<T> U>
   FOLLY_ERASE /* implicit */ field_ref(const field_ref<U>& other) noexcept
       : value_(other.value_), bitref_(other.bitref_) {}
 
@@ -348,9 +345,7 @@ class optional_field_ref {
       const uint8_t bit_index = 0) noexcept
       : value_(value), bitref_(is_set, bit_index) {}
 
-  template <
-      typename U,
-      typename = apache::thrift::detail::EnableIfImplicit<T, U>>
+  template <detail::ImplicitlyBindableTo<T> U>
   FOLLY_ERASE /* implicit */ optional_field_ref(
       const optional_field_ref<U>& other) noexcept
       : value_(other.value_), bitref_(other.bitref_) {}
@@ -690,9 +685,7 @@ class optional_boxed_field_ref {
   FOLLY_ERASE explicit optional_boxed_field_ref(T value) noexcept
       : value_(value) {}
 
-  template <
-      typename U,
-      typename = apache::thrift::detail::EnableIfImplicit<T, U>>
+  template <detail::ImplicitlyBindableTo<T> U>
   FOLLY_ERASE /* implicit */
   optional_boxed_field_ref(const optional_boxed_field_ref<U>& other) noexcept
       : value_(other.value_) {}
@@ -1001,9 +994,7 @@ class intern_boxed_field_ref {
       const uint8_t bit_index = 0) noexcept
       : value_(value), get_default_(get_default), bitref_(is_set, bit_index) {}
 
-  template <
-      typename U,
-      typename = apache::thrift::detail::EnableIfImplicit<T, U>>
+  template <detail::ImplicitlyBindableTo<T> U>
   FOLLY_ERASE /* implicit */ intern_boxed_field_ref(
       const intern_boxed_field_ref<U>& other) noexcept
       : value_(other.value_), bitref_(other.bitref_) {}
@@ -1227,9 +1218,7 @@ class terse_intern_boxed_field_ref {
       T value, get_default_t get_default) noexcept
       : value_(value), get_default_(get_default) {}
 
-  template <
-      typename U,
-      typename = apache::thrift::detail::EnableIfImplicit<T, U>>
+  template <detail::ImplicitlyBindableTo<T> U>
   FOLLY_ERASE /* implicit */ terse_intern_boxed_field_ref(
       const terse_intern_boxed_field_ref<U>& other) noexcept
       : value_(other.value_) {}
@@ -1606,9 +1595,7 @@ class required_field_ref {
   FOLLY_ERASE explicit required_field_ref(reference_type value) noexcept
       : value_(value) {}
 
-  template <
-      typename U,
-      typename = apache::thrift::detail::EnableIfImplicit<T, U>>
+  template <detail::ImplicitlyBindableTo<T> U>
   FOLLY_ERASE /* implicit */ required_field_ref(
       const required_field_ref<U>& other) noexcept
       : value_(other.value_) {}
@@ -2118,9 +2105,7 @@ class terse_field_ref {
 
   FOLLY_ERASE terse_field_ref(reference_type value) noexcept : value_(value) {}
 
-  template <
-      typename U,
-      typename = apache::thrift::detail::EnableIfImplicit<T, U>>
+  template <detail::ImplicitlyBindableTo<T> U>
   FOLLY_ERASE /* implicit */ terse_field_ref(
       const terse_field_ref<U>& other) noexcept
       : value_(other.value_) {}

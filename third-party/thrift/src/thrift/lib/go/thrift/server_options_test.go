@@ -101,8 +101,13 @@ func TestWithProcessorStats(t *testing.T) {
 	require.Equal(t, customProcessorStats, customOptions.processorStats)
 }
 
-func TestServerObserverDefaultNotNil(t *testing.T) {
-	serverOptions := newServerOptions()
-	require.NotNil(t, serverOptions.serverObserver)
-	require.IsType(t, &noopServerObserver{}, serverOptions.serverObserver)
+func TestWithServerObserver(t *testing.T) {
+	defaultOptions := newServerOptions()
+	require.NotNil(t, defaultOptions.serverObserver)
+	require.IsType(t, &noopServerObserver{}, defaultOptions.serverObserver)
+
+	type customServerObserver = noopServerObserver
+	customObserver := &customServerObserver{}
+	customOptions := newServerOptions(WithServerObserver(customObserver))
+	require.Equal(t, customObserver, customOptions.serverObserver)
 }

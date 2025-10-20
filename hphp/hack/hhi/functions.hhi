@@ -137,5 +137,5 @@ namespace HH {
 
   function prefetch_units(keyset<string> $paths, bool $hint): void;
 
-  function legacy_is_truthy(mixed $val)[]: bool;
+  function legacy_is_truthy(readonly mixed $val)[]: bool;
 }

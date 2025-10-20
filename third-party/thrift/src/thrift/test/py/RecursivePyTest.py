@@ -18,14 +18,13 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import unittest
 
-from thrift.protocol import TBinaryProtocol
+from Recursive.ttypes import CoRec, CoRec2, RecList, RecTree
+
 from thrift.protocol.TBinaryProtocol import (
     TBinaryProtocolAcceleratedFactory,
     TBinaryProtocolFactory,
 )
-from thrift.transport import TTransport
 from thrift.util.Serializer import deserialize, serialize
-from Recursive.ttypes import *
 
 
 class AbstractTestRecursivePythonStructs:

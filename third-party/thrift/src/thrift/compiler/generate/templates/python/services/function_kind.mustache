@@ -15,6 +15,10 @@
   limitations under the License.
 
 }}{{^function:oneway?}}{{!
+  }}{{#function:bidirectional_stream?}}{{!
+    }}RpcKind.BIDIRECTIONAL_STREAM{{!
+  }}{{/function:bidirectional_stream?}}{{!
+  }}{{^function:bidirectional_stream?}}{{!
   }}{{^function:stream?}}{{!
     }}{{^function:sink?}}{{!
       }}RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE{{!
@@ -28,6 +32,7 @@
   }}{{#function:stream?}}{{!
     }}RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE{{!
   }}{{/function:stream?}}{{!
+  }}{{/function:bidirectional_stream?}}{{!
 }}{{/function:oneway?}}{{!
 
 }}{{#function:oneway?}}{{!

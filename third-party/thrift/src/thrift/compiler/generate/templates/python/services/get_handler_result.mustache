@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}value = {{^function:stream?}}await {{/function:stream?}}self.{{function:name}}({{#function:args}}args_struct.{{field:py_name}},{{/function:args}})
+}}{{^function:bidirectional_stream?}}value = {{^function:stream?}}await {{/function:stream?}}self.{{function:name}}({{#function:args}}args_struct.{{field:py_name}},{{/function:args}})
 {{#function:stream?}}
 {{#function:stream_has_first_response?}}
 value, stream = await value
@@ -43,3 +43,14 @@ return_stream = self._fbthrift__stream_wrapper_{{function:name}}(stream, protoco
 {{#function:sink?}}
 return_sink_callback = self._fbthrift__sink_wrapper_{{function:name}}(sink_callback, protocol)
 {{/function:sink?}}
+{{/function:bidirectional_stream?}}
+{{#function:bidirectional_stream?}}
+value = await self.{{function:name}}({{#function:args}}args_struct.{{field:py_name}},{{/function:args}})
+{{#function:stream_has_first_response?}}
+value, bidi_callback = await value
+{{/function:stream_has_first_response?}}{{^function:stream_has_first_response?}}
+bidi_callback = value
+{{/function:stream_has_first_response?}}
+return_struct = {{> types/function_return_type}}()
+return_bidi_callback = self._fbthrift__bidi_wrapper_{{function:name}}(bidi_callback, protocol)
+{{/function:bidirectional_stream?}}

@@ -17,7 +17,7 @@
 }}
 {{#function:return_type}}
 {{^function:sink_or_stream?}}{{> metadata/thrift_type }}{{/function:sink_or_stream?}}{{!
-}}{{#function:sink?}}{{!
+}}{{^function:bidirectional_stream?}}{{#function:sink?}}{{!
     }}_fbthrift_metadata.ThriftType(t_sink=_fbthrift_metadata.ThriftSinkType({{!
     }}elemType={{#function:sink_elem_type}}{{> metadata/thrift_type }}{{/function:sink_elem_type}},{{!
     }}finalResponseType={{#function:sink_final_response_type}}{{> metadata/thrift_type }}{{/function:sink_final_response_type}}{{!
@@ -27,5 +27,11 @@
     }}_fbthrift_metadata.ThriftType(t_stream=_fbthrift_metadata.ThriftStreamType({{!
     }}elemType={{#function:stream_elem_type}}{{> metadata/thrift_type }}{{/function:stream_elem_type}}{{!
     }}{{#function:stream_has_first_response?}},initialResponseType={{#function:stream_first_response_type}}{{> metadata/thrift_type }}{{/function:stream_first_response_type}}{{/function:stream_has_first_response?}})){{!
-}}{{/function:stream?}}{{!
+}}{{/function:stream?}}{{/function:bidirectional_stream?}}{{!
+}}{{#function:bidirectional_stream?}}{{!
+    }}_fbthrift_metadata.ThriftType(t_bidi=_fbthrift_metadata.ThriftBidiType({{!
+    }}sinkElemType={{#function:sink_elem_type}}{{> metadata/thrift_type }}{{/function:sink_elem_type}},{{!
+    }}streamElemType={{#function:sink_elem_type}}{{> metadata/thrift_type }}{{/function:sink_elem_type}}{{!
+    }}{{#function:stream_has_first_response?}},initialResponseType={{#function:stream_first_response_type}}{{> metadata/thrift_type }}{{/function:stream_first_response_type}}{{/function:stream_has_first_response?}})){{!
+}}{{/function:bidirectional_stream?}}{{!
 }}{{/function:return_type}}

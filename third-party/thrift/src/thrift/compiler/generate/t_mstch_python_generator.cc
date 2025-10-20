@@ -313,6 +313,15 @@ bool service_has_any_sink_types(const t_service* service) {
       [](const auto& fn_iter) -> bool { return fn_iter.sink(); });
 }
 
+bool service_has_any_bidi_types(const t_service* service) {
+  return std::any_of(
+      service->functions().begin(),
+      service->functions().end(),
+      [](const auto& fn_iter) -> bool {
+        return fn_iter.is_bidirectional_stream();
+      });
+}
+
 class python_mstch_program : public mstch_program {
  public:
   python_mstch_program(
@@ -998,6 +1007,16 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
                  self.interactions().begin(),
                  self.interactions().end(),
                  service_has_any_sink_types);
+    });
+    def.property("has_bidi_functions?", [](const t_program& self) {
+      return std::any_of(
+                 self.services().begin(),
+                 self.services().end(),
+                 service_has_any_bidi_types) ||
+          std::any_of(
+                 self.interactions().begin(),
+                 self.interactions().end(),
+                 service_has_any_bidi_types);
     });
 
     return std::move(def).make();

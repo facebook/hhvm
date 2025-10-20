@@ -35,6 +35,9 @@ from {{program:base_library_package}}.client.omni_client import InteractionMetho
 {{#program:has_sink_functions?}}
 from {{program:base_library_package}}.streaming.sink import ClientSink as _fbthrift_ClientSink
 {{/program:has_sink_functions?}}
+{{#program:has_bidi_functions?}}
+from {{program:base_library_package}}.streaming.bidistream import BidirectionalStream as _fbthrift_BidirectionalStream
+{{/program:has_bidi_functions?}}
 from {{program:base_library_package}}.common import RpcOptions{{!
 }}{{#python.generate_mutable_types?}}
 import {{program:base_library_package}}.mutable_containers as _fbthrift_python_mutable_containers

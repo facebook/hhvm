@@ -1,1 +1,2 @@
 cpp2: streamdev-mstch_cpp2 src/module.thrift
+python: streamdev-mstch_python src/module.thrift

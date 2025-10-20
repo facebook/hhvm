@@ -220,7 +220,7 @@ class _fbthrift_BiDiService_simple_result(metaclass=_fbthrift_python_mutable_typ
 
 
 class _fbthrift_BiDiService_simple_result_stream_elem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
-    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.BIDIRECTIONAL_STREAM
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -236,7 +236,7 @@ class _fbthrift_BiDiService_simple_result_stream_elem(metaclass=_fbthrift_python
 
 
 class _fbthrift_BiDiService_simple_result_sink_elem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
-    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINK
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.BIDIRECTIONAL_STREAM
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -260,9 +260,6 @@ class _fbthrift_BiDiService_simple_result_sink_elem(metaclass=_fbthrift_python_m
             yield serialize_iobuf(cls(success=item), protocol)
 
 
-class _fbthrift_BiDiService_simple_result_sink_final(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
-    _fbthrift_SPEC = (
-    )
 
 
 class _fbthrift_BiDiService_response_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -286,7 +283,7 @@ class _fbthrift_BiDiService_response_result(metaclass=_fbthrift_python_mutable_t
 
 
 class _fbthrift_BiDiService_response_result_stream_elem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
-    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.BIDIRECTIONAL_STREAM
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -302,7 +299,7 @@ class _fbthrift_BiDiService_response_result_stream_elem(metaclass=_fbthrift_pyth
 
 
 class _fbthrift_BiDiService_response_result_sink_elem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
-    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINK
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.BIDIRECTIONAL_STREAM
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -326,9 +323,6 @@ class _fbthrift_BiDiService_response_result_sink_elem(metaclass=_fbthrift_python
             yield serialize_iobuf(cls(success=item), protocol)
 
 
-class _fbthrift_BiDiService_response_result_sink_final(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
-    _fbthrift_SPEC = (
-    )
 
 
 class _fbthrift_BiDiService_canThrow_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -353,7 +347,7 @@ class _fbthrift_BiDiService_canThrow_result(metaclass=_fbthrift_python_mutable_t
 
 
 class _fbthrift_BiDiService_canThrow_result_stream_elem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
-    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.BIDIRECTIONAL_STREAM
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -380,7 +374,7 @@ class _fbthrift_BiDiService_canThrow_result_stream_elem(metaclass=_fbthrift_pyth
 
 
 class _fbthrift_BiDiService_canThrow_result_sink_elem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
-    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINK
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.BIDIRECTIONAL_STREAM
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -421,9 +415,6 @@ class _fbthrift_BiDiService_canThrow_result_sink_elem(metaclass=_fbthrift_python
             raise exp
 
 
-class _fbthrift_BiDiService_canThrow_result_sink_final(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
-    _fbthrift_SPEC = (
-    )
 
 
 
@@ -432,15 +423,12 @@ _fbthrift_python_mutable_types.fill_specs(
     _fbthrift_BiDiService_simple_result,
     _fbthrift_BiDiService_simple_result_stream_elem,
     _fbthrift_BiDiService_simple_result_sink_elem,
-    _fbthrift_BiDiService_simple_result_sink_final,
     _fbthrift_BiDiService_response_args,
     _fbthrift_BiDiService_response_result,
     _fbthrift_BiDiService_response_result_stream_elem,
     _fbthrift_BiDiService_response_result_sink_elem,
-    _fbthrift_BiDiService_response_result_sink_final,
     _fbthrift_BiDiService_canThrow_args,
     _fbthrift_BiDiService_canThrow_result,
     _fbthrift_BiDiService_canThrow_result_stream_elem,
     _fbthrift_BiDiService_canThrow_result_sink_elem,
-    _fbthrift_BiDiService_canThrow_result_sink_final,
 )

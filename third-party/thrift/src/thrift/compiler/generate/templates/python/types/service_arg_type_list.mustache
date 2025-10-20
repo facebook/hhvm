@@ -21,6 +21,7 @@ A list of the argument and result types for functions on thrift services (and in
 {{^function:oneway?}}
 _fbthrift_{{service:name}}_{{function:name}}_result,
 {{/function:oneway?}}
+{{^function:bidirectional_stream?}}
 {{#function:stream?}}
 _fbthrift_{{service:name}}_{{function:name}}_result_stream_elem,
 {{/function:stream?}}
@@ -28,4 +29,9 @@ _fbthrift_{{service:name}}_{{function:name}}_result_stream_elem,
 _fbthrift_{{service:name}}_{{function:name}}_result_sink_elem,
 _fbthrift_{{service:name}}_{{function:name}}_result_sink_final,
 {{/function:sink?}}
+{{/function:bidirectional_stream?}}
+{{#function:bidirectional_stream?}}
+_fbthrift_{{service:name}}_{{function:name}}_result_stream_elem,
+_fbthrift_{{service:name}}_{{function:name}}_result_sink_elem,
+{{/function:bidirectional_stream?}}
 {{/service:supported_functions}}

@@ -111,14 +111,6 @@ class _fbthrift_BiDiService_simple_result_sink_elem(_fbthrift_python_types.Struc
     ) -> None: ...
 
 
-class _fbthrift_BiDiService_simple_result_sink_final(_fbthrift_python_types.Struct):
-    success: _typing.Final[]
-
-    def __init__(
-        self,
-        *,
-        success: _typing.Optional[] = ...
-    ) -> None: ...
 
 
 class _fbthrift_BiDiService_response_args(_fbthrift_python_types.Struct):
@@ -169,14 +161,6 @@ class _fbthrift_BiDiService_response_result_sink_elem(_fbthrift_python_types.Str
     ) -> None: ...
 
 
-class _fbthrift_BiDiService_response_result_sink_final(_fbthrift_python_types.Struct):
-    success: _typing.Final[]
-
-    def __init__(
-        self,
-        *,
-        success: _typing.Optional[] = ...
-    ) -> None: ...
 
 
 class _fbthrift_BiDiService_canThrow_args(_fbthrift_python_types.Struct):
@@ -232,11 +216,3 @@ class _fbthrift_BiDiService_canThrow_result_sink_elem(_fbthrift_python_types.Str
     ) -> None: ...
 
 
-class _fbthrift_BiDiService_canThrow_result_sink_final(_fbthrift_python_types.Struct):
-    success: _typing.Final[]
-
-    def __init__(
-        self,
-        *,
-        success: _typing.Optional[] = ...
-    ) -> None: ...

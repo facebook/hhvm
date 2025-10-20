@@ -110,5 +110,29 @@ struct from_type_tag<type::adapted<Adapter, Tag>> {
   using type = from_type_tag_t<Tag>;
 };
 
+template <class TC>
+struct remove_indirection_tag {
+  using type = TC;
+};
+template <class TC>
+using remove_indirection_tag_t = typename remove_indirection_tag<TC>::type;
+template <class TC>
+struct remove_indirection_tag<list<TC>> {
+  using type = list<remove_indirection_tag_t<TC>>;
+};
+template <class TC>
+struct remove_indirection_tag<set<TC>> {
+  using type = set<remove_indirection_tag_t<TC>>;
+};
+template <class Key, class Value>
+struct remove_indirection_tag<map<Key, Value>> {
+  using type =
+      map<remove_indirection_tag_t<Key>, remove_indirection_tag_t<Value>>;
+};
+template <class TC, class T>
+struct remove_indirection_tag<detail::indirection_tag<TC, T>> {
+  using type = TC;
+};
+
 } // namespace type_class
 } // namespace apache::thrift

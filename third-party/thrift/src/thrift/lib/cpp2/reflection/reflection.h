@@ -43,6 +43,7 @@
 #include <thrift/lib/cpp2/FieldRefTraits.h>
 #include <thrift/lib/cpp2/TypeClass.h>
 #include <thrift/lib/cpp2/op/Get.h>
+#include <thrift/lib/cpp2/type/detail/TypeClassFromTypeTag.h>
 
 #include <thrift/lib/cpp2/reflection/internal/reflection-inl-pre.h>
 
@@ -721,7 +722,13 @@ struct reflected_struct_data_member {
    *
    * @author: Marcelo Juchem <marcelo@fb.com>
    */
-  using type_class = typename Traits::type_class;
+  using type_class =
+      type_class::remove_indirection_tag_t< // Due to historical reason we need
+                                            // to remove indirection_tag for
+                                            // backward compatibility with
+                                            // legacy reflection
+          type_class::from_type_tag_t<
+              op::get_type_tag<typename Traits::owner, typename Traits::tag>>>;
 
   /**
    * An instantiation of `reflected_annotations` representing the annotations

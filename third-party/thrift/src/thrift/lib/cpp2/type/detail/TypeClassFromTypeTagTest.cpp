@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <set>
 #include <type_traits>
 #include <thrift/lib/cpp2/type/detail/TypeClassFromTypeTag.h>
 
@@ -39,4 +40,13 @@ static_assert(
 static_assert(std::is_same_v<
               from_type_tag_t<type::adapted<Foo, type::bool_t>>,
               integral>);
+
+static_assert(
+    std::is_same_v<
+        remove_indirection_tag_t<map<
+            string,
+            list<detail::
+                     indirection_tag<set<integral>, std::set<std::int32_t>>>>>,
+        map<string, list<set<integral>>>>);
+
 } // namespace apache::thrift::type_class

@@ -11,6 +11,7 @@
 #include <optional>
 
 #include <folly/IPAddress.h>
+#include <folly/Random.h>
 #include <folly/io/IOBuf.h>
 
 #include "mcrouter/lib/carbon/MessageCommon.h"
@@ -79,11 +80,17 @@ class RequestCommon : public MessageCommon {
 
   std::optional<uint64_t> getWriteTimestampNs() const noexcept;
 
+  uint64_t uniqueId() const {
+    return uniqueId_;
+  }
+
  protected:
   void markBufferAsDirty();
 
  private:
   const folly::IOBuf* serializedBuffer_{nullptr};
+  // random unique identifier
+  uint64_t uniqueId_{folly::Random::rand64()};
   // cat token(s) in string serialzed format
   std::optional<std::string> cryptoAuthToken_;
   // Hash string of primary (non-host) tls client identities

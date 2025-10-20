@@ -16,7 +16,8 @@ namespace carbon {
 #ifndef LIBMC_FBTRACE_DISABLE
 RequestCommon::RequestCommon() = default;
 
-RequestCommon::RequestCommon(const RequestCommon& other) {
+RequestCommon::RequestCommon(const RequestCommon& other)
+    : uniqueId_{other.uniqueId_} {
   traceContext_ = other.traceContext_;
   cryptoAuthToken_ = other.cryptoAuthToken_;
   replyBitMask_ = other.replyBitMask_;
@@ -29,6 +30,7 @@ RequestCommon& RequestCommon::operator=(const RequestCommon& other) {
     cryptoAuthToken_ = other.cryptoAuthToken_;
     replyBitMask_ = other.replyBitMask_;
     clientIdentifier_ = other.clientIdentifier_;
+    uniqueId_ = other.uniqueId_;
   }
   return *this;
 }

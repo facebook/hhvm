@@ -166,6 +166,14 @@ class RouteHandleTraverser {
     }
   };
 
+  //
+  // State that can be propagated down the routing tree and mutated by
+  // individual route handles, if necessary.
+  //
+  struct State {
+    std::optional<uint64_t> threadAffinitySalt;
+  };
+
  private:
   StartFunc start_;
   EndFunc end_;
@@ -173,6 +181,7 @@ class RouteHandleTraverser {
   SRHostInfoPtrFunc srHostInfoPtrFn_;
   SRHostFunc srHostFn_;
   Options options_;
+  State state_;
 
  public:
   const Options& options() const {
@@ -181,6 +190,14 @@ class RouteHandleTraverser {
 
   Options& options() {
     return options_;
+  }
+
+  State const& state() const {
+    return state_;
+  }
+
+  State& state() {
+    return state_;
   }
 };
 } // namespace memcache

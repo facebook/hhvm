@@ -7,6 +7,7 @@
 
 #include <gtest/gtest.h>
 
+#include <folly/executors/IOThreadPoolExecutor.h>
 #include <folly/fibers/FiberManagerMap.h>
 #include <folly/io/async/EventBaseManager.h>
 
@@ -133,9 +134,9 @@ TEST(AsyncMcServerShutdownTest, postShutdownConnections) {
   TestServer server(kNumWorkers);
   server.start();
 
-  std::vector<std::thread> threads;
-  for (size_t i = 0; i < kNumClients; ++i) {
-    threads.emplace_back([&]() {
+  folly::IOThreadPoolExecutor pool(kNumClients, kNumClients);
+  for (auto& evb : pool.getAllEventBases()) {
+    evb->runInEventBaseThread([&] {
       auto client = std::make_shared<TestClient>(server.getPort());
       for (size_t r = 0; r < kNumRequests; ++r) {
         client->send();
@@ -144,7 +145,4 @@ TEST(AsyncMcServerShutdownTest, postShutdownConnections) {
   }
 
   server.shutdown();
-  for (auto& t : threads) {
-    t.join();
-  }
 }

@@ -90,6 +90,7 @@ class fiber_local {
     int32_t selectedIndex{-1};
     uint32_t failoverCount{0};
     bool jumpThreads{false};
+    std::optional<uint64_t> jumpThreadsSalt;
     std::optional<uint64_t> bucketId;
     std::optional<std::string> distributionTargetRegion;
     RequestClass requestClass;
@@ -239,6 +240,14 @@ class fiber_local {
    */
   static bool shouldJumpThreads() {
     return folly::fibers::local<McrouterFiberContext>().jumpThreads;
+  }
+
+  /**
+   * When jumping to a different event base, apply this salt to the destination
+   * hash. This supports n-way thread affinity.
+   */
+  static std::optional<uint64_t>& jumpThreadsSalt() {
+    return folly::fibers::local<McrouterFiberContext>().jumpThreadsSalt;
   }
 
   /**

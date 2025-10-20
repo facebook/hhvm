@@ -30,8 +30,6 @@ ProxyRequestContext::~ProxyRequestContext() {
     return;
   }
 
-  assert(replied_);
-
   if (processing_) {
     --proxyBase_.numRequestsProcessing_;
     proxyBase_.stats().decrement(proxy_reqs_processing_stat);

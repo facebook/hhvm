@@ -236,7 +236,13 @@ CarbonRouterClient<RouterInfo>::findAffinitizedProxyIdx(
     auto config = proxies_[proxyIdx_]->getConfigLocked();
     config.second.proxyRoute().traverse(req, t);
   }
-  return hash ? std::make_optional(*hash % proxies_.size()) : std::nullopt;
+  if (!hash) {
+    return std::nullopt;
+  }
+  if (auto salt = t.state().threadAffinitySalt) {
+    hash = *hash + *salt;
+  }
+  return *hash % proxies_.size();
 }
 
 template <class RouterInfo>

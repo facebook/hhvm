@@ -18,8 +18,12 @@ namespace java.swift test.fixtures.annotation
 
 include "thrift/annotation/compat.thrift"
 include "thrift/annotation/java.thrift"
+include "thrift/annotation/thrift.thrift"
 
-typedef map<i32, i64> (java.swift.type = "com.foo.FastIntLongMap") FMap
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {"java.swift.type": "com.foo.FastIntLongMap"},
+}
+typedef map<i32, i64> FMap
 
 @java.BinaryString
 typedef string binary_string
@@ -35,8 +39,10 @@ struct MyStruct {
   3: string detailField;
   @java.Annotation{java_annotation = "@com.foo.Ignored"}
   4: FMap detailMap;
-  5: string titi (java.swift.name = "toto");
-  6: string password (java.sensitive = "true");
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"java.swift.name": "toto"}}
+  5: string titi;
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"java.sensitive": "true"}}
+  6: string password;
 }
 
 @java.Mutable
@@ -59,15 +65,22 @@ struct BinaryMapping {
 }
 
 // The following were automatically generated and may benefit from renaming.
-typedef string (java.swift.binary_string = "1") string_6863
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {"java.swift.binary_string": "1"},
+}
+typedef string string_6863
 
 // The following were automatically generated and may benefit from renaming.
-typedef map<i32, FMap> (
-  java.swift.type = "com.foo.FastIntObjectMap<com.foo.FastIntLongMap>",
-) map_i32_FMap_5221
-typedef map<i64, string> (
-  java.swift.type = "com.foo.FastLongStringMap",
-) map_i64_string_9739
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "java.swift.type": "com.foo.FastIntObjectMap<com.foo.FastIntLongMap>",
+  },
+}
+typedef map<i32, FMap> map_i32_FMap_5221
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {"java.swift.type": "com.foo.FastLongStringMap"},
+}
+typedef map<i64, string> map_i64_string_9739
 
 union Unfortunate_union {
   @java.FieldUseUnmangledName

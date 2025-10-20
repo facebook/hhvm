@@ -2222,6 +2222,37 @@ struct CancelRequestsResponse {
   1: list<CancellationStatusOrError> results;
 }
 
+/**
+ * Information about an active request.
+ *
+ * requestId - The unique ID of the request.
+ * method - The name of the thrift method being called.
+ * clientPid - The PID of the client that made the request.
+ * cancelable - Whether this request can be cancelled.
+ * processName - Process name/command line of the client process that initiated this request.
+ *   Contains the full command line (with null-delimited arguments) from /proc/<pid>/cmdline.
+ *   This field helps clients identify which command they intend to cancel.
+ * startTimeNs - Timestamp when the request was first initiated (nanoseconds since epoch).
+ *   This helps clients determine the age of the request for cancellation decisions.
+ */
+struct ActiveRequestInfo {
+  1: i64 requestId;
+  2: string method;
+  3: pid_t clientPid;
+  4: bool cancelable;
+  5: optional string processName;
+  6: optional i64 startTimeNs;
+}
+
+/**
+ * Response for the getActiveRequests API.
+ *
+ * requests - List of currently active requests.
+ */
+struct GetActiveRequestsResponse {
+  1: list<ActiveRequestInfo> requests;
+}
+
 service EdenService extends fb303_core.BaseService {
   list<MountInfo> listMounts() throws (1: EdenError ex);
   void mount(1: MountArgument info) throws (1: EdenError ex);
@@ -3076,4 +3107,13 @@ service EdenService extends fb303_core.BaseService {
   CancelRequestsResponse cancelRequests(1: CancelRequestsParams params) throws (
     1: EdenError ex,
   );
+
+  /**
+   * Gets a list of currently active requests.
+   *
+   * This method returns information about all currently active Thrift requests,
+   * including their request IDs, method names, client PIDs, and whether they
+   * can be cancelled.
+   */
+  GetActiveRequestsResponse getActiveRequests() throws (1: EdenError ex);
 }

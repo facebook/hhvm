@@ -92,6 +92,7 @@ public class ThriftServerConfig {
   private boolean enableUDS = false;
   private String udsPath = null;
   private ClientAuth clientAuth = ClientAuth.OPTIONAL;
+  private boolean enableKeepAliveThread = true;
 
   private boolean enableAlpn = false;
 
@@ -703,6 +704,15 @@ public class ThriftServerConfig {
 
   public boolean isEnableAlpn() {
     return enableAlpn;
+  }
+
+  public ThriftServerConfig setEnableKeepAliveThread(boolean enableKeepAliveThread) {
+    this.enableKeepAliveThread = enableKeepAliveThread;
+    return this;
+  }
+
+  public boolean isKeepAliveEnabled() {
+    return enableKeepAliveThread;
   }
 
   @Override

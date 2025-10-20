@@ -145,6 +145,11 @@ enum EdenErrorType {
   * be set to ENOENT.
   */
   ATTRIBUTE_UNAVAILABLE = 9,
+  /**
+   * An error occurred during request cancellation. The errorCode field will
+   * contain specific details about the cancellation failure.
+   */
+  CANCELLATION_ERROR = 10,
 }
 
 exception EdenError {
@@ -2173,6 +2178,49 @@ struct GetFileContentRequest {
 struct GetFileContentResponse {
   1: ScmBlobOrError blob;
 }
+/**
+ * Result for a successful cancellation attempt.
+ *
+ * requestId - The request ID that was successfully cancelled.
+ */
+struct CancellationStatus {
+  1: i64 requestId;
+}
+
+/**
+ * Request parameters for the cancelRequests API.
+ *
+ * requestIds - The list of unique IDs of the requests to cancel. Each ID
+ *   should correspond to an active or queued request in the system. Duplicate
+ *   IDs in the list will result in multiple attempts to cancel the same request.
+ */
+struct CancelRequestsParams {
+  1: list<i64> requestIds;
+}
+
+/**
+ * Result for a single cancellation attempt.
+ *
+ * Either contains success information or an error describing why the
+ * cancellation failed.
+ */
+union CancellationStatusOrError {
+  1: CancellationStatus success;
+  2: EdenError error;
+}
+
+/**
+ * Response for the cancelRequests API.
+ *
+ * results - List of cancellation results corresponding to the input request IDs.
+ *   The results are returned in the same order as the input requestIds from
+ *   CancelRequestsParams. Each result contains the original request ID and the
+ *   status of the cancellation attempt. The list will have the same length as
+ *   the input requestIds list, with one result per input ID.
+ */
+struct CancelRequestsResponse {
+  1: list<CancellationStatusOrError> results;
+}
 
 service EdenService extends fb303_core.BaseService {
   list<MountInfo> listMounts() throws (1: EdenError ex);
@@ -3016,4 +3064,16 @@ service EdenService extends fb303_core.BaseService {
   GetFileContentResponse getFileContent(
     1: GetFileContentRequest request,
   ) throws (1: EdenError ex);
+
+  /**
+   * Cancels requests with the given request IDs.
+   *
+   * This method allows clients to cancel ongoing requests by providing
+   * the unique request IDs. For each request ID, if the request is found
+   * and can be cancelled, the cancellation is triggered. The response
+   * contains the status of each cancellation attempt.
+   */
+  CancelRequestsResponse cancelRequests(1: CancelRequestsParams params) throws (
+    1: EdenError ex,
+  );
 }

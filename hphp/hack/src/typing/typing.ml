@@ -2504,6 +2504,8 @@ module rec Expr : sig
           (** Set to [false] when the subexpression is a lvalue we are defining. When true, we raise an error if [Lvar] or [This] expressions are not bound in the environment. *)
       immediately_called_lambda: bool;
           (** Set to [true] when checking a lambda expression that is immediately called *)
+      support_readonly_return: bool;
+          (** Set to [true] when the subexpression we are typing occurs inside an [ReadonlyExpr] expression. *)
     }
 
     val default : t
@@ -2602,6 +2604,7 @@ end = struct
       accept_using_var: bool;
       check_defined: bool;
       immediately_called_lambda: bool;
+      support_readonly_return: bool;
     }
     [@@deriving show]
 
@@ -2615,6 +2618,7 @@ end = struct
         accept_using_var = false;
         check_defined = true;
         immediately_called_lambda = false;
+        support_readonly_return = false;
       }
   end
 
@@ -4557,6 +4561,7 @@ end = struct
                 is_using_clause = ctxt.is_using_clause;
                 accept_using_var = false;
                 check_defined = ctxt.check_defined;
+                support_readonly_return = true;
               }
           env
           e
@@ -5695,6 +5700,7 @@ end = struct
    * The typing of call is different.
    *)
   and dispatch_call
+      ?(require_readonly_this = false)
       ~(expected : ExpectedTy.t option)
       ~ctxt
       p
@@ -6265,7 +6271,16 @@ end = struct
       let env = Env.set_readonly env true in
       (* Recurse onto the inner call *)
       let ((env, expr, ty), s) =
-        dispatch_call ~expected ~ctxt p env r explicit_targs el unpacked_element
+        dispatch_call
+          ~require_readonly_this:true
+          ~expected
+          ~ctxt
+          p
+          env
+          r
+          explicit_targs
+          el
+          unpacked_element
       in
       (match expr with
       | (ty, _, Call { func; targs; args; unpacked_arg }) ->
@@ -6308,17 +6323,20 @@ end = struct
       let arg_posl =
         List.map el ~f:(fun arg ->
             match arg with
-            | Aast_defs.Ainout (_, (_, pos, _))
-            | Aast_defs.Anamed (_, (_, pos, _))
-            | Aast_defs.Anormal (_, pos, _) ->
-              pos)
+            | Aast_defs.Ainout (_, (_, pos, e))
+            | Aast_defs.Anamed (_, (_, pos, e))
+            | Aast_defs.Anormal (_, pos, e) ->
+              (match e with
+              | ReadonlyExpr _ -> (pos, true)
+              | _ -> (pos, false)))
       in
-      let make_param pos ty =
+      let make_param (pos, is_readonly) ty =
         {
           fp_pos = Pos_or_decl.of_raw_pos pos;
           fp_name = None;
           fp_type = ty;
-          fp_flags = Typing_defs_flags.FunParam.default;
+          fp_flags =
+            Typing_defs_flags.FunParam.(set_readonly is_readonly default);
           fp_def_value = None;
         }
       in
@@ -6340,7 +6358,11 @@ end = struct
                         .Typing_local_types.ty;
                 };
               ft_ret = ty;
-              ft_flags = Typing_defs_flags.Fun.default;
+              ft_flags =
+                Typing_defs_flags.Fun.(
+                  set_readonly_this
+                    require_readonly_this
+                    (set_returns_readonly ctxt.support_readonly_return default));
               ft_require_package = None;
               ft_instantiated = true;
             } )
@@ -6351,7 +6373,12 @@ end = struct
           ~name:m
           ~ty:tfty
           ~class_id:(CIexpr e1)
-          ~methd:(Some { hmm_explicit_targs = []; hmm_args_pos = arg_posl })
+          ~methd:
+            (Some
+               {
+                 hmm_explicit_targs = [];
+                 hmm_args_pos = List.map ~f:fst arg_posl;
+               })
       in
       let (env, ty_err_opt) =
         Typing_utils.sub_type_i

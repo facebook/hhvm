@@ -214,7 +214,8 @@ class HandlerCallback<void> : public HandlerCallbackBase {
           DecoratorAfterCallback::noop());
 
 #if FOLLY_HAS_COROUTINES
-  folly::coro::Task<void> doInvokeServiceInterceptorsOnResponse(Ptr callback) {
+  static folly::coro::Task<void> doInvokeServiceInterceptorsOnResponse(
+      Ptr callback) {
     folly::Try<void> onResponseResult = co_await folly::coro::co_awaitTry(
         callback->processServiceInterceptorsOnResponse(
             apache::thrift::util::TypeErasedRef::of<folly::Unit>(folly::unit)));

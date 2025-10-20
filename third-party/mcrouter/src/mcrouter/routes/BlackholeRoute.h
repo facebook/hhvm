@@ -74,9 +74,8 @@ class BlackholeRoute {
   }
 
   template <class Request>
-  bool traverse(
-      const Request& req,
-      const RouteHandleTraverser<RouteHandleIf>& t) const {
+  bool traverse(const Request& req, RouteHandleTraverser<RouteHandleIf>& t)
+      const {
     if (shouldBlackhole(req, jsonMap_)) {
       return t(*blackholeRh_, req);
     }

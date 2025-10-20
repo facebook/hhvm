@@ -50,7 +50,7 @@ class ProxyRoute {
   template <class Request>
   bool traverse(
       const Request& req,
-      const RouteHandleTraverser<typename RouterInfo::RouteHandleIf>& t) const {
+      RouteHandleTraverser<typename RouterInfo::RouteHandleIf>& t) const {
     return t(*root_, req);
   }
 

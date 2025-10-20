@@ -45,9 +45,8 @@ class RateLimitRoute {
   }
 
   template <class Request>
-  bool traverse(
-      const Request& req,
-      const RouteHandleTraverser<RouteHandleIf>& t) const {
+  bool traverse(const Request& req, RouteHandleTraverser<RouteHandleIf>& t)
+      const {
     // Traverse intentionally doesn't implement rate-limiting or fallback, to
     // avoid changing state
     return t(*target_, req);

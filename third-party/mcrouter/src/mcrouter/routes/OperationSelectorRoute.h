@@ -49,9 +49,8 @@ class OperationSelectorRoute {
         defaultPolicy_(std::move(defaultPolicy)) {}
 
   template <class Request>
-  bool traverse(
-      const Request& req,
-      const RouteHandleTraverser<RouteHandleIf>& t) const {
+  bool traverse(const Request& req, RouteHandleTraverser<RouteHandleIf>& t)
+      const {
     if (const auto& rh =
             operationPolicies_.template getByRequestType<Request>()) {
       return t(*rh, req);

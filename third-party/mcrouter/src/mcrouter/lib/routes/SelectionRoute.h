@@ -77,9 +77,8 @@ class SelectionRoute {
   }
 
   template <class Request>
-  bool traverse(
-      const Request& req,
-      const RouteHandleTraverser<RouteHandleIf>& t) const {
+  bool traverse(const Request& req, RouteHandleTraverser<RouteHandleIf>& t)
+      const {
     return t(select(req), req);
   }
 
@@ -158,9 +157,8 @@ class SelectionRouteWithShadow : public SelectionRoute<RouterInfo, Selector> {
   }
 
   template <class Request>
-  bool traverse(
-      const Request& req,
-      const RouteHandleTraverser<RouteHandleIf>& t) const {
+  bool traverse(const Request& req, RouteHandleTraverser<RouteHandleIf>& t)
+      const {
     if (t(this->select(req), req)) {
       return true;
     }

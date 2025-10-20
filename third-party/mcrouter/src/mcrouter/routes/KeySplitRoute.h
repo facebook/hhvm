@@ -79,9 +79,8 @@ class KeySplitRoute {
   static constexpr size_t kMaxReplicaCount = 1000;
 
   template <class Request>
-  bool traverse(
-      const Request& req,
-      const RouteHandleTraverser<RouteHandleIf>& t) const {
+  bool traverse(const Request& req, RouteHandleTraverser<RouteHandleIf>& t)
+      const {
     uint64_t replicaId = getReplicaId();
     if (shouldAugmentRequest(replicaId)) {
       return t(*child_, copyAndAugment(req, replicaId));

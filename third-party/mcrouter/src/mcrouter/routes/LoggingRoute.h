@@ -47,9 +47,8 @@ class LoggingRoute {
       : child_(std::move(rh)) {}
 
   template <class Request>
-  bool traverse(
-      const Request& req,
-      const RouteHandleTraverser<RouteHandleIf>& t) const {
+  bool traverse(const Request& req, RouteHandleTraverser<RouteHandleIf>& t)
+      const {
     if (child_) {
       return t(*child_, req);
     }

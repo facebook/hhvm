@@ -51,9 +51,8 @@ class MigrateRoute {
   }
 
   template <class Request>
-  bool traverse(
-      const Request& req,
-      const RouteHandleTraverser<RouteHandleIf>& t) const {
+  bool traverse(const Request& req, RouteHandleTraverser<RouteHandleIf>& t)
+      const {
     auto mask = routeMask(tp_(), req);
     if (mask & kFromMask) {
       if (t(*from_, req)) {

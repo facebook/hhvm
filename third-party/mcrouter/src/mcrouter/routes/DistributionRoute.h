@@ -66,9 +66,8 @@ class DistributionRoute {
   }
 
   template <class Request>
-  bool traverse(
-      const Request& req,
-      const RouteHandleTraverser<RouteHandleIf>& t) const {
+  bool traverse(const Request& req, RouteHandleTraverser<RouteHandleIf>& t)
+      const {
     return t(*rh_, req);
   }
 

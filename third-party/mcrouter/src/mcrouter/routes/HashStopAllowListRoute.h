@@ -45,9 +45,8 @@ class HashStopAllowListRoute {
   }
 
   template <class Request>
-  bool traverse(
-      const Request& req,
-      const RouteHandleTraverser<RouteHandleIf>& t) const {
+  bool traverse(const Request& req, RouteHandleTraverser<RouteHandleIf>& t)
+      const {
     if (FOLLY_LIKELY(!req.key_ref()->hasHashStop()) ||
         allowedHashStop(req.key_ref()->fullKey())) {
       return t(*rh_, req);

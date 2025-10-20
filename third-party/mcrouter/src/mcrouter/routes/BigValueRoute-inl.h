@@ -87,7 +87,7 @@ template <class RouterInfo>
 template <class Request>
 bool BigValueRoute<RouterInfo>::traverse(
     const Request& req,
-    const RouteHandleTraverser<RouteHandleIf>& t) const {
+    RouteHandleTraverser<RouteHandleIf>& t) const {
   return t(*ch_, req);
 }
 

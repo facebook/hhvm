@@ -62,7 +62,7 @@ class RootRoute {
   template <class Request>
   bool traverse(
       const Request& req,
-      const RouteHandleTraverser<typename RouterInfo::RouteHandleIf>& t) const {
+      RouteHandleTraverser<typename RouterInfo::RouteHandleIf>& t) const {
     const auto* rhPtr = rhMap_.getTargetsForKeyFast(
         req.key_ref()->routingPrefix(), req.key_ref()->routingKey());
     if (FOLLY_LIKELY(rhPtr != nullptr)) {

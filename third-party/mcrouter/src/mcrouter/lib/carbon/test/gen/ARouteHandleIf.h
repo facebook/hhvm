@@ -45,7 +45,7 @@ class ARouteHandleIf {
 
 virtual bool traverse(
     const TestARequest&,
-    const facebook::memcache::RouteHandleTraverser<ARouteHandleIf>&) const = 0;
+    facebook::memcache::RouteHandleTraverser<ARouteHandleIf>&) const = 0;
 };
 
 template <class Route>
@@ -64,7 +64,7 @@ class ARouteHandle : public ARouteHandleIf {
 
 bool traverse(
     const TestARequest& request,
-    const facebook::memcache::RouteHandleTraverser<ARouteHandleIf>& traverser)
+    facebook::memcache::RouteHandleTraverser<ARouteHandleIf>& traverser)
     const override final {
   return route_.traverse(request, traverser);
 }

@@ -49,9 +49,8 @@ class RoutingGroupRoute {
         defaultPolicy_(std::move(defaultPolicy)) {}
 
   template <class Request>
-  bool traverse(
-      const Request& req,
-      const RouteHandleTraverser<RouteHandleIf>& t) const {
+  bool traverse(const Request& req, RouteHandleTraverser<RouteHandleIf>& t)
+      const {
     const auto& rgName = carbon::getRoutingGroupName<Request>();
     const auto& it = routingGroupPolicies_.find(rgName);
     if (it != routingGroupPolicies_.end()) {

@@ -45,13 +45,13 @@ class CarbonThriftTestRouteHandleIf {
 
 virtual bool traverse(
     const CustomRequest&,
-    const facebook::memcache::RouteHandleTraverser<CarbonThriftTestRouteHandleIf>&) const = 0;
+    facebook::memcache::RouteHandleTraverser<CarbonThriftTestRouteHandleIf>&) const = 0;
 virtual bool traverse(
     const DummyThriftRequest&,
-    const facebook::memcache::RouteHandleTraverser<CarbonThriftTestRouteHandleIf>&) const = 0;
+    facebook::memcache::RouteHandleTraverser<CarbonThriftTestRouteHandleIf>&) const = 0;
 virtual bool traverse(
     const ThriftTestRequest&,
-    const facebook::memcache::RouteHandleTraverser<CarbonThriftTestRouteHandleIf>&) const = 0;
+    facebook::memcache::RouteHandleTraverser<CarbonThriftTestRouteHandleIf>&) const = 0;
 };
 
 template <class Route>
@@ -76,19 +76,19 @@ class CarbonThriftTestRouteHandle : public CarbonThriftTestRouteHandleIf {
 
 bool traverse(
     const CustomRequest& request,
-    const facebook::memcache::RouteHandleTraverser<CarbonThriftTestRouteHandleIf>& traverser)
+    facebook::memcache::RouteHandleTraverser<CarbonThriftTestRouteHandleIf>& traverser)
     const override final {
   return route_.traverse(request, traverser);
 }
 bool traverse(
     const DummyThriftRequest& request,
-    const facebook::memcache::RouteHandleTraverser<CarbonThriftTestRouteHandleIf>& traverser)
+    facebook::memcache::RouteHandleTraverser<CarbonThriftTestRouteHandleIf>& traverser)
     const override final {
   return route_.traverse(request, traverser);
 }
 bool traverse(
     const ThriftTestRequest& request,
-    const facebook::memcache::RouteHandleTraverser<CarbonThriftTestRouteHandleIf>& traverser)
+    facebook::memcache::RouteHandleTraverser<CarbonThriftTestRouteHandleIf>& traverser)
     const override final {
   return route_.traverse(request, traverser);
 }

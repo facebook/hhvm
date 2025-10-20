@@ -35,8 +35,7 @@ class DevNullRoute {
   }
 
   template <class Request>
-  bool traverse(const Request&, const RouteHandleTraverser<RouteHandleIf>&)
-      const {
+  bool traverse(const Request&, RouteHandleTraverser<RouteHandleIf>&) const {
     return false;
   }
 

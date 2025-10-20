@@ -61,9 +61,8 @@ class L1L2SizeSplitRoute {
   }
 
   template <class Request>
-  bool traverse(
-      const Request& req,
-      const RouteHandleTraverser<RouteHandleIf>& t) const {
+  bool traverse(const Request& req, RouteHandleTraverser<RouteHandleIf>& t)
+      const {
     if constexpr (!carbon::ListContains<
                       typename memcache::MemcacheRouterInfo::AllRequests,
                       Request>::value) {

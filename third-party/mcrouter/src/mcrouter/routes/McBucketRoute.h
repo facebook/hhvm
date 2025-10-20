@@ -86,9 +86,8 @@ class McBucketRoute {
   }
 
   template <class Request>
-  bool traverse(
-      const Request& req,
-      const RouteHandleTraverser<RouteHandleIf>& t) const {
+  bool traverse(const Request& req, RouteHandleTraverser<RouteHandleIf>& t)
+      const {
     // when we execute traverse providing a pre-calculated bucket id,
     // no need to recalculate it:
     if (fiber_local<RouterInfo>::getBucketId().has_value()) {

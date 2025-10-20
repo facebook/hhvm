@@ -51,9 +51,8 @@ class KeyParseRoute {
   }
 
   template <class Request>
-  bool traverse(
-      const Request& req,
-      const RouteHandleTraverser<RouteHandleIf>& t) const {
+  bool traverse(const Request& req, RouteHandleTraverser<RouteHandleIf>& t)
+      const {
     auto routingKey = getPrefixWithDelimiters(getRoutingKey<Request>(req));
     return fiber_local<RouterInfo>::runWithLocals(
         [this, &req, &t, &routingKey]() {

@@ -57,9 +57,8 @@ class OriginalClientHashRoute {
       : children_(std::move(children)), offset_(offset) {}
 
   template <class Request>
-  bool traverse(
-      const Request& req,
-      const RouteHandleTraverser<RouteHandleIf>& t) const {
+  bool traverse(const Request& req, RouteHandleTraverser<RouteHandleIf>& t)
+      const {
     if (children_.empty()) {
       return false;
     }

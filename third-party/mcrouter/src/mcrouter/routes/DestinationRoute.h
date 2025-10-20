@@ -90,7 +90,7 @@ class DestinationRoute {
   template <class Request>
   bool traverse(
       const Request& req,
-      const RouteHandleTraverser<typename RouterInfo::RouteHandleIf>& t) const {
+      RouteHandleTraverser<typename RouterInfo::RouteHandleIf>& t) const {
     PoolContext poolContext{
         poolName_,
         indexInPool_,

@@ -77,7 +77,7 @@ class RouteHandleTraverser {
         srHostFn_(std::move(srHostFn)) {}
 
   template <class Request>
-  bool operator()(const RouteHandleIf& r, const Request& req) const {
+  bool operator()(const RouteHandleIf& r, const Request& req) {
     if (FOLLY_UNLIKELY(start_ != nullptr)) {
       start_(r);
     }
@@ -92,7 +92,7 @@ class RouteHandleTraverser {
   bool operator()(
       const AccessPoint& accessPoint,
       const PoolContext& poolContext,
-      const Request&) const {
+      const Request&) {
     bool stopTraversal = false;
     if (accessPointFn_) {
       stopTraversal = accessPointFn_(accessPoint, poolContext);
@@ -104,7 +104,7 @@ class RouteHandleTraverser {
   bool operator()(
       const HostInfoPtr& srHostInfoPtr,
       const RequestClass& requestClass,
-      const Request&) const {
+      const Request&) {
     bool stopTraversal = false;
     if (srHostInfoPtrFn_) {
       stopTraversal = srHostInfoPtrFn_(srHostInfoPtr, requestClass);
@@ -116,7 +116,7 @@ class RouteHandleTraverser {
   bool operator()(
       const AccessPoint& srHost,
       const RequestClass& requestClass,
-      const Request&) const {
+      const Request&) {
     bool stopTraversal = false;
     if (srHostFn_) {
       stopTraversal = srHostFn_(srHost, requestClass);
@@ -131,7 +131,7 @@ class RouteHandleTraverser {
   template <class Request>
   bool operator()(
       const std::vector<std::shared_ptr<RouteHandleIf>>& v,
-      const Request& req) const {
+      const Request& req) {
     for (const auto& child : v) {
       if (operator()(*child, req)) {
         return true;

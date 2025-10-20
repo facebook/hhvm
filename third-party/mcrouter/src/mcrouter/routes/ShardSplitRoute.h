@@ -91,9 +91,8 @@ class ShardSplitRoute {
         splitShardFanout_(splitShardFanout) {}
 
   template <class Request>
-  bool traverse(
-      const Request& req,
-      const RouteHandleTraverser<RouteHandleIf>& t) const {
+  bool traverse(const Request& req, RouteHandleTraverser<RouteHandleIf>& t)
+      const {
     auto* ctx = fiber_local<RouterInfo>::getTraverseCtx();
     if (ctx) {
       bool isShadow =

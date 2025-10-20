@@ -37,7 +37,7 @@ class DuplicateRoute {
   template <class Request>
   bool traverse(
       const Request& req,
-      const facebook::memcache::RouteHandleTraverser<
+      facebook::memcache::RouteHandleTraverser<
           typename RouterInfo::RouteHandleIf>& t) const {
     if (child_) {
       return t(*child_, req);

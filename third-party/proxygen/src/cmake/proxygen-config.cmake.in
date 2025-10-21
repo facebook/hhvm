@@ -31,14 +31,13 @@ find_dependency(Fizz)
 find_dependency(ZLIB)
 find_dependency(OpenSSL)
 find_dependency(Threads)
-find_dependency(Boost 1.58 REQUIRED
+find_dependency(Boost 1.69 REQUIRED
   COMPONENTS
     iostreams
     context
     filesystem
     program_options
     regex
-    system
     thread
 )
 find_dependency(c-ares REQUIRED)

@@ -1,0 +1,78 @@
+ERROR: File "type_splat_non_tuple_bad.php", line 4, characters 22-22:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_non_tuple_bad.php", line 4, characters 24-25:
+  Expected `(mixed...)`
+  File "type_splat_non_tuple_bad.php", line 4, characters 22-22:
+  But got `T`
+ERROR: File "type_splat_non_tuple_bad.php", line 4, characters 22-22:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_non_tuple_bad.php", line 4, characters 24-25:
+  Expected `(mixed...)`
+  File "type_splat_non_tuple_bad.php", line 4, characters 22-22:
+  But got `mixed`
+  File "type_splat_non_tuple_bad.php", line 4, characters 22-22:
+    by the definition of `T` arising from an implicit `as mixed` constraint on this type
+ERROR: File "type_splat_non_tuple_bad.php", line 5, characters 19-21:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_non_tuple_bad.php", line 5, characters 23-24:
+  Expected `(mixed...)`
+  File "type_splat_non_tuple_bad.php", line 5, characters 19-21:
+  But got `int`
+ERROR: File "type_splat_non_tuple_bad.php", line 6, characters 19-26:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_non_tuple_bad.php", line 6, characters 28-29:
+  Expected `(mixed...)`
+  File "type_splat_non_tuple_bad.php", line 6, characters 19-26:
+  But got `vec<int>`
+ERROR: File "type_splat_non_tuple_bad.php", line 9, characters 38-38:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_non_tuple_bad.php", line 9, characters 40-41:
+  Expected `(mixed...)`
+  File "type_splat_non_tuple_bad.php", line 9, characters 38-38:
+  But got `T`
+ERROR: File "type_splat_non_tuple_bad.php", line 9, characters 38-38:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_non_tuple_bad.php", line 9, characters 40-41:
+  Expected `(mixed...)`
+  File "type_splat_non_tuple_bad.php", line 9, characters 38-38:
+  But got `mixed`
+  File "type_splat_non_tuple_bad.php", line 9, characters 38-38:
+    by the definition of `T` arising from an implicit `as mixed` constraint on this type
+ERROR: File "type_splat_non_tuple_bad.php", line 10, characters 35-37:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_non_tuple_bad.php", line 10, characters 39-40:
+  Expected `(mixed...)`
+  File "type_splat_non_tuple_bad.php", line 10, characters 35-37:
+  But got `int`
+ERROR: File "type_splat_non_tuple_bad.php", line 11, characters 35-42:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_non_tuple_bad.php", line 11, characters 44-45:
+  Expected `(mixed...)`
+  File "type_splat_non_tuple_bad.php", line 11, characters 35-42:
+  But got `vec<int>`
+ERROR: File "type_splat_non_tuple_bad.php", line 13, characters 38-38:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_non_tuple_bad.php", line 13, characters 40-41:
+  Expected `(mixed...)`
+  File "type_splat_non_tuple_bad.php", line 13, characters 38-38:
+  But got `T`
+ERROR: File "type_splat_non_tuple_bad.php", line 13, characters 38-38:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_non_tuple_bad.php", line 13, characters 40-41:
+  Expected `(mixed...)`
+  File "type_splat_non_tuple_bad.php", line 13, characters 38-38:
+  But got `mixed`
+  File "type_splat_non_tuple_bad.php", line 13, characters 38-38:
+    by the definition of `T` arising from an implicit `as mixed` constraint on this type
+ERROR: File "type_splat_non_tuple_bad.php", line 14, characters 35-37:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_non_tuple_bad.php", line 14, characters 39-40:
+  Expected `(mixed...)`
+  File "type_splat_non_tuple_bad.php", line 14, characters 35-37:
+  But got `int`
+ERROR: File "type_splat_non_tuple_bad.php", line 15, characters 35-42:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_non_tuple_bad.php", line 15, characters 44-45:
+  Expected `(mixed...)`
+  File "type_splat_non_tuple_bad.php", line 15, characters 35-42:
+  But got `vec<int>`

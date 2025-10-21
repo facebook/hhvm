@@ -16,6 +16,24 @@ Some type arguments violate their constraints (Typing[4323])
   Expected `(mixed...)`
   File "type_splat_typeconst.php", line 18, characters 38-50:
   But got `this::TInputs`
+ERROR: File "type_splat_typeconst.php", line 19, characters 28-40:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_typeconst.php", line 19, characters 42-46:
+  Expected `(mixed...)`
+  File "type_splat_typeconst.php", line 19, characters 28-40:
+  But got `Bad::TInputs`
+ERROR: File "type_splat_typeconst.php", line 19, characters 28-40:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_typeconst.php", line 19, characters 42-46:
+  Expected `(mixed...)`
+  File "type_splat_typeconst.php", line 19, characters 28-40:
+  But got `mixed`
+ERROR: File "type_splat_typeconst.php", line 19, characters 28-40:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_typeconst.php", line 19, characters 42-46:
+  Expected `(mixed...)`
+  File "type_splat_typeconst.php", line 19, characters 28-40:
+  But got `this::TInputs`
 ERROR: File "type_splat_typeconst.php", line 20, characters 25-44:
 Some type arguments violate their constraints (Typing[4323])
   File "type_splat_typeconst.php", line 5, characters 13-13:

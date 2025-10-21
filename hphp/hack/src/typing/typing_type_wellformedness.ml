@@ -333,6 +333,18 @@ let where_constrs env = List.concat_map ~f:(where_constr env)
 
 let requirements env = List.concat_map ~f:(fun (h, _kind) -> hint env h)
 
+let check_splat_is_tuple env params =
+  match List.rev params with
+  | {
+      param_splat = Some Ast_defs.Splat;
+      param_pos;
+      param_type_hint = (_, Some h);
+      _;
+    }
+    :: _ ->
+    check_splat_hint env param_pos h
+  | _ -> []
+
 let fun_ tenv f =
   let support_dynamic_type =
     Naming_attributes.mem
@@ -390,20 +402,9 @@ let fun_ tenv f =
   let env = { typedef_tparams = []; tenv } in
   let errs =
     FunUtils.check_params ~from_abstract_method:false tenv.decl_env f.f_params
+    @ check_splat_is_tuple env f.f_params
   in
-  let splat_err =
-    match List.rev f.f_params with
-    | {
-        param_splat = Some Ast_defs.Splat;
-        param_pos;
-        param_type_hint = (_, Some h);
-        _;
-      }
-      :: _ ->
-      check_splat_hint env param_pos h
-    | _ -> []
-  in
-  List.iter ~f:(Typing_error_utils.add_typing_error ~env:tenv) (splat_err @ errs);
+  List.iter ~f:(Typing_error_utils.add_typing_error ~env:tenv) errs;
   type_hint env f.f_ret @ fun_params env f.f_params
 
 let fun_def tenv fd =
@@ -507,7 +508,8 @@ let method_ env m =
   in
 
   let env = { env with tenv } in
-  fun_params env m.m_params
+  check_splat_is_tuple env m.m_params
+  @ fun_params env m.m_params
   @ tparams env m.m_tparams
   @ where_constrs env m.m_where_constraints
   @ type_hint env m.m_ret

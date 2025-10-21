@@ -1630,6 +1630,8 @@ struct FaultDefinition {
   // If kill is true the fault will exit the process ungracefully.
   // block, delay, and errorMessage will be ignored if kill is true.
   8: bool kill;
+  // If blockWithCancel is true the fault will block until the request is cancelled or times out.
+  9: bool blockWithCancel;
 }
 
 struct RemoveFaultArg {

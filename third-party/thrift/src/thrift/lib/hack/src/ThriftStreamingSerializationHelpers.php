@@ -80,17 +80,9 @@ final abstract class ThriftStreamingSerializationHelpers {
           );
         }
       }
-      $use_accelearted_serialization =
-        JustKnobs::eval('thrift/hack:stream_accelerated_serialization');
-      if (
-        $use_accelearted_serialization &&
-        $protocol is \TBinaryProtocolAccelerated
-      ) {
+      if ($protocol is \TBinaryProtocolAccelerated) {
         thrift_protocol_write_binary_struct($protocol, $result);
-      } else if (
-        $use_accelearted_serialization &&
-        $protocol is \TCompactProtocolAccelerated
-      ) {
+      } else if ($protocol is \TCompactProtocolAccelerated) {
         thrift_protocol_write_compact_struct($protocol, $result);
       } else {
         $result->write($protocol);
@@ -131,18 +123,12 @@ final abstract class ThriftStreamingSerializationHelpers {
 
         $transport->resetBuffer();
         $transport->write($stream_payload as nonnull);
-        if (
-          JustKnobs::eval('thrift/hack:stream_accelerated_deserialization') &&
-          $protocol is \TBinaryProtocolAccelerated
-        ) {
+        if ($protocol is \TBinaryProtocolAccelerated) {
           $result = thrift_protocol_read_binary_struct(
             $protocol,
             HH\class_to_classname($payload_classname),
           );
-        } else if (
-          JustKnobs::eval('thrift/hack:stream_accelerated_deserialization') &&
-          $protocol is \TCompactProtocolAccelerated
-        ) {
+        } else if ($protocol is \TCompactProtocolAccelerated) {
           $result = thrift_protocol_read_compact_struct(
             $protocol,
             HH\class_to_classname($payload_classname),

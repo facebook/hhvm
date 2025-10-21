@@ -136,6 +136,10 @@ cdef void sink_final_resp_callback(
     PyObject* user_data,
 ):
     future, final_resp_cls, sink_elem_cls, protocol = <object> user_data
+    # Bidirectional stream don't have final response. Set the future to None and return.
+    if final_resp_cls is None:
+        future.set_result(None)
+        return
     try:
         if res.hasException():
             # PythonUserException denotes an expected (IDL-declared) exception

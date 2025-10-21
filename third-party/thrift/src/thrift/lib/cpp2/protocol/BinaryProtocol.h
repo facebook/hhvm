@@ -109,6 +109,7 @@ class BinaryProtocolWriter : public detail::ProtocolBase {
   uint32_t writeBinary(const std::unique_ptr<folly::IOBuf>& str);
   uint32_t writeBinary(const folly::IOBuf& str);
   uint32_t writeRaw(const IOBuf& buf);
+  uint32_t writeRaw(folly::io::Cursor cursor, uint32_t size);
 
   /**
    * Functions that return the [estimated] serialized size

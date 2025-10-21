@@ -336,6 +336,11 @@ inline uint32_t CompactProtocolWriter::writeRaw(const folly::IOBuf& str) {
   return writeBinaryImpl<false>(str);
 }
 
+inline uint32_t CompactProtocolWriter::writeRaw(
+    folly::io::Cursor cursor, uint32_t size) {
+  return folly::to_narrow(out_.pushAtMost(cursor, size));
+}
+
 inline void CompactProtocolWriter::checkBinarySize(uint64_t size) {
   // We can't deserialize binary/string over 2GB, enforcing the same limit on
   // serializing for consistency

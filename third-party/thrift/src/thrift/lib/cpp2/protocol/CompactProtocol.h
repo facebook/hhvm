@@ -132,6 +132,7 @@ class CompactProtocolWriter : public detail::ProtocolBase {
   uint32_t writeBinary(const std::unique_ptr<IOBuf>& str);
   uint32_t writeBinary(const IOBuf& str);
   uint32_t writeRaw(const IOBuf& buf);
+  uint32_t writeRaw(folly::io::Cursor cursor, uint32_t size);
 
   /**
    * Functions that return the serialized size

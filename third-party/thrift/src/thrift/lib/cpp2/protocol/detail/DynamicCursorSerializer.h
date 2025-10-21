@@ -87,20 +87,30 @@ class StructuredDynamicCursorReader : detail::BaseCursorReader<ProtocolReader> {
 
   std::unique_ptr<folly::IOBuf> readRaw() {
     beforeReadField();
+    requireRawReadSupport();
     auto begin = protocol_->getCursor();
     protocol_->skip(readState_.fieldType);
     auto end = protocol_->getCursor();
-
-    if (begin == end) {
-      folly::throw_exception<std::runtime_error>(
-          "readRaw doesn't support bool fields under compact protocol");
-    }
+    DCHECK(begin != end);
 
     auto numBytes = end - begin;
     std::unique_ptr<folly::IOBuf> ret;
     begin.clone(ret, numBytes);
     afterReadField();
     return ret;
+  }
+
+  folly::io::Cursor readRawCursor() {
+    beforeReadField();
+    requireRawReadSupport();
+    auto begin = protocol_->getCursor();
+    protocol_->skip(readState_.fieldType);
+    auto end = protocol_->getCursor();
+    DCHECK(begin != end);
+
+    auto numBytes = end - begin;
+    afterReadField();
+    return folly::io::Cursor(begin, numBytes);
   }
 
   StructuredDynamicCursorReader beginReadStructured() {
@@ -175,6 +185,14 @@ class StructuredDynamicCursorReader : detail::BaseCursorReader<ProtocolReader> {
     checkState(State::Active);
     if (readState_.fieldType == TType::T_STOP) {
       folly::throw_exception<std::runtime_error>("No more fields available");
+    }
+  }
+
+  void requireRawReadSupport() {
+    if (readState_.fieldType == TType::T_BOOL &&
+        std::is_same_v<ProtocolReader, CompactProtocolReader>) {
+      folly::throw_exception<std::runtime_error>(
+          "readRaw doesn't support bool fields under compact protocol");
     }
   }
 
@@ -272,6 +290,20 @@ class ContainerDynamicCursorReader : detail::BaseCursorReader<ProtocolReader> {
     begin.clone(ret, numBytes);
     advance();
     return ret;
+  }
+
+  folly::io::Cursor readRawCursor() {
+    checkRemaining();
+    auto begin = protocol_->getCursor();
+    protocol_->skip(nextTType());
+    auto end = protocol_->getCursor();
+
+    auto numBytes = end - begin;
+    advance();
+    return folly::io::Cursor(
+               begin.currentBuffer(),
+               numBytes + begin.getPositionInCurrentBuffer()) +
+        begin.getPositionInCurrentBuffer();
   }
 
   StructuredDynamicCursorReader beginReadStructured() {
@@ -447,6 +479,16 @@ class StructuredDynamicCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
     protocol_->writeRaw(value);
     afterWriteField();
   }
+  void writeRaw(
+      int16_t fieldId,
+      protocol::TType type,
+      folly::io::Cursor value,
+      uint32_t len = std::numeric_limits<uint32_t>::max()) {
+    DCHECK(value.isBounded() || len != std::numeric_limits<uint32_t>::max());
+    beforeWriteField(fieldId, type);
+    protocol_->writeRaw(value, len);
+    afterWriteField();
+  }
 
   StructuredDynamicCursorWriter beginWriteStructured(int16_t fieldId) {
     beforeWriteField(fieldId, protocol::TType::T_STRUCT);
@@ -593,6 +635,11 @@ class ContainerDynamicCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
   void writeRaw(protocol::TType type, const folly::IOBuf& value) {
     DCHECK(type == nextTType());
     writeRaw(value);
+  }
+  void writeRaw(folly::io::Cursor value, uint32_t len) {
+    checkRemaining();
+    protocol_->writeRaw(value, len);
+    advance();
   }
 
   StructuredDynamicCursorWriter beginWriteStructured() {

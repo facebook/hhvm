@@ -119,24 +119,24 @@ TEST(DynamicCursorSerializer, UnschematizedRead) {
   // Raw read
   reader = wrapper.beginRead();
   auto str = reader.readRaw();
-  auto i32 = reader.readRaw();
-  auto inner = reader.readRaw();
+  auto i32 = reader.readRawCursor();
+  auto inner = reader.readRawCursor();
   reader.skip(); // list_field
   reader.skip(); // set_nested_field;
   reader.skip(); // map_field;
   auto boolf = reader.readRaw();
   wrapper.endRead(std::move(reader));
-  auto read = [&]<typename Tag>(Tag, folly::IOBuf& buf) {
+  auto read = [&]<typename Tag>(Tag, auto buf) {
     type::native_type<Tag> ret;
     BinaryProtocolReader rawReader;
-    rawReader.setInput(&buf);
+    rawReader.setInput(buf);
     op::decode<Tag>(rawReader, ret);
     return ret;
   };
-  EXPECT_EQ(read(type::string_t{}, *str), "hello");
-  EXPECT_EQ(read(type::i32_t{}, *i32), 42);
-  EXPECT_EQ(read(type::struct_t<Inner>{}, *inner).binary_field(), "world");
-  EXPECT_TRUE(read(type::bool_t{}, *boolf));
+  EXPECT_EQ(read(type::string_t{}, str.get()), "hello");
+  EXPECT_EQ(read(type::i32_t{}, i32), 42);
+  EXPECT_EQ(read(type::struct_t<Inner>{}, inner).binary_field(), "world");
+  EXPECT_TRUE(read(type::bool_t{}, boolf.get()));
 }
 
 TEST(DynamicCursorSerializer, UnschematizedWrite) {

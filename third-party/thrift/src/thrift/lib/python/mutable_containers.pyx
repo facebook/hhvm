@@ -65,7 +65,7 @@ cdef class MutableList:
     A mutable container used to represent a Thrift mutable list.
     It implements the [`MutableSequence` abstract base class](https://docs.python.org/3.10/library/collections.abc.html#collections-abstract-base-classes).
     Additionally, it supports other methods from the built-in `list` data type,
-    including `append()`, `extend()`, `pop()` and `clear()`.
+    including `append()`, `extend()`, `pop()` `clear()`, and `remove()`.
 
     The `_list_data` member of `MutableList` is a reference to the `list` in
     the mutable struct tuple (`struct._fbthrift_data`). Any change to
@@ -114,6 +114,10 @@ cdef class MutableList:
     def pop(self, index=-1):
         internal_value = self._list_data.pop(index)
         return self._val_typeinfo.to_python_value(internal_value)
+
+    def remove(self, value):
+        internal_value = self._val_typeinfo.to_internal_data(value)
+        self._list_data.remove(internal_value)
 
     def clear(self):
         self._list_data.clear()

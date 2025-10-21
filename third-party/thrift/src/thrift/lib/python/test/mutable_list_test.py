@@ -106,6 +106,18 @@ class MutableListTest(unittest.TestCase):
         with self.assertRaises(OverflowError):
             mutable_list.append(2**31)
 
+    def test_remove(self) -> None:
+        mutable_list = _create_MutableList_i32(list(range(100)))
+        python_list = list(range(100))
+
+        elements_to_remove = [2, 4, 24, 42, 72]
+
+        for element in elements_to_remove:
+            mutable_list.remove(element)
+            python_list.remove(element)
+
+        self.assertEqual(python_list, mutable_list)
+
     def test_getitem(self) -> None:
         mutable_list = _create_MutableList_i32([])
         mutable_list.extend(range(100))

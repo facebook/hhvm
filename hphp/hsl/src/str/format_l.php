@@ -25,5 +25,5 @@ function format_l(
   SprintfFormatString $format_string,
   mixed ...$format_args
 )[]: string {
-  return _Str\vsprintf_l($locale, $format_string as string, $format_args);
+  return _Str\vsprintf_l($locale, $format_string, $format_args);
 }

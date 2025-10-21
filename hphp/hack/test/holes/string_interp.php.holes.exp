@@ -14,9 +14,7 @@
            param_named = None; param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
-        f_body =
-        { fb_ast =
-          [([5:3-10], (Expr ((string), [5:3-9], (String2 [((mixed), [5:4-8], (Hole (((mixed), [5:4-8], (Lvar ([5:4-8], $x))), (mixed), (~(arraykey | HH\FormatString<nothing>)), Typing)))]))))] };
+        f_body = { fb_ast = [([5:3-10], (Expr ((string), [5:3-9], (String2 [((mixed), [5:4-8], (Hole (((mixed), [5:4-8], (Lvar ([5:4-8], $x))), (mixed), (~arraykey), Typing)))]))))] };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-21], "__SupportDynamicType"); ua_params = [] }]; 
         f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 

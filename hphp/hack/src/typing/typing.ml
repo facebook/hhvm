@@ -8429,15 +8429,8 @@ end = struct
           let (_, p, _) = x in
           if TCO.enable_strict_string_concat_interp (Env.get_tcopt env) then (
             let r = Reason.interp_operand p in
-            let (env, formatter_tyvar) = Env.fresh_type_invariant env p in
             let stringlike =
-              MakeType.union
-                r
-                [
-                  MakeType.arraykey r;
-                  MakeType.dynamic r;
-                  MakeType.hh_formatstring r formatter_tyvar;
-                ]
+              MakeType.union r [MakeType.arraykey r; MakeType.dynamic r]
             in
             let (env, ty_err_opt) =
               Typing_ops.sub_type

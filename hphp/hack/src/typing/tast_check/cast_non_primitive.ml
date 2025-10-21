@@ -18,11 +18,8 @@ let error_codes = Typing_warning_utils.codes warning_kind
 let is_always_castable env ty =
   let open Typing_make_type in
   let r = Reason.none in
-  let mixed = mixed r in
   let castable_ty =
-    locl_like r
-    @@ nullable r
-    @@ union r [arraykey r; num r; bool r; hh_formatstring r mixed]
+    locl_like r @@ nullable r @@ union r [arraykey r; num r; bool r]
   in
   Env.is_sub_type env ty castable_ty
 

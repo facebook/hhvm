@@ -5817,7 +5817,8 @@ void t_hack_generator::generate_process_function(
                << "', $seqid, $handler_ctx, $output, $reply_type);\n"
                << indent()
                << "await $this->genExecuteStream($response_and_stream->stream, "
-               << stream_response_type << "::class, $output);\n"
+               << stream_response_type << "::class, $output, '" << fn_name
+               << "', $handler_ctx);\n"
                << indent() << "return;\n";
   } else if (tfunction->qualifier() != t_function_qualifier::oneway) {
     indent(f_service_) << "$this->eventHandler_->postExec($handler_ctx, '"

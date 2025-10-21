@@ -12,7 +12,7 @@ license = "MIT"
 ahash = { version = "0.8.11", features = ["runtime-rng"] }
 anyhow = "1.0.98"
 duct = "0.13.6"
-jwalk = "0.6"
+jwalk = "0.6.2"
 serde = { version = "1.0.219", features = ["derive", "rc"] }
 serde_json = { version = "1.0.140", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }
 structopt = "0.3.26"

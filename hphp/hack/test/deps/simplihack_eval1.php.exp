@@ -104,4 +104,3 @@ Type HH\Capabilities\WriteProperty -> Fun func,
                                       Type FunctionParam,
                                       Type Method
 Type HH\supportdyn -> Type ClassGeneric
-Type Stringish -> Fun prompt

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5184475c9d375c70536f0d2c0622536d>>
+// @generated SignedSource<<6db8a60711bd7e82cc4a67165dd6d2b2>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -281,8 +281,6 @@ pub struct GlobalOptions {
     /// Skip second check of method under dynamic assumptions
     pub tco_skip_check_under_dynamic: bool,
     pub tco_global_access_check_enabled: bool,
-    /// Restricts string concatenation and interpolation to arraykeys
-    pub tco_enable_strict_string_concat_interp: bool,
     /// Ignores unsafe_cast and retains the original type of the expression
     pub tco_ignore_unsafe_cast: bool,
     /// Enable expression trees via unstable features flag

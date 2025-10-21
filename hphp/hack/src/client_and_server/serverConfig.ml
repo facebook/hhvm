@@ -434,8 +434,6 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
     ?tco_skip_check_under_dynamic:(bool_opt "skip_check_under_dynamic" config)
     ?tco_enable_function_references:
       (bool_opt "enable_function_references" config)
-    ?tco_enable_strict_string_concat_interp:
-      (bool_opt "enable_strict_string_concat_interp" config)
     ?tco_ignore_unsafe_cast:(bool_opt "ignore_unsafe_cast" config)
     ?tco_allowed_expression_tree_visitors:
       (Option.map

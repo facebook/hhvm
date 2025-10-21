@@ -1,9 +1,30 @@
 ERROR: File "stringish.php", line 29, characters 28-29:
-You cannot use this object as a string
-Implicit conversions of Stringish objects to string are deprecated. (Typing[4067])
+String concatenation can only be performed on string and int arguments (Typing[4414])
+  File "stringish.php", line 29, characters 28-29:
+  Expected `string` or `int`
+  File "stringish.php", line 28, characters 13-21:
+  But got `Stringish`
 ERROR: File "stringish.php", line 53, characters 16-20:
-You cannot use this object as a string
-Implicit conversions of Stringish objects to string are deprecated. (Typing[4067])
+String concatenation can only be performed on string and int arguments (Typing[4414])
+  File "stringish.php", line 53, characters 16-20:
+  Expected `string` or `int`
+  File "stringish.php", line 53, characters 16-20:
+  But got `TStringish`
+ERROR: File "stringish.php", line 53, characters 16-20:
+String concatenation can only be performed on string and int arguments (Typing[4414])
+  File "stringish.php", line 53, characters 16-20:
+  Expected `string` or `int`
+  File "stringish.php", line 53, characters 16-20:
+  But got `this as TStringish`
 ERROR: File "stringish.php", line 61, characters 16-20:
-You cannot use this object as a string
-Implicit conversions of Stringish objects to string are deprecated. (Typing[4067])
+String concatenation can only be performed on string and int arguments (Typing[4414])
+  File "stringish.php", line 61, characters 16-20:
+  Expected `string` or `int`
+  File "stringish.php", line 61, characters 16-20:
+  But got `TReq`
+ERROR: File "stringish.php", line 61, characters 16-20:
+String concatenation can only be performed on string and int arguments (Typing[4414])
+  File "stringish.php", line 61, characters 16-20:
+  Expected `string` or `int`
+  File "stringish.php", line 61, characters 16-20:
+  But got `this as TReq`

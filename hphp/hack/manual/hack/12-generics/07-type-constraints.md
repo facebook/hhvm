@@ -16,8 +16,8 @@ function max_val<T as num>(T $p1, T $p2): T {
 
 <<__EntryPoint>>
 function main(): void {
-  echo "max_val(10, 20) = ".max_val(10, 20)."\n";
-  echo "max_val(15.6, -20.78) = ".max_val(15.6, -20.78)."\n";
+  echo "max_val(10, 20) = ".(string)(max_val(10, 20))."\n";
+  echo "max_val(15.6, -20.78) = ".(string)(max_val(15.6, -20.78))."\n";
 }
 ```
 

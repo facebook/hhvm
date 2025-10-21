@@ -1,2 +1,8 @@
 ERROR: File "newtype9.php--useit.php", line 6, characters 24-49:
-Expected an object convertible to string but got a value of type OpaqueInt (Typing[4318])
+String concatenation can only be performed on string and int arguments (Typing[4414])
+  File "newtype9.php--useit.php", line 6, characters 24-49:
+  Expected `string` or `int`
+  File "newtype9.php--newtype.php", line 6, characters 10-18:
+  But got `mixed`
+  File "newtype9.php--newtype.php", line 3, characters 9-17:
+    by the definition of `OpaqueInt`

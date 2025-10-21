@@ -414,10 +414,6 @@ impl HhConfig {
                 "tco_global_access_check_enabled",
                 default.tco_global_access_check_enabled,
             )?,
-            tco_enable_strict_string_concat_interp: hhconfig.get_bool_or(
-                "enable_strict_string_concat_interp",
-                default.tco_enable_strict_string_concat_interp,
-            )?,
             tco_ignore_unsafe_cast: default.tco_ignore_unsafe_cast,
             tco_enable_expression_trees: default.tco_enable_expression_trees,
             tco_enable_function_references: hhconfig.get_bool_or(

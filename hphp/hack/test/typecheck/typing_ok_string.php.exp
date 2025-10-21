@@ -1,3 +1,6 @@
 ERROR: File "typing_ok_string.php", line 21, characters 11-12:
-You cannot use this object as a string
-Implicit conversions of Stringish objects to string are deprecated. (Typing[4067])
+Only string and int values can be used in string interpolation (Typing[4415])
+  File "typing_ok_string.php", line 21, characters 11-12:
+  Expected `string` or `int`
+  File "typing_ok_string.php", line 20, characters 12-12:
+  But got `A`

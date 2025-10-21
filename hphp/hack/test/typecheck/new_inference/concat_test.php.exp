@@ -1,2 +1,62 @@
 ERROR: File "concat_test.php--file1.php", line 3, characters 10-12:
 Was expecting a return type hint (Typing[4030])
+ERROR: File "concat_test.php--file2.php", line 5, characters 9-10:
+String concatenation can only be performed on string and int arguments (Typing[4414])
+  File "concat_test.php--file2.php", line 5, characters 9-10:
+  Expected `string` or `int`
+  File "concat_test.php--file2.php", line 4, characters 19-21:
+  But got `float`
+ERROR: File "concat_test.php--file2.php", line 5, characters 14-15:
+String concatenation can only be performed on string and int arguments (Typing[4414])
+  File "concat_test.php--file2.php", line 5, characters 14-15:
+  Expected `string` or `int`
+  File "concat_test.php--file2.php", line 4, characters 41-44:
+  But got `bool`
+ERROR: File "concat_test.php--file2.php", line 6, characters 9-10:
+String concatenation can only be performed on string and int arguments (Typing[4414])
+  File "concat_test.php--file2.php", line 6, characters 9-10:
+  Expected `string` or `int`
+  File "concat_test.php--file2.php", line 4, characters 19-21:
+  But got `float`
+ERROR: File "concat_test.php--file2.php", line 7, characters 15-16:
+String concatenation can only be performed on string and int arguments (Typing[4414])
+  File "concat_test.php--file2.php", line 7, characters 15-16:
+  Expected `string` or `int`
+  File "concat_test.php--file2.php", line 4, characters 41-44:
+  But got `bool`
+ERROR: File "concat_test.php--file2.php", line 8, characters 9-12:
+String concatenation can only be performed on string and int arguments (Typing[4414])
+  File "concat_test.php--file2.php", line 8, characters 9-12:
+  Expected `string` or `int`
+  File "concat_test.php--file2.php", line 8, characters 9-12:
+  But got `null`
+ERROR: File "concat_test.php--file2.php", line 9, characters 9-12:
+String concatenation can only be performed on string and int arguments (Typing[4414])
+  File "concat_test.php--file2.php", line 9, characters 9-12:
+  Expected `string` or `int`
+  File "concat_test.php--file2.php", line 9, characters 9-12:
+  But got `null`
+ERROR: File "concat_test.php--file2.php", line 9, characters 16-17:
+String concatenation can only be performed on string and int arguments (Typing[4414])
+  File "concat_test.php--file2.php", line 9, characters 16-17:
+  Expected `string` or `int`
+  File "concat_test.php--file2.php", line 4, characters 19-21:
+  But got `float`
+ERROR: File "concat_test.php--file2.php", line 10, characters 9-12:
+String concatenation can only be performed on string and int arguments (Typing[4414])
+  File "concat_test.php--file2.php", line 10, characters 9-12:
+  Expected `string` or `int`
+  File "concat_test.php--file2.php", line 10, characters 9-12:
+  But got `null`
+ERROR: File "concat_test.php--file2.php", line 10, characters 16-17:
+String concatenation can only be performed on string and int arguments (Typing[4414])
+  File "concat_test.php--file2.php", line 10, characters 16-17:
+  Expected `string` or `int`
+  File "concat_test.php--file2.php", line 4, characters 41-44:
+  But got `bool`
+ERROR: File "concat_test.php--file2.php", line 11, characters 9-10:
+String concatenation can only be performed on string and int arguments (Typing[4414])
+  File "concat_test.php--file2.php", line 11, characters 9-10:
+  Expected `string` or `int`
+  File "concat_test.php--file2.php", line 4, characters 19-21:
+  But got `float`

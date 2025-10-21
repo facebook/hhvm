@@ -13,31 +13,7 @@ Invalid argument (Typing[4110])
 ERROR: File "lambda_unpacked_parameters.php", line 39, characters 11-12:
 Invalid argument (Typing[4110])
   File "lambda_unpacked_parameters.php", line 38, characters 25-29:
-  Expected `(bool | float | resource | arraykey)`
-  File "lambda_unpacked_parameters.php", line 3, characters 69-70:
-  But got `vec<string>` (variadic argument)
-ERROR: File "lambda_unpacked_parameters.php", line 39, characters 11-12:
-Invalid argument (Typing[4110])
-  File "lambda_unpacked_parameters.php", line 38, characters 25-29:
-  Expected `arraykey`
-  File "lambda_unpacked_parameters.php", line 3, characters 69-70:
-  But got `vec<string>` (variadic argument)
-ERROR: File "lambda_unpacked_parameters.php", line 39, characters 11-12:
-Invalid argument (Typing[4110])
-  File "lambda_unpacked_parameters.php", line 38, characters 25-29:
-  Expected `bool`
-  File "lambda_unpacked_parameters.php", line 3, characters 69-70:
-  But got `vec<string>` (variadic argument)
-ERROR: File "lambda_unpacked_parameters.php", line 39, characters 11-12:
-Invalid argument (Typing[4110])
-  File "lambda_unpacked_parameters.php", line 38, characters 25-29:
-  Expected `float`
-  File "lambda_unpacked_parameters.php", line 3, characters 69-70:
-  But got `vec<string>` (variadic argument)
-ERROR: File "lambda_unpacked_parameters.php", line 39, characters 11-12:
-Invalid argument (Typing[4110])
-  File "lambda_unpacked_parameters.php", line 38, characters 25-29:
-  Expected `resource`
+  Expected `string` or `int`
   File "lambda_unpacked_parameters.php", line 3, characters 69-70:
   But got `vec<string>` (variadic argument)
 ERROR: File "lambda_unpacked_parameters.php", line 42, characters 25-29:

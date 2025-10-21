@@ -1,3 +1,6 @@
 ERROR: File "heredoc.php", line 53, characters 3-7:
-You cannot use this object as a string
-Implicit conversions of Stringish objects to string are deprecated. (Typing[4067])
+Only string and int values can be used in string interpolation (Typing[4415])
+  File "heredoc.php", line 53, characters 3-7:
+  Expected `string` or `int`
+  File "heredoc.php", line 51, characters 17-20:
+  But got `Test`

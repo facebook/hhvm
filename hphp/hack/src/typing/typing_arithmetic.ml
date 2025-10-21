@@ -562,38 +562,29 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
     (* A bit weird, this one:
      *   function(Stringish | string, Stringish | string) : string)
      *)
-    if TypecheckerOptions.enable_strict_string_concat_interp (Env.get_tcopt env)
-    then
-      let sub_arraykey env p ty =
-        let r = Reason.concat_operand p in
-        let stringlike =
-          MakeType.union r [MakeType.arraykey r; MakeType.dynamic r]
-        in
-        let (env, ty_err_opt) =
-          Typing_ops.sub_type
-            p
-            Reason.URstr_concat
-            env
-            ty
-            stringlike
-            Typing_error.Callback.strict_str_concat_type_mismatch
-        in
-        let ty_mismatch =
-          Option.map ty_err_opt ~f:(Fn.const (ty, stringlike))
-        in
-        Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
-        (env, ty_mismatch)
+    let sub_arraykey env p ty =
+      let r = Reason.concat_operand p in
+      let stringlike =
+        MakeType.union r [MakeType.arraykey r; MakeType.dynamic r]
       in
+      let (env, ty_err_opt) =
+        Typing_ops.sub_type
+          p
+          Reason.URstr_concat
+          env
+          ty
+          stringlike
+          Typing_error.Callback.strict_str_concat_type_mismatch
+      in
+      let ty_mismatch = Option.map ty_err_opt ~f:(Fn.const (ty, stringlike)) in
+      Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
+      (env, ty_mismatch)
+    in
 
-      let (env, err_opt1) = sub_arraykey env p1 ty1 in
-      let (env, err_opt2) = sub_arraykey env p2 ty2 in
-      let ty = MakeType.string (Reason.concat_ret p) in
-      make_result env te1 err_opt1 te2 err_opt2 ty
-    else
-      let (env, err_opt1) = Typing_substring.sub_string_err p1 env ty1 in
-      let (env, err_opt2) = Typing_substring.sub_string_err p2 env ty2 in
-      let ty = MakeType.string (Reason.concat_ret p) in
-      make_result env te1 err_opt1 te2 err_opt2 ty
+    let (env, err_opt1) = sub_arraykey env p1 ty1 in
+    let (env, err_opt2) = sub_arraykey env p2 ty2 in
+    let ty = MakeType.string (Reason.concat_ret p) in
+    make_result env te1 err_opt1 te2 err_opt2 ty
   | Ast_defs.Barbar
   | Ast_defs.Ampamp ->
     make_result env te1 None te2 None (MakeType.bool (Reason.logic_ret p))

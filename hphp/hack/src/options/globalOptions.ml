@@ -146,7 +146,6 @@ type t = {
   tco_enable_no_auto_dynamic: bool;
   tco_skip_check_under_dynamic: bool;
   tco_global_access_check_enabled: bool;
-  tco_enable_strict_string_concat_interp: bool;
   tco_ignore_unsafe_cast: bool;
   tco_enable_expression_trees: bool;
   tco_enable_function_references: bool;
@@ -266,7 +265,6 @@ let default =
     tco_enable_no_auto_dynamic = false;
     tco_skip_check_under_dynamic = false;
     tco_global_access_check_enabled = false;
-    tco_enable_strict_string_concat_interp = false;
     tco_ignore_unsafe_cast = false;
     tco_enable_expression_trees = false;
     tco_enable_function_references = true;
@@ -385,7 +383,6 @@ let set
     ?tco_enable_no_auto_dynamic
     ?tco_skip_check_under_dynamic
     ?tco_global_access_check_enabled
-    ?tco_enable_strict_string_concat_interp
     ?tco_ignore_unsafe_cast
     ?tco_enable_expression_trees
     ?tco_enable_function_references
@@ -595,10 +592,6 @@ let set
       setting
         tco_global_access_check_enabled
         options.tco_global_access_check_enabled;
-    tco_enable_strict_string_concat_interp =
-      setting
-        tco_enable_strict_string_concat_interp
-        options.tco_enable_strict_string_concat_interp;
     tco_ignore_unsafe_cast =
       setting tco_ignore_unsafe_cast options.tco_ignore_unsafe_cast;
     tco_enable_expression_trees =

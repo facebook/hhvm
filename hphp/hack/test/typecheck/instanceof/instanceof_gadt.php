@@ -42,18 +42,17 @@ enum BinOp: int {
   Add = 0;
   Sub = 1;
   Mul = 2;
-  Div = 3;
 }
 
 // Binary numeric operator expressions
-class BinOpExp extends Exp<num> {
+class BinOpExp extends Exp<int> {
   public function __construct(
     public BinOp $op,
-    public Exp<num> $exp1,
-    public Exp<num> $exp2,
+    public Exp<int> $exp1,
+    public Exp<int> $exp2,
   ) {}
 
-  public function evaluate(): num {
+  public function evaluate(): int {
     $val1 = $this->exp1->evaluate();
     $val2 = $this->exp2->evaluate();
     switch ($this->op) {
@@ -63,8 +62,6 @@ class BinOpExp extends Exp<num> {
         return $val1 - $val2;
       case BinOp::Mul:
         return $val1 * $val2;
-      case BinOp::Div:
-        return $val1 / $val2;
     }
     return 0;
   }
@@ -102,7 +99,7 @@ class SndExp<Tu, Tv> extends Exp<Tv> {
 }
 
 // Example: the expression fst(true ? (42,false) : (30,true)) * 3
-function ExampleExp(): Exp<num> {
+function ExampleExp(): Exp<int> {
   return new BinOpExp(
     BinOp::Mul,
     new FstExp(
@@ -152,8 +149,6 @@ function IEval<T>(Exp<T> $e): T {
         return $val1 - $val2;
       case BinOp::Mul:
         return $val1 * $val2;
-      case BinOp::Div:
-        return $val1 / $val2;
     }
   } else if ($e is FstExp<_, _>) {
     list($val1, $val2) = IEval($e->exp);

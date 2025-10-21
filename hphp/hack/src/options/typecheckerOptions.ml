@@ -162,9 +162,6 @@ let set_skip_check_under_dynamic t =
 let interpret_soft_types_as_like_types t =
   t.GlobalOptions.po.ParserOptions.interpret_soft_types_as_like_types
 
-let enable_strict_string_concat_interp t =
-  t.GlobalOptions.tco_enable_strict_string_concat_interp
-
 let ignore_unsafe_cast t = t.GlobalOptions.tco_ignore_unsafe_cast
 
 let set_tco_no_parser_readonly_check t b =

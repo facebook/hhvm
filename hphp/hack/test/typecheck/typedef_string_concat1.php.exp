@@ -1,4 +1,10 @@
 ERROR: File "typedef_string_concat1.php--use.php", line 6, characters 19-19:
 Was expecting a return type hint (Typing[4030])
 ERROR: File "typedef_string_concat1.php--use.php", line 8, characters 33-40:
-Expected an object convertible to string but got a value of type TDef (Typing[4318])
+String concatenation can only be performed on string and int arguments (Typing[4414])
+  File "typedef_string_concat1.php--use.php", line 8, characters 33-40:
+  Expected `string` or `int`
+  File "typedef_string_concat1.php--use.php", line 4, characters 11-14:
+  But got `mixed`
+  File "typedef_string_concat1.php--def.php", line 3, characters 9-12:
+    by the definition of `TDef` arising from an implicit `as ?nonnull` constraint on this type

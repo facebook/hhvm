@@ -27,7 +27,7 @@ element indices. The index of the first element is zero, with subsequent element
 
 ```Hack
 $t = tuple(10, true, 2.3);
-echo "\$t[2] = >" . $t[2] . "<";  // outputs "$t[2] = >2.3<"
+echo "\$t[2] = >" . (string)$t[2] . "<";  // outputs "$t[2] = >2.3<"
 $t[0] = 99;                       // change 10 to 99
 ```
 

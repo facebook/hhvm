@@ -1,3 +1,12 @@
 ERROR: File "type__toString4.php", line 21, characters 18-22:
-You cannot use this object as a string
-Implicit conversions of Stringish objects to string are deprecated. (Typing[4067])
+String concatenation can only be performed on string and int arguments (Typing[4414])
+  File "type__toString4.php", line 21, characters 18-22:
+  Expected `string` or `int`
+  File "type__toString4.php", line 21, characters 18-22:
+  But got `ToS`
+ERROR: File "type__toString4.php", line 21, characters 18-22:
+String concatenation can only be performed on string and int arguments (Typing[4414])
+  File "type__toString4.php", line 21, characters 18-22:
+  Expected `string` or `int`
+  File "type__toString4.php", line 21, characters 18-22:
+  But got `this as ToS`

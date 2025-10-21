@@ -9,5 +9,5 @@ class C {
 <<__EntryPoint>>
 function main(): void {
   echo "MAX_COUNT = ".MAX_COUNT."\n";
-  echo "MAX_HEIGHT = ".C::MAX_HEIGHT."\n";
+  echo "MAX_HEIGHT = ".(string)C::MAX_HEIGHT."\n";
 }

@@ -31,7 +31,11 @@ Typing error (Typing[4062])
   File "supportdyn.bad.php", line 6, characters 26-32:
   Definition is here
 ERROR: File "supportdyn.bad.php", line 14, characters 9-11:
-Expected an object convertible to string but got a value of type supportdyn<nonnull> (Typing[4318])
+String concatenation can only be performed on string and int arguments (Typing[4414])
+  File "supportdyn.bad.php", line 14, characters 9-11:
+  Expected `string` or `int`
+  File "supportdyn.bad.php", line 6, characters 26-32:
+  But got `nonnull`
 ERROR: File "supportdyn.bad.php", line 15, characters 3-5:
 Typing error (Typing[4429])
   File "supportdyn.bad.php", line 15, characters 3-9:

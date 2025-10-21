@@ -72,7 +72,7 @@ class C {
   use T3;
 
   public function foo() : void {
-    echo static::is_odd($this->return_odd()) . "\n";
+    echo (string)static::is_odd($this->return_odd()) . "\n";
   }
 }
 

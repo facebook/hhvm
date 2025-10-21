@@ -1,11 +1,10 @@
 This intrinsic function converts the value of an expression to `string` (if necessary) and writes the string to standard output.  For example:
 
 ```Hack
-$v1 = true;
-$v2 = 123.45;
-echo '>>'.$v1.'|'.$v2."<<\n"; // outputs ">>1|123.45<<"
+$v1 = 23;
+echo '>>'.$v1."<<\n"; // outputs ">>23<<"
 
-$v3 = "abc{$v2}xyz";
+$v3 = "abc{$v1}xyz";
 echo "$v3\n";
 ```
 

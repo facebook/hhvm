@@ -15,7 +15,7 @@ function average_float(float $p1, float $p2): float {
 function main(): void {
   $val = 3e6;
   $result = average_float($val, 5.2E-2);
-  echo "\$result is ".$result."\n";
+  echo "\$result is ".(string)$result."\n";
 }
 ```
 

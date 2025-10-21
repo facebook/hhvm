@@ -283,7 +283,6 @@ let parse_options () =
   let report_pos_from_reason = ref false in
   let consider_type_const_enforceable = ref false in
   let interpret_soft_types_as_like_types = ref false in
-  let enable_strict_string_concat_interp = ref false in
   let ignore_unsafe_cast = ref false in
   let typeconst_concrete_concrete_error = ref false in
   let meth_caller_only_public_visibility = ref true in
@@ -667,10 +666,6 @@ let parse_options () =
         Arg.Set interpret_soft_types_as_like_types,
         " Types declared with <<__Soft>> (runtime logs but doesn't throw) become like types."
       );
-      ( "--enable-strict-string-concat-interp",
-        Arg.Set enable_strict_string_concat_interp,
-        " Require arguments are arraykey types in string concatenation and interpolation."
-      );
       ( "--ignore-unsafe-cast",
         Arg.Set ignore_unsafe_cast,
         " Ignore unsafe_cast and retain the original type of the expression" );
@@ -945,8 +940,6 @@ let parse_options () =
       ~glean_reponame:!glean_reponame
       ~tco_skip_check_under_dynamic:!skip_check_under_dynamic
       ~tco_global_access_check_enabled:!enable_global_access_check
-      ~tco_enable_strict_string_concat_interp:
-        !enable_strict_string_concat_interp
       ~tco_ignore_unsafe_cast:!ignore_unsafe_cast
       ~tco_typeconst_concrete_concrete_error:!typeconst_concrete_concrete_error
       ~tco_meth_caller_only_public_visibility:

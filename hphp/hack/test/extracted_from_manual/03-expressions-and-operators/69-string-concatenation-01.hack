@@ -2,4 +2,5 @@
 // @codegen-command : buck run fbcode//hphp/hack/src/hh_manual:hh_manual extract fbcode/hphp/hack/manual/hack/
 async function example_snippet_wrapper(): Awaitable<void> {
   "foo"."bar"; // "foobar"
+  "A" . 25;    // string result with value "A25"
 }

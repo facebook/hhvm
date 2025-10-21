@@ -2,6 +2,6 @@
 // @codegen-command : buck run fbcode//hphp/hack/src/hh_manual:hh_manual extract fbcode/hphp/hack/manual/hack/
 async function example_snippet_wrapper(): Awaitable<void> {
   $t = tuple(10, true, 2.3);
-  echo "\$t[2] = >" . $t[2] . "<";  // outputs "$t[2] = >2.3<"
+  echo "\$t[2] = >" . (string)$t[2] . "<";  // outputs "$t[2] = >2.3<"
   $t[0] = 99;                       // change 10 to 99
 }

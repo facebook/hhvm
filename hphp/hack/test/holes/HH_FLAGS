@@ -2,5 +2,4 @@
 --allowed-decl-fixme-codes 2084,4101
 --union-intersection-type-hints
 
---enable-strict-string-concat-interp
 --config constraint_array_index=true

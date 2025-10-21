@@ -179,8 +179,6 @@ type t = {
   tco_skip_check_under_dynamic: bool;
       (** Skip second check of method under dynamic assumptions *)
   tco_global_access_check_enabled: bool;
-  tco_enable_strict_string_concat_interp: bool;
-      (** Restricts string concatenation and interpolation to arraykeys *)
   tco_ignore_unsafe_cast: bool;
       (** Ignores unsafe_cast and retains the original type of the expression *)
   tco_enable_expression_trees: bool;
@@ -362,7 +360,6 @@ val set :
   ?tco_enable_no_auto_dynamic:bool ->
   ?tco_skip_check_under_dynamic:bool ->
   ?tco_global_access_check_enabled:bool ->
-  ?tco_enable_strict_string_concat_interp:bool ->
   ?tco_ignore_unsafe_cast:bool ->
   ?tco_enable_expression_trees:bool ->
   ?tco_enable_function_references:bool ->

@@ -1,6 +1,20 @@
 ERROR: File "string_expressions4a.php", line 32, characters 12-19:
-You cannot use this object as a string
-Implicit conversions of Stringish objects to string are deprecated. (Typing[4067])
+Only string and int values can be used in string interpolation (Typing[4415])
+  File "string_expressions4a.php", line 32, characters 12-19:
+  Expected `string` or `int`
+  File "string_expressions4a.php", line 32, characters 12-19:
+  But got `Other`
+  File "string_expressions4a.php", line 31, characters 29-33:
+    from this definition
 ERROR: File "string_expressions4a.php", line 32, characters 20-24:
-You cannot use this object as a string
-Implicit conversions of Stringish objects to string are deprecated. (Typing[4067])
+Only string and int values can be used in string interpolation (Typing[4415])
+  File "string_expressions4a.php", line 32, characters 20-24:
+  Expected `string` or `int`
+  File "string_expressions4a.php", line 32, characters 20-24:
+  But got `Meh`
+ERROR: File "string_expressions4a.php", line 32, characters 20-24:
+Only string and int values can be used in string interpolation (Typing[4415])
+  File "string_expressions4a.php", line 32, characters 20-24:
+  Expected `string` or `int`
+  File "string_expressions4a.php", line 32, characters 20-24:
+  But got `this as Meh`

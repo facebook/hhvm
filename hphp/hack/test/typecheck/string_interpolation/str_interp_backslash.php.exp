@@ -1,2 +1,8 @@
 ERROR: File "str_interp_backslash.php", line 4, characters 10-30:
 The `${x}` syntax is disallowed in Hack. Use `{$x}` instead. (Parsing[1002])
+ERROR: File "str_interp_backslash.php", line 4, characters 10-30:
+Only string and int values can be used in string interpolation (Typing[4415])
+  File "str_interp_backslash.php", line 4, characters 10-30:
+  Expected `string` or `int`
+  File "functions.hhi", line 57, characters 49-52:
+  But got `bool`

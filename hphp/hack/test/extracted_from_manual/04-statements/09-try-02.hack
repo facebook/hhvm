@@ -3,7 +3,7 @@
 function do_it(int $x, int $y): void {
   try {
     $result = $x / $y;
-    echo "\$result = $result\n";
+    echo "\$result = " . (string)$result . "\n";
     // ...
   }
   catch (DivisionByZeroException $ex) {

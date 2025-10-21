@@ -4645,24 +4645,24 @@ end = struct
     | (_, (_, Tany _)) -> valid env
     (* -- C-Fun ------------------------------------------------------------- *)
     | ((r_sub, Tfun ft_sub), (r_super, Tfun ft_super)) ->
-      (* If one or both function types are polymorphic we need to ensure that
-         any higher-rank type parameters do not escape into the bounds of any
-         lower ranked type variables. To do this we increase the rank of
-         any fresh type variables and type parameters generated when we move
-         through a binder then check that ranks are compatible when subtyping
-         type parameters against type variables and that ranks are equal when
-         when subtyping two type variables *)
-      let either_polymorphic =
-        not (ft_sub.ft_instantiated && ft_super.ft_instantiated)
-      in
+      (* If function type in supertype position is polymorphic we will move
+         through a binder. In doing so we need to ensure that any type parameters
+         bound at this higher-rank do not escape into the bounds of any
+         lower ranked type variables. To do this we increase the current rank
+         before binding the type parameters and instantiating the subtype (if
+         it is polymorphic). We then decrease the rank again before returning.
+
+         If only the subtype is polymorphic we don't change ranks because we
+         aren't going though a binder - we are just instantiating. *)
+      let increase_rank = not ft_super.ft_instantiated in
       let subtype_env =
         let check_rank_outer = Subtype_env.get_check_rank subtype_env in
         Subtype_env.set_check_rank
           subtype_env
-          (check_rank_outer || either_polymorphic)
+          (check_rank_outer || increase_rank)
       in
       let env =
-        if either_polymorphic then
+        if increase_rank then
           Typing_env_types.increment_rank env
         else
           env
@@ -4711,7 +4711,7 @@ end = struct
         (* If we incremented the rank during the instantiation of polymorphic
            function types we need to decrement it here *)
         let env =
-          if either_polymorphic then
+          if increase_rank then
             Typing_env_types.decrement_rank env
           else
             env

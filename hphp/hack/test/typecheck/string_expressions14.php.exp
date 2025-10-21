@@ -1,5 +1,5 @@
 ERROR: File "string_expressions14.php", line 20, characters 9-13:
-Only string and int values can be used in string interpolation (Typing[4415])
+Only string and int values can be used in string interpolation (Typing[4110])
   File "string_expressions14.php", line 20, characters 9-13:
   Expected `string` or `int`
   File "string_expressions14.php", line 13, characters 38-38:

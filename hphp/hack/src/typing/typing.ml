@@ -8427,21 +8427,17 @@ end = struct
       List.fold_left idl ~init:(env, []) ~f:(fun (env, tel) x ->
           let (env, te, ty) = expr ~expected:None ~ctxt:Context.default env x in
           let (_, p, _) = x in
-          let r = Reason.interp_operand p in
-          let stringlike =
-            MakeType.union r [MakeType.arraykey r; MakeType.dynamic r]
-          in
-          let (env, ty_err_opt) =
-            Typing_ops.sub_type
-              p
-              Reason.URstr_interp
+          let expected_ty = MakeType.arraykey (Reason.interp_operand p) in
+          let (env, ty_mismatch_opt, _used_dynamic) =
+            Typing_argument.check_argument_type_against_parameter_type
+              ~ureason:Reason.URstr_interp
+              ~ignore_readonly:false
+              ~dynamic_func:(Some Typing_argument.Supportdyn_function)
               env
+              expected_ty
+              p
               ty
-              stringlike
-              Typing_error.Callback.strict_str_interp_type_mismatch
           in
-          let ty_mismatch_opt = mk_ty_mismatch_opt ty stringlike ty_err_opt in
-          Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
           (env, hole_on_ty_mismatch ~ty_mismatch_opt te :: tel))
     in
     (env, List.rev tel)

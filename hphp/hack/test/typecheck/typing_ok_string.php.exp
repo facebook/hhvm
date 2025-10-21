@@ -1,5 +1,5 @@
 ERROR: File "typing_ok_string.php", line 21, characters 11-12:
-Only string and int values can be used in string interpolation (Typing[4415])
+Only string and int values can be used in string interpolation (Typing[4110])
   File "typing_ok_string.php", line 21, characters 11-12:
   Expected `string` or `int`
   File "typing_ok_string.php", line 20, characters 12-12:

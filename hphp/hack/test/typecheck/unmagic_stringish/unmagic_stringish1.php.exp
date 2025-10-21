@@ -1,5 +1,5 @@
 ERROR: File "unmagic_stringish1.php", line 31, characters 4-8:
-Only string and int values can be used in string interpolation (Typing[4415])
+Only string and int values can be used in string interpolation (Typing[4110])
   File "unmagic_stringish1.php", line 31, characters 4-8:
   Expected `string` or `int`
   File "unmagic_stringish1.php", line 20, characters 11-14:
@@ -11,7 +11,7 @@ String concatenation can only be performed on string and int arguments (Typing[4
   File "unmagic_stringish1.php", line 20, characters 11-14:
   But got `bool`
 ERROR: File "unmagic_stringish1.php", line 37, characters 4-9:
-Only string and int values can be used in string interpolation (Typing[4415])
+Only string and int values can be used in string interpolation (Typing[4110])
   File "unmagic_stringish1.php", line 37, characters 4-9:
   Expected `string` or `int`
   File "unmagic_stringish1.php", line 22, characters 12-17:
@@ -23,7 +23,7 @@ String concatenation can only be performed on string and int arguments (Typing[4
   File "unmagic_stringish1.php", line 22, characters 12-17:
   But got `float`
 ERROR: File "unmagic_stringish1.php", line 43, characters 4-8:
-Only string and int values can be used in string interpolation (Typing[4415])
+Only string and int values can be used in string interpolation (Typing[4110])
   File "unmagic_stringish1.php", line 43, characters 4-8:
   Expected `string` or `int`
   File "unmagic_stringish1.php", line 24, characters 11-14:
@@ -35,11 +35,11 @@ String concatenation can only be performed on string and int arguments (Typing[4
   File "unmagic_stringish1.php", line 24, characters 11-14:
   But got `null`
 ERROR: File "unmagic_stringish1.php", line 46, characters 4-7:
-Only string and int values can be used in string interpolation (Typing[4415])
+Only string and int values can be used in string interpolation (Typing[4110])
   File "unmagic_stringish1.php", line 46, characters 4-7:
   Expected `string` or `int`
   File "unmagic_stringish1.php", line 3, characters 22-24:
-  But got `float`
+  But got `num`
 ERROR: File "unmagic_stringish1.php", line 47, characters 6-9:
 String concatenation can only be performed on string and int arguments (Typing[4110])
   File "unmagic_stringish1.php", line 47, characters 6-9:

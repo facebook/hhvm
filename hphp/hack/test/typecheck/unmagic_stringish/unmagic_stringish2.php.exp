@@ -9,7 +9,7 @@ Only string and int values can be used in string interpolation (Typing[4415])
   File "unmagic_stringish2.php", line 58, characters 15-27:
   But got `CNonStringish`
 ERROR: File "unmagic_stringish2.php", line 67, characters 6-10:
-String concatenation can only be performed on string and int arguments (Typing[4414])
+String concatenation can only be performed on string and int arguments (Typing[4110])
   File "unmagic_stringish2.php", line 67, characters 6-10:
   Expected `string` or `int`
   File "unmagic_stringish2.php", line 58, characters 15-27:
@@ -21,7 +21,7 @@ Only string and int values can be used in string interpolation (Typing[4415])
   File "unmagic_stringish2.php", line 60, characters 15-23:
   But got `CExplicit`
 ERROR: File "unmagic_stringish2.php", line 70, characters 6-10:
-String concatenation can only be performed on string and int arguments (Typing[4414])
+String concatenation can only be performed on string and int arguments (Typing[4110])
   File "unmagic_stringish2.php", line 70, characters 6-10:
   Expected `string` or `int`
   File "unmagic_stringish2.php", line 60, characters 15-23:
@@ -33,7 +33,7 @@ Only string and int values can be used in string interpolation (Typing[4415])
   File "unmagic_stringish2.php", line 61, characters 15-23:
   But got `CImplicit`
 ERROR: File "unmagic_stringish2.php", line 73, characters 6-10:
-String concatenation can only be performed on string and int arguments (Typing[4414])
+String concatenation can only be performed on string and int arguments (Typing[4110])
   File "unmagic_stringish2.php", line 73, characters 6-10:
   Expected `string` or `int`
   File "unmagic_stringish2.php", line 61, characters 15-23:
@@ -45,7 +45,7 @@ Only string and int values can be used in string interpolation (Typing[4415])
   File "unmagic_stringish2.php", line 62, characters 19-31:
   But got `CImplicitIntf`
 ERROR: File "unmagic_stringish2.php", line 76, characters 6-14:
-String concatenation can only be performed on string and int arguments (Typing[4414])
+String concatenation can only be performed on string and int arguments (Typing[4110])
   File "unmagic_stringish2.php", line 76, characters 6-14:
   Expected `string` or `int`
   File "unmagic_stringish2.php", line 62, characters 19-31:
@@ -57,7 +57,7 @@ Only string and int values can be used in string interpolation (Typing[4415])
   File "unmagic_stringish2.php", line 63, characters 19-31:
   But got `CImplicitTuse`
 ERROR: File "unmagic_stringish2.php", line 79, characters 6-14:
-String concatenation can only be performed on string and int arguments (Typing[4414])
+String concatenation can only be performed on string and int arguments (Typing[4110])
   File "unmagic_stringish2.php", line 79, characters 6-14:
   Expected `string` or `int`
   File "unmagic_stringish2.php", line 63, characters 19-31:
@@ -69,7 +69,7 @@ Only string and int values can be used in string interpolation (Typing[4415])
   File "unmagic_stringish2.php", line 64, characters 19-31:
   But got `CImplicitTreq`
 ERROR: File "unmagic_stringish2.php", line 82, characters 6-14:
-String concatenation can only be performed on string and int arguments (Typing[4414])
+String concatenation can only be performed on string and int arguments (Typing[4110])
   File "unmagic_stringish2.php", line 82, characters 6-14:
   Expected `string` or `int`
   File "unmagic_stringish2.php", line 64, characters 19-31:

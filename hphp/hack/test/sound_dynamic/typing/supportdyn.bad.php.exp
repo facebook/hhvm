@@ -31,7 +31,7 @@ Typing error (Typing[4062])
   File "supportdyn.bad.php", line 6, characters 26-32:
   Definition is here
 ERROR: File "supportdyn.bad.php", line 14, characters 9-11:
-String concatenation can only be performed on string and int arguments (Typing[4414])
+String concatenation can only be performed on string and int arguments (Typing[4110])
   File "supportdyn.bad.php", line 14, characters 9-11:
   Expected `string` or `int`
   File "supportdyn.bad.php", line 6, characters 26-32:

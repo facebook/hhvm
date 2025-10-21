@@ -16,7 +16,7 @@ let mk_ty_mismatch_opt ty_have ty_expect = function
   | _ -> None
 
 let check_argument_type_against_parameter_type_helper
-    ~dynamic_func ~ignore_readonly env pos param_ty arg_ty =
+    ~dynamic_func ~ignore_readonly ~ureason env pos param_ty arg_ty =
   Typing_log.(
     log_with_level env "typing" ~level:2 (fun () ->
         log_types
@@ -50,7 +50,7 @@ let check_argument_type_against_parameter_type_helper
     ~is_dynamic_aware:false
     ~ignore_readonly
     pos
-    Typing_reason.URparam
+    ureason
     env
     arg_ty
     param_ty
@@ -70,6 +70,7 @@ let check_argument_type_against_parameter_type_helper
  *)
 let check_argument_type_against_parameter_type
     ?(is_single_argument = false)
+    ?(ureason = Typing_reason.URparam)
     ~dynamic_func
     ~ignore_readonly
     env
@@ -82,6 +83,7 @@ let check_argument_type_against_parameter_type
         check_argument_type_against_parameter_type_helper
           ~dynamic_func:None
           ~ignore_readonly
+          ~ureason
           env
           arg_pos
           param_ty
@@ -107,6 +109,7 @@ let check_argument_type_against_parameter_type
           check_argument_type_against_parameter_type_helper
             ~dynamic_func
             ~ignore_readonly
+            ~ureason
             env
             arg_pos
             param_ty
@@ -120,6 +123,7 @@ let check_argument_type_against_parameter_type
             check_argument_type_against_parameter_type_helper
               ~dynamic_func:None
               ~ignore_readonly
+              ~ureason
               env
               arg_pos
               param_ty
@@ -132,6 +136,7 @@ let check_argument_type_against_parameter_type
               check_argument_type_against_parameter_type_helper
                 ~dynamic_func
                 ~ignore_readonly
+                ~ureason
                 env
                 arg_pos
                 param_ty

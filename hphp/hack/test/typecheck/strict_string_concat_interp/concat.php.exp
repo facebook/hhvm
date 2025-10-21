@@ -1,29 +1,29 @@
 ERROR: File "concat.php", line 7, characters 12-16:
-String concatenation can only be performed on string and int arguments (Typing[4414])
+String concatenation can only be performed on string and int arguments (Typing[4110])
   File "concat.php", line 7, characters 12-16:
   Expected `string` or `int`
   File "concat.php", line 7, characters 12-16:
   But got `bool`
 ERROR: File "concat.php", line 8, characters 3-6:
-String concatenation can only be performed on string and int arguments (Typing[4414])
+String concatenation can only be performed on string and int arguments (Typing[4110])
   File "concat.php", line 8, characters 3-6:
   Expected `string` or `int`
   File "concat.php", line 8, characters 3-6:
   But got `null`
 ERROR: File "concat.php", line 9, characters 12-16:
-String concatenation can only be performed on string and int arguments (Typing[4414])
+String concatenation can only be performed on string and int arguments (Typing[4110])
   File "concat.php", line 9, characters 12-16:
   Expected `string` or `int`
   File "concat.php", line 9, characters 12-16:
   But got `float`
 ERROR: File "concat.php", line 10, characters 12-20:
-String concatenation can only be performed on string and int arguments (Typing[4414])
+String concatenation can only be performed on string and int arguments (Typing[4110])
   File "concat.php", line 10, characters 12-20:
   Expected `string` or `int`
   File "concat.php", line 10, characters 16-18:
   But got `Foo`
 ERROR: File "concat.php", line 11, characters 8-11:
-String concatenation can only be performed on string and int arguments (Typing[4414])
+String concatenation can only be performed on string and int arguments (Typing[4110])
   File "concat.php", line 11, characters 8-11:
   Expected `string` or `int`
   File "concat.php", line 11, characters 8-11:

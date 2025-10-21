@@ -5,7 +5,7 @@ Only string and int values can be used in string interpolation (Typing[4415])
   File "unmagic_stringish1.php", line 20, characters 11-14:
   But got `bool`
 ERROR: File "unmagic_stringish1.php", line 32, characters 6-10:
-String concatenation can only be performed on string and int arguments (Typing[4414])
+String concatenation can only be performed on string and int arguments (Typing[4110])
   File "unmagic_stringish1.php", line 32, characters 6-10:
   Expected `string` or `int`
   File "unmagic_stringish1.php", line 20, characters 11-14:
@@ -17,7 +17,7 @@ Only string and int values can be used in string interpolation (Typing[4415])
   File "unmagic_stringish1.php", line 22, characters 12-17:
   But got `float`
 ERROR: File "unmagic_stringish1.php", line 38, characters 6-11:
-String concatenation can only be performed on string and int arguments (Typing[4414])
+String concatenation can only be performed on string and int arguments (Typing[4110])
   File "unmagic_stringish1.php", line 38, characters 6-11:
   Expected `string` or `int`
   File "unmagic_stringish1.php", line 22, characters 12-17:
@@ -29,7 +29,7 @@ Only string and int values can be used in string interpolation (Typing[4415])
   File "unmagic_stringish1.php", line 24, characters 11-14:
   But got `null`
 ERROR: File "unmagic_stringish1.php", line 44, characters 6-10:
-String concatenation can only be performed on string and int arguments (Typing[4414])
+String concatenation can only be performed on string and int arguments (Typing[4110])
   File "unmagic_stringish1.php", line 44, characters 6-10:
   Expected `string` or `int`
   File "unmagic_stringish1.php", line 24, characters 11-14:
@@ -41,8 +41,8 @@ Only string and int values can be used in string interpolation (Typing[4415])
   File "unmagic_stringish1.php", line 3, characters 22-24:
   But got `float`
 ERROR: File "unmagic_stringish1.php", line 47, characters 6-9:
-String concatenation can only be performed on string and int arguments (Typing[4414])
+String concatenation can only be performed on string and int arguments (Typing[4110])
   File "unmagic_stringish1.php", line 47, characters 6-9:
   Expected `string` or `int`
   File "unmagic_stringish1.php", line 3, characters 22-24:
-  But got `float`
+  But got `num`

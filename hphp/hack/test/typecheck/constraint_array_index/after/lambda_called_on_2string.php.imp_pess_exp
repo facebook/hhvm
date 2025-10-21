@@ -1,0 +1,12 @@
+ERROR: File "lambda_called_on_2string.php", line 4, characters 6-10:
+Invalid argument (Typing[4110])
+  File "lambda_called_on_2string.php", line 3, characters 22-26:
+  Expected `string` or `int`
+  File "lambda_called_on_2string.php", line 3, characters 22-26:
+  But got `dynamic`
+ERROR: File "lambda_called_on_2string.php", line 4, characters 13-17:
+Invalid argument (Typing[4110])
+  File "lambda_called_on_2string.php", line 3, characters 30-34:
+  Expected `string` or `int`
+  File "lambda_called_on_2string.php", line 3, characters 30-34:
+  But got `dynamic`

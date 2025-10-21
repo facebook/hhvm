@@ -1,29 +1,29 @@
 ERROR: File "stringish.php", line 29, characters 28-29:
-String concatenation can only be performed on string and int arguments (Typing[4414])
+String concatenation can only be performed on string and int arguments (Typing[4110])
   File "stringish.php", line 29, characters 28-29:
   Expected `string` or `int`
   File "stringish.php", line 28, characters 13-21:
   But got `Stringish`
 ERROR: File "stringish.php", line 53, characters 16-20:
-String concatenation can only be performed on string and int arguments (Typing[4414])
+String concatenation can only be performed on string and int arguments (Typing[4110])
   File "stringish.php", line 53, characters 16-20:
   Expected `string` or `int`
   File "stringish.php", line 53, characters 16-20:
   But got `TStringish`
 ERROR: File "stringish.php", line 53, characters 16-20:
-String concatenation can only be performed on string and int arguments (Typing[4414])
+String concatenation can only be performed on string and int arguments (Typing[4110])
   File "stringish.php", line 53, characters 16-20:
   Expected `string` or `int`
   File "stringish.php", line 53, characters 16-20:
   But got `this as TStringish`
 ERROR: File "stringish.php", line 61, characters 16-20:
-String concatenation can only be performed on string and int arguments (Typing[4414])
+String concatenation can only be performed on string and int arguments (Typing[4110])
   File "stringish.php", line 61, characters 16-20:
   Expected `string` or `int`
   File "stringish.php", line 61, characters 16-20:
   But got `TReq`
 ERROR: File "stringish.php", line 61, characters 16-20:
-String concatenation can only be performed on string and int arguments (Typing[4414])
+String concatenation can only be performed on string and int arguments (Typing[4110])
   File "stringish.php", line 61, characters 16-20:
   Expected `string` or `int`
   File "stringish.php", line 61, characters 16-20:

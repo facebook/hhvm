@@ -1,5 +1,5 @@
 ERROR: File "append_nonnull_and_string.php", line 4, characters 16-17:
-String concatenation can only be performed on string and int arguments (Typing[4414])
+String concatenation can only be performed on string and int arguments (Typing[4110])
   File "append_nonnull_and_string.php", line 4, characters 16-17:
   Expected `string` or `int`
   File "append_nonnull_and_string.php", line 3, characters 12-18:

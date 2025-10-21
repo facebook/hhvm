@@ -1,0 +1,6 @@
+ERROR: File "lambda_called_on_2string_curry.php", line 4, characters 13-17:
+Invalid argument (Typing[4110])
+  File "lambda_called_on_2string_curry.php", line 3, characters 31-35:
+  Expected `string` or `int`
+  File "lambda_called_on_2string_curry.php", line 3, characters 31-35:
+  But got `dynamic`

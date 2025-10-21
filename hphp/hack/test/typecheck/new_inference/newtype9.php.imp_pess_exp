@@ -1,5 +1,5 @@
 ERROR: File "newtype9.php--useit.php", line 6, characters 24-49:
-String concatenation can only be performed on string and int arguments (Typing[4414])
+String concatenation can only be performed on string and int arguments (Typing[4110])
   File "newtype9.php--useit.php", line 6, characters 24-49:
   Expected `string` or `int`
   File "newtype9.php--newtype.php", line 6, characters 10-18:

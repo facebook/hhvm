@@ -1,5 +1,5 @@
 ERROR: File "nullsafe-any.php", line 18, characters 8-9:
-String concatenation can only be performed on string and int arguments (Typing[4414])
+String concatenation can only be performed on string and int arguments (Typing[4110])
   File "nullsafe-any.php", line 18, characters 8-9:
   Expected `string` or `int`
   File "nullsafe-any.php", line 15, characters 8-18:

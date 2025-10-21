@@ -12,6 +12,7 @@ type dyn_func_kind =
 
 val check_argument_type_against_parameter_type :
   ?is_single_argument:bool ->
+  ?ureason:Typing_reason.ureason ->
   dynamic_func:dyn_func_kind option ->
   ignore_readonly:bool ->
   Typing_env_types.env ->

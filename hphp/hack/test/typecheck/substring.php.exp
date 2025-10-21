@@ -1,5 +1,5 @@
 ERROR: File "substring.php", line 16, characters 3-10:
-String concatenation can only be performed on string and int arguments (Typing[4414])
+String concatenation can only be performed on string and int arguments (Typing[4110])
   File "substring.php", line 16, characters 3-10:
   Expected `string` or `int`
   File "substring.php", line 3, characters 37-38:

@@ -13,15 +13,15 @@
           [([3:3-14], (Expr ((string), [3:3-13], (Assign (((string), [3:3-5], (Lvar ([3:3-5], $s))), None, ((string), [3:8-13], (String "foo")))))));
             ([4:3-42],
              (Expr
-                (((function(~arraykey $n): string)), [4:3-41],
-                 (Assign ((((function(~arraykey $n): string)), [4:3-5], (Lvar ([4:3-5], $f))), None,
-                    (((function(~arraykey $n): string)), [4:8-41],
+                (((function(arraykey $n): string)), [4:3-41],
+                 (Assign ((((function(arraykey $n): string)), [4:3-5], (Lvar ([4:3-5], $f))), None,
+                    (((function(arraykey $n): string)), [4:8-41],
                      (Lfun (
                         { f_span = [4:8-41]; f_readonly_this = None; 
                           f_annotation = (); f_readonly_ret = None; f_tparams = []; 
                           f_ret = ((string), None);
                           f_params =
-                          [{ param_annotation = (~arraykey); param_type_hint = ((~arraykey), None); 
+                          [{ param_annotation = (arraykey); param_type_hint = ((arraykey), None); 
                              param_pos = [4:8-10]; param_name = "$n"; 
                              param_info = Param_required; param_readonly = None; 
                              param_splat = None; param_callconv = Pnormal; 
@@ -37,7 +37,7 @@
                                         (Binop
                                            { bop = Dot;
                                              lhs =
-                                             ((string), [4:24-31], (Binop { bop = Dot; lhs = ((~arraykey), [4:24-26], (Lvar ([4:24-26], $n))); rhs = ((~string), [4:29-31], (Lvar ([4:29-31], $s))) }));
+                                             ((string), [4:24-31], (Binop { bop = Dot; lhs = ((arraykey), [4:24-26], (Lvar ([4:24-26], $n))); rhs = ((~string), [4:29-31], (Lvar ([4:29-31], $s))) }));
                                              rhs = ((string), [4:34-38], (String "\\n")) })))))
                               ]
                             };
@@ -50,14 +50,14 @@
                 ((string), [5:3-13],
                  (Assign (((string), [5:3-5], (Lvar ([5:3-5], $x))), None,
                     ((string), [5:8-13],
-                     (Call { func = (((function(~arraykey $n): string)), [5:8-10], (Lvar ([5:8-10], $f))); targs = []; args = [(Anormal ((int), [5:11-12], (Int "4")))]; unpacked_arg = None }))
+                     (Call { func = (((function(arraykey $n): string)), [5:8-10], (Lvar ([5:8-10], $f))); targs = []; args = [(Anormal ((int), [5:11-12], (Int "4")))]; unpacked_arg = None }))
                     )))));
             ([6:3-18],
              (Expr
                 ((string), [6:3-17],
                  (Assign (((string), [6:3-5], (Lvar ([6:3-5], $y))), None,
                     ((string), [6:8-17],
-                     (Call { func = (((function(~arraykey $n): string)), [6:8-10], (Lvar ([6:8-10], $f))); targs = []; args = [(Anormal ((string), [6:11-16], (String "bar")))]; unpacked_arg = None }))
+                     (Call { func = (((function(arraykey $n): string)), [6:8-10], (Lvar ([6:8-10], $f))); targs = []; args = [(Anormal ((string), [6:11-16], (String "bar")))]; unpacked_arg = None }))
                     )))))
             ]
           };

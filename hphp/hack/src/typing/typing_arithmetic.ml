@@ -559,28 +559,20 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
       Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err2);
     make_result env te1 None te2 None ty_result
   | Ast_defs.Dot ->
-    (* A bit weird, this one:
-     *   function(Stringish | string, Stringish | string) : string)
-     *)
     let sub_arraykey env p ty =
-      let r = Reason.concat_operand p in
-      let stringlike =
-        MakeType.union r [MakeType.arraykey r; MakeType.dynamic r]
-      in
-      let (env, ty_err_opt) =
-        Typing_ops.sub_type
-          p
-          Reason.URstr_concat
+      let expected_ty = Typing_make_type.arraykey (Reason.concat_operand p) in
+      let (env, ty_mismatch, _used_dynamic) =
+        Typing_argument.check_argument_type_against_parameter_type
+          ~ureason:Reason.URstr_concat
+          ~ignore_readonly:false
+          ~dynamic_func:(Some Typing_argument.Supportdyn_function)
           env
+          expected_ty
+          p
           ty
-          stringlike
-          Typing_error.Callback.strict_str_concat_type_mismatch
       in
-      let ty_mismatch = Option.map ty_err_opt ~f:(Fn.const (ty, stringlike)) in
-      Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
       (env, ty_mismatch)
     in
-
     let (env, err_opt1) = sub_arraykey env p1 ty1 in
     let (env, err_opt2) = sub_arraykey env p2 ty2 in
     let ty = MakeType.string (Reason.concat_ret p) in

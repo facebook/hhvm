@@ -18,7 +18,7 @@ file_provider = { version = "0.0.0", path = "../../file_provider/cargo/file_prov
 folded_decl_provider = { version = "0.0.0", path = "../../folded_decl_provider/cargo/folded_decl_provider" }
 hackrs_test_utils = { version = "0.0.0", path = "../../hackrs_test_utils/cargo/hackrs_test_utils" }
 hhi = { version = "0.0.0", path = "../../../hhi/rust" }
-jwalk = "0.6.2"
+jwalk = "0.8.1"
 oxidized = { version = "0.0.0", path = "../../../oxidized" }
 pos = { version = "0.0.0", path = "../../pos/cargo/pos" }
 tempfile = "3.22"

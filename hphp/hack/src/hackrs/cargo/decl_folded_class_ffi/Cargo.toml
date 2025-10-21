@@ -21,7 +21,7 @@ folded_decl_provider = { version = "0.0.0", path = "../../folded_decl_provider/c
 hackrs_test_utils = { version = "0.0.0", path = "../../hackrs_test_utils/cargo/hackrs_test_utils" }
 hhi = { version = "0.0.0", path = "../../../hhi/rust" }
 indicatif = { version = "0.17.6", features = ["futures", "improved_unicode", "rayon", "tokio"] }
-jwalk = "0.6.2"
+jwalk = "0.8.1"
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_ocamlpool = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 oxidized = { version = "0.0.0", path = "../../../oxidized" }

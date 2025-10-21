@@ -295,19 +295,26 @@ class ServerPublisherStream : private StreamServerCallback {
       }
     }
 
-    return ServerStreamFactory([stream = std::move(stream)](
-                                   FirstResponsePayload&& payload,
-                                   StreamClientCallback* callback,
-                                   folly::EventBase* clientEb,
-                                   TilePtr&& interaction,
-                                   std::shared_ptr<ContextStack>) mutable {
-      stream->streamClientCallback_ = callback;
-      stream->clientEventBase_ = clientEb;
-      stream->interaction_ =
-          TileStreamGuard::transferFrom(std::move(interaction));
-      std::ignore = callback->onFirstResponse(
-          std::move(payload), clientEb, stream.release());
-    });
+    return ServerStreamFactory(
+        [stream = std::move(stream)](
+            FirstResponsePayload&& payload,
+            StreamClientCallback* callback,
+            folly::EventBase* clientEb,
+            TilePtr&& interaction,
+            std::shared_ptr<ContextStack> contextStack) mutable {
+          stream->streamClientCallback_ = callback;
+          stream->clientEventBase_ = clientEb;
+          stream->contextStack_ = std::move(contextStack);
+          stream->interaction_ =
+              TileStreamGuard::transferFrom(std::move(interaction));
+
+          // Notify stream subscribe
+          notifyStreamSubscribe(
+              stream->contextStack_.get(), stream->interaction_);
+
+          std::ignore = callback->onFirstResponse(
+              std::move(payload), clientEb, stream.release());
+        });
   }
 
   Ptr copy() {
@@ -322,6 +329,7 @@ class ServerPublisherStream : private StreamServerCallback {
 
   bool onStreamRequestN(uint64_t credits) override {
     clientEventBase_->dcheckIsInEventBaseThread();
+    notifyStreamCredit(contextStack_.get(), credits);
     if (!creditBuffer_.hasCredit()) {
       // we need creditBuffer_ to hold credits before calling processPayloads
       auto buffer = creditBuffer_.getBuffer();
@@ -336,6 +344,7 @@ class ServerPublisherStream : private StreamServerCallback {
 
   void onStreamCancel() override {
     clientEventBase_->dcheckIsInEventBaseThread();
+    notifyStreamCancel(contextStack_.get());
     serverExecutor_->add([ex = serverExecutor_, self = copy()] {
       self->onStreamCompleteOrCancel_.call();
     });
@@ -373,13 +382,16 @@ class ServerPublisherStream : private StreamServerCallback {
             return false;
           }
           if (hasPayload) {
+            notifyStreamNext(contextStack_.get());
             creditBuffer_.addCredits(-1);
           }
         } else if (payload.hasException()) {
+          notifyStreamError(contextStack_.get(), payload.exception());
           streamClientCallback_->onStreamError(std::move(payload.exception()));
           close();
           return false;
         } else {
+          notifyStreamCompletion(contextStack_.get());
           streamClientCallback_->onStreamComplete();
           close();
           return false;
@@ -439,6 +451,55 @@ class ServerPublisherStream : private StreamServerCallback {
   CreditBuffer creditBuffer_;
 
   TileStreamGuard interaction_;
+
+  std::shared_ptr<ContextStack> contextStack_;
+
+  //
+  // Helper methods to encapsulate ContextStack usage
+  //
+  static void notifyStreamSubscribe(
+      ContextStack* contextStack, const TileStreamGuard& interaction) {
+    if (contextStack) {
+      contextStack->onStreamSubscribe(
+          {.interactionCreationTime =
+               interaction.getInteractionCreationTime()});
+    }
+  }
+
+  static void notifyStreamCancel(ContextStack* contextStack) {
+    if (contextStack) {
+      contextStack->onStreamFinally(details::STREAM_ENDING_TYPES::CANCEL);
+    }
+  }
+
+  static void notifyStreamError(
+      ContextStack* contextStack, const folly::exception_wrapper& exception) {
+    if (contextStack) {
+      contextStack->handleStreamErrorWrapped(exception);
+      contextStack->onStreamFinally(details::STREAM_ENDING_TYPES::ERROR);
+    }
+  }
+
+  static void notifyStreamCompletion(ContextStack* contextStack) {
+    if (contextStack) {
+      contextStack->onStreamFinally(details::STREAM_ENDING_TYPES::COMPLETE);
+    }
+  }
+
+  static void notifyStreamCredit(ContextStack* contextStack, uint64_t credits) {
+    if (contextStack) {
+      contextStack->onStreamCredit(static_cast<uint32_t>(credits));
+    }
+  }
+
+  static void notifyStreamNext(ContextStack* contextStack) {
+    if (contextStack) {
+      contextStack->onStreamNext();
+    }
+  }
+  //
+  // end of Helper methods to encapsulate ContextStack usage
+  //
 
   friend class ServerStreamMultiPublisher<T, WithHeader>;
   friend class test::TestStreamClientCallbackService;

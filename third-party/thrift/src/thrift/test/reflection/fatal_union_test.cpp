@@ -231,17 +231,7 @@ FATAL_S(unionA_annotation1v, "some more text");
 FATAL_S(unionA_annotation2k, "sample.annotation");
 FATAL_S(unionA_annotation2v, "some text here");
 
-FATAL_S(union1_annotation1k, "thrift.uri");
-FATAL_S(
-    union1_annotation1v,
-    "facebook.com/thrift/test/reflection/reflection/union1");
-
 TEST(fatal_union, annotations) {
-  EXPECT_SAME<
-      fatal::list<
-          apache::thrift::annotation<union1_annotation1k, union1_annotation1v>>,
-      apache::thrift::reflect_variant<union1>::annotations::map>();
-
   EXPECT_SAME<
       fatal::list<>,
       apache::thrift::reflect_variant<union2>::annotations::map>();

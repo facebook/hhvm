@@ -18,11 +18,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import unittest
 
-from DefaultValuesTest import *
-from DefaultValuesTest.ttypes import *
+from DefaultValuesTest.ttypes import DefaultValues
 
-from thrift.protocol.TBinaryProtocol import *
-from thrift.transport.TTransport import *
+from thrift.protocol.TBinaryProtocol import TBinaryProtocol
+from thrift.transport.TTransport import TMemoryBuffer
 
 
 class TestDefaultValues(unittest.TestCase):

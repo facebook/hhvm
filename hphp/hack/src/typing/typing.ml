@@ -6296,117 +6296,6 @@ end = struct
         let result = make_call env wrapped_caller targs args unpacked_arg ty in
         (result, s)
       | _ -> ((env, expr, ty), s))
-    (* Call instance method with constraint-based inference *)
-    | Obj_get (e1, (_, pos_id, Id m), OG_nullthrows, Is_method)
-      when TCO.constraint_method_call env.genv.tcopt
-           && List.is_empty explicit_targs
-           && Option.is_none unpacked_element ->
-      (* Construct a function type from the types of the arguments, and check
-         that the receiver has a method that is a subtype of it. Since function parameters
-         are contravariant, this will check that the arguments are subtypes of the
-         parameters *)
-      let (env, te1, ty1) =
-        expr
-          ~expected:None
-          ~ctxt:Context.{ default with accept_using_var = true }
-          env
-          e1
-      in
-      let expr_with_edt env e =
-        let (env, tast, ty) = expr ~expected:None ~ctxt:Context.default env e in
-        let (env, ty) = ExprDepTy.make env ~cid:(CIexpr e) ty in
-        (env, tast, ty)
-      in
-      let (env, args_tast, arg_tys) =
-        argument_list_exprs expr_with_edt env el
-      in
-      let arg_posl =
-        List.map el ~f:(fun arg ->
-            match arg with
-            | Aast_defs.Ainout (_, (_, pos, e))
-            | Aast_defs.Anamed (_, (_, pos, e))
-            | Aast_defs.Anormal (_, pos, e) ->
-              (match e with
-              | ReadonlyExpr _ -> (pos, true)
-              | _ -> (pos, false)))
-      in
-      let make_param (pos, is_readonly) ty =
-        {
-          fp_pos = Pos_or_decl.of_raw_pos pos;
-          fp_name = None;
-          fp_type = ty;
-          fp_flags =
-            Typing_defs_flags.FunParam.(set_readonly is_readonly default);
-          fp_def_value = None;
-        }
-      in
-      let (env, ty) = Env.fresh_type env p in
-      let tfty =
-        ( Reason.witness p,
-          Tfun
-            {
-              ft_tparams = [];
-              ft_where_constraints = [];
-              ft_params = List.map2_exn ~f:make_param arg_posl arg_tys;
-              ft_implicit_params =
-                {
-                  capability =
-                    CapTy
-                      (Env.get_local_check_defined
-                         env
-                         (p, Typing_coeffects.capability_id))
-                        .Typing_local_types.ty;
-                };
-              ft_ret = ty;
-              ft_flags =
-                Typing_defs_flags.Fun.(
-                  set_readonly_this
-                    require_readonly_this
-                    (set_returns_readonly ctxt.support_readonly_return default));
-              ft_require_package = None;
-              ft_instantiated = true;
-            } )
-      in
-      let has_member_ty =
-        MakeType.has_member
-          (Reason.witness pos_id)
-          ~name:m
-          ~ty:tfty
-          ~class_id:(CIexpr e1)
-          ~methd:
-            (Some
-               {
-                 hmm_explicit_targs = [];
-                 hmm_args_pos = List.map ~f:fst arg_posl;
-               })
-      in
-      let (env, ty_err_opt) =
-        Typing_utils.sub_type_i
-          env
-          (LoclType ty1)
-          has_member_ty
-          (Some (Typing_error.Reasons_callback.unify_error_at p))
-      in
-      Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
-      let ty_mismatch_opt =
-        mk_ty_mismatch_opt ty1 (MakeType.nothing Reason.none) ty_err_opt
-      in
-      let (env, inner_te) =
-        Typing_helpers.make_simplify_typed_expr env pos_id tfty (Aast.Id m)
-      in
-      let (env, te) =
-        Typing_helpers.make_simplify_typed_expr
-          env
-          fpos
-          tfty
-          (Aast.Obj_get
-             ( hole_on_ty_mismatch ~ty_mismatch_opt te1,
-               inner_te,
-               OG_nullthrows,
-               Is_method ))
-      in
-      let result = make_call env te [] args_tast None ty in
-      (result, true)
     (* Call instance method *)
     | Obj_get (e1, (_, pos_id, Id m), nullflavor, Is_method) ->
       let (env, te1, ty1) =
@@ -6421,55 +6310,166 @@ end = struct
         | OG_nullthrows -> None
         | OG_nullsafe -> Some p
       in
-      let (_, p1, _) = e1 in
-      let ( (env, ty_err_opt),
-            (tfty, tal),
-            lval_ty_mismatch_opt,
-            _rval_ty_mismatch_opt ) =
-        TOG.obj_get_with_mismatches
-          ~obj_pos:p1
-          ~is_method:true
-          ~meth_caller:false
-          ~nullsafe
-          ~coerce_from_ty:None
-          ~explicit_targs
-          ~class_id:(CIexpr e1)
-          ~member_id:m
-          ~on_error:Typing_error.Callback.unify_error
-          env
-          ty1
+      let use_constraint_inference =
+        List.is_empty explicit_targs
+        && Option.is_none unpacked_element
+        && Option.is_none nullsafe
+        && TCO.constraint_method_call env.genv.tcopt
       in
-      Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
-      check_disposable_in_return env tfty;
-      let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
-        call
-          ~nullsafe
-          ~expected
-          ~expr_pos:p
-          ~recv_pos:p1
-          ~id_pos:pos_id
-          ~in_await:None
-          env
-          tfty
-          el
-          unpacked_element
-      in
-      let (env, inner_te) =
-        Typing_helpers.make_simplify_typed_expr env pos_id tfty (Aast.Id m)
-      in
-      let (env, te) =
-        Typing_helpers.make_simplify_typed_expr
-          env
-          fpos
-          tfty
-          (Aast.Obj_get
-             ( hole_on_ty_mismatch ~ty_mismatch_opt:lval_ty_mismatch_opt te1,
-               inner_te,
-               nullflavor,
-               Is_method ))
-      in
-      let result = make_call env te tal tel typed_unpack_element ty in
-      (result, should_forget_fakes)
+      if use_constraint_inference then (
+        (* Construct a function type from the types of the arguments, and check
+           that the receiver has a method that is a subtype of it. Since function parameters
+           are contravariant, this will check that the arguments are subtypes of the
+           parameters *)
+        let expr_with_edt env e =
+          let (env, tast, ty) =
+            expr ~expected:None ~ctxt:Context.default env e
+          in
+          let (env, ty) = ExprDepTy.make env ~cid:(CIexpr e) ty in
+          (env, tast, ty)
+        in
+        let (env, args_tast, arg_tys) =
+          argument_list_exprs expr_with_edt env el
+        in
+        let arg_posl =
+          List.map el ~f:(fun arg ->
+              match arg with
+              | Aast_defs.Ainout (_, (_, pos, e))
+              | Aast_defs.Anamed (_, (_, pos, e))
+              | Aast_defs.Anormal (_, pos, e) ->
+                (match e with
+                | ReadonlyExpr _ -> (pos, true)
+                | _ -> (pos, false)))
+        in
+        let make_param (pos, is_readonly) ty =
+          {
+            fp_pos = Pos_or_decl.of_raw_pos pos;
+            fp_name = None;
+            fp_type = ty;
+            fp_flags =
+              Typing_defs_flags.FunParam.(set_readonly is_readonly default);
+            fp_def_value = None;
+          }
+        in
+        let (env, ty) = Env.fresh_type env p in
+        let tfty =
+          ( Reason.witness p,
+            Tfun
+              {
+                ft_tparams = [];
+                ft_where_constraints = [];
+                ft_params = List.map2_exn ~f:make_param arg_posl arg_tys;
+                ft_implicit_params =
+                  {
+                    capability =
+                      CapTy
+                        (Env.get_local_check_defined
+                           env
+                           (p, Typing_coeffects.capability_id))
+                          .Typing_local_types.ty;
+                  };
+                ft_ret = ty;
+                ft_flags =
+                  Typing_defs_flags.Fun.(
+                    set_readonly_this
+                      require_readonly_this
+                      (set_returns_readonly
+                         ctxt.support_readonly_return
+                         default));
+                ft_require_package = None;
+                ft_instantiated = true;
+              } )
+        in
+        let has_member_ty =
+          MakeType.has_member
+            (Reason.witness pos_id)
+            ~name:m
+            ~ty:tfty
+            ~class_id:(CIexpr e1)
+            ~methd:
+              (Some
+                 {
+                   hmm_explicit_targs = [];
+                   hmm_args_pos = List.map ~f:fst arg_posl;
+                 })
+        in
+        let (env, ty_err_opt) =
+          Typing_utils.sub_type_i
+            env
+            (LoclType ty1)
+            has_member_ty
+            (Some (Typing_error.Reasons_callback.unify_error_at p))
+        in
+        Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
+        let ty_mismatch_opt =
+          mk_ty_mismatch_opt ty1 (MakeType.nothing Reason.none) ty_err_opt
+        in
+        let (env, inner_te) =
+          Typing_helpers.make_simplify_typed_expr env pos_id tfty (Aast.Id m)
+        in
+        let (env, te) =
+          Typing_helpers.make_simplify_typed_expr
+            env
+            fpos
+            tfty
+            (Aast.Obj_get
+               ( hole_on_ty_mismatch ~ty_mismatch_opt te1,
+                 inner_te,
+                 OG_nullthrows,
+                 Is_method ))
+        in
+        let result = make_call env te [] args_tast None ty in
+        (result, true)
+      ) else
+        let (_, p1, _) = e1 in
+        let ( (env, ty_err_opt),
+              (tfty, tal),
+              lval_ty_mismatch_opt,
+              _rval_ty_mismatch_opt ) =
+          TOG.obj_get_with_mismatches
+            ~obj_pos:p1
+            ~is_method:true
+            ~meth_caller:false
+            ~nullsafe
+            ~coerce_from_ty:None
+            ~explicit_targs
+            ~class_id:(CIexpr e1)
+            ~member_id:m
+            ~on_error:Typing_error.Callback.unify_error
+            env
+            ty1
+        in
+        Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
+        check_disposable_in_return env tfty;
+        let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
+          call
+            ~nullsafe
+            ~expected
+            ~expr_pos:p
+            ~recv_pos:p1
+            ~id_pos:pos_id
+            ~in_await:None
+            env
+            tfty
+            el
+            unpacked_element
+        in
+        let (env, inner_te) =
+          Typing_helpers.make_simplify_typed_expr env pos_id tfty (Aast.Id m)
+        in
+        let (env, te) =
+          Typing_helpers.make_simplify_typed_expr
+            env
+            fpos
+            tfty
+            (Aast.Obj_get
+               ( hole_on_ty_mismatch ~ty_mismatch_opt:lval_ty_mismatch_opt te1,
+                 inner_te,
+                 nullflavor,
+                 Is_method ))
+        in
+        let result = make_call env te tal tel typed_unpack_element ty in
+        (result, should_forget_fakes)
     (* Function invocation *)
     | Id id -> dispatch_id env id
     | _ ->

@@ -24,6 +24,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import errno
+import importlib.resources
 import socket
 import ssl as SSL
 import string
@@ -41,8 +42,7 @@ from thrift.protocol import (
 from thrift.transport import TSocket, TSSLSocket, TTransport
 from thrift.transport.THeaderTransport import CLIENT_TYPE, THeaderTransport, TRANSFORM
 from ThriftTest import SecondService, ThriftTest
-from ThriftTest.ttypes import *
-import importlib.resources
+from ThriftTest.ttypes import Xception, Xtruct
 
 
 _servers = []

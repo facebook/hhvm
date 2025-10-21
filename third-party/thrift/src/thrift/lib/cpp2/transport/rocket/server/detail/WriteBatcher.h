@@ -21,6 +21,7 @@
 #include <vector>
 
 #include <folly/io/IOBuf.h>
+#include <folly/io/IOBufQueue.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/HHWheelTimer.h>
 #include <folly/net/NetOps.h>
@@ -66,9 +67,12 @@ class WriteBatcher : private folly::EventBase::LoopCallback,
       bufferedWritesContext_.sendCallbacks.push_back(std::move(cb));
     }
 
+    // PERFORMANCE: Calculate byte size only once (was O(n)
+    // computeChainDataLength)
+    size_t totalBytesInWrite = 0;
     if (auto hasObservers = connection_.numObservers() != 0;
         batchingByteSize_ || hasObservers) {
-      auto totalBytesInWrite = data->computeChainDataLength();
+      totalBytesInWrite = data ? data->computeChainDataLength() : 0;
 
       if (hasObservers) {
         bufferedWritesContext_.writeEvents.emplace_back(
@@ -77,32 +81,31 @@ class WriteBatcher : private folly::EventBase::LoopCallback,
       totalBytesBuffered_ += totalBytesInWrite;
     }
 
-    if (!bufferedWrites_) {
-      bufferedWrites_ = std::move(data);
+    // PERFORMANCE: Use IOBufQueue for O(1) append instead of O(n) prependChain
+    bool wasEmpty = bufferedWritesQueue_.empty();
+    if (data) {
+      bufferedWritesQueue_.append(std::move(data));
+    }
+
+    if (wasEmpty && !bufferedWritesQueue_.empty()) {
       if (batchingInterval_ != std::chrono::milliseconds::zero()) {
         connection_.getEventBase().timer().scheduleTimeout(
             this, batchingInterval_);
       } else {
         connection_.getEventBase().runInLoop(this, true /* thisIteration */);
       }
-    } else {
-      bufferedWrites_->prependChain(std::move(data));
     }
 
     // We want the FDs to arrive no later than the last byte of `data`.
-    // By attaching the FDs after growing `bufferedWrites_`, it
-    // means that `fds` are associated with `[prev offset, offset)`.
+    // By attaching the FDs after growing the buffer, FDs are associated
+    // with `[prev offset, current offset)`.
     if (!fds.empty()) {
       fdsAndOffsets_.emplace_back(
           std::move(fds),
-          // This is costly, but the alternatives are all bad:
-          //  - Too fragile: capturing the IOBuf* before `appendToChain`
-          //    above would access invalid memory if the chain were coalesced.
-          //  - Too messy: `totalBytesBuffered_` as currently implemented
-          //    isn't trustworthy -- it's not always set, and even if it
-          //    were, it could be wrong because `hasObservers` could've
-          //    changed midway through the batch.
-          bufferedWrites_->computeChainDataLength());
+          // PERFORMANCE: Use O(1) chainLength() instead of O(n)
+          // computeChainDataLength() IOBufQueue maintains the chain length
+          // incrementally
+          bufferedWritesQueue_.chainLength());
     }
 
     ++bufferedWritesCount_;
@@ -122,7 +125,7 @@ class WriteBatcher : private folly::EventBase::LoopCallback,
   }
 
   void drain() noexcept {
-    if (!bufferedWrites_) {
+    if (bufferedWritesQueue_.empty()) {
       return;
     }
     cancelLoopCallback();
@@ -130,7 +133,7 @@ class WriteBatcher : private folly::EventBase::LoopCallback,
     flushPendingWrites();
   }
 
-  bool empty() const { return !bufferedWrites_; }
+  bool empty() const { return bufferedWritesQueue_.empty(); }
 
  private:
   void runLoopCallback() noexcept final { flushPendingWrites(); }
@@ -141,17 +144,21 @@ class WriteBatcher : private folly::EventBase::LoopCallback,
     bufferedWritesCount_ = 0;
     totalBytesBuffered_ = 0;
     earlyFlushRequested_ = false;
+
+    // PERFORMANCE: Extract buffered data from IOBufQueue (O(1) operation)
+    auto bufferedWrites = bufferedWritesQueue_.move();
+
     if (fdsAndOffsets_.empty()) {
       // Fast path: no FDs, write as one batch.
       connection_.flushWrites(
-          std::move(bufferedWrites_),
+          std::move(bufferedWrites),
           std::exchange(
               bufferedWritesContext_,
               apache::thrift::rocket::WriteBatchContext{}));
     } else {
       // Slow path: each set of FDs is split into its own batch.
       connection_.flushWritesWithFds(
-          std::move(bufferedWrites_),
+          std::move(bufferedWrites),
           std::exchange(
               bufferedWritesContext_,
               apache::thrift::rocket::WriteBatchContext{}),
@@ -164,13 +171,14 @@ class WriteBatcher : private folly::EventBase::LoopCallback,
   std::chrono::milliseconds batchingInterval_;
   size_t batchingSize_;
   size_t batchingByteSize_;
-  // Callback is scheduled iff bufferedWrites_ is not empty.
-  std::unique_ptr<folly::IOBuf> bufferedWrites_;
+  // PERFORMANCE: Use IOBufQueue for O(1) append operations instead of O(n)
+  // chain manipulation
+  folly::IOBufQueue bufferedWritesQueue_;
   size_t bufferedWritesCount_{0};
   size_t totalBytesBuffered_{0};
   bool earlyFlushRequested_{false};
   apache::thrift::rocket::WriteBatchContext bufferedWritesContext_;
-  // Offset in `bufferedWrites_` before which these FDs must be sent.
+  // Offset in buffered writes before which these FDs must be sent.
   apache::thrift::rocket::FdsAndOffsets fdsAndOffsets_;
 };
 

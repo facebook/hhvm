@@ -17,8 +17,13 @@
 #pragma once
 
 #include <utility>
+#include <vector>
+#include <folly/IntrusiveList.h>
+#include <folly/io/IOBufQueue.h>
 #include <folly/io/async/EventBase.h>
+#include <thrift/lib/cpp2/async/MessageChannel.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
+#include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnectionObserver.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/WriteBatchTypes.h>
 
 // Forward declarations to avoid circular dependencies
@@ -113,8 +118,121 @@ class ConnectionAdapter {
     connection_->send(std::move(serializedFrame));
   }
 
+  /**
+   * Add a pending write to this connection's buffer list.
+   */
+  void addPendingWrite(
+      std::unique_ptr<folly::IOBuf> data,
+      apache::thrift::MessageChannel::SendCallbackPtr sendCallback = nullptr,
+      StreamId streamId = StreamId{0});
+
+  /**
+   * Flush all pending writes for this connection.
+   * Called by OutgoingFrameHandler during drain().
+   */
+  void flushPendingWrites();
+
+  /**
+   * Check if this connection has pending writes buffered.
+   */
+  bool hasPendingWrites() const noexcept { return hasPendingWrites_; }
+
+  /**
+   * Reset the pending writes state (used internally after flush).
+   */
+  void resetPendingWritesState() noexcept {
+    hasPendingWrites_ = false;
+    totalBytesBuffered_ = 0;
+    guard_.reset();
+  }
+
+  // Safe intrusive list hook for pending connections list - automatically
+  // removes itself from lists when the ConnectionAdapter is destroyed
+  folly::SafeIntrusiveListHook listHook_;
+
  private:
   AdaptedConnectionT* connection_;
+  bool hasPendingWrites_{false};
+  folly::IOBufQueue pendingWrites_;
+  std::vector<apache::thrift::MessageChannel::SendCallbackPtr>
+      pendingSendCallbacks_;
+  size_t totalBytesBuffered_{0};
+  std::vector<
+      apache::thrift::rocket::RocketServerConnectionObserver::WriteEvent>
+      writeEvents_;
+
+  // Prevent event loop destruction while writes are in flight
+  std::optional<folly::DelayedDestruction::DestructorGuard> guard_;
 };
+
+template <typename AdaptedConnectionT>
+void ConnectionAdapter<AdaptedConnectionT>::addPendingWrite(
+    std::unique_ptr<folly::IOBuf> data,
+    apache::thrift::MessageChannel::SendCallbackPtr sendCallback,
+    StreamId streamId) {
+  DCHECK(connection_);
+  DCHECK(data);
+
+  guard_.emplace(connection_->getDestructorGuard());
+
+  size_t bytesInWrite = 0;
+  bool needsObserverTracking = connection_->numObservers() > 0;
+
+  if (data && needsObserverTracking) {
+    bytesInWrite = data->computeChainDataLength();
+  }
+
+  if (data) {
+    pendingWrites_.append(std::move(data));
+  }
+
+  // Add callback to batch
+  if (sendCallback) {
+    pendingSendCallbacks_.push_back(std::move(sendCallback));
+  }
+
+  // Track write event for observers only if needed
+  if (needsObserverTracking && bytesInWrite > 0) {
+    writeEvents_.emplace_back(streamId, totalBytesBuffered_, bytesInWrite);
+    totalBytesBuffered_ += bytesInWrite;
+  }
+
+  // Mark as having pending writes
+  hasPendingWrites_ = true;
+}
+
+template <typename AdaptedConnectionT>
+void ConnectionAdapter<AdaptedConnectionT>::flushPendingWrites() {
+  if (!hasPendingWrites_) {
+    return;
+  }
+
+  // Call sendQueued() on all callbacks before sending
+  for (auto& cb : pendingSendCallbacks_) {
+    if (cb) {
+      cb->sendQueued();
+    }
+  }
+
+  // Build WriteBatchContext for the flushWrites call
+  apache::thrift::rocket::WriteBatchContext context;
+  context.sendCallbacks = std::move(pendingSendCallbacks_);
+  context.writeEvents = std::move(writeEvents_);
+
+  // Build writeEventsContext for connection observers
+  if (!context.writeEvents.empty()) {
+    context.writeEventsContext.startRawByteOffset = 0;
+    context.writeEventsContext.endRawByteOffset = totalBytesBuffered_;
+  }
+
+  // Get the batched IOBuf chain and flush to underlying connection
+  auto batchedWrites = pendingWrites_.move();
+  if (batchedWrites) {
+    flushWrites(std::move(batchedWrites), std::move(context));
+  }
+
+  // Reset state for next batch
+  resetPendingWritesState();
+}
 
 } // namespace apache::thrift::rocket

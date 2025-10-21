@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <folly/IntrusiveList.h>
 #include <folly/io/async/EventBase.h>
 #include <thrift/lib/cpp2/async/MessageChannel.h>
 #include <thrift/lib/cpp2/transport/rocket/core/FrameUtil.h>
@@ -97,7 +98,7 @@ struct WriteBatch {
  * only run on the event base threads and is *NOT* thread-safe. It's shared
  * by all connections on an event loop to encourage batching.
  *
- * Default batch size is 64, but specified in log size - so 1 << 6.
+ * Default batch size is 16, but specified in log size - so 1 << 4.
  */
 template <typename ConnectionT, template <typename> class ConnectionAdapter>
 class OutgoingFrameHandler : public folly::EventBase::LoopCallback {
@@ -107,12 +108,9 @@ class OutgoingFrameHandler : public folly::EventBase::LoopCallback {
   using WriteBatch = detail::out_going_frame_handler::WriteBatch;
 
  public:
-  OutgoingFrameHandler(
+  explicit OutgoingFrameHandler(
       folly::EventBase& evb, size_t batchLogSize = 4 /* 1<<4 == 16 */)
-      : batchSize_(1 << batchLogSize),
-        evb_(evb),
-        queue_(batchLogSize),
-        batches_(batchLogSize) {}
+      : batchSize_(1 << batchLogSize), evb_(evb), queue_(batchLogSize) {}
 
   template <typename T>
   FOLLY_ALWAYS_INLINE void handle(T&& t, Connection& connection) {
@@ -132,10 +130,8 @@ class OutgoingFrameHandler : public folly::EventBase::LoopCallback {
       Connection& connection,
       apache::thrift::MessageChannel::SendCallbackPtr sendCallback) {
     evb_.dcheckIsInEventBaseThread();
-    // Note: ConnectionAdapter doesn't have getConnectionMetrics(), skip for now
-    // connection.getConnectionMetrics().incrNumOutgoingFrames();
     bool ret = queue_.emplace_back(
-        std::move(t),
+        std::forward<T>(t),
         &connection,
         folly::DelayedDestruction::DestructorGuard(
             connection.getWrappedConnection()),
@@ -144,7 +140,7 @@ class OutgoingFrameHandler : public folly::EventBase::LoopCallback {
     tryForceDrainOrSchedule();
   }
 
-  void runLoopCallback() noexcept { drain<false>(); }
+  void runLoopCallback() noexcept final { drain<false>(); }
 
   FOLLY_ALWAYS_INLINE size_t pending() const noexcept { return queue_.size(); }
 
@@ -152,7 +148,8 @@ class OutgoingFrameHandler : public folly::EventBase::LoopCallback {
   const size_t batchSize_;
   folly::EventBase& evb_;
   RingBuffer<SerializationEvent> queue_;
-  folly::F14NodeMap<Connection*, WriteBatch> batches_;
+  folly::SafeIntrusiveList<Connection, &Connection::listHook_>
+      pendingConnections_;
 
   FOLLY_ERASE void dcheckSerializedEvent(SerializationEvent& event) {
     if constexpr (folly::kIsDebug) {
@@ -165,88 +162,41 @@ class OutgoingFrameHandler : public folly::EventBase::LoopCallback {
     }
   }
 
-  void processWriteBatches() {
-    for (auto it = batches_.begin(); it != batches_.end(); ++it) {
-      Connection* connection = it->first;
-      WriteBatch& batch = it->second;
-
-      // Call sendQueued() on all sendCallbacks before sending
-      for (auto& cb : batch.sendCallbacks) {
-        if (cb) {
-          cb->sendQueued();
-        }
-      }
-
-      // Build WriteBatchContext for the direct flushWrites call
-      apache::thrift::rocket::WriteBatchContext context;
-      context.sendCallbacks = std::move(batch.sendCallbacks);
-      context.writeEvents = std::move(batch.writeEvents);
-
-      // Build writeEventsContext for connection observers
-      if (!context.writeEvents.empty()) {
-        context.writeEventsContext.startRawByteOffset = 0;
-        context.writeEventsContext.endRawByteOffset = batch.totalBytesBuffered;
-      }
-
-      // Call flushWrites directly instead of handleSerializedFrame
-      connection->flushWrites(std::move(batch.chain), std::move(context));
+  void processPendingConnections() {
+    for (auto& connection : pendingConnections_) {
+      connection.flushPendingWrites();
     }
-    batches_.clear();
+    pendingConnections_.clear();
+  }
+
+  void consumeSerializedEvent(SerializationEvent& event) {
+    dcheckSerializedEvent(event);
+    Connection* connection = event.connection;
+    auto serialized = event.container.serialize();
+
+    const bool wasEmpty = !connection->hasPendingWrites();
+
+    // Add the serialized frame to the connection's pending writes
+    connection->addPendingWrite(
+        std::move(serialized), std::move(event.sendCallback), event.streamId);
+
+    // If the connection didn't have any pending writes before we added a write
+    // this means the connection was not scheduled for draining so add it to the
+    // pending connections list.
+    if (wasEmpty) {
+      pendingConnections_.push_back(*connection);
+    }
   }
 
   template <bool Forced>
   void drain() {
     size_t processed = queue_.consume(
-        [this](SerializationEvent& event) {
-          dcheckSerializedEvent(event);
-          Connection* connection = event.connection;
-          auto serialized = event.container.serialize();
-          auto it = batches_.find(connection);
-          if (it == batches_.end()) {
-            WriteBatch batch(
-                std::move(serialized),
-                folly::DelayedDestructionBase::DestructorGuard(
-                    connection->getWrappedConnection()));
-
-            // Add sendCallback if present
-            if (event.sendCallback) {
-              batch.sendCallbacks.push_back(std::move(event.sendCallback));
-            }
-
-            // Build WriteEvent for connection observers if needed
-            if (connection->numObservers() > 0) {
-              auto totalBytesInWrite = batch.chain->computeChainDataLength();
-              batch.writeEvents.emplace_back(
-                  event.streamId, // Use the streamId from the event
-                  batch.totalBytesBuffered,
-                  totalBytesInWrite);
-              batch.totalBytesBuffered += totalBytesInWrite;
-            }
-
-            batches_.try_emplace(connection, std::move(batch));
-          } else {
-            // Add sendCallback if present
-            if (event.sendCallback) {
-              it->second.sendCallbacks.push_back(std::move(event.sendCallback));
-            }
-
-            // Build WriteEvent for connection observers if needed
-            if (connection->numObservers() > 0) {
-              auto totalBytesInWrite = serialized->computeChainDataLength();
-              it->second.writeEvents.emplace_back(
-                  event.streamId, // Use the streamId from the event
-                  it->second.totalBytesBuffered,
-                  totalBytesInWrite);
-              it->second.totalBytesBuffered += totalBytesInWrite;
-            }
-
-            it->second.chain->appendToChain(std::move(serialized));
-          }
-        },
+        [this](SerializationEvent& event) { consumeSerializedEvent(event); },
         batchSize_);
 
+    // Process all connections with pending writes
     if (processed > 0) {
-      processWriteBatches();
+      processPendingConnections();
     }
 
     auto p = pending();

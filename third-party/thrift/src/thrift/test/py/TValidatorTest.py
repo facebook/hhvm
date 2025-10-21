@@ -19,18 +19,18 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import unittest
 
-from myBinaryStruct.ttypes import *
-from myBoolStruct.ttypes import *
-from myByteStruct.ttypes import *
-from myComplexStruct.ttypes import *
-from myDoubleStruct.ttypes import *
-from myI16Struct.ttypes import *
-from myI32Struct.ttypes import *
-from myMixedStruct.ttypes import *
-from mySetStruct.ttypes import *
-from myMapStruct.ttypes import *
-from myNestedMapStruct.ttypes import *
-from mySimpleStruct.ttypes import *
+from myBinaryStruct.ttypes import myBinaryStruct
+from myBoolStruct.ttypes import myBoolStruct
+from myByteStruct.ttypes import myByteStruct
+from myComplexStruct.ttypes import EnumTest, ExceptionTest, myComplexStruct
+from myDoubleStruct.ttypes import myDoubleStruct
+from myI16Struct.ttypes import myI16Struct
+from myI32Struct.ttypes import myI32Struct
+from myMapStruct.ttypes import myMapStruct
+from myMixedStruct.ttypes import myMixedStruct, mySuperSimpleStruct
+from myNestedMapStruct.ttypes import myNestedMapStruct
+from mySetStruct.ttypes import mySetStruct
+from mySimpleStruct.ttypes import mySimpleStruct
 
 # import logging
 # log = logging.getLogger()

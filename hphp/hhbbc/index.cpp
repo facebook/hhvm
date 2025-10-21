@@ -1330,14 +1330,12 @@ struct ClassGraph {
 
 private:
   struct Node;
-  struct SerdeState;
   struct Table;
 
   using NodeSet = hphp_fast_set<Node*>;
   template <typename T> using NodeMap = hphp_fast_map<Node*, T>;
   using NodeVec = TinyVector<Node*, 4>;
 
-  struct NodeIdxSet;
   struct TLNodeIdxSet;
 
   struct SmallBitset;
@@ -1365,6 +1363,107 @@ private:
     (Flags)~(FlagCInfo2 | FlagRegSub | FlagNonRegSub |
              FlagWait | FlagChildren | FlagConservative);
 
+  // Node on the graph:
+  struct Node {
+    // The flags are stored along with any ClassInfo to save memory.
+    using CIAndFlags = CompactTaggedPtr<void, Flags>;
+
+    SString name{nullptr};
+    // Atomic because they might be manipulated from multiple threads
+    // during deserialization.
+    std::atomic<CIAndFlags::Opaque> ci{CIAndFlags{}.getOpaque()};
+    // Direct (not transitive) parents and children of this node.
+    CompactVector<Node*> parents;
+    CompactVector<Node*> children;
+
+    // This information is lazily cached (and is not serialized).
+    struct NonRegularInfo {
+      NodeSet subclassOf;
+      Node* regOnlyEquiv{nullptr};
+    };
+    LockFreeLazyPtr<NonRegularInfo> nonRegInfo;
+    LockFreeLazyPtr<NonRegularInfo> nonRegInfoDisallow;
+
+    // Unique sequential id assigned to every node. Used for NodeIdxSet.
+    using Idx = uint32_t;
+    Idx idx{0};
+
+    Flags flags() const { return CIAndFlags{ci.load()}.tag(); }
+    ClassInfo* cinfo() const {
+      CIAndFlags cif{ci.load()};
+      if (cif.tag() & FlagCInfo2) return nullptr;
+      return (ClassInfo*)cif.ptr();
+    }
+    ClassInfo2* cinfo2() const {
+      CIAndFlags cif{ci.load()};
+      if (!(cif.tag() & FlagCInfo2)) return nullptr;
+      return (ClassInfo2*)cif.ptr();
+    }
+    void* rawPtr() const {
+      CIAndFlags cif{ci.load()};
+      return cif.ptr();
+    }
+
+    bool isBase() const { return !(flags() & (FlagInterface | FlagTrait)); }
+    bool isRegular() const {
+      return !(flags() & (FlagInterface | FlagTrait | FlagAbstract | FlagEnum));
+    }
+    bool isTrait() const { return flags() & FlagTrait; }
+    bool isInterface() const { return flags() & FlagInterface; }
+    bool isEnum() const { return flags() & FlagEnum; }
+    bool isAbstract() const { return flags() & FlagAbstract; }
+    bool isMissing() const { return flags() & FlagMissing; }
+    bool hasCompleteChildren() const { return flags() & FlagChildren; }
+    bool isConservative() const { return flags() & FlagConservative; }
+
+    bool hasRegularSubclass() const { return flags() & FlagRegSub; }
+    bool hasNonRegularSubclass() const { return flags() & FlagNonRegSub; }
+
+    const NonRegularInfo& nonRegularInfo();
+
+    // NB: These aren't thread-safe, so don't use them during concurrent
+    // deserialization.
+    void setFlags(Flags f, Flags r = FlagNone) {
+      CIAndFlags old{ci.load()};
+      old.set((Flags)((old.tag() | f) & ~r), old.ptr());
+      ci.store(old.getOpaque());
+    }
+    void setCInfo(ClassInfo& c) {
+      CIAndFlags old{ci.load()};
+      old.set((Flags)(old.tag() & ~FlagCInfo2), &c);
+      ci.store(old.getOpaque());
+    }
+    void setCInfo(ClassInfo2& c) {
+      CIAndFlags old{ci.load()};
+      old.set((Flags)(old.tag() | FlagCInfo2), &c);
+      ci.store(old.getOpaque());
+    }
+
+    struct Compare {
+      bool operator()(const Node* a, const Node* b) const {
+        assertx(a->name);
+        assertx(b->name);
+        return string_data_lt_type{}(a->name, b->name);
+      }
+    };
+  };
+
+  struct NodeIdxSet {
+    NodeIdxSet();
+
+    bool add(Node& n);
+    void erase(Node& n);
+    void clear() { set.clear(); }
+    bool empty() { return set.empty(); }
+    size_t size() { return set.size(); }
+  private:
+    struct Extract {
+      Node::Idx operator()(const Node* n) const;
+    };
+
+    sparse_id_set<Node::Idx, const Node*, Extract> set;
+  };
+
   // Iterating through parents or children can result in one of three
   // different outcomes:
   enum class Action {
@@ -1372,6 +1471,46 @@ private:
     Stop, // Stop iteration entirely
     Skip // Continue iteration, but skip over any children/parents of
          // this class
+  };
+
+  // Class graph-internal state for serialization. Since a common access
+  // pattern is to create/destroy many SerdeState's while serializing the
+  // output of analysis jobs, the state may be used via the activate/deactivate
+  // APIs, which violate RAII and explicitly leak the containers on
+  // deactivation.
+  struct SerdeState {
+    SerdeState() : active{false} {}
+
+    bool isActive() const {
+      return active;
+    }
+
+    void activate() {
+      assertx(!active);
+      active = true;
+    }
+
+    void deactivate() {
+      assertx(active);
+      active = false;
+
+      if (upward) upward->clear();
+      if (downward) downward->clear();
+
+      strings.clear();
+      newStrings.clear();
+      strToIdx.clear();
+    }
+
+    Optional<NodeIdxSet> upward;
+    Optional<NodeIdxSet> downward;
+
+    std::vector<SString> strings;
+    std::vector<SString> newStrings;
+    SStringToOneT<size_t> strToIdx;
+
+  private:
+    bool active;
   };
 
   std::vector<ClassGraph> directParents(Flags) const;
@@ -1448,7 +1587,7 @@ private:
   static void setConservative(const Impl&, Node&, bool, bool);
 
   static std::unique_ptr<Table> g_table;
-  static __thread SerdeState* tl_serde_state;
+  static thread_local SerdeState tl_serde_state;
 
   friend struct res::Class;
 
@@ -1458,7 +1597,12 @@ private:
 };
 
 std::unique_ptr<ClassGraph::Table> ClassGraph::g_table{nullptr};
-__thread ClassGraph::SerdeState* ClassGraph::tl_serde_state{nullptr};
+// tl_serde_state is meant to only be accessed via `ScopedSerdeState`.
+// ScopedSerdeState intentionally leaks the internal container memory
+// of the thread-local state. This speeds up worker processes
+// that serialize many class graphs and would otherwise cause
+// memory pressure.
+thread_local ClassGraph::SerdeState ClassGraph::tl_serde_state{};
 
 struct ClassGraphHasher {
   size_t operator()(ClassGraph g) const {
@@ -1466,117 +1610,24 @@ struct ClassGraphHasher {
   }
 };
 
-// Node on the graph:
-struct ClassGraph::Node {
-  // The flags are stored along with any ClassInfo to save memory.
-  using CIAndFlags = CompactTaggedPtr<void, Flags>;
 
-  SString name{nullptr};
-  // Atomic because they might be manipulated from multiple threads
-  // during deserialization.
-  std::atomic<CIAndFlags::Opaque> ci{CIAndFlags{}.getOpaque()};
-  // Direct (not transitive) parents and children of this node.
-  CompactVector<Node*> parents;
-  CompactVector<Node*> children;
-
-  // This information is lazily cached (and is not serialized).
-  struct NonRegularInfo {
-    NodeSet subclassOf;
-    Node* regOnlyEquiv{nullptr};
-  };
-  LockFreeLazyPtr<NonRegularInfo> nonRegInfo;
-  LockFreeLazyPtr<NonRegularInfo> nonRegInfoDisallow;
-
-  // Unique sequential id assigned to every node. Used for NodeIdxSet.
-  using Idx = uint32_t;
-  Idx idx{0};
-
-  Flags flags() const { return CIAndFlags{ci.load()}.tag(); }
-  ClassInfo* cinfo() const {
-    CIAndFlags cif{ci.load()};
-    if (cif.tag() & FlagCInfo2) return nullptr;
-    return (ClassInfo*)cif.ptr();
+bool ClassGraph::NodeIdxSet::add(Node& n) {
+  if (n.idx >= set.universe_size()) {
+    set.resize(folly::nextPowTwo(n.idx+1));
   }
-  ClassInfo2* cinfo2() const {
-    CIAndFlags cif{ci.load()};
-    if (!(cif.tag() & FlagCInfo2)) return nullptr;
-    return (ClassInfo2*)cif.ptr();
-  }
-  void* rawPtr() const {
-    CIAndFlags cif{ci.load()};
-    return cif.ptr();
-  }
+  return set.insert(&n);
+}
 
-  bool isBase() const { return !(flags() & (FlagInterface | FlagTrait)); }
-  bool isRegular() const {
-    return !(flags() & (FlagInterface | FlagTrait | FlagAbstract | FlagEnum));
+void ClassGraph::NodeIdxSet::erase(Node& n) {
+  if (n.idx < set.universe_size()) {
+    set.erase(&n);
   }
-  bool isTrait() const { return flags() & FlagTrait; }
-  bool isInterface() const { return flags() & FlagInterface; }
-  bool isEnum() const { return flags() & FlagEnum; }
-  bool isAbstract() const { return flags() & FlagAbstract; }
-  bool isMissing() const { return flags() & FlagMissing; }
-  bool hasCompleteChildren() const { return flags() & FlagChildren; }
-  bool isConservative() const { return flags() & FlagConservative; }
+}
 
-  bool hasRegularSubclass() const { return flags() & FlagRegSub; }
-  bool hasNonRegularSubclass() const { return flags() & FlagNonRegSub; }
-
-  const NonRegularInfo& nonRegularInfo();
-
-  // NB: These aren't thread-safe, so don't use them during concurrent
-  // deserialization.
-  void setFlags(Flags f, Flags r = FlagNone) {
-    CIAndFlags old{ci.load()};
-    old.set((Flags)((old.tag() | f) & ~r), old.ptr());
-    ci.store(old.getOpaque());
-  }
-  void setCInfo(ClassInfo& c) {
-    CIAndFlags old{ci.load()};
-    old.set((Flags)(old.tag() & ~FlagCInfo2), &c);
-    ci.store(old.getOpaque());
-  }
-  void setCInfo(ClassInfo2& c) {
-    CIAndFlags old{ci.load()};
-    old.set((Flags)(old.tag() | FlagCInfo2), &c);
-    ci.store(old.getOpaque());
-  }
-
-  struct Compare {
-    bool operator()(const Node* a, const Node* b) const {
-      assertx(a->name);
-      assertx(b->name);
-      return string_data_lt_type{}(a->name, b->name);
-    }
-  };
-};
-
-// Efficient set of ClassGraph::Nodes.
-struct ClassGraph::NodeIdxSet {
-  NodeIdxSet();
-
-  bool add(Node& n) {
-    if (n.idx >= set.universe_size()) {
-      set.resize(folly::nextPowTwo(n.idx+1));
-    }
-    return set.insert(&n);
-  }
-  void erase(Node& n) {
-    if (n.idx < set.universe_size()) {
-      set.erase(&n);
-    }
-  }
-  void clear() { set.clear(); }
-  bool empty() { return set.empty(); }
-private:
-  struct Extract {
-    Node::Idx operator()(const Node* n) const {
-      assertx(n->idx > 0);
-      return n->idx;
-    }
-  };
-  sparse_id_set<Node::Idx, const Node*, Extract> set;
-};
+ClassGraph::Node::Idx ClassGraph::NodeIdxSet::Extract::operator()(const Node* n) const {
+  assertx(n->idx > 0);
+  return n->idx;
+}
 
 // Thread-local NodeIdxSet which automatically clears itself
 // afterwards (thus avoids memory allocation).
@@ -1633,36 +1684,29 @@ ClassGraph::NodeIdxSet::NodeIdxSet()
   assertx(!table().locking);
 }
 
-struct ClassGraph::SerdeState {
-  Optional<NodeIdxSet> upward;
-  Optional<NodeIdxSet> downward;
-
-  std::vector<SString> strings;
-  std::vector<SString> newStrings;
-  SStringToOneT<size_t> strToIdx;
-};
 
 struct ClassGraph::ScopedSerdeState {
   ScopedSerdeState() {
     // If there's no SerdeState active, make one active, otherwise do
     // nothing.
-    if (tl_serde_state) return;
-    s.emplace();
-    tl_serde_state = s.get_pointer();
+    if (tl_serde_state.isActive()) return;
+    tl_serde_state.activate();
+    activated = true;
   }
 
   ~ScopedSerdeState() {
-    if (!s.has_value()) return;
-    assertx(tl_serde_state == s.get_pointer());
-    tl_serde_state = nullptr;
+    assertx(tl_serde_state.isActive());
+    if (!activated) return;
+    tl_serde_state.deactivate();
   }
 
   ScopedSerdeState(const ScopedSerdeState&) = delete;
   ScopedSerdeState(ScopedSerdeState&&) = delete;
   ScopedSerdeState& operator=(const ScopedSerdeState&) = delete;
   ScopedSerdeState& operator=(ScopedSerdeState&&) = delete;
+
 private:
-  Optional<SerdeState> s;
+  bool activated{false};
 };
 
 /*
@@ -3809,8 +3853,8 @@ void ClassGraph::serdeImpl(SerDe& sd,
       } else {
         // Serializing:
 
-        if (!tl_serde_state->upward) tl_serde_state->upward.emplace();
-        if (!tl_serde_state->downward) tl_serde_state->downward.emplace();
+        if (!tl_serde_state.downward) tl_serde_state.downward.emplace();
+        if (!tl_serde_state.upward) tl_serde_state.upward.emplace();
 
         // Serialize all of the nodes reachable by this node (parents,
         // children, and parents of children) and encode how many.
@@ -3871,14 +3915,14 @@ void ClassGraph::serdeImpl(SerDe& sd,
     [&] {
       // When serializing, we write this out last. When deserializing,
       // we read it first.
-      assertx(tl_serde_state);
-      sd(tl_serde_state->newStrings);
-      tl_serde_state->strings.insert(
-        end(tl_serde_state->strings),
-        begin(tl_serde_state->newStrings),
-        end(tl_serde_state->newStrings)
+      assertx(tl_serde_state.isActive());
+      sd(tl_serde_state.newStrings);
+      tl_serde_state.strings.insert(
+        end(tl_serde_state.strings),
+        begin(tl_serde_state.newStrings),
+        end(tl_serde_state.newStrings)
       );
-      tl_serde_state->newStrings.clear();
+      tl_serde_state.newStrings.clear();
     }
   );
 }
@@ -3886,26 +3930,26 @@ void ClassGraph::serdeImpl(SerDe& sd,
 // Serialize a string using the string table.
 template <typename SerDe>
 void ClassGraph::encodeName(SerDe& sd, SString s) {
-  assertx(tl_serde_state);
-  if (auto const idx = folly::get_ptr(tl_serde_state->strToIdx, s)) {
+  assertx(tl_serde_state.isActive());
+  if (auto const idx = folly::get_ptr(tl_serde_state.strToIdx, s)) {
     sd(*idx);
     return;
   }
   auto const idx =
-    tl_serde_state->strings.size() + tl_serde_state->newStrings.size();
-  tl_serde_state->newStrings.emplace_back(s);
-  tl_serde_state->strToIdx.emplace(s, idx);
+    tl_serde_state.strings.size() + tl_serde_state.newStrings.size();
+  tl_serde_state.newStrings.emplace_back(s);
+  tl_serde_state.strToIdx.emplace(s, idx);
   sd(idx);
 }
 
 // Deserialize a string using the string table.
 template <typename SerDe>
 SString ClassGraph::decodeName(SerDe& sd) {
-  assertx(tl_serde_state);
+  assertx(tl_serde_state.isActive());
   size_t idx;
   sd(idx);
-  always_assert(idx < tl_serde_state->strings.size());
-  return tl_serde_state->strings[idx];
+  always_assert(idx < tl_serde_state.strings.size());
+  return tl_serde_state.strings[idx];
 }
 
 // Deserialize a node, along with any other nodes it depends on.
@@ -4005,8 +4049,8 @@ void ClassGraph::deserBlock(SerDe& sd, const Impl& impl) {
 template <typename SerDe>
 size_t ClassGraph::serDownward(SerDe& sd, Node& n) {
   assertx(!table().locking);
-  assertx(tl_serde_state);
-  if (!tl_serde_state->downward->add(n)) return 0;
+  assertx(tl_serde_state.isActive());
+  if (!tl_serde_state.downward->add(n)) return 0;
 
   if (n.children.empty() || !n.hasCompleteChildren()) {
     return serUpward(sd, n);
@@ -4026,10 +4070,10 @@ size_t ClassGraph::serDownward(SerDe& sd, Node& n) {
 template <typename SerDe>
 bool ClassGraph::serUpward(SerDe& sd, Node& n) {
   assertx(!table().locking);
-  assertx(tl_serde_state);
+  assertx(tl_serde_state.isActive());
   // If we've already serialized this node, no need to serialize it
   // again.
-  if (!tl_serde_state->upward->add(n)) return false;
+  if (!tl_serde_state.upward->add(n)) return false;
 
   assertx(n.name);
   assertx(IMPLIES(n.isMissing(), n.parents.empty()));

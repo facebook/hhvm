@@ -42,6 +42,14 @@
 
 namespace apache::thrift {
 
+namespace detail {
+THRIFT_PLUGGABLE_FUNC_REGISTER(
+    void,
+    handleFrameworkMetadataHTTPHeader,
+    const transport::THeader::StringToStringMap&,
+    RequestRpcMetadata*) {}
+} // namespace detail
+
 using apache::thrift::transport::TTransportException;
 using folly::EventBase;
 using folly::EventBaseManager;
@@ -474,6 +482,8 @@ void SingleRpcChannel::extractHeaderInfo(
     RequestRpcMetadata* metadata) noexcept {
   transport::THeader::StringToStringMap headers;
   decodeHeaders(*headers_, headers, metadata);
+  detail::handleFrameworkMetadataHTTPHeader(headers, metadata);
+
   if (!headers.empty()) {
     metadata->otherMetadata() = std::move(headers);
   }

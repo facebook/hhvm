@@ -56,8 +56,15 @@ void ThriftProcessor::onThriftRequest(
   bool invalidChecksum = metadata.crc32c() &&
       *metadata.crc32c() != apache::thrift::checksum::crc32c(*payload);
 
+  auto frameworkMetadataPtr = metadata.frameworkMetadata()
+      ? (*metadata.frameworkMetadata())->clone()
+      : nullptr;
   auto request = std::make_unique<ThriftRequest>(
       server_, channel, std::move(metadata), std::move(connContext));
+  if (frameworkMetadataPtr) {
+    request->getRequestContext()->setFrameworkMetadata(
+        std::move(*frameworkMetadataPtr));
+  }
 
   auto* evb = channel->getEventBase();
   if (UNLIKELY(invalidMetadata)) {

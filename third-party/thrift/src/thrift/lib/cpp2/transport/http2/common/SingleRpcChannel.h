@@ -23,9 +23,18 @@
 
 #include <proxygen/lib/http/session/HTTPTransaction.h>
 #include <thrift/lib/cpp/protocol/TProtocolTypes.h>
+#include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/transport/http2/common/H2Channel.h>
 
 namespace apache::thrift {
+
+namespace detail {
+THRIFT_PLUGGABLE_FUNC_DECLARE(
+    void,
+    handleFrameworkMetadataHTTPHeader,
+    const transport::THeader::StringToStringMap&,
+    RequestRpcMetadata*);
+}
 
 class Cpp2Worker;
 

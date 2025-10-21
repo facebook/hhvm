@@ -425,12 +425,35 @@ void setupNullCtor(Class* cls) {
 }
 
 Func* getNull86reifiedinit(Class* cls) {
-  auto f = setup86ReifiedInitMethod(cls);
-  f->setBaseCls(cls);
-  f->setGenerated(true);
-  return f;
-}
+    // Check if the function has already been generated and cached for this class.
+    // Assuming 'm_null86ReifiedInit' is a member of the 'Class' object
+    // or a thread-safe static map.
+    if (cls->m_null86ReifiedInit != nullptr) {
+        return cls->m_null86ReifiedInit;
+    }
 
+    // Lock to ensure thread-safe initialization of the function.
+    // 'getClassMutex' is a placeholder for a thread-safe mechanism
+    // that locks on a per-class basis.
+    std::scoped_lock<std::mutex> lock(getClassMutex(cls));
+
+    // Double-check lock to prevent race conditions.
+    // Another thread might have initialized the function while this thread
+    // was waiting for the lock.
+    if (cls->m_null86ReifiedInit != nullptr) {
+        return cls->m_null86ReifiedInit;
+    }
+
+    // Generate the function only if it hasn't been created yet.
+    auto f = setup86ReifiedInitMethod(cls);
+    f->setBaseCls(cls);
+    f->setGenerated(true);
+
+    // Cache the result for future calls.
+    cls->m_null86ReifiedInit = f;
+    
+    return f;
+}
 Func* funcLoad(const StringData* name, Func*& cache) {
   if (UNLIKELY(cache == nullptr)) {
     cache = Func::load(name);

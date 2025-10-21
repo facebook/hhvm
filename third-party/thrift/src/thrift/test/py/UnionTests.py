@@ -21,8 +21,8 @@ import json
 import unittest
 
 from thrift.protocol import TBinaryProtocol, TSimpleJSONProtocol
+from thrift.test.UnionTest.ttypes import OneOfEach, StructWithUnionAndOther, TestUnion
 from thrift.transport import TTransport
-from thrift.test.UnionTest.ttypes import *
 
 
 class TestUnionStructs(unittest.TestCase):

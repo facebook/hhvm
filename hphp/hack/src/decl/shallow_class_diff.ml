@@ -689,6 +689,16 @@ let diff_options option1 option2 ~diff =
 
 let diff_modules = diff_options ~diff:(diff_of_equal Ast_defs.equal_id)
 
+let diff_packages =
+  diff_options ~diff:(fun pm1 pm2 ->
+      let open Aast_defs in
+      match (pm1, pm2) with
+      | (PackageOverride (_, p1), PackageOverride (_, p2))
+      | (PackageConfigAssignment p1, PackageOverride (_, p2))
+      | (PackageOverride (_, p1), PackageConfigAssignment p2)
+      | (PackageConfigAssignment p1, PackageConfigAssignment p2) ->
+        diff_of_equal String.equal p1 p2)
+
 let diff
     (type value)
     ~(equal : value -> value -> bool)
@@ -771,6 +781,7 @@ let diff_class_shells (c1 : shallow_class) (c2 : shallow_class) :
     support_dynamic_type_change =
       diff_bools c1.sc_support_dynamic_type c2.sc_support_dynamic_type;
     module_change = diff_modules c1.sc_module c2.sc_module;
+    package_change = diff_packages c1.sc_package c2.sc_package;
     xhp_enum_values_change =
       not @@ equal_xhp_enum_values c1.sc_xhp_enum_values c2.sc_xhp_enum_values;
     user_attributes_changes =

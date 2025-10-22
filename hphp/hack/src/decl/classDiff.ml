@@ -314,6 +314,7 @@ type class_shell_change = {
   has_xhp_keyword_change: BoolChange.t option;
   support_dynamic_type_change: BoolChange.t option;
   module_change: unit ValueChange.t option;
+  package_change: unit ValueChange.t option;
   xhp_enum_values_change: bool;
   user_attributes_changes:
     unit NamedItemsListChange.t NamedItemsListChange.t option;
@@ -469,6 +470,7 @@ module ClassShellChangeCategory = struct
     has_xhp_keyword_change_category: BoolChange.t option;
     support_dynamic_type_change_category: BoolChange.t option;
     module_change_category: unit ValueChange.t option;
+    package_change_category: unit ValueChange.t option;
     xhp_enum_values_change_category: bool;
     user_attributes_changes_category: ListChange.t option;
     enum_type_change_category: EnumTypeChangeCategory.t ValueChange.t option;
@@ -488,6 +490,7 @@ module ClassShellChangeCategory = struct
          has_xhp_keyword_change;
          support_dynamic_type_change;
          module_change;
+         package_change;
          xhp_enum_values_change;
          user_attributes_changes;
          enum_type_change;
@@ -507,6 +510,7 @@ module ClassShellChangeCategory = struct
       has_xhp_keyword_change_category = has_xhp_keyword_change;
       support_dynamic_type_change_category = support_dynamic_type_change;
       module_change_category = module_change;
+      package_change_category = package_change;
       xhp_enum_values_change_category = xhp_enum_values_change;
       user_attributes_changes_category =
         Option.map ListChange.of_list_change_map user_attributes_changes;

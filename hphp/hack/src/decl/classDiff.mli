@@ -109,6 +109,7 @@ type class_shell_change = {
   has_xhp_keyword_change: BoolChange.t option;
   support_dynamic_type_change: BoolChange.t option;
   module_change: unit ValueChange.t option;
+  package_change: unit ValueChange.t option;
   xhp_enum_values_change: bool;
   user_attributes_changes:
     unit NamedItemsListChange.t NamedItemsListChange.t option;

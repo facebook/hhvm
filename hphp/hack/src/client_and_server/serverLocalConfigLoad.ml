@@ -110,6 +110,7 @@ let default =
     warnings_default_all = false;
     warnings_in_sandcastle = true;
     package_config_strict_validation = false;
+    fanout_strip_class_location = false;
   }
 
 let system_config_path =
@@ -859,6 +860,12 @@ let load_
       ~default:default.package_config_strict_validation
       config
   in
+  let fanout_strip_class_location =
+    bool_
+      "fanout_strip_class_location"
+      ~default:default.fanout_strip_class_location
+      config
+  in
   {
     saved_state =
       {
@@ -972,6 +979,7 @@ let load_
     warnings_default_all;
     warnings_in_sandcastle;
     package_config_strict_validation;
+    fanout_strip_class_location;
   }
 
 let load :
@@ -1023,4 +1031,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       edenfs_file_watcher_enabled = options.edenfs_file_watcher.enabled;
       edenfs_file_watcher_sync_queries_obey_deferral =
         options.edenfs_file_watcher.sync_queries_obey_deferral;
+      fanout_strip_class_location = options.fanout_strip_class_location;
     }

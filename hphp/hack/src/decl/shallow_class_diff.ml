@@ -429,13 +429,21 @@ let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
     resolution order.  
     NB: It is critical for the correctness of incremental typechecking that every
     bit of information used to decide the ordering of decl folding is checked here! *)
-let mro_inputs_equal (c1 : shallow_class) (c2 : shallow_class) : bool =
+let mro_inputs_equal
+    ~(strip_class_location : bool) (c1 : shallow_class) (c2 : shallow_class) :
+    bool =
   let is_to_string m = String.equal (snd m.sm_name) SN.Members.__toString in
-  (* compare c1 and c2 sc_name ignoring the position in the file, but not the filename *)
-  String.equal (snd c1.sc_name) (snd c2.sc_name)
-  && Relative_path.equal
-       (Pos_or_decl.filename (fst c1.sc_name))
-       (Pos_or_decl.filename (fst c2.sc_name))
+  let sc_name_equal =
+    if strip_class_location then
+      (* compare c1 and c2 sc_name ignoring the position in the file, but not the filename *)
+      String.equal (snd c1.sc_name) (snd c2.sc_name)
+      && Relative_path.equal
+           (Pos_or_decl.filename (fst c1.sc_name))
+           (Pos_or_decl.filename (fst c2.sc_name))
+    else
+      Typing_defs.equal_pos_id c1.sc_name c2.sc_name
+  in
+  sc_name_equal
   && Ast_defs.equal_classish_kind c1.sc_kind c2.sc_kind
   && Option.equal
        equal_shallow_method
@@ -775,7 +783,9 @@ let diff_class_shells (c1 : shallow_class) (c2 : shallow_class) :
     enum_type_change = diff_enum_type_options c1.sc_enum_type c2.sc_enum_type;
   }
 
-let diff_class (c1 : shallow_class) (c2 : shallow_class) : ClassDiff.t option =
+let diff_class
+    ~(strip_class_location : bool) (c1 : shallow_class) (c2 : shallow_class) :
+    ClassDiff.t option =
   let class_shell1 = normalize c1 and class_shell2 = normalize c2 in
   let member_diff = diff_class_members c1 c2 in
   if not (equal_shallow_class class_shell1 class_shell2) then
@@ -784,7 +794,7 @@ let diff_class (c1 : shallow_class) (c2 : shallow_class) : ClassDiff.t option =
          (MajorChange.Modified
             (diff_class_shells class_shell1 class_shell2, member_diff)))
   else
-    let mro_inputs_equal = mro_inputs_equal c1 c2 in
+    let mro_inputs_equal = mro_inputs_equal ~strip_class_location c1 c2 in
     if mro_inputs_equal && ClassDiff.is_empty_member_diff member_diff then
       None
     else

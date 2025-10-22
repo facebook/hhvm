@@ -257,7 +257,14 @@ let invalidate_decls_upon_change
              in
              match (prev_sc, new_sc) with
              | (Some prev_sc, Some new_sc) ->
-               Shallow_class_diff.diff_class prev_sc new_sc |> Option.is_some
+               let strip_class_location =
+                 (Provider_context.get_tcopt ctx).fanout_strip_class_location
+               in
+               Shallow_class_diff.diff_class
+                 ~strip_class_location
+                 prev_sc
+                 new_sc
+               |> Option.is_some
              | _ -> true)
   in
 

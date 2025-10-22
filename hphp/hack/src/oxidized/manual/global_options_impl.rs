@@ -156,6 +156,7 @@ impl Default for GlobalOptions {
             class_pointer_ban_class_array_key: false,
             tco_poly_function_pointers: false,
             tco_check_packages: true,
+            fanout_strip_class_location: false,
         }
     }
 }

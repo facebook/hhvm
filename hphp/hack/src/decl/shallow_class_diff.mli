@@ -9,4 +9,8 @@
 
 open Shallow_decl_defs
 
-val diff_class : shallow_class -> shallow_class -> ClassDiff.t option
+val diff_class :
+  strip_class_location:bool ->
+  shallow_class ->
+  shallow_class ->
+  ClassDiff.t option

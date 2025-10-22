@@ -628,6 +628,7 @@ let load ~silent ~from ~(cli_config_overrides : (string * string) list) :
         ~warnings_in_sandcastle:local_config.warnings_in_sandcastle
         ~hh_distc_exponential_backoff_num_retries:
           local_config.hh_distc_exponential_backoff_num_retries
+        ~fanout_strip_class_location:local_config.fanout_strip_class_location
         GlobalOptions.default
     in
     load_config config local_config_opts

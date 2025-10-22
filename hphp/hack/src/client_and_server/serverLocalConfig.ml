@@ -341,4 +341,6 @@ type t = {
   warnings_in_sandcastle: bool;
   package_config_strict_validation: bool;
       (** POC: @fzn, if true, `hh` fatals if paths specified in PACAKGES.toml `include_paths` do not exists *)
+  fanout_strip_class_location: bool;
+      (* POC: @fzn, if true fanout strips class location when comparing shallow classes for minor changes *)
 }

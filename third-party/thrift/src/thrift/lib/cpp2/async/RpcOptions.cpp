@@ -304,4 +304,14 @@ RpcOptions& RpcOptions::setMetricsToCollect(
 const std::shared_ptr<void>& RpcOptions::getMetricsToCollect() const {
   return metricsToCollect_;
 }
+
+RpcOptions& RpcOptions::setRoutingObjectiveKey(
+    std::string routingObjectiveKey) {
+  routingObjectiveKey_ = std::move(routingObjectiveKey);
+  return *this;
+}
+
+const std::string& RpcOptions::getRoutingObjectiveKey() const {
+  return routingObjectiveKey_;
+}
 } // namespace apache::thrift

@@ -183,6 +183,19 @@ class RpcOptions {
   RpcOptions& setForceSyncOnFiber(bool forceSyncOnFiber);
   bool getForceSyncOnFiber() const;
 
+  /**
+   * Set routing objective key for global routing optimization.
+   *
+   * This key is used by the routing layer to select the appropriate routing
+   * objective (e.g., REGION or RING) which determines the traffic routing
+   * behavior and optimization strategy for the request.
+   *
+   * @param routingKey routing objective key
+   * @return reference to this object
+   */
+  RpcOptions& setRoutingObjectiveKey(std::string routingKey);
+  const std::string& getRoutingObjectiveKey() const;
+
  private:
   using timeout_ms_t = uint32_t;
   timeout_ms_t timeout_{0};
@@ -227,6 +240,9 @@ class RpcOptions {
 
   // Metrics to be sent back to the client
   std::shared_ptr<void> metricsToCollect_;
+
+  // A routing objective key that affects the global routing behavior.
+  std::string routingObjectiveKey_;
 };
 
 } // namespace apache::thrift

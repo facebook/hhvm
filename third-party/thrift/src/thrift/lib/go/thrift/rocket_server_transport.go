@@ -103,7 +103,7 @@ func (r *rocketServerTransport) acceptLoop(ctx context.Context) error {
 		// Notify observer that connection was successfully accepted
 		r.observer.ConnAccepted()
 
-		go func(ctx context.Context, conn net.Conn) {
+		go func(conn net.Conn) {
 			// Explicitly force TLS handshake protocol to run (if this is a TLS connection).
 			//
 			// Usually, TLS handshake is done implicitly/seamlessly by 'crypto/tls' package,
@@ -129,7 +129,7 @@ func (r *rocketServerTransport) acceptLoop(ctx context.Context) error {
 
 			ctxConn := r.connContext(ctx, conn)
 			r.processRequests(ctxConn, conn)
-		}(ctx, conn)
+		}(conn)
 	}
 }
 

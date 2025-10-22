@@ -60,8 +60,6 @@ module VersionedFileInfo : sig
   val diff_names : VersionedNames.t -> Diff.t
 end
 
-val class_big_diff : Class.t -> Class.t -> bool
-
 module ClassDiff : sig
   val compare : Class.t -> Class.t -> bool
 end

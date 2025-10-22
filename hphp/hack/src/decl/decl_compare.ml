@@ -343,48 +343,6 @@ module ClassEltDiff = struct
     |> compare_smeths class1 class2
 end
 
-(*****************************************************************************)
-(* Determines if there is a "big" difference between two classes
- * What it really means: most of the time, a change in a class doesn't affect
- * the users of the class, recomputing the sub-classes is enough.
- * However, there are some cases, where we really need to re-check all the
- * use cases of a class. For example: if a class doesn't implement an
- * interface anymore, all the subtyping is changed, so we have to recheck
- * all the places where the class was used.
- *)
-(*****************************************************************************)
-let class_big_diff class1 class2 =
-  let class1 = Decl_pos_utils.NormalizeSig.class_type class1 in
-  let class2 = Decl_pos_utils.NormalizeSig.class_type class2 in
-  let ( <> ) = Poly.( <> ) in
-  class1.dc_need_init <> class2.dc_need_init
-  || SSet.compare
-       class1.dc_deferred_init_members
-       class2.dc_deferred_init_members
-     <> 0
-  || class1.dc_kind <> class2.dc_kind
-  || class1.dc_is_xhp <> class2.dc_is_xhp
-  || class1.dc_has_xhp_keyword <> class2.dc_has_xhp_keyword
-  || class1.dc_const <> class2.dc_const
-  || class1.dc_tparams <> class2.dc_tparams
-  || SMap.compare compare_subst_context class1.dc_substs class2.dc_substs <> 0
-  || SMap.compare
-       Typing_defs.compare_decl_ty
-       class1.dc_ancestors
-       class2.dc_ancestors
-     <> 0
-  || List.compare Poly.compare class1.dc_req_ancestors class2.dc_req_ancestors
-     <> 0
-  || SSet.compare
-       class1.dc_req_ancestors_extends
-       class2.dc_req_ancestors_extends
-     <> 0
-  || SSet.compare class1.dc_extends class2.dc_extends <> 0
-  || SSet.compare class1.dc_xhp_attr_deps class2.dc_xhp_attr_deps <> 0
-  || class1.dc_enum_type <> class2.dc_enum_type
-  || class1.dc_internal <> class2.dc_internal
-  || Option.map ~f:snd class1.dc_module <> Option.map ~f:snd class2.dc_module
-
 let get_extend_deps mode cid_hash acc =
   Typing_deps.get_extend_deps
     ~mode

@@ -110,7 +110,12 @@ struct
     }
 
   and fun_elt fe =
-    { fe with fe_type = ty fe.fe_type; fe_pos = pos_or_decl fe.fe_pos }
+    {
+      fe with
+      fe_type = ty fe.fe_type;
+      fe_pos = pos_or_decl fe.fe_pos;
+      fe_package = Option.map fe.fe_package ~f:package_membership;
+    }
 
   and where_constraint (ty1, c, ty2) = (ty ty1, c, ty ty2)
 
@@ -161,6 +166,12 @@ struct
       tp_user_attributes = List.map ~f:user_attribute t.tp_user_attributes;
     }
 
+  and package_membership m =
+    let open Aast_defs in
+    match m with
+    | PackageOverride (p, name) -> PackageOverride (pos p, name)
+    | PackageConfigAssignment name -> PackageConfigAssignment name
+
   and class_type dc =
     {
       dc_final = dc.dc_final;
@@ -207,7 +218,7 @@ struct
       dc_docs_url = dc.dc_docs_url;
       dc_allow_multiple_instantiations = dc.dc_allow_multiple_instantiations;
       dc_sort_text = dc.dc_sort_text;
-      dc_package = dc.dc_package;
+      dc_package = Option.map dc.dc_package ~f:package_membership;
     }
 
   and requirement (p, t) = (pos_or_decl p, ty t)
@@ -241,7 +252,7 @@ struct
       td_attributes = List.map tdef.td_attributes ~f:user_attribute;
       td_internal = tdef.td_internal;
       td_docs_url = tdef.td_docs_url;
-      td_package = tdef.td_package;
+      td_package = Option.map tdef.td_package ~f:package_membership;
     }
 
   and shallow_class sc =
@@ -277,7 +288,7 @@ struct
       sc_user_attributes = List.map sc.sc_user_attributes ~f:user_attribute;
       sc_enum_type = Option.map sc.sc_enum_type ~f:enum_type;
       sc_docs_url = sc.sc_docs_url;
-      sc_package = sc.sc_package;
+      sc_package = Option.map sc.sc_package ~f:package_membership;
     }
 
   and shallow_class_const scc =

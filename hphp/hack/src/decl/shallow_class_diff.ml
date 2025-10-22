@@ -426,13 +426,16 @@ let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
   diff
 
 (** Return true if the two classes would (shallowly) produce the same member
-    resolution order (the output of the Decl_linearize module).
-
-    NB: It is critical for the correctness of incremental typechecking that
-    every bit of information used by Decl_linearize is checked here! *)
+    resolution order.  
+    NB: It is critical for the correctness of incremental typechecking that every
+    bit of information used to decide the ordering of decl folding is checked here! *)
 let mro_inputs_equal (c1 : shallow_class) (c2 : shallow_class) : bool =
   let is_to_string m = String.equal (snd m.sm_name) SN.Members.__toString in
-  Typing_defs.equal_pos_id c1.sc_name c2.sc_name
+  (* compare c1 and c2 sc_name ignoring the position in the file, but not the filename *)
+  String.equal (snd c1.sc_name) (snd c2.sc_name)
+  && Relative_path.equal
+       (Pos_or_decl.filename (fst c1.sc_name))
+       (Pos_or_decl.filename (fst c2.sc_name))
   && Ast_defs.equal_classish_kind c1.sc_kind c2.sc_kind
   && Option.equal
        equal_shallow_method

@@ -245,10 +245,10 @@ class RefactoredRocketServerConnection final : public IRocketServerConnection {
 
   // Note that attachEventBase()/detachEventBase() are not supported in server
   // code
+  // **CACHE LINE 1: HOT PATH DATA** - Most frequently accessed together
   folly::EventBase& evb_;
   folly::AsyncTransport::UniquePtr const socket_;
   folly::AsyncSocket* const rawSocket_;
-  folly::SocketAddress peerAddress_;
 
   Parser<RefactoredRocketServerConnection> parser_;
   std::unique_ptr<RocketServerHandler> frameHandler_;
@@ -264,9 +264,6 @@ class RefactoredRocketServerConnection final : public IRocketServerConnection {
           RequestChannelFrame>>
       partialRequestFrames_;
   folly::F14FastMap<StreamId, Payload> bufferedFragments_;
-
-  // Total number of active Request* frames ("streams" in protocol parlance)
-  size_t inflightRequests_{0};
 
   // Context for each inflight write to the underlying transport.
   // The size of the queue is equal to the total number of inflight writes to
@@ -292,6 +289,9 @@ class RefactoredRocketServerConnection final : public IRocketServerConnection {
   ConnectionState state_{ConnectionState::ALIVE};
   std::optional<DrainCompleteCode> drainCompleteCode_;
 
+  // **STREAM MANAGEMENT DATA** - Co-located for cache efficiency
+  // Total number of active Request* frames ("streams" in protocol parlance)
+  size_t inflightRequests_{0};
   using ClientCallbackUniquePtr = std::variant<
       std::unique_ptr<RocketStreamClientCallback>,
       std::unique_ptr<RocketSinkClientCallback>,
@@ -350,6 +350,9 @@ class RefactoredRocketServerConnection final : public IRocketServerConnection {
   MemoryTracker& egressMemoryTracker_;
   StreamMetricCallback& streamMetricCallback_;
   const Config cfg_;
+
+  // **COLD DATA** - Accessed infrequently, moved away from hot cache lines
+  folly::SocketAddress peerAddress_;
 
   ~RefactoredRocketServerConnection() override;
 
@@ -507,6 +510,9 @@ class RefactoredRocketServerConnection final : public IRocketServerConnection {
       apache::thrift::rocket::ConnectionAdapter<
           RefactoredRocketServerConnection>>;
   folly::EventBaseLocal<IncomingFrameBatcher> batcher_;
+
+  // Cached pointer to avoid EventBaseLocal lookup overhead on hot path
+  IncomingFrameBatcher* cachedBatcher_{nullptr};
 
   // OutgoingFrameHandler for frame-level batching across connections
   folly::EventBaseLocal<apache::thrift::rocket::OutgoingFrameHandler<

@@ -17,6 +17,7 @@
 #pragma once
 
 #include <folly/String.h>
+#include <folly/io/Cursor.h>
 #include <folly/lang/Bits.h>
 #include <folly/logging/xlog.h>
 #include <thrift/lib/cpp2/transport/rocket/core/FrameUtil.h>
@@ -36,9 +37,14 @@ parseFrameType(folly::IOBuf& frame) noexcept {
       frame.computeChainDataLength() >= kFlagAndFrameSize + kStreamIdSize,
       "frame to small for RSocket Stream Id and Flag - must be at least as long 40-bits long");
 
-  const uint8_t* data = frame.data() + kStreamIdSize;
-  uint16_t rawFrameType =
-      folly::Endian::big(*reinterpret_cast<const uint16_t*>(data));
+  // Use cursor to safely read across IOBuf chain boundaries
+  folly::io::Cursor cursor(&frame);
+
+  // Skip the stream ID (4 bytes)
+  cursor.skip(kStreamIdSize);
+
+  // Read the frame type and flags (2 bytes) in big-endian format
+  uint16_t rawFrameType = cursor.readBE<uint16_t>();
   return static_cast<FrameType>(rawFrameType >> Flags::kBits);
 }
 
@@ -67,7 +73,7 @@ class IncomingFrameHandler {
         requestResponseHandler_(&requestResponseHandler) {}
 
   void handle(std::unique_ptr<folly::IOBuf>&& frame) {
-    hexDumpFrame(*frame);
+    // hexDumpFrame(*frame);
     auto frameType = parseFrameType(*frame);
     switch (frameType) {
       case FrameType::SETUP:
@@ -109,6 +115,7 @@ class IncomingFrameHandler {
       //   break;
       // case FrameType::EXT:
       default:
+        hexDumpFrame(*frame);
         handleUnknownFrame(frameType);
         break;
     }
@@ -122,15 +129,15 @@ class IncomingFrameHandler {
   RequestResponseHandler<ConnectionT, ConnectionAdapter>*
       requestResponseHandler_;
 
-  FOLLY_ALWAYS_INLINE void hexDumpFrame(folly::IOBuf&) const noexcept {
+  FOLLY_ALWAYS_INLINE void hexDumpFrame(folly::IOBuf& frame) const noexcept {
     // if constexpr (folly::kIsDebug) {
-    //   XLOG(DBG9)
-    //       << "Handling Frame from: "
-    //       << connection_->getWrappedConnection()->getPeerAddress().describe()
-    //       << std::endl
-    //       << folly::hexDump(
-    //              frame.coalesce().data(), frame.computeChainDataLength());
-    // }
+    XLOG(INFO)
+        << "Handling Frame from: "
+        << connection_->getWrappedConnection()->getPeerAddress().describe()
+        << std::endl
+        << folly::hexDump(
+               frame.coalesce().data(), frame.computeChainDataLength());
+    //}
   }
 
   void handleSetupFrame(std::unique_ptr<folly::IOBuf> frame) noexcept {
@@ -150,7 +157,7 @@ class IncomingFrameHandler {
     connection_->close(folly::make_exception_wrapper<RocketException>(
         ErrorCode::INVALID,
         fmt::format(
-            "Received unhandleable frame type ({})",
+            "$$$ Received unhandleable frame type ({})",
             static_cast<uint8_t>(frameType))));
   }
 

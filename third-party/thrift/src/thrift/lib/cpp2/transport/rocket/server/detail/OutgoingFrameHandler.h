@@ -186,6 +186,7 @@ class OutgoingFrameHandler : public folly::EventBase::LoopCallback {
     if (wasEmpty) {
       pendingConnections_.push_back(*connection);
     }
+    pendingConnections_.clear();
   }
 
   template <bool Forced>

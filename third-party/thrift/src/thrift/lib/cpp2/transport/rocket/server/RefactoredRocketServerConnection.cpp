@@ -424,10 +424,16 @@ void RefactoredRocketServerConnection::handleFrame(
 
   frameHandler_->onBeforeHandleFrame();
 
-  auto* batcher = batcher_.get(evb_);
+  // Fast path: use cached pointer to avoid EventBaseLocal lookup overhead
+  auto* batcher = cachedBatcher_;
   if (FOLLY_UNLIKELY(batcher == nullptr)) {
-    batcher_.emplace(evb_, evb_);
     batcher = batcher_.get(evb_);
+    if (FOLLY_UNLIKELY(batcher == nullptr)) {
+      batcher_.emplace(evb_, evb_);
+      batcher = batcher_.get(evb_);
+    }
+    // Cache the pointer for subsequent calls
+    cachedBatcher_ = batcher;
   }
 
   batcher->handle(std::move(frame), connectionAdapter_, incomingFrameHandler_);

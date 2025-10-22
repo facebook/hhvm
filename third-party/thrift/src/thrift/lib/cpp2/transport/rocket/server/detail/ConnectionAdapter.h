@@ -178,7 +178,7 @@ void ConnectionAdapter<AdaptedConnectionT>::addPendingWrite(
   size_t bytesInWrite = 0;
   bool needsObserverTracking = connection_->numObservers() > 0;
 
-  if (data && needsObserverTracking) {
+  if (needsObserverTracking) {
     bytesInWrite = data->computeChainDataLength();
   }
 
@@ -207,6 +207,8 @@ void ConnectionAdapter<AdaptedConnectionT>::flushPendingWrites() {
     return;
   }
 
+  DCHECK(!pendingWrites_.empty());
+
   // Call sendQueued() on all callbacks before sending
   for (auto& cb : pendingSendCallbacks_) {
     if (cb) {
@@ -227,9 +229,8 @@ void ConnectionAdapter<AdaptedConnectionT>::flushPendingWrites() {
 
   // Get the batched IOBuf chain and flush to underlying connection
   auto batchedWrites = pendingWrites_.move();
-  if (batchedWrites) {
-    flushWrites(std::move(batchedWrites), std::move(context));
-  }
+  DCHECK(batchedWrites);
+  flushWrites(std::move(batchedWrites), std::move(context));
 
   // Reset state for next batch
   resetPendingWritesState();

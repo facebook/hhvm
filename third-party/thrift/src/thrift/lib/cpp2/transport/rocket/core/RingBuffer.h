@@ -61,7 +61,6 @@ class RingBuffer {
           }
           return 1 << log_size;
         }()),
-        mask_(capacity_ - 1),
         data_(new T[capacity_]) {}
 
   RingBuffer(RingBuffer&& other) = delete;
@@ -137,10 +136,11 @@ class RingBuffer {
   size_t head_ = 0;
   size_t tail_ = 0;
   const size_t capacity_;
-  const size_t mask_;
   T* data_;
 
-  size_t index(size_t source) const noexcept { return source & mask_; }
+  size_t index(size_t source) const noexcept {
+    return source & (capacity_ - 1);
+  }
 
   size_t tail_index() const noexcept { return index(tail_); }
   size_t head_index() const noexcept { return index(head_); }

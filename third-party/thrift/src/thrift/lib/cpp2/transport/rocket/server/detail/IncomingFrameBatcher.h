@@ -29,28 +29,25 @@ template <
     typename ConnectionT,
     template <typename>
     class ConnectionAdapter>
-struct IncomingFrameEvent {
+struct alignas(8) IncomingFrameEvent {
   using Connection = ConnectionAdapter<ConnectionT>;
 
   IncomingFrameEvent() = default;
 
-  std::optional<folly::DelayedDestruction::DestructorGuard> guard;
   std::unique_ptr<folly::IOBuf> buf;
-  size_t frameSize;
   Connection* state;
   IncomingFrameHandler* handler;
+  std::optional<folly::DelayedDestruction::DestructorGuard> guard;
 
   IncomingFrameEvent(
       std::unique_ptr<folly::IOBuf>&& buf,
-      size_t frameSize,
       Connection* state,
       IncomingFrameHandler* handler,
       folly::DelayedDestruction::DestructorGuard&& guard) noexcept
-      : guard(std::move(guard)),
-        buf(std::move(buf)),
-        frameSize(frameSize),
+      : buf(std::move(buf)),
         state(state),
-        handler(handler) {}
+        handler(handler),
+        guard(std::move(guard)) {}
 
   IncomingFrameEvent(IncomingFrameEvent&& other) = delete;
   IncomingFrameEvent& operator=(IncomingFrameEvent&& other) = delete;
@@ -85,16 +82,13 @@ class IncomingFrameBatcher : public folly::EventBase::LoopCallback {
       folly::EventBase& evb, size_t batchLogSize = 4 /* 1<<4 == 16 */)
       : batchSize_(1 << batchLogSize), evb_(evb), queue_(batchLogSize) {}
 
-  void handle(
+  FOLLY_ALWAYS_INLINE void handle(
       std::unique_ptr<folly::IOBuf> buf,
       Connection& state,
       IncomingFrameHandler& handler) {
-    auto frameSize = buf->computeChainDataLength();
-
     evb_.dcheckIsInEventBaseThread();
     bool ret = queue_.emplace_back(
         std::move(buf),
-        frameSize,
         &state,
         &handler,
         folly::DelayedDestruction::DestructorGuard(state.getDestructorGuard()));

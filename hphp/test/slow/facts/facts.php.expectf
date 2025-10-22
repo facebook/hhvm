@@ -105,6 +105,11 @@ types-with-kinds.inc has b module definition
 types-with-kinds.inc has no module membership
 module-membership.inc has someModule module membership
 
+Getting package overrides from paths
+package-membership.inc has test package override
+types-with-kinds.inc has no package
+does-not-exist.inc has no package
+
 Checking nonexistent paths
 this/path/does/not/exist.php has 0 modules
 this/path/does/not/exist.php has no module membership
@@ -237,6 +242,11 @@ types-with-kinds.inc has a module definition
 types-with-kinds.inc has b module definition
 types-with-kinds.inc has no module membership
 module-membership.inc has someModule module membership
+
+Getting package overrides from paths
+package-membership.inc has test package override
+types-with-kinds.inc has no package
+does-not-exist.inc has no package
 
 Checking nonexistent paths
 this/path/does/not/exist.php has 0 modules

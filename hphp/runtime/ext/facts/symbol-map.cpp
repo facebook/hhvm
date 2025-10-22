@@ -74,6 +74,13 @@ typename std::enable_if<
 getPathSymMap(const typename SymbolMap::Data& data) {
   return data.m_moduleMembershipPath;
 }
+template <SymKind k>
+typename std::enable_if<
+    k == SymKind::PackageMembership,
+    const PathToSymbolsMap<SymKind::PackageMembership>&>::type
+getPathSymMap(const typename SymbolMap::Data& data) {
+  return data.m_packageMembershipPath;
+}
 
 // non-const
 template <SymKind k>
@@ -108,6 +115,13 @@ typename std::enable_if<
     PathToSymbolsMap<SymKind::ModuleMembership>&>::type
 getPathSymMap(typename SymbolMap::Data& data) {
   return data.m_moduleMembershipPath;
+}
+template <SymKind k>
+typename std::enable_if<
+    k == SymKind::PackageMembership,
+    PathToSymbolsMap<SymKind::PackageMembership>&>::type
+getPathSymMap(typename SymbolMap::Data& data) {
+  return data.m_packageMembershipPath;
 }
 
 } // namespace
@@ -235,6 +249,28 @@ std::vector<Symbol<SymKind::Type>> SymbolMap::getFileTypes(Path path) {
   return symbolVec;
 }
 
+bool SymbolMap::getFileExists(const fs::path& path) {
+  return getFileExists(Path{path});
+}
+
+// We want to determine if a file exists, quickly and ideally without having to
+// stat() it. We expect this to nearly always return true, so there's a few fast
+// path options we can try in order to see if we can get a hit for something in
+// memory.  The expected most common case for this is to determine in which
+// packages the files associated with the result of a Facts query are, and that
+// Facts query is typically going to be related to getting types - so the file
+// should already be in the type symbol map.
+//
+// If it doesn't exist in the type map, then we can fetch the sha1 and we'll
+// know that if there is a sha1, then it exists.
+bool SymbolMap::getFileExists(Path path) {
+  if (!getFileTypes(path).empty()) {
+    return true;
+  }
+
+  return getSha1(path).has_value();
+}
+
 std::vector<Symbol<SymKind::Type>> SymbolMap::getFileTypes(
     const fs::path& path) {
   return getFileTypes(Path{path});
@@ -293,6 +329,22 @@ SymbolMap::getFileModuleMembership(Path path) {
 std::optional<Symbol<SymKind::ModuleMembership>>
 SymbolMap::getFileModuleMembership(const fs::path& path) {
   return getFileModuleMembership(Path{path});
+}
+
+std::optional<Symbol<SymKind::PackageMembership>>
+SymbolMap::getFilePackageMembership(Path path) {
+  auto const& symbols = getPathSymbols<SymKind::PackageMembership>(path);
+  if (symbols.empty()) {
+    return std::nullopt;
+  } else {
+    assertx(symbols.size() == 1);
+    return symbols[0];
+  }
+}
+
+std::optional<Symbol<SymKind::PackageMembership>>
+SymbolMap::getFilePackageMembership(const fs::path& path) {
+  return getFilePackageMembership(Path{path});
 }
 
 std::vector<Symbol<SymKind::Type>> SymbolMap::getFileTypeAliases(Path path) {
@@ -1156,7 +1208,7 @@ Optional<SHA1> SymbolMap::getSha1Hash(Path path) const {
 }
 
 Optional<std::string> SymbolMap::getSha1(Path path) {
-  return readOrUpdate<std::string>(
+  auto sha1 = readOrUpdate<std::string>(
       [&](const Data& data) -> Optional<std::string> {
         auto it = data.m_sha1Hashes.find(path);
         if (it == data.m_sha1Hashes.end()) {
@@ -1168,9 +1220,17 @@ Optional<std::string> SymbolMap::getSha1(Path path) {
         return db->getSha1Hex(path.slice());
       },
       [&](Data& data, std::string sha1) -> std::string {
-        data.m_sha1Hashes[path] = SHA1{sha1};
+        if (!sha1.empty()) {
+          data.m_sha1Hashes[path] = SHA1{sha1};
+        } else {
+          data.m_sha1Hashes.erase(path);
+        }
         return sha1;
       });
+  if (sha1.empty()) {
+    return std::nullopt;
+  }
+  return sha1;
 }
 
 void SymbolMap::update(
@@ -1346,6 +1406,12 @@ void SymbolMap::updateDB(
     return;
   }
 
+  XLOGF(
+      INFO,
+      "Scheduling database updates:  {} altered, {} deleted.",
+      alteredPaths.size(),
+      deletedPaths.size());
+
   auto db = getDB();
 
   // Only update the DB if its clock matches the clock we thought it had.
@@ -1482,6 +1548,11 @@ void SymbolMap::updateDBPath(
   }
 
   if (!facts.package_membership.empty()) {
+    XLOGF(
+        ERR,
+        "{} -> package override {}",
+        path.native().c_str(),
+        std::string(facts.package_membership));
     db.insertPackageMembership(path, as_slice(facts.package_membership));
   }
 
@@ -1636,6 +1707,14 @@ typename PathToSymbolsMap<k>::PathSymbolMap::Values SymbolMap::getPathSymbols(
                 return std::vector<std::string>{};
               }
             }
+            case SymKind::PackageMembership: {
+              auto result = db->getPathPackageMembership(path);
+              if (result.has_value()) {
+                return std::vector<std::string>{*result};
+              } else {
+                return std::vector<std::string>{};
+              }
+            }
             case SymKind::Method:
               always_assert(
                   false && "getPathSymbols only for toplevel symbols");
@@ -1664,6 +1743,7 @@ SymbolMap::Data::Data()
       m_constantPath{m_versions},
       m_modulePath{m_versions},
       m_moduleMembershipPath{m_versions},
+      m_packageMembershipPath{m_versions},
       m_inheritanceInfo{m_versions},
       m_typeAttrs{m_versions},
       m_typeAliasAttrs{m_versions},
@@ -1746,6 +1826,13 @@ void SymbolMap::Data::updatePath(
         Symbol<SymKind::ModuleMembership>{as_slice(facts.module_membership)});
   }
 
+  typename PathToSymbolsMap<SymKind::PackageMembership>::Symbols
+      packageMembership;
+  if (!facts.package_membership.empty()) {
+    packageMembership.push_back(
+        Symbol<SymKind::PackageMembership>{as_slice(facts.package_membership)});
+  }
+
   typename PathToSymbolsMap<SymKind::Function>::Symbols functions;
   for (auto const& function : facts.functions) {
     always_assert(!function.empty());
@@ -1760,6 +1847,8 @@ void SymbolMap::Data::updatePath(
 
   m_fileAttrs.setAttributes({path}, facts.file_attributes);
 
+  m_packageMembershipPath.replacePathSymbols(
+      path, std::move(packageMembership));
   m_moduleMembershipPath.replacePathSymbols(path, std::move(moduleMembership));
   m_modulePath.replacePathSymbols(path, std::move(modules));
   m_typePath.replacePathSymbols(path, std::move(types));

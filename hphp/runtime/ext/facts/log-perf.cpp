@@ -262,6 +262,12 @@ Optional<String> FactsLogger::getFileModuleMembership(const String& path) {
   });
 }
 
+Optional<String> FactsLogger::getFilePackageMembership(const String& path) {
+  return logPerf(__func__, path.slice(), [&]() {
+    return m_inner->getFilePackageMembership(path);
+  });
+}
+
 void FactsLogger::close() {
   return logPerf(__func__, "", [&]() { m_inner->close(); });
 }

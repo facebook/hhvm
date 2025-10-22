@@ -136,6 +136,11 @@ namespace HH\Facts {
   function path_to_module_membership(string $path)[]: ?string;
 
   /**
+   * Return the package the file is a member of, if any.
+   */
+  function path_to_package(string $path)[]: ?string;
+
+  /**
    * Return the sha1 of the path, if any.
    */
   function sha1(string $path)[]: ?string;

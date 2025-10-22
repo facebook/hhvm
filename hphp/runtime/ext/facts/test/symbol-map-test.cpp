@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include <algorithm>
 #include <filesystem>
 #include <memory>
 #include <string>
@@ -36,7 +35,6 @@
 #include "hphp/runtime/ext/facts/string-ptr.h"
 #include "hphp/runtime/ext/facts/symbol-map.h"
 #include "hphp/runtime/ext/facts/test/string-data-fake.h"
-#include "hphp/util/bstring.h"
 #include "hphp/util/hash-set.h"
 #include "hphp/util/hash.h"
 
@@ -46,6 +44,8 @@ using ::testing::Contains;
 using ::testing::ElementsAre;
 using ::testing::Eq;
 using ::testing::IsEmpty;
+using ::testing::IsFalse;
+using ::testing::IsTrue;
 using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::SaveArg;
@@ -366,6 +366,7 @@ struct MockAutoloadDB : public AutoloadDB {
       (std::string_view),
       (override));
 
+  // Package Membership
   MOCK_METHOD(
       void,
       insertPackageMembership,
@@ -2218,6 +2219,44 @@ TEST_F(SymbolMapTest, GetFilesWithAttribute) {
   auto m2 = make("/var/www");
   update(m2, "1", "1", {}, {}, {});
   testMap(m2);
+}
+
+TEST_F(SymbolMapTest, GetFileExists) {
+  auto m1 = make("/var/www");
+
+  FileFacts ff1{
+      .sha1sum = "a79ebb17f2955b220f4c4fa6603a3389450ee6f8",
+      .file_attributes = {
+          {.name = "A1", .args = {"1"}}, {.name = "A2", .args = {}}}};
+  fs::path p1{"some/path1.php"};
+  update(m1, "", "1", {p1}, {}, {ff1});
+
+  EXPECT_THAT(m1.getFileExists("some/path1.php"), IsTrue());
+  EXPECT_THAT(m1.getFileExists("some/path2.php"), IsFalse());
+}
+
+TEST_F(SymbolMapTest, GetPackageOverrideForPath) {
+  auto m1 = make("/var/www");
+
+  FileFacts ff1{
+      .package_membership = "foo",
+      .file_attributes = {
+          {.name = "A1", .args = {"1"}}, {.name = "A2", .args = {}}}};
+  fs::path p1{"some/path1.php"};
+  FileFacts ff2{
+      .package_membership = "bar",
+      .file_attributes = {
+          {.name = "A1", .args = {"1"}}, {.name = "A2", .args = {}}}};
+  fs::path p2{"some/path2.php"};
+  FileFacts ff3{
+      .file_attributes = {
+          {.name = "A1", .args = {"1"}}, {.name = "A2", .args = {}}}};
+  fs::path p3{"some/path3.php"};
+  update(m1, "", "1", {p1, p2, p3}, {}, {ff1, ff2, ff3});
+
+  EXPECT_THAT(m1.getFilePackageMembership("some/path1.php"), Eq("foo"));
+  EXPECT_THAT(m1.getFilePackageMembership("some/path2.php"), Eq("bar"));
+  EXPECT_THAT(m1.getFilePackageMembership("some/path3.php"), Eq(std::nullopt));
 }
 
 TEST_F(SymbolMapTest, ConcurrentFillsFromDB) {

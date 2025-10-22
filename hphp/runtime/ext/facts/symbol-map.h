@@ -151,6 +151,9 @@ struct SymbolMap {
   Path getTypeAliasFile(Symbol<SymKind::Type> typeAlias);
   Path getTypeAliasFile(const StringData& typeAlias);
 
+  bool getFileExists(const std::filesystem::path& path);
+  bool getFileExists(Path path);
+
   /**
    * Return all symbols of a given kind declared in the given path.
    *
@@ -177,6 +180,11 @@ struct SymbolMap {
   std::optional<Symbol<SymKind::ModuleMembership>> getFileModuleMembership(
       Path path);
   std::optional<Symbol<SymKind::ModuleMembership>> getFileModuleMembership(
+      const std::filesystem::path& path);
+
+  std::optional<Symbol<SymKind::PackageMembership>> getFilePackageMembership(
+      Path path);
+  std::optional<Symbol<SymKind::PackageMembership>> getFilePackageMembership(
       const std::filesystem::path& path);
 
   std::vector<Symbol<SymKind::Type>> getFileTypeAliases(Path path);
@@ -486,6 +494,7 @@ struct SymbolMap {
     PathToSymbolsMap<SymKind::Constant> m_constantPath;
     PathToSymbolsMap<SymKind::Module> m_modulePath;
     PathToSymbolsMap<SymKind::ModuleMembership> m_moduleMembershipPath;
+    PathToSymbolsMap<SymKind::PackageMembership> m_packageMembershipPath;
 
     /**
      * Future chain and queue holding the work that needs to be done before the

@@ -238,6 +238,17 @@ function print_path_modules(
   }
 }
 
+function print_path_package(
+  string $path,
+): void {
+  $package = HH\Facts\path_to_package($path);
+  if ($package is null) {
+    print "$path has no package\n";
+  } else {
+    print "$path has $package package override\n";
+  }
+}
+
 function print_num_symbols(
   string $path,
 ): void {
@@ -632,6 +643,10 @@ function facts(): void {
   print "\nGetting modules from paths\n";
   print_path_modules('types-with-kinds.inc');
   print_path_modules('module-membership.inc');
+  print "\nGetting package overrides from paths\n";
+  print_path_package('package-membership.inc');
+  print_path_package('types-with-kinds.inc');
+  print_path_package('does-not-exist.inc');
   print "\nChecking nonexistent paths\n";
   print_num_symbols('this/path/does/not/exist.php');
   print_num_symbols('/this/path/does/not/exist.php');

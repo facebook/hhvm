@@ -350,6 +350,11 @@ struct FactsStore : public AutoloadMap {
    * Returns the module the given file is a member of, if any.
    */
   virtual Optional<String> getFileModuleMembership(const String& path) = 0;
+
+  /**
+   * Returns the package that the file is a member of, or empty string if the file is not known.
+   */
+  virtual Optional<String> getFilePackageMembership(const String& path) = 0;
 };
 
 } // namespace HPHP

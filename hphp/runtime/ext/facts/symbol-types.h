@@ -33,6 +33,7 @@ enum class SymKind {
   Module,
   Method, // Module Definition: new module X {}
   ModuleMembership, // The module a file is contained in: module X;
+  PackageMembership,
 };
 
 constexpr std::string_view toString(SymKind k) {
@@ -49,6 +50,8 @@ constexpr std::string_view toString(SymKind k) {
       return "method";
     case SymKind::ModuleMembership:
       return "module_membership";
+    case SymKind::PackageMembership:
+      return "package_membership";
   }
   return "unknown";
 }
@@ -62,6 +65,7 @@ constexpr bool isCaseSensitive(SymKind k) {
     case SymKind::Module:
     case SymKind::Method:
     case SymKind::ModuleMembership:
+    case SymKind::PackageMembership:
       return true;
   }
 }
@@ -140,6 +144,7 @@ struct Symbol {
       case SymKind::Module:
       case SymKind::Method:
       case SymKind::ModuleMembership:
+      case SymKind::PackageMembership:
         return m_name.same(o.m_name);
     }
   }

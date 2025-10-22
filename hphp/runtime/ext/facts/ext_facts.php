@@ -147,6 +147,12 @@ function path_to_type_aliases(string $path)[]: vec<string>;
 function path_to_module_membership(string $path)[]: ?string;
 
 /**
+ * Return the package the file is a member of, if any.
+ */
+<<__Native>>
+function path_to_package(string $path)[]: ?string;
+
+/**
  * Return the sha1 of the path, if any.
  */
 <<__Native>>

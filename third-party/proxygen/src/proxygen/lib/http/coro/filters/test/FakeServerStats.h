@@ -9,6 +9,7 @@
 #pragma once
 
 #include "proxygen/lib/http/stats/HttpServerStats.h"
+#include <array>
 #include <proxygen/lib/http/ProxygenErrorEnum.h>
 
 namespace proxygen {
@@ -34,9 +35,9 @@ class FakeHTTPServerStats : public HttpServerStatsIf {
   uint64_t errors{0};
 
   // 1xx -> 5xx (ignore index 0)
-  uint64_t responseCodes[6] = {0};
+  std::array<uint64_t, 6> responseCodes{};
   // errors categorized by type
-  uint64_t errorTypes[ProxygenError::kErrorMax] = {0};
+  std::array<uint64_t, ProxygenError::kErrorMax> errorTypes{};
 };
 
 } // namespace proxygen

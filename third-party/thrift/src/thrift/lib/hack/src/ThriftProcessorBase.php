@@ -143,15 +143,36 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
     );
     $encoded_first_response = $transport->getBuffer();
     $transport->resetBuffer();
-    $server_stream = await gen_start_thrift_stream($encoded_first_response);
-
-    $payload_encoder =
-      $this->encodeStreamWithLatencyTracking($stream_response_type, $output);
-    if ($server_stream === null) {
-      // Stream was cancelled by the client.
-      return;
+    $server_stream = await PHP\gen_start_thrift_stream($encoded_first_response);
+    // Set fatal error handling for thrift streaming requests.
+    // This will send proper thrift exception back to the caller
+    // instead of default html page for 500.
+    PHP\hphp_set_error_page(
+      php_root().
+      '/flib/core/runtime/error/error_pages/thrift/handle_thrift_streaming_service_error.php',
+    );
+    try {
+      $payload_encoder =
+        $this->encodeStreamWithLatencyTracking($stream_response_type, $output);
+      if ($server_stream === null) {
+        // Stream was cancelled by the client.
+        return;
+      }
+      await $server_stream->genStream<TStreamType>($stream, $payload_encoder);
+    } catch (Exception $ex) {
+      $payload_encoder =
+        ThriftStreamingSerializationHelpers::encodeStreamHelper(
+          $stream_response_type,
+          $output,
+        );
+      list($serialized_ex, $is_tax) = $payload_encoder(null, $ex);
+      $server_stream?->sendServerException(
+        $serialized_ex,
+        $ex->getMessage(),
+        get_class($ex),
+        !$is_tax,
+      );
     }
-    await $server_stream->genStream<TStreamType>($stream, $payload_encoder);
   }
 
   final protected function encodeStreamWithLatencyTracking<

@@ -17,7 +17,6 @@
 #pragma once
 
 #include <sys/types.h>
-#include <filesystem>
 #include <memory>
 
 #include "hphp/runtime/ext/facts/autoload-db.h"

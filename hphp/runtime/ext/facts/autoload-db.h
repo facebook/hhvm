@@ -255,6 +255,13 @@ struct AutoloadDB {
   virtual std::vector<std::filesystem::path> getModuleMembers(
       std::string_view module) = 0;
 
+  // Package Membership
+  virtual void insertPackageMembership(
+      const std::filesystem::path& path,
+      std::string_view package) = 0;
+  virtual std::optional<std::string> getPathPackageMembership(
+      const std::filesystem::path& path) = 0;
+
   /**
    * Validates the current facts DB is not corrupted
    *

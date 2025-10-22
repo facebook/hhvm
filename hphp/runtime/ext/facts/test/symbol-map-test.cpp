@@ -366,8 +366,18 @@ struct MockAutoloadDB : public AutoloadDB {
       (std::string_view),
       (override));
 
+  MOCK_METHOD(
+      void,
+      insertPackageMembership,
+      (const std::filesystem::path& path, std::string_view package));
+  MOCK_METHOD(
+      std::optional<std::string>,
+      getPathPackageMembership,
+      (const std::filesystem::path& path));
+
   /**
-   * Return a list of all paths defined in the given root, as absolute paths.
+   * Return a list of all paths defined in the given root, as absolute
+   * paths.
    *
    * Paths come paired with the last known SHA1 hash of the file.
    *

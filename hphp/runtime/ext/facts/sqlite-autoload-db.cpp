@@ -118,7 +118,7 @@ constexpr int toDBEnum(DeriveKind kind) {
   return -1;
 }
 
-void createSchema(SQLiteTxn& txn) {
+void createSchema(SQLiteTxn& txn, bool excludePackageMembership) {
   // Basically copied wholesale from FlibAutoloadMapSQL.php in WWW.
 
   // Common DB
@@ -218,6 +218,20 @@ void createSchema(SQLiteTxn& txn) {
       " pathid INTEGER NOT NULL UNIQUE REFERENCES all_paths ON DELETE CASCADE,"
       " module_name TEXT NOT NULL"
       ")");
+
+  if (!excludePackageMembership) {
+    txn.exec(
+        "CREATE TABLE IF NOT EXISTS packages ("
+        " package_id INTEGER PRIMARY KEY, "
+        " package_name TEXT NOT NULL"
+        ")");
+
+    txn.exec(
+        "CREATE TABLE IF NOT EXISTS file_package_membership ("
+        " pathid INTEGER NOT NULL PRIMARY KEY REFERENCES all_paths ON DELETE CASCADE,"
+        " package_id INTEGER NOT NULL REFERENCES packages"
+        ")");
+  }
 }
 
 void rebuildIndices(SQLiteTxn& txn) {
@@ -652,6 +666,29 @@ struct ModuleMembershipStmts {
   SQLiteStmt m_getPathModuleMembership;
 };
 
+struct PackageMembershipStmts {
+  explicit PackageMembershipStmts(SQLite& db)
+      : m_insert{db.prepare(
+            "INSERT OR REPLACE INTO file_package_membership (pathid, package_id) "
+            "VALUES ("
+            " (SELECT pathid FROM all_paths WHERE path=@path),"
+            " (SELECT package_id FROM packages WHERE package_name=@package_name)"
+            ")")},
+        m_insertPackage{
+            db.prepare("INSERT OR IGNORE INTO packages (package_name) VALUES("
+                       " @package_name"
+                       ")")},
+        m_getPathPackageMembership{
+            db.prepare("SELECT package_name FROM file_package_membership"
+                       " JOIN packages USING (package_id)"
+                       " JOIN all_paths USING (pathid)"
+                       " WHERE path=@path")} {}
+
+  SQLiteStmt m_insert;
+  SQLiteStmt m_insertPackage;
+  SQLiteStmt m_getPathPackageMembership;
+};
+
 struct ClockStmts {
   explicit ClockStmts(SQLite& db)
       : m_insert{db.prepare(
@@ -664,7 +701,7 @@ struct ClockStmts {
 };
 
 struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
-  explicit SQLiteAutoloadDBImpl(SQLite db)
+  explicit SQLiteAutoloadDBImpl(SQLite db, bool excludePackageMembership)
       : m_db{std::move(db)},
         m_txn{m_db.begin()},
         m_pathStmts{m_db},
@@ -676,6 +713,10 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
         m_validateSmts{m_db},
         m_moduleStmts{m_db},
         m_moduleMembershipStmts{m_db},
+        m_packageMembershipStmts{
+            excludePackageMembership
+                ? nullptr
+                : std::make_unique<PackageMembershipStmts>(m_db)},
         m_clockStmts{m_db} {}
 
   // We can't move `m_db` unless it has no outstanding
@@ -752,10 +793,16 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     }
 
     db.setSynchronousLevel(SQLite::SynchronousLevel::OFF);
+    // If the database is read only, and we don't have both requisite tables,
+    // we can't do package overrides.
+    bool excludePackageMembership = db.isReadOnly() &&
+        (!db.hasTable("packages") || !db.hasTable("file_package_membership"));
+
     {
       XLOGF(INFO, "Trying to open SQLite DB at {}", key.m_path.native());
       auto txn = db.begin();
-      createSchema(txn);
+
+      createSchema(txn, excludePackageMembership);
       if (!db.isReadOnly()) {
         rebuildIndices(txn);
       }
@@ -764,7 +811,8 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
       XLOGF(INFO, "Connected to SQLite DB at {}", key.m_path.native());
     }
 
-    return std::make_shared<SQLiteAutoloadDBImpl>(std::move(db));
+    return std::make_shared<SQLiteAutoloadDBImpl>(
+        std::move(db), excludePackageMembership);
   }
 
   void commit() override {
@@ -1388,6 +1436,47 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     return results;
   }
 
+  void insertPackageMembership(
+      const std::filesystem::path& path,
+      std::string_view package) override {
+    if (!hasPackageMembership()) {
+      return;
+    }
+
+    assertx(path.is_relative());
+    {
+      auto query = m_txn.query(m_packageMembershipStmts->m_insertPackage);
+      query.bindString("@package_name", package);
+      XLOGF(DBG9, "Running {}", query.sql());
+      query.step();
+    }
+    {
+      auto query = m_txn.query(m_packageMembershipStmts->m_insert);
+      query.bindString("@path", path.native());
+      query.bindString("@package_name", package);
+      XLOGF(DBG9, "Running {}", query.sql());
+      query.step();
+    }
+  }
+
+  std::optional<std::string> getPathPackageMembership(
+      const std::filesystem::path& path) override {
+    if (!hasPackageMembership()) {
+      return std::nullopt;
+    }
+
+    std::optional<std::string> result;
+    auto query =
+        m_txn.query(m_packageMembershipStmts->m_getPathPackageMembership);
+    query.bindString("@path", path.native());
+    XLOGF(DBG9, "Running {}", query.sql());
+    for (query.step(); query.row(); query.step()) {
+      assertx(!result.has_value());
+      result.emplace(std::string{query.getString(0)});
+    }
+    return result;
+  }
+
   MultiResult<PathAndHash> getAllPathsAndHashes() override {
     auto query = m_txn.query(m_pathStmts.m_getAllPaths);
     XLOGF(DBG9, "Running {}", query.sql());
@@ -1427,6 +1516,10 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     return m_db.isReadOnly();
   }
 
+  bool hasPackageMembership() {
+    return m_packageMembershipStmts != nullptr;
+  }
+
   void runPostBuildOptimizations() override {
     try {
       m_db.analyze();
@@ -1449,6 +1542,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
   ValidateStmts m_validateSmts;
   ModuleStmts m_moduleStmts;
   ModuleMembershipStmts m_moduleMembershipStmts;
+  std::unique_ptr<PackageMembershipStmts> m_packageMembershipStmts;
   ClockStmts m_clockStmts;
 };
 

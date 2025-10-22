@@ -1481,6 +1481,10 @@ void SymbolMap::updateDBPath(
     db.insertModuleMembership(path, as_slice(facts.module_membership));
   }
 
+  if (!facts.package_membership.empty()) {
+    db.insertPackageMembership(path, as_slice(facts.package_membership));
+  }
+
   for (auto const& function : facts.functions) {
     db.insertFunction(as_slice(function), path);
   }

@@ -92,12 +92,11 @@ namespace hackc {
 }
 
 namespace Facts {
-// SQLFacts version number representing the DB's schema.  This number is
-// determined randomly, but should match the number in the SQL Facts
-// implementation.  We use this when we make a change that invalidates
-// the cache, such as adding a new table which would otherwise be
-// unpopulated without a cache rebuild.
-constexpr size_t kSchemaVersion = 8306754210;
+// Version number representing the DB's schema.  This number is determined
+// randomly.  We use this when we make a change that invalidates the cache,
+// such as adding a new table which would otherwise be unpopulated without a
+// cache rebuild.
+constexpr size_t kSchemaVersion = 2035084036;
 }
 
 /*

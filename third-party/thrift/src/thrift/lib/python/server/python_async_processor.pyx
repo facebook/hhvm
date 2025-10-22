@@ -280,7 +280,7 @@ async def serverCallback_coro(object callFunc, str funcName, Promise_Py promise,
         elif kind is RpcKind.BIDIRECTIONAL_STREAM:
             val, bidi = await callFunc(buf, prot)
             bidi = StreamTransformation_IOBuf._fbthrift_create(bidi)
-            val = ResponseAndStreamTransformation._fbthrift_create(val.response, bidi)
+            val = ResponseAndStreamTransformation._fbthrift_create(val, bidi)
         else:
             val = await callFunc(buf, prot)
     except PythonUserException as pyex:

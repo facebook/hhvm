@@ -105,13 +105,12 @@ cdef class ResponseAndBidirectionalStream:
         return self._stream
 
 async def invokeBidiTransformCallback(
-    bidi_callback,
+    output_gen,
     ServerSinkGenerator input_gen,
     Promise_PyObject promise,
 ):
     """
-    Invoke bidi callback with input generator and return output generator.
-    bidi_callback should be Callable[AsyncGenerator, AsyncGenerator]
+    Invoke input generator stream and complete promise with output generator.
     """
     async def invoke_cpp_iobuf_gen():
         async for elem in input_gen:
@@ -119,8 +118,6 @@ async def invokeBidiTransformCallback(
 
     try:
         input_gen_wrapper = invoke_cpp_iobuf_gen()
-        output_gen = bidi_callback(input_gen_wrapper)
-        # Store the output generator in the promise for later retrieval
         promise.complete(output_gen)
     except Exception as ex:
         promise.error_py_object(ex)

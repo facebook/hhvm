@@ -13,7 +13,6 @@
 #include <string_view>
 #include <utility>
 
-#include <fmt/format.h>
 #include <folly/String.h>
 #include <folly/portability/Windows.h> // for windows compatibility: STRICT maybe defined by some win headers
 #include <proxygen/lib/utils/ParseURL.h>
@@ -132,14 +131,22 @@ class URL {
   }
 
   std::string getHostAndPort() const noexcept {
-    return port_ ? fmt::format("{}:{}", host_, port_) : host_;
+    if (port_ == 0) {
+      return host_;
+    }
+    std::stringstream ss;
+    ss << host_ << ":" << port_;
+    return ss.str();
   }
 
   std::string getHostAndPortOmitDefault() const noexcept {
-    return port_ && ((isSecure() && port_ != 443) ||
-                     (!isSecure() && port_ != 80))
-               ? fmt::format("{}:{}", host_, port_)
-               : host_;
+    bool defaultPort = port_ == 0 || port_ == (isSecure() ? 443 : 80);
+    if (defaultPort) {
+      return host_;
+    }
+    std::stringstream ss;
+    ss << host_ << ":" << port_;
+    return ss.str();
   }
 
   const std::string& getPath() const noexcept {
@@ -155,10 +162,19 @@ class URL {
   }
 
   std::string makeRelativeURL() const noexcept {
-    return fmt::format("{}{}{}",
-                       path_.empty() ? "/" : std::string_view(path_),
-                       query_.empty() ? "" : fmt::format("?{}", query_),
-                       fragment_.empty() ? "" : fmt::format("#{}", fragment_));
+    std::stringstream ss;
+    if (path_.empty()) {
+      ss << "/";
+    } else {
+      ss << path_;
+    }
+    if (!query_.empty()) {
+      ss << '?' << query_;
+    }
+    if (!fragment_.empty()) {
+      ss << '#' << fragment_;
+    }
+    return ss.str();
   }
 
   friend bool operator==(const URL& lhs, const URL& rhs) {

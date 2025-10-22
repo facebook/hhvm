@@ -9,10 +9,10 @@
 #pragma once
 
 #include <optional>
+#include <sstream>
 #include <string>
 #include <string_view>
 
-#include <fmt/format.h>
 #include <glog/logging.h>
 #include <proxygen/lib/utils/Export.h>
 
@@ -126,7 +126,9 @@ class ParseURL {
     if (port_ == 0) {
       return std::string(host_);
     }
-    return fmt::format("{}:{}", host_, port_);
+    std::stringstream ss;
+    ss << host_ << ":" << port_;
+    return ss.str();
   }
 
   [[nodiscard]] std::string_view path() const {

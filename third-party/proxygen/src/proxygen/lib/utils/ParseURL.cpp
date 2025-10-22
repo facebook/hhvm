@@ -11,7 +11,6 @@
 #include <algorithm>
 #include <charconv>
 
-#include <fmt/format.h>
 #include <folly/portability/Sockets.h>
 #include <proxygen/lib/utils/UtilInl.h>
 
@@ -92,8 +91,9 @@ std::optional<std::string> ParseURL::getRedirectDestination(
         return std::nullopt;
       }
     } // else oldURL was absolute and has a host
-    return fmt::format(
-        "{}://{}{}", requestScheme, oldURL->hostAndPort(), location);
+    std::stringstream ss;
+    ss << requestScheme << "://" << oldURL->hostAndPort() << location;
+    return ss.str();
   } else {
     return std::string(newUrl->url());
   }
@@ -142,7 +142,7 @@ void ParseURL::parse(bool strict) noexcept {
       fragment_ = url_.substr(u.field_data[UF_FRAGMENT].off,
                               u.field_data[UF_FRAGMENT].len);
 
-      authority_ = (port_) ? fmt::format("{}:{}", host_, port_) : host_;
+      authority_ = hostAndPort();
     }
   } else {
     parseNonFully(strict);

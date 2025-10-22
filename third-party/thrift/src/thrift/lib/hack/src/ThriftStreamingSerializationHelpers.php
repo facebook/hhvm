@@ -83,7 +83,17 @@ final abstract class ThriftStreamingSerializationHelpers {
       if ($protocol is \TBinaryProtocolAccelerated) {
         thrift_protocol_write_binary_struct($protocol, $result);
       } else if ($protocol is \TCompactProtocolAccelerated) {
-        thrift_protocol_write_compact_struct($protocol, $result);
+        if (TCompactSerializer::useCompactStruct()) {
+          return tuple(
+            thrift_protocol_write_compact_struct_to_string(
+              $result,
+              TCompactProtocolBase::VERSION,
+            ),
+            $is_application_ex,
+          );
+        } else {
+          thrift_protocol_write_compact_struct($protocol, $result);
+        }
       } else {
         $result->write($protocol);
         $transport->flush();
@@ -120,24 +130,35 @@ final abstract class ThriftStreamingSerializationHelpers {
           $transport is \TMemoryBuffer,
           "Stream/Sink methods require TMemoryBuffer transport",
         );
-
-        $transport->resetBuffer();
-        $transport->write($stream_payload as nonnull);
-        if ($protocol is \TBinaryProtocolAccelerated) {
-          $result = thrift_protocol_read_binary_struct(
-            $protocol,
+        if (
+          $protocol is \TCompactProtocolAccelerated &&
+          TCompactSerializer::useCompactStruct()
+        ) {
+          $result = thrift_protocol_read_compact_struct_from_string(
+            $stream_payload as nonnull,
             HH\class_to_classname($payload_classname),
-          );
-        } else if ($protocol is \TCompactProtocolAccelerated) {
-          $result = thrift_protocol_read_compact_struct(
-            $protocol,
-            HH\class_to_classname($payload_classname),
+            0, //options
+            TCompactProtocolBase::VERSION,
           );
         } else {
-          $result = $payload_classname::withDefaultValues();
-          $result->read($protocol);
+          $transport->resetBuffer();
+          $transport->write($stream_payload as nonnull);
+          if ($protocol is \TBinaryProtocolAccelerated) {
+            $result = thrift_protocol_read_binary_struct(
+              $protocol,
+              HH\class_to_classname($payload_classname),
+            );
+          } else if ($protocol is \TCompactProtocolAccelerated) {
+            $result = thrift_protocol_read_compact_struct(
+              $protocol,
+              HH\class_to_classname($payload_classname),
+            );
+          } else {
+            $result = $payload_classname::withDefaultValues();
+            $result->read($protocol);
+          }
+          $protocol->readMessageEnd();
         }
-        $protocol->readMessageEnd();
       } catch (\THandlerShortCircuitException $ex) {
         throw $ex->result;
       }

@@ -26,7 +26,7 @@
 final class TCompactSerializer extends TProtocolWritePropsSerializer {
 
   <<__Memoize>>
-  private static function useCompactStruct()[write_props]: bool {
+  public static function useCompactStruct()[write_props]: bool {
     return HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
       ()[defaults] ==> JustKnobs::eval('thrift/hack:compact_struct'),
       'Need to gate the change',

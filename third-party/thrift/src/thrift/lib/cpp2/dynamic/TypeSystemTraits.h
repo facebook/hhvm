@@ -17,6 +17,7 @@
 #pragma once
 
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
+#include <thrift/lib/cpp2/type/Type.h>
 
 namespace apache::thrift::type_system {
 
@@ -28,6 +29,22 @@ struct ToTTypeFn;
 // NOTE: This API will statically reject abstract tags (e.g. type::struct_c>)
 template <typename Tag>
 TypeRef resolveTag(const TypeSystem& ts, Tag);
+
+/**
+ * Resolves a concrete type::Type instance (format used by Any/SemiAny) into a
+ * TypeRef.
+ *
+ * Throws an std::invalid_argument if:
+ *   - Type is a user-defined type and is not defined in the type system.
+ *   - Type is a type::Type instance that is not a concrete/valid type.
+ *   - Type contains hashed/scoped URIs
+ */
+TypeRef resolveAnyType(const TypeSystem& ts, const type::Type& type);
+
+/**
+ * Translates a TypeRef into a type::Type instance (format used by Any/SemiAny).
+ */
+type::Type toAnyType(const TypeRef& ref);
 
 ///
 // API IMPLEMENTATION FOLLOWS
@@ -81,10 +98,10 @@ struct ToTTypeFn {
   constexpr TType operator()(const TypeRef::Any&) const noexcept {
     return TType::T_STRUCT;
   }
-  constexpr TType operator()(const OpaqueAliasNode& alias) const noexcept {
+  TType operator()(const OpaqueAliasNode& alias) const noexcept {
     return (*this)(alias.targetType());
   }
-  constexpr TType operator()(const TypeRef& tref) const noexcept {
+  TType operator()(const TypeRef& tref) const noexcept {
     return tref.visit(*this);
   }
 };

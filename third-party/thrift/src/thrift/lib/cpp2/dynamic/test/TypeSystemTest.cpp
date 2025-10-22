@@ -22,6 +22,7 @@
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystemBuilder.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystemTraits.h>
+#include <thrift/lib/cpp2/type/Any.h>
 
 #include <optional>
 #include <string_view>
@@ -1521,6 +1522,46 @@ TEST(TypeSystemTest, SourceIndexedTypeSystemLookupByDefinition) {
       sym.getSourceIdentiferForUserDefinedType(
           DefinitionRef(&unionWithI32FieldDefinition)),
       std::nullopt);
+}
+
+TEST(TypeSystemTest, AnyTypeInterop) {
+  auto ts = typeSystemWithEmpties();
+
+  auto test = [&](auto trefInput, auto anyTypeInput) {
+    auto tref = TypeRef(trefInput);
+    auto anyType = type::Type(anyTypeInput);
+    SCOPED_TRACE(
+        fmt::format("test({}, {})", tref.id().name(), anyType.debugString()));
+    EXPECT_TRUE(tref.isEqualIdentityTo(resolveAnyType(*ts, anyType)));
+    EXPECT_EQ(toAnyType(tref), anyType);
+  };
+
+  test(TypeRef::Bool{}, type::bool_t{});
+  test(TypeRef::Byte{}, type::byte_t{});
+  test(TypeRef::I16{}, type::i16_t{});
+  test(TypeRef::I32{}, type::i32_t{});
+  test(TypeRef::I64{}, type::i64_t{});
+  test(TypeRef::Double{}, type::double_t{});
+  test(TypeRef::Float{}, type::float_t{});
+  test(TypeRef::String{}, type::string_t{});
+  test(TypeRef::Binary{}, type::binary_t{});
+  test(TypeRef::Any{}, type::struct_t<type::AnyStruct>());
+
+  test(
+      ts->UserDefined(kEmptyStructUri),
+      type::Type::create<type::struct_c>(kEmptyStructUri));
+  test(
+      ts->UserDefined(kEmptyUnionUri),
+      type::Type::create<type::union_c>(kEmptyUnionUri));
+  test(
+      ts->UserDefined(kEmptyEnumUri),
+      type::Type::create<type::enum_c>(kEmptyEnumUri));
+
+  test(TypeRef::List::of(TypeRef::I32{}), type::list<type::i32_t>{});
+  test(TypeRef::Set::of(TypeRef::I64{}), type::set<type::i64_t>{});
+  test(
+      TypeRef::Map::of(TypeRef::I32{}, TypeRef::String{}),
+      type::map<type::i32_t, type::string_t>{});
 }
 
 } // namespace apache::thrift::type_system

@@ -21,7 +21,6 @@ namespace mcrouter {
 std::string routerName(const McrouterOptions& opts);
 
 #define MC_LOG_FAILURE(opts, ...) LOG_FAILURE(routerName(opts), __VA_ARGS__)
-#define MC_LOG_LUNA_FAILURE(service, ...) LOG_FAILURE(service, __VA_ARGS__)
 } // namespace mcrouter
 } // namespace memcache
 } // namespace facebook

@@ -220,8 +220,6 @@ _target_cache: typing.Dict[int, typing.Dict[str, typing.Any]] = {}
 def clear_caches(
     target: typing.Optional[lldb.SBTarget] = None, key: typing.Optional[str] = None
 ) -> None:
-    global _target_cache
-
     if target is None:
         _target_cache.clear()
         return
@@ -239,7 +237,6 @@ def clear_caches(
 def get_target_cache_dict(target: lldb.SBTarget) -> typing.Dict[str, typing.Any]:
     """Get the target cache dictionary for the specified target"""
 
-    global _target_cache
     target_idx = target.GetDebugger().GetIndexOfTarget(target)
 
     if target_idx not in _target_cache:
@@ -262,6 +259,9 @@ def get_hhvm_module(target: lldb.SBTarget) -> typing.Optional[lldb.SBModule]:
         sym = module.FindSymbol("HPHP::jit::tc::g_code")
         if sym is not None and sym.IsValid():
             target_cache_dict[key] = module
+            debug_print(
+                f"get_hhvm_module({target}): found hhvm module {module} (uuid {module.GetUUIDString()})"
+            )
             return module
 
     return None
@@ -308,6 +308,7 @@ def get_cached_global(
     target: lldb.SBTarget,
 ) -> typing.Optional[lldb.SBValue]:
     """Get a global by name (trying from the HHVM module first) and cache the results"""
+    debug_print(f"get_cached_global({name})")
 
     target_cache_dict = get_target_cache_dict(target)
     key = "globals"
@@ -334,8 +335,9 @@ def get_cached_global(
         debug_print(
             f"couldn't find global variable '{name}'; attempting to find it by evaluating it"
         )
-        return Value(name, target)
-    else:
+        g = Value(name, target)
+
+    if g is not None and g.IsValid():
         target_cache_dict[key][name] = g
 
     return g
@@ -353,6 +355,7 @@ def Type(name: str, target: lldb.SBTarget) -> lldb.SBType:
     Returns:
         An SBType wrapping the HHVM type
     """
+    debug_print(f"Type({name}, {target})")
     ty = get_cached_type(name, target)
     assert ty is not None and ty.IsValid(), f"couldn't find type '{name}'"
     return ty
@@ -371,6 +374,7 @@ def Global(name: str, target: lldb.SBTarget) -> lldb.SBValue:
     Returns:
         SBValue wrapping the global variable
     """
+    debug_print(f"Global({name}, {target})")
     g = get_cached_global(name, target)
     assert g is not None and g.GetError().Success(), f"couldn't find global '{name}'"
     return g
@@ -393,6 +397,7 @@ def Enum(
     Returns:
         SBTypeEnumMember wrapping the enumerator element
     """
+    debug_print(f"Enum({enum_name}, {elem}, {target})")
     enum = Type(enum_name, target)
     assert enum.IsValid(), f"couldn't find enumeration '{enum_name}'"
     members = enum.GetEnumMembers()
@@ -417,6 +422,7 @@ def Value(name: str, target: lldb.SBTarget) -> lldb.SBValue:
     Returns:
         SBValue wrapping the value
     """
+    debug_print(f"Value({name}, {target})")
     v = target.EvaluateExpression(name)
     assert v.GetError().Success(), f"couldn't find symbol {name}"
     return v
@@ -1163,6 +1169,7 @@ def has_array_kind(array_data: lldb.SBValue, *kinds: str) -> bool:
 
     heap_obj = array_data.children[0].children[0]  # HPHP::HeapObject
     m_kind = get(heap_obj, "m_kind")
+    debug_print(f"has_array_kind() with m_kind {m_kind}")
 
     for kind in kinds:
         kind = Enum(

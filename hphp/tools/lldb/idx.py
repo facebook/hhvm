@@ -205,6 +205,7 @@ def _aligned_tv_at_pos_to_tv(base: lldb.SBValue, idx: int) -> lldb.SBValue:
 
 def vec_at(base: lldb.SBValue, idx: int) -> lldb.SBValue | None:
     # base is a generic pointer to the start of the array of typed values
+    utils.debug_print(f"vec_at({base.unsigned}, idx)")
     try:
         if utils.Global("HPHP::VanillaVec::stores_unaligned_typed_values", base.target):
             return _unaligned_tv_at_pos_to_tv(base, idx)

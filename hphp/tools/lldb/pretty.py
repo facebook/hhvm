@@ -307,6 +307,8 @@ class pp_ArrayData:
             self.at_func = lambda ix: idx.dict_at(base, ix)
         elif utils.has_array_kind(self.val_obj, "Keyset"):
             self.at_func = lambda ix: idx.keyset_at(base, ix)
+        else:
+            utils.debug_print("Could not determine array kind")
 
         # Return false to make sure we always update this object every time we
         # stop. If we return True, then the value will never update again.

@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
+#include "hphp/runtime/vm/jit/irgen-func-prologue.h"
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
@@ -932,8 +933,8 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, SrcKey entry, SSATmp* ctx,
     return true;
   }
 
-  irgen::beginInlining(irgs, entry, ctx, asyncEagerOffset, calleeCost,
-                       calleeFP);
+  emitInitFuncInputsInline(irgs, entry.func(), argc, calleeFP);
+  beginInlining(irgs, entry, ctx, asyncEagerOffset, calleeCost, calleeFP);
 
   SCOPE_ASSERT_DETAIL("Inlined-RegionDesc")
     { return show(*calleeRegion); };

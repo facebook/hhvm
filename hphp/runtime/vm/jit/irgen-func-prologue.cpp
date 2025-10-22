@@ -417,6 +417,52 @@ void emitCalleeChecks(IRGS& env, const Func* callee, uint32_t& argc,
 
 } // namespace
 
+void emitInitFuncInputsInline(IRGS& env, const Func* callee, uint32_t argc,
+                              SSATmp* fp) {
+  assertx(argc <= callee->numParams());
+  std::vector<SSATmp*> args;
+
+  auto const pop = [&] {
+    gen(
+      env,
+      AssertStk,
+      TInitCell,
+      IRSPRelOffsetData { offsetFromIRSP(env, BCSPRelOffset{0}) },
+      sp(env)
+    );
+    args.emplace_back(popC(env, DataTypeGeneric));
+  };
+
+  // Generics and coeffects are already initialized
+  if (callee->hasCoeffectsLocal())  pop();
+  if (callee->hasReifiedGenerics()) pop();
+
+  // Empty array for `...$args`
+  if (callee->hasVariadicCaptureParam() && argc < callee->numParams()) {
+    args.emplace_back(cns(env, ArrayData::CreateVec()));
+  }
+
+  // Uninit for un-passed arguments
+  if (argc < callee->numNonVariadicParams()) {
+    for (int c = callee->numNonVariadicParams() - argc; c; c--) {
+      args.emplace_back(cns(env, TUninit));
+    }
+  }
+
+  for (int i = 0; i < argc; i++) pop();
+  assertx(args.size() == callee->numFuncEntryInputs());
+
+  // Make the new FramePtr live (marking the caller stack below the frame as
+  // killed).
+  gen(env, EnterInlineFrame, fp);
+  updateMarker(env);
+
+  int loc = 0;
+  for (; loc < callee->numFuncEntryInputs(); ++loc) {
+    stLocRaw(env, loc, fp, args[callee->numFuncEntryInputs() - loc - 1]);
+  }
+}
+
 void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t argc) {
   assertx(argc <= callee->numParams());
   if (argc == callee->numParams()) return;

@@ -291,50 +291,36 @@ void beginInlining(IRGS& env,
   FTRACE(1, "[[[ begin inlining: {}\n", callee->fullName()->data());
 
   auto const numTotalInputs = callee->numFuncEntryInputs();
-
-  jit::vector<SSATmp*> inputs{numTotalInputs};
-  for (auto i = 0; i < numTotalInputs; ++i) {
-    inputs[numTotalInputs - i - 1] = popCU(env);
-  }
+  jit::vector<SSATmp*> dvs{numTotalInputs};
 
   while (entry.trivialDVFuncEntry()) {
     auto const param = entry.numEntryArgs();
     assertx(param < numTotalInputs);
     auto const dv = callee->params()[param].defaultValue;
-    inputs[param] = cns(env, dv);
+    dvs[param] = cns(env, dv);
     entry = SrcKey{callee, param + 1, SrcKey::FuncEntryTag {}};
   }
 
-  updateMarker(env);
-
-  // NB: Now that we've popped the callee's arguments off the stack
-  // and thus modified the caller's frame state, we're committed to
-  // inlining. If we bail out from now on, the caller's frame state
-  // will be as if the arguments don't exist on the stack (even though
-  // they do).
   auto const extra = calleeFP->inst()->extra<DefCalleeFP>();
   extra->cost = cost;
 
-  always_assert(extra->spOffset == spOffBCFromIRSP(env));
+  always_assert(
+    extra->spOffset - callee->numSlotsInFrame() == spOffBCFromIRSP(env)
+  );
   always_assert(extra->sbOffset == extra->spOffset - callee->numSlotsInFrame());
-
-  // Make the new FramePtr live (marking the caller stack below the frame as
-  // killed).
-  gen(env, EnterInlineFrame, calleeFP);
 
   env.inlineState.frames.emplace_back(frame);
   env.inlineState.cost += cost;
   env.inlineState.stackDepth += callee->maxStackCells();
   env.bcState = entry;
 
-  // We have entered a new frame.
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
   if (!(ctx->type() <= TNullptr)) gen(env, StFrameCtx, fp(env), ctx);
 
   for (auto i = 0; i < numTotalInputs; ++i) {
-    stLocRaw(env, i, calleeFP, inputs[i]);
+    if (dvs[i]) stLocRaw(env, i, calleeFP, dvs[i]);
   }
 
   assertx(entry.hasThis() == callee->hasThisInBody());
@@ -377,15 +363,17 @@ void conjureBeginInlining(IRGS& env,
   }
 
   allocActRec(env);
-  auto const fp = genCalleeFP(env, callee, 0);
-
-  for (auto const inputType : inputs) {
-    push(env, conjure(inputType));
-  }
 
   // beginInlining() assumes synced state.
   updateMarker(env);
   env.irb->exceptionStackBoundary();
+
+  auto const fp = genCalleeFP(env, callee, 0);
+  gen(env, EnterInlineFrame, fp);
+
+  for (uint32_t i = 0; i < inputs.size(); ++i) {
+    gen(env, AssertLoc, inputs[i], LocalId(i), fp);
+  }
 
   beginInlining(env, entry, ctx, kInvalidOffset /* asyncEagerOffset */,
                 9 /* cost */, fp);

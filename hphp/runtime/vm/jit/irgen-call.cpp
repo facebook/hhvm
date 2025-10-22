@@ -679,8 +679,6 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
       std::min(numArgsInclUnpack, callee->numNonVariadicParams());
     auto const entry = SrcKey { callee, numArgs, SrcKey::FuncEntryTag {} };
 
-    emitInitFuncInputs(env, callee, numArgsInclUnpack);
-
     if (!hasRdsCache) {
       if (irGenTryInlineFCall(env, entry, objOrClass, asyncEagerOffset,
                               calleeFP, numArgsInclUnpack, inputTypes)) {
@@ -690,6 +688,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
 
     // We didn't end up inlining the callee, discard the frame pointer
     if (!calleeFP->isA(TBottom)) calleeFP->inst()->convertToNop();
+    emitInitFuncInputs(env, callee, numArgsInclUnpack);
 
     if (hasRdsCache) {
       auto const link = constParamCacheLink(env, callee, objOrClass,

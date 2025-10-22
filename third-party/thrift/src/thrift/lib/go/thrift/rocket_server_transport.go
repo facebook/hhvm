@@ -23,6 +23,7 @@ import (
 	"io"
 	"net"
 	"runtime/debug"
+	"time"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/stats"
 	"github.com/facebook/fbthrift/thrift/lib/thrift/rocket_upgrade"
@@ -200,7 +201,11 @@ func (r *rocketServerTransport) processRocketRequests(ctx context.Context, conn 
 			r.observer.ConnDropped()
 		}
 	}()
-	r.acceptor(ctx, transport.NewTransport(transport.NewTCPConn(conn)), func(*transport.Transport) {})
+
+	tp := transport.NewTransport(transport.NewTCPConn(conn))
+	tp.SetLifetime(1 * time.Hour)
+
+	r.acceptor(ctx, tp, func(*transport.Transport) {})
 }
 
 func (r *rocketServerTransport) processHeaderRequest(ctx context.Context, protocol Protocol, processor Processor) error {

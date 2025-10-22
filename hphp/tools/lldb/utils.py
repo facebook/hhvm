@@ -337,9 +337,7 @@ def get_cached_global(
         )
         g = Value(name, target)
 
-    if g is not None and g.IsValid():
-        target_cache_dict[key][name] = g
-
+    target_cache_dict[key][name] = g
     return g
 
 

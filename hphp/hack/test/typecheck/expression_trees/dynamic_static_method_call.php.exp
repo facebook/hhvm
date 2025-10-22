@@ -1,0 +1,16 @@
+ERROR: File "dynamic_static_method_call.php", line 15, characters 7-22:
+Expression trees only support function calls and static method calls on named classes. (Parsing[1002])
+ERROR: File "dynamic_static_method_call.php", line 15, characters 7-10:
+Variable `$cls` is undefined, or not always defined. (Naming[2050])
+  File "", line 0, characters 0-0:
+  Did you mean `$this` instead?
+ERROR: File "dynamic_static_method_call.php", line 15, characters 7-22:
+This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
+  File "dynamic_static_method_call.php", line 6, characters 56-148:
+  This is why I think it is `Awaitable`
+ERROR: File "dynamic_static_method_call.php", line 15, characters 17-21:
+Invalid argument (Typing[4110])
+  File "dynamic_static_method_call.php", line 6, characters 36-49:
+  Expected `ExampleContext`
+  File "dynamic_static_method_call.php", line 15, characters 17-21:
+  But got `string`

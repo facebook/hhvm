@@ -5,7 +5,7 @@
 final class MyClass {
   public static async function bar(
     ExampleContext $_,
-  ): Awaitable<ExampleExpression<(function(ExampleString): ExampleInt)>> {
+  ): Awaitable<ExampleExpression<ExampleFunction<(function(ExampleString): ExampleInt)>>> {
     throw new Exception();
   }
 

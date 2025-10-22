@@ -5,7 +5,7 @@
 abstract class MyClass {
   public abstract static function bar(
     ExampleContext $_,
-  ): Awaitable<ExampleExpression<(function(ExampleString): ExampleInt)>>;
+  ): Awaitable<ExampleExpression<ExampleFunction<(function(ExampleString): ExampleInt)>>>;
 
   public function test(): void {
     $fun_call = ExampleDsl`static::bar("baz")`;

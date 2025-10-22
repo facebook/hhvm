@@ -6,8 +6,8 @@ Invalid return type (Typing[4110])
   Expected `string`
   File "expr_tree.php", line 99, characters 28-43:
     resulting from expanding the type constant `ExampleDsl::TAst`
-  File "self_static_method_call.php", line 8, characters 6-72:
-  But got `Awaitable<ExampleExpression<(function(string): int)>>`
+  File "self_static_method_call.php", line 8, characters 6-89:
+  But got `Awaitable<ExampleExpression<ExampleFunction<(function(string): int)>>>`
 ERROR: File "self_static_method_call.php", line 13, characters 38-42:
 Invalid argument (Typing[4110])
   File "self_static_method_call.php", line 7, characters 5-18:

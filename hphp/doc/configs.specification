@@ -1351,6 +1351,8 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - uint32_t Eval.UnitPrefetcherMaxThreads = 0, UNKNOWN
 
+- bool Eval.UnitPrefetcherSpeculative = false, UNKNOWN
+
 - uint32_t Eval.UnitPrefetcherMinThreads = 0, UNKNOWN
 
 - uint32_t Eval.UnitPrefetcherIdleThreadTimeoutSecs = 60, UNKNOWN

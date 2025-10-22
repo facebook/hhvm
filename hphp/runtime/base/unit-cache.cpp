@@ -1072,7 +1072,7 @@ folly::CPUThreadPoolExecutor& getPrefetchExecutor() {
 // can optionally provide any Unit which is currently being loaded,
 // which will ignore any symbols defined in that unit.
 void prefetchSymbolRefs(SymbolRefs symbols, const Unit* loadingUnit) {
-  if (!unitPrefetchingEnabled()) return;
+  if (!speculativeUnitPrefetchingEnabled()) return;
   assertx(!Cfg::Repo::Authoritative);
 
   // If there's no autoloader associated with this request, we can't

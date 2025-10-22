@@ -737,7 +737,7 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
     // the prefetcher can claim them. Reset the atomic flag to mark
     // them available. Otherwise set the atomic flag was already
     // claimed as a shortcut.
-    if (!Cfg::Repo::Authoritative && unitPrefetchingEnabled()) {
+    if (!Cfg::Repo::Authoritative && speculativeUnitPrefetchingEnabled()) {
       ux->m_symbolRefsForPrefetch = m_symbol_refs;
       ux->m_symbolRefsPrefetched.clear();
     } else {

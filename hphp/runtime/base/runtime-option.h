@@ -455,6 +455,11 @@ inline bool unitPrefetchingEnabled() {
   return Cfg::Eval::UnitPrefetcherMaxThreads > 0;
 }
 
+inline bool speculativeUnitPrefetchingEnabled() {
+  return Cfg::Eval::UnitPrefetcherSpeculative && Cfg::Eval::UnitPrefetcherMaxThreads > 0;
+}
+
+
 inline StringToIntMap coeffectEnforcementLevelsDefaults() {
 #ifdef HHVM_FACEBOOK
   return {{"zoned", 2}};

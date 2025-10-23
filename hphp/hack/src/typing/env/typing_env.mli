@@ -628,6 +628,8 @@ val package_allow_reified_generics_violations : env -> bool
 
 val package_allow_all_generics_violations : env -> bool
 
+val package_allow_function_pointers_violations : env -> bool
+
 (** Remove solved variable from environment by replacing it by its binding. *)
 val remove_var :
   env ->

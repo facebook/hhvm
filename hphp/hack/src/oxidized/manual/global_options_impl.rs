@@ -140,6 +140,7 @@ impl Default for GlobalOptions {
             tco_package_allow_all_tconst_violations: true,
             tco_package_allow_reified_generics_violations: true,
             tco_package_allow_all_generics_violations: true,
+            tco_package_allow_function_pointers_violations: true,
             re_no_cache: false,
             hh_distc_should_disable_trace_store: false,
             hh_distc_exponential_backoff_num_retries: 10,

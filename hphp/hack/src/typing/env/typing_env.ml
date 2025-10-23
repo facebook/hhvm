@@ -684,6 +684,10 @@ module M = struct
   let package_allow_all_generics_violations env =
     TypecheckerOptions.package_allow_all_generics_violations @@ get_tcopt env
 
+  let package_allow_function_pointers_violations env =
+    TypecheckerOptions.package_allow_function_pointers_violations
+    @@ get_tcopt env
+
   let load_packages env packages =
     { env with loaded_packages = SSet.union env.loaded_packages packages }
 

@@ -480,6 +480,8 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
       (bool_opt "package_allow_all_tconst_violations" config)
     ?tco_package_allow_all_generics_violations:
       (bool_opt "package_allow_all_generics_violations" config)
+    ?tco_package_allow_function_pointers_violations:
+      (bool_opt "package_allow_function_pointers_violations" config)
     ?tco_package_exclude_patterns:
       (string_list_opt "package_exclude_patterns" config)
     ?tco_extended_reasons:(reasons_config_opt config)

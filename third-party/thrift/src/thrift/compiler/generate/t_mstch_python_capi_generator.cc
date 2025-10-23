@@ -636,7 +636,7 @@ class python_capi_mstch_field : public mstch_field {
   mstch::node marshal_type() { return format_marshal_type(*field_); }
 
   mstch::node iobuf() {
-    const auto* ttype = field_->get_type()->get_true_type();
+    const auto* ttype = field_->type()->get_true_type();
     return ttype->is_binary() && is_type_iobuf(ttype);
   }
 

@@ -1298,7 +1298,7 @@ void t_hack_generator::generate_json_field(
   if (skip_codegen(tfield)) {
     return;
   }
-  const t_type* type = tfield->get_type()->get_true_type();
+  const t_type* type = tfield->type()->get_true_type();
 
   if (type->is_void()) {
     throw std::runtime_error(
@@ -4023,7 +4023,7 @@ bool t_hack_generator::is_async_field(
   return find_hack_wrapper(field) /* Check for field wrapper */ ||
       wrapper /* Check for typedef wrapper*/ ||
       is_async_type(
-             field.get_type()->get_true_type(),
+             field.type()->get_true_type(),
              check_nested_structs) /* Check for struct wrapper and containers
                                     */
       ;
@@ -4329,7 +4329,7 @@ void t_hack_generator::generate_php_field_wrapper_methods(
 
 void t_hack_generator::generate_php_struct_field_methods(
     std::ofstream& out, const t_field* field, bool is_exception) {
-  const t_type* t = field->get_type()->get_true_type();
+  const t_type* t = field->type()->get_true_type();
   if (is_exception && field->name() == "code" && t->is<t_enum>()) {
     std::string enum_type = type_to_typehint(field->get_type());
     out << "\n";
@@ -6340,7 +6340,7 @@ void t_hack_generator::generate_php_docstring(
   }
   indent(out) << " * " << "Original thrift field:-\n";
   indent(out) << " * " << tfield->id() << ": "
-              << tfield->get_type()->get_full_name() << " " << tfield->name()
+              << tfield->type()->get_full_name() << " " << tfield->name()
               << "\n";
   indent(out) << " */\n";
 }
@@ -7383,7 +7383,7 @@ std::string t_hack_generator::declare_field(
     const t_field* tfield, bool init, bool obj, bool /*thrift*/) {
   std::string result = "$" + tfield->name();
   if (init) {
-    const t_type* type = tfield->get_type()->get_true_type();
+    const t_type* type = tfield->type()->get_true_type();
     if (const auto* tbase_type = type->try_as<t_primitive_type>()) {
       switch (tbase_type->primitive_type()) {
         case t_primitive_type::type::t_void:
@@ -7476,7 +7476,7 @@ std::string t_hack_generator::argument_list(
     result += delim;
     delim = ", ";
     if (typehints) {
-      auto true_type = field.get_type()->get_true_type();
+      auto true_type = field.type()->get_true_type();
       /*
        * force_nullable sets everything to null
        * Structs are nullable unless no_nullables_ is set.

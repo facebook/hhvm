@@ -76,7 +76,7 @@ bool is_custom_type(const t_type& type) {
 bool is_custom_type(const t_field& field) {
   return cpp_name_resolver::find_first_adapter(field) ||
       field.has_structured_annotation(kCppTypeUri) ||
-      is_custom_type(*field.get_type());
+      is_custom_type(*field.type());
 }
 
 bool container_supports_incomplete_params(const t_type& type) {
@@ -312,8 +312,7 @@ bool is_eligible_for_constexpr::operator()(const t_type* type) {
         result = eligible::no;
         return false;
       } else if (result == eligible::unknown) {
-        if (!field->get_type()->is<t_struct>() &&
-            !field->get_type()->is<t_union>()) {
+        if (!field->type()->is<t_struct>() && !field->type()->is<t_union>()) {
           return false;
         }
         // Structs are eligible if all their fields are.
@@ -445,7 +444,7 @@ std::string sha256_hex(std::string const& in) {
 bool deprecated_terse_writes(const t_field* field) {
   // Add terse writes for unqualified fields when comparison is cheap:
   // (e.g. i32/i64, empty strings/list/map)
-  auto t = field->get_type()->get_true_type();
+  auto t = field->type()->get_true_type();
   return field->qualifier() == t_field_qualifier::none &&
       (cpp2::is_unique_ref(field) || (!t->is<t_structured>()));
 }

@@ -1105,7 +1105,7 @@ void t_java_deprecated_generator::generate_java_constructor_using_builder(
   indent(out) << "public Builder() {" << endl;
   if (!useDefaultConstructor) {
     for (m_iter = fields.begin(); m_iter != fields.end(); ++m_iter) {
-      const t_type* t = (*m_iter)->get_type()->get_true_type();
+      const t_type* t = (*m_iter)->type()->get_true_type();
       if ((*m_iter)->default_value() != nullptr) {
         print_const_value(
             indent(out),
@@ -1303,7 +1303,7 @@ void t_java_deprecated_generator::generate_java_struct_definition(
     indent(out) << "public " << tstruct->name() << "() {" << endl;
     indent_up();
     for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
-      const t_type* t = (*m_iter)->get_type()->get_true_type();
+      const t_type* t = (*m_iter)->type()->get_true_type();
       if ((*m_iter)->default_value() != nullptr) {
         print_const_value(
             out,
@@ -1418,7 +1418,7 @@ void t_java_deprecated_generator::construct_constant_fields(
     ofstream& out, const t_structured* tstruct) {
   auto& members = tstruct->get_members();
   for (auto m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
-    const t_type* t = (*m_iter)->get_type()->get_true_type();
+    const t_type* t = (*m_iter)->type()->get_true_type();
     if ((*m_iter)->default_value() != nullptr) {
       print_const_value(
           out,
@@ -1458,7 +1458,7 @@ void t_java_deprecated_generator::generate_java_struct_equality(
   for (auto m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
     out << endl;
 
-    const t_type* t = (*m_iter)->get_type()->get_true_type();
+    const t_type* t = (*m_iter)->type()->get_true_type();
     // Most existing Thrift code does not use isset or optional/required,
     // so we treat "default" fields as required.
     bool is_optional = (*m_iter)->qualifier() == t_field_qualifier::optional;
@@ -1893,7 +1893,7 @@ void t_java_deprecated_generator::generate_generic_field_getters_setters(
   vector<t_field*>::const_iterator f_iter;
   for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
     const t_field* field = *f_iter;
-    const t_type* type = field->get_type()->get_true_type();
+    const t_type* type = field->type()->get_true_type();
     const std::string& field_name = field->name();
     std::string cap_name = get_cap_name(field_name);
 
@@ -1955,7 +1955,7 @@ std::string t_java_deprecated_generator::get_simple_getter_name(
     const t_field* field) {
   const std::string& field_name = field->name();
   std::string cap_name = get_cap_name(field_name);
-  const t_type* type = field->get_type()->get_true_type();
+  const t_type* type = field->type()->get_true_type();
 
   if (type->is<t_primitive_type>() &&
       ((t_primitive_type*)type)->primitive_type() ==
@@ -1978,7 +1978,7 @@ void t_java_deprecated_generator::generate_java_bean_boilerplate(
   vector<t_field*>::const_iterator f_iter;
   for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
     const t_field* field = *f_iter;
-    const t_type* type = field->get_type()->get_true_type();
+    const t_type* type = field->type()->get_true_type();
     std::string field_name = field->name();
     std::string cap_name = get_cap_name(field_name);
 
@@ -2108,7 +2108,7 @@ void t_java_deprecated_generator::generate_java_struct_tostring(
     for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
       const t_field* field = (*f_iter);
       string fname = field->name();
-      const t_type* ftype = field->get_type()->get_true_type();
+      const t_type* ftype = field->type()->get_true_type();
 
       if (tstruct->is<t_union>()) {
         indent(out) << "// Only print this field if it is the set field"
@@ -3216,7 +3216,7 @@ void t_java_deprecated_generator::generate_process_function(
  */
 void t_java_deprecated_generator::generate_deserialize_field(
     ofstream& out, const t_field* tfield, const string& prefix) {
-  const t_type* type = tfield->get_type()->get_true_type();
+  const t_type* type = tfield->type()->get_true_type();
 
   if (type->is_void()) {
     throw std::runtime_error(
@@ -3232,7 +3232,7 @@ void t_java_deprecated_generator::generate_deserialize_field(
     generate_deserialize_container(out, type, name);
   } else if (type->is<t_enum>()) {
     indent(out) << name << " = "
-                << get_enum_class_name(tfield->get_type()->get_true_type())
+                << get_enum_class_name(tfield->type()->get_true_type())
                 << ".findByValue(iprot.readI32());" << endl;
   } else if (const auto* primitive = type->try_as<t_primitive_type>()) {
     indent(out) << name << " = iprot.";
@@ -3434,7 +3434,7 @@ void t_java_deprecated_generator::generate_deserialize_list_element(
  */
 void t_java_deprecated_generator::generate_serialize_field(
     ofstream& out, const t_field* tfield, const string& prefix) {
-  const t_type* type = tfield->get_type()->get_true_type();
+  const t_type* type = tfield->type()->get_true_type();
 
   // Do nothing for void types
   if (type->is_void()) {
@@ -3720,7 +3720,7 @@ string t_java_deprecated_generator::declare_field(
   // TODO(mcslee): do we ever need to initialize the field?
   string result = type_name(tfield->get_type()) + " " + tfield->name();
   if (init) {
-    const t_type* ttype = tfield->get_type()->get_true_type();
+    const t_type* ttype = tfield->type()->get_true_type();
     if (ttype->is<t_primitive_type>() && tfield->default_value() != nullptr) {
       ofstream dummy;
       result += " = " +
@@ -3952,7 +3952,7 @@ void t_java_deprecated_generator::generate_java_docstring_comment(
 
 void t_java_deprecated_generator::generate_java_doc(
     ofstream& out, const t_field* field) {
-  if (field->get_type()->is<t_enum>()) {
+  if (field->type()->is<t_enum>()) {
     string combined_message =
         field->doc() + "\n@see " + get_enum_class_name(field->get_type());
     generate_java_docstring_comment(out, combined_message);

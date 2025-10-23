@@ -226,13 +226,13 @@ bool is_invariant_container_type(const t_type* type) {
 bool field_has_invariant_type(const t_field* field) {
   if (is_invariant_adapter(
           find_structured_adapter_annotation(*field),
-          field->get_type()->get_true_type())) {
+          field->type()->get_true_type())) {
     return true;
   }
 
   if (is_invariant_adapter(
           find_structured_adapter_annotation(*field->type()->get_true_type()),
-          field->get_type()->get_true_type())) {
+          field->type()->get_true_type())) {
     return true;
   }
 

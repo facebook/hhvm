@@ -1069,7 +1069,7 @@ class py3_mstch_field : public mstch_field {
       return mstch::node();
     }
     if (value->is_empty()) {
-      auto true_type = field_->get_type()->get_true_type();
+      auto true_type = field_->type()->get_true_type();
       if ((true_type->is<t_list>() || true_type->is<t_set>()) &&
           value->kind() != t_const_value::CV_LIST) {
         const_cast<t_const_value*>(value)->convert_empty_map_to_list();
@@ -1107,7 +1107,7 @@ class py3_mstch_field : public mstch_field {
         return ref_type_ = RefType::NotRef;
       }
       case gen::cpp::reference_type::none: {
-        const t_type* resolved_type = field_->get_type()->get_true_type();
+        const t_type* resolved_type = field_->type()->get_true_type();
         if (cpp2::get_type(resolved_type) == "std::unique_ptr<folly::IOBuf>") {
           return ref_type_ = RefType::IOBuf;
         }

@@ -995,7 +995,7 @@ class mstch_java_field : public mstch_field {
     return mstch::node();
   }
   mstch::node is_numeric_or_void() {
-    auto type = field_->get_type()->get_true_type();
+    auto type = field_->type()->get_true_type();
     return type->is_void() || type->is_bool() || type->is_byte() ||
         type->is_i16() || type->is_i32() || type->is_i64() ||
         type->is_double() || type->is_float();
@@ -1005,7 +1005,7 @@ class mstch_java_field : public mstch_field {
     if (field_->qualifier() == t_field_qualifier::optional) {
       return true;
     }
-    const t_type* field_type = field_->get_type()->get_true_type();
+    const t_type* field_type = field_->type()->get_true_type();
     return !(
         field_type->is_bool() || field_type->is_byte() ||
         field_type->is_float() || field_type->is_i16() ||
@@ -1014,27 +1014,27 @@ class mstch_java_field : public mstch_field {
   }
 
   mstch::node is_enum() {
-    const t_type* field_type = field_->get_type()->get_true_type();
+    const t_type* field_type = field_->type()->get_true_type();
     return field_type->is<t_enum>();
   }
 
   mstch::node is_object() {
-    const t_type* field_type = field_->get_type()->get_true_type();
+    const t_type* field_type = field_->type()->get_true_type();
     return field_type->is<t_structured>();
   }
 
   mstch::node is_union() {
-    const t_type* field_type = field_->get_type()->get_true_type();
+    const t_type* field_type = field_->type()->get_true_type();
     return field_type->is<t_union>();
   }
 
   mstch::node is_container() {
-    return field_->get_type()->get_true_type()->is<t_container>();
+    return field_->type()->get_true_type()->is<t_container>();
   }
   mstch::node java_name() { return get_java_swift_name(field_); }
 
   mstch::node type_field_name() {
-    auto type_name = field_->get_type()->get_true_type()->get_full_name();
+    auto type_name = field_->type()->get_true_type()->get_full_name();
     return java::mangle_java_name(type_name, true);
   }
 

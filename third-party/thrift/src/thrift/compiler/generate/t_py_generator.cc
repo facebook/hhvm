@@ -418,7 +418,7 @@ void t_py_generator::generate_json_field(
     const string& suffix_thrift,
     const string& prefix_json,
     bool generate_assignment) {
-  const t_type* type = tfield->get_type()->get_true_type();
+  const t_type* type = tfield->type()->get_true_type();
 
   if (type->is_void()) {
     throw std::runtime_error(
@@ -2875,8 +2875,7 @@ void t_py_generator::generate_service_remote(const t_service* tservice) {
         }
         f_remote << "('" << thrift_type_name((*it_2)->get_type()) << "', '"
                  << (*it_2)->name() << "', '"
-                 << thrift_type_name((*it_2)->get_type()->get_true_type())
-                 << "')";
+                 << thrift_type_name((*it_2)->type()->get_true_type()) << "')";
       }
       f_remote << "]),\n";
     }
@@ -3252,7 +3251,7 @@ void t_py_generator::generate_deserialize_field(
     const string& prefix,
     bool /*inclass*/,
     const string& /* actual_type */) {
-  const t_type* type = tfield->get_type()->get_true_type();
+  const t_type* type = tfield->type()->get_true_type();
 
   if (type->is_void()) {
     throw std::runtime_error(
@@ -3473,7 +3472,7 @@ void t_py_generator::generate_deserialize_list_element(
  */
 void t_py_generator::generate_serialize_field(
     ofstream& out, const t_field* tfield, const string& prefix) {
-  const t_type* type = tfield->get_type()->get_true_type();
+  const t_type* type = tfield->type()->get_true_type();
 
   // Do nothing for void types
   if (type->is_void()) {
@@ -3746,7 +3745,7 @@ string t_py_generator::declare_argument(
  * @param tfield The field
  */
 string t_py_generator::render_field_default_value(const t_field* tfield) {
-  const t_type* type = tfield->get_type()->get_true_type();
+  const t_type* type = tfield->type()->get_true_type();
   if (tfield->default_value() != nullptr) {
     return render_const_value(type, tfield->default_value());
   } else {

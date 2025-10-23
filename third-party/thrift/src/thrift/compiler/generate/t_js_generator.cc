@@ -544,7 +544,7 @@ void t_js_generator::generate_js_struct_definition(
   // members with arguments
   for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
     string dval = declare_field(*m_iter, false, true);
-    const t_type* t = (*m_iter)->get_type()->get_true_type();
+    const t_type* t = (*m_iter)->type()->get_true_type();
     if ((*m_iter)->default_value() != nullptr && !(t->is<t_structured>())) {
       dval =
           render_const_value((*m_iter)->get_type(), (*m_iter)->default_value());
@@ -558,7 +558,7 @@ void t_js_generator::generate_js_struct_definition(
   // Generate constructor from array
   if (members.size() > 0) {
     for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
-      const t_type* t = (*m_iter)->get_type()->get_true_type();
+      const t_type* t = (*m_iter)->type()->get_true_type();
       if ((*m_iter)->default_value() != nullptr && (t->is<t_structured>())) {
         indent(out) << "this." << (*m_iter)->name() << " = "
                     << render_const_value(t, (*m_iter)->default_value()) << ";"
@@ -568,7 +568,7 @@ void t_js_generator::generate_js_struct_definition(
 
     // Early returns for exceptions
     for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
-      const t_type* t = (*m_iter)->get_type()->get_true_type();
+      const t_type* t = (*m_iter)->type()->get_true_type();
       if (t->is<t_exception>()) {
         out << indent() << "if (args instanceof "
             << js_type_namespace(t->program()) << t->name() << ") {" << endl
@@ -1227,7 +1227,7 @@ std::string t_js_generator::render_recv_return(const std::string& var) {
 void t_js_generator::generate_deserialize_field(
     ofstream& out, const t_field* tfield, const string& prefix, bool inclass) {
   (void)inclass;
-  const t_type* type = tfield->get_type()->get_true_type();
+  const t_type* type = tfield->type()->get_true_type();
 
   if (type->is_void()) {
     throw std::runtime_error(
@@ -1440,7 +1440,7 @@ void t_js_generator::generate_deserialize_list_element(
  */
 void t_js_generator::generate_serialize_field(
     ofstream& out, const t_field* tfield, const string& prefix) {
-  const t_type* type = tfield->get_type()->get_true_type();
+  const t_type* type = tfield->type()->get_true_type();
 
   // Do nothing for void types
   if (type->is_void()) {
@@ -1637,7 +1637,7 @@ string t_js_generator::declare_field(
   }
 
   if (init) {
-    const t_type* type = tfield->get_type()->get_true_type();
+    const t_type* type = tfield->type()->get_true_type();
     if (const auto* primitive = type->try_as<t_primitive_type>()) {
       t_primitive_type::type tbase = primitive->primitive_type();
       switch (tbase) {

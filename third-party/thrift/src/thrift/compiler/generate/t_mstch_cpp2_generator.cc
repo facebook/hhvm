@@ -1632,7 +1632,7 @@ class cpp_mstch_struct : public mstch_struct {
     // non-empty structs, and containers
     std::vector<const t_field*> filtered_fields;
     for (const auto* field : get_members_in_layout_order()) {
-      const t_type* type = field->get_type()->get_true_type();
+      const t_type* type = field->type()->get_true_type();
       // Filter out all optional references.
       if (cpp2::is_explicit_ref(field) &&
           field->qualifier() == t_field_qualifier::optional) {
@@ -2130,7 +2130,7 @@ class cpp_mstch_struct : public mstch_struct {
 
   mstch::node is_trivially_destructible() {
     for (const auto& field : struct_->fields()) {
-      const t_type* type = field.get_type()->get_true_type();
+      const t_type* type = field.type()->get_true_type();
       if (cpp2::is_ref(&field) || cpp2::is_custom_type(field) ||
           !is_scalar(*type)) {
         return false;
@@ -2417,7 +2417,7 @@ class cpp_mstch_field : public mstch_field {
                field_->type().deref(), *field_->default_value());
   }
   mstch::node zero_copy_arg() {
-    return zero_copy_arg_impl(*field_->get_type()) ? "true" : "false";
+    return zero_copy_arg_impl(*field_->type()) ? "true" : "false";
   }
   mstch::node has_fatal_annotations() {
     return get_fatal_annotations(field_->unstructured_annotations()).size() > 0;
@@ -3141,7 +3141,7 @@ void forbid_deprecated_terse_writes_ref(
 
 void validate_lazy_fields(sema_context& ctx, const t_field& field) {
   if (cpp2::is_lazy(&field)) {
-    auto t = field.get_type()->get_true_type();
+    auto t = field.type()->get_true_type();
     const char* field_type = nullptr;
     if (t->is_any_int() || t->is_bool() || t->is_byte()) {
       field_type = "Integral field";

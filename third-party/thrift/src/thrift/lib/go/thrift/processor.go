@@ -77,15 +77,6 @@ func setRequestHeadersForError(protocol Protocol, err error) {
 	protocol.setRequestHeader("uexw", err.Error())
 }
 
-func setRequestHeadersForResult(protocol Protocol, result types.WritableStruct) {
-	if rr, ok := result.(types.WritableResult); ok && rr.Exception() != nil {
-		// If we got a structured exception back, write metadata about it into headers
-		terr := rr.Exception()
-		protocol.setRequestHeader("uex", errorType(terr))
-		protocol.setRequestHeader("uexw", terr.Error())
-	}
-}
-
 func sendWritableStruct(prot types.Encoder, name string, messageType types.MessageType, seqID int32, strct WritableStruct) error {
 	if err := prot.WriteMessageBegin(name, messageType, seqID); err != nil {
 		return err
@@ -177,9 +168,11 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 
 	// Step 3a: Write the headers to the protocol.
 	if appException != nil {
+		// ApplicationException (a.k.a. undeclared exception)
 		setRequestHeadersForError(prot, appException)
-	} else {
-		setRequestHeadersForResult(prot, result)
+	} else if wr, ok := result.(types.WritableResult); ok && wr.Exception() != nil {
+		// Declared exception
+		setRequestHeadersForError(prot, wr.Exception())
 	}
 
 	// Step 3b: Write the message using only the Decoder interface on the protocol.

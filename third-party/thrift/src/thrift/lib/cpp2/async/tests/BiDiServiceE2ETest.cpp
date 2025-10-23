@@ -162,6 +162,20 @@ CO_TEST_F(BiDiServiceE2ETest, MethodThrowsDeclaredException) {
       co_await client->co_canThrow(), detail::test::BiDiMethodException);
 }
 
+CO_TEST_F(BiDiServiceE2ETest, MethodThrowsUndeclaredException) {
+  struct Handler : public ServiceHandler<detail::test::TestBiDiService> {
+    folly::coro::Task<StreamTransformation<int64_t, int64_t>> co_canThrow()
+        override {
+      throw std::runtime_error{"Method threw"};
+    }
+  };
+
+  testConfig({std::make_shared<Handler>()});
+  auto client = makeClient<detail::test::TestBiDiService>();
+  EXPECT_THROW(
+      co_await client->co_canThrow(), apache::thrift::TApplicationException);
+}
+
 CO_TEST_F(BiDiServiceE2ETest, SinkThrowsDeclaredException) {
   struct Handler : public ServiceHandler<detail::test::TestBiDiService> {
     folly::coro::Task<StreamTransformation<int64_t, int64_t>> co_canThrow()

@@ -200,12 +200,10 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 			// close connection on write failure
 			return writeErr
 		}
-		// For REPLY, check for declared exceptions via "uex" header for structured exceptions
-		if protocolBuffer, ok := prot.(*protocolBuffer); ok {
-			if uexHeader := protocolBuffer.getRequestHeaders()["uex"]; uexHeader != "" {
-				observer.DeclaredException()
-				observer.AnyExceptionForFunction(name)
-			}
+		// Track declared exceptions
+		if wr, ok := result.(types.WritableResult); ok && wr.Exception() != nil {
+			observer.DeclaredException()
+			observer.AnyExceptionForFunction(name)
 		}
 	}
 	// if we got here, we successfully processed the message

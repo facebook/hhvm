@@ -566,6 +566,7 @@ function find_test_files(string $file): vec<string>{
     'zend_Zend'   => 'hphp/test/zend/good/Zend',
     'zend_tests'  => 'hphp/test/zend/good/tests',
     // Extension tests
+    'crypto_keyset' => 'hphp/facebook/extensions/crypto_keyset/test',
     'cryptonative' => 'hphp/facebook/extensions/cryptonative/test',
     'thrift' => 'hphp/facebook/extensions/thrift/test',
     'flighttracker' => 'hphp/facebook/extensions/flighttracker/test',

@@ -431,7 +431,7 @@ class ast_builder : public parser_actions {
       const source_range& range) {
     t_type_ref result = global_scope_->ref_type(program_, name, range);
 
-    if (auto* node = result.get_unresolved_type()) { // A newly created ph.
+    if (auto* node = result.unresolved_type()) { // A newly created ph.
       set_annotations(node, std::move(annotations));
     } else if (annotations) {
       // TODO: Remove support for annotations on type references.

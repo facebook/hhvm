@@ -221,8 +221,7 @@ class t_type_ref final {
   bool resolved() const noexcept;
   bool resolve();
 
-  // TODO(T231221715) Consistently remove get_ prefix from accessors
-  t_placeholder_typedef* get_unresolved_type() { return unresolved_type_; }
+  t_placeholder_typedef* unresolved_type() { return unresolved_type_; }
 
   source_range src_range() const { return range_; }
 

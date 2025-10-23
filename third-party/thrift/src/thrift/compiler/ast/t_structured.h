@@ -84,6 +84,7 @@ class t_structured : public t_type {
   explicit t_structured(const t_program* program = nullptr) : t_type(program) {}
 
   ////
+  // TODO(T227540797)
   // Everyting below here is for backwards compatiblity, and will be removed.
   ////
  public:

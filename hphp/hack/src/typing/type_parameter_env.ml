@@ -382,3 +382,17 @@ let force_lazy_values (env : t) =
         tparams;
     consistent;
   }
+
+let map_over_tparam_info f (info : tparam_info) =
+  {
+    info with
+    lower_bounds = TySet.map f info.lower_bounds;
+    upper_bounds = TySet.map f info.upper_bounds;
+  }
+
+let map f (env : t) =
+  {
+    env with
+    tparams =
+      SMap.map (fun (p, info) -> (p, map_over_tparam_info f info)) env.tparams;
+  }

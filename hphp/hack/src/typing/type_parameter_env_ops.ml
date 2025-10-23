@@ -180,5 +180,14 @@ let simplify_tpenv env (tparams : ((_ * string) option * locl_ty) list) r =
     | Some (_, name) -> fst (reduce substs name)
   in
   let substs = List.fold tparams ~init:substs ~f:reduce in
+  (* Apply substitution to bounds on type parameters that remain *)
+  let combine_reasons ~src:_ ~dest = dest in
+  let tpenv =
+    TPEnv.map
+      (fun ty ->
+        Typing_defs_core.Locl_subst.apply ty ~subst:substs ~combine_reasons)
+      tpenv
+  in
+  let env = Env.env_with_tpenv env tpenv in
   let env = Env.log_env_change "simplify_tpenv" old_env env in
   (env, substs)

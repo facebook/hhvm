@@ -65,6 +65,8 @@ val get_rank : t -> tparam_name -> int
 
 val is_consistent : t -> bool
 
+val map : (Typing_defs.locl_ty -> Typing_defs.locl_ty) -> t -> t
+
 (** When we detect that the set of constraints on the type parameters cannot be
     satisfied, we can mark the env as inconsistent using this. *)
 val mark_inconsistent : t -> t

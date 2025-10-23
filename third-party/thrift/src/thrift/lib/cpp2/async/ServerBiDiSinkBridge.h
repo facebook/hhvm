@@ -49,7 +49,7 @@ class ServerBiDiSinkBridge
 
   void onSinkError(folly::exception_wrapper ew) override {
     using apache::thrift::detail::EncodedError;
-    auto rex = ew.get_exception<rocket::RocketException>();
+    auto rex = ew.get_mutable_exception<rocket::RocketException>();
     auto payload = rex
         ? folly::Try<StreamPayload>(EncodedError(rex->moveErrorData()))
         : folly::Try<StreamPayload>(std::move(ew));

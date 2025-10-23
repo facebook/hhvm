@@ -195,7 +195,7 @@ void ClientSinkBridge::onFinalResponse(StreamPayload&& payload) {
 
 void ClientSinkBridge::onFinalResponseError(folly::exception_wrapper ew) {
   using apache::thrift::detail::EncodedError;
-  auto rex = ew.get_exception<rocket::RocketException>();
+  auto rex = ew.get_mutable_exception<rocket::RocketException>();
   auto payload = rex && rex->hasErrorData()
       ? folly::Try<StreamPayload>(EncodedError(rex->moveErrorData()))
       : folly::Try<StreamPayload>(std::move(ew));

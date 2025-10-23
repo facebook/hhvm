@@ -37,7 +37,7 @@ PythonUserException& PythonUserException::operator=(
 
 std::unique_ptr<folly::IOBuf> extractBufFromPythonUserException(
     folly::exception_wrapper& ew) {
-  if (auto ex_ptr = ew.get_exception<PythonUserException>()) {
+  if (auto ex_ptr = ew.get_mutable_exception<PythonUserException>()) {
     return std::move(*ex_ptr).extractBuf();
   }
 

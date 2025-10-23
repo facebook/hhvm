@@ -88,10 +88,10 @@ func (r *rocketServerTransport) Listen(ctx context.Context, notifier chan<- bool
 	defer connMasterCtxCancel()
 
 	err := r.acceptLoop(connMasterCtx)
-	if ctx.Err() != nil {
-		return ctx.Err()
+	if err != nil {
+		return err
 	}
-	return err
+	return ctx.Err()
 }
 
 // acceptLoop takes a context that will be decorated with ConnInfo and passed down to new clients.

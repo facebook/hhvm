@@ -41,6 +41,9 @@ type rocketServerTransport struct {
 	observer    ServerObserver
 }
 
+// Compile time interface enforcer
+var _ transport.ServerTransport = (*rocketServerTransport)(nil)
+
 func newRocketServerTransport(
 	listener net.Listener,
 	connContext ConnContextFunc,
@@ -79,7 +82,12 @@ func (r *rocketServerTransport) Listen(ctx context.Context, notifier chan<- bool
 	})
 	defer stopAfter()
 
-	err := r.acceptLoop(ctx)
+	// Master context given to all incoming connections in the accept loop.
+	// Upon cancellation it will drain and close all of those connections.
+	connMasterCtx, connMasterCtxCancel := context.WithCancel(ctx)
+	defer connMasterCtxCancel()
+
+	err := r.acceptLoop(connMasterCtx)
 	if ctx.Err() != nil {
 		return ctx.Err()
 	}
@@ -87,7 +95,7 @@ func (r *rocketServerTransport) Listen(ctx context.Context, notifier chan<- bool
 }
 
 // acceptLoop takes a context that will be decorated with ConnInfo and passed down to new clients.
-func (r *rocketServerTransport) acceptLoop(ctx context.Context) error {
+func (r *rocketServerTransport) acceptLoop(connMasterCtx context.Context) error {
 	for {
 		conn, err := r.listener.Accept()
 		if err != nil {
@@ -109,7 +117,7 @@ func (r *rocketServerTransport) acceptLoop(ctx context.Context) error {
 			// However, in our case, we require the handshake to be complete ahead of any
 			// Read/Write calls - so that we can access ALPN value and choose the transport.
 			if tlsConn, isTLS := conn.(tlsConnectionStaterHandshaker); isTLS {
-				err = tlsConn.HandshakeContext(ctx)
+				err = tlsConn.HandshakeContext(connMasterCtx)
 				if err != nil {
 					r.log("thrift: error performing TLS handshake with %s: %s\n", conn.RemoteAddr(), err)
 					// Notify observer that connection was dropped due to handshake failure
@@ -125,7 +133,7 @@ func (r *rocketServerTransport) acceptLoop(ctx context.Context) error {
 				}
 			}
 
-			ctxConn := r.connContext(ctx, conn)
+			ctxConn := r.connContext(connMasterCtx, conn)
 			r.processRequests(ctxConn, conn)
 		}(conn)
 	}

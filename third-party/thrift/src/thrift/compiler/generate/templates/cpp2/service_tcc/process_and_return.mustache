@@ -429,13 +429,15 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::throw_wrapped_{{function
       apache::thrift::MessageType::T_REPLY,
       "{{> common/function_name}}");
   payload.transform(reqCtx->getHeader()->getWriteTransforms());
-  {{#if (not (or function:sink? function:stream?))}}
-  return req->sendReply(std::move(payload));
-  {{#else if function:stream?}}
+{{#if function:bidirectional_stream?}}
+  req->sendBiDiReply(std::move(payload), apache::thrift::detail::ServerBiDiStreamFactory::makeNoopFactory());
+{{#else if function:stream?}}
   req->sendStreamReply(std::move(payload), apache::thrift::detail::ServerStreamFactory{nullptr});
-  {{#else}}
+{{#else if function:sink?}}
   req->sendSinkReply(std::move(payload), apache::thrift::detail::SinkConsumerImpl{});
-{{/if (not (or function:sink? function:stream?))}}
+{{#else}}
+  return req->sendReply(std::move(payload));
+{{/if function:bidirectional_stream?}}
 {{/function:exceptions?}}
 }
 {{/function:oneway?}}

@@ -148,6 +148,20 @@ CO_TEST_F(BiDiServiceE2ETest, BasicResponseAndStreamTransformation) {
   EXPECT_FALSE(exhausted.has_value());
 }
 
+CO_TEST_F(BiDiServiceE2ETest, MethodThrowsDeclaredException) {
+  struct Handler : public ServiceHandler<detail::test::TestBiDiService> {
+    folly::coro::Task<StreamTransformation<int64_t, int64_t>> co_canThrow()
+        override {
+      throw detail::test::BiDiMethodException{"Method threw"};
+    }
+  };
+
+  testConfig({std::make_shared<Handler>()});
+  auto client = makeClient<detail::test::TestBiDiService>();
+  EXPECT_THROW(
+      co_await client->co_canThrow(), detail::test::BiDiMethodException);
+}
+
 CO_TEST_F(BiDiServiceE2ETest, SinkThrowsDeclaredException) {
   struct Handler : public ServiceHandler<detail::test::TestBiDiService> {
     folly::coro::Task<StreamTransformation<int64_t, int64_t>> co_canThrow()
@@ -275,7 +289,7 @@ CO_TEST_F(BiDiServiceE2ETest, IgnoreInputProduceOutput) {
           [this](folly::coro::AsyncGenerator<int64_t&&>)
               -> folly::coro::AsyncGenerator<int64_t&&> {
             for (int64_t i = 0; i < kTestLimit; ++i) {
-              co_yield std::move(i);
+              co_yield int64_t(i);
             }
           }};
     }

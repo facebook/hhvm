@@ -86,6 +86,8 @@ class ServerBiDiStreamFactory {
     };
   }
 
+  static ServerBiDiStreamFactory makeNoopFactory();
+
   void setContextStack(std::shared_ptr<ContextStack> contextStack);
 
   void setInteraction(TilePtr&& interaction);
@@ -98,6 +100,13 @@ class ServerBiDiStreamFactory {
       folly::EventBase* eventBase) &&;
 
  private:
+  /**
+   * This constructor is only used when the method that initiates the
+   * bidirectional stream throws an exception. Calling start() on an
+   * ServerBiDiStreamFactory constructed in this manner will be a noop.
+   */
+  explicit ServerBiDiStreamFactory();
+
   StartFunction startFunction_;
   std::shared_ptr<ContextStack> contextStack_{nullptr};
   TilePtr interaction_{};

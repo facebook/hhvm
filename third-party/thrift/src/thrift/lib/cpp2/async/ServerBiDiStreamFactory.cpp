@@ -18,6 +18,13 @@
 
 namespace apache::thrift::detail {
 
+ServerBiDiStreamFactory::ServerBiDiStreamFactory() : startFunction_{nullptr} {}
+
+/* static */ ServerBiDiStreamFactory
+ServerBiDiStreamFactory::makeNoopFactory() {
+  return ServerBiDiStreamFactory();
+}
+
 void ServerBiDiStreamFactory::setContextStack(
     std::shared_ptr<ContextStack> contextStack) {
   contextStack_ = std::move(contextStack);
@@ -36,6 +43,14 @@ void ServerBiDiStreamFactory::start(
     FirstResponsePayload&& payload,
     BiDiClientCallback* clientCallback,
     folly::EventBase* eventBase) && {
+  // startFunction_ == nullptr indicates that the ServerBiDiStreamFactory was
+  // created with makeNoopFactory(), i.e the stream should do nothing. This
+  // is done if the method that is supposed to initiate the stream throws
+  // an exception.
+  if (startFunction_ == nullptr) {
+    return;
+  }
+
   startFunction_(
       std::move(contextStack_),
       std::move(interaction_),

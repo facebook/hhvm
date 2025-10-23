@@ -560,7 +560,7 @@ void BiDiServiceAsyncProcessor::throw_wrapped_canThrow(
       apache::thrift::MessageType::T_REPLY,
       "canThrow");
   payload.transform(reqCtx->getHeader()->getWriteTransforms());
-  req->sendStreamReply(std::move(payload), apache::thrift::detail::ServerStreamFactory{nullptr});
+  req->sendBiDiReply(std::move(payload), apache::thrift::detail::ServerBiDiStreamFactory::makeNoopFactory());
 }
 //
 // End of Method 'canThrow'

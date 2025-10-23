@@ -93,18 +93,36 @@ def str_set_init_statement(ctx, flavor: Flavor) -> str:
 
 
 @click.pass_context
-def map_init_statement(ctx, flavor: Flavor) -> str:
+def int_str_map_init_statement(ctx, flavor: Flavor) -> str:
     size = ctx.params["size"]
     if flavor == Flavor.MUTABLE_PYTHON:
         return f"""
 inst = MyStruct(val_map=to_thrift_map({{
-    i: f\"str_{{i}}"
+    i: f"str_{{i}}"
     for i in range({size})
 }}))
 """
     return f"""
 inst = MyStruct(val_map={{
-    i: f\"str_{{i}}"
+    i: f"str_{{i}}"
+    for i in range({size})
+}})
+"""
+
+
+@click.pass_context
+def str_str_map_init_statement(ctx, flavor: Flavor) -> str:
+    size = ctx.params["size"]
+    if flavor == Flavor.MUTABLE_PYTHON:
+        return f"""
+inst = MyStruct(str_map=to_thrift_map({{
+    f"key_{{i}}": f"str_{{i}}"
+    for i in range({size})
+}}))
+"""
+    return f"""
+inst = MyStruct(str_map={{
+    f"key_{{i}}": f"str_{{i}}"
     for i in range({size})
 }})
 """
@@ -212,9 +230,16 @@ def str_set_random_access_statement(ctx, flavor: Flavor) -> str:
 
 
 @click.pass_context
-def map_random_access_statement(ctx, flavor: Flavor) -> str:
+def int_str_map_random_access_statement(ctx, flavor: Flavor) -> str:
     size = ctx.params["size"]
     return f"_ = inst.val_map[{size//2}]"
+
+
+@click.pass_context
+def str_str_map_random_access_statement(ctx, flavor: Flavor) -> str:
+    size = ctx.params["size"]
+    key = f"key_{size//2}"
+    return f"_ = inst.str_map['{key}']"
 
 
 @click.pass_context
@@ -252,9 +277,16 @@ for _ in inst.str_set:
 """
 
 
-def map_iterate_statement(flavor: Flavor) -> str:
+def int_str_map_iterate_statement(flavor: Flavor) -> str:
     return """
 for _, _ in inst.val_map.items():
+    pass
+"""
+
+
+def str_str_map_iterate_statement(flavor: Flavor) -> str:
+    return """
+for _, _ in inst.str_map.items():
     pass
 """
 
@@ -379,13 +411,24 @@ def benchmark_str_set(ctx) -> None:
 
 
 @click.pass_context
-def benchmark_map(ctx) -> None:
+def benchmark_int_str_map(ctx) -> None:
     size = ctx.params["size"]
     benchmark_container(
         f"Map<i32, string> ({size} elements)",
-        map_init_statement,
-        map_random_access_statement,
-        map_iterate_statement,
+        int_str_map_init_statement,
+        int_str_map_random_access_statement,
+        int_str_map_iterate_statement,
+    )
+
+
+@click.pass_context
+def benchmark_str_str_map(ctx) -> None:
+    size = ctx.params["size"]
+    benchmark_container(
+        f"Map<string, string> ({size} elements)",
+        str_str_map_init_statement,
+        str_str_map_random_access_statement,
+        str_str_map_iterate_statement,
     )
 
 
@@ -394,7 +437,7 @@ def benchmark_nested_map(ctx) -> None:
     size = ctx.params["size"]
     inner_size = ctx.params["inner_size"]
     benchmark_container(
-        f"Nested Map ({size} * {inner_size})",
+        f"Map<i32, Struct(list<string>)> ({size} * {inner_size})",
         nested_map_init_statement,
         nested_map_random_access_statement,
         nested_map_iterate_statement,
@@ -422,7 +465,8 @@ def main(size, inner_size, repeat) -> int:
     benchmark_str_list()
     benchmark_int_set()
     benchmark_str_set()
-    benchmark_map()
+    benchmark_int_str_map()
+    benchmark_str_str_map()
     benchmark_nested_map()
     return 0
 

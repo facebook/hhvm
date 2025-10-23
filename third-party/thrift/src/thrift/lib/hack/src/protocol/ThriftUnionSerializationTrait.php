@@ -159,7 +159,7 @@ trait ThriftUnionSerializationTrait implements IThriftStruct {
       "ThriftUnionSerializationTrait is meant to be used only with unions.",
     );
     $num_field_count = 0;
-    $incorrect_field_set = false;
+    $incorrect_field_set = vec[];
     $extended_thrift_union = false;
     $set_field_name = null;
     $object_class_name = static::class;
@@ -232,13 +232,15 @@ trait ThriftUnionSerializationTrait implements IThriftStruct {
       $xfer += $protocol->writeFieldEnd();
       $num_field_count++;
       if ($set_field_name !== $field_name) {
-        $incorrect_field_set = true;
+        $incorrect_field_set[] = $field_name;
       }
     }
     $xfer += $protocol->writeFieldStop();
     $xfer += $protocol->writeStructEnd();
     if (
-      $extended_thrift_union || $incorrect_field_set || $num_field_count > 1
+      $extended_thrift_union ||
+      !C\is_empty($incorrect_field_set) ||
+      $num_field_count > 1
     ) {
       HH\Coeffects\fb\backdoor_from_pure__DO_NOT_USE(
         ()[defaults] ==> {
@@ -251,11 +253,16 @@ trait ThriftUnionSerializationTrait implements IThriftStruct {
             );
           }
 
-          if ($incorrect_field_set) {
+          if (!C\is_empty($incorrect_field_set)) {
             signal_log_in_psp(
               SignalDynamicLoggerDataset::SHARED_DATASET_AVOID,
               SignalDynamicLoggerProject::THRIFT_UNION_INCORRECT_FIELD_SET,
               $object_class_name,
+              Str\format(
+                "Expected: %s, Actual: %s",
+                $set_field_name ?? "(missing field)",
+                Str\join($incorrect_field_set, ','),
+              ),
             );
           }
 

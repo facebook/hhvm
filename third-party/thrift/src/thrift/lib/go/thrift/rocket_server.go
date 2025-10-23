@@ -265,7 +265,7 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 		s.observer.ProcessDelay(processDelay)
 
 		// Track actual handler execution time
-		if err := process(ctx, s.proc, protocol, s.pstats, s.observer); err != nil {
+		if _, err := process(ctx, s.proc, protocol, s.pstats, s.observer); err != nil {
 			// Notify observer that connection was dropped due to unparseable message begin
 			s.observer.ConnDropped()
 			return nil, err
@@ -344,7 +344,7 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 	s.observer.ProcessDelay(processDelay)
 
 	// TODO: support pipelining
-	if err := process(s.ctx, s.proc, protocol, s.pstats, s.observer); err != nil {
+	if _, err := process(s.ctx, s.proc, protocol, s.pstats, s.observer); err != nil {
 		// Notify observer that connection was dropped due to unparseable message begin
 		s.observer.ConnDropped()
 		s.log("rocketServer fireAndForget process error: %v", err)

@@ -220,7 +220,7 @@ func (r *rocketServerTransport) processHeaderRequest(ctx context.Context, protoc
 	// Track each individual header request being processed
 	r.observer.ReceivedHeaderRequest()
 
-	err := process(ctx, processor, protocol, r.pstats, r.observer)
+	_, err := process(ctx, processor, protocol, r.pstats, r.observer)
 	if isEOF(err) {
 		return err
 	}

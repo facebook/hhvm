@@ -95,14 +95,14 @@ func sendWritableStruct(prot types.Encoder, name string, messageType types.Messa
 // 1. Read the message from the protocol.
 // 2. Process the message.
 // 3. Write the message to the protocol.
-func process(ctx context.Context, processor Processor, prot Protocol, processorStats map[string]*stats.TimingSeries, observer ServerObserver) error {
+func process(ctx context.Context, processor Processor, prot Protocol, processorStats map[string]*stats.TimingSeries, observer ServerObserver) (*ApplicationException, error) {
 	// Step 1: Decode message only using Decoder interface and GetResponseHeaders method on the protocol.
 
 	// Step 1a: find the processor function for the message.
 	name, messageType, seqID, readErr := prot.ReadMessageBegin()
 	if readErr != nil {
 		// close connection on read failure
-		return readErr
+		return nil, readErr
 	}
 	var argStruct types.ReadableStruct
 	var appException *types.ApplicationException
@@ -118,17 +118,17 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 		readErr = skipMessage(prot)
 		if readErr != nil {
 			// close connection on read failure
-			return readErr
+			return nil, readErr
 		}
 	} else {
 		argStruct = pfunc.NewReqArgs()
 		if readErr := argStruct.Read(prot); readErr != nil {
 			// close connection on read failure
-			return readErr
+			return nil, readErr
 		}
 		if readErr := prot.ReadMessageEnd(); readErr != nil {
 			// close connection on read failure
-			return readErr
+			return nil, readErr
 		}
 	}
 
@@ -161,7 +161,7 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 	isOneWay := messageType == types.ONEWAY || (appException == nil && result == nil)
 	if isOneWay {
 		// for ONEWAY messages, never send a response and never throw an exception.
-		return nil
+		return nil, nil
 	}
 
 	// Step 3: Write the message using only the Encoder interface and SetRequestHeader method.
@@ -180,7 +180,7 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 		// it's an application generated error, so serialize it to the client
 		if writeErr := sendWritableStruct(prot, name, types.EXCEPTION, seqID, appException); writeErr != nil {
 			// close connection on write failure
-			return writeErr
+			return nil, writeErr
 		}
 		// Track undeclared exception only after successful write
 		observer.UndeclaredException()
@@ -188,7 +188,7 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 	} else {
 		if writeErr := sendWritableStruct(prot, name, types.REPLY, seqID, result); writeErr != nil {
 			// close connection on write failure
-			return writeErr
+			return nil, writeErr
 		}
 		// Track declared exceptions
 		if wr, ok := result.(types.WritableResult); ok && wr.Exception() != nil {
@@ -197,5 +197,5 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 		}
 	}
 	// if we got here, we successfully processed the message
-	return nil
+	return nil, nil
 }

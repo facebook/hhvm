@@ -41,6 +41,7 @@
 #include <folly/functional/Invoke.h>
 #include <thrift/lib/cpp2/FieldRef.h>
 #include <thrift/lib/cpp2/FieldRefTraits.h>
+#include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/TypeClass.h>
 #include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/type/detail/TypeClassFromTypeTag.h>
@@ -157,6 +158,40 @@ enum class optionality {
    */
   terse,
 };
+
+template <class T, class Id>
+constexpr optionality getOptionality() {
+  using FieldRef = op::get_field_ref<T, Id>;
+
+  static_assert(!detail::is_union_field_ref_v<FieldRef>);
+
+  // Optional
+  if (detail::qualifier::is_cpp_ref_field_optional<T, Id>::value) {
+    return optionality::optional;
+  }
+  if (detail::is_optional_or_union_field_ref_v<FieldRef>) {
+    return optionality::optional;
+  }
+
+  // Terse
+  if (detail::qualifier::is_cpp_ref_field_terse<T, Id>::value) {
+    return optionality::terse;
+  }
+
+  if (detail::is_terse_field_ref_v<FieldRef> ||
+      detail::is_terse_intern_boxed_field_ref_v<FieldRef>) {
+    return optionality::terse;
+  }
+
+  // Required
+
+  if (detail::is_required_field_ref_v<FieldRef>) {
+    return optionality::required;
+  }
+
+  // Unqualified
+  return optionality::required_of_writer;
+}
 
 /////////////////////////////
 // SECTION: TYPE CLASS API //
@@ -647,7 +682,9 @@ struct reflected_struct_data_member {
    *
    * @author: Marcelo Juchem <marcelo@fb.com>
    */
-  using optional = std::integral_constant<optionality, Traits::optional>;
+  using optional = std::integral_constant<
+      optionality,
+      getOptionality<typename Traits::owner, typename Traits::tag>()>;
 
   /**
    * A type that works as a getter for the data member.

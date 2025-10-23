@@ -34,7 +34,6 @@ class ReflectionStruct_struct_traits {
     using owner = ::cpp2::ReflectionStruct;
     using name = __fbthrift_strings_reflection::__fbthrift_hash_a003c1938a10c7729197e235918bdad7bc795ec24b19f24c66e4f24374526ad8;
     using tag = ::apache::thrift::ident::fieldA;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldA>;
   };
 

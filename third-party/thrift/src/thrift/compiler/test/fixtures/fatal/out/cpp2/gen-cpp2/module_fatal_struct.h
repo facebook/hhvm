@@ -37,14 +37,12 @@ class structA_struct_traits {
     using owner = ::test_cpp2::cpp_reflection::structA;
     using name = __fbthrift_strings_module::__fbthrift_hash_ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb;
     using tag = ::apache::thrift::ident::a;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::a>;
   };
   struct __fbthrift_member_b {
     using owner = ::test_cpp2::cpp_reflection::structA;
     using name = __fbthrift_strings_module::__fbthrift_hash_3e23e8160039594a33894f6564e1b1348bbd7a0088d42c4acb73eeaed59c009d;
     using tag = ::apache::thrift::ident::b;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::b>;
   };
 
@@ -121,14 +119,12 @@ class structB_struct_traits {
     using owner = ::test_cpp2::cpp_reflection::structB;
     using name = __fbthrift_strings_module::__fbthrift_hash_2e7d2c03a9507ae265ecf5b5356885a53393a2029d241394997265a1a25aefc6;
     using tag = ::apache::thrift::ident::c;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::c>;
   };
   struct __fbthrift_member_d {
     using owner = ::test_cpp2::cpp_reflection::structB;
     using name = __fbthrift_strings_module::__fbthrift_hash_18ac3e7343f016890c510e93f935261169d9e3f565436429830faf0934f4f8e4;
     using tag = ::apache::thrift::ident::d;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::d>;
   };
 
@@ -194,210 +190,180 @@ class structC_struct_traits {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb;
     using tag = ::apache::thrift::ident::a;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::a>;
   };
   struct __fbthrift_member_b {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_3e23e8160039594a33894f6564e1b1348bbd7a0088d42c4acb73eeaed59c009d;
     using tag = ::apache::thrift::ident::b;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::b>;
   };
   struct __fbthrift_member_c {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_2e7d2c03a9507ae265ecf5b5356885a53393a2029d241394997265a1a25aefc6;
     using tag = ::apache::thrift::ident::c;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::c>;
   };
   struct __fbthrift_member_d {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_18ac3e7343f016890c510e93f935261169d9e3f565436429830faf0934f4f8e4;
     using tag = ::apache::thrift::ident::d;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::d>;
   };
   struct __fbthrift_member_e {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea;
     using tag = ::apache::thrift::ident::e;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::e>;
   };
   struct __fbthrift_member_f {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_252f10c83610ebca1a059c0bae8255eba2f95be4d1d7bcfa89d7248a82d9f111;
     using tag = ::apache::thrift::ident::f;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::f>;
   };
   struct __fbthrift_member_g {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_cd0aa9856147b6c5b4ff2b7dfee5da20aa38253099ef1b4a64aced233c9afe29;
     using tag = ::apache::thrift::ident::g;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::g>;
   };
   struct __fbthrift_member_h {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_aaa9402664f1a41f40ebbc52c9993eb66aeb366602958fdfaa283b71e64db123;
     using tag = ::apache::thrift::ident::h;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::h>;
   };
   struct __fbthrift_member_i {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_de7d1b721a1e0632b7cf04edf5032c8ecffa9f9a08492152b926f1a5a7e765d7;
     using tag = ::apache::thrift::ident::i;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::i>;
   };
   struct __fbthrift_member_j {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_189f40034be7a199f1fa9891668ee3ab6049f82d38c68be70f596eab2e1857b7;
     using tag = ::apache::thrift::ident::j;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::j>;
   };
   struct __fbthrift_member_j1 {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_08243666f926aa4e5b884b8ef1fc3b93d19e191a793581530616bd2e032c4761;
     using tag = ::apache::thrift::ident::j1;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::j1>;
   };
   struct __fbthrift_member_j2 {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_a499068b8f456a03adaf1064efe8fb54c8f0fd204468f27e168642eab19d883b;
     using tag = ::apache::thrift::ident::j2;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::j2>;
   };
   struct __fbthrift_member_j3 {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_e73d2c69dab6b3798a4ba95017040d6bb669333591e6d717b349baddddb8b3b3;
     using tag = ::apache::thrift::ident::j3;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::j3>;
   };
   struct __fbthrift_member_k {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_8254c329a92850f6d539dd376f4816ee2764517da5e0235514af433164480d7a;
     using tag = ::apache::thrift::ident::k;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::k>;
   };
   struct __fbthrift_member_k1 {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_6ab9f1eb8f7d3388f4f9d586f66e99fd54080df2c446f0e58668b09c08a16dd0;
     using tag = ::apache::thrift::ident::k1;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::k1>;
   };
   struct __fbthrift_member_k2 {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_015f7e6bc5aeaf483724089e9252cc13b50951a6b69412522765cff4d780306e;
     using tag = ::apache::thrift::ident::k2;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::k2>;
   };
   struct __fbthrift_member_k3 {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_2f5052c9fd15b19a18c584d01363568198613f0c34e84409ef7938709a159ec2;
     using tag = ::apache::thrift::ident::k3;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::k3>;
   };
   struct __fbthrift_member_l {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_acac86c0e609ca906f632b0e2dacccb2b77d22b0621f20ebece1a4835b93f6f0;
     using tag = ::apache::thrift::ident::l;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::l>;
   };
   struct __fbthrift_member_l1 {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_2804bad6fe94a55f18b2b37e300919a5fd517b95aa81e95db574c0ba069a3740;
     using tag = ::apache::thrift::ident::l1;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::l1>;
   };
   struct __fbthrift_member_l2 {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_8a1cee436cbac1489a1883c9d886fcfc46f302c55ed4106ae31729e4f4eb9041;
     using tag = ::apache::thrift::ident::l2;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::l2>;
   };
   struct __fbthrift_member_l3 {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_10dacdccfe877dc064d57442e6fa7a4e3085dc94e11a29819c2290fc3d788724;
     using tag = ::apache::thrift::ident::l3;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::l3>;
   };
   struct __fbthrift_member_m1 {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_ca0df2c95aa144c1d0ff2ff3c8f967fdc1de9ef0c4120b3726416701b519d619;
     using tag = ::apache::thrift::ident::m1;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::m1>;
   };
   struct __fbthrift_member_m2 {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_29c1b289e7522195b362e44f54e05470b69ad20540ab60a18a05e5bf6951f13d;
     using tag = ::apache::thrift::ident::m2;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::m2>;
   };
   struct __fbthrift_member_m3 {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_153812ae5fea0b73a011bf28bd7cea93644437c3fe3260b7b2d7e1e2f9f46bde;
     using tag = ::apache::thrift::ident::m3;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::m3>;
   };
   struct __fbthrift_member_n1 {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_676b8bb84ce7267dd520deca4811c8f10a53e636352f06987f42fe425acedd80;
     using tag = ::apache::thrift::ident::n1;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::n1>;
   };
   struct __fbthrift_member_n2 {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_0480a93d2e9b094b89e08e01976089ac18193af802c66b631cc8d2dc1bae8c88;
     using tag = ::apache::thrift::ident::n2;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::n2>;
   };
   struct __fbthrift_member_n3 {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_8721d664ef60096aa559e1aa6c72caf1facf5ce08b03aa6921ed9af5645d5466;
     using tag = ::apache::thrift::ident::n3;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::n3>;
   };
   struct __fbthrift_member_o1 {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_2352da7280f1decc3acf1ba84eb945c9fc2b7b541094e1d0992dbffd1b6664cc;
     using tag = ::apache::thrift::ident::o1;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::o1>;
   };
   struct __fbthrift_member_o2 {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_9250b9912ee91d6b46e23299459ecd6eb8154451d62558a3a0a708a77926ad04;
     using tag = ::apache::thrift::ident::o2;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::o2>;
   };
   struct __fbthrift_member_o3 {
     using owner = ::test_cpp2::cpp_reflection::structC;
     using name = __fbthrift_strings_module::__fbthrift_hash_de2d91dc0a2580414e9a70f7dfc76af727b69cac0838f2cbe0a88d12642efcbf;
     using tag = ::apache::thrift::ident::o3;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::o3>;
   };
 
@@ -495,42 +461,36 @@ class struct1_struct_traits {
     using owner = ::test_cpp2::cpp_reflection::struct1;
     using name = __fbthrift_strings_module::__fbthrift_hash_a10609471500bbd1ea553c7c52359c10f98a225667900b5959e20513935074e9;
     using tag = ::apache::thrift::ident::field0;
-    static constexpr auto optional = ::apache::thrift::optionality::required;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::field0>;
   };
   struct __fbthrift_member_field1 {
     using owner = ::test_cpp2::cpp_reflection::struct1;
     using name = __fbthrift_strings_module::__fbthrift_hash_c6860db74ab2c01bef741314b0a5f12527840b703a81e93f11d7dbf4775086fa;
     using tag = ::apache::thrift::ident::field1;
-    static constexpr auto optional = ::apache::thrift::optionality::optional;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::field1>;
   };
   struct __fbthrift_member_field2 {
     using owner = ::test_cpp2::cpp_reflection::struct1;
     using name = __fbthrift_strings_module::__fbthrift_hash_859fcbf6d2d71ed300fa058619ed428a255580a9b1467395fcea973bf9ff3cee;
     using tag = ::apache::thrift::ident::field2;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::field2>;
   };
   struct __fbthrift_member_field3 {
     using owner = ::test_cpp2::cpp_reflection::struct1;
     using name = __fbthrift_strings_module::__fbthrift_hash_e14166046acce7f6048512fe844fd5124ecc9c7e51294112502c1fab9a6fcb57;
     using tag = ::apache::thrift::ident::field3;
-    static constexpr auto optional = ::apache::thrift::optionality::required;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::field3>;
   };
   struct __fbthrift_member_field4 {
     using owner = ::test_cpp2::cpp_reflection::struct1;
     using name = __fbthrift_strings_module::__fbthrift_hash_9403917303f1fef761d1fd094c11435b5213c3e94e3ff052a3b19f844542471a;
     using tag = ::apache::thrift::ident::field4;
-    static constexpr auto optional = ::apache::thrift::optionality::optional;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::field4>;
   };
   struct __fbthrift_member_field5 {
     using owner = ::test_cpp2::cpp_reflection::struct1;
     using name = __fbthrift_strings_module::__fbthrift_hash_05fc173fce220658b5bcbb4db4d54a10fa01e55da3cf70b3f67891243db6141d;
     using tag = ::apache::thrift::ident::field5;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::field5>;
   };
 
@@ -581,49 +541,42 @@ class struct2_struct_traits {
     using owner = ::test_cpp2::cpp_reflection::struct2;
     using name = __fbthrift_strings_module::__fbthrift_hash_a003c1938a10c7729197e235918bdad7bc795ec24b19f24c66e4f24374526ad8;
     using tag = ::apache::thrift::ident::fieldA;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldA>;
   };
   struct __fbthrift_member_fieldB {
     using owner = ::test_cpp2::cpp_reflection::struct2;
     using name = __fbthrift_strings_module::__fbthrift_hash_c7e10d053d5c1a0a0743c1dfc0a38c439cd181cc30829f18cc684e286d0baf27;
     using tag = ::apache::thrift::ident::fieldB;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldB>;
   };
   struct __fbthrift_member_fieldC {
     using owner = ::test_cpp2::cpp_reflection::struct2;
     using name = __fbthrift_strings_module::__fbthrift_hash_7a60aa9f6a5416b61206a441ce84695a835326c0edc0c9b86b92b618f29eb9ed;
     using tag = ::apache::thrift::ident::fieldC;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldC>;
   };
   struct __fbthrift_member_fieldD {
     using owner = ::test_cpp2::cpp_reflection::struct2;
     using name = __fbthrift_strings_module::__fbthrift_hash_a73c4974ccb5981437f75c22da908dd553c1389729210c7d554a65e1b0f4045a;
     using tag = ::apache::thrift::ident::fieldD;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldD>;
   };
   struct __fbthrift_member_fieldE {
     using owner = ::test_cpp2::cpp_reflection::struct2;
     using name = __fbthrift_strings_module::__fbthrift_hash_ba2a88de7258832d40bb04e70c8d37d66141754f3561ecfa366dc9496c9a7704;
     using tag = ::apache::thrift::ident::fieldE;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldE>;
   };
   struct __fbthrift_member_fieldF {
     using owner = ::test_cpp2::cpp_reflection::struct2;
     using name = __fbthrift_strings_module::__fbthrift_hash_68f4d40289380c5c6536b552d834e0a1e0df88fddcd39d4a6d7f3a0b1cf22012;
     using tag = ::apache::thrift::ident::fieldF;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldF>;
   };
   struct __fbthrift_member_fieldG {
     using owner = ::test_cpp2::cpp_reflection::struct2;
     using name = __fbthrift_strings_module::__fbthrift_hash_4c4f1be7384da0ab8e9483a59b7018f4671e228da38fa30ee8eabe777bc24cda;
     using tag = ::apache::thrift::ident::fieldG;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldG>;
   };
 
@@ -687,126 +640,108 @@ class struct3_struct_traits {
     using owner = ::test_cpp2::cpp_reflection::struct3;
     using name = __fbthrift_strings_module::__fbthrift_hash_a003c1938a10c7729197e235918bdad7bc795ec24b19f24c66e4f24374526ad8;
     using tag = ::apache::thrift::ident::fieldA;
-    static constexpr auto optional = ::apache::thrift::optionality::terse;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldA>;
   };
   struct __fbthrift_member_fieldB {
     using owner = ::test_cpp2::cpp_reflection::struct3;
     using name = __fbthrift_strings_module::__fbthrift_hash_c7e10d053d5c1a0a0743c1dfc0a38c439cd181cc30829f18cc684e286d0baf27;
     using tag = ::apache::thrift::ident::fieldB;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldB>;
   };
   struct __fbthrift_member_fieldC {
     using owner = ::test_cpp2::cpp_reflection::struct3;
     using name = __fbthrift_strings_module::__fbthrift_hash_7a60aa9f6a5416b61206a441ce84695a835326c0edc0c9b86b92b618f29eb9ed;
     using tag = ::apache::thrift::ident::fieldC;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldC>;
   };
   struct __fbthrift_member_fieldD {
     using owner = ::test_cpp2::cpp_reflection::struct3;
     using name = __fbthrift_strings_module::__fbthrift_hash_a73c4974ccb5981437f75c22da908dd553c1389729210c7d554a65e1b0f4045a;
     using tag = ::apache::thrift::ident::fieldD;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldD>;
   };
   struct __fbthrift_member_fieldE {
     using owner = ::test_cpp2::cpp_reflection::struct3;
     using name = __fbthrift_strings_module::__fbthrift_hash_ba2a88de7258832d40bb04e70c8d37d66141754f3561ecfa366dc9496c9a7704;
     using tag = ::apache::thrift::ident::fieldE;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldE>;
   };
   struct __fbthrift_member_fieldF {
     using owner = ::test_cpp2::cpp_reflection::struct3;
     using name = __fbthrift_strings_module::__fbthrift_hash_68f4d40289380c5c6536b552d834e0a1e0df88fddcd39d4a6d7f3a0b1cf22012;
     using tag = ::apache::thrift::ident::fieldF;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldF>;
   };
   struct __fbthrift_member_fieldG {
     using owner = ::test_cpp2::cpp_reflection::struct3;
     using name = __fbthrift_strings_module::__fbthrift_hash_4c4f1be7384da0ab8e9483a59b7018f4671e228da38fa30ee8eabe777bc24cda;
     using tag = ::apache::thrift::ident::fieldG;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldG>;
   };
   struct __fbthrift_member_fieldH {
     using owner = ::test_cpp2::cpp_reflection::struct3;
     using name = __fbthrift_strings_module::__fbthrift_hash_8841d05aac4c5bad0b39a0f488a8cb61c0d273515073afde4b80ba3b758e687c;
     using tag = ::apache::thrift::ident::fieldH;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldH>;
   };
   struct __fbthrift_member_fieldI {
     using owner = ::test_cpp2::cpp_reflection::struct3;
     using name = __fbthrift_strings_module::__fbthrift_hash_0c7d02e77b69e64478888bde6c36431c34c69317e783b302b7b09b6c32e55f6f;
     using tag = ::apache::thrift::ident::fieldI;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldI>;
   };
   struct __fbthrift_member_fieldJ {
     using owner = ::test_cpp2::cpp_reflection::struct3;
     using name = __fbthrift_strings_module::__fbthrift_hash_c79397b882513814c71f6918e4f63978c6f2f98c46fe9be1428f35d0dd8e6260;
     using tag = ::apache::thrift::ident::fieldJ;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldJ>;
   };
   struct __fbthrift_member_fieldK {
     using owner = ::test_cpp2::cpp_reflection::struct3;
     using name = __fbthrift_strings_module::__fbthrift_hash_63d2f586a734f5278e0744cfc648e9f7c35e3d26b0d5b6489478844d5eedffdd;
     using tag = ::apache::thrift::ident::fieldK;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldK>;
   };
   struct __fbthrift_member_fieldL {
     using owner = ::test_cpp2::cpp_reflection::struct3;
     using name = __fbthrift_strings_module::__fbthrift_hash_9982619222fccd8fa42f33f444d9218ca275a8d38f15ec00f4fc30b3a1aa3875;
     using tag = ::apache::thrift::ident::fieldL;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldL>;
   };
   struct __fbthrift_member_fieldM {
     using owner = ::test_cpp2::cpp_reflection::struct3;
     using name = __fbthrift_strings_module::__fbthrift_hash_ba17c9f00788cd9472d21de4fa490d6c91123ad11eb2afbf159648a6843947d5;
     using tag = ::apache::thrift::ident::fieldM;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldM>;
   };
   struct __fbthrift_member_fieldN {
     using owner = ::test_cpp2::cpp_reflection::struct3;
     using name = __fbthrift_strings_module::__fbthrift_hash_0863b4211874566cc69f5bc086858904a886f7fb53ca14065f36a1316318a746;
     using tag = ::apache::thrift::ident::fieldN;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldN>;
   };
   struct __fbthrift_member_fieldO {
     using owner = ::test_cpp2::cpp_reflection::struct3;
     using name = __fbthrift_strings_module::__fbthrift_hash_d78156e5127942886c65b291d2afe7152eca4710213c1cd05a5d78d6213a5842;
     using tag = ::apache::thrift::ident::fieldO;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldO>;
   };
   struct __fbthrift_member_fieldP {
     using owner = ::test_cpp2::cpp_reflection::struct3;
     using name = __fbthrift_strings_module::__fbthrift_hash_22ec6192f6a8118a3b6c9676d657ca661c7526233aeb9d65fbb13471eba460b3;
     using tag = ::apache::thrift::ident::fieldP;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldP>;
   };
   struct __fbthrift_member_fieldQ {
     using owner = ::test_cpp2::cpp_reflection::struct3;
     using name = __fbthrift_strings_module::__fbthrift_hash_99f9d962c593c34662e80187d7259f83331f619f278917a347d2921b3be29fbe;
     using tag = ::apache::thrift::ident::fieldQ;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldQ>;
   };
   struct __fbthrift_member_fieldR {
     using owner = ::test_cpp2::cpp_reflection::struct3;
     using name = __fbthrift_strings_module::__fbthrift_hash_a194aa34e029b01f10fff28e6f405720b31fb3bd8b82458b4c712a040112ecff;
     using tag = ::apache::thrift::ident::fieldR;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fieldR>;
   };
 
@@ -878,28 +813,24 @@ class struct4_struct_traits {
     using owner = ::test_cpp2::cpp_reflection::struct4;
     using name = __fbthrift_strings_module::__fbthrift_hash_a10609471500bbd1ea553c7c52359c10f98a225667900b5959e20513935074e9;
     using tag = ::apache::thrift::ident::field0;
-    static constexpr auto optional = ::apache::thrift::optionality::required;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::field0>;
   };
   struct __fbthrift_member_field1 {
     using owner = ::test_cpp2::cpp_reflection::struct4;
     using name = __fbthrift_strings_module::__fbthrift_hash_c6860db74ab2c01bef741314b0a5f12527840b703a81e93f11d7dbf4775086fa;
     using tag = ::apache::thrift::ident::field1;
-    static constexpr auto optional = ::apache::thrift::optionality::optional;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::field1>;
   };
   struct __fbthrift_member_field2 {
     using owner = ::test_cpp2::cpp_reflection::struct4;
     using name = __fbthrift_strings_module::__fbthrift_hash_859fcbf6d2d71ed300fa058619ed428a255580a9b1467395fcea973bf9ff3cee;
     using tag = ::apache::thrift::ident::field2;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::field2>;
   };
   struct __fbthrift_member_field3 {
     using owner = ::test_cpp2::cpp_reflection::struct4;
     using name = __fbthrift_strings_module::__fbthrift_hash_e14166046acce7f6048512fe844fd5124ecc9c7e51294112502c1fab9a6fcb57;
     using tag = ::apache::thrift::ident::field3;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::field3>;
   };
 
@@ -961,35 +892,30 @@ class struct5_struct_traits {
     using owner = ::test_cpp2::cpp_reflection::struct5;
     using name = __fbthrift_strings_module::__fbthrift_hash_a10609471500bbd1ea553c7c52359c10f98a225667900b5959e20513935074e9;
     using tag = ::apache::thrift::ident::field0;
-    static constexpr auto optional = ::apache::thrift::optionality::required;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::field0>;
   };
   struct __fbthrift_member_field1 {
     using owner = ::test_cpp2::cpp_reflection::struct5;
     using name = __fbthrift_strings_module::__fbthrift_hash_c6860db74ab2c01bef741314b0a5f12527840b703a81e93f11d7dbf4775086fa;
     using tag = ::apache::thrift::ident::field1;
-    static constexpr auto optional = ::apache::thrift::optionality::optional;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::field1>;
   };
   struct __fbthrift_member_field2 {
     using owner = ::test_cpp2::cpp_reflection::struct5;
     using name = __fbthrift_strings_module::__fbthrift_hash_859fcbf6d2d71ed300fa058619ed428a255580a9b1467395fcea973bf9ff3cee;
     using tag = ::apache::thrift::ident::field2;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::field2>;
   };
   struct __fbthrift_member_field3 {
     using owner = ::test_cpp2::cpp_reflection::struct5;
     using name = __fbthrift_strings_module::__fbthrift_hash_e14166046acce7f6048512fe844fd5124ecc9c7e51294112502c1fab9a6fcb57;
     using tag = ::apache::thrift::ident::field3;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::field3>;
   };
   struct __fbthrift_member_field4 {
     using owner = ::test_cpp2::cpp_reflection::struct5;
     using name = __fbthrift_strings_module::__fbthrift_hash_9403917303f1fef761d1fd094c11435b5213c3e94e3ff052a3b19f844542471a;
     using tag = ::apache::thrift::ident::field4;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::field4>;
   };
 
@@ -1032,7 +958,6 @@ class struct_binary_struct_traits {
     using owner = ::test_cpp2::cpp_reflection::struct_binary;
     using name = __fbthrift_strings_module::__fbthrift_hash_d9065d6da185ec28758619fc14b755f740043e1060d342aacef26f459fae8d9d;
     using tag = ::apache::thrift::ident::bi;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::bi>;
   };
 
@@ -1069,21 +994,18 @@ class dep_A_struct_struct_traits {
     using owner = ::test_cpp2::cpp_reflection::dep_A_struct;
     using name = __fbthrift_strings_module::__fbthrift_hash_3e23e8160039594a33894f6564e1b1348bbd7a0088d42c4acb73eeaed59c009d;
     using tag = ::apache::thrift::ident::b;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::b>;
   };
   struct __fbthrift_member_c {
     using owner = ::test_cpp2::cpp_reflection::dep_A_struct;
     using name = __fbthrift_strings_module::__fbthrift_hash_2e7d2c03a9507ae265ecf5b5356885a53393a2029d241394997265a1a25aefc6;
     using tag = ::apache::thrift::ident::c;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::c>;
   };
   struct __fbthrift_member_i_a {
     using owner = ::test_cpp2::cpp_reflection::dep_A_struct;
     using name = __fbthrift_strings_module::__fbthrift_hash_9bc94ffbc36014c622262b48d5fb80c41a47088628855413d6c61dca06bd17ff;
     using tag = ::apache::thrift::ident::i_a;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::i_a>;
   };
 
@@ -1124,21 +1046,18 @@ class dep_B_struct_struct_traits {
     using owner = ::test_cpp2::cpp_reflection::dep_B_struct;
     using name = __fbthrift_strings_module::__fbthrift_hash_3e23e8160039594a33894f6564e1b1348bbd7a0088d42c4acb73eeaed59c009d;
     using tag = ::apache::thrift::ident::b;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::b>;
   };
   struct __fbthrift_member_c {
     using owner = ::test_cpp2::cpp_reflection::dep_B_struct;
     using name = __fbthrift_strings_module::__fbthrift_hash_2e7d2c03a9507ae265ecf5b5356885a53393a2029d241394997265a1a25aefc6;
     using tag = ::apache::thrift::ident::c;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::c>;
   };
   struct __fbthrift_member_i_a {
     using owner = ::test_cpp2::cpp_reflection::dep_B_struct;
     using name = __fbthrift_strings_module::__fbthrift_hash_9bc94ffbc36014c622262b48d5fb80c41a47088628855413d6c61dca06bd17ff;
     using tag = ::apache::thrift::ident::i_a;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::i_a>;
   };
 
@@ -1261,7 +1180,6 @@ class annotated_struct_traits {
     using owner = ::test_cpp2::cpp_reflection::annotated;
     using name = __fbthrift_strings_module::__fbthrift_hash_ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb;
     using tag = ::apache::thrift::ident::a;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::a>;
   };
 
@@ -1323,196 +1241,168 @@ class struct_with_special_names_struct_traits {
     using owner = ::test_cpp2::cpp_reflection::struct_with_special_names;
     using name = __fbthrift_strings_module::__fbthrift_hash_2998b3232d29e8dc5a78d97a32ce83f556f3ed31b057077503df05641dd79158;
     using tag = ::apache::thrift::ident::get;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::get>;
   };
   struct __fbthrift_member_getter {
     using owner = ::test_cpp2::cpp_reflection::struct_with_special_names;
     using name = __fbthrift_strings_module::__fbthrift_hash_d665a09c95ebbc703485c7ba5384857536ca16f6c11fdd054e61c7dd81780731;
     using tag = ::apache::thrift::ident::getter;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::getter>;
   };
   struct __fbthrift_member_lists {
     using owner = ::test_cpp2::cpp_reflection::struct_with_special_names;
     using name = __fbthrift_strings_module::__fbthrift_hash_4c14c4a453f98de4bd1c972fea7850adb52822c5823e5da287085165afcf2020;
     using tag = ::apache::thrift::ident::lists;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::lists>;
   };
   struct __fbthrift_member_maps {
     using owner = ::test_cpp2::cpp_reflection::struct_with_special_names;
     using name = __fbthrift_strings_module::__fbthrift_hash_325392e8dd2826a53a9a35b7a7f8d71683cd27ebc2c73fee85dab673bc909b67;
     using tag = ::apache::thrift::ident::maps;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::maps>;
   };
   struct __fbthrift_member_name {
     using owner = ::test_cpp2::cpp_reflection::struct_with_special_names;
     using name = __fbthrift_strings_module::__fbthrift_hash_82a3537ff0dbce7eec35d69edc3a189ee6f17d82f353a553f9aa96cb0be3ce89;
     using tag = ::apache::thrift::ident::name;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::name>;
   };
   struct __fbthrift_member_name_to_value {
     using owner = ::test_cpp2::cpp_reflection::struct_with_special_names;
     using name = __fbthrift_strings_module::__fbthrift_hash_f1fe8005943a7730e9a95f7262952d9717a6f43a21d1b55daeb44de82fe4aac6;
     using tag = ::apache::thrift::ident::name_to_value;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::name_to_value>;
   };
   struct __fbthrift_member_names {
     using owner = ::test_cpp2::cpp_reflection::struct_with_special_names;
     using name = __fbthrift_strings_module::__fbthrift_hash_aeb24056810d3d1f1e8afee61a0bc0028556eb0fb49a215ae5eb1b970cad0315;
     using tag = ::apache::thrift::ident::names;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::names>;
   };
   struct __fbthrift_member_prefix_tree {
     using owner = ::test_cpp2::cpp_reflection::struct_with_special_names;
     using name = __fbthrift_strings_module::__fbthrift_hash_73e6f38f012472999e156878234ad5221469eb764ff0d39af613e045fdfe8c1e;
     using tag = ::apache::thrift::ident::prefix_tree;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::prefix_tree>;
   };
   struct __fbthrift_member_sets {
     using owner = ::test_cpp2::cpp_reflection::struct_with_special_names;
     using name = __fbthrift_strings_module::__fbthrift_hash_82c6db3dbf4ab47132dfd1d9d1bf8525edccb48512c8647b7a2067e0417537c0;
     using tag = ::apache::thrift::ident::sets;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::sets>;
   };
   struct __fbthrift_member_setter {
     using owner = ::test_cpp2::cpp_reflection::struct_with_special_names;
     using name = __fbthrift_strings_module::__fbthrift_hash_bab6f4cdfe399488eecf37176422c2f336b814c3b5f3d174987098ebb289f1fc;
     using tag = ::apache::thrift::ident::setter;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::setter>;
   };
   struct __fbthrift_member_str {
     using owner = ::test_cpp2::cpp_reflection::struct_with_special_names;
     using name = __fbthrift_strings_module::__fbthrift_hash_8c25cb3686462e9a86d2883c5688a22fe738b0bbc85f458d2d2b5f3f667c6d5a;
     using tag = ::apache::thrift::ident::str;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::str>;
   };
   struct __fbthrift_member_strings {
     using owner = ::test_cpp2::cpp_reflection::struct_with_special_names;
     using name = __fbthrift_strings_module::__fbthrift_hash_e967d16dae74a49b5e0e051225c5dac0d76e5e38f13dd1628028cbce108c25b6;
     using tag = ::apache::thrift::ident::strings;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::strings>;
   };
   struct __fbthrift_member_type {
     using owner = ::test_cpp2::cpp_reflection::struct_with_special_names;
     using name = __fbthrift_strings_module::__fbthrift_hash_1303c06b0b014d0ce7b988ab173a13f31227d417058ff4bbe6f8c222b4ad913c;
     using tag = ::apache::thrift::ident::type;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::type>;
   };
   struct __fbthrift_member_value {
     using owner = ::test_cpp2::cpp_reflection::struct_with_special_names;
     using name = __fbthrift_strings_module::__fbthrift_hash_cd42404d52ad55ccfa9aca4adc828aa5800ad9d385a0671fbcbf724118320619;
     using tag = ::apache::thrift::ident::value;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::value>;
   };
   struct __fbthrift_member_value_to_name {
     using owner = ::test_cpp2::cpp_reflection::struct_with_special_names;
     using name = __fbthrift_strings_module::__fbthrift_hash_144043bd95cdcc1f080ed3a117286f0b33b4738179cbcd0384c6ba14f086965e;
     using tag = ::apache::thrift::ident::value_to_name;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::value_to_name>;
   };
   struct __fbthrift_member_values {
     using owner = ::test_cpp2::cpp_reflection::struct_with_special_names;
     using name = __fbthrift_strings_module::__fbthrift_hash_89445ea08b55421faa49919a5fd272e9a520f701b479d6084847e161ca5b7711;
     using tag = ::apache::thrift::ident::values;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::values>;
   };
   struct __fbthrift_member_id {
     using owner = ::test_cpp2::cpp_reflection::struct_with_special_names;
     using name = __fbthrift_strings_module::__fbthrift_hash_a56145270ce6b3bebd1dd012b73948677dd618d496488bc608a3cb43ce3547dd;
     using tag = ::apache::thrift::ident::id;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::id>;
   };
   struct __fbthrift_member_ids {
     using owner = ::test_cpp2::cpp_reflection::struct_with_special_names;
     using name = __fbthrift_strings_module::__fbthrift_hash_23466067f626bf8a3ae1a39cdf81f31303220b331b5064c6e00662dcc34deaaf;
     using tag = ::apache::thrift::ident::ids;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::ids>;
   };
   struct __fbthrift_member_descriptor {
     using owner = ::test_cpp2::cpp_reflection::struct_with_special_names;
     using name = __fbthrift_strings_module::__fbthrift_hash_194b520dc30384b3fc233e123778835e2adc362d91c6e33015ed3db2379d7ea1;
     using tag = ::apache::thrift::ident::descriptor;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::descriptor>;
   };
   struct __fbthrift_member_descriptors {
     using owner = ::test_cpp2::cpp_reflection::struct_with_special_names;
     using name = __fbthrift_strings_module::__fbthrift_hash_12b2fdc0a0ffd6ce4b7d74d080cd8dcb1c60b6e8f365fb46ac511c46cc31f1c1;
     using tag = ::apache::thrift::ident::descriptors;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::descriptors>;
   };
   struct __fbthrift_member_key {
     using owner = ::test_cpp2::cpp_reflection::struct_with_special_names;
     using name = __fbthrift_strings_module::__fbthrift_hash_2c70e12b7a0646f92279f427c7b38e7334d8e5389cff167a1dc30e73f826b683;
     using tag = ::apache::thrift::ident::key;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::key>;
   };
   struct __fbthrift_member_keys {
     using owner = ::test_cpp2::cpp_reflection::struct_with_special_names;
     using name = __fbthrift_strings_module::__fbthrift_hash_48a53f0774c8ceff574a1fdcb0d470dbd382b3db273cff4344b6d39d5379c923;
     using tag = ::apache::thrift::ident::keys;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::keys>;
   };
   struct __fbthrift_member_annotation {
     using owner = ::test_cpp2::cpp_reflection::struct_with_special_names;
     using name = __fbthrift_strings_module::__fbthrift_hash_82264186375a8f31cd4bf73c2862777622f7616b039abfb62fb7c7eea19f9d07;
     using tag = ::apache::thrift::ident::annotation;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::annotation>;
   };
   struct __fbthrift_member_annotations {
     using owner = ::test_cpp2::cpp_reflection::struct_with_special_names;
     using name = __fbthrift_strings_module::__fbthrift_hash_295df243c6a33994c30b6e16aea7ce6155a24b44514ec956d7a09ae0a4cb0411;
     using tag = ::apache::thrift::ident::annotations;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::annotations>;
   };
   struct __fbthrift_member_member {
     using owner = ::test_cpp2::cpp_reflection::struct_with_special_names;
     using name = __fbthrift_strings_module::__fbthrift_hash_e31ab643c44f7a0ec824b59d1194d60dac334200d845e61d2d289daa0f087ea4;
     using tag = ::apache::thrift::ident::member;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::member>;
   };
   struct __fbthrift_member_members {
     using owner = ::test_cpp2::cpp_reflection::struct_with_special_names;
     using name = __fbthrift_strings_module::__fbthrift_hash_17373ca1c7634a4be4a13861a891abd975ec916caab8f3dcf5142fa4997d0b96;
     using tag = ::apache::thrift::ident::members;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::members>;
   };
   struct __fbthrift_member_field {
     using owner = ::test_cpp2::cpp_reflection::struct_with_special_names;
     using name = __fbthrift_strings_module::__fbthrift_hash_c0d2856b74d0df05b9d4456b177950351bd88e98b77f12574dfb7a911acee0d0;
     using tag = ::apache::thrift::ident::field;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::field>;
   };
   struct __fbthrift_member_fields {
     using owner = ::test_cpp2::cpp_reflection::struct_with_special_names;
     using name = __fbthrift_strings_module::__fbthrift_hash_bfe5d697162d90298c67c1933908741be8395838aa230408e04710909c576806;
     using tag = ::apache::thrift::ident::fields;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::fields>;
   };
 
@@ -1601,7 +1491,6 @@ class StructWithFieldAdapter_struct_traits {
     using owner = ::test_cpp2::cpp_reflection::StructWithFieldAdapter;
     using name = __fbthrift_strings_module::__fbthrift_hash_c0d2856b74d0df05b9d4456b177950351bd88e98b77f12574dfb7a911acee0d0;
     using tag = ::apache::thrift::ident::field;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
     using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::field>;
   };
 

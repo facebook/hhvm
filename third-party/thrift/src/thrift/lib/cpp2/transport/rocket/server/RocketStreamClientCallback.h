@@ -16,24 +16,22 @@
 
 #pragma once
 
-#include <folly/ExceptionWrapper.h>
 #include <folly/io/async/HHWheelTimer.h>
 
+#include <folly/io/async/AsyncSocket.h>
 #include <thrift/lib/cpp/ContextStack.h>
+#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/server/metrics/StreamMetricCallback.h>
-#include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
+#include <thrift/lib/cpp2/transport/rocket/Types.h>
+#include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
 #include <thrift/lib/cpp2/transport/rocket/server/IRocketServerConnection.h>
 
-namespace folly {
-class EventBase;
-} // namespace folly
-
-namespace apache::thrift {
-class ContextStack;
-} // namespace apache::thrift
+THRIFT_FLAG_DECLARE(rocket_server_disable_send_callback, bool);
 
 namespace apache::thrift::rocket {
+
+class RocketServerConnection;
 
 class RocketStreamClientCallback final : public StreamClientCallback {
  public:
@@ -91,6 +89,76 @@ class RocketStreamClientCallback final : public StreamClientCallback {
     return reinterpret_cast<StreamServerCallback*>(serverCallbackOrCancelled_);
   }
 
+  class StreamMessageSentCallback
+      : public apache::thrift::MessageChannel::SendCallback {
+   public:
+    explicit StreamMessageSentCallback(
+        std::shared_ptr<ContextStack> contextStack)
+        : contextStack_(std::move(contextStack)), endReason_(std::nullopt) {}
+
+    explicit StreamMessageSentCallback(
+        std::shared_ptr<ContextStack> contextStack,
+        std::optional<apache::thrift::details::STREAM_ENDING_TYPES>&& endReason)
+        : contextStack_(std::move(contextStack)),
+          endReason_(std::move(endReason)) {}
+
+    void sendQueued() noexcept override {}
+
+    void messageSent() noexcept override {
+      invokeCallbacks();
+      delete this;
+    }
+
+    void messageSendError(folly::exception_wrapper&&) noexcept override {
+      invokeCallbacks();
+      delete this;
+    }
+
+   private:
+    void invokeCallbacks() {
+      if (contextStack_) {
+        if (endReason_) {
+          contextStack_->onStreamFinally(*endReason_);
+        } else {
+          contextStack_->onStreamNextSent();
+        }
+      }
+    }
+    std::shared_ptr<ContextStack> contextStack_;
+    std::optional<details::STREAM_ENDING_TYPES> endReason_;
+  };
+
+  using SendCallbackPtr = apache::thrift::MessageChannel::SendCallbackPtr;
+  SendCallbackPtr makeSendCallback(
+      std::optional<details::STREAM_ENDING_TYPES> endReason) {
+    if (contextStack_ && !THRIFT_FLAG(rocket_server_disable_send_callback)) {
+      return SendCallbackPtr(
+          new StreamMessageSentCallback(contextStack_, std::move(endReason)));
+    }
+    return nullptr;
+  }
+
+  template <typename Payload>
+  void sendPayload(
+      Payload&& payload,
+      bool next,
+      bool complete,
+      apache::thrift::MessageChannel::SendCallbackPtr sendCallback);
+
+  void sendStreamPayload(StreamPayload&& payload);
+
+  template <typename Payload>
+  void sendErrorPayload(Payload&& payload);
+
+  void sendCompletePayload();
+
+  template <typename ErrorData>
+  void sendError(ErrorCode errorCode, ErrorData errorData);
+
+  inline void sendError(RocketException&& rex);
+
+  void applyCompressionConfigIfNeeded(StreamPayload& payload);
+
   const StreamId streamId_;
   IRocketServerConnection& connection_;
   static constexpr intptr_t kCancelledFlag = 1;
@@ -106,5 +174,46 @@ class RocketStreamClientCallback final : public StreamClientCallback {
   void scheduleTimeout();
   void cancelTimeout();
 };
+
+template <typename Payload>
+void RocketStreamClientCallback::sendPayload(
+    Payload&& payload,
+    bool next,
+    bool complete,
+    apache::thrift::MessageChannel::SendCallbackPtr sendCallback) {
+  auto serializer = connection_.getPayloadSerializer();
+  auto rocketPayload = serializer->pack(
+      std::forward<Payload>(payload),
+      connection_.isDecodingMetadataUsingBinaryProtocol(),
+      connection_.getRawSocket());
+
+  connection_.sendPayload(
+      streamId_,
+      std::move(rocketPayload),
+      Flags().next(next).complete(complete),
+      std::move(sendCallback));
+}
+
+template <typename ErrorData>
+void RocketStreamClientCallback::sendError(
+    ErrorCode errorCode, ErrorData errorData) {
+  sendError(RocketException(errorCode, std::move(errorData)));
+}
+
+void RocketStreamClientCallback::sendError(RocketException&& rex) {
+  connection_.sendError(
+      streamId_,
+      std::move(rex),
+      makeSendCallback(details::STREAM_ENDING_TYPES::ERROR));
+}
+
+template <typename Payload>
+void RocketStreamClientCallback::sendErrorPayload(Payload&& payload) {
+  sendPayload(
+      std::forward<Payload>(payload),
+      true /* next */,
+      true /* complete */,
+      makeSendCallback(details::STREAM_ENDING_TYPES::ERROR));
+}
 
 } // namespace apache::thrift::rocket

@@ -16,58 +16,9 @@
 
 #include <thrift/lib/cpp2/transport/rocket/server/RocketStreamClientCallback.h>
 
-#include <memory>
-#include <utility>
-
-#include <glog/logging.h>
-
-#include <folly/ExceptionWrapper.h>
-#include <folly/Range.h>
-#include <folly/ScopeGuard.h>
-#include <folly/io/IOBufQueue.h>
-#include <folly/io/async/AsyncSocket.h>
-#include <folly/io/async/EventBase.h>
-
-#include <thrift/lib/cpp/ContextStack.h>
-#include <thrift/lib/cpp2/Flags.h>
-#include <thrift/lib/cpp2/async/StreamCallbacks.h>
-#include <thrift/lib/cpp2/protocol/Serializer.h>
-#include <thrift/lib/cpp2/transport/rocket/RocketException.h>
-#include <thrift/lib/cpp2/transport/rocket/Types.h>
-#include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
-#include <thrift/lib/cpp2/transport/rocket/framing/ErrorCode.h>
-#include <thrift/lib/cpp2/transport/rocket/framing/Flags.h>
-
 THRIFT_FLAG_DEFINE_bool(rocket_server_disable_send_callback, false);
 
 namespace apache::thrift::rocket {
-namespace {
-class StreamNextSentCallback
-    : public apache::thrift::MessageChannel::SendCallback {
- public:
-  explicit StreamNextSentCallback(std::shared_ptr<ContextStack> contextStack)
-      : contextStack_(std::move(contextStack)) {}
-
-  void sendQueued() noexcept override {}
-
-  void messageSent() noexcept override {
-    if (contextStack_) {
-      contextStack_->onStreamNextSent();
-    }
-    delete this;
-  }
-
-  void messageSendError(folly::exception_wrapper&&) noexcept override {
-    if (contextStack_) {
-      contextStack_->onStreamNextSent();
-    }
-    delete this;
-  }
-
- private:
-  std::shared_ptr<ContextStack> contextStack_;
-};
-} // namespace
 
 class TimeoutCallback : public folly::HHWheelTimer::Callback {
  public:
@@ -97,7 +48,7 @@ bool RocketStreamClientCallback::onFirstResponse(
     streamMetricCallback_.onStreamCancel(rpcMethodName_);
     serverCallback->onStreamCancel();
     firstResponse.payload.reset();
-    connection_.freeStream(streamId_, true);
+    connection_.freeStream(streamId_, true /* complete */);
     return false;
   }
 
@@ -118,13 +69,11 @@ bool RocketStreamClientCallback::onFirstResponse(
 
   firstResponse.metadata.streamId() = static_cast<uint32_t>(streamId_);
 
-  connection_.sendPayload(
-      streamId_,
-      connection_.getPayloadSerializer()->pack(
-          std::move(firstResponse),
-          connection_.isDecodingMetadataUsingBinaryProtocol(),
-          connection_.getRawSocket()),
-      Flags().next(true));
+  sendPayload(
+      std::move(firstResponse),
+      /* next */ true,
+      /* complete */ false,
+      /* sendCallback */ nullptr);
 
   if (tokens) {
     return request(tokens);
@@ -135,25 +84,23 @@ bool RocketStreamClientCallback::onFirstResponse(
 void RocketStreamClientCallback::onFirstResponseError(
     folly::exception_wrapper ew) {
   streamMetricCallback_.onFirstResponseError(rpcMethodName_);
-  bool isEncodedError = ew.with_exception<RocketException>([&](auto& ex) {
-    connection_.sendError(streamId_, std::move(ex));
-  }) ||
-      ew.with_exception<thrift::detail::EncodedFirstResponseError>(
-          [&](auto& encodedError) {
-            DCHECK(encodedError.encoded.payload);
-            connection_.sendPayload(
-                streamId_,
-                connection_.getPayloadSerializer()->pack(
-                    std::move(encodedError.encoded),
-                    connection_.isDecodingMetadataUsingBinaryProtocol(),
-                    connection_.getRawSocket()),
-                Flags().next(true).complete(true));
-          });
+  bool isEncodedError = false;
+  ew.handle(
+      [this, &isEncodedError](RocketException& rex) {
+        sendError(std::move(rex));
+        isEncodedError = true;
+      },
+      [this, &isEncodedError](thrift::detail::EncodedFirstResponseError& err) {
+        DCHECK(err.encoded.payload);
+        isEncodedError = true;
+        sendErrorPayload(std::move(err.encoded));
+      });
   DCHECK(isEncodedError);
 
-  // In case of a first response error ThriftServerRequestStream is responsible
-  // for marking the request as complete (required for task timeout support).
-  connection_.freeStream(streamId_, false);
+  // In case of a first response error ThriftServerRequestStream is
+  // responsible for marking the request as complete (required for task
+  // timeout support).
+  connection_.freeStream(streamId_, false /* complete */);
 }
 
 bool RocketStreamClientCallback::onStreamNext(StreamPayload&& payload) {
@@ -162,30 +109,11 @@ bool RocketStreamClientCallback::onStreamNext(StreamPayload&& payload) {
     scheduleTimeout();
   }
 
-  // apply compression if client has specified compression codec
-  if (compressionConfig_) {
-    CompressionManager().setCompressionCodec(
-        *compressionConfig_,
-        payload.metadata,
-        payload.payload ? payload.payload->computeChainDataLength() : 0);
-  }
-
   streamMetricCallback_.onStreamNext(rpcMethodName_);
 
-  apache::thrift::MessageChannel::SendCallbackPtr sendCallback = nullptr;
-  if (contextStack_ && !THRIFT_FLAG(rocket_server_disable_send_callback)) {
-    sendCallback = apache::thrift::MessageChannel::SendCallbackPtr(
-        new StreamNextSentCallback(contextStack_));
-  }
+  applyCompressionConfigIfNeeded(payload);
 
-  connection_.sendPayload(
-      streamId_,
-      connection_.getPayloadSerializer()->pack(
-          std::move(payload),
-          connection_.isDecodingMetadataUsingBinaryProtocol(),
-          connection_.getRawSocket()),
-      Flags().next(true),
-      std::move(sendCallback));
+  sendStreamPayload(std::move(payload));
 
   return true;
 }
@@ -193,58 +121,26 @@ bool RocketStreamClientCallback::onStreamNext(StreamPayload&& payload) {
 void RocketStreamClientCallback::onStreamComplete() {
   streamMetricCallback_.onStreamComplete(rpcMethodName_);
 
-  connection_.sendPayload(
-      streamId_,
-      Payload::makeFromData(std::unique_ptr<folly::IOBuf>{}),
-      Flags().complete(true));
-  connection_.freeStream(streamId_, true);
+  sendCompletePayload();
+
+  connection_.freeStream(streamId_, /* complete */ true);
 }
 
 void RocketStreamClientCallback::onStreamError(folly::exception_wrapper ew) {
   streamMetricCallback_.onStreamError(rpcMethodName_);
   ew.handle(
       [this](RocketException& rex) {
-        connection_.sendError(
-            streamId_,
-            RocketException(ErrorCode::APPLICATION_ERROR, rex.moveErrorData()));
+        sendError(ErrorCode::APPLICATION_ERROR, rex.moveErrorData());
       },
       [this](::apache::thrift::detail::EncodedError& err) {
-        connection_.sendError(
-            streamId_,
-            RocketException(
-                ErrorCode::APPLICATION_ERROR, std::move(err.encoded)));
+        sendError(ErrorCode::APPLICATION_ERROR, std::move(err.encoded));
       },
       [this](::apache::thrift::detail::EncodedStreamError& err) {
-        // apply compression if client has specified compression codec
-        if (compressionConfig_) {
-          rocket::CompressionManager().setCompressionCodec(
-              *compressionConfig_,
-              err.encoded.metadata,
-              err.encoded.payload->computeChainDataLength());
-        }
-
-        apache::thrift::MessageChannel::SendCallbackPtr sendCallback = nullptr;
-        if (contextStack_ &&
-            !THRIFT_FLAG(rocket_server_disable_send_callback)) {
-          sendCallback = apache::thrift::MessageChannel::SendCallbackPtr(
-              new StreamNextSentCallback(contextStack_));
-        }
-
-        connection_.sendPayload(
-            streamId_,
-            connection_.getPayloadSerializer()->pack(
-                std::move(err.encoded),
-                connection_.isDecodingMetadataUsingBinaryProtocol(),
-                connection_.getRawSocket()),
-            Flags().next(true).complete(true),
-            std::move(sendCallback));
+        applyCompressionConfigIfNeeded(err.encoded);
+        sendErrorPayload(std::move(err.encoded));
       },
-      [this, &ew](...) {
-        connection_.sendError(
-            streamId_,
-            RocketException(ErrorCode::APPLICATION_ERROR, ew.what()));
-      });
-  connection_.freeStream(streamId_, true);
+      [this, &ew](...) { sendError(ErrorCode::APPLICATION_ERROR, ew.what()); });
+  connection_.freeStream(streamId_, true /* complete */);
 }
 
 bool RocketStreamClientCallback::onStreamHeaders(HeadersPayload&& payload) {
@@ -302,6 +198,9 @@ void RocketStreamClientCallback::onStreamCancel() {
   CHECK(serverCallbackReady()) << serverCallbackOrCancelled_;
   streamMetricCallback_.onStreamCancel(rpcMethodName_);
   serverCallback()->onStreamCancel();
+  if (contextStack_) {
+    contextStack_->onStreamFinally(details::STREAM_ENDING_TYPES::CANCEL);
+  }
 }
 
 void RocketStreamClientCallback::timeoutExpired() noexcept {
@@ -343,5 +242,31 @@ void RocketStreamClientCallback::scheduleTimeout() {
 
 void RocketStreamClientCallback::cancelTimeout() {
   timeoutCallback_.reset();
+}
+
+void RocketStreamClientCallback::sendStreamPayload(StreamPayload&& payload) {
+  sendPayload(
+      std::move(payload),
+      /* next */ true,
+      /* complete */ false,
+      makeSendCallback(/* endReason */ std::nullopt));
+}
+
+void RocketStreamClientCallback::sendCompletePayload() {
+  connection_.sendPayload(
+      streamId_,
+      Payload::makeFromData(std::unique_ptr<folly::IOBuf>{}),
+      Flags().complete(true),
+      makeSendCallback(details::STREAM_ENDING_TYPES::COMPLETE));
+}
+
+void RocketStreamClientCallback::applyCompressionConfigIfNeeded(
+    StreamPayload& payload) {
+  if (compressionConfig_) {
+    CompressionManager().setCompressionCodec(
+        *compressionConfig_,
+        payload.metadata,
+        payload.payload ? payload.payload->computeChainDataLength() : 0);
+  }
 }
 } // namespace apache::thrift::rocket

@@ -126,28 +126,6 @@ void ServerGeneratorStreamBridge::processClientMessages() {
   }
 }
 
-/*static*/ void ServerGeneratorStreamBridge::notifyStreamCancel(
-    ContextStack* contextStack) {
-  if (contextStack) {
-    contextStack->onStreamFinally(details::STREAM_ENDING_TYPES::CANCEL);
-  }
-}
-
-/*static*/ void ServerGeneratorStreamBridge::notifyStreamError(
-    ContextStack* contextStack, const folly::exception_wrapper& exception) {
-  if (contextStack) {
-    contextStack->handleStreamErrorWrapped(exception);
-    contextStack->onStreamFinally(details::STREAM_ENDING_TYPES::ERROR);
-  }
-}
-
-/*static*/ void ServerGeneratorStreamBridge::notifyStreamCompletion(
-    ContextStack* contextStack) {
-  if (contextStack) {
-    contextStack->onStreamFinally(details::STREAM_ENDING_TYPES::COMPLETE);
-  }
-}
-
 /*static*/ void ServerGeneratorStreamBridge::notifyStreamPause(
     ContextStack* contextStack, details::STREAM_PAUSE_REASON reason) {
   if (contextStack) {

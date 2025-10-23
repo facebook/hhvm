@@ -175,7 +175,6 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
           queue.pop();
           switch (next) {
             case detail::StreamControl::CANCEL:
-              notifyStreamCancel(contextStack.get());
               co_return;
             case detail::StreamControl::PAUSE:
               notifyStreamPause(
@@ -203,13 +202,11 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
           co_await folly::coro::co_awaitTry(folly::coro::co_withCancellation(
               stream->cancelSource_.getToken(), gen_.next()));
       if (next.hasException()) {
-        notifyStreamError(contextStack.get(), next.exception());
         stream->serverPush((*encode)(std::move(next.exception())));
         co_return;
       }
       if (!next->has_value()) {
         stream->serverPush({});
-        notifyStreamCompletion(contextStack.get());
         co_return;
       }
 
@@ -272,10 +269,6 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
   //
   static void notifyStreamSubscribe(
       ContextStack* contextStack, const TileStreamGuard& interaction);
-  static void notifyStreamCancel(ContextStack* contextStack);
-  static void notifyStreamError(
-      ContextStack* contextStack, const folly::exception_wrapper& exception);
-  static void notifyStreamCompletion(ContextStack* contextStack);
   static void notifyStreamPause(
       ContextStack* contextStack, details::STREAM_PAUSE_REASON reason);
   static void notifyStreamResumeReceive(ContextStack* contextStack);

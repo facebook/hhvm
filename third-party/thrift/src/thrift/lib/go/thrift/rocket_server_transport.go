@@ -20,7 +20,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"net"
 	"runtime/debug"
 	"time"
@@ -92,15 +91,11 @@ func (r *rocketServerTransport) acceptLoop(ctx context.Context) error {
 	for {
 		conn, err := r.listener.Accept()
 		if err != nil {
-			if errors.Is(err, io.EOF) {
+			// Listener was closed - return gracefully
+			if errors.Is(err, net.ErrClosed) {
 				return nil
 			}
-			select {
-			case <-ctx.Done():
-				return nil
-			default:
-				return fmt.Errorf("listener.Accept failed in rocketServerTransport.acceptLoop: %w", err)
-			}
+			return fmt.Errorf("unexpected acceptLoop error: %w", err)
 		}
 
 		// Notify observer that connection was successfully accepted

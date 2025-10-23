@@ -484,16 +484,23 @@ class RefactoredRocketServerConnection final : public IRocketServerConnection {
       RefactoredRocketServerConnection,
       apache::thrift::rocket::ConnectionAdapter>
       writerCallback_;
+
   ConnectionBufferCallback<
       RefactoredRocketServerConnection,
       apache::thrift::rocket::ConnectionAdapter>
       bufferCallback_;
+
+  KeepAliveHandler<
+      RefactoredRocketServerConnection,
+      apache::thrift::rocket::ConnectionAdapter>
+      keepAliveHandler_;
 
   SetupFrameAcceptor<
       RefactoredRocketServerConnection,
       apache::thrift::rocket::ConnectionAdapter,
       RocketServerHandler>
       setupFrameAcceptor_;
+
   RequestResponseHandler<
       RefactoredRocketServerConnection,
       apache::thrift::rocket::ConnectionAdapter>

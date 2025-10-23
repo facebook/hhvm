@@ -24,6 +24,7 @@
 #include <thrift/lib/cpp2/transport/rocket/core/StreamUtil.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/ConnectionAdapter.h>
+#include <thrift/lib/cpp2/transport/rocket/server/detail/KeepAliveHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/RequestResponseHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/SetupFrameAcceptor.h>
 
@@ -67,10 +68,12 @@ class IncomingFrameHandler {
       SetupFrameAcceptor<ConnectionT, ConnectionAdapter, RocketServerHandler>&
           setupFrameAcceptor,
       RequestResponseHandler<ConnectionT, ConnectionAdapter>&
-          requestResponseHandler)
+          requestResponseHandler,
+      KeepAliveHandler<ConnectionT, ConnectionAdapter>& keepAliveFrameHandler)
       : connection_(&connection),
         setupFrameAcceptor_(&setupFrameAcceptor),
-        requestResponseHandler_(&requestResponseHandler) {}
+        requestResponseHandler_(&requestResponseHandler),
+        keepAliveHandler_(&keepAliveFrameHandler) {}
 
   void handle(std::unique_ptr<folly::IOBuf>&& frame) {
     // hexDumpFrame(*frame);
@@ -109,11 +112,10 @@ class IncomingFrameHandler {
       //   handleFrame<FrameType::METADATA_PUSH>(
       //       std::move(frame), metadataPushFrameHandler_);
       //   break;
-      // case FrameType::KEEPALIVE:
-      //   handleFrame<FrameType::KEEPALIVE>(
-      //       std::move(frame), keepAliveFrameHandler_);
-      //   break;
-      // case FrameType::EXT:
+      case FrameType::KEEPALIVE:
+        handleFrame<FrameType::KEEPALIVE>(std::move(frame), keepAliveHandler_);
+        break;
+      case FrameType::EXT:
       default:
         hexDumpFrame(*frame);
         handleUnknownFrame(frameType);
@@ -128,6 +130,7 @@ class IncomingFrameHandler {
       setupFrameAcceptor_;
   RequestResponseHandler<ConnectionT, ConnectionAdapter>*
       requestResponseHandler_;
+  KeepAliveHandler<ConnectionT, ConnectionAdapter>* keepAliveHandler_;
 
   FOLLY_ALWAYS_INLINE void hexDumpFrame(folly::IOBuf& frame) const noexcept {
     // if constexpr (folly::kIsDebug) {

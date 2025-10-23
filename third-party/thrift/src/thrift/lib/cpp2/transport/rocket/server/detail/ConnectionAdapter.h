@@ -112,6 +112,17 @@ class ConnectionAdapter {
     connection_->flushWritesWithFds(
         std::move(writes), std::move(context), std::move(fdsAndOffsets));
   }
+  template <typename Frame>
+  void sendFrame(Frame&& frame) {
+    auto& evb = connection_->getEventBase();
+    auto* handler = connection_->outgoingFrameHandler_.get(evb);
+    if (FOLLY_UNLIKELY(handler == nullptr)) {
+      connection_->outgoingFrameHandler_.emplace(
+          evb, evb, connection_->cfg_.getOutgoingFrameHandlerBatchLogSize());
+      handler = connection_->outgoingFrameHandler_.get(evb);
+    }
+    handler->handle(std::forward<Frame>(frame), *this);
+  }
 
   // Method for OutgoingFrameHandler to send serialized frame data
   void handleSerializedFrame(std::unique_ptr<folly::IOBuf> serializedFrame) {

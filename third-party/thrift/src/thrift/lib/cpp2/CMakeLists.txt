@@ -408,7 +408,6 @@ add_library(
   transport/rocket/server/RocketServerConnectionFactory.cpp
   transport/rocket/server/ThriftRocketServerHandler.cpp
   transport/rocket/server/detail/WriteBatcher.cpp
-
   util/Checksum.cpp
   util/DebugString.cpp
   util/EmptyAsyncProcessor.cpp

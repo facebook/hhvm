@@ -92,10 +92,14 @@ RefactoredRocketServerConnection::RefactoredRocketServerConnection(
           cfg.writeBatchingByteSize),
       writerCallback_(connectionAdapter_),
       bufferCallback_(connectionAdapter_),
+      keepAliveHandler_(connectionAdapter_),
       setupFrameAcceptor_(connectionAdapter_, *frameHandler_),
       requestResponseHandler_(&connectionAdapter_),
       incomingFrameHandler_(
-          connectionAdapter_, setupFrameAcceptor_, requestResponseHandler_) {
+          connectionAdapter_,
+          setupFrameAcceptor_,
+          requestResponseHandler_,
+          keepAliveHandler_) {
   CHECK(socket_);
   CHECK(frameHandler_);
 

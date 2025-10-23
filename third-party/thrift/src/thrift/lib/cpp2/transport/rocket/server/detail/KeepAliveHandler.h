@@ -16,24 +16,36 @@
 
 #pragma once
 
-#include <thrift/lib/cpp2/transport/rocket/core/UnifexSupport.h>
-#include <thrift/lib/cpp2/transport/rocket/core/server/OutgoingFrameHandler.h>
+#include <thrift/lib/cpp2/transport/rocket/core/FrameUtil.h>
+#include <thrift/lib/cpp2/transport/rocket/server/detail/OutgoingFrameHandler.h>
 
 namespace apache::thrift::rocket {
 
+template <typename ConnectionT, template <typename> class ConnectionAdapter>
 class KeepAliveHandler {
-  using async_scope = unifex_support::async_scope;
+  using Connection = ConnectionAdapter<ConnectionT>;
+  using OutgoingFrameHandler = apache::thrift::rocket::
+      OutgoingFrameHandler<ConnectionT, ConnectionAdapter>;
 
  public:
-  KeepAliveHandler(
-      ConnectionState& connectionState,
-      OutgoingFrameHandler& outgoingFrameHandler);
+  KeepAliveHandler(const KeepAliveHandler&) = delete;
+  KeepAliveHandler(KeepAliveHandler&&) = delete;
+  KeepAliveHandler& operator=(const KeepAliveHandler&) = delete;
+  KeepAliveHandler& operator=(KeepAliveHandler&&) = delete;
+  explicit KeepAliveHandler(Connection& connection) noexcept
+      : connection_(&connection) {}
 
-  bool handle(KeepAliveFrame&&) noexcept;
+  bool handle(KeepAliveFrame&& frame) noexcept {
+    KeepAliveFrame keepAliveFrame{std::move(frame)};
+
+    if (keepAliveFrame.hasRespondFlag()) {
+      connection_->sendFrame(std::move(keepAliveFrame));
+    }
+    return true;
+  }
 
  private:
-  ConnectionState& connectionState_;
-  OutgoingFrameHandler& outgoingFrameHandler_;
+  Connection* connection_;
 };
 
 } // namespace apache::thrift::rocket

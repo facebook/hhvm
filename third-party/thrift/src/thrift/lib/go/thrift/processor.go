@@ -176,16 +176,6 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 	}
 
 	// Step 3b: Write the message using only the Decoder interface on the protocol.
-	if pfunc == nil {
-		if writeErr := sendWritableStruct(prot, name, types.EXCEPTION, seqID, appException); writeErr != nil {
-			// close connection on write failure
-			return writeErr
-		}
-		// Track undeclared exception only after successful write
-		observer.UndeclaredException()
-		observer.AnyExceptionForFunction(name)
-		return nil
-	}
 	if appException != nil {
 		// it's an application generated error, so serialize it to the client
 		if writeErr := sendWritableStruct(prot, name, types.EXCEPTION, seqID, appException); writeErr != nil {

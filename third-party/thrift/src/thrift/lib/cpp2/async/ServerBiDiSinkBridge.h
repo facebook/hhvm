@@ -150,24 +150,16 @@ class ServerBiDiSinkBridge
 
             for (auto messages = bridge->serverGetMessages(); !messages.empty();
                  messages.pop()) {
-              auto payloadTry = std::move(messages.front());
-              if (!payloadTry.hasValue() && !payloadTry.hasException()) {
-                // Empty Try means sink completion
+              // Empty try denotes end of sink
+              if (!messages.front().hasException() &&
+                  !messages.front().hasValue()) {
                 co_return;
               }
-
-              if (payloadTry.hasException()) {
-                // TODO(sazonovk): Is this the right way to handle errors? NO
-                payloadTry.exception().throw_exception();
-              }
-
-              auto decodedTry = (*decode)(std::move(payloadTry));
-              if (decodedTry.hasException()) {
-                // TODO(sazonovk): Is this the right way to handle errors? NO
-                decodedTry.exception().throw_exception();
-              }
-
-              co_yield std::move(decodedTry.value());
+              // This handled both both error and result cases. If the try
+              // contains an exception, it will eventually result in yielding
+              // a co_error
+              co_yield folly::coro::co_result(
+                  (*decode)(std::move(std::move(messages.front()))));
 
               if (++creditsUsed > bridge->bufferSize_ / 2) {
                 bridge->serverPush(uint64_t(creditsUsed));

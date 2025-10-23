@@ -46,7 +46,7 @@ type Processor interface {
 
 func errorType(err error) string {
 	// get type name without package or pointer information
-	fqet := strings.Replace(fmt.Sprintf("%T", err), "*", "", -1)
+	fqet := strings.ReplaceAll(fmt.Sprintf("%T", err), "*", "")
 	et := strings.Split(fqet, ".")
 	return et[len(et)-1]
 }

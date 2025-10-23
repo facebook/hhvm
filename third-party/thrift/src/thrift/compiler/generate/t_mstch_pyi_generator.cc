@@ -295,7 +295,7 @@ class pyi_mstch_program : public mstch_program {
     for (const auto* service : mstch_program::program_->services()) {
       for (const auto& function : service->functions()) {
         for (const auto& param : function.params().fields()) {
-          this->add_containers(visited, param.get_type());
+          this->add_containers(visited, param.type().get_type());
         }
         this->add_containers(visited, function.return_type().get_type());
       }
@@ -304,7 +304,7 @@ class pyi_mstch_program : public mstch_program {
     for (const t_structured* object :
          mstch_program::program_->structured_definitions()) {
       for (const auto& field : object->fields()) {
-        this->add_containers(visited, field.get_type());
+        this->add_containers(visited, field.type().get_type());
       }
     }
 

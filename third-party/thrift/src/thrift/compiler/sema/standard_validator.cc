@@ -1145,7 +1145,7 @@ void validate_exception_message_annotation(
   }
   if (field) {
     ctx.check(
-        field->get_type()->is_string_or_binary(),
+        field->type().get_type()->is_string_or_binary(),
         "member specified as exception 'message' should be of type "
         "STRING, '{}' in '{}' is not",
         field->name(),
@@ -1199,7 +1199,7 @@ void validate_cpp_deprecated_terse_write_annotation(
   if (gen::cpp::find_ref_type(field) == gen::cpp::reference_type::unique) {
     return;
   }
-  const t_type* type = field.get_type()->get_true_type();
+  const t_type* type = field.type().get_type()->get_true_type();
   if (type->is<t_structured>()) {
     ctx.error(
         field,

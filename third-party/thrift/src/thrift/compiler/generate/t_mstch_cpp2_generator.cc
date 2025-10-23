@@ -247,12 +247,12 @@ whisker::array::ptr build_user_type_footprint(
     const auto& function = *pending.front();
     pending.erase(pending.begin());
     for (const auto& param : function.params().fields()) {
-      extract_type(param.get_type());
+      extract_type(param.type().get_type());
     }
     if (const auto& excs = function.exceptions();
         !t_throws::is_null_or_empty(excs)) {
       for (auto& ex : excs->fields()) {
-        extract_type(ex.get_type());
+        extract_type(ex.type().get_type());
       }
     }
 
@@ -1728,7 +1728,7 @@ class cpp_mstch_struct : public mstch_struct {
 
     bool result = false;
     cpp2::for_each_transitive_field(struct_, [&result](const t_field* field) {
-      if (!field->get_type()->has_unstructured_annotation(
+      if (!field->type().get_type()->has_unstructured_annotation(
               {"cpp.noncopyable", "cpp2.noncopyable"})) {
         return true;
       }
@@ -2381,7 +2381,7 @@ class cpp_mstch_field : public mstch_field {
     return {};
   }
   mstch::node cpp_noncopyable() {
-    return field_->get_type()->has_unstructured_annotation(
+    return field_->type().get_type()->has_unstructured_annotation(
         {"cpp.noncopyable", "cpp2.noncopyable"});
   }
   mstch::node serialization_prev_field_key() {
@@ -2402,7 +2402,9 @@ class cpp_mstch_field : public mstch_field {
     assert(field_context && field_context->serialization_next);
     return field_context->serialization_next
         ? context_.type_factory->make_mstch_object(
-              field_context->serialization_next->get_type(), context_, pos_)
+              field_context->serialization_next->type().get_type(),
+              context_,
+              pos_)
         : mstch::node("");
   }
   mstch::node deprecated_terse_writes() {

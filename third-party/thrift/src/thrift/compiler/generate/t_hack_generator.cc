@@ -1509,7 +1509,7 @@ void t_hack_generator::generate_json_reader(
     }
     indent(out) << "if (idx($parsed, '" << tf.name() << "') !== null) {\n";
     indent_up();
-    std::string typehint = type_to_typehint(tf.get_type());
+    std::string typehint = type_to_typehint(tf.type().get_type());
     generate_json_field(
         out,
         namer,
@@ -2058,7 +2058,7 @@ std::string t_hack_generator::render_const_value_helper(
             inner << indent() << temp_val << "->" << field->name() << " = ";
           }
           inner << render_const_value_helper(
-              field->get_type(),
+              field->type().get_type(),
               v,
               temp_var_initializations_out,
               namer,
@@ -2114,7 +2114,7 @@ std::string t_hack_generator::render_const_value_helper(
                              force_arrays)
                       << " => "
                       << render_const_value_helper(
-                             field.get_type(),
+                             field.type().get_type(),
                              v,
                              temp_var_initializations_out,
                              namer,
@@ -2442,7 +2442,7 @@ std::unique_ptr<t_const_value> t_hack_generator::field_to_tmeta(
 
   tmeta_ThriftField->add_map(
       std::make_unique<t_const_value>("type"),
-      type_to_tmeta(field->get_type()));
+      type_to_tmeta(field->type().get_type()));
 
   tmeta_ThriftField->add_map(
       std::make_unique<t_const_value>("name"),
@@ -2868,7 +2868,7 @@ bool t_hack_generator::skip_codegen(const t_field* field) {
   auto skip_codegen = field->has_structured_annotation(kHackSkipCodegenUri);
   if (!skip_codegen) {
     skip_codegen = t_typedef::get_first_structured_annotation_or_null(
-        field->get_type(), kHackSkipCodegenUri);
+        field->type().get_type(), kHackSkipCodegenUri);
   }
   return skip_codegen || !is_valid_hack_type(field->type());
 }
@@ -3093,7 +3093,7 @@ void t_hack_generator::generate_php_struct_shape_spec(
     if (skip_codegen(&field)) {
       continue;
     }
-    const t_type* t = field.get_type();
+    const t_type* t = field.type().get_type();
     // Compute typehint before resolving typedefs to avoid missing any adapter
     // annotations.
     std::string typehint;
@@ -3426,7 +3426,8 @@ void t_hack_generator::generate_php_struct_shape_methods(
 
     std::stringstream inner;
     bool is_simple_shape_index = true;
-    if (find_hack_field_adapter(field) || find_hack_adapter(field.get_type())) {
+    if (find_hack_field_adapter(field) ||
+        find_hack_adapter(field.type().get_type())) {
       inner << source.str();
     } else if (t->is<t_set>()) {
       if (arraysets_ || !hack_collections_) {
@@ -3491,7 +3492,8 @@ void t_hack_generator::generate_php_struct_shape_methods(
 
     bool nullable = field_is_nullable(tstruct, &field) || nullable_everything_;
     auto fieldRef = "$this->" + field.name();
-    if (find_hack_field_adapter(field) || find_hack_adapter(field.get_type())) {
+    if (find_hack_field_adapter(field) ||
+        find_hack_adapter(field.type().get_type())) {
       val << fieldRef << ",\n";
     } else if (t->is<t_container>()) {
       if (t->is<t_map>() || t->is<t_list>()) {
@@ -3898,7 +3900,7 @@ void t_hack_generator::generate_php_struct_async_shape_methods(
           << "->genUnwrap();\n";
       fieldRef = "$" + field.name();
     }
-    auto [wrapper, name, ns] = find_hack_wrapper(field.get_type());
+    auto [wrapper, name, ns] = find_hack_wrapper(field.type().get_type());
     if (wrapper) {
       bool nullable =
           field_is_nullable(tstruct, &field) || nullable_everything_;
@@ -3926,7 +3928,7 @@ void t_hack_generator::generate_php_struct_async_shape_methods(
     if (find_hack_wrapper(field)) {
       fieldRef = "$" + field.name();
     } else {
-      auto [wrapper, name, ns] = find_hack_wrapper(field.get_type());
+      auto [wrapper, name, ns] = find_hack_wrapper(field.type().get_type());
       if (wrapper) {
         fieldRef = "$" + field.name();
       }
@@ -4019,7 +4021,7 @@ bool t_hack_generator::is_async_shapish_struct(const t_structured* tstruct) {
 
 bool t_hack_generator::is_async_field(
     const t_field& field, bool check_nested_structs) {
-  auto [wrapper, name, ns] = find_hack_wrapper(field.get_type());
+  auto [wrapper, name, ns] = find_hack_wrapper(field.type().get_type());
   return find_hack_wrapper(field) /* Check for field wrapper */ ||
       wrapper /* Check for typedef wrapper*/ ||
       is_async_type(
@@ -4106,7 +4108,7 @@ void t_hack_generator::generate_php_union_methods(
     if (std::optional<std::string> adapter = find_hack_field_adapter(field)) {
       typehint = *adapter + "::THackType";
     } else {
-      typehint = type_to_typehint(field.get_type());
+      typehint = type_to_typehint(field.type().get_type());
     }
 
     // set_<fieldName>()
@@ -4195,7 +4197,7 @@ void t_hack_generator::generate_php_struct_fields(
           " allowed for base exception properties.");
     }
 
-    const t_type* t = field.get_type();
+    const t_type* t = field.type().get_type();
     bool is_async_typ = is_async_type(t, false);
 
     t = t->get_true_type();
@@ -4331,7 +4333,7 @@ void t_hack_generator::generate_php_struct_field_methods(
     std::ofstream& out, const t_field* field, bool is_exception) {
   const t_type* t = field->type()->get_true_type();
   if (is_exception && field->name() == "code" && t->is<t_enum>()) {
-    std::string enum_type = type_to_typehint(field->get_type());
+    std::string enum_type = type_to_typehint(field->type().get_type());
     out << "\n";
     out << indent() << "public function setCodeAsEnum(" << enum_type
         << " $code)[write_props]: void {\n";
@@ -4475,7 +4477,7 @@ void t_hack_generator::generate_exception_method(
     if (it[0].type()->get_true_type()->is<t_exception>()) {
       indent(out) << "if ($e is "
                   << type_to_typehint(
-                         field.get_type(),
+                         field.type().get_type(),
                          // Type aliases are not supported in `catch` clauses.
                          // Hack expects the name of a class.
                          {{TypeToTypehintVariations::IGNORE_TYPEDEF_OPTION,
@@ -4508,7 +4510,7 @@ void t_hack_generator::generate_php_struct_constructor_field_assignment(
   std::string adapter;
   if (auto annotation = find_hack_field_adapter(field)) {
     adapter = *annotation;
-  } else if (auto annotation_2 = find_hack_adapter(field.get_type())) {
+  } else if (auto annotation_2 = find_hack_adapter(field.type().get_type())) {
     adapter = *annotation_2;
   }
 
@@ -4518,7 +4520,8 @@ void t_hack_generator::generate_php_struct_constructor_field_assignment(
     hack_typehint = adapter + "::THackType";
   } else {
     hack_typehint = type_to_typehint(
-        field.get_type(), {{TypeToTypehintVariations::IGNORE_WRAPPER, true}});
+        field.type().get_type(),
+        {{TypeToTypehintVariations::IGNORE_WRAPPER, true}});
   }
   std::string dval;
   bool is_exception = tstruct->is<t_exception>();
@@ -4569,13 +4572,13 @@ void t_hack_generator::generate_php_struct_constructor_field_assignment(
       t->is<t_enum>() && !enum_transparenttype_;
   if (is_default_assignment) {
     auto [type_wrapper, underlying_name, ns] =
-        find_hack_wrapper(field.get_type());
+        find_hack_wrapper(field.type().get_type());
     if (type_wrapper) {
       if (!nullable) {
         dval = *type_wrapper + "::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<" +
             hack_typehint + ">(" + dval + ")";
       }
-      hack_typehint = type_to_typehint(field.get_type());
+      hack_typehint = type_to_typehint(field.type().get_type());
     }
     if (std::optional<std::string> field_wrapper = find_hack_wrapper(field)) {
       static const std::string_view null = "null";
@@ -4633,7 +4636,7 @@ void t_hack_generator::generate_php_struct_constructor(
     if (std::optional<std::string> adapter = find_hack_field_adapter(field)) {
       typehint = *adapter + "::THackType";
     } else {
-      typehint = type_to_typehint(field.get_type());
+      typehint = type_to_typehint(field.type().get_type());
     }
     if (tstruct->is<t_result_struct>() && field.name() == "success") {
       typehint = "this::TResult";
@@ -4930,7 +4933,7 @@ std::string t_hack_generator::render_service_metadata_response(
       enums.push_back(tenum);
     } else if (const auto* tstruct = dynamic_cast<const t_structured*>(next)) {
       for (const auto& field : tstruct->fields()) {
-        queue.push(field.get_type());
+        queue.push(field.type().get_type());
       }
 
       if (!tstruct->program() || tstruct->is<t_paramlist>()) {
@@ -5143,7 +5146,8 @@ void t_hack_generator::generate_adapter_type_checks(
       continue;
     }
     if (std::optional<std::string> adapter = find_hack_field_adapter(field)) {
-      adapter_types_.emplace(*adapter, type_to_typehint(field.get_type()));
+      adapter_types_.emplace(
+          *adapter, type_to_typehint(field.type().get_type()));
     }
   }
 
@@ -5354,7 +5358,7 @@ void t_hack_generator::generate_php_struct_from_map(
       continue;
     }
 
-    std::string typehint = type_to_typehint(field.get_type());
+    std::string typehint = type_to_typehint(field.type().get_type());
     out << indent() << "HH\\FIXME\\UNSAFE_CAST<mixed, " << typehint
         << ">(idx($map, '" << field.name() << "'), 'map value is mixed'),\n";
   }
@@ -5410,7 +5414,7 @@ void t_hack_generator::_generate_args(
         out << name << " === null ? null : ";
       }
       t_name_generator namer;
-      this->_generate_sendImpl_arg(out, namer, name, field.get_type());
+      this->_generate_sendImpl_arg(out, namer, name, field.type().get_type());
       out << ",\n";
     }
     indent_down();
@@ -5485,13 +5489,14 @@ void t_hack_generator::
     is_async =
         generate_php_struct_async_struct_creation_method_field_assignment_helper(
             source,
-            field.get_type(),
+            field.type().get_type(),
             namer,
             field_ref,
             is_shape,
             uses_thrift_only_methods);
     source_str = source.str();
-    auto [type_wrapper, struct_name, ns] = find_hack_wrapper(field.get_type());
+    auto [type_wrapper, struct_name, ns] =
+        find_hack_wrapper(field.type().get_type());
     if (type_wrapper) {
       if (is_async) {
         out << indent() << "$" << name << " = " << source_str << ";\n";
@@ -5507,7 +5512,7 @@ void t_hack_generator::
       }
       val = val +
           type_to_typehint(
-                field.get_type(),
+                field.type().get_type(),
                 {{TypeToTypehintVariations::IGNORE_WRAPPER, true}}) +
           ">(" + source_str + ")";
       source_str = val;
@@ -5530,7 +5535,7 @@ void t_hack_generator::
       } else {
         out << "await " << *field_wrapper << "::genFromThrift<";
       }
-      out << type_to_typehint(field.get_type()) << ", "
+      out << type_to_typehint(field.type().get_type()) << ", "
           << struct_hack_name_with_ns << ">(" << source_str << ", "
           << field.id() << ", " << obj_ref << ");\n";
     } else {
@@ -5570,7 +5575,7 @@ void t_hack_generator::generate_php_struct_async_struct_creation_method(
 
     if (method_type == ThriftAsyncStructCreationMethod::FROM_MAP) {
       std::string typehint = type_to_typehint(
-          field.get_type(),
+          field.type().get_type(),
           {{TypeToTypehintVariations::RECURSIVE_IGNORE_WRAPPER, true}});
       field_ref.insert(0, "HH\\FIXME\\UNSAFE_CAST<mixed, " + typehint + ">(");
       field_ref.append(", 'Map value is mixed')");
@@ -6484,8 +6489,8 @@ void t_hack_generator::generate_php_docstring_args(
       } else {
         out << ",\n" << indent() << " * " << std::string(start_pos, ' ');
       }
-      out << param.id() << ": " << thrift_type_name(param.get_type()) << " "
-          << param.name();
+      out << param.id() << ": " << thrift_type_name(param.type().get_type())
+          << " " << param.name();
     }
   }
 }
@@ -6504,8 +6509,8 @@ void t_hack_generator::generate_php_docstring_stream_exceptions(
     } else {
       out << ", ";
     }
-    out << param.id() << ": " << thrift_type_name(param.get_type()) << " "
-        << param.name();
+    out << param.id() << ": " << thrift_type_name(param.type().get_type())
+        << " " << param.name();
   }
   out << ")";
 }
@@ -6663,7 +6668,7 @@ std::string t_hack_generator::field_to_typehint(
   }
 
   if (typehint.empty()) {
-    typehint = type_to_typehint(tfield.get_type());
+    typehint = type_to_typehint(tfield.type().get_type());
   }
   if (std::optional<std::string> field_wrapper = find_hack_wrapper(tfield)) {
     typehint = *field_wrapper + "<" + (is_field_nullable ? "?" : "") +
@@ -7486,7 +7491,8 @@ std::string t_hack_generator::argument_list(
           (!no_nullables_ &&
            (true_type->is<t_struct>() || true_type->is<t_union>()));
       result +=
-          type_to_param_typehint(field.get_type(), is_param_nullable) + " ";
+          type_to_param_typehint(field.type().get_type(), is_param_nullable) +
+          " ";
     }
     result += "$" + find_hack_name(&field);
   }

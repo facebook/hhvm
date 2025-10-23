@@ -235,7 +235,7 @@ void codegen_data::compute_thrift_metadata_types() {
   for (auto const& exception : current_program_->exceptions()) {
     // Visit exception members
     for (auto const& field : exception->get_members()) {
-      auto type = field->get_type();
+      auto type = field->type().get_type();
       add_to_thrift_metadata_types(type, visited_type_names);
     }
     // Visit exception itself
@@ -260,12 +260,12 @@ void codegen_data::compute_thrift_metadata_types() {
       add_to_thrift_metadata_types(return_type, visited_type_names);
 
       for (const auto& parameter : func.params().get_members()) {
-        auto type = parameter->get_type();
+        auto type = parameter->type().get_type();
         add_to_thrift_metadata_types(type, visited_type_names);
       }
       if (func.exceptions() != nullptr) {
         for (const auto& exception : func.exceptions()->get_members()) {
-          auto type = exception->get_type();
+          auto type = exception->type().get_type();
           add_to_thrift_metadata_types(type, visited_type_names);
         }
       }
@@ -275,7 +275,7 @@ void codegen_data::compute_thrift_metadata_types() {
         if (func.stream()->exceptions() != nullptr) {
           for (const auto& exception :
                func.stream()->exceptions()->get_members()) {
-            auto type = exception->get_type();
+            auto type = exception->type().get_type();
             add_to_thrift_metadata_types(type, visited_type_names);
           }
         }

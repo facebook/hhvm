@@ -859,13 +859,13 @@ class rust_mstch_program : public mstch_program {
   void foreach_type(F&& f) const {
     for (const t_structured* strct : program_->structs_and_unions()) {
       for (const auto& field : strct->fields()) {
-        f(field.get_type());
+        f(field.type().get_type());
       }
     }
     for (const auto* service : program_->services()) {
       for (const auto& function : service->functions()) {
         for (const auto& param : function.params().fields()) {
-          f(param.get_type());
+          f(param.type().get_type());
         }
         f(function.return_type().get_type());
       }
@@ -896,7 +896,7 @@ class rust_mstch_program : public mstch_program {
     for (const t_structured* strct : program_->structs_and_unions()) {
       for (const t_field& field : strct->fields()) {
         if (node_has_adapter(field) ||
-            type_has_transitive_adapter(field.get_type(), true)) {
+            type_has_transitive_adapter(field.type().get_type(), true)) {
           return true;
         }
       }
@@ -910,7 +910,7 @@ class rust_mstch_program : public mstch_program {
     for (const t_structured* strct : program_->structs_and_unions()) {
       for (const t_field& field : strct->fields()) {
         if (node_has_adapter(field) ||
-            type_has_transitive_adapter(field.get_type(), true)) {
+            type_has_transitive_adapter(field.type().get_type(), true)) {
           strcts.emplace_back(context_.struct_factory->make_mstch_object(
               strct, context_, pos_));
           break;
@@ -1095,7 +1095,7 @@ class rust_mstch_program : public mstch_program {
     }
     for (t_structured* strct : program_->structured_definitions()) {
       for (const t_field& field : strct->fields()) {
-        if (generate_reference_set(field.get_type())) {
+        if (generate_reference_set(field.type().get_type())) {
           dependent_types.insert(strct);
         }
       }
@@ -1386,11 +1386,11 @@ class rust_mstch_function : public mstch_function {
       const auto& exceptions = s->fields();
       std::map<const t_type*, unsigned> type_count;
       for (const auto& x : exceptions) {
-        type_count[x.get_type()] += 1;
+        type_count[x.type().get_type()] += 1;
       }
 
       for (const auto& x : exceptions) {
-        if (type_count.at(x.get_type()) == 1) {
+        if (type_count.at(x.type().get_type()) == 1) {
           unique_exceptions.emplace_back(&x);
         }
       }
@@ -1564,13 +1564,13 @@ class rust_mstch_struct : public mstch_struct {
     }
 
     for (const auto& field : struct_->fields()) {
-      if (!can_derive_ord(field.get_type())) {
+      if (!can_derive_ord(field.type().get_type())) {
         return false;
       }
 
       // Assume we cannot derive `Ord` on the adapted type.
       if (node_has_adapter(field) ||
-          type_has_transitive_adapter(field.get_type(), true)) {
+          type_has_transitive_adapter(field.type().get_type(), true)) {
         return false;
       }
 
@@ -1981,7 +1981,12 @@ class mstch_rust_value : public mstch_base {
     for (auto&& field : struct_type->fields()) {
       if (field.name() == variant) {
         return std::make_shared<mstch_rust_value>(
-            content, field.get_type(), depth_ + 1, context_, pos_, options_);
+            content,
+            field.type().get_type(),
+            depth_ + 1,
+            context_,
+            pos_,
+            options_);
       }
     }
     return mstch::node();
@@ -2113,7 +2118,7 @@ class mstch_rust_struct_field : public mstch_base {
   whisker::object self() { return make_self(*field_); }
   mstch::node explicit_value() {
     if (explicit_value_) {
-      auto type = field_->get_type();
+      auto type = field_->type().get_type();
       return std::make_shared<mstch_rust_value>(
           explicit_value_, type, depth_, context_, pos_, options_);
     }
@@ -2122,12 +2127,17 @@ class mstch_rust_struct_field : public mstch_base {
   mstch::node rust_default() {
     if (auto default_value = field_->default_value()) {
       return std::make_shared<mstch_rust_value>(
-          default_value, field_->get_type(), depth_, context_, pos_, options_);
+          default_value,
+          field_->type().get_type(),
+          depth_,
+          context_,
+          pos_,
+          options_);
     }
     return mstch::node();
   }
   mstch::node type() {
-    auto type = field_->get_type();
+    auto type = field_->type().get_type();
     return context_.type_factory->make_mstch_object(type, context_, pos_);
   }
   mstch::node is_boxed() { return field_kind(*field_) == FieldKind::Box; }
@@ -2136,7 +2146,7 @@ class mstch_rust_struct_field : public mstch_base {
   mstch::node has_adapter() {
     return adapter_node(
         adapter_annotation_,
-        field_->get_type(),
+        field_->type().get_type(),
         false,
         context_,
         pos_,
@@ -2280,7 +2290,7 @@ class rust_mstch_field : public mstch_field {
     return rust_type;
   }
   mstch::node rust_primitive() {
-    auto type = field_->get_type();
+    auto type = field_->type().get_type();
     return type->is_bool() || type->is_any_int() || type->is_floating_point();
   }
   mstch::node rust_rename() { return field_->name() != mangle(field_->name()); }
@@ -2288,7 +2298,7 @@ class rust_mstch_field : public mstch_field {
     auto value = field_->default_value();
     if (value) {
       unsigned depth = 2; // impl Default + fn default
-      auto type = field_->get_type();
+      auto type = field_->type().get_type();
       return std::make_shared<mstch_rust_value>(
           value, type, depth, context_, pos_, options_);
     }
@@ -2299,7 +2309,7 @@ class rust_mstch_field : public mstch_field {
   mstch::node has_adapter() {
     return adapter_node(
         adapter_annotation_,
-        field_->get_type(),
+        field_->type().get_type(),
         false,
         context_,
         pos_,

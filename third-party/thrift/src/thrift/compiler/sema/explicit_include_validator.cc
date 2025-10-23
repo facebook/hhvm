@@ -108,7 +108,7 @@ void add_explicit_include_validators(
     if (f.is_injected()) {
       return;
     }
-    visit_type(ctx, f, *f.get_type());
+    visit_type(ctx, f, *f.type().get_type());
   });
 
   // Typedefs: underlying type
@@ -125,11 +125,11 @@ void add_explicit_include_validators(
   });
   validator.add_function_param_visitor(
       [](sema_context& ctx, const t_field& param) {
-        visit_type(ctx, param, *param.get_type());
+        visit_type(ctx, param, *param.type().get_type());
       });
   validator.add_thrown_exception_visitor(
       [](sema_context& ctx, const t_field& ex) {
-        visit_type(ctx, ex, *ex.get_type());
+        visit_type(ctx, ex, *ex.type().get_type());
       });
   validator.add_stream_visitor([](sema_context& ctx, const t_stream& s) {
     visit_type(ctx, static_cast<const t_named&>(*ctx.parent()), *s.elem_type());

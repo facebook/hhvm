@@ -230,7 +230,7 @@ mstch::node mstch_const_value::const_struct() {
       assert(field != nullptr);
       constants.push_back(new t_const(
           nullptr,
-          t_type_ref::from_req_ptr(field->get_type()),
+          t_type_ref::from_req_ptr(field->type().get_type()),
           field->name(),
           member.second->clone()));
       fields.push_back(field);
@@ -256,7 +256,7 @@ mstch::node mstch_const_value::owning_const() {
 
 mstch::node mstch_field::type() {
   return context_.type_factory->make_mstch_object(
-      field_->get_type(), context_, pos_);
+      field_->type().get_type(), context_, pos_);
 }
 
 mstch::node mstch_struct::fields() {

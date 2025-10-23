@@ -99,7 +99,7 @@ inline bool is_explicit_ref(const t_field* f) {
 }
 
 inline bool is_ref(const t_field* f) {
-  return is_explicit_ref(f) || is_binary_iobuf_unique_ptr(f->get_type());
+  return is_explicit_ref(f) || is_binary_iobuf_unique_ptr(f->type().get_type());
 }
 
 inline bool field_has_isset(const t_field* field) {
@@ -170,7 +170,7 @@ void for_each_transitive_field(const t_structured* s, F f) {
       return;
     }
     if (const auto* sub =
-            dynamic_cast<const t_structured*>(field->get_type())) {
+            dynamic_cast<const t_structured*>(field->type().get_type())) {
       fields.push_back({sub, 0});
     }
   }

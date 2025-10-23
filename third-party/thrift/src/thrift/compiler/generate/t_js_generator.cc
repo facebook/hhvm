@@ -422,7 +422,7 @@ string t_js_generator::render_const_value(
       const t_type* field_type = nullptr;
       for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
         if ((*f_iter)->name() == v_iter->first->get_string()) {
-          field_type = (*f_iter)->get_type();
+          field_type = (*f_iter)->type().get_type();
         }
       }
       if (field_type == nullptr) {
@@ -546,8 +546,8 @@ void t_js_generator::generate_js_struct_definition(
     string dval = declare_field(*m_iter, false, true);
     const t_type* t = (*m_iter)->type()->get_true_type();
     if ((*m_iter)->default_value() != nullptr && !(t->is<t_structured>())) {
-      dval =
-          render_const_value((*m_iter)->get_type(), (*m_iter)->default_value());
+      dval = render_const_value(
+          (*m_iter)->type().get_type(), (*m_iter)->default_value());
       out << indent() << "this." << (*m_iter)->name() << " = " << dval << ";"
           << endl;
     } else {
@@ -649,8 +649,9 @@ void t_js_generator::generate_js_struct_reader(
     // Generate deserialization code for known cases
     for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
       indent(out) << "case " << (*f_iter)->id() << ":" << endl;
-      indent(out) << "if (ftype == " << type_to_enum((*f_iter)->get_type())
-                  << ") {" << endl;
+      indent(out) << "if (ftype == "
+                  << type_to_enum((*f_iter)->type().get_type()) << ") {"
+                  << endl;
 
       indent_up();
       generate_deserialize_field(out, *f_iter, "this.");
@@ -710,7 +711,7 @@ void t_js_generator::generate_js_struct_writer(
     indent_up();
 
     indent(out) << "output.writeFieldBegin(" << "'" << (*f_iter)->name()
-                << "', " << type_to_enum((*f_iter)->get_type()) << ", "
+                << "', " << type_to_enum((*f_iter)->type().get_type()) << ", "
                 << (*f_iter)->id() << ");" << endl;
 
     // Write field contents

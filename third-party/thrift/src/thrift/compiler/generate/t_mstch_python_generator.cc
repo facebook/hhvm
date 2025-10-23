@@ -237,7 +237,7 @@ bool field_has_invariant_type(const t_field* field) {
   }
 
   return ::apache::thrift::compiler::is_invariant_container_type(
-      field->get_type());
+      field->type().get_type());
 }
 
 /**
@@ -434,15 +434,15 @@ class python_mstch_program : public mstch_program {
   void visit_type_single_service(const t_service* service) {
     for (const auto& function : service->functions()) {
       for (const auto& field : function.params().fields()) {
-        visit_type(field.get_type());
+        visit_type(field.type().get_type());
       }
       for (const t_field& field : get_elems(function.exceptions())) {
-        visit_type(field.get_type());
+        visit_type(field.type().get_type());
       }
       if (const t_stream* stream = function.stream()) {
         if (const t_throws* exceptions = stream->exceptions()) {
           for (const auto& field : exceptions->fields()) {
-            visit_type(field.get_type());
+            visit_type(field.type().get_type());
           }
         }
         if (!function.has_void_initial_response()) {
@@ -467,7 +467,7 @@ class python_mstch_program : public mstch_program {
   void visit_types_for_objects() {
     for (const t_structured* object : program_->structured_definitions()) {
       for (auto&& field : object->fields()) {
-        visit_type(field.get_type());
+        visit_type(field.type().get_type());
       }
     }
   }

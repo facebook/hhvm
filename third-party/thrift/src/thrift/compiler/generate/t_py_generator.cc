@@ -1231,7 +1231,7 @@ string t_py_generator::render_const_value(
       const t_type* field_type = nullptr;
       for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
         if ((*f_iter)->name() == v_iter->first->get_string()) {
-          field_type = (*f_iter)->get_type();
+          field_type = (*f_iter)->type().get_type();
         }
       }
       if (field_type == nullptr) {
@@ -1439,7 +1439,7 @@ void t_py_generator::generate_py_union(
     if (is_hidden(*member)) {
       continue;
     }
-    auto t = type_to_enum(member->get_type());
+    auto t = type_to_enum(member->type().get_type());
     const auto& n = member->name();
     auto k = member->id();
     indent(out) << (first ? "" : "el") << "if fid == " << k << ":" << endl;
@@ -1479,7 +1479,7 @@ void t_py_generator::generate_py_union(
     if (is_hidden(*member)) {
       continue;
     }
-    auto t = type_to_enum(member->get_type());
+    auto t = type_to_enum(member->type().get_type());
     const auto& n = member->name();
     auto k = member->id();
 
@@ -1580,9 +1580,9 @@ void t_py_generator::generate_py_thrift_spec(
       continue;
     }
     indent(out) << "(" << (*m_iter)->id() << ", "
-                << type_to_enum((*m_iter)->get_type()) << ", " << "'"
+                << type_to_enum((*m_iter)->type().get_type()) << ", " << "'"
                 << rename_reserved_keywords((*m_iter)->name()) << "'" << ", "
-                << type_to_spec_args((*m_iter)->get_type()) << ", "
+                << type_to_spec_args((*m_iter)->type().get_type()) << ", "
                 << render_field_default_value(*m_iter) << ", "
                 << get_thrift_spec_req((*m_iter)->qualifier()) << ", ),"
                 << " # " << (*m_iter)->id() << endl;
@@ -1656,7 +1656,7 @@ void t_py_generator::generate_py_thrift_spec(
           continue;
         }
         // Initialize fields
-        const t_type* type = (*m_iter)->get_type();
+        const t_type* type = (*m_iter)->type().get_type();
         if (!type->is<t_primitive_type>() && !type->is<t_enum>() &&
             (*m_iter)->default_value() != nullptr) {
           indent(out) << "if " << rename_reserved_keywords((*m_iter)->name())
@@ -2097,8 +2097,8 @@ void t_py_generator::generate_py_struct_reader(
     }
     out << "fid == " << (*f_iter)->id() << ":" << endl;
     indent_up();
-    indent(out) << "if ftype == " << type_to_enum((*f_iter)->get_type()) << ":"
-                << endl;
+    indent(out) << "if ftype == " << type_to_enum((*f_iter)->type().get_type())
+                << ":" << endl;
     indent_up();
     generate_deserialize_field(out, *f_iter, "self.");
     indent_down();
@@ -2153,7 +2153,7 @@ void t_py_generator::generate_py_struct_writer(
     out << ":" << endl;
     indent_up();
     indent(out) << "oprot.writeFieldBegin(" << "'" << (*f_iter)->name() << "', "
-                << type_to_enum((*f_iter)->get_type()) << ", "
+                << type_to_enum((*f_iter)->type().get_type()) << ", "
                 << (*f_iter)->id() << ")" << endl;
 
     // Write field contents
@@ -2873,8 +2873,8 @@ void t_py_generator::generate_service_remote(const t_service* tservice) {
         } else {
           f_remote << ", ";
         }
-        f_remote << "('" << thrift_type_name((*it_2)->get_type()) << "', '"
-                 << (*it_2)->name() << "', '"
+        f_remote << "('" << thrift_type_name((*it_2)->type().get_type())
+                 << "', '" << (*it_2)->name() << "', '"
                  << thrift_type_name((*it_2)->type()->get_true_type()) << "')";
       }
       f_remote << "]),\n";
@@ -3138,7 +3138,7 @@ void t_py_generator::generate_process_function(
         known_exceptions += "'";
         known_exceptions += rename_reserved_keywords(x.name());
         known_exceptions += "': ";
-        known_exceptions += type_name(x.get_type());
+        known_exceptions += type_name(x.type().get_type());
       }
       known_exceptions += "}";
 
@@ -3189,7 +3189,7 @@ void t_py_generator::generate_process_function(
     indent_down();
     int exc_num = 0;
     for (const t_field& x : get_elems(tfunction->exceptions())) {
-      f_service_ << indent() << "except " << type_name(x.get_type())
+      f_service_ << indent() << "except " << type_name(x.type().get_type())
                  << " as exc" << exc_num << ":" << endl;
       if (tfunction->qualifier() != t_function_qualifier::oneway) {
         indent_up();
@@ -3318,7 +3318,7 @@ void t_py_generator::generate_deserialize_field(
         tfield->name().c_str(),
         type->name().c_str());
   }
-  if (const auto* adapter = get_py_adapter(tfield->get_type())) {
+  if (const auto* adapter = get_py_adapter(tfield->type().get_type())) {
     indent(out) << name << " = " << *adapter << ".from_thrift(" << name << ")"
                 << endl;
   }
@@ -3481,7 +3481,7 @@ void t_py_generator::generate_serialize_field(
         tfield->name());
   }
   string name = prefix + rename_reserved_keywords(tfield->name());
-  if (const auto* adapter = get_py_adapter(tfield->get_type())) {
+  if (const auto* adapter = get_py_adapter(tfield->type().get_type())) {
     string real_name = std::move(name);
     name = tmp("adpt");
     indent(out) << name << " = " << *adapter << ".to_thrift(" << real_name

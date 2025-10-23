@@ -393,7 +393,7 @@ class py3_mstch_program : public mstch_program {
         if (is_hidden(field)) {
           continue;
         }
-        visit_type(field.get_type());
+        visit_type(field.type().get_type());
       }
       objects_.push_back(object);
     }
@@ -1372,17 +1372,17 @@ void py3_mstch_program::visit_type_single_service(const t_service* service) {
     }
 
     for (const auto& field : function.params().fields()) {
-      visit_type(field.get_type());
+      visit_type(field.type().get_type());
     }
     const t_stream* stream = function.stream();
     if (const t_throws* exceptions = stream ? stream->exceptions() : nullptr) {
       for (const t_field& field : exceptions->fields()) {
-        const t_type* exType = field.get_type();
-        streamExceptions_.emplace(visit_type(field.get_type()), exType);
+        const t_type* exType = field.type().get_type();
+        streamExceptions_.emplace(visit_type(field.type().get_type()), exType);
       }
     }
     for (const t_field& field : get_elems(function.exceptions())) {
-      visit_type(field.get_type());
+      visit_type(field.type().get_type());
     }
 
     std::string return_type_name;

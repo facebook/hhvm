@@ -77,7 +77,7 @@ const t_const* find_structured_annotation(const t_node& node, const char* uri) {
     const t_const* annotation = field->find_structured_annotation_or_null(uri);
     return annotation ? annotation
                       : t_typedef::get_first_structured_annotation_or_null(
-                            field->get_type(), uri);
+                            field->type().get_type(), uri);
   } else if (auto type = dynamic_cast<const t_type*>(&node)) {
     return t_typedef::get_first_structured_annotation_or_null(type, uri);
   }
@@ -94,7 +94,7 @@ const t_const_value* structured_type_override(
 
 const t_type* type_of_node(const t_node& node) {
   if (auto* field = dynamic_cast<const t_field*>(&node)) {
-    return field->get_type();
+    return field->type().get_type();
   } else if (auto* type = dynamic_cast<const t_type*>(&node)) {
     return type;
   }
@@ -410,7 +410,7 @@ class python_capi_mstch_program : public mstch_program {
   void visit_types_for_objects() {
     for (const t_structured* object : program_->structured_definitions()) {
       for (auto&& field : object->fields()) {
-        visit_type(field.get_type());
+        visit_type(field.type().get_type());
       }
     }
   }
@@ -589,7 +589,7 @@ class python_capi_mstch_struct : public mstch_struct {
       return true;
     }
     for (const auto& f : struct_->fields()) {
-      if (!capi_eligible_field(f) || !capi_eligible_type(f.get_type())) {
+      if (!capi_eligible_field(f) || !capi_eligible_type(f.type().get_type())) {
         return false;
       }
     }

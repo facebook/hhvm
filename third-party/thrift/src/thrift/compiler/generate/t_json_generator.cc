@@ -654,7 +654,7 @@ void t_json_generator::generate_struct(const t_structured* tstruct) {
     }
     indent(f_out_) << "\"" << (*mem_iter)->name() << "\" : {" << endl;
     indent_up();
-    print_spec((*mem_iter)->get_type());
+    print_spec((*mem_iter)->type().get_type());
     f_out_ << "," << endl
            << indent() << "\"required\" : "
            << ((*mem_iter)->qualifier() != t_field_qualifier::optional
@@ -756,7 +756,7 @@ void t_json_generator::generate_service(const t_service* tservice) {
         indent(f_out_) << "{" << endl;
         indent_up();
         print_name((*arg_iter)->name());
-        print_spec((*arg_iter)->get_type());
+        print_spec((*arg_iter)->type().get_type());
         if ((*arg_iter)->default_value() != nullptr) {
           f_out_ << "," << endl << indent() << "\"value\" : ";
           print_const_value((*arg_iter)->default_value());
@@ -785,7 +785,7 @@ void t_json_generator::generate_service(const t_service* tservice) {
         if (ex_iter != exceptions.begin()) {
           f_out_ << "," << endl;
         }
-        indent(f_out_) << to_spec_args((*ex_iter).get_type());
+        indent(f_out_) << to_spec_args((*ex_iter).type().get_type());
       }
       f_out_ << endl;
       indent_down();

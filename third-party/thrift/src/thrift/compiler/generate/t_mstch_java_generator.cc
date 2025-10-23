@@ -916,7 +916,7 @@ class mstch_java_field : public mstch_field {
   }
 
   bool _has_type_adapter() {
-    auto type = field_->get_type();
+    auto type = field_->type().get_type();
     if (type->is<t_typedef>()) {
       if (t_typedef::get_first_structured_annotation_or_null(
               type, kJavaAdapterUri)) {
@@ -940,7 +940,7 @@ class mstch_java_field : public mstch_field {
 
   mstch::node get_typedef_structed_annotation_attribute(
       const char* uri, const std::string& field) {
-    auto type = field_->get_type();
+    auto type = field_->type().get_type();
     if (type->is<t_typedef>()) {
       if (auto annotation =
               t_typedef::get_first_structured_annotation_or_null(type, uri)) {
@@ -1063,7 +1063,7 @@ class mstch_java_field : public mstch_field {
     if (field_->qualifier() == t_field_qualifier::optional) {
       return "null";
     }
-    return default_value_for_type(field->get_type());
+    return default_value_for_type(field->type().get_type());
   }
   std::string default_value_for_type(const t_type* type) {
     if (const t_typedef* typedef_ = type->try_as<t_typedef>()) {
@@ -1132,7 +1132,7 @@ class mstch_java_field : public mstch_field {
     if (field_->has_structured_annotation(kStringsUri)) {
       return true;
     }
-    auto type = field_->get_type();
+    auto type = field_->type().get_type();
     if (type->is<t_typedef>() &&
         t_typedef::get_first_structured_annotation_or_null(type, kStringsUri) !=
             nullptr) {
@@ -1147,7 +1147,7 @@ class mstch_java_field : public mstch_field {
     constexpr auto kOnInvalidUtf8 = "onInvalidUtf8";
     constexpr int kActionReport = 1;
 
-    auto type = field_->get_type();
+    auto type = field_->type().get_type();
     if (type->is<t_typedef>()) {
       if (const t_const* annotation =
               t_typedef::get_first_structured_annotation_or_null(

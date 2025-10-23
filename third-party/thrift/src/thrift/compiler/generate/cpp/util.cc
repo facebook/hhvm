@@ -256,7 +256,7 @@ bool field_transitively_refers_to_unique(const t_field* field) {
     }
   }
   std::queue<const t_type*> queue;
-  queue.push(field->get_type());
+  queue.push(field->type().get_type());
   while (!queue.empty()) {
     auto type = queue.front()->get_true_type();
     queue.pop();
@@ -305,7 +305,7 @@ bool is_eligible_for_constexpr::operator()(const t_type* type) {
   if (const auto* s = dynamic_cast<const t_structured*>(type)) {
     result = eligible::yes;
     for_each_transitive_field(s, [&](const t_field* field) {
-      result = check(field->get_type());
+      result = check(field->type().get_type());
       if (result == eligible::no) {
         return false;
       } else if (is_explicit_ref(field) || is_lazy(field)) {

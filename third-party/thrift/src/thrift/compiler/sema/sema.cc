@@ -335,7 +335,8 @@ void match_type_with_const_value(
           // TODO(sadroeck) - Deprecate this behavior
           map_key->convert_identifier_to_string();
         }
-        match_type_with_const_value(ctx, mctx, field->get_type(), map_val);
+        match_type_with_const_value(
+            ctx, mctx, field->type().get_type(), map_val);
       }
     }
   } else if (const t_enum* enm = type->try_as<t_enum>()) {
@@ -385,7 +386,7 @@ void match_field_type_with_default_value(
   maybe_match_type_with_const_value(
       ctx,
       mctx,
-      field_node.get_type(),
+      field_node.type().get_type(),
       const_cast<t_const_value*>(field_node.default_value()));
 }
 
@@ -516,7 +517,7 @@ void add_annotations_to_node_type(
     std::map<std::string, std::string> annotations,
     t_program& program,
     deprecated_annotation_value::origin origin) {
-  const t_type* node_type = node.get_type();
+  const t_type* node_type = node.type().get_type();
 
   if (annotations.empty()) {
     if (!node_type->unstructured_annotations().empty()) {

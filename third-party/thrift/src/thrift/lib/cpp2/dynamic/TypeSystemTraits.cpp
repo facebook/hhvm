@@ -26,7 +26,7 @@ struct ResolveType {
     using S = type::TypeUri::Type;
     switch (type.getType()) {
       case S::uri: {
-        const auto& uri = type.uri_ref().value();
+        const auto& uri = type.uri().value();
         if (uri == thrift::uri<type::AnyStruct>()) {
           return TypeRef{TypeRef::Any{}};
         }
@@ -62,16 +62,16 @@ struct ResolveType {
       case S::binaryType:
         return TypeRef{TypeRef::Binary{}};
       case S::enumType:
-        return (*this)(type.name()->enumType_ref().value());
+        return (*this)(type.name()->enumType().value());
       case S::structType:
-        return (*this)(type.name()->structType_ref().value());
+        return (*this)(type.name()->structType().value());
       case S::unionType:
-        return (*this)(type.name()->unionType_ref().value());
+        return (*this)(type.name()->unionType().value());
       case S::exceptionType:
         // Exceptions will be resolved as structs
-        return (*this)(type.name()->exceptionType_ref().value());
+        return (*this)(type.name()->exceptionType().value());
       case S::typedefType:
-        return (*this)(type.name()->typedefType_ref().value());
+        return (*this)(type.name()->typedefType().value());
       case S::listType:
         return ts.ListOf((*this)(type.params()->at(0)));
       case S::setType:

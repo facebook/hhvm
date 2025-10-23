@@ -52,8 +52,6 @@ func runStressTest(t *testing.T, serverTransport thrift.TransportID) {
 
 	var clientTransportOption thrift.ClientOption
 	switch serverTransport {
-	case thrift.TransportIDHeader:
-		clientTransportOption = thrift.WithHeader()
 	case thrift.TransportIDUpgradeToRocket:
 		clientTransportOption = thrift.WithUpgradeToRocket()
 	case thrift.TransportIDRocket:

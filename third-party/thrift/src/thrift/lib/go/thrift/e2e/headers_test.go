@@ -34,9 +34,6 @@ import (
 // TestServiceHeaders ensures that persistent headers can be retrieved
 // from the context passed to the server handler.
 func TestServiceHeaders(t *testing.T) {
-	t.Run("Header", func(t *testing.T) {
-		runHeaderTest(t, thrift.TransportIDHeader)
-	})
 	t.Run("UpgradeToRocket", func(t *testing.T) {
 		runHeaderTest(t, thrift.TransportIDUpgradeToRocket)
 	})
@@ -55,8 +52,6 @@ func runHeaderTest(t *testing.T, serverTransport thrift.TransportID) {
 
 	var clientTransportOption thrift.ClientOption
 	switch serverTransport {
-	case thrift.TransportIDHeader:
-		clientTransportOption = thrift.WithHeader()
 	case thrift.TransportIDUpgradeToRocket:
 		clientTransportOption = thrift.WithUpgradeToRocket()
 	case thrift.TransportIDRocket:

@@ -152,7 +152,7 @@ func NewClient(opts ...ClientOption) (RequestChannel, error) {
 	config := newClientConfig(clientOpts...)
 
 	if config.transport == TransportIDUnknown {
-		panic(types.NewTransportException(types.NOT_SUPPORTED, "no transport specified! Please use thrift.WithHeader() or thrift.WithUpgradeToRocket() in the thrift.NewClient call"))
+		panic(types.NewTransportException(types.NOT_SUPPORTED, "no transport specified! Please use thrift.WithUpgradeToRocket() in the thrift.NewClient call"))
 	}
 
 	// Important: TLS config must be modified *before* the dialerFn below is called.

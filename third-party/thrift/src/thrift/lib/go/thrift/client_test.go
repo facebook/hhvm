@@ -167,7 +167,7 @@ func TestNewClientCreation(t *testing.T) {
 }
 
 func TestValidTransportRequired(t *testing.T) {
-	require.PanicsWithError(t, "no transport specified! Please use thrift.WithHeader() or thrift.WithUpgradeToRocket() in the thrift.NewClient call", func() {
+	require.PanicsWithError(t, "no transport specified! Please use thrift.WithUpgradeToRocket() in the thrift.NewClient call", func() {
 		NewClient( /* no transport option given */ )
 	})
 }

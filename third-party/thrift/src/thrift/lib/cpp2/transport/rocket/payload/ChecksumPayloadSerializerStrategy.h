@@ -100,8 +100,11 @@ class ChecksumPayloadSerializerStrategy final
       folly::SocketFds fds,
       bool encodeMetadataUsingBinary,
       folly::AsyncTransport* transport) {
-    if (auto checksumOpt = calculateChecksum(*payload, metadata->checksum())) {
-      metadata->checksum() = *checksumOpt;
+    if (payload != nullptr) {
+      if (auto checksumOpt =
+              calculateChecksum(*payload, metadata->checksum())) {
+        metadata->checksum() = *checksumOpt;
+      }
     }
     return delegate_.packWithFds(
         metadata,

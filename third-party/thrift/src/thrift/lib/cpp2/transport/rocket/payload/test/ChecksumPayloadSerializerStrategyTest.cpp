@@ -129,3 +129,24 @@ TEST(
     EXPECT_EQ(TApplicationException::CHECKSUM_MISMATCH, ex.getType());
   }
 }
+
+// Test for null payload with NONE checksum algorithm
+TEST(
+    ChecksumPayloadSerializerStrategyTest,
+    TestPackWithNullPayloadAndNoneAlgorithm) {
+  ChecksumPayloadSerializerStrategy<DefaultPayloadSerializerStrategy> strategy;
+  RequestRpcMetadata metadata;
+  metadata.protocol() = ProtocolId::COMPACT;
+
+  Checksum checksum;
+  checksum.algorithm() = ChecksumAlgorithm::NONE;
+  metadata.checksum() = checksum;
+
+  // Null payload with NONE algorithm should work fine
+  auto payload = strategy.packWithFds(
+      &metadata,
+      std::unique_ptr<folly::IOBuf>{}, // null payload
+      folly::SocketFds(),
+      false,
+      nullptr);
+}

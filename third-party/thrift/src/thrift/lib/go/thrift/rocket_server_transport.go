@@ -73,10 +73,13 @@ func (r *rocketServerTransport) Accept(acceptor transport.ServerTransportAccepto
 // You can specify notifier chan, it'll be sent true/false when server listening success/failed.
 func (r *rocketServerTransport) Listen(ctx context.Context, notifier chan<- bool) error {
 	notifier <- true
-	go func() {
-		<-ctx.Done()
+
+	// Close listener on context cancellation
+	stopAfter := context.AfterFunc(ctx, func() {
 		r.listener.Close()
-	}()
+	})
+	defer stopAfter()
+
 	err := r.acceptLoop(ctx)
 	if ctx.Err() != nil {
 		return ctx.Err()

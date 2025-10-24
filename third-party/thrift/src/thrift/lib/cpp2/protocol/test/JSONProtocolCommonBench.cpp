@@ -40,6 +40,14 @@ check_thrift_json_read_whitespace(JSONProtocolReaderCommon& reader) {
   return static_cast<Reader&>(reader).readWhitespace();
 }
 
+extern "C" FOLLY_KEEP void check_thrift_json_read_string(
+    JSONProtocolReaderCommon& reader, std::string& string) {
+  struct Reader : JSONProtocolReaderCommon {
+    using JSONProtocolReaderCommon::readJSONString;
+  };
+  static_cast<Reader&>(reader).readJSONString(string);
+}
+
 namespace {
 
 template <typename F>
@@ -68,6 +76,12 @@ void baseline(size_t iters) {
   });
 }
 
+} // namespace
+
+BENCHMARK_NAMED_PARAM(baseline, baseline)
+
+namespace {
+
 void read_whitespace(size_t iters, size_t spaces, bool more, bool endl) {
   struct Reader : JSONProtocolReaderCommon {
     using JSONProtocolReaderCommon::readWhitespace;
@@ -85,8 +99,6 @@ void read_whitespace(size_t iters, size_t spaces, bool more, bool endl) {
 }
 
 } // namespace
-
-BENCHMARK_NAMED_PARAM(baseline, baseline)
 
 BENCHMARK_DRAW_LINE();
 
@@ -147,6 +159,108 @@ BENCHMARK_NAMED_PARAM(read_whitespace, ws_endl_0d, 0x0d, true, true)
 BENCHMARK_NAMED_PARAM(read_whitespace, ws_endl_0e, 0x0e, true, true)
 BENCHMARK_NAMED_PARAM(read_whitespace, ws_endl_0f, 0x0f, true, true)
 BENCHMARK_NAMED_PARAM(read_whitespace, ws_endl_10, 0x10, true, true)
+
+namespace {
+
+constexpr auto _nil = R"(!)"sv;
+constexpr auto _sym = R"(\n)"sv;
+constexpr auto _hex = R"(\u0021)"sv;
+constexpr auto _sur = R"(\uD989\uDE3A)"sv;
+
+string quote(size_t chars, size_t reps, string_view suf) {
+  constexpr auto prefs = array{""sv, "f"sv, "foo"sv, "foo bar"sv};
+  if (chars == 0 || chars > prefs.size()) {
+    throw logic_error("bad chars");
+  }
+  auto in = fmt::format("{}{}", prefs[chars - 1], suf);
+  while (reps--) {
+    auto tmp = std::move(in);
+    in = tmp + tmp;
+  }
+  return fmt::format("\"{}\"", in);
+}
+
+void read_json_string(
+    size_t iters, bool utf8, size_t reps, size_t chars, string_view suf) {
+  struct Reader : JSONProtocolReaderCommon {
+    using JSONProtocolReaderCommon::readJSONString;
+  };
+  BenchmarkSuspender bs;
+  auto str = quote(chars, reps, suf);
+  IOBuf buf(IOBuf::WRAP_BUFFER, ByteRange(StringPiece(str)));
+  Cursor cur(&buf);
+  (void)cur.peekBytes();
+  bs.dismissing([&] {
+    reading(iters, cur, [&](Reader& r, string& _) {
+      r.setAllowDecodeUTF8(utf8);
+      r.readJSONString(_);
+    });
+  });
+}
+
+} // namespace
+
+BENCHMARK_DRAW_LINE();
+
+BENCHMARK_NAMED_PARAM(read_json_string, ascii_4_1_nil, false, 0x4, 1, _nil)
+BENCHMARK_NAMED_PARAM(read_json_string, ascii_4_1_sym, false, 0x4, 1, _sym)
+BENCHMARK_NAMED_PARAM(read_json_string, ascii_4_1_hex, false, 0x4, 1, _hex)
+BENCHMARK_NAMED_PARAM(read_json_string, ascii_4_2_nil, false, 0x4, 2, _nil)
+BENCHMARK_NAMED_PARAM(read_json_string, ascii_4_2_sym, false, 0x4, 2, _sym)
+BENCHMARK_NAMED_PARAM(read_json_string, ascii_4_2_hex, false, 0x4, 2, _hex)
+BENCHMARK_NAMED_PARAM(read_json_string, ascii_4_3_nil, false, 0x4, 3, _nil)
+BENCHMARK_NAMED_PARAM(read_json_string, ascii_4_3_sym, false, 0x4, 3, _sym)
+BENCHMARK_NAMED_PARAM(read_json_string, ascii_4_3_hex, false, 0x4, 3, _hex)
+BENCHMARK_NAMED_PARAM(read_json_string, ascii_4_4_nil, false, 0x4, 4, _nil)
+BENCHMARK_NAMED_PARAM(read_json_string, ascii_4_4_sym, false, 0x4, 4, _sym)
+BENCHMARK_NAMED_PARAM(read_json_string, ascii_4_4_hex, false, 0x4, 4, _hex)
+BENCHMARK_NAMED_PARAM(read_json_string, ascii_a_1_nil, false, 0xa, 1, _nil)
+BENCHMARK_NAMED_PARAM(read_json_string, ascii_a_1_sym, false, 0xa, 1, _sym)
+BENCHMARK_NAMED_PARAM(read_json_string, ascii_a_1_hex, false, 0xa, 1, _hex)
+BENCHMARK_NAMED_PARAM(read_json_string, ascii_a_2_nil, false, 0xa, 2, _nil)
+BENCHMARK_NAMED_PARAM(read_json_string, ascii_a_2_sym, false, 0xa, 2, _sym)
+BENCHMARK_NAMED_PARAM(read_json_string, ascii_a_2_hex, false, 0xa, 2, _hex)
+BENCHMARK_NAMED_PARAM(read_json_string, ascii_a_3_nil, false, 0xa, 3, _nil)
+BENCHMARK_NAMED_PARAM(read_json_string, ascii_a_3_sym, false, 0xa, 3, _sym)
+BENCHMARK_NAMED_PARAM(read_json_string, ascii_a_3_hex, false, 0xa, 3, _hex)
+BENCHMARK_NAMED_PARAM(read_json_string, ascii_a_4_nil, false, 0xa, 4, _nil)
+BENCHMARK_NAMED_PARAM(read_json_string, ascii_a_4_sym, false, 0xa, 4, _sym)
+BENCHMARK_NAMED_PARAM(read_json_string, ascii_a_4_hex, false, 0xa, 4, _hex)
+
+BENCHMARK_DRAW_LINE();
+
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_4_1_nil, true, 0x4, 1, _nil)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_4_1_sym, true, 0x4, 1, _sym)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_4_1_hex, true, 0x4, 1, _hex)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_4_1_sur, true, 0x4, 1, _sur)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_4_2_nil, true, 0x4, 2, _nil)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_4_2_sym, true, 0x4, 2, _sym)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_4_2_hex, true, 0x4, 2, _hex)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_4_2_sur, true, 0x4, 2, _sur)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_4_3_nil, true, 0x4, 3, _nil)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_4_3_sym, true, 0x4, 3, _sym)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_4_3_hex, true, 0x4, 3, _hex)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_4_3_sur, true, 0x4, 3, _sur)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_4_4_nil, true, 0x4, 4, _nil)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_4_4_sym, true, 0x4, 4, _sym)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_4_4_hex, true, 0x4, 4, _hex)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_4_4_sur, true, 0x4, 4, _sur)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_a_1_nil, true, 0xa, 1, _nil)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_a_1_sym, true, 0xa, 1, _sym)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_a_1_hex, true, 0xa, 1, _hex)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_a_1_sur, true, 0xa, 1, _sur)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_a_2_nil, true, 0xa, 2, _nil)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_a_2_sym, true, 0xa, 2, _sym)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_a_2_hex, true, 0xa, 2, _hex)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_a_2_sur, true, 0xa, 2, _sur)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_a_3_nil, true, 0xa, 3, _nil)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_a_3_sym, true, 0xa, 3, _sym)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_a_3_hex, true, 0xa, 3, _hex)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_a_3_sur, true, 0xa, 3, _sur)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_a_4_nil, true, 0xa, 4, _nil)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_a_4_sym, true, 0xa, 4, _sym)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_a_4_hex, true, 0xa, 4, _hex)
+BENCHMARK_NAMED_PARAM(read_json_string, utf8_a_4_sur, true, 0xa, 4, _sur)
 
 int main(int argc, char** argv) {
   folly::Init init(&argc, &argv);

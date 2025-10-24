@@ -42,7 +42,7 @@ class TestAsyncTransport
 
     proxygen::TimePoint time_;
     size_t count_;
-    struct iovec vec_[];
+    struct iovec vec_[]; // NOLINT(modernize-avoid-c-arrays)
   };
 
   explicit TestAsyncTransport(folly::EventBase* eventBase);

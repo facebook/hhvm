@@ -41,32 +41,33 @@ class ServerStreamMultiPublisher {
       : encodeToStreams_(std::make_shared<EncodeToStreams>()) {}
 
   void next(ConditionalPayload payload) {
-    encodeToStreams_->withRLock([=, this, payload = std::move(payload)](
-                                    const auto& map) {
-      auto remaining = map.size();
-      for (auto& [encode, streams] : map) {
-        bool canMove = --remaining == 0;
-        ConditionalPayload copy = canMove ? std::move(payload) : payload;
+    encodeToStreams_->withRLock(
+        [this, payload = std::move(payload)](const auto& map) {
+          auto remaining = map.size();
+          for (auto& [encode, streams] : map) {
+            bool canMove = --remaining == 0;
+            ConditionalPayload copy = canMove ? std::move(payload) : payload;
 
-        if (!encode) {
-          publishAll(folly::Try<ConditionalPayload>(std::move(copy)), streams);
-          continue;
-        }
+            if (!encode) {
+              this->publishAll(
+                  folly::Try<ConditionalPayload>(std::move(copy)), streams);
+              continue;
+            }
 
-        if constexpr (WithHeader) {
-          folly::Try<StreamPayload> sp =
-              detail::encodeMessageVariant(encode, std::move(copy));
-          if (sp->payload) {
-            sp->payload->coalesce();
+            if constexpr (WithHeader) {
+              folly::Try<StreamPayload> sp =
+                  detail::encodeMessageVariant(encode, std::move(copy));
+              if (sp->payload) {
+                sp->payload->coalesce();
+              }
+              this->publishAll(std::move(sp), streams);
+            } else {
+              auto encoded = (*encode)(std::move(copy));
+              encoded->payload->coalesce();
+              this->publishAll(std::move(encoded), streams);
+            }
           }
-          publishAll(std::move(sp), streams);
-        } else {
-          auto encoded = (*encode)(std::move(copy));
-          encoded->payload->coalesce();
-          publishAll(std::move(encoded), streams);
-        }
-      }
-    });
+        });
   }
 
   void complete(folly::exception_wrapper ew) && {

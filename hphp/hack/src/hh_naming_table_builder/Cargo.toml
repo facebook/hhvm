@@ -25,7 +25,7 @@ hh_slog = { version = "0.0.0", path = "../utils/hh_slog/cargo/hh_slog" }
 hhi = { version = "0.0.0", path = "../hhi/rust" }
 names = { version = "0.0.0", path = "../naming/names_rust" }
 oxidized = { version = "0.0.0", path = "../oxidized" }
-rayon = "1.9.0"
+rayon = "1.11.0"
 relative_path = { version = "0.0.0", path = "../utils/rust/relative_path" }
 si_addendum = { version = "0.0.0", path = "../utils/cargo/si_addendum" }
 slog = { version = "2.7", features = ["max_level_trace", "nested-values"] }

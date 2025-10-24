@@ -22,5 +22,5 @@ ocamlrep_caml_builtins = { version = "0.1.0", git = "https://github.com/facebook
 ocamlrep_custom = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_ocamlpool = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 oxidized = { version = "0.0.0", path = "../../../oxidized" }
-rayon = "1.9.0"
+rayon = "1.11.0"
 relative_path = { version = "0.0.0", path = "../../../utils/rust/relative_path" }

@@ -19,7 +19,7 @@ depgraph_writer = { version = "0.0.0", path = "../../../cargo/depgraph_writer" }
 hash = { version = "0.0.0", path = "../../../../utils/hash" }
 log = { version = "0.4.27", features = ["kv_unstable", "kv_unstable_std"] }
 newtype = { version = "0.0.0", path = "../../../../utils/newtype" }
-rayon = "1.9.0"
+rayon = "1.11.0"
 smallvec = { version = "1.15", features = ["impl_bincode", "serde", "specialization", "union"] }
 vint64 = "1.0.1"
 zstd = { version = "0.13", features = ["experimental", "zstdmt"] }

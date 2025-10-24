@@ -37,6 +37,7 @@ import (
 type RSocketClient interface {
 	SendSetup(ctx context.Context) error
 	FireAndForget(
+		ctx context.Context,
 		messageName string,
 		headers map[string]string,
 		dataBytes []byte,
@@ -189,7 +190,7 @@ func (r *rsocketClient) RequestResponse(
 	return nil, nil, err
 }
 
-func (r *rsocketClient) FireAndForget(messageName string, headers map[string]string, dataBytes []byte) error {
+func (r *rsocketClient) FireAndForget(_ context.Context, messageName string, headers map[string]string, dataBytes []byte) error {
 	r.resetDeadline()
 	request, err := rocket.EncodeRequestPayload(
 		messageName,

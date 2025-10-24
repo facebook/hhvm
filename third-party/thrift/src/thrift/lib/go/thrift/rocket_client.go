@@ -141,7 +141,7 @@ func (p *rocketClient) Flush() error {
 	}
 	headers := unionMaps(p.reqHeaders, p.persistentHeaders)
 	if p.writeType == types.ONEWAY {
-		return p.client.FireAndForget(p.messageName, headers, dataBytes)
+		return p.client.FireAndForget(ctx, p.messageName, headers, dataBytes)
 	}
 	if p.writeType != types.CALL {
 		return nil
@@ -174,7 +174,7 @@ func (p *rocketClient) SendRequestNoResponse(ctx context.Context, messageName st
 		writeHeaders = rpcOpts.GetWriteHeaders()
 	}
 	headers := unionMaps(writeHeaders, p.persistentHeaders)
-	return p.client.FireAndForget(messageName, headers, dataBytes)
+	return p.client.FireAndForget(ctx, messageName, headers, dataBytes)
 }
 
 func (p *rocketClient) SendRequestResponse(ctx context.Context, messageName string, request WritableStruct, response ReadableStruct) error {

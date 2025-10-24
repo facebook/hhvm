@@ -50,6 +50,10 @@ class TValidator:
         self.custom_validators[name] = validator
 
     def validate(self, msg):
+        # WARNING: `thrift_spec` is a deprecated internal field that only exists in thrift-py-deprecated.
+        # Usage of this field is unsafe and will break during migration to newer Thrift versions.
+        # Please refactor your code to avoid relying on `thrift_spec`.
+        # Details: https://www.internalfb.com/wiki/Thrift-Python/Migration_Guide/From_thrift-py-deprecated/#4-2-using-attribute-thri
         if not hasattr(msg, "thrift_spec"):
             _log.error("Not a valid thrift object")
             return False

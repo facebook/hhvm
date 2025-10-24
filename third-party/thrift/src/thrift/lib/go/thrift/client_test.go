@@ -91,7 +91,7 @@ func TestNewClientConnectionScenarios(t *testing.T) {
 			return net.Dial(addr.Network(), addr.String())
 		}),
 	)
-	expectedErrMsg = "Unknown protocol id: 12345"
+	expectedErrMsg = "unsupported ProtocolID: 12345"
 	require.ErrorContains(t, err, expectedErrMsg)
 	// IMPORTANT!
 	// Even though we perform an explicit call to Close() in NewClient()

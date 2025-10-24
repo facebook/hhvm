@@ -71,12 +71,15 @@ type rsocketClient struct {
 	initGroup singleflight.Group
 
 	useZstd bool
+
+	protoID rpcmetadata.ProtocolId
 }
 
-func newRSocketClient(conn net.Conn) RSocketClient {
+func newRSocketClient(conn net.Conn, protoID rpcmetadata.ProtocolId) RSocketClient {
 	return &rsocketClient{
 		conn:            conn,
 		clientScheduler: scheduler.NewElastic(math.MaxInt32),
+		protoID:         protoID,
 	}
 }
 

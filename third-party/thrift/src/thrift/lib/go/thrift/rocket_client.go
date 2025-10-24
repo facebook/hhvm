@@ -28,6 +28,7 @@ import (
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/format"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 )
 
 type rocketClient struct {
@@ -69,7 +70,16 @@ func newRocketClient(
 	ioTimeout time.Duration,
 	persistentHeaders map[string]string,
 ) (Protocol, error) {
-	return newRocketClientFromRsocket(newRSocketClient(conn), protoID, ioTimeout, persistentHeaders)
+	var rpcProtocolID rpcmetadata.ProtocolId
+	switch protoID {
+	case types.ProtocolIDBinary:
+		rpcProtocolID = rpcmetadata.ProtocolId_BINARY
+	case types.ProtocolIDCompact:
+		rpcProtocolID = rpcmetadata.ProtocolId_COMPACT
+	default:
+		return nil, fmt.Errorf("unsupported ProtocolID: %d", protoID)
+	}
+	return newRocketClientFromRsocket(newRSocketClient(conn, rpcProtocolID), protoID, ioTimeout, persistentHeaders)
 }
 
 func newRocketClientFromRsocket(

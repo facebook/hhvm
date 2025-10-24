@@ -1,0 +1,16 @@
+
+Warning: Value returned from function nn() must be of type @nonnull, null given in %s/checked_unsafe_cast/nest.php on line 8
+
+Warning: Runtime type-check: Expected nonnull, got null in %s/checked_unsafe_cast/nest.php on line 13
+
+Warning: Value returned from function nu() must be of type @nonnull, null given in %s/checked_unsafe_cast/nest.php on line 15
+
+Warning: Runtime type-check: Expected nonnull, got null in %s/checked_unsafe_cast/nest.php on line 20
+
+Warning: Value returned from function un() must be of type @nonnull, null given in %s/checked_unsafe_cast/nest.php on line 22
+
+Warning: Runtime type-check: Expected nonnull, got null in %s/checked_unsafe_cast/nest.php on line 27
+
+Warning: Runtime type-check: Expected nonnull, got null in %s/checked_unsafe_cast/nest.php on line 27
+
+Warning: Value returned from function uu() must be of type @nonnull, null given in %s/checked_unsafe_cast/nest.php on line 29

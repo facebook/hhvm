@@ -16,7 +16,7 @@ pub struct DropUnsafeCast {
 }
 
 impl Pass for DropUnsafeCast {
-    fn on_ty_expr_top_down(&mut self, _env: &Env, elem: &mut Expr) -> ControlFlow<()> {
+    fn on_ty_expr_bottom_up(&mut self, _env: &Env, elem: &mut Expr) -> ControlFlow<()> {
         let Expr(_, _, expr_) = elem;
         // Checked UNSAFE_NONNULL_CAST is not yet implemented, so it is
         // unconditionally removed

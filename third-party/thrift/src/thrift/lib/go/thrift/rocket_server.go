@@ -265,7 +265,8 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 		s.observer.ProcessDelay(processDelay)
 
 		// Track actual handler execution time
-		if _, err := process(ctx, s.proc, protocol, s.pstats, s.observer); err != nil {
+		appException, err := process(ctx, s.proc, protocol, s.pstats, s.observer)
+		if err != nil {
 			// Notify observer that connection was dropped due to unparseable message begin
 			s.observer.ConnDropped()
 			return nil, err
@@ -274,12 +275,16 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 		protocol.setRequestHeader(LoadHeaderKey, fmt.Sprintf("%d", loadFn(s.stats, s.totalActiveRequestCount)))
 
 		responseCompressionAlgo := rocket.CompressionAlgorithmFromCompressionConfig(metadata.GetCompressionConfig())
+		dataBytes := protocol.Bytes()
+		if appException != nil {
+			dataBytes = []byte(appException.Error())
+		}
 		payload, err := rocket.EncodeResponsePayload(
 			rpcFuncName,
 			protocol.messageType,
 			protocol.getRequestHeaders(),
 			responseCompressionAlgo,
-			protocol.Bytes(),
+			dataBytes,
 		)
 
 		// Track actual handler execution time

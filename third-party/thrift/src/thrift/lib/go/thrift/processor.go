@@ -197,5 +197,5 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 		}
 	}
 	// if we got here, we successfully processed the message
-	return nil, nil
+	return appException, nil
 }

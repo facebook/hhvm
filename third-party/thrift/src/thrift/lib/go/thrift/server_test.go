@@ -721,7 +721,8 @@ func TestProcessorScenarios(t *testing.T) {
 		client := dummyif.NewDummyChannelClient(channel)
 		err := client.GetUndeclaredException(context.Background())
 		require.Error(t, err)
-		require.ErrorContains(t, err, "undeclared exception")
+		// Extra quotes are intentional, until Rocket errors match the spec
+		require.ErrorContains(t, err, "\"Internal error processing GetUndeclaredException: undeclared exception\"")
 	})
 	t.Run("declared_exception", func(t *testing.T) {
 		client := dummyif.NewDummyChannelClient(channel)

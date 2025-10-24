@@ -167,7 +167,14 @@ func (r *rsocketClient) RequestResponse(
 	dataBytes []byte,
 ) (map[string]string, []byte, error) {
 	r.resetDeadline()
-	request, err := rocket.EncodeRequestPayload(messageName, protoID, rpcmetadata.RpcKind_SINGLE_REQUEST_SINGLE_RESPONSE, headers, rpcmetadata.CompressionAlgorithm_NONE, dataBytes)
+	request, err := rocket.EncodeRequestPayload(
+		messageName,
+		protoID,
+		rpcmetadata.RpcKind_SINGLE_REQUEST_SINGLE_RESPONSE,
+		headers,
+		rpcmetadata.CompressionAlgorithm_NONE,
+		dataBytes,
+	)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -185,7 +192,14 @@ func (r *rsocketClient) RequestResponse(
 
 func (r *rsocketClient) FireAndForget(messageName string, protoID types.ProtocolID, headers map[string]string, dataBytes []byte) error {
 	r.resetDeadline()
-	request, err := rocket.EncodeRequestPayload(messageName, protoID, rpcmetadata.RpcKind_SINGLE_REQUEST_NO_RESPONSE, headers, rpcmetadata.CompressionAlgorithm_NONE, dataBytes)
+	request, err := rocket.EncodeRequestPayload(
+		messageName,
+		protoID,
+		rpcmetadata.RpcKind_SINGLE_REQUEST_NO_RESPONSE,
+		headers,
+		rpcmetadata.CompressionAlgorithm_NONE,
+		dataBytes,
+	)
 	if err != nil {
 		return err
 	}

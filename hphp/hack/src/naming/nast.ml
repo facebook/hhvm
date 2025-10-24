@@ -835,7 +835,7 @@ module Visitor_DEPRECATED = struct
         | Class_const (cid, id) -> this#on_class_const acc cid id
         | Call { func = e; args = el; unpacked_arg; _ } ->
           this#on_call acc e el unpacked_arg
-        | FunctionPointer (fpid, targs) ->
+        | FunctionPointer (fpid, targs, _) ->
           this#on_function_pointer acc fpid targs
         | String2 el -> this#on_string2 acc el
         | PrefixedString (_, e) -> this#on_expr acc e

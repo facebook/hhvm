@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9f71ac8f6616bafee402c8b82064b9d5>>
+// @generated SignedSource<<6eac454cb9cb6efbd8d67a1e59cad6fb>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -285,6 +285,22 @@ pub trait Pass: PassClone {
     }
     #[inline(always)]
     fn on_ty_hole_source_bottom_up(&mut self, env: &Env, elem: &mut HoleSource) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_function_pointer_source_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut FunctionPointerSource,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_function_pointer_source_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut FunctionPointerSource,
+    ) -> ControlFlow<()> {
         Continue(())
     }
     #[inline(always)]
@@ -1776,6 +1792,28 @@ impl Pass for Passes {
     fn on_ty_hole_source_bottom_up(&mut self, env: &Env, elem: &mut HoleSource) -> ControlFlow<()> {
         for pass in &mut self.passes {
             pass.on_ty_hole_source_bottom_up(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_function_pointer_source_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut FunctionPointerSource,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_function_pointer_source_top_down(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_function_pointer_source_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut FunctionPointerSource,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_function_pointer_source_bottom_up(env, elem)?;
         }
         Continue(())
     }

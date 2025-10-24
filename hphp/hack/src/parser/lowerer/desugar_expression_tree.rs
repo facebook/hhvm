@@ -2433,7 +2433,11 @@ fn global_func_ptr(sid: &Sid) -> Expr {
     Expr::new(
         (),
         pos,
-        Expr_::mk_function_pointer(ast::FunctionPtrId::FPId(sid.clone()), vec![]),
+        Expr_::mk_function_pointer(
+            ast::FunctionPtrId::FPId(sid.clone()),
+            vec![],
+            aast::FunctionPointerSource::Lowered,
+        ),
     )
 }
 
@@ -2444,6 +2448,7 @@ fn static_meth_ptr(pos: &Pos, cid: &ClassId, meth: &Pstring) -> Expr {
         Expr_::mk_function_pointer(
             aast::FunctionPtrId::FPClassConst(cid.clone(), meth.clone()),
             vec![],
+            aast::FunctionPointerSource::Lowered,
         ),
     )
 }

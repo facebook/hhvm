@@ -3722,8 +3722,8 @@ end = struct
           (* Shouldn't happen *)
           let (env, ty) = Env.fresh_type_error env pos in
           make_result env p (Aast.Method_caller (pos_cname, meth_name)) ty))
-    | FunctionPointer (fp_id, targs) ->
-      Function_pointer.synth p (fp_id, targs) env
+    | FunctionPointer (fp_id, targs, source) ->
+      Function_pointer.synth p (fp_id, targs, source) env
     | Lplaceholder p ->
       let r = Reason.placeholder p in
       let ty = MakeType.void r in
@@ -8562,7 +8562,9 @@ end
 and Function_pointer : sig
   val synth :
     Pos.t ->
-    (unit, unit) function_ptr_id * unit Aast_defs.targ list ->
+    (unit, unit) function_ptr_id
+    * unit Aast_defs.targ list
+    * Aast_defs.function_pointer_source ->
     env ->
     env * Tast.expr * locl_ty
 end = struct
@@ -8861,7 +8863,7 @@ end = struct
       let (env, ty) = Env.fresh_type_error env (fst method_name) in
       (env, ty)
 
-  let synth_static_method pos class_id method_name ty_args env =
+  let synth_static_method pos class_id method_name ty_args source env =
     let (env, _, tclass_id, class_ty) =
       Class_id.class_expr ~is_function_pointer:true env [] class_id
     in
@@ -8896,7 +8898,7 @@ end = struct
       make_function_ref ~contains_generics:false env pos method_ty
     in
     let expr =
-      FunctionPointer (FP_class_const (tclass_id, method_name), ty_args)
+      FunctionPointer (FP_class_const (tclass_id, method_name), ty_args, source)
     in
     make_result env pos expr method_ty
 
@@ -8904,7 +8906,7 @@ end = struct
 
   (** Synthesize a (possibly polymorphic) function type based on the declared
          function signature of a top-level function *)
-  let synth_top_level pos fun_id ty_args env =
+  let synth_top_level pos fun_id ty_args source env =
     let (env, ty, ty_args) =
       Fun_id.synth ~is_function_pointer:true fun_id ty_args env
     in
@@ -8915,16 +8917,16 @@ end = struct
     let ty =
       let contains_generics = not (List.is_empty ty_args) in
       make_function_ref ~contains_generics env pos ty
-    and expr = FunctionPointer (FP_id fun_id, ty_args) in
+    and expr = FunctionPointer (FP_id fun_id, ty_args, source) in
     make_result env pos expr ty
 
-  let synth_poly pos (fpid, args) env =
+  let synth_poly pos (fpid, args, source) env =
     match (fpid, args) with
-    | (FP_id fun_id, ty_args) -> synth_top_level pos fun_id ty_args env
+    | (FP_id fun_id, ty_args) -> synth_top_level pos fun_id ty_args source env
     | (FP_class_const (class_id, method_name), ty_args) ->
-      synth_static_method pos class_id method_name ty_args env
+      synth_static_method pos class_id method_name ty_args source env
 
-  let synth_mono pos (fpid, args) env =
+  let synth_mono pos (fpid, args, source) env =
     match (fpid, args) with
     | (FP_class_const (cid, meth), targs) ->
       let (env, _, ce, cty) =
@@ -8958,7 +8960,7 @@ end = struct
       make_result
         env
         pos
-        (Aast.FunctionPointer (FP_class_const (ce, meth), tal))
+        (Aast.FunctionPointer (FP_class_const (ce, meth), tal, source))
         fpty
     | (FP_id fun_id, ty_args) ->
       let (env, ty, ty_args) =
@@ -8974,12 +8976,18 @@ end = struct
           pos
           ty
       in
-      make_result env pos (FunctionPointer (FP_id fun_id, ty_args)) ty
+      make_result env pos (FunctionPointer (FP_id fun_id, ty_args, source)) ty
 
   let synth pos fpid_args env =
-    if TypecheckerOptions.tco_poly_function_pointers env.genv.tcopt then
+    let (_, _, source) = fpid_args in
+    match source with
+    | Aast_defs.Code
+      when TypecheckerOptions.tco_poly_function_pointers env.genv.tcopt ->
       synth_poly pos fpid_args env
-    else
+    | Aast_defs.Code
+    | Aast_defs.Lowered ->
+      (* For expression tree code generated during lowering we preserve the
+         treatment of function pointers as monomorphic function types *)
       synth_mono pos fpid_args env
 end
 

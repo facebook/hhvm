@@ -291,7 +291,7 @@ let handler ctx =
     (* Below are the methods where we check for unbound names *)
     method! at_expr env (_, _, e) =
       match e with
-      | Aast.FunctionPointer (Aast.FP_id ((p, name) as id), _)
+      | Aast.FunctionPointer (Aast.FP_id ((p, name) as id), _, _)
       | Aast.(Call { func = (_, _, Aast.Id ((p, name) as id)); _ }) ->
         let custom_err_config = get_custom_error_config env in
         let () = check_fun_name env custom_err_config id in

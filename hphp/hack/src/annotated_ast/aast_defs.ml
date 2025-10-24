@@ -528,7 +528,8 @@ and ('ex, 'en) expr_ =
        *     async { return 1; }
        *     // lowered to:
        *     (async () ==> { return 1; })() *)
-  | FunctionPointer of ('ex, 'en) function_ptr_id * 'ex targ list
+  | FunctionPointer of
+      ('ex, 'en) function_ptr_id * 'ex targ list * function_pointer_source
       (** A reference to a function or method.
        *
        *     foo_fun<>
@@ -790,6 +791,10 @@ and hole_source =
   | UnsafeCast of hint list
   | UnsafeNonnullCast
   | EnforcedCast of hint list
+
+and function_pointer_source =
+  | Code
+  | Lowered
 
 and ('ex, 'en) binop = {
   bop: Ast_defs.bop; [@transform.opaque]

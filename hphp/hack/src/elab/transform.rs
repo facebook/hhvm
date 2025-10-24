@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7a60ba5cdc7ba5e7590c4c75178f01a5>>
+// @generated SignedSource<<3af89af5cb694a41535c3f5734aec361>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -759,6 +759,22 @@ impl Transform for HoleSource {
             HoleSource::EnforcedCast(ref mut __binding_0) => {
                 __binding_0.transform(env, &mut pass.clone())
             }
+        }
+    }
+}
+impl Transform for FunctionPointerSource {
+    fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        let mut in_pass = pass.clone();
+        if let Break(..) = pass.on_ty_function_pointer_source_top_down(env, self) {
+            return;
+        }
+        stack_limit::maybe_grow(|| self.traverse(env, pass));
+        let _ = in_pass.on_ty_function_pointer_source_bottom_up(env, self);
+    }
+    fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        match self {
+            FunctionPointerSource::Code => {}
+            FunctionPointerSource::Lowered => {}
         }
     }
 }

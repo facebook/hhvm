@@ -320,17 +320,20 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
             }
         in
         handle_meth_caller env renamed_call
-      | FunctionPointer (FP_id fn, targs) ->
+      | FunctionPointer (FP_id fn, targs, source) ->
         let fn = NS.elaborate_id env.namespace NS.ElaborateFun fn in
         let targs = List.map targs ~f:(self#on_targ env) in
-        FunctionPointer (FP_id fn, targs)
+        FunctionPointer (FP_id fn, targs, source)
       | FunctionPointer
-          (FP_class_const (((), p1, CIexpr ((), p2, Id x1)), meth_name), targs)
-        ->
+          ( FP_class_const (((), p1, CIexpr ((), p2, Id x1)), meth_name),
+            targs,
+            source ) ->
         let name = elaborate_type_name env x1 in
         let targs = List.map targs ~f:(self#on_targ env) in
         FunctionPointer
-          (FP_class_const (((), p1, CIexpr ((), p2, Id name)), meth_name), targs)
+          ( FP_class_const (((), p1, CIexpr ((), p2, Id name)), meth_name),
+            targs,
+            source )
       | Obj_get (e1, (ty, p, Id x), null_safe, in_parens) ->
         Obj_get (self#on_expr env e1, (ty, p, Id x), null_safe, in_parens)
       | Id ((_, name) as sid) ->

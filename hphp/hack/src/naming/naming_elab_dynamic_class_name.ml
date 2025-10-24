@@ -59,7 +59,7 @@ let on_expr on_error ((ex, pos, expr_) as expr) ~ctx =
         Err.naming @@ Naming_error.Dynamic_class_name_in_strict_mode cg_pos
       in
       Error [err]
-    | Aast.(FunctionPointer (FP_class_const ((_, _, ci), _), _))
+    | Aast.(FunctionPointer (FP_class_const ((_, _, ci), _), _, _))
       when is_dynamic ci ->
       (* TODO[mjt] report error in strict mode *)
       Error []

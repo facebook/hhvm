@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b2edcc0e952694e5def86ad25d6d3e85>>
+// @generated SignedSource<<1e57a1df082bbfe7d3be75b831886fcf>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -872,7 +872,7 @@ pub enum Expr_<Ex, En> {
     ///     foo_fun<>
     ///     FooCls::meth<int>
     #[rust_to_ocaml(inline_tuple)]
-    FunctionPointer(Box<(FunctionPtrId<Ex, En>, Vec<Targ<Ex>>)>),
+    FunctionPointer(Box<(FunctionPtrId<Ex, En>, Vec<Targ<Ex>>, FunctionPointerSource)>),
     /// Integer literal.
     ///
     ///     42
@@ -1159,6 +1159,31 @@ pub enum HoleSource {
     UnsafeNonnullCast,
     EnforcedCast(Vec<Hint>),
 }
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[repr(u8)]
+pub enum FunctionPointerSource {
+    Code,
+    Lowered,
+}
+impl TrivialDrop for FunctionPointerSource {}
+arena_deserializer::impl_deserialize_in_arena!(FunctionPointerSource);
 
 #[derive(
     Clone,

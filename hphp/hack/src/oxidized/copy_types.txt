@@ -5,6 +5,7 @@ aast_defs::ConstraintKind
 aast_defs::EmitId
 aast_defs::EnvAnnot
 aast_defs::FuncReactive
+aast_defs::FunctionPointerSource
 aast_defs::FunKind
 aast_defs::ImportFlavor
 aast_defs::KvcKind

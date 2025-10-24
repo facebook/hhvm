@@ -400,7 +400,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
                     func.accept(env, self.object())?;
                 }
             }
-            Expr_::FunctionPointer(box (fpid, targs)) => {
+            Expr_::FunctionPointer(box (fpid, targs, _)) => {
                 if let Some(sid) = fpid.as_fpid_mut() {
                     namespaces::elaborate_id(&env.namespace, namespaces::ElaborateKind::Fun, sid);
                 } else if let Some(cc) = fpid.as_fpclass_const_mut() {

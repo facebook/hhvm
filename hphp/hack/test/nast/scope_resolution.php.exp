@@ -42,7 +42,7 @@
                             hf_is_readonly_return = None }))
                        ]
                      )))));
-          cv_id = ([10:35-37], "_"); cv_expr = (Some ((), [10:40-53], (FunctionPointer ((FP_class_const (((), [10:40-44], CIself), ([10:46-51], "class"))), [])))); 
+          cv_id = ([10:35-37], "_"); cv_expr = (Some ((), [10:40-53], (FunctionPointer ((FP_class_const (((), [10:40-44], CIself), ([10:46-51], "class"))), [], Code)))); 
           cv_user_attributes = []; cv_doc_comment = None; cv_is_static = true; 
           cv_span = [10:35-53] }
          ];

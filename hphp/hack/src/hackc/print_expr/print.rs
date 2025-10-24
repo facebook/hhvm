@@ -635,7 +635,7 @@ fn print_expr(
         }
         Expr_::Efun(f) => print_efun(ctx, w, env, f),
         Expr_::FunctionPointer(fp) => {
-            let (fp_id, targs) = &**fp;
+            let (fp_id, targs, _) = &**fp;
             match fp_id {
                 ast::FunctionPtrId::FPId(ast::Id(_, sid)) => {
                     w.write_all(lstrip(adjust_id(env, sid).as_ref(), "\\").as_bytes())?

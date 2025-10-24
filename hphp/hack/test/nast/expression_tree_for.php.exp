@@ -27,7 +27,8 @@
                                  f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                  f_body =
                                  { fb_ast =
-                                   [([6:7-10], (Expr ((), [6:7-10], (Assign (((), [6:7-10], (Lvar ([6:7-10], $0fp0))), None, ((), [6:7-10], (FunctionPointer ((FP_id ([6:7-10], "\\foo")), []))))))));
+                                   [([6:7-10],
+                                     (Expr ((), [6:7-10], (Assign (((), [6:7-10], (Lvar ([6:7-10], $0fp0))), None, ((), [6:7-10], (FunctionPointer ((FP_id ([6:7-10], "\\foo")), [], Lowered))))))));
                                      ([4:14-8:4],
                                       (Return
                                          (Some ((), [4:3-13],

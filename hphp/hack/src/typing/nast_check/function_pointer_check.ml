@@ -44,14 +44,14 @@ let handler custom_err_config =
     method! at_expr env (_, _, e) =
       let () =
         match e with
-        | Aast.FunctionPointer (Aast.FP_id (pos, name), _) ->
+        | Aast.FunctionPointer (Aast.FP_id (pos, name), _, _) ->
           if Naming_special_names.SpecialFunctions.is_special_function name then
             Errors.add_error
               (Naming_error_utils.to_user_error
                  (Naming_error.Invalid_fun_pointer { pos; name })
                  custom_err_config)
         | Aast.FunctionPointer
-            (Aast.FP_class_const ((_, p, Aast.CIself), (_, meth_name)), _) ->
+            (Aast.FP_class_const ((_, p, Aast.CIself), (_, meth_name)), _, _) ->
           if not env.in_final_class then
             if env.is_trait then
               Errors.add_error
@@ -66,7 +66,8 @@ let handler custom_err_config =
                       { pos = p; class_name = env.class_name; meth_name })
                    custom_err_config)
         | Aast.FunctionPointer
-            (Aast.FP_class_const ((_, p, Aast.CIparent), (_, meth_name)), _) ->
+            (Aast.FP_class_const ((_, p, Aast.CIparent), (_, meth_name)), _, _)
+          ->
           Errors.add_error
             (Naming_error_utils.to_user_error
                (Naming_error.Parent_in_function_pointer

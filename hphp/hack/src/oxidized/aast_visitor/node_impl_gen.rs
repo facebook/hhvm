@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a51b772c2a1f65c37a804be29633ffda>>
+// @generated SignedSource<<9d215d01fa1d39a278e5d821734f894c>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -907,12 +907,13 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
         }
         #[inline]
         fn helper6<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node Box<(FunctionPtrId<Ex, En>, Vec<Targ<Ex>>)>,
+            a: &'node Box<(FunctionPtrId<Ex, En>, Vec<Targ<Ex>>, FunctionPointerSource)>,
             c: &mut P::Context,
             v: &mut dyn Visitor<'node, Params = P>,
         ) -> Result<(), P::Error> {
             a.0.accept(c, v)?;
-            a.1.accept(c, v)
+            a.1.accept(c, v)?;
+            a.2.accept(c, v)
         }
         #[inline]
         fn helper7<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
@@ -1345,6 +1346,25 @@ impl<P: Params> Node<P> for FuncBody<P::Ex, P::En> {
         v: &mut dyn Visitor<'node, Params = P>,
     ) -> Result<(), P::Error> {
         self.fb_ast.accept(c, v)
+    }
+}
+impl<P: Params> Node<P> for FunctionPointerSource {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_function_pointer_source(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            FunctionPointerSource::Code => Ok(()),
+            FunctionPointerSource::Lowered => Ok(()),
+        }
     }
 }
 impl<P: Params> Node<P> for FunctionPtrId<P::Ex, P::En> {

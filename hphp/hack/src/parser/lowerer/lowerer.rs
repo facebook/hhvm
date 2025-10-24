@@ -2086,12 +2086,14 @@ fn p_function_pointer_expr<'a>(
         Expr_::Id(id) => Ok(Expr_::mk_function_pointer(
             aast::FunctionPtrId::FPId(*(id.to_owned())),
             targs,
+            aast::FunctionPointerSource::Code,
         )),
         Expr_::ClassConst(c) => {
             if let aast::ClassId_::CIexpr(Expr(_, _, Expr_::Id(_))) = (c.0).2 {
                 Ok(Expr_::mk_function_pointer(
                     aast::FunctionPtrId::FPClassConst(c.0.to_owned(), c.1.to_owned()),
                     targs,
+                    aast::FunctionPointerSource::Code,
                 ))
             } else {
                 raise_parsing_error(node, env, &syntax_error::function_pointer_bad_recv);

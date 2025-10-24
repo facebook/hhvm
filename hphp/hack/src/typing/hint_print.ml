@@ -360,7 +360,7 @@ and pp_expr_ ppf = function
     Fmt.(pair ~sep:nop pp_expr @@ pair ~sep:nop pp_targs pp_arg_exprs)
       ppf
       (func, (targs, (args, unpacked_arg)))
-  | Aast.FunctionPointer (id, targs) ->
+  | Aast.FunctionPointer (id, targs, _) ->
     Fmt.(pair ~sep:nop pp_function_ptr_id (angles @@ list ~sep:comma pp_targ))
       ppf
       (id, targs)

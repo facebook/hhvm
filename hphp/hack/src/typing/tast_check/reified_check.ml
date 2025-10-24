@@ -213,7 +213,8 @@ let handler =
         | None -> ())
       | ( _,
           pos,
-          FunctionPointer (FP_class_const ((ty, _, CI (_, class_id)), _), _) )
+          FunctionPointer (FP_class_const ((ty, _, CI (_, class_id)), _), _, _)
+        )
         when Env.is_in_expr_tree env ->
         let (_env, ty) = Env.expand_type env ty in
         begin
@@ -227,7 +228,7 @@ let handler =
                 @@ Primary.Expr_tree.Reified_static_method_in_expr_tree pos)
           | _ -> ()
         end
-      | (fun_ty, pos, FunctionPointer (_, targs)) -> begin
+      | (fun_ty, pos, FunctionPointer (_, targs, _)) -> begin
         match get_ft_tparams env fun_ty with
         | Some (ft_tparams, _) ->
           verify_call_targs

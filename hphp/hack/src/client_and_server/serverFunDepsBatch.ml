@@ -92,8 +92,9 @@ let collect_in_decl =
         | T.Method_caller ((p, cid), mid) ->
           process_function (p, SN.AutoimportedFunctions.meth_caller)
           + process_method_cid mid cid
-        | T.FunctionPointer (T.FP_id id, _targs) -> process_function id
-        | T.FunctionPointer (T.FP_class_const ((ty, _, _cid), mid), _targs) ->
+        | T.FunctionPointer (T.FP_id id, _targs, _) -> process_function id
+        | T.FunctionPointer (T.FP_class_const ((ty, _, _cid), mid), _targs, _)
+          ->
           process_method env ty mid
         | _ -> self#zero
       in

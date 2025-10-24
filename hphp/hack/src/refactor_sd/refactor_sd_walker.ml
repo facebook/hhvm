@@ -199,7 +199,7 @@ let rec expr_
         (env, entity_obj)
       | None -> (env, None)
     end
-  | Aast.FunctionPointer (Aast.FP_id (_, id), _) ->
+  | Aast.FunctionPointer (Aast.FP_id (_, id), _, _) ->
     if String.equal upcasted_info.element_name id then
       let entity_ = Literal pos in
       let env = Env.add_constraint env (Introduction pos) in

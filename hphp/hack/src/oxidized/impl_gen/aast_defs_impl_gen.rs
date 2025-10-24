@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bee8355cfa3b6cde1669ad278b1f4c9a>>
+// @generated SignedSource<<681a73565bd2ce9dd04745be36f010b6>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -1006,8 +1006,12 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_call(p0: CallExpr<Ex, En>) -> Self {
         Expr_::Call(Box::new(p0))
     }
-    pub fn mk_function_pointer(p0: FunctionPtrId<Ex, En>, p1: Vec<Targ<Ex>>) -> Self {
-        Expr_::FunctionPointer(Box::new((p0, p1)))
+    pub fn mk_function_pointer(
+        p0: FunctionPtrId<Ex, En>,
+        p1: Vec<Targ<Ex>>,
+        p2: FunctionPointerSource,
+    ) -> Self {
+        Expr_::FunctionPointer(Box::new((p0, p1, p2)))
     }
     pub fn mk_int(p0: String) -> Self {
         Expr_::Int(p0)
@@ -1527,9 +1531,15 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_function_pointer(&self) -> Option<(&FunctionPtrId<Ex, En>, &Vec<Targ<Ex>>)> {
+    pub fn as_function_pointer(
+        &self,
+    ) -> Option<(
+        &FunctionPtrId<Ex, En>,
+        &Vec<Targ<Ex>>,
+        &FunctionPointerSource,
+    )> {
         match self {
-            Expr_::FunctionPointer(p0) => Some((&p0.0, &p0.1)),
+            Expr_::FunctionPointer(p0) => Some((&p0.0, &p0.1, &p0.2)),
             _ => None,
         }
     }
@@ -1856,9 +1866,13 @@ impl<Ex, En> Expr_<Ex, En> {
     }
     pub fn as_function_pointer_mut(
         &mut self,
-    ) -> Option<(&mut FunctionPtrId<Ex, En>, &mut Vec<Targ<Ex>>)> {
+    ) -> Option<(
+        &mut FunctionPtrId<Ex, En>,
+        &mut Vec<Targ<Ex>>,
+        &mut FunctionPointerSource,
+    )> {
         match self {
-            Expr_::FunctionPointer(p0) => Some((&mut p0.0, &mut p0.1)),
+            Expr_::FunctionPointer(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
             _ => None,
         }
     }
@@ -2198,9 +2212,11 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_function_pointer_into(self) -> Option<(FunctionPtrId<Ex, En>, Vec<Targ<Ex>>)> {
+    pub fn as_function_pointer_into(
+        self,
+    ) -> Option<(FunctionPtrId<Ex, En>, Vec<Targ<Ex>>, FunctionPointerSource)> {
         match self {
-            Expr_::FunctionPointer(p0) => Some(((*p0).0, (*p0).1)),
+            Expr_::FunctionPointer(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
             _ => None,
         }
     }
@@ -2492,6 +2508,26 @@ impl HoleSource {
         match self {
             HoleSource::EnforcedCast(p0) => Some(p0),
             _ => None,
+        }
+    }
+}
+impl FunctionPointerSource {
+    pub fn mk_code() -> Self {
+        FunctionPointerSource::Code
+    }
+    pub fn mk_lowered() -> Self {
+        FunctionPointerSource::Lowered
+    }
+    pub fn is_code(&self) -> bool {
+        match self {
+            FunctionPointerSource::Code => true,
+            _ => false,
+        }
+    }
+    pub fn is_lowered(&self) -> bool {
+        match self {
+            FunctionPointerSource::Lowered => true,
+            _ => false,
         }
     }
 }

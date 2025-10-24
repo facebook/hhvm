@@ -27,12 +27,17 @@
                                  f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                  f_body =
                                  { fb_ast =
-                                   [([7:9-12], (Expr ((), [7:9-12], (Assign (((), [7:9-12], (Lvar ([7:9-12], $0fp0))), None, ((), [7:9-12], (FunctionPointer ((FP_id ([7:9-12], "\\baz")), []))))))));
-                                     ([8:9-12], (Expr ((), [8:9-12], (Assign (((), [8:9-12], (Lvar ([8:9-12], $0fp1))), None, ((), [8:9-12], (FunctionPointer ((FP_id ([8:9-12], "\\qux")), []))))))));
-                                     ([6:7-10], (Expr ((), [6:7-10], (Assign (((), [6:7-10], (Lvar ([6:7-10], $0fp2))), None, ((), [6:7-10], (FunctionPointer ((FP_id ([6:7-10], "\\bar")), []))))))));
+                                   [([7:9-12],
+                                     (Expr ((), [7:9-12], (Assign (((), [7:9-12], (Lvar ([7:9-12], $0fp0))), None, ((), [7:9-12], (FunctionPointer ((FP_id ([7:9-12], "\\baz")), [], Lowered))))))));
+                                     ([8:9-12],
+                                      (Expr ((), [8:9-12], (Assign (((), [8:9-12], (Lvar ([8:9-12], $0fp1))), None, ((), [8:9-12], (FunctionPointer ((FP_id ([8:9-12], "\\qux")), [], Lowered))))))));
+                                     ([6:7-10],
+                                      (Expr ((), [6:7-10], (Assign (((), [6:7-10], (Lvar ([6:7-10], $0fp2))), None, ((), [6:7-10], (FunctionPointer ((FP_id ([6:7-10], "\\bar")), [], Lowered))))))));
                                      ([10:7-11],
-                                      (Expr ((), [10:7-11], (Assign (((), [10:7-11], (Lvar ([10:7-11], $0fp3))), None, ((), [10:7-11], (FunctionPointer ((FP_id ([10:7-11], "\\qaal")), []))))))));
-                                     ([5:5-8], (Expr ((), [5:5-8], (Assign (((), [5:5-8], (Lvar ([5:5-8], $0fp4))), None, ((), [5:5-8], (FunctionPointer ((FP_id ([5:5-8], "\\foo")), []))))))));
+                                      (Expr
+                                         ((), [10:7-11], (Assign (((), [10:7-11], (Lvar ([10:7-11], $0fp3))), None, ((), [10:7-11], (FunctionPointer ((FP_id ([10:7-11], "\\qaal")), [], Lowered))))))));
+                                     ([5:5-8],
+                                      (Expr ((), [5:5-8], (Assign (((), [5:5-8], (Lvar ([5:5-8], $0fp4))), None, ((), [5:5-8], (FunctionPointer ((FP_id ([5:5-8], "\\foo")), [], Lowered))))))));
                                      ([5:5-11:4],
                                       (Return
                                          (Some ((), [4:3-13],

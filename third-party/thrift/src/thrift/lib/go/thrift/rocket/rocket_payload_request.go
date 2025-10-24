@@ -38,15 +38,13 @@ func EncodeRequestPayload(
 	if err != nil {
 		return nil, err
 	}
-	headersCopy := make(map[string]string, len(headers))
-	maps.Copy(headersCopy, headers)
 
 	metadata := rpcmetadata.NewRequestRpcMetadata().
 		SetName(&name).
 		SetProtocol(&rpcProtocolID).
 		SetKind(&rpcKind).
 		SetCompression(&compression).
-		SetOtherMetadata(headersCopy)
+		SetOtherMetadata(maps.Clone(headers))
 
 	return EncodePayloadMetadataAndData(metadata, dataBytes, compression)
 }

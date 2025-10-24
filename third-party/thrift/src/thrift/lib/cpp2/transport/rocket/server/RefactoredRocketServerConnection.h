@@ -58,6 +58,7 @@
 #include <thrift/lib/cpp2/transport/rocket/server/detail/ConnectionWriterCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/IncomingFrameBatcher.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/IncomingFrameHandler.h>
+#include <thrift/lib/cpp2/transport/rocket/server/detail/MetadataPushHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/WriteBatcher.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -301,6 +302,16 @@ class RefactoredRocketServerConnection final : public IRocketServerConnection {
       RocketSinkClientCallback*,
       RocketBiDiClientCallback*>;
   folly::F14FastMap<StreamId, ClientCallbackUniquePtr> streams_;
+
+  // Accessor methods for streams_ - needed for MetadataPushHandler
+ public:
+  auto findStream(StreamId streamId) -> decltype(streams_.find(streamId)) {
+    return streams_.find(streamId);
+  }
+
+  auto streamsEnd() -> decltype(streams_.end()) { return streams_.end(); }
+
+ private:
   const std::chrono::milliseconds streamStarvationTimeout_;
   const size_t egressBufferBackpressureThreshold_;
   const size_t egressBufferRecoverySize_;
@@ -505,6 +516,11 @@ class RefactoredRocketServerConnection final : public IRocketServerConnection {
       RefactoredRocketServerConnection,
       apache::thrift::rocket::ConnectionAdapter>
       requestResponseHandler_;
+
+  MetadataPushHandler<
+      RefactoredRocketServerConnection,
+      apache::thrift::rocket::ConnectionAdapter>
+      metadataPushHandler_;
 
   using IncomingFrameHandler = apache::thrift::rocket::IncomingFrameHandler<
       RefactoredRocketServerConnection,

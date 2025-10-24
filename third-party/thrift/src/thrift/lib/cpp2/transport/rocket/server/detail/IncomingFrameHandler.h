@@ -25,6 +25,7 @@
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/ConnectionAdapter.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/KeepAliveHandler.h>
+#include <thrift/lib/cpp2/transport/rocket/server/detail/MetadataPushHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/RequestResponseHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/SetupFrameAcceptor.h>
 
@@ -69,11 +70,13 @@ class IncomingFrameHandler {
           setupFrameAcceptor,
       RequestResponseHandler<ConnectionT, ConnectionAdapter>&
           requestResponseHandler,
-      KeepAliveHandler<ConnectionT, ConnectionAdapter>& keepAliveFrameHandler)
+      KeepAliveHandler<ConnectionT, ConnectionAdapter>& keepAliveFrameHandler,
+      MetadataPushHandler<ConnectionT, ConnectionAdapter>& metadataPushHandler)
       : connection_(&connection),
         setupFrameAcceptor_(&setupFrameAcceptor),
         requestResponseHandler_(&requestResponseHandler),
-        keepAliveHandler_(&keepAliveFrameHandler) {}
+        keepAliveHandler_(&keepAliveFrameHandler),
+        metadataPushHandler_(&metadataPushHandler) {}
 
   void handle(std::unique_ptr<folly::IOBuf>&& frame) {
     // hexDumpFrame(*frame);
@@ -108,10 +111,10 @@ class IncomingFrameHandler {
       // case FrameType::ERROR:
       //   handleFrame<FrameType::ERROR>(std::move(frame), streamHandler_);
       //   break;
-      // case FrameType::METADATA_PUSH:
-      //   handleFrame<FrameType::METADATA_PUSH>(
-      //       std::move(frame), metadataPushFrameHandler_);
-      //   break;
+      case FrameType::METADATA_PUSH:
+        handleFrame<FrameType::METADATA_PUSH>(
+            std::move(frame), metadataPushHandler_);
+        break;
       case FrameType::KEEPALIVE:
         handleFrame<FrameType::KEEPALIVE>(std::move(frame), keepAliveHandler_);
         break;
@@ -131,6 +134,7 @@ class IncomingFrameHandler {
   RequestResponseHandler<ConnectionT, ConnectionAdapter>*
       requestResponseHandler_;
   KeepAliveHandler<ConnectionT, ConnectionAdapter>* keepAliveHandler_;
+  MetadataPushHandler<ConnectionT, ConnectionAdapter>* metadataPushHandler_;
 
   FOLLY_ALWAYS_INLINE void hexDumpFrame(folly::IOBuf& frame) const noexcept {
     // if constexpr (folly::kIsDebug) {

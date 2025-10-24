@@ -95,11 +95,13 @@ RefactoredRocketServerConnection::RefactoredRocketServerConnection(
       keepAliveHandler_(connectionAdapter_),
       setupFrameAcceptor_(connectionAdapter_, *frameHandler_),
       requestResponseHandler_(&connectionAdapter_),
+      metadataPushHandler_(connectionAdapter_),
       incomingFrameHandler_(
           connectionAdapter_,
           setupFrameAcceptor_,
           requestResponseHandler_,
-          keepAliveHandler_) {
+          keepAliveHandler_,
+          metadataPushHandler_) {
   CHECK(socket_);
   CHECK(frameHandler_);
 

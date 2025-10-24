@@ -168,6 +168,7 @@ func (r *rsocketClient) RequestResponse(
 ) (map[string]string, []byte, error) {
 	r.resetDeadline()
 	request, err := rocket.EncodeRequestPayload(
+		ctx,
 		messageName,
 		r.protoID,
 		rpcmetadata.RpcKind_SINGLE_REQUEST_SINGLE_RESPONSE,
@@ -193,6 +194,7 @@ func (r *rsocketClient) RequestResponse(
 func (r *rsocketClient) FireAndForget(_ context.Context, messageName string, headers map[string]string, dataBytes []byte) error {
 	r.resetDeadline()
 	request, err := rocket.EncodeRequestPayload(
+		context.Background(),
 		messageName,
 		r.protoID,
 		rpcmetadata.RpcKind_SINGLE_REQUEST_NO_RESPONSE,
@@ -219,6 +221,7 @@ func (r *rsocketClient) RequestStream(
 	r.resetDeadline()
 
 	request, err := rocket.EncodeRequestPayload(
+		ctx,
 		messageName,
 		r.protoID,
 		rpcmetadata.RpcKind_SINGLE_REQUEST_STREAMING_RESPONSE,

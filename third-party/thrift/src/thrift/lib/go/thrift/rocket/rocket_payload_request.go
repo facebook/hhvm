@@ -17,6 +17,7 @@
 package rocket
 
 import (
+	"context"
 	"fmt"
 	"maps"
 
@@ -26,6 +27,7 @@ import (
 
 // EncodeRequestPayload encodes a request payload.
 func EncodeRequestPayload(
+	_ context.Context,
 	name string,
 	protoID rpcmetadata.ProtocolId,
 	rpcKind rpcmetadata.RpcKind,

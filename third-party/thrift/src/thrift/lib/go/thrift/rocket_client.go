@@ -63,16 +63,6 @@ type rocketClient struct {
 var _ Protocol = (*rocketClient)(nil)
 var _ RequestChannel = (*rocketClient)(nil)
 
-// NewRocketClient creates a new Rocket client given an RSocketClient.
-func NewRocketClient(
-	client RSocketClient,
-	protoID types.ProtocolID,
-	ioTimeout time.Duration,
-	persistentHeaders map[string]string,
-) (Protocol, error) {
-	return newRocketClientFromRsocket(client, protoID, ioTimeout, persistentHeaders)
-}
-
 func newRocketClient(
 	conn net.Conn,
 	protoID types.ProtocolID,

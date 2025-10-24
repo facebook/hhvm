@@ -15,7 +15,6 @@
 from cpython.ref cimport PyObject
 from libc.stdint cimport uint64_t
 from libcpp cimport bool as cbool
-from libcpp.optional cimport optional
 from libcpp.memory cimport unique_ptr
 from libcpp.string cimport string
 from libcpp.utility cimport pair
@@ -25,6 +24,12 @@ from thrift.py3.std_libcpp cimport milliseconds, string_view
 from thrift.python.common cimport cPriority
 from thrift.python.server_impl.event_handler cimport cfollySocketAddress
 from thrift.python.common cimport Headers
+
+# Cython stdlib in 3.1.x has an except+ on the value() which breaks C++ scoping rules.
+cdef extern from "<optional>" namespace "std" nogil:
+    cdef cppclass optional[T]:
+        cbool has_value()
+        T& value()
 
 cdef extern from "folly/container/F14Map.h" namespace "folly":
   cdef cppclass F14NodeMap[K, T]:

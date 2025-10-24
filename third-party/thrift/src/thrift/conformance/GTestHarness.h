@@ -17,8 +17,6 @@
 #pragma once
 
 #include <chrono>
-#include <cstdio>
-#include <cstdlib>
 #include <functional>
 #include <memory>
 #include <stdexcept>
@@ -26,7 +24,7 @@
 #include <string_view>
 #include <vector>
 
-#include <fmt/core.h>
+#include <fmt/ranges.h>
 #include <gtest/gtest.h>
 #include <folly/FileUtil.h>
 #include <folly/Range.h>
@@ -96,12 +94,10 @@ std::unique_ptr<Client> createClient(std::string_view) {
 template <typename Client>
 class ClientAndServer {
  public:
-  explicit ClientAndServer(std::string cmd, ChannelType channelType)
-      : server_(
-            std::vector<std::string>{std::move(cmd)},
-            folly::Subprocess::Options().pipeStdout()),
+  ClientAndServer(const std::vector<std::string>& cmd, ChannelType channelType)
+      : server_(cmd, folly::Subprocess::Options().pipeStdout()),
         channelType_(channelType) {
-    LOG(INFO) << "Starting binary: " << cmd;
+    LOG(INFO) << "Starting binary: " << fmt::format("{}", cmd);
     std::string port;
     server_.communicate(
         folly::Subprocess::readLinesCallback(
@@ -139,7 +135,10 @@ client_fn_map<Client> getServers(ChannelType channelType) {
         entry.first,
         [name = std::string(entry.first),
          cmd = std::string(entry.second),
-         channelType]() -> Client& {
+         channelType]() mutable -> Client& {
+          auto args = cmd.ends_with(".jar")
+              ? std::vector<std::string>{"/usr/bin/env", "java", "-jar", cmd}
+              : std::vector<std::string>{cmd};
           static folly::Synchronized<std::map<
               std::string_view,
               std::unique_ptr<ClientAndServer<Client>>>>
@@ -152,7 +151,7 @@ client_fn_map<Client> getServers(ChannelType channelType) {
             itr = lockedClients->emplace_hint(
                 itr,
                 name,
-                std::make_unique<ClientAndServer<Client>>(cmd, channelType));
+                std::make_unique<ClientAndServer<Client>>(args, channelType));
           }
           return itr->second->getClient();
         });

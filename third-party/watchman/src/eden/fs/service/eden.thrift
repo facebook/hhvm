@@ -150,6 +150,13 @@ enum EdenErrorType {
    * contain specific details about the cancellation failure.
    */
   CANCELLATION_ERROR = 10,
+  /**
+  * The errorCode property is a network error code.
+  *
+  * If there should be a code collision with different networking libraries,
+  * the higher bits of the error code can be utilized to disambiguate.
+  */
+  NETWORK_ERROR = 11,
 }
 
 exception EdenError {

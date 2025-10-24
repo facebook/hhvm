@@ -70,7 +70,7 @@ func (t *rpcClientConformanceTester) execute() {
 
 	t.client, err = t.getClient()
 	if err != nil {
-		glog.Fatalf("failed to get client: %v", err)
+		glog.Exitf("failed to get client: %v", err)
 	}
 
 	// 60 second timeout per test-case should be plenty
@@ -79,7 +79,7 @@ func (t *rpcClientConformanceTester) execute() {
 
 	testCase, err := t.client.GetTestCase(testCaseCtx)
 	if err != nil {
-		glog.Fatalf("failed to get test case: %v", err)
+		glog.Exitf("failed to get test case: %v", err)
 	}
 	t.instruction = testCase.ClientInstruction
 
@@ -131,11 +131,11 @@ func (t *rpcClientConformanceTester) execute() {
 	case t.instruction.InteractionTermination != nil:
 		err = t.InteractionTermination(testCaseCtx)
 	default:
-		glog.Fatal("unsupported test case")
+		glog.Exitf("unsupported test case")
 	}
 
 	if err != nil {
-		glog.Fatalf("test failed: %v", err)
+		glog.Exitf("test failed: %v", err)
 	}
 }
 

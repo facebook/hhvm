@@ -125,8 +125,8 @@ class BiDiServiceInterface(
     async def _fbthrift__handler_response(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Callable[[_typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]:
         args_struct = deserialize(_fbthrift__module__thrift_mutable_types._fbthrift_BiDiService_response_args, args, protocol)
         value = await self.response()
-        value, bidi_callback = await value
-        return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_BiDiService_response_result()
+        value, bidi_callback = value
+        return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_BiDiService_response_result(success=value)
         return_bidi_callback = self._fbthrift__bidi_wrapper_response(bidi_callback, protocol)
         return (serialize_iobuf(return_struct, protocol), return_bidi_callback)
 

@@ -47,10 +47,11 @@ return_sink_callback = self._fbthrift__sink_wrapper_{{function:name}}(sink_callb
 {{#function:bidirectional_stream?}}
 value = await self.{{function:name}}({{#function:args}}args_struct.{{field:py_name}},{{/function:args}})
 {{#function:stream_has_first_response?}}
-value, bidi_callback = await value
+value, bidi_callback = value
+return_struct = {{> types/function_return_type}}(success=value)
 {{/function:stream_has_first_response?}}{{^function:stream_has_first_response?}}
 bidi_callback = value
-{{/function:stream_has_first_response?}}
 return_struct = {{> types/function_return_type}}()
+{{/function:stream_has_first_response?}}
 return_bidi_callback = self._fbthrift__bidi_wrapper_{{function:name}}(bidi_callback, protocol)
 {{/function:bidirectional_stream?}}

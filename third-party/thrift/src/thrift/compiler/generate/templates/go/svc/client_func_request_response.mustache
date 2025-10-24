@@ -30,9 +30,9 @@ func (c *{{service:go_client_name}}) {{> svc/client_func_signature}} {
     fbthriftResp := newResp{{service:go_name}}{{function:go_name}}()
     fbthriftErr := c.ch.SendRequestResponse({{function:ctx_arg_name}}, "{{function:name}}", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
-        return {{^function:void?}}{{#function:return_type}}{{> common/go_zero_value}}{{/function:return_type}}, {{/function:void?}}fbthriftErr
+        return {{#function:return_type}}{{^type:void?}}{{> common/go_zero_value}}, {{/type:void?}}{{/function:return_type}}fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return {{^function:void?}}{{#function:return_type}}{{> common/go_zero_value}}{{/function:return_type}}, {{/function:void?}}fbthriftEx
+        return {{#function:return_type}}{{^type:void?}}{{> common/go_zero_value}}, {{/type:void?}}{{/function:return_type}}fbthriftEx
     }
-    return {{^function:void?}}fbthriftResp.Get{{function:retval_field_name}}(), {{/function:void?}}nil
+    return {{#function:return_type}}{{^type:void?}}fbthriftResp.Get{{function:retval_field_name}}(), {{/type:void?}}{{/function:return_type}}nil
 }

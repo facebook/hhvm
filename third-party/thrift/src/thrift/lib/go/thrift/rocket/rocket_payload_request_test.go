@@ -19,14 +19,13 @@ package rocket
 import (
 	"testing"
 
-	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 	"github.com/stretchr/testify/require"
 )
 
 func TestRequestRPCMetadata(t *testing.T) {
 	wantName := "test123"
-	wantProto := types.ProtocolIDCompact
+	wantProto := rpcmetadata.ProtocolId_COMPACT
 	wantOther := map[string]string{"header": "1"}
 	_, err := EncodeRequestPayload(wantName, wantProto, rpcmetadata.RpcKind_SINGLE_REQUEST_SINGLE_RESPONSE, wantOther, rpcmetadata.CompressionAlgorithm_NONE, nil)
 	require.NoError(t, err)

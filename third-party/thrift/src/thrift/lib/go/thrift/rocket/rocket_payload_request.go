@@ -28,20 +28,15 @@ import (
 // EncodeRequestPayload encodes a request payload.
 func EncodeRequestPayload(
 	name string,
-	protoID types.ProtocolID,
+	protoID rpcmetadata.ProtocolId,
 	rpcKind rpcmetadata.RpcKind,
 	headers map[string]string,
 	compression rpcmetadata.CompressionAlgorithm,
 	dataBytes []byte,
 ) (payload.Payload, error) {
-	rpcProtocolID, err := protocolIDToRPCProtocolID(protoID)
-	if err != nil {
-		return nil, err
-	}
-
 	metadata := rpcmetadata.NewRequestRpcMetadata().
 		SetName(&name).
-		SetProtocol(&rpcProtocolID).
+		SetProtocol(&protoID).
 		SetKind(&rpcKind).
 		SetCompression(&compression).
 		SetOtherMetadata(maps.Clone(headers))

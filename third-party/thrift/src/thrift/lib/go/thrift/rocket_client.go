@@ -141,12 +141,12 @@ func (p *rocketClient) Flush() error {
 	}
 	headers := unionMaps(p.reqHeaders, p.persistentHeaders)
 	if p.writeType == types.ONEWAY {
-		return p.client.FireAndForget(p.messageName, p.protoID, headers, dataBytes)
+		return p.client.FireAndForget(p.messageName, headers, dataBytes)
 	}
 	if p.writeType != types.CALL {
 		return nil
 	}
-	p.respHeaders, p.resultData, p.resultErr = p.client.RequestResponse(ctx, p.messageName, p.protoID, headers, dataBytes)
+	p.respHeaders, p.resultData, p.resultErr = p.client.RequestResponse(ctx, p.messageName, headers, dataBytes)
 	clear(p.reqHeaders)
 	return nil
 }
@@ -174,7 +174,7 @@ func (p *rocketClient) SendRequestNoResponse(ctx context.Context, messageName st
 		writeHeaders = rpcOpts.GetWriteHeaders()
 	}
 	headers := unionMaps(writeHeaders, p.persistentHeaders)
-	return p.client.FireAndForget(messageName, p.protoID, headers, dataBytes)
+	return p.client.FireAndForget(messageName, headers, dataBytes)
 }
 
 func (p *rocketClient) SendRequestResponse(ctx context.Context, messageName string, request WritableStruct, response ReadableStruct) error {
@@ -200,7 +200,7 @@ func (p *rocketClient) SendRequestResponse(ctx context.Context, messageName stri
 		writeHeaders = rpcOpts.GetWriteHeaders()
 	}
 	headers := unionMaps(writeHeaders, p.persistentHeaders)
-	respHeaders, resultData, resultErr := p.client.RequestResponse(ctx, messageName, p.protoID, headers, dataBytes)
+	respHeaders, resultData, resultErr := p.client.RequestResponse(ctx, messageName, headers, dataBytes)
 	if resultErr != nil {
 		return resultErr
 	}
@@ -268,7 +268,7 @@ func (p *rocketClient) SendRequestStream(
 		writeHeaders = rpcOpts.GetWriteHeaders()
 	}
 	headers := unionMaps(writeHeaders, p.persistentHeaders)
-	respHeaders, resultData, resultErr := p.client.RequestStream(ctx, messageName, p.protoID, headers, dataBytes, onStreamNextWrapperFn, onStreamErrorFn, onStreamCompleteFn)
+	respHeaders, resultData, resultErr := p.client.RequestStream(ctx, messageName, headers, dataBytes, onStreamNextWrapperFn, onStreamErrorFn, onStreamCompleteFn)
 	if resultErr != nil {
 		return resultErr
 	}

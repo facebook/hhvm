@@ -57,6 +57,10 @@ type RSocketClient interface {
 		onStreamErrorFn func(error),
 		onStreamComplete func(),
 	) (map[string]string, []byte, error)
+	MetadataPush(
+		ctx context.Context,
+		metadata *rpcmetadata.ClientPushMetadata,
+	) error
 	Close() error
 }
 
@@ -277,6 +281,16 @@ func (r *rsocketClient) RequestStream(
 	}()
 
 	return firstResponse.Headers(), firstResponse.Data(), nil
+}
+
+func (r *rsocketClient) MetadataPush(_ context.Context, metadata *rpcmetadata.ClientPushMetadata) error {
+	r.resetDeadline()
+	payload, err := rocket.EncodePayloadMetadataAndData(metadata, nil, 0)
+	if err != nil {
+		return err
+	}
+	r.client.MetadataPush(payload)
+	return nil
 }
 
 func (r *rsocketClient) Close() error {

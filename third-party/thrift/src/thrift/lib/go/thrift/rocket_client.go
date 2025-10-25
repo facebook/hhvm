@@ -285,6 +285,14 @@ func (p *rocketClient) SendRequestStream(
 	return nil
 }
 
+func (p *rocketClient) TerminateInteraction(interactionID int64) error {
+	interactionTerminate := rpcmetadata.NewInteractionTerminate().
+		SetInteractionId(interactionID)
+	metadata := rpcmetadata.NewClientPushMetadata().
+		SetInteractionTerminate(interactionTerminate)
+	return p.client.MetadataPush(context.Background(), metadata)
+}
+
 func encodeRequest(protoID types.ProtocolID, request WritableStruct) ([]byte, error) {
 	switch protoID {
 	case types.ProtocolIDBinary:

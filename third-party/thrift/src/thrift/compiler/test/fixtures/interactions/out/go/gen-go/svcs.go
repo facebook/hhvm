@@ -62,7 +62,7 @@ func (c *myInteractionClientImpl) Frobnicate(ctx context.Context) (int32, error)
     fbthriftReq := &reqMyInteractionFrobnicate{
     }
     fbthriftResp := newRespMyInteractionFrobnicate()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "frobnicate", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "MyInteraction.frobnicate", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return 0, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -74,7 +74,7 @@ func (c *myInteractionClientImpl) Frobnicate(ctx context.Context) (int32, error)
 func (c *myInteractionClientImpl) Ping(ctx context.Context) (error) {
     fbthriftReq := &reqMyInteractionPing{
     }
-    return c.ch.SendRequestNoResponse(ctx, "ping", fbthriftReq)
+    return c.ch.SendRequestNoResponse(ctx, "MyInteraction.ping", fbthriftReq)
 }
 
 func (c *myInteractionClientImpl) Truthify(ctx context.Context) (<-chan bool /* elem stream */, <-chan error /* stream err */, error) {
@@ -114,7 +114,7 @@ func (c *myInteractionClientImpl) Truthify(ctx context.Context) (<-chan bool /* 
 
     fbthriftErr := c.ch.SendRequestStream(
         fbthriftStreamCtx,
-        "truthify",
+        "MyInteraction.truthify",
         fbthriftReq,
         fbthriftResp,
         fbthriftOnStreamNextFn,
@@ -165,7 +165,7 @@ func (c *myInteractionFastClientImpl) Frobnicate(ctx context.Context) (int32, er
     fbthriftReq := &reqMyInteractionFastFrobnicate{
     }
     fbthriftResp := newRespMyInteractionFastFrobnicate()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "frobnicate", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "MyInteractionFast.frobnicate", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return 0, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -177,7 +177,7 @@ func (c *myInteractionFastClientImpl) Frobnicate(ctx context.Context) (int32, er
 func (c *myInteractionFastClientImpl) Ping(ctx context.Context) (error) {
     fbthriftReq := &reqMyInteractionFastPing{
     }
-    return c.ch.SendRequestNoResponse(ctx, "ping", fbthriftReq)
+    return c.ch.SendRequestNoResponse(ctx, "MyInteractionFast.ping", fbthriftReq)
 }
 
 func (c *myInteractionFastClientImpl) Truthify(ctx context.Context) (<-chan bool /* elem stream */, <-chan error /* stream err */, error) {
@@ -217,7 +217,7 @@ func (c *myInteractionFastClientImpl) Truthify(ctx context.Context) (<-chan bool
 
     fbthriftErr := c.ch.SendRequestStream(
         fbthriftStreamCtx,
-        "truthify",
+        "MyInteractionFast.truthify",
         fbthriftReq,
         fbthriftResp,
         fbthriftOnStreamNextFn,
@@ -264,7 +264,7 @@ func (c *serialInteractionClientImpl) Frobnicate(ctx context.Context) (error) {
     fbthriftReq := &reqSerialInteractionFrobnicate{
     }
     fbthriftResp := newRespSerialInteractionFrobnicate()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "frobnicate", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "SerialInteraction.frobnicate", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -303,7 +303,7 @@ func (c *boxedInteractionClientImpl) GetABox(ctx context.Context) (*ShouldBeBoxe
     fbthriftReq := &reqBoxedInteractionGetABox{
     }
     fbthriftResp := newRespBoxedInteractionGetABox()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "getABox", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "BoxedInteraction.getABox", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return nil, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {

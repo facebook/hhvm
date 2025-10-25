@@ -16,16 +16,7 @@
 
 }}{{!
 
-  This template defines the client oneway function.
+  Defines function RPC name as it should be sent on the wire.
 
 }}
-func (c *{{service:go_client_name}}) {{> svc/client_func_signature}} {
-    fbthriftReq := &req{{service:go_name}}{{function:go_name}}{
-        {{#function:args}}
-        {{#field:type}}
-        {{field:go_name}}: {{field:go_arg_name}},
-        {{/field:type}}
-        {{/function:args}}
-    }
-    return c.ch.SendRequestNoResponse({{function:ctx_arg_name}}, "{{> svc/func_rpc_name}}", fbthriftReq)
-}
+{{#service:interaction?}}{{service:name}}.{{/service:interaction?}}{{function:name}}

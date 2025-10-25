@@ -56,7 +56,7 @@ func (c *badInteractionClientImpl) Foo(ctx context.Context) (error) {
     fbthriftReq := &reqBadInteractionFoo{
     }
     fbthriftResp := newRespBadInteractionFoo()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "foo", fbthriftReq, fbthriftResp)
+    fbthriftErr := c.ch.SendRequestResponse(ctx, "BadInteraction.foo", fbthriftReq, fbthriftResp)
     if fbthriftErr != nil {
         return fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {

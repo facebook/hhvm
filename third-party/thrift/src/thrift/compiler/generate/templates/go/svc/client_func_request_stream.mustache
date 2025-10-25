@@ -70,7 +70,7 @@ func (c *{{service:go_client_name}}) {{> svc/client_func_signature}} {
 
     fbthriftErr := c.ch.SendRequestStream(
         fbthriftStreamCtx,
-        "{{function:name}}",
+        "{{> svc/func_rpc_name}}",
         fbthriftReq,
         fbthriftResp,
         fbthriftOnStreamNextFn,

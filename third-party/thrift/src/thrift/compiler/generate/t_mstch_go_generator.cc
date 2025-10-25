@@ -611,7 +611,11 @@ class mstch_go_interaction : public mstch_go_service {
       mstch_element_position pos,
       const t_service* containing_service,
       go::codegen_data* data)
-      : mstch_go_service(interaction, ctx, pos, data, containing_service) {}
+      : mstch_go_service(interaction, ctx, pos, data, containing_service),
+        data_(*data) {}
+
+ private:
+  go::codegen_data& data_;
 };
 
 class mstch_go_function : public mstch_function {

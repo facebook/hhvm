@@ -18,10 +18,13 @@
 
 from __future__ import annotations
 
+import typing
+
 import unittest
 
 import testing.thrift_metadata
-from apache.thrift.metadata.thrift_types import ThriftPrimitiveType
+
+from apache.thrift.metadata.thrift_types import ThriftMetadata, ThriftPrimitiveType
 from testing.thrift_clients import (
     ExtendServiceWithNoTypes,
     TestingService,
@@ -29,7 +32,14 @@ from testing.thrift_clients import (
 )
 from testing.thrift_services import TestingServiceInterface
 from testing.thrift_types import Complex, hard, HardError, mixed, Perm
-from thrift.python.metadata import gen_metadata
+from thrift.python.metadata import (
+    gen_metadata,
+    ThriftExceptionProxy,
+    ThriftServiceProxy,
+    ThriftStructProxy,
+)
+
+T = typing.TypeVar("T")
 
 
 class MetadataTests(unittest.TestCase):
@@ -298,3 +308,16 @@ class MetadataTests(unittest.TestCase):
             )  # Injected by @policy_annotation.TThriftStructHasDynamicFieldPolicy
 
         inject_metadata_fields()
+
+    def test_gen_metadata_with_module_returns_thrift_metadata(self) -> None:
+        """Test that gen_metadata() with a module input returns ThriftMetadata type."""
+        meta: (
+            ThriftStructProxy
+            | ThriftExceptionProxy
+            | ThriftServiceProxy
+            | ThriftMetadata
+        ) = gen_metadata(testing.thrift_metadata)
+        self.assertIsNotNone(meta.enums)
+        self.assertIsNotNone(meta.structs)
+        self.assertIsNotNone(meta.services)
+        self.assertIsNotNone(meta.exceptions)

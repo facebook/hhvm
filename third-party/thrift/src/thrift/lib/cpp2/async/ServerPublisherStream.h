@@ -344,7 +344,6 @@ class ServerPublisherStream : private StreamServerCallback {
 
   void onStreamCancel() override {
     clientEventBase_->dcheckIsInEventBaseThread();
-    notifyStreamCancel(contextStack_.get());
     serverExecutor_->add([ex = serverExecutor_, self = copy()] {
       self->onStreamCompleteOrCancel_.call();
     });
@@ -386,12 +385,10 @@ class ServerPublisherStream : private StreamServerCallback {
             creditBuffer_.addCredits(-1);
           }
         } else if (payload.hasException()) {
-          notifyStreamError(contextStack_.get(), payload.exception());
           streamClientCallback_->onStreamError(std::move(payload.exception()));
           close();
           return false;
         } else {
-          notifyStreamCompletion(contextStack_.get());
           streamClientCallback_->onStreamComplete();
           close();
           return false;
@@ -463,26 +460,6 @@ class ServerPublisherStream : private StreamServerCallback {
       contextStack->onStreamSubscribe(
           {.interactionCreationTime =
                interaction.getInteractionCreationTime()});
-    }
-  }
-
-  static void notifyStreamCancel(ContextStack* contextStack) {
-    if (contextStack) {
-      contextStack->onStreamFinally(details::STREAM_ENDING_TYPES::CANCEL);
-    }
-  }
-
-  static void notifyStreamError(
-      ContextStack* contextStack, const folly::exception_wrapper& exception) {
-    if (contextStack) {
-      contextStack->handleStreamErrorWrapped(exception);
-      contextStack->onStreamFinally(details::STREAM_ENDING_TYPES::ERROR);
-    }
-  }
-
-  static void notifyStreamCompletion(ContextStack* contextStack) {
-    if (contextStack) {
-      contextStack->onStreamFinally(details::STREAM_ENDING_TYPES::COMPLETE);
     }
   }
 

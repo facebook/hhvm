@@ -130,11 +130,3 @@ func (p *headerProtocol) setRequestHeader(key, value string) {
 func (p *headerProtocol) getResponseHeaders() map[string]string {
 	return p.trans.GetResponseHeaders()
 }
-
-func (p *headerProtocol) ProtocolID() types.ProtocolID {
-	return p.protoID
-}
-
-func (p *headerProtocol) AddTransform(trans TransformID) error {
-	return p.trans.AddTransform(trans)
-}

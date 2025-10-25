@@ -19,6 +19,7 @@
 #include "hphp/util/portability.h"
 #include <folly/Bits.h>
 #include <numaif.h>
+#include <algorithm>
 #include <fstream>
 #include <map>
 #include <thread>

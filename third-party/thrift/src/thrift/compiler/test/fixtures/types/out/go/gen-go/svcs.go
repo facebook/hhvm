@@ -61,8 +61,14 @@ func (c *someServiceClientImpl) BounceMap(ctx context.Context, m included.SomeMa
     fbthriftReq := &reqSomeServiceBounceMap{
         M: m,
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespSomeServiceBounceMap()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "bounce_map", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "bounce_map",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return nil, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -75,8 +81,14 @@ func (c *someServiceClientImpl) BinaryKeyedMap(ctx context.Context, r []int64) (
     fbthriftReq := &reqSomeServiceBinaryKeyedMap{
         R: r,
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespSomeServiceBinaryKeyedMap()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "binary_keyed_map", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "binary_keyed_map",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return nil, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {

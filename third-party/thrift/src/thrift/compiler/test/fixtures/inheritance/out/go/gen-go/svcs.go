@@ -56,8 +56,14 @@ func (c *myRootClientImpl) Close() error {
 func (c *myRootClientImpl) DoRoot(ctx context.Context) (error) {
     fbthriftReq := &reqMyRootDoRoot{
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespMyRootDoRoot()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "do_root", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "do_root",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -173,8 +179,14 @@ func (c *myNodeClientImpl) Close() error {
 func (c *myNodeClientImpl) DoMid(ctx context.Context) (error) {
     fbthriftReq := &reqMyNodeDoMid{
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespMyNodeDoMid()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "do_mid", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "do_mid",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -263,8 +275,14 @@ func (c *myLeafClientImpl) Close() error {
 func (c *myLeafClientImpl) DoLeaf(ctx context.Context) (error) {
     fbthriftReq := &reqMyLeafDoLeaf{
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespMyLeafDoLeaf()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "do_leaf", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "do_leaf",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {

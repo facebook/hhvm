@@ -101,8 +101,14 @@ func (c *getEntityClientImpl) GetEntity(ctx context.Context, r *GetEntityRequest
     fbthriftReq := &reqGetEntityGetEntity{
         R: r,
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespGetEntityGetEntity()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "getEntity", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "getEntity",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return nil, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -114,8 +120,14 @@ func (c *getEntityClientImpl) GetEntity(ctx context.Context, r *GetEntityRequest
 func (c *getEntityClientImpl) GetBool(ctx context.Context) (bool, error) {
     fbthriftReq := &reqGetEntityGetBool{
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespGetEntityGetBool()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "getBool", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "getBool",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return false, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -127,8 +139,14 @@ func (c *getEntityClientImpl) GetBool(ctx context.Context) (bool, error) {
 func (c *getEntityClientImpl) GetByte(ctx context.Context) (int8, error) {
     fbthriftReq := &reqGetEntityGetByte{
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespGetEntityGetByte()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "getByte", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "getByte",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return 0, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -140,8 +158,14 @@ func (c *getEntityClientImpl) GetByte(ctx context.Context) (int8, error) {
 func (c *getEntityClientImpl) GetI16(ctx context.Context) (int16, error) {
     fbthriftReq := &reqGetEntityGetI16{
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespGetEntityGetI16()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "getI16", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "getI16",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return 0, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -153,8 +177,14 @@ func (c *getEntityClientImpl) GetI16(ctx context.Context) (int16, error) {
 func (c *getEntityClientImpl) GetI32(ctx context.Context) (int32, error) {
     fbthriftReq := &reqGetEntityGetI32{
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespGetEntityGetI32()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "getI32", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "getI32",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return 0, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -166,8 +196,14 @@ func (c *getEntityClientImpl) GetI32(ctx context.Context) (int32, error) {
 func (c *getEntityClientImpl) GetI64(ctx context.Context) (int64, error) {
     fbthriftReq := &reqGetEntityGetI64{
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespGetEntityGetI64()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "getI64", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "getI64",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return 0, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -179,8 +215,14 @@ func (c *getEntityClientImpl) GetI64(ctx context.Context) (int64, error) {
 func (c *getEntityClientImpl) GetDouble(ctx context.Context) (float64, error) {
     fbthriftReq := &reqGetEntityGetDouble{
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespGetEntityGetDouble()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "getDouble", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "getDouble",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return 0.0, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -192,8 +234,14 @@ func (c *getEntityClientImpl) GetDouble(ctx context.Context) (float64, error) {
 func (c *getEntityClientImpl) GetString(ctx context.Context) (string, error) {
     fbthriftReq := &reqGetEntityGetString{
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespGetEntityGetString()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "getString", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "getString",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return "", fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -205,8 +253,14 @@ func (c *getEntityClientImpl) GetString(ctx context.Context) (string, error) {
 func (c *getEntityClientImpl) GetBinary(ctx context.Context) ([]byte, error) {
     fbthriftReq := &reqGetEntityGetBinary{
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespGetEntityGetBinary()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "getBinary", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "getBinary",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return nil, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -218,8 +272,14 @@ func (c *getEntityClientImpl) GetBinary(ctx context.Context) ([]byte, error) {
 func (c *getEntityClientImpl) GetMap(ctx context.Context) (map[string]string, error) {
     fbthriftReq := &reqGetEntityGetMap{
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespGetEntityGetMap()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "getMap", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "getMap",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return nil, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -231,8 +291,14 @@ func (c *getEntityClientImpl) GetMap(ctx context.Context) (map[string]string, er
 func (c *getEntityClientImpl) GetSet(ctx context.Context) ([]string, error) {
     fbthriftReq := &reqGetEntityGetSet{
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespGetEntityGetSet()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "getSet", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "getSet",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return nil, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -244,8 +310,14 @@ func (c *getEntityClientImpl) GetSet(ctx context.Context) ([]string, error) {
 func (c *getEntityClientImpl) GetList(ctx context.Context) ([]string, error) {
     fbthriftReq := &reqGetEntityGetList{
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespGetEntityGetList()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "getList", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "getList",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return nil, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -260,8 +332,14 @@ func (c *getEntityClientImpl) GetLegacyStuff(ctx context.Context, numPos int64, 
         NumNeg1: numNeg1,
         NumNeg2: numNeg2,
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespGetEntityGetLegacyStuff()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "getLegacyStuff", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "getLegacyStuff",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return 0, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -274,8 +352,14 @@ func (c *getEntityClientImpl) GetCtxCollision(ctx1 context.Context, ctx int64) (
     fbthriftReq := &reqGetEntityGetCtxCollision{
         Ctx: ctx,
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespGetEntityGetCtxCollision()
-    fbthriftErr := c.ch.SendRequestResponse(ctx1, "getCtxCollision", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx1,
+        "getCtxCollision",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return 0, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -289,8 +373,14 @@ func (c *getEntityClientImpl) GetCtx1Collision(ctx2 context.Context, ctx int64, 
         Ctx: ctx,
         Ctx1: ctx1,
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespGetEntityGetCtx1Collision()
-    fbthriftErr := c.ch.SendRequestResponse(ctx2, "getCtx1Collision", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx2,
+        "getCtx1Collision",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return 0, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -303,8 +393,14 @@ func (c *getEntityClientImpl) GetContextCollision(ctx context.Context, context_ 
     fbthriftReq := &reqGetEntityGetContextCollision{
         Context: context_,
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespGetEntityGetContextCollision()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "getContextCollision", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "getContextCollision",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return 0, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -317,8 +413,14 @@ func (c *getEntityClientImpl) GetOutCollision(ctx context.Context, out int64) (i
     fbthriftReq := &reqGetEntityGetOutCollision{
         Out: out,
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespGetEntityGetOutCollision()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "getOutCollision", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "getOutCollision",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return 0, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -332,8 +434,14 @@ func (c *getEntityClientImpl) GetOut1Collision(ctx context.Context, out int64, o
         Out: out,
         Out1: out1,
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespGetEntityGetOut1Collision()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "getOut1Collision", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "getOut1Collision",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return 0, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -346,8 +454,14 @@ func (c *getEntityClientImpl) GetInCollision(ctx context.Context, in int64) (int
     fbthriftReq := &reqGetEntityGetInCollision{
         In: in,
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespGetEntityGetInCollision()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "getInCollision", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "getInCollision",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return 0, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -361,8 +475,14 @@ func (c *getEntityClientImpl) GetIn1Collision(ctx context.Context, in int64, in1
         In: in,
         In1: in1,
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespGetEntityGetIn1Collision()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "getIn1Collision", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "getIn1Collision",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return 0, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -375,8 +495,14 @@ func (c *getEntityClientImpl) GetErrCollision(ctx context.Context, err int64) (i
     fbthriftReq := &reqGetEntityGetErrCollision{
         Err: err,
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespGetEntityGetErrCollision()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "getErrCollision", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "getErrCollision",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return 0, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -390,8 +516,14 @@ func (c *getEntityClientImpl) GetErr1Collision(ctx context.Context, err int64, e
         Err: err,
         Err1: err1,
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespGetEntityGetErr1Collision()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "getErr1Collision", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "getErr1Collision",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return 0, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -405,8 +537,14 @@ func (c *getEntityClientImpl) MyMethodWithConflictingParamAccessors(ctx context.
         SetFoo: setFoo,
         Foo: foo,
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespGetEntityMyMethodWithConflictingParamAccessors()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "myMethodWithConflictingParamAccessors", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "myMethodWithConflictingParamAccessors",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {

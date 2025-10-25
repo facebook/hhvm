@@ -59,8 +59,14 @@ func (c *serviceClientImpl) Func(ctx context.Context, arg1 StringWithAdapter_720
         Arg2: arg2,
         Arg3: arg3,
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespServiceFunc()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "func", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "func",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return 0, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -171,8 +177,14 @@ func (c *adapterServiceClientImpl) Close() error {
 func (c *adapterServiceClientImpl) Count(ctx context.Context) (*CountingStruct, error) {
     fbthriftReq := &reqAdapterServiceCount{
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespAdapterServiceCount()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "count", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "count",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return nil, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -185,8 +197,14 @@ func (c *adapterServiceClientImpl) AdaptedTypes(ctx context.Context, arg *HeapAl
     fbthriftReq := &reqAdapterServiceAdaptedTypes{
         Arg: arg,
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespAdapterServiceAdaptedTypes()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "adaptedTypes", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "adaptedTypes",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return nil, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {

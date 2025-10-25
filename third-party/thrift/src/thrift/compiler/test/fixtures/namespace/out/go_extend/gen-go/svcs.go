@@ -68,8 +68,14 @@ func (c *extendTestServiceClientImpl) Check(ctx context.Context, struct1 *test0.
     fbthriftReq := &reqExtendTestServiceCheck{
         Struct1: struct1,
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespExtendTestServiceCheck()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "check", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "check",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return false, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {

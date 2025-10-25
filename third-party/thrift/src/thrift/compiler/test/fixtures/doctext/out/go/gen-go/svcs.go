@@ -62,8 +62,14 @@ func (c *cClientImpl) Close() error {
 func (c *cClientImpl) F(ctx context.Context) (error) {
     fbthriftReq := &reqCF{
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespCF()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "f", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "f",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -132,8 +138,14 @@ func (c *cClientImpl) Thing(ctx context.Context, a int32, b string, c []int32) (
         B: b,
         C: c,
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespCThing()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "thing", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "thing",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return "", fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {

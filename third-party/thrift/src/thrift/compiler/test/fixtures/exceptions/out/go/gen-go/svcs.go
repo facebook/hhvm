@@ -62,8 +62,14 @@ func (c *raiserClientImpl) Close() error {
 func (c *raiserClientImpl) DoBland(ctx context.Context) (error) {
     fbthriftReq := &reqRaiserDoBland{
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespRaiserDoBland()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "doBland", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "doBland",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -75,8 +81,14 @@ func (c *raiserClientImpl) DoBland(ctx context.Context) (error) {
 func (c *raiserClientImpl) DoRaise(ctx context.Context) (error) {
     fbthriftReq := &reqRaiserDoRaise{
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespRaiserDoRaise()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "doRaise", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "doRaise",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -88,8 +100,14 @@ func (c *raiserClientImpl) DoRaise(ctx context.Context) (error) {
 func (c *raiserClientImpl) Get200(ctx context.Context) (string, error) {
     fbthriftReq := &reqRaiserGet200{
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespRaiserGet200()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "get200", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "get200",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return "", fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -101,8 +119,14 @@ func (c *raiserClientImpl) Get200(ctx context.Context) (string, error) {
 func (c *raiserClientImpl) Get500(ctx context.Context) (string, error) {
     fbthriftReq := &reqRaiserGet500{
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespRaiserGet500()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "get500", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "get500",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return "", fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {

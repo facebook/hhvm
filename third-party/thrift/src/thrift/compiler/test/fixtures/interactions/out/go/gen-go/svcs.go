@@ -61,8 +61,14 @@ func (c *myInteractionClientImpl) Close() error {
 func (c *myInteractionClientImpl) Frobnicate(ctx context.Context) (int32, error) {
     fbthriftReq := &reqMyInteractionFrobnicate{
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespMyInteractionFrobnicate()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "MyInteraction.frobnicate", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "MyInteraction.frobnicate",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return 0, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -164,8 +170,14 @@ func (c *myInteractionFastClientImpl) Close() error {
 func (c *myInteractionFastClientImpl) Frobnicate(ctx context.Context) (int32, error) {
     fbthriftReq := &reqMyInteractionFastFrobnicate{
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespMyInteractionFastFrobnicate()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "MyInteractionFast.frobnicate", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "MyInteractionFast.frobnicate",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return 0, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -263,8 +275,14 @@ func (c *serialInteractionClientImpl) Close() error {
 func (c *serialInteractionClientImpl) Frobnicate(ctx context.Context) (error) {
     fbthriftReq := &reqSerialInteractionFrobnicate{
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespSerialInteractionFrobnicate()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "SerialInteraction.frobnicate", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "SerialInteraction.frobnicate",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -302,8 +320,14 @@ func (c *boxedInteractionClientImpl) Close() error {
 func (c *boxedInteractionClientImpl) GetABox(ctx context.Context) (*ShouldBeBoxed, error) {
     fbthriftReq := &reqBoxedInteractionGetABox{
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespBoxedInteractionGetABox()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "BoxedInteraction.getABox", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "BoxedInteraction.getABox",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return nil, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -342,8 +366,14 @@ func (c *myServiceClientImpl) Close() error {
 func (c *myServiceClientImpl) Foo(ctx context.Context) (error) {
     fbthriftReq := &reqMyServiceFoo{
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespMyServiceFoo()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "foo", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "foo",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -450,8 +480,14 @@ func (c *factoriesClientImpl) Close() error {
 func (c *factoriesClientImpl) Foo(ctx context.Context) (error) {
     fbthriftReq := &reqFactoriesFoo{
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespFactoriesFoo()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "foo", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "foo",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -558,8 +594,14 @@ func (c *performClientImpl) Close() error {
 func (c *performClientImpl) Foo(ctx context.Context) (error) {
     fbthriftReq := &reqPerformFoo{
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespPerformFoo()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "foo", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "foo",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
@@ -666,8 +708,14 @@ func (c *interactWithSharedClientImpl) Close() error {
 func (c *interactWithSharedClientImpl) DoSomeSimilarThings(ctx context.Context) (*shared.DoSomethingResult, error) {
     fbthriftReq := &reqInteractWithSharedDoSomeSimilarThings{
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newRespInteractWithSharedDoSomeSimilarThings()
-    fbthriftErr := c.ch.SendRequestResponse(ctx, "do_some_similar_things", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        ctx,
+        "do_some_similar_things",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return nil, fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {

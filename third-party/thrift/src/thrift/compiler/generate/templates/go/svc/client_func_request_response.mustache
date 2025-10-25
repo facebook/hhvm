@@ -27,8 +27,14 @@ func (c *{{service:go_client_name}}) {{> svc/client_func_signature}} {
         {{/field:type}}
         {{/function:args}}
     }
+    fbthriftChannel := c.ch
     fbthriftResp := newResp{{service:go_name}}{{function:go_name}}()
-    fbthriftErr := c.ch.SendRequestResponse({{function:ctx_arg_name}}, "{{> svc/func_rpc_name}}", fbthriftReq, fbthriftResp)
+    fbthriftErr := fbthriftChannel.SendRequestResponse(
+        {{function:ctx_arg_name}},
+        "{{> svc/func_rpc_name}}",
+        fbthriftReq,
+        fbthriftResp,
+    )
     if fbthriftErr != nil {
         return {{#function:return_type}}{{^type:void?}}{{> common/go_zero_value}}, {{/type:void?}}{{/function:return_type}}fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {

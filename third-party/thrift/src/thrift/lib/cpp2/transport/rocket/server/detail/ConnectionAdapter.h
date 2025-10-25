@@ -22,6 +22,7 @@
 #include <folly/io/IOBufQueue.h>
 #include <folly/io/async/EventBase.h>
 #include <thrift/lib/cpp2/async/MessageChannel.h>
+#include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnectionObserver.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/WriteBatchTypes.h>
@@ -96,6 +97,44 @@ class ConnectionAdapter {
   bool areStreamsPaused() { return connection_->streamsPaused_; }
   void pauseStreams() { connection_->pauseStreams(); }
   void resumeStreams() { connection_->resumeStreams(); }
+
+  // ====== READ HANDLE SUPPORT METHODS ======
+
+  /**
+   * Increment the count of active paused read handlers.
+   * Called when a ReadPausableHandle is created.
+   */
+  void incrementActivePausedHandlers() { ++connection_->activePausedHandlers_; }
+
+  /**
+   * Decrement the count of active paused read handlers.
+   * Called when ReadHandles are destroyed or resumed.
+   */
+  void decrementActivePausedHandlers() { --connection_->activePausedHandlers_; }
+
+  /**
+   * Set the socket read callback to resume reading.
+   * Only sets callback if connection is in appropriate state.
+   */
+  void setSocketReadCallback() {
+    if (connection_->state_ == AdaptedConnectionT::ConnectionState::ALIVE ||
+        connection_->state_ == AdaptedConnectionT::ConnectionState::DRAINING) {
+      connection_->socket_->setReadCB(&connection_->parser_);
+    }
+  }
+
+  /**
+   * Clear the socket read callback to pause reading.
+   */
+  void clearSocketReadCallback() { connection_->socket_->setReadCB(nullptr); }
+
+  /**
+   * Get the Cpp2ConnContext for this connection.
+   * Used by ReadHandles to provide context access.
+   */
+  apache::thrift::Cpp2ConnContext* getCpp2ConnContext() {
+    return connection_->frameHandler_->getCpp2ConnContext();
+  }
 
   // Accessor methods for WriteBatcher functionality
   size_t numObservers() { return connection_->numObservers(); }

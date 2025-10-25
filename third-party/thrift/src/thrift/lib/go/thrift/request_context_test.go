@@ -161,13 +161,16 @@ func TestParallelWriteHeader(t *testing.T) {
 }
 
 func TestRequestContext(t *testing.T) {
-	reqCtx := &RequestContext{}
-	ctx := WithRequestContext(context.TODO(), reqCtx)
-	reqCtxPrime := GetRequestContext(ctx)
-	require.Equal(t, reqCtx, reqCtxPrime)
-
-	reqCtxPrime = GetRequestContext(context.TODO())
-	require.Nil(t, reqCtxPrime)
+	t.Run("empty context", func(t *testing.T) {
+		reqCtx := GetRequestContext(context.TODO())
+		require.Nil(t, reqCtx)
+	})
+	t.Run("non-empty context", func(t *testing.T) {
+		reqCtx := &RequestContext{}
+		ctx := WithRequestContext(context.TODO(), reqCtx)
+		reqCtxPrime := GetRequestContext(ctx)
+		require.Equal(t, reqCtx, reqCtxPrime)
+	})
 }
 
 func TestGetRequestHeadersFromContext(t *testing.T) {

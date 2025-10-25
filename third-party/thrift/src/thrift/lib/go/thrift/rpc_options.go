@@ -132,9 +132,9 @@ func WithRPCOptions(ctx context.Context, opts *RPCOptions) context.Context {
 
 // GetRPCOptions returns the RPCOptions in a go context, or nil if there is nothing
 func GetRPCOptions(ctx context.Context) *RPCOptions {
-	v := ctx.Value(rpcOptionsKey)
-	if v == nil {
-		return nil
+	opts, ok := ctx.Value(rpcOptionsKey).(*RPCOptions)
+	if ok {
+		return opts
 	}
-	return v.(*RPCOptions)
+	return nil
 }

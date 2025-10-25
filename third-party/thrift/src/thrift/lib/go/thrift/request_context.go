@@ -56,11 +56,11 @@ const (
 
 // GetRequestContext returns the RequestContext in a go context, or nil if there is nothing
 func GetRequestContext(ctx context.Context) *RequestContext {
-	v := ctx.Value(reqContextKey)
-	if v == nil {
-		return nil
+	reqCtx, ok := ctx.Value(reqContextKey).(*RequestContext)
+	if ok {
+		return reqCtx
 	}
-	return v.(*RequestContext)
+	return nil
 }
 
 // WithRequestContext sets the RequestContext in a given go context

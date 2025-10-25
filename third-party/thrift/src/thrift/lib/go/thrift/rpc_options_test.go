@@ -25,12 +25,14 @@ import (
 )
 
 func TestRPCOptionsContext(t *testing.T) {
-	rpcOpts := &RPCOptions{Timeout: time.Minute}
-
-	ctx := WithRPCOptions(context.TODO(), rpcOpts)
-	rpcOptsPrime := GetRPCOptions(ctx)
-	assert.Equal(t, rpcOpts, rpcOptsPrime)
-
-	rpcOptsPrime = GetRPCOptions(context.TODO())
-	assert.Nil(t, rpcOptsPrime)
+	t.Run("empty context", func(t *testing.T) {
+		rpcOpts := GetRPCOptions(context.TODO())
+		assert.Nil(t, rpcOpts)
+	})
+	t.Run("non-empty context", func(t *testing.T) {
+		rpcOpts := &RPCOptions{Timeout: time.Minute}
+		ctx := WithRPCOptions(context.TODO(), rpcOpts)
+		rpcOptsPrime := GetRPCOptions(ctx)
+		assert.Equal(t, rpcOpts, rpcOptsPrime)
+	})
 }

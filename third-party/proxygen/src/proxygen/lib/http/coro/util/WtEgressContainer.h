@@ -46,8 +46,7 @@ struct BufferedFlowController {
   }
 
   [[nodiscard]] bool isBlocked() const {
-    constexpr auto kMaxEgressBuf = std::numeric_limits<uint16_t>::max();
-    return bufferedOffset_ - window_.getCurrentOffset() >= kMaxEgressBuf;
+    return getBufferAvailable() == 0;
   }
 
   uint64_t getBufferedOffset() const {
@@ -63,8 +62,8 @@ struct BufferedFlowController {
   }
 
   uint64_t getBufferAvailable() const {
-    auto max = getMaxOffset();
-    return bufferedOffset_ >= max ? 0 : max - bufferedOffset_;
+    const auto bufferedBytes = bufferedOffset_ - getCurrentOffset();
+    return bufferedBytes >= kMaxEgressBuf ? 0 : (kMaxEgressBuf - bufferedBytes);
   }
 
   uint64_t getAvailable() const {
@@ -72,6 +71,7 @@ struct BufferedFlowController {
   }
 
  private:
+  static constexpr auto kMaxEgressBuf = std::numeric_limits<uint16_t>::max();
   FlowController window_;
   uint64_t bufferedOffset_{0};
 };

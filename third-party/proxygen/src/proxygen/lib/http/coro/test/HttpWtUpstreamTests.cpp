@@ -544,4 +544,41 @@ TEST(WtStreamManager, StopSendingResetStreamTest) {
   EXPECT_EQ(resetStream.err, 1);
 }
 
+TEST(WtStreamManager, AwaitWritableTest) {
+  using WtStreamManager = detail::WtStreamManager;
+  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
+  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+  WtStreamManagerCb cb;
+  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
+
+  constexpr auto kBufLen = 65'535;
+  // next ::nextBidiHandle should succeed
+  auto eh = CHECK_NOTNULL(streamManager.nextEgressHandle());
+
+  // await writable future should be synchronously ready & equal to kBufLen
+  // (default egress stream fc)
+  auto await = eh->awaitWritable();
+  EXPECT_TRUE(await.hasValue() && await.value().isReady() &&
+              await.value().value() == kBufLen);
+
+  // send kBufLen + 1 bytes
+  auto fcRes = eh->writeStreamData(
+      makeBuf(kBufLen + 1), /*fin=*/false, /*byteEventCallback=*/nullptr);
+  EXPECT_TRUE(fcRes.hasValue() &&
+              fcRes.value() == WebTransport::FCState::BLOCKED);
+
+  // await writable future; not ready awaiting egress buffer space
+  await = eh->awaitWritable();
+  EXPECT_TRUE(await.hasValue() && !await.value().isReady());
+
+  // granting additional fc credit does not unblock egress buffer
+  streamManager.onMaxData({{kBufLen + 2}, eh->getID()});
+
+  // dequeue will resolve promise
+  streamManager.dequeue(*eh, kBufLen);
+  EXPECT_TRUE(await->isReady() &&
+              await->value() == kBufLen - 1); // minus one because we enqueued
+                                              // kBufLen + 1 bytes of data
+}
+
 } // namespace proxygen::coro::test

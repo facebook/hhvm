@@ -57,6 +57,11 @@ ReadPromise emptyReadPromise() {
   return ReadPromise::makeEmpty();
 }
 
+using WritePromise = folly::Promise<uint64_t>;
+WritePromise emptyWritePromise() {
+  return WritePromise::makeEmpty();
+}
+
 using StreamData = WtStreamManager::StreamData;
 using WebTransport = proxygen::WebTransport;
 using Accessor = WtStreamManager::Accessor;
@@ -100,6 +105,7 @@ struct WriteHandle : public WebTransport::StreamWriteHandle {
       override;
 
   WebTransport::StreamData dequeue(uint64_t atMost) noexcept;
+  bool onMaxData(uint64_t offset);
   void cancel() {
     cs_.requestCancellation();
   }
@@ -108,6 +114,7 @@ struct WriteHandle : public WebTransport::StreamWriteHandle {
   WtEgressContainer send_{kDefaultFc};
   // set to stop_sending's error code
   uint64_t err{kInvalidVarint};
+  WritePromise promise_{emptyWritePromise()};
 };
 
 } // namespace
@@ -303,12 +310,13 @@ WebTransport::BidiStreamHandle WtStreamManager::nextBidiHandle() noexcept {
 }
 
 bool WtStreamManager::onMaxData(MaxConnData data) noexcept {
+  // TODO(@damlaj): notify previously blocked streams
   return send_.grant(data.maxData);
 }
 bool WtStreamManager::onMaxData(MaxStreamData data) noexcept {
   // TODO(@damlaj): connection-level err if not egress stream?
   auto* eh = static_cast<WriteHandle*>(getEgressHandle(data.streamId));
-  return eh && eh->send_.grant(data.maxData);
+  return eh && eh->onMaxData(data.maxData);
 }
 
 bool WtStreamManager::onStopSending(StopSending data) noexcept {
@@ -419,13 +427,34 @@ folly::Expected<folly::Unit, WriteHandle::ErrCode> WriteHandle::setPriority(
     uint8_t level, uint32_t order, bool incremental) {
   XLOG(FATAL) << "not implemented";
 }
+
+bool WriteHandle::onMaxData(uint64_t offset) {
+  // TODO(@damlaj): handle ::grant error; take into acc conn send_ window
+  send_.grant(offset);
+  return true;
+}
+
 folly::Expected<folly::SemiFuture<uint64_t>, WriteHandle::ErrCode>
 WriteHandle::awaitWritable() {
-  XLOG(FATAL) << "not implemented";
+  XCHECK(!promise_.valid()) << "at most one pending awaitWritable";
+  auto [p, f] = folly::makePromiseContract<uint64_t>();
+  const auto& window = send_.window();
+  if (auto avail = window.getBufferAvailable(); avail > 0) {
+    p.setValue(avail);
+    return std::move(f);
+  }
+  promise_ = std::move(p);
+  return std::move(f);
 }
 
 // TODO(@damlaj): StreamData and DequeueResult should be the same struct
 StreamData WriteHandle::dequeue(uint64_t atMost) noexcept {
   auto res = send_.dequeue(atMost);
+  const auto bufferAvailable = send_.window().getBufferAvailable();
+  if (bufferAvailable > 0) {
+    if (auto p = std::exchange(promise_, emptyWritePromise()); p.valid()) {
+      p.setValue(bufferAvailable);
+    }
+  }
   return StreamData{std::move(res.data), res.fin};
 }

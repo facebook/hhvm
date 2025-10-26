@@ -25,6 +25,7 @@ struct WtStreamManager::Accessor {
   }
   void maybeGrantFc(ReadHandle* rh, uint64_t bytes) noexcept;
   void stopSending(ReadHandle& rh, uint32_t err) noexcept;
+  void resetStream(WriteHandle& wh, uint32_t err) noexcept;
   auto& connSend() {
     return sm_.send_;
   }
@@ -162,6 +163,10 @@ void Accessor::maybeGrantFc(ReadHandle* rh, uint64_t bytes) noexcept {
 
 void Accessor::stopSending(ReadHandle& rh, uint32_t err) noexcept {
   sm_.enqueueEvent(StopSending{rh.getID(), err});
+}
+
+void Accessor::resetStream(WriteHandle& wh, uint32_t err) noexcept {
+  sm_.enqueueEvent(ResetStream{wh.getID(), err});
 }
 
 WtStreamManager::WtStreamManager(WtDir dir,
@@ -406,8 +411,10 @@ WriteHandle::writeStreamData(std::unique_ptr<folly::IOBuf> data,
 
 folly::Expected<folly::Unit, WriteHandle::ErrCode> WriteHandle::resetStream(
     uint32_t error) {
-  XLOG(FATAL) << "not implemented";
+  acc_.resetStream(*this, error);
+  return folly::unit;
 }
+
 folly::Expected<folly::Unit, WriteHandle::ErrCode> WriteHandle::setPriority(
     uint8_t level, uint32_t order, bool incremental) {
   XLOG(FATAL) << "not implemented";

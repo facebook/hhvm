@@ -527,12 +527,21 @@ TEST(WtStreamManager, StopSendingResetStreamTest) {
   CHECK(one.readHandle && one.writeHandle);
   // stop sending should invoke callback
   one.readHandle->stopSending(0);
-  EXPECT_TRUE(cb.evAvail_);
+  EXPECT_TRUE(std::exchange(cb.evAvail_, false));
   auto events = streamManager.moveEvents();
   EXPECT_EQ(events.size(), 1);
   auto stopSending = std::get<WtStreamManager::StopSending>(events[0]);
   EXPECT_EQ(stopSending.streamId, one.readHandle->getID());
   EXPECT_EQ(stopSending.err, 0);
+
+  // reset stream should invoke callback
+  one.writeHandle->resetStream(/*error=*/1);
+  EXPECT_TRUE(std::exchange(cb.evAvail_, false));
+  events = streamManager.moveEvents();
+  EXPECT_EQ(events.size(), 1);
+  auto resetStream = std::get<WtStreamManager::ResetStream>(events[0]);
+  EXPECT_EQ(resetStream.streamId, one.readHandle->getID());
+  EXPECT_EQ(resetStream.err, 1);
 }
 
 } // namespace proxygen::coro::test

@@ -24,6 +24,7 @@ struct WtStreamManager::Accessor {
   Accessor(WtStreamManager& sm) : sm_(sm) {
   }
   void maybeGrantFc(ReadHandle* rh, uint64_t bytes) noexcept;
+  void stopSending(ReadHandle& rh, uint32_t err) noexcept;
   auto& connSend() {
     return sm_.send_;
   }
@@ -157,6 +158,10 @@ void Accessor::maybeGrantFc(ReadHandle* rh, uint64_t bytes) noexcept {
     connRecv.grant(connRecv.getCurrentOffset() + kDefaultFc);
     sm_.enqueueEvent(MaxConnData{connRecv.getMaxOffset()});
   }
+}
+
+void Accessor::stopSending(ReadHandle& rh, uint32_t err) noexcept {
+  sm_.enqueueEvent(StopSending{rh.getID(), err});
 }
 
 WtStreamManager::WtStreamManager(WtDir dir,
@@ -365,7 +370,8 @@ folly::SemiFuture<StreamData> ReadHandle::readStreamData() {
 
 folly::Expected<folly::Unit, ReadHandle::ErrCode> ReadHandle::stopSending(
     uint32_t error) {
-  XLOG(FATAL) << "not implemented";
+  acc_.stopSending(*this, error);
+  return folly::unit;
 }
 
 bool ReadHandle::enqueue(StreamData&& data) noexcept {

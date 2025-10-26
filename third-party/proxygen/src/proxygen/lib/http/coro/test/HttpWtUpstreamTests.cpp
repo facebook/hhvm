@@ -515,4 +515,24 @@ TEST(WtStreamManager, GrantFlowControlCredit) {
   EXPECT_TRUE(std::holds_alternative<MaxConnData>(events[0]));
 }
 
+TEST(WtStreamManager, StopSendingResetStreamTest) {
+  using WtStreamManager = detail::WtStreamManager;
+  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
+  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+  WtStreamManagerCb cb;
+  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
+
+  // next ::nextBidiHandle should succeed
+  auto one = streamManager.nextBidiHandle();
+  CHECK(one.readHandle && one.writeHandle);
+  // stop sending should invoke callback
+  one.readHandle->stopSending(0);
+  EXPECT_TRUE(cb.evAvail_);
+  auto events = streamManager.moveEvents();
+  EXPECT_EQ(events.size(), 1);
+  auto stopSending = std::get<WtStreamManager::StopSending>(events[0]);
+  EXPECT_EQ(stopSending.streamId, one.readHandle->getID());
+  EXPECT_EQ(stopSending.err, 0);
+}
+
 } // namespace proxygen::coro::test

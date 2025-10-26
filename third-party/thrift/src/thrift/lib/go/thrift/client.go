@@ -160,11 +160,11 @@ func NewClient(opts ...ClientOption) (RequestChannel, error) {
 		// Set ALPN based on transport
 		switch config.transport {
 		case TransportIDRocket:
-			config.tlsConfig.NextProtos = []string{"rs"}
+			ApplyALPNRocket(config.tlsConfig)
 		case TransportIDUpgradeToRocket:
-			config.tlsConfig.NextProtos = []string{"rs" /* preferred */, "thrift" /* fallback */}
+			ApplyALPNUpgradeToRocket(config.tlsConfig)
 		default:
-			config.tlsConfig.NextProtos = []string{"thrift"}
+			ApplyALPNHeader(config.tlsConfig)
 		}
 	}
 

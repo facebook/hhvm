@@ -111,6 +111,24 @@ inst = MyStruct(val_map={{
 
 
 @click.pass_context
+def int_int_map_init_statement(ctx, flavor: Flavor) -> str:
+    size = ctx.params["size"]
+    if flavor == Flavor.MUTABLE_PYTHON:
+        return f"""
+inst = MyStruct(int_map=to_thrift_map({{
+    i: i
+    for i in range({size})
+}}))
+"""
+    return f"""
+inst = MyStruct(int_map={{
+    i: i
+    for i in range({size})
+}})
+"""
+
+
+@click.pass_context
 def str_str_map_init_statement(ctx, flavor: Flavor) -> str:
     size = ctx.params["size"]
     if flavor == Flavor.MUTABLE_PYTHON:
@@ -236,6 +254,12 @@ def int_str_map_random_access_statement(ctx, flavor: Flavor) -> str:
 
 
 @click.pass_context
+def int_int_map_random_access_statement(ctx, flavor: Flavor) -> str:
+    size = ctx.params["size"]
+    return f"_ = inst.int_map[{size//2}]"
+
+
+@click.pass_context
 def str_str_map_random_access_statement(ctx, flavor: Flavor) -> str:
     size = ctx.params["size"]
     key = f"key_{size//2}"
@@ -280,6 +304,13 @@ for _ in inst.str_set:
 def int_str_map_iterate_statement(flavor: Flavor) -> str:
     return """
 for _, _ in inst.val_map.items():
+    pass
+"""
+
+
+def int_int_map_iterate_statement(flavor: Flavor) -> str:
+    return """
+for _, _ in inst.int_map.items():
     pass
 """
 
@@ -422,6 +453,17 @@ def benchmark_int_str_map(ctx) -> None:
 
 
 @click.pass_context
+def benchmark_int_int_map(ctx) -> None:
+    size = ctx.params["size"]
+    benchmark_container(
+        f"Map<i32, i32> ({size} elements)",
+        int_int_map_init_statement,
+        int_int_map_random_access_statement,
+        int_int_map_iterate_statement,
+    )
+
+
+@click.pass_context
 def benchmark_str_str_map(ctx) -> None:
     size = ctx.params["size"]
     benchmark_container(
@@ -465,6 +507,7 @@ def main(size, inner_size, repeat) -> int:
     benchmark_str_list()
     benchmark_int_set()
     benchmark_str_set()
+    benchmark_int_int_map()
     benchmark_int_str_map()
     benchmark_str_str_map()
     benchmark_nested_map()

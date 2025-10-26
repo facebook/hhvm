@@ -47,6 +47,13 @@ struct WtStreamManager {
   WtRh* getIngressHandle(uint64_t streamId);
   WebTransport::BidiStreamHandle getBidiHandle(uint64_t streamId);
 
+  /**
+   * initiators of streams should use this api, attempts to create the next
+   * consecutive egress/bidi handle
+   */
+  WtWh* nextEgressHandle() noexcept;
+  WebTransport::BidiStreamHandle nextBidiHandle() noexcept;
+
  private:
   bool isSelf(uint64_t streamId) const;
   bool isPeer(uint64_t streamId) const;

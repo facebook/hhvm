@@ -259,4 +259,31 @@ TEST(WtStreamManager, BasicPeerUni) {
   EXPECT_EQ(bidiRes.writeHandle, nullptr); // ingress only
 }
 
+TEST(WtStreamManager, NextBidiUniHandle) {
+  using WtStreamManager = detail::WtStreamManager;
+  // TODO(@damlaj): WtMaxStreams ignored for now
+  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
+  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+
+  WtStreamManager streamManager{detail::WtDir::Client, self, peer};
+  // next egress handle tests
+  auto uni = CHECK_NOTNULL(streamManager.nextEgressHandle());
+  EXPECT_EQ(uni->getID(), 0x02);
+  uni = streamManager.nextEgressHandle();
+  EXPECT_EQ(uni->getID(), 0x06);
+
+  // next bidi handle test
+  auto bidi = streamManager.nextBidiHandle();
+  EXPECT_NE(bidi.readHandle, nullptr);
+  EXPECT_NE(bidi.writeHandle, nullptr);
+  EXPECT_EQ(bidi.readHandle->getID(), bidi.writeHandle->getID());
+  EXPECT_EQ(bidi.readHandle->getID(), 0x00);
+
+  bidi = streamManager.nextBidiHandle();
+  EXPECT_NE(bidi.readHandle, nullptr);
+  EXPECT_NE(bidi.writeHandle, nullptr);
+  EXPECT_EQ(bidi.readHandle->getID(), bidi.writeHandle->getID());
+  EXPECT_EQ(bidi.readHandle->getID(), 0x04);
+}
+
 } // namespace proxygen::coro::test

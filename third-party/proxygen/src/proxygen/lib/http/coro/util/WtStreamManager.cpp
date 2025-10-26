@@ -155,6 +155,14 @@ WebTransport::BidiStreamHandle WtStreamManager::getBidiHandle(
   return {getIngressHandle(streamId), getEgressHandle(streamId)};
 }
 
+WtStreamManager::WtWh* WtStreamManager::nextEgressHandle() noexcept {
+  return getEgressHandle(self_.uni);
+}
+
+WebTransport::BidiStreamHandle WtStreamManager::nextBidiHandle() noexcept {
+  return getBidiHandle(self_.bidi);
+}
+
 /**
  * ReadHandle & WriteHandle implementations here
  */

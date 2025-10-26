@@ -459,10 +459,10 @@ TEST(WtStreamManager, BidiHandleCancellation) {
   EXPECT_EQ(streamManager.nextWritable(), nullptr);
 
   // StreamManager::onResetStream should request cancellation of ingress handle
+  auto fut = one.readHandle->readStreamData();
   ct = one.readHandle->getCancelToken();
   streamManager.onResetStream({one.writeHandle->getID(), 0x00});
   EXPECT_TRUE(ct.isCancellationRequested());
-  auto fut = one.readHandle->readStreamData();
   EXPECT_TRUE(fut.isReady() && fut.hasException());
 }
 
@@ -521,6 +521,7 @@ TEST(WtStreamManager, StopSendingResetStreamTest) {
   // next ::nextBidiHandle should succeed
   auto one = streamManager.nextBidiHandle();
   CHECK(one.readHandle && one.writeHandle);
+  auto id = one.readHandle->getID();
 
   // stop sending should invoke callback and resolve pending promise
   auto rp = one.readHandle->readStreamData();
@@ -530,7 +531,7 @@ TEST(WtStreamManager, StopSendingResetStreamTest) {
   auto events = streamManager.moveEvents();
   EXPECT_EQ(events.size(), 1);
   auto stopSending = std::get<WtStreamManager::StopSending>(events[0]);
-  EXPECT_EQ(stopSending.streamId, one.readHandle->getID());
+  EXPECT_EQ(stopSending.streamId, id);
   EXPECT_EQ(stopSending.err, 0);
 
   // fill up egress buffer to ensure ::resetStream resolves pending promise
@@ -545,8 +546,19 @@ TEST(WtStreamManager, StopSendingResetStreamTest) {
   events = streamManager.moveEvents();
   EXPECT_EQ(events.size(), 1);
   auto resetStream = std::get<WtStreamManager::ResetStream>(events[0]);
-  EXPECT_EQ(resetStream.streamId, one.readHandle->getID());
+  EXPECT_EQ(resetStream.streamId, id);
   EXPECT_EQ(resetStream.err, 1);
+
+  // bidirectionally reset => stream deleted
+  EXPECT_FALSE(streamManager.hasStreams());
+
+  // ::resetStream on a unidirectional egress stream should erase the stream
+  auto* egress = CHECK_NOTNULL(streamManager.nextEgressHandle());
+  EXPECT_TRUE(streamManager.hasStreams());
+  egress->resetStream(/*error=*/0); // read side is closed for an egress-only
+                                    // handle; bidirectionally complete after
+                                    // ::resetStream
+  EXPECT_FALSE(streamManager.hasStreams());
 }
 
 TEST(WtStreamManager, AwaitWritableTest) {

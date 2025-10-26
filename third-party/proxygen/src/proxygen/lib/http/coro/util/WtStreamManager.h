@@ -175,6 +175,10 @@ struct WtStreamManager {
    */
   WtWh* nextWritable() noexcept;
 
+  bool hasStreams() const noexcept {
+    return !streams_.empty();
+  }
+
  private:
   bool isSelf(uint64_t streamId) const;
   bool isPeer(uint64_t streamId) const;

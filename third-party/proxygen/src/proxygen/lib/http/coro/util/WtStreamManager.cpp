@@ -27,6 +27,16 @@ struct WtStreamManager::Accessor {
   void stopSending(ReadHandle& rh, uint32_t err) noexcept;
   void resetStream(WriteHandle& wh, uint32_t err) noexcept;
   void onStreamWritable(WriteHandle& wh) noexcept;
+  // invoked when write handle or read handle are done
+  void done(WriteHandle& wh) noexcept;
+  void done(ReadHandle& rh) noexcept;
+
+  bool isIngress(uint64_t id) {
+    return sm_.isIngress(id);
+  }
+  bool isEgress(uint64_t id) {
+    return sm_.isEgress(id);
+  }
   auto& connSend() {
     return sm_.send_;
   }
@@ -70,11 +80,11 @@ using WtException = WtStreamManager::WtException;
 using StreamData = WtStreamManager::StreamData;
 using WebTransport = proxygen::WebTransport;
 using Accessor = WtStreamManager::Accessor;
+enum HandleState : uint8_t { Closed = 0, Open = 1 };
 
 struct ReadHandle : public WebTransport::StreamReadHandle {
   // why doesn't using StreamReadHandle::StreamReadHandle work here?
-  ReadHandle(uint64_t id, Accessor acc) : StreamReadHandle(id), acc_(acc) {
-  }
+  ReadHandle(uint64_t id, Accessor acc) noexcept;
   using ErrCode = WebTransport::ErrorCode;
   // StreamReadHandle overrides
   folly::SemiFuture<StreamData> readStreamData() override;
@@ -82,17 +92,19 @@ struct ReadHandle : public WebTransport::StreamReadHandle {
   bool enqueue(StreamData&& data) noexcept;
   void cancel(folly::exception_wrapper ex) noexcept;
   ReadPromise resetPromise() noexcept;
+  void finish(bool done) noexcept;
 
   Accessor acc_;
   FlowController recv_{kDefaultFc};
   BufferedData buf_;
   ReadPromise promise_{emptyReadPromise()};
   folly::exception_wrapper ex_; // set on self stop sending or peer reset_stream
+  HandleState state_;
+  WriteHandle* wh_{nullptr}; // ptr to the symmetric wh
 };
 struct WriteHandle : public WebTransport::StreamWriteHandle {
   // why doesn't using StreamWriteHandle::StreamWriteHandle work here?
-  WriteHandle(uint64_t id, Accessor acc) : StreamWriteHandle(id), acc_(acc) {
-  }
+  WriteHandle(uint64_t id, Accessor acc) noexcept;
   using FcState = WebTransport::FCState;
   using ErrCode = WebTransport::ErrorCode;
   // StreamWriteHandle overrides
@@ -111,12 +123,15 @@ struct WriteHandle : public WebTransport::StreamWriteHandle {
   bool onMaxData(uint64_t offset);
   WritePromise resetPromise() noexcept;
   void cancel(folly::exception_wrapper ex) noexcept;
+  void finish(bool done) noexcept;
 
   Accessor acc_;
   WtEgressContainer send_{kDefaultFc};
   folly::exception_wrapper ex_; // set on peer stop_sending or self reset_stream
   uint64_t err{kInvalidVarint};
   WritePromise promise_{emptyWritePromise()};
+  HandleState state_;
+  ReadHandle* rh_{nullptr}; // ptr to the symmetric rh
 };
 
 } // namespace
@@ -180,6 +195,20 @@ void Accessor::resetStream(WriteHandle& wh, uint32_t err) noexcept {
 
 void Accessor::onStreamWritable(WriteHandle& wh) noexcept {
   sm_.onStreamWritable(wh);
+}
+
+void Accessor::done(WriteHandle& wh) noexcept {
+  XCHECK_EQ(wh.state_, Closed);
+  if (wh.rh_->state_ == Closed) { // bidi done
+    sm_.streams_.erase(wh.getID());
+  }
+}
+
+void Accessor::done(ReadHandle& rh) noexcept {
+  XCHECK_EQ(rh.state_, Closed);
+  if (rh.wh_->state_ == Closed) { // bidi done
+    sm_.streams_.erase(rh.getID());
+  }
 }
 
 WtStreamManager::WtStreamManager(WtDir dir,
@@ -268,6 +297,8 @@ struct WtStreamManager::BidiHandle {
 
   BidiHandle(uint64_t id, WtStreamManager& sm)
       : wh(id, Accessor{sm}), rh(id, Accessor{sm}) {
+    wh.rh_ = &rh;
+    rh.wh_ = &wh;
   }
 
   static std::unique_ptr<BidiHandle> make(uint64_t id, WtStreamManager& sm) {
@@ -406,6 +437,13 @@ bool WtStreamManager::Compare::operator()(const WtWh* l, const WtWh* r) const {
 /**
  * ReadHandle & WriteHandle implementations here
  */
+
+ReadHandle::ReadHandle(uint64_t id, Accessor acc) noexcept
+    : StreamReadHandle(id),
+      acc_(acc),
+      state_(static_cast<HandleState>(acc.isIngress(id))) {
+}
+
 folly::SemiFuture<StreamData> ReadHandle::readStreamData() {
   // TODO(@damlaj): hook into interrupt handler, but somehow ensure no UB from
   // concurrent access
@@ -416,11 +454,13 @@ folly::SemiFuture<StreamData> ReadHandle::readStreamData() {
     // only issue conn-level fc if we've rx'd fin
     acc_.maybeGrantFc(buf_.fin ? nullptr : this, len);
     p.setValue(StreamData{buf_.chain.pop(), buf_.fin});
+    finish(buf_.fin);
     return std::move(f);
   }
   // always deliver buffered data (even if rx fin) prior to delivering err
   if (ex_) {
     p.setException(ex_);
+    finish(/*done=*/true);
     return std::move(f);
   }
   promise_ = std::move(p);
@@ -429,8 +469,9 @@ folly::SemiFuture<StreamData> ReadHandle::readStreamData() {
 
 folly::Expected<folly::Unit, ReadHandle::ErrCode> ReadHandle::stopSending(
     uint32_t error) {
-  cancel(folly::make_exception_wrapper<WtException>(error, "tx stop_sending"));
   acc_.stopSending(*this, error);
+  // **beware cancel must be last** (`this` can be deleted immediately after)
+  cancel(folly::make_exception_wrapper<WtException>(error, "tx stop_sending"));
   return folly::unit;
 }
 
@@ -444,10 +485,11 @@ bool ReadHandle::enqueue(StreamData&& data) noexcept {
     buf_.chain.appendChain(std::move(data.data));
   }
   buf_.fin = data.fin;
-  if (auto p = std::exchange(promise_, emptyReadPromise()); p.valid()) {
+  if (auto p = resetPromise(); p.valid()) {
     // only issue conn-level fc if we've rx'd fin
     acc_.maybeGrantFc(buf_.fin ? nullptr : this, len);
     p.setValue(StreamData{buf_.chain.pop(), buf_.fin});
+    finish(buf_.fin);
   }
   return true;
 }
@@ -459,10 +501,24 @@ void ReadHandle::cancel(folly::exception_wrapper ex) noexcept {
     p.setException(ex_);
   }
   cs_.requestCancellation();
+  finish(/*done=*/true);
 }
 
 ReadPromise ReadHandle::resetPromise() noexcept {
   return std::exchange(promise_, emptyReadPromise());
+}
+
+void ReadHandle::finish(bool done) noexcept {
+  if (done) {
+    state_ = Closed;
+    acc_.done(*this);
+  }
+}
+
+WriteHandle::WriteHandle(uint64_t id, Accessor acc) noexcept
+    : StreamWriteHandle(id),
+      acc_(acc),
+      state_(static_cast<HandleState>(acc.isEgress(id))) {
 }
 
 folly::Expected<WriteHandle::FcState, WriteHandle::ErrCode>
@@ -484,8 +540,9 @@ WriteHandle::writeStreamData(std::unique_ptr<folly::IOBuf> data,
 
 folly::Expected<folly::Unit, WriteHandle::ErrCode> WriteHandle::resetStream(
     uint32_t error) {
-  cancel(folly::make_exception_wrapper<WtException>(error, "tx reset_stream"));
   acc_.resetStream(*this, error);
+  // **beware cancel must be last** (`this` can be deleted immediately after)
+  cancel(folly::make_exception_wrapper<WtException>(error, "tx reset_stream"));
   return folly::unit;
 }
 
@@ -522,6 +579,7 @@ WritePromise WriteHandle::resetPromise() noexcept {
 
 // TODO(@damlaj): StreamData and DequeueResult should be the same struct
 StreamData WriteHandle::dequeue(uint64_t atMost) noexcept {
+  XCHECK_NE(state_, Closed) << "dequeue after close";
   auto res = send_.dequeue(atMost);
   const auto bufferAvailable = send_.window().getBufferAvailable();
   if (bufferAvailable > 0) {
@@ -532,6 +590,7 @@ StreamData WriteHandle::dequeue(uint64_t atMost) noexcept {
   if (!send_.canSendData()) {
     acc_.writableStreams().erase(this);
   }
+  finish(res.fin);
   return StreamData{std::move(res.data), res.fin};
 }
 
@@ -543,4 +602,13 @@ void WriteHandle::cancel(folly::exception_wrapper ex) noexcept {
   }
   acc_.writableStreams().erase(this);
   cs_.requestCancellation();
+  // **beware finish must be last** (this can be deleted immediately after)
+  finish(/*done=*/true);
+}
+
+void WriteHandle::finish(bool done) noexcept {
+  if (done) {
+    state_ = Closed;
+    acc_.done(*this);
+  }
 }

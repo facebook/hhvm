@@ -10,6 +10,7 @@
 #include "proxygen/lib/http/coro/test/HTTPCoroSessionTests.h"
 #include "proxygen/lib/http/coro/util/test/TestHelpers.h"
 #include <proxygen/lib/http/codec/HTTP2Codec.h>
+#include <proxygen/lib/http/coro/util/WtStreamManager.h>
 
 using namespace proxygen;
 using namespace testing;
@@ -165,5 +166,97 @@ INSTANTIATE_TEST_SUITE_P(
     H2WtUpstreamSessionTest,
     Values(TestParams({.codecProtocol = CodecProtocol::HTTP_2})),
     paramsToTestName);
+
+TEST(WtStreamManager, BasicSelfBidi) {
+  using WtStreamManager = detail::WtStreamManager;
+  // TODO(@damlaj): WtMaxStreams ignored for now
+  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
+  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+
+  WtStreamManager streamManager{detail::WtDir::Client, self, peer};
+  // 0x00 is the next expected bidi stream id for client
+  auto bidiRes = streamManager.getBidiHandle(0x00);
+  EXPECT_NE(bidiRes.readHandle, nullptr);
+  EXPECT_NE(bidiRes.writeHandle, nullptr);
+
+  // 0x08 is not the next expected bidi stream id for client
+  bidiRes = streamManager.getBidiHandle(0x08);
+  EXPECT_EQ(bidiRes.readHandle, nullptr);
+  EXPECT_EQ(bidiRes.writeHandle, nullptr);
+
+  // 0x04 is the next expected bidi stream id for client
+  bidiRes = streamManager.getBidiHandle(0x04);
+  EXPECT_NE(bidiRes.readHandle, nullptr);
+  EXPECT_NE(bidiRes.writeHandle, nullptr);
+}
+
+TEST(WtStreamManager, BasicSelfUni) {
+  using WtStreamManager = detail::WtStreamManager;
+  // TODO(@damlaj): WtMaxStreams ignored for now
+  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
+  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+
+  WtStreamManager streamManager{detail::WtDir::Client, self, peer};
+  // 0x02 is the next expected uni stream id for client
+  auto bidiRes = streamManager.getBidiHandle(0x02);
+  EXPECT_EQ(bidiRes.readHandle, nullptr); // egress only
+  EXPECT_NE(bidiRes.writeHandle, nullptr);
+
+  // 0x0a is not the next expected uni stream id for client
+  bidiRes = streamManager.getBidiHandle(0x0a);
+  EXPECT_EQ(bidiRes.readHandle, nullptr); // egress only
+  EXPECT_EQ(bidiRes.writeHandle, nullptr);
+
+  // 0x06 is the next expected uni stream id for client
+  bidiRes = streamManager.getBidiHandle(0x06);
+  EXPECT_EQ(bidiRes.readHandle, nullptr); // egress only
+  EXPECT_NE(bidiRes.writeHandle, nullptr);
+}
+
+TEST(WtStreamManager, BasicPeerBidi) {
+  using WtStreamManager = detail::WtStreamManager;
+  // TODO(@damlaj): WtMaxStreams ignored for now
+  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
+  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+
+  WtStreamManager streamManager{detail::WtDir::Client, self, peer};
+  // 0x01 is the next expected bidi stream for server
+  auto bidiRes = streamManager.getBidiHandle(0x01);
+  EXPECT_NE(bidiRes.readHandle, nullptr);
+  EXPECT_NE(bidiRes.writeHandle, nullptr);
+
+  // 0x09 is not the next expected bidi stream for server
+  bidiRes = streamManager.getBidiHandle(0x09);
+  EXPECT_EQ(bidiRes.readHandle, nullptr);
+  EXPECT_EQ(bidiRes.writeHandle, nullptr);
+
+  // 0x05 is the next expected bidi stream for server
+  bidiRes = streamManager.getBidiHandle(0x05);
+  EXPECT_NE(bidiRes.readHandle, nullptr);
+  EXPECT_NE(bidiRes.writeHandle, nullptr);
+}
+
+TEST(WtStreamManager, BasicPeerUni) {
+  using WtStreamManager = detail::WtStreamManager;
+  // TODO(@damlaj): WtMaxStreams ignored for now
+  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
+  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+
+  WtStreamManager streamManager{detail::WtDir::Client, self, peer};
+  // 0x03 is the next expected uni stream for server
+  auto bidiRes = streamManager.getBidiHandle(0x03);
+  EXPECT_NE(bidiRes.readHandle, nullptr);
+  EXPECT_EQ(bidiRes.writeHandle, nullptr); // ingress only
+
+  // 0x0b is not the next expected uni stream for server
+  bidiRes = streamManager.getBidiHandle(0x0b);
+  EXPECT_EQ(bidiRes.readHandle, nullptr);
+  EXPECT_EQ(bidiRes.writeHandle, nullptr);
+
+  // 0x07 is the next expected bidi stream for server
+  bidiRes = streamManager.getBidiHandle(0x07);
+  EXPECT_NE(bidiRes.readHandle, nullptr);
+  EXPECT_EQ(bidiRes.writeHandle, nullptr); // ingress only
+}
 
 } // namespace proxygen::coro::test

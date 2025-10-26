@@ -441,6 +441,13 @@ TEST(WtStreamManager, BidiHandleCancellation) {
   auto ct = one.writeHandle->getCancelToken();
   streamManager.onStopSending({one.writeHandle->getID(), 0x00});
   EXPECT_TRUE(ct.isCancellationRequested());
+
+  // StreamManager::onResetStream should request cancellation of ingress handle
+  ct = one.readHandle->getCancelToken();
+  streamManager.onResetStream({one.writeHandle->getID(), 0x00});
+  EXPECT_TRUE(ct.isCancellationRequested());
+  auto fut = one.readHandle->readStreamData();
+  EXPECT_TRUE(fut.isReady() && fut.hasException());
 }
 
 } // namespace proxygen::coro::test

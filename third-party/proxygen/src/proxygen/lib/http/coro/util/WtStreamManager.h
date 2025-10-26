@@ -85,7 +85,7 @@ struct WtStreamManager {
   bool onMaxData(MaxStreamData) noexcept;
 
   /**
-   * invoke when receiving a wt_stop_sending – returns bool if stream was found
+   * invoke when receiving a stop_sending – returns bool if stream was found
    * TODO(@damlaj): enforce sending a rst_stream in response to stop_sending
    */
   struct StopSending {
@@ -93,6 +93,17 @@ struct WtStreamManager {
     uint64_t err{0};
   };
   bool onStopSending(StopSending) noexcept;
+
+  struct ResetStream {
+    uint64_t streamId{0};
+    uint64_t err{0};
+    /*uint64_t reliable_offset;*/
+  };
+  /**
+   * invoke when receiving a rst_stream – returns bool if stream was found
+   * TODO(@damlaj): implement reliable_offset
+   */
+  bool onResetStream(ResetStream) noexcept;
 
   /**
    * Enqueues data into read handle – returns bool indicating if recv window

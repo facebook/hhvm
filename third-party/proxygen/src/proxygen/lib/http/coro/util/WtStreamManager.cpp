@@ -130,9 +130,14 @@ struct ReadHandle : public WebTransport::StreamReadHandle {
   folly::Expected<folly::Unit, ErrCode> stopSending(uint32_t error) override;
   bool enqueue(StreamData&& data) noexcept;
 
+  void cancel() {
+    cs_.requestCancellation();
+  }
+
   FlowController recv_{kDefaultFc};
   BufferedData buf_;
   ReadPromise promise_{emptyReadPromise()};
+  uint64_t err{kInvalidVarint};
 };
 struct WriteHandle : public WebTransport::StreamWriteHandle {
   // why doesn't using StreamWriteHandle::StreamWriteHandle work here?
@@ -240,6 +245,15 @@ bool WtStreamManager::onStopSending(StopSending data) noexcept {
   return false;
 }
 
+bool WtStreamManager::onResetStream(ResetStream data) noexcept {
+  if (auto* rh = static_cast<ReadHandle*>(getIngressHandle(data.streamId))) {
+    rh->err = data.err;
+    rh->cancel();
+    return true;
+  }
+  return false;
+}
+
 bool WtStreamManager::enqueue(WtRh& rh, StreamData data) noexcept {
   auto len = data.data ? data.data->computeChainDataLength() : 0;
   bool err = !recv_.reserve(len);
@@ -268,6 +282,12 @@ folly::SemiFuture<StreamData> ReadHandle::readStreamData() {
   if (!buf_.chain.empty() || buf_.fin) {
     // TODO(@damlaj): release flow control
     p.setValue(StreamData{buf_.chain.pop(), buf_.fin});
+    return std::move(f);
+  }
+  // always deliver buffered data (even if rx fin) prior to delivering err
+  if (err != kInvalidVarint) {
+    // TODO(@damlaj): i don't understand why it's a uint32_t here
+    p.setException(WebTransport::Exception{uint32_t(err)});
     return std::move(f);
   }
   promise_ = std::move(p);

@@ -169,9 +169,8 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST(WtStreamManager, BasicSelfBidi) {
   using WtStreamManager = detail::WtStreamManager;
-  // TODO(@damlaj): WtMaxStreams ignored for now
   WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
-  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+  WtStreamManager::WtMaxStreams peer{.bidi = 2, .uni = 1};
 
   WtStreamManager streamManager{detail::WtDir::Client, self, peer};
   // 0x00 is the next expected bidi stream id for client
@@ -192,9 +191,8 @@ TEST(WtStreamManager, BasicSelfBidi) {
 
 TEST(WtStreamManager, BasicSelfUni) {
   using WtStreamManager = detail::WtStreamManager;
-  // TODO(@damlaj): WtMaxStreams ignored for now
   WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
-  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 2};
 
   WtStreamManager streamManager{detail::WtDir::Client, self, peer};
   // 0x02 is the next expected uni stream id for client
@@ -215,8 +213,7 @@ TEST(WtStreamManager, BasicSelfUni) {
 
 TEST(WtStreamManager, BasicPeerBidi) {
   using WtStreamManager = detail::WtStreamManager;
-  // TODO(@damlaj): WtMaxStreams ignored for now
-  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
+  WtStreamManager::WtMaxStreams self{.bidi = 2, .uni = 1};
   WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
 
   WtStreamManager streamManager{detail::WtDir::Client, self, peer};
@@ -238,8 +235,7 @@ TEST(WtStreamManager, BasicPeerBidi) {
 
 TEST(WtStreamManager, BasicPeerUni) {
   using WtStreamManager = detail::WtStreamManager;
-  // TODO(@damlaj): WtMaxStreams ignored for now
-  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
+  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 2};
   WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
 
   WtStreamManager streamManager{detail::WtDir::Client, self, peer};
@@ -261,9 +257,8 @@ TEST(WtStreamManager, BasicPeerUni) {
 
 TEST(WtStreamManager, NextBidiUniHandle) {
   using WtStreamManager = detail::WtStreamManager;
-  // TODO(@damlaj): WtMaxStreams ignored for now
   WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
-  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+  WtStreamManager::WtMaxStreams peer{.bidi = 2, .uni = 2};
 
   WtStreamManager streamManager{detail::WtDir::Client, self, peer};
   // next egress handle tests
@@ -284,6 +279,46 @@ TEST(WtStreamManager, NextBidiUniHandle) {
   EXPECT_NE(bidi.writeHandle, nullptr);
   EXPECT_EQ(bidi.readHandle->getID(), bidi.writeHandle->getID());
   EXPECT_EQ(bidi.readHandle->getID(), 0x04);
+}
+
+TEST(WtStreamManager, StreamLimits) {
+  using WtStreamManager = detail::WtStreamManager;
+  using MaxStreamsBidi = WtStreamManager::MaxStreamsBidi;
+  using MaxStreamsUni = WtStreamManager::MaxStreamsUni;
+  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
+  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+  WtStreamManager streamManager{detail::WtDir::Client, self, peer};
+
+  // a single egress handle should succeed
+  auto uni = streamManager.nextEgressHandle();
+  EXPECT_NE(uni, nullptr);
+
+  // a single bidi handle should succeed
+  auto bidi = streamManager.nextBidiHandle();
+  EXPECT_NE(bidi.readHandle, nullptr);
+  EXPECT_NE(bidi.writeHandle, nullptr);
+
+  // next egress handle should fail
+  uni = streamManager.nextEgressHandle();
+  EXPECT_EQ(uni, nullptr);
+
+  // next bidi handle should fail
+  bidi = streamManager.nextBidiHandle();
+  EXPECT_EQ(bidi.readHandle, nullptr);
+  EXPECT_EQ(bidi.writeHandle, nullptr);
+
+  // peer grants one additional credit for each of bidi and uni
+  EXPECT_TRUE(streamManager.onMaxStreams(MaxStreamsBidi{2}));
+  EXPECT_TRUE(streamManager.onMaxStreams(MaxStreamsUni{2}));
+
+  // next egress handle should succeed
+  uni = CHECK_NOTNULL(streamManager.nextEgressHandle());
+  EXPECT_NE(uni, nullptr);
+
+  // next bidi handle should succeed
+  bidi = streamManager.nextBidiHandle();
+  EXPECT_NE(bidi.readHandle, nullptr);
+  EXPECT_NE(bidi.writeHandle, nullptr);
 }
 
 } // namespace proxygen::coro::test

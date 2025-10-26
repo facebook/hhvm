@@ -22,6 +22,9 @@ namespace proxygen::coro::detail {
 
 enum WtDir : uint8_t { Client = 0, Server = 1 };
 
+constexpr uint64_t kInvalidVarint = std::numeric_limits<uint64_t>::max();
+constexpr uint64_t kMaxVarint = (1ull << 62) - 1;
+
 struct WtStreamManager {
   struct WtMaxStreams {
     uint64_t bidi{0};
@@ -29,7 +32,6 @@ struct WtStreamManager {
   };
 
   WtStreamManager(WtDir dir, WtMaxStreams self, WtMaxStreams peer);
-
   ~WtStreamManager();
 
   using WtWh = WebTransport::StreamWriteHandle;
@@ -54,6 +56,18 @@ struct WtStreamManager {
   WtWh* nextEgressHandle() noexcept;
   WebTransport::BidiStreamHandle nextBidiHandle() noexcept;
 
+  /**
+   * invoke when receiving max_streams frame from peer – returns bool if
+   * successful (i.e. valid incremental max_streams)
+   */
+  struct MaxStreams {
+    uint64_t maxStreams{0};
+  };
+  struct MaxStreamsBidi : MaxStreams {};
+  struct MaxStreamsUni : MaxStreams {};
+  bool onMaxStreams(MaxStreamsBidi);
+  bool onMaxStreams(MaxStreamsUni);
+
  private:
   bool isSelf(uint64_t streamId) const;
   bool isPeer(uint64_t streamId) const;
@@ -62,6 +76,7 @@ struct WtStreamManager {
   bool isUni(uint64_t streamId) const;
   bool isBidi(uint64_t streamId) const;
   uint64_t* nextExpectedStream(uint64_t streamId);
+
   WtDir dir_;
   struct NextStreams {
     uint64_t bidi{0}, uni{0}; // expected consecutive stream ids

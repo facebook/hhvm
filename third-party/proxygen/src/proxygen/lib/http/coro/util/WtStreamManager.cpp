@@ -71,9 +71,35 @@ bool WtStreamManager::isEgress(uint64_t streamId) const {
 }
 
 uint64_t* WtStreamManager::nextExpectedStream(uint64_t streamId) {
-  auto& next = isSelf(streamId) ? self_ : peer_;
-  auto& id = (isBidi(streamId) ? next.bidi : next.uni);
-  return (id == streamId) ? &id : nullptr;
+  // nextExpectedStream can either be a self or peer stream; in either case, we
+  // need to prevent exceeding concurrent streams limit
+  NextStreams *next{&self_}, *limit{&peer_};
+  if (isPeer(streamId)) {
+    next = &peer_;
+    limit = &self_;
+  }
+
+  uint64_t *nextId{&next->bidi}, *limitId{&limit->max.bidi};
+  if (isUni(streamId)) {
+    nextId = &next->uni;
+    limitId = &limit->max.uni;
+  }
+  return (streamId == *nextId && ((streamId >> 2) < *limitId)) ? nextId
+                                                               : nullptr;
+}
+
+bool WtStreamManager::onMaxStreams(MaxStreamsBidi bidi) {
+  XCHECK_LE(bidi.maxStreams, kMaxVarint);
+  bool valid = bidi.maxStreams >= peer_.max.bidi;
+  peer_.max.bidi = std::max(peer_.max.bidi, bidi.maxStreams);
+  return valid;
+}
+
+bool WtStreamManager::onMaxStreams(MaxStreamsUni uni) {
+  XCHECK_LE(uni.maxStreams, kMaxVarint);
+  bool valid = uni.maxStreams >= peer_.max.uni;
+  peer_.max.uni = std::max(peer_.max.uni, uni.maxStreams);
+  return valid;
 }
 
 struct ReadHandle : public WebTransport::StreamReadHandle {

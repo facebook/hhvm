@@ -26,6 +26,7 @@ struct WtStreamManager::Accessor {
   void maybeGrantFc(ReadHandle* rh, uint64_t bytes) noexcept;
   void stopSending(ReadHandle& rh, uint32_t err) noexcept;
   void resetStream(WriteHandle& wh, uint32_t err) noexcept;
+  void onStreamWritable(WriteHandle& wh) noexcept;
   auto& connSend() {
     return sm_.send_;
   }
@@ -177,6 +178,10 @@ void Accessor::stopSending(ReadHandle& rh, uint32_t err) noexcept {
 
 void Accessor::resetStream(WriteHandle& wh, uint32_t err) noexcept {
   sm_.enqueueEvent(ResetStream{wh.getID(), err});
+}
+
+void Accessor::onStreamWritable(WriteHandle& wh) noexcept {
+  sm_.onStreamWritable(wh);
 }
 
 WtStreamManager::WtStreamManager(WtDir dir,
@@ -362,6 +367,14 @@ WtStreamManager::WtWh* WtStreamManager::nextWritable() noexcept {
   return hasSend ? *writableStreams_.begin() : nullptr;
 }
 
+void WtStreamManager::onStreamWritable(WtWh& wh) noexcept {
+  bool wasEmpty = nextWritable() == nullptr;
+  writableStreams_.insert(&wh);
+  if (wasEmpty && nextWritable()) {
+    cb_.eventsAvailable();
+  }
+}
+
 bool WtStreamManager::Compare::operator()(const WtWh* l, const WtWh* r) const {
   return l->getID() < r->getID();
 }
@@ -429,7 +442,7 @@ WriteHandle::writeStreamData(std::unique_ptr<folly::IOBuf> data,
   auto res = send_.enqueue(std::move(data), fin) ? FcState::BLOCKED
                                                  : FcState::UNBLOCKED;
   if (send_.canSendData()) {
-    acc_.writableStreams().insert(this); // stream is now writable
+    acc_.onStreamWritable(*this); // stream is now writable
   }
   return res;
 }

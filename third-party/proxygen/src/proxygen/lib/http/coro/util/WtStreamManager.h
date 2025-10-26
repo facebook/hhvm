@@ -34,6 +34,9 @@ struct WtStreamManager {
    * events are available to be dequeued by the backing transport – (e.g.
    * connection- and stream-level flow control, reset_stream, stop_sending,
    * etc.)
+   *
+   * It is also invoked once there is a writable stream (i.e. nextWritable()
+   * transitions from returning nullptr to returning a valid egress handle)
    */
   struct Callback {
     virtual ~Callback() = default;
@@ -165,6 +168,7 @@ struct WtStreamManager {
   bool isBidi(uint64_t streamId) const;
   uint64_t* nextExpectedStream(uint64_t streamId);
   void enqueueEvent(Event&& ev) noexcept;
+  void onStreamWritable(WtWh& wh) noexcept;
 
   WtDir dir_;
   struct NextStreams {

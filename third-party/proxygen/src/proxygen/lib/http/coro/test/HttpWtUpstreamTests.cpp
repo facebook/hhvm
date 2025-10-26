@@ -593,6 +593,8 @@ TEST(WtStreamManager, WritableStreams) {
       makeBuf(1), /*fin=*/true, /*byteEventCallback=*/nullptr);
   EXPECT_TRUE(writeRes.hasValue() &&
               writeRes.value() == WebTransport::FCState::UNBLOCKED);
+  EXPECT_TRUE(std::exchange(cb.evAvail_, false)); // nextWritable now
+                                                  // not-nullptr
   EXPECT_EQ(streamManager.nextWritable(), one);
 
   // dequeue should yield the expected results
@@ -607,6 +609,8 @@ TEST(WtStreamManager, WritableStreams) {
       makeBuf(kBufLen), /*fin=*/false, /*byteEventCallback=*/nullptr);
   EXPECT_TRUE(writeRes.hasValue() &&
               writeRes.value() == WebTransport::FCState::BLOCKED);
+  EXPECT_TRUE(std::exchange(cb.evAvail_, false)); // nextWritable now
+                                                  // not-nullptr
   EXPECT_EQ(streamManager.nextWritable(), two);
 
   // dequeue will yield kBufLen - 1 (limited by conn flow control)

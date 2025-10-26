@@ -270,9 +270,9 @@ uint64_t* WtStreamManager::nextExpectedStream(uint64_t streamId) {
 }
 
 void WtStreamManager::enqueueEvent(Event&& ev) noexcept {
-  bool wasEmpty = events_.empty();
+  bool wasEmpty = !hasEvent();
   events_.push_back(std::move(ev));
-  if (wasEmpty) {
+  if (wasEmpty && hasEvent()) {
     cb_.eventsAvailable();
   }
 }
@@ -386,10 +386,11 @@ bool WtStreamManager::onResetStream(ResetStream data) noexcept {
 }
 
 void WtStreamManager::onDrainSession(DrainSession) noexcept {
-  drain_ = true;
+  drain();
 }
 
 void WtStreamManager::onCloseSession(CloseSession close) noexcept {
+  drain();
   auto ex = folly::make_exception_wrapper<WtException>(close.err, close.msg);
   auto streams = std::move(streams_);
   for (auto& [_, handle] : streams) {
@@ -415,21 +416,34 @@ StreamData WtStreamManager::dequeue(WtWh& wh, uint64_t atMost) noexcept {
   return res;
 }
 
-WtStreamManager::WtWh* WtStreamManager::nextWritable() noexcept {
+WtStreamManager::WtWh* WtStreamManager::nextWritable() const noexcept {
   bool hasSend = !writableStreams_.empty() && send_.getAvailable() > 0;
   return hasSend ? *writableStreams_.begin() : nullptr;
 }
 
 void WtStreamManager::onStreamWritable(WtWh& wh) noexcept {
-  bool wasEmpty = nextWritable() == nullptr;
+  bool wasEmpty = !hasEvent();
   writableStreams_.insert(&wh);
-  if (wasEmpty && nextWritable()) {
+  if (wasEmpty && hasEvent()) {
     cb_.eventsAvailable();
   }
 }
 
+void WtStreamManager::drain() noexcept {
+  drain_ = true;
+}
+
+void WtStreamManager::shutdown(CloseSession data) noexcept {
+  onCloseSession(data);
+  enqueueEvent(std::move(data));
+}
+
 bool WtStreamManager::Compare::operator()(const WtWh* l, const WtWh* r) const {
   return l->getID() < r->getID();
+}
+
+bool WtStreamManager::hasEvent() const noexcept {
+  return nextWritable() != nullptr || !events_.empty();
 }
 
 } // namespace proxygen::coro::detail
@@ -602,7 +616,7 @@ void WriteHandle::cancel(folly::exception_wrapper ex) noexcept {
   }
   acc_.writableStreams().erase(this);
   cs_.requestCancellation();
-  // **beware finish must be last** (this can be deleted immediately after)
+  // **beware finish must be last** (`this` can be deleted immediately after)
   finish(/*done=*/true);
 }
 

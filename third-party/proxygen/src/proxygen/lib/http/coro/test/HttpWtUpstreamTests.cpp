@@ -694,6 +694,12 @@ TEST(WtStreamManager, CloseWtSession) {
   }
   // read promise should have exception set
   EXPECT_TRUE(oneRead.isReady() && oneRead.hasException());
+
+  // a locally initiated close should enqueue an event
+  streamManager.shutdown(WtStreamManager::CloseSession{0, ""});
+  auto events = streamManager.moveEvents();
+  EXPECT_TRUE(
+      std::holds_alternative<WtStreamManager::CloseSession>(events.back()));
 }
 
 } // namespace proxygen::coro::test

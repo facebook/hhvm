@@ -159,8 +159,11 @@ struct WtStreamManager {
    * using the below ::moveEvents(). All these events are strictly control
    * frames by design, as they are not flow controlled.
    */
-  using Event =
-      std::variant<ResetStream, StopSending, MaxConnData, MaxStreamData>;
+  using Event = std::variant<ResetStream,
+                             StopSending,
+                             MaxConnData,
+                             MaxStreamData,
+                             CloseSession>;
   std::vector<Event> moveEvents() noexcept {
     return std::move(events_);
   }
@@ -173,11 +176,21 @@ struct WtStreamManager {
    * nextWritable() returns the next writable stream **if exists and there is
    * available connection flow control**. Otherwise, returns nullptr
    */
-  WtWh* nextWritable() noexcept;
+  WtWh* nextWritable() const noexcept;
 
   bool hasStreams() const noexcept {
     return !streams_.empty();
   }
+
+  bool isClosed() const noexcept {
+    return drain_ && !hasStreams();
+  }
+
+  // locally initiated drain
+  void drain() noexcept;
+
+  // locally initiated shutdown
+  void shutdown(CloseSession) noexcept;
 
  private:
   bool isSelf(uint64_t streamId) const;
@@ -189,6 +202,8 @@ struct WtStreamManager {
   uint64_t* nextExpectedStream(uint64_t streamId);
   void enqueueEvent(Event&& ev) noexcept;
   void onStreamWritable(WtWh& wh) noexcept;
+  void shutdownImpl(uint32_t, std::string) noexcept;
+  bool hasEvent() const noexcept;
 
   WtDir dir_;
   struct NextStreams {

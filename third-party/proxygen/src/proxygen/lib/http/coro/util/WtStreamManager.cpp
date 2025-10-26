@@ -14,7 +14,15 @@ namespace {
 
 constexpr uint8_t kStreamIdInc = 0x04;
 
-}
+// TODO(@damlaj): change default fc
+constexpr auto kDefaultFc = std::numeric_limits<uint16_t>::max();
+
+struct BufferedData {
+  folly::IOBuf chain; // head is always empty
+  bool fin{false};
+};
+
+} // namespace
 
 namespace proxygen::coro::detail {
 
@@ -43,7 +51,8 @@ WtStreamManager::WtStreamManager(WtDir dir,
                                  WtMaxStreams peer)
     : dir_(dir),
       self_(selfNextStreams(dir, self)),
-      peer_(peerNextStreams(dir, peer)) {
+      peer_(peerNextStreams(dir, peer)),
+      recv_(kDefaultFc) {
   XCHECK(dir <= WtDir::Server) << "invalid dir";
 }
 
@@ -111,7 +120,10 @@ struct ReadHandle : public WebTransport::StreamReadHandle {
   // StreamReadHandle overrides
   folly::SemiFuture<StreamData> readStreamData() override;
   folly::Expected<folly::Unit, ErrCode> stopSending(uint32_t error) override;
-  void enqueue(StreamData&& data);
+  bool enqueue(StreamData&& data) noexcept;
+
+  FlowController recv_{kDefaultFc};
+  BufferedData buf_;
 };
 struct WriteHandle : public WebTransport::StreamWriteHandle {
   // why doesn't using StreamWriteHandle::StreamWriteHandle work here?
@@ -189,6 +201,13 @@ WebTransport::BidiStreamHandle WtStreamManager::nextBidiHandle() noexcept {
   return getBidiHandle(self_.bidi);
 }
 
+bool WtStreamManager::enqueue(WtRh& rh, StreamData data) noexcept {
+  auto len = data.data ? data.data->computeChainDataLength() : 0;
+  bool err = !recv_.reserve(len);
+  err = !err && (static_cast<ReadHandle&>(rh).enqueue(std::move(data)));
+  return err;
+}
+
 /**
  * ReadHandle & WriteHandle implementations here
  */
@@ -201,6 +220,19 @@ folly::Expected<folly::Unit, ReadHandle::ErrCode> ReadHandle::stopSending(
   XLOG(FATAL) << "not implemented";
 }
 
+bool ReadHandle::enqueue(StreamData&& data) noexcept {
+  XCHECK(!buf_.fin) << "already rx'd eof";
+  auto len = data.data ? data.data->computeChainDataLength() : 0;
+  if (!recv_.reserve(len)) {
+    return false; // error
+  }
+  if (len > 0) {
+    buf_.chain.appendChain(std::move(data.data));
+  }
+  buf_.fin = data.fin;
+  return true;
+}
+
 folly::Expected<WriteHandle::FcState, ReadHandle::ErrCode>
 WriteHandle::writeStreamData(
     std::unique_ptr<folly::IOBuf> data,
@@ -208,6 +240,7 @@ WriteHandle::writeStreamData(
     WebTransport::ByteEventCallback* byteEventCallback) {
   XLOG(FATAL) << "not implemented";
 }
+
 folly::Expected<folly::Unit, WriteHandle::ErrCode> WriteHandle::resetStream(
     uint32_t error) {
   XLOG(FATAL) << "not implemented";

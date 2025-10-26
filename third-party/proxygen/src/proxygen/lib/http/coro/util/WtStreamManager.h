@@ -54,6 +54,7 @@ struct WtStreamManager {
                   Callback& cb);
   ~WtStreamManager();
 
+  using WtException = WebTransport::Exception;
   using WtWh = WebTransport::StreamWriteHandle;
   using WtRh = WebTransport::StreamReadHandle;
   using StreamData = WebTransport::StreamData;

@@ -456,6 +456,7 @@ TEST(WtStreamManager, BidiHandleCancellation) {
   auto ct = one.writeHandle->getCancelToken();
   streamManager.onStopSending({one.writeHandle->getID(), 0x00});
   EXPECT_TRUE(ct.isCancellationRequested());
+  EXPECT_EQ(streamManager.nextWritable(), nullptr);
 
   // StreamManager::onResetStream should request cancellation of ingress handle
   ct = one.readHandle->getCancelToken();
@@ -515,12 +516,16 @@ TEST(WtStreamManager, StopSendingResetStreamTest) {
   WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
   WtStreamManagerCb cb;
   WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
+  constexpr auto kBufLen = 65'535;
 
   // next ::nextBidiHandle should succeed
   auto one = streamManager.nextBidiHandle();
   CHECK(one.readHandle && one.writeHandle);
-  // stop sending should invoke callback
+
+  // stop sending should invoke callback and resolve pending promise
+  auto rp = one.readHandle->readStreamData();
   one.readHandle->stopSending(0);
+  EXPECT_TRUE(rp.isReady() && rp.hasException()); // exception via stopSending
   EXPECT_TRUE(std::exchange(cb.evAvail_, false));
   auto events = streamManager.moveEvents();
   EXPECT_EQ(events.size(), 1);
@@ -528,8 +533,14 @@ TEST(WtStreamManager, StopSendingResetStreamTest) {
   EXPECT_EQ(stopSending.streamId, one.readHandle->getID());
   EXPECT_EQ(stopSending.err, 0);
 
-  // reset stream should invoke callback
+  // fill up egress buffer to ensure ::resetStream resolves pending promise
+  one.writeHandle->writeStreamData(
+      makeBuf(kBufLen), /*fin=*/false, /*byteEventCallback=*/nullptr);
+  auto wp = one.writeHandle->awaitWritable();
+
+  // reset stream should invoke callback and resolve pending promise
   one.writeHandle->resetStream(/*error=*/1);
+  EXPECT_TRUE(wp.hasValue() && wp->isReady() && wp->hasException());
   EXPECT_TRUE(std::exchange(cb.evAvail_, false));
   events = streamManager.moveEvents();
   EXPECT_EQ(events.size(), 1);

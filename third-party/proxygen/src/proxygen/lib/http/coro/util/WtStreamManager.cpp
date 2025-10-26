@@ -66,6 +66,7 @@ WritePromise emptyWritePromise() {
   return WritePromise::makeEmpty();
 }
 
+using WtException = WtStreamManager::WtException;
 using StreamData = WtStreamManager::StreamData;
 using WebTransport = proxygen::WebTransport;
 using Accessor = WtStreamManager::Accessor;
@@ -79,16 +80,14 @@ struct ReadHandle : public WebTransport::StreamReadHandle {
   folly::SemiFuture<StreamData> readStreamData() override;
   folly::Expected<folly::Unit, ErrCode> stopSending(uint32_t error) override;
   bool enqueue(StreamData&& data) noexcept;
-
-  void cancel() {
-    cs_.requestCancellation();
-  }
+  void cancel(folly::exception_wrapper ex) noexcept;
+  ReadPromise resetPromise() noexcept;
 
   Accessor acc_;
   FlowController recv_{kDefaultFc};
   BufferedData buf_;
   ReadPromise promise_{emptyReadPromise()};
-  uint64_t err{kInvalidVarint};
+  folly::exception_wrapper ex_; // set on self stop sending or peer reset_stream
 };
 struct WriteHandle : public WebTransport::StreamWriteHandle {
   // why doesn't using StreamWriteHandle::StreamWriteHandle work here?
@@ -111,13 +110,11 @@ struct WriteHandle : public WebTransport::StreamWriteHandle {
   WebTransport::StreamData dequeue(uint64_t atMost) noexcept;
   bool onMaxData(uint64_t offset);
   WritePromise resetPromise() noexcept;
-  void cancel() {
-    cs_.requestCancellation();
-  }
+  void cancel(folly::exception_wrapper ex) noexcept;
 
   Accessor acc_;
   WtEgressContainer send_{kDefaultFc};
-  // set to stop_sending's error code
+  folly::exception_wrapper ex_; // set on peer stop_sending or self reset_stream
   uint64_t err{kInvalidVarint};
   WritePromise promise_{emptyWritePromise()};
 };
@@ -339,8 +336,9 @@ bool WtStreamManager::onMaxData(MaxStreamData data) noexcept {
 
 bool WtStreamManager::onStopSending(StopSending data) noexcept {
   if (auto* eh = static_cast<WriteHandle*>(getEgressHandle(data.streamId))) {
-    eh->err = data.err;
-    eh->cancel();
+    auto ex = folly::make_exception_wrapper<WtException>(uint32_t(data.err),
+                                                         "rx stop_sending");
+    eh->cancel(std::move(ex));
     return true;
   }
   return false;
@@ -348,8 +346,9 @@ bool WtStreamManager::onStopSending(StopSending data) noexcept {
 
 bool WtStreamManager::onResetStream(ResetStream data) noexcept {
   if (auto* rh = static_cast<ReadHandle*>(getIngressHandle(data.streamId))) {
-    rh->err = data.err;
-    rh->cancel();
+    auto ex = folly::make_exception_wrapper<WtException>(uint32_t(data.err),
+                                                         "rx reset_stream");
+    rh->cancel(std::move(ex));
     return true;
   }
   return false;
@@ -411,9 +410,8 @@ folly::SemiFuture<StreamData> ReadHandle::readStreamData() {
     return std::move(f);
   }
   // always deliver buffered data (even if rx fin) prior to delivering err
-  if (err != kInvalidVarint) {
-    // TODO(@damlaj): i don't understand why it's a uint32_t here
-    p.setException(WebTransport::Exception{uint32_t(err)});
+  if (ex_) {
+    p.setException(ex_);
     return std::move(f);
   }
   promise_ = std::move(p);
@@ -422,6 +420,7 @@ folly::SemiFuture<StreamData> ReadHandle::readStreamData() {
 
 folly::Expected<folly::Unit, ReadHandle::ErrCode> ReadHandle::stopSending(
     uint32_t error) {
+  cancel(folly::make_exception_wrapper<WtException>(error, "tx stop_sending"));
   acc_.stopSending(*this, error);
   return folly::unit;
 }
@@ -444,6 +443,19 @@ bool ReadHandle::enqueue(StreamData&& data) noexcept {
   return true;
 }
 
+void ReadHandle::cancel(folly::exception_wrapper ex) noexcept {
+  ex_ = std::move(ex);
+  // any pending reads should be resolved with ex
+  if (auto p = resetPromise(); p.valid()) {
+    p.setException(ex_);
+  }
+  cs_.requestCancellation();
+}
+
+ReadPromise ReadHandle::resetPromise() noexcept {
+  return std::exchange(promise_, emptyReadPromise());
+}
+
 folly::Expected<WriteHandle::FcState, WriteHandle::ErrCode>
 WriteHandle::writeStreamData(std::unique_ptr<folly::IOBuf> data,
                              bool fin,
@@ -463,6 +475,7 @@ WriteHandle::writeStreamData(std::unique_ptr<folly::IOBuf> data,
 
 folly::Expected<folly::Unit, WriteHandle::ErrCode> WriteHandle::resetStream(
     uint32_t error) {
+  cancel(folly::make_exception_wrapper<WtException>(error, "tx reset_stream"));
   acc_.resetStream(*this, error);
   return folly::unit;
 }
@@ -511,4 +524,14 @@ StreamData WriteHandle::dequeue(uint64_t atMost) noexcept {
     acc_.writableStreams().erase(this);
   }
   return StreamData{std::move(res.data), res.fin};
+}
+
+void WriteHandle::cancel(folly::exception_wrapper ex) noexcept {
+  ex_ = std::move(ex);
+  // any pending awaitWritable should be resolved with ex
+  if (auto p = resetPromise(); p.valid()) {
+    p.setException(ex_);
+  }
+  acc_.writableStreams().erase(this);
+  cs_.requestCancellation();
 }

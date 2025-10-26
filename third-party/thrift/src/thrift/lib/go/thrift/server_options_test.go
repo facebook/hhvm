@@ -32,9 +32,9 @@ func TestListenerALPNOptions(t *testing.T) {
 		option             func(*tls.Config)
 		expectedNextProtos []string
 	}{
-		{"Header", WithALPNHeader(), []string{"thrift"}},
-		{"Rocket", WithALPNRocket(), []string{"rs"}},
-		{"UpgradeToRocket", WithALPNUpgradeToRocket(), []string{"rs", "thrift"}},
+		{"Header", ApplyALPNHeader, []string{"thrift"}},
+		{"Rocket", ApplyALPNRocket, []string{"rs"}},
+		{"UpgradeToRocket", ApplyALPNUpgradeToRocket, []string{"rs", "thrift"}},
 	}
 
 	for _, tc := range testCases {

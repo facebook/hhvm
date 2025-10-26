@@ -131,23 +131,17 @@ func WithMaxRequests(maxRequests int64) ServerOption {
 	}
 }
 
-// WithALPNHeader adds the ALPN value "thrift" to the provided tls.Config
-func WithALPNHeader() func(*tls.Config) {
-	return func(tlsConfig *tls.Config) {
-		tlsConfig.NextProtos = []string{"thrift"}
-	}
+// ApplyALPNHeader adds the ALPN value "thrift" to the provided tls.Config
+func ApplyALPNHeader(tlsConfig *tls.Config) {
+	tlsConfig.NextProtos = []string{"thrift"}
 }
 
-// WithALPNRocket adds the ALPN value "rs" to the provided tls.Config
-func WithALPNRocket() func(*tls.Config) {
-	return func(tlsConfig *tls.Config) {
-		tlsConfig.NextProtos = []string{"rs"}
-	}
+// ApplyALPNRocket adds the ALPN value "rs" to the provided tls.Config
+func ApplyALPNRocket(tlsConfig *tls.Config) {
+	tlsConfig.NextProtos = []string{"rs"}
 }
 
-// WithALPNUpgradeToRocket adds the ALPN value "rs" and "thrift" to the provided tls.Config
-func WithALPNUpgradeToRocket() func(*tls.Config) {
-	return func(tlsConfig *tls.Config) {
-		tlsConfig.NextProtos = []string{"rs" /* preferred */, "thrift" /* fallback */}
-	}
+// ApplyALPNUpgradeToRocket adds the ALPN value "rs" and "thrift" to the provided tls.Config
+func ApplyALPNUpgradeToRocket(tlsConfig *tls.Config) {
+	tlsConfig.NextProtos = []string{"rs" /* preferred */, "thrift" /* fallback */}
 }

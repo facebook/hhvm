@@ -261,7 +261,7 @@ func TestALPN(t *testing.T) {
 	require.NoError(t, err)
 
 	// Apply ALPN to server config:
-	WithALPNUpgradeToRocket()(serverConfig)
+	ApplyALPNUpgradeToRocket(serverConfig)
 	listener, err := tls.Listen("tcp", "[::]:0", serverConfig)
 	require.NoError(t, err)
 	addr := listener.Addr()

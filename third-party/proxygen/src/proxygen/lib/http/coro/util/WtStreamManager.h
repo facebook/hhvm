@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <map>
 #include <memory>
+#include <variant>
 
 /**
  * get rid of WebTransport.h dependency, extract StreamReadHandle &
@@ -27,12 +28,26 @@ constexpr uint64_t kInvalidVarint = std::numeric_limits<uint64_t>::max();
 constexpr uint64_t kMaxVarint = (1ull << 62) - 1;
 
 struct WtStreamManager {
+  /**
+   * This level-triggered callback (::eventsAvailable) is invoked once control
+   * events are available to be dequeued by the backing transport – (e.g.
+   * connection- and stream-level flow control, reset_stream, stop_sending,
+   * etc.)
+   */
+  struct Callback {
+    virtual ~Callback() = default;
+    virtual void eventsAvailable() noexcept = 0;
+  };
+
   struct WtMaxStreams {
     uint64_t bidi{0};
     uint64_t uni{0};
   };
 
-  WtStreamManager(WtDir dir, WtMaxStreams self, WtMaxStreams peer);
+  WtStreamManager(WtDir dir,
+                  WtMaxStreams self,
+                  WtMaxStreams peer,
+                  Callback& cb);
   ~WtStreamManager();
 
   using WtWh = WebTransport::StreamWriteHandle;
@@ -116,6 +131,22 @@ struct WtStreamManager {
    */
   StreamData dequeue(WtWh&, uint64_t atMost) noexcept;
 
+  /**
+   * Events are communicated to the backing transport (http/2 or http/3) via
+   * Callback::eventsAvailable – the user can subsequently dequeue all events
+   * using the below ::moveEvents(). All these events are strictly control
+   * frames by design, as they are not flow controlled.
+   */
+  using Event =
+      std::variant<ResetStream, StopSending, MaxConnData, MaxStreamData>;
+  std::vector<Event> moveEvents() noexcept {
+    return std::move(events_);
+  }
+
+  struct Accessor; // used by Read&Write handle to access private members of
+                   // this class
+  friend struct Accessor;
+
  private:
   bool isSelf(uint64_t streamId) const;
   bool isPeer(uint64_t streamId) const;
@@ -124,6 +155,7 @@ struct WtStreamManager {
   bool isUni(uint64_t streamId) const;
   bool isBidi(uint64_t streamId) const;
   uint64_t* nextExpectedStream(uint64_t streamId);
+  void enqueueEvent(Event&& ev) noexcept;
 
   WtDir dir_;
   struct NextStreams {
@@ -136,6 +168,8 @@ struct WtStreamManager {
 
   FlowController recv_;
   BufferedFlowController send_;
+  Callback& cb_;
+  std::vector<Event> events_;
 
   // helper functions to compute next streams
   static NextStreams selfNextStreams(WtDir, WtMaxStreams);

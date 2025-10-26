@@ -167,12 +167,22 @@ INSTANTIATE_TEST_SUITE_P(
     Values(TestParams({.codecProtocol = CodecProtocol::HTTP_2})),
     paramsToTestName);
 
+struct WtStreamManagerCb : detail::WtStreamManager::Callback {
+  WtStreamManagerCb() = default;
+  ~WtStreamManagerCb() override = default;
+  void eventsAvailable() noexcept override {
+    evAvail_ = true;
+  }
+  bool evAvail_{false};
+};
+
 TEST(WtStreamManager, BasicSelfBidi) {
   using WtStreamManager = detail::WtStreamManager;
   WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
   WtStreamManager::WtMaxStreams peer{.bidi = 2, .uni = 1};
+  WtStreamManagerCb cb;
 
-  WtStreamManager streamManager{detail::WtDir::Client, self, peer};
+  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
   // 0x00 is the next expected bidi stream id for client
   auto bidiRes = streamManager.getBidiHandle(0x00);
   EXPECT_NE(bidiRes.readHandle, nullptr);
@@ -193,8 +203,9 @@ TEST(WtStreamManager, BasicSelfUni) {
   using WtStreamManager = detail::WtStreamManager;
   WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
   WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 2};
+  WtStreamManagerCb cb;
 
-  WtStreamManager streamManager{detail::WtDir::Client, self, peer};
+  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
   // 0x02 is the next expected uni stream id for client
   auto bidiRes = streamManager.getBidiHandle(0x02);
   EXPECT_EQ(bidiRes.readHandle, nullptr); // egress only
@@ -215,8 +226,9 @@ TEST(WtStreamManager, BasicPeerBidi) {
   using WtStreamManager = detail::WtStreamManager;
   WtStreamManager::WtMaxStreams self{.bidi = 2, .uni = 1};
   WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+  WtStreamManagerCb cb;
 
-  WtStreamManager streamManager{detail::WtDir::Client, self, peer};
+  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
   // 0x01 is the next expected bidi stream for server
   auto bidiRes = streamManager.getBidiHandle(0x01);
   EXPECT_NE(bidiRes.readHandle, nullptr);
@@ -237,8 +249,9 @@ TEST(WtStreamManager, BasicPeerUni) {
   using WtStreamManager = detail::WtStreamManager;
   WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 2};
   WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+  WtStreamManagerCb cb;
 
-  WtStreamManager streamManager{detail::WtDir::Client, self, peer};
+  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
   // 0x03 is the next expected uni stream for server
   auto bidiRes = streamManager.getBidiHandle(0x03);
   EXPECT_NE(bidiRes.readHandle, nullptr);
@@ -259,8 +272,9 @@ TEST(WtStreamManager, NextBidiUniHandle) {
   using WtStreamManager = detail::WtStreamManager;
   WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
   WtStreamManager::WtMaxStreams peer{.bidi = 2, .uni = 2};
+  WtStreamManagerCb cb;
 
-  WtStreamManager streamManager{detail::WtDir::Client, self, peer};
+  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
   // next egress handle tests
   auto uni = CHECK_NOTNULL(streamManager.nextEgressHandle());
   EXPECT_EQ(uni->getID(), 0x02);
@@ -287,7 +301,9 @@ TEST(WtStreamManager, StreamLimits) {
   using MaxStreamsUni = WtStreamManager::MaxStreamsUni;
   WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
   WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
-  WtStreamManager streamManager{detail::WtDir::Client, self, peer};
+  WtStreamManagerCb cb;
+
+  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
 
   // a single egress handle should succeed
   auto uni = streamManager.nextEgressHandle();
@@ -325,7 +341,9 @@ TEST(WtStreamManager, EnqueueIngressData) {
   using WtStreamManager = detail::WtStreamManager;
   WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
   WtStreamManager::WtMaxStreams peer{.bidi = 2, .uni = 1};
-  WtStreamManager streamManager{detail::WtDir::Client, self, peer};
+
+  WtStreamManagerCb cb;
+  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
 
   // next nextBidiHandle should succeed
   auto one = streamManager.nextBidiHandle();
@@ -335,13 +353,8 @@ TEST(WtStreamManager, EnqueueIngressData) {
   constexpr auto kBufLen = 65'535;
 
   // both conn & stream recv window exactly full, expect success
-  auto oneFut = one.readHandle->readStreamData();
   EXPECT_TRUE(
       streamManager.enqueue(*one.readHandle, {makeBuf(kBufLen), false}));
-  EXPECT_TRUE(oneFut.isReady()); // enqueue should fulfill promise
-  EXPECT_EQ(oneFut.value().data->computeChainDataLength(), kBufLen);
-  EXPECT_FALSE(oneFut.value().fin);
-
   // enqueuing a additional byte in one will fail (stream recv window full)
   EXPECT_FALSE(
       streamManager.enqueue(*one.readHandle, {makeBuf(kBufLen), false}));
@@ -350,13 +363,20 @@ TEST(WtStreamManager, EnqueueIngressData) {
   EXPECT_FALSE(streamManager.enqueue(*two.readHandle, {makeBuf(1), false}));
   auto twoFut = two.readHandle->readStreamData();
   EXPECT_FALSE(twoFut.isReady()); // no data buffered, ::enqueue failed
+
+  // reading stream data should succeed
+  auto oneFut = one.readHandle->readStreamData();
+  EXPECT_TRUE(oneFut.isReady()); // enqueue should fulfill promise
+  EXPECT_EQ(oneFut.value().data->computeChainDataLength(), kBufLen);
+  EXPECT_FALSE(oneFut.value().fin);
 }
 
 TEST(WtStreamManager, WriteEgressHandle) {
   using WtStreamManager = detail::WtStreamManager;
   WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
   WtStreamManager::WtMaxStreams peer{.bidi = 2, .uni = 1};
-  WtStreamManager streamManager{detail::WtDir::Client, self, peer};
+  WtStreamManagerCb cb;
+  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
 
   // next two ::nextBidiHandle should succeed
   auto one = streamManager.nextBidiHandle();
@@ -426,7 +446,8 @@ TEST(WtStreamManager, BidiHandleCancellation) {
   using WtStreamManager = detail::WtStreamManager;
   WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
   WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
-  WtStreamManager streamManager{detail::WtDir::Client, self, peer};
+  WtStreamManagerCb cb;
+  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
 
   // next ::nextBidiHandle should succeed
   auto one = streamManager.nextBidiHandle();
@@ -448,6 +469,50 @@ TEST(WtStreamManager, BidiHandleCancellation) {
   EXPECT_TRUE(ct.isCancellationRequested());
   auto fut = one.readHandle->readStreamData();
   EXPECT_TRUE(fut.isReady() && fut.hasException());
+}
+
+TEST(WtStreamManager, GrantFlowControlCredit) {
+  using WtStreamManager = detail::WtStreamManager;
+  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
+  WtStreamManager::WtMaxStreams peer{.bidi = 2, .uni = 1};
+  WtStreamManagerCb cb;
+  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
+
+  constexpr auto kBufLen = 65'535;
+
+  // next ::nextBidiHandle should succeed
+  auto one = streamManager.nextBidiHandle();
+  CHECK(one.readHandle && one.writeHandle);
+  // fills up both conn- & stream-level flow control
+  EXPECT_TRUE(streamManager.enqueue(*one.readHandle,
+                                    {makeBuf(kBufLen), /*fin=*/false}));
+
+  auto fut = one.readHandle->readStreamData();
+  EXPECT_TRUE(fut.isReady() && fut.hasValue());
+
+  EXPECT_TRUE(std::exchange(cb.evAvail_, false)); // callback should have
+                                                  // triggered
+  auto events = streamManager.moveEvents();
+  CHECK_GE(events.size(), 2); // one conn & one stream fc
+  using MaxConnData = WtStreamManager::MaxConnData;
+  using MaxStreamData = WtStreamManager::MaxStreamData;
+  auto maxStreamData = std::get<MaxStreamData>(events[0]);
+  auto maxConnData = std::get<MaxConnData>(events[1]);
+  EXPECT_EQ(maxStreamData.streamId, one.readHandle->getID());
+  EXPECT_EQ(maxStreamData.maxData, kBufLen * 2);
+  EXPECT_EQ(maxConnData.maxData, kBufLen * 2);
+
+  // next ::nextBidiHandle should succeed
+  auto two = streamManager.nextBidiHandle();
+  CHECK(two.readHandle && two.writeHandle);
+  // fills up both conn- & stream-level flow control
+  fut = two.readHandle->readStreamData();
+  EXPECT_TRUE(
+      streamManager.enqueue(*two.readHandle, {makeBuf(kBufLen), /*fin=*/true}));
+  // should have triggered only connection-level flow control since fin=true
+  events = streamManager.moveEvents();
+  EXPECT_EQ(events.size(), 1);
+  EXPECT_TRUE(std::holds_alternative<MaxConnData>(events[0]));
 }
 
 } // namespace proxygen::coro::test

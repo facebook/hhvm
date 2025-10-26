@@ -422,4 +422,25 @@ TEST(WtStreamManager, WriteEgressHandle) {
   EXPECT_TRUE(dequeue.fin);
 }
 
+TEST(WtStreamManager, BidiHandleCancellation) {
+  using WtStreamManager = detail::WtStreamManager;
+  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
+  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+  WtStreamManager streamManager{detail::WtDir::Client, self, peer};
+
+  // next ::nextBidiHandle should succeed
+  auto one = streamManager.nextBidiHandle();
+  CHECK(one.readHandle && one.writeHandle);
+
+  auto res = one.writeHandle->writeStreamData(
+      /*data=*/makeBuf(100), /*fin=*/false, /*byteEventCallback=*/nullptr);
+  EXPECT_TRUE(res.hasValue() &&
+              res.value() == WebTransport::FCState::UNBLOCKED);
+
+  // StreamManager::onStopSending should request cancellation of egress handle
+  auto ct = one.writeHandle->getCancelToken();
+  streamManager.onStopSending({one.writeHandle->getID(), 0x00});
+  EXPECT_TRUE(ct.isCancellationRequested());
+}
+
 } // namespace proxygen::coro::test

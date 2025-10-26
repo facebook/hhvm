@@ -85,6 +85,16 @@ struct WtStreamManager {
   bool onMaxData(MaxStreamData) noexcept;
 
   /**
+   * invoke when receiving a wt_stop_sending – returns bool if stream was found
+   * TODO(@damlaj): enforce sending a rst_stream in response to stop_sending
+   */
+  struct StopSending {
+    uint64_t streamId{0};
+    uint64_t err{0};
+  };
+  bool onStopSending(StopSending) noexcept;
+
+  /**
    * Enqueues data into read handle – returns bool indicating if recv window
    * overflowed (either conn or stream)
    */

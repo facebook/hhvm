@@ -154,8 +154,14 @@ struct WriteHandle : public WebTransport::StreamWriteHandle {
       override;
 
   WebTransport::StreamData dequeue(uint64_t atMost) noexcept;
+  void cancel() {
+    cs_.requestCancellation();
+  }
+
   BufferedFlowController& connSend_;
   WtEgressContainer send_{kDefaultFc};
+  // set to stop_sending's error code
+  uint64_t err{kInvalidVarint};
 };
 
 struct WtStreamManager::BidiHandle {
@@ -223,6 +229,15 @@ bool WtStreamManager::onMaxData(MaxStreamData data) noexcept {
   // TODO(@damlaj): connection-level err if not egress stream?
   auto* eh = static_cast<WriteHandle*>(getEgressHandle(data.streamId));
   return eh && eh->send_.grant(data.maxData);
+}
+
+bool WtStreamManager::onStopSending(StopSending data) noexcept {
+  if (auto* eh = static_cast<WriteHandle*>(getEgressHandle(data.streamId))) {
+    eh->err = data.err;
+    eh->cancel();
+    return true;
+  }
+  return false;
 }
 
 bool WtStreamManager::enqueue(WtRh& rh, StreamData data) noexcept {

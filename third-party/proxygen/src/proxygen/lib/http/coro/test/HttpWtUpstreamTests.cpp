@@ -184,17 +184,17 @@ TEST(WtStreamManager, BasicSelfBidi) {
 
   WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
   // 0x00 is the next expected bidi stream id for client
-  auto bidiRes = streamManager.getBidiHandle(0x00);
+  auto bidiRes = streamManager.getOrCreateBidiHandle(0x00);
   EXPECT_NE(bidiRes.readHandle, nullptr);
   EXPECT_NE(bidiRes.writeHandle, nullptr);
 
   // 0x08 is not the next expected bidi stream id for client
-  bidiRes = streamManager.getBidiHandle(0x08);
+  bidiRes = streamManager.getOrCreateBidiHandle(0x08);
   EXPECT_EQ(bidiRes.readHandle, nullptr);
   EXPECT_EQ(bidiRes.writeHandle, nullptr);
 
   // 0x04 is the next expected bidi stream id for client
-  bidiRes = streamManager.getBidiHandle(0x04);
+  bidiRes = streamManager.getOrCreateBidiHandle(0x04);
   EXPECT_NE(bidiRes.readHandle, nullptr);
   EXPECT_NE(bidiRes.writeHandle, nullptr);
 }
@@ -207,17 +207,17 @@ TEST(WtStreamManager, BasicSelfUni) {
 
   WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
   // 0x02 is the next expected uni stream id for client
-  auto bidiRes = streamManager.getBidiHandle(0x02);
+  auto bidiRes = streamManager.getOrCreateBidiHandle(0x02);
   EXPECT_EQ(bidiRes.readHandle, nullptr); // egress only
   EXPECT_NE(bidiRes.writeHandle, nullptr);
 
   // 0x0a is not the next expected uni stream id for client
-  bidiRes = streamManager.getBidiHandle(0x0a);
+  bidiRes = streamManager.getOrCreateBidiHandle(0x0a);
   EXPECT_EQ(bidiRes.readHandle, nullptr); // egress only
   EXPECT_EQ(bidiRes.writeHandle, nullptr);
 
   // 0x06 is the next expected uni stream id for client
-  bidiRes = streamManager.getBidiHandle(0x06);
+  bidiRes = streamManager.getOrCreateBidiHandle(0x06);
   EXPECT_EQ(bidiRes.readHandle, nullptr); // egress only
   EXPECT_NE(bidiRes.writeHandle, nullptr);
 }
@@ -230,17 +230,17 @@ TEST(WtStreamManager, BasicPeerBidi) {
 
   WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
   // 0x01 is the next expected bidi stream for server
-  auto bidiRes = streamManager.getBidiHandle(0x01);
+  auto bidiRes = streamManager.getOrCreateBidiHandle(0x01);
   EXPECT_NE(bidiRes.readHandle, nullptr);
   EXPECT_NE(bidiRes.writeHandle, nullptr);
 
   // 0x09 is not the next expected bidi stream for server
-  bidiRes = streamManager.getBidiHandle(0x09);
+  bidiRes = streamManager.getOrCreateBidiHandle(0x09);
   EXPECT_EQ(bidiRes.readHandle, nullptr);
   EXPECT_EQ(bidiRes.writeHandle, nullptr);
 
   // 0x05 is the next expected bidi stream for server
-  bidiRes = streamManager.getBidiHandle(0x05);
+  bidiRes = streamManager.getOrCreateBidiHandle(0x05);
   EXPECT_NE(bidiRes.readHandle, nullptr);
   EXPECT_NE(bidiRes.writeHandle, nullptr);
 }
@@ -253,17 +253,17 @@ TEST(WtStreamManager, BasicPeerUni) {
 
   WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
   // 0x03 is the next expected uni stream for server
-  auto bidiRes = streamManager.getBidiHandle(0x03);
+  auto bidiRes = streamManager.getOrCreateBidiHandle(0x03);
   EXPECT_NE(bidiRes.readHandle, nullptr);
   EXPECT_EQ(bidiRes.writeHandle, nullptr); // ingress only
 
   // 0x0b is not the next expected uni stream for server
-  bidiRes = streamManager.getBidiHandle(0x0b);
+  bidiRes = streamManager.getOrCreateBidiHandle(0x0b);
   EXPECT_EQ(bidiRes.readHandle, nullptr);
   EXPECT_EQ(bidiRes.writeHandle, nullptr);
 
   // 0x07 is the next expected bidi stream for server
-  bidiRes = streamManager.getBidiHandle(0x07);
+  bidiRes = streamManager.getOrCreateBidiHandle(0x07);
   EXPECT_NE(bidiRes.readHandle, nullptr);
   EXPECT_EQ(bidiRes.writeHandle, nullptr); // ingress only
 }
@@ -276,19 +276,19 @@ TEST(WtStreamManager, NextBidiUniHandle) {
 
   WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
   // next egress handle tests
-  auto uni = CHECK_NOTNULL(streamManager.nextEgressHandle());
+  auto uni = CHECK_NOTNULL(streamManager.createEgressHandle());
   EXPECT_EQ(uni->getID(), 0x02);
-  uni = streamManager.nextEgressHandle();
+  uni = streamManager.createEgressHandle();
   EXPECT_EQ(uni->getID(), 0x06);
 
   // next bidi handle test
-  auto bidi = streamManager.nextBidiHandle();
+  auto bidi = streamManager.createBidiHandle();
   EXPECT_NE(bidi.readHandle, nullptr);
   EXPECT_NE(bidi.writeHandle, nullptr);
   EXPECT_EQ(bidi.readHandle->getID(), bidi.writeHandle->getID());
   EXPECT_EQ(bidi.readHandle->getID(), 0x00);
 
-  bidi = streamManager.nextBidiHandle();
+  bidi = streamManager.createBidiHandle();
   EXPECT_NE(bidi.readHandle, nullptr);
   EXPECT_NE(bidi.writeHandle, nullptr);
   EXPECT_EQ(bidi.readHandle->getID(), bidi.writeHandle->getID());
@@ -306,20 +306,20 @@ TEST(WtStreamManager, StreamLimits) {
   WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
 
   // a single egress handle should succeed
-  auto uni = streamManager.nextEgressHandle();
+  auto uni = streamManager.createEgressHandle();
   EXPECT_NE(uni, nullptr);
 
   // a single bidi handle should succeed
-  auto bidi = streamManager.nextBidiHandle();
+  auto bidi = streamManager.createBidiHandle();
   EXPECT_NE(bidi.readHandle, nullptr);
   EXPECT_NE(bidi.writeHandle, nullptr);
 
   // next egress handle should fail
-  uni = streamManager.nextEgressHandle();
+  uni = streamManager.createEgressHandle();
   EXPECT_EQ(uni, nullptr);
 
   // next bidi handle should fail
-  bidi = streamManager.nextBidiHandle();
+  bidi = streamManager.createBidiHandle();
   EXPECT_EQ(bidi.readHandle, nullptr);
   EXPECT_EQ(bidi.writeHandle, nullptr);
 
@@ -328,11 +328,11 @@ TEST(WtStreamManager, StreamLimits) {
   EXPECT_TRUE(streamManager.onMaxStreams(MaxStreamsUni{2}));
 
   // next egress handle should succeed
-  uni = CHECK_NOTNULL(streamManager.nextEgressHandle());
+  uni = CHECK_NOTNULL(streamManager.createEgressHandle());
   EXPECT_NE(uni, nullptr);
 
   // next bidi handle should succeed
-  bidi = streamManager.nextBidiHandle();
+  bidi = streamManager.createBidiHandle();
   EXPECT_NE(bidi.readHandle, nullptr);
   EXPECT_NE(bidi.writeHandle, nullptr);
 }
@@ -345,9 +345,9 @@ TEST(WtStreamManager, EnqueueIngressData) {
   WtStreamManagerCb cb;
   WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
 
-  // next nextBidiHandle should succeed
-  auto one = streamManager.nextBidiHandle();
-  auto two = streamManager.nextBidiHandle();
+  // next createBidiHandle should succeed
+  auto one = streamManager.createBidiHandle();
+  auto two = streamManager.createBidiHandle();
   CHECK(one.readHandle && one.writeHandle && two.readHandle && two.writeHandle);
 
   constexpr auto kBufLen = 65'535;
@@ -378,9 +378,9 @@ TEST(WtStreamManager, WriteEgressHandle) {
   WtStreamManagerCb cb;
   WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
 
-  // next two ::nextBidiHandle should succeed
-  auto one = streamManager.nextBidiHandle();
-  auto two = streamManager.nextBidiHandle();
+  // next two ::createBidiHandle should succeed
+  auto one = streamManager.createBidiHandle();
+  auto two = streamManager.createBidiHandle();
   CHECK(one.readHandle && one.writeHandle && two.readHandle && two.writeHandle);
 
   constexpr auto kBufLen = 65'535;
@@ -443,8 +443,8 @@ TEST(WtStreamManager, BidiHandleCancellation) {
   WtStreamManagerCb cb;
   WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
 
-  // next ::nextBidiHandle should succeed
-  auto one = streamManager.nextBidiHandle();
+  // next ::createBidiHandle should succeed
+  auto one = streamManager.createBidiHandle();
   CHECK(one.readHandle && one.writeHandle);
 
   auto res = one.writeHandle->writeStreamData(
@@ -475,8 +475,8 @@ TEST(WtStreamManager, GrantFlowControlCredit) {
 
   constexpr auto kBufLen = 65'535;
 
-  // next ::nextBidiHandle should succeed
-  auto one = streamManager.nextBidiHandle();
+  // next ::createBidiHandle should succeed
+  auto one = streamManager.createBidiHandle();
   CHECK(one.readHandle && one.writeHandle);
   // fills up both conn- & stream-level flow control
   EXPECT_TRUE(streamManager.enqueue(*one.readHandle,
@@ -497,8 +497,8 @@ TEST(WtStreamManager, GrantFlowControlCredit) {
   EXPECT_EQ(maxStreamData.maxData, kBufLen * 2);
   EXPECT_EQ(maxConnData.maxData, kBufLen * 2);
 
-  // next ::nextBidiHandle should succeed
-  auto two = streamManager.nextBidiHandle();
+  // next ::createBidiHandle should succeed
+  auto two = streamManager.createBidiHandle();
   CHECK(two.readHandle && two.writeHandle);
   // fills up both conn- & stream-level flow control
   fut = two.readHandle->readStreamData();
@@ -518,8 +518,8 @@ TEST(WtStreamManager, StopSendingResetStreamTest) {
   WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
   constexpr auto kBufLen = 65'535;
 
-  // next ::nextBidiHandle should succeed
-  auto one = streamManager.nextBidiHandle();
+  // next ::createBidiHandle should succeed
+  auto one = streamManager.createBidiHandle();
   CHECK(one.readHandle && one.writeHandle);
   auto id = one.readHandle->getID();
 
@@ -553,7 +553,7 @@ TEST(WtStreamManager, StopSendingResetStreamTest) {
   EXPECT_FALSE(streamManager.hasStreams());
 
   // ::resetStream on a unidirectional egress stream should erase the stream
-  auto* egress = CHECK_NOTNULL(streamManager.nextEgressHandle());
+  auto* egress = CHECK_NOTNULL(streamManager.createEgressHandle());
   EXPECT_TRUE(streamManager.hasStreams());
   egress->resetStream(/*error=*/0); // read side is closed for an egress-only
                                     // handle; bidirectionally complete after
@@ -569,8 +569,8 @@ TEST(WtStreamManager, AwaitWritableTest) {
   WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
 
   constexpr auto kBufLen = 65'535;
-  // next ::nextBidiHandle should succeed
-  auto eh = CHECK_NOTNULL(streamManager.nextEgressHandle());
+  // next ::createBidiHandle should succeed
+  auto eh = CHECK_NOTNULL(streamManager.createEgressHandle());
 
   // await writable future should be synchronously ready & equal to kBufLen
   // (default egress stream fc)
@@ -608,9 +608,9 @@ TEST(WtStreamManager, WritableStreams) {
   constexpr auto kBufLen = 65'535;
   constexpr auto kAtMost = std::numeric_limits<uint64_t>::max();
 
-  // next two ::nextEgressHandle should succeed
-  auto one = CHECK_NOTNULL(streamManager.nextEgressHandle());
-  auto two = CHECK_NOTNULL(streamManager.nextEgressHandle());
+  // next two ::createEgressHandle should succeed
+  auto one = CHECK_NOTNULL(streamManager.createEgressHandle());
+  auto two = CHECK_NOTNULL(streamManager.createEgressHandle());
 
   // 1 byte + eof; next writableStream == one
   auto writeRes = one->writeStreamData(
@@ -666,8 +666,8 @@ TEST(WtStreamManager, DrainWtSession) {
   streamManager.onDrainSession({});
 
   // all self- and peer-initiated streams will fail
-  auto one = streamManager.nextBidiHandle();
-  auto* two = streamManager.nextEgressHandle();
+  auto one = streamManager.createBidiHandle();
+  auto* two = streamManager.createEgressHandle();
   EXPECT_TRUE(one.readHandle == nullptr && one.writeHandle == nullptr);
   EXPECT_TRUE(two == nullptr);
 }
@@ -680,10 +680,10 @@ TEST(WtStreamManager, CloseWtSession) {
   WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
 
   // ensure cancellation source is cancelled when invoked ::onCloseSession
-  auto one = streamManager.nextBidiHandle();
+  auto one = streamManager.createBidiHandle();
   auto oneRead = one.readHandle->readStreamData();
 
-  auto* two = streamManager.nextEgressHandle();
+  auto* two = streamManager.createEgressHandle();
   auto cts = {one.readHandle->getCancelToken(),
               one.writeHandle->getCancelToken(),
               two->getCancelToken()};

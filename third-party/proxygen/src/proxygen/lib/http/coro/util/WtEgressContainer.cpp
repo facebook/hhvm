@@ -11,8 +11,8 @@
 
 namespace proxygen::coro {
 
-bool WtEgressContainer::enqueue(std::unique_ptr<folly::IOBuf> data,
-                                bool fin) noexcept {
+WtBufferedStreamData::FcRes WtBufferedStreamData::enqueue(
+    std::unique_ptr<folly::IOBuf> data, bool fin) noexcept {
   XCHECK(!fin_) << "enqueue after fin";
   auto len = data ? data->computeChainDataLength() : 0;
   data_.append(std::move(data)); // ok if nullptr
@@ -20,7 +20,7 @@ bool WtEgressContainer::enqueue(std::unique_ptr<folly::IOBuf> data,
   return window_.buffer(len);
 }
 
-WtEgressContainer::DequeueResult WtEgressContainer::dequeue(
+WtBufferedStreamData::DequeueResult WtBufferedStreamData::dequeue(
     uint64_t atMost) noexcept {
   // min of maxBytes and how many bytes remaining in egress window
   atMost = std::min({atMost, window_.getAvailable(), data_.chainLength()});

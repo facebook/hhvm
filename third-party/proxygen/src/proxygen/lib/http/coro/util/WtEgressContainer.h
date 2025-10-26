@@ -24,14 +24,15 @@ namespace proxygen::coro {
  * the application has buffered more than 64KiB bytes.
  */
 struct BufferedFlowController {
-  BufferedFlowController(uint64_t initMax = 0) : window_(initMax) {
+  explicit BufferedFlowController(uint64_t initMax = 0) : window_(initMax) {
   }
 
   // advances the bufferedOffset_ by len bytes – returns true if buffering len
   // bytes has exceeded send window
-  bool buffer(uint64_t len) {
+  enum FcRes : uint8_t { Unblocked = 0, Blocked = 1 };
+  [[nodiscard]] FcRes buffer(uint64_t len) {
     bufferedOffset_ += len; // TODO(@damlaj) overflow
-    return isBlocked();
+    return isBlocked() ? FcRes::Blocked : FcRes::Unblocked;
   }
 
   // adv currentOffset_ by len bytes (must be <= bufferedOffset_ after
@@ -41,7 +42,7 @@ struct BufferedFlowController {
     CHECK_LE(getCurrentOffset(), getBufferedOffset());
   }
 
-  bool grant(uint64_t offset) {
+  [[nodiscard]] bool grant(uint64_t offset) {
     return window_.grant(offset);
   }
 
@@ -49,24 +50,24 @@ struct BufferedFlowController {
     return getBufferAvailable() == 0;
   }
 
-  uint64_t getBufferedOffset() const {
+  [[nodiscard]] uint64_t getBufferedOffset() const {
     return bufferedOffset_;
   }
 
-  uint64_t getCurrentOffset() const {
+  [[nodiscard]] uint64_t getCurrentOffset() const {
     return window_.getCurrentOffset();
   }
 
-  uint64_t getMaxOffset() const {
+  [[nodiscard]] uint64_t getMaxOffset() const {
     return window_.getMaxOffset();
   }
 
-  uint64_t getBufferAvailable() const {
+  [[nodiscard]] uint64_t getBufferAvailable() const {
     const auto bufferedBytes = bufferedOffset_ - getCurrentOffset();
     return bufferedBytes >= kMaxEgressBuf ? 0 : (kMaxEgressBuf - bufferedBytes);
   }
 
-  uint64_t getAvailable() const {
+  [[nodiscard]] uint64_t getAvailable() const {
     return window_.getAvailable();
   }
 
@@ -76,9 +77,9 @@ struct BufferedFlowController {
   uint64_t bufferedOffset_{0};
 };
 
-class WtEgressContainer {
+class WtBufferedStreamData {
  public:
-  WtEgressContainer(uint64_t initMax = 0) : window_(initMax) {
+  explicit WtBufferedStreamData(uint64_t initMax = 0) : window_(initMax) {
   }
 
   const BufferedFlowController& window() {
@@ -86,18 +87,20 @@ class WtEgressContainer {
   }
 
   /**
-   * enqueues data into the container's buffer – returns true if the egress is
-   * now flow control blocked
+   * enqueues data into the container's buffer – returns FcRes::Blocked if the
+   * egress is now flow control blocked, FcRes::Unblocked otherwise
    */
-  bool enqueue(std::unique_ptr<folly::IOBuf> data, bool fin) noexcept;
+  using FcRes = BufferedFlowController::FcRes;
+  FcRes enqueue(std::unique_ptr<folly::IOBuf> data, bool fin) noexcept;
 
   struct DequeueResult {
     std::unique_ptr<folly::IOBuf> data;
     bool fin{false};
   };
+
   /**
-   * dequeues data from the container's buffer, returning min(atMost,
-   * window_available) bytes
+   * Dequeues data from the container's buffer, returning min(atMost,
+   * window_available, bytes_enqueued) bytes.
    */
   DequeueResult dequeue(uint64_t atMost) noexcept;
 

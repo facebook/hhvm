@@ -93,12 +93,12 @@ struct WtStreamManager {
   WtStreamManager(WtDir dir,
                   WtMaxStreams self,
                   WtMaxStreams peer,
-                  Callback& cb);
-  ~WtStreamManager();
+                  Callback& cb) noexcept;
+  ~WtStreamManager() noexcept;
 
   using WtException = WebTransport::Exception;
-  using WtWh = WebTransport::StreamWriteHandle;
-  using WtRh = WebTransport::StreamReadHandle;
+  using WtWriteHandle = WebTransport::StreamWriteHandle;
+  using WtReadHandle = WebTransport::StreamReadHandle;
   using StreamData = WebTransport::StreamData;
   using ReadPromise = folly::Promise<StreamData>;
   using ReadFut = folly::SemiFuture<StreamData>;
@@ -110,32 +110,35 @@ struct WtStreamManager {
    *    logical id)
    *  - Otherwise nullptr
    */
-  WtWh* getEgressHandle(uint64_t streamId);
-  WtRh* getIngressHandle(uint64_t streamId);
-  WebTransport::BidiStreamHandle getBidiHandle(uint64_t streamId);
+  WtWriteHandle* getOrCreateEgressHandle(uint64_t streamId) noexcept;
+  WtReadHandle* getOrCreateIngressHandle(uint64_t streamId) noexcept;
+  WebTransport::BidiStreamHandle getOrCreateBidiHandle(
+      uint64_t streamId) noexcept;
 
   /**
    * initiators of streams should use this api, attempts to create the next
    * consecutive egress/bidi handle
    */
-  WtWh* nextEgressHandle() noexcept;
-  WebTransport::BidiStreamHandle nextBidiHandle() noexcept;
+  WtWriteHandle* createEgressHandle() noexcept;
+  WebTransport::BidiStreamHandle createBidiHandle() noexcept;
 
+  enum Result : uint8_t { Fail = 0, Ok = 1 };
   /**
-   * invoke when receiving max_streams frame from peer – returns bool if
-   * successful (i.e. valid incremental max_streams)
+   * invoke when receiving max_streams frame from peer – returns Ok if
+   * successful (monotonically increasing max_streams), Fail otherwise
    */
   struct MaxStreams {
     uint64_t maxStreams{0};
   };
   struct MaxStreamsBidi : MaxStreams {};
   struct MaxStreamsUni : MaxStreams {};
-  bool onMaxStreams(MaxStreamsBidi);
-  bool onMaxStreams(MaxStreamsUni);
+  Result onMaxStreams(MaxStreamsBidi);
+  Result onMaxStreams(MaxStreamsUni);
 
   /**
    * invoke when receiving wt_max_data & wt_max_stream_data (latter in http/2
-   * only) – returns bool if successful (i.e. valid incremental max_data)
+   * only) – returns Ok if successful (i.e. monotonically increasing max_data),
+   * Fail otherwise
    */
   struct MaxConnData {
     uint64_t maxData{0};
@@ -143,8 +146,8 @@ struct WtStreamManager {
   struct MaxStreamData : MaxConnData {
     uint64_t streamId{0};
   };
-  bool onMaxData(MaxConnData) noexcept;
-  bool onMaxData(MaxStreamData) noexcept;
+  Result onMaxData(MaxConnData) noexcept;
+  Result onMaxData(MaxStreamData) noexcept;
 
   /**
    * invoke when receiving a stop_sending – returns bool if stream was found
@@ -154,7 +157,7 @@ struct WtStreamManager {
     uint64_t streamId{0};
     uint64_t err{0};
   };
-  bool onStopSending(StopSending) noexcept;
+  Result onStopSending(StopSending) noexcept;
 
   struct ResetStream {
     uint64_t streamId{0};
@@ -162,19 +165,25 @@ struct WtStreamManager {
     /*uint64_t reliable_offset;*/
   };
   /**
-   * invoke when receiving a rst_stream – returns bool if stream was found
+   * Invoke when receiving a rst_stream capsule – returns Ok if stream was
+   * found, Fail otherwise
+   *
    * TODO(@damlaj): implement reliable_offset
    */
-  bool onResetStream(ResetStream) noexcept;
+  Result onResetStream(ResetStream) noexcept;
 
   /**
-   * invoke when receiving a drain_session capsule
+   * Invoke when receiving a drain_session capsule. ::onDrainSession has no
+   * immediate side-effect, all streams are untouched. It does however prevent
+   * the creation of any new streams (both self- and peer-initiated)
    */
   struct DrainSession {};
   void onDrainSession(DrainSession) noexcept;
 
   /**
-   * invoke when receiving a close_session capsule
+   * Invoke when receiving a close_session capsule. ::onCloseSession has the
+   * immediate side-effect of deallocating every stream. In addition, it
+   * prevents the creation of any new streams (both self- and peer-initiated).
    */
   struct CloseSession {
     uint64_t err{0};
@@ -183,17 +192,17 @@ struct WtStreamManager {
   void onCloseSession(CloseSession) noexcept;
 
   /**
-   * Enqueues data into read handle – returns bool indicating if recv window
-   * overflowed (either conn or stream)
+   * Enqueues data into read handle – returns Fail if recv window overflowed
+   * (either conn or stream) or Ok otherwise. Receive window is considered
+   * "strict", and any overflow should be treated as an error.
    */
-  bool enqueue(WtRh&, StreamData data) noexcept;
+  Result enqueue(WtReadHandle&, StreamData data) noexcept;
 
   /**
-   * Dequeues data from write handle
-   * - invariant, must be the stream received from ::nextWritable
-   * -  TODO(@damlaj): combine into a single function?
+   * Dequeues buffered data from the WtWriteHandle; if there is no data to be
+   * dequeued, it returns StreamData{.data=nullptr, .fin=false}
    */
-  StreamData dequeue(WtWh&, uint64_t atMost) noexcept;
+  StreamData dequeue(WtWriteHandle&, uint64_t atMost) noexcept;
 
   /**
    * Events are communicated to the backing transport (http/2 or http/3) via
@@ -207,7 +216,7 @@ struct WtStreamManager {
                              MaxStreamData,
                              CloseSession>;
   std::vector<Event> moveEvents() noexcept {
-    return std::move(events_);
+    return std::move(ctrlEvents_);
   }
 
   struct Accessor; // used by Read&Write handle to access private members of
@@ -218,7 +227,7 @@ struct WtStreamManager {
    * nextWritable() returns the next writable stream **if exists and there is
    * available connection flow control**. Otherwise, returns nullptr
    */
-  WtWh* nextWritable() const noexcept;
+  WtWriteHandle* nextWritable() const noexcept;
 
   bool hasStreams() const noexcept {
     return !streams_.empty();
@@ -228,30 +237,43 @@ struct WtStreamManager {
     return drain_ && !hasStreams();
   }
 
-  // locally initiated drain
+  /**
+   * Locally initiated drain of the WtStreamManager. This will enqueue an event
+   * to send to the peer (of type DrainSession, notified via Callback). Similar
+   * to ::onDrainSession, this will leave existing streams untouched. However,
+   * no new streams can be created following this invocation.
+   */
   void drain() noexcept;
 
-  // locally initiated shutdown
+  /**
+   * Locally initiated shutdown of the WtStreamManager. This will enqueue an
+   * event to send to the peer (of type CloseSession, notified via Callback).
+   * Similar to ::onCloseSession, this has an immediate side-effect of
+   * deallocating every stream and prevents the creation of new streams.
+   */
   void shutdown(CloseSession) noexcept;
 
  private:
-  bool isSelf(uint64_t streamId) const;
-  bool isPeer(uint64_t streamId) const;
-  bool isEgress(uint64_t streamId) const;
-  bool isIngress(uint64_t streamId) const;
-  bool isUni(uint64_t streamId) const;
-  bool isBidi(uint64_t streamId) const;
+  [[nodiscard]] bool isSelf(uint64_t streamId) const;
+  [[nodiscard]] bool isPeer(uint64_t streamId) const;
+  [[nodiscard]] bool isEgress(uint64_t streamId) const;
+  [[nodiscard]] bool isIngress(uint64_t streamId) const;
+  [[nodiscard]] bool isUni(uint64_t streamId) const;
+  [[nodiscard]] bool isBidi(uint64_t streamId) const;
   uint64_t* nextExpectedStream(uint64_t streamId);
   void enqueueEvent(Event&& ev) noexcept;
-  void onStreamWritable(WtWh& wh) noexcept;
+  void onStreamWritable(WtWriteHandle& wh) noexcept;
   void shutdownImpl(uint32_t, std::string) noexcept;
   bool hasEvent() const noexcept;
 
   WtDir dir_;
   struct NextStreams {
-    uint64_t bidi{0}, uni{0}; // expected consecutive stream ids
-    WtMaxStreams max;         // max concurrency
-  } self_, peer_;
+    uint64_t bidi{0};
+    uint64_t uni{0};  // expected consecutive stream ids
+    WtMaxStreams max; // max concurrency
+  };
+  NextStreams selfNextStreams_;
+  NextStreams peerNextStreams_;
 
   struct BidiHandle;
   std::map<uint64_t, std::unique_ptr<BidiHandle>> streams_;
@@ -259,15 +281,22 @@ struct WtStreamManager {
   // writable streams ordered by stream id
   // TODO(@damlaj): support priorities
   struct Compare {
-    bool operator()(const WtWh* l, const WtWh* r) const;
+    bool operator()(const WtWriteHandle* l, const WtWriteHandle* r) const;
   };
-  // streams are in this map regardless of available connection flow control
-  std::set<WtWh*, Compare> writableStreams_;
+  /**
+   * Any stream with buffered data & available stream-level flow control is in
+   * this map, regardless of available connection-level flow control. This is so
+   * an ::onMaxData does not have to iterate over all streams to determine which
+   * streams are writable.
+   *
+   * ::nextWritable, however, will account for the connection-level flow control
+   */
+  std::set<WtWriteHandle*, Compare> writableStreams_;
 
-  FlowController recv_;
-  BufferedFlowController send_;
+  FlowController connRecvFc_;
+  BufferedFlowController connSendFc_;
   Callback& cb_;
-  std::vector<Event> events_;
+  std::vector<Event> ctrlEvents_;
   bool drain_{false};
 
   // helper functions to compute next streams

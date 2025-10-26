@@ -22,6 +22,12 @@ struct BufferedData {
   bool fin{false};
 };
 
+using namespace proxygen::coro::detail;
+using ReadPromise = WtStreamManager::ReadPromise;
+ReadPromise emptyReadPromise() {
+  return ReadPromise::makeEmpty();
+}
+
 } // namespace
 
 namespace proxygen::coro::detail {
@@ -124,6 +130,7 @@ struct ReadHandle : public WebTransport::StreamReadHandle {
 
   FlowController recv_{kDefaultFc};
   BufferedData buf_;
+  ReadPromise promise_{emptyReadPromise()};
 };
 struct WriteHandle : public WebTransport::StreamWriteHandle {
   // why doesn't using StreamWriteHandle::StreamWriteHandle work here?
@@ -212,7 +219,17 @@ bool WtStreamManager::enqueue(WtRh& rh, StreamData data) noexcept {
  * ReadHandle & WriteHandle implementations here
  */
 folly::SemiFuture<ReadHandle::StreamData> ReadHandle::readStreamData() {
-  XLOG(FATAL) << "not implemented";
+  // TODO(@damlaj): hook into interrupt handler, but somehow ensure no UB from
+  // concurrent access
+  XLOG_IF(FATAL, promise_.valid()) << "one pending read at a time";
+  auto [p, f] = folly::makePromiseContract<StreamData>();
+  if (!buf_.chain.empty() || buf_.fin) {
+    // TODO(@damlaj): release flow control
+    p.setValue(StreamData{buf_.chain.pop(), buf_.fin});
+    return std::move(f);
+  }
+  promise_ = std::move(p);
+  return std::move(f);
 }
 
 folly::Expected<folly::Unit, ReadHandle::ErrCode> ReadHandle::stopSending(
@@ -230,6 +247,10 @@ bool ReadHandle::enqueue(StreamData&& data) noexcept {
     buf_.chain.appendChain(std::move(data.data));
   }
   buf_.fin = data.fin;
+  if (auto p = std::exchange(promise_, emptyReadPromise()); p.valid()) {
+    // fulfill if pending promise; TODO(@damlaj): release fc
+    p.setValue(StreamData{buf_.chain.pop(), buf_.fin});
+  }
   return true;
 }
 

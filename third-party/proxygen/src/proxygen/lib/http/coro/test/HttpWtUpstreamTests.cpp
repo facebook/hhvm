@@ -321,7 +321,7 @@ TEST(WtStreamManager, StreamLimits) {
   EXPECT_NE(bidi.writeHandle, nullptr);
 }
 
-TEST(WtStreamManager, EnqueueData) {
+TEST(WtStreamManager, EnqueueIngressData) {
   using WtStreamManager = detail::WtStreamManager;
   WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
   WtStreamManager::WtMaxStreams peer{.bidi = 2, .uni = 1};
@@ -333,7 +333,11 @@ TEST(WtStreamManager, EnqueueData) {
   CHECK(one.readHandle && one.writeHandle && two.readHandle && two.writeHandle);
 
   // both conn & stream recv window exactly full, expect success
+  auto oneFut = one.readHandle->readStreamData();
   EXPECT_TRUE(streamManager.enqueue(*one.readHandle, {makeBuf(65'535), false}));
+  EXPECT_TRUE(oneFut.isReady()); // enqueue should fulfill promise
+  EXPECT_EQ(oneFut.value().data->computeChainDataLength(), 65'535);
+  EXPECT_FALSE(oneFut.value().fin);
 
   // enqueuing a additional byte in one will fail (stream recv window full)
   EXPECT_FALSE(
@@ -341,6 +345,8 @@ TEST(WtStreamManager, EnqueueData) {
 
   // enqueuing a single byte in two will fail (conn recv window full)
   EXPECT_FALSE(streamManager.enqueue(*two.readHandle, {makeBuf(1), false}));
+  auto twoFut = two.readHandle->readStreamData();
+  EXPECT_FALSE(twoFut.isReady()); // no data buffered, ::enqueue failed
 }
 
 } // namespace proxygen::coro::test

@@ -38,6 +38,8 @@ struct WtStreamManager {
   using WtWh = WebTransport::StreamWriteHandle;
   using WtRh = WebTransport::StreamReadHandle;
   using StreamData = WebTransport::StreamData;
+  using ReadPromise = folly::Promise<StreamData>;
+  using ReadFut = folly::SemiFuture<StreamData>;
   /**
    * a bit of an odd api, but:
    *  - Gets the stream if already present

@@ -26,7 +26,7 @@ WtEgressContainer::DequeueResult WtEgressContainer::dequeue(
   atMost = std::min({atMost, window_.getAvailable(), data_.chainLength()});
   DequeueResult res;
   res.data = data_.splitAtMost(atMost);
-  res.fin = data_.empty() && fin_;
+  res.fin = data_.empty() && std::exchange(fin_, false);
   window_.commit(atMost);
   return res;
 }

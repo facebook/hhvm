@@ -29,6 +29,9 @@ struct WtStreamManager::Accessor {
   auto& connSend() {
     return sm_.send_;
   }
+  auto& writableStreams() {
+    return sm_.writableStreams_;
+  }
   WtStreamManager& sm_;
 };
 
@@ -354,6 +357,15 @@ StreamData WtStreamManager::dequeue(WtWh& wh, uint64_t atMost) noexcept {
   return res;
 }
 
+WtStreamManager::WtWh* WtStreamManager::nextWritable() noexcept {
+  bool hasSend = !writableStreams_.empty() && send_.getAvailable() > 0;
+  return hasSend ? *writableStreams_.begin() : nullptr;
+}
+
+bool WtStreamManager::Compare::operator()(const WtWh* l, const WtWh* r) const {
+  return l->getID() < r->getID();
+}
+
 } // namespace proxygen::coro::detail
 
 /**
@@ -412,9 +424,14 @@ WriteHandle::writeStreamData(std::unique_ptr<folly::IOBuf> data,
   // TODO(@damlaj): handle byte events & reset stream; elide unnecessarily
   // recomputing len
   auto len = computeChainLength(data);
+  XLOG_IF(ERR, !(len || fin)) << "no-op writeStreamData";
   acc_.connSend().buffer(len);
-  return send_.enqueue(std::move(data), fin) ? FcState::BLOCKED
-                                             : FcState::UNBLOCKED;
+  auto res = send_.enqueue(std::move(data), fin) ? FcState::BLOCKED
+                                                 : FcState::UNBLOCKED;
+  if (send_.canSendData()) {
+    acc_.writableStreams().insert(this); // stream is now writable
+  }
+  return res;
 }
 
 folly::Expected<folly::Unit, WriteHandle::ErrCode> WriteHandle::resetStream(
@@ -431,6 +448,9 @@ folly::Expected<folly::Unit, WriteHandle::ErrCode> WriteHandle::setPriority(
 bool WriteHandle::onMaxData(uint64_t offset) {
   // TODO(@damlaj): handle ::grant error; take into acc conn send_ window
   send_.grant(offset);
+  if (send_.canSendData()) {
+    acc_.writableStreams().insert(this); // stream is now writable
+  }
   return true;
 }
 
@@ -455,6 +475,9 @@ StreamData WriteHandle::dequeue(uint64_t atMost) noexcept {
     if (auto p = std::exchange(promise_, emptyWritePromise()); p.valid()) {
       p.setValue(bufferAvailable);
     }
+  }
+  if (!send_.canSendData()) {
+    acc_.writableStreams().erase(this);
   }
   return StreamData{std::move(res.data), res.fin};
 }

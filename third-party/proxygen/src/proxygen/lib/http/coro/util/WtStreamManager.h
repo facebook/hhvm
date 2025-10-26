@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <map>
 #include <memory>
+#include <set>
 #include <variant>
 
 /**
@@ -128,6 +129,8 @@ struct WtStreamManager {
 
   /**
    * Dequeues data from write handle
+   * - invariant, must be the stream received from ::nextWritable
+   * -  TODO(@damlaj): combine into a single function?
    */
   StreamData dequeue(WtWh&, uint64_t atMost) noexcept;
 
@@ -147,6 +150,12 @@ struct WtStreamManager {
                    // this class
   friend struct Accessor;
 
+  /**
+   * nextWritable() returns the next writable stream **if exists and there is
+   * available connection flow control**. Otherwise, returns nullptr
+   */
+  WtWh* nextWritable() noexcept;
+
  private:
   bool isSelf(uint64_t streamId) const;
   bool isPeer(uint64_t streamId) const;
@@ -165,6 +174,14 @@ struct WtStreamManager {
 
   struct BidiHandle;
   std::map<uint64_t, std::unique_ptr<BidiHandle>> streams_;
+
+  // writable streams ordered by stream id
+  // TODO(@damlaj): support priorities
+  struct Compare {
+    bool operator()(const WtWh* l, const WtWh* r) const;
+  };
+  // streams are in this map regardless of available connection flow control
+  std::set<WtWh*, Compare> writableStreams_;
 
   FlowController recv_;
   BufferedFlowController send_;

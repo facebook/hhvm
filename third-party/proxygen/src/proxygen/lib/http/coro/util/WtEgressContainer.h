@@ -105,6 +105,16 @@ class WtEgressContainer {
     return window_.grant(offset);
   }
 
+  bool hasData() const {
+    return !data_.empty() || fin_;
+  }
+
+  // we can send data if there is either data & available stream fc, or only fin
+  // pending
+  bool canSendData() const {
+    return (hasData() && window_.getAvailable()) || (data_.empty() && fin_);
+  }
+
  private:
   folly::IOBufQueue data_{folly::IOBufQueue::cacheChainLength()};
   bool fin_{false};

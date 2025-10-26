@@ -110,6 +110,7 @@ struct WriteHandle : public WebTransport::StreamWriteHandle {
 
   WebTransport::StreamData dequeue(uint64_t atMost) noexcept;
   bool onMaxData(uint64_t offset);
+  WritePromise resetPromise() noexcept;
   void cancel() {
     cs_.requestCancellation();
   }
@@ -318,9 +319,14 @@ WebTransport::BidiStreamHandle WtStreamManager::nextBidiHandle() noexcept {
 }
 
 bool WtStreamManager::onMaxData(MaxConnData data) noexcept {
-  // TODO(@damlaj): notify previously blocked streams
-  return send_.grant(data.maxData);
+  bool wasWritable = nextWritable() != nullptr;
+  send_.grant(data.maxData); // TODO(@damlaj): handle ::grant err
+  if (!wasWritable && nextWritable()) {
+    cb_.eventsAvailable();
+  }
+  return true;
 }
+
 bool WtStreamManager::onMaxData(MaxStreamData data) noexcept {
   // TODO(@damlaj): connection-level err if not egress stream?
   auto* eh = static_cast<WriteHandle*>(getEgressHandle(data.streamId));
@@ -459,7 +465,7 @@ folly::Expected<folly::Unit, WriteHandle::ErrCode> WriteHandle::setPriority(
 }
 
 bool WriteHandle::onMaxData(uint64_t offset) {
-  // TODO(@damlaj): handle ::grant error; take into acc conn send_ window
+  // TODO(@damlaj): handle ::grant error
   send_.grant(offset);
   if (send_.canSendData()) {
     acc_.writableStreams().insert(this); // stream is now writable
@@ -471,13 +477,17 @@ folly::Expected<folly::SemiFuture<uint64_t>, WriteHandle::ErrCode>
 WriteHandle::awaitWritable() {
   XCHECK(!promise_.valid()) << "at most one pending awaitWritable";
   auto [p, f] = folly::makePromiseContract<uint64_t>();
-  const auto& window = send_.window();
-  if (auto avail = window.getBufferAvailable(); avail > 0) {
-    p.setValue(avail);
+  const auto bufferAvailable = send_.window().getBufferAvailable();
+  if (bufferAvailable > 0) {
+    p.setValue(bufferAvailable);
     return std::move(f);
   }
   promise_ = std::move(p);
   return std::move(f);
+}
+
+WritePromise WriteHandle::resetPromise() noexcept {
+  return std::exchange(promise_, emptyWritePromise());
 }
 
 // TODO(@damlaj): StreamData and DequeueResult should be the same struct
@@ -485,7 +495,7 @@ StreamData WriteHandle::dequeue(uint64_t atMost) noexcept {
   auto res = send_.dequeue(atMost);
   const auto bufferAvailable = send_.window().getBufferAvailable();
   if (bufferAvailable > 0) {
-    if (auto p = std::exchange(promise_, emptyWritePromise()); p.valid()) {
+    if (auto p = resetPromise(); p.valid()) {
       p.setValue(bufferAvailable);
     }
   }

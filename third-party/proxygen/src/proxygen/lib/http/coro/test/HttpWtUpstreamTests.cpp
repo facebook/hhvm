@@ -567,6 +567,7 @@ TEST(WtStreamManager, AwaitWritableTest) {
 
   // granting additional fc credit does not unblock egress buffer
   streamManager.onMaxData({{kBufLen + 2}, eh->getID()});
+  EXPECT_TRUE(await.hasValue() && !await.value().isReady());
 
   // dequeue will resolve promise
   streamManager.dequeue(*eh, kBufLen);

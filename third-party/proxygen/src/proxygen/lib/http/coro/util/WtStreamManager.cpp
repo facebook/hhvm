@@ -6,6 +6,63 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+/**
+ * This comment block documents the implementation details of WtStreamManager
+ * (i.e. the how).
+ *
+ * WriteHandle & ReadHandle (concrete implementations of
+ * WebTransport::WriteHandle and WebTransport::ReadHandle respsectively, defined
+ * below) are anonymous and strictly scoped to this TU. This requires
+ * downcasting in all apis that receive a pointer to those pure virtual classes.
+ * To prevent leaking implementation details by marking methods in
+ * WtStreamManager public just for internal use by WriteHandle & ReadHandle, we
+ * utilize a friend struct Accessor (also anonymously defined and strictly
+ * scoped to this TU).
+ *
+ * First thing to note is that we always allocate both a WriteHandle and
+ * ReadHandle regardless of the underlying properities of the stream (e.g. if
+ * it's a unidirectional stream). This makes things extremely easier to reason
+ * about, as there's a single map from [id]->[bidi_handle]. The public api in
+ * WtStreamManager is extremely restrictive, and we do not hand out a pointer to
+ * an invalid handle. For example, if a client WtStreamManager attempts to
+ * retrieve a EgressHandle for a server-initiated unidirectional stream (e.g.
+ * id=0x03), the state for such a handle exists but we return nullptr – it's
+ * effectively invisible to the user.
+ *
+ * A note about flow control:
+ * – Ingress flow control is strict, as a peer exceeding the advertised max
+ *   offset is a connection- or stream-level flow control.
+ *
+ * – Egress flow control is not strict, as an application can enqueue too much
+ *   data for any number of reasons (large write, ignoring backpressure, etc.).
+ *   We buffer this data in WriteHandle and is subsequently dequeued by the
+ *   transport whenever the stream is writable (hence the need for
+ *   WtEgressContainer to manage this small complexity). Applications should
+ *   respect backpressure signalled by returning FcState::BLOCKED from
+ *   WriteHandle::writeStreamData
+ *
+ * A note about stream states:
+ * – An egress handle transitions from [HandleState::Open] ->
+ *   [HandleState::Closed] in three cases: fin is dequeued from WriteHandle via
+ *   ::dequeue, the application resets the stream (i.e.
+ *   WebTransport::WriteHandle::resetStream), or the transport receives a
+ *   stop_sending and WtStreamManager::onStopSending is invoked.
+ *
+ * – An ingress handle transitions from [HandleState::Open] ->
+ *   [HandleState::Closed] in three cases: fin is read via ::readStreamData(),
+ *   the application is no longer interested in ingress (i.e.
+ *   WebTransport::ReadHandle::stopSending), or the transport receives a
+ *   reset_stream and WtStreamManager::onResetStream is invoked.
+ *
+ * – An invalid handle (e.g. client egress handle for a
+ *   server-initiated unidirectional stream) starts in the HandleState::Closed.
+ *
+ * – Once both the ingress & egress handles have reached the HandleState::Closed
+ *   state, we deallocate the state. Since we always allocate both a ReadHandle
+ *   and WriteHandle, they're both unconditionally linked together for
+ *   simplicity.
+ */
+
 #include <proxygen/lib/http/coro/util/WtStreamManager.h>
 
 #include <folly/logging/xlog.h>

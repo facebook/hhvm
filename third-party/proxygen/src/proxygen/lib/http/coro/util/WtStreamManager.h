@@ -21,6 +21,48 @@
 #include <proxygen/lib/http/coro/util/WtEgressContainer.h>
 #include <proxygen/lib/http/webtransport/WebTransport.h>
 
+/**
+ * This comment block documents the api of WtStreamManager (i.e. its behaviour).
+ * Please refer to the documentation in WtStreamManager.cpp for the
+ * implementation details (i.e. the how).
+ *
+ * WtStreamManager, as the name suggestions, simply manages the stream state of
+ * WebTransport streams. Following good design philosophy, as much as possible
+ * is hidden from the user of this class.
+ *
+ * There are two channels to interact with this class:
+ *
+ * – The application via the handles (StreamWriteHandle & StreamReadHandle) and
+ *   their respective methods (e.g. WriteHandle::writeStreamData,
+ *   ReadHandle::stopSending, etc.).
+ *
+ * – The backing transport (http/2, quic, etc.) via the methods in this class
+ *   (e.g. onMaxStreams, onMaxData, ::enqueue(ReadHandle&),
+ *   ::dequeue(WriteHandle&), etc.)
+ *
+ * As of now, there's a single channel to communicate events to the backing
+ * transport –via WtStreamManager::Callback. This simply lets the backing
+ * transport know that there is an event available for the write loop to action
+ * on – there are two main events:
+ *
+ * – Control frames that need to be serialized/sent by the transport (e.g.
+ *   reset_stream, stop_sending, etc.). The transport should invoke ::moveEvents
+ *   and install a visitor to ensure all control-frames are handled
+ *   appropriately.
+ *
+ * – A stream that is now writable (e.g. ::nextWritable will return
+ *   non-nullptr). The transport should query the nextWritable stream and
+ *   dequeue data from the handle.
+ *
+ *
+ * A note about stream handles – everything is dervied from WtDir (the role of
+ * the endpoint, e.g. client or server) and stream id. Any attempt to
+ * access/create a handle for an invalid direction will return nullptr. For
+ * example, a client invoking ::getEgressHandle for a stream id that is
+ * logically a server-initiated unidirectional stream (e.g. id=0x03) will return
+ * nullptr.
+ */
+
 namespace proxygen::coro::detail {
 
 enum WtDir : uint8_t { Client = 0, Server = 1 };
@@ -30,7 +72,7 @@ constexpr uint64_t kMaxVarint = (1ull << 62) - 1;
 
 struct WtStreamManager {
   /**
-   * This level-triggered callback (::eventsAvailable) is invoked once control
+   * This edge-triggered callback (::eventsAvailable) is invoked once control
    * events are available to be dequeued by the backing transport – (e.g.
    * connection- and stream-level flow control, reset_stream, stop_sending,
    * etc.)

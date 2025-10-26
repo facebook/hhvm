@@ -16,7 +16,7 @@
  * get rid of WebTransport.h dependency, extract StreamReadHandle &
  * StreamWriteHandle into a different TU?
  */
-#include <proxygen/lib/http/webtransport/FlowController.h>
+#include <proxygen/lib/http/coro/util/WtEgressContainer.h>
 #include <proxygen/lib/http/webtransport/WebTransport.h>
 
 namespace proxygen::coro::detail {
@@ -77,6 +77,11 @@ struct WtStreamManager {
    */
   bool enqueue(WtRh&, StreamData data) noexcept;
 
+  /**
+   * Dequeues data from write handle
+   */
+  StreamData dequeue(WtWh&, uint64_t atMost) noexcept;
+
  private:
   bool isSelf(uint64_t streamId) const;
   bool isPeer(uint64_t streamId) const;
@@ -96,6 +101,7 @@ struct WtStreamManager {
   std::map<uint64_t, std::unique_ptr<BidiHandle>> streams_;
 
   FlowController recv_;
+  BufferedFlowController send_;
 
   // helper functions to compute next streams
   static NextStreams selfNextStreams(WtDir, WtMaxStreams);

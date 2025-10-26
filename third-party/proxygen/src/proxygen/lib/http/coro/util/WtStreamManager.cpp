@@ -28,6 +28,8 @@ ReadPromise emptyReadPromise() {
   return ReadPromise::makeEmpty();
 }
 
+using StreamData = WtStreamManager::StreamData;
+
 } // namespace
 
 namespace proxygen::coro::detail {
@@ -58,7 +60,8 @@ WtStreamManager::WtStreamManager(WtDir dir,
     : dir_(dir),
       self_(selfNextStreams(dir, self)),
       peer_(peerNextStreams(dir, peer)),
-      recv_(kDefaultFc) {
+      recv_(kDefaultFc),
+      send_(kDefaultFc) {
   XCHECK(dir <= WtDir::Server) << "invalid dir";
 }
 
@@ -121,7 +124,6 @@ struct ReadHandle : public WebTransport::StreamReadHandle {
   // why doesn't using StreamReadHandle::StreamReadHandle work here?
   ReadHandle(uint64_t id) : StreamReadHandle(id) {
   }
-  using StreamData = WebTransport::StreamData;
   using ErrCode = WebTransport::ErrorCode;
   // StreamReadHandle overrides
   folly::SemiFuture<StreamData> readStreamData() override;
@@ -134,7 +136,8 @@ struct ReadHandle : public WebTransport::StreamReadHandle {
 };
 struct WriteHandle : public WebTransport::StreamWriteHandle {
   // why doesn't using StreamWriteHandle::StreamWriteHandle work here?
-  WriteHandle(uint64_t id) : StreamWriteHandle(id) {
+  WriteHandle(uint64_t id, BufferedFlowController& connSend)
+      : StreamWriteHandle(id), connSend_(connSend) {
   }
   using FcState = WebTransport::FCState;
   using ErrCode = WebTransport::ErrorCode;
@@ -150,17 +153,22 @@ struct WriteHandle : public WebTransport::StreamWriteHandle {
   folly::Expected<folly::SemiFuture<uint64_t>, ErrCode> awaitWritable()
       override;
 
-  WebTransport::StreamData dequeue();
+  WebTransport::StreamData dequeue(uint64_t atMost) noexcept;
+  BufferedFlowController& connSend_;
+  WtEgressContainer send_{kDefaultFc};
 };
+
 struct WtStreamManager::BidiHandle {
   WriteHandle wh;
   ReadHandle rh;
 
-  BidiHandle(uint64_t id) : wh(id), rh(id) {
+  BidiHandle(uint64_t id, BufferedFlowController& connSend)
+      : wh(id, connSend), rh(id) {
   }
 
-  static std::unique_ptr<BidiHandle> make(uint64_t id) {
-    return std::make_unique<BidiHandle>(id);
+  static std::unique_ptr<BidiHandle> make(uint64_t id,
+                                          BufferedFlowController& connSend) {
+    return std::make_unique<BidiHandle>(id, connSend);
   }
 };
 
@@ -172,7 +180,7 @@ WebTransport::StreamWriteHandle* WtStreamManager::getEgressHandle(
 
   // create if next expected stream
   if (auto* next = nextExpectedStream(streamId)) {
-    streams_.emplace(streamId, BidiHandle::make(streamId));
+    streams_.emplace(streamId, BidiHandle::make(streamId, send_));
     *next += kStreamIdInc;
   }
 
@@ -187,7 +195,7 @@ WebTransport::StreamReadHandle* WtStreamManager::getIngressHandle(
   }
   // create if next expected stream
   if (auto* next = nextExpectedStream(streamId)) {
-    streams_.emplace(streamId, BidiHandle::make(streamId));
+    streams_.emplace(streamId, BidiHandle::make(streamId, send_));
     *next += kStreamIdInc;
   }
 
@@ -215,10 +223,20 @@ bool WtStreamManager::enqueue(WtRh& rh, StreamData data) noexcept {
   return err;
 }
 
+StreamData WtStreamManager::dequeue(WtWh& wh, uint64_t atMost) noexcept {
+  // we're limited by conn egress fc
+  atMost = std::min(atMost, send_.getAvailable());
+  // TODO(@damlaj): return len to elide unnecessarily computing chain len
+  auto res = static_cast<WriteHandle&>(wh).dequeue(atMost);
+  // commit len bytes to conn window
+  send_.commit(res.data->computeChainDataLength());
+  return res;
+}
+
 /**
  * ReadHandle & WriteHandle implementations here
  */
-folly::SemiFuture<ReadHandle::StreamData> ReadHandle::readStreamData() {
+folly::SemiFuture<StreamData> ReadHandle::readStreamData() {
   // TODO(@damlaj): hook into interrupt handler, but somehow ensure no UB from
   // concurrent access
   XLOG_IF(FATAL, promise_.valid()) << "one pending read at a time";
@@ -254,12 +272,16 @@ bool ReadHandle::enqueue(StreamData&& data) noexcept {
   return true;
 }
 
-folly::Expected<WriteHandle::FcState, ReadHandle::ErrCode>
-WriteHandle::writeStreamData(
-    std::unique_ptr<folly::IOBuf> data,
-    bool fin,
-    WebTransport::ByteEventCallback* byteEventCallback) {
-  XLOG(FATAL) << "not implemented";
+folly::Expected<WriteHandle::FcState, WriteHandle::ErrCode>
+WriteHandle::writeStreamData(std::unique_ptr<folly::IOBuf> data,
+                             bool fin,
+                             WebTransport::ByteEventCallback*) {
+  // TODO(@damlaj): handle byte events & reset stream; elide unnecessarily
+  // recomputing len
+  auto len = data ? data->computeChainDataLength() : 0;
+  connSend_.buffer(len);
+  return send_.enqueue(std::move(data), fin) ? FcState::BLOCKED
+                                             : FcState::UNBLOCKED;
 }
 
 folly::Expected<folly::Unit, WriteHandle::ErrCode> WriteHandle::resetStream(
@@ -273,6 +295,12 @@ folly::Expected<folly::Unit, WriteHandle::ErrCode> WriteHandle::setPriority(
 folly::Expected<folly::SemiFuture<uint64_t>, WriteHandle::ErrCode>
 WriteHandle::awaitWritable() {
   XLOG(FATAL) << "not implemented";
+}
+
+// TODO(@damlaj): StreamData and DequeueResult should be the same struct
+StreamData WriteHandle::dequeue(uint64_t atMost) noexcept {
+  auto res = send_.dequeue(atMost);
+  return StreamData{std::move(res.data), res.fin};
 }
 
 } // namespace proxygen::coro::detail

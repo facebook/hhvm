@@ -332,21 +332,61 @@ TEST(WtStreamManager, EnqueueIngressData) {
   auto two = streamManager.nextBidiHandle();
   CHECK(one.readHandle && one.writeHandle && two.readHandle && two.writeHandle);
 
+  constexpr auto kBufLen = 65'535;
+
   // both conn & stream recv window exactly full, expect success
   auto oneFut = one.readHandle->readStreamData();
-  EXPECT_TRUE(streamManager.enqueue(*one.readHandle, {makeBuf(65'535), false}));
+  EXPECT_TRUE(
+      streamManager.enqueue(*one.readHandle, {makeBuf(kBufLen), false}));
   EXPECT_TRUE(oneFut.isReady()); // enqueue should fulfill promise
-  EXPECT_EQ(oneFut.value().data->computeChainDataLength(), 65'535);
+  EXPECT_EQ(oneFut.value().data->computeChainDataLength(), kBufLen);
   EXPECT_FALSE(oneFut.value().fin);
 
   // enqueuing a additional byte in one will fail (stream recv window full)
   EXPECT_FALSE(
-      streamManager.enqueue(*one.readHandle, {makeBuf(65'535), false}));
+      streamManager.enqueue(*one.readHandle, {makeBuf(kBufLen), false}));
 
   // enqueuing a single byte in two will fail (conn recv window full)
   EXPECT_FALSE(streamManager.enqueue(*two.readHandle, {makeBuf(1), false}));
   auto twoFut = two.readHandle->readStreamData();
   EXPECT_FALSE(twoFut.isReady()); // no data buffered, ::enqueue failed
+}
+
+TEST(WtStreamManager, WriteEgressHandle) {
+  using WtStreamManager = detail::WtStreamManager;
+  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
+  WtStreamManager::WtMaxStreams peer{.bidi = 2, .uni = 1};
+  WtStreamManager streamManager{detail::WtDir::Client, self, peer};
+
+  // next two ::nextBidiHandle should succeed
+  auto one = streamManager.nextBidiHandle();
+  auto two = streamManager.nextBidiHandle();
+  CHECK(one.readHandle && one.writeHandle && two.readHandle && two.writeHandle);
+
+  constexpr auto kBufLen = 65'535;
+  // kBufLen will fill up both conn & stream egress windows
+  auto res = one.writeHandle->writeStreamData(
+      /*data=*/makeBuf(kBufLen), /*fin=*/true, /*byteEventCallback=*/nullptr);
+  EXPECT_TRUE(res.hasValue() && res.value() == WebTransport::FCState::BLOCKED);
+
+  // each stream has an individual egress buffer of kBufLen before applying
+  // backpressure => writing (kBufLen - 1) bytes into two should return
+  // UNBLOCKED
+  res = two.writeHandle->writeStreamData(
+      makeBuf(kBufLen - 1), /*fin=*/true, /*byteEventCallback=*/nullptr);
+  EXPECT_TRUE(res.hasValue() &&
+              res.value() == WebTransport::FCState::UNBLOCKED);
+
+  // we should be able to dequeue all of kBufLen from one.writeHandle
+  auto dequeue = streamManager.dequeue(*one.writeHandle, /*atMost=*/kBufLen);
+  EXPECT_EQ(dequeue.data->computeChainDataLength(), kBufLen);
+  EXPECT_TRUE(dequeue.fin);
+
+  // we cannot dequeue one byte from two.writeHandle since egress conn fc is
+  // blocked
+  dequeue = streamManager.dequeue(*two.writeHandle, /*atMost=*/kBufLen);
+  EXPECT_EQ(dequeue.data->computeChainDataLength(), 0);
+  EXPECT_FALSE(dequeue.fin);
 }
 
 } // namespace proxygen::coro::test

@@ -216,6 +216,15 @@ WebTransport::BidiStreamHandle WtStreamManager::nextBidiHandle() noexcept {
   return getBidiHandle(self_.bidi);
 }
 
+bool WtStreamManager::onMaxData(MaxConnData data) noexcept {
+  return send_.grant(data.maxData);
+}
+bool WtStreamManager::onMaxData(MaxStreamData data) noexcept {
+  // TODO(@damlaj): connection-level err if not egress stream?
+  auto* eh = static_cast<WriteHandle*>(getEgressHandle(data.streamId));
+  return eh && eh->send_.grant(data.maxData);
+}
+
 bool WtStreamManager::enqueue(WtRh& rh, StreamData data) noexcept {
   auto len = data.data ? data.data->computeChainDataLength() : 0;
   bool err = !recv_.reserve(len);

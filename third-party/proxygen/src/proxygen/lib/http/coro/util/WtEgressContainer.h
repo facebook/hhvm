@@ -101,6 +101,10 @@ class WtEgressContainer {
    */
   DequeueResult dequeue(uint64_t atMost) noexcept;
 
+  bool grant(uint64_t offset) noexcept {
+    return window_.grant(offset);
+  }
+
  private:
   folly::IOBufQueue data_{folly::IOBufQueue::cacheChainLength()};
   bool fin_{false};

@@ -72,6 +72,19 @@ struct WtStreamManager {
   bool onMaxStreams(MaxStreamsUni);
 
   /**
+   * invoke when receiving wt_max_data & wt_max_stream_data (latter in http/2
+   * only) – returns bool if successful (i.e. valid incremental max_data)
+   */
+  struct MaxConnData {
+    uint64_t maxData{0};
+  };
+  struct MaxStreamData : MaxConnData {
+    uint64_t streamId{0};
+  };
+  bool onMaxData(MaxConnData) noexcept;
+  bool onMaxData(MaxStreamData) noexcept;
+
+  /**
    * Enqueues data into read handle – returns bool indicating if recv window
    * overflowed (either conn or stream)
    */

@@ -366,7 +366,11 @@ TEST(WtStreamManager, WriteEgressHandle) {
   constexpr auto kBufLen = 65'535;
   // kBufLen will fill up both conn & stream egress windows
   auto res = one.writeHandle->writeStreamData(
-      /*data=*/makeBuf(kBufLen), /*fin=*/true, /*byteEventCallback=*/nullptr);
+      /*data=*/makeBuf(kBufLen), /*fin=*/false, /*byteEventCallback=*/nullptr);
+  EXPECT_TRUE(res.hasValue() && res.value() == WebTransport::FCState::BLOCKED);
+  // enqueue an additional byte into one
+  res = one.writeHandle->writeStreamData(
+      /*data=*/makeBuf(1), /*fin=*/true, /*byteEventCallback=*/nullptr);
   EXPECT_TRUE(res.hasValue() && res.value() == WebTransport::FCState::BLOCKED);
 
   // each stream has an individual egress buffer of kBufLen before applying
@@ -377,16 +381,45 @@ TEST(WtStreamManager, WriteEgressHandle) {
   EXPECT_TRUE(res.hasValue() &&
               res.value() == WebTransport::FCState::UNBLOCKED);
 
-  // we should be able to dequeue all of kBufLen from one.writeHandle
+  // we should be able to dequeue kBufLen data from one.writeHandle
   auto dequeue = streamManager.dequeue(*one.writeHandle, /*atMost=*/kBufLen);
   EXPECT_EQ(dequeue.data->computeChainDataLength(), kBufLen);
-  EXPECT_TRUE(dequeue.fin);
+  EXPECT_FALSE(dequeue.fin);
 
   // we cannot dequeue one byte from two.writeHandle since egress conn fc is
   // blocked
   dequeue = streamManager.dequeue(*two.writeHandle, /*atMost=*/kBufLen);
   EXPECT_EQ(dequeue.data->computeChainDataLength(), 0);
   EXPECT_FALSE(dequeue.fin);
+
+  // grant one a single byte of stream credit; dequeuing from one should yield
+  // nothing since we're still blocked on conn flow control
+  EXPECT_TRUE(streamManager.onMaxData(
+      WtStreamManager::MaxStreamData{{kBufLen + 1}, one.writeHandle->getID()}));
+  dequeue = streamManager.dequeue(*one.writeHandle, /*atMost=*/kBufLen);
+  EXPECT_EQ(dequeue.data->computeChainDataLength(), 0);
+  EXPECT_FALSE(dequeue.fin);
+
+  // grant one additional byte of conn credit; dequeue from one should yield
+  // byte + eof
+  EXPECT_TRUE(
+      streamManager.onMaxData(WtStreamManager::MaxConnData{kBufLen + 1}));
+  dequeue = streamManager.dequeue(*one.writeHandle, /*atMost=*/kBufLen);
+  EXPECT_EQ(dequeue.data->computeChainDataLength(), 1);
+  EXPECT_TRUE(dequeue.fin);
+
+  // dequeuing from two should yield nothing since we're blocked on conn flow
+  // control
+  dequeue = streamManager.dequeue(*two.writeHandle, /*atMost=*/kBufLen);
+  EXPECT_EQ(dequeue.data->computeChainDataLength(), 0);
+  EXPECT_FALSE(dequeue.fin);
+
+  // grant enough conn fc credit to unblock two completely
+  EXPECT_TRUE(
+      streamManager.onMaxData(WtStreamManager::MaxConnData{kBufLen * 2}));
+  dequeue = streamManager.dequeue(*two.writeHandle, /*atMost=*/kBufLen);
+  EXPECT_EQ(dequeue.data->computeChainDataLength(), kBufLen - 1);
+  EXPECT_TRUE(dequeue.fin);
 }
 
 } // namespace proxygen::coro::test

@@ -660,4 +660,28 @@ TEST(WtStreamManager, DrainWtSession) {
   EXPECT_TRUE(two == nullptr);
 }
 
+TEST(WtStreamManager, CloseWtSession) {
+  using WtStreamManager = detail::WtStreamManager;
+  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
+  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+  WtStreamManagerCb cb;
+  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
+
+  // ensure cancellation source is cancelled when invoked ::onCloseSession
+  auto one = streamManager.nextBidiHandle();
+  auto oneRead = one.readHandle->readStreamData();
+
+  auto* two = streamManager.nextEgressHandle();
+  auto cts = {one.readHandle->getCancelToken(),
+              one.writeHandle->getCancelToken(),
+              two->getCancelToken()};
+
+  streamManager.onCloseSession(WtStreamManager::CloseSession{0, ""});
+  for (auto& ct : cts) {
+    EXPECT_TRUE(ct.isCancellationRequested());
+  }
+  // read promise should have exception set
+  EXPECT_TRUE(oneRead.isReady() && oneRead.hasException());
+}
+
 } // namespace proxygen::coro::test

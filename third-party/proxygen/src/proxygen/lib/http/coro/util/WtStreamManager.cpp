@@ -358,6 +358,15 @@ void WtStreamManager::onDrainSession(DrainSession) noexcept {
   drain_ = true;
 }
 
+void WtStreamManager::onCloseSession(CloseSession close) noexcept {
+  auto ex = folly::make_exception_wrapper<WtException>(close.err, close.msg);
+  auto streams = std::move(streams_);
+  for (auto& [_, handle] : streams) {
+    handle->rh.cancel(ex);
+    handle->wh.cancel(ex);
+  }
+}
+
 bool WtStreamManager::enqueue(WtRh& rh, StreamData data) noexcept {
   auto len = computeChainLength(data.data);
   bool err = !recv_.reserve(len);

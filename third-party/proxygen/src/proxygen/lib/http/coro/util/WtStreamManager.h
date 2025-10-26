@@ -132,6 +132,15 @@ struct WtStreamManager {
   void onDrainSession(DrainSession) noexcept;
 
   /**
+   * invoke when receiving a close_session capsule
+   */
+  struct CloseSession {
+    uint64_t err{0};
+    std::string msg;
+  };
+  void onCloseSession(CloseSession) noexcept;
+
+  /**
    * Enqueues data into read handle – returns bool indicating if recv window
    * overflowed (either conn or stream)
    */

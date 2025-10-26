@@ -632,4 +632,21 @@ TEST(WtStreamManager, WritableStreams) {
   EXPECT_FALSE(dequeue.fin);
 }
 
+TEST(WtStreamManager, DrainWtSession) {
+  using WtStreamManager = detail::WtStreamManager;
+  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
+  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+  WtStreamManagerCb cb;
+  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
+
+  // drain session
+  streamManager.onDrainSession({});
+
+  // all self- and peer-initiated streams will fail
+  auto one = streamManager.nextBidiHandle();
+  auto* two = streamManager.nextEgressHandle();
+  EXPECT_TRUE(one.readHandle == nullptr && one.writeHandle == nullptr);
+  EXPECT_TRUE(two == nullptr);
+}
+
 } // namespace proxygen::coro::test

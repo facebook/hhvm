@@ -125,6 +125,12 @@ struct WtStreamManager {
   bool onResetStream(ResetStream) noexcept;
 
   /**
+   * invoke when receiving a drain_session capsule
+   */
+  struct DrainSession {};
+  void onDrainSession(DrainSession) noexcept;
+
+  /**
    * Enqueues data into read handle – returns bool indicating if recv window
    * overflowed (either conn or stream)
    */
@@ -191,6 +197,7 @@ struct WtStreamManager {
   BufferedFlowController send_;
   Callback& cb_;
   std::vector<Event> events_;
+  bool drain_{false};
 
   // helper functions to compute next streams
   static NextStreams selfNextStreams(WtDir, WtMaxStreams);

@@ -222,6 +222,10 @@ bool WtStreamManager::isEgress(uint64_t streamId) const {
 }
 
 uint64_t* WtStreamManager::nextExpectedStream(uint64_t streamId) {
+  if (drain_) {
+    return nullptr;
+  }
+
   // nextExpectedStream can either be a self or peer stream; in either case, we
   // need to prevent exceeding concurrent streams limit
   NextStreams *next{&self_}, *limit{&peer_};
@@ -349,6 +353,10 @@ bool WtStreamManager::onResetStream(ResetStream data) noexcept {
     return true;
   }
   return false;
+}
+
+void WtStreamManager::onDrainSession(DrainSession) noexcept {
+  drain_ = true;
 }
 
 bool WtStreamManager::enqueue(WtRh& rh, StreamData data) noexcept {

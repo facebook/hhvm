@@ -64,17 +64,9 @@ func newRocketClient(
 	default:
 		return nil, fmt.Errorf("unsupported ProtocolID: %d", protoID)
 	}
-	return newRocketClientFromRsocket(newRSocketClient(conn, rpcProtocolID), protoID, ioTimeout, persistentHeaders)
-}
-
-func newRocketClientFromRsocket(
-	client RSocketClient,
-	protoID types.ProtocolID,
-	ioTimeout time.Duration,
-	persistentHeaders map[string]string,
-) (RequestChannel, error) {
+	rsocketClient := newRSocketClient(conn, rpcProtocolID)
 	p := &rocketClient{
-		client:            client,
+		client:            rsocketClient,
 		protoID:           protoID,
 		persistentHeaders: persistentHeaders,
 		ioTimeout:         ioTimeout,
@@ -82,7 +74,7 @@ func newRocketClientFromRsocket(
 	p.clientCleanup = runtime.AddCleanup(p,
 		func(underlyingClient RSocketClient) {
 			underlyingClient.Close()
-		}, client)
+		}, rsocketClient)
 	return p, nil
 }
 

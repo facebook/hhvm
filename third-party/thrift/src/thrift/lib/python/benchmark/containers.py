@@ -334,7 +334,14 @@ for _, v in inst.val_map_structs.items():
 def benchmark_steps(ctx, *statements: typing.List[str]) -> typing.List[str]:
     result = []
     setup = ""
-    for stmt in statements:
+    for item in statements:
+        # Support ("RESET", reset_stmt) tuple to reset state without measuring
+        if isinstance(item, tuple) and item[0] == "RESET":
+            _, reset_stmt = item
+            setup = f"{setup}\n{reset_stmt}"
+            continue
+
+        stmt = item
         timer = timeit.Timer(
             # pyre-fixme[6]: For 1st argument expected `Union[typing.Callable[[],
             #  object], str]` but got `List[str]`.
@@ -370,7 +377,8 @@ def benchmark_container(
         "Serialize",
         "Deserialize",
         "Random Access",
-        "Iterate",
+        "Iterate (first)",
+        "Iterate (cached)",
         "Total",
     ]
     table = [
@@ -383,6 +391,8 @@ def benchmark_container(
             serialze_statement(flavor),
             deserialze_statement(flavor),
             random_access_statement_func(flavor),
+            ("RESET", deserialze_statement(flavor)),
+            iterate_statement_func(flavor),
             iterate_statement_func(flavor),
         )
         for flavor in Flavor

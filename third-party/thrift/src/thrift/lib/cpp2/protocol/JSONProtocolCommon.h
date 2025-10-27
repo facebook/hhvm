@@ -23,6 +23,7 @@
 #include <folly/Conv.h>
 #include <folly/Range.h>
 #include <folly/Traits.h>
+#include <folly/Unicode.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
@@ -213,6 +214,8 @@ class JSONProtocolReaderCommon : public detail::ProtocolBase {
  protected:
   enum class ContextType { MAP, ARRAY };
 
+  using DecodedEscapeSequence = folly::unicode_code_point_utf8;
+
   // skip over whitespace so that we can peek, and store number of bytes
   // skipped
   void skipWhitespace();
@@ -256,6 +259,9 @@ class JSONProtocolReaderCommon : public detail::ProtocolBase {
   void readJSONNull();
   void readJSONKeyword(std::string& kw);
   void readJSONEscapeChar(uint8_t& out);
+  char16_t readJSONEscapeCodeUnit16Suffix();
+  DecodedEscapeSequence readJSONEscapeCodePoint16Suffix();
+  DecodedEscapeSequence readJSONEscapeSequence();
   template <typename StrType>
   void readJSONString(StrType& val);
   template <typename StrType>
@@ -287,13 +293,13 @@ class JSONProtocolReaderCommon : public detail::ProtocolBase {
       folly::StringPiece s, folly::StringPiece typeName);
   [[noreturn]] static void throwUnrecognizableAsFloatingPoint(
       const std::string& s);
-  [[noreturn]] static void throwUnrecognizableAsString(
-      const std::string& s, const std::exception& e);
   [[noreturn]] static void throwUnrecognizableAsAny(const std::string& s);
   [[noreturn]] static void throwInvalidFieldStart(char ch);
   [[noreturn]] static void throwUnexpectedChar(char ch, char expected);
   [[noreturn]] static void throwInvalidEscapeChar(char ch);
   [[noreturn]] static void throwInvalidHexChar(char ch);
+  [[noreturn]] static void throwInvalidTrailingSurrogate(char16_t);
+  [[noreturn]] static void throwInvalidUtf16CodeUnit(char16_t);
 
   //  Rewrite in subclasses.
   std::array<folly::StringPiece, 2> bools_{{"", ""}};

@@ -135,6 +135,55 @@ uint32_t JSONProtocolWriterCommon::writeJSONBoolInternal(bool val) {
   return appender.size();
 }
 
+char16_t JSONProtocolReaderCommon::readJSONEscapeCodeUnit16Suffix() {
+  char16_t c = 0;
+  for (size_t i = 0; i < 4; ++i) {
+    c = c | (hexVal(in_.read<uint8_t>()) << (12 - (i * 4)));
+  }
+  return c;
+}
+
+JSONProtocolReaderCommon::DecodedEscapeSequence
+JSONProtocolReaderCommon::readJSONEscapeCodePoint16Suffix() {
+  char32_t cp = 0;
+  char16_t c0 = readJSONEscapeCodeUnit16Suffix();
+  if (folly::utf16_code_unit_is_bmp(c0)) {
+    cp = c0;
+  } else if (folly::utf16_code_unit_is_high_surrogate(c0)) {
+    ensureCharNoWhitespace(detail::json::kJSONBackslash);
+    ensureCharNoWhitespace(detail::json::kJSONEscapeChar);
+    char16_t c1 = readJSONEscapeCodeUnit16Suffix();
+    if (folly::utf16_code_unit_is_low_surrogate(c1)) {
+      cp = folly::unicode_code_point_from_utf16_surrogate_pair(c0, c1);
+    } else {
+      throwInvalidTrailingSurrogate(c1);
+    }
+  } else {
+    throwInvalidUtf16CodeUnit(c0);
+  }
+  return folly::unicode_code_point_to_utf8(cp);
+}
+
+JSONProtocolReaderCommon::DecodedEscapeSequence
+JSONProtocolReaderCommon::readJSONEscapeSequence() {
+  auto ch = in_.read<uint8_t>();
+  if (ch == apache::thrift::detail::json::kJSONEscapeChar) {
+    if (allowDecodeUTF8_) {
+      return readJSONEscapeCodePoint16Suffix();
+    } else {
+      readJSONEscapeChar(ch);
+      return {1, {ch}};
+    }
+  } else {
+    size_t pos = kEscapeChars().find_first_of(ch);
+    if (pos == std::string::npos) {
+      throwInvalidEscapeChar(ch);
+    }
+    ch = kEscapeCharVals[pos];
+    return {1, {ch}};
+  }
+}
+
 static folly::StringPiece sp(const char& ch) {
   return {&ch, 1};
 }
@@ -177,13 +226,6 @@ std::string JSONProtocolReaderCommon::readJSONStringViaDynamic(
       quote(s) + " is not a valid float/double");
 }
 
-[[noreturn]] void JSONProtocolReaderCommon::throwUnrecognizableAsString(
-    const std::string& s, const std::exception& e) {
-  throw TProtocolException(
-      TProtocolException::INVALID_DATA,
-      quote(s) + " is not a valid JSON string: " + e.what());
-}
-
 [[noreturn]] void JSONProtocolReaderCommon::throwUnrecognizableAsAny(
     const std::string& s) {
   throw TProtocolException(
@@ -218,4 +260,20 @@ std::string JSONProtocolReaderCommon::readJSONStringViaDynamic(
       folly::to<std::string>(
           "Expected hex val ([0-9a-f]); got \'", escape(sp(ch)), "\'."));
 }
+
+[[noreturn]] void JSONProtocolReaderCommon::throwInvalidTrailingSurrogate(
+    char16_t const c) {
+  throw TProtocolException(
+      TProtocolException::INVALID_DATA,
+      fmt::format(
+          "expected utf16 trailing surrogate, got '{:04x}'.", uint16_t(c)));
+}
+
+[[noreturn]] void JSONProtocolReaderCommon::throwInvalidUtf16CodeUnit(
+    char16_t const c) {
+  throw TProtocolException(
+      TProtocolException::INVALID_DATA,
+      fmt::format("expected utf16 code unit, got '{:04x}'.", uint16_t(c)));
+}
+
 } // namespace apache::thrift

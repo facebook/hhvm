@@ -795,54 +795,35 @@ inline void JSONProtocolReaderCommon::readJSONEscapeChar(uint8_t& out) {
 template <typename StrType>
 inline void JSONProtocolReaderCommon::readJSONString(StrType& val) {
   ensureChar(apache::thrift::detail::json::kJSONStringDelimiter);
-
-  std::string json = "\"";
-  bool fullDecodeRequired = false;
   val.clear();
-  while (true) {
-    auto ch = in_.read<uint8_t>();
-    if (ch == apache::thrift::detail::json::kJSONStringDelimiter) {
-      break;
+
+  while (true) { // for loop generates larger code with 2 calls to peekBytesSlow
+  next_peek:
+    auto peek = in_.peekBytes();
+    if (FOLLY_UNLIKELY(peek.empty())) {
+      std::ignore = in_.read<uint8_t>(); // this should throw
+      folly::assume_unreachable();
     }
-    if (ch == apache::thrift::detail::json::kJSONBackslash) {
-      ch = in_.read<uint8_t>();
-      if (ch == apache::thrift::detail::json::kJSONEscapeChar) {
-        if (allowDecodeUTF8_) {
-          json += "\\u";
-          fullDecodeRequired = true;
-          continue;
-        } else {
-          readJSONEscapeChar(ch);
-        }
-      } else {
-        size_t pos = kEscapeChars().find_first_of(ch);
-        if (pos == std::string::npos) {
-          throwInvalidEscapeChar(ch);
-        }
-        if (fullDecodeRequired) {
-          json += "\\";
-          json += ch;
-          continue;
-        } else {
-          ch = kEscapeCharVals[pos];
-        }
+    uint32_t size = 0;
+    for (auto const ch : peek) {
+      if (ch == apache::thrift::detail::json::kJSONStringDelimiter) {
+        val += std::string_view(folly::StringPiece(peek)).substr(0, size);
+        in_.skip(size + 1);
+        return;
       }
+      if (ch == apache::thrift::detail::json::kJSONBackslash) {
+        val += std::string_view(folly::StringPiece(peek)).substr(0, size);
+        in_.skip(size + 1);
+        auto const seq = readJSONEscapeSequence();
+        auto const utf8 = folly::span{seq.data, seq.size};
+        auto const utf8c = folly::reinterpret_span_cast<char const>(utf8);
+        val += std::string_view(utf8c.data(), utf8c.size());
+        goto next_peek; // out of for-ch-in-peek; continue to while-true
+      }
+      ++size;
     }
-
-    if (fullDecodeRequired) {
-      json += ch;
-    } else {
-      val += ch;
-    }
-  }
-
-  if (fullDecodeRequired) {
-    json += "\"";
-    try {
-      val += readJSONStringViaDynamic(json);
-    } catch (const std::exception& e) {
-      throwUnrecognizableAsString(json, e);
-    }
+    val += std::string_view(folly::StringPiece(peek)).substr(0, size);
+    in_.skip(size);
   }
 }
 

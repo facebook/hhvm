@@ -100,7 +100,7 @@ ServerStream<int32_t> TestStreamServiceMock::slowRange(
       std::make_shared<std::function<void(decltype(publisher), int32_t)>>();
   *schedule =
       [=,
-       schedule =
+       weakSchedule =
            std::weak_ptr<std::function<void(decltype(publisher), int32_t)>>(
                schedule)](auto publisher, int32_t from) {
         publisher.next(from);
@@ -109,7 +109,7 @@ ServerStream<int32_t> TestStreamServiceMock::slowRange(
               .via(eb)
               .thenValue([=,
                           publisher = std::move(publisher),
-                          schedule = schedule.lock()](auto) mutable {
+                          schedule = weakSchedule.lock()](auto) mutable {
                 (*schedule)(std::move(publisher), from);
               });
         } else {

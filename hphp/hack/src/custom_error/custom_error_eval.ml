@@ -505,7 +505,24 @@ let matches_typing_error t ~scrut ~env =
         matches_string patt_class_name ~scrut:class_name ~env >>= fun env ->
         matches_string patt_member_name ~scrut:member_name ~env)
     | (Member_not_found _, _) -> Match.no_match
-    (* -- Module / package errors ------------------------------------------- *)
+    (* -- Package errors ---------------------------------------------------- *)
+    | ( Cross_pkg_access { patt_use_file; patt_decl_file },
+        Typing_error.Primary.(
+          Package (Package.Cross_pkg_access { pos; decl_pos; _ })) ) ->
+      Match.(
+        matches_file patt_use_file ~scrut:(Pos.filename pos) ~env >>= fun env ->
+        matches_file patt_decl_file ~scrut:(Pos_or_decl.filename decl_pos) ~env)
+    | (Cross_pkg_access _, _) -> Match.no_match
+    | ( Cross_pkg_access_with_requirepackage { patt_use_file; patt_decl_file },
+        Typing_error.Primary.(
+          Package
+            (Package.Cross_pkg_access_with_requirepackage { pos; decl_pos; _ }))
+      ) ->
+      Match.(
+        matches_file patt_use_file ~scrut:(Pos.filename pos) ~env >>= fun env ->
+        matches_file patt_decl_file ~scrut:(Pos_or_decl.filename decl_pos) ~env)
+    | (Cross_pkg_access_with_requirepackage _, _) -> Match.no_match
+    (* -- Module errors ----------------------------------------------------- *)
     | ( Module_cross_package_access
           {
             patt_use_file;
@@ -629,7 +646,6 @@ let matches_naming_error t ~scrut ~env =
       let scrut = (pos_or_decl, name) in
       matches_name patt_name ~scrut ~env)
   | _ -> Match.no_match
-
 (* -- Top level error matches ----------------------------------------------- *)
 
 type phase_error =

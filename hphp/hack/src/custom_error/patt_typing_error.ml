@@ -36,7 +36,16 @@ and primary =
       patt_member_name: Patt_string.t; (* Member name pattern *)
       patt_visibility: visibility_pattern option; (* Optional visibility *)
     }
-  (* Module / package errors *)
+  (* Package *)
+  | Cross_pkg_access of {
+      patt_use_file: Patt_file.t; (* The file in which the error was raised *)
+      patt_decl_file: Patt_file.t; (* The accessed module/package is declared *)
+    }
+  | Cross_pkg_access_with_requirepackage of {
+      patt_use_file: Patt_file.t; (* The file in which the error was raised *)
+      patt_decl_file: Patt_file.t; (* The accessed module/package is declared *)
+    }
+  (* Module *)
   | Module_cross_package_access of {
       patt_use_file: Patt_file.t; (* The file in which the error was raised *)
       patt_decl_file: Patt_file.t; (* The accessed module/package is declared *)

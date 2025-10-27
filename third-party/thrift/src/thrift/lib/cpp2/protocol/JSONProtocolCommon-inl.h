@@ -44,6 +44,23 @@ inline constexpr auto json_ws_vector_needle =
 inline constexpr auto json_ws_scalar_needle =
     json_ws_scalar_needle_t{json_ws_alphabet};
 
+inline constexpr auto json_str_alphabet = std::array{
+    char(kJSONStringDelimiter),
+    char(kJSONBackslash),
+};
+using json_str_scalar_needle_t = folly::conditional_t<
+    folly::kIsMobile,
+    folly::simd::default_scalar_finder_first_of,
+    folly::simd::ltindex_scalar_finder_first_of>;
+using json_str_vector_needle_t = folly::conditional_t<
+    folly::kIsMobile || !folly::kIsArchAmd64,
+    folly::simd::default_vector_finder_first_of,
+    folly::simd::shuffle_vector_finder_first_of>;
+inline constexpr auto json_str_vector_needle =
+    json_str_vector_needle_t{json_str_alphabet};
+inline constexpr auto json_str_scalar_needle =
+    json_str_scalar_needle_t{json_str_alphabet};
+
 } // namespace detail::json
 
 // Return the hex character representing the integer val. The value is masked
@@ -794,36 +811,37 @@ inline void JSONProtocolReaderCommon::readJSONEscapeChar(uint8_t& out) {
 
 template <typename StrType>
 inline void JSONProtocolReaderCommon::readJSONString(StrType& val) {
+  constexpr auto& vector_needle = detail::json::json_str_vector_needle;
+  constexpr auto& scalar_needle = detail::json::json_str_scalar_needle;
+
   ensureChar(apache::thrift::detail::json::kJSONStringDelimiter);
   val.clear();
 
   while (true) { // for loop generates larger code with 2 calls to peekBytesSlow
-  next_peek:
-    auto peek = in_.peekBytes();
+    auto const peek = folly::reinterpret_span_cast<char const>(in_.peek());
     if (FOLLY_UNLIKELY(peek.empty())) {
       std::ignore = in_.read<uint8_t>(); // this should throw
       folly::assume_unreachable();
     }
-    uint32_t size = 0;
-    for (auto const ch : peek) {
-      if (ch == apache::thrift::detail::json::kJSONStringDelimiter) {
-        val += std::string_view(folly::StringPiece(peek)).substr(0, size);
-        in_.skip(size + 1);
-        return;
-      }
-      if (ch == apache::thrift::detail::json::kJSONBackslash) {
-        val += std::string_view(folly::StringPiece(peek)).substr(0, size);
-        in_.skip(size + 1);
-        auto const seq = readJSONEscapeSequence();
-        auto const utf8 = folly::span{seq.data, seq.size};
-        auto const utf8c = folly::reinterpret_span_cast<char const>(utf8);
-        val += std::string_view(utf8c.data(), utf8c.size());
-        goto next_peek; // out of for-ch-in-peek; continue to while-true
-      }
-      ++size;
+    constexpr auto usevec = !folly::kIsMobile && folly::kIsArchAmd64;
+    auto const size = vector_needle(scalar_needle, usevec, peek);
+    auto const good = peek.subspan(0, size);
+    val += std::string_view(good.data(), good.size());
+    if (size == peek.size()) {
+      in_.skip(size);
+      continue;
     }
-    val += std::string_view(folly::StringPiece(peek)).substr(0, size);
-    in_.skip(size);
+    auto const ch = peek[size];
+    in_.skip(size + 1);
+    // ch must be either '"' or '\\'
+    if (FOLLY_LIKELY(ch == detail::json::kJSONStringDelimiter)) {
+      return;
+    }
+    FOLLY_SAFE_DCHECK(ch == apache::thrift::detail::json::kJSONBackslash);
+    auto const seq = readJSONEscapeSequence();
+    auto const utf8 = folly::span{seq.data, seq.size};
+    auto const utf8c = folly::reinterpret_span_cast<char const>(utf8);
+    val += std::string_view(utf8c.data(), utf8c.size());
   }
 }
 

@@ -27,6 +27,13 @@ enum UserIdCategory: int {
   IG = 1;
 }
 
+enum UserIdSource: int {
+  UNKNOWN = 0;
+  VIEWER_CONTEXT = 1;
+  LOGIN_STATE = 2;
+  PERF_EXPERIMENT = 3;
+}
+
 final class ThriftContextPropState {
   private static ?ThriftContextPropState $instance = null;
   private ThriftFrameworkMetadata $storage;
@@ -177,7 +184,11 @@ final class ThriftContextPropState {
   }
 
   // update FB user id from explicit value
-  public static function updateFBUserId(?int $fb_user_id, string $src): bool {
+  public static function updateFBUserId(
+    ?int $fb_user_id,
+    string $src,
+    UserIdSource $user_id_source,
+  ): bool {
     $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
     $ods->bumpKey('contextprop.update_fb_user_id.'.$src);
     // Make sure the id is valid (non-null, positive) and matches the type
@@ -195,6 +206,11 @@ final class ThriftContextPropState {
     }
 
     if (self::coerceId($tcps_fb_user_id, UserIdCategory::FB) is nonnull) {
+      // Only allow ViewerContext to override the user id since it has
+      // most accurate user id
+      if ($user_id_source !== UserIdSource::VIEWER_CONTEXT) {
+        return false;
+      }
       $ods->bumpKey('contextprop.fb_user_id_override.'.$src);
     }
 
@@ -219,7 +235,11 @@ final class ThriftContextPropState {
     }
   }
 
-  public static function updateIGUserId(?int $ig_user_id, string $src): bool {
+  public static function updateIGUserId(
+    ?int $ig_user_id,
+    string $src,
+    UserIdSource $user_id_source,
+  ): bool {
     $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
     $ods->bumpKey('contextprop.update_ig_user_id.'.$src);
     // Make sure the id is valid (non-null, positive) and matches the type
@@ -231,12 +251,18 @@ final class ThriftContextPropState {
     $ods->bumpKey('contextprop.update_with_valid_ig_user_id.'.$src);
 
     $tcps_ig_user_id = self::get()->getIGUserId();
+
     if ($ig_user_id == $tcps_ig_user_id) {
       $ods->bumpKey('contextprop.same_ig_user_id.'.$src);
       return true;
     }
 
     if (self::coerceId($tcps_ig_user_id, UserIdCategory::IG) is nonnull) {
+      // Only allow ViewerContext to override the user id since it has
+      // most accurate user id
+      if ($user_id_source !== UserIdSource::VIEWER_CONTEXT) {
+        return false;
+      }
       $ods->bumpKey('contextprop.ig_user_id_override.'.$src);
     }
 
@@ -260,23 +286,18 @@ final class ThriftContextPropState {
       $user_id = $vc->getAccountID();
     }
 
-    if (self::updateFBUserId($user_id, $src)) {
-      return true;
-    }
-
-    $user_id = LoginState::getInstance()->getLoggedInAccount();
-    if (self::updateFBUserId($user_id, $src)) {
-      return true;
-    }
-
-    return false;
+    return self::updateFBUserId($user_id, $src, UserIdSource::VIEWER_CONTEXT);
   }
 
   private static function updateIGUserIdFromVC(
     IIGViewerContext $vc,
     string $src,
   ): bool {
-    return self::updateIGUserId($vc->getViewerID(), $src);
+    return self::updateIGUserId(
+      $vc->getViewerID(),
+      $src,
+      UserIdSource::VIEWER_CONTEXT,
+    );
   }
 
   private static function getIgUserId(int $ig_user_id): ?int {

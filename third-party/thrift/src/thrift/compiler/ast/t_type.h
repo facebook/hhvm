@@ -154,10 +154,6 @@ class t_type : public t_named {
   };
 
   static constexpr size_t kTypeCount = 19;
-  // TODO: add description
-  static constexpr size_t kTypeBits = 5;
-  // TODO: add description
-  static constexpr uint64_t kTypeMask = (1ULL << kTypeBits) - 1;
   static const std::string& type_name(type t);
 
   // TODO: Rename function.
@@ -180,11 +176,6 @@ class t_type : public t_named {
   bool is_string_or_binary() const { return is_string() || is_binary(); }
   bool is_any_int() const { return is_i16() || is_i32() || is_i64(); }
   bool is_floating_point() const { return is_double() || is_float(); }
-
-  /**
-   * Create a unique hash number based on t_type's properties.
-   */
-  virtual uint64_t get_type_id() const;
 };
 
 /**

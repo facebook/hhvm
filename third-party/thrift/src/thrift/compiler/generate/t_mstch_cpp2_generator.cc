@@ -27,6 +27,7 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <fmt/core.h>
+#include <openssl/sha.h>
 
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/type_visitor.h>
@@ -213,6 +214,31 @@ bool has_schema(source_manager& sm, const t_program& program) {
 
 bool generate_reduced_client(const t_interface& i) {
   return i.is<t_interaction>();
+}
+
+/**
+ * Create a unique hash number based on t_type's properties.
+ * Used for legacy C++ reflection.
+ */
+uint64_t get_legacy_structured_type_id(const t_structured& node) {
+  // See `thrift/lib/cpp/Reflection.h` for corresponding runtime values
+  // Minimum number of bits required to represent t_type::kTypeCount (19) in an
+  // unsigned integer value
+  static constexpr size_t kTypeBits = 5;
+  static constexpr uint64_t kTypeMask = (1ULL << kTypeBits) - 1;
+
+  std::string name = node.get_full_name();
+  std::array<unsigned char, SHA_DIGEST_LENGTH> buf{};
+  SHA1(
+      reinterpret_cast<const unsigned char*>(name.data()),
+      name.size(),
+      buf.data());
+  uint64_t hash = 0;
+  std::memcpy(&hash, buf.data(), sizeof(hash));
+#if !defined(_WIN32) && __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__
+  hash = __builtin_bswap64(hash);
+#endif
+  return (hash & ~kTypeMask) | static_cast<int>(node.get_type_value());
 }
 
 // Compute the set of types that appear anywhere in the service
@@ -1885,7 +1911,7 @@ class cpp_mstch_struct : public mstch_struct {
         get_fatal_annotations(struct_->unstructured_annotations()));
   }
   mstch::node get_legacy_type_id() {
-    return std::to_string(struct_->get_type_id());
+    return std::to_string(get_legacy_structured_type_id(*struct_));
   }
   mstch::node legacy_api() { return true; }
   mstch::node metadata_name() {

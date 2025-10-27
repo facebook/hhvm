@@ -108,10 +108,6 @@ class t_primitive_type : public t_type {
   t_type::type get_type_value() const override {
     return static_cast<t_type::type>(primitive_type_);
   }
-
-  uint64_t get_type_id() const override {
-    return static_cast<uint64_t>(primitive_type_);
-  }
 };
 
 } // namespace apache::thrift::compiler

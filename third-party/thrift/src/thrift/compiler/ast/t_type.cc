@@ -21,8 +21,6 @@
 #include <stdexcept>
 #include <string>
 
-#include <openssl/sha.h>
-
 #include <thrift/compiler/ast/t_enum.h>
 #include <thrift/compiler/ast/t_primitive_type.h>
 #include <thrift/compiler/ast/t_program.h>
@@ -53,21 +51,6 @@ const std::string& t_type::type_name(type t) {
             "", // unused [stream]
             "binary"}});
   return kTypeNames.at(static_cast<size_t>(t));
-}
-
-uint64_t t_type::get_type_id() const {
-  std::string name = get_full_name();
-  std::array<unsigned char, SHA_DIGEST_LENGTH> buf{};
-  SHA1(
-      reinterpret_cast<const unsigned char*>(name.data()),
-      name.size(),
-      buf.data());
-  uint64_t hash = 0;
-  std::memcpy(&hash, buf.data(), sizeof(hash));
-#if !defined(_WIN32) && __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__
-  hash = __builtin_bswap64(hash);
-#endif
-  return (hash & ~t_type::kTypeMask) | static_cast<int>(get_type_value());
 }
 
 const t_type* t_type::get_true_type() const {

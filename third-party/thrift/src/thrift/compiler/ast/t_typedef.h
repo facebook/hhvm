@@ -105,8 +105,6 @@ class t_typedef : public t_type {
   t_type::type get_type_value() const override {
     return get_type()->get_type_value();
   }
-
-  uint64_t get_type_id() const override { return get_type()->get_type_id(); }
 };
 
 // A placeholder for a type that can't be resolved at parse time.

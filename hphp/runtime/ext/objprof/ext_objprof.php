@@ -20,6 +20,9 @@ namespace HH {
  * @param int $max_depth - Maximum recursion depth for object graph traversal.
  *                         0 (default) means unlimited depth.
  *                         Positive values limit traversal depth to prevent deep recursion.
+ * @param int $max_visits - Maximum total number of nodes to visit during traversal.
+ *                          0 (default) means unlimited visits.
+ *                          Positive values limit total nodes visited to bound execution time.
  *
  * @return Array - an Array of (object allocation datas) as well as
  *  It is possible for the output of this function to change in the near
@@ -49,6 +52,7 @@ function objprof_get_data(
   int $flags = \OBJPROF_FLAGS_DEFAULT,
   varray<string> $exclude_list = vec[],
   int $max_depth = 0,
+  int $max_visits = 0, // 0 means unlimited visits
 ): darray<string, ObjprofObjectStats>;
 
 <<__Native>>
@@ -56,6 +60,7 @@ function objprof_get_data_extended(
   int $flags = \OBJPROF_FLAGS_DEFAULT,
   varray<string> $exclude_list = vec[],
   int $max_depth = 0, // 0 means unlimited depth to traversal
+  int $max_visits = 0, // 0 means unlimited visits
 ): darray<string, ObjprofObjectStats>;
 
 <<__Native>>
@@ -63,6 +68,7 @@ function objprof_get_paths(
   int $flags = \OBJPROF_FLAGS_DEFAULT,
   varray<string> $exclude_list = vec[],
   int $max_depth = 0, // 0 means unlimited depth to traversal
+  int $max_visits = 0, // 0 means unlimited visits
 ): darray<string, ObjprofObjectStats>;
 
 <<__Native>>

@@ -110,6 +110,11 @@ struct ObjprofState {
   // While iterating the heap objprof is retaining pointers to heap objects,
   // any logic that may reenter (or trigger frees) must be deferred.
   std::vector<std::string>& deferred_warnings;
+  // Visit tracking for max_visits limit
+  int64_t& visit_count;
+  int64_t max_visits;
+  // Track the deepest depth reached during traversal
+  unsigned int& max_depth_seen;
 };
 
 std::pair<int, double> tvGetSize(TypedValue tv, ObjprofState& env, unsigned int depth, int64_t max_depth);
@@ -182,8 +187,18 @@ std::pair<int, double> sizeOfArray(
   unsigned int depth,
   int64_t max_depth
 ) {
+  // Track the maximum depth reached
+  if (depth > env.max_depth_seen) {
+    env.max_depth_seen = depth;
+  }
+
   if (max_depth > 0 && depth >= max_depth) {
     FTRACE(3, "Max depth {} reached for ObjProf in sizeOfArray\n", max_depth);
+    return std::make_pair(0, 0);
+  }
+
+  if (env.max_visits > 0 && env.visit_count >= env.max_visits) {
+    FTRACE(3, "Max visits {} reached for ObjProf in sizeOfArray\n", env.max_visits);
     return std::make_pair(0, 0);
   }
 
@@ -194,6 +209,7 @@ std::pair<int, double> sizeOfArray(
 
   FTRACE(3, "\n\nInserting ArrayData*({})\n", ad);
   env.seen_vals.insert(ad);
+  env.visit_count++;
 
   int size = 0;
   double sized = 0;
@@ -295,8 +311,18 @@ std::pair<int, double> sizeOfArray(
  * into ObjectData* references.
  */
 std::pair<int, double> tvGetSize(TypedValue tv, ObjprofState& env, unsigned int depth, int64_t max_depth) {
+  // Track the maximum depth reached
+  if (depth > env.max_depth_seen) {
+    env.max_depth_seen = depth;
+  }
+
   if (max_depth > 0 && depth >= max_depth) {
     FTRACE(3, " Max depth {} reached for ObjProf graph traversal\n", max_depth);
+    return std::make_pair(0, 0);
+  }
+
+  if (env.max_visits > 0 && env.visit_count >= env.max_visits) {
+    FTRACE(3, " Max visits {} reached for ObjProf graph traversal\n", env.max_visits);
     return std::make_pair(0, 0);
   }
 
@@ -481,8 +507,18 @@ std::pair<int, double> getObjSize(
   unsigned int depth,
   int64_t max_depth
 ) {
+  // Track the maximum depth reached
+  if (depth > env.max_depth_seen) {
+    env.max_depth_seen = depth;
+  }
+
   if (max_depth > 0 && depth >= max_depth) {
     FTRACE(3, "Max depth {} reached for {}*({})\n", max_depth, obj->getClassName().data(), obj);
+    return std::make_pair(0, 0);
+  }
+
+  if (env.max_visits > 0 && env.visit_count >= env.max_visits) {
+    FTRACE(3, "Max visits {} reached for {}*({})\n", env.max_visits, obj->getClassName().data(), obj);
     return std::make_pair(0, 0);
   }
 
@@ -495,6 +531,7 @@ std::pair<int, double> getObjSize(
 
   FTRACE(3, "\n\nInserting {}*({})\n", obj->getClassName().data(), obj);
   env.seen_vals.insert(obj);
+  env.visit_count++;
 
   FTRACE(1, "Getting object size for type {} at {}\n",
     obj->getClassName().data(),
@@ -617,13 +654,19 @@ std::pair<int, double> getObjSize(
 //                  object graph (subject to cycle detection).
 //                  Positive values limit traversal depth to prevent deep recursion.
 //                  Must be non-negative.
+// @param max_visits Maximum total number of nodes to visit during traversal.
+//                   0 (default) means unlimited visits.
+//                   Positive values limit total nodes visited to bound execution time.
+//                   Must be non-negative.
 
 Array HHVM_FUNCTION(objprof_get_data,
   int64_t flags = ObjprofFlags::DEFAULT,
   const Array& exclude_list = Array(),
-  int64_t max_depth = 0
+  int64_t max_depth = 0,
+  int64_t max_visits = 0
 ) {
   assertx(max_depth >= 0);
+  assertx(max_visits >= 0);
   hphp_fast_map<ClassProp, ObjprofMetrics> histogram;
   UNUSED auto objprof_props_mode = (flags & ObjprofFlags::PER_PROPERTY) != 0;
 
@@ -636,6 +679,8 @@ Array HHVM_FUNCTION(objprof_get_data,
   }
 
   std::vector<std::string> deferred_warnings;
+  int64_t visit_count = 0;
+  unsigned int max_depth_seen = 0;
   tl_heap->forEachObject([&](const ObjectData* obj) {
     if (!isObjprofRoot(obj, (ObjprofFlags)flags, exclude_classes)) return;
     if (obj->hasZeroRefs()) return;
@@ -646,7 +691,10 @@ Array HHVM_FUNCTION(objprof_get_data,
       .seen_vals = ObjprofSeenValuePtrs{},
       .exclude_classes = exclude_classes,
       .flags = (ObjprofFlags)flags,
-      .deferred_warnings = deferred_warnings
+      .deferred_warnings = deferred_warnings,
+      .visit_count = visit_count,
+      .max_visits = max_visits,
+      .max_depth_seen = max_depth_seen
     };
     auto objsizePair = getObjSize(
       obj, env,
@@ -672,6 +720,7 @@ Array HHVM_FUNCTION(objprof_get_data,
     }
   });
   issueWarnings(deferred_warnings);
+  FTRACE(1, "Max depth seen during objprof_get_data: {}\n", max_depth_seen);
 
   // Create response
   DictInit objs(histogram.size());
@@ -920,13 +969,19 @@ void attributeStaticPropFootprint(hphp_fast_map<ClassProp, ObjprofMetrics>* hist
 *                   object graph (subject to cycle detection).
 *                   Positive values limit traversal depth to prevent deep recursion.
 *                   Must be non-negative.
+*  @param max_visits Maximum total number of nodes to visit during traversal.
+*                    0 (default) means unlimited visits.
+*                    Positive values limit total nodes visited to bound execution time.
+*                    Must be non-negative.
 */
 Array HHVM_FUNCTION(objprof_get_data_extended,
   int64_t flags = ObjprofFlags::DEFAULT,
   const Array& exclude_list = Array(),
-  int64_t max_depth = 0
+  int64_t max_depth = 0,
+  int64_t max_visits = 0
 ) {
   assertx(max_depth >= 0);
+  assertx(max_visits >= 0);
   hphp_fast_map<ClassProp, ObjprofMetrics> histogram;
   hphp_fast_set<const HPHP::MemoCacheBase*> seen_caches;
   auto objprof_props_mode = (flags & ObjprofFlags::PER_PROPERTY) != 0;
@@ -944,6 +999,8 @@ Array HHVM_FUNCTION(objprof_get_data_extended,
   }
 
   std::vector<std::string> deferred_warnings;
+  int64_t visit_count = 0;
+  unsigned int max_depth_seen = 0;
   tl_heap->forEachObject([&](const ObjectData* obj) {
     if (!isObjprofRoot(obj, (ObjprofFlags)flags, exclude_classes)) return;
     if (obj->hasZeroRefs()) return;
@@ -954,7 +1011,10 @@ Array HHVM_FUNCTION(objprof_get_data_extended,
       .seen_vals = ObjprofSeenValuePtrs{},
       .exclude_classes = exclude_classes,
       .flags = (ObjprofFlags)flags,
-      .deferred_warnings = deferred_warnings
+      .deferred_warnings = deferred_warnings,
+      .visit_count = visit_count,
+      .max_visits = max_visits,
+      .max_depth_seen = max_depth_seen
     };
     auto objsizePair = getObjSize(
       obj, env,
@@ -982,8 +1042,12 @@ Array HHVM_FUNCTION(objprof_get_data_extended,
     .seen_vals = ObjprofSeenValuePtrs{},
     .exclude_classes = exclude_classes,
     .flags = (ObjprofFlags)flags,
-    .deferred_warnings = deferred_warnings
+    .deferred_warnings = deferred_warnings,
+    .visit_count = visit_count,
+    .max_visits = max_visits,
+    .max_depth_seen = max_depth_seen
   };
+  FTRACE(1, "Max depth seen during objprof_get_data_extended: {}\n", max_depth_seen);
   // Finished iterating over objects, now gather static memoized functions
   attributeStaticMemoizedFootprint(&histogram, objprof_props_mode, env, max_depth);
   attributeStaticPropFootprint(&histogram, objprof_props_mode, env, max_depth);
@@ -1019,13 +1083,19 @@ Array HHVM_FUNCTION(objprof_get_data_extended,
 //                  object graph (subject to cycle detection).
 //                  Positive values limit traversal depth to prevent deep recursion.
 //                  Must be non-negative.
+// @param max_visits Maximum total number of nodes to visit during traversal.
+//                   0 (default) means unlimited visits.
+//                   Positive values limit total nodes visited to bound execution time.
+//                   Must be non-negative.
 
 Array HHVM_FUNCTION(objprof_get_paths,
   int64_t flags = ObjprofFlags::DEFAULT,
   const Array& exclude_list = Array(),
-  int64_t max_depth = 0
+  int64_t max_depth = 0,
+  int64_t max_visits = 0
 ) {
   assertx(max_depth >= 0);
+  assertx(max_visits >= 0);
   hphp_fast_map<ClassProp, ObjprofMetrics> histogram;
   PathsToClass pathsToClass;
 
@@ -1038,6 +1108,8 @@ Array HHVM_FUNCTION(objprof_get_paths,
   }
 
   std::vector<std::string> deferred_warnings;
+  int64_t visit_count = 0;
+  unsigned int max_depth_seen = 0;
   tl_heap->forEachObject([&](const ObjectData* obj) {
       if (!isObjprofRoot(obj, (ObjprofFlags)flags, exclude_classes)) return;
       if (obj->hasZeroRefs()) return;
@@ -1050,7 +1122,10 @@ Array HHVM_FUNCTION(objprof_get_paths,
         .seen_vals = ObjprofSeenValuePtrs{},
         .exclude_classes = exclude_classes,
         .flags = (ObjprofFlags)flags,
-        .deferred_warnings = deferred_warnings
+        .deferred_warnings = deferred_warnings,
+        .visit_count = visit_count,
+        .max_visits = max_visits,
+        .max_depth_seen = max_depth_seen
       };
       auto objsizePair = getObjSize(
         obj, /* obj */
@@ -1110,7 +1185,10 @@ Array HHVM_FUNCTION(objprof_get_paths,
         .seen_vals = ObjprofSeenValuePtrs{},
         .exclude_classes = exclude_classes,
         .flags = (ObjprofFlags)flags,
-        .deferred_warnings = deferred_warnings
+        .deferred_warnings = deferred_warnings,
+        .visit_count = visit_count,
+        .max_visits = max_visits,
+        .max_depth_seen = max_depth_seen
       };
 
       auto refname = std::string(
@@ -1143,6 +1221,7 @@ Array HHVM_FUNCTION(objprof_get_paths,
     }
   });
   issueWarnings(deferred_warnings);
+  FTRACE(1, "Max depth seen during objprof_get_paths: {}\n", max_depth_seen);
 
   // Create response
   DictInit objs(histogram.size());

@@ -1,13 +1,20 @@
-dict(1) {
-  ["C"]=>
-  dict(4) {
-    ["instances"]=>
-    int(1)
-    ["bytes"]=>
-    int(%d)
-    ["bytes_normalized"]=>
-    float(%f)
-    ["paths"]=>
-    NULL
-  }
-}
+=== Unlimited depth ===
+C bytes: %d
+
+=== Max depth 100 ===
+C bytes: %d
+
+=== Max depth 10 ===
+C bytes: %d
+
+=== Max visits 100 ===
+C bytes: %d
+
+=== Max visits 10 ===
+C bytes: %d
+
+=== Verification ===
+bytes(depth=10) < bytes(depth=100): true
+bytes(depth=100) < bytes(unlimited): true
+bytes(visits=10) < bytes(visits=100): true
+bytes(visits=100) < bytes(unlimited): true

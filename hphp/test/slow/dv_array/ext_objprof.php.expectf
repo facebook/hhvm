@@ -1,3 +1,4 @@
+=== Basic Tests ===
 dict(2) {
   ["LeafClass"]=>
   dict(4) {
@@ -80,3 +81,34 @@ dict(1) {
     }
   }
 }
+
+=== Max Depth Tests ===
+--- Unlimited depth (0) ---
+DeepClass instances: 10
+--- Max depth 5 ---
+DeepClass instances: 10
+--- Max depth 1 ---
+DeepClass instances: 10
+
+=== Max Visits Tests ===
+--- Unlimited visits (0) ---
+WideClass instances: 1
+LeafClass instances: 20
+--- Max visits 10 ---
+WideClass instances: 1
+LeafClass instances: 20
+--- Max visits 5 ---
+WideClass instances: 1
+LeafClass instances: 20
+
+=== Combined Limits Tests ===
+--- Both depth=3 and visits=5 ---
+DeepClass instances: 10
+
+=== Extended Function Tests ===
+--- objprof_get_data_extended with max_visits=8 ---
+WideClass instances: 1
+LeafClass instances: 15
+--- objprof_get_paths with max_depth=2 ---
+WideClass instances: 1
+LeafClass instances: 15

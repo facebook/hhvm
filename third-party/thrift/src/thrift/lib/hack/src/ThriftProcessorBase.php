@@ -135,6 +135,8 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
     HH\AsyncGenerator<null, TStreamType, void> $stream,
     class<TStreamResponseType> $stream_response_type,
     \TProtocol $output,
+    string $_request_name = '',
+    mixed $_handler_ctx = null,
   ): Awaitable<void> {
     $transport = $output->getTransport();
     invariant(

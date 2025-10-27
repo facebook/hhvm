@@ -178,26 +178,22 @@ func NewClient(opts ...ClientOption) (RequestChannel, error) {
 	}
 
 	var channel RequestChannel
-	var protocol Protocol
-	var clientErr error
+	var channelErr error
 	switch config.transport {
 	case TransportIDHeader:
-		channel, clientErr = newHeaderProtocolAsRequestChannel(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
+		channel, channelErr = newHeaderProtocolAsRequestChannel(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
 	case TransportIDRocket:
-		channel, clientErr = newRocketClientAsRequestChannel(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
+		channel, channelErr = newRocketClientAsRequestChannel(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
 	case TransportIDUpgradeToRocket:
-		protocol, clientErr = newUpgradeToRocketClient(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
-		if clientErr == nil {
-			channel = newSerialChannel(protocol)
-		}
+		channel, channelErr = newUpgradeToRocketClient(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
 	default:
 		panic("framed and unframed transport are not supported")
 	}
 
-	if clientErr != nil {
+	if channelErr != nil {
 		// Protocol creation failed, close the connection (IMPORTANT!).
 		conn.Close()
-		return nil, clientErr
+		return nil, channelErr
 	}
 
 	return channel, nil

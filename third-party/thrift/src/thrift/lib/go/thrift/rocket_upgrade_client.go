@@ -24,19 +24,22 @@ import (
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/facebook/fbthrift/thrift/lib/thrift/rocket_upgrade"
+	"golang.org/x/sync/singleflight"
 )
 
 type upgradeToRocketClient struct {
-	// Current protocol - either 'nil', 'headerProtocol' or 'rocketProtocol',
+	// Current channel - either 'nil', 'headerProtocol' or 'rocketProtocol',
 	// depending on the current state of "upgrade". It will be 'nil' initially
 	// to indicate that "upgrade" has not yet been attempted or started.
-	Protocol
+	actualChannel RequestChannel
 
-	rocketProtocol Protocol
-	headerProtocol Protocol
+	rocketChannel RequestChannel
+	headerChannel RequestChannel
+
+	upgradeGroup singleflight.Group
 }
 
-var _ Protocol = (*upgradeToRocketClient)(nil)
+var _ RequestChannel = (*upgradeToRocketClient)(nil)
 
 // newUpgradeToRocketClient creates a protocol that upgrades from Header to Rocket client from a socket.
 func newUpgradeToRocketClient(
@@ -44,17 +47,17 @@ func newUpgradeToRocketClient(
 	protoID types.ProtocolID,
 	ioTimeout time.Duration,
 	persistentHeaders map[string]string,
-) (Protocol, error) {
-	rocket, err := newRocketClient(conn, protoID, ioTimeout, persistentHeaders)
+) (RequestChannel, error) {
+	rocketChannel, err := newRocketClientAsRequestChannel(conn, protoID, ioTimeout, persistentHeaders)
 	if err != nil {
 		return nil, err
 	}
-	header, err := newHeaderProtocol(conn, protoID, ioTimeout, persistentHeaders)
+	headerChannel, err := newHeaderProtocolAsRequestChannel(conn, protoID, ioTimeout, persistentHeaders)
 	if err != nil {
 		return nil, err
 	}
 
-	var protocol Protocol
+	var actualChannel RequestChannel
 	// Explicitly force TLS handshake protocol to run (if this is a TLS connection).
 	//
 	// Usually, TLS handshake is done implicitly/seamlessly by 'crypto/tls' package,
@@ -70,59 +73,83 @@ func newUpgradeToRocketClient(
 		tlsConnState := tlsConn.ConnectionState()
 		// Use Rocket protocol right away if ALPN value is set to "rs".
 		if tlsConnState.NegotiatedProtocol == "rs" {
-			protocol = rocket
+			actualChannel = rocketChannel
 		}
 	}
 
 	return &upgradeToRocketClient{
-		Protocol:       protocol,
-		rocketProtocol: rocket,
-		headerProtocol: header,
+		actualChannel: actualChannel,
+		rocketChannel: rocketChannel,
+		headerChannel: headerChannel,
 	}, nil
 }
 
-// WriteMessageBegin first sends a upgradeToRocket message using the HeaderProtocol.
-// If this succeeds, we switch to the RocketProtocol and write the message using it.
-// If this fails, we send the original message using the HeaderProtocol and continue using the HeaderProtocol.
-func (p *upgradeToRocketClient) WriteMessageBegin(name string, typeID types.MessageType, seqid int32) error {
-	if p.Protocol == nil {
-		ruClient := rocket_upgrade.NewRocketUpgradeChannelClient(newSerialChannel(p.headerProtocol))
-		err := ruClient.UpgradeToRocket(context.Background())
-		if err != nil {
-			p.Protocol = p.headerProtocol
-		} else {
-			p.Protocol = p.rocketProtocol
-		}
-	}
-	return p.Protocol.WriteMessageBegin(name, typeID, seqid)
+func (p *upgradeToRocketClient) SendRequestResponse(
+	ctx context.Context,
+	method string,
+	request WritableStruct,
+	response ReadableStruct,
+) error {
+	p.maybeUpgrade(ctx)
+	return p.actualChannel.SendRequestResponse(ctx, method, request, response)
 }
 
-func (p *upgradeToRocketClient) setRequestHeader(key, value string) {
-	if p.Protocol == nil {
-		p.rocketProtocol.setRequestHeader(key, value)
-		p.headerProtocol.setRequestHeader(key, value)
-		return
-	}
-	p.Protocol.setRequestHeader(key, value)
+func (p *upgradeToRocketClient) SendRequestNoResponse(
+	ctx context.Context,
+	method string,
+	request WritableStruct,
+) error {
+	p.maybeUpgrade(ctx)
+	return p.actualChannel.SendRequestNoResponse(ctx, method, request)
 }
 
-func (p *upgradeToRocketClient) getResponseHeaders() map[string]string {
-	if p.Protocol == nil {
-		headers := p.headerProtocol.getResponseHeaders()
-		rocketHeaders := p.rocketProtocol.getResponseHeaders()
-		for k, v := range rocketHeaders {
-			headers[k] = v
-		}
-		return headers
-	}
-	return p.Protocol.getResponseHeaders()
+func (p *upgradeToRocketClient) SendRequestStream(
+	ctx context.Context,
+	method string,
+	request WritableStruct,
+	response ReadableStruct,
+	onStreamNextFn func(Decoder) error,
+	onStreamErrorFn func(error),
+	onStreamCompleteFn func(),
+) error {
+	p.maybeUpgrade(ctx)
+	return p.actualChannel.SendRequestStream(
+		ctx,
+		method,
+		request,
+		response,
+		onStreamNextFn,
+		onStreamErrorFn,
+		onStreamCompleteFn,
+	)
 }
 
 func (p *upgradeToRocketClient) Close() error {
-	if p.Protocol == nil {
+	if p.actualChannel == nil {
 		// Upgrade was never atttempted or never succeeded,
 		// so we only need to close the 'headerProtocol'.
-		return p.headerProtocol.Close()
+		return p.headerChannel.Close()
 	}
-	return p.Protocol.Close()
+	return p.actualChannel.Close()
+}
+
+// maybeUpgrade first sends a upgradeToRocket message using the Header channel.
+// If this succeeds, we switch to the Rocket and write the message using it.
+// If this fails, we continue using the Header.
+func (p *upgradeToRocketClient) maybeUpgrade(ctx context.Context) {
+	p.upgradeGroup.Do(
+		"upgradeToRocket",
+		func() (any, error) {
+			if p.actualChannel == nil {
+				ruClient := rocket_upgrade.NewRocketUpgradeChannelClient(p.headerChannel)
+				err := ruClient.UpgradeToRocket(ctx)
+				if err != nil {
+					p.actualChannel = p.headerChannel
+				} else {
+					p.actualChannel = p.rocketChannel
+				}
+			}
+			return nil, nil
+		},
+	)
 }

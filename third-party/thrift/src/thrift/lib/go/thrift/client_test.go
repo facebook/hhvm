@@ -142,7 +142,7 @@ func TestNewClientCreation(t *testing.T) {
 			}),
 		)
 		require.NoError(t, err)
-		require.IsType(t, &serialChannel{}, channel)
+		require.IsType(t, &upgradeToRocketClient{}, channel)
 		err = channel.Close()
 		require.NoError(t, err)
 	})

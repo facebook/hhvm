@@ -45,10 +45,10 @@ func TestUpgradeToRocketFallbackAgainstHeaderServer(t *testing.T) {
 	conn, err := net.Dial(addr.Network(), addr.String())
 	require.NoError(t, err)
 
-	proto, err := newUpgradeToRocketClient(conn, types.ProtocolIDCompact, 0, nil)
+	channel, err := newUpgradeToRocketClient(conn, types.ProtocolIDCompact, 0, nil)
 	require.NoError(t, err)
 
-	client := dummyif.NewDummyChannelClient(newSerialChannel(proto))
+	client := dummyif.NewDummyChannelClient(channel)
 	defer client.Close()
 	result, err := client.Echo(context.TODO(), "hello")
 	require.NoError(t, err)
@@ -107,18 +107,18 @@ func TestUpgradeToRocketAgainstUpgradeToRocketServer(t *testing.T) {
 	conn, err := net.Dial(addr.Network(), addr.String())
 	require.NoError(t, err)
 
-	proto, err := newUpgradeToRocketClient(conn, types.ProtocolIDCompact, 0, nil)
+	channel, err := newUpgradeToRocketClient(conn, types.ProtocolIDCompact, 0, nil)
 	require.NoError(t, err)
 
-	client := dummyif.NewDummyChannelClient(newSerialChannel(proto))
+	client := dummyif.NewDummyChannelClient(channel)
 	defer client.Close()
 	result, err := client.Echo(context.TODO(), "hello")
 	require.NoError(t, err)
 	require.Equal(t, "hello", result)
 
 	// check if client was really upgraded to rocket and is not using header
-	upgradeToRocketClient := proto.(*upgradeToRocketClient)
-	require.IsType(t, &rocketClient{}, upgradeToRocketClient.Protocol)
+	upgradeToRocketClient := channel.(*upgradeToRocketClient)
+	require.IsType(t, &rocketClient{}, upgradeToRocketClient.actualChannel)
 
 	cancel()
 	<-errChan

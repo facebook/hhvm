@@ -127,7 +127,7 @@ public class ThriftProtocolDetection extends ByteToMessageDecoder {
     ChannelPipeline pipeline = context.pipeline();
 
     pipeline.addLast(
-        new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, Integer.BYTES, 0, Integer.BYTES),
+        new ThriftHeaderFrameLengthBasedDecoder(),
         new LengthFieldPrepender(Integer.BYTES),
         new HeaderTransportCodec(true),
         thriftServerHandler);

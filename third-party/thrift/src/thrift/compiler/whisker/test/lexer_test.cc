@@ -42,15 +42,15 @@ struct token_description {
         [&desc](std::monostate) {
           return fmt::format("token[kind={}]", to_string(desc.kind));
         },
-        [](bool value) {
-          return fmt::format("token[boolean={}]", value ? "true" : "false");
+        [](bool val) {
+          return fmt::format("token[boolean={}]", val ? "true" : "false");
         },
-        [](std::int64_t value) { return fmt::format("token[i64={}]", value); },
-        [&desc](const std::string& value) {
+        [](std::int64_t val) { return fmt::format("token[i64={}]", val); },
+        [&desc](const std::string& val) {
           return fmt::format(
               "token[kind={}, string=\"{}\"]",
               to_string(desc.kind),
-              detail::escape(value));
+              detail::escape(val));
         });
     return out << str;
   }
@@ -61,16 +61,16 @@ struct token_description {
     }
     switch (rhs.value_kind()) {
       case token_value_kind::boolean: {
-        const auto* value = std::get_if<bool>(&lhs.value);
-        return value && *value == rhs.boolean_value();
+        const auto* val = std::get_if<bool>(&lhs.value);
+        return val && *val == rhs.boolean_value();
       }
       case token_value_kind::i64: {
-        const auto* value = std::get_if<std::int64_t>(&lhs.value);
-        return value && *value == rhs.i64_value();
+        const auto* val = std::get_if<std::int64_t>(&lhs.value);
+        return val && *val == rhs.i64_value();
       }
       case token_value_kind::string: {
-        const auto* value = std::get_if<std::string>(&lhs.value);
-        return value && *value == rhs.string_value();
+        const auto* val = std::get_if<std::string>(&lhs.value);
+        return val && *val == rhs.string_value();
       }
       case token_value_kind::none:
         return std::holds_alternative<std::monostate>(lhs.value);

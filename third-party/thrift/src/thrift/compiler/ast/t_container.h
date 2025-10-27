@@ -31,11 +31,6 @@ class t_container : public t_type {
     t_map = int(t_type::type::t_map),
   };
 
-  using t_type::type_name;
-  static const std::string& type_name(type container_type) {
-    return type_name(static_cast<t_type::type>(container_type));
-  }
-
   virtual type container_type() const = 0;
 
   ~t_container() override;

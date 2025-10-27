@@ -66,7 +66,10 @@ const StaticString
   s_paths("paths"),
   s_bytes("bytes"),
   s_bytes_rel("bytes_normalized"),
-  s_instances("instances");
+  s_instances("instances"),
+  s_object_stats("object_stats"),
+  s_nodes_visited("nodes_visited"),
+  s_max_depth_seen("max_depth_seen");
 
 struct ObjprofObjectReferral {
   uint64_t refs{0};
@@ -114,7 +117,7 @@ struct ObjprofState {
   int64_t& visit_count;
   int64_t max_visits;
   // Track the deepest depth reached during traversal
-  unsigned int& max_depth_seen;
+  int64_t& max_depth_seen;
 };
 
 std::pair<int, double> tvGetSize(TypedValue tv, ObjprofState& env, unsigned int depth, int64_t max_depth);
@@ -646,24 +649,13 @@ std::pair<int, double> getObjSize(
   return std::make_pair(size, sized);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// Function that inits the scan of the memory and count of class pointers
-//
-// @param max_depth Maximum recursion depth for object graph traversal.
-//                  0 (default) means unlimited depth - will traverse the entire
-//                  object graph (subject to cycle detection).
-//                  Positive values limit traversal depth to prevent deep recursion.
-//                  Must be non-negative.
-// @param max_visits Maximum total number of nodes to visit during traversal.
-//                   0 (default) means unlimited visits.
-//                   Positive values limit total nodes visited to bound execution time.
-//                   Must be non-negative.
-
-Array HHVM_FUNCTION(objprof_get_data,
-  int64_t flags = ObjprofFlags::DEFAULT,
-  const Array& exclude_list = Array(),
-  int64_t max_depth = 0,
-  int64_t max_visits = 0
+Array objprof_get_data_impl(
+  int64_t flags,
+  const Array& exclude_list,
+  int64_t max_depth,
+  int64_t max_visits,
+  int64_t& visit_count,
+  int64_t& max_depth_seen
 ) {
   assertx(max_depth >= 0);
   assertx(max_visits >= 0);
@@ -679,8 +671,6 @@ Array HHVM_FUNCTION(objprof_get_data,
   }
 
   std::vector<std::string> deferred_warnings;
-  int64_t visit_count = 0;
-  unsigned int max_depth_seen = 0;
   tl_heap->forEachObject([&](const ObjectData* obj) {
     if (!isObjprofRoot(obj, (ObjprofFlags)flags, exclude_classes)) return;
     if (obj->hasZeroRefs()) return;
@@ -742,6 +732,61 @@ Array HHVM_FUNCTION(objprof_get_data,
     objs.set(StrNR(key), Variant(metrics_val));
   }
   return objs.toArray();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Function that inits the scan of the memory and count of class pointers
+//
+// @param max_depth Maximum recursion depth for object graph traversal.
+//                  0 (default) means unlimited depth - will traverse the entire
+//                  object graph (subject to cycle detection).
+//                  Positive values limit traversal depth to prevent deep recursion.
+//                  Must be non-negative.
+// @param max_visits Maximum total number of nodes to visit during traversal.
+//                   0 (default) means unlimited visits.
+//                   Positive values limit total nodes visited to bound execution time.
+//                   Must be non-negative.
+
+Array HHVM_FUNCTION(objprof_get_data,
+  int64_t flags = ObjprofFlags::DEFAULT,
+  const Array& exclude_list = Array(),
+  int64_t max_depth = 0,
+  int64_t max_visits = 0
+) {
+  int64_t visit_count = 0;
+  int64_t max_depth_seen = 0;
+  return objprof_get_data_impl(
+    flags,
+    exclude_list,
+    max_depth,
+    max_visits,
+    visit_count,
+    max_depth_seen
+  );
+}
+
+Array HHVM_FUNCTION(objprof_get_data_with_graph_stats,
+  int64_t flags = ObjprofFlags::DEFAULT,
+  const Array& exclude_list = Array(),
+  int64_t max_depth = 0,
+  int64_t max_visits = 0
+) {
+  int64_t visit_count = 0;
+  int64_t max_depth_seen = 0;
+  auto profs = objprof_get_data_impl(
+    flags,
+    exclude_list,
+    max_depth,
+    max_visits,
+    visit_count,
+    max_depth_seen
+  );
+  DictInit response(3);
+  response.set(s_max_depth_seen, max_depth_seen);
+  response.set(s_nodes_visited, visit_count);
+  response.set(s_object_stats, profs);
+
+  return response.toArray();
 }
 
 namespace {
@@ -974,11 +1019,13 @@ void attributeStaticPropFootprint(hphp_fast_map<ClassProp, ObjprofMetrics>* hist
 *                    Positive values limit total nodes visited to bound execution time.
 *                    Must be non-negative.
 */
-Array HHVM_FUNCTION(objprof_get_data_extended,
-  int64_t flags = ObjprofFlags::DEFAULT,
-  const Array& exclude_list = Array(),
-  int64_t max_depth = 0,
-  int64_t max_visits = 0
+Array objprof_get_data_extended_impl(
+  int64_t flags,
+  const Array& exclude_list,
+  int64_t max_depth,
+  int64_t max_visits,
+  int64_t& visit_count,
+  int64_t& max_depth_seen
 ) {
   assertx(max_depth >= 0);
   assertx(max_visits >= 0);
@@ -999,8 +1046,6 @@ Array HHVM_FUNCTION(objprof_get_data_extended,
   }
 
   std::vector<std::string> deferred_warnings;
-  int64_t visit_count = 0;
-  unsigned int max_depth_seen = 0;
   tl_heap->forEachObject([&](const ObjectData* obj) {
     if (!isObjprofRoot(obj, (ObjprofFlags)flags, exclude_classes)) return;
     if (obj->hasZeroRefs()) return;
@@ -1074,9 +1119,49 @@ Array HHVM_FUNCTION(objprof_get_data_extended,
   }
 
   return objs.toArray();
-
 }
 
+Array HHVM_FUNCTION(objprof_get_data_extended,
+  int64_t flags = ObjprofFlags::DEFAULT,
+  const Array& exclude_list = Array(),
+  int64_t max_depth = 0,
+  int64_t max_visits = 0
+) {
+  int64_t visit_count = 0;
+  int64_t max_depth_seen = 0;
+  return objprof_get_data_extended_impl(
+    flags,
+    exclude_list,
+    max_depth,
+    max_visits,
+    visit_count,
+    max_depth_seen
+  );
+}
+
+Array HHVM_FUNCTION(objprof_get_data_extended_with_graph_stats,
+  int64_t flags = ObjprofFlags::DEFAULT,
+  const Array& exclude_list = Array(),
+  int64_t max_depth = 0,
+  int64_t max_visits = 0
+) {
+  int64_t visit_count = 0;
+  int64_t max_depth_seen = 0;
+  auto profs = objprof_get_data_extended_impl(
+    flags,
+    exclude_list,
+    max_depth,
+    max_visits,
+    visit_count,
+    max_depth_seen
+  );
+  DictInit response(3);
+  response.set(s_max_depth_seen, max_depth_seen);
+  response.set(s_nodes_visited, visit_count);
+  response.set(s_object_stats, profs);
+
+  return response.toArray();
+}
 ///////////////////////////////////////////////////////////////////////////////
 // @param max_depth Maximum recursion depth for object graph traversal.
 //                  0 (default) means unlimited depth - will traverse the entire
@@ -1087,12 +1172,13 @@ Array HHVM_FUNCTION(objprof_get_data_extended,
 //                   0 (default) means unlimited visits.
 //                   Positive values limit total nodes visited to bound execution time.
 //                   Must be non-negative.
-
-Array HHVM_FUNCTION(objprof_get_paths,
-  int64_t flags = ObjprofFlags::DEFAULT,
-  const Array& exclude_list = Array(),
-  int64_t max_depth = 0,
-  int64_t max_visits = 0
+Array objprof_get_paths_impl(
+  int64_t flags,
+  const Array& exclude_list,
+  int64_t max_depth,
+  int64_t max_visits,
+  int64_t& visit_count,
+  int64_t& max_depth_seen
 ) {
   assertx(max_depth >= 0);
   assertx(max_visits >= 0);
@@ -1108,8 +1194,6 @@ Array HHVM_FUNCTION(objprof_get_paths,
   }
 
   std::vector<std::string> deferred_warnings;
-  int64_t visit_count = 0;
-  unsigned int max_depth_seen = 0;
   tl_heap->forEachObject([&](const ObjectData* obj) {
       if (!isObjprofRoot(obj, (ObjprofFlags)flags, exclude_classes)) return;
       if (obj->hasZeroRefs()) return;
@@ -1251,6 +1335,48 @@ Array HHVM_FUNCTION(objprof_get_paths,
   return objs.toArray();
 }
 
+Array HHVM_FUNCTION(objprof_get_paths,
+  int64_t flags = ObjprofFlags::DEFAULT,
+  const Array& exclude_list = Array(),
+  int64_t max_depth = 0,
+  int64_t max_visits = 0
+) {
+  int64_t visit_count = 0;
+  int64_t max_depth_seen = 0;
+  return objprof_get_paths_impl(
+    flags,
+    exclude_list,
+    max_depth,
+    max_visits,
+    visit_count,
+    max_depth_seen
+  );
+}
+
+Array HHVM_FUNCTION(objprof_get_paths_with_graph_stats,
+  int64_t flags = ObjprofFlags::DEFAULT,
+  const Array& exclude_list = Array(),
+  int64_t max_depth = 0,
+  int64_t max_visits = 0
+) {
+  int64_t visit_count = 0;
+  int64_t max_depth_seen = 0;
+  auto profs = objprof_get_paths_impl(
+    flags,
+    exclude_list,
+    max_depth,
+    max_visits,
+    visit_count,
+    max_depth_seen
+  );
+  DictInit response(3);
+  response.set(s_max_depth_seen, max_depth_seen);
+  response.set(s_nodes_visited, visit_count);
+  response.set(s_object_stats, profs);
+
+  return response.toArray();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 size_t get_thread_stack_size() {
@@ -1331,6 +1457,9 @@ struct objprofExtension final : Extension {
     HHVM_FALIAS(HH\\objprof_get_data, objprof_get_data);
     HHVM_FALIAS(HH\\objprof_get_data_extended, objprof_get_data_extended);
     HHVM_FALIAS(HH\\objprof_get_paths, objprof_get_paths);
+    HHVM_FALIAS(HH\\objprof_get_data_with_graph_stats, objprof_get_data_with_graph_stats);
+    HHVM_FALIAS(HH\\objprof_get_data_extended_with_graph_stats, objprof_get_data_extended_with_graph_stats);
+    HHVM_FALIAS(HH\\objprof_get_paths_with_graph_stats, objprof_get_paths_with_graph_stats);
     HHVM_FALIAS(HH\\thread_memory_stats, thread_memory_stats);
     HHVM_FALIAS(HH\\thread_mark_stack, thread_mark_stack);
     HHVM_FALIAS(HH\\set_mem_threshold_callback, set_mem_threshold_callback);

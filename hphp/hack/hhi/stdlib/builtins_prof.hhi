@@ -49,6 +49,39 @@ namespace HH {
     varray<string> $exclude_list = vec[],
   ): darray<string, ObjprofObjectStats>; // auto-imported from HH namespace
 
+  function objprof_get_data_with_graph_stats(
+    int $flags = \OBJPROF_FLAGS_DEFAULT,
+    varray<string> $exclude_list = vec[],
+    int $max_depth = 0,
+    int $max_visits = 0, // 0 means unlimited visits
+  ): shape(
+    'object_stats' => dict<string, ObjprofObjectStats>,
+    'nodes_visited' => int,
+    'max_depth_seen' => int,
+  );
+
+  function objprof_get_data_extended_with_graph_stats(
+    int $flags = \OBJPROF_FLAGS_DEFAULT,
+    varray<string> $exclude_list = vec[],
+    int $max_depth = 0, // 0 means unlimited depth to traversal
+    int $max_visits = 0, // 0 means unlimited visits
+  ): shape(
+    'object_stats' => dict<string, ObjprofObjectStats>,
+    'nodes_visited' => int,
+    'max_depth_seen' => int,
+  );
+
+  function objprof_get_paths_with_graph_stats(
+    int $flags = \OBJPROF_FLAGS_DEFAULT,
+    varray<string> $exclude_list = vec[],
+    int $max_depth = 0, // 0 means unlimited depth to traversal
+    int $max_visits = 0, // 0 means unlimited visits
+  ): shape(
+    'object_stats' => dict<string, ObjprofObjectStats>,
+    'nodes_visited' => int,
+    'max_depth_seen' => int,
+  );
+
   function objprof_get_data_extended(
     int $flags = \OBJPROF_FLAGS_DEFAULT,
     varray<string> $exclude_list = vec[],

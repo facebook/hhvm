@@ -15,6 +15,12 @@ namespace HH {
  * - Objprof ignores padding space added to allocations to increase their
  *   uniformity.
  *
+ * @param int $flags - Configuration flags (e.g., OBJPROF_FLAGS_DEFAULT)
+ * @param varray<string> $exclude_list - List of class names to exclude from profiling
+ * @param int $max_depth - Maximum recursion depth for object graph traversal.
+ *                         0 (default) means unlimited depth.
+ *                         Positive values limit traversal depth to prevent deep recursion.
+ *
  * @return Array - an Array of (object allocation datas) as well as
  *  It is possible for the output of this function to change in the near
  *  future.  If so, it will be documented.
@@ -42,19 +48,21 @@ type ObjprofStringStats = shape(
 function objprof_get_data(
   int $flags = \OBJPROF_FLAGS_DEFAULT,
   varray<string> $exclude_list = vec[],
+  int $max_depth = 0,
 ): darray<string, ObjprofObjectStats>;
 
-// this version is objprof_get_data + other things such as memoization caches
 <<__Native>>
 function objprof_get_data_extended(
   int $flags = \OBJPROF_FLAGS_DEFAULT,
   varray<string> $exclude_list = vec[],
+  int $max_depth = 0, // 0 means unlimited depth to traversal
 ): darray<string, ObjprofObjectStats>;
 
 <<__Native>>
 function objprof_get_paths(
   int $flags = \OBJPROF_FLAGS_DEFAULT,
   varray<string> $exclude_list = vec[],
+  int $max_depth = 0, // 0 means unlimited depth to traversal
 ): darray<string, ObjprofObjectStats>;
 
 <<__Native>>

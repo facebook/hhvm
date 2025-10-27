@@ -112,11 +112,13 @@ struct ObjprofState {
   std::vector<std::string>& deferred_warnings;
 };
 
-std::pair<int, double> tvGetSize(TypedValue tv, ObjprofState& env);
+std::pair<int, double> tvGetSize(TypedValue tv, ObjprofState& env, unsigned int depth, int64_t max_depth);
 
 std::pair<int, double> getObjSize(
   const ObjectData* obj, ObjprofState& env,
-  hphp_fast_map<ClassProp, ObjprofMetrics>* histogram
+  hphp_fast_map<ClassProp, ObjprofMetrics>* histogram,
+  unsigned int depth,
+  int64_t max_depth
 );
 
 std::string pathString(const ObjprofStack& stack, const char* sep) {
@@ -176,8 +178,15 @@ bool isObjprofRoot(
  */
 std::pair<int, double> sizeOfArray(
   const ArrayData* ad, ObjprofState& env, Class* cls,
-  hphp_fast_map<ClassProp, ObjprofMetrics>* histogram
+  hphp_fast_map<ClassProp, ObjprofMetrics>* histogram,
+  unsigned int depth,
+  int64_t max_depth
 ) {
+  if (max_depth > 0 && depth >= max_depth) {
+    FTRACE(3, "Max depth {} reached for ObjProf in sizeOfArray\n", max_depth);
+    return std::make_pair(0, 0);
+  }
+
   if (seenValue(env, ad)) {
     FTRACE(3, "Seen ArrayData*({})\n", ad);
     return std::make_pair(0, 0);
@@ -193,7 +202,7 @@ std::pair<int, double> sizeOfArray(
     if (env.stack) env.stack->push_back("ArrayIndex");
 
     IterateV(ad, [&] (TypedValue v) {
-      auto val_size_pair = tvGetSize(v, env);
+      auto val_size_pair = tvGetSize(v, env, depth + 1, max_depth);
       if (histogram) {
         auto histogram_key = std::make_pair(cls->name()->toCppString(), "<index>");
         auto& metrics = (*histogram)[histogram_key];
@@ -222,7 +231,7 @@ std::pair<int, double> sizeOfArray(
           if (env.stack) {
             env.stack->push_back(std::string("ArrayKeyString:" + k_str));
           }
-          key_size_pair = tvGetSize(k, env);
+          key_size_pair = tvGetSize(k, env, depth + 1, max_depth);
           FTRACE(2, "  Iterating str-key {} with size {}:{}\n",
             str->data(), key_size_pair.first, key_size_pair.second);
           break;
@@ -233,7 +242,7 @@ std::pair<int, double> sizeOfArray(
           if (env.stack) {
             env.stack->push_back(std::string("ArrayKeyInt:" + k_str));
           }
-          key_size_pair = tvGetSize(k, env);
+          key_size_pair = tvGetSize(k, env, depth + 1, max_depth);
           FTRACE(2, "  Iterating num-key {} with size {}:{}\n",
             num, key_size_pair.first, key_size_pair.second);
           break;
@@ -260,7 +269,7 @@ std::pair<int, double> sizeOfArray(
           always_assert(false);
       }
 
-      auto val_size_pair = tvGetSize(v, env);
+      auto val_size_pair = tvGetSize(v, env, depth + 1, max_depth);
       FTRACE(2, "  Value size for that key was {}:{}\n",
         val_size_pair.first, val_size_pair.second);
       if (histogram) {
@@ -285,7 +294,12 @@ std::pair<int, double> sizeOfArray(
  * Measures the size of the typed value and referenced objects without going
  * into ObjectData* references.
  */
-std::pair<int, double> tvGetSize(TypedValue tv, ObjprofState& env) {
+std::pair<int, double> tvGetSize(TypedValue tv, ObjprofState& env, unsigned int depth, int64_t max_depth) {
+  if (max_depth > 0 && depth >= max_depth) {
+    FTRACE(3, " Max depth {} reached for ObjProf graph traversal\n", max_depth);
+    return std::make_pair(0, 0);
+  }
+
   int size = sizeof(tv);
   double sized = size;
 
@@ -320,7 +334,9 @@ std::pair<int, double> tvGetSize(TypedValue tv, ObjprofState& env) {
     auto size_of_array_pair = sizeOfArray(
       arr, env,
       nullptr, /* cls */
-      nullptr /* histogram */
+      nullptr, /* histogram */
+      depth + 1,
+      max_depth
     );
     auto arr_ref_count = int{cnt->count()};
     FTRACE(3, " ArrayData tv: at {} with ref count {}\n",
@@ -379,7 +395,7 @@ std::pair<int, double> tvGetSize(TypedValue tv, ObjprofState& env) {
       ObjectData* obj_cnt = (ObjectData*)cnt;
       // If its not a root node, recurse into the object to determine its size
       if (!isObjprofRoot(obj_cnt, env.flags, env.exclude_classes)) {
-        auto obj_size_pair = getObjSize(obj_cnt, env, nullptr /* histogram */);
+        auto obj_size_pair = getObjSize(obj_cnt, env, nullptr /* histogram */, depth + 1, max_depth);
         size += obj_size_pair.first;
         auto obj_ref_count = int{cnt->count()};
         FTRACE(3, " ObjectData tv: at {} with ref count {}\n",
@@ -461,8 +477,15 @@ std::pair<int, double> tvGetSize(TypedValue tv, ObjprofState& env) {
 
 std::pair<int, double> getObjSize(
   const ObjectData* obj, ObjprofState& env,
-  hphp_fast_map<ClassProp, ObjprofMetrics>* histogram
+  hphp_fast_map<ClassProp, ObjprofMetrics>* histogram,
+  unsigned int depth,
+  int64_t max_depth
 ) {
+  if (max_depth > 0 && depth >= max_depth) {
+    FTRACE(3, "Max depth {} reached for {}*({})\n", max_depth, obj->getClassName().data(), obj);
+    return std::make_pair(0, 0);
+  }
+
   Class* cls = obj->getVMClass();
 
   if (seenValue(env, obj)) {
@@ -492,16 +515,16 @@ std::pair<int, double> getObjSize(
   if (obj->isCollection()) {
     auto const arr = collections::asArray(obj);
     if (arr) {
-      auto array_size_pair = sizeOfArray(arr, env, cls, histogram);
+      auto array_size_pair = sizeOfArray(arr, env, cls, histogram, depth + 1, max_depth);
       size += array_size_pair.first;
       sized += array_size_pair.second;
     } else {
       assertx(collections::isType(cls, CollectionType::Pair));
       auto pair = static_cast<const c_Pair*>(obj);
-      auto elm_size_pair = tvGetSize(*pair->get(0), env);
+      auto elm_size_pair = tvGetSize(*pair->get(0), env, depth + 1, max_depth);
       size += elm_size_pair.first;
       sized += elm_size_pair.second;
-      elm_size_pair = tvGetSize(*pair->get(1), env);
+      elm_size_pair = tvGetSize(*pair->get(1), env, depth + 1, max_depth);
       size += elm_size_pair.first;
       sized += elm_size_pair.second;
     }
@@ -522,7 +545,7 @@ std::pair<int, double> getObjSize(
         );
       }
 
-      auto val_size_pair = tvGetSize(val.tv(), env);
+      auto val_size_pair = tvGetSize(val.tv(), env, depth + 1, max_depth);
       if (env.stack) env.stack->pop_back();
 
       FTRACE(2, "   Summary for key {} with size key=0:0, val={}:{}\n",
@@ -549,7 +572,7 @@ std::pair<int, double> getObjSize(
       if (tvIsString(key_tv)) {
         k_str = key_tv.m_data.pstr->toCppString();
         FTRACE(2, "Counting dynamic string key {}\n", k_str);
-        key_size_pair = tvGetSize(key_tv, env);
+        key_size_pair = tvGetSize(key_tv, env, depth + 1, max_depth);
       } else {
         assertx(isIntType(key_tv.m_type));
         k_str = std::to_string(key_tv.m_data.num);
@@ -558,7 +581,7 @@ std::pair<int, double> getObjSize(
 
       FTRACE(2, "Counting value for key {}\n", k_str);
       if (env.stack) env.stack->push_back(std::string("Key:" + k_str));
-      auto val_size_pair = tvGetSize(val, env);
+      auto val_size_pair = tvGetSize(val, env, depth + 1, max_depth);
       if (env.stack) env.stack->pop_back();
 
       FTRACE(2, "   Summary for key {} with size key={}:{}, val={}:{}\n",
@@ -588,11 +611,19 @@ std::pair<int, double> getObjSize(
 
 ///////////////////////////////////////////////////////////////////////////////
 // Function that inits the scan of the memory and count of class pointers
+//
+// @param max_depth Maximum recursion depth for object graph traversal.
+//                  0 (default) means unlimited depth - will traverse the entire
+//                  object graph (subject to cycle detection).
+//                  Positive values limit traversal depth to prevent deep recursion.
+//                  Must be non-negative.
 
 Array HHVM_FUNCTION(objprof_get_data,
   int64_t flags = ObjprofFlags::DEFAULT,
-  const Array& exclude_list = Array()
+  const Array& exclude_list = Array(),
+  int64_t max_depth = 0
 ) {
+  assertx(max_depth >= 0);
   hphp_fast_map<ClassProp, ObjprofMetrics> histogram;
   UNUSED auto objprof_props_mode = (flags & ObjprofFlags::PER_PROPERTY) != 0;
 
@@ -619,7 +650,9 @@ Array HHVM_FUNCTION(objprof_get_data,
     };
     auto objsizePair = getObjSize(
       obj, env,
-      objprof_props_mode ? &histogram : nullptr
+      objprof_props_mode ? &histogram : nullptr,
+      0, /* depth */
+      max_depth
     );
 
     if (!objprof_props_mode) {
@@ -669,7 +702,8 @@ namespace {
 void attributeMemoizedFootprint(const ObjectData* obj, hphp_fast_map<ClassProp, ObjprofMetrics>* histogram,
                                 bool objprof_props_mode,
                                 hphp_fast_set<const HPHP::MemoCacheBase*>& seen_caches,
-                                ObjprofState& env) {
+                                ObjprofState& env,
+                                int64_t max_depth) {
   auto cls = obj->getVMClass();
   auto clsName = cls->name()->toCppString();
   auto method_count = cls->numMethods();
@@ -692,7 +726,7 @@ void attributeMemoizedFootprint(const ObjectData* obj, hphp_fast_map<ClassProp, 
           cache->heapSizesPerCacheEntry(cache_mem_footprints);
           std::string func_name;
           for (auto e : cache_mem_footprints) {
-            auto tv_size = tvGetSize(e.cacheEntry, env);
+            auto tv_size = tvGetSize(e.cacheEntry, env, 0 /* depth */, max_depth);
             if(e.funcId == FuncId::Invalid) {
               // this should only happen if cache is non-shared
               assertx(!isShared);
@@ -719,7 +753,7 @@ void attributeMemoizedFootprint(const ObjectData* obj, hphp_fast_map<ClassProp, 
         }
         else {
           // value type
-          auto tv_size = tvGetSize(*(memoslot->getValue()), env);
+          auto tv_size = tvGetSize(*(memoslot->getValue()), env, 0 /* depth */, max_depth);
           auto histogram_key = objprof_props_mode ?
                               std::make_pair(clsName, m->name()->toCppString()) :
                               std::make_pair(clsName, "");
@@ -743,7 +777,7 @@ template<class Fn> void iterateRDSRoots(const Fn& fn) {
 }
 
 void attributeStaticMemoizedFootprint(hphp_fast_map<ClassProp, ObjprofMetrics>* histogram,
-                                      bool objprof_props_mode, ObjprofState& env) {
+                                      bool objprof_props_mode, ObjprofState& env, int64_t max_depth) {
   /*
   *  To get the static memoized methods cache sizes, we need to iterate RDS roots
   *  and find the static memo caches and values.
@@ -766,7 +800,7 @@ void attributeStaticMemoizedFootprint(hphp_fast_map<ClassProp, ObjprofMetrics>* 
                               std::make_pair(clsName, func->name()->toCppString()) :
                               std::make_pair(clsName, "Static");
         auto& metrics = (*histogram)[histogram_key];
-        auto tv_size = tvGetSize(*tv, env);
+        auto tv_size = tvGetSize(*tv, env, 0 /* depth */, max_depth);
 
         /*
         * Here, we either want per prop data or account for everything at the class level
@@ -800,7 +834,7 @@ void attributeStaticMemoizedFootprint(hphp_fast_map<ClassProp, ObjprofMetrics>* 
           auto clsName = cls ? cls->name()->toCppString() : "NoClass";
           auto func = Func::fromFuncId(memo_cache.funcId);
           assertx(func);
-          auto tv_size = tvGetSize(e.cacheEntry, env);
+          auto tv_size = tvGetSize(e.cacheEntry, env, 0 /* depth */, max_depth);
 
           auto histogram_key = objprof_props_mode ?
                                 std::make_pair(clsName, func->name()->toCppString()) :
@@ -828,7 +862,7 @@ void attributeStaticMemoizedFootprint(hphp_fast_map<ClassProp, ObjprofMetrics>* 
 }
 
 void attributeStaticPropFootprint(hphp_fast_map<ClassProp, ObjprofMetrics>* histogram,
-                                      bool objprof_props_mode, ObjprofState& env) {
+                                      bool objprof_props_mode, ObjprofState& env, int64_t max_depth) {
   NamedType::foreach_class([&](Class* cls) {
     if (cls->needsInitSProps()) {
       return;
@@ -845,7 +879,7 @@ void attributeStaticPropFootprint(hphp_fast_map<ClassProp, ObjprofMetrics>* hist
         continue;
       }
 
-      auto size_pair = tvGetSize(*tv, env);
+      auto size_pair = tvGetSize(*tv, env, 0 /* depth */, max_depth);
       auto histogram_key = objprof_props_mode ?
                            std::make_pair(cls->name()->toCppString(),
                            prop.name->toCppString()) :
@@ -880,11 +914,19 @@ void attributeStaticPropFootprint(hphp_fast_map<ClassProp, ObjprofMetrics>* hist
 *  If the ObjprofFlags::PER_PROPERTY was not supplied, the outout will summarize
 *  all non static memo cache footprints in the object itself, and all static
 *  memo cache footprints under ::Static title
+*
+*  @param max_depth Maximum recursion depth for object graph traversal.
+*                   0 (default) means unlimited depth - will traverse the entire
+*                   object graph (subject to cycle detection).
+*                   Positive values limit traversal depth to prevent deep recursion.
+*                   Must be non-negative.
 */
 Array HHVM_FUNCTION(objprof_get_data_extended,
   int64_t flags = ObjprofFlags::DEFAULT,
-  const Array& exclude_list = Array()
+  const Array& exclude_list = Array(),
+  int64_t max_depth = 0
 ) {
+  assertx(max_depth >= 0);
   hphp_fast_map<ClassProp, ObjprofMetrics> histogram;
   hphp_fast_set<const HPHP::MemoCacheBase*> seen_caches;
   auto objprof_props_mode = (flags & ObjprofFlags::PER_PROPERTY) != 0;
@@ -916,7 +958,9 @@ Array HHVM_FUNCTION(objprof_get_data_extended,
     };
     auto objsizePair = getObjSize(
       obj, env,
-      objprof_props_mode ? &histogram : nullptr
+      objprof_props_mode ? &histogram : nullptr,
+      0, /* depth */
+      max_depth
     );
 
     if (!objprof_props_mode) {
@@ -927,7 +971,7 @@ Array HHVM_FUNCTION(objprof_get_data_extended,
       metrics.bytes_rel += objsizePair.second;
     }
     // Gather Memoized methods data
-    attributeMemoizedFootprint(obj, &histogram, objprof_props_mode, seen_caches, env);
+    attributeMemoizedFootprint(obj, &histogram, objprof_props_mode, seen_caches, env, max_depth);
   });
   issueWarnings(deferred_warnings);
 
@@ -941,8 +985,8 @@ Array HHVM_FUNCTION(objprof_get_data_extended,
     .deferred_warnings = deferred_warnings
   };
   // Finished iterating over objects, now gather static memoized functions
-  attributeStaticMemoizedFootprint(&histogram, objprof_props_mode, env);
-  attributeStaticPropFootprint(&histogram, objprof_props_mode, env);
+  attributeStaticMemoizedFootprint(&histogram, objprof_props_mode, env, max_depth);
+  attributeStaticPropFootprint(&histogram, objprof_props_mode, env, max_depth);
 
   // Create response
   DictInit objs(histogram.size() + 1);
@@ -969,10 +1013,19 @@ Array HHVM_FUNCTION(objprof_get_data_extended,
 
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// @param max_depth Maximum recursion depth for object graph traversal.
+//                  0 (default) means unlimited depth - will traverse the entire
+//                  object graph (subject to cycle detection).
+//                  Positive values limit traversal depth to prevent deep recursion.
+//                  Must be non-negative.
+
 Array HHVM_FUNCTION(objprof_get_paths,
   int64_t flags = ObjprofFlags::DEFAULT,
-  const Array& exclude_list = Array()
+  const Array& exclude_list = Array(),
+  int64_t max_depth = 0
 ) {
+  assertx(max_depth >= 0);
   hphp_fast_map<ClassProp, ObjprofMetrics> histogram;
   PathsToClass pathsToClass;
 
@@ -1002,7 +1055,9 @@ Array HHVM_FUNCTION(objprof_get_paths,
       auto objsizePair = getObjSize(
         obj, /* obj */
         env,
-        nullptr /* histogram */
+        nullptr, /* histogram */
+        0, /* depth */
+        max_depth
       );
       metrics.instances += 1;
       metrics.bytes += objsizePair.first;
@@ -1069,7 +1124,7 @@ Array HHVM_FUNCTION(objprof_get_paths,
       }
 
       env.stack->push_back(refname);
-      tvGetSize(*tv, env);
+      tvGetSize(*tv, env, 0 /* depth */, max_depth);
       env.stack->pop_back();
 
       for (auto const& pathsIt : *env.paths) {

@@ -1,5 +1,11 @@
-**Note:** Context and capabilities are enabled by default since
+# Closures
+
+:::note
+
+Context and capabilities are enabled by default since
 [HHVM 4.93](https://hhvm.com/blog/2021/01/19/hhvm-4.93.html).
+
+:::
 
 As with standard functions, closures may optionally choose to list one or more contexts. Note that the outer function may or may not have its own context list. Lambdas wishing to specify a list of contexts must include a (possibly empty) parenthesized argument list.
 

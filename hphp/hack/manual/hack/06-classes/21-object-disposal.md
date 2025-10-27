@@ -1,3 +1,5 @@
+# Object Disposal
+
 Modern programming languages allow resources to be allocated at runtime, under programmer control. However, in the case where
 explicit action must be taken to free such resources, different languages have different approaches. Some languages use a
 *destructor* for cleanup, while others use a *finalizer*, which is called by a garbage collector, sometime, maybe! Hack uses
@@ -7,7 +9,7 @@ In the following example, we define and use type `TextFile` to encapsulate a tex
 we need to make sure that output buffers are flushed, among other things. Let us call these tasks *object cleanup*.  (The
 example is skeletal; it has only the minimal machinery needed to demonstrate object disposal.)
 
-```Hack
+```hack
 class TextFile implements \IDisposable {
   private ?int $fileHandle = null;
   private bool $openFlag = false;
@@ -143,7 +145,7 @@ in its base class explicitly.
 For objects of a class type to be used in an asynchronous context, that type must implement interface `IAsyncDisposable` instead,
 which requires a public method called `__disposeAsync`, like this:
 
-```Hack
+```hack
 class Example implements IAsyncDisposable {
   public async function __disposeAsync(): Awaitable<void> {
     // Cleanup here.

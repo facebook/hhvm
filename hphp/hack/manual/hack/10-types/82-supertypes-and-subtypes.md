@@ -1,3 +1,5 @@
+# Supertypes & Subtypes
+
 The set of built-in and user-defined types in Hack can be thought of as a type hierarchy of *supertypes* and *subtypes* in which a variable
 of some type can hold the values of any of its subtypes. For example, `int` and `float` are subtypes of `num`.
 
@@ -25,4 +27,4 @@ is a subtype of *A*. Outside that file, *A* and *T* have no relationship, except
 * A class type is a subtype of all the interfaces it and its direct and indirect base-class types implement.
 * An interface type is a subtype of all its direct and indirect base interfaces.
 * A shape type *S2* whose field set is a superset of that in shape type *S1*, is a subtype of *S1*.
-* Although [`noreturn`](../built-in-types/noreturn.md) is not a type, per se, it is regarded as a subtype of all other types, and a supertype of none.
+* Although [`noreturn`](/hack/built-in-types/noreturn) is not a type, per se, it is regarded as a subtype of all other types, and a supertype of none.

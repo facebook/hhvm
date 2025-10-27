@@ -1,6 +1,8 @@
+# Assignment
+
 The assignment operator `=` assigns the value of the right-hand operand to the left-hand operand.  For example:
 
-```Hack
+```hack
 $a = 10;
 ```
 
@@ -8,7 +10,7 @@ $a = 10;
 
 We can assign to array elements, as follows:
 
-```Hack
+```hack
 $v = vec[1, 2, 3];
 
 $v[0] = 42; // $v is now vec[42, 2, 3]
@@ -52,4 +54,4 @@ $x = $tmp;
 ```
 
 The complete set of compound-assignment operators is: `**=`, `*=`, `/=`, `%=`, `+=`, `-=`, `.=`, `<<=`, `>>=`, `&=`, `^=`, `|=`, and
-[`??=`](https://docs.hhvm.com/hack/expressions-and-operators/coalesce#coalescing-assignment-operator).
+[`??=`](/hack/expressions-and-operators/coalesce#coalescing-assignment-operator).

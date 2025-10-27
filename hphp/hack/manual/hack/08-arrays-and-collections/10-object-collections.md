@@ -1,3 +1,5 @@
+# Object Collections
+
 The collection object types are `Vector`, `ImmVector`, `Map`, `ImmMap`,
 `Set`, `ImmSet` and `Pair`. There are also a range of helper
 interfaces, discussed below.
@@ -11,7 +13,7 @@ support array style syntax. Idiomatic Hack prefers array access syntax over meth
 
 This page focuses on the core operations available, which all have
 array access syntax. Consult the reference pages
-(e.g. [Vector](/hack/reference/class/HH.Vector/)) for the full list of
+(e.g. [Vector](/apis/class/HH.Vector/)) for the full list of
 methods.
 
 ## `Vector` and `ImmVector`
@@ -21,7 +23,7 @@ methods.
 A `Vector` is a mutable ordered data structure. It is
 created with the `Vector {}` syntax.
 
-```Hack
+```hack
 // Creating a Vector.
 function get_items(): Vector<string> {
   $items = Vector {'a', 'b', 'c'};
@@ -31,7 +33,7 @@ function get_items(): Vector<string> {
 
 `Vector`s can be accessed with the following syntax.
 
-```Hack
+```hack
 $items = Vector {'a', 'b', 'c'};
 
 // Accessing items by index.
@@ -92,7 +94,7 @@ is created with the `Set {}` syntax.
 
 A `Set` can only contain `string` or `int` values.
 
-```Hack
+```hack
 // Creating a Set.
 function get_items(): Set<string> {
   $items = Set {'a', 'b', 'c'};
@@ -102,7 +104,7 @@ function get_items(): Set<string> {
 
 `Set`s can be accessed with the following syntax.
 
-```Hack
+```hack
 $items = Set {'a', 'b', 'c'};
 
 // Checking if a Set contains a value.
@@ -153,7 +155,7 @@ created with the `Map {}` syntax.
 
 Keys must be `string`s or `int`s.
 
-```Hack
+```hack
 // Creating a Map.
 function get_items(): Map<string, int> {
   $items = Map {'a' => 1, 'b' => 3};
@@ -163,7 +165,7 @@ function get_items(): Map<string, int> {
 
 `Map`s can be accessed with the following syntax.
 
-```Hack
+```hack
 $items = Map {'a' => 1, 'b' => 3};
 
 // Accessing items by key.
@@ -236,7 +238,7 @@ function get_items(): Pair<int, string> {
 
 `Pair`s can be accessed with the following syntax.
 
-```Hack
+```hack
 $items = Pair {42, 'foo'};
 
 // Destructuring a Pair value.

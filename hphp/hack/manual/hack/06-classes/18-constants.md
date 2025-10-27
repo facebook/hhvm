@@ -1,8 +1,10 @@
+# Constants
+
 A class can contain definitions for named constants.
 
 Because a class constant belongs to the class as a whole, it is implicitly `static`. For example:
 
-```Hack
+```hack
 class Automobile {
   const DEFAULT_COLOR = "white";
   // ...

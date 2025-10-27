@@ -1,3 +1,5 @@
+# Inheritance
+
 Hack supports single inheritance between classes.
 
 ``` Hack
@@ -144,7 +146,7 @@ class Dog extends Animal {
 This allows `new Dog()` but not `new Animal()`.
 
 Abstract classes are similar to
-[interfaces](implementing-an-interface.md), but they can include
+[interfaces](/hack/traits-and-interfaces/implementing-an-interface), but they can include
 implementations of methods.
 
 ## Final Classes

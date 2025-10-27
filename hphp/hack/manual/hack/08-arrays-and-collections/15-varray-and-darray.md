@@ -1,3 +1,5 @@
+# Varray & Darray
+
 **`varray`, `darray` and `varray_or_darray` are legacy value types for
 storing iterable data.**. They are also called 'PHP arrays' and will
 eventually be removed.
@@ -9,7 +11,7 @@ bugs.
 For example, in HHVM 4.36, invalid array keys are accepted and
 silently coerced to an `arraykey`.
 
-```Hack no-extract
+```hack no-extract
 $x = dict[false => 123];
 var_dump(array_keys($x)[0]);
 // int(0), not `bool(false)`
@@ -19,13 +21,13 @@ var_dump(array_keys($x)[0]);
 
 #### Use Hack Arrays
 
-As of [HHVM 4.103](https://hhvm.com/blog/2021/03/31/hhvm-4.103.html), `varray` is aliased to `vec`. Use [`vec`](https://docs.hhvm.com/hack/arrays-and-collections/hack-arrays#vec).
+As of [HHVM 4.103](https://hhvm.com/blog/2021/03/31/hhvm-4.103.html), `varray` is aliased to `vec`. Use [`vec`](/hack/arrays-and-collections/hack-arrays#vec).
 
 #### Working with varrays
 
 A `varray` is an ordered, iterable data structure.
 
-```Hack no-extract
+```hack no-extract
 // Creating a varray.
 function get_items(): varray<string> {
   $items = vec['a', 'b', 'c'];
@@ -72,13 +74,13 @@ varray(keyset[10, 11]); // vec[10, 11]
 
 #### Use Hack Arrays
 
-As of [HHVM 4.103](https://hhvm.com/blog/2021/03/31/hhvm-4.103.html), `darray` is aliased to `dict`. Use [`dict`](https://docs.hhvm.com/hack/arrays-and-collections/hack-arrays#dict).
+As of [HHVM 4.103](https://hhvm.com/blog/2021/03/31/hhvm-4.103.html), `darray` is aliased to `dict`. Use [`dict`](/hack/arrays-and-collections/hack-arrays#dict).
 
 #### Working with darrays
 
 A `darray` is an ordered key-value data structure.
 
-```Hack no-extract
+```hack no-extract
 // Creating a darray.
 function get_items(): darray<string, int> {
   $items = dict['a' => 1, 'b' => 3];
@@ -138,7 +140,7 @@ A `varray_or_darray` is type that can be either a `varray` or
 `darray`. It exists to help gradually migrate code to more specific
 types, and should be avoided when possible.
 
-```Hack
+```hack
 function get_items(bool $b): varray_or_darray<int, string> {
   if ($b) {
     return vec['a', 'b'];
@@ -159,4 +161,4 @@ The available runtime options change frequently; to get an up-to-date list, sear
 
 The `hhvm.hack_arr_compat_notices` option must be set to true for any of the `hhvm.hack_arr_` options to have an effect.
 
-Individual runtime settings are documented [here](/hack/built-in-types/darray-varray-runtime-options.md).
+Individual runtime settings are documented [here](/hack/built-in-types/darray-varray-runtime-options).

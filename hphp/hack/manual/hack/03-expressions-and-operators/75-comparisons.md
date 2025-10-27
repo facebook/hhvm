@@ -1,3 +1,5 @@
+# Comparisons
+
 Hack provides comparison operators. They operate on two operands and
 return `bool`.
 
@@ -31,7 +33,7 @@ Often referred to as the *spaceship operator*, the binary operator `<=>` compare
 result. If the left-hand value is less than the right-hand value, the result is some unspecified negative value; else, if the left-hand
 value is greater than the right-hand value, the result is some unspecified positive value; otherwise, the values are equal and the result is zero. For example:
 
-```Hack
+```hack
 1 <=> 1;         // 0; equal
 1 <=> 2;         // negative; 1 < 2
 2 <=> 1;         // positive; 2 > 1

@@ -1,3 +1,5 @@
+# Type Constraints
+
 A *type constraint* on a generic type parameter indicates a requirement that a type must fulfill in order to be accepted as a type
 argument for that type parameter. (For example, it might have to be a given class type or a subtype of that class type, or it might
 have to implement a given interface.)
@@ -9,7 +11,7 @@ A constraint can have one of three forms:
 
 Consider the following example in which function `max_val` has one type parameter, `T`, and that has a constraint, `num`:
 
-```Hack
+```hack
 function max_val<T as num>(T $p1, T $p2): T {
   return $p1 > $p2 ? $p1 : $p2;
 }
@@ -28,7 +30,7 @@ Unlike an `as` constraint, `T super U` asserts that `T` must be a supertype of `
 an interesting problem encountered when multiple types "collide". Here is an example of how it's used on method `concat` in the library interface
 type `ConstVector`:
 
-```Hack no-extract
+```hack no-extract
 interface ConstVector<+T> {
   public function concat<Tu super T>(ConstVector<Tu> $x): ConstVector<Tu>;
   // ...
@@ -43,7 +45,7 @@ on classes, constraints on the type parameters can be assumed in *any* method in
 the type parameter, and others want to use some different features, and not all instances of the class will satisfy all constraints. This can be done by
 specifying constraints that are *local* to particular methods. For example:
 
-```Hack no-extract
+```hack no-extract
 class MyWidget<Telem> {
   public function showIt(): void where Telem as IPrintable { ... }
   public function countIt(): int where Telem as ICountable { ... }
@@ -52,7 +54,7 @@ class MyWidget<Telem> {
 
 Constraints can make use of the type parameter itself. They can also make use of generic type parameters on the method. For example:
 
-```Hack
+```hack
 class MyList<T> {
   public function flatten<Tu>(): MyList<Tu> where T = MyList<Tu> {
     throw new Exception('unimplemented');
@@ -62,7 +64,7 @@ class MyList<T> {
 
 Here we might create a list of lists of int, of type `MyList<MyList<int>>`, and then invoke `flatten` on it to get a `MyList<int>`. Here's another example:
 
-```Hack
+```hack
 class MyList<T> {
   public function compact<Tu>(): MyList<Tu> where T = ?Tu {
     throw new Exception('unimplemented');
@@ -72,7 +74,7 @@ class MyList<T> {
 
 A `where` constraint permits multiple constraints supported; just separate the constraints with commas. For example:
 
-```Hack no-extract
+```hack no-extract
 class SomeClass<T> {
   function foo(T $x) where T as MyInterface, T as MyOtherInterface
 }

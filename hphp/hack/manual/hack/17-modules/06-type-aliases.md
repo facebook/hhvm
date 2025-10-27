@@ -1,3 +1,5 @@
+# Type Aliases
+
 Type aliases have special rules when it comes to internal types depending on which kind of type alias is used.
 
 ## Internal type aliases

@@ -1,3 +1,5 @@
+# Guidelines
+
 It might be tempting to just sprinkle `async`, `await` and `Awaitable` on all code. And while it is OK to have more `async` functions than
 not&mdash;in fact, we should generally *not be afraid* to make a function `async` since there is no performance penalty for doing so&mdash;there are
 some guidelines to follow in order to make the most efficient use of `async`.
@@ -10,7 +12,7 @@ simply ready for any future changes that may require async.
 
 These two programs are, for all intents and purposes, equivalent.
 
-```Hack
+```hack
 function get_hello(): string {
   return "Hello";
 }
@@ -21,7 +23,7 @@ function run_na_hello(): void {
 }
 ```
 
-```Hack
+```hack
 async function get_hello(): Awaitable<string> {
   return "Hello";
 }
@@ -40,20 +42,24 @@ and efficiency.
 
 For the common cases where async would provide maximum benefit, HHVM provides convenient extension libraries to help make writing code
 much easier. Depending on the use case scenario, we should liberally use:
-* [MySQL](extensions.md#mysql) for database access and queries.
-* [cURL](extensions.md#curl) for web page data and transfer.
-* [McRouter](extensions.md#mcrouter) for memcached-based operations.
-* [Streams](extensions.md#streams) for stream-based resource operations.
+* [MySQL](/hack/asynchronous-operations/extensions#mysql) for database access and queries.
+* [cURL](/hack/asynchronous-operations/extensions#curl) for web page data and transfer.
+* [McRouter](/hack/asynchronous-operations/extensions#mcrouter) for memcached-based operations.
+* [Streams](/hack/asynchronous-operations/extensions#streams) for stream-based resource operations.
 
 ## Do Not Use Async in Loops
 
 If you only remember one rule, remember this:
 
-**DON'T `await` IN A LOOP**
+:::caution
+
+Don't `await` in a loop.
+
+:::
 
 It totally defeats the purpose of async.
 
-```Hack
+```hack
 class User {
   public string $name;
 
@@ -94,7 +100,7 @@ In the above example, the loop is doing two things:
 
 Instead, we will want to use our async-aware mapping function, `Vec\map_async`.
 
-```Hack
+```hack
 class User {
   public string $name;
 
@@ -142,7 +148,7 @@ Let's say we are getting blog posts of an author. This would involve the followi
 3. Get comment count for each post id.
 4. Generate final page of information
 
-```Hack
+```hack
 class PostData {
   // using constructor argument promotion
   public function __construct(public string $text) {}
@@ -217,7 +223,7 @@ Wait handles can be rescheduled. This means that they can be sent back to the qu
 run. Batching can be a good use of rescheduling. For example, say we have high latency lookup of data, but we can send multiple keys for
 the lookup in a single request.
 
-```Hack
+```hack
 async function b_one(string $key): Awaitable<string> {
   $subkey = await Batcher::lookup($key);
   return await Batcher::lookup($subkey);
@@ -291,7 +297,7 @@ fetches, and returns the result.
 
 What do you think happens here?
 
-```Hack
+```hack
 async function speak(): Awaitable<void> {
   echo "one";
   await \HH\Asio\later();
@@ -314,7 +320,7 @@ appropriately suspend and resume `speak`; otherwise, the async scheduler will pr
 In order to minimize any unwanted side effects (e.g., ordering disparities), the creation and awaiting of awaitables should happen as close
 together as possible.
 
-```Hack
+```hack
 async function get_curl_data(string $url): Awaitable<string> {
   return await \HH\Asio\curl_exec($url);
 }
@@ -347,10 +353,10 @@ use dependencies via awaitables and `await`.
 
 Given that async is commonly used in operations that are time-consuming, memoizing (i.e., caching) the result of an async call can definitely be worthwhile.
 
-The [`<<__Memoize>>`](../attributes/predefined-attributes.md#__memoize) attribute does the right thing, so, use that. However, if to get
+The [`<<__Memoize>>`](/hack/attributes/predefined-attributes#__memoize) attribute does the right thing, so, use that. However, if to get
 explicit control of the memoization, *memoize the awaitable* and not the result of awaiting it.
 
-```Hack
+```hack
 abstract final class MemoizeResult {
   private static async function time_consuming(): Awaitable<string> {
     await \HH\Asio\usleep(5000000);
@@ -393,7 +399,7 @@ still a bug; the time-consuming operation is being done multiple times when it o
 
 Instead, memoize the awaitable:
 
-```Hack
+```hack
 abstract final class MemoizeAwaitable {
   private static async function time_consuming(): Awaitable<string> {
     await \HH\Asio\usleep(5000000);
@@ -422,7 +428,7 @@ function runMe(): void {
 }
 ```
 
-This simply caches the handle and returns it verbatim; [Async Vs Awaitable](async-vs.-awaitable.md) explains this in more detail.
+This simply caches the handle and returns it verbatim; [Async Vs Awaitable](/hack/asynchronous-operations/introduction) explains this in more detail.
 
 This would also work if it were an async function that awaited the handle after caching. This may seem unintuitive, because the function
 `await`s every time it's executed, even on the cache-hit path. But that's fine: on every execution except the first, `$handle` is not `null`, so
@@ -433,10 +439,10 @@ Either approach works, but the non-async caching wrapper can be easier to reason
 ## Use Lambdas Where Possible
 
 The use of lambdas can cut down on code verbosity that comes with writing full closure syntax. Lambdas are quite useful in conjunction
-with the [async utility helpers](utility-functions.md).  For example, look how the following three ways to accomplish the same thing can be
+with the [async utility helpers](utility-functions).  For example, look how the following three ways to accomplish the same thing can be
 shortened using lambdas.
 
-```Hack
+```hack
 async function fourth_root(num $n): Awaitable<float> {
   return sqrt(sqrt((float)$n));
 }
@@ -480,7 +486,7 @@ If you need to call an async function from a non-async function, the best approa
 
 Imagine we are making a call to an `async` function `join_async` from a non-async scope. If refactoring to an entirely async call stack is not possible, `HH\Asio\join()` can be used to resolve the awaitable:
 
-```Hack
+```hack
 async function join_async(): Awaitable<string> {
   return "Hello";
 }
@@ -509,4 +515,4 @@ multitasking). Async still lives in the single-threaded world of normal Hack!
 
 To strike a balance between flexibility, latency, and performance, we require
 that `await`s only appear in **unconditionally consumed expression positions**.
-For more details, see [Await As An Expression](await-as-an-expression).
+For more details, see [Await As An Expression](/hack/asynchronous-operations/await-as-an-expression).

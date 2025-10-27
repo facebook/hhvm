@@ -1,3 +1,5 @@
+# Int
+
 The integer type `int` is signed and uses twos-complement representation for negative values. At least 64 bits are used, so the range of values that
 can be stored is at least [-9223372036854775808, 9223372036854775807].
 
@@ -9,7 +11,7 @@ unary minus is applied to the smallest value.
 
 Consider the following example:
 
-```Hack
+```hack
 function is_leap_year(int $yy): bool {
   return ((($yy & 3) === 0) && (($yy % 100) !== 0)) || (($yy % 400) === 0);
 }

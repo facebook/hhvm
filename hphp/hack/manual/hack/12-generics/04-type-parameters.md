@@ -1,3 +1,5 @@
+# Type Parameters
+
 A type parameter is a placeholder for a type that is supplied when a generic type is instantiated, or a generic method or function is invoked.
 
 A type parameter is a compile-time construct. At run-time, each type parameter is matched to a run-time type that was specified by a
@@ -9,7 +11,7 @@ of a class constant, an attribute, a method, an enum constant, or a namespace). 
 
 In the following case, class `Vector` has one type parameter, `Tv`. Method `map` also has one type parameter, `Tu`.
 
-```Hack no-extract
+```hack no-extract
 final class Vector<Tv> implements MutableVector<Tv> {
   // ...
   public function map<Tu>((function(Tv): Tu) $callback): Vector<Tu> { ... }
@@ -18,7 +20,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
 
 In the following case, class `Map` has two type parameters, `Tk` and `Tv`. Method `zip` has one, `Tu`.
 
-```Hack no-extract
+```hack no-extract
 final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
   // ...
   public function zip<Tu>(Traversable<Tu> $iter): Map<Tk, Pair<Tv, Tu>> { ... }
@@ -27,10 +29,10 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
 
 In the following case, function `max_value` has one type parameter, `T`.
 
-```Hack
+```hack
 function max_value<T>(T $p1, T $p2): T {
   throw new Exception("unimplemented");
 }
 ```
 
-Generic type constraints are discussed in [type constraints](type-constraints.md).
+Generic type constraints are discussed in [type constraints](/hack/generics/type-constraints).

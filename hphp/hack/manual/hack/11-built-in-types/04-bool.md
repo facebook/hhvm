@@ -1,8 +1,10 @@
+# Bool
+
 The Boolean type `bool` can store two distinct values, which correspond to the Boolean values `true` and `false`, respectively.
 
 Consider the following example:
 
-```Hack
+```hack
 function is_leap_year(int $yy): bool {
   return ((($yy & 3) === 0) && (($yy % 100) !== 0)) || (($yy % 400) === 0);
 }

@@ -1,6 +1,8 @@
+# Methods
+
 A method is a function defined in a class.
 
-```Hack file:person.hack
+```hack file:person.hack
 class Person {
   public string $name = "anonymous";
 
@@ -12,7 +14,7 @@ class Person {
 
 To call an instance method, use `->`.
 
-```Hack file:person.hack
+```hack file:person.hack
 $p = new Person();
 echo $p->greeting();
 ```
@@ -24,7 +26,7 @@ You can access the current instance with `$this` inside a method.
 A static method is a function in a class that is called without an
 instance. Since there's no instance, `$this` is not available.
 
-```Hack file:person2.hack
+```hack file:person2.hack
 class Person {
   public static function typicalGreeting(): string {
     return "Hello";
@@ -34,6 +36,6 @@ class Person {
 
 To call a static method, use `::`.
 
-```Hack file:person2.hack
+```hack file:person2.hack
 echo Person::typicalGreeting();
 ```

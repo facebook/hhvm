@@ -1,7 +1,9 @@
+# Shape
+
 A shape is a lightweight type with named fields. It's similar to
 structs or records in other programming languages.
 
-```Hack
+```hack
 $my_point = shape('x' => -3, 'y' => 6, 'visible' => true);
 ```
 
@@ -19,7 +21,7 @@ $empty = shape();
 Shape fields are accessed with array indexing syntax, similar to
 `dict`. Note that field names must be string literals.
 
-```Hack no-extract
+```hack no-extract
 // OK.
 $n = $server['name'];
 
@@ -86,7 +88,7 @@ function uses_shape_internally(): void {
 
 For large shapes, it is often convenient to define a type alias.  This is useful because it promotes code re-use and when the same type is being used, and provides a descriptive name for the type.
 
-```Hack
+```hack
 type Server = shape('name' => string, 'age' => int);
 
 // Equivalent to the previous takes_server function.
@@ -98,7 +100,7 @@ function takes_server(Server $s): void {
 
 Any shape value that has all of the required fields (and no undefined fields - unless the shape permits them) is considered a value of type `Server`; the type is not specified when creating the value.
 
-```Hack error
+```hack error
 function takes_server(Server $s): void {
   return;
 }
@@ -117,7 +119,7 @@ function test(): void {
 
 Since shapes are copy-on-write, updates can change the type.
 
-```Hack
+```hack
 // $s has type shape('name' => string, 'age' => int).
 $s = shape('name' => 'db-01', 'age' => 365);
 
@@ -129,7 +131,7 @@ $s['age'] = '1 year';
 types**. This makes shapes convenient to create, but can cause
 surprises. This is called 'structural subtyping'.
 
-```Hack
+```hack
 type Server = shape('name' => string, 'age' => int);
 type Pet = shape('name' => string, 'age' => int);
 
@@ -146,7 +148,7 @@ function takes_pet(Pet $p): void {
 Normally, the type checker will enforce that you provide exactly the
 fields specified. This is called a 'closed shape'.
 
-```Hack error
+```hack error
 function takes_named(shape('name' => string) $_): void {}
 
 function demo(): void {
@@ -157,7 +159,7 @@ function demo(): void {
 Shape types may include `...` to indicate that additional fields are
 permitted. This is called an 'open shape'.
 
-```Hack
+```hack
 function takes_named(shape('name' => string, ...) $_): void {}
 
 // OK.
@@ -169,7 +171,7 @@ function demo(): void {
 To access the additional fields in an open shape, you can use
 `Shapes::idx`.
 
-```Hack
+```hack
 function takes_named(shape('name' => string, ...) $n): void {
   // The value in the shape, or null if field is absent.
   $nullable_age = Shapes::idx($n, 'age');
@@ -184,7 +186,7 @@ function takes_named(shape('name' => string, ...) $n): void {
 
 A shape type may declare fields as optional.
 
-```Hack
+```hack
 function takes_server(shape('name' => string, ?'age' => int) $s): void {
   $age = Shapes::idx($s, 'age', 0);
 }
@@ -201,7 +203,7 @@ an error. The `age` field is optional though.
 Optional fields can be tricky to reason about, so your code may be
 clearer with nullable fields or open shapes.
 
-```Hack
+```hack
 function takes_server2(shape('name' => string, 'age' => ?int) $s): void {
   $age = $s['age'] ?? 0;
 }
@@ -216,7 +218,7 @@ function takes_server3(shape('name' => string, ...) $s): void {
 HHVM will check that arguments are shapes, but it will not deeply
 check fields.
 
-```Hack error
+```hack error
 // This produces a typehint violation at runtime.
 function returns_int_instead(): shape('x' => int) {
   return 1;

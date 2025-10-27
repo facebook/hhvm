@@ -1,3 +1,5 @@
+# Resources
+
 A resource is a descriptor to some sort of external entity. (Examples include files, databases, and sockets.) Resources are only created or
 consumed by the implementation; they are never created or consumed by Hack code. Each distinct resource has a unique ID of some unspecified form.
 

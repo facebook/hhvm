@@ -1,8 +1,10 @@
+# Introduction
+
 Classes provide a way to group functionality and state together.
 
 To define a class, use the `class` keyword.
 
-```Hack
+```hack
 class Counter {
   private int $i = 0;
 
@@ -17,4 +19,4 @@ class Counter {
 ```
 
 To create an instance of a class, use
-[`new`](../expressions-and-operators/new.md), e.g. `new Counter();`.
+[`new`](/hack/expressions-and-operators/new), e.g. `new Counter();`.

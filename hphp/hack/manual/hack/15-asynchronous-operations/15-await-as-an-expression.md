@@ -1,10 +1,12 @@
+# Await as an Expression
+
 To strike a balance between flexibility, latency, and performance, we require that the `await`s only appear in **unconditionally consumed expression positions**. This means that from the closest statement, the result of the `await` must be used under all non-throwing cases. This is important because all `await`s for a statement will run together, we don't want to over-run code if its result might not be utilized.
 
 All `await`s within the same statement will execute concurrently.
 
 ## Examples
 
-```Hack no-extract
+```hack no-extract
 $sum =
   await x_async() +      // yes!
   await y_async();       // yes!
@@ -38,7 +40,7 @@ Similar to other aspects of `await`, we do not guarantee an order of execution o
 
 In this example, you should make no assumptions about the order in which `a_async()`, `b()`, `c_async()` or `d()` are executed, but you can assume that both `await`'ed functions (`a_async()` and `c_async()`) will be concurrently awaited.
 
-```Hack no-extract
+```hack no-extract
 $x = foo(
   await a_async(),
   b(),
@@ -53,7 +55,7 @@ To further help protect against depending on order-of-execution, we've
 banned assignment or updating variables as-an-expression for
 statements that contain an `await`.
 
-```Hack no-extract
+```hack no-extract
 // Yes!
 $x = await x_async();
 // No, assignment as an expression
@@ -68,7 +70,7 @@ await bar_async(baz(inout $x));
 
 Hack doesn't currently support nested `await`s.
 
-```Hack error
+```hack error
 // Syntax error.
 $y = await foo_async(await bar_async());
 

@@ -1,3 +1,5 @@
+# Extensions
+
 Async in and of itself is a highly useful construct that can provide possible time-saving through its cooperative multitasking
 infrastructure. Async is especially useful with database access and caching, web resource access, and dealing with streams.
 
@@ -6,13 +8,13 @@ infrastructure. Async is especially useful with database access and caching, web
 The async MySQL extension provides a Hack API to query MySQL and similar databases. All relevant methods return an `Awaitable`,
 which gives your code control over how it spends the time until the result is ready.
 
-The [full API](../reference/class/AsyncMysqlConnection/) contains all of the classes and methods available for accessing MySQL via async; we
+The [full API](/apis/class/AsyncMysqlConnection/) contains all of the classes and methods available for accessing MySQL via async; we
 will only cover a few of the more common scenarios here.
 
-The primary class for connecting to a MySQL database is [`AsyncMysqlConnectionPool`](../reference/class/AsyncMysqlClient/) and its
-primary method is the `async` [`connect`](../reference/class/AsyncMysqlClient/connect/).
+The primary class for connecting to a MySQL database is [`AsyncMysqlConnectionPool`](/apis/class/AsyncMysqlClient/) and its
+primary method is the `async` [`connect`](/apis/class/AsyncMysqlClient/connect/).
 
-The primary class for querying a database is [`AsyncMysqlConnection`](../reference/class/AsyncMysqlConnection/) with the three main query methods:
+The primary class for querying a database is [`AsyncMysqlConnection`](/apis/class/AsyncMysqlConnection/) with the three main query methods:
 `AsyncMysqlConnection::query`, `AsyncMysqlConnection::queryf`, and `AsyncMysqlConnection::queryAsync`
 all of which are `async`. The naming conventions for async methods have not been applied consistently.
 There is also a method which turns a raw string into an SQL escaped string `AsyncMysqlConnection::escapeString`.
@@ -58,9 +60,9 @@ Is an older API which does what `queryAsync` does, but with more restrictions. I
 
 ## Getting results
 The primary class for retrieving results from a query is an abstract class called `AsyncMysqlResult`, which itself has two concrete
-subclasses called [`AsyncMysqlQueryResult`](../reference/class/AsyncMysqlQueryResult/) and
-[`AsyncMysqlErrorResult`](../reference/class/AsyncMysqlErrorResult/). The main methods on these classes are
-[`vectorRows`](../reference/class/AsyncMysqlQueryResult/vectorRows/) | [`vectorRowsTyped`](../reference/class/AsyncMysqlQueryResult/vectorRowsTyped/) and [`mapRows`](../reference/class/AsyncMysqlQueryResult/mapRows/) | [`mapRowsTyped`](../reference/class/AsyncMysqlQueryResult/mapRowsTyped/), which are *non-async*.
+subclasses called [`AsyncMysqlQueryResult`](/apis/class/AsyncMysqlQueryResult/) and
+[`AsyncMysqlErrorResult`](/apis/class/AsyncMysqlErrorResult/). The main methods on these classes are
+[`vectorRows`](/apis/class/AsyncMysqlQueryResult/vectorRows/) | [`vectorRowsTyped`](/apis/class/AsyncMysqlQueryResult/vectorRowsTyped/) and [`mapRows`](/apis/class/AsyncMysqlQueryResult/mapRows/) | [`mapRowsTyped`](/apis/class/AsyncMysqlQueryResult/mapRowsTyped/), which are *non-async*.
 
 ### When to use the `____Typed` variant over its untyped counterpart.
 
@@ -73,7 +75,7 @@ The untyped function will return all fields as either a Hack `string` or a Hack 
 
 Here is a simple example that shows how to get a user name from a database using this extension:
 
-```Hack no-extract
+```hack no-extract
 async function get_connection(): Awaitable<AsyncMysqlConnection> {
   // Get a connection pool with default options
   $pool = new AsyncMysqlConnectionPool(darray[]);
@@ -137,7 +139,7 @@ The async MySQL extension does *not* support multiplexing; each concurrent query
 does support connection pooling.
 
 The async MySQL extension provides a mechanism to pool connection objects so we don't have to create a new connection every time we
-want to make a query. The class is [`AsyncMysqlConnectionPool`](../reference/class/AsyncMysqlConnectionPool/) and one can be created like this:
+want to make a query. The class is [`AsyncMysqlConnectionPool`](/apis/class/AsyncMysqlConnectionPool/) and one can be created like this:
 
 ```hack no-extract
 function get_pool(): AsyncMysqlConnectionPool {
@@ -166,8 +168,8 @@ async function run(): Awaitable<void> {
 ```
 
 It is ***highly recommended*** that connection pools are used for MySQL connections; if for some reason we really need one, single asynchronous
-client, there is an [`AsyncMysqlClient`](../reference/class/AsyncMysqlClient/) class that provides a
-[`connect`](../reference/class/AsyncMysqlClient/connect/) method.
+client, there is an [`AsyncMysqlClient`](/apis/class/AsyncMysqlClient/) class that provides a
+[`connect`](/apis/class/AsyncMysqlClient/connect/) method.
 
 ## MCRouter
 
@@ -176,10 +178,10 @@ provides features such as connection pooling and prefix-based routing.
 
 The async MCRouter extension is basically an async subset of the Memcached extension that is part of HHVM. The primary class is
 `MCRouter`. There are two ways to create an instance of an MCRouter object. The
-[`createSimple`](../reference/class/MCRouter/createSimple/) method takes a vector of server addresses where memcached is running. The
-more configurable [`__construct`](../reference/class/MCRouter/__construct/) method allows for more option tweaking. After getting an object,
-we can use the `async` versions of the core memcached protocol methods like [`add`](../reference/class/MCRouter/add/),
-[`get`](../reference/class/MCRouter/get/) and [`del`](../reference/class/MCRouter/del/).
+[`createSimple`](/apis/class/MCRouter/createSimple/) method takes a vector of server addresses where memcached is running. The
+more configurable [`__construct`](/apis/class/MCRouter/__construct/) method allows for more option tweaking. After getting an object,
+we can use the `async` versions of the core memcached protocol methods like [`add`](/apis/class/MCRouter/add/),
+[`get`](/apis/class/MCRouter/get/) and [`del`](/apis/class/MCRouter/del/).
 
 Here is a simple example showing how one might get a user name from memcached:
 
@@ -283,19 +285,19 @@ function main(): void {
 
 ## Streams
 
-The async stream extension has one function, [`stream_await`](../reference/function/stream_await/), which is functionally similar
+The async stream extension has one function, [`stream_await`](/apis/function/stream_await/), which is functionally similar
 to HHVM's [`stream_select`](http://php.net/manual/en/function.stream-select.php). It waits for a stream to enter a state (e.g.,
 `STREAM_AWAIT_READY`), but without the multiplexing functionality of [`stream_select`](http://php.net/manual/en/function.stream-select.php). We
-can use [HH\Lib\Vec\from_async](../reference/function/HH.Lib.Vec.from_async/) to await multiple stream handles, but the resulting combined awaitable won't be complete
+can use [HH\Lib\Vec\from_async](/apis/function/HH.Lib.Vec.from_async/) to await multiple stream handles, but the resulting combined awaitable won't be complete
 until all of the underlying streams have completed.
 
-```Hack no-extract
+```hack no-extract
 async function stream_await(resource $fp, int $events, float $timeout = 0.0): Awaitable<int>;
 ```
 
-The following example shows how to use [`stream_await`](../reference/function/stream_await/) to write to resources:
+The following example shows how to use [`stream_await`](/apis/function/stream_await/) to write to resources:
 
-```Hack
+```hack
 function get_resources(): vec<resource> {
   $r1 = fopen('php://stdout', 'w');
   $r2 = fopen('php://stdout', 'w');

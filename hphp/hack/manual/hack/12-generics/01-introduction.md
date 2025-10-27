@@ -1,3 +1,5 @@
+# Introduction
+
 Certain types (classes, interfaces, and traits) and their methods can be *parameterized*; that is, their declarations can have one or more
 placeholder names---called *type parameters*---that are associated with types via *type arguments* when a class is instantiated, or a method
 is called. A type or method having such placeholder names is called a *generic type* or *generic method*, respectively. Top-level functions
@@ -7,7 +9,7 @@ Generics allow programmers to write a class or method with the ability to be par
 
 Consider the following example in which `VecStack` is a generic class having one type parameter, `T`:
 
-```Hack file:stack.hack
+```hack file:stack.hack
 use namespace HH\Lib\{C, Vec};
 
 interface StackLike<T> {
@@ -52,7 +54,7 @@ class VecStack<T> implements StackLike<T> {
 
 As shown, the type parameter `T` is used in the declaration of the instance property `$elements`, as a parameter for `push()`, and as a return type for `pop()`.
 
-```Hack file:stack.hack
+```hack file:stack.hack
 function useIntStack(StackLike<int> $stInt): void {
   $stInt->push(10);
   $stInt->push(20);
@@ -70,7 +72,7 @@ The *arity* of a generic type or method is the number of type parameters declare
 
 Here is an example of a generic function, `swap`, having one type parameter, `T`:
 
-```Hack
+```hack
 function swap<T>(inout T $i1, inout T $i2): void {
   $temp = $i1;
   $i1 = $i2;

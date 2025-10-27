@@ -1,3 +1,5 @@
+# Tuples
+
 Suppose we wish to have a function return multiple values. We can do that by using a tuple containing two or more elements. A
 tuple is an *ordered* set of one or more elements, which can have different types. The number of elements in a particular tuple is fixed
 when that tuple is created. After a tuple has been created, no elements can be added or removed. A tuple is a mutable value type.
@@ -8,7 +10,7 @@ did not exist when the tuple was created.
 
 Consider the case in which we want to have a pair of related values, one a string, the other an integer. For example:
 
-```Hack no-extract
+```hack no-extract
 $v = tuple("apples", 25);
 function process_pair((string, int) $pair): void { ... }
 function get_next_pair(): (string, int) { ... }
@@ -25,7 +27,7 @@ fruit- or animal-specific about this tuple type.]
 A tuple can be indexed with the subscript operator (`[]`); however, the index value must be an integer constant whose value is in the range of
 element indices. The index of the first element is zero, with subsequent elements having index values one more than their predecessor:
 
-```Hack
+```hack
 $t = tuple(10, true, 2.3);
 echo "\$t[2] = >" . (string)$t[2] . "<";  // outputs "$t[2] = >2.3<"
 $t[0] = 99;                       // change 10 to 99
@@ -33,7 +35,7 @@ $t[0] = 99;                       // change 10 to 99
 
 Here is a more exotic example of a type involve a tuple:
 
-```Hack no-extract
+```hack no-extract
 ?(int, (string, float))
 ```
 
@@ -42,7 +44,7 @@ This declares a nullable type for a tuple containing an `int` and a tuple, which
 For non-trivial tuple types, it can be cumbersome to write out the complete type. Fortunately, Hack provides type-aliasing via
 `newtype` (and `type`). For example:
 
-```Hack
+```hack
 newtype Point = (float, float);
 
 function create_point(float $x, float $y): Point {

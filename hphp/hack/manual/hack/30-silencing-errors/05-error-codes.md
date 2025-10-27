@@ -1,10 +1,12 @@
+# Error Codes
+
 This page lists the most common error codes, and suggests how to fix
 them. You can see the full list of error codes in
 [error_map.ml](https://github.com/facebook/hhvm/blob/master/hphp/hack/src/errors/error_codes.ml).
 
 ## 1002: Top-level code
 
-```Hack no-extract
+```hack no-extract
 function foo(): void {}
 
 /* HH_FIXME[1002] Top-level code isn't checked. */
@@ -18,7 +20,7 @@ attribute.
 
 ## 2049: Unbound name
 
-```Hack
+```hack
 function foo(): void {
   /* HH_FIXME[4107] No such function (type checking). */
   /* HH_FIXME[2049] No such function (global name check). */
@@ -36,7 +38,7 @@ legacy PHP APIs.
 
 ## 2050: Undefined Variable
 
-```Hack
+```hack
 function foo(): mixed {
   /* HH_FIXME[2050] This variable doesn't exist. */
   return $no_such_var;
@@ -53,7 +55,7 @@ legacy PHP APIs.
 
 ## 4006: Array append on an inappropriate type
 
-```Hack
+```hack
 function foo(mixed $m): void {
   /* HH_FIXME[4006] $m may not be an array. */
   $m[] = 1;
@@ -68,7 +70,7 @@ vec<_>`) to perform a runtime type check.
 
 ## 4032: Missing return type
 
-```Hack
+```hack
 /* HH_FIXME[4030] Missing a return type declaration. */
 function foo() {
   return 1;
@@ -84,7 +86,7 @@ the type, consider using `__Soft`. You may also want to consider a
 
 ## 4045: Array without type parameter
 
-```Hack no-extract
+```hack no-extract
 function foo(array $_): void {}
 ```
 
@@ -96,7 +98,7 @@ you still want to use `array`, specify the type e.g. `array<mixed>`.
 
 ## 4051: Accessing a shape with an invalid field name
 
-```Hack
+```hack
 function foo(shape(...) $s): void {
   /* HH_FIXME[4051] Invalid shape field name. */
   $value = $s[1.0];
@@ -111,7 +113,7 @@ integer, or a class constant.
 
 ## 4053: Member not found
 
-```Hack
+```hack
 class MyClass {}
 
 function takes_myclass(MyClass $c): void {
@@ -130,7 +132,7 @@ type you're expecting.
 
 ## 4057: Missing shape field
 
-```Hack
+```hack
 function foo(): shape('x' => int) {
   /* HH_FIXME[4057] Missing the field `x`. */
   return shape();
@@ -145,7 +147,7 @@ fields are not enforced when calling or returning from functions.
 
 ## 4063: Nullable container access
 
-```Hack
+```hack
 function foo(?vec<int> $items): void {
   /* HH_FIXME[4063] $items can be null. */
   $x = $items[0];
@@ -160,7 +162,7 @@ assert with `$items as nonnull`.
 
 ## 4064: Accessing members on a nullable object
 
-```Hack
+```hack
 class MyClass {
   public int $x = 0;
   public function foo(): void {}
@@ -183,7 +185,7 @@ assert with `$m as nonnull`.
 
 ## 4101: Wrong number of type parameters
 
-```Hack
+```hack
 class MyBox<T> {
   public ?T $x = null;
 }
@@ -206,7 +208,7 @@ parameters inside function and method bodies.
 
 ## 4107: Unbound name (type checking)
 
-```Hack
+```hack
 function foo(): void {
   /* HH_FIXME[4107] No such function (type checking). */
   /* HH_FIXME[2049] No such function (global name check). */
@@ -224,7 +226,7 @@ legacy PHP APIs.
 
 ## 4108: Undefined shape field
 
-```Hack
+```hack
 function foo(shape('x' => int) $s): void {
   /* HH_FIXME[4108] No such field in this shape. */
   $value = $s['not_x'];
@@ -239,7 +241,7 @@ you're using.
 
 ## 4110: Bad type in expression
 
-```Hack
+```hack
 function takes_int(int $_): void {}
 
 function foo(): void {
@@ -280,7 +282,7 @@ results when converting shapes to arrays.
 
 ## 4128: Using deprecated code
 
-```Hack
+```hack
 function foo_new(): void {}
 
 <<__Deprecated("Use foo_new instead")>>
@@ -301,7 +303,7 @@ API.
 
 ## 4165: Accessing optional shape field
 
-```Hack
+```hack
 function foo(shape(?'x' => int) $s): void {
   /* HH_FIXME[4165] This field may not be present. */
   $value = $s['x'];
@@ -316,7 +318,7 @@ the missing field.
 
 ## 4193: Illegal XHP child
 
-```Hack no-extract
+```hack no-extract
 use type Facebook\XHP\HTML\div;
 
 function foo(mixed $m): void {
@@ -355,7 +357,7 @@ for empty values.
 
 ## 4297: Type inference failed
 
-```Hack
+```hack
 class MyA {
   public function doStuff(): void {}
 }
@@ -391,7 +393,7 @@ $d = dict<string, string>[];
 
 ## 4323: Type constraint violation
 
-```Hack
+```hack
 /* HH_FIXME[4323] A dict must have arraykey, int or string keys. */
 function foo(dict<mixed, bool> $d): void {}
 ```
@@ -408,7 +410,7 @@ supported for the generic you're using.
 
 ## 4324: Array access on a type that doesn't support indexing
 
-```Hack
+```hack
 function foo(int $m): void {
   /* HH_FIXME[4324] Indexing a type that isn't indexable. */
   $value = $m['foo'];

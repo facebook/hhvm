@@ -1,8 +1,10 @@
+# Inout Parameters
+
 Hack functions normally pass arguments by value. `inout` provides
 "copy-in, copy-out" arguments, which allow you to modify the variable
 in the caller.
 
-```Hack
+```hack
 function takes_inout(inout int $x): void {
   $x = 1;
 }
@@ -19,7 +21,7 @@ This is similar to copy-by-reference, but the copy-out only happens
 when the function returns. If the function throws an exception, no
 changes occur.
 
-```Hack
+```hack
 function takes_inout(inout int $x): void {
   $x = 1;
   throw new Exception();
@@ -45,7 +47,7 @@ function call. This is enforced in the typechecker and at runtime.
 In addition to local variables, `inout` supports indexes in value
 types.
 
-```Hack
+```hack
 function set_to_value(inout int $item, int $value): void {
   $item = $value;
 }

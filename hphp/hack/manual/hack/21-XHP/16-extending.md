@@ -1,3 +1,5 @@
+# Extending
+
 XHP comes with classes for all standard HTML tags, but since these are first-class objects, you can create your own XHP classes for rendering
 items that are not in the standard HTML specification.
 
@@ -6,13 +8,15 @@ items that are not in the standard HTML specification.
 XHP class names must follow the same rules as any other Hack class names:
 Letters, numbers and `_` are allowed and the name mustn't start with a number.
 
-**Historical note:**
-<span data-nosnippet class="fbOnly fbIcon">(applies in FB WWW repository)</span>
+<FbHistorical>
+
 Before XHP namespace support (in XHP-Lib v3), XHP class
 names could also contain `:` (now a namespace separator) and `-` (now disallowed
 completely). These were translated to `__` and `_` respectively at runtime (this
 is called "name mangling"). For example, `<ui:big-table>` would instantiate a
 global class named `xhp_ui__big_table`.
+
+</FbHistorical>
 
 A custom XHP class needs to do three things:
 * use the keywords `xhp class` instead of `class`
@@ -37,6 +41,7 @@ final xhp class intro_plain_str extends x\primitive {
   }
 }
 ```
+
 ```basic.hack
 <<__EntryPoint>>
 async function extending_examples_basic_run(): Awaitable<void> {
@@ -48,11 +53,13 @@ async function extending_examples_basic_run(): Awaitable<void> {
 }
 ```
 
-**Historical note:**
-<span data-nosnippet class="fbOnly fbIcon">(applies in FB WWW repository)</span>
+<FbHistorical>
+
 Before XHP namespace support (in XHP-Lib v3), use
 `class :intro_plain_str` instead of `xhp class intro_plain_str` (no `xhp`
 keyword, but requires a `:` prefix in the class name).
+
+</FbHistorical>
 
 ## Attributes
 
@@ -60,13 +67,13 @@ keyword, but requires a `:` prefix in the class name).
 
 Your custom class may have attributes in a similar form to XML attributes, using the `attribute` keyword:
 
-```
+```hack no-extract
 attribute <type> <name> [= default value|@required];
 ```
 
 Additionally, multiple declarations can be combined:
 
-```
+```hack no-extract
 attribute
   int foo,
   string bar @required;
@@ -107,6 +114,7 @@ final xhp class user_info extends x\element {
   }
 }
 ```
+
 ```required-attributes.hack
 use namespace Facebook\XHP;
 
@@ -135,7 +143,7 @@ async function extending_examples_attributes_run(): Awaitable<void> {
 For historical reasons, nullable types are inferred instead of explicitly stated. An attribute is nullable if it is not `@required` and
 does not have a default value. For example:
 
-```
+```hack no-extract
 attribute
   string iAmNotNullable @required,
   string iAmNotNullableEither = "foo",
@@ -147,7 +155,7 @@ attribute
 An XHP class can inherit all attributes of another XHP class using the
 following syntax:
 
-```
+```hack no-extract
 // inherit all attributes from the <div> HTML element
 attribute :Facebook:XHP:HTML:div;
 ```
@@ -173,6 +181,7 @@ final xhp class ui_my_box extends x\element {
   }
 }
 ```
+
 ```bad-attribute-transfer.hack
 <<__EntryPoint>>
 async function extending_examples_bad_attribute_transfer_run(
@@ -204,6 +213,7 @@ final xhp class ui_my_good_box extends x\element {
   }
 }
 ```
+
 ```attribute-transfer.hack
 <<__EntryPoint>>
 async function extending_examples_good_attribute_transfer_run(
@@ -221,7 +231,7 @@ async function extending_examples_good_attribute_transfer_run(
 Now, when `<ui_my_good_box>` is rendered, each `<div>` attribute will be transferred over.
 
 Observe that `extra_attr`, which doesn't exist on `<div>`, is not transferred.
-Also note that the position of `{...$this}` matters&mdash;it overrides any
+Also note that the position of `{...$this}` matters - it overrides any
 duplicate attributes specified earlier, but attributes specified later override
 it.
 
@@ -231,13 +241,15 @@ You can declare the types that your custom class is allowed to have as children
 by using the `Facebook\XHP\ChildValidation\Validation` trait and implementing the
 `getChildrenDeclaration()` method.
 
-**Historical note:**
-<span data-nosnippet class="fbOnly fbIcon">(applies in FB WWW repository)</span>
+<FbHistorical>
+
 Before XHP namespace support (in XHP-Lib v3), a special
 `children` keyword with a regex-like syntax could be used instead
 ([examples](https://github.com/hhvm/xhp-lib/blob/v3.x/tests/ChildRuleTest.php)).
 However, XHP-Lib v3 also supports `Facebook\XHP\ChildValidation\Validation`, and
 it is therefore recommended to use it everywhere.
+
+</FbHistorical>
 
 If you don't use the child validation trait, then your class can have any
 children. However, child validation still applies to any XHP objects returned
@@ -293,6 +305,7 @@ xhp class my_html extends x\element {
   }
 }
 ```
+
 ```children.hack
 use namespace Facebook\XHP;
 use type Facebook\XHP\HTML\{body, head, li, ul};
@@ -352,6 +365,7 @@ xhp class my_text extends x\element implements Category\Phrase {
   }
 }
 ```
+
 ```categories.hack
 use type Facebook\XHP\HTML\em;
 
@@ -363,20 +377,22 @@ async function extending_examples_categories_run(): Awaitable<void> {
 
   $my_text = <my_text />;
   $my_text->appendChild("Bye!"); // This is pcdata, not a phrase
-  // Won't print out "Bye!" because render is only returing Phrase children
+  // Won't print out "Bye!" because render is only returning Phrase children
   echo await $my_text->toStringAsync();
 }
 ```
 
-**Historical note:**
-<span data-nosnippet class="fbOnly fbIcon">(applies in FB WWW repository)</span>
+<FbHistorical>
+
 Before XHP namespace support (in XHP-Lib v3), a special
 `category` keyword could be used instead of an interface
 (`category %name1, %name2;`).
 
+</FbHistorical>
+
 ## Async
 
-XHP and [async](../asynchronous-operations/introduction.md) co-exist well together.
+XHP and [async](/hack/asynchronous-operations/introduction) co-exist well together.
 As you may have noticed, all rendering methods (`renderAsync`, `stringifyAsync`)
 are declared to return an `Awaitable` and can therefore be implemented as async
 functions and use `await`.
@@ -394,6 +410,7 @@ final xhp class ui_get_status extends x\element {
   }
 }
 ```
+
 ```xhp-async.hack
 <<__EntryPoint>>
 async function extending_examples_async_run(): Awaitable<void> {
@@ -405,11 +422,14 @@ async function extending_examples_async_run(): Awaitable<void> {
 }
 ```
 
-**Historical note:**
-<span data-nosnippet class="fbOnly fbIcon">(applies in FB WWW repository)</span>
+
+<FbHistorical>
+
 In XHP-Lib v3, most rendering methods are not async, and
 therefore a special `\XHPAsync` trait must be used in XHP classes that need to
 `await` something during rendering.
+
+</FbHistorical>
 
 ## HTML Helpers
 
@@ -417,9 +437,11 @@ The `Facebook\XHP\HTML\XHPHTMLHelpers` trait implements two behaviors:
 * Giving each object a unique `id` attribute.
 * Managing the `class` attribute.
 
-**Historical note:**
-<span data-nosnippet class="fbOnly fbIcon">(applies in FB WWW repository)</span>
+<FbHistorical>
+
 In XHP-Lib v3, this trait is called `\XHPHelpers`.
+
+</FbHistorical>
 
 ### Unique IDs
 
@@ -438,6 +460,7 @@ xhp class my_id extends x\element {
   }
 }
 ```
+
 ```get-id.hack
 <<__EntryPoint>>
 async function extending_examples_get_id_run(): Awaitable<void> {
@@ -446,8 +469,6 @@ async function extending_examples_get_id_run(): Awaitable<void> {
   $xhp = <my_id />;
   echo await $xhp->toStringAsync();
 }
-```.hhvm.expectf
-<span id="%s">This has a random id</span>
 ```
 
 ### Class Attribute Management

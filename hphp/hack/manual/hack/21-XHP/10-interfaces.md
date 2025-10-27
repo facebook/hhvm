@@ -1,3 +1,5 @@
+# Interfaces
+
 There are two important XHP types, the `\XHPChild` interface (HHVM built-in) and
 the `\Facebook\XHP\Core\node` base class (declared in XHP-Lib). You will most
 commonly encounter these in functions' return type annotations.
@@ -28,11 +30,13 @@ one of its two subclasses:
   a `stringifyAsync()` method that returns a `string` and must manually deal with
   any children
 
-**Historical note:**
-<span data-nosnippet fbIcon">(applies in FB WWW repository)</span>
+<FbHistorical>
+
 Before XHP namespace support (in XHP-Lib v3), the names of
 `node`, `element` and `primitive` are `\XHPRoot`, `:x:element` and
 `:x:primitive` respectively.
+
+</FbHistorical>
 
 The `\Facebook\XHP\Core` namespace is conventionally aliased as `x` (`use Facebook\XHP\Core as x;`), so you might encounter these classes as `x\node`,
 `x\element` and `x\primitive`, which also mirrors their historical names.
@@ -49,10 +53,12 @@ XHP usually gets in the way of this by:
 
 The `\Facebook\XHP\UnsafeRenderable` and `\Facebook\XHP\XHPAlwaysValidChild` interfaces allow bypassing these safety mechanisms.
 
-**Historical note:**
-<span data-nosnippet class="fbOnly fbIcon">(applies in FB WWW repository)</span>
+<FbHistorical>
+
 Before XHP namespace support (in XHP-Lib v3), the names of
 these interfaces are `\XHPUnsafeRenderable` and `\XHPAlwaysValidChild`.
+
+</FbHistorical>
 
 ### `\Facebook\XHP\UnsafeRenderable`
 

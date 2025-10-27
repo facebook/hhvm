@@ -1,8 +1,10 @@
+# Break and Continue
+
 ## `continue`
 
 A `continue` statement terminates the execution of the innermost enclosing `do`, `for`, `foreach`, or `while` statement.  For example:
 
-```Hack
+```hack
 for ($i = 1; $i <= 10; ++$i) {
   if (($i % 2) === 0) {
     continue;
@@ -19,7 +21,7 @@ fully contained within a finally block.
 A `break` statement can be used to interrupt the iteration of a loop statement and to break-out to the statement immediately following
 that loop statement.  For example:
 
-```Hack no-extract
+```hack no-extract
 while (true) {
   // ...
   if ($done) {

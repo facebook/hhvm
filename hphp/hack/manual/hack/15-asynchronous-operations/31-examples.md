@@ -1,3 +1,5 @@
+# Examples
+
 Here are some examples representing a slew of possible async scenarios. Obviously, this does not cover all possible situations, but they
 provide an idea of how and where async can be used effectively. Some of these examples are found spread out through the rest of the async
 documentation; they are added here again for consolidation purposes.
@@ -6,7 +8,7 @@ documentation; they are added here again for consolidation purposes.
 
 This example shows the basic tenets of async, particularly the keywords used:
 
-```Hack
+```hack
 // async specifies a function will return an awaitable. Awaitable<string> means
 // that the awaitable will ultimately return a string when complete
 async function trivial(): Awaitable<string> {
@@ -31,7 +33,7 @@ async function call_trivial(): Awaitable<void> {
 
 To get the result of an awaitable in a non-async function, use `join`:
 
-```Hack
+```hack
 async function join_async(): Awaitable<string> {
   return "Hello";
 }
@@ -51,7 +53,7 @@ function main(): void {
 
 Closure and lambda expressions can involve async functions:
 
-```Hack
+```hack
 <<__EntryPoint>>
 async function closure_async(): Awaitable<void> {
   // closure
@@ -73,7 +75,7 @@ async function closure_async(): Awaitable<void> {
 
 This shows a way to organize async functions such that we have a nice clean data dependency graph:
 
-```Hack
+```hack
 class PostData {
   // using constructor argument promotion
   public function __construct(public string $text) {}
@@ -145,7 +147,7 @@ function main(): void {
 Use rescheduling (via `HH\Asio\later`) to batch up operations to send multiple keys in a single request over a high latency network (for
 example purposes, the network isn't high latency, but just returns something random):
 
-```Hack
+```hack
 async function b_one(string $key): Awaitable<string> {
   $subkey = await Batcher::lookup($key);
   return await Batcher::lookup($subkey);
@@ -211,7 +213,7 @@ async function multi_key_lookup(
 We can use rescheduling in a polling loop to allow other awaitables to run. A polling loop may be needed where a service does not have
 an async function to add to the scheduler:
 
-```Hack
+```hack
 // Of course, this is all made up :)
 class Polling {
   private int $count = 0;

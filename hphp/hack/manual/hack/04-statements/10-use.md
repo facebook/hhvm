@@ -1,10 +1,12 @@
+# Use
+
 The `use` statement permits names defined in one namespace to be introduced into another namespace, so they can be referenced
 there by their simple name rather than their (sometimes very long) fully qualified name. The `use` statement can only be
 present at the top level.
 
 Consider the following:
 
-```Hack file:use.hack
+```hack file:use.hack
 namespace UseNS {
 
   const int CON = 100;
@@ -94,7 +96,7 @@ one namespace, references to that name would be ambiguous, so this is disallowed
 In the case of `use namespace`, we can implicitly reference names inside the given namespace by using a prefix that is the right-most
 part of the fully qualified name. For example, once
 
-```Hack file:use.hack
+```hack file:use.hack
 namespace {
   use namespace Hack\UserDocumentation\Statements\use\Examples\XXX;
 }

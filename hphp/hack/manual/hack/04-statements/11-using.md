@@ -1,7 +1,9 @@
-A `using` statement is used to enforce [object disposal](../classes/object-disposal.md).  It has two forms: block and non-block. Here is an
+# Using
+
+A `using` statement is used to enforce [object disposal](/hack/classes/object-disposal).  It has two forms: block and non-block. Here is an
 example of the block form:
 
-```Hack no-extract
+```hack no-extract
   using ($f1 = new TextFile("file1.txt", "rw")) {
     // ... work with the file
   } // __dispose is called here
@@ -13,10 +15,10 @@ omitted, we cannot access the object directly inside the block.
 
 Within the block, there are limits to what we can do with `$f1`. Specifically, we *cannot* assign to it again or make copies of it.  And to
 pass it to a function, we must mark the function's corresponding parameter with the
-[attribute __AcceptDisposable](../attributes/predefined-attributes.md#__AcceptDisposable).  We can also call methods on the object
+[attribute __AcceptDisposable](/hack/attributes/predefined-attributes#__AcceptDisposable).  We can also call methods on the object
 that `$f1` designates.  Consider the following:
 
-```Hack no-extract
+```hack no-extract
   using ($f1 = new TextFile("file1.txt", "rw")) {
 //  echo "\$f1 is >" . $f1 . "<\n";  // usage not permitted
     echo "\$f1 is >" . $f1->__toString() . "<\n";
@@ -30,7 +32,7 @@ which is why `__toString` is called explicitly in the statement following.
 
 Here is an example of the non-block form:
 
-```Hack no-extract
+```hack no-extract
 function foo(): void {
   using $f4 = TextFile::open_TextFile("file4.txt", "rw");
   using $f5 = new TextFile("file5.txt", "rw");
@@ -41,4 +43,4 @@ function foo(): void {
 The difference here is that no parentheses are required around the controlling expression, we use a trailing semicolon instead of a block,
 and the scope of the assigned-to variables ends at the end of the parent block, which avoids the need to use nested `using` statements.
 
-See [object disposal](../classes/object-disposal) for a detailed example of the use of both forms.
+See [object disposal](/hack/classes/object-disposal) for a detailed example of the use of both forms.

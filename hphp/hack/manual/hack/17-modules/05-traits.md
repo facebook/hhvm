@@ -1,3 +1,5 @@
+# Traits
+
 Traits have special behavior in Hack when used with modules.
 
 ## Marking traits internal

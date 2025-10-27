@@ -1,3 +1,5 @@
+# Pipe
+
 The binary pipe operator, `|>`, evaluates the result of a left-hand expression and stores the result in `$$`, the pre-defined pipe variable. The right-hand expression *must* contain at least one occurrence of `$$`.
 
 ## Basic Usage

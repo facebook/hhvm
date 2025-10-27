@@ -1,5 +1,7 @@
+# Introduction
+
 **Topics covered in this section**
 
-* [Using a Trait](using-a-trait.md)
-* [Implementing an Interface](implementing-an-interface.md)
-* [Trait and Interface Requirements](trait-and-interface-requirements.md)
+* [Using a Trait](/hack/traits-and-interfaces/using-a-trait)
+* [Implementing an Interface](/hack/traits-and-interfaces/implementing-an-interface)
+* [Trait and Interface Requirements](/hack/traits-and-interfaces/trait-and-interface-requirements)

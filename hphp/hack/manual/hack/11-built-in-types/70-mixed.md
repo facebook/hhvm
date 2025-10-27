@@ -1,8 +1,10 @@
+# Mixed
+
 The `mixed` type represents any value at all in Hack.
 
 For example, the following function can be passed anything.
 
-```Hack no-extract
+```hack no-extract
 function takes_anything(mixed $m): void {}
 
 function call_it(): void {

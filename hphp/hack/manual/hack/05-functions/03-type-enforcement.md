@@ -1,7 +1,9 @@
+# Type Enforcement
+
 HHVM does a runtime type check for function arguments and return
 values.
 
-```Hack error
+```hack error
 function takes_int(int $_): void {}
 
 function check_parameter(): void {

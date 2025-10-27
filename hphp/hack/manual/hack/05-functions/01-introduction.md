@@ -1,6 +1,8 @@
+# Introduction
+
 The `function` keyword defines a global function.
 
-```Hack
+```hack
 function add_one(int $x): int {
   return $x + 1;
 }
@@ -12,7 +14,7 @@ The `function` keyword can also be used to define [methods](/hack/classes/method
 
 Hack supports default values for parameters.
 
-```Hack
+```hack
 function add_value(int $x, int $y = 1): int {
   return $x + $y;
 }
@@ -23,7 +25,7 @@ This function can take one or two arguments. `add_value(3)` returns 4.
 Required parameters must come before optional parameters, so the
 following code is invalid:
 
-```Hack error
+```hack error
 function add_value_bad(int $x = 1, int $y): int {
   return $x + $y;
 }
@@ -34,7 +36,7 @@ function add_value_bad(int $x = 1, int $y): int {
 You can use `...` to define a function that takes a variable number of
 arguments.
 
-```Hack file:sumints.hack
+```hack file:sumints.hack
 function sum_ints(int $val, int ...$vals): int {
   $result = $val;
 
@@ -48,7 +50,7 @@ function sum_ints(int $val, int ...$vals): int {
 This function requires at least one argument, but has no maximum
 number of arguments.
 
-```Hack file:sumints.hack
+```hack file:sumints.hack
 // Passing positional arguments.
 sum_ints(1, 2, 3);
 
@@ -61,7 +63,7 @@ sum_ints(0, ...$args);
 
 Functions are values in Hack, so they can be passed as arguments too.
 
-```Hack
+```hack
 function apply_func(int $v, (function(int): int) $f): int {
   return $f($v);
 }
@@ -73,7 +75,7 @@ function usage_example(): void {
 
 Variadic functions can also be passed as arguments.
 
-```Hack
+```hack
 function takes_variadic_fun((function(int...): void) $f): void {
   $f(1, 2, 3);
 
@@ -84,7 +86,7 @@ function takes_variadic_fun((function(int...): void) $f): void {
 
 Finally, functions taking optional parameters can be passed as arguments.
 
-```Hack
+```hack
 function with_default(int $x, int $y = 0):void {
 }
 function takes_unary_or_binary_fun((function(int,optional int):void) $f):void {

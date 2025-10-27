@@ -1,15 +1,15 @@
-```yamlmeta
-{
-  "fbonly messages": [
-    "This type is under migration, and is allowed to flow to the [classname type](/hack/built-in-types/classname) for existing string use cases. There is [an internal wiki](https://www.internalfb.com/intern/wiki/Hack_Foundation/classnameC_vs._classC/) describing the type separation."
-  ]
-}
-```
+# Class
+
+<FbCaution>
+
+This type is under migration, with the class-specific use cases described below shifting to the new [class type](/hack/built-in-types/class). There is [an internal wiki](https://www.internalfb.com/intern/wiki/Hack_Foundation/classnameC_vs._classC/) describing the type separation.
+
+</FbCaution>
 
 Hack supports passing references to classes for use in instatiation and static
 member access.
 
-```Hack no-extract
+```hack no-extract
 <<__ConsistentConstruct>>
 class Employee {
   public static function getKind(): int { return 4; };
@@ -25,7 +25,7 @@ function f(class<Employee> $cls): void {
 Function `f` can be called with a reference to the class `Employee` or any of
 its subclasses using `::class` literals (`SomeClassName::class`).
 
-```Hack no-extract
+```hack no-extract
 class Intern extends Employee {
   // ...
 }

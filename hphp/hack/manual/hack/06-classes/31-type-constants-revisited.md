@@ -1,6 +1,8 @@
+# Type Constants Revisited
+
 Imagine that you have a class, and some various `extends` to that class.
 
-```Hack
+```hack
 abstract class User {
   public function __construct(private int $id) {}
   public function getID(): int {
@@ -33,7 +35,7 @@ of `User` will know exactly what type will be returned.
 While this situation could be handled by using generics, an alternate approach is to use type constants. Instead of types being declared
 as parameters directly on the class itself, type constants allow the type to be declared as class member constants instead.
 
-```Hack
+```hack
 abstract class User {
   abstract const type T as arraykey;
   public function __construct(private this::T $id) {}
@@ -98,12 +100,12 @@ e.g.,
 this::T
 ```
 
-You can think of `this::` in a similar manner as the [`this` return type](../built-in-types/this.md).
+You can think of `this::` in a similar manner as the [`this` return type](/hack/built-in-types/this).
 
 This example shows the real benefit of type constants. The property is defined in `Base`, but can have different types depending
 on the context of where it is being used.
 
-```Hack
+```hack
 abstract class Base {
   abstract const type T;
   protected this::T $value;
@@ -148,7 +150,7 @@ Here are some examples of where type constants may be useful:
 
 Referencing type constants is as easy as referencing a static class constant.
 
-```Hack
+```hack
 abstract class UserTC {
   abstract const type Ttc as arraykey;
   public function __construct(private this::Ttc $id) {}
@@ -176,7 +178,7 @@ function run(): void {
 
 You can use type constants as inputs to class instance methods.
 
-```Hack
+```hack
 abstract class Box {
   abstract const type T;
   public function __construct(private this::T $value) {}

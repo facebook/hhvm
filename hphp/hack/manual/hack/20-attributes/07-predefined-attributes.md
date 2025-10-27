@@ -1,33 +1,37 @@
+# Predefined Attributes
+
 The following attributes are defined:
-* [__AcceptDisposable](#__acceptdisposable)
-* [__AutocompleteSortText](#__autocompletesorttext)
-* [__ConsistentConstruct](#__consistentconstruct)
-* [__Deprecated](#__deprecated)
-* [__Docs](#__docs)
-* [__DynamicallyCallable](#__dynamicallycallable)
-* [__DynamicallyConstructible](#__dynamicallyconstructible)
-* [__EnableMethodTraitDiamond](#__enablemethodtraitdiamond)
-* [__Enforceable](#__enforceable)
-* [__EntryPoint](#__entrypoint)
-* [__Explicit](#__explicit)
-* [__LateInit](#__lateinit)
-* [__LSB](#__lsb)
-* [__Memoize](#__memoize)
-* [__MemoizeLSB](#__memoizelsb)
-* [__MockClass](#__mockclass)
-* [__ModuleLevelTrait](#__moduleleveltrait)
-* [__Newable](#__newable)
-* [__Override](#__override)
-* [__PHPStdLib](#__phpstdlib)
-* [__ReturnDisposable](#__returndisposable)
-* [__Sealed](#__sealed)
-* [__Soft](#__soft)
+- [\_\_AcceptDisposable](#__acceptdisposable)
+- [\_\_AutocompleteSortText](#__autocompletesorttext)
+- [\_\_ConsistentConstruct](#__consistentconstruct)
+- [\_\_Deprecated](#__deprecated)
+- [\_\_Docs](#__docs)
+- [\_\_DynamicallyCallable](#__dynamicallycallable)
+- [\_\_DynamicallyConstructible](#__dynamicallyconstructible)
+- [\_\_EnableMethodTraitDiamond](#__enablemethodtraitdiamond)
+- [\_\_Enforceable](#__enforceable)
+- [\_\_Explicit](#__explicit)
+- [\_\_EntryPoint](#__entrypoint)
+- [\_\_LateInit](#__lateinit)
+- [\_\_LSB](#__lsb)
+- [\_\_Memoize](#__memoize)
+  - [Exceptions](#exceptions)
+  - [Awaitables and Exceptions](#awaitables-and-exceptions)
+- [\_\_MemoizeLSB](#__memoizelsb)
+- [\_\_MockClass](#__mockclass)
+- [\_\_ModuleLevelTrait](#__moduleleveltrait)
+- [\_\_Newable](#__newable)
+- [\_\_Override](#__override)
+- [\_\_PHPStdLib](#__phpstdlib)
+- [\_\_ReturnDisposable](#__returndisposable)
+- [\_\_Sealed](#__sealed)
+- [\_\_Soft](#__soft)
 
 ## __AcceptDisposable
 
 This attribute can be applied to a function parameter that has a type that implements interface `IDisposable` or `IAsyncDisposable`.
 
-See [object disposal](../classes/object-disposal.md) for an example of its use.
+See [object disposal](/hack/classes/object-disposal) for an example of its use.
 
 ## __AutocompleteSortText
 
@@ -35,7 +39,7 @@ When we are displaying autocomplete suggestions, we sort method suggestions
 alphabetically. To override what text is used for sorting a specific method in
 the autocomplete suggestions, use the `__AutocompleteSortText` attribute.
 
-```Hack file:base.hack
+```hack file:base.hack
 class Dog {
   <<__AutocompleteSortText('!getName')>>
   public function getName(): string {
@@ -66,7 +70,7 @@ however, especially when using `new static`.
 
 This attribute can be applied to classes; it has no attribute values.  Consider the following example:
 
-```Hack
+```hack
 <<__ConsistentConstruct>>
 class Base {
   public function __construct() {}
@@ -97,7 +101,7 @@ If you mark a function with `__Deprecated`, the Hack typechecker will find all s
 
 Consider the following example:
 
-```Hack
+```hack
 <<__Deprecated("This function has been replaced by do_that", 7)>>
 function do_this(): void { /* ... */ }
 ```
@@ -115,7 +119,7 @@ To disable runtime notices, use a sampling rate of 0.
 
 Associates a documentation URL with a type.
 
-```Hack file:base.hack
+```hack file:base.hack
 <<__Docs("http://www.example.com/my_framework")>>
 class MyFrameworkBaseClass {}
 ```
@@ -123,7 +127,7 @@ class MyFrameworkBaseClass {}
 The IDE will include this URL when hovering over the
 `MyFrameworkBaseClass` type name.
 
-```Hack file:base.hack
+```hack file:base.hack
 class MyClass extends MyFrameworkBaseClass {}
 ```
 
@@ -146,14 +150,14 @@ dynamic instantiations of classes without this attribute.
 
 This attribute can be applied to a class or trait to enable resolution of traits used along multiple paths.
 
-See [using a trait](../traits-and-interfaces/using-a-trait.md) for an example of its use.
+See [using a trait](/hack/traits-and-interfaces/using-a-trait) for an example of its use.
 
 
 ## __Enforceable
 
 A type is _enforceable_ if it can be used in `is` and `as` expressions.  Examples of non-enforceable types are function types and erased (non-reified) generics.  The `__Enforceable` attribute is used to annotate abstract type constants so they can only be instantiated with enforceable types, and thus used in `is` and `as` expressions. The attribute restricts deriving type constants to values that are valid for a type test.
 
-```Hack error
+```hack error
 abstract class A {
   abstract const type Tnoenf;
   <<__Enforceable>>
@@ -184,7 +188,7 @@ Similarly, the `__Enforceable` attribute can also be used to annotate reified ge
 Requires callers to explicitly specify the value for a generic
 type. Normally Hack allows generics to be inferred at the call site.
 
-```Hack error
+```hack error
 function values_are_equal<<<__Explicit>> T>(T $x, T $y): bool {
   return $x === $y;
 }
@@ -203,7 +207,7 @@ function example_usage(int $x, int $y, string $s): void {
 A Hack program begins execution at a top-level function referred to as the *entry-point function*. A top-level function can be designated as such using this attribute, which
 has no attribute values. For example:
 
-```Hack
+```hack
 <<__EntryPoint>>
 function main(): void {
   printf("Hello, World!\n");
@@ -219,7 +223,7 @@ initial value on the property definition or inside the constructor.
 
 `__LateInit` disables this check.
 
-```Hack
+```hack
 class Foo {}
 
 class Bar {
@@ -238,7 +242,7 @@ Accessing a property that is not initialized produces a runtime error.
 
 `__LateInit` can also be used with static properties.
 
-```Hack
+```hack
 class Foo {}
 
 class Bar {
@@ -265,7 +269,7 @@ and/or order of the parameters can change that key. Functions with variadic para
 
 This attribute can be applied to functions and static or instance methods; it has no attribute values.  Consider the following example:
 
-```Hack no-extract
+```hack no-extract
 class Item {
   <<__Memoize>>
   public static function get_name_from_product_code(int $productCode): string {
@@ -304,7 +308,7 @@ Consider using `__MemoizeLSB` instead on static methods.
 Thrown exceptions are not memoized, showing by the increasing counter in this
 example:
 
-```Hack
+```hack
 class CountThrows {
   private int $count = -1;
   <<__Memoize>>
@@ -328,28 +332,29 @@ function main(): void {
 ```
 
 ### Awaitables and Exceptions
-As memoize caches an [Awaitable](../asynchronous-operations/awaitables) itself, this means that **if an async function
+As memoize caches an [Awaitable](/hack/asynchronous-operations/awaitables) itself, this means that **if an async function
 is memoized and throws, you will get the same exception backtrace on every
 failed call**.
 
-For more information and examples, see [Memoized Async Exceptions](../asynchronous-operations/exceptions#memoized-async-exceptions).
+For more information and examples, see [Memoized Async Exceptions](/hack/asynchronous-operations/exceptions#memoized-async-exceptions).
 
 ## __MemoizeLSB
 
-This is like [<<__Memoize>>](#__memoize), but the cache has Late Static Binding. Each subclass has its own memoize cache.
+This is like [`<<__Memoize>>`](#__memoize), but the cache has Late Static Binding. Each subclass has its own memoize cache.
 
 You can clear the cache with `HH\clear_lsb_memoization`. This should only be used **in tests** where:
 - the component being tested is meant to be immutable/idempotent for the entire request
 - the test needs to cover multiple initial states, where only one would truly be reachable in a single request
 
 ## __MockClass
-```yamlmeta
-{
-  "fbonly messages": [
-    "Mock classes are intended for test infrastructure. They should not be added or used directly in Facebook's WWW repository."
-  ]
-}
-```
+
+<FbInfo>
+
+Mock classes are intended for test infrastructure. They should not be added or used directly in Facebook's WWW repository.
+
+</FbInfo>
+
+
 Mock classes are useful in testing frameworks when you want to test functionality provided by a legitimate, user-accessible class,
 by creating a new class (many times a child class) to help with the testing. However, what if a class is marked as `final` or a method in a
 class is marked as `final`? Your mocking framework would generally be out of luck.
@@ -357,7 +362,7 @@ class is marked as `final`? Your mocking framework would generally be out of luc
 The `__MockClass` attribute allows you to override the restriction of `final` on a class or method within a class, so that a
 mock class can exist.
 
-```Hack no-extract
+```hack no-extract
 final class FinalClass {
   public static function f(): void {
     echo __METHOD__, "\n";
@@ -393,13 +398,13 @@ Mock classes *cannot* extend types `vec`, `dict`, and `keyset`, or the Hack lega
 
 ## __ModuleLevelTrait
 
-Can be used on public traits.  The elements of a trait annotated with `<<__ModuleLevelTrait>>` are considered to belong to the module where the trait is defined, and can access other internal symbols of the module.  For more information see [Traits and Modules](../modules/traits.md).
+Can be used on public traits.  The elements of a trait annotated with `<<__ModuleLevelTrait>>` are considered to belong to the module where the trait is defined, and can access other internal symbols of the module.  For more information see [Traits and Modules](/hack/modules/traits).
 
 ## __Newable
 
 This attribute is used to annotate reified type parameters to ensure that they are only instantiated with classes on which `new` can be safely called.  A common pattern, defining a function that creates instances of a class passed as type parameter, is:
 
-```Hack
+```hack
 final class A {}
 
 function f<<<__Newable>> reify T as A>(): T {
@@ -407,11 +412,11 @@ function f<<<__Newable>> reify T as A>(): T {
 }
 ```
 
-The class `A` must either be final (as in the example) or annotated with `__ConsistentConstruct`.  The `__Newable` attribute ensures that the function `f` is only be applied to a _non-abstract_ class, say `C`, while the `as A` constraint guarantees that the interface of the constructor of `C` is uniquely determined by the interface of the constructor of class `A`.  The generic type `T` must be reified so that the runtime has access to it, refer to [Generics: Reified Generics](../generics/reified-generics.md) for details.
+The class `A` must either be final (as in the example) or annotated with `__ConsistentConstruct`.  The `__Newable` attribute ensures that the function `f` is only be applied to a _non-abstract_ class, say `C`, while the `as A` constraint guarantees that the interface of the constructor of `C` is uniquely determined by the interface of the constructor of class `A`.  The generic type `T` must be reified so that the runtime has access to it, refer to [Generics: Reified Generics](/hack/generics/reified-generics) for details.
 
 A complete example thus is:
 
-```Hack
+```hack
 <<__ConsistentConstruct>>
 abstract class A {
   public function __construct(int $x, int $y) {}
@@ -439,7 +444,7 @@ Methods marked with `__Override` must be used with inheritance.
 For classes, `__Override` ensures that a parent class has a method
 with the same name.
 
-```Hack
+```hack
 class Button {
   // If we rename 'draw' to 'render' in the parent class,
   public function draw(): void { /* ... */ }
@@ -454,7 +459,7 @@ class CustomButton extends Button {
 For traits, `__Override` ensures that trait users have a method that
 is overridden.
 
-```Hack
+```hack
 class Button {
   public function draw(): void { /* ... */ }
 }
@@ -474,7 +479,7 @@ class ExampleButton extends Button {
 It is often clearer to use constraints on traits instead. The above
 trait could also be written like this.
 
-```Hack
+```hack
 class Button {
   public function draw(): void { /* ... */ }
 }
@@ -505,7 +510,7 @@ everywhere with the option `deregister_php_stdlib`.
 
 This attribute can be applied to a function that returns a value whose type implements interface `IDisposable` or `IAsyncDisposable`.
 
-See [object disposal](../classes/object-disposal.md) for an example of its use.
+See [object disposal](/hack/classes/object-disposal) for an example of its use.
 
 ## __Sealed
 
@@ -514,7 +519,7 @@ can be implemented directly only by the classes named in the attribute value lis
 extended arbitrarily unless they are final or also sealed. In this way, sealing provides a single-level restraint on inheritance.
 For example:
 
-```Hack
+```hack
 <<__Sealed(X::class, Y::class)>>
 abstract class A {}
 

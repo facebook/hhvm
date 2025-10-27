@@ -1,11 +1,13 @@
+# Enum
+
 Use an enum (enumerated type) to create a set of named, constant, immutable values.
 
 In Hack, enums are limited to `int` or `string` (as an [`Arraykey`](/hack/built-in-types/arraykey)), or other `enum` values.
 
-## Quickstart
+## Quick Start
 To access an enum's value, use its full name, as in `Colors::Blue` or `Permission::Read`.
 
-```Hack
+```hack
 enum Colors: int {
   Red = 3;
   Green = 5;
@@ -14,7 +16,7 @@ enum Colors: int {
 }
 ```
 
-```Hack
+```hack
 enum Permission: string {
   Read = 'R';
   Write = 'W';
@@ -25,7 +27,7 @@ enum Permission: string {
 
 Additionally, by using the [`as`](/hack/expressions-and-operators/type-assertions#enforcing-types-with-as-and-as) operator to enforce type, you can initialize your enum with static expressions that reference other enum values.
 
-```Hack
+```hack
 enum BitFlags: int as int {
   F1 = 1; // value 1
   F2 = BitFlags::F1 << 1; // value 2
@@ -37,7 +39,7 @@ enum BitFlags: int as int {
 ## Full Example
 With an enum, we can create a placement-direction system with names like `Top`, `Bottom`, `Left`, `Right`, and `Center`, then direct output accordingly to write text to the top, bottom, left, right, or center of a window.
 
-```Hack
+```hack
 enum Position: int {
   Top = 0;
   Bottom = 1;
@@ -85,7 +87,7 @@ Returns a `dict` of enum constant values and their names.
   * Following the same example, the keys/values would be: `0 => "Top"`, `1 => "Bottom"`, etc.
   * Because a `dict` *can not* contain duplicate keys, when you call `getNames()`—the static method that returns a `dict` and flips an enum's constant values *to* keys—there is a possiblity of creating a `dict` with duplicates, resulting in an `HH\InvariantException`. In this situation, one safe option for discarding duplicates (and keeping the most recent of every duplicate) is `Dict\flip`.
 
-```Hack
+```hack
 enum Position: int {
   Top = 0;
   Bottom = 1;
@@ -117,7 +119,7 @@ function main(): void {
 
 `coerce($value)` checks if a value exists in an enum, and if it does, returns the value; if the value does not exist, returns `null`.
 
-```Hack
+```hack
 enum Bits: int {
   B1 = 2;
   B2 = 4;
@@ -141,7 +143,7 @@ function main(): void {
 `assertAll($traversable)` calls `assert($value)` on every element of the traversable (e.g. [Hack Arrays](/hack/arrays-and-collections/hack-arrays)); if at least one value does not exist, throws an `UnexpectedValueException`.
 
 
-```Hack
+```hack
 enum Bits: int {
   B1 = 2;
   B2 = 4;
@@ -163,7 +165,7 @@ function main(): void {
 ### `isValid()`
 `isValid($value)` checks if a value exists in an enum, and if it does, returns `true`; if the value does not exist, it returns `false`.
 
-```Hack
+```hack
 enum Bits: int {
   B1 = 2;
   B2 = 4;
@@ -184,7 +186,7 @@ The operators [`is`](/hack/expressions-and-operators/type-assertions#checking-ty
 
 For `is`/`as`/`?as` refinement, the operators validate that a value is a part of a given enum. **Caution:** These operators may perform implicit int/string coercion of enum values to preserve compatibility with `isValid()`.
 
-```Hack
+```hack
 enum MyEnum: int {
   FOO = 1;
 }
@@ -210,7 +212,7 @@ You can define an enum to include all of the constants of another enum with the 
 
 In the following example, `enum` `F` contains all of the constants of `enum` `E1` and `enum` `E2`.
 
-```Hack
+```hack
 enum E1: int as int {
   A = 0;
 }

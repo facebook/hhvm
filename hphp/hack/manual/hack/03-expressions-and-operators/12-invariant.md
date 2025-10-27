@@ -1,7 +1,9 @@
+# Invariant
+
 This intrinsic function behaves like a function with a `void` return type. It is intended to indicate a programmer error for a condition that
 should never occur.  For example:
 
-```Hack no-extract
+```hack no-extract
 invariant($obj is B, "Object must have type B");
 invariant(!$p is null, "Value can't be null");
 $max = 100;

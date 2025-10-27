@@ -1,0 +1,32 @@
+/**
+ * (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
+ */
+
+/**
+ * CSS files with the .module.css suffix will be treated as CSS modules
+ * and scoped locally.
+ */
+
+.heroBanner {
+  padding: 4rem 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  background-color: #242424;
+}
+
+html[data-theme='dark'] .heroBanner {
+  color: #fff;
+}
+
+@media screen and (max-width: 966px) {
+  .heroBanner {
+    padding: 2rem;
+  }
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

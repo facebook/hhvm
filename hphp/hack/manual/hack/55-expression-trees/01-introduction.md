@@ -1,3 +1,5 @@
+# Introduction
+
 Expression trees are an experimental Hack feature that allow you write domain specific languages (DSLs) with Hack syntax.
 
 You can write expressions using normal Hack syntax, and all the normal Hack tools work: syntax highlighting, type checking, and code completion.

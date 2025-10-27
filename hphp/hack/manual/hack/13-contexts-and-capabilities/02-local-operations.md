@@ -1,5 +1,11 @@
-**Note:** Context and capabilities are enabled by default since
+# Local Operations
+
+:::note
+
+Context and capabilities are enabled by default since
 [HHVM 4.93](https://hhvm.com/blog/2021/01/19/hhvm-4.93.html).
+
+:::
 
 The existence of a capability (or lack thereof) within the contexts of a function plays a direct role in the operations allowed within that function.
 

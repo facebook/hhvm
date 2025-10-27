@@ -1,3 +1,5 @@
+# Splicing
+
 Expression trees support "splicing", where you insert one expression tree into another.
 
 ```hack

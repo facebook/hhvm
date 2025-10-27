@@ -1,11 +1,13 @@
+# Type Aliases
+
 We can create an alias name for a type, and it is common to do so for non-trivial tuple and shape types.  Once such a type alias has been defined,
 that alias can be used in almost all contexts in which a type specifier is permitted.  Any given type can have multiple aliases, and a type alias
 can itself have aliases.
 
-## Quickstart
+## Quick Start
 A type alias can be created in two ways: using `type` and `newtype`.
 
-```Hack
+```hack
 type Complex = shape('real' => float, 'imag' => float);
 newtype Point = (float, float);
 ```
@@ -23,7 +25,7 @@ Only source code in the file that contains the definition of the opaque type ali
 such, opaque type aliasing is an abstraction mechanism. Consider the following file, which contains an opaque alias definition for a tuple
 that mimics a point:
 
-```Hack
+```hack
 newtype Point = (float, float);
 
 function create_Point(float $x, float $y): Point {
@@ -43,7 +45,7 @@ Looking at the earlier example, being in the same source file as the alias defin
 
 Similarly, if a source file defines the following opaque alias...
 
-```Hack
+```hack
 newtype Widget = int;
 ```
 
@@ -52,7 +54,7 @@ integer-like operations on a `Widget`.
 
 Consider a file that contains the following opaque type definition:
 
-```Hack
+```hack
 newtype Counter = int;
 ```
 
@@ -60,7 +62,7 @@ Any file that includes this file has no knowledge that a Counter is really an in
 integer-like operations on that type. This is a major limitation, as the supposedly well-chosen name for the abstract type, Counter,
 suggests that its value could increase and/or decrease. We can fix this by adding a type constraint to the alias's definition, as follows:
 
-```Hack
+```hack
 newtype Counter as int = int;
 ```
 
@@ -71,7 +73,7 @@ into an `int`, but not the other way around.
 
 Consider the following:
 
-```Hack no-extract
+```hack no-extract
 class C {
   const type T2 as arraykey = int;
   // ...

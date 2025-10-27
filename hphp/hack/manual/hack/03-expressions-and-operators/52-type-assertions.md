@@ -1,5 +1,7 @@
+# Type Assertions
+
 Hack provides the `is` and `as` operators for inspecting types at
-runtime. To convert primitive types, see [casting](casting.md).
+runtime. To convert primitive types, see [casting](/hack/expressions-and-operators/casting).
 
 The type checker also understands `is` and `as`, so it will infer
 precise types.
@@ -9,7 +11,7 @@ precise types.
 The `is` operator checks whether a value has the type specified, and
 returns a boolean result.
 
-```Hack
+```hack
 1 is int;        // true
 'foo' is int;    // false
 
@@ -19,10 +21,10 @@ returns a boolean result.
 ```
 
 The type checker understands `is` and [refines
-values](../types/type-refinement.md) inside conditionals or after
+values](/hack/types/type-refinement) inside conditionals or after
 `invariant` calls.
 
-```Hack no-extract
+```hack no-extract
 function transport(Vehicle $v): void {
   if ($v is Car) {
     $v->drive();
@@ -52,7 +54,7 @@ function transport(?Car $c): void {
 
 For enums, `is` also checks that the value is valid.
 
-```Hack
+```hack
 enum MyEnum: int {
   FOO = 1;
 }
@@ -84,7 +86,7 @@ generics instead.
 
 For tuples and shapes, `is` validates the size and recursively validates every field in the value.
 
-```Hack
+```hack
 $x = tuple(1, 2.0, null);
 $x is (int, float, ?bool); // true
 
@@ -112,16 +114,16 @@ function demo(): void {
 However, it throws `TypeAssertionException` if the value has a
 different type. The type checker understands that the value must have
 the type specified afterwards, so it
-[refines](../types/type-refinement.md) the value.
+[refines](/hack/types/type-refinement) the value.
 
-```Hack
+```hack
 1 as int;        // 1
 'foo' as int;    // TypeAssertionException
 ```
 
 `as` enables you to narrow a type.
 
-```Hack no-extract
+```hack no-extract
 // Normally you'd want to make transport take a Vehicle
 // directly, so you can check when you call the function.
 function transport(mixed $m): void {
@@ -141,7 +143,7 @@ function transport(mixed $m): void {
 Hack also provides `?as`, which returns `null` if the type does not match.
 
 
-```Hack
+```hack
 1 ?as int;        // 1
 'foo' ?as int;    // null
 ```

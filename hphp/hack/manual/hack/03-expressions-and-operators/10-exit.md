@@ -1,6 +1,8 @@
+# Exit
+
 This intrinsic function terminates the current script, optionally specifying an *exit value* that is returned to the execution environment.  For example:
 
-```Hack
+```hack
 exit ("Closing down\n");
 exit (1);
 ```

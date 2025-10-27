@@ -1,3 +1,5 @@
+# Namespaces
+
 A ***namespace*** is a container for a set of (typically related) definitions of classes, interfaces, traits, functions, and constants.
 
 When the same namespace is declared across multiple scripts, and those scripts are combined into the same program, the resulting namespace
@@ -33,7 +35,7 @@ Namespace declarations can be file-scoped with `namespace MyNS;`, or block-scope
 
 With semicolons, a namespace extends until the end of the script, or until the next namespace declaration, whichever is first.
 
-```Hack
+```hack
 namespace NS1;
 // ...              // __NAMESPACE__ is "NS1"
 namespace NS3\Sub1;
@@ -42,7 +44,7 @@ namespace NS3\Sub1;
 
 With brace delimiters, a namespace extends from the opening brace to the closing brace.
 
-```Hack
+```hack
 namespace NS1 {
   // __NAMESPACE__ is "NS1"
 }
@@ -58,7 +60,7 @@ With the `use` keyword, a namespace can import one or more member names into a s
 
 When importing many names, use `{ ... }`.
 
-```Hack no-extract
+```hack no-extract
 use namespace NS1\{C, I, T}; // instead of `NS1\C, NS1\I, NS1\T`
 ```
 
@@ -67,7 +69,7 @@ Imported names can designate a namespace, a sub-namespace, a class or interface 
 If an imported name introduces ambiguity, you can refer to name `foo` with `namespace\foo`—using the the actual word `namespace`. For example, if you're importing a function `bar()`, but also want to call the `bar()` function from within your own namespace, refer to the one native to your namespace with `namespace\bar()`.
 
 
-```Hack
+```hack
 namespace NS1 {
   const int CON1 = 100;
   function f(): void {

@@ -1,8 +1,10 @@
+# Noreturn
+
 A function that never returns a value can be annotated with the
 `noreturn` type. A `noreturn` function either loops forever, throws an
 an error, or calls another `noreturn` function.
 
-```Hack
+```hack
 function something_went_wrong(): noreturn {
   throw new Exception('something went wrong');
 }
@@ -12,9 +14,9 @@ function something_went_wrong(): noreturn {
 
 `noreturn` informs the typesystem that code execution can not continue past a certain line.
 In combination with a conditional, you can refine variables, since the typesystem will take note.
-This is actually how [invariant](../expressions-and-operators/invariant) is [implemented](/hack/reference/function/HH.invariant).
+This is actually how [invariant](/hack/expressions-and-operators/invariant) is [implemented](/apis/function/HH.invariant).
 
-```Hack
+```hack
 <<__EntryPoint>>
 async function main_async(): Awaitable<void> {
   $nullable_int = '_' ? 0 : null;
@@ -33,7 +35,7 @@ function takes_int(int $int): void {
 If you want to, you can also use [nothing](./nothing) instead. This allows you use the return value of the function.
 This makes it more explicit to the reader of your code that you are depending on the fact that this function influences typechecking.
 
-```Hack
+```hack
 function i_am_a_noreturn_function(): noreturn {
   throw new Exception('stop right here');
 }

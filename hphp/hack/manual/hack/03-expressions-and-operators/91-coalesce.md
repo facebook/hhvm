@@ -1,8 +1,10 @@
+# Coalesce
+
 Given the expression `e1 ?? e2`, if `e1` is defined and not `null`, then the
 result is `e1`. Otherwise, `e2` is evaluated, and its value becomes the result.
 There is a sequence point after the evaluation of `e1`.
 
-```Hack
+```hack
 $nully = null;
 $nonnull = 'a string';
 \print_r(vec[
@@ -22,7 +24,7 @@ It is important to note that the right-hand side of the `??` operator will be
 conditionally evaluated. If the left-hand side is defined and not `null`, the
 right-hand side will not be evaluated.
 
-```Hack no-extract
+```hack no-extract
 $nonnull = 4;
 
 // The `1 / 0` will never be evaluated and no Exception is thrown.
@@ -40,7 +42,7 @@ important difference is that `idx()` only falls back to the specified default
 value if the given key does not exist, while `??` uses the fallback value even
 if a key exists but has `null` value. Compare these examples to the ones above:
 
-```Hack
+```hack
 $arr = dict['black' => 10, 'white' => null];
 \print_r(vec[
   idx($arr, 'black', -100),  // 10
@@ -54,7 +56,7 @@ $arr = dict['black' => 10, 'white' => null];
 ## Coalescing assignment operator
 
 A coalescing
-[assignment](https://docs.hhvm.com/hack/expressions-and-operators/assignment)
+[assignment](/hack/expressions-and-operators/assignment)
 operator `??=` is also available.
 
 The `??=` operator can be used for conditionally writing to a variable if it is
@@ -66,7 +68,7 @@ only evaluated once.
 
 The `??=` operator is very useful for initializing elements of a collection:
 
-```Hack
+```hack
 function get_counts_by_value(Traversable<string> $values): dict<string, int> {
   $counts_by_value = dict[];
   foreach ($values as $value) {

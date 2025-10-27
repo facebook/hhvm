@@ -1,8 +1,10 @@
+# Format Strings
+
 The Hack typechecker checks that format strings are being used correctly.
 
-## Quickstart
+## Quick Start
 
-```Hack error
+```hack error
 // Correct.
 Str\format("First: %d, second: %s", 1, "foo");
 
@@ -12,7 +14,7 @@ Str\format("First: %d, second: %s", 1);
 
 This requires that the format string argument is a string literal, not a variable.
 
-```Hack error
+```hack error
 $string = "Number is: %d";
 
 // Typechecker error: Only string literals are allowed here.
@@ -22,7 +24,7 @@ Str\format($string, 1);
 ## Defining Functions with Format Strings
 You can define your own functions with format string arguments too.
 
-```Hack
+```hack
 function takes_format_string(
   \HH\FormatString<\PlainSprintf> $format,
   mixed ...$args

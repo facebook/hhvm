@@ -1,3 +1,5 @@
+# Migration
+
 You can incrementally port code to use XHP.
 
 Assume your output is currently handled by the following function, which might

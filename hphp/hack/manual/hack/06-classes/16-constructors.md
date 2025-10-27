@@ -1,7 +1,9 @@
-A constructor is a specially named instance method that is used to initialize the instance immediately after it has been created.  A
-constructor is called by the [`new` operator](../expressions-and-operators/new.md).  For example:
+# Constructors
 
-```Hack
+A constructor is a specially named instance method that is used to initialize the instance immediately after it has been created.  A
+constructor is called by the [`new` operator](/hack/expressions-and-operators/new).  For example:
+
+```hack
 class Point {
   private static int $pointCount = 0; // static property with initializer
   private float $x; // instance property
@@ -31,7 +33,7 @@ A constructor does not require a return type, but if one is included, it must be
 
 If you have created a class in Hack, you have probably seen a pattern like this:
 
-```Hack
+```hack
 final class User {
   private int $id;
   private string $name;
@@ -52,7 +54,7 @@ the constructor parameters and in the assignment. This can be quite cumbersome.
 With *constructor parameter promotion*, all that repetitive boilerplate is
 removed.
 
-```Hack
+```hack
 final class User {
   public function __construct(
     private int $id,
@@ -77,7 +79,7 @@ turns out that a different internal data representation would be better. For
 example, if we later decided to store `$name` in a structured form instead of a string, we could easily make that change while keeping the public-facing
 constructor parameters unchanged (and therefore backwards-compatible).
 
-```Hack no-extract
+```hack no-extract
 final class User {
   private ParsedName $name;
 
@@ -101,7 +103,7 @@ final class User {
 * Other code in the constructor is run **after** the parameter promotion
   assignment.
 
-```Hack
+```hack
 final class User {
   private static dict<int, User> $allUsers = dict[];
   private int $age;

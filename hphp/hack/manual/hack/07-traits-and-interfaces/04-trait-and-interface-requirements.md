@@ -1,3 +1,5 @@
+# Trait & Interface Requirements
+
 Trait and interface requirements allow you to restrict the use of these constructs by specifying what classes may actually use a trait or
 implement an interface. This can simplify long lists of `abstract` method requirements, and provide a hint to the reader as to the
 intended use of the trait or interface.
@@ -6,7 +8,7 @@ intended use of the trait or interface.
 
 To introduce a trait requirement, you can have one or more of the following in your trait:
 
-```Hack no-extract
+```hack no-extract
 require extends <class name>;
 require class <class name>;
 require implements <interface name>;
@@ -14,7 +16,7 @@ require implements <interface name>;
 
 To introduce an interface requirement, you can have one or more of following in your interface:
 
-```Hack no-extract
+```hack no-extract
 require extends <class name>;
 ```
 
@@ -22,7 +24,7 @@ require extends <class name>;
 
 Here is an example of a trait that introduces a class and interface requirement, and shows a class that meets the requirement:
 
-```Hack
+```hack
 abstract class Machine {
   public function openDoors(): void {
     return;
@@ -64,7 +66,7 @@ function run(): void {
 
 Here is an example of a trait that introduces a class and interface requirement, and shows a class that *does not* meet the requirement:
 
-```Hack error
+```hack error
 abstract class Machine {
   public function openDoors(): void {
     return;
@@ -114,7 +116,7 @@ _non-generic, _final_, class `<class name>`.  This contrasts with the `require e
 By relaxing the strict subtype constraint of `require extends`, `require class` constraints allow splitting the implementation of a class into a
 class and one (or multiple) traits, as in the following:
 
-```Hack
+```hack
 trait T {
   require class C;
   public function foo(): void {
@@ -132,7 +134,7 @@ final class C {
 
 Here is an example of an interface that introduces a class requirement, and shows a class that meets the requirement:
 
-```Hack
+```hack
 abstract class Machine {
   public function openDoors(): void {
     return;
@@ -168,7 +170,7 @@ function run(): void {
 
 Here is an example of an interface that introduces a class requirement, and shows a class that *does not* meet the requirement:
 
-```Hack error
+```hack error
 abstract class Machine {
   public function openDoors(): void {
     return;
@@ -203,7 +205,7 @@ function run(): void {
 
 **NOTE**: trait cannot be used as a type, comparing to some other languages. Only class and interface are types. For example,
 
-```Hack no-extract
+```hack no-extract
 trait T {}
 class C { use T; }
 $a = new C();

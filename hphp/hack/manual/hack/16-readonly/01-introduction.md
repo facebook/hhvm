@@ -1,3 +1,5 @@
+# Introduction
+
 `readonly` is a keyword used to create immutable references to [Objects](/hack/classes/introduction) and their properties.
 
 ### How does it work?
@@ -9,7 +11,7 @@ Expressions in Hack can be annotated with the `readonly` keyword. When an object
 ### Readonlyness
 Object properties of `readonly` values cannot be modified (i.e. mutated).
 
-```Hack error
+```hack error
 class Bar {
   public function __construct(
     public Foo $foo,
@@ -41,8 +43,8 @@ function test(readonly Bar $x) : void {
 
 
 ### Topics covered in this section
-* [Syntax](syntax.md): Basic syntax for readonly keyword
-* [Subtyping](subtyping.md): Rules and semantics for interacting with readonly and mutable values
-* [Explicit Readonly Keywords](explicit-readonly-keywords.md): Positions where the readonly keyword is explicitly required
-* [Containers and Collections](containers-and-collections.md): Interactions between collections of readonly values
-* [Advanced Features and Semantics](advanced-semantics.md): More complex features and interactions
+* [Syntax](/hack/readonly/syntax): Basic syntax for readonly keyword
+* [Subtyping](/hack/readonly/subtyping): Rules and semantics for interacting with readonly and mutable values
+* [Explicit Readonly Keywords](/hack/readonly/explicit-readonly-keywords): Positions where the readonly keyword is explicitly required
+* [Containers and Collections](/hack/readonly/containers-and-collections): Interactions between collections of readonly values
+* [Advanced Features and Semantics](/hack/readonly/advanced-semantics): More complex features and interactions

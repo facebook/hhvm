@@ -1,5 +1,7 @@
-Here are some general guidelines to know and follow when using XHP. In addition to its [basic usage](basic-usage.md),
-[available methods](methods.md) and [extending XHP with your own objects](extending.md), these are other tips to make the best use of XHP.
+# Guidelines
+
+Here are some general guidelines to know and follow when using XHP. In addition to its [basic usage](/hack/xhp/basic-usage),
+[available methods](/hack/xhp/methods) and [extending XHP with your own objects](/hack/xhp/extending), these are other tips to make the best use of XHP.
 
 ## Validation of Attributes and Children
 
@@ -91,7 +93,7 @@ original XHP class from its `renderAsync` method).
 
 Attribute declarations look like Hack property declarations:
 
-```Hack no-extract
+```hack no-extract
 public string $prop;
 attribute string attr;
 ```

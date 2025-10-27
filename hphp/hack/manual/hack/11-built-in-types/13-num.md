@@ -1,7 +1,9 @@
+# Num
+
 The type `num` can represent any `int` or `float` value. This type can be useful when specifying the interface to a function. Consider the
 following function declarations from the math library:
 
-```Hack no-extract
+```hack no-extract
 function sqrt(num $arg): float;
 function log(num $arg, ?num $base = null): float;
 function abs<T as num>(T $number): T;
@@ -15,7 +17,7 @@ type `Container`-of-type-`num` and returns a nullable-of-`float`.
 
 Consider the following example:
 
-```Hack
+```hack
 class Point {
   private float $x;
   private float $y;
@@ -36,4 +38,4 @@ to be passed to its constructor and method `move`.
 
 When given a `num` value, to find out what type of value that `num` actually contains, use the `is` operator.
 
-See the discussion of [type refinement](../types/type-refinement.md).
+See the discussion of [type refinement](/hack/types/type-refinement).

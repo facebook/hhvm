@@ -1,3 +1,5 @@
+# Setup
+
 XHP provides a native XML-like representation of output.
 
 After adding the required dependencies, read the [Introduction](/hack/XHP/introduction).
@@ -13,7 +15,11 @@ We stongly recommend using XHP-Lib v4, which includes XHP namespace support. XHP
 
 **Important:** All of the guides in this section are written with the assumption that XHP-Lib v4 is used, but there are notes pointing out any major differences—look for the **Historical note** sections.
 
-<span data-nosnippet class="fbOnly fbIcon">**XHP namespaces are not enabled in Facebook's WWW repository**, so all *Historical note* sections apply.</span>
+<FbCaution>
+
+XHP namespaces are not enabled in Facebook's WWW repository, so all *Historical note* sections apply.
+
+</FbCaution>
 
 #### XHP-Lib v4
 Used when XHP namespace support is enabled. Declares all base classes, interfaces and elements in namespaces (e.g. standard HTML elements are in `Facebook\XHP\HTML`). It is also more strict (e.g. disallows most mutations after an element is rendered) and deprecates some features (e.g. attribute "clobbering" in `XHPHTMLHelpers`).
@@ -60,5 +66,5 @@ Make sure to also use the correct version of XHP-Lib based on whether XHP namesp
 ## HHVM Configuration Flags
 These are not enabled by default in any HHVM version, but we recommend enabling them in any new Hack projects:
 
-- `disable_xhp_children_declarations = true` disables the old way of declaring allowed children, which has been deprecated in favor of the `Facebook\XHP\ChildValidation\Validation` trait. See [Children](extending#children) for more information.
+- `disable_xhp_children_declarations = true` disables the old way of declaring allowed children, which has been deprecated in favor of the `Facebook\XHP\ChildValidation\Validation` trait. See [Children](/hack/xhp/extending#children) for more information.
 - `check_xhp_attribute = true` enables the typechecker to check that all required attributes are provided. Otherwise, these would only be errors at runtime.

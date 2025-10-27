@@ -1,3 +1,5 @@
+# Introduction
+
 This section covers the different built-in types available in Hack.
 
 ## Primitive Types

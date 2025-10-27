@@ -1,3 +1,5 @@
+# Type Refinement
+
 A supertype has one or more subtypes, and while any operation permitted on a value of some supertype is also permitted on a value of any of
 its subtypes, the reverse is not true. For example, the type `num` is a supertype of `int` and `float`, and while addition and subtraction are
 well defined for all three types, bit shifting requires integer operands. As such, a `num` cannot be bit-shifted directly. (Similar situations
@@ -5,7 +7,7 @@ occur with `arraykey` and its subtypes `int` and `string`, with nullable types a
 
 Certain program elements are capable of changing the type of an expression using what is called *type refinement*. Consider the following:
 
-```Hack
+```hack
 function f1(?int $p): void {
   //  $x = $p % 3;       // rejected; % not defined for ?int
   if ($p is int) { // type refinement occurs; $p has type int
@@ -21,7 +23,7 @@ be applied. However, once execution flows out of the `if` statement, the type of
 
 Consider the following:
 
-```Hack
+```hack
 function f2(?int $p): void {
   if ($p is null) { // type refinement occurs; $p has type null
     //    $x = $p % 3;      // rejected; % not defined for null
@@ -34,7 +36,7 @@ function f2(?int $p): void {
 The first assignment is rejected, not because we don't know `$p`'s type, but because we know its type is not `int`. See how an opposite
 type refinement occurs with the `else`.  Similarly, we can write the following:
 
-```Hack
+```hack
 function f3(?int $p): void {
   if (!$p is null) { // type refinement occurs; $p has type int
     $x = $p % 3; // accepted; % defined for int
@@ -48,7 +50,7 @@ function f3(?int $p): void {
 
 Consider the following example that contains multiple selection criteria:
 
-```Hack
+```hack
 function f4(?num $p): void {
   if (($p is int) || ($p is float)) {
     //    $x = $p**2;    // rejected
@@ -69,7 +71,7 @@ logical test `if ($x)` is equivalent to `if ($x is nonnull)`.]
 Thus far, all the examples use the value of an expression that designates a parameter (which is a local variable). Consider the following
 case, which involves a property:
 
-```Hack
+```hack
 class C {
   private ?int $p = 8; // holds an int, but type is ?int
   public function m(): void {

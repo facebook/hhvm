@@ -1,10 +1,12 @@
+# Nameof
+
 An expression to get the name of a class as a string, replacement for
 [`::class` expressions](/hack/expressions-and-operators/scope-resolution) in
 string positions.
 
-## Quickstart
+## Quick Start
 
-```Hack
+```hack
 class C {}
 function expect_string(string $s): void {}
 function test(): void {
@@ -20,7 +22,7 @@ function test(): void {
 It also supports the special class identifiers `self`, `static`, and `parent` where
 they are valid.
 
-```Hack
+```hack
 class B {}
 class C extends B {}
 trait T {
@@ -43,5 +45,5 @@ function main(): void {
 
 The type of a `nameof Target` expression is
 [`classname<Target>`](/hack/built-in-types/classname) and `typename<Target>` when `Target`
-is a type alias. [Reified generics](/hack/reified-generics/reified-generics) are not 
+is a type alias. [Reified generics](/hack/reified-generics/reified-generics) are not
 supported targets for `nameof`.

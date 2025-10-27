@@ -1,3 +1,5 @@
+# Introduction
+
 **Topics covered in this section**
 
 * [program structure](/hack/source-code-fundamentals/program-structure)

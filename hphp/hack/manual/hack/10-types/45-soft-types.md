@@ -1,7 +1,9 @@
+# Soft Types
+
 A soft type hint `<<__Soft>> Foo` allows you to add types to code without
 crashing if you get the type wrong.
 
-```Hack
+```hack
 function probably_int(<<__Soft>> int $x): @int {
   return $x + 1;
 }

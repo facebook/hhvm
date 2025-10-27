@@ -1,1 +1,0 @@
-Installing Hack, running your first program, and introducing the tools.

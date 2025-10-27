@@ -1,5 +1,11 @@
-**Note:** Context and capabilities are enabled by default since
+# Introduction
+
+:::note
+
+Context and capabilities are enabled by default since
 [HHVM 4.93](https://hhvm.com/blog/2021/01/19/hhvm-4.93.html).
+
+:::
 
 Contexts and capabilities provide a way to specify a set of capabilities for a function's implementation and a permission system for its callers. These capabilities may be in terms of what functions may be used in the implementation (e.g. a pure function cannot call non-pure functions), or in terms of other language features (e.g. a pure function can not write properties on `$this`).
 

@@ -1,8 +1,10 @@
+# Switch
+
 A `switch` statement typically consists of a controlling expression, some case labels, and optionally a default label.  Based on the
 value of the controlling expression, execution passes to one of the case labels, the default label, or to the statement immediately
 following the switch statement.  For example:
 
-```Hack no-extract
+```hack no-extract
 enum Bank: int {
   DEPOSIT = 1;
   WITHDRAWAL = 2;
@@ -36,7 +38,7 @@ corresponding case labels, no default label is needed, as no other values can ex
 expression has type `int`. Here, we're unlikely to have case labels cover the complete range of `int` values, so a default label might be
 necessary.  For example:
 
-```Hack
+```hack
 $v = 100;
 
 switch ($v) {
@@ -70,7 +72,7 @@ If no `break` statement is seen for a case or default before a subsequent case l
 encountered, an implementation might issue a warning. However, such a warning can be suppressed by placing a source line containing the
 special comment `// FALLTHROUGH`, at the end of that case or default statement group.
 
-```Hack
+```hack
 $v = 10;
 switch ($v) {
   case 10:
@@ -88,9 +90,9 @@ switch ($v) {
 Case-label values can be runtime expressions, and the types of sibling case-label values need not be the same.
 
 **Note switch uses `==` equality for comparing the value with the
-different cases.**. See [equality](../expressions-and-operators/equality.md) for more details.
+different cases.**. See [equality](/hack/expressions-and-operators/equality) for more details.
 
-```Hack
+```hack
 $v = 30;
 switch ($v) {
   case 30.0:  // <===== this case matches with 30

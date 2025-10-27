@@ -1,9 +1,11 @@
+# Explicit Readonly Keywords
+
 There are a few places where an explicit readonly keyword is required when using readonly values.
 
 ## Calling a readonly function
 Calling a function or method that returns readonly requires wrapping the result in a readonly expression.
 
-```Hack
+```hack
 
 class Foo {}
 function returns_readonly(): readonly Foo {
@@ -18,7 +20,7 @@ function test(): void {
 ## Accessing readonly properties
 Accessing a readonly property (i.e. a property annotated readonly at the declaration, not accessing a property off of a readonly object) requires readonly annotation.
 
-```Hack
+```hack
 
 class Bar {}
 class Foo {
@@ -32,10 +34,10 @@ function test(Foo $f): void {
 }
 ```
 
-## Interactions with [Coeffects](https://docs.hhvm.com/hack/contexts-and-capabilities/available-contexts-and-capabilities)
+## Interactions with [Coeffects](/hack/contexts-and-capabilities/available-contexts-and-capabilities)
 If your function has the `ReadGlobals` capability but not the `AccessGlobals` capability (i.e. is marked `read_globals` or `leak_safe`), it can only access class static variables if they are wrapped in a readonly expression:
 
-```Hack
+```hack
 <<file:__EnableUnstableFeatures("readonly")>>
 class Bar {}
 class Foo {

@@ -1,4 +1,4 @@
-## Starting A Real Project
+# Starting a Real Project
 
 Real projects generally aren't a single file in isolation; they tend to have
 dependencies such as the [Hack Standard Library], and various optional tools.
@@ -26,7 +26,7 @@ $ php /path/to/composer.phar require hhvm/hhvm-autoload
 hhvm-autoload needs an `hh_autoload.json` configuration
 file. For most projects, a minimal example is:
 
-```JSON
+```json
 {
   "roots": [
     "src/"
@@ -59,7 +59,7 @@ to generate or update the map, which is created as `vendor/autoload.hack`
 The following sequence of commands could be used to fully initialize a Hack
 project with the most common dependencies:
 
-```
+```bash
 $ curl https://raw.githubusercontent.com/hhvm/hhast/master/.hhconfig > .hhconfig
 $ mkdir bin src tests
 $ cat > hh_autoload.json
@@ -80,11 +80,11 @@ You may need to use the full path to Composer, depending on how it's installed.
 
 We curl an existing hhconfig from hhast from github. The reason for this is that starting with hhvm version [4.62](https://hhvm.com/blog/2020/06/16/hhvm-4.62.html), it is no longer enough for projects that use external dependencies. Almost all packages you pull in using composer will have a suppression comment in them somewhere. You must whitelist these suppression comments in order to use these packages.
 
-The hhast `.hhconfig` file whitelists all suppression comments used by hsl, hhvm-autoload, hacktest, fbexpect, hhast. Hhast depends on these packages itself, so this should stay up to date. If the result of `hh_client restart && hh_client` does not end with `No errors!` after the last step, please refer to the [error suppression docs](https://docs.hhvm.com/hack/silencing-errors/introduction).
+The hhast `.hhconfig` file whitelists all suppression comments used by hsl, hhvm-autoload, hacktest, fbexpect, hhast. Hhast depends on these packages itself, so this should stay up to date. If the result of `hh_client restart && hh_client` does not end with `No errors!` after the last step, please refer to the [error suppression docs](/hack/silencing-errors/introduction).
 
 The same commands with their expected output:
 
-```
+```bash
 $ curl https://raw.githubusercontent.com/hhvm/hhast/master/.hhconfig > .hhconfig
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
@@ -137,7 +137,7 @@ Generating autoload files
 As a toy example, we're going to create a function that squares a vector of
 numbers; save the following as `src/square_vec.hack`:
 
-```Hack error
+```hack error
 use namespace HH\Lib\Vec;
 
 function square_vec(vec<num> $numbers): vec<int> {
@@ -149,9 +149,9 @@ If you then run `hh_client`, it will tell you of a mistake:
 
 ```
 src/square_vec.hack:4:10,57: Invalid return type (Typing[4110])
-  src/square_vec.hack:3:53,55: This is an int
-  src/square_vec.hack:4:40,56: It is incompatible with a num (int/float) because this is the result of an arithmetic operation with a num as the first argument, and no floats.
-  src/square_vec.hack:3:35,35: Here is why I think the argument is a num: this is a num
+src/square_vec.hack:3:53,55: This is an int
+src/square_vec.hack:4:40,56: It is incompatible with a num (int/float) because this is the result of an arithmetic operation with a num as the first argument, and no floats.
+src/square_vec.hack:3:35,35: Here is why I think the argument is a num: this is a num
 ```
 
 To fix this, change the return type of the function from `vec<int>` to `vec<num>`.
@@ -162,7 +162,7 @@ We now have a function that is valid Hack, but it's not tested, and nothing call
 
 Save the following as `bin/square_some_things.hack`:
 
-```Hack no-extract
+```hack no-extract
 #!/usr/bin/env hhvm
 
 <<__EntryPoint>>
@@ -186,7 +186,7 @@ This program:
 You can now execute your new program, either explicitly with HHVM, or by
 marking it as executable:
 
-```
+```bash
 $ hhvm bin/square_some_things.hack
 1
 4
@@ -221,7 +221,7 @@ the following as `hhast-lint.json`:
 When you ran `composer require` earlier, HHAST was installed into the `vendor/`
 subdirectory, and can be executed from there:
 
-```
+```bash
 $ vendor/bin/hhast-lint
 Function "main()" does not match conventions; consider renaming to "main_async"
   Linter: Facebook\HHAST\Linters\AsyncFunctionAndMethodLinter
@@ -258,7 +258,7 @@ final class MyTest extends HackTest {
 
 We can then use HackTest to run the tests:
 
-```
+```bash
 $ vendor/bin/hh-autoload
 $ vendor/bin/hacktest tests/
 ..
@@ -275,7 +275,7 @@ before running the test suite.
 If we intentionally add a failure, such as `tuple(vec[1, 2, 3], vec[1, 2, 3])`,
 HackTest reports this:
 
-```
+```bash
 $ vendor/bin/hacktest tests/
 ..F
 
@@ -301,7 +301,6 @@ Failed asserting that vec [
 
 /private/var/folders/3l/2yk1tgkn7xdd76bs547d9j90fcbt87/T/tmp.xaQwE1xE/tests/MyTest.hack(15): Facebook\FBExpect\ExpectObj->toBeSame()
 
-
 Summary: 3 test(s), 2 passed, 1 failed, 0 skipped, 0 error(s).
 ```
 
@@ -312,7 +311,7 @@ on another system or checkout, use `composer install`. This will use the
 generated `composer.lock` file (which should generally be committed) to install
 the exact same versions.
 
-```
+```bash
 $ echo vendor/ > .gitignore
 ```
 
@@ -324,7 +323,7 @@ As Composer uses GitHub releases which are automatically generated via
 `git export`, the simplest solution is to configure `git export` to ignore
 the `tests/` directory:
 
-```
+```bash
 $ echo 'tests/ export-ignore' > .gitattributes
 ```
 
@@ -334,7 +333,7 @@ We recommend using Docker on TravisCI for continuous integration of Hack
 projects. This is usually done by creating a separate `.travis.sh` which
 executes in the container. For example, a `.travis.yml` might look like this:
 
-```
+```yaml
 sudo: required
 language: generic
 services: docker
@@ -349,7 +348,7 @@ script:
 
 ... and a corresponding `.travis.sh`:
 
-```
+```bash
 #!/bin/sh
 set -ex
 apt update -y

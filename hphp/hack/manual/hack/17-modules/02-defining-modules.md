@@ -1,4 +1,5 @@
-## Defining modules
+# Defining Modules
+
 You can define a module with the `new module` syntax. A module, just like any other toplevel entity (classes, functions, etc), can have at most one definition.
 
 ```hack
@@ -6,7 +7,7 @@ new module foo {}
 ```
 Module names live in their own namespace, and do not conflict with classes, functions, etc. Module names are **not** affected by namespaces.
 
-```Hack no-extract
+```hack no-extract
 namespace Bar;
 module foo;
 function foo(): void {}
@@ -14,10 +15,10 @@ function foo(): void {}
 
 Currently, module bodies are empty. This will change in future versions of Hack as we build more support for modules and organizing their relationships.
 
-# Module membership
+## Module membership
 A module can be thought of as a logical structure of code organized into a list of files. To add a file to a module, use the `module foo;` syntax at the top of the file.
 
-```Hack no-extract
+```hack no-extract
 // This file is now a member of module foo
 module foo;
 class MyFoo {

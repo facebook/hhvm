@@ -1,3 +1,5 @@
+# Names
+
 Names are used to label variables, constants, functions, and user-defined types, among other things. A name *must* begin
 with an upper- or lowercase letter or underscore, which can optionally be followed by those same characters or decimal digits.
 
@@ -25,7 +27,7 @@ function compute(int $val): void {
 
 ## Placeholder Variables
 Variables beginning with `$_` are referred to as *placeholder variables*, and should be used where an assignment is structurally required but the value is unused. This is frequently used for the
-[list intrinsic function](../expressions-and-operators/list.md) and the [foreach statement](../statements/foreach.md) - for example:
+[list intrinsic function](/hack/expressions-and-operators/list) and the [foreach statement](/hack/statements/foreach) - for example:
 
 * `list($foo, $_, $bar) = baz();` if `baz()` returns a 3-element tuple but the middle element is unused
 * `foreach ($container as $key => $_) { /* ... */ }` when iterating a keyed container and the values are unneeded
@@ -33,7 +35,7 @@ Variables beginning with `$_` are referred to as *placeholder variables*, and sh
 ## The Current Instance Variable
 The name `$this` is predefined inside any instance method or constructor when that method is called from within an object context.
 `$this` is read-only and designates the object on which the method is being called, or the object being constructed. The type of
-`$this` is [`this`](../built-in-types/this.md).
+`$this` is [`this`](/hack/built-in-types/this).
 
 ## Reserved Names
 Names beginning with two underscores (__) are reserved by the Hack language.

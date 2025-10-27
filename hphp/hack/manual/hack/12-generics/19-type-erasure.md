@@ -1,11 +1,13 @@
+# Type Erasure
+
 Parameterized types with generics give you type safety without runtime
 checks.
 
 Generic type information is not available at runtime: this is called
 "erasure". If you need this information, consider using [reified
-generics](reified-generics).
+generics](/hack/reified-generics/reified-generics).
 
-```Hack
+```hack
 function takes_ints(vec<int> $items): vec<int> {
   return $items;
 }
@@ -21,7 +23,7 @@ For async functions, Hack will also enforce the wrapped return type at
 runtime. For example, the following function will produce a runtime
 error:
 
-```Hack error
+```hack error
 async function my_foo(): Awaitable<int> {
   return "not an int";
 }
@@ -39,5 +41,5 @@ following situations:
  * As the type of the exception in a catch block: `catch (T $exception)`
 
 For passing around class names for instantiation, Hack provides
-[`classname<T>`](../built-in-types/classname.md) that extends the
+[`classname<T>`](/hack/built-in-types/classname) that extends the
 representation of `Foo::class`.

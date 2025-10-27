@@ -1,7 +1,9 @@
+# Equality
+
 There are two equality operators in Hack: `===` (recommended) and
 `==`. They also have not-equal equivalents, which are `!==` and `!=`.
 
-```Hack
+```hack
 1 === 2; // false
 1 !== 2; // true
 ```
@@ -10,11 +12,11 @@ There are two equality operators in Hack: `===` (recommended) and
 
 `===` compares objects by reference.
 
-```Hack file:object.hack
+```hack file:object.hack
 class MyObject {}
 ```
 
-```Hack file:object.hack
+```hack file:object.hack
 $obj = new MyObject();
 
 // Different references aren't equal.
@@ -26,14 +28,14 @@ $obj === $obj; // true
 
 `===` compares primitives types by value.
 
-```Hack
+```hack
 1 === 1; // true
 vec[1, 2] === vec[1, 2]; // true
 ```
 
 Items of different primitive types are never equal.
 
-```Hack
+```hack
 0 === null; // false
 vec[1] === keyset[1]; // false
 
@@ -45,7 +47,7 @@ vec[1] === keyset[1]; // false
 `vec`, `keyset`, `dict` and `shape` values are equal if their items
 are `===` equal and if the items are in the same order.
 
-```Hack
+```hack
 vec[1, 2] === vec[1, 2]; // true
 vec[1] === vec[2]; // false
 
@@ -63,7 +65,7 @@ Dict\equal(dict[1 => null, 0 => null], dict[0 => null, 1 => null]); // true
 
 `!==` returns the negation of `===`.
 
-```Hack
+```hack
 1 !== 2; // true
 2 !== 2; // false
 ```
@@ -75,20 +77,20 @@ Dict\equal(dict[1 => null, 0 => null], dict[0 => null, 1 => null]); // true
 `==` compares objects by comparing each property, producing a
 structural equality.
 
-```Hack file:wrapper.hack
+```hack file:wrapper.hack
 class MyWrapper {
   public function __construct(private mixed $m) {}
 }
 ```
 
-```Hack file:wrapper.hack
+```hack file:wrapper.hack
 new MyWrapper(1) == new MyWrapper(1); // true
 new MyWrapper(1) == new MyWrapper(2); // false
 ```
 
 Items of different type are never equal with `==`, the same as `===`.
 
-```Hack
+```hack
 1 == 1.0; // false
 0 == null; // false
 "" == 0; // false
@@ -98,7 +100,7 @@ Items of different type are never equal with `==`, the same as `===`.
 values. Items within these collections are compared with `==`
 recursively.
 
-```Hack
+```hack
 keyset[1, 2] == keyset[2, 1]; // true
 dict[1 => null, 2 => null] == dict[2 => null, 1 => null]; // true
 
@@ -108,7 +110,7 @@ vec[1, 2] == vec[2, 1]; // false
 
 `!=` returns the negation of `==`.
 
-```Hack
+```hack
 1 != 2; // true
 1 != 1; // false
 ```

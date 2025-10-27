@@ -1,13 +1,15 @@
+# Variables
+
 A variable is a named area of data storage that has a type and a value.  Distinct variables may have the same name provided
-they are in different [scopes](scope.md).  A [constant](constants.md) is a variable that, once initialized, its value cannot
+they are in different [scopes](/hack/source-code-fundamentals/scope).  A [constant](/hack/source-code-fundamentals/constants) is a variable that, once initialized, its value cannot
 be changed.   Based on the context in which it is declared, a variable has a scope.
 
 The following kinds of variable may exist in a script:
--   [Local variable](#local-variables)
--   [Array element](#array-elements)
--   [Instance property](#instance-properties)
--   [Static property](#static-properties)
--   [Class and interface constant](#class-and-interface-constants)
+- [Local Variables](#local-variables)
+- [Array Elements](#array-elements)
+- [Instance Properties](#instance-properties)
+- [Static Properties](#static-properties)
+- [Class and Interface Constants](#class-and-interface-constants)
 
 ## Local Variables
 
@@ -17,7 +19,7 @@ inside any compound statement. It has function scope.
 
 Consider the following example:
 
-```Hack
+```hack
 function do_it(bool $p1): void {
   $count = 10;
   // ...
@@ -60,13 +62,13 @@ the function calls, so this function `f` outputs "`$lv = 1`" each time.
 An array is created via a vec-literal, a dict-literal, a
 keyset-literal. At the same time, one or more elements may be created
 for that array. New elements are inserted into an existing array via
-the [simple-assignment](../expressions-and-operators/assignment.md)
+the [simple-assignment](/hack/expressions-and-operators/assignment)
 operator in conjunction with the [subscript
-`[]`](../expressions-and-operators/subscript.md) operator.
+`[]`](/hack/expressions-and-operators/subscript) operator.
 
 The scope of an array element is the same as the scope of that array's name.
 
-```Hack
+```hack
 $colors1 = vec["green", "yellow"];   // create a vec of two elements
 $colors1[] = "blue";                 // add element 2 with value "blue"
 $colors2 = dict[];                   // create an empty dict
@@ -75,12 +77,12 @@ $colors2[4] = "black";               // create element 4 with value "black"
 
 ## Instance Properties
 
-These are described in the [class instance properties](../classes/properties.md) section. They have class scope.
+These are described in the [class instance properties](/hack/classes/properties) section. They have class scope.
 
 ## Static Properties
 
-These are described in the [class static properties](../classes/properties.md) section. They have class scope.
+These are described in the [class static properties](/hack/classes/properties) section. They have class scope.
 
 ## Class and Interface Constants
 
-These are described in the [class constants](../classes/constants.md) section. They have class or interface scope.
+These are described in the [class constants](/hack/classes/constants) section. They have class or interface scope.

@@ -1,7 +1,9 @@
+# Member Selection
+
 The operator `->` is used to access instance properties and instance
 methods on objects.
 
-```Hack file:intbox.hack
+```hack file:intbox.hack
 class IntBox {
   private int $x;
 
@@ -23,12 +25,12 @@ function main(): void {
 
 ## Null Safe Member Access
 
-The operator `?->` allows access to objects that [may be null](../types/nullable-types.md).
+The operator `?->` allows access to objects that [may be null](/hack/types/nullable-types).
 
 If the value is null, the result is null. Otherwise, `?->` behaves
 like `->`.
 
-```Hack file:intbox.hack
+```hack file:intbox.hack
 function my_example(?IntBox $ib): ?int {
   return $ib?->getX();
 }

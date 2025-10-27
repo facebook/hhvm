@@ -1,3 +1,5 @@
+# Nullable Types
+
 A type `?Foo` is either a value of type `Foo`, or `null`.
 
 ``` Hack

@@ -1,5 +1,11 @@
-**Note:** Context and capabilities are enabled by default since
+# Dependent Contexts Continued
+
+:::note
+
+Context and capabilities are enabled by default since
 [HHVM 4.93](https://hhvm.com/blog/2021/01/19/hhvm-4.93.html).
+
+:::
 
 Dependent contexts may be accessed off of nullable parameters. If the dynamic value of the parameter is null, then the capability set required by that parameter is empty.
 

@@ -1,3 +1,5 @@
+# Float
+
 The floating-point type, `float`, allows the use of real numbers. It supports at least the range and precision of IEEE 754 64-bit double-precision
 representation, and includes the special values minus infinity, plus infinity, and Not-a-Number (NaN).  Using predefined constant names, those
 values are written as `-INF`, `INF`, and `NAN`, respectively.
@@ -6,7 +8,7 @@ The library functions `is_finite`, `is_infinite`, and `is_nan` indicate if a giv
 
 Consider the following example:
 
-```Hack
+```hack
 function average_float(float $p1, float $p2): float {
   return ($p1 + $p2) / 2.0;
 }

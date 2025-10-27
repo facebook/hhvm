@@ -1,3 +1,5 @@
+# String
+
 A `string` is a sequence of *bytes* - they are not required to be valid characters in any particular encoding,
 for example, they may contain null bytes, or invalid UTF-8 sequences.
 
@@ -9,7 +11,7 @@ Concatenation and byte indexing are built-in operations; for example:
 - `"abc"[1]` is `"b"`
 - if the source code is UTF-8, `"a😀c"[1]` is byte `0xf0`, the first of the 4 bytes compromising the "😀" emoji in UTF-8
 
-Other operations are supported by the `Str\` namespace in the [Hack Standard Library](/hsl/reference/), such as:
+Other operations are supported by the `Str\` namespace in the [Hack Standard Library](/hsl/overview), such as:
 
 - `Str\length("foo")` is 3
 - `Str\length("foo\0")` is 4
@@ -45,7 +47,7 @@ This means that various comparison functions may report strings as equivalent, d
 byte sequences - so if the result of a character-based operation is used for another function, that function
 should also be character-based:
 
-```Hack
+```hack
 use namespace HH\Lib\{Locale,Str};
 
 <<__EntryPoint>>

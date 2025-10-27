@@ -1,3 +1,5 @@
+# Vec Keyset & Dict
+
 `vec`, `keyset` and `dict` are value types. Any mutation produces a
 new value, and does not modify the original value.
 
@@ -9,7 +11,7 @@ whenever you're unsure.
 A `vec` is an ordered, iterable data structure. It is created with
 the `vec[]` syntax.
 
-```Hack
+```hack
 // Creating a vec.
 function get_items(): vec<string> {
   $items = vec['a', 'b', 'c'];
@@ -19,7 +21,7 @@ function get_items(): vec<string> {
 
 `vec`s can be accessed with the following syntax.
 
-```Hack
+```hack
 $items = vec['a', 'b', 'c'];
 
 // Accessing items by index.
@@ -82,7 +84,7 @@ created with the `keyset[]` syntax.
 A `keyset` can only contain `string` or `int` values.
 
 
-```Hack
+```hack
 // Creating a keyset.
 function get_items(): keyset<string> {
   $items = keyset['a', 'b', 'c'];
@@ -92,7 +94,7 @@ function get_items(): keyset<string> {
 
 `keyset`s can be accessed with the following syntax.
 
-```Hack
+```hack
 $items = keyset['a', 'b', 'c'];
 
 // Checking if a keyset contains a value.
@@ -137,7 +139,7 @@ created with the `dict[]` syntax.
 Keys must be `string`s or `int`s. `dict`s are ordered according to the
 insertion order.
 
-```Hack
+```hack
 // Creating a dict.
 function get_items(): dict<string, int> {
   $items = dict['a' => 1, 'b' => 3];
@@ -147,7 +149,7 @@ function get_items(): dict<string, int> {
 
 `dicts`s can be accessed with the following syntax.
 
-```Hack
+```hack
 $items = dict['a' => 1, 'b' => 3];
 
 // Accessing items by key.

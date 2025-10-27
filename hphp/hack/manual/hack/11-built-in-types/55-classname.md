@@ -1,15 +1,15 @@
-```yamlmeta
-{
-  "fbonly messages": [
-    "This type is under migration, with the class-specific use cases described below shifting to the new [class type](/hack/built-in-types/class). There is [an internal wiki](https://www.internalfb.com/intern/wiki/Hack_Foundation/classnameC_vs._classC/) describing the type separation."
-  ]
-}
-```
+# Classname
+
+<FbCaution>
+
+This type is under migration, with the class-specific use cases described below shifting to the new [class type](/hack/built-in-types/class). There is [an internal wiki](https://www.internalfb.com/intern/wiki/Hack_Foundation/classnameC_vs._classC/) describing the type separation.
+
+</FbCaution>
 
 For the most part, we deal with class types directly via their names. For
 example:
 
-```Hack no-extract
+```hack no-extract
 class Employee {
   // ...
 }
@@ -20,7 +20,7 @@ $emp = new Employee();
 However, in some applications, it is useful to be able to abstract a class' name
 rather than to hard-code it. Consider the following:
 
-```Hack file:employee.hack
+```hack file:employee.hack
 <<__ConsistentConstruct>>
 class Employee {
   // ...
@@ -34,7 +34,7 @@ function f(classname<Employee> $clsname): void {
 This function can be called with the name of the class `Employee` or any of its
 subclasses.
 
-```Hack no-extract
+```hack no-extract
 class Intern extends Employee {
   // ...
 }

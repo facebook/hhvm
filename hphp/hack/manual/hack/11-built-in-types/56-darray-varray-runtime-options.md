@@ -1,12 +1,14 @@
+# Darray Varray Runtime Options
+
 As of [HHVM 4.103](https://hhvm.com/blog/2021/03/31/hhvm-4.103.html), `darray` / `varray` are aliased to `dict` / `vec` respectively. Use [Hack arrays](/hack/arrays-and-collections/hack-arrays).
 
-## WARNING WARNING WARNING
-
-_These runtime options are a migrational feature. This means that they come and go when new hhvm versions are released. Before relying on them, it is recommended to run the given example code. If this does not raise a "Hack Arr Compat Notice" this option is not available in your version of HHVM._
+:::warning Warning
+These runtime options are a migrational feature. This means that they come and go when new hhvm versions are released. Before relying on them, it is recommended to run the given example code. If this does not raise a "Hack Arr Compat Notice" this option is not available in your version of HHVM.
+:::
 
 If you notice that an option doesn't apply anymore and you are running a very modern version of HHVM, please open an issue or pull request against this repository. We'll mark the EOL date of that given runtime option in the documentation. We thank you in advance.
 
-The [runtime options](arrays.md#php-arrays-array-varray-and-darray__runtime-options) were briefly introduced in the article on [arrays](arrays.md). This article builds upon the information given there.
+The [runtime options](/hack/arrays-and-collections/introduction) were briefly introduced in the article on [arrays](/hack/arrays-and-collections/introduction). This article builds upon the information given there.
 
 You can get a list of the runtime options that your current hhvm recognizes from this script.
 This relies on the settings being in your `server.ini`.
@@ -59,7 +61,9 @@ An important note: These settings will not work when you set them at runtime usi
 
 Fullname: hhvm.hack_arr_compat_check_implicit_varray_append
 
-**WARNING: This option was removed in HHVM 4.64. It is now always a fatal error.**
+:::warning Warning
+This option was removed in HHVM 4.64. It is now always a fatal error.
+:::
 
 Before HHVM 4.64, this setting will raise a notice under the following condition.
 If it does not raise a warning, this option is not available in your version of hhvm.
@@ -98,7 +102,9 @@ A `varray<_>` will, before HHVM 4.64, accept you implicitly appending a key. It 
 
 Fullname: hhvm.hack_arr_compat_check_varray_promote
 
-**WARNING: This option was removed in HHVM 4.64. It is now always a fatal error.**
+:::warning Warning
+This option was removed in HHVM 4.64. It is now always a fatal error.
+:::
 
 Before HHVM 4.64, this setting will raise a notice under the following condition.
 If it does not raise a warning, this option is not available in your version of hhvm.
@@ -208,7 +214,9 @@ Notice: Hack Array Compat: vec is tuple in /home/example/hack_arr_is_shape_tuple
 
 Fullname: hhvm.hack_arr_compat_check_array_key_cast
 
-**WARNING: This option was removed in HHVM 4.66. It is now always a fatal error.**
+:::warning Warning
+This option was removed in HHVM 4.66. It is now always a fatal error.
+:::
 
 Before HHVM 4.66, this setting will raise a notice under the following condition.
 If it does not raise a warning, this option is not available in your version of hhvm.

@@ -1,6 +1,8 @@
+# DSL Types
+
 For every literal supported in a DSL, the visitor must provide a stub method that shows what type it should have.
 
-```Hack file:types.hack
+```hack file:types.hack
 class MyDsl {
   // Types for literals
   public static function intType(): MyDslInt {
@@ -33,7 +35,7 @@ class MyDsl {
 
 All types used in the visitor need to define what operators they support. Here's an expanded version of `MyDsl` with types that are very similar to plain Hack.
 
-```Hack file:types.hack
+```hack file:types.hack
 interface MyDslNonnull {
   public function __tripleEquals(?MyDslNonnull $_): MyDslBool;
   public function __notTripleEquals(?MyDslNonnull $_): MyDslBool;

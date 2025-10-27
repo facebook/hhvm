@@ -1,4 +1,6 @@
+# Introduction
+
 **Topics covered in this section**
 
-* [Reified Generics](reified-generics.md)
-* [Reified Generics Migration](reified-generics-migration.md)
+* [Reified Generics](/hack/reified-generics/reified-generics)
+* [Reified Generics Migration](/hack/reified-generics/reified-generics-migration)

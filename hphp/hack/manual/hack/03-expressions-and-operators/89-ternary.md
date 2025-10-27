@@ -1,7 +1,9 @@
+# Ternary
+
 The ternary operator `?` `:` is a shorthand for `if` statements. It is
 an expression, so it evaluates to a value. For example:
 
-```Hack no-extract
+```hack no-extract
 $days_in_feb = is_leap_year($year) ? 29 : 28;
 ```
 

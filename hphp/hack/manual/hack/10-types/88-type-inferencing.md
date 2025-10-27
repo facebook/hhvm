@@ -1,7 +1,9 @@
+# Type Inferencing
+
 While certain kinds of variables must have their type declared explicitly, others can have their type inferred by having the implementation
 look at the context in which those variables are used.  For example:
 
-```Hack
+```hack
 function foo(int $i): void {
     $v = 100;
 }
@@ -18,7 +20,7 @@ The process of type inferencing does not cross function boundaries.
 
 Here's an example involving a local variable:
 
-```Hack file:c.hack
+```hack file:c.hack
 function f(): void {
   $v = 'acb';       // $v has type string
   // ...
@@ -33,7 +35,7 @@ function f(): void {
 For each assignment, the type of `$v` is inferred from the type of the expression on the right-hand side, as shown in the comments. The type
 of function statics is inferred in the same manner, as are function parameters. For example:
 
-```Hack
+```hack
 function g(int $p1 = -1): void {
   // on entry to the function, $p1 has the declared type int
   // ...
@@ -46,7 +48,7 @@ As a parameter, `$p1` is required to have a declared type, in this case, `int`. 
 
 In the case of a class constant, if the type is omitted, it is inferred from the initializer:
 
-```Hack file:c.hack
+```hack file:c.hack
 class C {
   const C1 = 10;            // type int inferred from initializer
   const string C2 = "red";  // type string declared
@@ -55,7 +57,7 @@ class C {
 
 Let's consider types in closures:
 
-```Hack
+```hack
 $doubler = $p ==> $p * 2;
 $doubler(3);
 ```
@@ -66,7 +68,7 @@ also has type `int`, so the type of the value returned is the type of `$p * 2`, 
 
 We can add partial explicit type information; the following all result in the same behavior:
 
-```Hack
+```hack
 $doubler = (int $p) ==> $p * 2;
 $doubler = ($p = 0) ==> $p * 2;
 $doubler = ($p): int ==> $p * 2;

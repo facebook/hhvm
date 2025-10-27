@@ -1,10 +1,8 @@
-```yamlmeta
-{
-  "note": [
-    "Hash comments (`#`) are no longer supported, and are a parse error since [HHVM 4.133](https://hhvm.com/blog/2021/10/26/hhvm-4.133.html)."
-  ]
-}
-```
+# Comments
+
+:::note
+Hash comments (`#`) are no longer supported, and are a parse error since [HHVM 4.133](https://hhvm.com/blog/2021/10/26/hhvm-4.133.html).
+:::
 
 Hack has three comment syntaxes.
 
@@ -18,7 +16,7 @@ Hack has three comment syntaxes.
 /**
  * A doc comment starts with two asterisks.
  *
- * It summarises the purpose of a definition, such as a
+ * It summarizes the purpose of a definition, such as a
  * function, class or method.
  */
 function foo(): void {}

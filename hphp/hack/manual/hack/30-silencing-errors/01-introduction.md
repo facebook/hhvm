@@ -1,3 +1,5 @@
+# Introduction
+
 Errors reported by the Hack typechecker can be silenced with
 `HH_FIXME` and `HH_IGNORE_ERROR` comments. Errors arising from type mismatches
 on expressions may also be silenced using the `HH\FIXME\UNSAFE_CAST` function.
@@ -23,7 +25,7 @@ Whilst a single `HH_FIXME` comment will silence all related errors on the
 proceeding line, the `UNSAFE_CAST` function must be applied to each
 sub-expression that has a type mismatch.
 
-```Hack file:takes_int.hack
+```hack file:takes_int.hack
 function takes_int(int $i): int {
   return $i + 1;
 }
@@ -35,7 +37,7 @@ function takes_float_with_fixme(float $i): float {
 }
 ```
 
-```Hack file:takes_int.hack
+```hack file:takes_int.hack
 function takes_float_with_unsafe_cast(float $i): float {
   return HH\FIXME\UNSAFE_CAST<int, float>(
     takes_int(HH\FIXME\UNSAFE_CAST<float, int>($i, 'wrong param type')),
@@ -46,7 +48,7 @@ function takes_float_with_unsafe_cast(float $i): float {
 
 ## Silencing Errors with Comments
 
-```Hack file:takes_int.hack
+```hack file:takes_int.hack
 /* HH_FIXME[4110] Your explanation here. */
 takes_int("foo");
 ```
@@ -70,7 +72,7 @@ releases. This will usually be noted in the changelog.
 Both `HH_FIXME` and `HH_IGNORE_ERROR` have the same effect: they
 suppress an error.
 
-```Hack file:takes_int.hack
+```hack file:takes_int.hack
 /* HH_FIXME[4110] An example fixme. */
 takes_int("foo");
 

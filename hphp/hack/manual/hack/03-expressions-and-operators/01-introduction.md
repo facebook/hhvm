@@ -1,3 +1,5 @@
+# Introduction
+
 When combined, operators evaluate according to their associativity. For more information, see [Operator Precedence](/hack/expressions-and-operators/operator-precedence).
 
 ## Assignment Operators

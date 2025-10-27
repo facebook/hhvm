@@ -1,9 +1,11 @@
+# Syntax
+
 The `readonly` keyword can be applied to various positions in Hack.
 
 ## Parameters and return values
 Parameters and return values of any callable (e.g. a function or method) can be marked `readonly`.
 
-```Hack
+```hack
 class Bar {
   public function __construct(
     public Foo $foo,
@@ -25,7 +27,7 @@ A readonly *parameter* signals that the function/method will not modify that par
 ## Static and regular properties
 Static and regular properties marked as `readonly` cannot be modified.
 
-```Hack
+```hack
 class Bar {}
 class Foo {
   private static readonly ?Bar $static_bar = null;
@@ -40,7 +42,7 @@ A readonly property represents a property that holds a readonly reference (speci
 ## Lambdas and function type signatures
 `readonly` is allowed on inner parameters and return types on function typehints.
 
-```Hack
+```hack
 class Bar {}
 function call(
     (function(readonly Bar) : readonly Bar) $f,
@@ -52,7 +54,7 @@ function call(
 
 ## Expressions
 `readonly` can appear on expressions to convert mutable values to readonly.
-```Hack
+```hack
 class Foo {}
 function foo(): void {
   $x = new Foo();

@@ -1,3 +1,5 @@
+# Closures & Function Pointers
+
 Within a module, you can create a pointer to an internal function and pass it anywhere for use. Pointers to internal functions can only be created from within a module, but can be called and acccessed from anywhere.
 
 ```hack

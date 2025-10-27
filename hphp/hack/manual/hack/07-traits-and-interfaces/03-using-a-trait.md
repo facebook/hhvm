@@ -1,8 +1,10 @@
+# Using a Trait
+
 Traits are a mechanism for code reuse that overcomes some limitations of Hack single inheritance model.
 
 In its simplest form a trait defines properties and method declarations.  A trait cannot be instantiated with `new`, but it can be _used_ inside one or more classes, via the `use` clause.  Informally, whenever a trait is used by a class, the property and method definitions of the trait are inlined (copy/pasted) inside the class itself.  The example below shows a simple trait defining a method that returns even numbers.  The trait is used by two, unrelated, classes.
 
-```Hack
+```hack
 trait T {
   public int $x = 0;
 
@@ -38,7 +40,7 @@ function main() : void {
 
 A class can use multiple traits, and traits themselves can use one or more traits.  The example below uses three traits, to generate even numbers, to generate odd numbers given a generator of even numbers, and to test if a number is odd:
 
-```Hack
+```hack
 trait T1 {
   public int $x = 0;
 
@@ -84,7 +86,7 @@ function main() : void {
 
 Traits can contain both instance and static members. If a trait defines a static property, then each class using the trait has its own instance of the static property.
 
-A trait can access methods and properties of the class that uses it, but these dependencies must be declared using [trait requirements](trait-and-interface-requirements.md).
+A trait can access methods and properties of the class that uses it, but these dependencies must be declared using [trait requirements](/hack/traits-and-interfaces/trait-and-interface-requirements).
 
 ### Resolution of naming conflicts
 
@@ -94,7 +96,7 @@ If a class uses multiple traits that define the same property, say `$x`, then ev
 
 Beware that at runtime all the instances of the multiply defined property `$x` are _aliased_. This might be source of unexpected interference between traits implementing unrelated services: in the example below the trait `T2` breaks the invariant of trait `T1` whenever both are used by the same class.
 
-```Hack
+```hack
 trait T1 {
   public static int $x = 0;
 
@@ -139,7 +141,7 @@ If multiple traits used by a class define the same method `m`, and a method name
 Traits inherited along multiple paths (aka. "diamond traits") are rejected by Hack and HHVM whenever they define methods.  However the experimental `<<__EnableMethodTraitDiamond>>` attribute can be specified on the base class (or trait) to enable support for diamond traits that define methods, provided that method resolution remains unambiguous.  For instance, in the example below the invocation of `(new C())->foo()` unambiguously  resolves to the method `foo` defined in trait `T`:
 
 
-```Hack
+```hack
 <<file:__EnableUnstableFeatures('method_trait_diamond')>>
 
 trait T {
@@ -171,7 +173,7 @@ _Remark_: a diamond trait cannot define properties if it is used by a class via 
 
 For constants, constants inherited from the parent class take precedence over constants inherited from traits.
 
-```Hack
+```hack
 trait T {
   const FOO = 'trait';
 }
@@ -190,7 +192,7 @@ function main() : void {
 
 If multiple used traits declare the same constant, the constant inherited from the first trait is used.
 
-```Hack
+```hack
 trait T1 {
   const FOO = 'one';
 }
@@ -209,7 +211,7 @@ function main() : void {
 
 Finally, constants inherited from interfaces declared on the class conflict with other inherited constants, including constants declared on traits.
 
-```Hack error
+```hack error
 trait T {
   const FOO = 'trait';
 }
@@ -228,7 +230,7 @@ function main() : void {
 
 The single exception to this rule are constants inherited from traits via interfaces, as these will lose silently upon conflict.
 
-```Hack
+```hack
 interface I1 {
   const FOO = 'one';
 }

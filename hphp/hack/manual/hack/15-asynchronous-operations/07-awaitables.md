@@ -1,8 +1,10 @@
-```yamlmeta
+# Awaitables
+
+<!-- ```yamlmeta
 {
   "namespace": "HH\\Asio"
 }
-```
+``` -->
 
 An *awaitable* is the key construct in `async` code. An awaitable is a first-class object that represents a possibly asynchronous
 operation that may or may not have completed. We `await` the awaitable until the operation has completed.
@@ -12,13 +14,13 @@ same awaitable twice **will not** execute the code twice. For example,
 while the result of both `await`s below is `42`, the `print()` call (and the
 `return`) only happen once:
 
-```Hack
+```hack
 $x = async { print("Hello, world\n"); return 42; };
 \var_dump(await $x);
 \var_dump(await $x);
 ```
 
-This can be surprising when the result depends on the call stack; [exceptions](exceptions)
+This can be surprising when the result depends on the call stack; [exceptions](/hack/asynchronous-operations/exceptions)
 are the most common case of this.
 
 ## `Awaitable`
@@ -28,7 +30,7 @@ need to concern ourselves with their implementation details. `Awaitable` is the 
 
 The type returned from an async function is `Awaitable<T>`, where `T` is the final result type (e.g., `int`) of the awaited value.
 
-```Hack
+```hack
 async function foo(): Awaitable<int> {
   throw new Exception('unimplemented');
 }
@@ -39,7 +41,7 @@ async function demo(): Awaitable<void> {
 }
 ```
 
-```Hack
+```hack
 async function f(): Awaitable<int> {
   return 2;
 }
@@ -70,7 +72,7 @@ such as a `main` block, we will need to use `join`, as will be shown below.
 
 Many times, we will `await` on one `Awaitable`, get the result, and move on. For example:
 
-```Hack
+```hack
 async function foo(): Awaitable<int> {
   return 3;
 }
@@ -92,7 +94,7 @@ Here we are using one of the library helper-functions in order to batch a bunch 
 * `HH\Lib\Vec\from_async`: vec of awaitables with consecutive integer keys
 * `HH\Lib\Dict\from_async`: dict of awaitables with integer or string keys
 
-```Hack
+```hack
 async function quads(float $n): Awaitable<float> {
   return $n * 4.0;
 }
@@ -114,7 +116,7 @@ takes an `Awaitable` and blocks until it resolves to a result.
 
 This means that invocations of async functions from the top-level scope cannot be awaited, and must be joined.
 
-```Hack
+```hack
 async function get_raw(string $url): Awaitable<string> {
   return await \HH\Asio\curl_exec($url);
 }

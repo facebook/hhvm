@@ -1,3 +1,5 @@
+# Script Inclusion
+
 When creating large applications or building component libraries, it is useful to be able to break up the source code into small,
 manageable pieces each of which performs some specific task, and which can be shared somehow, and tested, maintained, and
 deployed individually. For example, a programmer might define a series of useful constants and use them in numerous and
@@ -12,7 +14,7 @@ the autoloader itself.
 
 The `require_once()` directive is used for this:
 
-```
+```hack no-extract
 namespace MyProject;
 
 require_once(__DIR__.'/../vendor/autoload.hack');
@@ -34,7 +36,7 @@ We expect to make autoloading fully-automatic, and remove inclusion directives f
 
 ## Legacy Issues
 
-For relative paths, the configuration directive [`include_path`](https://docs.hhvm.com/hhvm/configuration/INI-settings#supported-php-ini-settings) is used to resolve the include file's location.
+For relative paths, the configuration directive [`include_path`](/hhvm/configuration/INI-settings#supported-php-ini-settings) is used to resolve the include file's location.
 
 It is currently possible (though strongly discoraged) for top-level code to exist in a file, without
 being in a function. In this cases, including a file may execute code, not just import definitions.

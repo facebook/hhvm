@@ -1,3 +1,5 @@
+# Variance
+
 Hack supports both generic *covariance* and *contravariance* on a type parameter.
 
 Each generic parameter can optionally be marked separately with a variance indicator:
@@ -11,7 +13,7 @@ If no variance is indicated, the parameter is invariant.
 If `Foo<int>` is a subtype of `Foo<num>`, then `Foo` is covariant on `T`. 'co' means 'with'; and the subtype relationship of the generic
 type goes with the subtype relationship of arguments to a covariant type parameter.  Here is an example:
 
-```Hack
+```hack
 // This class is readonly. Had we put in a setter for $this->t, we could not
 // use covariance. e.g., if we had function setMe(T $x), you would get this
 // cov.php:9:25,25: Illegal usage of a covariant type parameter (Typing[4120])
@@ -51,7 +53,7 @@ Covariance cannot be used as the type of a parameter on any method, or as the ty
 If `Foo<num>` is a subtype of `Foo<int>`, then `Foo` is contravariant on `T`. 'contra' means 'against'; and the subtype relationship
 of the generic type goes against the subtype relationship of arguments to a contravariant type parameter.  Here is an example:
 
-```Hack
+```hack
 // This class is write only. Had we put in a getter for $this->t, we could not
 // use contravariance. e.g., if we had function getMe(T $x): T, you would get
 // con.php:10:28,28: Illegal usage of a contravariant type

@@ -1,7 +1,9 @@
+# For
+
 The `for` statement is typically used to step through a range of values in ascending or descending increments, performing some set of operations
 on each value.  For example:
 
-```Hack
+```hack
 for ($i = 1; $i <= 5; ++$i) {
   echo "$i\t".($i * $i)."\n"; // output a table of squares
 }
@@ -24,7 +26,7 @@ for (; ; ) {
 In the first `for` loop above, let's call `$i = 1` the *for-initializer*, `$i <= 10` the *for-control*, and `++$i` the *for-end-of-loop-action*.
 Each of these three parts can contain a comma-separated list of expressions.  For example:
 
-```Hack no-extract
+```hack no-extract
 for ($i = 1, $j = 10; f($i), $i <= 10; $i = $i + 2, --$j) {
   // ...
 }

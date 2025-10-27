@@ -1,3 +1,5 @@
+# Async Blocks
+
 Inside a lengthy async function, it's generally a good idea to group together data fetches that are independent of the rest of the
 function. This reduces unneeded waiting for I/O.
 
@@ -21,7 +23,7 @@ Async blocks have two main use-cases. Remember, this is essentially syntactic su
 - Inline simple async statements that would before have required a function call to execute.
 - Replace the call required by an async lambda to return an actual `Awaitable<T>`.
 
-```Hack
+```hack
 async function get_int_async(): Awaitable<int> {
   return 4;
 }
@@ -95,7 +97,7 @@ lambdas, `async` also immediately precedes the parameters.
 
 So:
 
-```Hack no-extract
+```hack no-extract
 $x = async () ==> { ... } // good
 $x = () ==> async { ... } // bad
 ```

@@ -1,3 +1,5 @@
+# Tools
+
 The core tools are:
 
 - `hh_client`: this is the command line interface for Hack's static analysis; it
@@ -5,7 +7,7 @@ The core tools are:
   in your programs
 - `hhvm`: this is used to execute your Hack code, and can either be used for
   CLI (e.g. `hhvm foo.hack`) or as a server, and has
-  [its own documentation](/hhvm/)
+  [its own documentation](/hhvm-overview)
 
 ### Editors and IDEs
 

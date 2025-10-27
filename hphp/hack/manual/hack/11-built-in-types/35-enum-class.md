@@ -1,3 +1,5 @@
+# Enum Class
+
 In comparison to [enumerated types (enums)](/hack/built-in-types/enum), enum classes are not restricted to int and string values.
 
 ## Enum types v. Enum class
@@ -14,7 +16,7 @@ Enum classes are syntactically different from [enum types](/hack/built-in-types/
 
 ### Example: Simple declarations
 
-```Hack
+```hack
 // Enum class where we allow any type
 enum class Random: mixed {
   int X = 42;
@@ -30,7 +32,7 @@ enum class Ints: int {
 
 ### Example: Interface as a Base Type
 
-```Hack file:hasname.hack
+```hack file:hasname.hack
 // Some class definitions to make a more involved example
 interface IHasName {
   public function name(): string;
@@ -64,7 +66,7 @@ Once declared, enum values are accessed using the `::` operator: `Names::Hello`,
 
 ### Control over enum values
 
-Using [coeffects](../contexts-and-capabilities/introduction.md), you can have control over which expressions are allowed as enum class constants.
+Using [coeffects](/hack/contexts-and-capabilities/introduction), you can have control over which expressions are allowed as enum class constants.
 
 By default, all enum classes are under the `write_props` context. It is not possible to override this explicitly.
 
@@ -72,7 +74,7 @@ By default, all enum classes are under the `write_props` context. It is not poss
 
 Enum classes can be composed together, as long as they implement the same base type:
 
-```Hack file:extend.hack
+```hack file:extend.hack
 interface IBox {}
 
 class Box<T> implements IBox {
@@ -96,7 +98,7 @@ function test0(): void {
 }
 ```
 
-```Hack file:extend.hack
+```hack file:extend.hack
 enum class EBase: IBox {
   Box<int> Age = new Box(42);
 }
@@ -111,7 +113,7 @@ In this example, `EExtend` inherits `Age` from `EBase`, which means that `EExten
 As with ordinary class extension, using the `extends` keyword will create a subtype relation between the enums: `EExtend <: EBase`.
 Enum classes support multiple inheritance as long as there is no ambiguity in value names, and that each enum class uses the same base type:
 
-```Hack file:extend.hack
+```hack file:extend.hack
 enum class E: IBox {
   Box<int> Age = new Box(42);
 }
@@ -139,7 +141,7 @@ enum class E1: IBox extends E {
 ### Diamond shape scenarios
 Enum classes support diamond shaped inheritance as long as there is no ambiguity, like in:
 
-```Hack file:extend.hack
+```hack file:extend.hack
 enum class DiamondBase: IBox {
   Box<int> Age = new Box(42);
 }
@@ -167,14 +169,14 @@ If either `D1`, `D2` or `D3` tries to define a constant named `Age`, there will 
 
 ### Control over inheritance
 
-Though the `final` keyword is not supported, Enum classes support the [`__Sealed`](../attributes/predefined-attributes#__sealed) attribute. Using `__Sealed`, you can specify which other enum classes, if any, are allowed to extend from your enum class.
+Though the `final` keyword is not supported, Enum classes support the [`__Sealed`](/hack/attributes/predefined-attributes#__sealed) attribute. Using `__Sealed`, you can specify which other enum classes, if any, are allowed to extend from your enum class.
 
 
 ## Abstract enum classes
 
 Like regular classes, enum classes come in two flavors: concrete and abstract. An abstract enum class can declare abstract members (constants), where only their type and name are provided.
 
-```Hack file:hasname.hack
+```hack file:hasname.hack
 // abstract enum class with some abstract members
 abstract enum class AbstractNames: IHasName {
   abstract HasName Foo;
@@ -186,7 +188,7 @@ Abstract members do not support default values, and can't be accessed directly. 
 You must extend your abstract enum class into a concrete one with implementations of all abstract members to
 safely access members defined as abstract.
 
-```Hack file:hasname.hack
+```hack file:hasname.hack
 enum class ConcreteNames: IHasName extends AbstractNames {
   HasName Foo = new HasName('foo'); // one must provide all the abstract members
   // Bar is inherited from AbstractNames
@@ -201,7 +203,7 @@ All concrete members are inherited, and can't be overriden.
 
 When defining a function that expects an enum class value (e.g. `Foo::BAR`), you need to define the expected parameter appropriately with `HH\MemberOf` or you will run into errors.
 
-```Hack error
+```hack error
 enum class Foo: string {
   string BAR = 'BAZ';
 }
@@ -217,7 +219,7 @@ function main(): void {
 
 However, if we instead define `do_stuff()` as receiving `HH\MemberOf<Foo, string>`, then we can use `Foo::Bar` with no issues.
 
-```Hack
+```hack
 enum class Foo: string {
   string BAR = 'BAZ';
 }
@@ -237,13 +239,13 @@ function main(): void {
 
 Let's examine `enum E` v. `enum class EC`.
 
-```Hack
+```hack
 enum E: int {
   A = 42;
 }
 ```
 
-```Hack
+```hack
 enum class EC: int {
   int A = 42;
 }
@@ -258,7 +260,7 @@ But if we look at the enum class `EC::A` its type is `HH\MemberOf<EC, int>`. We 
 Like normal classes, enum classes can declare type constants. Abstract type
 constants are also supported:
 
-```Hack
+```hack
 interface IGet<+T> {
   public function get(): T;
 }
@@ -285,7 +287,7 @@ enum class F : IGet<mixed> extends E {
 
 First, a couple of general Hack definitions:
 
-```Hack file:dep_dict.hack
+```hack file:dep_dict.hack
 function expect_string(string $str): void {
   echo 'expect_string called with: '.$str."\n";
 }
@@ -320,7 +322,7 @@ class StringKey extends Key<string> {
 
 Now let’s create the base definitions for our dictionary
 
-```Hack file:dep_dict.hack
+```hack file:dep_dict.hack
 enum class EKeys: IKey {
   // here are a default key, but this could be left empty
   Key<string> NAME = new StringKey('NAME');
@@ -353,7 +355,7 @@ abstract class DictBase {
 
 Now one just need to provide a set of keys and extends `DictBase`:
 
-```Hack file:dep_dict.hack
+```hack file:dep_dict.hack
 class Foo { /* user code in here */ }
 
 class MyKeyType extends Key<Foo> {
@@ -373,7 +375,7 @@ class MyDict extends DictBase {
 }
 ```
 
-```Hack file:dep_dict.hack
+```hack file:dep_dict.hack
 <<__EntryPoint>>
 function main(): void {
   $d = new MyDict();

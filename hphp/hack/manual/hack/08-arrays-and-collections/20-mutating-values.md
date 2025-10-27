@@ -1,3 +1,5 @@
+# Mutating Values
+
 Hack arrays are value types. This makes your code easier to reason
 about, faster (no work required on a fresh web request), and well
 suited for caches.
@@ -71,7 +73,7 @@ function demo(): void {
 
 The `Ref` class provides a single value that can be mutated.
 
-```Hack no-extract
+```hack no-extract
 function update_value(Ref<vec<int>> $items): void {
   $inner = $items->get();
   $inner[0] = 42;

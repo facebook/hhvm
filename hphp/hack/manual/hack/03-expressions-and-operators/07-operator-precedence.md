@@ -1,3 +1,5 @@
+# Operator Precedence
+
 The precedence of Hack operators is shown in the table below.
 
 Operators higher in the table have a higher precedence (binding more

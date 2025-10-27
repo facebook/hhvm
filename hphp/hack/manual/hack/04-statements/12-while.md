@@ -1,3 +1,5 @@
+# While
+
 The general format of a `while` statement is
 
 `while  (`  *expression* ` )`  *statement*
@@ -6,7 +8,7 @@ If the expression tests `true`, the *single* statement that follows is executed,
 control transfers to the point immediately following the end of the `while` statement. The loop body (that is, the single statement) is executed
 zero or more times. Consider the following:
 
-```Hack
+```hack
 $i = 1;
 while ($i <= 10) {
   echo "$i\t".($i * $i)."\n"; // output a table of squares
@@ -15,11 +17,11 @@ while ($i <= 10) {
 ```
 
 The execution of a `while` statement is impacted by a subordinate
-[`break` or `continue`](break-and-continue.md).
+[`break` or `continue`](/hack/statements/break-and-continue).
 
 The controlling expression is often a combination of relational, equality, and logical expressions.  For example:
 
-```Hack no-extract
+```hack no-extract
 while (($i <= 10 && $j !== 0) || !getStatus()) {
   // ...
 }

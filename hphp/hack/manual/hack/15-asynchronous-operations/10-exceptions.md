@@ -1,3 +1,5 @@
+# Exceptions
+
 In general, an async operation has the following pattern:
 * Call an `async` function
 * Get an awaitable back
@@ -9,7 +11,7 @@ means that if an `Awaitable` is resolved multiple times, the same exception
 object instance will be thrown every time; as it is the same object every time,
 its data will be unchanged, **including backtraces**.
 
-```Hack
+```hack
 async function exception_thrower(): Awaitable<void> {
   throw new \Exception("Return exception handle");
 }
@@ -31,7 +33,7 @@ function main(): void {
 The use of `from_async` ignores any successful awaitable results and just throw an exception of one of the
 awaitable results, if one of the results was an exception.
 
-```Hack
+```hack
 async function exception_thrower(): Awaitable<void> {
   throw new \Exception("Return exception handle");
 }
@@ -54,11 +56,11 @@ function main(): void {
 }
 ```
 
-To get around this, and get the successful results as well, we can use the [utility function](utility-functions.md)
-[`HH\Asio\wrap`](/hack/reference/function/HH.Asio.wrap/). It takes an awaitable and returns the expected result or the exception
-if one was thrown. The exception it gives back is of the type [`ResultOrExceptionWrapper`](/hack/reference/interface/HH.Asio.ResultOrExceptionWrapper/).
+To get around this, and get the successful results as well, we can use the [utility function](utility-functions)
+[`HH\Asio\wrap`](/apis/function/HH.Asio.wrap/). It takes an awaitable and returns the expected result or the exception
+if one was thrown. The exception it gives back is of the type [`ResultOrExceptionWrapper`](/apis/interface/HH.Asio.ResultOrExceptionWrapper/).
 
-```Hack no-extract
+```hack no-extract
 namespace HH\Asio {
   interface ResultOrExceptionWrapper<T> {
     public function isSucceeded(): bool;
@@ -71,7 +73,7 @@ namespace HH\Asio {
 
 Taking the example above and using the wrapping mechanism, this is what the code looks like:
 
-```Hack
+```hack
 async function exception_thrower(): Awaitable<void> {
   throw new Exception();
 }
@@ -98,7 +100,7 @@ function main(): void {
 ```
 
 ## Memoized Async Exceptions
-Because [`__Memoize`](../attributes/predefined-attributes#__memoize) caches the awaitable itself, **if an async function
+Because [`__Memoize`](/hack/attributes/predefined-attributes#__memoize) caches the awaitable itself, **if an async function
 is memoized and throws, you will get the same exception backtrace on every
 failed call**.
 
@@ -106,7 +108,7 @@ For example, both times an exception is caught here, `foo` is in the backtrace,
 but `bar` is not, as the call to `foo` led to the creation of the memoized
 awaitable:
 
-```Hack
+```hack
 <<__Memoize>>
 async function throw_something(): Awaitable<int> {
   throw new Exception();

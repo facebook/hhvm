@@ -1,10 +1,14 @@
-```yamlmeta
-{
-  "fbonly messages": [
-    "There is [an internal wiki](https://www.internalfb.com/intern/wiki/Hack_Foundation/Memoization_options/) with more, Meta-specific guidance."
-  ]
-}
-```
+---
+title: Introduction
+---
+
+# Memoization Options
+
+<FbInfo>
+
+There is [an internal wiki](https://www.internalfb.com/intern/wiki/Hack_Foundation/Memoization_options/) with more, Meta-specific guidance.
+
+</FbInfo>
 
 The `__Memoize` and `__MemoizeLSB` attributes in Hack support experimental options that control how the function behaves with respect to an Implicit Context value.
 
@@ -24,7 +28,7 @@ If static requirements are desired, one can make use of special [contexts and ca
 
 A memoized function may specify its behavior relative to the IC by passing an option to the `__Memoize` (or `__MemoizeLSB`) attribute.
 
-```Hack
+```hack
 <<__Memoize(#MakeICInaccessible)>>
 function get_same_random_int(): int {
   return HH\Lib\PseudoRandom\int();
@@ -46,13 +50,9 @@ function get_same_random_int(): int {
 
 ## Related classes and functions
 
-```yamlmeta
-{
-  "fbonly messages": [
-    "Meta developers should not use these symbols directly and instead should only use them via Zones APIs."
-  ]
-}
-```
+<FbInfo>
+Meta developers should not use these symbols directly and instead should only use them via Zones APIs.
+</FbInfo>
 
 * Executing code with an IC value and accessing the propagated value is done by extending and using methods of the class `HH\ImplicitContext`.
 * Functions `HH\ImplicitContext\soft_run_with` and `HH\ImplicitContext\soft_run_with_async` are passthrough functions that do not affect the Implicit Context state.

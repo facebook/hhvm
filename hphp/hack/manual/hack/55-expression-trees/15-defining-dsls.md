@@ -1,3 +1,5 @@
+# Defining DSLs
+
 Adding a DSL to Hack requires you to define a new visitor.
 
 This page will demonstrate defining a DSL supporting integer arithmetic:
@@ -28,7 +30,7 @@ function foo(): void {
 
 Our DSL needs a data type to represent expressions written by the user. We'll define a simple abstract syntax tree (AST).
 
-```Hack file:mydsl.hack
+```hack file:mydsl.hack
 abstract class MyDslAst {}
 
 class MyDslAstBinOp extends MyDslAst {
@@ -92,7 +94,7 @@ You can see that `$v-visitBinop()` receives the return value of `$v->visitInt()`
 
 We can support binary operators by adding `visitBinop` to our visitor.
 
-```Hack no-extract
+```hack no-extract
 class MyDsl {
   public function visitBinop(
     ?ExprPos $_pos,
@@ -124,7 +126,7 @@ MyDsl::makeTree<MyDslInt>(null, shape(), (MyDsl $v) ==> $v->visitInt(null, 1))
 
 We call `makeTree` on our visitor class, providing the visitor closure and some additional metadata. The type checker also sees the `TInfer` type, which is `MyDslInt` in this example (discussed below).
 
-```Hack file:mydsl.hack
+```hack file:mydsl.hack
 class MyDsl {
   public static function makeTree<<<__Explicit>> TInfer>(
     ?ExprPos $pos,
@@ -174,7 +176,7 @@ The `splices` field contains a dictionary of string keys and the values the spli
 
 Expression tree values implement `Spliceable`, a typed value that can be visited or spliced into another `Spliceable`. Here's the definition for the `Spliceable` interface.
 
-```Hack no-extract
+```hack no-extract
 /**
  * Spliceable is this base type for all expression tree visitors.
  *
@@ -199,7 +201,7 @@ interface Spliceable<TVisitor, TResult, +TInfer> {
 
 The `MyDslExprTree` class implements `Spliceable`, and calls the visitor closure ('builder') when `visit` is called.
 
-```Hack file:mydsl.hack
+```hack file:mydsl.hack
 class MyDslExprTree<+T> implements Spliceable<MyDsl, MyDslAst, T> {
   public function __construct(
     public ?ExprPos $pos,
@@ -233,7 +235,7 @@ class MyDsl {
 
 For each type in our DSL, we define an associated type. It's usually easier to use interfaces for these types, as they're only used for type checking.
 
-```Hack no-extract
+```hack no-extract
 interface MyDslNonnull {}
 
 interface MyDslInt extends MyDslNonnull {

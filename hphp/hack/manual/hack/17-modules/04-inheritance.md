@@ -1,3 +1,5 @@
+# Inheritance
+
 ## Inheriting methods and properties
 In general, override rules for internal class members are consistent with that of private and protected: you can only override a class member with a visibility that's at least as visible as the previous.
 

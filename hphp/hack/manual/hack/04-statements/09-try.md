@@ -1,8 +1,10 @@
+# Try-Catch
+
 An *exception* is some unusual condition in that it is outside the ordinary expected behavior. (Examples include dealing with situations in
 which a critical resource is needed, but is unavailable, and detecting an out-of-range value for some computation.) As such, exceptions require
 special handling.
 
-Whenever some exceptional condition is detected at runtime, an exception is thrown using [`throw`](throw.md). A designated exception handler
+Whenever some exceptional condition is detected at runtime, an exception is thrown using `throw`. A designated exception handler
 can *catch* the thrown exception and service it. Among other things, the handler might recover from the situation completely (allowing the
 script to continue execution), it might perform some recovery and then throw an exception to get further help, or it might perform some
 cleanup action and terminate the script. Exceptions may be thrown on behalf of the runtime or by explicit code source code in the script.
@@ -10,7 +12,7 @@ cleanup action and terminate the script. Exceptions may be thrown on behalf of t
 A `throw` statement throws an exception immediately and unconditionally.  Control never reaches the statement immediately
 following the throw. For example:
 
-```Hack
+```hack
 class MyException extends Exception {}
 
 function demo(): void {
@@ -29,7 +31,7 @@ occurred within that try-block
 
 Consider the following:
 
-```Hack
+```hack
 function do_it(int $x, int $y): void {
   try {
     $result = $x / $y;
@@ -52,7 +54,7 @@ only an exception of that type is thrown, is the catch handler code executed.
 
 Consider the following hierarchy of exception-class types:
 
-```Hack
+```hack
 class DeviceException extends Exception { /*...*/ }
 class DiskException extends DeviceException { /*...*/ }
 class RemovableDiskException extends DiskException { /*...*/ }

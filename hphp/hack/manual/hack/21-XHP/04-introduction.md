@@ -1,3 +1,5 @@
+# Introduction
+
 XHP provides a native XML-like representation of output (which is usually HTML). This allows UI code to be typechecked, and automatically
 avoids several common issues such as cross-site scripting (XSS) and double-escaping. It also applies other validation rules, e.g., `<head>`
 must contain `<title>`.

@@ -1,9 +1,11 @@
+# Introduction
+
 Attributes attach metadata to Hack definitions.
 
 Hack provides built-in attributes that can change runtime or
 typechecker behavior.
 
-```Hack
+```hack
 <<__Memoize>>
 function add_one(int $x): int {
   return $x + 1;
@@ -28,7 +30,7 @@ class OtherClass {
 You can define your own attribute by implementing an attribute
 interface in the HH namespace.
 
-```Hack file:contributors.hack
+```hack file:contributors.hack
 class Contributors implements HH\ClassAttribute {
   public function __construct(private string $author, private ?keyset<string> $maintainers = null) {}
   public function getAuthor(): string {
@@ -48,7 +50,7 @@ class YourClass {}
 
 Other common attribute interfaces are `HH\FunctionAttribute`,
 `HH\MethodAttribute` and `HH\PropertyAttribute`, but see [the Hack
-interface reference](/hack/reference/interface/) for the full list.
+interface reference](/apis/interface/) for the full list.
 
 
 ## Accessing attribute arguments
@@ -57,7 +59,7 @@ You need to use reflection to access attribute arguments.
 
 Given the `MyClass` example defined above:
 
-```Hack file:contributors.hack
+```hack file:contributors.hack
 $rc = new ReflectionClass('MyClass');
 $my_class_contributors = $rc->getAttributeClass(Contributors::class);
 $my_class_contributors?->getAuthor(); // "John Doe"

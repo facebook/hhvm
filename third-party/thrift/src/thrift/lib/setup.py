@@ -147,11 +147,6 @@ else:
             **common_options,
         ),
         Extension(
-            "thrift.python.flags",
-            sources=["thrift/python/flags.pyx"],
-            **common_options,
-        ),
-        Extension(
             "thrift.python.mutable_containers",
             sources=["thrift/python/mutable_containers.pyx"],
             **common_options,

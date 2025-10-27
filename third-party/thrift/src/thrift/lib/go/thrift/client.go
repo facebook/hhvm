@@ -184,10 +184,7 @@ func NewClient(opts ...ClientOption) (RequestChannel, error) {
 	case TransportIDHeader:
 		channel, clientErr = newHeaderProtocolAsRequestChannel(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
 	case TransportIDRocket:
-		protocol, clientErr = newRocketClient(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
-		if clientErr == nil {
-			channel = protocol.(RequestChannel)
-		}
+		channel, clientErr = newRocketClientAsRequestChannel(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
 	case TransportIDUpgradeToRocket:
 		protocol, clientErr = newUpgradeToRocketClient(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
 		if clientErr == nil {

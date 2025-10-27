@@ -176,7 +176,7 @@ class {{service:name}}Interface(
         self,
         handler_bidi_callback: {{> services/bidi_callback }},
         protocol: Protocol
-    ) -> _typing.Callable[_typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]:
+    ) -> _typing.Callable[[_typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]:
         async def _fbthrift_iobuf_bidi_callback(
             _iobuf_agen: _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None],
         ) -> _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]:
@@ -190,7 +190,7 @@ class {{service:name}}Interface(
                     assert sink_elem.success is not None, "unexpected empty sink element"
                     yield sink_elem.success
 
-            async def _handle_stream(self, stream_generator: _typing.AsyncIterator[{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}], protocol: Protocol) -> _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf]:
+            async def _handle_stream(stream_generator: _typing.AsyncIterator[{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}]) -> _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]:
                 async for item in stream_generator:
                     yield serialize_iobuf({{program:module_mangle}}__{{> types/types_import_path}}._fbthrift_{{service:name}}_{{function:name}}_result_stream_elem(success=item), protocol)
             return _handle_stream(handler_bidi_callback(_handle_sink()))

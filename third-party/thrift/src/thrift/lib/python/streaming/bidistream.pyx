@@ -13,10 +13,20 @@
 # limitations under the License.
 
 import asyncio
+import sys
+import traceback
 from libcpp.memory cimport unique_ptr
 from libcpp.utility cimport move as cmove
 from folly cimport cFollyPromise
 
+from thrift.python.exceptions cimport (
+    ApplicationError,
+    cTApplicationException,
+    cTApplicationExceptionType__UNKNOWN,
+)
+from thrift.python.streaming.python_user_exception cimport (
+    PythonUserException,
+)
 from thrift.python.protocol cimport Protocol
 from thrift.python.streaming.sink cimport ServerSinkGenerator, ClientSink, cIOBufClientSink
 from thrift.python.streaming.stream cimport ClientBufferedStream, cIOBufClientBufferedStream
@@ -105,7 +115,7 @@ cdef class ResponseAndBidirectionalStream:
         return self._stream
 
 async def invokeBidiTransformCallback(
-    output_gen,
+    bidi_callback,
     ServerSinkGenerator input_gen,
     Promise_PyObject promise,
 ):
@@ -118,9 +128,31 @@ async def invokeBidiTransformCallback(
 
     try:
         input_gen_wrapper = invoke_cpp_iobuf_gen()
+        output_gen = await bidi_callback(input_gen_wrapper)
         promise.complete(output_gen)
+    except ApplicationError as ex:
+        promise.error_ta(
+            cTApplicationException(ex.type.value, ex.message.encode('UTF-8'))
+        )
+    except asyncio.CancelledError as ex:
+        print(f"Coroutine was cancelled in bidi handler:", file=sys.stderr)
+        traceback.print_exc()
+        msg = f"Application was cancelled on the server with message: {str(ex)}"
+        promise.error_ta(
+            cTApplicationException(
+                cTApplicationExceptionType__UNKNOWN,
+                msg.encode('UTF-8'),
+            )
+        )
     except Exception as ex:
-        promise.error_py_object(ex)
+        print(
+            f"Unexpected error in server bidi handler:",
+            file=sys.stderr
+        )
+        traceback.print_exc()
+        promise.error_ta(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
+        ))
 
 
 cdef api int invoke_server_bidi_callback(

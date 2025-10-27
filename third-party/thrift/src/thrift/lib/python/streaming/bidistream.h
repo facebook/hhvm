@@ -35,6 +35,26 @@ apache::thrift::
   return {std::move(response), std::move(bidi)};
 }
 
+// Helper class to manage PyObject* reference counting for bidi callbacks
+class BidiCallbackWrapper {
+ public:
+  BidiCallbackWrapper() = default;
+  ~BidiCallbackWrapper();
+  BidiCallbackWrapper(BidiCallbackWrapper&&) noexcept;
+  BidiCallbackWrapper& operator=(BidiCallbackWrapper&&) noexcept;
+  BidiCallbackWrapper(const BidiCallbackWrapper&) = delete;
+  BidiCallbackWrapper& operator=(const BidiCallbackWrapper&) = delete;
+
+  BidiCallbackWrapper(folly::Executor* exec, PyObject* bidi_callback);
+
+  PyObject* get() const { return bidi_callback_; }
+  folly::Executor* getExecutor() const { return executor_.get(); }
+
+ private:
+  folly::Executor::KeepAlive<> executor_;
+  PyObject* bidi_callback_ = nullptr;
+};
+
 using IOBufStreamTransformation = apache::thrift::StreamTransformation<
     std::unique_ptr<folly::IOBuf>,
     std::unique_ptr<folly::IOBuf>>;

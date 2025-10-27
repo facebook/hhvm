@@ -27,6 +27,7 @@ The internal return type of a service handler
     }}{{/function:sink?}}{{!
     }}{{^function:sink_or_stream?}}_fbthrift_iobuf.IOBuf{{/function:sink_or_stream?}}{{!
   }}{{/function:bidirectional_stream?}}{{#function:bidirectional_stream?}}{{!
-    }}_typing.Callable[[_typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]{{!
+    }}_typing.Tuple[_fbthrift_iobuf.IOBuf, {{!
+      }}_typing.Callable[[_typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]]{{!
   }}{{/function:bidirectional_stream?}}{{!
 }}{{/function:oneway?}}

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#include <stdexcept>
-
 #include <glog/logging.h>
 #include <folly/Portability.h>
 #include <folly/futures/Promise.h>
@@ -38,7 +36,40 @@ bool do_import() {
   return bidi_import() && py_promise_import();
 }
 
+} // namespace
+
 #if FOLLY_HAS_COROUTINES
+
+// BidiCallbackWrapper implementation
+BidiCallbackWrapper::BidiCallbackWrapper(
+    folly::Executor* executor, PyObject* bidi_callback)
+    : executor_(folly::getKeepAliveToken(CHECK_NOTNULL(executor))),
+      bidi_callback_(bidi_callback) {
+  Py_INCREF(bidi_callback);
+}
+
+BidiCallbackWrapper::~BidiCallbackWrapper() {
+  if (bidi_callback_ == nullptr) {
+    return;
+  }
+  executor_->add(
+      [bidi_callback = bidi_callback_] { Py_DECREF(bidi_callback); });
+}
+
+BidiCallbackWrapper::BidiCallbackWrapper(BidiCallbackWrapper&& other) noexcept {
+  executor_ = std::move(other.executor_);
+  bidi_callback_ = CHECK_NOTNULL(std::exchange(other.bidi_callback_, nullptr));
+}
+
+BidiCallbackWrapper& BidiCallbackWrapper::operator=(
+    BidiCallbackWrapper&& other) noexcept {
+  if (this == &other) {
+    return *this;
+  }
+  executor_ = std::move(other.executor_);
+  bidi_callback_ = CHECK_NOTNULL(std::exchange(other.bidi_callback_, nullptr));
+  return *this;
+}
 
 // Helper coroutine function implementing the transformation logic
 folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&>
@@ -80,18 +111,20 @@ makeTransformFunc(PyObject* bidi, folly::Executor* exec) {
     ::folly::python::handlePythonError("Python module import error");
   }
 
-  // Capture bidi and exec for use in the transformation
-  return [bidi, exec](
+  // Wrap bidi callback to manage reference counting
+  auto bidi_wrapper = BidiCallbackWrapper(exec, bidi);
+
+  // Capture wrapper for use in the transformation
+  return [bidi_wrapper = std::move(bidi_wrapper)](
              folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&>
-                 input_agen)
+                 input_agen) mutable
              -> folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&> {
-    return transformAsyncGeneratorImpl(std::move(input_agen), bidi, exec);
+    return transformAsyncGeneratorImpl(
+        std::move(input_agen), bidi_wrapper.get(), bidi_wrapper.getExecutor());
   };
 }
 
 #endif // FOLLY_HAS_COROUTINES
-
-} // namespace
 
 std::unique_ptr<apache::thrift::StreamTransformation<
     std::unique_ptr<folly::IOBuf>,

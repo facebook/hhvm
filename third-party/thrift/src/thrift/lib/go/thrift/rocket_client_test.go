@@ -61,10 +61,10 @@ func TestRocketClientClose(t *testing.T) {
 	require.NoError(t, err)
 
 	cconn := &closeConn{Conn: conn, closed: make(chan struct{}, 10)}
-	proto, err := newRocketClient(cconn, types.ProtocolIDCompact, 0, nil)
+	channel, err := newRocketClient(cconn, types.ProtocolIDCompact, 0, nil)
 	require.NoError(t, err)
 
-	client := dummyif.NewDummyChannelClient(newSerialChannel(proto))
+	client := dummyif.NewDummyChannelClient(channel)
 	result, err := client.Echo(context.TODO(), "hello")
 	require.NoError(t, err)
 	require.Equal(t, "hello", result)
@@ -96,10 +96,10 @@ func TestRocketClientUnix(t *testing.T) {
 	conn, err := net.Dial(addr.Network(), addr.String())
 	require.NoError(t, err)
 
-	proto, err := newRocketClient(conn, types.ProtocolIDCompact, 0, nil)
+	channel, err := newRocketClient(conn, types.ProtocolIDCompact, 0, nil)
 	require.NoError(t, err)
 
-	client := dummyif.NewDummyChannelClient(newSerialChannel(proto))
+	client := dummyif.NewDummyChannelClient(channel)
 	defer client.Close()
 	result, err := client.Echo(context.TODO(), "hello")
 	require.NoError(t, err)

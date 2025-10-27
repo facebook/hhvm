@@ -183,7 +183,7 @@ func NewClient(opts ...ClientOption) (RequestChannel, error) {
 	case TransportIDHeader:
 		channel, channelErr = newHeaderProtocolAsRequestChannel(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
 	case TransportIDRocket:
-		channel, channelErr = newRocketClientAsRequestChannel(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
+		channel, channelErr = newRocketClient(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
 	case TransportIDUpgradeToRocket:
 		channel, channelErr = newUpgradeToRocketClient(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
 	default:

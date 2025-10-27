@@ -64,25 +64,12 @@ type rocketClient struct {
 var _ Protocol = (*rocketClient)(nil)
 var _ RequestChannel = (*rocketClient)(nil)
 
-func newRocketClientAsRequestChannel(
-	conn net.Conn,
-	protoID types.ProtocolID,
-	ioTimeout time.Duration,
-	persistentHeaders map[string]string,
-) (RequestChannel, error) {
-	proto, err := newRocketClient(conn, protoID, ioTimeout, persistentHeaders)
-	if err != nil {
-		return nil, err
-	}
-	return proto.(RequestChannel), nil
-}
-
 func newRocketClient(
 	conn net.Conn,
 	protoID types.ProtocolID,
 	ioTimeout time.Duration,
 	persistentHeaders map[string]string,
-) (Protocol, error) {
+) (RequestChannel, error) {
 	var rpcProtocolID rpcmetadata.ProtocolId
 	switch protoID {
 	case types.ProtocolIDBinary:
@@ -100,7 +87,7 @@ func newRocketClientFromRsocket(
 	protoID types.ProtocolID,
 	ioTimeout time.Duration,
 	persistentHeaders map[string]string,
-) (Protocol, error) {
+) (RequestChannel, error) {
 	p := &rocketClient{
 		client:            client,
 		protoID:           protoID,

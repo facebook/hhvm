@@ -48,7 +48,7 @@ func newUpgradeToRocketClient(
 	ioTimeout time.Duration,
 	persistentHeaders map[string]string,
 ) (RequestChannel, error) {
-	rocketChannel, err := newRocketClientAsRequestChannel(conn, protoID, ioTimeout, persistentHeaders)
+	rocketChannel, err := newRocketClient(conn, protoID, ioTimeout, persistentHeaders)
 	if err != nil {
 		return nil, err
 	}

@@ -22,7 +22,12 @@ final class TFileStreamBuffer {
   private string $buffer = '';
   private int $bufferIndex = 0;
 
-  public function __construct()[] {}
+  public function __construct(private int $bufferSize)[] {}
+
+  public function setBufferSize(int $buffer_size)[write_props]: this {
+    $this->bufferSize = $buffer_size;
+    return $this;
+  }
 
   public function getAvailableBytes()[]: int {
     return Str\length($this->buffer) - $this->bufferIndex;
@@ -43,12 +48,18 @@ final class TFileStreamBuffer {
     if ($len === 1) {
       $result = $this->buffer[$this->bufferIndex];
       $this->bufferIndex++;
-      return $result;
+    } else {
+      $result = $this->peek($len);
+      $this->bufferIndex += $len;
     }
 
-    $result = $this->peek($len);
-    $this->buffer = Str\slice($this->buffer, $this->bufferIndex + $len);
-    $this->bufferIndex = 0;
+    // If we read enough of the buffer throw away the stuff that we read so we
+    // don't use too much memory
+    if ($this->bufferIndex >= $this->bufferSize) {
+      $this->buffer = Str\slice($this->buffer, $this->bufferIndex);
+      $this->bufferIndex = 0;
+    }
+
     return $result;
   }
 
@@ -83,11 +94,12 @@ final class TFileStream extends TTransport implements IThriftBufferedTransport {
     private TFileStreamMode $mode,
     private string $filePath,
   )[] {
-    $this->buffer = new TFileStreamBuffer();
+    $this->buffer = new TFileStreamBuffer($this->bufferSize);
   }
 
   public function setBufferSize(int $buffer_size)[write_props]: this {
     $this->bufferSize = $buffer_size;
+    $this->buffer->setBufferSize($buffer_size);
     return $this;
   }
 

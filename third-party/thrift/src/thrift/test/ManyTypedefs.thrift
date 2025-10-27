@@ -16,6 +16,7 @@
 
 package "thrift.org/test"
 namespace go thrift.test.ManyTypedefs
+namespace py3 thrift.test
 
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"

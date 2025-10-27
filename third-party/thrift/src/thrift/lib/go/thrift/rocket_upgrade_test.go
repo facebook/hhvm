@@ -76,10 +76,10 @@ func TestUpgradeToRocketServerAgainstHeaderClient(t *testing.T) {
 	conn, err := net.Dial(addr.Network(), addr.String())
 	require.NoError(t, err)
 
-	proto, err := newHeaderProtocol(conn, types.ProtocolIDCompact, 0, nil)
+	channel, err := newHeaderProtocolAsRequestChannel(conn, types.ProtocolIDCompact, 0, nil)
 	require.NoError(t, err)
 
-	client := dummyif.NewDummyChannelClient(newSerialChannel(proto))
+	client := dummyif.NewDummyChannelClient(channel)
 	defer client.Close()
 	result, err := client.Echo(context.TODO(), "hello")
 	require.NoError(t, err)

@@ -22,12 +22,31 @@ import asyncio
 import gc
 import threading
 import unittest
-from typing import Optional, Sequence
+from contextlib import contextmanager
+from typing import Iterator, Optional, Sequence
 
 from testing.thrift_services import TestingServiceInterface
 from testing.thrift_types import Color, easy
 from thrift.py3.server import SocketAddress
 from thrift.python.server import ThriftServer
+
+
+@contextmanager
+def event_loop() -> Iterator[asyncio.AbstractEventLoop]:
+    """
+    If there is already running loop, yields it. Otherwise, creates a new loop,
+    sets it as the current event loop, yields it, and then closes it on exit.
+    """
+    try:
+        loop = asyncio.get_running_loop()
+        yield loop
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            yield loop
+        finally:
+            loop.close()
 
 
 class Handler(TestingServiceInterface):
@@ -88,25 +107,21 @@ class Handler(TestingServiceInterface):
 
 class ServicesTests(unittest.TestCase):
     def test_handler_acontext(self) -> None:
-        loop = asyncio.get_event_loop()
-
         async def inner() -> None:
             async with Handler() as h:
                 self.assertTrue(h.initalized)
 
-        loop.run_until_complete(inner())
+        asyncio.run(inner())
 
     def test_get_service_name(self) -> None:
         self.assertEqual(Handler.service_name(), b"TestingService")
 
     def test_get_address(self) -> None:
-        loop = asyncio.get_event_loop()
-        coro = self.get_address(loop)
-        self.assertIsInstance(loop.run_until_complete(coro), SocketAddress)
+        addy = asyncio.run(self.get_address())
+        self.assertIsInstance(addy, SocketAddress)
 
-    async def get_address(
-        self, loop: asyncio.AbstractEventLoop, handler: Optional[Handler] = None
-    ) -> SocketAddress:
+    async def get_address(self, handler: Optional[Handler] = None) -> SocketAddress:
+        loop = asyncio.get_running_loop()
         server = ThriftServer(Handler() if handler is None else handler, port=0)
         serve_task = loop.create_task(server.serve())
         addy = await server.get_address()
@@ -116,15 +131,13 @@ class ServicesTests(unittest.TestCase):
 
     def test_unittest_call(self) -> None:
         h = Handler()
-        loop = asyncio.get_event_loop()
         call = 5
-        ret = loop.run_until_complete(h.complex_action("", "", call, ""))
+        ret = asyncio.run(h.complex_action("", "", call, ""))
         self.assertEqual(call, ret)
 
     def test_unittest_call_renamed_func(self) -> None:
         h = Handler()
-        loop = asyncio.get_event_loop()
-        ret = loop.run_until_complete(h.renamed_func(True))
+        ret = asyncio.run(h.renamed_func(True))
         self.assertTrue(ret)
 
     def test_server_manipulate_config(self) -> None:
@@ -136,38 +149,38 @@ class ServicesTests(unittest.TestCase):
         QUEUE_TIMEOUT = 20.19
         SOCKET_QUEUE_TIMEOUT = 21.37
 
-        server = ThriftServer(Handler(), port=0)
-        server.set_max_requests(MAX_REQUESTS)
-        server.set_max_connections(MAX_CONNECTIONS)
-        server.set_listen_backlog(LISTEN_BACKLOG)
-        server.set_io_worker_threads(NUM_IO_WORKERS)
-        server.set_idle_timeout(IDLE_TIMEOUT)
-        server.set_queue_timeout(QUEUE_TIMEOUT)
-        server.set_socket_queue_timeout(SOCKET_QUEUE_TIMEOUT)
-        self.assertEqual(server.get_max_requests(), MAX_REQUESTS)
-        self.assertEqual(server.get_max_connections(), MAX_CONNECTIONS)
-        self.assertEqual(server.get_listen_backlog(), LISTEN_BACKLOG)
-        self.assertEqual(server.get_io_worker_threads(), NUM_IO_WORKERS)
-        self.assertEqual(server.get_idle_timeout(), IDLE_TIMEOUT)
-        self.assertEqual(server.get_queue_timeout(), QUEUE_TIMEOUT)
-        self.assertEqual(server.get_socket_queue_timeout(), SOCKET_QUEUE_TIMEOUT)
+        with event_loop():
+            server = ThriftServer(Handler(), port=0)
+            server.set_max_requests(MAX_REQUESTS)
+            server.set_max_connections(MAX_CONNECTIONS)
+            server.set_listen_backlog(LISTEN_BACKLOG)
+            server.set_io_worker_threads(NUM_IO_WORKERS)
+            server.set_idle_timeout(IDLE_TIMEOUT)
+            server.set_queue_timeout(QUEUE_TIMEOUT)
+            server.set_socket_queue_timeout(SOCKET_QUEUE_TIMEOUT)
+            self.assertEqual(server.get_max_requests(), MAX_REQUESTS)
+            self.assertEqual(server.get_max_connections(), MAX_CONNECTIONS)
+            self.assertEqual(server.get_listen_backlog(), LISTEN_BACKLOG)
+            self.assertEqual(server.get_io_worker_threads(), NUM_IO_WORKERS)
+            self.assertEqual(server.get_idle_timeout(), IDLE_TIMEOUT)
+            self.assertEqual(server.get_queue_timeout(), QUEUE_TIMEOUT)
+            self.assertEqual(server.get_socket_queue_timeout(), SOCKET_QUEUE_TIMEOUT)
 
-        self.assertFalse(server.is_plaintext_allowed_on_loopback())
-        server.set_allow_plaintext_on_loopback(True)
-        self.assertTrue(server.is_plaintext_allowed_on_loopback())
+            self.assertFalse(server.is_plaintext_allowed_on_loopback())
+            server.set_allow_plaintext_on_loopback(True)
+            self.assertTrue(server.is_plaintext_allowed_on_loopback())
 
     def test_server_get_stats(self) -> None:
-        server = ThriftServer(Handler(), port=0)
+        with event_loop():
+            server = ThriftServer(Handler(), port=0)
 
-        active_requests = server.get_active_requests()
-        self.assertGreaterEqual(active_requests, 0)
-        self.assertLess(active_requests, 10)
+            active_requests = server.get_active_requests()
+            self.assertGreaterEqual(active_requests, 0)
+            self.assertLess(active_requests, 10)
 
     def test_lifecycle_hooks(self) -> None:
         handler = Handler()
-        loop = asyncio.get_event_loop()
-        coro = self.get_address(loop, handler)
-        loop.run_until_complete(coro)
+        asyncio.run(self.get_address(handler))
         self.assertTrue(handler.on_start_serving)
         self.assertTrue(handler.on_stop_requested)
 
@@ -175,8 +188,7 @@ class ServicesTests(unittest.TestCase):
         handler = Handler()
 
         async def inner(handler: Handler) -> None:
-            loop = asyncio.get_event_loop()
-            await self.get_address(loop, handler)
+            await self.get_address(handler)
 
         server_runner = threading.Thread(
             target=lambda handler: asyncio.run(inner(handler)),

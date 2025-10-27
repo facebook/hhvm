@@ -240,6 +240,24 @@ def mutable_deserialize_leak() -> None:
     mutable_deserialize_impl(leak=True)
 
 
+def immutable_string_set_impl(size: int) -> None:
+    """
+    Test memory usage for string set.
+    """
+    lst = []
+    # Create structs with large string sets
+    for _ in range(size):
+        my_struct = MyStructImmutable(str_set={f"permission_{i}" for i in range(1000)})
+        _ = my_struct.str_set
+        lst.append(my_struct)
+
+
+@cli.command()
+@click.option("--size", default=1000, help="Number of structs to create")
+def immutable_string_set(size: int) -> None:
+    immutable_string_set_impl(size)
+
+
 def main() -> None:
     trace_python_allocators = "TRACE_PYMALLOC" in os.environ
     with memray.Tracker(

@@ -126,11 +126,6 @@ class t_field final : public t_named {
   std::unique_ptr<t_const_value> value_;
 
   bool injected_ = false;
-
-  // TODO(T227540797): Delete everything below here. It is only provided for
-  // backwards compatibility.
- public:
-  const t_type* get_type() const { return type().get_type(); }
 };
 
 using t_field_list = node_list<t_field>;

@@ -177,29 +177,34 @@ func NewClient(opts ...ClientOption) (RequestChannel, error) {
 		}
 	}
 
+	var channel RequestChannel
 	var protocol Protocol
-	var protocolErr error
+	var clientErr error
 	switch config.transport {
 	case TransportIDHeader:
-		protocol, protocolErr = newHeaderProtocol(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
+		protocol, clientErr = newHeaderProtocol(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
+		if clientErr == nil {
+			channel = newSerialChannel(protocol)
+		}
 	case TransportIDRocket:
-		protocol, protocolErr = newRocketClient(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
+		protocol, clientErr = newRocketClient(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
+		if clientErr == nil {
+			channel = protocol.(RequestChannel)
+		}
 	case TransportIDUpgradeToRocket:
-		protocol, protocolErr = newUpgradeToRocketClient(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
+		protocol, clientErr = newUpgradeToRocketClient(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
+		if clientErr == nil {
+			channel = newSerialChannel(protocol)
+		}
 	default:
 		panic("framed and unframed transport are not supported")
 	}
 
-	if protocolErr != nil {
+	if clientErr != nil {
 		// Protocol creation failed, close the connection (IMPORTANT!).
 		conn.Close()
-		return nil, protocolErr
+		return nil, clientErr
 	}
 
-	// RocketClient (protocol) implements RequestChannel.
-	// It doesn't need to be wrapped in a serialChannel.
-	if channel, ok := protocol.(RequestChannel); ok {
-		return channel, nil
-	}
-	return newSerialChannel(protocol), nil
+	return channel, nil
 }

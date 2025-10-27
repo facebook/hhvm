@@ -39,6 +39,14 @@ func NewHeaderProtocol(conn net.Conn) (Protocol, error) {
 	return newHeaderProtocol(conn, types.ProtocolIDCompact, 0, nil)
 }
 
+func newHeaderProtocolAsRequestChannel(conn net.Conn, protoID types.ProtocolID, ioTimeout time.Duration, persistentHeaders map[string]string) (RequestChannel, error) {
+	proto, err := newHeaderProtocol(conn, protoID, ioTimeout, persistentHeaders)
+	if err != nil {
+		return nil, err
+	}
+	return newSerialChannel(proto), nil
+}
+
 func newHeaderProtocol(conn net.Conn, protoID types.ProtocolID, ioTimeout time.Duration, persistentHeaders map[string]string) (Protocol, error) {
 	p := &headerProtocol{protoID: protoID}
 	p.trans = newHeaderTransport(conn, protoID)

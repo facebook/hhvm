@@ -182,10 +182,7 @@ func NewClient(opts ...ClientOption) (RequestChannel, error) {
 	var clientErr error
 	switch config.transport {
 	case TransportIDHeader:
-		protocol, clientErr = newHeaderProtocol(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
-		if clientErr == nil {
-			channel = newSerialChannel(protocol)
-		}
+		channel, clientErr = newHeaderProtocolAsRequestChannel(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
 	case TransportIDRocket:
 		protocol, clientErr = newRocketClient(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
 		if clientErr == nil {

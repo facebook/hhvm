@@ -412,7 +412,7 @@ function f<<<__Newable>> reify T as A>(): T {
 }
 ```
 
-The class `A` must either be final (as in the example) or annotated with `__ConsistentConstruct`.  The `__Newable` attribute ensures that the function `f` is only be applied to a _non-abstract_ class, say `C`, while the `as A` constraint guarantees that the interface of the constructor of `C` is uniquely determined by the interface of the constructor of class `A`.  The generic type `T` must be reified so that the runtime has access to it, refer to [Generics: Reified Generics](/hack/generics/reified-generics) for details.
+The class `A` must either be final (as in the example) or annotated with `__ConsistentConstruct`.  The `__Newable` attribute ensures that the function `f` is only be applied to a _non-abstract_ class, say `C`, while the `as A` constraint guarantees that the interface of the constructor of `C` is uniquely determined by the interface of the constructor of class `A`.  The generic type `T` must be reified so that the runtime has access to it, refer to [Generics: Reified Generics](/hack/reified-generics/reified-generics) for details.
 
 A complete example thus is:
 

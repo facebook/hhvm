@@ -1,1 +1,0 @@
-The built in and dynamic extensions that HHVM currently supports.

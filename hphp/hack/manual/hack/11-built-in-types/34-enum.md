@@ -140,7 +140,7 @@ function main(): void {
 **Note:** Both library methods will, when no exact match is found, attempt to do a cast to the other `arraykey` type. If the cast is not reversible / lossless, or the resulting value is still not a member of the enum after the cast, the failure result occurs, where a failure for assert is throwing an `UnexpectedValueException` and a failure for `coerce` is returning null.
 
 ### `assertAll()`
-`assertAll($traversable)` calls `assert($value)` on every element of the traversable (e.g. [Hack Arrays](/hack/arrays-and-collections/hack-arrays)); if at least one value does not exist, throws an `UnexpectedValueException`.
+`assertAll($traversable)` calls `assert($value)` on every element of the traversable (e.g. [Hack Arrays](/hack/arrays-and-collections/vec-keyset-and-dict)); if at least one value does not exist, throws an `UnexpectedValueException`.
 
 
 ```hack

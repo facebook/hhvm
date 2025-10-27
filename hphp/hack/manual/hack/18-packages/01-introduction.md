@@ -24,4 +24,4 @@ Every module can be in at most one package, so the same module cannot be part of
 - If no package directly references the module, but a package has a prefix which matches foo.bar (in this case, foo.* for example), foo.bar belongs to the package with that prefix. If multiple packages list a prefix of the module, we take the most specific prefix, i.e. the longest prefix that matches.
 - If no package references the module in its use clause, the module belongs to the default package.
 
-Once you've defined a set of packages, you can deploy them using [deployments](./deployments).
+Once you've defined a set of packages, you can deploy them using [deployments](/hack/packages/deployments).

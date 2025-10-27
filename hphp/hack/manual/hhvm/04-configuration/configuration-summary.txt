@@ -1,1 +1,0 @@
-How to configure HHVM with various user-configurable options.

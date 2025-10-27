@@ -24,16 +24,16 @@ A few things to know when working with `mixed` as a type:
 
 ## Hack Arrays
 There are three types of [Hack Arrays](/hack/arrays-and-collections/introduction). They are:
-[vec](/hack/arrays-and-collections/hack-arrays#vec),
-[keyset](/hack/arrays-and-collections/hack-arrays#keyset), and
-[dict](/hack/arrays-and-collections/hack-arrays#dict).
+[vec](/hack/arrays-and-collections/vec-keyset-and-dict#vec),
+[keyset](/hack/arrays-and-collections/vec-keyset-and-dict#keyset), and
+[dict](/hack/arrays-and-collections/vec-keyset-and-dict#dict).
 
-Though not built-in as types, other alternatives exist in [Hack Collections](/hack/arrays-and-collections/collections).
+Though not built-in as types, other alternatives exist in [Hack Collections](/hack/arrays-and-collections/object-collections).
 
 ## Other Built-In Types
 Hack has other built-in types too, like:
 [enum](/hack/built-in-types/enum) (with [enum class](/hack/built-in-types/enum-class) and [enum class labels](/hack/built-in-types/enum-class-label)),
-[shape](/hack/built-in-types/shapes), and
+[shape](/hack/built-in-types/shape), and
 [tuples](/hack/built-in-types/tuples).
 
 ## Function Return Types

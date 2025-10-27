@@ -1,6 +1,6 @@
 # Reified Generics
 
-A _Reified Generic_ is a [Generic](/hack/generics/some-basics) with type information accessible at runtime.
+A _Reified Generic_ is a [Generic](/hack/generics/introduction) with type information accessible at runtime.
 
 ## Introduction
 

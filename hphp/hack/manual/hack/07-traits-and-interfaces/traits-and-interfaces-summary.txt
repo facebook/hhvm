@@ -1,1 +1,0 @@
-Mechanisms for code reuse and code constraint within classes.

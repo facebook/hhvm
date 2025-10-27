@@ -21,7 +21,7 @@ var_dump(array_keys($x)[0]);
 
 #### Use Hack Arrays
 
-As of [HHVM 4.103](https://hhvm.com/blog/2021/03/31/hhvm-4.103.html), `varray` is aliased to `vec`. Use [`vec`](/hack/arrays-and-collections/hack-arrays#vec).
+As of [HHVM 4.103](https://hhvm.com/blog/2021/03/31/hhvm-4.103.html), `varray` is aliased to `vec`. Use [`vec`](/hack/arrays-and-collections/vec-keyset-and-dict#vec).
 
 #### Working with varrays
 
@@ -74,7 +74,7 @@ varray(keyset[10, 11]); // vec[10, 11]
 
 #### Use Hack Arrays
 
-As of [HHVM 4.103](https://hhvm.com/blog/2021/03/31/hhvm-4.103.html), `darray` is aliased to `dict`. Use [`dict`](/hack/arrays-and-collections/hack-arrays#dict).
+As of [HHVM 4.103](https://hhvm.com/blog/2021/03/31/hhvm-4.103.html), `darray` is aliased to `dict`. Use [`dict`](/hack/arrays-and-collections/vec-keyset-and-dict#dict).
 
 #### Working with darrays
 

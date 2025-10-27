@@ -1,1 +1,0 @@
-Classes provide a way to group functionality and state together.

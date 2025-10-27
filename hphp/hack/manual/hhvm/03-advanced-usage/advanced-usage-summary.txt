@@ -1,1 +1,0 @@
-Advanced usage, with more ways to run and configure HHVM.

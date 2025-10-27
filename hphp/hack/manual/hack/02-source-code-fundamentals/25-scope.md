@@ -5,10 +5,10 @@ designates, that name is visible only within a part of the program called that n
 -   Script, which means from the point of declaration/first initialization through to the end of that script,
 including any [included scripts](/hack/source-code-fundamentals/script-inclusion).
 -   Function, which means from the point of declaration/first initialization through to the end of that
-[function](/hack/functions/defining-a-function).
--   Class, which means the body of that class and any classes derived from it ([defining a class](/hack/classes/defining-a-basic-class)).
+[function](/hack/functions/introduction).
+-   Class, which means the body of that class and any classes derived from it ([defining a class](/hack/classes/introduction)).
 -   Interface, which means the body of that interface, any interfaces derived from it, and any classes that implement it
-([implementing an interface](/hack/classes/implementing-an-interface)).
+([implementing an interface](/hack/traits-and-interfaces/implementing-an-interface)).
 -   Namespace, which means from the point of declaration/first initialization through to the end of that
 [namespace](/hack/source-code-fundamentals/namespaces).
 
@@ -20,11 +20,11 @@ separate from that of any function inside which that anonymous function is defin
 The scope of a parameter is the body of the function in which the parameter is declared. For the purposes of scope, a
 [catch-block](/hack/statements/try) is treated like a function body.
 
-The scope of a class member ([defining a class](/hack/classes/defining-a-basic-class)) declared in, or inherited by, a class type `C` is
+The scope of a class member ([defining a class](/hack/classes/introduction)) declared in, or inherited by, a class type `C` is
 the body of `C`.
 
-The scope of an interface member ([implementing an interface](/hack/classes/implementing-an-interface)) declared in, or inherited by, an interface
+The scope of an interface member ([implementing an interface](/hack/traits-and-interfaces/implementing-an-interface)) declared in, or inherited by, an interface
 type `I` is the body of `I`.
 
-When a [trait](/hack/classes/using-a-trait) is used by a class or an interface, the trait's members take on the scope of a
+When a [trait](/hack/traits-and-interfaces/using-a-trait) is used by a class or an interface, the trait's members take on the scope of a
 member of that class or interface.

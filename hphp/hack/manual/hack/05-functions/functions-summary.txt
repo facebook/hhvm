@@ -1,1 +1,0 @@
-Named functions, anonymous functions and parameters.

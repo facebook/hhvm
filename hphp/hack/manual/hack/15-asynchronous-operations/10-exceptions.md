@@ -56,7 +56,7 @@ function main(): void {
 }
 ```
 
-To get around this, and get the successful results as well, we can use the [utility function](utility-functions)
+To get around this, and get the successful results as well, we can use the [utility function](/hack/asynchronous-operations/utility-functions)
 [`HH\Asio\wrap`](/apis/function/HH.Asio.wrap/). It takes an awaitable and returns the expected result or the exception
 if one was thrown. The exception it gives back is of the type [`ResultOrExceptionWrapper`](/apis/interface/HH.Asio.ResultOrExceptionWrapper/).
 

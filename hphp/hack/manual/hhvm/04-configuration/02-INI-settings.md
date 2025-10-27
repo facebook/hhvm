@@ -21,7 +21,7 @@ These are the options that are probably the most commonly used on a day-to-day b
 | `hhvm.server_variables` | `array` | `$_SERVER` | Sets the contents of the `$_SERVER` variable.
 | `hhvm.enable_obj_destruct_call` | `bool` | `false` | If `false`, `__destruct()` methods will not be called on an object at the end of the request. This can be a performance benefit if your system and application can handle the memory requirements. Deallocation can occur all at one time. If `true`, then HHVM will run all `__destruct()` methods in the usual way.
 | `hhvm.hack.lang.look_for_typechecker` | `bool` | `true` | When `true`, HHVM will only process Hack `<?hh` files if the Hack typechecker server is available and running. You normally turn this off in production and it will be turned off automatically in [repo authoritative mode](/hhvm/advanced-usage/repo-authoritative).
-| hhvm.jit | `bool` | `true` | Enables the [JIT](https://en.wikipedia.org/wiki/Just-in-time_compilation) [compiler](http://hhvm.com/blog/2027/faster-and-cheaper-the-evolution-of-the-hhvm-jit). This is turned on by default for all supported distributions. Times when you might want to turn this off is for a [short running script](/hhvm/FAQ/faq#why-is-my-code-slow-at-startup) that may not make use of the JIT.
+| hhvm.jit | `bool` | `true` | Enables the [JIT](https://en.wikipedia.org/wiki/Just-in-time_compilation) [compiler](http://hhvm.com/blog/2027/faster-and-cheaper-the-evolution-of-the-hhvm-jit). This is turned on by default for all supported distributions. Times when you might want to turn this off is for a [short running script](/hhvm/faq#why-is-my-code-slow-at-startup) that may not make use of the JIT.
 | `hhvm.jit_enable_rename_function` | `bool` | `false` | If `false`, `fb_rename_function()` will throw a fatal error. And HHVM knowing that functions cannot be renamed can increase performance.
 | `hhvm.server.thread_count` | `int` | 2x the number of CPU cores | This specifies the number of worker threads used to serve web traffic in [server mode](/hhvm/basic-usage/server). The number to set here is really quite experimental. If you use [`async`](/hack/asynchronous-operations/introduction), then this number can be the default. Otherwise, you might want a higher number.
 | `hhvm.server.source_root` | `string` | working directory of HHVM process | For [server mode](/hhvm/basic-usage/server), this will hold the path to the root of the directory of the code being served up. This setting is *useless* in [repo-authoritative mode](/hhvm/advanced-usage/repo-authoritative).
@@ -377,7 +377,7 @@ hhvm.virtual_host[default][rewrite_rules][common][redirect] = 301
 
 ## Feature flags
 
-These settings enable various features in the runtime, including [Hack](/hack/)-specific features.
+These settings enable various features in the runtime, including Hack-specific features.
 
 | Setting | Type | Default | Description
 |---------|------|---------|------------
@@ -679,7 +679,7 @@ The [hacker's guide](https://github.com/facebook/hhvm/blob/master/hphp/doc/hacke
 
 | Setting | Type | Default | Description
 |---------|------|---------|------------
-| `hhvm.jit` | `bool` | `true` | Enables the JIT compiler. This is turned on by default for all supported distributions. Times when you might want to turn this off is for a [short running script](/hhvm/FAQ/faq#why-is-my-code-slow-at-startup) that may not make use of the JIT.
+| `hhvm.jit` | `bool` | `true` | Enables the JIT compiler. This is turned on by default for all supported distributions. Times when you might want to turn this off is for a [short running script](/hhvm/faq#why-is-my-code-slow-at-startup) that may not make use of the JIT.
 | `hhvm.jit_always_interp_one` | `bool` | `false` |
 | `hhvm.jit_disabled_by_hphpd` | `bool` | `false` | If enabled, the JIT is disabled in the debugger.
 | `hhvm.jit_enable_rename_function` | `bool` | `false` | If `false`, `fb_rename_function()` will throw a fatal error. And HHVM knowing that functions cannot be renamed can increase performance.

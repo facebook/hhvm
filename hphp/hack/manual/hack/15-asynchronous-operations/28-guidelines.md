@@ -439,7 +439,7 @@ Either approach works, but the non-async caching wrapper can be easier to reason
 ## Use Lambdas Where Possible
 
 The use of lambdas can cut down on code verbosity that comes with writing full closure syntax. Lambdas are quite useful in conjunction
-with the [async utility helpers](utility-functions).  For example, look how the following three ways to accomplish the same thing can be
+with the [async utility helpers](/hack/asynchronous-operations/utility-functions).  For example, look how the following three ways to accomplish the same thing can be
 shortened using lambdas.
 
 ```hack

@@ -19,7 +19,7 @@ of arguments has been omitted (the missing parentheses).
 
 The following example stores a function reference in a variable and later calls
 the function. Note that the type checker keeps track of the
-[function's type](/hack/built-in-types/function)
+[function's type](/hack/functions/introduction)
 and correctly checks all calls.
 
 ```hack no-extract
@@ -122,7 +122,7 @@ fizz<string, _>;
 fizz<string, int>;
 ```
 
-Example with [reified generics](/hack/generics/reified-generics):
+Example with [reified generics](/hack/reified-generics/reified-generics):
 
 ```hack no-extract
 function buzz<reify T as arraykey>(T $x): mixed { ... }

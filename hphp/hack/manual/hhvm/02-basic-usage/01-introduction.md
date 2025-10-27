@@ -4,8 +4,8 @@ After [installing](/hhvm/installation/introduction), you are ready to start usin
 
 For a majority of cases, you will run HHVM in one of two different ways:
 
-* In [command-line](./command-line) mode to run standalone scripts.
-* In [server](./server) mode, where HHVM will serve web requests from users.
+* In [command-line](/hhvm/basic-usage/command-line) mode to run standalone scripts.
+* In [server](/hhvm/basic-usage/server) mode, where HHVM will serve web requests from users.
 
 ## Default Configuration
 

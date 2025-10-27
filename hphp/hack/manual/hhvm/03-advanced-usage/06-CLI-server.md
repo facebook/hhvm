@@ -58,7 +58,7 @@ The INI style runtime options are documented [here](/hhvm/configuration/INI-sett
 
 If you need to run CLI-like jobs in a production environment, for example
 from a cron job or alike, CLI server mode looks very appealing. It is however
-important to note that CLI server mode and [repo auth mode](./repo-authoritative)
+important to note that CLI server mode and [repo auth mode](/hhvm/advanced-usage/repo-authoritative)
 can not be combined. All else being equal, repo auth mode will be a lot faster
 than CLI server mode.
 

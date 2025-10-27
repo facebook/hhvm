@@ -1,1 +1,0 @@
-The easiest way to run HHVM, with sensible defaults.

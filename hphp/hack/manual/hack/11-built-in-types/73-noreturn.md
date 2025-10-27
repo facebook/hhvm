@@ -32,7 +32,7 @@ function takes_int(int $int): void {
 }
 ```
 
-If you want to, you can also use [nothing](./nothing) instead. This allows you use the return value of the function.
+If you want to, you can also use [nothing](/hack/built-in-types/nothing) instead. This allows you use the return value of the function.
 This makes it more explicit to the reader of your code that you are depending on the fact that this function influences typechecking.
 
 ```hack

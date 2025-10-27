@@ -3,8 +3,8 @@
 Hack includes a strong static type system. This section covers the
 basic features of the type checker.
 
-See also the [`is` operator](/hack/expressions-and-operators/is) for
-checking the type of a value, and the [`as` operator](/hack/expressions-and-operators/as)
+See also the [`is` operator](/hack/expressions-and-operators/type-assertions) for
+checking the type of a value, and the [`as` operator](/hack/expressions-and-operators/type-assertions)
 for asserting types.
 
 **Topics covered in this section**

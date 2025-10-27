@@ -1,1 +1,0 @@
-Basic syntax, namespaces, and the autoloader.

@@ -1,1 +1,0 @@
-How to install HHVM on a supported platform.

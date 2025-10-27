@@ -32,6 +32,7 @@ enum UserIdSource: int {
   VIEWER_CONTEXT = 1;
   LOGIN_STATE = 2;
   PERF_EXPERIMENT = 3;
+  PERF_METADATA = 4;
 }
 
 final class ThriftContextPropState {

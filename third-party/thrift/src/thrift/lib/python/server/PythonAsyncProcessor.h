@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <exception>
 #include <map>
 #include <memory>
 #include <string>
@@ -44,16 +43,13 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
       PyObject* python_server,
       const FunctionMapType& functions,
       folly::Executor::KeepAlive<> executor,
-      std::string serviceName)
+      std::string serviceName,
+      const std::unordered_map<std::string, std::string>& functionFullNameMap)
       : python_server_(python_server),
+        functionFullNameMap_(functionFullNameMap),
         functions_(functions),
         executor_(std::move(executor)),
-        serviceName_(std::move(serviceName)) {
-    for (const auto& function : functions) {
-      functionFullNameMap_.insert(
-          {function.first, fmt::format("{}.{}", serviceName_, function.first)});
-    }
-  }
+        serviceName_(std::move(serviceName)) {}
 
   struct PythonMetadata final
       : public apache::thrift::AsyncProcessorFactory::MethodMetadata {
@@ -119,7 +115,7 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
 
  private:
   PyObject* python_server_;
-  std::unordered_map<std::string, std::string> functionFullNameMap_;
+  const std::unordered_map<std::string, std::string>& functionFullNameMap_;
   const FunctionMapType& functions_;
   folly::Executor::KeepAlive<> executor_;
   std::string serviceName_;

@@ -16,8 +16,6 @@
 
 #pragma once
 
-#include <exception>
-#include <map>
 #include <memory>
 #include <string>
 #include <Python.h>
@@ -41,7 +39,11 @@ class PythonAsyncProcessorFactory
 
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override {
     return std::make_unique<PythonAsyncProcessor>(
-        python_server_, functions_, executor, serviceName_);
+        python_server_,
+        functions_,
+        executor,
+        serviceName_,
+        functionFullNameMap_);
   }
 
   std::vector<apache::thrift::ServiceHandlerBase*> getServiceHandlers()
@@ -74,6 +76,7 @@ class PythonAsyncProcessorFactory
   const std::vector<PyObject*> lifecycleFuncs_;
   folly::Executor::KeepAlive<> executor;
   std::string serviceName_;
+  std::unordered_map<std::string, std::string> functionFullNameMap_;
 
   /**
    * Callers must use the create() factory function to create a
@@ -90,7 +93,12 @@ class PythonAsyncProcessorFactory
         functions_(std::move(functions)),
         lifecycleFuncs_(std::move(lifecycleFuncs)),
         executor(std::move(executor)),
-        serviceName_(std::move(serviceName)) {}
+        serviceName_(std::move(serviceName)) {
+    for (const auto& function : functions_) {
+      functionFullNameMap_.insert(
+          {function.first, fmt::format("{}.{}", serviceName_, function.first)});
+    }
+  }
 };
 
 } // namespace apache::thrift::python

@@ -822,7 +822,8 @@ function basename(string $path, string $suffix = "")[]: string;
 
 /**
  * fnmatch() checks if the passed string would match the given shell wildcard
- *   pattern.
+ *   pattern. If you're looking to test a GLOB pattern against a filepath, this
+ *   is what you want.
  *
  * @param string $pattern - The shell wildcard pattern.
  * @param string $filename - The tested string. This function is especially

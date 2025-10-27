@@ -263,6 +263,8 @@ class JSONProtocolReaderCommon : public detail::ProtocolBase {
   DecodedEscapeSequence readJSONEscapeCodePoint16Suffix();
   DecodedEscapeSequence readJSONEscapeSequence();
   template <typename StrType>
+  void readJSONStringEscapeSequence(StrType& val);
+  template <typename StrType>
   void readJSONString(StrType& val);
   template <typename StrType>
   void readJSONBase64(StrType& s);

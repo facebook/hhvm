@@ -810,6 +810,15 @@ inline void JSONProtocolReaderCommon::readJSONEscapeChar(uint8_t& out) {
 }
 
 template <typename StrType>
+FOLLY_NOINLINE inline void
+JSONProtocolReaderCommon::readJSONStringEscapeSequence(StrType& val) {
+  auto const seq = readJSONEscapeSequence();
+  auto const utf8 = folly::span{seq.data, seq.size};
+  auto const utf8c = folly::reinterpret_span_cast<char const>(utf8);
+  val += std::string_view(utf8c.data(), utf8c.size());
+}
+
+template <typename StrType>
 inline void JSONProtocolReaderCommon::readJSONString(StrType& val) {
   constexpr auto& vector_needle = detail::json::json_str_vector_needle;
   constexpr auto& scalar_needle = detail::json::json_str_scalar_needle;
@@ -838,10 +847,7 @@ inline void JSONProtocolReaderCommon::readJSONString(StrType& val) {
       return;
     }
     FOLLY_SAFE_DCHECK(ch == apache::thrift::detail::json::kJSONBackslash);
-    auto const seq = readJSONEscapeSequence();
-    auto const utf8 = folly::span{seq.data, seq.size};
-    auto const utf8c = folly::reinterpret_span_cast<char const>(utf8);
-    val += std::string_view(utf8c.data(), utf8c.size());
+    readJSONStringEscapeSequence(val);
   }
 }
 

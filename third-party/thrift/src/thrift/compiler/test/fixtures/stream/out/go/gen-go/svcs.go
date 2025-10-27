@@ -644,7 +644,7 @@ func (p *procFuncPubSubStreamingServiceReturnstream) NewReqArgs() thrift.Readabl
 }
 
 func (p *procFuncPubSubStreamingServiceReturnstream) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
-    return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
+    return nil, errors.New("not supported")
 }
 
 func (p *procFuncPubSubStreamingServiceReturnstream) RunStreamContext(
@@ -703,7 +703,7 @@ func (p *procFuncPubSubStreamingServiceStreamthrows) NewReqArgs() thrift.Readabl
 }
 
 func (p *procFuncPubSubStreamingServiceStreamthrows) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
-    return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
+    return nil, errors.New("not supported")
 }
 
 func (p *procFuncPubSubStreamingServiceStreamthrows) RunStreamContext(
@@ -769,7 +769,7 @@ func (p *procFuncPubSubStreamingServiceServicethrows) NewReqArgs() thrift.Readab
 }
 
 func (p *procFuncPubSubStreamingServiceServicethrows) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
-    return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
+    return nil, errors.New("not supported")
 }
 
 func (p *procFuncPubSubStreamingServiceServicethrows) RunStreamContext(
@@ -834,7 +834,7 @@ func (p *procFuncPubSubStreamingServiceServicethrows2) NewReqArgs() thrift.Reada
 }
 
 func (p *procFuncPubSubStreamingServiceServicethrows2) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
-    return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
+    return nil, errors.New("not supported")
 }
 
 func (p *procFuncPubSubStreamingServiceServicethrows2) RunStreamContext(
@@ -902,7 +902,7 @@ func (p *procFuncPubSubStreamingServiceBoththrows) NewReqArgs() thrift.ReadableS
 }
 
 func (p *procFuncPubSubStreamingServiceBoththrows) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
-    return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
+    return nil, errors.New("not supported")
 }
 
 func (p *procFuncPubSubStreamingServiceBoththrows) RunStreamContext(
@@ -974,7 +974,7 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamstreamthrows) NewReqArgs
 }
 
 func (p *procFuncPubSubStreamingServiceResponseandstreamstreamthrows) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
-    return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
+    return nil, errors.New("not supported")
 }
 
 func (p *procFuncPubSubStreamingServiceResponseandstreamstreamthrows) RunStreamContext(
@@ -1041,7 +1041,7 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamservicethrows) NewReqArg
 }
 
 func (p *procFuncPubSubStreamingServiceResponseandstreamservicethrows) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
-    return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
+    return nil, errors.New("not supported")
 }
 
 func (p *procFuncPubSubStreamingServiceResponseandstreamservicethrows) RunStreamContext(
@@ -1107,7 +1107,7 @@ func (p *procFuncPubSubStreamingServiceResponseandstreamboththrows) NewReqArgs()
 }
 
 func (p *procFuncPubSubStreamingServiceResponseandstreamboththrows) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
-    return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
+    return nil, errors.New("not supported")
 }
 
 func (p *procFuncPubSubStreamingServiceResponseandstreamboththrows) RunStreamContext(
@@ -1180,7 +1180,7 @@ func (p *procFuncPubSubStreamingServiceReturnstreamFast) NewReqArgs() thrift.Rea
 }
 
 func (p *procFuncPubSubStreamingServiceReturnstreamFast) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
-    return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
+    return nil, errors.New("not supported")
 }
 
 func (p *procFuncPubSubStreamingServiceReturnstreamFast) RunStreamContext(

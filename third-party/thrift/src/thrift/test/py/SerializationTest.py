@@ -24,7 +24,6 @@ lib_path = glob.glob("../../lib/py/build/lib.*")
 if lib_path:
     sys.path.insert(0, lib_path[0])
 
-from ThriftTest.ttypes import *
 import unittest
 
 from thrift.protocol import (
@@ -36,6 +35,14 @@ from thrift.protocol import (
 )
 from thrift.transport import TSocket, TTransport
 from thrift.util import Serializer
+from ThriftTest.ttypes import (
+    Bonk,
+    Bools,
+    NestedStructs,
+    SimpleJSONTestStruct,
+    VersioningTestV1,
+    VersioningTestV2,
+)
 
 
 def bytes_comp(ut, seq1, seq2):

@@ -32,7 +32,7 @@ and primary =
   | Member_not_found of {
       patt_is_static: static_pattern option; (* Static vs instance pattern *)
       patt_kind: member_kind_pattern; (* Kind of member pattern *)
-      patt_class_name: Patt_string.t; (* Class name pattern *)
+      patt_class_name: Patt_name.t; (* Class name pattern *)
       patt_member_name: Patt_string.t; (* Member name pattern *)
       patt_visibility: visibility_pattern option; (* Optional visibility *)
     }

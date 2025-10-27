@@ -37,7 +37,12 @@ let test_instance_method_pattern () =
              {
                patt_is_static = Some Instance_only;
                patt_kind = Method_only;
-               patt_class_name = Patt_string.Exactly class_name;
+               patt_class_name =
+                 Patt_name.Name
+                   {
+                     patt_namespace = Patt_name.Root;
+                     patt_name = Patt_string.Exactly class_name;
+                   };
                patt_member_name = Patt_string.Exactly method_name;
                patt_visibility = None;
              }))

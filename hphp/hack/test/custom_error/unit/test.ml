@@ -372,7 +372,12 @@ let test_member_not_found_instance_method_pattern _ =
              {
                patt_is_static = Some Instance_only;
                patt_kind = Method_only;
-               patt_class_name = Patt_string.Exactly class_name;
+               patt_class_name =
+                 Patt_name.Name
+                   {
+                     patt_namespace = Patt_name.Root;
+                     patt_name = Patt_string.Exactly class_name;
+                   };
                patt_member_name = Patt_string.Exactly method_name;
                patt_visibility = None;
              }))
@@ -421,7 +426,12 @@ let test_member_not_found_instance_property_pattern _ =
              {
                patt_is_static = Some Instance_only;
                patt_kind = Property_only;
-               patt_class_name = Patt_string.Exactly class_name;
+               patt_class_name =
+                 Patt_name.Name
+                   {
+                     patt_namespace = Patt_name.Root;
+                     patt_name = Patt_string.Exactly class_name;
+                   };
                patt_member_name = Patt_string.Exactly property_name;
                patt_visibility = None;
              }))
@@ -470,7 +480,12 @@ let test_member_not_found_static_method_pattern _ =
              {
                patt_is_static = Some Static_only;
                patt_kind = Method_only;
-               patt_class_name = Patt_string.Exactly class_name;
+               patt_class_name =
+                 Patt_name.Name
+                   {
+                     patt_namespace = Patt_name.Root;
+                     patt_name = Patt_string.Exactly class_name;
+                   };
                patt_member_name = Patt_string.Exactly method_name;
                patt_visibility = None;
              }))
@@ -519,7 +534,12 @@ let test_member_not_found_class_constant_pattern _ =
              {
                patt_is_static = Some Static_only;
                patt_kind = Class_constant_only;
-               patt_class_name = Patt_string.Exactly class_name;
+               patt_class_name =
+                 Patt_name.Name
+                   {
+                     patt_namespace = Patt_name.Root;
+                     patt_name = Patt_string.Exactly class_name;
+                   };
                patt_member_name = Patt_string.Exactly constant_name;
                patt_visibility = None;
              }))
@@ -568,7 +588,12 @@ let test_member_not_found_static_property_pattern _ =
              {
                patt_is_static = Some Static_only;
                patt_kind = Property_only;
-               patt_class_name = Patt_string.Exactly class_name;
+               patt_class_name =
+                 Patt_name.Name
+                   {
+                     patt_namespace = Patt_name.Root;
+                     patt_name = Patt_string.Exactly class_name;
+                   };
                patt_member_name = Patt_string.Exactly property_name;
                patt_visibility = None;
              }))
@@ -617,7 +642,12 @@ let test_member_not_found_class_typeconst_pattern _ =
              {
                patt_is_static = Some Static_only;
                patt_kind = Class_typeconst_only;
-               patt_class_name = Patt_string.Exactly class_name;
+               patt_class_name =
+                 Patt_name.Name
+                   {
+                     patt_namespace = Patt_name.Root;
+                     patt_name = Patt_string.Exactly class_name;
+                   };
                patt_member_name = Patt_string.Exactly typeconst_name;
                patt_visibility = None;
              }))
@@ -666,7 +696,12 @@ let test_member_wildcard_patterns _ =
              {
                patt_is_static = None;
                patt_kind = Any_member_kind;
-               patt_class_name = Patt_string.Exactly class_name;
+               patt_class_name =
+                 Patt_name.Name
+                   {
+                     patt_namespace = Patt_name.Root;
+                     patt_name = Patt_string.Exactly class_name;
+                   };
                patt_member_name = Patt_string.Exactly method_name;
                patt_visibility = None;
              }))
@@ -715,7 +750,12 @@ let test_member_name_patterns _ =
              {
                patt_is_static = Some Instance_only;
                patt_kind = Method_only;
-               patt_class_name = Patt_string.Contains "Test";
+               patt_class_name =
+                 Patt_name.Name
+                   {
+                     patt_namespace = Patt_name.Root;
+                     patt_name = Patt_string.Contains "Test";
+                   };
                patt_member_name = Patt_string.Starts_with "render";
                patt_visibility = None;
              }))
@@ -765,7 +805,12 @@ let test_member_pattern_specificity _ =
              {
                patt_is_static = Some Instance_only;
                patt_kind = Method_only;
-               patt_class_name = Patt_string.Exactly class_name;
+               patt_class_name =
+                 Patt_name.Name
+                   {
+                     patt_namespace = Patt_name.Root;
+                     patt_name = Patt_string.Exactly class_name;
+                   };
                patt_member_name = Patt_string.Exactly method_name;
                patt_visibility = None;
              }))
@@ -780,7 +825,12 @@ let test_member_pattern_specificity _ =
              {
                patt_is_static = None;
                patt_kind = Any_member_kind;
-               patt_class_name = Patt_string.Exactly class_name;
+               patt_class_name =
+                 Patt_name.Name
+                   {
+                     patt_namespace = Patt_name.Root;
+                     patt_name = Patt_string.Exactly class_name;
+                   };
                patt_member_name = Patt_string.Exactly method_name;
                patt_visibility = None;
              }))
@@ -851,7 +901,12 @@ let test_member_pattern_no_match _ =
              {
                patt_is_static = Some Static_only;
                patt_kind = Method_only;
-               patt_class_name = Patt_string.Exactly class_name;
+               patt_class_name =
+                 Patt_name.Name
+                   {
+                     patt_namespace = Patt_name.Root;
+                     patt_name = Patt_string.Exactly class_name;
+                   };
                patt_member_name = Patt_string.Exactly method_name;
                patt_visibility = None;
              }))
@@ -901,11 +956,16 @@ let test_member_complex_string_patterns _ =
                patt_is_static = Some Instance_only;
                patt_kind = Method_only;
                patt_class_name =
-                 Patt_string.Or
-                   [
-                     Patt_string.Contains "React";
-                     Patt_string.Contains "Component";
-                   ];
+                 Patt_name.Name
+                   {
+                     patt_namespace = Patt_name.Root;
+                     patt_name =
+                       Patt_string.Or
+                         [
+                           Patt_string.Contains "React";
+                           Patt_string.Contains "Component";
+                         ];
+                   };
                patt_member_name =
                  Patt_string.And
                    [

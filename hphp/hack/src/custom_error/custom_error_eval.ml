@@ -482,13 +482,13 @@ let matches_typing_error t ~scrut ~env =
             patt_visibility = _;
           },
         Typing_error.Primary.Member_not_found
-          { kind; class_name; member_name; _ } ) ->
+          { kind; class_pos; class_name; member_name; _ } ) ->
       Match.(
         matches_static_pattern patt_is_static ~scrut:`instance ~env
         >>= fun env ->
         matches_member_kind_instance patt_kind ~scrut:kind ~env >>= fun env ->
-        matches_string patt_class_name ~scrut:class_name ~env >>= fun env ->
-        matches_string patt_member_name ~scrut:member_name ~env)
+        matches_name patt_class_name ~scrut:(class_pos, class_name) ~env
+        >>= fun env -> matches_string patt_member_name ~scrut:member_name ~env)
     | ( Member_not_found
           {
             patt_is_static;
@@ -498,12 +498,12 @@ let matches_typing_error t ~scrut ~env =
             patt_visibility = _;
           },
         Typing_error.Primary.Smember_not_found
-          { kind; class_name; member_name; _ } ) ->
+          { kind; class_pos; class_name; member_name; _ } ) ->
       Match.(
         matches_static_pattern patt_is_static ~scrut:`static ~env >>= fun env ->
         matches_member_kind_static patt_kind ~scrut:kind ~env >>= fun env ->
-        matches_string patt_class_name ~scrut:class_name ~env >>= fun env ->
-        matches_string patt_member_name ~scrut:member_name ~env)
+        matches_name patt_class_name ~scrut:(class_pos, class_name) ~env
+        >>= fun env -> matches_string patt_member_name ~scrut:member_name ~env)
     | (Member_not_found _, _) -> Match.no_match
     (* -- Package errors ---------------------------------------------------- *)
     | ( Cross_pkg_access { patt_use_file; patt_decl_file },

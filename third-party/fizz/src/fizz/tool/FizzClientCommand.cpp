@@ -658,20 +658,21 @@ int fizzClientCommand(const std::vector<std::string>& args) {
     return 1;
   }
 
-  EventBase evb(folly::EventBase::Options().setBackendFactory([uring,
-                                                               uringAsync,
-                                                               uringRegisterFds,
-                                                               uringCapacity,
-                                                               uringMaxSubmit,
-                                                               uringMaxGet] {
-    return setupBackend(
-        uring,
-        uringAsync,
-        uringRegisterFds,
-        uringCapacity,
-        uringMaxSubmit,
-        uringMaxGet);
-  }));
+  EventBase evb(
+      folly::EventBase::Options().setBackendFactory([uring,
+                                                     uringAsync,
+                                                     uringRegisterFds,
+                                                     uringCapacity,
+                                                     uringMaxSubmit,
+                                                     uringMaxGet] {
+        return setupBackend(
+            uring,
+            uringAsync,
+            uringRegisterFds,
+            uringCapacity,
+            uringMaxSubmit,
+            uringMaxGet);
+      }));
 
   auto clientContext = std::make_shared<FizzClientContext>();
 

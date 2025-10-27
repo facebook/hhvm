@@ -104,8 +104,7 @@ class FOLLY_EXPORT TProtocolException
   [[noreturn]] static void throwReportedTypeMismatch();
   [[noreturn]] static void throwNegativeSize();
   [[deprecated("Use override with size and limit.")]] //
-  [[noreturn]] static void
-  throwExceededSizeLimit();
+  [[noreturn]] static void throwExceededSizeLimit();
   [[noreturn]] static void throwExceededSizeLimit(size_t size, size_t limit);
   [[noreturn]] static void throwExceededDepthLimit();
   [[noreturn]] static void throwMissingRequiredField(

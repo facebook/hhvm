@@ -58,8 +58,9 @@ struct FdClientBatchingTest : public testing::Test {
     runner_ = std::make_unique<ScopedServerInterfaceThread>(
         std::make_shared<EchoInterface>(), sockAddr);
     client_ = std::make_unique<Client<test::TestService>>(
-        RocketClientChannel::newChannel(folly::AsyncSocket::UniquePtr{
-            new InterceptedAsyncFdSocket(&checkQueue_, &evb_, sockAddr)}));
+        RocketClientChannel::newChannel(
+            folly::AsyncSocket::UniquePtr{
+                new InterceptedAsyncFdSocket(&checkQueue_, &evb_, sockAddr)}));
   }
 
   auto newFd() {

@@ -136,9 +136,10 @@ createSocketCommon(
 
   // Creating a secure transport - make sure it isn't over a unix domain sock
   if (connectionOptions.accessPoint->isUnixDomainSocket()) {
-    return folly::makeUnexpected(folly::AsyncSocketException(
-        folly::AsyncSocketException::BAD_ARGS,
-        "SSL protocol is not applicable for Unix Domain Sockets"));
+    return folly::makeUnexpected(
+        folly::AsyncSocketException(
+            folly::AsyncSocketException::BAD_ARGS,
+            "SSL protocol is not applicable for Unix Domain Sockets"));
   }
   const auto& securityOpts = connectionOptions.securityOpts;
   const auto& sessionKey = getSessionKey(connectionOptions);
@@ -146,10 +147,11 @@ createSocketCommon(
     // openssl based tls
     auto sslContext = getClientContext(eventBase, securityOpts, mech);
     if (!sslContext) {
-      return folly::makeUnexpected(folly::AsyncSocketException(
-          folly::AsyncSocketException::SSL_ERROR,
-          "SSLContext provider returned nullptr, "
-          "check SSL certificates"));
+      return folly::makeUnexpected(
+          folly::AsyncSocketException(
+              folly::AsyncSocketException::SSL_ERROR,
+              "SSLContext provider returned nullptr, "
+              "check SSL certificates"));
     }
 
     typename AsyncSSLSocketT::UniquePtr sslSocket(
@@ -175,10 +177,11 @@ createSocketCommon(
   // tls 13 fizz
   auto fizzContextAndVerifier = getFizzClientConfig(eventBase, securityOpts);
   if (!fizzContextAndVerifier.first) {
-    return folly::makeUnexpected(folly::AsyncSocketException(
-        folly::AsyncSocketException::SSL_ERROR,
-        "Fizz context provider returned nullptr, "
-        "check SSL certificates"));
+    return folly::makeUnexpected(
+        folly::AsyncSocketException(
+            folly::AsyncSocketException::SSL_ERROR,
+            "Fizz context provider returned nullptr, "
+            "check SSL certificates"));
   }
   auto fizzClient = new McFizzClient(
       &eventBase,
@@ -237,13 +240,14 @@ getSocketAddress(const ConnectionOptions& connectionOptions) {
     }
     return address;
   } catch (const std::system_error& e) {
-    return folly::makeUnexpected(folly::AsyncSocketException(
-        folly::AsyncSocketException::NOT_OPEN,
-        fmt::format(
-            "AsyncMcClient",
-            failure::Category::kBadEnvironment,
-            "{}",
-            e.what())));
+    return folly::makeUnexpected(
+        folly::AsyncSocketException(
+            folly::AsyncSocketException::NOT_OPEN,
+            fmt::format(
+                "AsyncMcClient",
+                failure::Category::kBadEnvironment,
+                "{}",
+                e.what())));
   }
 }
 

@@ -643,8 +643,9 @@ TEST(Frozen, FixedSizeString) {
 
     {
       std::string key = "hellosnw";
-      auto iter = view.aMap_ref()->find(folly::ByteRange{
-          reinterpret_cast<const uint8_t*>(key.data()), key.size()});
+      auto iter = view.aMap_ref()->find(
+          folly::ByteRange{
+              reinterpret_cast<const uint8_t*>(key.data()), key.size()});
       ASSERT_NE(iter, view.aMap_ref()->end());
       EXPECT_EQ(iter->first().toString(), "hellosnw");
       EXPECT_EQ(iter->second().toString(), "ef");

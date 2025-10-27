@@ -50,9 +50,10 @@ template <class Clock>
 class Ewma {
  public:
   explicit Ewma(std::chrono::duration<double> window, double initialValue = 0)
-      : tau_(std::chrono::duration_cast<std::chrono::nanoseconds>(
-                 window / Ewma<Clock>::LN2l_)
-                 .count()),
+      : tau_(
+            std::chrono::duration_cast<std::chrono::nanoseconds>(
+                window / Ewma<Clock>::LN2l_)
+                .count()),
         ewma_(initialValue),
         timestamp_(Clock::now()) {}
 

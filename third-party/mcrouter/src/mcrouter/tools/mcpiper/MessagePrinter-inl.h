@@ -273,8 +273,9 @@ folly::Optional<StyledString> MessagePrinter::filterAndBuildOutput(
 
     if (options_.script) {
       out.append(fmt::format(",\n  \"value_wire_bytes\": {}", value.size()));
-      out.append(fmt::format(
-          ",\n  \"value_uncompressed_bytes\": {}", uncompressedSize));
+      out.append(
+          fmt::format(
+              ",\n  \"value_uncompressed_bytes\": {}", uncompressedSize));
     } else {
       out.append("\n  value size: ", format_.msgAttrColor);
       if (uncompressedSize != value.size()) {

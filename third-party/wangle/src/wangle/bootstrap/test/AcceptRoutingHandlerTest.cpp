@@ -229,8 +229,9 @@ TEST_F(AcceptRoutingHandlerTest, SocketErrorInRoutingPipeline) {
       .thenValue([](DefaultPipeline* clientPipeline) {
         clientPipeline->getTransport()->getEventBase()->runInEventBaseThread(
             [clientPipeline]() {
-              clientPipeline->writeException(std::runtime_error(
-                  "Socket error while expecting routing data."));
+              clientPipeline->writeException(
+                  std::runtime_error(
+                      "Socket error while expecting routing data."));
             });
       });
   EXPECT_CALL(*routingDataHandler_, readException(_, _))

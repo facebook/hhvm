@@ -56,8 +56,9 @@ class RocketThriftRequestsTest : public TestSetup {
 
   void connectToServer(
       folly::Function<void(std::unique_ptr<Client<StreamService>>)> callMe) {
-    callMe(std::make_unique<Client<StreamService>>(
-        TestSetup::connectToServer(port_)));
+    callMe(
+        std::make_unique<Client<StreamService>>(
+            TestSetup::connectToServer(port_)));
   }
 
  private:

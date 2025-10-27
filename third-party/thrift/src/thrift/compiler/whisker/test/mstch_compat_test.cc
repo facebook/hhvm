@@ -112,8 +112,9 @@ TEST_F(MstchCompatTest, map_lookups) {
 
   EXPECT_TRUE(
       has_error<eval_scope_lookup_error>(ctx.look_up_object(path("unknown"))));
-  EXPECT_TRUE(has_error<eval_property_lookup_error>(
-      ctx.look_up_object(path("key", "unknown"))));
+  EXPECT_TRUE(
+      has_error<eval_property_lookup_error>(
+          ctx.look_up_object(path("key", "unknown"))));
 }
 
 TEST_F(MstchCompatTest, array_iteration) {

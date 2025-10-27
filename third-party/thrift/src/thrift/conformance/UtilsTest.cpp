@@ -53,9 +53,10 @@ TEST(UtilsTest, ParseCmds_Dupe) {
 
 TEST(UtilsTest, ParseNonconforming) {
   EXPECT_THAT(
-      parseNonconforming(" # Comment\n"
-                         "test1 # Other comment\n"
-                         " test2"),
+      parseNonconforming(
+          " # Comment\n"
+          "test1 # Other comment\n"
+          " test2"),
       UnorderedElementsAre("test1", "test2"));
 }
 

@@ -150,8 +150,9 @@ TEST_F(EvalContextTest, parent_scope) {
   // Should still be shadowing after popping unrelated scope
   ctx.pop_scope();
   EXPECT_EQ(**ctx.look_up_object(path()), child_1);
-  EXPECT_TRUE(has_error<eval_property_lookup_error>(
-      ctx.look_up_object(path("foo", "bar"))));
+  EXPECT_TRUE(
+      has_error<eval_property_lookup_error>(
+          ctx.look_up_object(path("foo", "bar"))));
 
   // Shadowing should stop
   ctx.pop_scope();

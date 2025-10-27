@@ -63,8 +63,9 @@ bool LengthFieldBasedFrameDecoder::decode(
 
   if (frameLength > maxFrameLength_) {
     buf.trimStartAtMost(frameLength);
-    ctx->fireReadException(folly::make_exception_wrapper<std::runtime_error>(
-        "Frame larger than " + folly::to<std::string>(maxFrameLength_)));
+    ctx->fireReadException(
+        folly::make_exception_wrapper<std::runtime_error>(
+            "Frame larger than " + folly::to<std::string>(maxFrameLength_)));
     return false;
   }
 
@@ -74,8 +75,9 @@ bool LengthFieldBasedFrameDecoder::decode(
 
   if (initialBytesToStrip_ > frameLength) {
     buf.trimStart(frameLength);
-    ctx->fireReadException(folly::make_exception_wrapper<std::runtime_error>(
-        "InitialBytesToSkip larger than frame"));
+    ctx->fireReadException(
+        folly::make_exception_wrapper<std::runtime_error>(
+            "InitialBytesToSkip larger than frame"));
     return false;
   }
 

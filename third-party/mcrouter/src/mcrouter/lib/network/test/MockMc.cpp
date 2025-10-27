@@ -148,8 +148,9 @@ std::pair<const MockMc::Item*, uint64_t> MockMc::leaseGet(
     /* Lease get on a non-existing item: create a new empty item and
        put it in TLRU with valid token */
     it = citems_
-             .insert(std::make_pair(
-                 key.str(), CacheItem(Item(folly::IOBuf::copyBuffer("")))))
+             .insert(
+                 std::make_pair(
+                     key.str(), CacheItem(Item(folly::IOBuf::copyBuffer("")))))
              .first;
     it->second.state = CacheItem::TLRU;
     it->second.updateLeaseToken();

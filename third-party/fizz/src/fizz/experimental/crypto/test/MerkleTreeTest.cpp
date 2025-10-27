@@ -87,21 +87,24 @@ TEST(MerkleTreeTest, TestTree3) {
   EXPECT_EQ(mt.countLeaves(), 3);
   auto newlyAddedNode1 = mt.getNodeValue(0, 3);
   EXPECT_EQ(
-      folly::hexlify(std::string(
-          (char*)newlyAddedNode1.value()->data(),
-          newlyAddedNode1.value()->length())),
+      folly::hexlify(
+          std::string(
+              (char*)newlyAddedNode1.value()->data(),
+              newlyAddedNode1.value()->length())),
       "785bc5e5d7da71a3734ea21f64dd2752c82fbd323748292a8b1ba50afe99bbc6");
   auto newlyAddedNode2 = mt.getNodeValue(1, 1);
   EXPECT_EQ(
-      folly::hexlify(std::string(
-          (char*)newlyAddedNode2.value()->data(),
-          newlyAddedNode2.value()->length())),
+      folly::hexlify(
+          std::string(
+              (char*)newlyAddedNode2.value()->data(),
+              newlyAddedNode2.value()->length())),
       "e51583b571942ea1f7a1da34fdf66c310ed05b339f7c8d1bf495949fcce4437f");
   auto newlyAddedNode3 = mt.getNodeValue(2, 0);
   EXPECT_EQ(
-      folly::hexlify(std::string(
-          (char*)newlyAddedNode3.value()->data(),
-          newlyAddedNode3.value()->length())),
+      folly::hexlify(
+          std::string(
+              (char*)newlyAddedNode3.value()->data(),
+              newlyAddedNode3.value()->length())),
       "afb6987ffbd8fce1d5db50c8ea9b598ad82870eb27885b2f47109bb84d86b025");
 }
 
@@ -127,15 +130,17 @@ TEST(MerkleTreeTest, TestTLSTree) {
   auto path = mt.getPath(index2.value());
   EXPECT_EQ(path.path->computeChainDataLength() / Sha256::HashLen, 2);
   auto expectedPathNode1 = mt.getNodeValue(0, 3);
-  EXPECT_TRUE(std::equal(
-      path.path->data(),
-      path.path->data() + Sha256::HashLen,
-      expectedPathNode1.value()->data()));
+  EXPECT_TRUE(
+      std::equal(
+          path.path->data(),
+          path.path->data() + Sha256::HashLen,
+          expectedPathNode1.value()->data()));
   auto expectedPathNode2 = mt.getNodeValue(1, 0);
-  EXPECT_TRUE(std::equal(
-      path.path->data() + Sha256::HashLen,
-      path.path->data() + 2 * Sha256::HashLen,
-      expectedPathNode2.value()->data()));
+  EXPECT_TRUE(
+      std::equal(
+          path.path->data() + Sha256::HashLen,
+          path.path->data() + 2 * Sha256::HashLen,
+          expectedPathNode2.value()->data()));
   // compute the root from message, index, and path
   mt.finalizeAndBuild();
   auto root = mt.getRootValue();

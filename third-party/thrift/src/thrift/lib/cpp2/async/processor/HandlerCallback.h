@@ -697,18 +697,20 @@ struct HandlerCallbackHelper<
         typename DecoratorArgType<typename inner_type<Response>::type>::type;
 
     template <typename InnerResponseType>
-    static constexpr ArgType extractDecoratorArg(const ResponseAndSinkConsumer<
-                                                 InnerResponseType,
-                                                 SinkElement,
-                                                 FinalResponse>& result) {
+    static constexpr ArgType extractDecoratorArg(
+        const ResponseAndSinkConsumer<
+            InnerResponseType,
+            SinkElement,
+            FinalResponse>& result) {
       return result.response;
     }
 
     template <ResponseIsUniquePtr InnerResponseType>
-    static constexpr ArgType extractDecoratorArg(const ResponseAndSinkConsumer<
-                                                 InnerResponseType,
-                                                 SinkElement,
-                                                 FinalResponse>& result) {
+    static constexpr ArgType extractDecoratorArg(
+        const ResponseAndSinkConsumer<
+            InnerResponseType,
+            SinkElement,
+            FinalResponse>& result) {
       return *result.response;
     }
   };

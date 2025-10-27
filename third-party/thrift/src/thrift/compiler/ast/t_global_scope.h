@@ -173,12 +173,13 @@ class t_global_scope {
       const t_program& program,
       const t_named* local_node,
       const t_named* global_node) {
-    resolution_mismatches_.emplace(ResolutionMismatch{
-        .id = id.fmtDebug(),
-        .id_loc = id.src_range(),
-        .program = &program,
-        .local_node = local_node,
-        .global_node = global_node});
+    resolution_mismatches_.emplace(
+        ResolutionMismatch{
+            .id = id.fmtDebug(),
+            .id_loc = id.src_range(),
+            .program = &program,
+            .local_node = local_node,
+            .global_node = global_node});
   }
 
  private:

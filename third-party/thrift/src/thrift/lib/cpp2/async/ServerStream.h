@@ -85,8 +85,7 @@ class ServerStream {
       "Use ScopedServerInterfaceThread instead of invoking handler methods "
       "directly. This approach changes the threading model and can hide race "
       "conditions in production code.")]] //
-  ClientBufferedStream<T>
-  toClientStreamUnsafeDoNotUse(
+  ClientBufferedStream<T> toClientStreamUnsafeDoNotUse(
       folly::EventBase* evb = folly::getUnsafeMutableGlobalEventBase(),
       int32_t bufferSize = 100) &&;
 

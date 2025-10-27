@@ -32,7 +32,7 @@ QueryExprParser getQueryExprParser(const w_string& name);
   _(ipcre)                                 \
   _(match)                                 \
   _(name)                                  \
-  _(not )                                  \
+  _(not)                                   \
   _(pcre)                                  \
   _(since)                                 \
   _(size)                                  \

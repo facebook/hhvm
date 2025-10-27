@@ -236,8 +236,9 @@ int fizzClientLoadGenCommand(const std::vector<std::string>& args) {
        SignatureScheme::ecdsa_secp256r1_sha256,
        SignatureScheme::ecdsa_secp384r1_sha384});
   if (enableBatch) {
-    clientContext->setFactory(BatchSignatureFactory::makeBatchSignatureFactory(
-        clientContext->getFactoryPtr()));
+    clientContext->setFactory(
+        BatchSignatureFactory::makeBatchSignatureFactory(
+            clientContext->getFactoryPtr()));
     clientContext->setSupportedSigSchemes(
         {SignatureScheme::rsa_pss_sha256_batch,
          SignatureScheme::ecdsa_secp256r1_sha256_batch});

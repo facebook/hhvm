@@ -1233,14 +1233,19 @@ void testMergeMovedPatch(T t) {
   p2.customVisit(checkAssign);
 
   DynamicPatch dp{std::move(p2)};
-  dp.visitPatch(folly::overload(
-      [&](const DynamicListPatch& patch) { patch.customVisit(checkAssign); },
-      [&](const DynamicSetPatch& patch) { patch.customVisit(checkAssign); },
-      [&](const DynamicMapPatch& patch) { patch.customVisit(checkAssign); },
-      [&](const DynamicStructPatch& patch) { patch.customVisit(checkAssign); },
-      [&](const auto&) {
-        folly::throw_exception<std::runtime_error>("not reachable.");
-      }));
+  dp.visitPatch(
+      folly::overload(
+          [&](const DynamicListPatch& patch) {
+            patch.customVisit(checkAssign);
+          },
+          [&](const DynamicSetPatch& patch) { patch.customVisit(checkAssign); },
+          [&](const DynamicMapPatch& patch) { patch.customVisit(checkAssign); },
+          [&](const DynamicStructPatch& patch) {
+            patch.customVisit(checkAssign);
+          },
+          [&](const auto&) {
+            folly::throw_exception<std::runtime_error>("not reachable.");
+          }));
   dp.customVisit(badge, checkAssign);
 }
 

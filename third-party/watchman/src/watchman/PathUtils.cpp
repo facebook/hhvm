@@ -32,7 +32,7 @@ namespace watchman {
 void verify_dir_ownership(const std::string& state_dir) {
 #ifndef _WIN32
   // verify ownership
-  struct stat st {};
+  struct stat st{};
   int dir_fd;
   int ret = 0;
   uid_t euid = geteuid();

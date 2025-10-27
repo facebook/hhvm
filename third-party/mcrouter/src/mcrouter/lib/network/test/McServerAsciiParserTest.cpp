@@ -44,8 +44,9 @@ class TestRunner {
 
   template <class Request>
   TestRunner& expectNext(Request req, bool noreply = false) {
-    callbacks_.emplace_back(std::make_unique<ExpectedRequestCallback<Request>>(
-        std::move(req), noreply));
+    callbacks_.emplace_back(
+        std::make_unique<ExpectedRequestCallback<Request>>(
+            std::move(req), noreply));
     return *this;
   }
 
@@ -389,8 +390,9 @@ void setLikeTest(std::string opCmd) {
 
   // Test negative exptime.
   TestRunner()
-      .expectNext(createUpdateLike<Request>(
-          "test:stepan:1", kTestValue, 123, -12341232))
+      .expectNext(
+          createUpdateLike<Request>(
+              "test:stepan:1", kTestValue, 123, -12341232))
       .run(
           "{} test:stepan:1 123 -12341232 {}\r\n{}\r\n",
           opCmd,
@@ -711,8 +713,9 @@ TEST(McServerAsciiParserHarness, allOps) {
       .expectNext(McMetagetRequest("test:stepan:4"))
       .expectMultiOpEnd()
       .expectNext(createUpdateLike<McSetRequest>("test:stepan:5", "Abc", 1, 2))
-      .expectNext(createUpdateLike<McAddRequest>(
-          "test:stepan:6", "abcdefgHiJklMNo", 3, 4))
+      .expectNext(
+          createUpdateLike<McAddRequest>(
+              "test:stepan:6", "abcdefgHiJklMNo", 3, 4))
       .expectNext(
           createUpdateLike<McReplaceRequest>("test:stepan:7", "A", 6, 7))
       .expectNext(createUpdateLike<McAppendRequest>("test:stepan:8", "", 8, 9))

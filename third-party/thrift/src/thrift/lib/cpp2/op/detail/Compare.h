@@ -590,8 +590,7 @@ struct IdenticalTo<type::cpp_type<T, type::set<KTag>>>
 template <
     typename KTag,
     typename VTag,
-    template <class...>
-    typename Equality,
+    template <class...> typename Equality,
     typename Tag = type::map<KTag, VTag>,
     typename T = type::native_type<Tag>>
 struct MapEquality {

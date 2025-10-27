@@ -146,15 +146,17 @@ class FdWriteBatchingTest : public testing::TestWithParam<bool> {
     }
     // Pad the queues so they don't run dry during TearDown
     for (size_t i = 0; i < batchingSize_ + 1; ++i) {
-      sendQueue_.blockingWrite(std::make_pair(
-          std::make_unique<std::string>("FdWriteBatchingTest::TearDown"),
-          folly::SocketFds::ToSend{}));
-      checkQueue_.blockingWrite(std::make_pair(
-          std::make_unique<std::string>(
-              "(FdWriteBatchingTest::TearDown" // batched test cases
-              "|TTransportException: Channel got EOF)" // unbatched
-              ),
-          folly::SocketFds::ToSend{}));
+      sendQueue_.blockingWrite(
+          std::make_pair(
+              std::make_unique<std::string>("FdWriteBatchingTest::TearDown"),
+              folly::SocketFds::ToSend{}));
+      checkQueue_.blockingWrite(
+          std::make_pair(
+              std::make_unique<std::string>(
+                  "(FdWriteBatchingTest::TearDown" // batched test cases
+                  "|TTransportException: Channel got EOF)" // unbatched
+                  ),
+              folly::SocketFds::ToSend{}));
     }
 
     folly::SocketAddress sockAddr;

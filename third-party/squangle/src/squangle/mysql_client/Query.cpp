@@ -130,10 +130,11 @@ folly::fbstring QueryArgument::asString() const {
           return folly::to<folly::fbstring>(arg);
         }
 
-        throw std::invalid_argument(fmt::format(
-            "Only allowed type conversions are Int, Double, Bool and String:"
-            " type found: {}",
-            typeid(arg).name()));
+        throw std::invalid_argument(
+            fmt::format(
+                "Only allowed type conversions are Int, Double, Bool and String:"
+                " type found: {}",
+                typeid(arg).name()));
       },
       value_);
 }

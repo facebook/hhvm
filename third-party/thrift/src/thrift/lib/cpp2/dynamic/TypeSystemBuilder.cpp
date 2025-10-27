@@ -80,10 +80,11 @@ class TypeSystemImpl final : public SourceIndexedTypeSystem {
           sourceIndexedDefinitions[sourceIdentifier.location].emplace(
               sourceIdentifier.name, def);
       if (!inserted) {
-        throw InvalidTypeError(fmt::format(
-            "Duplicate source identifier name '{}' at location '{}'",
-            sourceIdentifier.name,
-            sourceIdentifier.location));
+        throw InvalidTypeError(
+            fmt::format(
+                "Duplicate source identifier name '{}' at location '{}'",
+                sourceIdentifier.name,
+                sourceIdentifier.location));
       }
     }
 
@@ -91,10 +92,11 @@ class TypeSystemImpl final : public SourceIndexedTypeSystem {
       auto [_, inserted] =
           definitionToSourceIdentifier.emplace(def, sourceIdentifier);
       if (!inserted) {
-        throw InvalidTypeError(fmt::format(
-            "Duplicate definition for source identifier name '{}' at location '{}'",
-            sourceIdentifier.name,
-            sourceIdentifier.location));
+        throw InvalidTypeError(
+            fmt::format(
+                "Duplicate definition for source identifier name '{}' at location '{}'",
+                sourceIdentifier.name,
+                sourceIdentifier.location));
       }
     }
   }
@@ -186,14 +188,17 @@ std::unique_ptr<SourceIndexedTypeSystem> TypeSystemBuilder::build() && {
               // type.
               auto typeref = typeSystem->typeOf(k);
               if (!typeref.isStruct()) {
-                throw InvalidTypeError(fmt::format(
-                    "Definition for uri '{}' for annotation is not struct.",
-                    k));
+                throw InvalidTypeError(
+                    fmt::format(
+                        "Definition for uri '{}' for annotation is not struct.",
+                        k));
               }
               // Validate if the value is a struct.
               if (!v.fieldSetDatum_ref().has_value()) {
-                throw InvalidTypeError(fmt::format(
-                    "Value for uri '{}' for annotation is not a struct.", k));
+                throw InvalidTypeError(
+                    fmt::format(
+                        "Value for uri '{}' for annotation is not a struct.",
+                        k));
               }
               ret.emplace(
                   std::move(k), SerializableRecord::fromThrift(std::move(v)));
@@ -259,10 +264,11 @@ std::unique_ptr<SourceIndexedTypeSystem> TypeSystemBuilder::build() && {
         std::vector<EnumNode::Value> values;
         values.reserve(enumDef.values()->size());
         for (SerializableEnumValueDefinition& mapping : *enumDef.values()) {
-          values.emplace_back(EnumNode::Value{
-              std::move(*mapping.name()),
-              *mapping.datum(),
-              makeAnnots(std::move(*mapping.annotations()))});
+          values.emplace_back(
+              EnumNode::Value{
+                  std::move(*mapping.name()),
+                  *mapping.datum(),
+                  makeAnnots(std::move(*mapping.annotations()))});
         }
         EnumNode& enumNode = std::get<EnumNode>(uninitDef);
         enumNode = EnumNode(
@@ -309,18 +315,20 @@ void validateIdentitiesAreUnique(
 
   for (const auto& field : fields) {
     if (seenIds.contains(field.identity()->id())) {
-      throw InvalidTypeError(fmt::format(
-          "Duplicate field id '{}' in structured type '{}'",
-          folly::to_underlying(field.identity()->id()),
-          uri));
+      throw InvalidTypeError(
+          fmt::format(
+              "Duplicate field id '{}' in structured type '{}'",
+              folly::to_underlying(field.identity()->id()),
+              uri));
     }
     seenIds.insert(field.identity()->id());
 
     if (seenNames.contains(field.identity()->name())) {
-      throw InvalidTypeError(fmt::format(
-          "Duplicate field name '{}' in structured type '{}'",
-          field.identity()->name(),
-          uri));
+      throw InvalidTypeError(
+          fmt::format(
+              "Duplicate field name '{}' in structured type '{}'",
+              field.identity()->name(),
+              uri));
     }
     seenNames.insert(field.identity()->name());
   }
@@ -333,10 +341,11 @@ void validateFieldsAreOptional(
     UriView uri, const SerializableUnionDefinition& unionDef) {
   for (const SerializableFieldDefinition& field : *unionDef.fields()) {
     if (field.presence() != PresenceQualifier::OPTIONAL_) {
-      throw InvalidTypeError(fmt::format(
-          "field '{}' must be optional in union '{}'",
-          field.identity()->name(),
-          uri));
+      throw InvalidTypeError(
+          fmt::format(
+              "field '{}' must be optional in union '{}'",
+              field.identity()->name(),
+              uri));
     }
   }
 }
@@ -357,8 +366,9 @@ void validateEnumMappingsAreUnique(
     seenNames.insert(*entry.name());
 
     if (seenValues.contains(*entry.datum())) {
-      throw InvalidTypeError(fmt::format(
-          "Duplicate value '{}' in enum '{}'", *entry.datum(), uri));
+      throw InvalidTypeError(
+          fmt::format(
+              "Duplicate value '{}' in enum '{}'", *entry.datum(), uri));
     }
     seenValues.insert(*entry.datum());
   }
@@ -371,10 +381,11 @@ void validateEnumMappingsAreUnique(
 void validateOpaqueAliasIsNotUserDefined(
     UriView uri, const SerializableOpaqueAliasDefinition& opaqueAliasDef) {
   if (opaqueAliasDef.targetType()->kind() == TypeId::Kind::URI) {
-    throw InvalidTypeError(fmt::format(
-        "Opaque alias '{}' cannot have target type of a user-defined type '{}'",
-        uri,
-        *opaqueAliasDef.targetType()));
+    throw InvalidTypeError(
+        fmt::format(
+            "Opaque alias '{}' cannot have target type of a user-defined type '{}'",
+            uri,
+            *opaqueAliasDef.targetType()));
   }
 }
 
@@ -448,9 +459,10 @@ void TypeSystemBuilder::addType(
       addType(uri, *def.opaqueAliasDef(), std::move(sourceInfo));
       break;
     default:
-      throw InvalidTypeError(fmt::format(
-          "Invalid SerializableTypeDefinition::Type: {}",
-          apache::thrift::util::enumNameSafe(def.getType())));
+      throw InvalidTypeError(
+          fmt::format(
+              "Invalid SerializableTypeDefinition::Type: {}",
+              apache::thrift::util::enumNameSafe(def.getType())));
   }
 }
 

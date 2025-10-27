@@ -42,9 +42,10 @@ template <typename K, typename V, typename M = std::mutex>
 class FilePersistentCache : public PersistentCache<K, V> {
  public:
   FilePersistentCache(const std::string& file, PersistentCacheConfig config)
-      : cache_(std::make_shared<LRUPersistentCache<K, V, M>>(
-            std::move(config),
-            std::make_unique<FilePersistenceLayer>(file))) {
+      : cache_(
+            std::make_shared<LRUPersistentCache<K, V, M>>(
+                std::move(config),
+                std::make_unique<FilePersistenceLayer>(file))) {
     cache_->init();
   }
 

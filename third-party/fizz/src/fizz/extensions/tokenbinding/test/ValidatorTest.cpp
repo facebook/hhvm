@@ -119,35 +119,38 @@ TEST_F(ValidatorTest, TestTruncatedSignature) {
 
 TEST_F(ValidatorTest, TestMultipleSupportedParameters) {
   auto binding = setUpWithKeyParameters(TokenBindingKeyParameters::ecdsap256);
-  EXPECT_TRUE(Validator::validateTokenBinding(
-                  std::move(binding),
-                  ekm_,
-                  {TokenBindingKeyParameters::rsa2048_pkcs1_5,
-                   TokenBindingKeyParameters::ecdsap256,
-                   TokenBindingKeyParameters::ed25519_experimental})
-                  .has_value());
+  EXPECT_TRUE(
+      Validator::validateTokenBinding(
+          std::move(binding),
+          ekm_,
+          {TokenBindingKeyParameters::rsa2048_pkcs1_5,
+           TokenBindingKeyParameters::ecdsap256,
+           TokenBindingKeyParameters::ed25519_experimental})
+          .has_value());
 }
 
 TEST_F(ValidatorTest, TestSentParameterNotSupported) {
   auto binding = setUpWithKeyParameters(TokenBindingKeyParameters::ecdsap256);
-  EXPECT_FALSE(Validator::validateTokenBinding(
-                   std::move(binding),
-                   ekm_,
-                   {TokenBindingKeyParameters::rsa2048_pkcs1_5,
-                    TokenBindingKeyParameters::rsa2048_pss,
-                    TokenBindingKeyParameters::ed25519_experimental})
-                   .has_value());
+  EXPECT_FALSE(
+      Validator::validateTokenBinding(
+          std::move(binding),
+          ekm_,
+          {TokenBindingKeyParameters::rsa2048_pkcs1_5,
+           TokenBindingKeyParameters::rsa2048_pss,
+           TokenBindingKeyParameters::ed25519_experimental})
+          .has_value());
 }
 
 // The tests below are mostly Ed25519 variants of the tests above
 TEST_F(ValidatorTest, TestValidEd25519Signature) {
   auto binding =
       setUpWithKeyParameters(TokenBindingKeyParameters::ed25519_experimental);
-  EXPECT_TRUE(Validator::validateTokenBinding(
-                  std::move(binding),
-                  ekm_,
-                  TokenBindingKeyParameters::ed25519_experimental)
-                  .has_value());
+  EXPECT_TRUE(
+      Validator::validateTokenBinding(
+          std::move(binding),
+          ekm_,
+          TokenBindingKeyParameters::ed25519_experimental)
+          .has_value());
 }
 
 TEST_F(ValidatorTest, TestBadEd25519KeySent) {
@@ -158,11 +161,12 @@ TEST_F(ValidatorTest, TestBadEd25519KeySent) {
       setUpWithKeyParameters(TokenBindingKeyParameters::ed25519_experimental);
 
   binding.tokenbindingid.key = getBuf(bad_ed25519_key);
-  EXPECT_FALSE(Validator::validateTokenBinding(
-                   std::move(binding),
-                   ekm_,
-                   TokenBindingKeyParameters::ed25519_experimental)
-                   .has_value());
+  EXPECT_FALSE(
+      Validator::validateTokenBinding(
+          std::move(binding),
+          ekm_,
+          TokenBindingKeyParameters::ed25519_experimental)
+          .has_value());
 }
 
 TEST_F(ValidatorTest, TestBadEd25519KeyLength) {
@@ -173,33 +177,36 @@ TEST_F(ValidatorTest, TestBadEd25519KeyLength) {
       setUpWithKeyParameters(TokenBindingKeyParameters::ed25519_experimental);
 
   binding.tokenbindingid.key = getBuf(bad_ed25519_key);
-  EXPECT_FALSE(Validator::validateTokenBinding(
-                   std::move(binding),
-                   ekm_,
-                   TokenBindingKeyParameters::ed25519_experimental)
-                   .has_value());
+  EXPECT_FALSE(
+      Validator::validateTokenBinding(
+          std::move(binding),
+          ekm_,
+          TokenBindingKeyParameters::ed25519_experimental)
+          .has_value());
 }
 
 TEST_F(ValidatorTest, TestInvalidEd25519Signature) {
   auto binding =
       setUpWithKeyParameters(TokenBindingKeyParameters::ed25519_experimental);
   *binding.signature->writableData() ^= 0x04;
-  EXPECT_FALSE(Validator::validateTokenBinding(
-                   std::move(binding),
-                   ekm_,
-                   TokenBindingKeyParameters::ed25519_experimental)
-                   .has_value());
+  EXPECT_FALSE(
+      Validator::validateTokenBinding(
+          std::move(binding),
+          ekm_,
+          TokenBindingKeyParameters::ed25519_experimental)
+          .has_value());
 }
 
 TEST_F(ValidatorTest, TestTruncatedEd25519Signature) {
   auto binding =
       setUpWithKeyParameters(TokenBindingKeyParameters::ed25519_experimental);
   binding.signature->trimEnd(4);
-  EXPECT_FALSE(Validator::validateTokenBinding(
-                   std::move(binding),
-                   ekm_,
-                   TokenBindingKeyParameters::ed25519_experimental)
-                   .has_value());
+  EXPECT_FALSE(
+      Validator::validateTokenBinding(
+          std::move(binding),
+          ekm_,
+          TokenBindingKeyParameters::ed25519_experimental)
+          .has_value());
 }
 
 } // namespace test

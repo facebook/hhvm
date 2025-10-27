@@ -1075,10 +1075,11 @@ class TypeSystemFacade final : public type_system::SourceIndexedTypeSystem {
             std::vector<type_system::EnumNode::Value> values;
             values.reserve(e.values().size());
             for (const auto& value : e.values()) {
-              values.emplace_back(type_system::EnumNode::Value{
-                  std::string(value.name()),
-                  value.i32(),
-                  toTypeSystemAnnotations(value.annotations())});
+              values.emplace_back(
+                  type_system::EnumNode::Value{
+                      std::string(value.name()),
+                      value.i32(),
+                      toTypeSystemAnnotations(value.annotations())});
             }
             auto [entry, _] = cache_.emplace(
                 sgDef,
@@ -1383,9 +1384,10 @@ TypeRef SyntaxGraph::asSyntaxGraphTypeRef(
         return TypeRef::of(Set::of(asSyntaxGraphTypeRef(s.elementType())));
       },
       [&](const type_system::TypeRef::Map& m) {
-        return TypeRef::of(Map::of(
-            asSyntaxGraphTypeRef(m.keyType()),
-            asSyntaxGraphTypeRef(m.valueType())));
+        return TypeRef::of(
+            Map::of(
+                asSyntaxGraphTypeRef(m.keyType()),
+                asSyntaxGraphTypeRef(m.valueType())));
       },
       [&](const type_system::StructNode& s) {
         return TypeRef::of(asSyntaxGraphStructNode(s));

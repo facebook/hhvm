@@ -78,21 +78,23 @@ RequestChannel::Ptr TestSetup::connectToServer(
       [port,
        onDetachable = std::move(onDetachable),
        socketSetup = std::move(socketSetup)](folly::EventBase& evb) mutable
-      -> std::unique_ptr<ClientChannel, folly::DelayedDestruction::Destructor> {
-        auto socket = folly::AsyncSocket::UniquePtr(
-            new TAsyncSocketIntercepted(&evb, "::1", port));
-        if (socketSetup) {
-          socketSetup(*static_cast<TAsyncSocketIntercepted*>(socket.get()));
-        }
+          -> std::
+              unique_ptr<ClientChannel, folly::DelayedDestruction::Destructor> {
+                auto socket = folly::AsyncSocket::UniquePtr(
+                    new TAsyncSocketIntercepted(&evb, "::1", port));
+                if (socketSetup) {
+                  socketSetup(
+                      *static_cast<TAsyncSocketIntercepted*>(socket.get()));
+                }
 
-        ClientChannel::Ptr channel =
-            RocketClientChannel::newChannel(std::move(socket));
+                ClientChannel::Ptr channel =
+                    RocketClientChannel::newChannel(std::move(socket));
 
-        if (onDetachable) {
-          channel->setOnDetachable(std::move(onDetachable));
-        }
-        return channel;
-      });
+                if (onDetachable) {
+                  channel->setOnDetachable(std::move(onDetachable));
+                }
+                return channel;
+              });
 }
 
 } // namespace apache::thrift

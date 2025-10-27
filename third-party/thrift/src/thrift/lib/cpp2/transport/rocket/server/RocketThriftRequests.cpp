@@ -727,9 +727,10 @@ void ThriftServerRequestStream::sendSerializedError(
     return;
   }
   std::exchange(clientCallback_, nullptr)
-      ->onFirstResponseError(folly::make_exception_wrapper<
-                             thrift::detail::EncodedFirstResponseError>(
-          FirstResponsePayload(std::move(exbuf), std::move(metadata))));
+      ->onFirstResponseError(
+          folly::make_exception_wrapper<
+              thrift::detail::EncodedFirstResponseError>(
+              FirstResponsePayload(std::move(exbuf), std::move(metadata))));
 }
 
 void ThriftServerRequestStream::closeConnection(
@@ -799,9 +800,10 @@ void ThriftServerRequestSink::sendSerializedError(
     return;
   }
   std::exchange(clientCallback_, nullptr)
-      ->onFirstResponseError(folly::make_exception_wrapper<
-                             thrift::detail::EncodedFirstResponseError>(
-          FirstResponsePayload(std::move(exbuf), std::move(metadata))));
+      ->onFirstResponseError(
+          folly::make_exception_wrapper<
+              thrift::detail::EncodedFirstResponseError>(
+              FirstResponsePayload(std::move(exbuf), std::move(metadata))));
 }
 
 #if FOLLY_HAS_COROUTINES
@@ -877,9 +879,10 @@ void ThriftServerRequestBiDi::sendSerializedError(
     return;
   }
   std::exchange(clientCallback_, nullptr)
-      ->onFirstResponseError(folly::make_exception_wrapper<
-                             thrift::detail::EncodedFirstResponseError>(
-          FirstResponsePayload(std::move(exbuf), std::move(metadata))));
+      ->onFirstResponseError(
+          folly::make_exception_wrapper<
+              thrift::detail::EncodedFirstResponseError>(
+              FirstResponsePayload(std::move(exbuf), std::move(metadata))));
 }
 
 void ThriftServerRequestBiDi::sendBiDiThriftResponse(

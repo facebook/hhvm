@@ -27,10 +27,11 @@ template class TwoWayBridge<
     ClientSinkBridge>;
 
 void ClientSinkBridge::ClientDeleter::operator()(ClientSinkBridge* ptr) {
-  ptr->cancel(folly::Try<StreamPayload>{
-      folly::make_exception_wrapper<TApplicationException>(
-          TApplicationException::TApplicationExceptionType::INTERRUPTION,
-          "never called sink object")});
+  ptr->cancel(
+      folly::Try<StreamPayload>{
+          folly::make_exception_wrapper<TApplicationException>(
+              TApplicationException::TApplicationExceptionType::INTERRUPTION,
+              "never called sink object")});
   Deleter::operator()(ptr);
 }
 
@@ -101,8 +102,9 @@ folly::coro::Task<folly::Try<StreamPayload>> ClientSinkBridge::sink(
       }
 
       if (clientCancelToken.isCancellationRequested()) {
-        clientPush(folly::Try<apache::thrift::StreamPayload>(
-            rocket::RocketException(rocket::ErrorCode::CANCELED)));
+        clientPush(
+            folly::Try<apache::thrift::StreamPayload>(
+                rocket::RocketException(rocket::ErrorCode::CANCELED)));
         co_yield folly::coro::co_cancelled;
       }
     }
@@ -114,8 +116,9 @@ folly::coro::Task<folly::Try<StreamPayload>> ClientSinkBridge::sink(
     }
 
     if (clientCancelToken.isCancellationRequested()) {
-      clientPush(folly::Try<apache::thrift::StreamPayload>(
-          rocket::RocketException(rocket::ErrorCode::CANCELED)));
+      clientPush(
+          folly::Try<apache::thrift::StreamPayload>(
+              rocket::RocketException(rocket::ErrorCode::CANCELED)));
       co_yield folly::coro::co_cancelled;
     }
 

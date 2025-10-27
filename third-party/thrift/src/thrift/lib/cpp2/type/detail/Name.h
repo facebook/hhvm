@@ -87,8 +87,9 @@ struct GetNameParamed<CTag, T1> {
 template <typename CTag, typename T1, typename T2>
 struct GetNameParamed<CTag, T1, T2> {
   FOLLY_EXPORT const std::string& operator()() const {
-    static const auto* kName = new std::string(fmt::format(
-        "{}<{}, {}>", GetName<CTag>()(), GetName<T1>()(), GetName<T2>()()));
+    static const auto* kName = new std::string(
+        fmt::format(
+            "{}<{}, {}>", GetName<CTag>()(), GetName<T1>()(), GetName<T2>()()));
     return *kName;
   }
 };

@@ -424,7 +424,8 @@ template <typename Traits>
 struct [[deprecated(
     "Deprecated in favor of "
     "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and " // @oss-disable
-    "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]] reflected_struct {
+    "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]]
+reflected_struct {
   /**
    * A type alias for the struct itself.
    *
@@ -1030,7 +1031,8 @@ template <typename T>
 struct [[deprecated(
     "Deprecated in favor of "
     "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and " // @oss-disable
-    "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]] reflected_variant {
+    "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]]
+reflected_variant {
   /**
    * A type alias for the union itself.
    *

@@ -820,21 +820,30 @@ void SSLContextManager::verifyCertNames(
     subjectAltName = std::move(altName);
   } else {
     if (groupIdentity != *identity) {
-      throw std::runtime_error(folly::to<string>(
-          "X509 ",
-          description,
-          " does not have same identity as ",
-          lastCertPath));
+      throw std::runtime_error(
+          folly::to<string>(
+              "X509 ",
+              description,
+              " does not have same identity as ",
+              lastCertPath));
     }
     if (altName == nullptr) {
       if (subjectAltName != nullptr) {
-        throw std::runtime_error(folly::to<string>(
-            "X509 ", description, " does not have same SAN as ", lastCertPath));
+        throw std::runtime_error(
+            folly::to<string>(
+                "X509 ",
+                description,
+                " does not have same SAN as ",
+                lastCertPath));
       }
     } else {
       if ((subjectAltName == nullptr) || (*altName != *subjectAltName)) {
-        throw std::runtime_error(folly::to<string>(
-            "X509 ", description, " does not have same SAN as ", lastCertPath));
+        throw std::runtime_error(
+            folly::to<string>(
+                "X509 ",
+                description,
+                " does not have same SAN as ",
+                lastCertPath));
       }
     }
   }

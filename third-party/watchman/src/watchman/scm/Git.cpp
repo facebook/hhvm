@@ -174,8 +174,9 @@ std::chrono::time_point<std::chrono::system_clock> Git::getCommitDate(
       "get commit date");
   double timestamp;
   if (std::sscanf(result.output.c_str(), "%lf", &timestamp) != 1) {
-    throw std::runtime_error(fmt::format(
-        "failed to parse date value `{}` into a double", result.output));
+    throw std::runtime_error(
+        fmt::format(
+            "failed to parse date value `{}` into a double", result.output));
   }
   // TODO: maybe do some bounds checking on the double we get from
   // git.

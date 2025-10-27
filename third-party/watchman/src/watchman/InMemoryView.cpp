@@ -110,8 +110,9 @@ void InMemoryFileResult::batchFetchProperties(
 
         readlinkFutures.emplace_back(
             caches_.symlinkTargetCache.get(key).thenTry(
-                [file](folly::Try<std::shared_ptr<
-                           const SymlinkTargetCache::Node>>&& result) {
+                [file](
+                    folly::Try<std::shared_ptr<
+                        const SymlinkTargetCache::Node>>&& result) {
                   if (result.hasValue()) {
                     file->symlinkTarget_ = result.value()->value();
                   } else {
@@ -141,8 +142,9 @@ void InMemoryFileResult::batchFetchProperties(
           file->file_->stat.mtime};
 
       sha1Futures.emplace_back(caches_.contentHashCache.get(key).thenTry(
-          [file](folly::Try<std::shared_ptr<const ContentHashCache::Node>>&&
-                     result) {
+          [file](
+              folly::Try<std::shared_ptr<const ContentHashCache::Node>>&&
+                  result) {
             file->contentSha1_ =
                 makeResultWith([&] { return result.value()->value(); });
           }));
@@ -974,8 +976,9 @@ void InMemoryView::stopThreads(std::string_view reason) {
     auto pending = pendingFromWatcher_.lock();
     // we need this to make sure that watch does not hang
     for (auto& sync : pending->stealSyncs()) {
-      sync.setException(std::runtime_error(
-          fmt::format("Watch shutting down because ... {}", reason)));
+      sync.setException(
+          std::runtime_error(
+              fmt::format("Watch shutting down because ... {}", reason)));
     }
     pending->startRefusingSyncs(reason);
     pending->ping();

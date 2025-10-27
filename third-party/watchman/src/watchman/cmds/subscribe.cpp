@@ -529,8 +529,9 @@ static UntypedResponse cmd_subscribe(Client* clientbase, const json_ref& args) {
     log(ERR, "clobbering existing subscription '", sub_name, "'\n");
     resp.set(
         "warning",
-        w_string_to_json(w_string::format(
-            "subscription name '{}' is not unique", sub_name)));
+        w_string_to_json(
+            w_string::format(
+                "subscription name '{}' is not unique", sub_name)));
   }
 
   auto sub =
@@ -584,16 +585,17 @@ static UntypedResponse cmd_subscribe(Client* clientbase, const json_ref& args) {
     }
 
     std::weak_ptr<Client> clientRef(client->shared_from_this());
-    client->unilateralSub.insert(std::make_pair(
-        sub,
-        root->unilateralResponses->subscribe(
-            [clientRef, sub]() {
-              auto client = clientRef.lock();
-              if (client) {
-                client->ping->notify();
-              }
-            },
-            info_json)));
+    client->unilateralSub.insert(
+        std::make_pair(
+            sub,
+            root->unilateralResponses->subscribe(
+                [clientRef, sub]() {
+                  auto client = clientRef.lock();
+                  if (client) {
+                    client->ping->notify();
+                  }
+                },
+                info_json)));
   }
 
   client->subscriptions[sub->name] = sub;

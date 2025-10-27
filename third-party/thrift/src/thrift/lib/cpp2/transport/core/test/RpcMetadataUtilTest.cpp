@@ -48,8 +48,9 @@ TEST(RpcMetadataUtil, frameworkMetadata) {
   header.setProtocolId(protocol::T_COMPACT_PROTOCOL);
 
   rpcOptions.setShardId("123");
-  MethodMetadata methodMetadata(MethodMetadata::Data(
-      methodName, FunctionQualifier::Unspecified, serviceName));
+  MethodMetadata methodMetadata(
+      MethodMetadata::Data(
+          methodName, FunctionQualifier::Unspecified, serviceName));
   auto requestRpcMetadata = makeRequestRpcMetadata(
       rpcOptions,
       kind,
@@ -78,8 +79,9 @@ TEST(RpcMetadataUtil, interceptorFrameworkMetadata) {
   header.setProtocolId(protocol::T_COMPACT_PROTOCOL);
 
   rpcOptions.setShardId("123");
-  MethodMetadata methodMetadata(MethodMetadata::Data(
-      methodName, FunctionQualifier::Unspecified, serviceName));
+  MethodMetadata methodMetadata(
+      MethodMetadata::Data(
+          methodName, FunctionQualifier::Unspecified, serviceName));
   auto requestRpcMetadata = makeRequestRpcMetadata(
       rpcOptions,
       kind,
@@ -113,8 +115,9 @@ TEST(RpcMetadataUtil, CustomCompressionFallback) {
     compressionConfig.codecConfig().ensure().customConfig().emplace();
     header.setDesiredCompressionConfig(std::move(compressionConfig));
 
-    MethodMetadata methodMetadata(MethodMetadata::Data(
-        methodName, FunctionQualifier::Unspecified, serviceName));
+    MethodMetadata methodMetadata(
+        MethodMetadata::Data(
+            methodName, FunctionQualifier::Unspecified, serviceName));
     auto requestRpcMetadata = makeRequestRpcMetadata(
         rpcOptions,
         kind,
@@ -143,8 +146,9 @@ TEST(RpcMetadataUtil, CustomCompressionFallback) {
     compressionConfig.codecConfig().ensure().customConfig().emplace();
     header.setDesiredCompressionConfig(std::move(compressionConfig));
 
-    MethodMetadata methodMetadata(MethodMetadata::Data(
-        methodName, FunctionQualifier::Unspecified, serviceName));
+    MethodMetadata methodMetadata(
+        MethodMetadata::Data(
+            methodName, FunctionQualifier::Unspecified, serviceName));
     auto requestRpcMetadata = makeRequestRpcMetadata(
         rpcOptions,
         kind,
@@ -172,8 +176,9 @@ TEST(RpcMetadataUtil, CustomCompressionFallback) {
     compressionConfig.codecConfig().ensure().customConfig().emplace();
     header.setDesiredCompressionConfig(std::move(compressionConfig));
 
-    MethodMetadata methodMetadata(MethodMetadata::Data(
-        methodName, FunctionQualifier::Unspecified, serviceName));
+    MethodMetadata methodMetadata(
+        MethodMetadata::Data(
+            methodName, FunctionQualifier::Unspecified, serviceName));
     auto requestRpcMetadata = makeRequestRpcMetadata(
         rpcOptions,
         kind,
@@ -201,8 +206,9 @@ TEST(RpcMetadataUtil, CustomCompressionFallback) {
     compressionConfig.codecConfig().ensure().zstdConfig().emplace();
     header.setDesiredCompressionConfig(std::move(compressionConfig));
 
-    MethodMetadata methodMetadata(MethodMetadata::Data(
-        methodName, FunctionQualifier::Unspecified, serviceName));
+    MethodMetadata methodMetadata(
+        MethodMetadata::Data(
+            methodName, FunctionQualifier::Unspecified, serviceName));
     auto requestRpcMetadata = makeRequestRpcMetadata(
         rpcOptions,
         kind,

@@ -293,10 +293,11 @@ TEST_F(BiDiBridgesTest, HandoffInput) {
                 }
               };
 
-              backgroundScope.add(folly::coro::co_withExecutor(
-                  folly::getGlobalCPUExecutor(),
-                  folly::coro::co_invoke(
-                      std::move(consumeFunc), std::move(gen))));
+              backgroundScope.add(
+                  folly::coro::co_withExecutor(
+                      folly::getGlobalCPUExecutor(),
+                      folly::coro::co_invoke(
+                          std::move(consumeFunc), std::move(gen))));
               co_return;
             });
       });

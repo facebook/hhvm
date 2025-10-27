@@ -99,8 +99,9 @@ void MessagePrinter::printRawMessage(
   rawMessage.append(
       std::string(reinterpret_cast<char*>(&rawMessageSize), sizeof(uint64_t)));
   for (size_t i = 0; i < iovsCount; ++i) {
-    rawMessage.append(std::string(
-        static_cast<char*>(iovsBegin[i].iov_base), iovsBegin[i].iov_len));
+    rawMessage.append(
+        std::string(
+            static_cast<char*>(iovsBegin[i].iov_base), iovsBegin[i].iov_len));
   }
   printMessage(rawMessage);
 }
@@ -136,8 +137,9 @@ std::string MessagePrinter::serializeConnectionDetails(
   }
   if ((!from.empty() || !to.empty()) && protocol != mc_unknown_protocol) {
     if (options_.script) {
-      out.append(fmt::format(
-          ",\n  \"protocol\": \"{}\"", mc_protocol_to_string(protocol)));
+      out.append(
+          fmt::format(
+              ",\n  \"protocol\": \"{}\"", mc_protocol_to_string(protocol)));
     } else {
       out.append(fmt::format(" ({})", mc_protocol_to_string(protocol)));
     }
@@ -155,8 +157,9 @@ std::string MessagePrinter::serializeMessageHeader(
   if (options_.script) {
     out.append(fmt::format("\"type\": \"{}\"", messageName.data()));
     if (result != carbon::Result::UNKNOWN) {
-      out.append(fmt::format(
-          ",\n  \"result\": \"{}\"", carbon::resultToString(result)));
+      out.append(
+          fmt::format(
+              ",\n  \"result\": \"{}\"", carbon::resultToString(result)));
     }
     if (!key.empty()) {
       out.append(fmt::format(",\n  \"key\": \"{}\"", folly::backslashify(key)));

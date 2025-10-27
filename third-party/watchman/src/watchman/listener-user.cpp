@@ -45,15 +45,16 @@ void add_root_warnings_to_response(
 
   response.set(
       "warning",
-      w_string_to_json(w_string::build(
-          info->warning.value(),
-          "\n",
-          "To clear this warning, run:\n"
-          "`watchman watch-del '",
-          root->root_path,
-          "' ; watchman watch-project '",
-          root->root_path,
-          "'`\n")));
+      w_string_to_json(
+          w_string::build(
+              info->warning.value(),
+              "\n",
+              "To clear this warning, run:\n"
+              "`watchman watch-del '",
+              root->root_path,
+              "' ; watchman watch-project '",
+              root->root_path,
+              "'`\n")));
 }
 
 std::shared_ptr<Root>

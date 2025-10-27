@@ -116,8 +116,9 @@ class program_scope {
     std::unordered_set<std::string> ambiguous_values;
     for (const auto& [id, _] : definitions_) {
       if (id.subdefinition_name && id.subdefinition_name.value() == name) {
-        ambiguous_values.insert(fmt::format(
-            "{}.{}", id.definition_name, id.subdefinition_name.value()));
+        ambiguous_values.insert(
+            fmt::format(
+                "{}.{}", id.definition_name, id.subdefinition_name.value()));
       }
     }
 

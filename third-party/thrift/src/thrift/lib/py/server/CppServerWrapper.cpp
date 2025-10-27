@@ -558,8 +558,9 @@ class CppServerWrapper : public ThriftServer {
     // We use a shared_ptr to manage the adapter so the processor
     // factory handing won't ever try to manipulate python reference
     // counts without the GIL.
-    setInterface(std::make_unique<PythonAsyncProcessorFactory>(
-        std::make_shared<object>(adapter)));
+    setInterface(
+        std::make_unique<PythonAsyncProcessorFactory>(
+            std::make_shared<object>(adapter)));
   }
 
   // peer to setObserver, but since we want a different argument, avoid
@@ -631,12 +632,14 @@ class CppServerWrapper : public ThriftServer {
           extract<SSLContext::SSLVersion>(sslConfig.attr("ssl_version"));
     }
 
-    ThriftServer::setSSLConfig(folly::observer::makeObserver(
-        [cfg, nextProtocolsObserver = ThriftServer::defaultNextProtocols()] {
-          auto cfgWithNextProtocols = *cfg;
-          cfgWithNextProtocols.setNextProtocols(**nextProtocolsObserver);
-          return cfgWithNextProtocols;
-        }));
+    ThriftServer::setSSLConfig(
+        folly::observer::makeObserver(
+            [cfg,
+             nextProtocolsObserver = ThriftServer::defaultNextProtocols()] {
+              auto cfgWithNextProtocols = *cfg;
+              cfgWithNextProtocols.setNextProtocols(**nextProtocolsObserver);
+              return cfgWithNextProtocols;
+            }));
 
     setSSLPolicy(extract<SSLPolicy>(sslConfig.attr("ssl_policy")));
 
@@ -662,8 +665,9 @@ class CppServerWrapper : public ThriftServer {
             getIntAttr<uint64_t>(cacheOptions, "max_ssl_cache_size"),
         .sslCacheFlushSize =
             getIntAttr<uint64_t>(cacheOptions, "ssl_cache_flush_size"),
-        .handshakeValidity = std::chrono::seconds(getIntAttr<uint32_t>(
-            cacheOptions, "ssl_handshake_validity_seconds")),
+        .handshakeValidity = std::chrono::seconds(
+            getIntAttr<uint32_t>(
+                cacheOptions, "ssl_handshake_validity_seconds")),
     };
     ThriftServer::setSSLCacheOptions(std::move(options));
   }

@@ -109,8 +109,9 @@ class HibernatingRequestChannel : public RequestChannel {
       : implCreator_(std::move(implCreator)),
         evb_(evb),
         waitTime_(waitTime),
-        timeout_(folly::AsyncTimeout::make(
-            evb_, [&impl = impl_]() mutable noexcept { impl.reset(); })) {}
+        timeout_(
+            folly::AsyncTimeout::make(
+                evb_, [&impl = impl_]() mutable noexcept { impl.reset(); })) {}
 
   ImplPtr& impl();
 

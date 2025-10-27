@@ -141,7 +141,7 @@ class SessionPoolFixture
   }
   void onBody(std::unique_ptr<folly::IOBuf> /*chain*/) noexcept override {
   }
-  void onChunkHeader(size_t /*length*/) noexcept override{};
+  void onChunkHeader(size_t /*length*/) noexcept override {};
   void onChunkComplete() noexcept override {};
   void onTrailers(std::unique_ptr<HTTPHeaders> /*trailers*/) noexcept override {
   }

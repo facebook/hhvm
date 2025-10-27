@@ -31,11 +31,12 @@
     std::string_view union_name,
     int16_t accessed_field_id,
     int16_t active_field_id) {
-  throw bad_union_field_access(fmt::format(
-      "bad union field access: attempted to access field '{}' in union '{}', but active field is '{}'",
-      accessed_field_id,
-      union_name,
-      active_field_id));
+  throw bad_union_field_access(
+      fmt::format(
+          "bad union field access: attempted to access field '{}' in union '{}', but active field is '{}'",
+          accessed_field_id,
+          union_name,
+          active_field_id));
 }
 
 [[noreturn]] void apache::thrift::detail::throw_on_nullptr_dereferencing() {

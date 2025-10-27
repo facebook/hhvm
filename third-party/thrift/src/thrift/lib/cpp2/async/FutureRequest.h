@@ -215,8 +215,10 @@ class HeaderFutureCallback
           Helper::makeError(std::move(ew), std::move(state)));
     } else {
       auto header = state.extractHeader();
-      this->promise_.setValue(Helper::makeResult(
-          std::pair{std::move(result), std::move(header)}, std::move(state)));
+      this->promise_.setValue(
+          Helper::makeResult(
+              std::pair{std::move(result), std::move(header)},
+              std::move(state)));
     }
   }
 };

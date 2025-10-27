@@ -851,8 +851,9 @@ McRouteHandleProvider<RouterInfo>::buildCheckedRouteMap() {
             checkLogic(rh != nullptr, "make{} returned nullptr", rhName);
             return rh;
           } catch (const std::exception& e) {
-            throw std::logic_error(fmt::format(
-                "make{} throws when contructing: {}", rhName, e.what()));
+            throw std::logic_error(
+                fmt::format(
+                    "make{} throws when contructing: {}", rhName, e.what()));
           }
         });
   }
@@ -883,8 +884,9 @@ McRouteHandleProvider<RouterInfo>::buildCheckedRouteMapWithProxy() {
             checkLogic(rh != nullptr, "make{} returned nullptr", rhName);
             return rh;
           } catch (const std::exception& e) {
-            throw std::logic_error(fmt::format(
-                "make{} throws when contructing: {}", rhName, e.what()));
+            throw std::logic_error(
+                fmt::format(
+                    "make{} throws when contructing: {}", rhName, e.what()));
           }
         });
   }
@@ -916,8 +918,9 @@ McRouteHandleProvider<RouterInfo>::buildCheckedRouteMapForWrapper() {
             checkLogic(ret != nullptr, "make{} returned nullptr", rhName);
             return ret;
           } catch (const std::exception& e) {
-            throw std::logic_error(fmt::format(
-                "make{} throws when contructing: {}", rhName, e.what()));
+            throw std::logic_error(
+                fmt::format(
+                    "make{} throws when contructing: {}", rhName, e.what()));
           }
         });
   }

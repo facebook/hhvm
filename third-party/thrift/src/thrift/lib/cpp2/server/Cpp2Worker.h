@@ -279,9 +279,10 @@ class Cpp2Worker : public IOWorkerContext,
       // Leave enough headroom to close connections ungracefully before the
       // worker join timeout expires.
       constexpr auto kGracefulTimeoutHeadroom = std::chrono::milliseconds{500};
-      setGracefulShutdownTimeout(std::max(
-          server->getWorkersJoinTimeout() - kGracefulTimeoutHeadroom,
-          std::chrono::milliseconds::zero()));
+      setGracefulShutdownTimeout(
+          std::max(
+              server->getWorkersJoinTimeout() - kGracefulTimeoutHeadroom,
+              std::chrono::milliseconds::zero()));
     }
   }
 

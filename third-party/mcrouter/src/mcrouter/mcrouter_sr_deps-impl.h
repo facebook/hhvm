@@ -17,7 +17,7 @@ using HostInfoPtr = std::shared_ptr<HostInfo>;
 
 class HostInfoLocation {
  public:
-  HostInfoLocation(){};
+  HostInfoLocation() {};
 
   const std::string& getIp() const {
     return ip_;
@@ -38,7 +38,7 @@ class HostInfoLocation {
 
 class HostInfo {
  public:
-  HostInfo(){};
+  HostInfo() {};
 
   const HostInfoLocation& location() {
     return location_;
@@ -50,7 +50,7 @@ class HostInfo {
 
 struct SRHost {
  public:
-  SRHost(){};
+  SRHost() {};
   const std::string& getIp() const {
     return "127.0.0.1";
   }

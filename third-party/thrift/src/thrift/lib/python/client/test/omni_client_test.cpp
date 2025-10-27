@@ -300,15 +300,16 @@ class OmniClientTest : public ::testing::Test {
           std::string args = S::template serialize<std::string>(req);
           auto data = apache::thrift::MethodMetadata::Data(
               function, apache::thrift::FunctionQualifier::Unspecified);
-          co_await onResponse(co_await client.semifuture_send(
-              service,
-              function,
-              args,
-              std::move(data),
-              {},
-              {},
-              co_await folly::coro::co_current_executor,
-              RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE));
+          co_await onResponse(
+              co_await client.semifuture_send(
+                  service,
+                  function,
+                  args,
+                  std::move(data),
+                  {},
+                  {},
+                  co_await folly::coro::co_current_executor,
+                  RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE));
         });
   }
 
@@ -325,15 +326,16 @@ class OmniClientTest : public ::testing::Test {
           std::string args = S::template serialize<std::string>(req);
           auto data = apache::thrift::MethodMetadata::Data(
               function, apache::thrift::FunctionQualifier::Unspecified);
-          auto resp = co_await onResponse(co_await client.semifuture_send(
-              service,
-              function,
-              args,
-              std::move(data),
-              {},
-              {},
-              co_await folly::coro::co_current_executor,
-              RpcKind::SINK));
+          auto resp = co_await onResponse(
+              co_await client.semifuture_send(
+                  service,
+                  function,
+                  args,
+                  std::move(data),
+                  {},
+                  {},
+                  co_await folly::coro::co_current_executor,
+                  RpcKind::SINK));
           EXPECT_EQ(resp->template to<std::string>(), expected);
         });
   }

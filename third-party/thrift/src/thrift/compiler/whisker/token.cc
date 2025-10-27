@@ -187,17 +187,18 @@ std::int64_t token::i64_value() const {
 
 std::string_view token::string_value() const {
   if (value_kind() != token_value_kind::string) {
-    throw_invalid_kind(fmt::format(
-        "one of {}",
-        fmt::join(
-            std::initializer_list<std::string_view>{
-                to_string(tok::string_literal),
-                to_string(tok::identifier),
-                to_string(tok::path_component),
-                to_string(tok::text),
-                to_string(tok::whitespace),
-                to_string(tok::newline)},
-            ", ")));
+    throw_invalid_kind(
+        fmt::format(
+            "one of {}",
+            fmt::join(
+                std::initializer_list<std::string_view>{
+                    to_string(tok::string_literal),
+                    to_string(tok::identifier),
+                    to_string(tok::path_component),
+                    to_string(tok::text),
+                    to_string(tok::whitespace),
+                    to_string(tok::newline)},
+                ", ")));
   }
   return detail::variant_match(
       data,

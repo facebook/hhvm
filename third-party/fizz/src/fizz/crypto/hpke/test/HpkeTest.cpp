@@ -2169,19 +2169,21 @@ TEST(HpkeTest, TestKeySchedule) {
     EXPECT_CALL(*cipher, _setKey(TrafficKeyMatcher(&expectedTrafficKey)))
         .Times(1);
 
-    struct KeyScheduleParams keyScheduleParams {
-      testParam.mode, toIOBuf(testParam.sharedSecret), toIOBuf(testParam.info),
-          PskInputs(
-              testParam.mode,
-              toIOBuf(testParam.psk),
-              toIOBuf(testParam.pskId)),
-          std::move(cipher), std::move(hkdf), std::move(suiteId),
-          fizz::hpke::HpkeContext::Role::Sender
-    };
+    struct KeyScheduleParams keyScheduleParams{
+        testParam.mode,
+        toIOBuf(testParam.sharedSecret),
+        toIOBuf(testParam.info),
+        PskInputs(
+            testParam.mode, toIOBuf(testParam.psk), toIOBuf(testParam.pskId)),
+        std::move(cipher),
+        std::move(hkdf),
+        std::move(suiteId),
+        fizz::hpke::HpkeContext::Role::Sender};
     auto context = keySchedule(std::move(keyScheduleParams));
 
-    EXPECT_TRUE(folly::IOBufEqualTo()(
-        context->getExporterSecret(), toIOBuf(testParam.exporterSecret)));
+    EXPECT_TRUE(
+        folly::IOBufEqualTo()(
+            context->getExporterSecret(), toIOBuf(testParam.exporterSecret)));
   }
 }
 

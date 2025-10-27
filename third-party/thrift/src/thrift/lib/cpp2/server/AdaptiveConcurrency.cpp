@@ -199,9 +199,11 @@ void AdaptiveConcurrencyController::recalculate() {
     if (cfg->targetRttFixed == std::chrono::milliseconds{}) {
       // If a min target RTT latency is specified then ensure that the
       // computed target is not below that minimum threshold.
-      targetRtt_.store(std::max(
-          std::chrono::round<Clock::duration>(cfg->minTargetRtt),
-          std::chrono::round<Clock::duration>(pctRtt * cfg->targetRttFactor)));
+      targetRtt_.store(
+          std::max(
+              std::chrono::round<Clock::duration>(cfg->minTargetRtt),
+              std::chrono::round<Clock::duration>(
+                  pctRtt * cfg->targetRttFactor)));
     } else {
       targetRtt_.store(Clock::duration{cfg->targetRttFixed});
     }

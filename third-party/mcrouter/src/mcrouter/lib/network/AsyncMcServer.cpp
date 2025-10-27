@@ -167,8 +167,9 @@ class McServerThread {
  public:
   explicit McServerThread(AsyncMcServer& server, size_t id)
       : server_(server),
-        evb_(std::make_unique<folly::EventBase>(
-            server.opts_.worker.enableEventBaseTimeMeasurement)),
+        evb_(
+            std::make_unique<folly::EventBase>(
+                server.opts_.worker.enableEventBaseTimeMeasurement)),
         vevb_(nullptr),
         id_(id),
         worker_(server.opts_.worker, *evb_),
@@ -197,8 +198,9 @@ class McServerThread {
 
   McServerThread(AcceptorT, AsyncMcServer& server, size_t id, bool reusePort)
       : server_(server),
-        evb_(std::make_unique<folly::EventBase>(
-            server.opts_.worker.enableEventBaseTimeMeasurement)),
+        evb_(
+            std::make_unique<folly::EventBase>(
+                server.opts_.worker.enableEventBaseTimeMeasurement)),
         vevb_(nullptr),
         id_(id),
         worker_(server.opts_.worker, *evb_),
@@ -753,9 +755,10 @@ AsyncMcServer::AsyncMcServer(Options opts) : opts_(std::move(opts)) {
     virtualEventBaseMode_ = true;
     if (opts_.numListeningSockets == 0 ||
         opts_.numListeningSockets > opts_.eventBases.size()) {
-      throw std::invalid_argument(fmt::format(
-          "Unexpected option: opts_.numListeningSockets={}",
-          opts_.numListeningSockets));
+      throw std::invalid_argument(
+          fmt::format(
+              "Unexpected option: opts_.numListeningSockets={}",
+              opts_.numListeningSockets));
     }
 
     for (auto evb : opts_.eventBases) {
@@ -769,31 +772,35 @@ AsyncMcServer::AsyncMcServer(Options opts) : opts_(std::move(opts)) {
     // First construct the McServerThreads with listening sockets.
     size_t id;
     for (id = 0; id < opts_.numListeningSockets; id++) {
-      threads_.emplace_back(std::make_unique<McServerThread>(
-          McServerThread::Acceptor,
-          *this,
-          id,
-          (opts_.numListeningSockets > 1),
-          virtualEventBases_[id].get()));
+      threads_.emplace_back(
+          std::make_unique<McServerThread>(
+              McServerThread::Acceptor,
+              *this,
+              id,
+              (opts_.numListeningSockets > 1),
+              virtualEventBases_[id].get()));
     }
     // Now the rest
     for (; id < opts_.numThreads; ++id) {
-      threads_.emplace_back(std::make_unique<McServerThread>(
-          *this, id, virtualEventBases_[id].get()));
+      threads_.emplace_back(
+          std::make_unique<McServerThread>(
+              *this, id, virtualEventBases_[id].get()));
     }
   } else {
     if (opts_.numThreads == 0) {
-      throw std::invalid_argument(fmt::format(
-          "Unexpected option: opts_.numThreads={}, virtualEventBaseMode={}",
-          opts_.numThreads,
-          virtualEventBaseMode_));
+      throw std::invalid_argument(
+          fmt::format(
+              "Unexpected option: opts_.numThreads={}, virtualEventBaseMode={}",
+              opts_.numThreads,
+              virtualEventBaseMode_));
     }
 
     if (opts_.numListeningSockets == 0 ||
         opts_.numListeningSockets > opts_.numThreads) {
-      throw std::invalid_argument(fmt::format(
-          "Unexpected option: opts_.numListeningSockets={}",
-          opts_.numListeningSockets));
+      throw std::invalid_argument(
+          fmt::format(
+              "Unexpected option: opts_.numListeningSockets={}",
+              opts_.numListeningSockets));
     }
 
     threadsSpawnController_ = std::make_unique<McServerThreadSpawnController>(
@@ -801,11 +808,12 @@ AsyncMcServer::AsyncMcServer(Options opts) : opts_(std::move(opts)) {
     size_t id;
     // First construct the McServerThreads with listening sockets.
     for (id = 0; id < opts_.numListeningSockets; id++) {
-      threads_.emplace_back(std::make_unique<McServerThread>(
-          McServerThread::Acceptor,
-          *this,
-          /*id*/ id,
-          (opts_.numListeningSockets > 1)));
+      threads_.emplace_back(
+          std::make_unique<McServerThread>(
+              McServerThread::Acceptor,
+              *this,
+              /*id*/ id,
+              (opts_.numListeningSockets > 1)));
     }
     // Now the rest
     for (; id < opts_.numThreads; ++id) {

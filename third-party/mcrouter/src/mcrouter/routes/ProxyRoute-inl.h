@@ -44,10 +44,11 @@ ProxyRoute<RouterInfo>::ProxyRoute(
     const RouteSelectorMap<typename RouterInfo::RouteHandleIf>& routeSelectors,
     RootRouteRolloutOpts rolloutOpts)
     : proxy_(proxy),
-      root_(makeRouteHandleWithInfo<RouterInfo, RootRoute>(
-          proxy_,
-          routeSelectors,
-          rolloutOpts)) {
+      root_(
+          makeRouteHandleWithInfo<RouterInfo, RootRoute>(
+              proxy_,
+              routeSelectors,
+              rolloutOpts)) {
   if (proxy_.getRouterOptions().big_value_split_threshold != 0 &&
       rolloutOpts.enableGlobalBigValueRoute) {
     root_ = detail::wrapWithBigValueRoute<RouterInfo>(

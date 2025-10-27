@@ -59,8 +59,9 @@ class Handler : public apache::thrift::ServiceHandler<DummyStatus>,
                                ->getConnectionContext()
                                ->getWorker()
                                ->getServer();
-    callback->result(static_cast<std::int64_t>(
-        server->getServiceHealth().value_or(ServiceHealth{})));
+    callback->result(
+        static_cast<std::int64_t>(
+            server->getServiceHealth().value_or(ServiceHealth{})));
   }
 
   folly::coro::Task<void> co_waitForPoll() {

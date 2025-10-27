@@ -312,9 +312,10 @@ void ThriftServer::initializeDefaults() {
       methodsBypassMaxRequestsLimit.insert(method);
     }
   }
-  setInternalMethods(std::unordered_set<std::string>(
-      methodsBypassMaxRequestsLimit.begin(),
-      methodsBypassMaxRequestsLimit.end()));
+  setInternalMethods(
+      std::unordered_set<std::string>(
+          methodsBypassMaxRequestsLimit.begin(),
+          methodsBypassMaxRequestsLimit.end()));
   thriftConfig_.methodsBypassMaxRequestsLimit_.setDefault(
       std::move(methodsBypassMaxRequestsLimit));
 
@@ -595,8 +596,9 @@ void ThriftServer::setup() {
   // Initialize event base for this thread
   auto serveEventBase = eventBaseManager_->getEventBase();
   serveEventBase_ = serveEventBase;
-  stopController_.set(std::make_unique<StopController>(
-      folly::badge<ThriftServer>{}, *serveEventBase));
+  stopController_.set(
+      std::make_unique<StopController>(
+          folly::badge<ThriftServer>{}, *serveEventBase));
   if (idleServerTimeout_.count() > 0) {
     idleServer_.emplace(*this, serveEventBase->timer(), idleServerTimeout_);
   }
@@ -1031,8 +1033,9 @@ void ThriftServer::setupThreadManagerImpl() {
           detail::getThriftServerConfig(*this)
               .getMaxRequests()
               .getObserver()
-              .addCallback([this](const folly::observer::Snapshot<uint32_t>&
-                                      snapshot) {
+              .addCallback([this](
+                               const folly::observer::Snapshot<uint32_t>&
+                                   snapshot) {
                 auto maxRequests = *snapshot;
                 if (auto cc =
                         resourcePoolSet()
@@ -1053,8 +1056,9 @@ void ThriftServer::setupThreadManagerImpl() {
         detail::getThriftServerConfig(*this)
             .getExecutionRate()
             .getObserver()
-            .addCallback([this](const folly::observer::Snapshot<uint32_t>&
-                                    snapshot) {
+            .addCallback([this](
+                             const folly::observer::Snapshot<uint32_t>&
+                                 snapshot) {
               auto executionRate = *snapshot;
               if (auto cc =
                       resourcePoolSet()
@@ -1454,21 +1458,23 @@ void ThriftServer::ensureResourcePools() {
         break;
       }
       case ThreadManagerType::SIMPLE: {
-        pools.push_back(Pool{
-            threadPriority_.value_or(
-                concurrency::PosixThreadFactory::NORMAL_PRI),
-            getNumCPUWorkerThreads(),
-            ResourcePoolHandle::defaultAsync(),
-            concurrency::NORMAL});
+        pools.push_back(
+            Pool{
+                threadPriority_.value_or(
+                    concurrency::PosixThreadFactory::NORMAL_PRI),
+                getNumCPUWorkerThreads(),
+                ResourcePoolHandle::defaultAsync(),
+                concurrency::NORMAL});
         break;
       }
       case ThreadManagerType::PRIORITY_QUEUE: {
-        pools.push_back(Pool{
-            threadPriority_.value_or(
-                concurrency::PosixThreadFactory::NORMAL_PRI),
-            getNumCPUWorkerThreads(),
-            ResourcePoolHandle::defaultAsync(),
-            concurrency::NORMAL});
+        pools.push_back(
+            Pool{
+                threadPriority_.value_or(
+                    concurrency::PosixThreadFactory::NORMAL_PRI),
+                getNumCPUWorkerThreads(),
+                ResourcePoolHandle::defaultAsync(),
+                concurrency::NORMAL});
         break;
       }
       default: {
@@ -2596,8 +2602,9 @@ ThriftServer::processModulesSpecification(ModulesSpecification&& specs) {
         interceptor->setModuleName(moduleSpec.name);
         auto qualifiedNameStr = interceptor->getQualifiedName().get();
         if (seenNames_.find(qualifiedNameStr) != seenNames_.end()) {
-          throw std::logic_error(fmt::format(
-              "Duplicate ServiceInterceptor: {}", qualifiedNameStr));
+          throw std::logic_error(
+              fmt::format(
+                  "Duplicate ServiceInterceptor: {}", qualifiedNameStr));
         }
         seenNames_.insert(qualifiedNameStr);
         result.emplace_back(std::move(interceptor));

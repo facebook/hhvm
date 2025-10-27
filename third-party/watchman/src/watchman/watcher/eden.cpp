@@ -1557,11 +1557,12 @@ std::shared_ptr<QueryableView> detectEden(
   log(DBG, "detected eden root: ", edenRoot, "\n");
 
   if (isEdenStopped(root_path)) {
-    throw TerminalWatcherError(fmt::format(
-        "{} appears to be an offline EdenFS mount. "
-        "Try running `edenfsctl start` to bring it back online and "
-        "then retry your watch",
-        root_path));
+    throw TerminalWatcherError(
+        fmt::format(
+            "{} appears to be an offline EdenFS mount. "
+            "Try running `edenfsctl start` to bring it back online and "
+            "then retry your watch",
+            root_path));
   }
 
 #else
@@ -1587,11 +1588,12 @@ std::shared_ptr<QueryableView> detectEden(
     // We can't watch it using this watcher in its current state,
     // and we don't want to allow falling back to inotify as that
     // will be horribly slow.
-    throw TerminalWatcherError(fmt::format(
-        "{} appears to be an offline EdenFS mount. "
-        "Try running `eden doctor` to bring it back online and "
-        "then retry your watch",
-        root_path));
+    throw TerminalWatcherError(
+        fmt::format(
+            "{} appears to be an offline EdenFS mount. "
+            "Try running `eden doctor` to bring it back online and "
+            "then retry your watch",
+            root_path));
   }
 
   // Given that the readlink() succeeded, assume this is an Eden mount.
@@ -1617,19 +1619,21 @@ std::shared_ptr<QueryableView> detectEden(
     // Throw a TerminalWatcherError to indicate that the Eden watcher is the
     // correct watcher type for this directory (so don't try other watcher
     // types), but that it can't be used due to an error.
-    throw TerminalWatcherError(fmt::format(
-        "you may only watch from the root of an eden mount point. "
-        "Try again using {}",
-        edenRoot));
+    throw TerminalWatcherError(
+        fmt::format(
+            "you may only watch from the root of an eden mount point. "
+            "Try again using {}",
+            edenRoot));
   }
 
   try {
     return std::make_shared<EdenView>(root_path, config);
   } catch (const std::exception& exc) {
-    throw TerminalWatcherError(fmt::format(
-        "Failed to initialize eden watcher, and since this is an Eden "
-        "repo, will not allow falling back to another watcher.  Error was: {}",
-        exc.what()));
+    throw TerminalWatcherError(
+        fmt::format(
+            "Failed to initialize eden watcher, and since this is an Eden "
+            "repo, will not allow falling back to another watcher.  Error was: {}",
+            exc.what()));
   }
 }
 

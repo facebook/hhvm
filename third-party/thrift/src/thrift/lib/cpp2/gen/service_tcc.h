@@ -62,8 +62,9 @@ std::unique_ptr<folly::IOBuf> process_serialize_xform_app_exn(
   if (includeEnvelope) {
     prot.writeMessageEnd();
   }
-  queue.append(transport::THeader::transform(
-      queue.move(), ctx->getHeader()->getWriteTransforms()));
+  queue.append(
+      transport::THeader::transform(
+          queue.move(), ctx->getHeader()->getWriteTransforms()));
   return queue.move();
 }
 

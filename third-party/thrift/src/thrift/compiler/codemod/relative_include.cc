@@ -61,23 +61,24 @@ class CodemodRelativeInclude final {
       return false;
     }
 
-    std::set<std::string> raw_path_heuristic = {// WWW
-                                                "cf/",
-                                                "cfa/",
-                                                "cfdsi/",
-                                                "cfgk/",
-                                                "cfmeta/",
-                                                "cfsitevars/",
-                                                "fbcode/",
-                                                "fbsource/",
-                                                "igsrv/",
-                                                // fbcode
-                                                "arvr/",
-                                                "fbandroid/",
-                                                "fbobjc/",
-                                                "xplat/",
-                                                // bundled
-                                                "thrift/annotation/"};
+    std::set<std::string> raw_path_heuristic = {
+        // WWW
+        "cf/",
+        "cfa/",
+        "cfdsi/",
+        "cfgk/",
+        "cfmeta/",
+        "cfsitevars/",
+        "fbcode/",
+        "fbsource/",
+        "igsrv/",
+        // fbcode
+        "arvr/",
+        "fbandroid/",
+        "fbobjc/",
+        "xplat/",
+        // bundled
+        "thrift/annotation/"};
     if (std::any_of(
             raw_path_heuristic.begin(),
             raw_path_heuristic.end(),
@@ -87,12 +88,13 @@ class CodemodRelativeInclude final {
       return false;
     }
 
-    std::set<std::string> full_path_heuristic = {// configerator
-                                                 "source/",
-                                                 // fbcode
-                                                 "fbcode/",
-                                                 // xplat
-                                                 "xplat/"};
+    std::set<std::string> full_path_heuristic = {
+        // configerator
+        "source/",
+        // fbcode
+        "fbcode/",
+        // xplat
+        "xplat/"};
     if (std::any_of(
             full_path_heuristic.begin(),
             full_path_heuristic.end(),

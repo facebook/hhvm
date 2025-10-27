@@ -93,12 +93,13 @@ std::string FetchOperationImpl::generateTimeoutError(
   bool stalled = cbDelay >= kCallbackDelayStallThreshold;
 
   std::vector<std::string> parts;
-  parts.push_back(fmt::format(
-      "[{}]({}) Query timed out",
-      static_cast<uint16_t>(
-          stalled ? SquangleErrno::SQ_ERRNO_QUERY_TIMEOUT_LOOP_STALLED
-                  : SquangleErrno::SQ_ERRNO_QUERY_TIMEOUT),
-      kErrorPrefix));
+  parts.push_back(
+      fmt::format(
+          "[{}]({}) Query timed out",
+          static_cast<uint16_t>(
+              stalled ? SquangleErrno::SQ_ERRNO_QUERY_TIMEOUT_LOOP_STALLED
+                      : SquangleErrno::SQ_ERRNO_QUERY_TIMEOUT),
+          kErrorPrefix));
 
   parts.push_back(std::move(rowdata));
   parts.push_back(timeoutMessage(elapsed));

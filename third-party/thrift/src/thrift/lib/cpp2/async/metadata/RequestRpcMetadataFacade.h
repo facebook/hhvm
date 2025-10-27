@@ -134,18 +134,20 @@ class RequestRpcMetadataFacade {
 
 FOLLY_ERASE RequestRpcMetadataFacade::RequestRpcMetadataFacade(
     std::unique_ptr<folly::IOBuf>&& serializedMetadata)
-    : adapter_(std::variant<
-               TCompactRequestRpcMetadataAdapter,
-               CursorBasedRequestRpcMetadataAdapter>(
-          std::in_place_type<TCompactRequestRpcMetadataAdapter>,
-          std::move(serializedMetadata))) {}
+    : adapter_(
+          std::variant<
+              TCompactRequestRpcMetadataAdapter,
+              CursorBasedRequestRpcMetadataAdapter>(
+              std::in_place_type<TCompactRequestRpcMetadataAdapter>,
+              std::move(serializedMetadata))) {}
 
 FOLLY_ERASE RequestRpcMetadataFacade::RequestRpcMetadataFacade(
     folly::IOBuf& serializedMetadata)
-    : adapter_(std::variant<
-               TCompactRequestRpcMetadataAdapter,
-               CursorBasedRequestRpcMetadataAdapter>(
-          std::in_place_type<TCompactRequestRpcMetadataAdapter>,
-          serializedMetadata)) {}
+    : adapter_(
+          std::variant<
+              TCompactRequestRpcMetadataAdapter,
+              CursorBasedRequestRpcMetadataAdapter>(
+              std::in_place_type<TCompactRequestRpcMetadataAdapter>,
+              serializedMetadata)) {}
 
 } // namespace apache::thrift

@@ -253,8 +253,9 @@ class RequestClientCallback {
  public:
   struct RequestClientCallbackDeleter {
     void operator()(RequestClientCallback* callback) const {
-      callback->onResponseError(folly::exception_wrapper(
-          std::logic_error("Request callback detached")));
+      callback->onResponseError(
+          folly::exception_wrapper(
+              std::logic_error("Request callback detached")));
     }
   };
   using Ptr =

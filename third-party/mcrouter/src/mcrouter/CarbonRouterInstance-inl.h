@@ -236,9 +236,10 @@ CarbonRouterInstance<RouterInfo>::setupProxy(
       proxies_.emplace_back(
           Proxy<RouterInfo>::createProxy(*this, *proxyEvbs_[i], i));
     } catch (...) {
-      return folly::makeUnexpected(fmt::format(
-          "Failed to create proxy: {}",
-          folly::exceptionStr(std::current_exception())));
+      return folly::makeUnexpected(
+          fmt::format(
+              "Failed to create proxy: {}",
+              folly::exceptionStr(std::current_exception())));
     }
   }
   return folly::Unit();
@@ -248,8 +249,9 @@ template <class RouterInfo>
 folly::Expected<folly::Unit, std::string>
 CarbonRouterInstance<RouterInfo>::spinUp() {
   if (opts_.force_same_thread && opts_.thread_affinity) {
-    return folly::makeUnexpected(std::string(
-        "force_same_thread and thread_affinity may not both be true"));
+    return folly::makeUnexpected(
+        std::string(
+            "force_same_thread and thread_affinity may not both be true"));
   }
   // Must init compression before creating proxies.
   if (opts_.enable_compression) {
@@ -268,10 +270,11 @@ CarbonRouterInstance<RouterInfo>::spinUp() {
       configuringFromDisk = true;
       builder = createConfigBuilder();
       if (builder.hasError()) {
-        return folly::makeUnexpected(fmt::format(
-            "Failed to configure, initial error '{}', from backup '{}'",
-            initialError,
-            builder.error()));
+        return folly::makeUnexpected(
+            fmt::format(
+                "Failed to configure, initial error '{}', from backup '{}'",
+                initialError,
+                builder.error()));
       }
     }
 
@@ -281,9 +284,10 @@ CarbonRouterInstance<RouterInfo>::spinUp() {
         proxyThreads_ = detail::createProxyThreadsExecutor(opts_);
         embeddedMode_ = true;
       } catch (...) {
-        return folly::makeUnexpected(fmt::format(
-            "Failed to create IOThreadPoolExecutor {}",
-            folly::exceptionStr(std::current_exception())));
+        return folly::makeUnexpected(
+            fmt::format(
+                "Failed to create IOThreadPoolExecutor {}",
+                folly::exceptionStr(std::current_exception())));
       }
     }
 
@@ -295,20 +299,22 @@ CarbonRouterInstance<RouterInfo>::spinUp() {
 
     auto threadPoolEvbs = extractEvbs(*proxyThreads_);
     if (threadPoolEvbs.size() != opts_.num_proxies) {
-      return folly::makeUnexpected(fmt::format(
-          "IOThreadPoolExecutor size does not match num_proxies sz={} proxies={} {}",
-          threadPoolEvbs.size(),
-          opts_.num_proxies,
-          folly::exceptionStr(std::current_exception())));
+      return folly::makeUnexpected(
+          fmt::format(
+              "IOThreadPoolExecutor size does not match num_proxies sz={} proxies={} {}",
+              threadPoolEvbs.size(),
+              opts_.num_proxies,
+              folly::exceptionStr(std::current_exception())));
     }
 
     if (opts_.enable_service_router && mcrouter::gSRInitHook) {
       try {
         setMetadata(mcrouter::gSRInitHook(proxyThreads_, opts_));
       } catch (...) {
-        return folly::makeUnexpected(fmt::format(
-            "Failed to create SR {}",
-            folly::exceptionStr(std::current_exception())));
+        return folly::makeUnexpected(
+            fmt::format(
+                "Failed to create SR {}",
+                folly::exceptionStr(std::current_exception())));
       }
     }
 
@@ -321,9 +327,10 @@ CarbonRouterInstance<RouterInfo>::spinUp() {
       try {
         mcrouter::gAxonInitHook(*this, proxyThreads_);
       } catch (...) {
-        return folly::makeUnexpected(fmt::format(
-            "Failed to create SR for Axon proxy {}",
-            folly::exceptionStr(std::current_exception())));
+        return folly::makeUnexpected(
+            fmt::format(
+                "Failed to create SR for Axon proxy {}",
+                folly::exceptionStr(std::current_exception())));
       }
     }
 
@@ -348,10 +355,11 @@ CarbonRouterInstance<RouterInfo>::spinUp() {
       } else {
         configApi_->abandonTrackedSources();
         LOG(ERROR) << "Failed to configure proxies";
-        return folly::makeUnexpected(fmt::format(
-            "Failed to configure, initial error '{}', from backup '{}'",
-            configResult.error(),
-            reconfigResult.error()));
+        return folly::makeUnexpected(
+            fmt::format(
+                "Failed to configure, initial error '{}', from backup '{}'",
+                configResult.error(),
+                reconfigResult.error()));
       }
     }
   }

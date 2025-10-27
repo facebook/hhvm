@@ -78,8 +78,9 @@ class Client {
             FLAGS_key.size() > 0 ? FLAGS_key.c_str() : FLAGS_cert.c_str();
         CHECK(folly::readFile(keypath, key));
         auto certMgr = std::make_shared<fizz::client::CertManager>();
-        certMgr->addCert(fizz::openssl::CertUtils::makeSelfCert(
-            std::move(cert), std::move(key)));
+        certMgr->addCert(
+            fizz::openssl::CertUtils::makeSelfCert(
+                std::move(cert), std::move(key)));
         context->setClientCertManager(std::move(certMgr));
       }
       auto* fizzClient =

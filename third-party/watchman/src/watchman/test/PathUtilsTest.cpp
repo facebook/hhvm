@@ -55,7 +55,7 @@ class PathUtilsTest : public ::testing::Test {
   // Helper function to check permissions on a directory (Unix only)
   void checkDirectoryPermissions(const std::string& dir_path) {
 #ifndef _WIN32
-    struct stat st {};
+    struct stat st{};
     EXPECT_EQ(stat(dir_path.c_str(), &st), 0)
         << fmt::format("Should be able to stat directory: {}", dir_path);
 

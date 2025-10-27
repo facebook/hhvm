@@ -489,8 +489,9 @@ void UserClient::clientThread() noexcept {
           if ((*sub)->lastResponses.size() >= kResponseLogLimit) {
             (*sub)->lastResponses.pop_front();
           }
-          (*sub)->lastResponses.push_back(ClientSubscription::LoggedResponse{
-              std::chrono::system_clock::now(), response_to_send});
+          (*sub)->lastResponses.push_back(
+              ClientSubscription::LoggedResponse{
+                  std::chrono::system_clock::now(), response_to_send});
         }
       }
 

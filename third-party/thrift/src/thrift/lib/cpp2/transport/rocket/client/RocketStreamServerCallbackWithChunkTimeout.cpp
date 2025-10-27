@@ -63,10 +63,11 @@ bool RocketStreamServerCallbackWithChunkTimeout::onStreamPayload(
 }
 
 void RocketStreamServerCallbackWithChunkTimeout::timeoutExpired() noexcept {
-  onStreamError(folly::make_exception_wrapper<transport::TTransportException>(
-      transport::TTransportException::TTransportExceptionType::TIMED_OUT,
-      folly::to<std::string>(
-          "stream chunk timeout after ", chunkTimeout_.count(), " ms.")));
+  onStreamError(
+      folly::make_exception_wrapper<transport::TTransportException>(
+          transport::TTransportException::TTransportExceptionType::TIMED_OUT,
+          folly::to<std::string>(
+              "stream chunk timeout after ", chunkTimeout_.count(), " ms.")));
   onStreamCancel();
 }
 

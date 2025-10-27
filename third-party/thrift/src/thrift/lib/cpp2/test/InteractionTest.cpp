@@ -170,8 +170,9 @@ TEST(InteractionTest, TerminateUsed) {
   ScopedServerInterfaceThread runner{std::make_shared<SemiCalculatorHandler>()};
   folly::EventBase eb;
   CalculatorAsyncClient client(
-      RocketClientChannel::newChannel(folly::AsyncSocket::UniquePtr(
-          new folly::AsyncSocket(&eb, runner.getAddress()))));
+      RocketClientChannel::newChannel(
+          folly::AsyncSocket::UniquePtr(
+              new folly::AsyncSocket(&eb, runner.getAddress()))));
 
   auto adder = client.createAddition();
   adder.semifuture_getPrimitive().via(&eb).getVia(&eb);
@@ -181,8 +182,9 @@ TEST(InteractionTest, TerminateActive) {
   ScopedServerInterfaceThread runner{std::make_shared<SemiCalculatorHandler>()};
   folly::EventBase eb;
   CalculatorAsyncClient client(
-      RocketClientChannel::newChannel(folly::AsyncSocket::UniquePtr(
-          new folly::AsyncSocket(&eb, runner.getAddress()))));
+      RocketClientChannel::newChannel(
+          folly::AsyncSocket::UniquePtr(
+              new folly::AsyncSocket(&eb, runner.getAddress()))));
 
   auto adder = client.createAddition();
   adder.semifuture_noop().via(&eb).getVia(&eb);
@@ -192,8 +194,9 @@ TEST(InteractionTest, TerminateUnused) {
   ScopedServerInterfaceThread runner{std::make_shared<SemiCalculatorHandler>()};
   folly::EventBase eb;
   CalculatorAsyncClient client(
-      RocketClientChannel::newChannel(folly::AsyncSocket::UniquePtr(
-          new folly::AsyncSocket(&eb, runner.getAddress()))));
+      RocketClientChannel::newChannel(
+          folly::AsyncSocket::UniquePtr(
+              new folly::AsyncSocket(&eb, runner.getAddress()))));
 
   client.sync_addPrimitive(0, 0); // sends setup frame
   auto adder = client.createAddition();
@@ -203,8 +206,9 @@ TEST(InteractionTest, TerminateWithoutSetup) {
   ScopedServerInterfaceThread runner{std::make_shared<SemiCalculatorHandler>()};
   folly::EventBase eb;
   CalculatorAsyncClient client(
-      RocketClientChannel::newChannel(folly::AsyncSocket::UniquePtr(
-          new folly::AsyncSocket(&eb, runner.getAddress()))));
+      RocketClientChannel::newChannel(
+          folly::AsyncSocket::UniquePtr(
+              new folly::AsyncSocket(&eb, runner.getAddress()))));
 
   auto adder = client.createAddition();
 }
@@ -250,8 +254,9 @@ TEST(InteractionTest, IsDetachable) {
   ScopedServerInterfaceThread runner{std::make_shared<SemiCalculatorHandler>()};
   folly::EventBase eb;
   CalculatorAsyncClient client(
-      RocketClientChannel::newChannel(folly::AsyncSocket::UniquePtr(
-          new folly::AsyncSocket(&eb, runner.getAddress()))));
+      RocketClientChannel::newChannel(
+          folly::AsyncSocket::UniquePtr(
+              new folly::AsyncSocket(&eb, runner.getAddress()))));
   auto channel = static_cast<ClientChannel*>(client.getChannel());
 
   bool detached = false;
@@ -857,8 +862,9 @@ TEST(InteractionCodegenTest, ReuseIdDuringConstructor) {
   ScopedServerInterfaceThread runner{handler};
   folly::EventBase eb;
   CalculatorAsyncClient client(
-      RocketClientChannel::newChannel(folly::AsyncSocket::UniquePtr(
-          new folly::AsyncSocket(&eb, runner.getAddress()))));
+      RocketClientChannel::newChannel(
+          folly::AsyncSocket::UniquePtr(
+              new folly::AsyncSocket(&eb, runner.getAddress()))));
 
   {
     auto id = client.getChannel()->registerInteraction("Addition", 1);
@@ -1371,8 +1377,9 @@ TEST(InteractionCodegenTest, FactoryHandlerCallback) {
       auto handler =
           std::make_unique<SemiCalculatorHandler::SemiAdditionHandler>();
       handler->acc_ = x;
-      cb->complete(folly::Try<TileAndResponse<AdditionIf, int>>{
-          {std::move(handler), x}});
+      cb->complete(
+          folly::Try<TileAndResponse<AdditionIf, int>>{
+              {std::move(handler), x}});
     }
 
     void async_tm_stringifiedAddition(

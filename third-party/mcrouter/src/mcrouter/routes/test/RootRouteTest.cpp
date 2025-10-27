@@ -22,12 +22,15 @@ class RootRouteTest : public ::testing::Test {
 
  public:
   RootRouteTest() {
-    srHandleVec1.push_back(std::make_shared<TestHandle>(
-        GetRouteTestData(carbon::Result::FOUND, "a")));
-    srHandleVec2.push_back(std::make_shared<TestHandle>(
-        GetRouteTestData(carbon::Result::FOUND, "b")));
-    srHandleVec3.push_back(std::make_shared<TestHandle>(
-        GetRouteTestData(carbon::Result::FOUND, "c")));
+    srHandleVec1.push_back(
+        std::make_shared<TestHandle>(
+            GetRouteTestData(carbon::Result::FOUND, "a")));
+    srHandleVec2.push_back(
+        std::make_shared<TestHandle>(
+            GetRouteTestData(carbon::Result::FOUND, "b")));
+    srHandleVec3.push_back(
+        std::make_shared<TestHandle>(
+            GetRouteTestData(carbon::Result::FOUND, "c")));
     mockSrHandle1 = get_route_handles(srHandleVec1)[0];
     mockSrHandle2 = get_route_handles(srHandleVec2)[0];
     mockSrHandle3 = get_route_handles(srHandleVec3)[0];

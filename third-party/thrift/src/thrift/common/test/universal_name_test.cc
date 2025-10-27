@@ -126,11 +126,12 @@ void expect_validate_error(
 
 TEST(UniversalNameTest, validate_universal_name_bulk) {
   // @lint-ignore-every CLANGTIDY facebook-hte-StdRegexIsAwful
-  std::regex pattern(fmt::format(
-      "{0}(\\.{0})+\\/{1}(\\/{1})*(\\/{2})",
-      "[a-z0-9]+",
-      "[a-z0-9_]+",
-      "[a-zA-Z0-9_]+"));
+  std::regex pattern(
+      fmt::format(
+          "{0}(\\.{0})+\\/{1}(\\/{1})*(\\/{2})",
+          "[a-z0-9]+",
+          "[a-z0-9_]+",
+          "[a-zA-Z0-9_]+"));
   for (const std::string& good : gen_good_def_uris()) {
     SCOPED_TRACE(good);
     EXPECT_TRUE(std::regex_match(good, pattern));

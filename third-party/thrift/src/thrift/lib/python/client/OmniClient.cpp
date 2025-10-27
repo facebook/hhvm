@@ -154,17 +154,18 @@ OmniClientResponseWithHeaders OmniClient::sync_send(
     apache::thrift::MethodMetadata::Data&& metadata,
     const std::unordered_map<std::string, std::string>& headers,
     apache::thrift::RpcOptions&& rpcOptions) {
-  return folly::coro::blockingWait(folly::makeSemiFuture().deferExTry(
-      [&](folly::Executor::KeepAlive<> executor, auto&&) {
-        return semifuture_send(
-            serviceName,
-            functionName,
-            std::move(args),
-            std::move(metadata),
-            headers,
-            std::move(rpcOptions),
-            executor.get());
-      }));
+  return folly::coro::blockingWait(
+      folly::makeSemiFuture().deferExTry(
+          [&](folly::Executor::KeepAlive<> executor, auto&&) {
+            return semifuture_send(
+                serviceName,
+                functionName,
+                std::move(args),
+                std::move(metadata),
+                headers,
+                std::move(rpcOptions),
+                executor.get());
+          }));
 }
 
 OmniClientResponseWithHeaders OmniClient::sync_send(

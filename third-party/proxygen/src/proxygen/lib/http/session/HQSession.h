@@ -1875,8 +1875,8 @@ class HQSession
                                quic::StreamWriteCallback* wcb) override;
 
     folly::Expected<folly::Unit, WebTransport::ErrorCode>
-        resetWebTransportEgress(HTTPCodec::StreamID /*id*/,
-                                uint32_t /*errorCode*/) override;
+    resetWebTransportEgress(HTTPCodec::StreamID /*id*/,
+                            uint32_t /*errorCode*/) override;
 
     folly::Expected<folly::Unit, WebTransport::ErrorCode>
     setWebTransportStreamPriority(HTTPCodec::StreamID /*id*/,

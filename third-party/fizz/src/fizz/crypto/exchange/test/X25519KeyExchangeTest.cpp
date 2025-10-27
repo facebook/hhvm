@@ -63,8 +63,9 @@ TEST(X25519KeyExchange, setPrivateKeyTest) {
 
   auto gotKeyShare = kex.getKeyShare();
 
-  auto expectedKeyShare = folly::IOBuf::copyBuffer(folly::unhexlify(
-      "2c908774a108700951a233e9efad4788f5fd42247e0978b84e96e0a6eb33716c"));
+  auto expectedKeyShare = folly::IOBuf::copyBuffer(
+      folly::unhexlify(
+          "2c908774a108700951a233e9efad4788f5fd42247e0978b84e96e0a6eb33716c"));
 
   EXPECT_TRUE(folly::IOBufEqualTo()(expectedKeyShare, gotKeyShare));
 }

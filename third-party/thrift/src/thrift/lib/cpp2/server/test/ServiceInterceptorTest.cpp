@@ -416,14 +416,15 @@ struct ServiceInterceptorLogResultTypeOnResponse
 
   folly::coro::Task<void> onResponse(
       folly::Unit*, folly::Unit*, ResponseInfo responseInfo) override {
-    results.emplace_back(folly::variant_match(
-        responseInfo.resultOrActiveException,
-        [](const folly::exception_wrapper& ex) -> Entry {
-          return Entry{ResultKind::EXCEPTION, *ex.type()};
-        },
-        [](const apache::thrift::util::TypeErasedRef& result) -> Entry {
-          return Entry{ResultKind::OK, result.type()};
-        }));
+    results.emplace_back(
+        folly::variant_match(
+            responseInfo.resultOrActiveException,
+            [](const folly::exception_wrapper& ex) -> Entry {
+              return Entry{ResultKind::EXCEPTION, *ex.type()};
+            },
+            [](const apache::thrift::util::TypeErasedRef& result) -> Entry {
+              return Entry{ResultKind::OK, result.type()};
+            }));
     co_return;
   }
 
@@ -581,8 +582,9 @@ CO_TEST_P(ServiceInterceptorTestP, BasicVoidReturn) {
       std::make_shared<ServiceInterceptorCountWithRequestState>("Interceptor2");
   auto runner =
       makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
-        server.addModule(std::make_unique<TestModule>(
-            InterceptorList{interceptor1, interceptor2}));
+        server.addModule(
+            std::make_unique<TestModule>(
+                InterceptorList{interceptor1, interceptor2}));
       });
 
   // HTTP2 does not support onConnection and onConnectionClosed because
@@ -712,8 +714,9 @@ CO_TEST_P(ServiceInterceptorTestP, NonTrivialRequestState) {
           "Interceptor2", counts);
   auto runner =
       makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
-        server.addModule(std::make_unique<TestModule>(
-            InterceptorList{interceptor1, interceptor2}));
+        server.addModule(
+            std::make_unique<TestModule>(
+                InterceptorList{interceptor1, interceptor2}));
       });
 
   auto client =
@@ -763,8 +766,9 @@ CO_TEST_P(ServiceInterceptorTestP, IterationOrder) {
           "Interceptor2", seq);
   auto runner =
       makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
-        server.addModule(std::make_unique<TestModule>(
-            InterceptorList{interceptor1, interceptor2}));
+        server.addModule(
+            std::make_unique<TestModule>(
+                InterceptorList{interceptor1, interceptor2}));
       });
 
   auto client =
@@ -808,8 +812,9 @@ TEST_P(ServiceInterceptorTestP, OnStartServing) {
       std::make_shared<ServiceInterceptorCountOnStartServing>("Interceptor2");
   auto runner =
       makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
-        server.addModule(std::make_unique<TestModule>(
-            InterceptorList{interceptor1, interceptor2}));
+        server.addModule(
+            std::make_unique<TestModule>(
+                InterceptorList{interceptor1, interceptor2}));
       });
 
   for (auto& interceptor : {interceptor1, interceptor2}) {
@@ -828,8 +833,9 @@ TEST_P(ServiceInterceptorTestP, DuplicateNameThrows) {
         try {
           makeServer(
               std::make_shared<TestHandler>(), [&](ThriftServer& server) {
-                server.addModule(std::make_unique<TestModule>(
-                    InterceptorList{interceptor1, interceptor2}));
+                server.addModule(
+                    std::make_unique<TestModule>(
+                        InterceptorList{interceptor1, interceptor2}));
               });
         } catch (const std::logic_error& ex) {
           EXPECT_THAT(ex.what(), HasSubstr("TestModule.Duplicate"));
@@ -848,8 +854,9 @@ CO_TEST_P(ServiceInterceptorTestP, OnRequestException) {
       std::make_shared<ServiceInterceptorThrowOnRequest>("Interceptor3");
   auto runner =
       makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
-        server.addModule(std::make_unique<TestModule>(
-            InterceptorList{interceptor1, interceptor2, interceptor3}));
+        server.addModule(
+            std::make_unique<TestModule>(
+                InterceptorList{interceptor1, interceptor2, interceptor3}));
       });
 
   auto client =
@@ -931,8 +938,9 @@ CO_TEST_P(
       "Exception from ServiceInterceptorThrowOnRequest::onRequest");
   auto runner =
       makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
-        server.addModule(std::make_unique<TestModule>(
-            InterceptorList{interceptor1, interceptor2}));
+        server.addModule(
+            std::make_unique<TestModule>(
+                InterceptorList{interceptor1, interceptor2}));
       });
 
   auto client =
@@ -1003,8 +1011,9 @@ CO_TEST_P(ServiceInterceptorTestP, OnResponseException) {
       std::make_shared<ServiceInterceptorThrowOnResponse>("Interceptor3");
   auto runner =
       makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
-        server.addModule(std::make_unique<TestModule>(
-            InterceptorList{interceptor1, interceptor2, interceptor3}));
+        server.addModule(
+            std::make_unique<TestModule>(
+                InterceptorList{interceptor1, interceptor2, interceptor3}));
       });
 
   auto client =
@@ -1047,8 +1056,9 @@ CO_TEST_P(ServiceInterceptorTestP, OnResponseExceptionEB) {
       std::make_shared<ServiceInterceptorCountWithRequestState>("Interceptor2");
   auto runner =
       makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
-        server.addModule(std::make_unique<TestModule>(
-            InterceptorList{interceptor1, interceptor2}));
+        server.addModule(
+            std::make_unique<TestModule>(
+                InterceptorList{interceptor1, interceptor2}));
       });
 
   auto client =
@@ -1150,8 +1160,9 @@ CO_TEST_P(
           "Interceptor2");
   auto runner =
       makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
-        server.addModule(std::make_unique<TestModule>(
-            InterceptorList{interceptor1, interceptor2}));
+        server.addModule(
+            std::make_unique<TestModule>(
+                InterceptorList{interceptor1, interceptor2}));
       });
 
   auto client =
@@ -1190,8 +1201,9 @@ CO_TEST_P(ServiceInterceptorTestP, OnConnectionException) {
       std::make_shared<ServiceInterceptorThrowOnConnection>("Interceptor3");
   auto runner =
       makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
-        server.addModule(std::make_unique<TestModule>(
-            InterceptorList{interceptor1, interceptor2, interceptor3}));
+        server.addModule(
+            std::make_unique<TestModule>(
+                InterceptorList{interceptor1, interceptor2, interceptor3}));
       });
 
   if (transportType() == TransportType::HTTP2) {
@@ -1256,8 +1268,9 @@ CO_TEST_P(ServiceInterceptorTestP, BasicInteraction) {
       std::make_shared<ServiceInterceptorCountWithRequestState>("Interceptor2");
   auto runner =
       makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
-        server.addModule(std::make_unique<TestModule>(
-            InterceptorList{interceptor1, interceptor2}));
+        server.addModule(
+            std::make_unique<TestModule>(
+                InterceptorList{interceptor1, interceptor2}));
       });
 
   auto client =
@@ -1299,8 +1312,9 @@ CO_TEST_P(ServiceInterceptorTestP, BasicStream) {
       std::make_shared<ServiceInterceptorCountWithRequestState>("Interceptor2");
   auto runner =
       makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
-        server.addModule(std::make_unique<TestModule>(
-            InterceptorList{interceptor1, interceptor2}));
+        server.addModule(
+            std::make_unique<TestModule>(
+                InterceptorList{interceptor1, interceptor2}));
       });
 
   auto client =

@@ -572,10 +572,11 @@ mstch::node structured_annotations_node(
           annotation_type, context, pos);
     }
 
-    annotations.emplace_back(mstch::map{
-        {"structured_annotation:direct", direct_annotation},
-        {"structured_annotation:transitive?", transitive},
-    });
+    annotations.emplace_back(
+        mstch::map{
+            {"structured_annotation:direct", direct_annotation},
+            {"structured_annotation:transitive?", transitive},
+        });
   }
 
   return annotations;
@@ -634,8 +635,9 @@ class t_mstch_rust_generator : public t_mstch_generator {
         [](whisker::dsl::function::context ctx) -> whisker::object {
           ctx.declare_named_arguments({});
           ctx.declare_arity(1);
-          return whisker::make::string(boost::algorithm::replace_all_copy(
-              ctx.argument<whisker::string>(0), ".", "_"));
+          return whisker::make::string(
+              boost::algorithm::replace_all_copy(
+                  ctx.argument<whisker::string>(0), ".", "_"));
         });
     globals["rust_quote"] = whisker::dsl::make_function(
         "rust_quote",
@@ -1410,11 +1412,12 @@ class rust_mstch_function : public mstch_function {
     auto returns = std::vector<std::string>();
     auto add_return =
         [&](std::string_view name, std::string_view type, int id) {
-          returns.push_back(fmt::format(
-              "::fbthrift::Field::new(\"{}\", ::fbthrift::TType::{}, {})",
-              name,
-              type,
-              id));
+          returns.push_back(
+              fmt::format(
+                  "::fbthrift::Field::new(\"{}\", ::fbthrift::TType::{}, {})",
+                  name,
+                  type,
+                  id));
         };
     auto get_ttype = [](const t_type& type) {
       const t_type* true_type = type.get_true_type();
@@ -1905,8 +1908,9 @@ class mstch_rust_value : public mstch_base {
 
     mstch::array elements;
     for (auto elem : const_value_->get_list()) {
-      elements.emplace_back(std::make_shared<mstch_rust_value>(
-          elem, elem_type, depth_ + 1, context_, pos_, options_));
+      elements.emplace_back(
+          std::make_shared<mstch_rust_value>(
+              elem, elem_type, depth_ + 1, context_, pos_, options_));
     }
     return elements;
   }
@@ -2171,15 +2175,16 @@ mstch::node mstch_rust_value::map_entries() {
 
   mstch::array entries;
   for (auto entry : const_value_->get_map()) {
-    entries.emplace_back(std::make_shared<mstch_rust_map_entry>(
-        entry.first,
-        key_type,
-        entry.second,
-        value_type,
-        depth_ + 3,
-        context_,
-        pos_,
-        options_));
+    entries.emplace_back(
+        std::make_shared<mstch_rust_map_entry>(
+            entry.first,
+            key_type,
+            entry.second,
+            value_type,
+            depth_ + 3,
+            context_,
+            pos_,
+            options_));
   }
   return entries;
 }
@@ -2201,8 +2206,9 @@ mstch::node mstch_rust_value::struct_fields() {
   mstch::array fields;
   for (auto&& field : struct_type->fields()) {
     auto explicit_value = map_entries[field.name()];
-    fields.emplace_back(std::make_shared<mstch_rust_struct_field>(
-        &field, explicit_value, depth_ + 1, context_, pos_, options_));
+    fields.emplace_back(
+        std::make_shared<mstch_rust_struct_field>(
+            &field, explicit_value, depth_ + 1, context_, pos_, options_));
   }
   return fields;
 }
@@ -2444,25 +2450,28 @@ mstch::node rust_mstch_service::rust_all_exceptions() {
 
   for (const auto& fun : service_->functions()) {
     for (const t_field& fld : get_elems(fun.exceptions())) {
-      source_map[&fld.type().deref()].push_back(exception_source{
-          .source_enum = exception_source_enum::FUNCTION,
-          .function = &fun,
-          .field = &fld});
+      source_map[&fld.type().deref()].push_back(
+          exception_source{
+              .source_enum = exception_source_enum::FUNCTION,
+              .function = &fun,
+              .field = &fld});
     }
     if (fun.stream()) {
       for (const t_field& fld : get_elems(fun.stream()->exceptions())) {
-        source_map[&fld.type().deref()].push_back(exception_source{
-            .source_enum = exception_source_enum::STREAM,
-            .function = &fun,
-            .field = &fld});
+        source_map[&fld.type().deref()].push_back(
+            exception_source{
+                .source_enum = exception_source_enum::STREAM,
+                .function = &fun,
+                .field = &fld});
       }
     }
     if (fun.sink()) {
       for (const t_field& fld : get_elems(fun.sink()->sink_exceptions())) {
-        source_map[&fld.type().deref()].push_back(exception_source{
-            .source_enum = exception_source_enum::SINK,
-            .function = &fun,
-            .field = &fld});
+        source_map[&fld.type().deref()].push_back(
+            exception_source{
+                .source_enum = exception_source_enum::SINK,
+                .function = &fun,
+                .field = &fld});
       }
     }
   }
@@ -2570,22 +2579,25 @@ void t_mstch_rust_generator::generate_program() {
     boost::split(pieces, namespace_rust, boost::is_any_of("."));
     if (options_.multifile_mode) {
       if (pieces.size() > 2) {
-        throw std::runtime_error(fmt::format(
-            "`namespace rust {}`: namespace for multi-file Thrift library must have 1 piece, or 2 pieces separated by '.'",
-            namespace_rust));
+        throw std::runtime_error(
+            fmt::format(
+                "`namespace rust {}`: namespace for multi-file Thrift library must have 1 piece, or 2 pieces separated by '.'",
+                namespace_rust));
       }
     } else {
       if (pieces.size() != 1) {
-        throw std::runtime_error(fmt::format(
-            "`namespace rust {}`: namespace for single-file Thrift library must not contain '.'",
-            namespace_rust));
+        throw std::runtime_error(
+            fmt::format(
+                "`namespace rust {}`: namespace for single-file Thrift library must not contain '.'",
+                namespace_rust));
       }
     }
     if (crate_name_option && pieces[0] != *crate_name_option) {
-      throw std::runtime_error(fmt::format(
-          R"(`namespace rust` disagrees with rust_crate_name option: "{}" vs "{}")",
-          pieces[0],
-          *crate_name_option));
+      throw std::runtime_error(
+          fmt::format(
+              R"(`namespace rust` disagrees with rust_crate_name option: "{}" vs "{}")",
+              pieces[0],
+              *crate_name_option));
     }
   } else if (crate_name_option) {
     namespace_rust = *crate_name_option;
@@ -2733,11 +2745,12 @@ bool validate_program_annotations(sema_context& ctx, const t_program& program) {
 
 void t_mstch_rust_generator::fill_validator_visitors(
     ast_validator& validator) const {
-  validator.add_structured_definition_visitor(std::bind(
-      validate_struct_annotations,
-      std::placeholders::_1,
-      std::placeholders::_2,
-      options_));
+  validator.add_structured_definition_visitor(
+      std::bind(
+          validate_struct_annotations,
+          std::placeholders::_1,
+          std::placeholders::_2,
+          options_));
   validator.add_program_visitor(validate_program_annotations);
 }
 

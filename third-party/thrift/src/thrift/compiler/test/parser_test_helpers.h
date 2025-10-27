@@ -43,8 +43,9 @@ std::unique_ptr<t_function> create_fake_function(
 
   std::size_t index = 0;
   for (auto& arg : signature::args_types()) {
-    args->append(std::make_unique<t_field>(
-        arg.release(), fmt::format("arg_{}", index++)));
+    args->append(
+        std::make_unique<t_field>(
+            arg.release(), fmt::format("arg_{}", index++)));
   }
 
   return std::make_unique<t_function>(

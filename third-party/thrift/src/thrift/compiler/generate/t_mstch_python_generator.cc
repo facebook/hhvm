@@ -288,9 +288,10 @@ int field_idl_type(const t_field& field) {
         }
 
         // AST types which are not valid to be a field type - e.g. service
-        throw std::runtime_error(fmt::format(
-            "Mapping Error: Failed to map type '{}' to 'BaseType'",
-            true_type->get_full_name()));
+        throw std::runtime_error(
+            fmt::format(
+                "Mapping Error: Failed to map type '{}' to 'BaseType'",
+                true_type->get_full_name()));
       },
       field.type()->get_true_type());
 
@@ -356,13 +357,14 @@ class python_mstch_program : public mstch_program {
         });
     mstch::array a;
     for (const auto& it : namespaces) {
-      a.emplace_back(mstch::map{
-          {"included_module_path", it->ns},
-          {"included_module_mangle", it->ns_mangle},
-          {"has_services?", it->has_services},
-          {"has_types?", it->has_types},
-          {"is_patch?", it->is_patch},
-          {"needed_by_patch?", it->needed_by_patch}});
+      a.emplace_back(
+          mstch::map{
+              {"included_module_path", it->ns},
+              {"included_module_mangle", it->ns_mangle},
+              {"has_services?", it->has_services},
+              {"has_types?", it->has_types},
+              {"is_patch?", it->is_patch},
+              {"needed_by_patch?", it->needed_by_patch}});
     }
     return a;
   }
@@ -805,16 +807,17 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
   whisker::map::raw globals() const override {
     assert(python_context_ != nullptr);
     whisker::map::raw globals = t_mstch_generator::globals();
-    globals["python"] =
-        whisker::object(whisker::native_handle<python_generator_context>(
+    globals["python"] = whisker::object(
+        whisker::native_handle<python_generator_context>(
             python_context_, make_prototype_for_context()));
     globals["py_string_literal"] = whisker::dsl::make_function(
         "py_string_literal",
         [](whisker::dsl::function::context ctx) -> whisker::object {
           ctx.declare_named_arguments({});
           ctx.declare_arity(1);
-          return whisker::make::string(python::to_python_string_literal(
-              ctx.argument<whisker::string>(0)));
+          return whisker::make::string(
+              python::to_python_string_literal(
+                  ctx.argument<whisker::string>(0)));
         });
     return globals;
   }
@@ -826,8 +829,9 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
 
     def.property("py3_enum_value_name", [](const t_const_value& self) {
       return self.is_enum() && self.get_enum_value() != nullptr
-          ? whisker::make::string(python::get_py3_name_class_scope(
-                *self.get_enum_value(), self.get_enum()->name()))
+          ? whisker::make::string(
+                python::get_py3_name_class_scope(
+                    *self.get_enum_value(), self.get_enum()->name()))
           : whisker::make::null;
     });
     def.property("unicode_value", [](const t_const_value& self) {

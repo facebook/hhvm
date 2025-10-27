@@ -55,8 +55,9 @@ class Operation {
 #ifdef STREAM_PERF_TEST
         download_(std::make_unique<Download<AsyncClient>>(stats)),
         upload_(std::make_unique<Upload<AsyncClient>>(stats, FLAGS_chunk_size)),
-        stream_(std::make_unique<StreamDownload<AsyncClient>>(
-            stats, FLAGS_chunk_size)),
+        stream_(
+            std::make_unique<StreamDownload<AsyncClient>>(
+                stats, FLAGS_chunk_size)),
 #endif
         semifuture_sum_(std::make_unique<SemiFutureSum<AsyncClient>>(stats)),
         co_sum_(std::make_unique<CoSum<AsyncClient>>(stats)) {

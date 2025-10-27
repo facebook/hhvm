@@ -45,10 +45,12 @@ std::unique_ptr<folly::IOThreadPoolExecutorBase> createProxyThreadsExecutor(
     return std::make_unique<folly::MuxIOThreadPoolExecutor>(
         numProxies,
         folly::MuxIOThreadPoolExecutor::Options{}
-            .setWakeUpInterval(std::chrono::microseconds{
-                opts.mux_io_thread_pool_wake_up_interval_us})
-            .setIdleSpinMax(std::chrono::microseconds{
-                opts.mux_io_thread_pool_idle_spin_max_us}),
+            .setWakeUpInterval(
+                std::chrono::microseconds{
+                    opts.mux_io_thread_pool_wake_up_interval_us})
+            .setIdleSpinMax(
+                std::chrono::microseconds{
+                    opts.mux_io_thread_pool_idle_spin_max_us}),
         std::move(threadFactory));
   } else {
     return std::make_unique<folly::IOThreadPoolExecutor>(

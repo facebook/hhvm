@@ -98,9 +98,10 @@ const char* const kSimpleSRRoute =
 struct TestSetup {
  public:
   TestSetup()
-      : router_(CarbonRouterInstance<McrouterRouterInfo>::init(
-            "test_get_route",
-            getOpts())),
+      : router_(
+            CarbonRouterInstance<McrouterRouterInfo>::init(
+                "test_get_route",
+                getOpts())),
         poolFactory_(
             folly::dynamic::object(),
             router_->configApi(),

@@ -200,10 +200,11 @@ static json_ref getDebugSubscriptionInfo(Root* root) {
           char timebuf[64];
           last_responses.push_back(json_object({
               {"written_time",
-               typed_string_to_json(Log::timeString(
-                   timebuf,
-                   std::size(timebuf),
-                   folly::to<timeval>(response.written)))},
+               typed_string_to_json(
+                   Log::timeString(
+                       timebuf,
+                       std::size(timebuf),
+                       folly::to<timeval>(response.written)))},
               {"response", response.response},
           }));
         }

@@ -445,14 +445,15 @@ class ConnectionPool
       const std::string& user,
       const std::string& password,
       const std::string& special_tag = "") {
-    return beginConnection(std::make_shared<const MysqlConnectionKey>(
-        host,
-        port,
-        database_name,
-        user,
-        password,
-        special_tag,
-        poolPerMysqlInstance()));
+    return beginConnection(
+        std::make_shared<const MysqlConnectionKey>(
+            host,
+            port,
+            database_name,
+            user,
+            password,
+            special_tag,
+            poolPerMysqlInstance()));
   }
 
   std::shared_ptr<ConnectOperation> beginConnection(

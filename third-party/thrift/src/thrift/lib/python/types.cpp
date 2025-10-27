@@ -1356,10 +1356,11 @@ void resetFieldToStandardDefault(
     PyObject* structList, const detail::StructInfo& structInfo, int index) {
   ensureImportOrThrow();
   if (structList == nullptr) {
-    throw std::runtime_error(fmt::format(
-        "Received null list while resetting struct:`{}`, field-index:'{}'",
-        structInfo.name,
-        index));
+    throw std::runtime_error(
+        fmt::format(
+            "Received null list while resetting struct:`{}`, field-index:'{}'",
+            structInfo.name,
+            index));
   }
 
   DCHECK(PyList_Check(structList));

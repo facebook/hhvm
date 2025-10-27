@@ -137,9 +137,10 @@ std::unique_ptr<folly::IOBuf> ClientMcParser<Callback>::decompress(
       ? compressionCodecMap_->get(headerInfo.usedCodecId)
       : nullptr;
   if (!codec) {
-    throw std::runtime_error(fmt::format(
-        "Failed to get compression codec id {}. Reply is likely corrupted!",
-        headerInfo.usedCodecId));
+    throw std::runtime_error(
+        fmt::format(
+            "Failed to get compression codec id {}. Reply is likely corrupted!",
+            headerInfo.usedCodecId));
   }
 
   auto buf = buffer.data() + headerInfo.headerSize;
@@ -178,9 +179,10 @@ bool ClientMcParser<Callback>::caretMessageReady(
 template <class Callback>
 void ClientMcParser<Callback>::handleAscii(folly::IOBuf& readBuffer) {
   if (FOLLY_UNLIKELY(parser_.protocol() != mc_ascii_protocol)) {
-    std::string reason(fmt::format(
-        "Expected {} protocol, but received ASCII!",
-        mc_protocol_to_string(parser_.protocol())));
+    std::string reason(
+        fmt::format(
+            "Expected {} protocol, but received ASCII!",
+            mc_protocol_to_string(parser_.protocol())));
     callback_.parseError(carbon::Result::LOCAL_ERROR, reason);
     return;
   }
@@ -190,12 +192,14 @@ void ClientMcParser<Callback>::handleAscii(folly::IOBuf& readBuffer) {
       // Ask the client to initialize parser.
       if (!callback_.nextReplyAvailable(0 /* reqId */)) {
         auto data = reinterpret_cast<const char*>(readBuffer.data());
-        std::string reason(fmt::format(
-            "Received unexpected data from remote endpoint: '{}'!",
-            folly::cEscape<std::string>(folly::StringPiece(
-                data,
-                data +
-                    std::min(readBuffer.length(), static_cast<size_t>(128))))));
+        std::string reason(
+            fmt::format(
+                "Received unexpected data from remote endpoint: '{}'!",
+                folly::cEscape<std::string>(folly::StringPiece(
+                    data,
+                    data +
+                        std::min(
+                            readBuffer.length(), static_cast<size_t>(128))))));
         callback_.parseError(carbon::Result::LOCAL_ERROR, reason);
         return;
       }

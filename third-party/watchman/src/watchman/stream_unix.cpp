@@ -366,7 +366,7 @@ std::unique_ptr<watchman_stream> w_stm_fdopen(FileDescriptor&& fd) {
 ResultErrno<std::unique_ptr<watchman_stream>> w_stm_connect_unix(
     const char* path,
     int timeoutms) {
-  struct sockaddr_un un {};
+  struct sockaddr_un un{};
   int max_attempts = timeoutms / 10;
   int attempts = 0;
 

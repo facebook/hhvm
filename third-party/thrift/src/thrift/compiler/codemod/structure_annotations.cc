@@ -203,8 +203,10 @@ class structure_annotations {
           std::set<std::string>(
               {"HIGH_IMPORTANT", "HIGH", "IMPORTANT", "NORMAL", "BEST_EFFORT"})
               .contains(data.value)) {
-        to_add.insert(fmt::format(
-            "@thrift.Priority{{level = thrift.RpcPriority.{}}}", data.value));
+        to_add.insert(
+            fmt::format(
+                "@thrift.Priority{{level = thrift.RpcPriority.{}}}",
+                data.value));
         fm_.add_include("thrift/annotation/thrift.thrift");
       }
     } else if (name == "serial") {
@@ -256,8 +258,9 @@ class structure_annotations {
         } else {
           return;
         }
-        to_add.insert(fmt::format(
-            "@cpp.EnumType{{type = cpp.EnumUnderlyingType.{}}}", type));
+        to_add.insert(
+            fmt::format(
+                "@cpp.EnumType{{type = cpp.EnumUnderlyingType.{}}}", type));
         fm_.add_include("thrift/annotation/cpp.thrift");
       }
     } else if (
@@ -315,11 +318,12 @@ class structure_annotations {
                isspace(*(pos - trailing_spaces - 1));
                ++trailing_spaces) {
           }
-          attrs.push_back(fmt::format(
-              "{}{}{}",
-              delim,
-              std::string_view(start, pos - start - trailing_spaces),
-              delim));
+          attrs.push_back(
+              fmt::format(
+                  "{}{}{}",
+                  delim,
+                  std::string_view(start, pos - start - trailing_spaces),
+                  delim));
           start = pos + 1;
           for (; start != end && isspace(*start); ++start) {
           }
@@ -327,8 +331,10 @@ class structure_annotations {
       }
       to_remove.emplace_back(name, data);
       if (!node.has_structured_annotation(kHackAttributeUri)) {
-        to_add.insert(fmt::format(
-            "@hack.Attributes{{attributes = [{}]}}", fmt::join(attrs, ", ")));
+        to_add.insert(
+            fmt::format(
+                "@hack.Attributes{{attributes = [{}]}}",
+                fmt::join(attrs, ", ")));
         fm_.add_include("thrift/annotation/hack.thrift");
       }
     } else if (name == "hack.name") {
@@ -390,8 +396,9 @@ class structure_annotations {
       }
     } else if (name == "java.swift.annotations") {
       to_remove.emplace_back(name, data);
-      to_add.insert(fmt::format(
-          "@java.Annotation{{java_annotation = \"{}\"}}", data.value));
+      to_add.insert(
+          fmt::format(
+              "@java.Annotation{{java_annotation = \"{}\"}}", data.value));
       fm_.add_include("thrift/annotation/java.thrift");
     } else if (name == "swift.recursive_reference") {
       to_remove.emplace_back(name, data);
@@ -421,10 +428,11 @@ class structure_annotations {
       fm_.add_include("thrift/annotation/erlang.thrift");
     } else if (name == "erl.struct_repr") {
       to_remove.emplace_back(name, data);
-      to_add.insert(fmt::format(
-          "@erlang.StructRepr{{repr = {}}}",
-          data.value == "record" ? "erlang.StructReprType.RECORD"
-                                 : "erlang.StructReprType.MAP"));
+      to_add.insert(
+          fmt::format(
+              "@erlang.StructRepr{{repr = {}}}",
+              data.value == "record" ? "erlang.StructReprType.RECORD"
+                                     : "erlang.StructReprType.MAP"));
       fm_.add_include("thrift/annotation/erlang.thrift");
     } else if (name == "erl.default_value") {
       to_remove.emplace_back(name, data);
@@ -433,11 +441,13 @@ class structure_annotations {
       fm_.add_include("thrift/annotation/erlang.thrift");
     } else if (name == "iq.node_type") {
       to_remove.emplace_back(name, data);
-      to_add.insert(fmt::format(
-          "@erlang.Iq{{node_type = {}}}",
-          data.value == "xmlcdata"      ? "erlang.IqNodeType.XMLCDATA"
-              : data.value == "xmlnode" ? "erlang.IqNodeType.XMLNODE"
-                                        : "erlang.IqNodeType.XMLATTRIBUTE"));
+      to_add.insert(
+          fmt::format(
+              "@erlang.Iq{{node_type = {}}}",
+              data.value == "xmlcdata" ? "erlang.IqNodeType.XMLCDATA"
+                  : data.value == "xmlnode"
+                  ? "erlang.IqNodeType.XMLNODE"
+                  : "erlang.IqNodeType.XMLATTRIBUTE"));
       fm_.add_include("thrift/annotation/erlang.thrift");
     }
 
@@ -586,9 +596,10 @@ class structure_annotations {
           fmt::format(R"("{}": {})", name, quote(value)));
     }
 
-    to_add.insert(fmt::format(
-        "@thrift.DeprecatedUnvalidatedAnnotations{{items = {{{}}}}}",
-        fmt::join(annotations_for_catch_all_strs, ", ")));
+    to_add.insert(
+        fmt::format(
+            "@thrift.DeprecatedUnvalidatedAnnotations{{items = {{{}}}}}",
+            fmt::join(annotations_for_catch_all_strs, ", ")));
     fm_.add_include("thrift/annotation/thrift.thrift");
   }
 

@@ -240,8 +240,9 @@ class mstch_base : public mstch::object {
    public:
     /* implicit */ field_range(const std::vector<t_field*>& fields) noexcept
         : begin_(const_cast<const t_field* const*>(fields.data())),
-          end_(const_cast<const t_field* const*>(
-              fields.data() + fields.size())) {}
+          end_(
+              const_cast<const t_field* const*>(
+                  fields.data() + fields.size())) {}
     /* implicit */ field_range(
         const std::vector<const t_field*>& fields) noexcept
         : begin_(fields.data()), end_(fields.data() + fields.size()) {}
@@ -306,8 +307,9 @@ class mstch_base : public mstch::object {
 
   template <typename T>
   whisker::object make_self(const T& node) {
-    return whisker::object(whisker::native_handle<T>(
-        whisker::manage_as_static(node), context_.prototypes->of<T>()));
+    return whisker::object(
+        whisker::native_handle<T>(
+            whisker::manage_as_static(node), context_.prototypes->of<T>()));
   }
 
   template <typename Container, typename Factory, typename... Args>

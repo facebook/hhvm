@@ -101,8 +101,10 @@ ThriftRocketServerHandler::ThriftRocketServerHandler(
           worker_->getServer()->getServiceInterceptors().size()),
       setupFrameHandlers_(handlers),
       setupFrameInterceptors_(interceptors),
-      version_(static_cast<int32_t>(std::min(
-          kRocketServerMaxVersion, THRIFT_FLAG(rocket_server_max_version)))),
+      version_(
+          static_cast<int32_t>(std::min(
+              kRocketServerMaxVersion,
+              THRIFT_FLAG(rocket_server_max_version)))),
       maxResponseWriteTime_(worker_->getServer()
                                 ->getThriftServerConfig()
                                 .getMaxResponseWriteTime()
@@ -123,9 +125,10 @@ ThriftRocketServerHandler::~ThriftRocketServerHandler() {
   }
   // Ensure each connAccepted() call has a matching connClosed()
   if (auto* observer = worker_->getServer()->getObserver()) {
-    observer->connClosed(server::TServerObserver::ConnectionInfo(
-        reinterpret_cast<uint64_t>(transport_),
-        connContext_.getSecurityProtocol()));
+    observer->connClosed(
+        server::TServerObserver::ConnectionInfo(
+            reinterpret_cast<uint64_t>(transport_),
+            connContext_.getSecurityProtocol()));
   }
 }
 
@@ -153,8 +156,10 @@ ThriftRocketServerHandler::shouldSample(const transport::THeader& header) {
 void ThriftRocketServerHandler::handleSetupFrame(
     SetupFrame&& frame, IRocketServerConnection& connection) {
   if (!frame.payload().hasNonemptyMetadata()) {
-    return connection.close(folly::make_exception_wrapper<RocketException>(
-        ErrorCode::INVALID_SETUP, "Missing required metadata in SETUP frame"));
+    return connection.close(
+        folly::make_exception_wrapper<RocketException>(
+            ErrorCode::INVALID_SETUP,
+            "Missing required metadata in SETUP frame"));
   }
 
   folly::io::Cursor cursor(frame.payload().buffer());
@@ -168,8 +173,9 @@ void ThriftRocketServerHandler::handleSetupFrame(
         protocolKey != kLegacyRocketProtocolKey) &&
        protocolKey != RpcMetadata_constants::kRocketProtocolKey())) {
     if (!frame.rocketMimeTypes()) {
-      return connection.close(folly::make_exception_wrapper<RocketException>(
-          ErrorCode::INVALID_SETUP, "Incompatible Thrift version"));
+      return connection.close(
+          folly::make_exception_wrapper<RocketException>(
+              ErrorCode::INVALID_SETUP, "Incompatible Thrift version"));
     }
     // If Rocket MIME types are used the protocol key is optional.
     if (success) {
@@ -182,9 +188,10 @@ void ThriftRocketServerHandler::handleSetupFrame(
     if (PayloadSerializer::getInstance()->unpack(
             meta, cursor, frame.encodeMetadataUsingBinary()) !=
         frame.payload().metadataSize()) {
-      return connection.close(folly::make_exception_wrapper<RocketException>(
-          ErrorCode::INVALID_SETUP,
-          "Error deserializing SETUP payload: underflow"));
+      return connection.close(
+          folly::make_exception_wrapper<RocketException>(
+              ErrorCode::INVALID_SETUP,
+              "Error deserializing SETUP payload: underflow"));
     }
 
     connContext_.readSetupMetadata(meta);
@@ -198,19 +205,22 @@ void ThriftRocketServerHandler::handleSetupFrame(
     });
 
     if (minVersion > version_) {
-      return connection.close(folly::make_exception_wrapper<RocketException>(
-          ErrorCode::INVALID_SETUP, "Incompatible Rocket version"));
+      return connection.close(
+          folly::make_exception_wrapper<RocketException>(
+              ErrorCode::INVALID_SETUP, "Incompatible Rocket version"));
     }
 
     if (maxVersion < kRocketServerMinVersion) {
-      return connection.close(folly::make_exception_wrapper<RocketException>(
-          ErrorCode::INVALID_SETUP, "Incompatible Rocket version"));
+      return connection.close(
+          folly::make_exception_wrapper<RocketException>(
+              ErrorCode::INVALID_SETUP, "Incompatible Rocket version"));
     }
     version_ = std::min(version_, maxVersion);
 
     if (version_ >= 9 && !frame.rocketMimeTypes()) {
-      return connection.close(folly::make_exception_wrapper<RocketException>(
-          ErrorCode::INVALID_SETUP, "Unsupported MIME types"));
+      return connection.close(
+          folly::make_exception_wrapper<RocketException>(
+              ErrorCode::INVALID_SETUP, "Unsupported MIME types"));
     }
 
     SCOPE_EXIT {
@@ -226,8 +236,9 @@ void ThriftRocketServerHandler::handleSetupFrame(
     for (const auto& i : setupFrameInterceptors_) {
       auto frameAccepted = i->acceptSetup(meta, connContext_);
       if (frameAccepted.hasError()) {
-        return connection.close(folly::make_exception_wrapper<RocketException>(
-            ErrorCode::INVALID_SETUP, frameAccepted.error().what()));
+        return connection.close(
+            folly::make_exception_wrapper<RocketException>(
+                ErrorCode::INVALID_SETUP, frameAccepted.error().what()));
       }
     }
 
@@ -306,11 +317,12 @@ void ThriftRocketServerHandler::handleSetupFrame(
     connection.sendMetadataPush(
         PayloadSerializer::getInstance()->packCompact(serverMeta));
   } catch (const std::exception& e) {
-    return connection.close(folly::make_exception_wrapper<RocketException>(
-        ErrorCode::INVALID_SETUP,
-        fmt::format(
-            "Error deserializing SETUP payload: {}",
-            folly::exceptionStr(e).toStdString())));
+    return connection.close(
+        folly::make_exception_wrapper<RocketException>(
+            ErrorCode::INVALID_SETUP,
+            fmt::format(
+                "Error deserializing SETUP payload: {}",
+                folly::exceptionStr(e).toStdString())));
   }
 
   invokeServiceInterceptorsOnConnection(connection);
@@ -329,9 +341,10 @@ ThriftRocketServerHandler::handleSetupFrameCustomCompression(
   auto factory =
       CustomCompressorRegistry::get(*customSetupRequest.compressorName());
   if (!factory) {
-    return folly::makeUnexpected(fmt::format(
-        "Custom compressor {} is not supported on server.",
-        *customSetupRequest.compressorName()));
+    return folly::makeUnexpected(
+        fmt::format(
+            "Custom compressor {} is not supported on server.",
+            *customSetupRequest.compressorName()));
   }
 
   std::optional<CustomCompressionSetupResponse> response;
@@ -339,9 +352,10 @@ ThriftRocketServerHandler::handleSetupFrameCustomCompression(
     response =
         factory->createCustomCompressorNegotiationResponse(customSetupRequest);
   } catch (const std::exception& ex) {
-    return folly::makeUnexpected(fmt::format(
-        "Failed to make create negotiation response on server due to: {}",
-        ex.what()));
+    return folly::makeUnexpected(
+        fmt::format(
+            "Failed to make create negotiation response on server due to: {}",
+            ex.what()));
   }
 
   if (!response) {
@@ -356,14 +370,16 @@ ThriftRocketServerHandler::handleSetupFrameCustomCompression(
         *response,
         CustomCompressorFactory::CompressorLocation::SERVER);
   } catch (const std::exception& ex) {
-    return folly::makeUnexpected(fmt::format(
-        "Failed to make create custom compressor on server due to: {}",
-        ex.what()));
+    return folly::makeUnexpected(
+        fmt::format(
+            "Failed to make create custom compressor on server due to: {}",
+            ex.what()));
   }
 
   if (!compressor) {
-    return folly::makeUnexpected(fmt::format(
-        "Failed to make create custom compressor on server due to unknown error."));
+    return folly::makeUnexpected(
+        fmt::format(
+            "Failed to make create custom compressor on server due to unknown error."));
   }
 
   connection.applyCustomCompression(compressor);
@@ -1072,8 +1088,9 @@ void ThriftRocketServerHandler::invokeServiceInterceptorsOnConnection(
           serviceInterceptors[exceptions[i].first]->getQualifiedName().get(),
           folly::exceptionStr(exceptions[i].second));
     }
-    return connection.close(folly::make_exception_wrapper<RocketException>(
-        ErrorCode::REJECTED_SETUP, std::move(message)));
+    return connection.close(
+        folly::make_exception_wrapper<RocketException>(
+            ErrorCode::REJECTED_SETUP, std::move(message)));
   }
 #endif // FOLLY_HAS_COROUTINES
 }

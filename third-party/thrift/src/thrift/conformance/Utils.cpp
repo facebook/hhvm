@@ -137,8 +137,9 @@ std::vector<TestSuite> getSuites() {
       ',', getEnvOr("THRIFT_CONFORMANCE_TEST_SUITE_GENS", ""), suiteGens);
   for (auto cmd : suiteGens) {
     if (!cmd.empty()) {
-      result.emplace_back(BinarySerializer::deserialize<TestSuite>(
-          readFromCmd({std::move(cmd)})));
+      result.emplace_back(
+          BinarySerializer::deserialize<TestSuite>(
+              readFromCmd({std::move(cmd)})));
     }
   }
   if (result.empty()) {

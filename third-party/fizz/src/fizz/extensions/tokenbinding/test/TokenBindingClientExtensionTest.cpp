@@ -63,10 +63,12 @@ TEST_F(TokenBindingClientExtensionTest, TestServerBadKeyParam) {
   setUpServerHelloExtensions(
       TokenBindingProtocolVersion::token_binding_1_0,
       TokenBindingKeyParameters::rsa2048_pss);
-  context_->setSupportedVersions(std::vector<TokenBindingProtocolVersion>{
-      TokenBindingProtocolVersion::token_binding_1_0});
-  context_->setSupportedKeyParameters(std::vector<TokenBindingKeyParameters>{
-      TokenBindingKeyParameters::rsa2048_pkcs1_5});
+  context_->setSupportedVersions(
+      std::vector<TokenBindingProtocolVersion>{
+          TokenBindingProtocolVersion::token_binding_1_0});
+  context_->setSupportedKeyParameters(
+      std::vector<TokenBindingKeyParameters>{
+          TokenBindingKeyParameters::rsa2048_pkcs1_5});
 
   EXPECT_THROW(
       extensions_->onEncryptedExtensions(serverExtensions_), FizzException);

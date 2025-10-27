@@ -157,8 +157,9 @@ type::Schema t_ast_generator::gen_schema(
       memcpy(&key, hash.data(), sizeof(key));
       if (ast.valuesMap()->count(key)) {
         if (ast.valuesMap()->at(key) != value) {
-          throw std::runtime_error(fmt::format(
-              "Hash collision on value: {}", debugStringViaEncode(value)));
+          throw std::runtime_error(
+              fmt::format(
+                  "Hash collision on value: {}", debugStringViaEncode(value)));
         }
       } else {
         ast.valuesMap()->insert({key, std::move(value)});
@@ -286,8 +287,9 @@ type::Schema t_ast_generator::gen_schema(
 
       for (const auto& [lang, incs] : program.language_includes()) {
         for (const auto& inc : incs) {
-          info.languageIncludes()[lang].push_back(static_cast<type::ValueId>(
-              intern_value(std::make_unique<t_const_value>(inc))));
+          info.languageIncludes()[lang].push_back(
+              static_cast<type::ValueId>(
+                  intern_value(std::make_unique<t_const_value>(inc))));
         }
       }
 
@@ -323,9 +325,10 @@ type::Schema t_ast_generator::gen_schema(
       set_child_source_ranges(node, def);
     }
     if (ast.definitionsMap()->count(key)) {
-      throw std::runtime_error(fmt::format(
-          "Duplicate definition key: {}",
-          node.uri().empty() ? node.name() : node.uri()));
+      throw std::runtime_error(
+          fmt::format(
+              "Duplicate definition key: {}",
+              node.uri().empty() ? node.name() : node.uri()));
     }
     ast.definitionsMap()[std::move(key)] = definitions.back();
   };

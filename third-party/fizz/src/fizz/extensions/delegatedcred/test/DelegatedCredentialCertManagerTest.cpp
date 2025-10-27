@@ -163,8 +163,10 @@ TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestSigSchemesServerPref) {
       std::string("www.test.com"),
       {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
       {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
-      getChlo(TypeParam::Extensions(
-          {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512})));
+      getChlo(
+          TypeParam::Extensions(
+              {SignatureScheme::rsa_pss_sha256,
+               SignatureScheme::rsa_pss_sha512})));
   EXPECT_EQ(res->cert, cert);
   EXPECT_EQ(res->scheme, SignatureScheme::rsa_pss_sha256);
 
@@ -172,8 +174,10 @@ TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestSigSchemesServerPref) {
       std::string("www.test.com"),
       {SignatureScheme::rsa_pss_sha512, SignatureScheme::rsa_pss_sha256},
       {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
-      getChlo(TypeParam::Extensions(
-          {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512})));
+      getChlo(
+          TypeParam::Extensions(
+              {SignatureScheme::rsa_pss_sha256,
+               SignatureScheme::rsa_pss_sha512})));
   EXPECT_EQ(res->cert, cert);
   EXPECT_EQ(res->scheme, SignatureScheme::rsa_pss_sha512);
 }
@@ -325,13 +329,14 @@ TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestWildcard) {
       getChlo(TypeParam::Extensions()));
   EXPECT_EQ(res->cert, cert);
 
-  EXPECT_FALSE(DelegatedCredentialCertManagerTest::manager_
-                   .getCert(
-                       std::string("foo.bar.test.com"),
-                       kRsa,
-                       kRsa,
-                       getChlo(TypeParam::Extensions()))
-                   .hasValue());
+  EXPECT_FALSE(
+      DelegatedCredentialCertManagerTest::manager_
+          .getCert(
+              std::string("foo.bar.test.com"),
+              kRsa,
+              kRsa,
+              getChlo(TypeParam::Extensions()))
+          .hasValue());
 }
 
 TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestExactMatch) {
@@ -380,20 +385,22 @@ TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestNoWildcard) {
         DelegatedCredentialCertManagerTest::manager_.hasDelegatedCredential());
   }
 
-  EXPECT_FALSE(DelegatedCredentialCertManagerTest::manager_
-                   .getCert(
-                       std::string("blah.test.com"),
-                       kRsa,
-                       kRsa,
-                       getChlo(TypeParam::Extensions()))
-                   .hasValue());
-  EXPECT_FALSE(DelegatedCredentialCertManagerTest::manager_
-                   .getCert(
-                       std::string("test.com"),
-                       kRsa,
-                       kRsa,
-                       getChlo(TypeParam::Extensions()))
-                   .hasValue());
+  EXPECT_FALSE(
+      DelegatedCredentialCertManagerTest::manager_
+          .getCert(
+              std::string("blah.test.com"),
+              kRsa,
+              kRsa,
+              getChlo(TypeParam::Extensions()))
+          .hasValue());
+  EXPECT_FALSE(
+      DelegatedCredentialCertManagerTest::manager_
+          .getCert(
+              std::string("test.com"),
+              kRsa,
+              kRsa,
+              getChlo(TypeParam::Extensions()))
+          .hasValue());
 }
 
 TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestGetByIdentity) {

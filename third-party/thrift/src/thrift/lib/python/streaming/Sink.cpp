@@ -92,7 +92,7 @@ makeSinkCallback(PyObject* sink_callback, folly::Executor* exec) {
       [sink_callback, exec, sink_gen = IOBufSinkGenerator(exec, sink_callback)](
           folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&>
               agen) mutable
-      -> folly::coro::Task<std::unique_ptr<folly::IOBuf>> {
+          -> folly::coro::Task<std::unique_ptr<folly::IOBuf>> {
         auto [promise, future] =
             folly::makePromiseContract<std::unique_ptr<folly::IOBuf>>();
         sink_gen.attach(std::move(agen));

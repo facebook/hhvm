@@ -47,11 +47,12 @@ std::vector<t_function*> lifecycleFunctions() {
 mstch::array create_string_array(const std::vector<std::string>& values) {
   mstch::array mstch_array;
   for (auto it = values.begin(); it != values.end(); ++it) {
-    mstch_array.emplace_back(mstch::map{
-        {"value", *it},
-        {"first?", it == values.begin()},
-        {"last?", std::next(it) == values.end()},
-    });
+    mstch_array.emplace_back(
+        mstch::map{
+            {"value", *it},
+            {"first?", it == values.begin()},
+            {"last?", std::next(it) == values.end()},
+        });
   }
 
   return mstch_array;
@@ -288,10 +289,11 @@ class py3_mstch_program : public mstch_program {
   mstch::node includeNamespaces() {
     mstch::array mstch_array;
     for (const auto& kvp : includeNamespaces_) {
-      mstch_array.emplace_back(mstch::map{
-          {"includeNamespace", create_string_array(kvp.second.ns)},
-          {"hasServices?", kvp.second.hasServices},
-          {"hasTypes?", kvp.second.hasTypes}});
+      mstch_array.emplace_back(
+          mstch::map{
+              {"includeNamespace", create_string_array(kvp.second.ns)},
+              {"hasServices?", kvp.second.hasServices},
+              {"hasTypes?", kvp.second.hasTypes}});
     }
     return mstch_array;
   }
@@ -478,8 +480,9 @@ class py3_mstch_service : public mstch_service {
     // Collect supported interactions
     for (const auto* function : get_functions()) {
       if (function->is_interaction_constructor()) {
-        supported_interactions_.insert(dynamic_cast<const t_interaction*>(
-            function->interaction().get_type()));
+        supported_interactions_.insert(
+            dynamic_cast<const t_interaction*>(
+                function->interaction().get_type()));
       }
     }
   }
@@ -1471,8 +1474,9 @@ class t_mstch_py3_generator : public t_mstch_generator {
         [](whisker::dsl::function::context ctx) -> whisker::object {
           ctx.declare_named_arguments({});
           ctx.declare_arity(1);
-          return whisker::make::string(python::to_python_string_literal(
-              ctx.argument<whisker::string>(0)));
+          return whisker::make::string(
+              python::to_python_string_literal(
+                  ctx.argument<whisker::string>(0)));
         });
     return globals;
   }

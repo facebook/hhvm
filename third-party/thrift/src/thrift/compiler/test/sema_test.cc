@@ -124,8 +124,9 @@ TEST_F(SemaTest, transitive) {
       std::make_unique<t_struct>(program, "TransitiveTerse");
   transitive_annot->add_structured_annotation(
       gen::thrift_annotation_builder::transitive(*program).make());
-  transitive_terse->add_structured_annotation(std::make_unique<t_const>(
-      program, *transitive_annot, "", std::make_unique<t_const_value>()));
+  transitive_terse->add_structured_annotation(
+      std::make_unique<t_const>(
+          program, *transitive_annot, "", std::make_unique<t_const_value>()));
   transitive_terse->add_structured_annotation(
       gen::thrift_annotation_builder::terse(*program).make());
   transitive_terse->add_structured_annotation(
@@ -133,8 +134,9 @@ TEST_F(SemaTest, transitive) {
 
   strct->append_field(std::move(terse_field));
   program->add_definition(std::move(strct));
-  program->add_structured_annotation(std::make_unique<t_const>(
-      program, *transitive_terse, "", std::make_unique<t_const_value>()));
+  program->add_structured_annotation(
+      std::make_unique<t_const>(
+          program, *transitive_terse, "", std::make_unique<t_const_value>()));
 
   EXPECT_EQ(terse_field_ptr->qualifier(), t_field_qualifier::none);
 

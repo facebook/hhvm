@@ -180,13 +180,14 @@ AsyncActions ServerStateMachine::processSocketData(
   } catch (...) {
     return detail::handleError(
         state,
-        ReportError(folly::make_exception_wrapper<FizzException>(
-            folly::to<std::string>(
-                "error decoding record in state ",
-                toString(state.state()),
-                ": ",
-                folly::exceptionStr(std::current_exception())),
-            AlertDescription::decode_error)),
+        ReportError(
+            folly::make_exception_wrapper<FizzException>(
+                folly::to<std::string>(
+                    "error decoding record in state ",
+                    toString(state.state()),
+                    ": ",
+                    folly::exceptionStr(std::current_exception())),
+                AlertDescription::decode_error)),
         AlertDescription::decode_error);
   }
 }
@@ -2156,7 +2157,7 @@ static SemiFuture<Optional<WriteToSocket>> generateTicket(
       std::move(ticketFuture),
       [&state, ticketAgeAdd, ticketNonce = std::move(ticketNonce)](
           Optional<std::pair<Buf, std::chrono::seconds>> ticket) mutable
-      -> Optional<WriteToSocket> {
+          -> Optional<WriteToSocket> {
         if (!ticket) {
           return folly::none;
         }

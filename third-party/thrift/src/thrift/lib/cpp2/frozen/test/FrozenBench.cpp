@@ -159,8 +159,7 @@ Map makeMap() {
 template <
     typename K,
     typename V,
-    template <typename, typename>
-    class ContainerType>
+    template <typename, typename> class ContainerType>
 auto convertToFixedSizeMap(const ContainerType<K, V>& map) {
   ContainerType<FixedSizeString<sizeof(K)>, FixedSizeString<sizeof(V)>> strMap;
   strMap.reserve(map.size());

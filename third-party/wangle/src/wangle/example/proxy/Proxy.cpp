@@ -158,8 +158,9 @@ int main(int argc, char** argv) {
   folly::Init init(&argc, &argv);
 
   ServerBootstrap<DefaultPipeline> server;
-  server.childPipeline(std::make_shared<ProxyFrontendPipelineFactory>(
-      SocketAddress(FLAGS_remote_host, FLAGS_remote_port)));
+  server.childPipeline(
+      std::make_shared<ProxyFrontendPipelineFactory>(
+          SocketAddress(FLAGS_remote_host, FLAGS_remote_port)));
   server.bind(FLAGS_port);
   server.waitForStop();
 

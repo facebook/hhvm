@@ -137,15 +137,17 @@ SessionTestHarness::NoopCallback SessionTestHarness::noopCb;
 SessionTestHarness::SessionTestHarness(
     const AsyncMcServerWorkerOptions& opts,
     McServerSession::StateCallback& cb)
-    : session_(McServerSession::create(
-          folly::AsyncTransportWrapper::UniquePtr(new MockAsyncSocket(*this)),
-          std::make_shared<
-              McServerOnRequestWrapper<MemcacheRequestHandler<OnRequest>>>(
-              OnRequest(*this)),
-          cb,
-          opts,
-          /* userCtxt */ nullptr,
-          /* queue */ nullptr)) {}
+    : session_(
+          McServerSession::create(
+              folly::AsyncTransportWrapper::UniquePtr(
+                  new MockAsyncSocket(*this)),
+              std::make_shared<
+                  McServerOnRequestWrapper<MemcacheRequestHandler<OnRequest>>>(
+                  OnRequest(*this)),
+              cb,
+              opts,
+              /* userCtxt */ nullptr,
+              /* queue */ nullptr)) {}
 
 void SessionTestHarness::inputPacket(folly::StringPiece p) {
   savedInputs_.push_back(p.str());

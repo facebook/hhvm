@@ -34,10 +34,11 @@ void FizzServer<ActionMoveVisitor, SM>::newTransportData() {
       VLOG(3) << "Attempting fallback due to V2 ClientHello";
       AttemptVersionFallback fallback;
       fallback.clientHello = this->transportReadBuf_.move();
-      return this->addProcessingActions(detail::actions(
-          MutateState(
-              [](State& newState) { newState.state() = StateEnum::Error; }),
-          std::move(fallback)));
+      return this->addProcessingActions(
+          detail::actions(
+              MutateState(
+                  [](State& newState) { newState.state() = StateEnum::Error; }),
+              std::move(fallback)));
     }
     checkV2Hello_ = false;
   }

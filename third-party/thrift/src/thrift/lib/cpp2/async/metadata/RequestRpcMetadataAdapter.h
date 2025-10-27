@@ -32,7 +32,7 @@ concept RequestRpcMetadataAdapter = requires(T t) {
   {
     t.name()
   } -> std::same_as<
-        std::optional<std::reference_wrapper<ManagedStringViewField>>>;
+      std::optional<std::reference_wrapper<ManagedStringViewField>>>;
   { t.kind() } -> std::same_as<std::optional<std::reference_wrapper<RpcKind>>>;
   {
     t.clientTimeoutMs()
@@ -75,7 +75,7 @@ concept RequestRpcMetadataAdapter = requires(T t) {
   {
     t.frameworkMetadata()
   } -> std::same_as<
-        std::optional<std::reference_wrapper<std::unique_ptr<folly::IOBuf>>>>;
+      std::optional<std::reference_wrapper<std::unique_ptr<folly::IOBuf>>>>;
   {
     t.fdMetadata()
   } -> std::same_as<std::optional<std::reference_wrapper<FdMetadata>>>;

@@ -38,8 +38,7 @@ struct nonesuch {
 template <
     typename Default,
     typename AlwaysVoid,
-    template <typename...>
-    typename Op,
+    template <typename...> typename Op,
     typename... Args>
 struct detector {
   using value_t = std::false_type;
@@ -47,8 +46,7 @@ struct detector {
 };
 template <
     typename Default,
-    template <typename...>
-    typename Op,
+    template <typename...> typename Op,
     typename... Args>
 struct detector<Default, std::void_t<Op<Args...>>, Op, Args...> {
   using value_t = std::true_type;
@@ -60,8 +58,7 @@ template <template <typename...> typename Op, typename... Args>
 using detected_t = typename detector<nonesuch, void, Op, Args...>::type;
 template <
     typename Default,
-    template <typename...>
-    typename Op,
+    template <typename...> typename Op,
     typename... Args>
 using detected_or = detector<Default, void, Op, Args...>;
 template <template <typename...> typename Detector, typename = void>

@@ -26,8 +26,9 @@ void run(Iterator begin, Iterator end) {
     sum += (*it)();
   }
   if (sum != n * (n - 1) / 2) {
-    throw std::runtime_error(folly::to<std::string>(
-        "Bad sum: ", sum, ", expected: ", n * (n + 1) / 2));
+    throw std::runtime_error(
+        folly::to<std::string>(
+            "Bad sum: ", sum, ", expected: ", n * (n + 1) / 2));
   }
   folly::doNotOptimizeAway(sum);
 }

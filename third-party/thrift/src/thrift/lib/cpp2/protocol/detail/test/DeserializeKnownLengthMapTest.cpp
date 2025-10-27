@@ -106,26 +106,24 @@ TEST_F(DeserializeKnownLengthMapTest, SortedUniqueConstuctCount) {
   EXPECT_EQ(map.size(), 1);
   EXPECT_EQ(
       TrackedKey::counts(),
-      (folly::test::Counts{
-          /* copyConstruct */ 0,
-          /* moveConstruct */ 0,
-          /* copyConvert */ 0,
-          /* moveConvert */ 0,
-          /* copyAssign */ 0,
-          /* moveAssign */ 0,
-          /* defaultConstruct */ 1,
-          /* destroyed */ 0}));
+      (folly::test::Counts{/* copyConstruct */ 0,
+                           /* moveConstruct */ 0,
+                           /* copyConvert */ 0,
+                           /* moveConvert */ 0,
+                           /* copyAssign */ 0,
+                           /* moveAssign */ 0,
+                           /* defaultConstruct */ 1,
+                           /* destroyed */ 0}));
   EXPECT_EQ(
       TrackedValue::counts(),
-      (folly::test::Counts{
-          /* copyConstruct */ 0,
-          /* moveConstruct */ 0,
-          /* copyConvert */ 0,
-          /* moveConvert */ 0,
-          /* copyAssign */ 0,
-          /* moveAssign */ 0,
-          /* defaultConstruct */ 1,
-          /* destroyed */ 0}));
+      (folly::test::Counts{/* copyConstruct */ 0,
+                           /* moveConstruct */ 0,
+                           /* copyConvert */ 0,
+                           /* moveConvert */ 0,
+                           /* copyAssign */ 0,
+                           /* moveAssign */ 0,
+                           /* defaultConstruct */ 1,
+                           /* destroyed */ 0}));
 }
 
 TEST_F(DeserializeKnownLengthMapTest, EmplaceHintConstuctCount) {
@@ -142,26 +140,24 @@ TEST_F(DeserializeKnownLengthMapTest, EmplaceHintConstuctCount) {
   EXPECT_EQ(map.size(), 1);
   EXPECT_EQ(
       TrackedKey::counts(),
-      (folly::test::Counts{
-          /* copyConstruct */ 0,
-          /* moveConstruct */ 1,
-          /* copyConvert */ 0,
-          /* moveConvert */ 0,
-          /* copyAssign */ 0,
-          /* moveAssign */ 0,
-          /* defaultConstruct */ 1,
-          /* destroyed */ 1}));
+      (folly::test::Counts{/* copyConstruct */ 0,
+                           /* moveConstruct */ 1,
+                           /* copyConvert */ 0,
+                           /* moveConvert */ 0,
+                           /* copyAssign */ 0,
+                           /* moveAssign */ 0,
+                           /* defaultConstruct */ 1,
+                           /* destroyed */ 1}));
   EXPECT_EQ(
       TrackedValue::counts(),
-      (folly::test::Counts{
-          /* copyConstruct */ 0,
-          /* moveConstruct */ 1,
-          /* copyConvert */ 0,
-          /* moveConvert */ 0,
-          /* copyAssign */ 0,
-          /* moveAssign */ 0,
-          /* defaultConstruct */ 1,
-          /* destroyed */ 1}));
+      (folly::test::Counts{/* copyConstruct */ 0,
+                           /* moveConstruct */ 1,
+                           /* copyConvert */ 0,
+                           /* moveConvert */ 0,
+                           /* copyAssign */ 0,
+                           /* moveAssign */ 0,
+                           /* defaultConstruct */ 1,
+                           /* destroyed */ 1}));
 }
 
 TEST_F(DeserializeKnownLengthMapTest, EmplaceHintConstuctCountVec) {
@@ -179,26 +175,24 @@ TEST_F(DeserializeKnownLengthMapTest, EmplaceHintConstuctCountVec) {
   EXPECT_EQ(map.size(), 1);
   EXPECT_EQ(
       TrackedKey::counts(),
-      (folly::test::Counts{
-          /* copyConstruct */ 0,
-          /* moveConstruct */ 1,
-          /* copyConvert */ 0,
-          /* moveConvert */ 0,
-          /* copyAssign */ 0,
-          /* moveAssign */ 0,
-          /* defaultConstruct */ 1,
-          /* destroyed */ 1}));
+      (folly::test::Counts{/* copyConstruct */ 0,
+                           /* moveConstruct */ 1,
+                           /* copyConvert */ 0,
+                           /* moveConvert */ 0,
+                           /* copyAssign */ 0,
+                           /* moveAssign */ 0,
+                           /* defaultConstruct */ 1,
+                           /* destroyed */ 1}));
   EXPECT_EQ(
       TrackedValue::counts(),
-      (folly::test::Counts{
-          /* copyConstruct */ 0,
-          /* moveConstruct */ 0,
-          /* copyConvert */ 0,
-          /* moveConvert */ 0,
-          /* copyAssign */ 0,
-          /* moveAssign */ 0,
-          /* defaultConstruct */ 1,
-          /* destroyed */ 0}));
+      (folly::test::Counts{/* copyConstruct */ 0,
+                           /* moveConstruct */ 0,
+                           /* copyConvert */ 0,
+                           /* moveConvert */ 0,
+                           /* copyAssign */ 0,
+                           /* moveAssign */ 0,
+                           /* defaultConstruct */ 1,
+                           /* destroyed */ 0}));
 }
 
 TEST_F(DeserializeKnownLengthMapTest, EmplaceConstuctCount) {
@@ -221,26 +215,24 @@ TEST_F(DeserializeKnownLengthMapTest, EmplaceConstuctCount) {
   EXPECT_EQ(map.size(), 1);
   EXPECT_EQ(
       TrackedKey::counts(),
-      (folly::test::Counts{
-          /* copyConstruct */ 0,
-          /* moveConstruct */ 1,
-          /* copyConvert */ 0,
-          /* moveConvert */ 0,
-          /* copyAssign */ 0,
-          /* moveAssign */ 0,
-          /* defaultConstruct */ 1,
-          /* destroyed */ 1}));
+      (folly::test::Counts{/* copyConstruct */ 0,
+                           /* moveConstruct */ 1,
+                           /* copyConvert */ 0,
+                           /* moveConvert */ 0,
+                           /* copyAssign */ 0,
+                           /* moveAssign */ 0,
+                           /* defaultConstruct */ 1,
+                           /* destroyed */ 1}));
   EXPECT_EQ(
       TrackedValue::counts(),
-      (folly::test::Counts{
-          /* copyConstruct */ 0,
-          /* moveConstruct */ 0,
-          /* copyConvert */ 0,
-          /* moveConvert */ 0,
-          /* copyAssign */ 0,
-          /* moveAssign */ 0,
-          /* defaultConstruct */ 1,
-          /* destroyed */ 0}));
+      (folly::test::Counts{/* copyConstruct */ 0,
+                           /* moveConstruct */ 0,
+                           /* copyConvert */ 0,
+                           /* moveConvert */ 0,
+                           /* copyAssign */ 0,
+                           /* moveAssign */ 0,
+                           /* defaultConstruct */ 1,
+                           /* destroyed */ 0}));
 }
 
 TEST_F(DeserializeKnownLengthMapTest, EmplaceConstuctCountVec) {
@@ -264,26 +256,24 @@ TEST_F(DeserializeKnownLengthMapTest, EmplaceConstuctCountVec) {
   EXPECT_EQ(map.size(), 1);
   EXPECT_EQ(
       TrackedKey::counts(),
-      (folly::test::Counts{
-          /* copyConstruct */ 0,
-          /* moveConstruct */ 1,
-          /* copyConvert */ 0,
-          /* moveConvert */ 0,
-          /* copyAssign */ 0,
-          /* moveAssign */ 0,
-          /* defaultConstruct */ 1,
-          /* destroyed */ 1}));
+      (folly::test::Counts{/* copyConstruct */ 0,
+                           /* moveConstruct */ 1,
+                           /* copyConvert */ 0,
+                           /* moveConvert */ 0,
+                           /* copyAssign */ 0,
+                           /* moveAssign */ 0,
+                           /* defaultConstruct */ 1,
+                           /* destroyed */ 1}));
   EXPECT_EQ(
       TrackedValue::counts(),
-      (folly::test::Counts{
-          /* copyConstruct */ 0,
-          /* moveConstruct */ 0,
-          /* copyConvert */ 0,
-          /* moveConvert */ 0,
-          /* copyAssign */ 0,
-          /* moveAssign */ 0,
-          /* defaultConstruct */ 1,
-          /* destroyed */ 0}));
+      (folly::test::Counts{/* copyConstruct */ 0,
+                           /* moveConstruct */ 0,
+                           /* copyConvert */ 0,
+                           /* moveConvert */ 0,
+                           /* copyAssign */ 0,
+                           /* moveAssign */ 0,
+                           /* defaultConstruct */ 1,
+                           /* destroyed */ 0}));
 }
 
 #if FOLLY_HAS_MEMORY_RESOURCE
@@ -305,26 +295,24 @@ TEST_F(DeserializeKnownLengthMapTest, EmplaceHintConstuctCountVecAlloc) {
   EXPECT_EQ(map.size(), 1);
   EXPECT_EQ(
       TrackedKey::counts(),
-      (folly::test::Counts{
-          /* copyConstruct */ 0,
-          /* moveConstruct */ 1,
-          /* copyConvert */ 0,
-          /* moveConvert */ 0,
-          /* copyAssign */ 0,
-          /* moveAssign */ 0,
-          /* defaultConstruct */ 1,
-          /* destroyed */ 1}));
+      (folly::test::Counts{/* copyConstruct */ 0,
+                           /* moveConstruct */ 1,
+                           /* copyConvert */ 0,
+                           /* moveConvert */ 0,
+                           /* copyAssign */ 0,
+                           /* moveAssign */ 0,
+                           /* defaultConstruct */ 1,
+                           /* destroyed */ 1}));
   EXPECT_EQ(
       TrackedValue::counts(),
-      (folly::test::Counts{
-          /* copyConstruct */ 0,
-          /* moveConstruct */ 0,
-          /* copyConvert */ 0,
-          /* moveConvert */ 0,
-          /* copyAssign */ 0,
-          /* moveAssign */ 0,
-          /* defaultConstruct */ 1,
-          /* destroyed */ 0}));
+      (folly::test::Counts{/* copyConstruct */ 0,
+                           /* moveConstruct */ 0,
+                           /* copyConvert */ 0,
+                           /* moveConvert */ 0,
+                           /* copyAssign */ 0,
+                           /* moveAssign */ 0,
+                           /* defaultConstruct */ 1,
+                           /* destroyed */ 0}));
 }
 
 TEST_F(DeserializeKnownLengthMapTest, EmplaceConstuctCountVecAlloc) {
@@ -349,26 +337,24 @@ TEST_F(DeserializeKnownLengthMapTest, EmplaceConstuctCountVecAlloc) {
   EXPECT_EQ(map.size(), 1);
   EXPECT_EQ(
       TrackedKey::counts(),
-      (folly::test::Counts{
-          /* copyConstruct */ 0,
-          /* moveConstruct */ 1,
-          /* copyConvert */ 0,
-          /* moveConvert */ 0,
-          /* copyAssign */ 0,
-          /* moveAssign */ 0,
-          /* defaultConstruct */ 1,
-          /* destroyed */ 1}));
+      (folly::test::Counts{/* copyConstruct */ 0,
+                           /* moveConstruct */ 1,
+                           /* copyConvert */ 0,
+                           /* moveConvert */ 0,
+                           /* copyAssign */ 0,
+                           /* moveAssign */ 0,
+                           /* defaultConstruct */ 1,
+                           /* destroyed */ 1}));
   EXPECT_EQ(
       TrackedValue::counts(),
-      (folly::test::Counts{
-          /* copyConstruct */ 0,
-          /* moveConstruct */ 0,
-          /* copyConvert */ 0,
-          /* moveConvert */ 0,
-          /* copyAssign */ 0,
-          /* moveAssign */ 0,
-          /* defaultConstruct */ 1,
-          /* destroyed */ 0}));
+      (folly::test::Counts{/* copyConstruct */ 0,
+                           /* moveConstruct */ 0,
+                           /* copyConvert */ 0,
+                           /* moveConvert */ 0,
+                           /* copyAssign */ 0,
+                           /* moveAssign */ 0,
+                           /* defaultConstruct */ 1,
+                           /* destroyed */ 0}));
 }
 
 #endif

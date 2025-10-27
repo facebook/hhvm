@@ -86,10 +86,11 @@ class McrouterOptionsBase {
 
   virtual ~McrouterOptionsBase() {}
 
-  virtual void forEach(std::function<void(
-                           const std::string& name,
-                           McrouterOptionData::Type type,
-                           const boost::any& value)> f) const = 0;
+  virtual void forEach(
+      std::function<void(
+          const std::string& name,
+          McrouterOptionData::Type type,
+          const boost::any& value)> f) const = 0;
 };
 
 #define OPTIONS_FILE "mcrouter/mcrouter_options_list.h"

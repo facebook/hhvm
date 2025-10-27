@@ -80,8 +80,9 @@ TEST_F(GetCookieStateTest, TestBasic) {
   EXPECT_EQ(state.version, TestProtocolVersion);
   EXPECT_EQ(state.cipher, CipherSuite::TLS_AES_128_GCM_SHA256);
   EXPECT_FALSE(state.group.has_value());
-  EXPECT_TRUE(folly::IOBufEqualTo()(
-      state.chloHash, folly::IOBuf::copyBuffer("context")));
+  EXPECT_TRUE(
+      folly::IOBufEqualTo()(
+          state.chloHash, folly::IOBuf::copyBuffer("context")));
   EXPECT_TRUE(
       folly::IOBufEqualTo()(state.appToken, folly::IOBuf::copyBuffer("token")));
 }

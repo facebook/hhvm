@@ -191,11 +191,12 @@ bool detail::native_map_emplace(NativeMap& map, K&& key, V&& val) {
                 .second;
           }
         } else {
-          throw std::runtime_error(fmt::format(
-              "Cannot emplace key={} value={} pair into a map with a different type: {}",
-              folly::pretty_name<K>(),
-              folly::pretty_name<V>(),
-              folly::pretty_name<MapTy>()));
+          throw std::runtime_error(
+              fmt::format(
+                  "Cannot emplace key={} value={} pair into a map with a different type: {}",
+                  folly::pretty_name<K>(),
+                  folly::pretty_name<V>(),
+                  folly::pretty_name<MapTy>()));
         }
       });
 }
@@ -232,11 +233,12 @@ bool detail::native_map_insert_or_assign(NativeMap& map, K&& key, V&& val) {
                 .second;
           }
         } else {
-          throw std::runtime_error(fmt::format(
-              "Cannot insert_or_assign key={} value={} pair into a map with a different type: {}",
-              folly::pretty_name<K>(),
-              folly::pretty_name<V>(),
-              folly::pretty_name<MapTy>()));
+          throw std::runtime_error(
+              fmt::format(
+                  "Cannot insert_or_assign key={} value={} pair into a map with a different type: {}",
+                  folly::pretty_name<K>(),
+                  folly::pretty_name<V>(),
+                  folly::pretty_name<MapTy>()));
         }
       });
 }

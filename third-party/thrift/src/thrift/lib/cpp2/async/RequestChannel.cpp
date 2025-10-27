@@ -231,11 +231,12 @@ class RequestClientCallbackWrapper
     tHeader->fds = std::move(firstResponse.fds.dcheckReceivedOrEmpty());
     detail::fillTHeaderFromResponseRpcMetadata(
         firstResponse.metadata, *tHeader);
-    requestCallback_.release()->onResponse(ClientReceiveState::create(
-        std::move(firstResponse.payload),
-        std::move(tHeader),
-        std::move(clientBridge),
-        bufferOptions_));
+    requestCallback_.release()->onResponse(
+        ClientReceiveState::create(
+            std::move(firstResponse.payload),
+            std::move(tHeader),
+            std::move(clientBridge),
+            bufferOptions_));
     delete this;
   }
 

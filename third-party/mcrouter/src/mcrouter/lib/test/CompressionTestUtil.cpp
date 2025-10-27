@@ -23,8 +23,9 @@ std::string createBinaryData(size_t size) {
   std::string dic;
   dic.reserve(size);
   for (size_t i = 0; i < size; ++i) {
-    dic.push_back(static_cast<char>(
-        folly::Random::rand32(0, std::numeric_limits<char>::max() + 1)));
+    dic.push_back(
+        static_cast<char>(
+            folly::Random::rand32(0, std::numeric_limits<char>::max() + 1)));
   }
   return dic;
 }

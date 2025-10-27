@@ -70,10 +70,11 @@ struct iovec getDictionaryIovec(const Lz4ImmutableState& state) noexcept {
 
 void checkInputSize(size_t inputLength) {
   if (inputLength > kMaxInputSize) {
-    throw std::invalid_argument(fmt::format(
-        "Data too large to compress. Size: {}. Max size allowed: {}",
-        inputLength,
-        kMaxInputSize));
+    throw std::invalid_argument(
+        fmt::format(
+            "Data too large to compress. Size: {}. Max size allowed: {}",
+            inputLength,
+            kMaxInputSize));
   }
 }
 
@@ -91,8 +92,9 @@ Lz4ImmutableState loadDictionary(std::unique_ptr<folly::IOBuf> dictionary) {
         fmt::format("Dictionary cannot be smaller than {}.", kHashUnit));
   }
   if (dicSize > kMaxDictionarySize) {
-    throw std::invalid_argument(fmt::format(
-        "Dictionary cannot be larger than {}.", kMaxDictionarySize));
+    throw std::invalid_argument(
+        fmt::format(
+            "Dictionary cannot be larger than {}.", kMaxDictionarySize));
   }
 
   Lz4ImmutableState state;
@@ -271,10 +273,11 @@ size_t Lz4Immutable::compressInto(
   checkInputSize(source.totalLength());
 
   if (FOLLY_UNLIKELY(destSize < compressBound(source.totalLength()))) {
-    throw std::invalid_argument(fmt::format(
-        "Destination too small. Size: {}. Required: {}",
-        destSize,
-        compressBound(source.totalLength())));
+    throw std::invalid_argument(
+        fmt::format(
+            "Destination too small. Size: {}. Required: {}",
+            destSize,
+            compressBound(source.totalLength())));
   }
 
   return compressCommon(source, static_cast<uint8_t*>(dest), destSize);

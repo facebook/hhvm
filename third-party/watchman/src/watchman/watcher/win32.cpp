@@ -189,8 +189,9 @@ void WinWatcher::readChangesThread(const std::shared_ptr<Root>& root) {
             ERR,
             "ReadDirectoryChangesW: failed, cancel watch. {}\n",
             win32_strerror(err));
-        root->cancel(fmt::format(
-            "ReadDirectoryChangesW failed: {}", win32_strerror(err)));
+        root->cancel(
+            fmt::format(
+                "ReadDirectoryChangesW failed: {}", win32_strerror(err)));
         break;
       } else {
         initiate_read = false;
@@ -245,9 +246,10 @@ void WinWatcher::readChangesThread(const std::shared_ptr<Root>& root) {
               PendingFlags{W_PENDING_IS_DESYNCED | W_PENDING_RECURSIVE});
         } else {
           logf(ERR, "Cancelling watch for {}\n", root->root_path);
-          root->cancel(fmt::format(
-              "unexpected error from GetOverlappedResult: {}",
-              win32_strerror(err)));
+          root->cancel(
+              fmt::format(
+                  "unexpected error from GetOverlappedResult: {}",
+                  win32_strerror(err)));
           break;
         }
       } else {

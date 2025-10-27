@@ -1587,10 +1587,12 @@ TEST(FieldMaskTest, IsCompatibleWithAdaptedField) {
 }
 
 TEST(FieldMaskTest, IsCompatibleWithSmartPointer) {
-  EXPECT_TRUE(protocol::is_compatible_with<type::struct_t<SmartPointerStruct>>(
-      allMask()));
-  EXPECT_TRUE(protocol::is_compatible_with<type::struct_t<SmartPointerStruct>>(
-      noneMask()));
+  EXPECT_TRUE(
+      protocol::is_compatible_with<type::struct_t<SmartPointerStruct>>(
+          allMask()));
+  EXPECT_TRUE(
+      protocol::is_compatible_with<type::struct_t<SmartPointerStruct>>(
+          noneMask()));
 
   {
     Mask mask;
@@ -2295,18 +2297,24 @@ TEST(FieldMaskTest, LogicalOpSimple) {
 
   // maskA & maskB == includes{2: excludes{}}
   Mask maskIntersect;
-  { maskIntersect.includes().emplace()[2] = allMask(); }
+  {
+    maskIntersect.includes().emplace()[2] = allMask();
+  }
   EXPECT_EQ(maskA & maskB, maskIntersect);
   EXPECT_EQ(maskB & maskA, maskIntersect);
 
   // maskA - maskB == includes{1: excludes{}}
   Mask maskSubtractAB;
-  { maskSubtractAB.includes().emplace()[1] = allMask(); }
+  {
+    maskSubtractAB.includes().emplace()[1] = allMask();
+  }
   EXPECT_EQ(maskA - maskB, maskSubtractAB);
 
   // maskB - maskA == includes{3: excludes{}}
   Mask maskSubtractBA;
-  { maskSubtractBA.includes().emplace()[3] = allMask(); }
+  {
+    maskSubtractBA.includes().emplace()[3] = allMask();
+  }
   EXPECT_EQ(maskB - maskA, maskSubtractBA);
 }
 
@@ -2347,18 +2355,24 @@ TEST(FieldMaskTest, LogicalOpSimpleMap) {
 
   // maskA & maskB == includes_map{2: excludes{}}
   Mask maskIntersect;
-  { maskIntersect.includes_map().emplace()[2] = allMask(); }
+  {
+    maskIntersect.includes_map().emplace()[2] = allMask();
+  }
   EXPECT_EQ(maskA & maskB, maskIntersect);
   EXPECT_EQ(maskB & maskA, maskIntersect);
 
   // maskA - maskB == includes_map{1: excludes{}}
   Mask maskSubtractAB;
-  { maskSubtractAB.includes_map().emplace()[1] = allMask(); }
+  {
+    maskSubtractAB.includes_map().emplace()[1] = allMask();
+  }
   EXPECT_EQ(maskA - maskB, maskSubtractAB);
 
   // maskB - maskA == includes_map{3: excludes{}}
   Mask maskSubtractBA;
-  { maskSubtractBA.includes_map().emplace()[3] = allMask(); }
+  {
+    maskSubtractBA.includes_map().emplace()[3] = allMask();
+  }
   EXPECT_EQ(maskB - maskA, maskSubtractBA);
 
   testLogicalOperations(maskA, maskB);
@@ -2400,18 +2414,24 @@ TEST(FieldMaskTest, LogicalOpSimpleStringMap) {
 
   // maskA & maskB == includes_string_map{2: excludes_string_map{}}
   Mask maskIntersect;
-  { maskIntersect.includes_string_map().emplace()["2"] = allMask(); }
+  {
+    maskIntersect.includes_string_map().emplace()["2"] = allMask();
+  }
   EXPECT_EQ(maskA & maskB, maskIntersect);
   EXPECT_EQ(maskB & maskA, maskIntersect);
 
   // maskA - maskB == includes_string_map{1: excludes_string_map{}}
   Mask maskSubtractAB;
-  { maskSubtractAB.includes_string_map().emplace()["1"] = allMask(); }
+  {
+    maskSubtractAB.includes_string_map().emplace()["1"] = allMask();
+  }
   EXPECT_EQ(maskA - maskB, maskSubtractAB);
 
   // maskB - maskA == includes_string_map{3: excludes_string_map{}}
   Mask maskSubtractBA;
-  { maskSubtractBA.includes_string_map().emplace()["3"] = allMask(); }
+  {
+    maskSubtractBA.includes_string_map().emplace()["3"] = allMask();
+  }
   EXPECT_EQ(maskB - maskA, maskSubtractBA);
 
   testLogicalOperations(maskA, maskB);
@@ -2591,7 +2611,9 @@ TEST(FieldMaskTest, LogicalOpBothExcludes) {
 
   // maskA | maskB == excludes{3: includes{5: excludes{}}}
   Mask maskUnion;
-  { maskUnion.excludes().emplace()[3].includes().emplace()[5] = allMask(); }
+  {
+    maskUnion.excludes().emplace()[3].includes().emplace()[5] = allMask();
+  }
   EXPECT_EQ(maskA | maskB, maskUnion);
   EXPECT_EQ(maskB | maskA, maskUnion);
 

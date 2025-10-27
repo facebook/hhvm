@@ -62,8 +62,9 @@ class InitRunnable : public Runnable {
 
 std::shared_ptr<Thread> InitThreadFactory::newThread(
     const std::shared_ptr<Runnable>& runnable) const {
-  return threadFactory_->newThread(std::make_shared<InitRunnable>(
-      threadInitializer_, threadFinalizer_, runnable));
+  return threadFactory_->newThread(
+      std::make_shared<InitRunnable>(
+          threadInitializer_, threadFinalizer_, runnable));
 }
 
 std::shared_ptr<Thread> InitThreadFactory::newThread(

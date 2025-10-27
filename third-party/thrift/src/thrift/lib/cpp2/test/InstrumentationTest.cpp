@@ -960,8 +960,9 @@ TEST(ThriftServerDeathTest, getSnapshotOnServerShutdown) {
           server.setNumCPUWorkerThreads(2);
           server.setThreadManagerType(
               apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
-          server.setThreadFactory(std::make_shared<PosixThreadFactory>(
-              PosixThreadFactory::ATTACHED));
+          server.setThreadFactory(
+              std::make_shared<PosixThreadFactory>(
+                  PosixThreadFactory::ATTACHED));
           server.setWorkersJoinTimeout(1s);
         });
 

@@ -50,8 +50,9 @@ std::vector<DisabledName> parseDisabledInterceptorsFlag(
       CHECK(!moduleName.empty() && !interceptorName.empty())
           << "Thrift flag disabled_service_interceptors is malformed - empty moduleName and/or interceptorName. Value: "
           << disabledInterceptorFlagValue;
-      output.emplace_back(DisabledQualifiedName{
-          .moduleName = moduleName, .interceptorName = interceptorName});
+      output.emplace_back(
+          DisabledQualifiedName{
+              .moduleName = moduleName, .interceptorName = interceptorName});
     } else {
       // Basically if there is no '.', we assume it's a module name
       CHECK(!disabledName.empty())

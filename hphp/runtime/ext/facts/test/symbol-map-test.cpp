@@ -471,8 +471,9 @@ class TestingSymbolMap : public SymbolMap {
 class SymbolMapTest : public ::testing::TestWithParam<bool> {
  protected:
   SymbolMapTest()
-      : m_tmpdir(std::make_unique<folly::test::TemporaryDirectory>(
-            folly::test::TemporaryDirectory{"autoload"})) {}
+      : m_tmpdir(
+            std::make_unique<folly::test::TemporaryDirectory>(
+                folly::test::TemporaryDirectory{"autoload"})) {}
 
   TestingSymbolMap make(
       std::string root,
@@ -502,8 +503,9 @@ class SymbolMapTest : public ::testing::TestWithParam<bool> {
         folly::to<std::string>(
                       "autoload_", std::hash<std::string>{}(root), "_db.sql3");
     auto dbOpener = [dbPath]() -> std::shared_ptr<AutoloadDB> {
-      return SQLiteAutoloadDB::get(SQLiteKey::readWriteCreate(
-          fs::path{dbPath.native()}, static_cast<::gid_t>(-1), 0644));
+      return SQLiteAutoloadDB::get(
+          SQLiteKey::readWriteCreate(
+              fs::path{dbPath.native()}, static_cast<::gid_t>(-1), 0644));
     };
     return make(root, dbOpener, useManualExecutor, indexedMethodAttributesVec);
   }
@@ -561,8 +563,9 @@ TEST_F(SymbolMapTest, ModulesFromDB) {
       .WillOnce(Return(std::vector<fs::path>{path2}));
 
   EXPECT_CALL(*db, getPathModules(path1))
-      .WillOnce(Return(std::vector<std::string>{
-          "some_new_module", "some_other_new_module"}));
+      .WillOnce(Return(
+          std::vector<std::string>{
+              "some_new_module", "some_other_new_module"}));
   EXPECT_CALL(*db, getPathModules(path2))
       .WillOnce(Return(std::vector<std::string>{"some_new_third_module"}));
 
@@ -1986,11 +1989,12 @@ TEST_F(SymbolMapTest, GetMethodsWithAttribute) {
         methods,
         AllOf(
             SizeIs(2),
-            Contains(MethodDecl{
-                .m_type =
-                    {.m_name = Symbol<SymKind::Type>{StringData{"C1"}},
-                     .m_path = Path{p1}},
-                .m_method = Symbol<SymKind::Method>{StringData{"m1"}}})));
+            Contains(
+                MethodDecl{
+                    .m_type =
+                        {.m_name = Symbol<SymKind::Type>{StringData{"C1"}},
+                         .m_path = Path{p1}},
+                    .m_method = Symbol<SymKind::Method>{StringData{"m1"}}})));
 
     EXPECT_THAT(m.getAttributesOfMethod("C1", "m1"), ElementsAre("A1"));
     EXPECT_THAT(m.getMethodAttributeArgs("C1", "m1", "A1"), ElementsAre("1"));

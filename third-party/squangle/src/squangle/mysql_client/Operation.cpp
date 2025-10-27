@@ -46,8 +46,10 @@ void OperationBase::run() {
   }
 
   if (getOp().getOperationType() == db::OperationType::Connect) {
-    setTimeoutInternal(std::min(
-        Duration(FLAGS_async_mysql_max_connect_timeout_micros), getTimeout()));
+    setTimeoutInternal(
+        std::min(
+            Duration(FLAGS_async_mysql_max_connect_timeout_micros),
+            getTimeout()));
   }
 
   specializedRun();

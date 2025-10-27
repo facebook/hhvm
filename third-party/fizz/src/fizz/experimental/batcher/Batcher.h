@@ -46,8 +46,9 @@ class Batcher {
    */
   struct EpochData {
     EpochData(size_t numMsgThreshold)
-        : tree_(std::make_shared<BatchSignatureMerkleTree<Hash>>(
-              numMsgThreshold)) {}
+        : tree_(
+              std::make_shared<BatchSignatureMerkleTree<Hash>>(
+                  numMsgThreshold)) {}
     std::shared_ptr<BatchSignatureMerkleTree<Hash>> tree_;
     folly::SharedPromise<SignedTree> promise_;
   };
@@ -109,8 +110,9 @@ class Batcher {
       signatureFut =
           asyncSigner->signFuture(baseScheme_, context_, std::move(toBeSigned));
     } else {
-      signatureFut = folly::makeSemiFuture(folly::Optional(
-          signer_->sign(baseScheme_, context_, toBeSigned->coalesce())));
+      signatureFut = folly::makeSemiFuture(
+          folly::Optional(
+              signer_->sign(baseScheme_, context_, toBeSigned->coalesce())));
     }
     return std::move(signatureFut)
         .deferValue(

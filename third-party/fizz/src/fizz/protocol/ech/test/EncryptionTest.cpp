@@ -57,15 +57,17 @@ void checkExtensions(
     const std::vector<Extension>& expectedExts) {
   EXPECT_EQ(testExts.size(), expectedExts.size());
   for (size_t extIndex = 0; extIndex < testExts.size(); ++extIndex) {
-    EXPECT_TRUE(folly::IOBufEqualTo()(
-        testExts[extIndex].extension_data,
-        expectedExts[extIndex].extension_data));
+    EXPECT_TRUE(
+        folly::IOBufEqualTo()(
+            testExts[extIndex].extension_data,
+            expectedExts[extIndex].extension_data));
   }
 }
 
 void checkDecodedChlo(ClientHello decodedChlo, ClientHello expectedChlo) {
-  EXPECT_TRUE(folly::IOBufEqualTo()(
-      decodedChlo.legacy_session_id, expectedChlo.legacy_session_id));
+  EXPECT_TRUE(
+      folly::IOBufEqualTo()(
+          decodedChlo.legacy_session_id, expectedChlo.legacy_session_id));
   checkExtensions(decodedChlo.extensions, expectedChlo.extensions);
   EXPECT_EQ(decodedChlo.random, expectedChlo.random);
   EXPECT_EQ(decodedChlo.cipher_suites, expectedChlo.cipher_suites);
@@ -295,8 +297,9 @@ TEST(EncryptionTest, TestValidEncryptClientHello) {
 
   // Check that we don't have a legacy_session_id (it should have gotten removed
   // during encryption)
-  EXPECT_TRUE(folly::IOBufEqualTo()(
-      gotChlo.legacy_session_id, folly::IOBuf::copyBuffer("")));
+  EXPECT_TRUE(
+      folly::IOBufEqualTo()(
+          gotChlo.legacy_session_id, folly::IOBuf::copyBuffer("")));
 
   // Replace legacy_session_id that was removed during encryption
   gotChlo.legacy_session_id =
@@ -376,9 +379,10 @@ TEST(EncryptionTest, TestInnerClientHelloOuterExtensionsSuccess) {
   EXPECT_EQ(
       decryptedClientKeyShare.extension_type,
       encodedClientKeyShare.extension_type);
-  EXPECT_TRUE(folly::IOBufEqualTo()(
-      decryptedClientKeyShare.extension_data,
-      encodedClientKeyShare.extension_data));
+  EXPECT_TRUE(
+      folly::IOBufEqualTo()(
+          decryptedClientKeyShare.extension_data,
+          encodedClientKeyShare.extension_data));
 }
 
 TEST(EncryptionTest, TestInnerClientHelloOuterExtensionsContainsECH) {
@@ -670,8 +674,9 @@ TEST(EncryptionTest, TestMakeDummyServerHello) {
     EXPECT_EQ(*it, 0);
   }
 
-  EXPECT_TRUE(folly::IOBufEqualTo()(
-      shlo.legacy_session_id_echo, dummyShlo.legacy_session_id_echo));
+  EXPECT_TRUE(
+      folly::IOBufEqualTo()(
+          shlo.legacy_session_id_echo, dummyShlo.legacy_session_id_echo));
   EXPECT_EQ(shlo.cipher_suite, dummyShlo.cipher_suite);
   EXPECT_EQ(
       shlo.legacy_compression_method, dummyShlo.legacy_compression_method);
@@ -680,9 +685,10 @@ TEST(EncryptionTest, TestMakeDummyServerHello) {
     EXPECT_EQ(
         shlo.extensions[i].extension_type,
         dummyShlo.extensions[i].extension_type);
-    EXPECT_TRUE(folly::IOBufEqualTo()(
-        shlo.extensions[i].extension_data,
-        dummyShlo.extensions[i].extension_data));
+    EXPECT_TRUE(
+        folly::IOBufEqualTo()(
+            shlo.extensions[i].extension_data,
+            dummyShlo.extensions[i].extension_data));
   }
 }
 
@@ -702,8 +708,9 @@ TEST(EncryptionTest, TestMakeDummyHRR) {
   hrr.extensions.push_back(makeDummyECHExtension());
   auto dummyHrr = makeDummyHRR(hrr);
   EXPECT_EQ(hrr.legacy_version, dummyHrr.legacy_version);
-  EXPECT_TRUE(folly::IOBufEqualTo()(
-      hrr.legacy_session_id_echo, dummyHrr.legacy_session_id_echo));
+  EXPECT_TRUE(
+      folly::IOBufEqualTo()(
+          hrr.legacy_session_id_echo, dummyHrr.legacy_session_id_echo));
   EXPECT_EQ(hrr.cipher_suite, dummyHrr.cipher_suite);
   EXPECT_EQ(hrr.legacy_compression_method, dummyHrr.legacy_compression_method);
   EXPECT_EQ(hrr.extensions.size(), dummyHrr.extensions.size());
@@ -723,9 +730,10 @@ TEST(EncryptionTest, TestMakeDummyHRR) {
             return c == 0;
           }));
     } else {
-      EXPECT_TRUE(folly::IOBufEqualTo()(
-          hrr.extensions[i].extension_data,
-          dummyHrr.extensions[i].extension_data));
+      EXPECT_TRUE(
+          folly::IOBufEqualTo()(
+              hrr.extensions[i].extension_data,
+              dummyHrr.extensions[i].extension_data));
     }
   }
 }
@@ -869,9 +877,10 @@ TEST(EncryptionTest, TestGenerateGreasePsk) {
   for (size_t i = 0; i < hrrGreasePsk.identities.size(); i++) {
     auto binderSz = psk->binders[i].binder->computeChainDataLength();
     auto randomBinder = folly::IOBuf::copyBuffer(std::string(binderSz, 0x44));
-    EXPECT_TRUE(folly::IOBufEqualTo()(
-        hrrGreasePsk.identities[i].psk_identity,
-        psk->identities[i].psk_identity));
+    EXPECT_TRUE(
+        folly::IOBufEqualTo()(
+            hrrGreasePsk.identities[i].psk_identity,
+            psk->identities[i].psk_identity));
     EXPECT_TRUE(
         folly::IOBufEqualTo()(hrrGreasePsk.binders[i].binder, randomBinder));
   }

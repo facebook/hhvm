@@ -37,8 +37,9 @@ void bench(size_t iters) {
   auto sock = folly::AsyncSocket::UniquePtr(
       new folly::AsyncSocket(&eb, runner.getAddress()));
   auto chan = isHeader
-      ? RequestChannel::Ptr(HeaderClientChannel::newChannel(
-            HeaderClientChannel::WithoutRocketUpgrade{}, std::move(sock)))
+      ? RequestChannel::Ptr(
+            HeaderClientChannel::newChannel(
+                HeaderClientChannel::WithoutRocketUpgrade{}, std::move(sock)))
       : RocketClientChannel::newChannel(std::move(sock));
   TestServiceAsyncClient client(std::move(chan));
 

@@ -269,8 +269,9 @@ void PythonAsyncProcessor::executeRequest(
       ctx);
 
   auto serializedRequest =
-      std::move(apache::thrift::detail::ServerRequestHelper::compressedRequest(
-                    request))
+      std::move(
+          apache::thrift::detail::ServerRequestHelper::compressedRequest(
+              request))
           .uncompress();
 
   auto* eb = apache::thrift::detail::ServerRequestHelper::eventBase(request);

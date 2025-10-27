@@ -498,8 +498,7 @@ class THeader final {
       uint32_t sz);
 
   template <
-      template <class BaseProt>
-      class ProtocolClass,
+      template <class BaseProt> class ProtocolClass,
       protocol::PROTOCOL_TYPES ProtocolID>
   std::unique_ptr<folly::IOBuf> removeUnframed(
       folly::IOBufQueue* queue, size_t& needed);

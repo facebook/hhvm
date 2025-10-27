@@ -50,15 +50,17 @@ void KeyScheduler::deriveHandshakeSecret() {
       kDerivedSecret,
       deriver_->blankHash(),
       deriver_->hashLength());
-  secret_.emplace(HandshakeSecret{
-      deriver_->hkdfExtract(folly::range(preSecret), folly::range(zeros))});
+  secret_.emplace(
+      HandshakeSecret{
+          deriver_->hkdfExtract(folly::range(preSecret), folly::range(zeros))});
 }
 
 void KeyScheduler::deriveHandshakeSecret(folly::ByteRange ecdhe) {
   if (!secret_) {
     auto zeros = std::vector<uint8_t>(deriver_->hashLength(), 0);
-    secret_.emplace(EarlySecret{
-        deriver_->hkdfExtract(folly::range(zeros), folly::range(zeros))});
+    secret_.emplace(
+        EarlySecret{
+            deriver_->hkdfExtract(folly::range(zeros), folly::range(zeros))});
   }
 
   auto& earlySecret = secret_->tryAsEarlySecret();
@@ -79,8 +81,9 @@ void KeyScheduler::deriveMasterSecret() {
       kDerivedSecret,
       deriver_->blankHash(),
       deriver_->hashLength());
-  secret_.emplace(MasterSecret{
-      deriver_->hkdfExtract(folly::range(preSecret), folly::range(zeros))});
+  secret_.emplace(
+      MasterSecret{
+          deriver_->hkdfExtract(folly::range(preSecret), folly::range(zeros))});
 }
 
 void KeyScheduler::deriveAppTrafficSecrets(folly::ByteRange transcript) {

@@ -74,18 +74,22 @@ UTEtx/WVlZvlrPi3dsi7QikkjQgo1wCnm7owtuAHlPDMAB8wKk4+vvIOjsGM33T/
   sockaddr_storage addrStorage;
   sockaddr* addr_ptr = reinterpret_cast<sockaddr*>(&addrStorage);
   addr.getAddress(&addrStorage);
-  EXPECT_TRUE(OpenSSLUtils::validatePeerCertNames(
-      cert.getX509(), addr_ptr, addr.getActualSize()));
+  EXPECT_TRUE(
+      OpenSSLUtils::validatePeerCertNames(
+          cert.getX509(), addr_ptr, addr.getActualSize()));
   addr.setFromIpPort("::1", 1);
   addr.getAddress(&addrStorage);
-  EXPECT_TRUE(OpenSSLUtils::validatePeerCertNames(
-      cert.getX509(), addr_ptr, addr.getActualSize()));
+  EXPECT_TRUE(
+      OpenSSLUtils::validatePeerCertNames(
+          cert.getX509(), addr_ptr, addr.getActualSize()));
   addr.setFromIpPort("127.0.0.2", 1);
   addr.getAddress(&addrStorage);
-  EXPECT_FALSE(OpenSSLUtils::validatePeerCertNames(
-      cert.getX509(), addr_ptr, addr.getActualSize()));
+  EXPECT_FALSE(
+      OpenSSLUtils::validatePeerCertNames(
+          cert.getX509(), addr_ptr, addr.getActualSize()));
   addr.setFromIpPort("::2", 1);
   addr.getAddress(&addrStorage);
-  EXPECT_FALSE(OpenSSLUtils::validatePeerCertNames(
-      cert.getX509(), addr_ptr, addr.getActualSize()));
+  EXPECT_FALSE(
+      OpenSSLUtils::validatePeerCertNames(
+          cert.getX509(), addr_ptr, addr.getActualSize()));
 }

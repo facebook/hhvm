@@ -157,8 +157,9 @@ source_view source_manager::add_source(
     std::string_view file_name, std::vector<char> text) {
   assert(text.back() == '\0');
   std::string_view sv(text.data(), text.size());
-  sources_.push_back(source_info{
-      std::string(file_name), std::move(text), get_line_offsets(sv)});
+  sources_.push_back(
+      source_info{
+          std::string(file_name), std::move(text), get_line_offsets(sv)});
   return source_view{
       /* .start = */
       source_location(/* source_id= */ sources_.size(), /* offset= */ 0),

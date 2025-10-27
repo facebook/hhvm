@@ -461,15 +461,17 @@ void RocketServerConnection::handleFrame(std::unique_ptr<folly::IOBuf> frame) {
 
   if (UNLIKELY(!setupFrameReceived_)) {
     if (frameType != FrameType::SETUP) {
-      return close(folly::make_exception_wrapper<RocketException>(
-          ErrorCode::INVALID_SETUP, "First frame must be SETUP frame"));
+      return close(
+          folly::make_exception_wrapper<RocketException>(
+              ErrorCode::INVALID_SETUP, "First frame must be SETUP frame"));
     }
     DCHECK(!decodeMetadataUsingBinary_.has_value());
     setupFrameReceived_ = true;
   } else {
     if (UNLIKELY(frameType == FrameType::SETUP)) {
-      return close(folly::make_exception_wrapper<RocketException>(
-          ErrorCode::INVALID_SETUP, "More than one SETUP frame received"));
+      return close(
+          folly::make_exception_wrapper<RocketException>(
+              ErrorCode::INVALID_SETUP, "More than one SETUP frame received"));
     }
     DCHECK(decodeMetadataUsingBinary_.has_value());
   }
@@ -507,15 +509,17 @@ void RocketServerConnection::handleFrame(std::unique_ptr<folly::IOBuf> frame) {
         KeepAliveFrame keepAliveFrame{std::move(frame)};
         if (keepAliveFrame.hasRespondFlag()) {
           // Echo back data without 'respond' flag
-          send(KeepAliveFrame{Flags(), std::move(keepAliveFrame).data()}
-                   .serialize());
+          send(
+              KeepAliveFrame{Flags(), std::move(keepAliveFrame).data()}
+                  .serialize());
         }
       } else {
-        close(folly::make_exception_wrapper<RocketException>(
-            ErrorCode::CONNECTION_ERROR,
-            fmt::format(
-                "Received keepalive frame with non-zero stream ID {}",
-                static_cast<uint32_t>(streamId))));
+        close(
+            folly::make_exception_wrapper<RocketException>(
+                ErrorCode::CONNECTION_ERROR,
+                fmt::format(
+                    "Received keepalive frame with non-zero stream ID {}",
+                    static_cast<uint32_t>(streamId))));
       }
       return;
     }
@@ -600,11 +604,12 @@ void RocketServerConnection::handleUntrackedFrame(
     case FrameType::EXT: {
       ExtFrame extFrame(streamId, flags, cursor, std::move(frame));
       if (!extFrame.hasIgnore()) {
-        close(folly::make_exception_wrapper<RocketException>(
-            ErrorCode::INVALID,
-            fmt::format(
-                "Received unhandleable ext frame type ({}) without ignore flag",
-                static_cast<uint32_t>(extFrame.extFrameType()))));
+        close(
+            folly::make_exception_wrapper<RocketException>(
+                ErrorCode::INVALID,
+                fmt::format(
+                    "Received unhandleable ext frame type ({}) without ignore flag",
+                    static_cast<uint32_t>(extFrame.extFrameType()))));
       }
       return;
     }
@@ -616,8 +621,10 @@ void RocketServerConnection::handleUntrackedFrame(
         getPayloadSerializer()->unpack(
             clientMeta, metadataFrame.metadata(), false);
       } catch (...) {
-        close(folly::make_exception_wrapper<RocketException>(
-            ErrorCode::INVALID, "Failed to deserialize metadata push frame"));
+        close(
+            folly::make_exception_wrapper<RocketException>(
+                ErrorCode::INVALID,
+                "Failed to deserialize metadata push frame"));
         return;
       }
       switch (clientMeta.getType()) {
@@ -667,11 +674,12 @@ void RocketServerConnection::handleUntrackedFrame(
     }
 
     default:
-      close(folly::make_exception_wrapper<RocketException>(
-          ErrorCode::INVALID,
-          fmt::format(
-              "Received unhandleable frame type ({})",
-              static_cast<uint8_t>(frameType))));
+      close(
+          folly::make_exception_wrapper<RocketException>(
+              ErrorCode::INVALID,
+              fmt::format(
+                  "Received unhandleable frame type ({})",
+                  static_cast<uint8_t>(frameType))));
   }
 }
 
@@ -688,12 +696,13 @@ void RocketServerConnection::handleStreamFrame(
         return clientCallback.earlyCancelled();
       }
       default:
-        return close(folly::make_exception_wrapper<RocketException>(
-            ErrorCode::INVALID,
-            fmt::format(
-                "Received unexpected early frame, stream id ({}) type ({})",
-                static_cast<uint32_t>(streamId),
-                static_cast<uint8_t>(frameType))));
+        return close(
+            folly::make_exception_wrapper<RocketException>(
+                ErrorCode::INVALID,
+                fmt::format(
+                    "Received unexpected early frame, stream id ({}) type ({})",
+                    static_cast<uint32_t>(streamId),
+                    static_cast<uint8_t>(frameType))));
     }
   }
 
@@ -713,23 +722,25 @@ void RocketServerConnection::handleStreamFrame(
     case FrameType::EXT: {
       ExtFrame extFrame(streamId, flags, cursor, std::move(frame));
       if (!extFrame.hasIgnore()) {
-        close(folly::make_exception_wrapper<RocketException>(
-            ErrorCode::INVALID,
-            fmt::format(
-                "Received unhandleable EXT frame type ({}) for stream (id {})",
-                static_cast<uint32_t>(extFrame.extFrameType()),
-                static_cast<uint32_t>(streamId))));
+        close(
+            folly::make_exception_wrapper<RocketException>(
+                ErrorCode::INVALID,
+                fmt::format(
+                    "Received unhandleable EXT frame type ({}) for stream (id {})",
+                    static_cast<uint32_t>(extFrame.extFrameType()),
+                    static_cast<uint32_t>(streamId))));
       }
       return;
     }
 
     default:
-      close(folly::make_exception_wrapper<RocketException>(
-          ErrorCode::INVALID,
-          fmt::format(
-              "Received unhandleable frame type ({}) for stream (id {})",
-              static_cast<uint8_t>(frameType),
-              static_cast<uint32_t>(streamId))));
+      close(
+          folly::make_exception_wrapper<RocketException>(
+              ErrorCode::INVALID,
+              fmt::format(
+                  "Received unhandleable frame type ({}) for stream (id {})",
+                  static_cast<uint8_t>(frameType),
+                  static_cast<uint32_t>(streamId))));
   }
 }
 
@@ -747,12 +758,13 @@ void RocketServerConnection::handleSinkFrame(
         return clientCallback.earlyCancelled();
       }
     }
-    return close(folly::make_exception_wrapper<RocketException>(
-        ErrorCode::INVALID,
-        fmt::format(
-            "Received unexpected early frame, stream id ({}) type ({})",
-            static_cast<uint32_t>(streamId),
-            static_cast<uint8_t>(frameType))));
+    return close(
+        folly::make_exception_wrapper<RocketException>(
+            ErrorCode::INVALID,
+            fmt::format(
+                "Received unexpected early frame, stream id ({}) type ({})",
+                static_cast<uint32_t>(streamId),
+                static_cast<uint8_t>(frameType))));
   }
 
   auto handleSinkPayload = [&](PayloadFrame&& payloadFrame) {
@@ -803,10 +815,11 @@ void RocketServerConnection::handleSinkFrame(
       }
 
       if (!notViolateContract) {
-        close(folly::make_exception_wrapper<transport::TTransportException>(
-            transport::TTransportException::TTransportExceptionType::
-                STREAMING_CONTRACT_VIOLATION,
-            "receiving sink payload frame after sink completion"));
+        close(
+            folly::make_exception_wrapper<transport::TTransportException>(
+                transport::TTransportException::TTransportExceptionType::
+                    STREAMING_CONTRACT_VIOLATION,
+                "receiving sink payload frame after sink completion"));
       }
     }
   };
@@ -833,10 +846,11 @@ void RocketServerConnection::handleSinkFrame(
       if (notViolateContract) {
         freeStream(streamId, true);
       } else {
-        close(folly::make_exception_wrapper<transport::TTransportException>(
-            transport::TTransportException::TTransportExceptionType::
-                STREAMING_CONTRACT_VIOLATION,
-            "receiving sink error frame after sink completion"));
+        close(
+            folly::make_exception_wrapper<transport::TTransportException>(
+                transport::TTransportException::TTransportExceptionType::
+                    STREAMING_CONTRACT_VIOLATION,
+                "receiving sink error frame after sink completion"));
       }
     } break;
 
@@ -847,12 +861,13 @@ void RocketServerConnection::handleSinkFrame(
       [[fallthrough]];
 
     default:
-      close(folly::make_exception_wrapper<RocketException>(
-          ErrorCode::INVALID,
-          fmt::format(
-              "Received unhandleable frame type ({}) for sink (id {})",
-              static_cast<uint8_t>(frameType),
-              static_cast<uint32_t>(streamId))));
+      close(
+          folly::make_exception_wrapper<RocketException>(
+              ErrorCode::INVALID,
+              fmt::format(
+                  "Received unhandleable frame type ({}) for sink (id {})",
+                  static_cast<uint8_t>(frameType),
+                  static_cast<uint32_t>(streamId))));
   }
 }
 
@@ -873,12 +888,13 @@ void RocketServerConnection::handleBiDiFrame(
       }
     }
     // unexpected frame
-    close(folly::make_exception_wrapper<RocketException>(
-        ErrorCode::INVALID,
-        fmt::format(
-            "Received unexpected early frame, stream id ({}) type ({})",
-            static_cast<uint32_t>(streamId),
-            static_cast<uint8_t>(frameType))));
+    close(
+        folly::make_exception_wrapper<RocketException>(
+            ErrorCode::INVALID,
+            fmt::format(
+                "Received unexpected early frame, stream id ({}) type ({})",
+                static_cast<uint32_t>(streamId),
+                static_cast<uint8_t>(frameType))));
     return;
   }
 
@@ -978,21 +994,23 @@ void RocketServerConnection::handleBiDiFrame(
     case FrameType::EXT: {
       ExtFrame extFrame(streamId, flags, cursor, std::move(frame));
       if (!extFrame.hasIgnore()) {
-        close(folly::make_exception_wrapper<RocketException>(
-            ErrorCode::INVALID,
-            fmt::format(
-                "Received unsupported EXT frame type ({}) for stream (id {})",
-                static_cast<uint32_t>(extFrame.extFrameType()),
-                static_cast<uint32_t>(streamId))));
+        close(
+            folly::make_exception_wrapper<RocketException>(
+                ErrorCode::INVALID,
+                fmt::format(
+                    "Received unsupported EXT frame type ({}) for stream (id {})",
+                    static_cast<uint32_t>(extFrame.extFrameType()),
+                    static_cast<uint32_t>(streamId))));
       }
     } break;
     default: {
-      close(folly::make_exception_wrapper<RocketException>(
-          ErrorCode::INVALID,
-          fmt::format(
-              "Received unsupported frame type ({}) for bidi stream (id {})",
-              static_cast<uint8_t>(frameType),
-              static_cast<uint32_t>(streamId))));
+      close(
+          folly::make_exception_wrapper<RocketException>(
+              ErrorCode::INVALID,
+              fmt::format(
+                  "Received unsupported frame type ({}) for bidi stream (id {})",
+                  static_cast<uint8_t>(frameType),
+                  static_cast<uint32_t>(streamId))));
     }
   }
 }
@@ -1078,16 +1096,18 @@ void RocketServerConnection::dropConnection(const std::string& errorMsg) {
     }
   }
 
-  close(folly::make_exception_wrapper<transport::TTransportException>(
-      transport::TTransportException::TTransportExceptionType::INTERRUPTED,
-      "Dropping connection"));
+  close(
+      folly::make_exception_wrapper<transport::TTransportException>(
+          transport::TTransportException::TTransportExceptionType::INTERRUPTED,
+          "Dropping connection"));
 }
 
 void RocketServerConnection::closeWhenIdle() {
   socketDrainer_.drainComplete();
-  close(folly::make_exception_wrapper<transport::TTransportException>(
-      transport::TTransportException::TTransportExceptionType::INTERRUPTED,
-      "Closing due to imminent shutdown"));
+  close(
+      folly::make_exception_wrapper<transport::TTransportException>(
+          transport::TTransportException::TTransportExceptionType::INTERRUPTED,
+          "Closing due to imminent shutdown"));
 }
 
 void RocketServerConnection::writeStarting() noexcept {

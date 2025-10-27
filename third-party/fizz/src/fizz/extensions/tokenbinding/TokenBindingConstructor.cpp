@@ -24,8 +24,9 @@ TokenBinding TokenBindingConstructor::createTokenBinding(
     TokenBindingKeyParameters negotiatedParameters,
     TokenBindingType type) {
   if (negotiatedParameters != TokenBindingKeyParameters::ecdsap256) {
-    throw std::runtime_error(folly::to<std::string>(
-        "key params not implemented: ", negotiatedParameters));
+    throw std::runtime_error(
+        folly::to<std::string>(
+            "key params not implemented: ", negotiatedParameters));
   }
 
   EcKeyUniquePtr ecKey(EVP_PKEY_get1_EC_KEY(&keyPair));

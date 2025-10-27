@@ -59,8 +59,9 @@ class IOBufSinkGenerator {
 
   IOBufSinkGenerator(folly::Executor* exec, PyObject* sink_callback);
 
-  void attach(folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&>
-                  gen) noexcept;
+  void attach(
+      folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&>
+          gen) noexcept;
 
   folly::coro::Task<std::unique_ptr<folly::IOBuf>> getNext();
 

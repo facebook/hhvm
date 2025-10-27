@@ -147,8 +147,9 @@ struct Bytes {
   explicit Bytes(Buf buf) noexcept : buf_(std::move(buf)) {}
   explicit Bytes(const std::string& s) : buf_(folly::IOBuf::fromString(s)) {}
   explicit Bytes(std::string_view v)
-      : buf_(std::make_unique<folly::IOBuf>(
-            folly::IOBuf::COPY_BUFFER, v.data(), v.size())) {}
+      : buf_(
+            std::make_unique<folly::IOBuf>(
+                folly::IOBuf::COPY_BUFFER, v.data(), v.size())) {}
 
   Bytes(const Bytes& other) noexcept
       : buf_(std::make_unique<folly::IOBuf>(*other.buf_)) {}
@@ -1180,9 +1181,10 @@ NativeList make_list_of(T&& t) {
         return NativeList{ListTy{std::forward<T>(t)}};
       }
     } else {
-      throw std::runtime_error(fmt::format(
-          "Unsupported specialization for make_list_of<{}>",
-          folly::pretty_name<V>()));
+      throw std::runtime_error(
+          fmt::format(
+              "Unsupported specialization for make_list_of<{}>",
+              folly::pretty_name<V>()));
     }
   }
 }

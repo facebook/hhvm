@@ -14,8 +14,7 @@ namespace memcache {
 
 template <
     class RouteHandleIf,
-    template <typename... Ignored>
-    class R,
+    template <typename... Ignored> class R,
     typename... RArgs,
     typename... Args>
 std::shared_ptr<RouteHandleIf> makeRouteHandle(Args&&... args) {
@@ -26,8 +25,7 @@ std::shared_ptr<RouteHandleIf> makeRouteHandle(Args&&... args) {
 
 template <
     class RouterInfo,
-    template <typename... Ignored>
-    class R,
+    template <typename... Ignored> class R,
     typename... RArgs,
     typename... Args>
 std::shared_ptr<typename RouterInfo::RouteHandleIf> makeRouteHandleWithInfo(

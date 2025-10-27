@@ -61,9 +61,10 @@ HandlerCallbackBase::~HandlerCallbackBase() {
     if (req_->isActive() && ewp_) {
       // We must call doException() here instead of exception() because the
       // latter may invoke ServiceInterceptor::onResponse.
-      doException(std::make_exception_ptr(TApplicationException(
-          TApplicationException::INTERNAL_ERROR,
-          "apache::thrift::HandlerCallback not completed")));
+      doException(
+          std::make_exception_ptr(TApplicationException(
+              TApplicationException::INTERNAL_ERROR,
+              "apache::thrift::HandlerCallback not completed")));
       return;
     }
     if (getEventBase()) {

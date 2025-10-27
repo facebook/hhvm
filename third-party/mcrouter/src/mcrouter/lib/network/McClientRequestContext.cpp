@@ -77,16 +77,18 @@ McClientRequestContextQueue::McClientRequestContextQueue(
     bool outOfOrder) noexcept
     : outOfOrder_(outOfOrder),
       buckets_(kDefaultNumBuckets),
-      set_(McClientRequestContextBase::UnorderedSet::bucket_traits(
-          buckets_.data(),
-          buckets_.size())) {}
+      set_(
+          McClientRequestContextBase::UnorderedSet::bucket_traits(
+              buckets_.data(),
+              buckets_.size())) {}
 
 void McClientRequestContextQueue::growBucketsArray() {
   // Allocate buckets array that is twice bigger than the current one.
   std::vector<McClientRequestContextBase::UnorderedSet::bucket_type> tmp(
       buckets_.size() * 2);
-  set_.rehash(McClientRequestContextBase::UnorderedSet::bucket_traits(
-      tmp.data(), tmp.size()));
+  set_.rehash(
+      McClientRequestContextBase::UnorderedSet::bucket_traits(
+          tmp.data(), tmp.size()));
   // Use swap here, since it has better defined behaviour regarding iterators.
   buckets_.swap(tmp);
 }

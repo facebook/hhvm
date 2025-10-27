@@ -99,8 +99,10 @@ void PendingChanges::startRefusingSyncs(std::string_view reason) {
 
 void PendingChanges::addSync(folly::Promise<folly::Unit> promise) {
   if (refuseSyncs_) {
-    promise.setException(std::runtime_error(fmt::format(
-        "Watch is shutting down because ... {}", refuseSyncsReason_)));
+    promise.setException(
+        std::runtime_error(
+            fmt::format(
+                "Watch is shutting down because ... {}", refuseSyncsReason_)));
     return;
   }
   syncs_.push_back(std::move(promise));

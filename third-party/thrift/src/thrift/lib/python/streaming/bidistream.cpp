@@ -81,12 +81,12 @@ makeTransformFunc(PyObject* bidi, folly::Executor* exec) {
   }
 
   // Capture bidi and exec for use in the transformation
-  return
-      [bidi, exec](folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&>
-                       input_agen)
-          -> folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&> {
-        return transformAsyncGeneratorImpl(std::move(input_agen), bidi, exec);
-      };
+  return [bidi, exec](
+             folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&>
+                 input_agen)
+             -> folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&> {
+    return transformAsyncGeneratorImpl(std::move(input_agen), bidi, exec);
+  };
 }
 
 #endif // FOLLY_HAS_COROUTINES

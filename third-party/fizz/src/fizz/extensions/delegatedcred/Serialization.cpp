@@ -86,9 +86,10 @@ std::unique_ptr<SelfDelegatedCredential> loadDCFromPEM(
 
   if (!(keyHeaderPtr != std::string::npos &&
         keyFooderPtr != std::string::npos)) {
-    throw std::runtime_error(folly::sformat(
-        "Failed to load delegated credential key from pem, expected label {} which was not found",
-        dcKeyHeader));
+    throw std::runtime_error(
+        folly::sformat(
+            "Failed to load delegated credential key from pem, expected label {} which was not found",
+            dcKeyHeader));
   }
   // Replace out custom dc key labels with the standard private key labels so
   // the key can be read as normal
@@ -112,9 +113,10 @@ std::unique_ptr<SelfDelegatedCredential> loadDCFromPEM(
   auto credDataEndPtr = combinedPemData.find(dcFooter);
   if (!(credDataPtr != std::string::npos &&
         credDataEndPtr != std::string::npos)) {
-    throw std::runtime_error(folly::sformat(
-        "Failed to load delegated credential from pem, expected label {} which was not found",
-        dcHeader));
+    throw std::runtime_error(
+        folly::sformat(
+            "Failed to load delegated credential from pem, expected label {} which was not found",
+            dcHeader));
   }
   folly::Optional<DelegatedCredential> cred;
   try {
@@ -124,13 +126,16 @@ std::unique_ptr<SelfDelegatedCredential> loadDCFromPEM(
     data.erase(remove_if(data.begin(), data.end(), ::isspace), data.end());
     auto credData = folly::base64Decode(data);
     std::vector<Extension> credVec;
-    credVec.emplace_back(Extension{
-        ExtensionType::delegated_credential,
-        folly::IOBuf::copyBuffer(std::move(credData))});
+    credVec.emplace_back(
+        Extension{
+            ExtensionType::delegated_credential,
+            folly::IOBuf::copyBuffer(std::move(credData))});
     cred = getExtension<DelegatedCredential>(std::move(credVec));
   } catch (const std::exception& e) {
-    throw std::runtime_error(folly::sformat(
-        "Failed to decode delegated credential with exception {}", e.what()));
+    throw std::runtime_error(
+        folly::sformat(
+            "Failed to decode delegated credential with exception {}",
+            e.what()));
   }
   // Note we currently only support P256 this will throw if there is a mismatch
   // in the delegated creds expected verification aglorithm

@@ -128,8 +128,8 @@ class RocketClientChannelTest : public testing::Test {
   template <typename F>
   test::TestServiceAsyncClient makeClient(
       folly::EventBase& evb, F&& configureChannel) {
-    auto channel =
-        RocketClientChannel::newChannel(folly::AsyncSocket::UniquePtr(
+    auto channel = RocketClientChannel::newChannel(
+        folly::AsyncSocket::UniquePtr(
             new folly::AsyncSocket(&evb, runner_.getAddress())));
     configureChannel(*channel);
     return test::TestServiceAsyncClient(std::move(channel));
@@ -373,8 +373,9 @@ folly::SemiFuture<ClientBufferedStream<int8_t>> echoIOBufAsByteStreamSemiFuture(
 TEST_F(RocketClientChannelTest, BatchedWriteFastFirstResponseFiberSync) {
   folly::EventBase evb;
   auto* slowWritingSocket = new SlowWritingSocket(&evb, runner_.getAddress());
-  test::TestServiceAsyncClient client(RocketClientChannel::newChannel(
-      folly::AsyncSocket::UniquePtr(slowWritingSocket)));
+  test::TestServiceAsyncClient client(
+      RocketClientChannel::newChannel(
+          folly::AsyncSocket::UniquePtr(slowWritingSocket)));
 
   // Allow first requests to be written completely to the socket quickly, but
   // hold off on sending the complete second request.
@@ -428,8 +429,9 @@ TEST_F(RocketClientChannelTest, BatchedWriteFastFirstResponseFiberSync) {
 TEST_F(RocketClientChannelTest, BatchedWriteFastFirstResponseSemiFuture) {
   folly::EventBase evb;
   auto* slowWritingSocket = new SlowWritingSocket(&evb, runner_.getAddress());
-  test::TestServiceAsyncClient client(RocketClientChannel::newChannel(
-      folly::AsyncSocket::UniquePtr(slowWritingSocket)));
+  test::TestServiceAsyncClient client(
+      RocketClientChannel::newChannel(
+          folly::AsyncSocket::UniquePtr(slowWritingSocket)));
 
   // Allow first requests to be written completely to the socket quickly, but
   // hold off on sending the complete second request.
@@ -487,8 +489,9 @@ void doFailLastRequestsInBatchFiber(
     folly::Optional<size_t> failLastRequestWithNBytesWritten = folly::none) {
   folly::EventBase evb;
   auto* slowWritingSocket = new SlowWritingSocket(&evb, serverAddr);
-  test::TestServiceAsyncClient client(RocketClientChannel::newChannel(
-      folly::AsyncSocket::UniquePtr(slowWritingSocket)));
+  test::TestServiceAsyncClient client(
+      RocketClientChannel::newChannel(
+          folly::AsyncSocket::UniquePtr(slowWritingSocket)));
 
   // Allow first requests to be written completely to the socket quickly, but
   // hold off on sending the complete second request.
@@ -556,8 +559,9 @@ void doFailLastRequestsInBatchSemiFuture(
     folly::Optional<size_t> failLastRequestWithNBytesWritten = folly::none) {
   folly::EventBase evb;
   auto* slowWritingSocket = new SlowWritingSocket(&evb, serverAddr);
-  test::TestServiceAsyncClient client(RocketClientChannel::newChannel(
-      folly::AsyncSocket::UniquePtr(slowWritingSocket)));
+  test::TestServiceAsyncClient client(
+      RocketClientChannel::newChannel(
+          folly::AsyncSocket::UniquePtr(slowWritingSocket)));
 
   // Allow first requests to be written completely to the socket quickly, but
   // hold off on sending the complete second request.
@@ -644,8 +648,9 @@ TEST_F(
     RocketClientChannelTest, BatchedWriteRequestResponseWithFastClientTimeout) {
   folly::EventBase evb;
   auto* slowWritingSocket = new SlowWritingSocket(&evb, runner_.getAddress());
-  test::TestServiceAsyncClient client(RocketClientChannel::newChannel(
-      folly::AsyncSocket::UniquePtr(slowWritingSocket)));
+  test::TestServiceAsyncClient client(
+      RocketClientChannel::newChannel(
+          folly::AsyncSocket::UniquePtr(slowWritingSocket)));
 
   // Hold off on writing any requests. This ensures that this test exercises the
   // path where a client request timeout fires while the request is still in the
@@ -724,8 +729,9 @@ TEST_F(
 TEST_F(RocketClientChannelTest, StreamInitialResponseBeforeBatchedWriteFails) {
   folly::EventBase evb;
   auto* slowWritingSocket = new SlowWritingSocket(&evb, runner_.getAddress());
-  test::TestServiceAsyncClient client(RocketClientChannel::newChannel(
-      folly::AsyncSocket::UniquePtr(slowWritingSocket)));
+  test::TestServiceAsyncClient client(
+      RocketClientChannel::newChannel(
+          folly::AsyncSocket::UniquePtr(slowWritingSocket)));
 
   // Ensure the first request is written completely to the socket quickly, but
   // force the write for the whole batch of requests to fail.

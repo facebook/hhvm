@@ -54,11 +54,12 @@ LocalSSLSessionCache::LocalSSLSessionCache(
     uint32_t maxCacheSize,
     uint32_t cacheCullSize)
     : sessionCache(maxCacheSize, cacheCullSize) {
-  sessionCache.setPruneHook(std::bind(
-      &LocalSSLSessionCache::pruneSessionCallback,
-      this,
-      std::placeholders::_1,
-      std::placeholders::_2));
+  sessionCache.setPruneHook(
+      std::bind(
+          &LocalSSLSessionCache::pruneSessionCallback,
+          this,
+          std::placeholders::_1,
+          std::placeholders::_2));
 }
 
 void LocalSSLSessionCache::pruneSessionCallback(
@@ -85,8 +86,9 @@ ShardedLocalSSLSessionCache::ShardedLocalSSLSessionCache(
     cacheCullSize = 1;
   }
   for (uint32_t i = 0; i < n_buckets; i++) {
-    caches_.push_back(std::unique_ptr<LocalSSLSessionCache>(
-        new LocalSSLSessionCache(maxCacheSize, cacheCullSize)));
+    caches_.push_back(
+        std::unique_ptr<LocalSSLSessionCache>(
+            new LocalSSLSessionCache(maxCacheSize, cacheCullSize)));
   }
 }
 

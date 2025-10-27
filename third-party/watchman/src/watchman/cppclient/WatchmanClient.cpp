@@ -27,14 +27,15 @@ WatchmanClient::WatchmanClient(
     std::optional<std::string>&& socketPath,
     folly::Executor* cpuExecutor,
     ErrorCallback errorCallback)
-    : conn_(std::make_shared<WatchmanConnection>(
-          eventBase,
-          std::move(socketPath),
-          std::optional<WatchmanConnection::Callback>(
-              [this](Try<dynamic>&& data) {
-                connectionCallback(std::move(data));
-              }),
-          cpuExecutor)),
+    : conn_(
+          std::make_shared<WatchmanConnection>(
+              eventBase,
+              std::move(socketPath),
+              std::optional<WatchmanConnection::Callback>(
+                  [this](Try<dynamic>&& data) {
+                    connectionCallback(std::move(data));
+                  }),
+              cpuExecutor)),
       errorCallback_(std::move(errorCallback)) {}
 
 void WatchmanClient::connectionCallback(Try<dynamic>&& try_data) {

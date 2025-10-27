@@ -62,9 +62,8 @@ void HTTPStreamSource::headers(std::unique_ptr<HTTPMessage> msg, bool eom) {
   }
 }
 
-auto HTTPStreamSource::body(BufQueue body,
-                            uint16_t padding,
-                            bool eom) -> FlowControlState {
+auto HTTPStreamSource::body(BufQueue body, uint16_t padding, bool eom)
+    -> FlowControlState {
   auto length = body.chainLength();
   if (!validateStateTransition(HTTPTransactionIngressSM::Event::onBody, eom)) {
     return FlowControlState::ERROR;

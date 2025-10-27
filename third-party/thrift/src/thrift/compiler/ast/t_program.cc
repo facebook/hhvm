@@ -245,8 +245,9 @@ const t_named* t_program::find_global_by_id(scope::identifier id) const {
 
         // Or an unscoped definition with the same scope name as the local
         // program.
-        return global_scope_->find(scope::identifier{
-            scope::enum_id{id.loc, name(), id.scope, id.name}});
+        return global_scope_->find(
+            scope::identifier{
+                scope::enum_id{id.loc, name(), id.scope, id.name}});
       },
       [&](scope::enum_id&& id) -> const t_named* {
         return global_scope_->find(id);

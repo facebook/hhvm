@@ -78,9 +78,11 @@ using namespace apache::thrift::transport;
 using namespace testutil::testservice;
 
 TransportCompatibilityTest::TransportCompatibilityTest()
-    : handler_(std::make_shared<
-               StrictMock<testutil::testservice::TestServiceMock>>()),
-      server_(std::make_unique<
+    : handler_(
+          std::make_shared<
+              StrictMock<testutil::testservice::TestServiceMock>>()),
+      server_(
+          std::make_unique<
               SampleServer<testutil::testservice::TestServiceMock>>(handler_)) {
 }
 
@@ -1374,9 +1376,9 @@ void TransportCompatibilityTest::TestOnWriteQuiescence() {
    protected:
     void onConnection(rocket::IRocketServerConnection& connection) override {
       connection.setOnWriteQuiescenceCallback(
-          [this,
-           callCounter = 0](rocket::IRocketServerConnection::ReadPausableHandle
-                                handle) mutable {
+          [this, callCounter = 0](
+              rocket::IRocketServerConnection::ReadPausableHandle
+                  handle) mutable {
             if (callCounter == 0) {
               ++callCounter;
               state_.resumeHandle.emplace(std::move(handle).pause());

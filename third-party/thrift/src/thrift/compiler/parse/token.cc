@@ -30,8 +30,7 @@ struct token_kind_info {
   const char* name;
 };
 
-#define THRIFT_KEYWORD(kw) \
-  { tok::kw_##kw, #kw }
+#define THRIFT_KEYWORD(kw) {tok::kw_##kw, #kw}
 
 constexpr token_kind_info info[] = {
     {tok::eof, "EOF"},

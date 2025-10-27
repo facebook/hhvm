@@ -102,8 +102,9 @@ class DelegatedCredentialUtilsTest : public Test {
     clock_ = std::make_shared<MockClock>();
     // Default return time to June 10, 2019 6:08:58 PM
     ON_CALL(*clock_, getCurrentTime())
-        .WillByDefault(Return(std::chrono::system_clock::time_point(
-            std::chrono::seconds(1560190138))));
+        .WillByDefault(Return(
+            std::chrono::system_clock::time_point(
+                std::chrono::seconds(1560190138))));
   }
 
   void expectThrows(

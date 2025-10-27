@@ -164,8 +164,10 @@ Buf KTLSCryptoParams::toSockoptFormat() const {
   static_assert(
       kLegacyFixedIVSize == TLS_CIPHER_AES_GCM_256_SALT_SIZE,
       "mismatched sizes");
-  cursor.push(folly::ByteRange(
-      realIV.data() + kLegacyFixedIVSize, realIV.size() - kLegacyFixedIVSize));
+  cursor.push(
+      folly::ByteRange(
+          realIV.data() + kLegacyFixedIVSize,
+          realIV.size() - kLegacyFixedIVSize));
 
   // The key
   cursor.push(key.key->coalesce());
@@ -211,7 +213,7 @@ static folly::Optional<ConnectedPair> makeConnectedTCPPair() {
     return result;
   }
 
-  struct sockaddr_in addr {};
+  struct sockaddr_in addr{};
   addr.sin_family = AF_INET;
   addr.sin_port = 0;
   addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
@@ -259,7 +261,7 @@ bool platformSupportsKTLS() {
     }
 
     // Check for both TX and RX support for TLS 1.3
-    struct tls12_crypto_info_aes_gcm_128 fake_info {};
+    struct tls12_crypto_info_aes_gcm_128 fake_info{};
     fake_info.info.version = TLS_1_3_VERSION;
     fake_info.info.cipher_type = TLS_CIPHER_AES_GCM_128;
     if (setsockopt(fd, SOL_TLS, TLS_RX, &fake_info, sizeof(fake_info)) < 0) {

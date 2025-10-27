@@ -111,8 +111,9 @@ class t_const_value {
 
   int64_t get_integer() const {
     if (kind_ != CV_INTEGER && kind_ != CV_BOOL) {
-      throw std::runtime_error(fmt::format(
-          "invalid const value access: {}", fmt::underlying(kind_)));
+      throw std::runtime_error(
+          fmt::format(
+              "invalid const value access: {}", fmt::underlying(kind_)));
     }
     return std::get<int64_t>(value_);
   }
@@ -316,10 +317,11 @@ class t_const_value {
 
   void check_kind(t_const_value_kind expected) const {
     if (kind_ != expected) {
-      throw std::runtime_error(fmt::format(
-          "invalid const value access: expected '{}', got '{}'",
-          kind_to_string(expected),
-          kind_to_string(kind_)));
+      throw std::runtime_error(
+          fmt::format(
+              "invalid const value access: expected '{}', got '{}'",
+              kind_to_string(expected),
+              kind_to_string(kind_)));
     }
   }
 };

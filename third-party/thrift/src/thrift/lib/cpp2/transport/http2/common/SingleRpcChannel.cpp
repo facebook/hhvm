@@ -317,11 +317,12 @@ void SingleRpcChannel::onH2StreamClosed(
     // at "error" in more detail.
     ex->setOptions(TTransportException::CHANNEL_IS_VALID);
     auto evb = callback_->getEventBase();
-    evb->runInEventBaseThread([evbCallback = std::move(callback_),
-                               evbEx = std::move(ex)]() mutable {
-      evbCallback->onError(folly::make_exception_wrapper<TTransportException>(
-          std::move(*evbEx)));
-    });
+    evb->runInEventBaseThread(
+        [evbCallback = std::move(callback_), evbEx = std::move(ex)]() mutable {
+          evbCallback->onError(
+              folly::make_exception_wrapper<TTransportException>(
+                  std::move(*evbEx)));
+        });
   }
   httpTransaction_ = nullptr;
 }
@@ -456,8 +457,9 @@ void SingleRpcChannel::onThriftResponse() noexcept {
     VLOG(2) << "Contents has not been set.";
     auto evb = callback_->getEventBase();
     evb->runInEventBaseThread([evbCallback = std::move(callback_)]() mutable {
-      evbCallback->onError(folly::make_exception_wrapper<TTransportException>(
-          TTransportException::END_OF_FILE, "No content"));
+      evbCallback->onError(
+          folly::make_exception_wrapper<TTransportException>(
+              TTransportException::END_OF_FILE, "No content"));
     });
     return;
   }

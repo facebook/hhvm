@@ -155,14 +155,16 @@ TEST_F(TransportUpgradeTest, RawClientRocketUpgradeAsyncEnabled) {
 }
 
 TEST_F(TransportUpgradeTest, RawClientRocketUpgradeSyncEnabled_BinaryProtocol) {
-  testRawClientRocketUpgradeSync(HeaderClientChannel::Options().setProtocolId(
-      protocol::T_BINARY_PROTOCOL));
+  testRawClientRocketUpgradeSync(
+      HeaderClientChannel::Options().setProtocolId(
+          protocol::T_BINARY_PROTOCOL));
 }
 
 TEST_F(
     TransportUpgradeTest, RawClientRocketUpgradeAsyncEnabled_BinaryProtocol) {
-  testRawClientRocketUpgradeAsync(HeaderClientChannel::Options().setProtocolId(
-      protocol::T_BINARY_PROTOCOL));
+  testRawClientRocketUpgradeAsync(
+      HeaderClientChannel::Options().setProtocolId(
+          protocol::T_BINARY_PROTOCOL));
 }
 
 TEST_F(TransportUpgradeTest, RawClientRocketUpgradeOneway) {

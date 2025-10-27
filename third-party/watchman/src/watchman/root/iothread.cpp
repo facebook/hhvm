@@ -341,14 +341,15 @@ InMemoryView::IsDesynced InMemoryView::processAllPending(
     if (processedPaths_) {
       // Record a fake entry to indicate when we unblocked the cookie in the
       // processed paths log.
-      processedPaths_->write(PendingChangeLogEntry{
-          PendingChange{
-              pendingCookie,
-              std::chrono::system_clock::now(),
-              W_PENDING_CRAWL_ONLY},
-          // This error code is unlikely to ever collide with reality.
-          make_error_code(error_code::too_many_symbolic_link_levels),
-          FileInformation{}});
+      processedPaths_->write(
+          PendingChangeLogEntry{
+              PendingChange{
+                  pendingCookie,
+                  std::chrono::system_clock::now(),
+                  W_PENDING_CRAWL_ONLY},
+              // This error code is unlikely to ever collide with reality.
+              make_error_code(error_code::too_many_symbolic_link_levels),
+              FileInformation{}});
     }
     root->cookies.notifyCookie(pendingCookie);
   }

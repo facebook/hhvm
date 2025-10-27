@@ -287,11 +287,12 @@ class hoist_annotated_types {
     } else if (auto existing = prog_.find<t_type>({name, type.src_range()})) {
       if (existing->get_true_type()->get_full_name() !=
           type->get_true_type()->get_full_name()) {
-        throw std::runtime_error(fmt::format(
-            "Type conflict: {} is already defined as {} but we need to define it as {}",
-            name,
-            existing->get_true_type()->get_full_name(),
-            type->get_true_type()->get_full_name()));
+        throw std::runtime_error(
+            fmt::format(
+                "Type conflict: {} is already defined as {} but we need to define it as {}",
+                name,
+                existing->get_true_type()->get_full_name(),
+                type->get_true_type()->get_full_name()));
       }
     } else {
       auto typedf = std::make_unique<t_typedef>(&prog_, name, type);

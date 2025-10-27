@@ -426,10 +426,11 @@ void THttpClientParser::appendHeadersToQueue(
   for (const auto& headerToAppend : headersToAppend) {
     if (headerToAppend.first.find(CRLF) != std::string::npos ||
         headerToAppend.second.find(CRLF) != std::string::npos) {
-      throw TTransportException(fmt::format(
-          "HTTP Headers cannot contain \\r\\n. Header: {}:{}",
-          folly::cEscape<std::string>(headerToAppend.first),
-          folly::cEscape<std::string>(headerToAppend.second)));
+      throw TTransportException(
+          fmt::format(
+              "HTTP Headers cannot contain \\r\\n. Header: {}:{}",
+              folly::cEscape<std::string>(headerToAppend.first),
+              folly::cEscape<std::string>(headerToAppend.second)));
     }
     queue.append(headerToAppend.first);
     queue.append(": ");

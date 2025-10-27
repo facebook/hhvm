@@ -67,9 +67,10 @@ std::unique_ptr<folly::IOBuf> ZstdCompressionCodec::compress(
       zstdCDict_.get());
 
   if (ZSTD_isError(compressedSize)) {
-    throw std::runtime_error(fmt::format(
-        "ZSTD codec: Failed to compress. Error: {}",
-        ZSTD_getErrorName(compressedSize)));
+    throw std::runtime_error(
+        fmt::format(
+            "ZSTD codec: Failed to compress. Error: {}",
+            ZSTD_getErrorName(compressedSize)));
   }
 
   buffer->append(compressedSize);
@@ -94,9 +95,10 @@ std::unique_ptr<folly::IOBuf> ZstdCompressionCodec::uncompress(
       zstdDDict_.get());
 
   if (ZSTD_isError(bytesWritten)) {
-    throw std::runtime_error(fmt::format(
-        "ZSTD codec: decompression returned invalid value. Error: {} ",
-        ZSTD_getErrorName(bytesWritten)));
+    throw std::runtime_error(
+        fmt::format(
+            "ZSTD codec: decompression returned invalid value. Error: {} ",
+            ZSTD_getErrorName(bytesWritten)));
   }
 
   assert(bytesWritten == uncompressedLength);

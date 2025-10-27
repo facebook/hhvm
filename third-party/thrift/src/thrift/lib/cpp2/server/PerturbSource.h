@@ -34,8 +34,9 @@ class PerturbSource {
   PerturbSource(std::chrono::milliseconds interval = std::chrono::seconds(30)) {
     auto task =
         co_withExecutor(folly::getGlobalCPUExecutor(), updatePerturb(interval));
-    asyncScope_.add(folly::coro::co_withCancellation(
-        cancellation_.getToken(), std::move(task)));
+    asyncScope_.add(
+        folly::coro::co_withCancellation(
+            cancellation_.getToken(), std::move(task)));
   }
 
   ~PerturbSource() {

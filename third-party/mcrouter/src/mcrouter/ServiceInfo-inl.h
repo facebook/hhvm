@@ -253,8 +253,9 @@ class GetBucketCommandDispatcher {
           baton.wait();
           return keyBucketKeyspaceTuples;
         },
-        [ctx](folly::Try<std::unique_ptr<std::vector<KeyBucketKeyspaceTuple>>>&&
-                  data) {
+        [ctx](
+            folly::Try<std::unique_ptr<std::vector<KeyBucketKeyspaceTuple>>>&&
+                data) {
           std::string str;
           const auto& tuplesPtr = *data;
           for (const auto& [key, bucket, keyspace, tenantId] : *tuplesPtr) {

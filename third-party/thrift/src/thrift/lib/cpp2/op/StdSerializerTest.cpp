@@ -56,12 +56,15 @@ void testSerialization(const S& seralizer, const T& value) {
 template <typename T, typename Tag = type::infer_tag<T>>
 void testRoundTrip(const T& value) {
   using type::StandardProtocol;
-  FBTHRIFT_SCOPED_CHECK(testSerialization<Tag>(
-      StdSerializer<Tag, StandardProtocol::Binary>(), value));
-  FBTHRIFT_SCOPED_CHECK(testSerialization<Tag>(
-      StdSerializer<Tag, StandardProtocol::Compact>(), value));
-  FBTHRIFT_SCOPED_CHECK(testSerialization<Tag>(
-      StdSerializer<Tag, StandardProtocol::SimpleJson>(), value));
+  FBTHRIFT_SCOPED_CHECK(
+      testSerialization<Tag>(
+          StdSerializer<Tag, StandardProtocol::Binary>(), value));
+  FBTHRIFT_SCOPED_CHECK(
+      testSerialization<Tag>(
+          StdSerializer<Tag, StandardProtocol::Compact>(), value));
+  FBTHRIFT_SCOPED_CHECK(
+      testSerialization<Tag>(
+          StdSerializer<Tag, StandardProtocol::SimpleJson>(), value));
 }
 
 TEST(StdSerializerTest, Struct) {

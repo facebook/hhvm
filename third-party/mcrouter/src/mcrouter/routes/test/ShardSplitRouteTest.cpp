@@ -78,8 +78,9 @@ TEST(shardSplitRoute, simpleSplit_deleteFanout) {
   constexpr size_t kNumSplits = 26 * 26 + 1;
   std::vector<std::string> allKeys{"test:123:"};
   for (size_t i = 0; i < kNumSplits - 1; ++i) {
-    allKeys.emplace_back(fmt::format(
-        "test:123{}{}:", (char)('a' + i % 26), (char)('a' + i / 26)));
+    allKeys.emplace_back(
+        fmt::format(
+            "test:123{}{}:", (char)('a' + i % 26), (char)('a' + i / 26)));
   }
 
   vector<std::shared_ptr<TestHandle>> handles{
@@ -100,7 +101,8 @@ TEST(shardSplitRoute, simpleSplit_deleteFanout) {
 }
 
 TEST(shardSplitRoute, simpleSplit_deleteNoFanout) {
-  ShardSplitter splitter(folly::dynamic::object(
-      "123", folly::dynamic::object("new_split_size", kNumSplits)));
+  ShardSplitter splitter(
+      folly::dynamic::object(
+          "123", folly::dynamic::object("new_split_size", kNumSplits)));
   testShardingForOp<McDeleteRequest>(splitter);
 }

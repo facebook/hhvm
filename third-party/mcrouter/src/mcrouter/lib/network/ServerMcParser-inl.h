@@ -65,9 +65,10 @@ bool ServerMcParser<Callback>::caretMessageReady(
 template <class Callback>
 void ServerMcParser<Callback>::handleAscii(folly::IOBuf& readBuffer) {
   if (FOLLY_UNLIKELY(parser_.protocol() != mc_ascii_protocol)) {
-    std::string reason(fmt::format(
-        "Expected {} protocol, but received ASCII!",
-        mc_protocol_to_string(parser_.protocol())));
+    std::string reason(
+        fmt::format(
+            "Expected {} protocol, but received ASCII!",
+            mc_protocol_to_string(parser_.protocol())));
     callback_.parseError(carbon::Result::LOCAL_ERROR, reason);
     return;
   }

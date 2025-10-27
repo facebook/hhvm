@@ -331,8 +331,9 @@ TEST(ObjectTest, ProtocolValueToThriftValueNestedStructure) {
     myStructObj[FieldId{1}] = faultyFooVal;
 
     MyStruct myStruct;
-    EXPECT_FALSE(detail::ProtocolValueToThriftValue<type::struct_t<MyStruct>>{}(
-        myStructObj, myStruct));
+    EXPECT_FALSE(
+        detail::ProtocolValueToThriftValue<type::struct_t<MyStruct>>{}(
+            myStructObj, myStruct));
     EXPECT_TRUE(myStruct.foo().has_value());
     EXPECT_EQ(myStruct.foo().value().field_1(), 1);
   }
@@ -341,8 +342,9 @@ TEST(ObjectTest, ProtocolValueToThriftValueNestedStructure) {
     myStructObj[FieldId{2}].emplace_list().push_back(faultyFooVal);
 
     MyStruct myStruct;
-    EXPECT_FALSE(detail::ProtocolValueToThriftValue<type::struct_t<MyStruct>>{}(
-        myStructObj, myStruct));
+    EXPECT_FALSE(
+        detail::ProtocolValueToThriftValue<type::struct_t<MyStruct>>{}(
+            myStructObj, myStruct));
     EXPECT_TRUE(myStruct.foo_vector().has_value());
     EXPECT_EQ(
         myStruct,
@@ -354,8 +356,9 @@ TEST(ObjectTest, ProtocolValueToThriftValueNestedStructure) {
     myStructObj[FieldId{3}].emplace_set().insert(faultyFooVal);
 
     MyStruct myStruct;
-    EXPECT_FALSE(detail::ProtocolValueToThriftValue<type::struct_t<MyStruct>>{}(
-        myStructObj, myStruct));
+    EXPECT_FALSE(
+        detail::ProtocolValueToThriftValue<type::struct_t<MyStruct>>{}(
+            myStructObj, myStruct));
     EXPECT_TRUE(myStruct.foo_set().has_value());
     EXPECT_EQ(
         myStruct,
@@ -368,8 +371,9 @@ TEST(ObjectTest, ProtocolValueToThriftValueNestedStructure) {
         faultyFooVal, asValueStruct<type::i32_t>(42));
 
     MyStruct myStruct;
-    EXPECT_FALSE(detail::ProtocolValueToThriftValue<type::struct_t<MyStruct>>{}(
-        myStructObj, myStruct));
+    EXPECT_FALSE(
+        detail::ProtocolValueToThriftValue<type::struct_t<MyStruct>>{}(
+            myStructObj, myStruct));
     EXPECT_TRUE(myStruct.foo_key_map().has_value());
     EXPECT_EQ(
         myStruct,
@@ -382,8 +386,9 @@ TEST(ObjectTest, ProtocolValueToThriftValueNestedStructure) {
         asValueStruct<type::i32_t>(42), faultyFooVal);
 
     MyStruct myStruct;
-    EXPECT_FALSE(detail::ProtocolValueToThriftValue<type::struct_t<MyStruct>>{}(
-        myStructObj, myStruct));
+    EXPECT_FALSE(
+        detail::ProtocolValueToThriftValue<type::struct_t<MyStruct>>{}(
+            myStructObj, myStruct));
     EXPECT_TRUE(myStruct.foo_value_map().has_value());
     EXPECT_EQ(
         myStruct,
@@ -395,8 +400,9 @@ TEST(ObjectTest, ProtocolValueToThriftValueNestedStructure) {
     myStructObj[FieldId{6}] = faultyFooVal;
 
     MyStruct myStruct;
-    EXPECT_FALSE(detail::ProtocolValueToThriftValue<type::struct_t<MyStruct>>{}(
-        myStructObj, myStruct));
+    EXPECT_FALSE(
+        detail::ProtocolValueToThriftValue<type::struct_t<MyStruct>>{}(
+            myStructObj, myStruct));
     EXPECT_TRUE(myStruct.foo_adapted().has_value());
     EXPECT_EQ(myStruct.foo_adapted().value().value.field_1(), 1);
   }
@@ -405,8 +411,9 @@ TEST(ObjectTest, ProtocolValueToThriftValueNestedStructure) {
     myStructObj[FieldId{7}].emplace_list().push_back(faultyFooVal);
 
     MyStruct myStruct;
-    EXPECT_FALSE(detail::ProtocolValueToThriftValue<type::struct_t<MyStruct>>{}(
-        myStructObj, myStruct));
+    EXPECT_FALSE(
+        detail::ProtocolValueToThriftValue<type::struct_t<MyStruct>>{}(
+            myStructObj, myStruct));
     EXPECT_TRUE(myStruct.foo_vector_adapted().has_value());
     EXPECT_EQ(
         myStruct,
@@ -418,8 +425,9 @@ TEST(ObjectTest, ProtocolValueToThriftValueNestedStructure) {
     myStructObj[FieldId{8}].emplace_list().push_back(faultyFooVal);
 
     MyStruct myStruct;
-    EXPECT_FALSE(detail::ProtocolValueToThriftValue<type::struct_t<MyStruct>>{}(
-        myStructObj, myStruct));
+    EXPECT_FALSE(
+        detail::ProtocolValueToThriftValue<type::struct_t<MyStruct>>{}(
+            myStructObj, myStruct));
     EXPECT_TRUE(myStruct.foo_adapted_vector().has_value());
     EXPECT_EQ(
         myStruct,
@@ -432,8 +440,9 @@ TEST(ObjectTest, ProtocolValueToThriftValueNestedStructure) {
         asValueStruct<type::i32_t>(42), faultyFooVal);
 
     MyStruct myStruct;
-    EXPECT_FALSE(detail::ProtocolValueToThriftValue<type::struct_t<MyStruct>>{}(
-        myStructObj, myStruct));
+    EXPECT_FALSE(
+        detail::ProtocolValueToThriftValue<type::struct_t<MyStruct>>{}(
+            myStructObj, myStruct));
     EXPECT_TRUE(myStruct.foo_value_cpp_map().has_value());
     EXPECT_EQ(
         myStruct,
@@ -882,8 +891,8 @@ TEST(Value, IsIntrinsicDefaultFalse) {
       isIntrinsicDefault(asValueStruct<type::list<type::string_t>>({"foo"})));
   EXPECT_FALSE(
       isIntrinsicDefault(asValueStruct<type::set<type::i64_t>>({1, 2, 3})));
-  EXPECT_FALSE(
-      isIntrinsicDefault(asValueStruct<type::map<type::i32_t, type::string_t>>(
+  EXPECT_FALSE(isIntrinsicDefault(
+      asValueStruct<type::map<type::i32_t, type::string_t>>(
           {{1, "foo"}, {2, "bar"}})));
   testset::struct_with<type::map<type::string_t, type::i32_t>> s;
   s.field_1() = std::map<std::string, int>{{"foo", 1}, {"bar", 2}};

@@ -82,8 +82,8 @@ class PythonStreamElementEncoder final
     apache::thrift::PayloadMetadata payloadMetadata;
     payloadMetadata.exceptionMetadata() = std::move(exceptionMetadataBase);
     streamPayloadMetadata.payloadMetadata() = std::move(payloadMetadata);
-    return folly::Try<apache::thrift::StreamPayload>(
-        folly::exception_wrapper(apache::thrift::detail::EncodedStreamError(
+    return folly::Try<apache::thrift::StreamPayload>(folly::exception_wrapper(
+        apache::thrift::detail::EncodedStreamError(
             apache::thrift::StreamPayload(
                 std::move(queue).move(), std::move(streamPayloadMetadata)))));
   }

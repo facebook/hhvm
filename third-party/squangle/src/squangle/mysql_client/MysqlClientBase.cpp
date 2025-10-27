@@ -117,8 +117,9 @@ std::shared_ptr<ConnectOperation> MysqlClientBase::beginConnection(
     const std::string& database_name,
     const std::string& user,
     const std::string& password) {
-  return beginConnection(std::make_shared<const MysqlConnectionKey>(
-      host, port, database_name, user, password));
+  return beginConnection(
+      std::make_shared<const MysqlConnectionKey>(
+          host, port, database_name, user, password));
 }
 
 std::shared_ptr<ConnectOperation> MysqlClientBase::beginConnection(

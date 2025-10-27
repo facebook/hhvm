@@ -1099,7 +1099,9 @@ TYPED_TEST(AsyncFizzBaseTest, TestAlignedRecordReads) {
   this->transportReadCallback_->readDataAvailable(5);
   EXPECT_TRUE(
       eq(*IOBuf::copyBuffer("12345"), *(this->transportReadBuf_.front())));
-  { auto _ = this->transportReadBuf_.move(); }
+  {
+    auto _ = this->transportReadBuf_.move();
+  }
 
   // Subclasses would normally make this call whenever it receives a
   // WaitForData action from the state machine
@@ -1111,7 +1113,9 @@ TYPED_TEST(AsyncFizzBaseTest, TestAlignedRecordReads) {
 
   EXPECT_CALL(*this, transportDataAvailable());
   this->transportReadCallback_->readDataAvailable(100);
-  { auto _ = this->transportReadBuf_.move(); }
+  {
+    auto _ = this->transportReadBuf_.move();
+  }
 
   // When the handshake completes, read hint will be 0, subsequent allocations
   // should be equal to the default kMaxReadSize allocation.

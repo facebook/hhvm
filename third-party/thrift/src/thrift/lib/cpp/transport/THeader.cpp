@@ -116,8 +116,7 @@ bool THeader::compactFramed(uint32_t magic) {
 }
 
 template <
-    template <class BaseProt>
-    class ProtocolClass,
+    template <class BaseProt> class ProtocolClass,
     PROTOCOL_TYPES ProtocolID>
 unique_ptr<IOBuf> THeader::removeUnframed(IOBufQueue* queue, size_t& needed) {
   auto buf = queue->move();
@@ -696,8 +695,9 @@ void THeader::setHeader(std::string_view key, std::string&& value) {
 
 void THeader::setHeader(
     const char* key, size_t keyLength, const char* value, size_t valueLength) {
-  ensureWriteHeaders().emplace(std::make_pair(
-      std::string(key, keyLength), std::string(value, valueLength)));
+  ensureWriteHeaders().emplace(
+      std::make_pair(
+          std::string(key, keyLength), std::string(value, valueLength)));
 }
 
 void THeader::setHeaders(THeader::StringToStringMap&& headers) {

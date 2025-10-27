@@ -57,8 +57,7 @@ parseFrameType(folly::IOBuf& frame) noexcept {
  */
 template <
     typename ConnectionT,
-    template <typename>
-    class ConnectionAdapter,
+    template <typename> class ConnectionAdapter,
     typename RocketServerHandler>
 class IncomingFrameHandler {
   using Connection = ConnectionAdapter<ConnectionT>;
@@ -150,8 +149,9 @@ class IncomingFrameHandler {
   void handleSetupFrame(std::unique_ptr<folly::IOBuf> frame) noexcept {
     if (std::exchange(receivedSetupFrame_, true)) {
       XLOG(WARN) << "More than one SETUP frame received";
-      connection_->close(folly::make_exception_wrapper<RocketException>(
-          ErrorCode::INVALID_SETUP, "More than one SETUP frame received"));
+      connection_->close(
+          folly::make_exception_wrapper<RocketException>(
+              ErrorCode::INVALID_SETUP, "More than one SETUP frame received"));
     } else {
       auto setupFrame =
           frame_util::FrameTypeToTraits_t<FrameType::SETUP>::deserialize(
@@ -161,18 +161,20 @@ class IncomingFrameHandler {
   }
 
   void handleUnknownFrame(FrameType frameType) {
-    connection_->close(folly::make_exception_wrapper<RocketException>(
-        ErrorCode::INVALID,
-        fmt::format(
-            "$$$ Received unhandleable frame type ({})",
-            static_cast<uint8_t>(frameType))));
+    connection_->close(
+        folly::make_exception_wrapper<RocketException>(
+            ErrorCode::INVALID,
+            fmt::format(
+                "$$$ Received unhandleable frame type ({})",
+                static_cast<uint8_t>(frameType))));
   }
 
   bool hasValidSetupFrameState() const noexcept {
     bool valid = true;
     if (FOLLY_UNLIKELY(receivedSetupFrame_ == false)) {
-      connection_->close(folly::make_exception_wrapper<RocketException>(
-          ErrorCode::INVALID_SETUP, "First frame must be SETUP frame"));
+      connection_->close(
+          folly::make_exception_wrapper<RocketException>(
+              ErrorCode::INVALID_SETUP, "First frame must be SETUP frame"));
       valid = false;
     }
     return valid;
@@ -224,8 +226,9 @@ class IncomingFrameHandler {
     if (FOLLY_UNLIKELY(receivedSetupFrame_ == false)) {
       XLOG(DBG4) << "Received frame before setup frame for raw frame type "
                  << frame_util::rawFrameType<type>() << std::endl;
-      connection_->close(folly::make_exception_wrapper<RocketException>(
-          ErrorCode::INVALID_SETUP, "First frame must be SETUP frame"));
+      connection_->close(
+          folly::make_exception_wrapper<RocketException>(
+              ErrorCode::INVALID_SETUP, "First frame must be SETUP frame"));
       return;
     }
 

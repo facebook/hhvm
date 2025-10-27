@@ -99,9 +99,9 @@ void AsyncStopTLS::readEOF() noexcept {
 //
 // This is an error with respect to the StopTLS handshake negotiation.
 void AsyncStopTLS::readBufferAvailable(std::unique_ptr<folly::IOBuf>) noexcept {
-  prepareForTerminalCallback()->stopTLSError(folly::make_exception_wrapper<
-                                             std::runtime_error>(
-      "stoptls protocol error: received unexpected application data, expecting close_notify"));
+  prepareForTerminalCallback()->stopTLSError(
+      folly::make_exception_wrapper<std::runtime_error>(
+          "stoptls protocol error: received unexpected application data, expecting close_notify"));
 }
 
 // The underlying transport has closed with an error *before* we received

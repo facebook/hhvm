@@ -32,8 +32,9 @@ void ClientStateAssertions::queueAssertion(
     auto disp = state_q->second.back()->disposition;
     if (disp == ClientStateDisposition::PendingEnter ||
         disp == ClientStateDisposition::Asserted) {
-      throw std::runtime_error(fmt::format(
-          "state {} is already Asserted or PendingEnter", assertion->name));
+      throw std::runtime_error(
+          fmt::format(
+              "state {} is already Asserted or PendingEnter", assertion->name));
     }
   }
   states_[assertion->name].push_back(assertion);

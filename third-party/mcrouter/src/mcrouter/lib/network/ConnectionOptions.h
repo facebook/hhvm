@@ -34,16 +34,17 @@ struct ConnectionOptions {
       mc_protocol_t protocol,
       SecurityMech mech = SecurityMech::NONE,
       const std::optional<std::string>& serviceIdOverride = std::nullopt)
-      : accessPoint(std::make_shared<AccessPoint>(
-            host,
-            port,
-            protocol,
-            mech,
-            false,
-            false,
-            0,
-            std::nullopt,
-            serviceIdOverride)) {}
+      : accessPoint(
+            std::make_shared<AccessPoint>(
+                host,
+                port,
+                protocol,
+                mech,
+                false,
+                false,
+                0,
+                std::nullopt,
+                serviceIdOverride)) {}
 
   explicit ConnectionOptions(std::string_view serviceName)
       : accessPoint(std::make_shared<AccessPoint>(serviceName)) {}

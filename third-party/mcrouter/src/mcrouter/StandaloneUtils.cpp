@@ -188,10 +188,8 @@ void validateConfigAndExit(const McrouterOptions& libmcrouterOptions) {
 
 template <
     class RouterInfo,
-    template <class>
-    class RequestHandler,
-    template <class>
-    class ThriftRequestHandler>
+    template <class> class RequestHandler,
+    template <class> class ThriftRequestHandler>
 void validateConfigAndExitThrift(const McrouterOptions& libmcrouterOptions) {
   validateConfigAndExit<RouterInfo, RequestHandler>(libmcrouterOptions);
 }
@@ -211,10 +209,8 @@ void run(
 
 template <
     class RouterInfo,
-    template <class>
-    class RequestHandler,
-    template <class>
-    class ThriftRequestHandler>
+    template <class> class RequestHandler,
+    template <class> class ThriftRequestHandler>
 void runDual(
     const McrouterOptions& libmcrouterOptions,
     const McrouterStandaloneOptions& standaloneOptions,

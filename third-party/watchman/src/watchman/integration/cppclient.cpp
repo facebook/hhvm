@@ -81,9 +81,8 @@ int main(int argc, char** argv) {
     // Watchman will reuse the watch root, but return results as though it were
     // watching only the subdirectory.
     LOG(INFO) << "Testing relative paths";
-    auto subdir = folly::test::TemporaryDirectory{
-        /*namePrefix=*/"",
-        /*dir=*/current_dir};
+    auto subdir = folly::test::TemporaryDirectory{/*namePrefix=*/"",
+                                                  /*dir=*/current_dir};
     LOG(INFO) << "Created " << subdir.path();
     auto empty_file_path = subdir.path() / "empty_file";
     auto empty_file_relative_path =

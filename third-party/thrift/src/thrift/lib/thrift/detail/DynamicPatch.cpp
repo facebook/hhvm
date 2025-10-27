@@ -193,20 +193,22 @@ void checkSameType(
     const apache::thrift::protocol::Value& v1,
     const apache::thrift::protocol::Value& v2) {
   if (v1.getType() != v2.getType()) {
-    throw std::runtime_error(fmt::format(
-        "Value type does not match: ({}) v.s. ({})",
-        apache::thrift::util::enumNameSafe(v1.getType()),
-        apache::thrift::util::enumNameSafe(v2.getType())));
+    throw std::runtime_error(
+        fmt::format(
+            "Value type does not match: ({}) v.s. ({})",
+            apache::thrift::util::enumNameSafe(v1.getType()),
+            apache::thrift::util::enumNameSafe(v2.getType())));
   }
 }
 void checkCompatibleType(
     const ValueList& l, const apache::thrift::protocol::Value& v) {
   if (!l.empty()) {
     if (l.back().getType() != v.getType()) {
-      throw std::runtime_error(fmt::format(
-          "Type of value ({}) does not match value type of list ({}) in patch.",
-          apache::thrift::util::enumNameSafe(l.back().getType()),
-          apache::thrift::util::enumNameSafe(v.getType())));
+      throw std::runtime_error(
+          fmt::format(
+              "Type of value ({}) does not match value type of list ({}) in patch.",
+              apache::thrift::util::enumNameSafe(l.back().getType()),
+              apache::thrift::util::enumNameSafe(v.getType())));
     }
   }
 }
@@ -215,10 +217,11 @@ void checkCompatibleType(
   if (!s.empty()) {
     auto it = s.begin();
     if (it->getType() != v.getType()) {
-      throw std::runtime_error(fmt::format(
-          "Type of value ({}) does not match value type of set ({}) in patch.",
-          apache::thrift::util::enumNameSafe(it->getType()),
-          apache::thrift::util::enumNameSafe(v.getType())));
+      throw std::runtime_error(
+          fmt::format(
+              "Type of value ({}) does not match value type of set ({}) in patch.",
+              apache::thrift::util::enumNameSafe(it->getType()),
+              apache::thrift::util::enumNameSafe(v.getType())));
     }
   }
 }
@@ -587,20 +590,22 @@ void DynamicMapPatch::setOrCheckMapType(
     const protocol::Value& k, const protocol::Value& v) {
   if (keyType_) {
     if (*keyType_ != k.getType()) {
-      throw std::runtime_error(fmt::format(
-          "Type of value ({}) does not match key type of map ({}) in patch.",
-          apache::thrift::util::enumNameSafe(k.getType()),
-          apache::thrift::util::enumNameSafe(*keyType_)));
+      throw std::runtime_error(
+          fmt::format(
+              "Type of value ({}) does not match key type of map ({}) in patch.",
+              apache::thrift::util::enumNameSafe(k.getType()),
+              apache::thrift::util::enumNameSafe(*keyType_)));
     }
   } else {
     keyType_ = k.getType();
   }
   if (valueType_) {
     if (*valueType_ != v.getType()) {
-      throw std::runtime_error(fmt::format(
-          "Type of value ({}) does not match value type of map ({}) in patch.",
-          apache::thrift::util::enumNameSafe(v.getType()),
-          apache::thrift::util::enumNameSafe(*valueType_)));
+      throw std::runtime_error(
+          fmt::format(
+              "Type of value ({}) does not match value type of map ({}) in patch.",
+              apache::thrift::util::enumNameSafe(v.getType()),
+              apache::thrift::util::enumNameSafe(*valueType_)));
     }
   } else {
     valueType_ = v.getType();
@@ -1593,8 +1598,9 @@ ExtractedMasksFromPatch DynamicUnknownPatch::extractMaskFromPatch() const {
 }
 
 ExtractedMasksFromPatch DynamicPatch::extractMaskFromPatch() const {
-  return visitPatch(folly::overload(
-      [&](const auto& patch) { return patch.extractMaskFromPatch(); }));
+  return visitPatch(folly::overload([&](const auto& patch) {
+    return patch.extractMaskFromPatch();
+  }));
 }
 
 void DynamicListPatch::apply(detail::Badge, ValueList& v) const {
@@ -2141,23 +2147,24 @@ class MinSafePatchVersionVisitor {
   void clear() {}
   void recurse(const DynamicPatch& patch) {
     // recurse visitPatch
-    patch.visitPatch(folly::overload(
-        [&](const DynamicMapPatch& p) { p.customVisit(*this); },
-        [&](const DynamicStructPatch& p) { p.customVisit(*this); },
-        [&](const DynamicUnionPatch& p) { p.customVisit(*this); },
-        [&](const op::AnyPatch& p) {
-          // recurse AnyPatch in case it only uses `assign` or `clear`
-          // operations that are V1.
-          p.customVisit(*this);
-        },
-        [&](const DynamicUnknownPatch& p) {
-          // recurse DynamicUnknownPatch for `patchPrior/patchAfter` in
-          // `DynamicUnknownPatch::Category::StructuredPatch`.
-          p.customVisit(*this);
-        },
-        [&](const auto&) {
-          // Short circuit all other patch types.
-        }));
+    patch.visitPatch(
+        folly::overload(
+            [&](const DynamicMapPatch& p) { p.customVisit(*this); },
+            [&](const DynamicStructPatch& p) { p.customVisit(*this); },
+            [&](const DynamicUnionPatch& p) { p.customVisit(*this); },
+            [&](const op::AnyPatch& p) {
+              // recurse AnyPatch in case it only uses `assign` or `clear`
+              // operations that are V1.
+              p.customVisit(*this);
+            },
+            [&](const DynamicUnknownPatch& p) {
+              // recurse DynamicUnknownPatch for `patchPrior/patchAfter` in
+              // `DynamicUnknownPatch::Category::StructuredPatch`.
+              p.customVisit(*this);
+            },
+            [&](const auto&) {
+              // Short circuit all other patch types.
+            }));
   }
 
   // Map

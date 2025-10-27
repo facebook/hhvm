@@ -90,8 +90,9 @@ TEST(PoolFactory, inherit_loop) {
 }
 
 TEST(PoolFactory, inherit_cache) {
-  MockConfigApi api(folly::F14NodeMap<std::string, std::string>{
-      {"api_pool", "{ \"servers\": [ \"localhost:1234\" ] }"}});
+  MockConfigApi api(
+      folly::F14NodeMap<std::string, std::string>{
+          {"api_pool", "{ \"servers\": [ \"localhost:1234\" ] }"}});
   PoolFactory factory(
       folly::parseJson(R"({
     "pools": {

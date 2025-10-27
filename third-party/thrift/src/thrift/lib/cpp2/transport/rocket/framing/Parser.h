@@ -149,10 +149,11 @@ template <class T>
 void Parser<T>::readEOF() noexcept {
   folly::DelayedDestruction::DestructorGuard dg(&this->owner_);
 
-  owner_.close(transport::TTransportException(
-      transport::TTransportException::TTransportExceptionType::END_OF_FILE,
-      "Channel got EOF. Check for server hitting connection limit, "
-      "connection age timeout, server connection idle timeout, and server crashes."));
+  owner_.close(
+      transport::TTransportException(
+          transport::TTransportException::TTransportExceptionType::END_OF_FILE,
+          "Channel got EOF. Check for server hitting connection limit, "
+          "connection age timeout, server connection idle timeout, and server crashes."));
 }
 
 template <class T>

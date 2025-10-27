@@ -64,7 +64,8 @@ struct BaseConstructor {
     return (*static_cast<Constructor<T>*>(this))(*ref);
   }
   template <typename S>
-  PyObject* constructFrom(const std::unique_ptr<S>& ref /* RefType.Unique */
+  PyObject* constructFrom(
+      const std::unique_ptr<S>& ref /* RefType.Unique */
   ) {
     // Ref may be optional so always check if None
     if (!ref) {

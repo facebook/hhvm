@@ -21,10 +21,11 @@ struct bits24 {
 template <class U>
 struct Sizer {
   template <class T>
-  size_t getSize(const typename std::enable_if<
-                 (std::is_enum<T>::value || std::is_unsigned<T>::value) &&
-                     std::is_same<U, T>::value,
-                 T>::type&) {
+  size_t getSize(
+      const typename std::enable_if<
+          (std::is_enum<T>::value || std::is_unsigned<T>::value) &&
+              std::is_same<U, T>::value,
+          T>::type&) {
     return sizeof(T);
   }
 };
@@ -98,9 +99,10 @@ struct Writer {
 };
 
 template <class T>
-void checkWithin24bits(const typename std::enable_if<
-                       std::is_integral<T>::value && !std::is_signed<T>::value,
-                       T>::type& value) {
+void checkWithin24bits(
+    const typename std::enable_if<
+        std::is_integral<T>::value && !std::is_signed<T>::value,
+        T>::type& value) {
   const uint32_t UINT24_MAX = 0xFFFFFF;
   if (value > UINT24_MAX) {
     throw std::runtime_error("Overflow 24 bit type");
@@ -208,8 +210,9 @@ template <>
 inline void write<Extension>(
     const Extension& extension,
     folly::io::Appender& out) {
-  out.writeBE(static_cast<typename std::underlying_type<ExtensionType>::type>(
-      extension.extension_type));
+  out.writeBE(
+      static_cast<typename std::underlying_type<ExtensionType>::type>(
+          extension.extension_type));
   writeBuf<uint16_t>(extension.extension_data, out);
 }
 
@@ -671,7 +674,8 @@ template <typename T>
 std::string enumToHex(T enumValue) {
   auto value = folly::Endian::big(
       static_cast<typename std::underlying_type<T>::type>(enumValue));
-  return folly::hexlify(folly::ByteRange(
-      reinterpret_cast<const uint8_t*>(&value), sizeof(value)));
+  return folly::hexlify(
+      folly::ByteRange(
+          reinterpret_cast<const uint8_t*>(&value), sizeof(value)));
 }
 } // namespace fizz

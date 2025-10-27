@@ -57,8 +57,8 @@ class WebTransportImpl : public WebTransport {
                                quic::StreamWriteCallback* wcb) = 0;
 
     virtual folly::Expected<folly::Unit, WebTransport::ErrorCode>
-        resetWebTransportEgress(HTTPCodec::StreamID /*id*/,
-                                uint32_t /*errorCode*/) = 0;
+    resetWebTransportEgress(HTTPCodec::StreamID /*id*/,
+                            uint32_t /*errorCode*/) = 0;
 
     virtual folly::Expected<folly::Unit, WebTransport::ErrorCode>
         setWebTransportStreamPriority(HTTPCodec::StreamID /*id*/,
@@ -66,7 +66,7 @@ class WebTransportImpl : public WebTransport {
 
     virtual folly::Expected<std::pair<std::unique_ptr<folly::IOBuf>, bool>,
                             WebTransport::ErrorCode>
-        readWebTransportData(HTTPCodec::StreamID /*id*/, size_t /*max*/) = 0;
+    readWebTransportData(HTTPCodec::StreamID /*id*/, size_t /*max*/) = 0;
 
     virtual folly::Expected<folly::Unit, WebTransport::ErrorCode>
     initiateReadOnBidiStream(HTTPCodec::StreamID /*id*/,

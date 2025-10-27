@@ -806,8 +806,9 @@ protocol_value_builder::protocol_value_builder() : ty_{nullptr} {}
         return protocol_value_builder{*field->type().get_type()};
       },
       [&](auto&&) -> protocol_value_builder {
-        throw std::logic_error(fmt::format(
-            "Invalid name={} for property look-up", ty_->get_full_name()));
+        throw std::logic_error(
+            fmt::format(
+                "Invalid name={} for property look-up", ty_->get_full_name()));
       });
 }
 
@@ -834,8 +835,9 @@ protocol_value_builder::protocol_value_builder() : ty_{nullptr} {}
         return protocol_value_builder{map.key_type().deref()};
       },
       [&](auto&&) -> protocol_value_builder {
-        throw std::logic_error(fmt::format(
-            "Invalid name={} for key look-up", ty_->get_full_name()));
+        throw std::logic_error(
+            fmt::format(
+                "Invalid name={} for key look-up", ty_->get_full_name()));
       });
 }
 
@@ -859,9 +861,10 @@ protocol_value_builder::protocol_value_builder() : ty_{nullptr} {}
             "Maps should not deduce a single container element");
       },
       [&](auto&&) -> protocol_value_builder {
-        throw std::logic_error(fmt::format(
-            "Invalid name={} for container element look-up",
-            ty_->get_full_name()));
+        throw std::logic_error(
+            fmt::format(
+                "Invalid name={} for container element look-up",
+                ty_->get_full_name()));
       });
 }
 
@@ -875,10 +878,11 @@ protocol_value_builder::to_labeled_value(
 
   std::unique_ptr<t_const_value> value;
   auto raise_exception = [&] {
-    throw std::runtime_error(fmt::format(
-        "Could not match value of kind {} to type {}",
-        t_const_value::kind_to_string(protocol_value.kind()),
-        ty_->get_full_name()));
+    throw std::runtime_error(
+        fmt::format(
+            "Could not match value of kind {} to type {}",
+            t_const_value::kind_to_string(protocol_value.kind()),
+            ty_->get_full_name()));
   };
 
   // Verify that the field is a valid type for a protocol value key

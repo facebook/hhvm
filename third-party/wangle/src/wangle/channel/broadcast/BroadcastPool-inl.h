@@ -54,8 +54,9 @@ BroadcastPool<T, R, P>::BroadcastManager::getHandler() {
         if (deletingBroadcast_) {
           // setRoutingData() could result in an error that would cause the
           // BroadcastPipeline to get deleted.
-          handleConnectError(std::runtime_error(
-              "Broadcast deleted due to upstream connection error"));
+          handleConnectError(
+              std::runtime_error(
+                  "Broadcast deleted due to upstream connection error"));
           return;
         }
 

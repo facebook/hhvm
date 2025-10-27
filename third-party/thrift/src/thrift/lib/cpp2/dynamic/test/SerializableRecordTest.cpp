@@ -179,8 +179,9 @@ TEST(SerializableRecordTest, ByteArray) {
 
   EXPECT_EQ(toDebugString(r), "ByteArray(\"aGVsbG8=\")\n");
 
-  EXPECT_TRUE(folly::IOBufEqualTo{}(
-      encode(r).byteArrayDatum().value(), *makeByteArray("hello")));
+  EXPECT_TRUE(
+      folly::IOBufEqualTo{}(
+          encode(r).byteArrayDatum().value(), *makeByteArray("hello")));
 }
 
 TEST(SerializableRecordTest, Kind) {

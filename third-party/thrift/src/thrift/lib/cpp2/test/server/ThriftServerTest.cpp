@@ -259,8 +259,9 @@ TEST(ThriftServer, DefaultCompressionTest) {
 
   // no compression if client does not compress/send preference
   auto socket = folly::AsyncSocket::newSocket(&base, *sst.getAddress());
-  TestServiceAsyncClient client(HeaderClientChannel::newChannel(
-      HeaderClientChannel::WithoutRocketUpgrade{}, std::move(socket)));
+  TestServiceAsyncClient client(
+      HeaderClientChannel::newChannel(
+          HeaderClientChannel::WithoutRocketUpgrade{}, std::move(socket)));
   client.sendResponse(std::make_unique<Callback>(false, 0), 64);
   base.loop();
 
@@ -284,8 +285,9 @@ TEST(ThriftServer, HeaderTest) {
   folly::EventBase base;
   auto socket = folly::AsyncSocket::newSocket(&base, *sst.getAddress());
 
-  TestServiceAsyncClient client(HeaderClientChannel::newChannel(
-      HeaderClientChannel::WithoutRocketUpgrade{}, std::move(socket)));
+  TestServiceAsyncClient client(
+      HeaderClientChannel::newChannel(
+          HeaderClientChannel::WithoutRocketUpgrade{}, std::move(socket)));
 
   RpcOptions options;
   // Set it as a header directly so the client channel won't set a
@@ -977,8 +979,9 @@ TEST(ThriftServerDeathTest, LongShutdown_DumpSnapshot) {
               server.setNumCPUWorkerThreads(2);
               server.setThreadManagerType(
                   apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
-              server.setThreadFactory(std::make_shared<PosixThreadFactory>(
-                  PosixThreadFactory::ATTACHED));
+              server.setThreadFactory(
+                  std::make_shared<PosixThreadFactory>(
+                      PosixThreadFactory::ATTACHED));
             });
 
         long_shutdown::requestedDumpSnapshotDelay = 1s;
@@ -1005,8 +1008,9 @@ TEST(ThriftServerDeathTest, LongShutdown_DumpSnapshotTimeout) {
               server.setNumCPUWorkerThreads(2);
               server.setThreadManagerType(
                   apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
-              server.setThreadFactory(std::make_shared<PosixThreadFactory>(
-                  PosixThreadFactory::ATTACHED));
+              server.setThreadFactory(
+                  std::make_shared<PosixThreadFactory>(
+                      PosixThreadFactory::ATTACHED));
             });
 
         long_shutdown::requestedDumpSnapshotDelay = 500ms;
@@ -1429,8 +1433,9 @@ TEST_P(HeaderOrRocket, ThreadManagerAdapterManyPools) {
                        1, std::make_shared<folly::NamedThreadFactory>("cpu")),
                    nullptr}));
           tm->setNamePrefix("tm");
-          tm->threadFactory(std::make_shared<PosixThreadFactory>(
-              PosixThreadFactory::ATTACHED));
+          tm->threadFactory(
+              std::make_shared<PosixThreadFactory>(
+                  PosixThreadFactory::ATTACHED));
           tm->start();
           ts.setThreadManager(tm);
         } else {
@@ -1484,8 +1489,9 @@ TEST_P(HeaderOrRocket, ThreadManagerAdapterSinglePool) {
                   std::make_shared<folly::CPUThreadPoolExecutor>(
                       1, std::make_shared<folly::NamedThreadFactory>("cpu"))));
           tm->setNamePrefix("tm");
-          tm->threadFactory(std::make_shared<PosixThreadFactory>(
-              PosixThreadFactory::ATTACHED));
+          tm->threadFactory(
+              std::make_shared<PosixThreadFactory>(
+                  PosixThreadFactory::ATTACHED));
           tm->start();
           ts.setThreadManager(tm);
         } else {
@@ -1923,8 +1929,9 @@ TEST_P(HeaderOrRocket, ResponseWriteTimeout) {
 
   folly::Baton<> requestReceivedBaton;
   folly::Baton<> callbackInstalledBaton;
-  ScopedServerInterfaceThread ssit(std::make_shared<TestHandler>(
-      requestReceivedBaton, callbackInstalledBaton));
+  ScopedServerInterfaceThread ssit(
+      std::make_shared<TestHandler>(
+          requestReceivedBaton, callbackInstalledBaton));
 
   // Set maxResponseWriteTime to 1 second.
   auto& config =
@@ -2766,8 +2773,9 @@ TEST(ThriftServer, SSLRequiredRejectsPlaintext) {
 
   folly::EventBase base;
   auto socket = folly::AsyncSocket::newSocket(&base, *sst.getAddress());
-  TestServiceAsyncClient client(HeaderClientChannel::newChannel(
-      HeaderClientChannel::WithoutRocketUpgrade{}, std::move(socket)));
+  TestServiceAsyncClient client(
+      HeaderClientChannel::newChannel(
+          HeaderClientChannel::WithoutRocketUpgrade{}, std::move(socket)));
 
   std::string response;
   EXPECT_THROW(client.sync_sendResponse(response, 64);, TTransportException);
@@ -2919,8 +2927,9 @@ TEST(ThriftServer, SSLRequiredAllowsLocalPlaintext) {
   auto port = sst.getAddress()->getPort();
   folly::SocketAddress loopback("::1", port);
   auto socket = folly::AsyncSocket::newSocket(&base, loopback);
-  TestServiceAsyncClient client(HeaderClientChannel::newChannel(
-      HeaderClientChannel::WithoutRocketUpgrade{}, std::move(socket)));
+  TestServiceAsyncClient client(
+      HeaderClientChannel::newChannel(
+          HeaderClientChannel::WithoutRocketUpgrade{}, std::move(socket)));
 
   std::string response;
   client.sync_sendResponse(response, 64);
@@ -2944,8 +2953,9 @@ TEST(ThriftServer, SSLRequiredLoopbackUsesSSL) {
   auto sslSock = folly::AsyncSSLSocket::newSocket(ctx, &base);
   sslSock->connect(nullptr /* connect callback */, loopback);
 
-  TestServiceAsyncClient client(HeaderClientChannel::newChannel(
-      HeaderClientChannel::WithoutRocketUpgrade{}, std::move(sslSock)));
+  TestServiceAsyncClient client(
+      HeaderClientChannel::newChannel(
+          HeaderClientChannel::WithoutRocketUpgrade{}, std::move(sslSock)));
 
   std::string response;
   client.sync_sendResponse(response, 64);
@@ -2963,8 +2973,9 @@ TEST(ThriftServer, SSLPermittedAcceptsPlaintextAndSSL) {
   {
     SCOPED_TRACE("Plaintext");
     auto socket = folly::AsyncSocket::newSocket(&base, *sst.getAddress());
-    TestServiceAsyncClient client(HeaderClientChannel::newChannel(
-        HeaderClientChannel::WithoutRocketUpgrade{}, std::move(socket)));
+    TestServiceAsyncClient client(
+        HeaderClientChannel::newChannel(
+            HeaderClientChannel::WithoutRocketUpgrade{}, std::move(socket)));
 
     std::string response;
     client.sync_sendResponse(response, 64);
@@ -2978,8 +2989,9 @@ TEST(ThriftServer, SSLPermittedAcceptsPlaintextAndSSL) {
     auto sslSock = folly::AsyncSSLSocket::newSocket(ctx, &base);
     sslSock->connect(nullptr /* connect callback */, *sst.getAddress());
 
-    TestServiceAsyncClient client(HeaderClientChannel::newChannel(
-        HeaderClientChannel::WithoutRocketUpgrade{}, std::move(sslSock)));
+    TestServiceAsyncClient client(
+        HeaderClientChannel::newChannel(
+            HeaderClientChannel::WithoutRocketUpgrade{}, std::move(sslSock)));
 
     std::string response;
     client.sync_sendResponse(response, 64);
@@ -3717,9 +3729,10 @@ TEST(ThriftServer, RocketOnly) {
 
   // Header rejected
   try {
-    TestServiceAsyncClient client(HeaderClientChannel::newChannel(
-        HeaderClientChannel::WithoutRocketUpgrade{},
-        folly::AsyncSocket::newSocket(&base, *sst.getAddress())));
+    TestServiceAsyncClient client(
+        HeaderClientChannel::newChannel(
+            HeaderClientChannel::WithoutRocketUpgrade{},
+            folly::AsyncSocket::newSocket(&base, *sst.getAddress())));
     client.sync_voidResponse();
     ADD_FAILURE() << "should reject";
   } catch (const TTransportException&) {
@@ -3727,9 +3740,10 @@ TEST(ThriftServer, RocketOnly) {
 
   // Rocket via upgrade accepted
   try {
-    TestServiceAsyncClient client(HeaderClientChannel::newChannel(
-        HeaderClientChannel::WithRocketUpgrade{},
-        folly::AsyncSocket::newSocket(&base, *sst.getAddress())));
+    TestServiceAsyncClient client(
+        HeaderClientChannel::newChannel(
+            HeaderClientChannel::WithRocketUpgrade{},
+            folly::AsyncSocket::newSocket(&base, *sst.getAddress())));
     client.sync_voidResponse();
   } catch (const TTransportException&) {
     ADD_FAILURE() << "should accept";
@@ -3737,8 +3751,9 @@ TEST(ThriftServer, RocketOnly) {
 
   // Rocket accepted
   try {
-    TestServiceAsyncClient client(RocketClientChannel::newChannel(
-        folly::AsyncSocket::newSocket(&base, *sst.getAddress())));
+    TestServiceAsyncClient client(
+        RocketClientChannel::newChannel(
+            folly::AsyncSocket::newSocket(&base, *sst.getAddress())));
     client.sync_voidResponse();
   } catch (const TTransportException&) {
     ADD_FAILURE() << "should accept";
@@ -3755,9 +3770,10 @@ TEST(ThriftServer, DisableHeaderReject) {
 
   // Header traffic rejected
   try {
-    Client<TestService> client(HeaderClientChannel::newChannel(
-        HeaderClientChannel::WithoutRocketUpgrade{},
-        folly::AsyncSocket::newSocket(&base, *sst.getAddress())));
+    Client<TestService> client(
+        HeaderClientChannel::newChannel(
+            HeaderClientChannel::WithoutRocketUpgrade{},
+            folly::AsyncSocket::newSocket(&base, *sst.getAddress())));
     client.sync_voidResponse();
     ADD_FAILURE() << "should reject";
   } catch (const TTransportException&) {
@@ -3767,9 +3783,10 @@ TEST(ThriftServer, DisableHeaderReject) {
   try {
     serv->setLegacyTransport(
         apache::thrift::ThriftServer::LegacyTransport::ALLOWED);
-    Client<TestService> client(HeaderClientChannel::newChannel(
-        HeaderClientChannel::WithRocketUpgrade{},
-        folly::AsyncSocket::newSocket(&base, *sst.getAddress())));
+    Client<TestService> client(
+        HeaderClientChannel::newChannel(
+            HeaderClientChannel::WithRocketUpgrade{},
+            folly::AsyncSocket::newSocket(&base, *sst.getAddress())));
     client.sync_voidResponse();
   } catch (const TTransportException&) {
     ADD_FAILURE() << "should accept";
@@ -4486,11 +4503,13 @@ TEST_P(HeaderOrRocket, StatusOnStartingAndStopping) {
   preStartHandler->preStartDone.wait();
 
   auto clientEvbThread = std::make_shared<folly::ScopedEventBaseThread>();
-  DummyStatusAsyncClient client(PooledRequestChannel::newSyncChannel(
-      clientEvbThread,
-      [address = preStartHandler->address, this](folly::EventBase& eb) mutable {
-        return makeChannel(folly::AsyncSocket::newSocket(&eb, address));
-      }));
+  DummyStatusAsyncClient client(
+      PooledRequestChannel::newSyncChannel(
+          clientEvbThread,
+          [address = preStartHandler->address,
+           this](folly::EventBase& eb) mutable {
+            return makeChannel(folly::AsyncSocket::newSocket(&eb, address));
+          }));
 
   EXPECT_EQ(
       client.semifuture_getStatus().get(),

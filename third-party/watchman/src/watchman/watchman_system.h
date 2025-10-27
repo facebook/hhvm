@@ -171,8 +171,7 @@ char* realpath(const char* filename, char* target);
     w_paste1(sym, _reg)() {           \
       sym();                          \
     }                                 \
-  }                                   \
-  w_paste1(sym, _reg_inst);
+  } w_paste1(sym, _reg_inst);
 
 #else
 #define w_ctor_fn_type(sym) __attribute__((constructor)) void sym()

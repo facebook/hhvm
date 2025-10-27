@@ -236,17 +236,19 @@ void RocketClient::handleFrame(std::unique_ptr<folly::IOBuf> frame) {
       getPayloadSerializer()->unpack(
           serverMeta, std::move(mdPushFrame.metadata()), false /* useBinary */);
     } catch (...) {
-      close(transport::TTransportException(
-          transport::TTransportException::CORRUPTED_DATA,
-          "Failed to deserialize metadata push frame"));
+      close(
+          transport::TTransportException(
+              transport::TTransportException::CORRUPTED_DATA,
+              "Failed to deserialize metadata push frame"));
       return;
     }
     switch (serverMeta.getType()) {
       case ServerPushMetadata::Type::setupResponse: {
         sendTransportMetadataPush();
-        setServerVersion(std::min(
-            serverMeta.setupResponse()->version().value_or(0),
-            (int32_t)std::numeric_limits<int16_t>::max()));
+        setServerVersion(
+            std::min(
+                serverMeta.setupResponse()->version().value_or(0),
+                (int32_t)std::numeric_limits<int16_t>::max()));
         serverZstdSupported_ =
             serverMeta.setupResponse()->zstdSupported().value_or(false);
 
@@ -314,28 +316,31 @@ folly::Expected<folly::Unit, transport::TTransportException>
 RocketClient::handleSetupResponseCustomCompression(
     CompressionSetupResponse const& setupResponse) {
   if (!setupResponse.custom()) {
-    return folly::makeUnexpected(transport::TTransportException(
-        transport::TTransportException::NOT_SUPPORTED,
-        "Only 'custom' compressor setup response is supported on client."));
+    return folly::makeUnexpected(
+        transport::TTransportException(
+            transport::TTransportException::NOT_SUPPORTED,
+            "Only 'custom' compressor setup response is supported on client."));
   }
   const auto& customSetupResponse = setupResponse.custom().value();
 
   auto factory =
       CustomCompressorRegistry::get(*customSetupResponse.compressorName());
   if (!factory) {
-    return folly::makeUnexpected(transport::TTransportException(
-        transport::TTransportException::NOT_SUPPORTED,
-        fmt::format(
-            "Custom compressor {} is not supported on client.",
-            *customSetupResponse.compressorName())));
+    return folly::makeUnexpected(
+        transport::TTransportException(
+            transport::TTransportException::NOT_SUPPORTED,
+            fmt::format(
+                "Custom compressor {} is not supported on client.",
+                *customSetupResponse.compressorName())));
   }
 
   if (!customCompressionSetupRequest_) {
-    return folly::makeUnexpected(transport::TTransportException(
-        transport::TTransportException::INTERNAL_ERROR,
-        "Trying to setup custom compression on client without a valid request. "
-        "Maybe it has already been moved out? Did we somehow invoke "
-        "handleSetupResponseCustomCompression more than once?"));
+    return folly::makeUnexpected(
+        transport::TTransportException(
+            transport::TTransportException::INTERNAL_ERROR,
+            "Trying to setup custom compression on client without a valid request. "
+            "Maybe it has already been moved out? Did we somehow invoke "
+            "handleSetupResponseCustomCompression more than once?"));
   }
 
   std::shared_ptr<CustomCompressor> compressor;
@@ -346,17 +351,19 @@ RocketClient::handleSetupResponseCustomCompression(
         customSetupResponse,
         CustomCompressorFactory::CompressorLocation::CLIENT);
   } catch (const std::exception& ex) {
-    return folly::makeUnexpected(transport::TTransportException(
-        transport::TTransportException::INVALID_SETUP,
-        fmt::format(
-            "Failed to make custom compressor on client due to: {}",
-            ex.what())));
+    return folly::makeUnexpected(
+        transport::TTransportException(
+            transport::TTransportException::INVALID_SETUP,
+            fmt::format(
+                "Failed to make custom compressor on client due to: {}",
+                ex.what())));
   }
 
   if (!compressor) {
-    return folly::makeUnexpected(transport::TTransportException(
-        transport::TTransportException::INVALID_SETUP,
-        "Failed to make custom compressor on client."));
+    return folly::makeUnexpected(
+        transport::TTransportException(
+            transport::TTransportException::INVALID_SETUP,
+            "Failed to make custom compressor on client."));
   }
 
   if (!payloadSerializerHolder_) {
@@ -413,12 +420,13 @@ void RocketClient::handleRequestResponseFrame(
       return ctx.onErrorFrame(ErrorFrame(std::move(frame)));
     }
     default:
-      close(transport::TTransportException(
-          transport::TTransportException::TTransportExceptionType::
-              NETWORK_ERROR,
-          folly::to<std::string>(
-              "Client attempting to handle unhandleable frame type: ",
-              static_cast<uint8_t>(frameType))));
+      close(
+          transport::TTransportException(
+              transport::TTransportException::TTransportExceptionType::
+                  NETWORK_ERROR,
+              folly::to<std::string>(
+                  "Client attempting to handle unhandleable frame type: ",
+                  static_cast<uint8_t>(frameType))));
   }
 }
 
@@ -445,12 +453,13 @@ void RocketClient::handleStreamChannelFrame(
       case FrameType::EXT:
         return this->handleExtFrame(serverCallback, std::move(frame));
       default:
-        this->close(transport::TTransportException(
-            transport::TTransportException::TTransportExceptionType::
-                NETWORK_ERROR,
-            folly::to<std::string>(
-                "Client attempting to handle unhandleable frame type: ",
-                static_cast<uint8_t>(frameType))));
+        this->close(
+            transport::TTransportException(
+                transport::TTransportException::TTransportExceptionType::
+                    NETWORK_ERROR,
+                folly::to<std::string>(
+                    "Client attempting to handle unhandleable frame type: ",
+                    static_cast<uint8_t>(frameType))));
     }
   });
 }
@@ -611,8 +620,9 @@ void RocketClient::handleStreamResponse(
     if (payloadMetadataRef &&
         payloadMetadataRef->getType() ==
             PayloadMetadata::Type::exceptionMetadata) {
-      serverCallback.onStreamError(apache::thrift::detail::EncodedStreamError(
-          std::move(streamPayload.value())));
+      serverCallback.onStreamError(
+          apache::thrift::detail::EncodedStreamError(
+              std::move(streamPayload.value())));
       freeStream(streamId);
       return;
     }
@@ -720,8 +730,9 @@ void RocketClient::handleBiDiResponse(
         payloadMetadataRef->getType() ==
             PayloadMetadata::Type::exceptionMetadata) {
       bool needsFree = !serverCallback.state().sinkAlive();
-      serverCallback.onStreamError(apache::thrift::detail::EncodedStreamError(
-          std::move(streamPayload.value())));
+      serverCallback.onStreamError(
+          apache::thrift::detail::EncodedStreamError(
+              std::move(streamPayload.value())));
       if (needsFree) {
         freeStream(streamId);
       }
@@ -861,9 +872,11 @@ void RocketClient::handleExtFrame(
   auto errorMsg = fmt::format(
       "Received unhandleable ext frame type ({}) without ignore flag",
       static_cast<uint32_t>(extFrame.extFrameType()));
-  close(transport::TTransportException(
-      transport::TTransportException::TTransportExceptionType::NOT_SUPPORTED,
-      errorMsg));
+  close(
+      transport::TTransportException(
+          transport::TTransportException::TTransportExceptionType::
+              NOT_SUPPORTED,
+          errorMsg));
 }
 
 void RocketClient::handleError(RocketException&& rex) {
@@ -887,9 +900,10 @@ void RocketClient::handleError(RocketException&& rex) {
       clientState_.connState = ConnectionState::CLOSING;
 
       writeLoopCallback_.cancelLoopCallback();
-      queue_.failAllScheduledWrites(transport::TTransportException(
-          transport::TTransportException::NOT_OPEN,
-          "Connection closed by server"));
+      queue_.failAllScheduledWrites(
+          transport::TTransportException(
+              transport::TTransportException::NOT_OPEN,
+              "Connection closed by server"));
 
       notifyIfDetachable();
 
@@ -902,9 +916,10 @@ void RocketClient::handleError(RocketException&& rex) {
       break;
     }
     default: {
-      close(transport::TTransportException(
-          transport::TTransportException::END_OF_FILE,
-          enrichMsg("Unhandled error frame on control stream", rex)));
+      close(
+          transport::TTransportException(
+              transport::TTransportException::END_OF_FILE,
+              enrichMsg("Unhandled error frame on control stream", rex)));
       return;
     }
   }
@@ -1538,13 +1553,14 @@ void RocketClient::writeErr(
     }
   });
 
-  close(transport::TTransportException(
-      transport::TTransportException::UNKNOWN,
-      fmt::format(
-          "Failed to write to remote endpoint. Wrote {} bytes."
-          " AsyncSocketException: {}",
-          bytesWritten,
-          ex.what())));
+  close(
+      transport::TTransportException(
+          transport::TTransportException::UNKNOWN,
+          fmt::format(
+              "Failed to write to remote endpoint. Wrote {} bytes."
+              " AsyncSocketException: {}",
+              bytesWritten,
+              ex.what())));
 }
 
 void RocketClient::closeNow(transport::TTransportException ex) noexcept {
@@ -1642,8 +1658,9 @@ void RocketClient::freeStream(StreamId streamId) {
 }
 
 void RocketClient::contractViolation(std::string_view msg) {
-  close(makeContractViolation(fmt::format(
-      "Streaming contract violation: {}. Closing the connection.", msg)));
+  close(makeContractViolation(
+      fmt::format(
+          "Streaming contract violation: {}. Closing the connection.", msg)));
 }
 
 folly::Optional<Payload> RocketClient::bufferOrGetFullPayload(

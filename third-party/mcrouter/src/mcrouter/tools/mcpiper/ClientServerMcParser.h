@@ -125,14 +125,16 @@ class ClientServerMcParser {
   explicit ClientServerMcParser(Callback& callback)
       : replyCallback_(callback),
         requestCallback_(callback),
-        replyParser_(std::make_unique<ClientMcParser<ReplyCallback>>(
-            replyCallback_,
-            kReadBufferSizeMin,
-            kReadBufferSizeMax)),
-        requestParser_(std::make_unique<ServerMcParser<RequestCallback>>(
-            requestCallback_,
-            kReadBufferSizeMin,
-            kReadBufferSizeMax)),
+        replyParser_(
+            std::make_unique<ClientMcParser<ReplyCallback>>(
+                replyCallback_,
+                kReadBufferSizeMin,
+                kReadBufferSizeMax)),
+        requestParser_(
+            std::make_unique<ServerMcParser<RequestCallback>>(
+                requestCallback_,
+                kReadBufferSizeMin,
+                kReadBufferSizeMax)),
         expectNextDispatcher_(replyParser_.get()) {}
 
   /**

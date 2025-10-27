@@ -99,8 +99,9 @@ class MockClient : public TestServiceAsyncClient {
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(
-          folly::coro::detachOnCancel(std::move(task))));
+      co_yield folly::coro::co_result(
+          co_await folly::coro::co_awaitTry(
+              folly::coro::detachOnCancel(std::move(task))));
     } else {
       co_yield folly::coro::co_result(
           co_await folly::coro::co_awaitTry(std::move(task)));
@@ -113,8 +114,9 @@ class MockClient : public TestServiceAsyncClient {
     const folly::CancellationToken& cancelToken =
         co_await folly::coro::co_current_cancellation_token;
     if (cancelToken.canBeCancelled()) {
-      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(
-          folly::coro::detachOnCancel(std::move(task))));
+      co_yield folly::coro::co_result(
+          co_await folly::coro::co_awaitTry(
+              folly::coro::detachOnCancel(std::move(task))));
     } else {
       co_yield folly::coro::co_result(
           co_await folly::coro::co_awaitTry(std::move(task)));
@@ -160,12 +162,14 @@ void bench(size_t iters) {
           folly::coro::blockingWait(client.co_old_echoInt(0));
           break;
         case Flavor::Co_cancellable:
-          folly::coro::blockingWait(folly::coro::co_withCancellation(
-              cs.getToken(), client.co_echoInt(0)));
+          folly::coro::blockingWait(
+              folly::coro::co_withCancellation(
+                  cs.getToken(), client.co_echoInt(0)));
           break;
         case Flavor::Co_cancellable_old:
-          folly::coro::blockingWait(folly::coro::co_withCancellation(
-              cs.getToken(), client.co_old_echoInt(0)));
+          folly::coro::blockingWait(
+              folly::coro::co_withCancellation(
+                  cs.getToken(), client.co_old_echoInt(0)));
           break;
       }
     } else {
@@ -186,12 +190,14 @@ void bench(size_t iters) {
           folly::coro::blockingWait(client.co_old_noResponse(0));
           break;
         case Flavor::Co_cancellable:
-          folly::coro::blockingWait(folly::coro::co_withCancellation(
-              cs.getToken(), client.co_noResponse(0)));
+          folly::coro::blockingWait(
+              folly::coro::co_withCancellation(
+                  cs.getToken(), client.co_noResponse(0)));
           break;
         case Flavor::Co_cancellable_old:
-          folly::coro::blockingWait(folly::coro::co_withCancellation(
-              cs.getToken(), client.co_old_noResponse(0)));
+          folly::coro::blockingWait(
+              folly::coro::co_withCancellation(
+                  cs.getToken(), client.co_old_noResponse(0)));
           break;
       }
     }

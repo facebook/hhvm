@@ -920,10 +920,11 @@ struct FactsStoreImpl final
 
   Array getMethodsWithAttribute(const String& attr) override {
     if (UNLIKELY(!m_symbolMap.isAttrIndexed(*attr.get()))) {
-      HPHP::SystemLib::throwRuntimeExceptionObject(fmt::format(
-          "Queried attribute {} not found in IndexedMethodAttributes={}",
-          attr.get()->data(),
-          m_symbolMap.debugIndexedAttrs()));
+      HPHP::SystemLib::throwRuntimeExceptionObject(
+          fmt::format(
+              "Queried attribute {} not found in IndexedMethodAttributes={}",
+              attr.get()->data(),
+              m_symbolMap.debugIndexedAttrs()));
     }
     return makeVecOfStringString(
         m_symbolMap.getMethodsWithAttribute(*attr.get()));

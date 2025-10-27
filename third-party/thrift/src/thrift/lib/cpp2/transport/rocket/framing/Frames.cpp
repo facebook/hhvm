@@ -683,8 +683,10 @@ SetupFrame::SetupFrame(std::unique_ptr<folly::IOBuf> frame) {
   folly::io::Cursor cursor(frame.get());
   const StreamId zero(readStreamId(cursor));
   if (zero != StreamId{0}) {
-    throw std::runtime_error(fmt::format(
-        "SETUP frame has non zero stream id {}", static_cast<uint32_t>(zero)));
+    throw std::runtime_error(
+        fmt::format(
+            "SETUP frame has non zero stream id {}",
+            static_cast<uint32_t>(zero)));
   }
 
   FrameType type;
@@ -694,10 +696,11 @@ SetupFrame::SetupFrame(std::unique_ptr<folly::IOBuf> frame) {
   const auto minorVersion = cursor.readBE<uint16_t>();
 
   if (majorVersion != 1 || minorVersion != 0) {
-    throw std::runtime_error(fmt::format(
-        "SETUP frame received with unsupported version {}.{}",
-        majorVersion,
-        minorVersion));
+    throw std::runtime_error(
+        fmt::format(
+            "SETUP frame received with unsupported version {}.{}",
+            majorVersion,
+            minorVersion));
   }
 
   // Skip keep-alive interval (4 bytes) and max lifetime (4 bytes). These values

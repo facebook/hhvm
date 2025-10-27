@@ -35,9 +35,10 @@ class PreprocessFunctionSet {
     if (std::find_if(functions_.begin(), functions_.end(), [&](const auto& f) {
           return f.first == name;
         }) != functions_.end()) {
-      throw std::invalid_argument(fmt::format(
-          "PreprocessFunction with name {} already exists in this Thrift Server",
-          name));
+      throw std::invalid_argument(
+          fmt::format(
+              "PreprocessFunction with name {} already exists in this Thrift Server",
+              name));
     }
 
     functions_.emplace_back(name, std::move(function));

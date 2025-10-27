@@ -296,8 +296,8 @@ std::vector<ech::ParsedECHConfig> getDefaultECHConfigs() {
 
   // Set default public key (which corresponds to the private key set on the
   // server side).
-  echConfigContent.key_config.public_key =
-      folly::IOBuf::copyBuffer(folly::unhexlify(
+  echConfigContent.key_config.public_key = folly::IOBuf::copyBuffer(
+      folly::unhexlify(
           "8a07563949fac6232936ed6f36c4fa735930ecdeaef6734e314aeac35a56fd0a"));
 
   // Corresponds to the public key set above.

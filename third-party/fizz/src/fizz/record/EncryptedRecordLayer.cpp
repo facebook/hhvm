@@ -58,9 +58,10 @@ EncryptedReadRecordLayer::getDecryptedBuf(
 
     if (contentType == ContentType::alert && length == 2) {
       auto alert = decode<Alert>(cursor);
-      throw std::runtime_error(folly::to<std::string>(
-          "received plaintext alert in encrypted record: ",
-          toString(alert.description)));
+      throw std::runtime_error(
+          folly::to<std::string>(
+              "received plaintext alert in encrypted record: ",
+              toString(alert.description)));
     }
 
     // If we already know that the length of the buffer is the
@@ -146,9 +147,10 @@ EncryptedReadRecordLayer::ReadResult<TLSMessage> EncryptedReadRecordLayer::read(
     case ContentType::application_data:
       break;
     default:
-      throw std::runtime_error(folly::to<std::string>(
-          "received encrypted content type ",
-          static_cast<ContentTypeType>(msg.type)));
+      throw std::runtime_error(
+          folly::to<std::string>(
+              "received encrypted content type ",
+              static_cast<ContentTypeType>(msg.type)));
   }
 
   if (!msg.fragment || msg.fragment->empty()) {

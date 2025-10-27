@@ -36,8 +36,9 @@ TEST(TEnumTest, Unused) {
   def.append_value(std::make_unique<t_enum_value>("two", 2));
   def.append_value(std::make_unique<t_enum_value>("one", 1));
   def.append_value(std::make_unique<t_enum_value>("ntwo", -2));
-  def.append_value(std::make_unique<t_enum_value>(
-      "max", std::numeric_limits<int32_t>::max()));
+  def.append_value(
+      std::make_unique<t_enum_value>(
+          "max", std::numeric_limits<int32_t>::max()));
   EXPECT_EQ(def.unused(), 113);
 
   def.append_value(std::make_unique<t_enum_value>("t1", 113));

@@ -325,8 +325,9 @@ int serverTest() {
   EventBase evb;
   std::vector<std::unique_ptr<BogoTestServer>> servers;
   for (size_t i = 0; i <= size_t(FLAGS_resume_count); i++) {
-    servers.push_back(std::make_unique<BogoTestServer>(
-        &evb, FLAGS_port, serverContext, nullptr));
+    servers.push_back(
+        std::make_unique<BogoTestServer>(
+            &evb, FLAGS_port, serverContext, nullptr));
   }
   evb.loop();
   for (const auto& server : servers) {

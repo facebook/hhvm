@@ -30,12 +30,13 @@ FOLLY_GFLAGS_DEFINE_bool(thrift_frozen_util_mlock_on_fault, false,
 namespace apache::thrift::frozen {
 
 FrozenFileForwardIncompatible::FrozenFileForwardIncompatible(int fileVersion)
-    : std::runtime_error(folly::to<std::string>(
-          "Frozen File version ",
-          fileVersion,
-          " cannot be read, only versions up to ",
-          schema::frozen_constants::kCurrentFrozenFileVersion(),
-          " are supported.")),
+    : std::runtime_error(
+          folly::to<std::string>(
+              "Frozen File version ",
+              fileVersion,
+              " cannot be read, only versions up to ",
+              schema::frozen_constants::kCurrentFrozenFileVersion(),
+              " are supported.")),
       fileVersion_(fileVersion) {}
 
 MallocFreezer::Segment::Segment(size_t _size)

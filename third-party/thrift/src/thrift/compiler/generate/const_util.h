@@ -245,8 +245,9 @@ inline protocol::Value const_to_value(const t_const_value& val) {
         for (const auto& map_elem : val.get_map()) {
           auto field = strct.get_field_by_name(map_elem.first->get_string());
           if (!field) {
-            throw std::out_of_range(fmt::format(
-                "invalid field name: {}", map_elem.first->get_string()));
+            throw std::out_of_range(
+                fmt::format(
+                    "invalid field name: {}", map_elem.first->get_string()));
           }
           obj[FieldId{field->id()}] = const_to_value(*map_elem.second);
         }

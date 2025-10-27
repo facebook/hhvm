@@ -213,9 +213,10 @@ void RocketStreamClientCallback::timeoutExpired() noexcept {
       apache::thrift::TEnumTraits<StreamRpcErrorCode>::findName(
           StreamRpcErrorCode::CREDIT_TIMEOUT);
   streamRpcError.what_utf8() = "Stream expire timeout(no credit from client)";
-  onStreamError(folly::make_exception_wrapper<rocket::RocketException>(
-      rocket::ErrorCode::CANCELED,
-      connection_.getPayloadSerializer()->packCompact(streamRpcError)));
+  onStreamError(
+      folly::make_exception_wrapper<rocket::RocketException>(
+          rocket::ErrorCode::CANCELED,
+          connection_.getPayloadSerializer()->packCompact(streamRpcError)));
 }
 
 void RocketStreamClientCallback::setProtoId(protocol::PROTOCOL_TYPES protoId) {

@@ -86,10 +86,11 @@ TEST(ECHTest, TestOuterECHClientHelloEncode) {
 
   EXPECT_EQ(encoded.extension_type, ExtensionType::encrypted_client_hello);
   // This was captured as the expected output from generating the result.
-  EXPECT_TRUE(folly::IOBufEqualTo()(
-      encoded.extension_data,
-      folly::IOBuf::copyBuffer(
-          folly::unhexlify(kOuterECHClientHelloExtensionData))));
+  EXPECT_TRUE(
+      folly::IOBufEqualTo()(
+          encoded.extension_data,
+          folly::IOBuf::copyBuffer(
+              folly::unhexlify(kOuterECHClientHelloExtensionData))));
 }
 
 TEST(ECHTest, TestOuterECHClientHelloDecode) {

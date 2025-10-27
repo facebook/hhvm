@@ -535,10 +535,11 @@ class EphemeralRow {
   DataType convertTo(size_t colIndex) const {
     switch (getType(colIndex)) {
       case common::mysql_client::InternalRow::Type::Null:
-        throw std::runtime_error(fmt::format(
-            "Column {} ({}) has a null value",
-            colIndex,
-            getRowFields().fieldName(colIndex)));
+        throw std::runtime_error(
+            fmt::format(
+                "Column {} ({}) has a null value",
+                colIndex,
+                getRowFields().fieldName(colIndex)));
       case common::mysql_client::InternalRow::Type::Bool:
         return folly::to<DataType>(getBool(colIndex));
       case common::mysql_client::InternalRow::Type::Int64:

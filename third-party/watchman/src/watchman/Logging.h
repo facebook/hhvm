@@ -51,12 +51,13 @@ class Log {
 
     auto payload = json_object(
         {{"log",
-          typed_string_to_json(w_string::build(
-              currentTimeString(timebuf, sizeof(timebuf)),
-              ": [",
-              getThreadName(),
-              "] ",
-              std::forward<Args>(args)...))},
+          typed_string_to_json(
+              w_string::build(
+                  currentTimeString(timebuf, sizeof(timebuf)),
+                  ": [",
+                  getThreadName(),
+                  "] ",
+                  std::forward<Args>(args)...))},
          {"unilateral", json_true()},
          {"level", typed_string_to_json(logLevelToLabel(level))}});
 
@@ -79,12 +80,13 @@ class Log {
         fmt::format(fmt::runtime(format_str), std::forward<Args>(args)...);
     auto payload = json_object(
         {{"log",
-          typed_string_to_json(w_string::build(
-              currentTimeString(timebuf, sizeof(timebuf)),
-              ": [",
-              getThreadName(),
-              "] ",
-              std::move(message)))},
+          typed_string_to_json(
+              w_string::build(
+                  currentTimeString(timebuf, sizeof(timebuf)),
+                  ": [",
+                  getThreadName(),
+                  "] ",
+                  std::move(message)))},
          {"unilateral", json_true()},
          {"level", typed_string_to_json(logLevelToLabel(level))}});
 

@@ -43,24 +43,25 @@ SerializableRecord::SerializableRecord(Map&& map) noexcept
     : datum_(folly::copy_to_unique_ptr(std::move(map))) {}
 
 SerializableRecord::SerializableRecord(const SerializableRecord& other)
-    : datum_(folly::variant_match(
-          other.datum_,
-          [](const auto& datum) -> Alternative { return datum; },
-          [](const FieldSetPtr& datum) -> Alternative {
-            return folly::copy_through_unique_ptr(datum);
-          },
-          [](const ListPtr& datum) -> Alternative {
-            return folly::copy_through_unique_ptr(datum);
-          },
-          [](const SetPtr& datum) -> Alternative {
-            return folly::copy_through_unique_ptr(datum);
-          },
-          [](const MapPtr& datum) -> Alternative {
-            return folly::copy_through_unique_ptr(datum);
-          },
-          [](const SerializableRecord::ByteArray& datum) -> Alternative {
-            return datum->clone();
-          })) {}
+    : datum_(
+          folly::variant_match(
+              other.datum_,
+              [](const auto& datum) -> Alternative { return datum; },
+              [](const FieldSetPtr& datum) -> Alternative {
+                return folly::copy_through_unique_ptr(datum);
+              },
+              [](const ListPtr& datum) -> Alternative {
+                return folly::copy_through_unique_ptr(datum);
+              },
+              [](const SetPtr& datum) -> Alternative {
+                return folly::copy_through_unique_ptr(datum);
+              },
+              [](const MapPtr& datum) -> Alternative {
+                return folly::copy_through_unique_ptr(datum);
+              },
+              [](const SerializableRecord::ByteArray& datum) -> Alternative {
+                return datum->clone();
+              })) {}
 
 SerializableRecord& SerializableRecord::operator=(
     const SerializableRecord& other) {

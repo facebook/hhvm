@@ -223,8 +223,9 @@ struct HashTableLayout : public ArrayLayout<T, Item> {
         // introduced field.
         assert(
             KeyLayout::hash(KeyExtractor::getKey(*it)) ==
-            KeyLayout::hash(KeyExtractor::getViewKey(
-                this->itemField.layout.view({write.start, write.bitOffset}))));
+            KeyLayout::hash(
+                KeyExtractor::getViewKey(this->itemField.layout.view(
+                    {write.start, write.bitOffset}))));
         write = write(writeStep);
       }
     }

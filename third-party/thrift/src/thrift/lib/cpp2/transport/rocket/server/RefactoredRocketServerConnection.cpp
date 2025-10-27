@@ -467,12 +467,13 @@ void RefactoredRocketServerConnection::handleSinkFrame(
         return clientCallback.earlyCancelled();
       }
     }
-    return close(folly::make_exception_wrapper<RocketException>(
-        ErrorCode::INVALID,
-        fmt::format(
-            "Received unexpected early frame, stream id ({}) type ({})",
-            static_cast<uint32_t>(streamId),
-            static_cast<uint8_t>(frameType))));
+    return close(
+        folly::make_exception_wrapper<RocketException>(
+            ErrorCode::INVALID,
+            fmt::format(
+                "Received unexpected early frame, stream id ({}) type ({})",
+                static_cast<uint32_t>(streamId),
+                static_cast<uint8_t>(frameType))));
   }
 
   auto handleSinkPayload = [&](PayloadFrame&& payloadFrame) {
@@ -523,10 +524,11 @@ void RefactoredRocketServerConnection::handleSinkFrame(
       }
 
       if (!notViolateContract) {
-        close(folly::make_exception_wrapper<transport::TTransportException>(
-            transport::TTransportException::TTransportExceptionType::
-                STREAMING_CONTRACT_VIOLATION,
-            "receiving sink payload frame after sink completion"));
+        close(
+            folly::make_exception_wrapper<transport::TTransportException>(
+                transport::TTransportException::TTransportExceptionType::
+                    STREAMING_CONTRACT_VIOLATION,
+                "receiving sink payload frame after sink completion"));
       }
     }
   };
@@ -553,10 +555,11 @@ void RefactoredRocketServerConnection::handleSinkFrame(
       if (notViolateContract) {
         freeStream(streamId, true);
       } else {
-        close(folly::make_exception_wrapper<transport::TTransportException>(
-            transport::TTransportException::TTransportExceptionType::
-                STREAMING_CONTRACT_VIOLATION,
-            "receiving sink error frame after sink completion"));
+        close(
+            folly::make_exception_wrapper<transport::TTransportException>(
+                transport::TTransportException::TTransportExceptionType::
+                    STREAMING_CONTRACT_VIOLATION,
+                "receiving sink error frame after sink completion"));
       }
     } break;
 
@@ -567,12 +570,13 @@ void RefactoredRocketServerConnection::handleSinkFrame(
       [[fallthrough]];
 
     default:
-      close(folly::make_exception_wrapper<RocketException>(
-          ErrorCode::INVALID,
-          fmt::format(
-              "Received unhandleable frame type ({}) for sink (id {})",
-              static_cast<uint8_t>(frameType),
-              static_cast<uint32_t>(streamId))));
+      close(
+          folly::make_exception_wrapper<RocketException>(
+              ErrorCode::INVALID,
+              fmt::format(
+                  "Received unhandleable frame type ({}) for sink (id {})",
+                  static_cast<uint8_t>(frameType),
+                  static_cast<uint32_t>(streamId))));
   }
 }
 
@@ -593,12 +597,13 @@ void RefactoredRocketServerConnection::handleBiDiFrame(
       }
     }
     // unexpected frame
-    close(folly::make_exception_wrapper<RocketException>(
-        ErrorCode::INVALID,
-        fmt::format(
-            "Received unexpected early frame, stream id ({}) type ({})",
-            static_cast<uint32_t>(streamId),
-            static_cast<uint8_t>(frameType))));
+    close(
+        folly::make_exception_wrapper<RocketException>(
+            ErrorCode::INVALID,
+            fmt::format(
+                "Received unexpected early frame, stream id ({}) type ({})",
+                static_cast<uint32_t>(streamId),
+                static_cast<uint8_t>(frameType))));
     return;
   }
 
@@ -698,21 +703,23 @@ void RefactoredRocketServerConnection::handleBiDiFrame(
     case FrameType::EXT: {
       ExtFrame extFrame(streamId, flags, cursor, std::move(frame));
       if (!extFrame.hasIgnore()) {
-        close(folly::make_exception_wrapper<RocketException>(
-            ErrorCode::INVALID,
-            fmt::format(
-                "Received unsupported EXT frame type ({}) for stream (id {})",
-                static_cast<uint32_t>(extFrame.extFrameType()),
-                static_cast<uint32_t>(streamId))));
+        close(
+            folly::make_exception_wrapper<RocketException>(
+                ErrorCode::INVALID,
+                fmt::format(
+                    "Received unsupported EXT frame type ({}) for stream (id {})",
+                    static_cast<uint32_t>(extFrame.extFrameType()),
+                    static_cast<uint32_t>(streamId))));
       }
     } break;
     default: {
-      close(folly::make_exception_wrapper<RocketException>(
-          ErrorCode::INVALID,
-          fmt::format(
-              "Received unsupported frame type ({}) for bidi stream (id {})",
-              static_cast<uint8_t>(frameType),
-              static_cast<uint32_t>(streamId))));
+      close(
+          folly::make_exception_wrapper<RocketException>(
+              ErrorCode::INVALID,
+              fmt::format(
+                  "Received unsupported frame type ({}) for bidi stream (id {})",
+                  static_cast<uint8_t>(frameType),
+                  static_cast<uint32_t>(streamId))));
     }
   }
 }
@@ -811,16 +818,18 @@ void RefactoredRocketServerConnection::dropConnection(
     }
   }
 
-  close(folly::make_exception_wrapper<transport::TTransportException>(
-      transport::TTransportException::TTransportExceptionType::INTERRUPTED,
-      "Dropping connection"));
+  close(
+      folly::make_exception_wrapper<transport::TTransportException>(
+          transport::TTransportException::TTransportExceptionType::INTERRUPTED,
+          "Dropping connection"));
 }
 
 void RefactoredRocketServerConnection::closeWhenIdle() {
   socketDrainer_.drainComplete();
-  close(folly::make_exception_wrapper<transport::TTransportException>(
-      transport::TTransportException::TTransportExceptionType::INTERRUPTED,
-      "Closing due to imminent shutdown"));
+  close(
+      folly::make_exception_wrapper<transport::TTransportException>(
+          transport::TTransportException::TTransportExceptionType::INTERRUPTED,
+          "Closing due to imminent shutdown"));
 }
 
 void RefactoredRocketServerConnection::scheduleStreamTimeout(

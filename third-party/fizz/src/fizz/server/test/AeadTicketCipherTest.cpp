@@ -121,8 +121,9 @@ class AeadTicketCipherTest : public Test {
         .WillOnce(Invoke([](Buf& encoded,
                             const Factory& /* factory */,
                             const CertManager& /* certManager */) {
-          EXPECT_TRUE(folly::IOBufEqualTo()(
-              encoded, folly::IOBuf::copyBuffer("encodedticket")));
+          EXPECT_TRUE(
+              folly::IOBufEqualTo()(
+                  encoded, folly::IOBuf::copyBuffer("encodedticket")));
           return ResumptionState();
         }));
   }

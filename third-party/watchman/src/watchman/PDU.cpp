@@ -259,8 +259,10 @@ std::optional<json_ref> PduBuffer::readBserPdu(
         ERR,
         "decoding BSER failed. The first KB of the hex representation of "
         "message follows:\n{:.1024}\n",
-        folly::hexlify(folly::ByteRange{
-            reinterpret_cast<const unsigned char*>(buf + rpos), wpos - rpos}));
+        folly::hexlify(
+            folly::ByteRange{
+                reinterpret_cast<const unsigned char*>(buf + rpos),
+                wpos - rpos}));
     *jerr = e.detail;
   }
 

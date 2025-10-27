@@ -129,10 +129,11 @@ TEST_F(PreprocessedConfigDumpTest, EndToEndSuccessfulConfigDump) {
 
   // Set up expectations for the mock
   EXPECT_CALL(*mockPtr, getConfigFile(::testing::_, ::testing::_))
-      .WillOnce(::testing::DoAll(
-          ::testing::SetArgReferee<0>(opts.config_str),
-          ::testing::SetArgReferee<1>("test_config_path"),
-          ::testing::Return(true)));
+      .WillOnce(
+          ::testing::DoAll(
+              ::testing::SetArgReferee<0>(opts.config_str),
+              ::testing::SetArgReferee<1>("test_config_path"),
+              ::testing::Return(true)));
 
   TestableRouterInstance instance(std::move(opts), std::move(mockConfigApi));
 
@@ -154,7 +155,7 @@ TEST_F(PreprocessedConfigDumpTest, EndToEndSuccessfulConfigDump) {
   EXPECT_NE(content.find("test_pool"), std::string::npos);
 
   // Verify file permissions are set correctly (0664)
-  struct stat fileStat {};
+  struct stat fileStat{};
   EXPECT_EQ(0, stat(expectedFile.string().c_str(), &fileStat));
   EXPECT_EQ(
       S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH, fileStat.st_mode & 0777);
@@ -191,10 +192,11 @@ TEST_F(PreprocessedConfigDumpTest, EndToEndSameContentOnlyTouchesFile) {
   // Mock successful config file retrieval for both calls
   EXPECT_CALL(*mockPtr, getConfigFile(::testing::_, ::testing::_))
       .Times(2)
-      .WillRepeatedly(::testing::DoAll(
-          ::testing::SetArgReferee<0>(opts.config_str),
-          ::testing::SetArgReferee<1>("test_config_path"),
-          ::testing::Return(true)));
+      .WillRepeatedly(
+          ::testing::DoAll(
+              ::testing::SetArgReferee<0>(opts.config_str),
+              ::testing::SetArgReferee<1>("test_config_path"),
+              ::testing::Return(true)));
 
   TestableRouterInstance instance(std::move(opts), std::move(mockConfigApi));
 
@@ -246,10 +248,11 @@ TEST_F(PreprocessedConfigDumpTest, EndToEndDifferentContentCausesRewrite) {
 
   // First call with initial config
   EXPECT_CALL(*mockPtr, getConfigFile(::testing::_, ::testing::_))
-      .WillOnce(::testing::DoAll(
-          ::testing::SetArgReferee<0>(opts.config_str),
-          ::testing::SetArgReferee<1>("test_config_path"),
-          ::testing::Return(true)));
+      .WillOnce(
+          ::testing::DoAll(
+              ::testing::SetArgReferee<0>(opts.config_str),
+              ::testing::SetArgReferee<1>("test_config_path"),
+              ::testing::Return(true)));
 
   TestableRouterInstance instance(std::move(opts), std::move(mockConfigApi));
   instance.dumpPreprocessedConfigToDiskForTesting();
@@ -263,10 +266,11 @@ TEST_F(PreprocessedConfigDumpTest, EndToEndDifferentContentCausesRewrite) {
 
   // Second call with different config
   EXPECT_CALL(*mockPtr, getConfigFile(::testing::_, ::testing::_))
-      .WillOnce(::testing::DoAll(
-          ::testing::SetArgReferee<0>(secondConfig),
-          ::testing::SetArgReferee<1>("test_config_path"),
-          ::testing::Return(true)));
+      .WillOnce(
+          ::testing::DoAll(
+              ::testing::SetArgReferee<0>(secondConfig),
+              ::testing::SetArgReferee<1>("test_config_path"),
+              ::testing::Return(true)));
 
   instance.dumpPreprocessedConfigToDiskForTesting();
 
@@ -293,10 +297,11 @@ TEST_F(PreprocessedConfigDumpTest, EndToEndHandlesInvalidConfig) {
   std::string invalidConfig = "{ invalid json syntax [";
 
   EXPECT_CALL(*mockPtr, getConfigFile(::testing::_, ::testing::_))
-      .WillOnce(::testing::DoAll(
-          ::testing::SetArgReferee<0>(invalidConfig),
-          ::testing::SetArgReferee<1>("test_config_path"),
-          ::testing::Return(true)));
+      .WillOnce(
+          ::testing::DoAll(
+              ::testing::SetArgReferee<0>(invalidConfig),
+              ::testing::SetArgReferee<1>("test_config_path"),
+              ::testing::Return(true)));
 
   TestableRouterInstance instance(std::move(opts), std::move(mockConfigApi));
 
@@ -316,10 +321,11 @@ TEST_F(PreprocessedConfigDumpTest, EndToEndCorrectFilenameFormat) {
   auto opts = createTestOptions();
 
   EXPECT_CALL(*mockPtr, getConfigFile(::testing::_, ::testing::_))
-      .WillOnce(::testing::DoAll(
-          ::testing::SetArgReferee<0>(opts.config_str),
-          ::testing::SetArgReferee<1>("test_config_path"),
-          ::testing::Return(true)));
+      .WillOnce(
+          ::testing::DoAll(
+              ::testing::SetArgReferee<0>(opts.config_str),
+              ::testing::SetArgReferee<1>("test_config_path"),
+              ::testing::Return(true)));
 
   TestableRouterInstance instance(std::move(opts), std::move(mockConfigApi));
   instance.dumpPreprocessedConfigToDiskForTesting();

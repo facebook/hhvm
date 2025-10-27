@@ -285,10 +285,8 @@ void setupRouter(
 
 template <
     class RouterInfo,
-    template <class>
-    class RequestHandler,
-    template <class>
-    class ThriftRequestHandler>
+    template <class> class RequestHandler,
+    template <class> class ThriftRequestHandler>
 bool runServerDual(
     const McrouterOptions& mcrouterOpts,
     const McrouterStandaloneOptions& standaloneOpts,
@@ -403,8 +401,9 @@ bool runServerDual(
       }
     }
 
-    thriftServer->setAcceptorFactory(std::make_shared<ThriftAcceptorFactory>(
-        *thriftServer, std::move(aclCheckerThrift), qos));
+    thriftServer->setAcceptorFactory(
+        std::make_shared<ThriftAcceptorFactory>(
+            *thriftServer, std::move(aclCheckerThrift), qos));
 
     // Set listening port for cleartext and SSL connections
     if (standaloneOpts.thrift_port > 0) {

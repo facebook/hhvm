@@ -181,10 +181,11 @@ bool type_is_orderable_walk(
                forceCustomTypeOrderable);
   }
 
-  throw std::logic_error(fmt::format(
-      "type_is_orderable_walk unhandled t_type: {} (of type {})",
-      type.get_scoped_name(),
-      type.get_full_name()));
+  throw std::logic_error(
+      fmt::format(
+          "type_is_orderable_walk unhandled t_type: {} (of type {})",
+          type.get_scoped_name(),
+          type.get_full_name()));
 }
 
 bool field_is_orderable_walk(

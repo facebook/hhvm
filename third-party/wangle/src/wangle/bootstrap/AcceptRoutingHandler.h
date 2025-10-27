@@ -97,8 +97,9 @@ class AcceptRoutingPipelineFactory : public AcceptPipelineFactory {
 
   AcceptPipeline::Ptr newPipeline(Acceptor*) override {
     auto pipeline = AcceptPipeline::create();
-    pipeline->addBack(AcceptRoutingHandler<Pipeline, R>(
-        server_, routingHandlerFactory_, childPipelineFactory_));
+    pipeline->addBack(
+        AcceptRoutingHandler<Pipeline, R>(
+            server_, routingHandlerFactory_, childPipelineFactory_));
     pipeline->finalize();
 
     return pipeline;

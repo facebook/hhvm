@@ -87,7 +87,7 @@ static std::pair<int, int> makeTCPPair() {
     ::close(listener);
   };
 
-  struct sockaddr_in listenAddr {};
+  struct sockaddr_in listenAddr{};
   listenAddr.sin_family = AF_INET;
   listenAddr.sin_port = htons(0);
   listenAddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);

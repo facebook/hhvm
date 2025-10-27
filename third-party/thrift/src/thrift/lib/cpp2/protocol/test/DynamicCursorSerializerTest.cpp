@@ -52,8 +52,9 @@ std::string debugPrint(const folly::IOBuf& s) {
 
 TEST(DynamicCursorSerializer, UnschematizedRead) {
   DynamicCursorSerializationWrapper<BinaryProtocolReader, CompactProtocolWriter>
-      wrapper(BinarySerializer::serialize<folly::IOBufQueue>(createStruct())
-                  .move());
+      wrapper(
+          BinarySerializer::serialize<folly::IOBufQueue>(createStruct())
+              .move());
 
   // Native type reads
   auto reader = wrapper.beginRead();

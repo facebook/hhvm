@@ -51,7 +51,8 @@ template <typename T>
 struct [[deprecated(
     "Deprecated in favor of "
     "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and " // @oss-disable
-    "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]] reflect_type_class_of_thrift_class_impl {
+    "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]]
+reflect_type_class_of_thrift_class_impl {
   using type = fatal::conditional<
       is_reflectable_struct<T>::value,
       type_class::structure,
@@ -75,7 +76,8 @@ template <typename T, bool IsTry>
 struct [[deprecated(
     "Deprecated in favor of "
     "https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/languages/cpp/reflection and " // @oss-disable
-    "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]] reflect_module_tag_selector<type_class::structure, T, IsTry> {
+    "https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/op/Get.h")]]
+reflect_module_tag_selector<type_class::structure, T, IsTry> {
   using type = typename reflect_struct<T>::module;
 };
 

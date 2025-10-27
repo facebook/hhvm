@@ -36,9 +36,10 @@ TEST(FizzCommandCommonTest, TestParseECHConfigsBase64) {
       firstConfig.key_config.cipher_suites[0].aead_id,
       hpke::AeadId::TLS_AES_128_GCM_SHA256);
   ASSERT_EQ(firstConfig.maximum_name_length, 100);
-  ASSERT_TRUE(folly::IOBufEqualTo()(
-      firstConfig.key_config.public_key,
-      folly::IOBuf::copyBuffer(folly::unhexlify(expectedPubKey))));
+  ASSERT_TRUE(
+      folly::IOBufEqualTo()(
+          firstConfig.key_config.public_key,
+          folly::IOBuf::copyBuffer(folly::unhexlify(expectedPubKey))));
 }
 
 TEST(FizzCommandCommonTest, TestValidHostPortFromString) {
@@ -79,9 +80,10 @@ void checkParsedECHConfig(const ech::ParsedECHConfig& echConfig) {
   ASSERT_EQ("publicname", echConfig.public_name);
   auto expectedPubKey =
       "049d87bcaddb65d8dcf6df8b148a9679b5b710db19c95a9badfff13468cb358b4e21d24a5c826112658ebb96d64e2985dfb41c1948334391a4aa81b67837e2dbf0";
-  ASSERT_TRUE(folly::IOBufEqualTo()(
-      echConfig.key_config.public_key,
-      folly::IOBuf::copyBuffer(folly::unhexlify(expectedPubKey))));
+  ASSERT_TRUE(
+      folly::IOBufEqualTo()(
+          echConfig.key_config.public_key,
+          folly::IOBuf::copyBuffer(folly::unhexlify(expectedPubKey))));
   ASSERT_EQ(echConfig.key_config.kem_id, hpke::KEMId::secp256r1);
   ASSERT_EQ(echConfig.key_config.cipher_suites[0].kdf_id, hpke::KDFId::Sha256);
   ASSERT_EQ(

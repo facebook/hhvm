@@ -25,9 +25,10 @@ template <class RouterInfo>
 class RouteHandleTestBase : public ::testing::Test {
  public:
   RouteHandleTestBase()
-      : router_(memcache::mcrouter::CarbonRouterInstance<RouterInfo>::init(
-            "testRouter",
-            getOpts())),
+      : router_(
+            memcache::mcrouter::CarbonRouterInstance<RouterInfo>::init(
+                "testRouter",
+                getOpts())),
         poolFactory_(
             folly::dynamic::object(),
             router_->configApi(),

@@ -623,9 +623,10 @@ folly::Try<void> ContextStack::processClientInterceptorsOnRequest(
     try {
       clientInterceptor->internal_onRequest(std::move(requestInfo));
     } catch (...) {
-      exceptions.emplace_back(ClientInterceptorException::SingleExceptionInfo{
-          clientInterceptor->getName(),
-          folly::exception_wrapper(folly::current_exception())});
+      exceptions.emplace_back(
+          ClientInterceptorException::SingleExceptionInfo{
+              clientInterceptor->getName(),
+              folly::exception_wrapper(folly::current_exception())});
     }
   }
 
@@ -669,9 +670,10 @@ folly::Try<void> ContextStack::processClientInterceptorsOnResponse(
     try {
       clientInterceptor->internal_onResponse(std::move(responseInfo));
     } catch (...) {
-      exceptions.emplace_back(ClientInterceptorException::SingleExceptionInfo{
-          clientInterceptor->getName(),
-          folly::exception_wrapper(folly::current_exception())});
+      exceptions.emplace_back(
+          ClientInterceptorException::SingleExceptionInfo{
+              clientInterceptor->getName(),
+              folly::exception_wrapper(folly::current_exception())});
     }
   }
 

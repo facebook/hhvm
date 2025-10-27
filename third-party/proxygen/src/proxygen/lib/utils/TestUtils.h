@@ -27,7 +27,8 @@
   }
 #else
 #define EXPECT_DEATH_NO_CORE(tken, regex) \
-  {}
+  {                                       \
+  }
 #endif
 
 inline folly::StringPiece getContainingDirectory(folly::StringPiece input) {

@@ -306,8 +306,10 @@ TEST_F(AsyncFizzServerTest, TestAttemptVersionFallback) {
       .WillOnce(Invoke([&](AttemptVersionFallback& fallback) {
         // The mock machine does not move the read buffer so there will be a 2nd
         // ClientHello.
-        EXPECT_TRUE(IOBufEqualTo()(
-            fallback.clientHello, IOBuf::copyBuffer("ClientHelloClientHello")));
+        EXPECT_TRUE(
+            IOBufEqualTo()(
+                fallback.clientHello,
+                IOBuf::copyBuffer("ClientHelloClientHello")));
         EXPECT_EQ(fallback.sni, "www.hostname.com");
         server_.reset();
       }));

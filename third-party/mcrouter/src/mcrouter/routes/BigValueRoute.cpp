@@ -53,10 +53,9 @@ BigValueRouteOptions parseBigValueRouteSettings(const folly::dynamic& json) {
     hideReplyFlags = parseBool(*jHideReplyFlag, "hide_reply_flag");
   }
 
-  return BigValueRouteOptions{
-      /*threshold_=*/threshold,
-      /*batchSize_=*/batchSize,
-      /*hideReplyFlags_=*/hideReplyFlags};
+  return BigValueRouteOptions{/*threshold_=*/threshold,
+                              /*batchSize_=*/batchSize,
+                              /*hideReplyFlags_=*/hideReplyFlags};
 }
 
 } // namespace detail

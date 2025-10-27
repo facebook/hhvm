@@ -378,9 +378,10 @@ class default_value_checker final {
       // initializer values for structs and exceptions.
       return false;
     } else {
-      throw std::logic_error(fmt::format(
-          "[default_value_checker] unsupported type: {}",
-          type_.get_full_name()));
+      throw std::logic_error(
+          fmt::format(
+              "[default_value_checker] unsupported type: {}",
+              type_.get_full_name()));
     }
   }
 

@@ -28,8 +28,7 @@ class SetupFrame;
  */
 template <
     typename ConnectionT,
-    template <typename>
-    class ConnectionAdapter,
+    template <typename> class ConnectionAdapter,
     typename RocketServerHandler>
 class SetupFrameAcceptor {
   using Connection = ConnectionAdapter<ConnectionT>;

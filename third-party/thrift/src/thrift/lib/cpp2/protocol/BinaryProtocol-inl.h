@@ -250,7 +250,8 @@ inline uint32_t BinaryProtocolWriter::serializedFieldSize(
   return serializedSizeByte() + serializedSizeI16();
 }
 
-inline uint32_t BinaryProtocolWriter::serializedStructSize(const char* /*name*/
+inline uint32_t BinaryProtocolWriter::serializedStructSize(
+    const char* /*name*/
 ) const {
   return 0;
 }

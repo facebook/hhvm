@@ -190,19 +190,20 @@ RocketTestClient::sendRequestStreamSync(Payload request) {
             folly::make_exception_wrapper<thrift::detail::EncodedError>(
                 std::move(firstPayload.payload)));
       } else {
-        p_.setValue(ClientBufferedStream<Payload>(
-            std::move(clientStreamBridge),
-            [](folly::Try<StreamPayload>&& v) {
-              if (v.hasValue()) {
-                return folly::Try<Payload>(
-                    Payload::makeFromData(std::move(v->payload)));
-              } else if (v.hasException()) {
-                return folly::Try<Payload>(std::move(v.exception()));
-              } else {
-                return folly::Try<Payload>();
-              }
-            },
-            {100, 0}));
+        p_.setValue(
+            ClientBufferedStream<Payload>(
+                std::move(clientStreamBridge),
+                [](folly::Try<StreamPayload>&& v) {
+                  if (v.hasValue()) {
+                    return folly::Try<Payload>(
+                        Payload::makeFromData(std::move(v->payload)));
+                  } else if (v.hasException()) {
+                    return folly::Try<Payload>(std::move(v.exception()));
+                  } else {
+                    return folly::Try<Payload>();
+                  }
+                },
+                {100, 0}));
       }
       delete this;
     }
@@ -407,8 +408,9 @@ class RocketTestServer::RocketTestServerHandler : public RocketServerHandler {
 
       bool onStreamRequestN(uint64_t tokens) override {
         while (tokens-- && i_++ < n_) {
-          auto alive = clientCallback_->onStreamNext(StreamPayload{
-              folly::IOBuf::copyBuffer(folly::to<std::string>(i_)), {}});
+          auto alive = clientCallback_->onStreamNext(
+              StreamPayload{
+                  folly::IOBuf::copyBuffer(folly::to<std::string>(i_)), {}});
           DCHECK(alive);
         }
         if (i_ == n_ && iEchoHeaders_ == nEchoHeaders_) {

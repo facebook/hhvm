@@ -101,7 +101,7 @@ SinkConsumer<int32_t, bool> TestSinkService::unSubscribedSink() {
   return SinkConsumer<int32_t, bool>{
       [g = folly::makeGuard([this]() { activeSinks_--; })](
           folly::coro::AsyncGenerator<int32_t&&> gen) mutable
-      -> folly::coro::Task<bool> {
+          -> folly::coro::Task<bool> {
         EXPECT_THROW(co_await gen.next(), TApplicationException);
         co_return true;
       },
@@ -117,7 +117,7 @@ TestSinkService::semifuture_unSubscribedSinkSlowReturn() {
         return SinkConsumer<int32_t, bool>{
             [g = folly::makeGuard([this]() { activeSinks_--; })](
                 folly::coro::AsyncGenerator<int32_t&&> gen) mutable
-            -> folly::coro::Task<bool> {
+                -> folly::coro::Task<bool> {
               co_await gen.next();
               co_return true;
             },

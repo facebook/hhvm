@@ -54,10 +54,11 @@ static inline std::shared_ptr<watchman::QueryableView> reportWatcher(
     const w_string& root_path,
     std::shared_ptr<watchman::QueryableView>&& watcher) {
   if (!watcher) {
-    throw std::runtime_error(fmt::format(
-        "watcher {} returned nullptr, but should throw an exception"
-        " to correctly report initialization issues",
-        watcherName));
+    throw std::runtime_error(
+        fmt::format(
+            "watcher {} returned nullptr, but should throw an exception"
+            " to correctly report initialization issues",
+            watcherName));
   }
   watchman::log(
       watchman::ERR,

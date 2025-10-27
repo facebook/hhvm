@@ -37,8 +37,9 @@ class RandomRoute {
 
   explicit RandomRoute(std::vector<std::shared_ptr<RouteHandleIf>> children)
       : children_(std::move(children)),
-        gen_(std::ranlux24_base(
-            std::chrono::system_clock::now().time_since_epoch().count())) {
+        gen_(
+            std::ranlux24_base(
+                std::chrono::system_clock::now().time_since_epoch().count())) {
     assert(!children_.empty());
   }
 

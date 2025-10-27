@@ -160,7 +160,7 @@ class object_t {
       return [method](Self* self) -> property_dispatcher {
         return
             [self, method, cache = std::optional<whisker::object>()]() mutable
-            -> lookup_result {
+                -> lookup_result {
               if (!cache) {
                 if constexpr (std::is_same_v<T, whisker::object::ptr>) {
                   cache = (self->*method)();

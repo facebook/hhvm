@@ -152,8 +152,9 @@ void WatchmanConnection::close() {
       sock_.reset();
     });
   }
-  failQueuedCommands(make_exception_wrapper<WatchmanError>(
-      "WatchmanConnection::close() was called"));
+  failQueuedCommands(
+      make_exception_wrapper<WatchmanError>(
+          "WatchmanConnection::close() was called"));
 }
 
 // The convention for Watchman responses is that they represent

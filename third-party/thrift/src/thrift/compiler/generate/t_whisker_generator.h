@@ -453,8 +453,9 @@ class t_whisker_generator : public t_generator {
       R* ptr = (self.*function)();
       return ptr == nullptr
           ? whisker::make::null
-          : whisker::object(whisker::native_handle<std::remove_const_t<R>>(
-                whisker::manage_as_static(*ptr), proto));
+          : whisker::object(
+                whisker::native_handle<std::remove_const_t<R>>(
+                    whisker::manage_as_static(*ptr), proto));
     };
   }
   template <std::derived_from<t_node> R, typename Self>

@@ -388,10 +388,11 @@ whisker::object make_whisker_annotations(
   whisker::array::raw result;
   result.reserve(annotations.size());
   for (const t_annotation& a : annotations) {
-    result.push_back(whisker::make::map({
-        {"key", whisker::make::string(a.first)},
-        {"value", whisker::make::string(a.second.value)},
-    }));
+    result.push_back(
+        whisker::make::map({
+            {"key", whisker::make::string(a.first)},
+            {"value", whisker::make::string(a.second.value)},
+        }));
   }
   return whisker::make::array(std::move(result));
 }
@@ -807,10 +808,11 @@ class cpp_mstch_program : public mstch_program {
   mstch::node to_fatal_string_array(const std::vector<std::string>&& vec) {
     mstch::array a;
     for (size_t i = 0; i < vec.size(); i++) {
-      a.emplace_back(mstch::map{
-          {"fatal_string:name", vec.at(i)},
-          {"last?", i == vec.size() - 1},
-      });
+      a.emplace_back(
+          mstch::map{
+              {"fatal_string:name", vec.at(i)},
+              {"last?", i == vec.size() - 1},
+          });
     }
     return mstch::map{{"fatal_strings:items", a}};
   }
@@ -926,12 +928,13 @@ class cpp_mstch_program : public mstch_program {
     mstch::array a;
     for (const auto& pair : program_->namespaces()) {
       if (!pair.second.empty()) {
-        a.emplace_back(mstch::map{
-            {"language:safe_name", get_fatal_string_short_id(pair.first)},
-            {"language:safe_namespace",
-             get_fatal_namespace_name_short_id(pair.first, pair.second)},
-            {"last?", false},
-        });
+        a.emplace_back(
+            mstch::map{
+                {"language:safe_name", get_fatal_string_short_id(pair.first)},
+                {"language:safe_namespace",
+                 get_fatal_namespace_name_short_id(pair.first, pair.second)},
+                {"last?", false},
+            });
       }
     }
     if (!a.empty()) {
@@ -1008,10 +1011,11 @@ class cpp_mstch_program : public mstch_program {
 
     mstch::array a;
     for (const auto& name : unique_names) {
-      a.emplace_back(mstch::map{
-          {"identifier:name", name.first},
-          {"identifier:fatal_string", render_fatal_string(name.second)},
-      });
+      a.emplace_back(
+          mstch::map{
+              {"identifier:name", name.first},
+              {"identifier:fatal_string", render_fatal_string(name.second)},
+          });
     }
     return a;
   }
@@ -1662,10 +1666,11 @@ class cpp_mstch_struct : public mstch_struct {
     mstch::array fields;
     for (auto i : cpp2::get_mixins_and_members(*struct_)) {
       const auto suffix = "_ref";
-      fields.emplace_back(mstch::map{
-          {"mixin:name", i.mixin->name()},
-          {"mixin:field_name", i.member->name()},
-          {"mixin:accessor", i.member->name() + suffix}});
+      fields.emplace_back(
+          mstch::map{
+              {"mixin:name", i.mixin->name()},
+              {"mixin:field_name", i.member->name()},
+              {"mixin:accessor", i.member->name() + suffix}});
     }
     return fields;
   }
@@ -3179,24 +3184,27 @@ void validate_deprecated_terse_writes(
 
 void t_mstch_cpp2_generator::fill_validator_visitors(
     ast_validator& validator) const {
-  validator.add_structured_definition_visitor(std::bind(
-      validate_struct_annotations,
-      std::placeholders::_1,
-      std::placeholders::_2,
-      options()));
-  validator.add_struct_visitor(std::bind(
-      forbid_deprecated_terse_writes_ref,
-      std::placeholders::_1,
-      std::placeholders::_2,
-      options()));
+  validator.add_structured_definition_visitor(
+      std::bind(
+          validate_struct_annotations,
+          std::placeholders::_1,
+          std::placeholders::_2,
+          options()));
+  validator.add_struct_visitor(
+      std::bind(
+          forbid_deprecated_terse_writes_ref,
+          std::placeholders::_1,
+          std::placeholders::_2,
+          options()));
   validator.add_program_visitor(
       validate_splits(get_split_count(options()), client_name_to_split_count_));
   validator.add_field_visitor(validate_lazy_fields);
-  validator.add_field_visitor(std::bind(
-      validate_deprecated_terse_writes,
-      std::placeholders::_1,
-      std::placeholders::_2,
-      options()));
+  validator.add_field_visitor(
+      std::bind(
+          validate_deprecated_terse_writes,
+          std::placeholders::_1,
+          std::placeholders::_2,
+          options()));
 }
 
 THRIFT_REGISTER_GENERATOR(

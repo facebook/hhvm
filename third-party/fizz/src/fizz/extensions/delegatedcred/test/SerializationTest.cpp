@@ -202,9 +202,10 @@ TEST(SerializationTest, TestBuildServerOnlyPEM) {
   auto credData =
       folly::base64Decode(kP256ServerDelegatedCredNoLabel.toString());
   std::vector<Extension> credVec;
-  credVec.emplace_back(Extension{
-      ExtensionType::delegated_credential,
-      folly::IOBuf::copyBuffer(std::move(credData))});
+  credVec.emplace_back(
+      Extension{
+          ExtensionType::delegated_credential,
+          folly::IOBuf::copyBuffer(std::move(credData))});
   auto serverCred = getExtension<DelegatedCredential>(std::move(credVec));
   auto combinedPem = kP256ServerDelegatedCred.toString() +
       kP256DelegatedCredKeyWServerLabel.toString();
@@ -221,9 +222,10 @@ TEST(SerializationTest, TestBuildClientOnlyPEM) {
   auto credData =
       folly::base64Decode(kP256ClientDelegatedCredNoLabel.toString());
   std::vector<Extension> credVec;
-  credVec.emplace_back(Extension{
-      ExtensionType::delegated_credential,
-      folly::IOBuf::copyBuffer(std::move(credData))});
+  credVec.emplace_back(
+      Extension{
+          ExtensionType::delegated_credential,
+          folly::IOBuf::copyBuffer(std::move(credData))});
   auto clientCred = getExtension<DelegatedCredential>(std::move(credVec));
   auto combinedPem = kP256ClientDelegatedCred.toString() +
       kP256DelegatedCredKeyWClientLabel.toString();
@@ -240,9 +242,10 @@ TEST(SerializationTest, TestBuildMismatchedPEM) {
   auto credData =
       folly::base64Decode(kP256ClientDelegatedCredNoLabel.toString());
   std::vector<Extension> credVec;
-  credVec.emplace_back(Extension{
-      ExtensionType::delegated_credential,
-      folly::IOBuf::copyBuffer(std::move(credData))});
+  credVec.emplace_back(
+      Extension{
+          ExtensionType::delegated_credential,
+          folly::IOBuf::copyBuffer(std::move(credData))});
   auto clientCred = getExtension<DelegatedCredential>(std::move(credVec));
   auto combinedPem = kP256ClientDelegatedCred.toString() +
       kP256DelegatedCredKeyWClientLabel.toString();
@@ -259,16 +262,18 @@ TEST(SerializationTest, TestBuildCombinedClientAndServerPEM) {
   auto credData =
       folly::base64Decode(kP256ServerDelegatedCredNoLabel.toString());
   std::vector<Extension> credVec;
-  credVec.emplace_back(Extension{
-      ExtensionType::delegated_credential,
-      folly::IOBuf::copyBuffer(std::move(credData))});
+  credVec.emplace_back(
+      Extension{
+          ExtensionType::delegated_credential,
+          folly::IOBuf::copyBuffer(std::move(credData))});
   auto serverCred = getExtension<DelegatedCredential>(std::move(credVec));
   auto credData2 =
       folly::base64Decode(kP256ClientDelegatedCredNoLabel.toString());
   std::vector<Extension> credVec2;
-  credVec2.emplace_back(Extension{
-      ExtensionType::delegated_credential,
-      folly::IOBuf::copyBuffer(std::move(credData2))});
+  credVec2.emplace_back(
+      Extension{
+          ExtensionType::delegated_credential,
+          folly::IOBuf::copyBuffer(std::move(credData2))});
   auto clientCred = getExtension<DelegatedCredential>(std::move(credVec2));
 
   auto combinedPem = kP256ClientDelegatedCred.toString() +

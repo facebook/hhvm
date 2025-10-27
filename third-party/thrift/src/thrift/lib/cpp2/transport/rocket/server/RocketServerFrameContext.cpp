@@ -93,13 +93,13 @@ void RocketServerFrameContext::onFullFrame(RequestStreamFrame&& fullFrame) && {
     frameHandler.handleRequestStreamFrame(
         std::move(fullFrame), std::move(*this), clientCallback);
   } else {
-    connection.close(folly::make_exception_wrapper<
-                     transport::TTransportException>(
-        transport::TTransportException::TTransportExceptionType::
-            STREAMING_CONTRACT_VIOLATION,
-        fmt::format(
-            "Received stream request frame with already in use stream id {}",
-            static_cast<uint32_t>(streamId_))));
+    connection.close(
+        folly::make_exception_wrapper<transport::TTransportException>(
+            transport::TTransportException::TTransportExceptionType::
+                STREAMING_CONTRACT_VIOLATION,
+            fmt::format(
+                "Received stream request frame with already in use stream id {}",
+                static_cast<uint32_t>(streamId_))));
   }
 }
 

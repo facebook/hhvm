@@ -43,9 +43,10 @@ class AllInitialRoute {
 
   explicit AllInitialRoute(std::vector<std::shared_ptr<RouteHandleIf>> rh)
       : firstChild_(getFirstAndCheck(rh)),
-        asyncRoute_(std::vector<std::shared_ptr<RouteHandleIf>>(
-            rh.begin() + 1,
-            rh.end())) {}
+        asyncRoute_(
+            std::vector<std::shared_ptr<RouteHandleIf>>(
+                rh.begin() + 1,
+                rh.end())) {}
 
   template <class Request>
   ReplyT<Request> route(const Request& req) const {

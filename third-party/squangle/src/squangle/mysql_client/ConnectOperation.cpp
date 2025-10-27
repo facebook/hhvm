@@ -161,13 +161,14 @@ ConnectionHolder* ConnectOperationImpl::mysqlConnection() const {
   //   [at stage <connect_stage>] (took Nms, timeout was Nms)
   //   [(CLIENT_OVERLOADED: cb delay Nms, N active conns)] [TcpTimeout:N]
   std::vector<std::string> parts;
-  parts.push_back(fmt::format(
-      "[{}]({}){} to {}:{} timed out",
-      getErrorNo(stalled),
-      kErrorPrefix,
-      apiName,
-      conn_key_->host(),
-      conn_key_->port()));
+  parts.push_back(
+      fmt::format(
+          "[{}]({}){} to {}:{} timed out",
+          getErrorNo(stalled),
+          kErrorPrefix,
+          apiName,
+          conn_key_->host(),
+          conn_key_->port()));
   if (location) {
     parts.push_back(std::move(*location));
   }

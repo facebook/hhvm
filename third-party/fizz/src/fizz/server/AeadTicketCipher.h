@@ -38,8 +38,9 @@ class TicketCipherImpl : public TicketCipher {
       std::shared_ptr<Factory> factory,
       std::shared_ptr<CertManager> certManager,
       std::string pskContext)
-      : tokenCipher_(std::vector<std::string>(
-            {CodecType::Label.toString(), pskContext})),
+      : tokenCipher_(
+            std::vector<std::string>(
+                {CodecType::Label.toString(), pskContext})),
         policy_(),
         factory_(std::move(factory)),
         certManager_(std::move(certManager)) {}

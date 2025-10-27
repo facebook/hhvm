@@ -225,8 +225,9 @@ class OneshotRead : public folly::AsyncTransport::ReadCallback {
 static std::shared_ptr<fizz::server::FizzServerContext>
 makeTestServerContext() {
   auto certmanager = std::make_shared<fizz::server::CertManager>();
-  certmanager->addCertAndSetDefault(openssl::CertUtils::makeSelfCert(
-      fizz::test::kP256Certificate.str(), fizz::test::kP256Key.str()));
+  certmanager->addCertAndSetDefault(
+      openssl::CertUtils::makeSelfCert(
+          fizz::test::kP256Certificate.str(), fizz::test::kP256Key.str()));
 
   auto factory = std::make_shared<fizz::test::MockFactory>();
   auto certManager = std::make_shared<server::CertManager>();

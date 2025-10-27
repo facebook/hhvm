@@ -99,8 +99,9 @@ TEST(ScopedServerInterfaceThread, example) {
   ScopedServerInterfaceThread ssit(make_shared<SimpleServiceImpl>());
 
   EventBase eb;
-  SimpleServiceAsyncClient cli(HeaderClientChannel::newChannel(
-      folly::AsyncSocket::newSocket(&eb, ssit.getAddress())));
+  SimpleServiceAsyncClient cli(
+      HeaderClientChannel::newChannel(
+          folly::AsyncSocket::newSocket(&eb, ssit.getAddress())));
 
   EXPECT_EQ(6, cli.sync_add(-3, 9));
 }
@@ -206,8 +207,9 @@ TEST(ScopedServerInterfaceThread, ctor_with_thriftserver) {
   EXPECT_EQ(uintptr_t(ts.get()), uintptr_t(&ssit.getThriftServer())); // sanity
 
   EventBase eb;
-  SimpleServiceAsyncClient cli(HeaderClientChannel::newChannel(
-      folly::AsyncSocket::newSocket(&eb, ssit.getAddress())));
+  SimpleServiceAsyncClient cli(
+      HeaderClientChannel::newChannel(
+          folly::AsyncSocket::newSocket(&eb, ssit.getAddress())));
 
   EXPECT_EQ(6, cli.sync_add(-3, 9));
 }
@@ -396,8 +398,9 @@ struct ScopedServerInterfaceThreadTest : public testing::Test {
       folly::EventBase* evb, ScopedServerInterfaceThread& ssit) {
     return std::make_unique<AsyncClientT>(
         folly::via(evb, [&] {
-          return ChannelAndServiceT::newChannel(folly::AsyncSocket::UniquePtr(
-              new folly::AsyncSocket(evb, ssit.getAddress())));
+          return ChannelAndServiceT::newChannel(
+              folly::AsyncSocket::UniquePtr(
+                  new folly::AsyncSocket(evb, ssit.getAddress())));
         }).get());
   }
 

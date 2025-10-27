@@ -30,10 +30,11 @@ void BaseSchemaRegistry::registerSchema(
   std::lock_guard lock(mutex_);
   if (auto it = rawSchemas_.find(name); it != rawSchemas_.end()) {
     if (it->second.path != path) { // Needed to support dynamic linking
-      throw std::runtime_error(fmt::format(
-          "Checksum collision between {} and {}. Make any change to either file's content (e.g.. whitespace/comment) to fix it.",
-          it->second.path,
-          path));
+      throw std::runtime_error(
+          fmt::format(
+              "Checksum collision between {} and {}. Make any change to either file's content (e.g.. whitespace/comment) to fix it.",
+              it->second.path,
+              path));
     }
     return;
   }
@@ -41,11 +42,12 @@ void BaseSchemaRegistry::registerSchema(
   schema = {data, path, programId};
   for (auto uri : uris) {
     if (auto it = rawSchemasByUri_.find(uri); it != rawSchemasByUri_.end()) {
-      throw std::runtime_error(fmt::format(
-          "URI collision on '{}' between '{}' and '{}'.",
-          uri,
-          path,
-          it->second->path));
+      throw std::runtime_error(
+          fmt::format(
+              "URI collision on '{}' between '{}' and '{}'.",
+              uri,
+              path,
+              it->second->path));
     }
     rawSchemasByUri_[uri] = &schema;
   }

@@ -84,15 +84,13 @@ struct Foo {
 }
 
 TEST_F(FileManagerTest, add) {
-  file_manager_->add(
-      {/* .begin_pos= */ 52,
-       /* .end_pos= */ 52 + "struct"sv.size(),
-       /* .new_content= */ "union"});
+  file_manager_->add({/* .begin_pos= */ 52,
+                      /* .end_pos= */ 52 + "struct"sv.size(),
+                      /* .new_content= */ "union"});
 
-  file_manager_->add(
-      {/* .begin_pos= */ 69,
-       /* .end_pos= */ 69 + "optional "sv.size(),
-       /* .new_content= */ ""});
+  file_manager_->add({/* .begin_pos= */ 69,
+                      /* .end_pos= */ 69 + "optional "sv.size(),
+                      /* .new_content= */ ""});
 
   EXPECT_THAT(file_manager_->get_new_content().data(), StrEq(R"(
 package "test.module"

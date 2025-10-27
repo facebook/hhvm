@@ -295,8 +295,9 @@ void PooledRequestChannel::sendRequestBiDi(
 InteractionId PooledRequestChannel::createInteraction(
     ManagedStringView&& name) {
   CHECK(!name.view().empty());
-  return createInteractionId(reinterpret_cast<int64_t>(
-      new InteractionState{getEvb({}), std::move(name), {}, impl_}));
+  return createInteractionId(
+      reinterpret_cast<int64_t>(
+          new InteractionState{getEvb({}), std::move(name), {}, impl_}));
 }
 
 void PooledRequestChannel::terminateInteraction(InteractionId idWrapper) {

@@ -252,11 +252,12 @@ void buildChildrenLatestRoutes(
     if (customFn) {
       customFn(shardId, childrenRouteHandles);
     }
-    destinations.push_back(createLatestRoute<RouterInfo>(
-        json,
-        std::move(childrenRouteHandles),
-        options,
-        std::vector<double>(numChildren, 1.0)));
+    destinations.push_back(
+        createLatestRoute<RouterInfo>(
+            json,
+            std::move(childrenRouteHandles),
+            options,
+            std::vector<double>(numChildren, 1.0)));
     shardToDestinationIndexMap[shardId] = destinations.size() - 1;
   });
 }
@@ -278,8 +279,9 @@ void buildChildrenLoadBalancerRoutes(
     if (customFn) {
       customFn(shardId, childrenRouteHandles);
     }
-    destinations.push_back(createLoadBalancerRoute<RouterInfo>(
-        std::move(childrenRouteHandles), options));
+    destinations.push_back(
+        createLoadBalancerRoute<RouterInfo>(
+            std::move(childrenRouteHandles), options));
     shardToDestinationIndexMap[shardId] = destinations.size() - 1;
   });
 }

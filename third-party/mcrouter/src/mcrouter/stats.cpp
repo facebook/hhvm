@@ -271,7 +271,8 @@ void init_stats(stat_t* stats) {
 #define STSS(name, value, agg) \
   STAT(name, stat_string, agg, .string = (char*)value)
 #define EXTERNAL_STAT(name) \
-  {}
+  {                         \
+  }
 #include "stat_list.h"
 #undef STAT
 #undef STUI

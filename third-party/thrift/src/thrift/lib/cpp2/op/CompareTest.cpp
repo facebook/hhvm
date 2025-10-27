@@ -72,15 +72,18 @@ TEST(CompareTest, Double) {
   EXPECT_EQ(compare<>(-0.0, +0.0), folly::ordering::eq);
 
   // NaN is identical to, but not equal to itself.
-  EXPECT_TRUE(identical<type::double_t>(
-      std::numeric_limits<double>::quiet_NaN(),
-      std::numeric_limits<double>::quiet_NaN()));
-  EXPECT_FALSE(equal<type::double_t>(
-      std::numeric_limits<double>::quiet_NaN(),
-      std::numeric_limits<double>::quiet_NaN()));
-  EXPECT_FALSE(less<type::double_t>(
-      std::numeric_limits<double>::quiet_NaN(),
-      std::numeric_limits<double>::quiet_NaN()));
+  EXPECT_TRUE(
+      identical<type::double_t>(
+          std::numeric_limits<double>::quiet_NaN(),
+          std::numeric_limits<double>::quiet_NaN()));
+  EXPECT_FALSE(
+      equal<type::double_t>(
+          std::numeric_limits<double>::quiet_NaN(),
+          std::numeric_limits<double>::quiet_NaN()));
+  EXPECT_FALSE(
+      less<type::double_t>(
+          std::numeric_limits<double>::quiet_NaN(),
+          std::numeric_limits<double>::quiet_NaN()));
   EXPECT_EQ(
       compare<type::double_t>(
           std::numeric_limits<double>::quiet_NaN(),
@@ -105,12 +108,14 @@ TEST(CompareTest, Float) {
   EXPECT_FALSE(identical<type::float_t>(-0.0f, +0.0f));
 
   // NaN is identical to, but not equal to itself.
-  EXPECT_FALSE(equal<type::float_t>(
-      std::numeric_limits<float>::quiet_NaN(),
-      std::numeric_limits<float>::quiet_NaN()));
-  EXPECT_TRUE(identical<type::float_t>(
-      std::numeric_limits<float>::quiet_NaN(),
-      std::numeric_limits<float>::quiet_NaN()));
+  EXPECT_FALSE(
+      equal<type::float_t>(
+          std::numeric_limits<float>::quiet_NaN(),
+          std::numeric_limits<float>::quiet_NaN()));
+  EXPECT_TRUE(
+      identical<type::float_t>(
+          std::numeric_limits<float>::quiet_NaN(),
+          std::numeric_limits<float>::quiet_NaN()));
 }
 
 TEST(CompareTest, StructWithFloat) {

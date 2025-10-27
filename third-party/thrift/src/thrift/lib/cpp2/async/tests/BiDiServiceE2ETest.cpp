@@ -218,7 +218,7 @@ CO_TEST_F(BiDiServiceE2ETest, SinkThrowsDeclaredException) {
 
   auto streamTask = folly::coro::co_invoke(
       [&, streamGen = std::move(stream.stream).toAsyncGenerator()]() mutable
-      -> folly::coro::Task<void> {
+          -> folly::coro::Task<void> {
         for (int64_t i = 0; i < kTestLimit; ++i) {
           auto next = co_await streamGen.next();
           if (!next) {
@@ -278,7 +278,7 @@ CO_TEST_F(BiDiServiceE2ETest, SinkThrowsUndeclaredException) {
 
   auto streamTask = folly::coro::co_invoke(
       [&, streamGen = std::move(stream.stream).toAsyncGenerator()]() mutable
-      -> folly::coro::Task<void> {
+          -> folly::coro::Task<void> {
         for (int64_t i = 0; i < kTestLimit; ++i) {
           auto next = co_await streamGen.next();
           if (!next) {
@@ -328,7 +328,7 @@ CO_TEST_F(BiDiServiceE2ETest, StreamThrowsDeclaredException) {
 
   auto streamTask = folly::coro::co_invoke(
       [&, streamGen = std::move(stream.stream).toAsyncGenerator()]() mutable
-      -> folly::coro::Task<void> {
+          -> folly::coro::Task<void> {
         for (int64_t i = 0; i < kStreamItemsUntilThrow; ++i) {
           auto next = co_await streamGen.next();
           if (!next) {
@@ -379,7 +379,7 @@ CO_TEST_F(BiDiServiceE2ETest, StreamThrowsUndeclaredException) {
 
   auto streamTask = folly::coro::co_invoke(
       [&, streamGen = std::move(stream.stream).toAsyncGenerator()]() mutable
-      -> folly::coro::Task<void> {
+          -> folly::coro::Task<void> {
         for (int64_t i = 0; i < kStreamItemsUntilThrow; ++i) {
           auto next = co_await streamGen.next();
           if (!next) {
@@ -427,7 +427,7 @@ CO_TEST_F(BiDiServiceE2ETest, IgnoreInputProduceOutput) {
 
   auto streamTask = folly::coro::co_invoke(
       [&, streamGen = std::move(stream.stream).toAsyncGenerator()]() mutable
-      -> folly::coro::Task<void> {
+          -> folly::coro::Task<void> {
         for (int64_t i = 0; i < kTestLimit; ++i) {
           auto next = co_await streamGen.next();
           if (!next) {

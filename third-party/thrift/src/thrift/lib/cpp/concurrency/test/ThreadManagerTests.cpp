@@ -286,8 +286,13 @@ static void expireTest(
   auto threadManager = ThreadManager::newSimpleThreadManager(numWorkers);
   auto threadFactory = std::make_shared<PosixThreadFactory>();
   threadManager->threadFactory(threadFactory);
-  threadManager->setExpireCallback(std::bind(
-      expireTestCallback, std::placeholders::_1, &mutex, &cond, &activeTasks));
+  threadManager->setExpireCallback(
+      std::bind(
+          expireTestCallback,
+          std::placeholders::_1,
+          &mutex,
+          &cond,
+          &activeTasks));
   threadManager->start();
 
   // Add numWorkers + maxPendingTasks to fill up the ThreadManager's task queue
@@ -843,7 +848,7 @@ TEST_F(ThreadManagerTest, DISABLED_PriorityQueueThreadManagerExecutor) {
 
 std::array<std::function<std::shared_ptr<ThreadManager>()>, 3> factories = {
     std::bind(
-        (std::shared_ptr<ThreadManager>(*)(
+        (std::shared_ptr<ThreadManager> (*)(
             size_t))ThreadManager::newSimpleThreadManager,
         1),
     std::bind(ThreadManager::newPriorityQueueThreadManager, 1),

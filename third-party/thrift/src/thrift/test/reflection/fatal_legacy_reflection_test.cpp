@@ -34,11 +34,13 @@ TEST(FatalLegacyReflectionTest, name) {
 
 TEST(FatalLegacyReflectionTest, schema) {
   using type = SampleStruct;
-  ASSERT_FALSE(std::is_unsigned<
-               folly::remove_cvref_t<decltype(*type().i16_field())>>::value)
+  ASSERT_FALSE(
+      std::is_unsigned<
+          folly::remove_cvref_t<decltype(*type().i16_field())>>::value)
       << "sanity";
-  ASSERT_TRUE(std::is_unsigned<
-              folly::remove_cvref_t<decltype(*type().ui16_field())>>::value)
+  ASSERT_TRUE(
+      std::is_unsigned<
+          folly::remove_cvref_t<decltype(*type().ui16_field())>>::value)
       << "sanity";
   constexpr auto name = "struct fatal_legacy_reflection.SampleStruct";
   auto schema = legacy_reflection<type>::schema();

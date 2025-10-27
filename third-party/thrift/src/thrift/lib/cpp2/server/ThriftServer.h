@@ -422,8 +422,9 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   void setServerEventHandler(
       std::shared_ptr<server::TServerEventHandler> eventHandler) {
     if (eventHandler_) {
-      eventHandlers_.erase(std::find(
-          eventHandlers_.begin(), eventHandlers_.end(), eventHandler_));
+      eventHandlers_.erase(
+          std::find(
+              eventHandlers_.begin(), eventHandlers_.end(), eventHandler_));
     }
     eventHandler_ = std::move(eventHandler);
     if (eventHandler_) {
@@ -1523,8 +1524,10 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
       AttributeSource source = AttributeSource::OVERRIDE) {
     if (timeout) {
       thriftConfig_.setSocketQueueTimeout(
-          folly::observer::makeStaticObserver(std::optional{
-              std::chrono::duration_cast<std::chrono::milliseconds>(*timeout)}),
+          folly::observer::makeStaticObserver(
+              std::optional{
+                  std::chrono::duration_cast<std::chrono::milliseconds>(
+                      *timeout)}),
           source);
     }
   }
@@ -2437,8 +2440,9 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   void setSSLConfig(std::shared_ptr<wangle::SSLContextConfig> context) {
     CHECK(configMutable());
     if (context) {
-      setSSLConfig(folly::observer::makeObserver(
-          [context = std::move(context)]() { return *context; }));
+      setSSLConfig(
+          folly::observer::makeObserver(
+              [context = std::move(context)]() { return *context; }));
     }
     updateCertsToWatch();
   }

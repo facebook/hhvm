@@ -52,12 +52,13 @@ struct StaticWatcher : public Watcher {
       }
       return Clock{.m_clock = std::to_string(std::stoll(lastClockStr) + 1)};
     }(lastClock.m_clock);
-    return folly::makeSemiFuture(Delta{
-        .m_lastClock = {std::move(lastClock)},
-        .m_newClock = std::move(newClock),
-        .m_fresh = true,
-        .m_files = std::move(fileDeltas),
-    });
+    return folly::makeSemiFuture(
+        Delta{
+            .m_lastClock = {std::move(lastClock)},
+            .m_newClock = std::move(newClock),
+            .m_fresh = true,
+            .m_files = std::move(fileDeltas),
+        });
   }
 
   void subscribe(

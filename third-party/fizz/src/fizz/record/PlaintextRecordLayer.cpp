@@ -56,11 +56,12 @@ PlaintextReadRecordLayer::ReadResult<TLSMessage> PlaintextReadRecordLayer::read(
       case ContentType::change_cipher_spec:
         break;
       default:
-        throw std::runtime_error(folly::to<std::string>(
-            "received plaintext content type ",
-            static_cast<ContentTypeType>(msg.type),
-            ", header: ",
-            folly::hexlify(buf.splitAtMost(10)->coalesce())));
+        throw std::runtime_error(
+            folly::to<std::string>(
+                "received plaintext content type ",
+                static_cast<ContentTypeType>(msg.type),
+                ", header: ",
+                folly::hexlify(buf.splitAtMost(10)->coalesce())));
     }
 
     receivedRecordVersion_ =

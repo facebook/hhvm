@@ -81,8 +81,9 @@ class Client : public std::enable_shared_from_this<Client> {
       fmt::format_string<T, Rest...> fmt,
       T&& arg,
       Rest&&... rest) {
-    return sendErrorResponse(fmt::format(
-        std::move(fmt), std::forward<T>(arg), std::forward<Rest>(rest)...));
+    return sendErrorResponse(
+        fmt::format(
+            std::move(fmt), std::forward<T>(arg), std::forward<Rest>(rest)...));
   }
 };
 

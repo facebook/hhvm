@@ -78,10 +78,11 @@ prototype<t_named>::ptr t_whisker_generator::make_prototype_for_named(
     whisker::array::raw result;
     result.reserve(self.unstructured_annotations().size());
     for (const t_annotation& annotation : self.unstructured_annotations()) {
-      result.emplace_back(w::map({
-          {"key", w::string(annotation.first)},
-          {"value", w::string(annotation.second.value)},
-      }));
+      result.emplace_back(
+          w::map({
+              {"key", w::string(annotation.first)},
+              {"value", w::string(annotation.second.value)},
+          }));
     }
     return w::array(std::move(result));
   });
@@ -466,11 +467,12 @@ t_whisker_generator::make_prototype_for_const_value(
       const t_field* field =
           strct->get_field_by_name(key_const_val->get_string());
       assert(field != nullptr);
-      result.emplace_back(w::map({
-          {"field", w::native_handle(proto.create<t_field>(*field))},
-          {"value",
-           w::native_handle(proto.create<t_const_value>(*val_const_val))},
-      }));
+      result.emplace_back(
+          w::map({
+              {"field", w::native_handle(proto.create<t_field>(*field))},
+              {"value",
+               w::native_handle(proto.create<t_const_value>(*val_const_val))},
+          }));
     }
     return w::array(result);
   });
@@ -489,12 +491,13 @@ t_whisker_generator::make_prototype_for_const_value(
     // supports string keys, while our Thrift map key can be any const
     whisker::array::raw result;
     for (const auto& [key_const_val, val_const_val] : self.get_map()) {
-      result.emplace_back(w::map({
-          {"key",
-           w::native_handle(proto.create<t_const_value>(*key_const_val))},
-          {"value",
-           w::native_handle(proto.create<t_const_value>(*val_const_val))},
-      }));
+      result.emplace_back(
+          w::map({
+              {"key",
+               w::native_handle(proto.create<t_const_value>(*key_const_val))},
+              {"value",
+               w::native_handle(proto.create<t_const_value>(*val_const_val))},
+          }));
     }
     return w::array(result);
   });
@@ -886,8 +889,9 @@ class t_whisker_generator::whisker_source_parser
   explicit whisker_source_parser(
       templates_map templates_by_path, std::string template_prefix)
       : template_prefix_(std::move(template_prefix)),
-        src_manager_(std::make_unique<in_memory_source_manager_backend>(
-            std::move(templates_by_path))) {}
+        src_manager_(
+            std::make_unique<in_memory_source_manager_backend>(
+                std::move(templates_by_path))) {}
 
   resolve_import_result resolve_import(
       std::string_view combined_path,

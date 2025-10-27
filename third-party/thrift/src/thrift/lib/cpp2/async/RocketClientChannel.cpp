@@ -1285,8 +1285,9 @@ void RocketClientChannel::closeNow() {
   if (evb_) {
     evb_->dcheckIsInEventBaseThread();
   }
-  rocket::RocketClient::closeNow(transport::TTransportException(
-      transport::TTransportException::INTERRUPTED, "Client shutdown."));
+  rocket::RocketClient::closeNow(
+      transport::TTransportException(
+          transport::TTransportException::INTERRUPTED, "Client shutdown."));
 }
 
 void RocketClientChannel::setCloseCallback(CloseCallback* closeCallback) {

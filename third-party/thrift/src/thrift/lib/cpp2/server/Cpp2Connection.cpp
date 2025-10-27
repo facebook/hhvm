@@ -209,9 +209,10 @@ void Cpp2Connection::stop() {
 
   if (connectionAdded_) {
     if (auto* observer = worker_->getServer()->getObserver()) {
-      observer->connClosed(server::TServerObserver::ConnectionInfo(
-          reinterpret_cast<uint64_t>(transport_.get()),
-          context_.getSecurityProtocol()));
+      observer->connClosed(
+          server::TServerObserver::ConnectionInfo(
+              reinterpret_cast<uint64_t>(transport_.get()),
+              context_.getSecurityProtocol()));
       connectionAdded_ = false;
     }
   }

@@ -159,8 +159,9 @@ class ThreadFactoryTests {
 
       for (tix = 0; tix < count; tix++) {
         try {
-          threads.insert(threadFactory.newThread(shared_ptr<Runnable>(
-              new ReapNTask(*mutex, *cond, *activeCount))));
+          threads.insert(threadFactory.newThread(
+              shared_ptr<Runnable>(
+                  new ReapNTask(*mutex, *cond, *activeCount))));
         } catch (SystemResourceException& e) {
           std::cout << "\t\t\tfailed to create " << lix * count + tix
                     << " thread " << e.what() << std::endl;

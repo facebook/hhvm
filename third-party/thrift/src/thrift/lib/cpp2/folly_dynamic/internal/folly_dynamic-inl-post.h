@@ -260,9 +260,10 @@ struct dynamic_converter_impl<apache::thrift::type::union_t<T>> {
       dynamic_format format,
       format_adherence adherence) {
     if (!input.isObject()) {
-      throw std::invalid_argument(folly::to<std::string>(
-          "dynamic input when converting to variant must be object: ",
-          input.typeName()));
+      throw std::invalid_argument(
+          folly::to<std::string>(
+              "dynamic input when converting to variant must be object: ",
+              input.typeName()));
     } else if (input.size() > 1) {
       throw std::invalid_argument("unexpected additional fields for a variant");
     }

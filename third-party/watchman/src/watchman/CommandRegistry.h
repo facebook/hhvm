@@ -35,11 +35,12 @@ class ErrorResponse : public std::runtime_error {
       fmt::format_string<First, Rest...> fmt,
       First&& first,
       Rest&&... rest)
-      : ErrorResponse(fmt::format(
-                          std::move(fmt),
-                          std::forward<First>(first),
-                          std::forward<Rest>(rest)...)
-                          .c_str()) {}
+      : ErrorResponse(
+            fmt::format(
+                std::move(fmt),
+                std::forward<First>(first),
+                std::forward<Rest>(rest)...)
+                .c_str()) {}
 };
 
 /**
@@ -189,8 +190,10 @@ class TypedCommand : public CommandDefinition {
     }
 
     using Request = typename T::Request;
-    auto encodedResponse = serde::encode(T::handle(
-        client, serde::decode<Request>(json_array(std::move(adjusted_args)))));
+    auto encodedResponse = serde::encode(
+        T::handle(
+            client,
+            serde::decode<Request>(json_array(std::move(adjusted_args)))));
     return UntypedResponse{encodedResponse.object()};
   }
 };

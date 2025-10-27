@@ -26,9 +26,10 @@ void InMemoryView::notifyThread(const std::shared_ptr<Root>& root) {
         "failed to start root {}, cancelling watch: {}\n",
         root->root_path,
         root->failure_reason ? *root->failure_reason : w_string{});
-    root->cancel(fmt::format(
-        "Failed to start watcher: {}",
-        root->failure_reason ? root->failure_reason->view() : ""));
+    root->cancel(
+        fmt::format(
+            "Failed to start watcher: {}",
+            root->failure_reason ? root->failure_reason->view() : ""));
     return;
   }
 

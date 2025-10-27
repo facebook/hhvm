@@ -90,9 +90,10 @@ bool add_glob(GlobTree* tree, const w_string& glob_str) {
   bool had_specials;
 
   if (glob_str.piece().pathIsAbsolute()) {
-    throw QueryParseError(fmt::format(
-        "glob `{}` is an absolute path.  All globs must be relative paths!",
-        glob_str));
+    throw QueryParseError(
+        fmt::format(
+            "glob `{}` is an absolute path.  All globs must be relative paths!",
+            glob_str));
   }
 
   while (pattern < pattern_end) {

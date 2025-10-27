@@ -56,11 +56,12 @@ const std::unordered_set<std::string> kKeywords = {
 mstch::array create_string_array(const std::vector<std::string>& values) {
   mstch::array mstch_array;
   for (auto it = values.begin(); it != values.end(); ++it) {
-    mstch_array.emplace_back(mstch::map{
-        {"value", *it},
-        {"first?", it == values.begin()},
-        {"last?", std::next(it) == values.end()},
-    });
+    mstch_array.emplace_back(
+        mstch::map{
+            {"value", *it},
+            {"first?", it == values.begin()},
+            {"last?", std::next(it) == values.end()},
+        });
   }
 
   return mstch_array;
@@ -181,9 +182,11 @@ std::vector<std::string> gather_import_modules(
     }
 
     if (has_types(prog)) {
-      import_modules.push_back(fmt::format(
-          "{}",
-          fmt::join(get_py_namespaces_raw(prog, is_asyncio, "ttypes"), ".")));
+      import_modules.push_back(
+          fmt::format(
+              "{}",
+              fmt::join(
+                  get_py_namespaces_raw(prog, is_asyncio, "ttypes"), ".")));
     }
   }
 

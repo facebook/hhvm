@@ -722,11 +722,12 @@ bool maybe_parse_boolean_flag(
     } else if (flag_value == "false") {
       *target = false;
     } else {
-      throw std::runtime_error(fmt::format(
-          "Invalid boolean value for \"{}\": expected \"true\" or \"false\", "
-          "got: {}",
-          prefix,
-          flag_value));
+      throw std::runtime_error(
+          fmt::format(
+              "Invalid boolean value for \"{}\": expected \"true\" or \"false\", "
+              "got: {}",
+              prefix,
+              flag_value));
     }
     return true;
   }
@@ -1089,26 +1090,33 @@ void record_invocation_params(
   sema_params_metric.add(
       "skip_lowering_cpp_type_annotations=" +
       std::to_string(sparams.skip_lowering_cpp_type_annotations));
-  sema_params_metric.add(fmt::format(
-      "redundant_custom_default_values={}",
-      fmt::underlying(sparams.redundant_custom_default_values)));
-  sema_params_metric.add(fmt::format(
-      "unnecessary_enable_custom_type_ordering={}",
-      fmt::underlying(sparams.unnecessary_enable_custom_type_ordering)));
-  sema_params_metric.add(fmt::format(
-      "nonallowed_typedef_with_uri={}",
-      fmt::underlying(sparams.nonallowed_typedef_with_uri)));
-  sema_params_metric.add(fmt::format(
-      "struct_optional_field_custom_default={}",
-      fmt::underlying(sparams.struct_optional_field_custom_default)));
-  sema_params_metric.add(fmt::format(
-      "union_field_custom_default={}",
-      fmt::underlying(sparams.union_field_custom_default)));
-  sema_params_metric.add(fmt::format(
-      "required_field_qualifier={}",
-      fmt::underlying(sparams.required_field_qualifier)));
-  sema_params_metric.add(fmt::format(
-      "missing_package={}", fmt::underlying(sparams.missing_package)));
+  sema_params_metric.add(
+      fmt::format(
+          "redundant_custom_default_values={}",
+          fmt::underlying(sparams.redundant_custom_default_values)));
+  sema_params_metric.add(
+      fmt::format(
+          "unnecessary_enable_custom_type_ordering={}",
+          fmt::underlying(sparams.unnecessary_enable_custom_type_ordering)));
+  sema_params_metric.add(
+      fmt::format(
+          "nonallowed_typedef_with_uri={}",
+          fmt::underlying(sparams.nonallowed_typedef_with_uri)));
+  sema_params_metric.add(
+      fmt::format(
+          "struct_optional_field_custom_default={}",
+          fmt::underlying(sparams.struct_optional_field_custom_default)));
+  sema_params_metric.add(
+      fmt::format(
+          "union_field_custom_default={}",
+          fmt::underlying(sparams.union_field_custom_default)));
+  sema_params_metric.add(
+      fmt::format(
+          "required_field_qualifier={}",
+          fmt::underlying(sparams.required_field_qualifier)));
+  sema_params_metric.add(
+      fmt::format(
+          "missing_package={}", fmt::underlying(sparams.missing_package)));
   sema_params_metric.add(
       "warn_on_redundant_custom_default_values=" +
       std::to_string(

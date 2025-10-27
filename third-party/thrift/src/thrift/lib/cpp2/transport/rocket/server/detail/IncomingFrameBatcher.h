@@ -27,8 +27,7 @@ namespace detail::incoming_frame_batcher {
 template <
     typename IncomingFrameHandler,
     typename ConnectionT,
-    template <typename>
-    class ConnectionAdapter>
+    template <typename> class ConnectionAdapter>
 struct alignas(8) IncomingFrameEvent {
   using Connection = ConnectionAdapter<ConnectionT>;
 

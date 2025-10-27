@@ -616,10 +616,12 @@ std::shared_ptr<ech::Decrypter> setupDecrypterFromInputs(
 }
 
 std::shared_ptr<ech::Decrypter> setupDefaultDecrypter() {
-  auto defaultPrivateKey = folly::IOBuf::copyBuffer(folly::unhexlify(
-      "8c490e5b0c7dbe0c6d2192484d2b7a0423b3b4544f2481095a99dbf238fb350f"));
-  auto defaultPublicKey = folly::IOBuf::copyBuffer(folly::unhexlify(
-      "8a07563949fac6232936ed6f36c4fa735930ecdeaef6734e314aeac35a56fd0a"));
+  auto defaultPrivateKey = folly::IOBuf::copyBuffer(
+      folly::unhexlify(
+          "8c490e5b0c7dbe0c6d2192484d2b7a0423b3b4544f2481095a99dbf238fb350f"));
+  auto defaultPublicKey = folly::IOBuf::copyBuffer(
+      folly::unhexlify(
+          "8a07563949fac6232936ed6f36c4fa735930ecdeaef6734e314aeac35a56fd0a"));
 
   auto chosenConfig = getDefaultECHConfigs()[0];
   auto kex = std::make_unique<libsodium::X25519KeyExchange>();
@@ -802,20 +804,21 @@ int fizzServerCommand(const std::vector<std::string>& args) {
     return 1;
   }
 
-  EventBase evb(folly::EventBase::Options().setBackendFactory([uring,
-                                                               uringAsync,
-                                                               uringRegisterFds,
-                                                               uringCapacity,
-                                                               uringMaxSubmit,
-                                                               uringMaxGet] {
-    return setupBackend(
-        uring,
-        uringAsync,
-        uringRegisterFds,
-        uringCapacity,
-        uringMaxSubmit,
-        uringMaxGet);
-  }));
+  EventBase evb(
+      folly::EventBase::Options().setBackendFactory([uring,
+                                                     uringAsync,
+                                                     uringRegisterFds,
+                                                     uringCapacity,
+                                                     uringMaxSubmit,
+                                                     uringMaxGet] {
+        return setupBackend(
+            uring,
+            uringAsync,
+            uringRegisterFds,
+            uringCapacity,
+            uringMaxSubmit,
+            uringMaxGet);
+      }));
   std::shared_ptr<const CertificateVerifier> verifier;
 
   if (clientAuthMode != ClientAuthMode::None) {
@@ -971,9 +974,10 @@ int fizzServerCommand(const std::vector<std::string>& args) {
         return 1;
       }
       std::vector<Extension> credVec;
-      credVec.emplace_back(Extension{
-          ExtensionType::delegated_credential,
-          folly::IOBuf::copyBuffer(std::move(credData))});
+      credVec.emplace_back(
+          Extension{
+              ExtensionType::delegated_credential,
+              folly::IOBuf::copyBuffer(std::move(credData))});
 
       try {
         cred = getExtension<fizz::extensions::DelegatedCredential>(

@@ -31,11 +31,12 @@ SSLException::SSLException(
     SSLErrorEnum const error,
     std::chrono::milliseconds const& latency,
     uint64_t const bytesRead)
-    : std::runtime_error(fmt::format(
-          "SSL error: {}; Elapsed time: {} ms; Bytes read: {}",
-          static_cast<int>(error),
-          latency.count(),
-          bytesRead)),
+    : std::runtime_error(
+          fmt::format(
+              "SSL error: {}; Elapsed time: {} ms; Bytes read: {}",
+              static_cast<int>(error),
+              latency.count(),
+              bytesRead)),
       error_(error),
       latency_(latency),
       bytesRead_(bytesRead) {}

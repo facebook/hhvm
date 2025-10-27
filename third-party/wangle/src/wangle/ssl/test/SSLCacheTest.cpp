@@ -98,9 +98,10 @@ class SSLCacheClient : public AsyncSocket::ConnectCallback,
 };
 
 int main(int argc, char* argv[]) {
-  gflags::SetUsageMessage(std::string(
-      "\n\n"
-      "usage: sslcachetest [options] -c <clients> -t <threads> servers\n"));
+  gflags::SetUsageMessage(
+      std::string(
+          "\n\n"
+          "usage: sslcachetest [options] -c <clients> -t <threads> servers\n"));
   gflags::ParseCommandLineFlags(&argc, &argv, true);
   int reqs = 0;
   int hits = 0;

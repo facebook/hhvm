@@ -351,8 +351,9 @@ struct PathStmts {
       : m_insert{db.prepare(
             "INSERT OR IGNORE INTO all_paths (path) VALUES (@path)")},
         m_erase{db.prepare("DELETE FROM all_paths WHERE path = @path")},
-        m_getAllPaths{db.prepare("SELECT path, sha1sum FROM path_sha1sum"
-                                 " JOIN all_paths USING (pathid)")} {}
+        m_getAllPaths{db.prepare(
+            "SELECT path, sha1sum FROM path_sha1sum"
+            " JOIN all_paths USING (pathid)")} {}
 
   SQLiteStmt m_insert;
   SQLiteStmt m_erase;
@@ -361,13 +362,15 @@ struct PathStmts {
 
 struct Sha1HexStmts {
   explicit Sha1HexStmts(SQLite& db)
-      : m_insert{db.prepare("INSERT OR REPLACE INTO path_sha1sum VALUES ("
-                            " (SELECT pathid FROM all_paths WHERE path=@path),"
-                            " @sha1sum"
-                            ")")},
-        m_get{db.prepare("SELECT sha1sum FROM path_sha1sum"
-                         " JOIN all_paths USING (pathid)"
-                         " WHERE path = @path")} {}
+      : m_insert{db.prepare(
+            "INSERT OR REPLACE INTO path_sha1sum VALUES ("
+            " (SELECT pathid FROM all_paths WHERE path=@path),"
+            " @sha1sum"
+            ")")},
+        m_get{db.prepare(
+            "SELECT sha1sum FROM path_sha1sum"
+            " JOIN all_paths USING (pathid)"
+            " WHERE path = @path")} {}
 
   SQLiteStmt m_insert;
   SQLiteStmt m_get;
@@ -384,16 +387,19 @@ struct TypeStmts {
             "  @kind_of,"
             "  @flags"
             " )")},
-        m_getTypePath{db.prepare("SELECT path FROM type_details"
-                                 " JOIN all_paths USING (pathid)"
-                                 " WHERE name=@type")},
-        m_getPathTypes{db.prepare("SELECT name FROM type_details"
-                                  " JOIN all_paths USING (pathid)"
-                                  " WHERE path=@path")},
-        m_getKindAndFlags{db.prepare("SELECT kind_of, flags FROM type_details"
-                                     " JOIN all_paths USING (pathid)"
-                                     " WHERE name=@type"
-                                     " AND path=@path")},
+        m_getTypePath{db.prepare(
+            "SELECT path FROM type_details"
+            " JOIN all_paths USING (pathid)"
+            " WHERE name=@type")},
+        m_getPathTypes{db.prepare(
+            "SELECT name FROM type_details"
+            " JOIN all_paths USING (pathid)"
+            " WHERE path=@path")},
+        m_getKindAndFlags{db.prepare(
+            "SELECT kind_of, flags FROM type_details"
+            " JOIN all_paths USING (pathid)"
+            " WHERE name=@type"
+            " AND path=@path")},
         m_insertBaseType{db.prepare(
             "INSERT OR IGNORE INTO derived_types (base_name, derived_id, kind)"
             " VALUES ("
@@ -402,20 +408,21 @@ struct TypeStmts {
             "   WHERE name=@derived AND path=@path),"
             "  @kind"
             " )")},
-        m_getBaseTypes{db.prepare("SELECT base_name FROM derived_types"
-                                  " JOIN type_details AS derived_type ON "
-                                  "(derived_type.typeid=derived_id)"
-                                  " JOIN all_paths USING (pathid)"
-                                  " WHERE derived_type.name = @derived"
-                                  " AND path = @path"
-                                  " AND kind = @kind")},
-        m_getDerivedTypes{
-            db.prepare("SELECT path, derived_type.name FROM derived_types"
-                       " JOIN type_details AS derived_type ON "
-                       "(derived_type.typeid=derived_id)"
-                       " JOIN all_paths USING (pathid)"
-                       " WHERE base_name = @base"
-                       " AND kind = @kind")},
+        m_getBaseTypes{db.prepare(
+            "SELECT base_name FROM derived_types"
+            " JOIN type_details AS derived_type ON "
+            "(derived_type.typeid=derived_id)"
+            " JOIN all_paths USING (pathid)"
+            " WHERE derived_type.name = @derived"
+            " AND path = @path"
+            " AND kind = @kind")},
+        m_getDerivedTypes{db.prepare(
+            "SELECT path, derived_type.name FROM derived_types"
+            " JOIN type_details AS derived_type ON "
+            "(derived_type.typeid=derived_id)"
+            " JOIN all_paths USING (pathid)"
+            " WHERE base_name = @base"
+            " AND kind = @kind")},
         m_insertTypeAttribute{db.prepare(
             "INSERT OR IGNORE INTO type_attributes ("
             " typeid,"
@@ -446,70 +453,71 @@ struct TypeStmts {
             "  @attribute_position,"
             "  @attribute_value"
             " )")},
-        m_getTypeAttributes{db.prepare("SELECT DISTINCT attribute_name"
-                                       " FROM type_attributes"
-                                       "  JOIN type_details USING (typeid)"
-                                       "  JOIN all_paths USING (pathid)"
-                                       " WHERE name=@type AND path = @path")},
+        m_getTypeAttributes{db.prepare(
+            "SELECT DISTINCT attribute_name"
+            " FROM type_attributes"
+            "  JOIN type_details USING (typeid)"
+            "  JOIN all_paths USING (pathid)"
+            " WHERE name=@type AND path = @path")},
         m_getMethodAttributes{db.prepare(
             "SELECT DISTINCT attribute_name"
             " FROM method_attributes"
             "  JOIN type_details USING (typeid)"
             "  JOIN all_paths USING (pathid)"
             " WHERE name=@type AND method=@method AND path = @path")},
-        m_getTypeAttributeArgs{
-            db.prepare("SELECT attribute_value"
-                       " FROM type_attributes"
-                       "  JOIN type_details USING (typeid)"
-                       "  JOIN all_paths USING (pathid)"
-                       " WHERE name = @type"
-                       " AND kind_of <> 'typeAlias'"
-                       " AND path = @path"
-                       " AND attribute_name = @attribute_name")},
-        m_getTypeAliasAttributeArgs{
-            db.prepare("SELECT attribute_value"
-                       " FROM type_attributes"
-                       "  JOIN type_details USING (typeid)"
-                       "  JOIN all_paths USING (pathid)"
-                       " WHERE name = @type"
-                       " AND kind_of = 'typeAlias'"
-                       " AND path = @path"
-                       " AND attribute_name = @attribute_name")},
-        m_getMethodAttributeArgs{
-            db.prepare("SELECT attribute_value"
-                       " FROM method_attributes"
-                       "  JOIN type_details USING (typeid)"
-                       "  JOIN all_paths USING (pathid)"
-                       " WHERE name = @type"
-                       " AND method = @method"
-                       " AND path = @path"
-                       " AND attribute_name = @attribute_name")},
-        m_getTypesWithAttribute{
-            db.prepare("SELECT name, path FROM ("
-                       " SELECT DISTINCT typeid FROM type_attributes"
-                       " WHERE attribute_name = @attribute_name"
-                       ")"
-                       "  JOIN type_details USING (typeid)"
-                       "  JOIN all_paths USING (pathid)"
-                       " WHERE kind_of <> 'typeAlias'")},
-        m_getTypeAliasesWithAttribute{
-            db.prepare("SELECT name, path FROM ("
-                       " SELECT DISTINCT typeid FROM type_attributes"
-                       " WHERE attribute_name = @attribute_name"
-                       ")"
-                       "  JOIN type_details USING (typeid)"
-                       "  JOIN all_paths USING (pathid)"
-                       " WHERE kind_of = 'typeAlias'")},
-        m_getMethodsInPath{
-            db.prepare("SELECT name, method, path FROM type_details"
-                       " JOIN method_attributes USING (typeid)"
-                       " JOIN all_paths USING (pathid) WHERE path = @path")},
-        m_getMethodsWithAttribute{
-            db.prepare("SELECT name, method, path"
-                       " FROM type_details"
-                       "  JOIN method_attributes USING (typeid)"
-                       "  JOIN all_paths USING (pathid)"
-                       " WHERE attribute_name = @attribute_name")} {}
+        m_getTypeAttributeArgs{db.prepare(
+            "SELECT attribute_value"
+            " FROM type_attributes"
+            "  JOIN type_details USING (typeid)"
+            "  JOIN all_paths USING (pathid)"
+            " WHERE name = @type"
+            " AND kind_of <> 'typeAlias'"
+            " AND path = @path"
+            " AND attribute_name = @attribute_name")},
+        m_getTypeAliasAttributeArgs{db.prepare(
+            "SELECT attribute_value"
+            " FROM type_attributes"
+            "  JOIN type_details USING (typeid)"
+            "  JOIN all_paths USING (pathid)"
+            " WHERE name = @type"
+            " AND kind_of = 'typeAlias'"
+            " AND path = @path"
+            " AND attribute_name = @attribute_name")},
+        m_getMethodAttributeArgs{db.prepare(
+            "SELECT attribute_value"
+            " FROM method_attributes"
+            "  JOIN type_details USING (typeid)"
+            "  JOIN all_paths USING (pathid)"
+            " WHERE name = @type"
+            " AND method = @method"
+            " AND path = @path"
+            " AND attribute_name = @attribute_name")},
+        m_getTypesWithAttribute{db.prepare(
+            "SELECT name, path FROM ("
+            " SELECT DISTINCT typeid FROM type_attributes"
+            " WHERE attribute_name = @attribute_name"
+            ")"
+            "  JOIN type_details USING (typeid)"
+            "  JOIN all_paths USING (pathid)"
+            " WHERE kind_of <> 'typeAlias'")},
+        m_getTypeAliasesWithAttribute{db.prepare(
+            "SELECT name, path FROM ("
+            " SELECT DISTINCT typeid FROM type_attributes"
+            " WHERE attribute_name = @attribute_name"
+            ")"
+            "  JOIN type_details USING (typeid)"
+            "  JOIN all_paths USING (pathid)"
+            " WHERE kind_of = 'typeAlias'")},
+        m_getMethodsInPath{db.prepare(
+            "SELECT name, method, path FROM type_details"
+            " JOIN method_attributes USING (typeid)"
+            " JOIN all_paths USING (pathid) WHERE path = @path")},
+        m_getMethodsWithAttribute{db.prepare(
+            "SELECT name, method, path"
+            " FROM type_details"
+            "  JOIN method_attributes USING (typeid)"
+            "  JOIN all_paths USING (pathid)"
+            " WHERE attribute_name = @attribute_name")} {}
 
   SQLiteStmt m_insertDetails;
   SQLiteStmt m_getTypePath;
@@ -546,29 +554,30 @@ struct FileStmts {
             "  @attribute_position,"
             "  @attribute_value"
             " )")},
-        m_getFileAttributes{db.prepare("SELECT DISTINCT attribute_name"
-                                       " FROM file_attributes"
-                                       "  JOIN all_paths USING (pathid)"
-                                       " WHERE path = @path")},
-        m_getFileAttributeArgs{
-            db.prepare("SELECT attribute_value"
-                       " FROM file_attributes"
-                       "  JOIN all_paths USING (pathid)"
-                       " WHERE path = @path"
-                       " AND attribute_name = @attribute_name")},
-        m_getFilesWithAttribute{
-            db.prepare("SELECT path from all_paths"
-                       " JOIN file_attributes USING (pathid)"
-                       " WHERE attribute_name = @attribute_name")},
-        m_getFilesWithAttributeAndAnyValue{
-            db.prepare("SELECT path FROM all_paths"
-                       " JOIN file_attributes USING (pathid)"
-                       " WHERE attribute_name = @attribute_name"
-                       " AND attribute_value = @attribute_value")},
-        m_getFilesAndAttrValsWithAttribute{
-            db.prepare("SELECT path, attribute_value FROM all_paths"
-                       " JOIN file_attributes USING (pathid)"
-                       " WHERE attribute_name = @attribute_name")} {}
+        m_getFileAttributes{db.prepare(
+            "SELECT DISTINCT attribute_name"
+            " FROM file_attributes"
+            "  JOIN all_paths USING (pathid)"
+            " WHERE path = @path")},
+        m_getFileAttributeArgs{db.prepare(
+            "SELECT attribute_value"
+            " FROM file_attributes"
+            "  JOIN all_paths USING (pathid)"
+            " WHERE path = @path"
+            " AND attribute_name = @attribute_name")},
+        m_getFilesWithAttribute{db.prepare(
+            "SELECT path from all_paths"
+            " JOIN file_attributes USING (pathid)"
+            " WHERE attribute_name = @attribute_name")},
+        m_getFilesWithAttributeAndAnyValue{db.prepare(
+            "SELECT path FROM all_paths"
+            " JOIN file_attributes USING (pathid)"
+            " WHERE attribute_name = @attribute_name"
+            " AND attribute_value = @attribute_value")},
+        m_getFilesAndAttrValsWithAttribute{db.prepare(
+            "SELECT path, attribute_value FROM all_paths"
+            " JOIN file_attributes USING (pathid)"
+            " WHERE attribute_name = @attribute_name")} {}
 
   SQLiteStmt m_insertFileAttribute;
   SQLiteStmt m_getFileAttributes;
@@ -585,12 +594,14 @@ struct FunctionStmts {
             " @function,"
             " (SELECT pathid FROM all_paths WHERE path=@path)"
             ")")},
-        m_getFunctionPath{db.prepare("SELECT path, function FROM function_paths"
-                                     " JOIN all_paths USING (pathid)"
-                                     " WHERE function=@function")},
-        m_getPathFunctions{db.prepare("SELECT function FROM function_paths"
-                                      " JOIN all_paths USING (pathid)"
-                                      " WHERE path=@path")} {}
+        m_getFunctionPath{db.prepare(
+            "SELECT path, function FROM function_paths"
+            " JOIN all_paths USING (pathid)"
+            " WHERE function=@function")},
+        m_getPathFunctions{db.prepare(
+            "SELECT function FROM function_paths"
+            " JOIN all_paths USING (pathid)"
+            " WHERE path=@path")} {}
 
   SQLiteStmt m_insert;
   SQLiteStmt m_getFunctionPath;
@@ -605,12 +616,14 @@ struct ConstantStmts {
             " (SELECT pathid FROM all_paths"
             "  WHERE path=@path)"
             ")")},
-        m_getConstantPath{db.prepare("SELECT path FROM constant_paths"
-                                     " JOIN all_paths USING (pathid)"
-                                     " WHERE constant=@constant")},
-        m_getPathConstants{db.prepare("SELECT constant FROM constant_paths"
-                                      " JOIN all_paths USING (pathid)"
-                                      " WHERE path=@path")} {}
+        m_getConstantPath{db.prepare(
+            "SELECT path FROM constant_paths"
+            " JOIN all_paths USING (pathid)"
+            " WHERE constant=@constant")},
+        m_getPathConstants{db.prepare(
+            "SELECT constant FROM constant_paths"
+            " JOIN all_paths USING (pathid)"
+            " WHERE path=@path")} {}
 
   SQLiteStmt m_insert;
   SQLiteStmt m_getConstantPath;
@@ -619,9 +632,9 @@ struct ConstantStmts {
 
 struct ValidateStmts {
   explicit ValidateStmts(SQLite& db)
-      : m_validateNoDuplicateTypeEntries{
-            db.prepare("SELECT name from type_details"
-                       " GROUP BY name having count(*) > 1")} {}
+      : m_validateNoDuplicateTypeEntries{db.prepare(
+            "SELECT name from type_details"
+            " GROUP BY name having count(*) > 1")} {}
 
   SQLiteStmt m_validateNoDuplicateTypeEntries;
 };
@@ -634,12 +647,14 @@ struct ModuleStmts {
             " (SELECT pathid FROM all_paths WHERE path=@path),"
             " @module_name"
             ")")},
-        m_getModulePath{db.prepare("SELECT path FROM file_modules"
-                                   " JOIN all_paths USING (pathid)"
-                                   " WHERE module_name=@module_name")},
-        m_getPathModules{db.prepare("SELECT module_name FROM file_modules"
-                                    " JOIN all_paths USING (pathid)"
-                                    " WHERE path=@path")} {}
+        m_getModulePath{db.prepare(
+            "SELECT path FROM file_modules"
+            " JOIN all_paths USING (pathid)"
+            " WHERE module_name=@module_name")},
+        m_getPathModules{db.prepare(
+            "SELECT module_name FROM file_modules"
+            " JOIN all_paths USING (pathid)"
+            " WHERE path=@path")} {}
 
   SQLiteStmt m_insert;
   SQLiteStmt m_getModulePath;
@@ -653,13 +668,14 @@ struct ModuleMembershipStmts {
             " (SELECT pathid FROM all_paths WHERE path=@path),"
             " @module_name"
             ")")},
-        m_getModuleMembers{db.prepare("SELECT path FROM file_module_membership"
-                                      " JOIN all_paths USING (pathid)"
-                                      " WHERE module_name=@module_name")},
-        m_getPathModuleMembership{
-            db.prepare("SELECT module_name FROM file_module_membership"
-                       " JOIN all_paths USING (pathid)"
-                       " WHERE path=@path")} {}
+        m_getModuleMembers{db.prepare(
+            "SELECT path FROM file_module_membership"
+            " JOIN all_paths USING (pathid)"
+            " WHERE module_name=@module_name")},
+        m_getPathModuleMembership{db.prepare(
+            "SELECT module_name FROM file_module_membership"
+            " JOIN all_paths USING (pathid)"
+            " WHERE path=@path")} {}
 
   SQLiteStmt m_insert;
   SQLiteStmt m_getModuleMembers;
@@ -674,15 +690,15 @@ struct PackageMembershipStmts {
             " (SELECT pathid FROM all_paths WHERE path=@path),"
             " (SELECT package_id FROM packages WHERE package_name=@package_name)"
             ")")},
-        m_insertPackage{
-            db.prepare("INSERT OR IGNORE INTO packages (package_name) VALUES("
-                       " @package_name"
-                       ")")},
-        m_getPathPackageMembership{
-            db.prepare("SELECT package_name FROM file_package_membership"
-                       " JOIN packages USING (package_id)"
-                       " JOIN all_paths USING (pathid)"
-                       " WHERE path=@path")} {}
+        m_insertPackage{db.prepare(
+            "INSERT OR IGNORE INTO packages (package_name) VALUES("
+            " @package_name"
+            ")")},
+        m_getPathPackageMembership{db.prepare(
+            "SELECT package_name FROM file_package_membership"
+            " JOIN packages USING (package_id)"
+            " JOIN all_paths USING (pathid)"
+            " WHERE path=@path")} {}
 
   SQLiteStmt m_insert;
   SQLiteStmt m_insertPackage;
@@ -1104,9 +1120,10 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     std::vector<SymbolPath> results;
     XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
-      results.push_back(SymbolPath{
-          .m_symbol = std::string{query.getString(0)},
-          .m_path = fs::path{std::string{query.getString(1)}}});
+      results.push_back(
+          SymbolPath{
+              .m_symbol = std::string{query.getString(0)},
+              .m_path = fs::path{std::string{query.getString(1)}}});
     }
     return results;
   }
@@ -1118,9 +1135,10 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     std::vector<SymbolPath> results;
     XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
-      results.push_back(SymbolPath{
-          .m_symbol = std::string{query.getString(0)},
-          .m_path = fs::path{std::string{query.getString(1)}}});
+      results.push_back(
+          SymbolPath{
+              .m_symbol = std::string{query.getString(0)},
+              .m_path = fs::path{std::string{query.getString(1)}}});
     }
     return results;
   }
@@ -1131,10 +1149,11 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     std::vector<MethodPath> results;
     XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
-      results.push_back(MethodPath{
-          .m_type = std::string{query.getString(0)},
-          .m_method = std::string{query.getString(1)},
-          .m_path = fs::path{std::string{query.getString(2)}}});
+      results.push_back(
+          MethodPath{
+              .m_type = std::string{query.getString(0)},
+              .m_method = std::string{query.getString(1)},
+              .m_path = fs::path{std::string{query.getString(2)}}});
     }
     return results;
   }
@@ -1146,10 +1165,11 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     std::vector<MethodPath> results;
     XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
-      results.push_back(MethodPath{
-          .m_type = std::string{query.getString(0)},
-          .m_method = std::string{query.getString(1)},
-          .m_path = fs::path{std::string{query.getString(2)}}});
+      results.push_back(
+          MethodPath{
+              .m_type = std::string{query.getString(0)},
+              .m_method = std::string{query.getString(1)},
+              .m_path = fs::path{std::string{query.getString(2)}}});
     }
     return results;
   }

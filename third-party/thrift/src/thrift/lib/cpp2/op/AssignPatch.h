@@ -93,8 +93,9 @@ class AssignPatch : public BaseAssignPatch<Patch, AssignPatch<Patch>> {
           << folly::toPrettyJson(
                  apache::thrift::protocol::toDynamic(dynPatch_->toObject()))
           << "\nSecond Patch = "
-          << folly::toPrettyJson(apache::thrift::protocol::toDynamic(
-                 other.dynPatch_->toObject()));
+          << folly::toPrettyJson(
+                 apache::thrift::protocol::toDynamic(
+                     other.dynPatch_->toObject()));
 
       // Do nothing, which is the old behavior
       return;

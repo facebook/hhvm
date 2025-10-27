@@ -207,13 +207,14 @@ Actions ClientStateMachine::processSocketData(
   } catch (...) {
     return detail::handleError(
         state,
-        ReportError(folly::make_exception_wrapper<FizzException>(
-            folly::to<std::string>(
-                "error decoding record in state ",
-                toString(state.state()),
-                ": ",
-                folly::exceptionStr(std::current_exception())),
-            AlertDescription::decode_error)),
+        ReportError(
+            folly::make_exception_wrapper<FizzException>(
+                folly::to<std::string>(
+                    "error decoding record in state ",
+                    toString(state.state()),
+                    ": ",
+                    folly::exceptionStr(std::current_exception())),
+                AlertDescription::decode_error)),
         AlertDescription::decode_error);
   }
 }
@@ -2306,8 +2307,9 @@ EventHandler<ClientTypes, StateEnum::ExpectingFinished, Event::Finished>::
       state.echState()->status == ECHStatus::Rejected) {
     auto errActions = handleError(
         state,
-        ReportError(folly::make_exception_wrapper<FizzException>(
-            "ech not accepted", AlertDescription::ech_required)),
+        ReportError(
+            folly::make_exception_wrapper<FizzException>(
+                "ech not accepted", AlertDescription::ech_required)),
         AlertDescription::ech_required);
     for (auto& act : errActions) {
       fizz::detail::addAction(pendingActions, std::move(act));

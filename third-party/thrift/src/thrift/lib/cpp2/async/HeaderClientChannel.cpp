@@ -403,10 +403,11 @@ void HeaderClientChannel::messageReceived(
 
 void HeaderClientChannel::messageChannelEOF() {
   DestructorGuard dg(this);
-  messageReceiveErrorWrapped(folly::make_exception_wrapper<TTransportException>(
-      TTransportException::TTransportExceptionType::END_OF_FILE,
-      "Channel got EOF. Check for server hitting connection limit, "
-      "connection age timeout, server connection idle timeout, and server crashes."));
+  messageReceiveErrorWrapped(
+      folly::make_exception_wrapper<TTransportException>(
+          TTransportException::TTransportExceptionType::END_OF_FILE,
+          "Channel got EOF. Check for server hitting connection limit, "
+          "connection age timeout, server connection idle timeout, and server crashes."));
   if (closeCallback_) {
     closeCallback_->channelClosed();
     closeCallback_ = nullptr;
@@ -643,11 +644,12 @@ void HeaderClientChannel::RocketUpgradeChannel::initUpgradeIfNeeded(
   state_ = State::UPGRADE_IN_PROGRESS;
 
   apache::thrift::RpcOptions rpcOptions;
-  rpcOptions.setTimeout(folly::constexpr_max(
-      std::chrono::milliseconds(
-          THRIFT_FLAG(raw_client_rocket_upgrade_timeout_ms)),
-      firstRequestRpcOptions.getTimeout(),
-      std::chrono::milliseconds(headerChannel_->timeout_)));
+  rpcOptions.setTimeout(
+      folly::constexpr_max(
+          std::chrono::milliseconds(
+              THRIFT_FLAG(raw_client_rocket_upgrade_timeout_ms)),
+          firstRequestRpcOptions.getTimeout(),
+          std::chrono::milliseconds(headerChannel_->timeout_)));
 
   auto callback = std::make_unique<RocketUpgradeCallback>(this);
   auto client = std::make_unique<apache::thrift::RocketUpgradeAsyncClient>(

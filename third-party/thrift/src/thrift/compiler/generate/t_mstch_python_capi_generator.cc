@@ -495,9 +495,10 @@ class python_capi_mstch_struct : public mstch_struct {
         });
     mstch::array a;
     for (size_t i = 0; i < index_keys.size(); ++i) {
-      a.emplace_back(mstch::map{
-          {"tuple:index", index_keys[i].first},
-          {"tuple:comma", std::string_view(i == 0 ? "" : ", ")}});
+      a.emplace_back(
+          mstch::map{
+              {"tuple:index", index_keys[i].first},
+              {"tuple:comma", std::string_view(i == 0 ? "" : ", ")}});
     }
     return a;
   }

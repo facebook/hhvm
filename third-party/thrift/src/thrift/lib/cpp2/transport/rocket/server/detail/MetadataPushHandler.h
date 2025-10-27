@@ -63,8 +63,9 @@ void MetadataPushHandler<ConnectionT, ConnectionAdapter>::handle(
     connection_->getWrappedConnection()->getPayloadSerializer()->unpack(
         clientMeta, metadataFrame.metadata(), false);
   } catch (...) {
-    connection_->close(folly::make_exception_wrapper<RocketException>(
-        ErrorCode::INVALID, "Failed to deserialize metadata push frame"));
+    connection_->close(
+        folly::make_exception_wrapper<RocketException>(
+            ErrorCode::INVALID, "Failed to deserialize metadata push frame"));
     return;
   }
 

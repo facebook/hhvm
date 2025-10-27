@@ -172,8 +172,9 @@ TEST_F(PeerDelegatedCredentialTest, TestCredentialVerify) {
 
   auto clock = std::make_shared<MockClock>();
   ON_CALL(*clock, getCurrentTime())
-      .WillByDefault(Return(std::chrono::system_clock::time_point(
-          std::chrono::seconds(1712700000))));
+      .WillByDefault(Return(
+          std::chrono::system_clock::time_point(
+              std::chrono::seconds(1712700000))));
   auto peerCred =
       std::make_shared<PeerDelegatedCredentialImpl<openssl::KeyType::P256>>(
           std::move(cert), std::move(pubKey), std::move(cred));
@@ -224,8 +225,9 @@ TEST_F(PeerDelegatedCredentialTest, TestCredentialVerifyBadSignature) {
       d2i_PUBKEY(nullptr, &addr, pubKeyRange.size()));
   auto clock = std::make_shared<MockClock>();
   ON_CALL(*clock, getCurrentTime())
-      .WillByDefault(Return(std::chrono::system_clock::time_point(
-          std::chrono::seconds(1570400000))));
+      .WillByDefault(Return(
+          std::chrono::system_clock::time_point(
+              std::chrono::seconds(1570400000))));
   auto peerCred =
       std::make_shared<PeerDelegatedCredentialImpl<openssl::KeyType::P256>>(
           std::move(cert), std::move(pubKey), std::move(cred));

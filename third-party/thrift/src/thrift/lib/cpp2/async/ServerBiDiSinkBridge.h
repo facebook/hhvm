@@ -140,7 +140,7 @@ class ServerBiDiSinkBridge
         [cleanup = Cleanup(std::move(bridgePtr))](
             ServerBiDiSinkBridge::Ptr bridge,
             SinkElementDecoder<In>* decode) mutable
-        -> folly::coro::AsyncGenerator<In&&> {
+            -> folly::coro::AsyncGenerator<In&&> {
           uint64_t creditsUsed{0};
           while (true) {
             CoroConsumer c;

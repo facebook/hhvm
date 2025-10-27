@@ -91,11 +91,12 @@ inline uint32_t CompactProtocolWriter::writeMessageBegin(
     folly::StringPiece name, MessageType messageType, int32_t seqid) {
   uint32_t wsize = 0;
   wsize += writeByte(apache::thrift::detail::compact::PROTOCOL_ID);
-  wsize += writeByte(folly::to_narrow(
-      apache::thrift::detail::compact::COMPACT_PROTOCOL_VERSION |
-      ((static_cast<int32_t>(messageType)
-        << apache::thrift::detail::compact::TYPE_SHIFT_AMOUNT) &
-       apache::thrift::detail::compact::TYPE_MASK)));
+  wsize += writeByte(
+      folly::to_narrow(
+          apache::thrift::detail::compact::COMPACT_PROTOCOL_VERSION |
+          ((static_cast<int32_t>(messageType)
+            << apache::thrift::detail::compact::TYPE_SHIFT_AMOUNT) &
+           apache::thrift::detail::compact::TYPE_MASK)));
   wsize += apache::thrift::util::writeVarint(out_, seqid);
   wsize += writeString(name);
   return wsize;
@@ -205,11 +206,14 @@ inline uint32_t CompactProtocolWriter::writeCollectionBegin(
     int8_t elemType, int32_t size) {
   uint32_t wsize = 0;
   if (size <= 14) {
-    wsize += writeByte(static_cast<int8_t>(
-        size << 4 | apache::thrift::detail::compact::TTypeToCType[elemType]));
+    wsize += writeByte(
+        static_cast<int8_t>(
+            size << 4 |
+            apache::thrift::detail::compact::TTypeToCType[elemType]));
   } else {
-    wsize += writeByte(folly::to_narrow(
-        0xf0 | apache::thrift::detail::compact::TTypeToCType[elemType]));
+    wsize += writeByte(
+        folly::to_narrow(
+            0xf0 | apache::thrift::detail::compact::TTypeToCType[elemType]));
     wsize += apache::thrift::util::writeVarint(out_, size);
   }
   return wsize;

@@ -466,8 +466,9 @@ TEST_F(KeySplitRouteTest, FirstHitTestHashStop) {
   std::vector<std::string> expectedKeys;
   expectedKeys.push_back(key);
   for (size_t i = 1; i < 3; ++i) {
-    expectedKeys.push_back(folly::to<std::string>(
-        routingKey, kMemcacheReplicaSeparator, i, keySuffix));
+    expectedKeys.push_back(
+        folly::to<std::string>(
+            routingKey, kMemcacheReplicaSeparator, i, keySuffix));
   }
 
   TestFiberManager<MemcacheRouterInfo> fm;
@@ -534,8 +535,9 @@ TEST_F(KeySplitRouteTest, FirstHitWorstCaseTestHashStop) {
   // create expected keys, the first key is not modified.
   std::vector<std::string> expectedKeys;
   for (size_t i = 1; i < 3; ++i) {
-    expectedKeys.push_back(folly::to<std::string>(
-        routingKey, kMemcacheReplicaSeparator, i, keySuffix));
+    expectedKeys.push_back(
+        folly::to<std::string>(
+            routingKey, kMemcacheReplicaSeparator, i, keySuffix));
   }
   expectedKeys.push_back(key);
 

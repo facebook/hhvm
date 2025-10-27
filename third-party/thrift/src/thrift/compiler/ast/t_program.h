@@ -271,8 +271,9 @@ class t_program : public t_named {
         : global_scope_->global_priority(*include->get_program());
     auto& defs = available_scopes_[scope_name];
     // TODO @sadroeck - Sort on insert for performance
-    defs.push_back(scope_by_priority{
-        &include->get_program()->program_scope(), global_priority});
+    defs.push_back(
+        scope_by_priority{
+            &include->get_program()->program_scope(), global_priority});
     std::sort(defs.begin(), defs.end());
     includes_.push_back(include.get());
     nodes_.push_back(std::move(include));

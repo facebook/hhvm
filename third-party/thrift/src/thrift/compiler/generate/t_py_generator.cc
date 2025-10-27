@@ -2822,8 +2822,7 @@ void t_py_generator::generate_service_remote(const t_service* tservice) {
       // in case the environment is not correct.
       py_par_warning("remote") <<
       // Import the service module and types
-      "\n"
-           << "from . import " << rename_reserved_keywords(service_name_)
+      "\n" << "from . import " << rename_reserved_keywords(service_name_)
            << "\n"
            << "from . import ttypes\n"
               "\n"

@@ -169,9 +169,10 @@ void parse_sync(Query* res, const json_ref& query) {
 
   auto sync_timeout = query.get_default(
       "sync_timeout",
-      json_integer(std::chrono::duration_cast<std::chrono::milliseconds>(
-                       kDefaultQuerySyncTimeout)
-                       .count()));
+      json_integer(
+          std::chrono::duration_cast<std::chrono::milliseconds>(
+              kDefaultQuerySyncTimeout)
+              .count()));
   res->sync_timeout = std::chrono::milliseconds{
       parse_nonnegative_integer("sync_timeout", sync_timeout)};
 }
@@ -179,9 +180,10 @@ void parse_sync(Query* res, const json_ref& query) {
 void parse_lock_timeout(Query* res, const json_ref& query) {
   auto lock_timeout = query.get_default(
       "lock_timeout",
-      json_integer(std::chrono::duration_cast<std::chrono::milliseconds>(
-                       kDefaultQuerySyncTimeout)
-                       .count()));
+      json_integer(
+          std::chrono::duration_cast<std::chrono::milliseconds>(
+              kDefaultQuerySyncTimeout)
+              .count()));
 
   if (!lock_timeout.isInt()) {
     throw QueryParseError("lock_timeout must be an integer value >= 0");

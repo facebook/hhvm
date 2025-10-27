@@ -75,17 +75,20 @@ class PcreExpr : public QueryExpr {
     if (term.array().size() > 1 && term.at(1).isString()) {
       pattern = json_string_value(term.at(1));
     } else {
-      throw QueryParseError(fmt::format(
-          "First parameter to \"{}\" term must be a pattern string", which));
+      throw QueryParseError(
+          fmt::format(
+              "First parameter to \"{}\" term must be a pattern string",
+              which));
     }
 
     if (term.array().size() > 2) {
       if (term.at(2).isString()) {
         scope = json_string_value(term.at(2));
       } else {
-        throw QueryParseError(fmt::format(
-            "Second parameter to \"{}\" term must be an optional scope string",
-            which));
+        throw QueryParseError(
+            fmt::format(
+                "Second parameter to \"{}\" term must be an optional scope string",
+                which));
       }
     }
 
@@ -112,13 +115,14 @@ class PcreExpr : public QueryExpr {
           sizeof(char) == sizeof(PCRE2_UCHAR),
           "Watchman uses the 8-bit PCRE2 library");
       pcre2_get_error_message(errcode, buffer, 120);
-      throw QueryParseError(fmt::format(
-          "invalid {}: code {} {} at offset {} in {}",
-          which,
-          errcode,
-          reinterpret_cast<const char*>(&buffer),
-          erroff,
-          pattern));
+      throw QueryParseError(
+          fmt::format(
+              "invalid {}: code {} {} at offset {} in {}",
+              which,
+              errcode,
+              reinterpret_cast<const char*>(&buffer),
+              erroff,
+              pattern));
     }
 
     auto matchData = pcre2_match_data_create_from_pattern(re, nullptr);

@@ -89,9 +89,10 @@ TEST(OQSKeyExchangeTest, CloneTest) {
       folly::IOBufEqualTo()(clientKeyShare, clientKexCopy->getKeyShare()));
   EXPECT_TRUE(
       folly::IOBufEqualTo()(serverKeyShare, serverKexCopy->getKeyShare()));
-  EXPECT_TRUE(folly::IOBufEqualTo()(
-      clientKex.generateSharedSecret(serverKeyShare->coalesce()),
-      clientKexCopy->generateSharedSecret(serverKeyShare->coalesce())));
+  EXPECT_TRUE(
+      folly::IOBufEqualTo()(
+          clientKex.generateSharedSecret(serverKeyShare->coalesce()),
+          clientKexCopy->generateSharedSecret(serverKeyShare->coalesce())));
 }
 
 TEST(OQSKeyExchangeTest, FailedCloneTest) {

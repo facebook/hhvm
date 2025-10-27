@@ -100,14 +100,15 @@ class t_json_experimental_generator : public t_mstch_generator {
     });
     def.property("domain_prefix", [](const t_package& self) {
       return self.domain().size() > 1
-          ? whisker::make::string(fmt::format(
-                "{}",
-                // Take everything but the last element (domain_suffix)
-                // E.g. "foo.bar.baz" -> "foo.bar"
-                fmt::join(
-                    self.domain().begin(),
-                    std::prev(self.domain().end()),
-                    ".")))
+          ? whisker::make::string(
+                fmt::format(
+                    "{}",
+                    // Take everything but the last element (domain_suffix)
+                    // E.g. "foo.bar.baz" -> "foo.bar"
+                    fmt::join(
+                        self.domain().begin(),
+                        std::prev(self.domain().end()),
+                        ".")))
           : whisker::make::null;
     });
     def.property("domain_suffix", [](const t_package& self) {
@@ -117,9 +118,10 @@ class t_json_experimental_generator : public t_mstch_generator {
           : whisker::make::null;
     });
     def.property("path", [](const t_package& self) {
-      return self.path().empty() ? whisker::make::null
-                                 : whisker::make::string(fmt::format(
-                                       "{}", fmt::join(self.path(), "/")));
+      return self.path().empty()
+          ? whisker::make::null
+          : whisker::make::string(
+                fmt::format("{}", fmt::join(self.path(), "/")));
     });
 
     return std::move(def).make();

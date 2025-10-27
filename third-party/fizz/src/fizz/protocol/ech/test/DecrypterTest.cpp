@@ -143,16 +143,18 @@ TEST(DecrypterTest, TestDecodeSuccess) {
   EXPECT_TRUE(gotChlo.has_value());
 
   auto expectedChloInner = TestMessages::clientHello();
-  EXPECT_FALSE(folly::IOBufEqualTo()(
-      encodeHandshake(chloOuter), encodeHandshake(expectedChloInner)));
+  EXPECT_FALSE(
+      folly::IOBufEqualTo()(
+          encodeHandshake(chloOuter), encodeHandshake(expectedChloInner)));
 
   auto chlo = std::move(gotChlo.value());
   // Remove the inner ECH extension from the client hello inner
   TestMessages::removeExtension(
       chlo.chlo, ExtensionType::encrypted_client_hello);
 
-  EXPECT_TRUE(folly::IOBufEqualTo()(
-      encodeHandshake(chlo.chlo), encodeHandshake(expectedChloInner)));
+  EXPECT_TRUE(
+      folly::IOBufEqualTo()(
+          encodeHandshake(chlo.chlo), encodeHandshake(expectedChloInner)));
 }
 
 TEST(DecrypterTest, TestDecodeHRRSuccess) {
@@ -168,14 +170,16 @@ TEST(DecrypterTest, TestDecodeHRRSuccess) {
   auto gotChlo = decrypter.decryptClientHelloHRR(chloOuter, enc);
 
   auto expectedChloInner = TestMessages::clientHello();
-  EXPECT_FALSE(folly::IOBufEqualTo()(
-      encodeHandshake(chloOuter), encodeHandshake(expectedChloInner)));
+  EXPECT_FALSE(
+      folly::IOBufEqualTo()(
+          encodeHandshake(chloOuter), encodeHandshake(expectedChloInner)));
 
   // Remove the inner ECH extension from the client hello inner
   TestMessages::removeExtension(gotChlo, ExtensionType::encrypted_client_hello);
 
-  EXPECT_TRUE(folly::IOBufEqualTo()(
-      encodeHandshake(gotChlo), encodeHandshake(expectedChloInner)));
+  EXPECT_TRUE(
+      folly::IOBufEqualTo()(
+          encodeHandshake(gotChlo), encodeHandshake(expectedChloInner)));
 }
 
 TEST(DecrypterTest, TestDecodeHRRWithContextSuccess) {
@@ -197,15 +201,17 @@ TEST(DecrypterTest, TestDecodeHRRWithContextSuccess) {
   auto gotChloHRR = decrypter.decryptClientHelloHRR(chloOuter, chlo.context);
 
   auto expectedChloInner = TestMessages::clientHello();
-  EXPECT_FALSE(folly::IOBufEqualTo()(
-      encodeHandshake(chloOuter), encodeHandshake(expectedChloInner)));
+  EXPECT_FALSE(
+      folly::IOBufEqualTo()(
+          encodeHandshake(chloOuter), encodeHandshake(expectedChloInner)));
 
   // Remove the inner ECH extension from the client hello inner
   TestMessages::removeExtension(
       gotChloHRR, ExtensionType::encrypted_client_hello);
 
-  EXPECT_TRUE(folly::IOBufEqualTo()(
-      encodeHandshake(gotChloHRR), encodeHandshake(expectedChloInner)));
+  EXPECT_TRUE(
+      folly::IOBufEqualTo()(
+          encodeHandshake(gotChloHRR), encodeHandshake(expectedChloInner)));
 }
 
 TEST(DecrypterTest, TestDecodeFailure) {

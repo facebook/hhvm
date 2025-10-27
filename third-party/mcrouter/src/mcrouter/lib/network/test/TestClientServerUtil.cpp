@@ -282,22 +282,23 @@ TestClient::TestClient(
               LOG(INFO) << "Client DOWN.";
             }
           }});
-  client_->setRequestStatusCallbacks(typename Transport::RequestStatusCallbacks{
-      [this](int pendingDiff, int inflightDiff) {
-        CHECK(pendingDiff != inflightDiff)
-            << "A request can't be pending and inflight at the same time";
+  client_->setRequestStatusCallbacks(
+      typename Transport::RequestStatusCallbacks{
+          [this](int pendingDiff, int inflightDiff) {
+            CHECK(pendingDiff != inflightDiff)
+                << "A request can't be pending and inflight at the same time";
 
-        pendingStat_ += pendingDiff;
-        inflightStat_ += inflightDiff;
+            pendingStat_ += pendingDiff;
+            inflightStat_ += inflightDiff;
 
-        CHECK(pendingStat_ >= 0 && inflightStat_ >= 0)
-            << "Pending and inflight stats should always be 0 or more.";
+            CHECK(pendingStat_ >= 0 && inflightStat_ >= 0)
+                << "Pending and inflight stats should always be 0 or more.";
 
-        pendingStatMax_ = std::max(pendingStatMax_, pendingStat_);
-        inflightStatMax_ = std::max(inflightStatMax_, inflightStat_);
-      },
-      nullptr,
-      nullptr});
+            pendingStatMax_ = std::max(pendingStatMax_, pendingStat_);
+            inflightStatMax_ = std::max(inflightStatMax_, inflightStat_);
+          },
+          nullptr,
+          nullptr});
 }
 
 void TestClient::setConnectionStatusCallbacks(

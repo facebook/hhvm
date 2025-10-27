@@ -36,12 +36,14 @@ std::string ConnectionOptions::getDisplayString() const {
     parts.push_back(fmt::format("outbound dscp={}", *dscp_));
   }
   if (ssl_options_provider_ != nullptr) {
-    parts.push_back(fmt::format(
-        "SSL options provider={}", (void*)ssl_options_provider_.get()));
+    parts.push_back(
+        fmt::format(
+            "SSL options provider={}", (void*)ssl_options_provider_.get()));
   }
   if (compression_lib_.has_value()) {
-    parts.push_back(fmt::format(
-        "compression library={}", (void*)compression_lib_.get_pointer()));
+    parts.push_back(
+        fmt::format(
+            "compression library={}", (void*)compression_lib_.get_pointer()));
   }
 
   if (!attributes_.empty()) {
@@ -50,8 +52,9 @@ std::string ConnectionOptions::getDisplayString() const {
       substrings.push_back(fmt::format("{}={}", key, value));
     }
 
-    parts.push_back(fmt::format(
-        "connection attributes=[{}]", folly::join(",", substrings)));
+    parts.push_back(
+        fmt::format(
+            "connection attributes=[{}]", folly::join(",", substrings)));
   }
   return fmt::format("({})", folly::join(", ", parts));
 }

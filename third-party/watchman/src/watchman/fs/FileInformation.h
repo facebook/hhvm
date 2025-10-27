@@ -106,15 +106,9 @@ struct FileInformation {
   uint32_t fileAttributes{0};
 #endif
 
-  struct timespec atime {
-    0, 0
-  };
-  struct timespec mtime {
-    0, 0
-  };
-  struct timespec ctime {
-    0, 0
-  };
+  struct timespec atime{0, 0};
+  struct timespec mtime{0, 0};
+  struct timespec ctime{0, 0};
 
   // Returns the directory entry type for the file.
   DType dtype() const;

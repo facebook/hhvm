@@ -148,8 +148,9 @@ class ThriftTransport : public ThriftTransportBase {
       const Request& /* request */,
       std::chrono::milliseconds /* timeout */,
       RpcStatsContext* /* rpcContext */ = nullptr) {
-    throw std::logic_error(folly::to<std::string>(
-        "Router ", RouterInfo::name, " does not support thrift transport"));
+    throw std::logic_error(
+        folly::to<std::string>(
+            "Router ", RouterInfo::name, " does not support thrift transport"));
   }
 };
 

@@ -96,8 +96,9 @@ TEST_F(AuthenticatorTest, TestValidAuthenticator) {
     return TestMessages::certificate();
   }));
   EXPECT_CALL(*mockCert, getSigSchemes())
-      .WillOnce(Return(std::vector<SignatureScheme>(
-          1, SignatureScheme::ecdsa_secp256r1_sha256)));
+      .WillOnce(Return(
+          std::vector<SignatureScheme>(
+              1, SignatureScheme::ecdsa_secp256r1_sha256)));
   EXPECT_CALL(*mockCert, sign(_, CertificateVerifyContext::Authenticator, _))
       .WillOnce(
           InvokeWithoutArgs([]() { return IOBuf::copyBuffer("signature"); }));
@@ -118,8 +119,9 @@ TEST_F(AuthenticatorTest, TestValidAuthenticator) {
 TEST_F(AuthenticatorTest, TestEmptyAuthenticator) {
   auto mockCert = std::make_shared<MockSelfCert>();
   EXPECT_CALL(*mockCert, getSigSchemes())
-      .WillOnce(Return(std::vector<SignatureScheme>(
-          1, SignatureScheme::ecdsa_secp256r1_sha256)));
+      .WillOnce(Return(
+          std::vector<SignatureScheme>(
+              1, SignatureScheme::ecdsa_secp256r1_sha256)));
   schemes_.clear();
   auto reencodedAuthenticator = ExportedAuthenticator::makeAuthenticator(
       hasher(),

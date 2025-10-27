@@ -1572,10 +1572,11 @@ apache::thrift::detail::SinkConsumerImpl toSinkConsumerImpl(
               -> folly::coro::AsyncGenerator<SinkType&&> {
             while (auto item = co_await gen_.next()) {
               auto payload = std::move(*item);
-              co_yield folly::coro::co_result(ap::decode_stream_element<
-                                              ProtocolReader,
-                                              SinkPResult,
-                                              SinkType>(std::move(payload)));
+              co_yield folly::coro::co_result(
+                  ap::decode_stream_element<
+                      ProtocolReader,
+                      SinkPResult,
+                      SinkType>(std::move(payload)));
             }
           }(std::move(gen)));
       co_return folly::Try<StreamPayload>(StreamPayload(

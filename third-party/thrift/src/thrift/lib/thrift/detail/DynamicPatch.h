@@ -63,10 +63,11 @@ PatchType createPatchFromObject(Badge badge, Object obj) {
     patch.fromObject(badge, std::move(obj));
   } else {
     if (!ProtocolValueToThriftValue<type::infer_tag<PatchType>>{}(obj, patch)) {
-      throw std::runtime_error(fmt::format(
-          "Object does not match patch ({}) schema. Object = {}",
-          folly::pretty_name<PatchType>(),
-          debugStringViaEncode(obj)));
+      throw std::runtime_error(
+          fmt::format(
+              "Object does not match patch ({}) schema. Object = {}",
+              folly::pretty_name<PatchType>(),
+              debugStringViaEncode(obj)));
     }
   }
   return patch;

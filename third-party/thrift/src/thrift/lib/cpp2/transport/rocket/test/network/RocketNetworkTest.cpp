@@ -933,8 +933,8 @@ TEST_F(RocketNetworkTest, ClientCreationAndReconnectClientOutlivesStream) {
     // outlive the associated stream.
     for (size_t i = 0; i < 1000; ++i) {
       {
-        auto stream =
-            client.sendRequestStreamSync(Payload::makeFromMetadataAndData(
+        auto stream = client.sendRequestStreamSync(
+            Payload::makeFromMetadataAndData(
                 metadata, folly::StringPiece{data}));
         EXPECT_TRUE(stream.hasValue());
       }
@@ -1242,12 +1242,13 @@ TEST_F(RocketNetworkTest, SinkBasic) {
                 }
               });
 
-          int finalResponse = co_await clientSink.sink(folly::coro::co_invoke(
-              []() -> folly::coro::AsyncGenerator<int&&> {
-                for (size_t i = 0; i < numUploadPayloads; i++) {
-                  co_yield i;
-                }
-              }));
+          int finalResponse = co_await clientSink.sink(
+              folly::coro::co_invoke(
+                  []() -> folly::coro::AsyncGenerator<int&&> {
+                    for (size_t i = 0; i < numUploadPayloads; i++) {
+                      co_yield i;
+                    }
+                  }));
           EXPECT_EQ(numUploadPayloads, finalResponse);
         }));
   });
@@ -1288,19 +1289,21 @@ TEST_F(RocketNetworkTest, SinkCloseClient) {
 
     client.disconnect();
     bool exceptionThrows = false;
-    folly::coro::blockingWait(folly::coro::co_invoke(
-        [&, sink = std::move(sink)]() mutable -> folly::coro::Task<void> {
-          try {
-            co_await sink.sink(folly::coro::co_invoke(
-                [&]() -> folly::coro::AsyncGenerator<int&&> {
-                  for (size_t i = 0; i < numUploadPayloads; i++) {
-                    co_yield i;
-                  }
-                }));
-          } catch (const std::exception&) {
-            exceptionThrows = true;
-          }
-        }));
+    folly::coro::blockingWait(
+        folly::coro::co_invoke(
+            [&, sink = std::move(sink)]() mutable -> folly::coro::Task<void> {
+              try {
+                co_await sink.sink(
+                    folly::coro::co_invoke(
+                        [&]() -> folly::coro::AsyncGenerator<int&&> {
+                          for (size_t i = 0; i < numUploadPayloads; i++) {
+                            co_yield i;
+                          }
+                        }));
+              } catch (const std::exception&) {
+                exceptionThrows = true;
+              }
+            }));
     EXPECT_TRUE(exceptionThrows);
   });
 }

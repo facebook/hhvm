@@ -93,13 +93,14 @@ std::optional<object> find_property(
           return detail::variant_match(
               *descriptor,
               [&](const prototype<>::property& prop) -> object {
-                return prop.function->invoke(native_function::context{
-                    component.loc,
-                    diags,
-                    self,
-                    {} /* positional arguments */,
-                    {} /* named arguments */,
-                });
+                return prop.function->invoke(
+                    native_function::context{
+                        component.loc,
+                        diags,
+                        self,
+                        {} /* positional arguments */,
+                        {} /* named arguments */,
+                    });
               },
               [&](const prototype<>::fixed_object& fixed) -> object {
                 return fixed.value;

@@ -33,8 +33,9 @@ ParsedECHConfig getParsedECHConfig(ECHConfigParam param) {
   parsedECHConfig.key_config.kem_id = hpke::KEMId::secp256r1;
   parsedECHConfig.key_config.public_key = openssl::detail::encodeECPublicKey(
       ::fizz::test::getPublicKey(::fizz::test::kP256PublicKey));
-  parsedECHConfig.key_config.cipher_suites.push_back(HpkeSymmetricCipherSuite{
-      hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256});
+  parsedECHConfig.key_config.cipher_suites.push_back(
+      HpkeSymmetricCipherSuite{
+          hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256});
   parsedECHConfig.maximum_name_length = 50;
   parsedECHConfig.public_name = std::move(param.publicName);
   if (param.cookie.hasValue()) {

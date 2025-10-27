@@ -123,15 +123,17 @@ IntermHeaderService::IntermHeaderService(
   if (FLAGS_transport == "header") {
     HeaderClientChannel::Ptr channel;
     evbThread_.getEventBase()->runInEventBaseThreadAndWait([&]() {
-      channel = HeaderClientChannel::newChannel(folly::AsyncSocket::UniquePtr(
-          new folly::AsyncSocket(evbThread_.getEventBase(), host, port)));
+      channel = HeaderClientChannel::newChannel(
+          folly::AsyncSocket::UniquePtr(
+              new folly::AsyncSocket(evbThread_.getEventBase(), host, port)));
     });
     client_ = std::make_unique<TestServiceAsyncClient>(std::move(channel));
   } else if (FLAGS_transport == "rocket") {
     RocketClientChannel::Ptr channel;
     evbThread_.getEventBase()->runInEventBaseThreadAndWait([&]() {
-      channel = RocketClientChannel::newChannel(folly::AsyncSocket::UniquePtr(
-          new folly::AsyncSocket(evbThread_.getEventBase(), host, port)));
+      channel = RocketClientChannel::newChannel(
+          folly::AsyncSocket::UniquePtr(
+              new folly::AsyncSocket(evbThread_.getEventBase(), host, port)));
     });
     client_ = std::make_unique<TestServiceAsyncClient>(std::move(channel));
   } else {

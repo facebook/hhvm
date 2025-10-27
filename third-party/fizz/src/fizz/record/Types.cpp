@@ -28,8 +28,9 @@ ProtocolVersion getRealDraftVersion(ProtocolVersion version) {
     case ProtocolVersion::tls_1_3_28:
       return ProtocolVersion::tls_1_3_28;
     default:
-      throw std::runtime_error(folly::to<std::string>(
-          "getRealDraftVersion() called with ", toString(version)));
+      throw std::runtime_error(
+          folly::to<std::string>(
+              "getRealDraftVersion() called with ", toString(version)));
   }
 }
 

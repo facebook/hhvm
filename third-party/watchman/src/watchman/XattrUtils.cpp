@@ -91,7 +91,7 @@ bool setSecondaryGroupACL(
   }
 
   // Get the path's current permissions
-  struct stat st {};
+  struct stat st{};
   if (lstat(path, &st) != 0) {
     logf(ERR, "Failed to lstat {}: {}\n", path, folly::errnoStr(errno));
     return false;

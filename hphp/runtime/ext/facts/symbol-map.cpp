@@ -453,10 +453,11 @@ std::vector<Symbol<SymKind::Type>> SymbolMap::getDerivedTypes(
         std::vector<EdgeToSupertype> typeDefs;
         typeDefs.reserve(typeDefStrs.size());
         for (auto const& typeDefStr : typeDefStrs) {
-          typeDefs.push_back(EdgeToSupertype{
-              .m_type = Symbol<SymKind::Type>{typeDefStr.m_symbol},
-              .m_kind = kind,
-              .m_path = Path{typeDefStr.m_path}});
+          typeDefs.push_back(
+              EdgeToSupertype{
+                  .m_type = Symbol<SymKind::Type>{typeDefStr.m_symbol},
+                  .m_kind = kind,
+                  .m_path = Path{typeDefStr.m_path}});
         }
         return typeDefs;
       },
@@ -775,12 +776,13 @@ std::vector<MethodDecl> SymbolMap::getMethodsWithAttribute(
         MethodVec methodDecls;
         methodDecls.reserve(dbMethodDecls.size());
         for (auto const& [type, method, path] : dbMethodDecls) {
-          methodDecls.push_back(MethodDecl{
-              .m_type =
-                  TypeDecl{
-                      .m_name = Symbol<SymKind::Type>{type},
-                      .m_path = Path{path}},
-              .m_method = Symbol<SymKind::Method>{method}});
+          methodDecls.push_back(
+              MethodDecl{
+                  .m_type =
+                      TypeDecl{
+                          .m_name = Symbol<SymKind::Type>{type},
+                          .m_path = Path{path}},
+                  .m_method = Symbol<SymKind::Method>{method}});
         }
         return methodDecls;
       },
@@ -1663,8 +1665,9 @@ Path SymbolMap::getSymbolPath(Symbol<k> symbol) {
         return paths;
       },
       [&](Data& data, std::vector<Path> pathsFromDB) -> Path {
-        return symbolPath(getPathSymMap<k>(data).getSymbolPaths(
-            symbol, std::move(pathsFromDB)));
+        return symbolPath(
+            getPathSymMap<k>(data).getSymbolPaths(
+                symbol, std::move(pathsFromDB)));
       });
 }
 

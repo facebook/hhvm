@@ -388,26 +388,29 @@ TYPED_TEST(MultiStreamServiceTest, Cancel) {
       [&](Client<TestStreamService>& client) -> folly::coro::Task<void> {
         std::vector<folly::coro::Task<void>> tasks;
         for (int streamCount = 0; streamCount < 5; streamCount++) {
-          tasks.push_back(folly::coro::co_invoke(
-              [&, streamCount]() -> folly::coro::Task<void> {
-                auto gen = (co_await client.co_rangeWaitForCancellation(0, 100))
-                               .toAsyncGenerator();
+          tasks.push_back(
+              folly::coro::co_invoke(
+                  [&, streamCount]() -> folly::coro::Task<void> {
+                    auto gen =
+                        (co_await client.co_rangeWaitForCancellation(0, 100))
+                            .toAsyncGenerator();
 
-                int i = 0;
-                while (auto t = co_await gen.next()) {
-                  EXPECT_EQ(i, *t);
-                  EXPECT_LE(++i, 101);
-                  // cancel some streams after they have reached steady-state
-                  if (streamCount % 2 == 0) {
-                    if (streamCount == 4) {
-                      waitForCancellation.post();
+                    int i = 0;
+                    while (auto t = co_await gen.next()) {
+                      EXPECT_EQ(i, *t);
+                      EXPECT_LE(++i, 101);
+                      // cancel some streams after they have reached
+                      // steady-state
+                      if (streamCount % 2 == 0) {
+                        if (streamCount == 4) {
+                          waitForCancellation.post();
+                        }
+                        co_return;
+                      }
+                      co_await folly::coro::co_reschedule_on_current_executor;
                     }
-                    co_return;
-                  }
-                  co_await folly::coro::co_reschedule_on_current_executor;
-                }
-                EXPECT_EQ(i, 101);
-              }));
+                    EXPECT_EQ(i, 101);
+                  }));
         }
         co_await folly::coro::collectAllRange(std::move(tasks));
       });
@@ -448,16 +451,19 @@ TEST_F(MultiStreamStressedServiceTest, SubscriptionStressTest) {
         tasks.reserve(kNumStreams);
         for (uint32_t streamCount = 0; streamCount < kNumStreams;
              streamCount++) {
-          tasks.push_back(folly::coro::co_invoke(
-              [&client, streamCount]() -> folly::coro::Task<void> {
-                auto gen = (co_await client.co_rangePassiveSubscription())
-                               .toAsyncGenerator();
-                co_await folly::coro::co_reschedule_on_current_executor;
-                co_await folly::coro::co_awaitTry(folly::coro::timeout(
-                    gen.next(), std::chrono::milliseconds(streamCount)));
-                // To delay disconnection a little bit more
-                co_await folly::coro::co_reschedule_on_current_executor;
-              }));
+          tasks.push_back(
+              folly::coro::co_invoke(
+                  [&client, streamCount]() -> folly::coro::Task<void> {
+                    auto gen = (co_await client.co_rangePassiveSubscription())
+                                   .toAsyncGenerator();
+                    co_await folly::coro::co_reschedule_on_current_executor;
+                    co_await folly::coro::co_awaitTry(
+                        folly::coro::timeout(
+                            gen.next(),
+                            std::chrono::milliseconds(streamCount)));
+                    // To delay disconnection a little bit more
+                    co_await folly::coro::co_reschedule_on_current_executor;
+                  }));
         }
         co_await folly::coro::collectAllRange(std::move(tasks));
       },

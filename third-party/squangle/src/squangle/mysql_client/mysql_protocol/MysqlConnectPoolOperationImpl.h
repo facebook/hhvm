@@ -23,8 +23,9 @@ class MysqlConnectPoolOperationImpl : public MysqlConnectOperationImpl,
       std::weak_ptr<ConnectionPool<Client>> pool,
       std::shared_ptr<Client> client,
       std::shared_ptr<const ConnectionKey> conn_key)
-      : OperationBase(std::make_unique<OperationBase::OwnedConnection>(
-            client->createConnection(conn_key))),
+      : OperationBase(
+            std::make_unique<OperationBase::OwnedConnection>(
+                client->createConnection(conn_key))),
         ConnectOperationImpl(client.get(), conn_key),
         MysqlConnectOperationImpl(client.get(), std::move(conn_key)),
         pool_(pool) {}

@@ -202,9 +202,10 @@ class RocketClient : public virtual folly::DelayedDestruction,
   void notifyIfDetachable() {
     if (clientState_.connState == ConnectionState::CLOSING && !requests_ &&
         streams_.empty()) {
-      close(transport::TTransportException(
-          transport::TTransportException::END_OF_FILE,
-          "Connection closed by server"));
+      close(
+          transport::TTransportException(
+              transport::TTransportException::END_OF_FILE,
+              "Connection closed by server"));
     }
     if (!onDetachable_ || !isDetachable()) {
       return;
@@ -315,18 +316,21 @@ class RocketClient : public virtual folly::DelayedDestruction,
     auto match(F&& f) const {
       switch (static_cast<CallbackType>(storage_ & kTypeMask)) {
         case CallbackType::STREAM:
-          return f(reinterpret_cast<RocketStreamServerCallback*>(
-              storage_ & kPointerMask));
+          return f(
+              reinterpret_cast<RocketStreamServerCallback*>(
+                  storage_ & kPointerMask));
         case CallbackType::STREAM_WITH_CHUNK_TIMEOUT:
           return f(
               reinterpret_cast<RocketStreamServerCallbackWithChunkTimeout*>(
                   storage_ & kPointerMask));
         case CallbackType::SINK:
-          return f(reinterpret_cast<RocketSinkServerCallback*>(
-              storage_ & kPointerMask));
+          return f(
+              reinterpret_cast<RocketSinkServerCallback*>(
+                  storage_ & kPointerMask));
         case CallbackType::BIDI:
-          return f(reinterpret_cast<RocketBiDiServerCallback*>(
-              storage_ & kPointerMask));
+          return f(
+              reinterpret_cast<RocketBiDiServerCallback*>(
+                  storage_ & kPointerMask));
       }
       folly::assume_unreachable();
     }
@@ -591,9 +595,10 @@ class RocketClient : public virtual folly::DelayedDestruction,
     explicit ServerVersionTimeout(RocketClient& client) : client_(client) {}
 
     void timeoutExpired() noexcept override {
-      client_.close(transport::TTransportException(
-          apache::thrift::transport::TTransportException::TIMED_OUT,
-          "Server version not reported"));
+      client_.close(
+          transport::TTransportException(
+              apache::thrift::transport::TTransportException::TIMED_OUT,
+              "Server version not reported"));
     }
 
    private:

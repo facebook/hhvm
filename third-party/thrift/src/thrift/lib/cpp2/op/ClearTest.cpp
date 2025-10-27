@@ -154,8 +154,9 @@ void test_custom_default() {
   auto defaultObj = getDefault<Tag>();
   const auto& intrinsicDefaultObj = getIntrinsicDefault<Tag>();
 
-  EXPECT_FALSE(apache::thrift::adapt_detail::equal<Adapter>(
-      defaultObj, intrinsicDefaultObj));
+  EXPECT_FALSE(
+      apache::thrift::adapt_detail::equal<Adapter>(
+          defaultObj, intrinsicDefaultObj));
 
   // The default of a field with field adapter is constructed with the default
   // parent struct. Meanwhile, the intrinsic default of a field with field

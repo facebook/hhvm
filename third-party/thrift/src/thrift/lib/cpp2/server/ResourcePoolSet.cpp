@@ -70,8 +70,9 @@ ResourcePoolHandle ResourcePoolSet::addResourcePool(
       joinExecutorOnStop}};
   // Ensure that any default slots have been initialized (with empty unique_ptr
   // if necessary).
-  resourcePools_.resize(std::max(
-      resourcePools_.size(), ResourcePoolHandle::kMaxReservedIndex + 1));
+  resourcePools_.resize(
+      std::max(
+          resourcePools_.size(), ResourcePoolHandle::kMaxReservedIndex + 1));
   resourcePools_.emplace_back(std::move(pool));
 
   priorities_.resize(

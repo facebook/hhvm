@@ -277,8 +277,9 @@ time_point<system_clock> Mercurial::getCommitDate(
 time_point<system_clock> Mercurial::convertCommitDate(const char* commitDate) {
   double date;
   if (std::sscanf(commitDate, "%lf", &date) != 1) {
-    throw std::runtime_error(fmt::format(
-        "failed to parse date value `{}` into a double", commitDate));
+    throw std::runtime_error(
+        fmt::format(
+            "failed to parse date value `{}` into a double", commitDate));
   }
   // TODO: maybe do some bounds checking on the double we get from
   // hg.

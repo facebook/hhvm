@@ -1156,8 +1156,9 @@ TEST_F(AsyncFizzClientTest, TestECHRetryAvailableAction) {
   auto callback = MockECHRetryCallback();
   EXPECT_CALL(callback, retryAvailable(_))
       .WillOnce(Invoke([](ECHRetryAvailable gotRetryConfig) {
-        EXPECT_TRUE(ech::test::isEqual(
-            gotRetryConfig.configs.at(0), ech::test::getParsedECHConfig()));
+        EXPECT_TRUE(
+            ech::test::isEqual(
+                gotRetryConfig.configs.at(0), ech::test::getParsedECHConfig()));
       }));
   client_->setECHRetryCallback(&callback);
   ECHRetryAvailable expectedECHRetries;

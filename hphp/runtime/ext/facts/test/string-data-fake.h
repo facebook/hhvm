@@ -56,7 +56,7 @@ namespace Facts {
 
 struct TestStringTable {
  private:
-  TestStringTable(){};
+  TestStringTable() {};
 
  public:
   static TestStringTable* getInstance() {

@@ -27,7 +27,7 @@ using UniqueIntrusiveListHook = folly::SafeIntrusiveListHook;
  */
 template <
     typename T,
-    UniqueIntrusiveListHook T::*PtrToMember,
+    UniqueIntrusiveListHook T::* PtrToMember,
     typename TDeleter = std::default_delete<T>>
 class UniqueIntrusiveList {
  public:

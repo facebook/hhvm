@@ -77,8 +77,9 @@ TEST(TicketCodecTest, TestEncodeWithAppTokenAndTime) {
   rs.appToken = folly::IOBuf::copyBuffer("hello world");
   EXPECT_CALL(*cert, getIdentity()).WillOnce(Return("ident"));
   auto encoded = TicketCodec<CertificateStorage::X509>::encode(std::move(rs));
-  EXPECT_TRUE(folly::IOBufEqualTo()(
-      encoded, toIOBuf(ticketWithAppTokenAndHandshakeTime)))
+  EXPECT_TRUE(
+      folly::IOBufEqualTo()(
+          encoded, toIOBuf(ticketWithAppTokenAndHandshakeTime)))
       << folly::hexlify(encoded->coalesce());
 }
 
@@ -192,8 +193,9 @@ TEST(TicketCodecTest, TestDecode) {
   auto rs = x509Decode(toIOBuf(ticketClientAuthX509));
   EXPECT_EQ(rs.version, ProtocolVersion::tls_1_3);
   EXPECT_EQ(rs.cipher, CipherSuite::TLS_AES_128_GCM_SHA256);
-  EXPECT_TRUE(folly::IOBufEqualTo()(
-      rs.resumptionSecret, folly::IOBuf::copyBuffer("secret")));
+  EXPECT_TRUE(
+      folly::IOBufEqualTo()(
+          rs.resumptionSecret, folly::IOBuf::copyBuffer("secret")));
   EXPECT_EQ(rs.ticketAgeAdd, 0x44444444);
   EXPECT_EQ(
       rs.ticketIssueTime,
@@ -223,16 +225,18 @@ TEST(TicketCodecTest, TestDecodeWithAppToken) {
   auto rs = x509Decode(toIOBuf(ticketWithAppToken));
   EXPECT_EQ(rs.version, ProtocolVersion::tls_1_3);
   EXPECT_EQ(rs.cipher, CipherSuite::TLS_AES_128_GCM_SHA256);
-  EXPECT_TRUE(folly::IOBufEqualTo()(
-      rs.resumptionSecret, folly::IOBuf::copyBuffer("secret")));
+  EXPECT_TRUE(
+      folly::IOBufEqualTo()(
+          rs.resumptionSecret, folly::IOBuf::copyBuffer("secret")));
   EXPECT_EQ(rs.ticketAgeAdd, 0x44444444);
   EXPECT_EQ(
       rs.ticketIssueTime,
       std::chrono::time_point<std::chrono::system_clock>(
           std::chrono::seconds(25)));
   EXPECT_EQ(*rs.alpn, "h2");
-  EXPECT_TRUE(folly::IOBufEqualTo()(
-      rs.appToken, folly::IOBuf::copyBuffer("hello world")));
+  EXPECT_TRUE(
+      folly::IOBufEqualTo()(
+          rs.appToken, folly::IOBuf::copyBuffer("hello world")));
   EXPECT_EQ(
       rs.handshakeTime,
       std::chrono::time_point<std::chrono::system_clock>(
@@ -243,16 +247,18 @@ TEST(TicketCodecTest, TestDecodeWithAppTokenAndTime) {
   auto rs = x509Decode(toIOBuf(ticketWithAppTokenAndHandshakeTime));
   EXPECT_EQ(rs.version, ProtocolVersion::tls_1_3);
   EXPECT_EQ(rs.cipher, CipherSuite::TLS_AES_128_GCM_SHA256);
-  EXPECT_TRUE(folly::IOBufEqualTo()(
-      rs.resumptionSecret, folly::IOBuf::copyBuffer("secret")));
+  EXPECT_TRUE(
+      folly::IOBufEqualTo()(
+          rs.resumptionSecret, folly::IOBuf::copyBuffer("secret")));
   EXPECT_EQ(rs.ticketAgeAdd, 0x44444444);
   EXPECT_EQ(
       rs.ticketIssueTime,
       std::chrono::time_point<std::chrono::system_clock>(
           std::chrono::seconds(25)));
   EXPECT_EQ(*rs.alpn, "h2");
-  EXPECT_TRUE(folly::IOBufEqualTo()(
-      rs.appToken, folly::IOBuf::copyBuffer("hello world")));
+  EXPECT_TRUE(
+      folly::IOBufEqualTo()(
+          rs.appToken, folly::IOBuf::copyBuffer("hello world")));
   EXPECT_EQ(
       rs.handshakeTime,
       std::chrono::time_point<std::chrono::system_clock>(
@@ -263,8 +269,9 @@ TEST(TicketCodecTest, TestDecodeWithEmptyAppToken) {
   auto rs = x509Decode(toIOBuf(ticket));
   EXPECT_EQ(rs.version, ProtocolVersion::tls_1_3);
   EXPECT_EQ(rs.cipher, CipherSuite::TLS_AES_128_GCM_SHA256);
-  EXPECT_TRUE(folly::IOBufEqualTo()(
-      rs.resumptionSecret, folly::IOBuf::copyBuffer("secret")));
+  EXPECT_TRUE(
+      folly::IOBufEqualTo()(
+          rs.resumptionSecret, folly::IOBuf::copyBuffer("secret")));
   EXPECT_EQ(rs.ticketAgeAdd, 0x44444444);
   EXPECT_EQ(
       rs.ticketIssueTime,
@@ -281,8 +288,9 @@ TEST(TicketCodecTest, TestDecodeWithoutAppToken) {
   auto rs = x509Decode(toIOBuf(ticketWithoutAppToken));
   EXPECT_EQ(rs.version, ProtocolVersion::tls_1_3);
   EXPECT_EQ(rs.cipher, CipherSuite::TLS_AES_128_GCM_SHA256);
-  EXPECT_TRUE(folly::IOBufEqualTo()(
-      rs.resumptionSecret, folly::IOBuf::copyBuffer("secret")));
+  EXPECT_TRUE(
+      folly::IOBufEqualTo()(
+          rs.resumptionSecret, folly::IOBuf::copyBuffer("secret")));
   EXPECT_EQ(rs.ticketAgeAdd, 0x44444444);
   EXPECT_EQ(
       rs.ticketIssueTime,

@@ -96,8 +96,9 @@ RequestChannel::Ptr ScopedServerInterfaceThread::newChannel(
       callbackExecutor,
       [makeChannel = std::move(makeChannel),
        address = getAddress()](folly::EventBase& eb) mutable {
-        return makeChannel(folly::AsyncSocket::UniquePtr(
-            new folly::AsyncSocket(&eb, address)));
+        return makeChannel(
+            folly::AsyncSocket::UniquePtr(
+                new folly::AsyncSocket(&eb, address)));
       },
       numThreads,
       prot);

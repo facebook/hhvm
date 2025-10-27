@@ -197,8 +197,9 @@ LegacySerializedResponse::LegacySerializedResponse(
     int32_t seqid,
     folly::StringPiece methodName,
     const TApplicationException& ex)
-    : buffer(serializeError</*includeEnvelope=*/true>(
-          protocolId, ex, methodName.str(), seqid)) {}
+    : buffer(
+          serializeError</*includeEnvelope=*/true>(
+              protocolId, ex, methodName.str(), seqid)) {}
 
 LegacySerializedResponse::LegacySerializedResponse(
     uint16_t protocolId,

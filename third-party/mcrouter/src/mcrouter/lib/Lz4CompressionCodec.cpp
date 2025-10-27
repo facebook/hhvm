@@ -35,8 +35,9 @@ Lz4CompressionCodec::Lz4CompressionCodec(
       reinterpret_cast<const char*>(dictionary_->data()),
       dictionary_->length());
   if (res < 0 || static_cast<size_t>(res) != dictionary_->length()) {
-    throw std::runtime_error(fmt::format(
-        "LZ4 codec: Failed to load dictionary. Return code: {}", res));
+    throw std::runtime_error(
+        fmt::format(
+            "LZ4 codec: Failed to load dictionary. Return code: {}", res));
   }
 }
 

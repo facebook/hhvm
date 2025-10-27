@@ -431,8 +431,7 @@ constexpr size_t hash(const AdaptedT& value) {
 // for a set, with the appropriate adapted versions.
 template <
     typename Adapter,
-    template <typename, typename, typename>
-    class SetT,
+    template <typename, typename, typename> class SetT,
     typename Key,
     typename Less,
     typename Allocator>
@@ -440,8 +439,7 @@ SetT<Key, adapt_detail::adapted_less<Adapter, Key>, Allocator>
 resolveSetForAdapated(const SetT<Key, Less, Allocator>&);
 template <
     typename Adapter,
-    template <typename, typename, typename, typename>
-    class SetT,
+    template <typename, typename, typename, typename> class SetT,
     typename Key,
     typename Hash,
     typename KeyEqual,
@@ -460,8 +458,7 @@ using adapt_set_key_t =
 // for a map with an adapted key type.
 template <
     typename Adapter,
-    template <typename, typename, typename, typename>
-    class MapT,
+    template <typename, typename, typename, typename> class MapT,
     typename Key,
     typename Value,
     typename Less,
@@ -470,8 +467,7 @@ MapT<Key, Value, adapt_detail::adapted_less<Adapter, Key>, Allocator>
 resolveMapForAdapated(const MapT<Key, Value, Less, Allocator>&);
 template <
     typename Adapter,
-    template <typename, typename, typename, typename, typename>
-    class MapT,
+    template <typename, typename, typename, typename, typename> class MapT,
     typename Key,
     typename Value,
     typename Hash,

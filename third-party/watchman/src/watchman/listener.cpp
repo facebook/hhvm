@@ -70,7 +70,7 @@ static FileDescriptor get_listener_unix_domain_socket(const char* path) {
 #endif
   FileDescriptor listener_fd;
 
-  struct sockaddr_un un {};
+  struct sockaddr_un un{};
   if (strlen(path) >= sizeof(un.sun_path) - 1) {
     logf(ERR, "{}: path is too long\n", path);
     return FileDescriptor();

@@ -38,8 +38,9 @@ void RequestContextQueue::timeOutSendingRequest(RequestContext& req) noexcept {
   DCHECK(req.state_ == State::WRITE_SENDING);
   DCHECK(!req.responsePayload_.hasException());
 
-  req.responsePayload_.emplaceException(transport::TTransportException(
-      transport::TTransportException::TIMED_OUT));
+  req.responsePayload_.emplaceException(
+      transport::TTransportException(
+          transport::TTransportException::TIMED_OUT));
   untrackIfRequestResponse(req);
   removeFromWriteSendingQueue(req);
   req.state_ = State::COMPLETE;

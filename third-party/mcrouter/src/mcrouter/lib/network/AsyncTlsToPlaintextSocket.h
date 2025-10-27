@@ -60,18 +60,20 @@ class AsyncTlsToPlaintextSocket final : public folly::AsyncTransportWrapper {
 
   // AsyncTransport overrides
   void close() override {
-    failAllWrites(folly::AsyncSocketException{
-        folly::AsyncSocketException::END_OF_FILE,
-        "AsyncTlsToPlaintextSocket closed"});
+    failAllWrites(
+        folly::AsyncSocketException{
+            folly::AsyncSocketException::END_OF_FILE,
+            "AsyncTlsToPlaintextSocket closed"});
     if (auto* readCallback = std::exchange(readCallback_, nullptr)) {
       readCallback->readEOF();
     }
     impl_->close();
   }
   void closeNow() override {
-    failAllWrites(folly::AsyncSocketException{
-        folly::AsyncSocketException::END_OF_FILE,
-        "AsyncTlsToPlaintextSocket closed"});
+    failAllWrites(
+        folly::AsyncSocketException{
+            folly::AsyncSocketException::END_OF_FILE,
+            "AsyncTlsToPlaintextSocket closed"});
     if (auto* readCallback = std::exchange(readCallback_, nullptr)) {
       readCallback->readEOF();
     }

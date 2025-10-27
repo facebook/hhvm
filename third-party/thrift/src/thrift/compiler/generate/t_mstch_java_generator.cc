@@ -519,15 +519,17 @@ class mstch_java_program : public mstch_program {
       for (int32_t i = n * BATCH_SIZE; i < std::min((n + 1) * BATCH_SIZE, size);
            i++) {
         const auto& m = type_list[i];
-        a.emplace_back(mstch::map{
-            {"typeList:uri", m.uri},
-            {"typeList:className", m.className},
-        });
+        a.emplace_back(
+            mstch::map{
+                {"typeList:uri", m.uri},
+                {"typeList:className", m.className},
+            });
       }
-      arr.emplace_back(mstch::map{
-          {"typeList:index", n++},
-          {"typeList:batch", a},
-      });
+      arr.emplace_back(
+          mstch::map{
+              {"typeList:index", n++},
+              {"typeList:batch", a},
+          });
     }
     return arr;
   }

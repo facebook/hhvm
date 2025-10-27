@@ -198,8 +198,8 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
         continue;
       }
 
-      auto next =
-          co_await folly::coro::co_awaitTry(folly::coro::co_withCancellation(
+      auto next = co_await folly::coro::co_awaitTry(
+          folly::coro::co_withCancellation(
               stream->cancelSource_.getToken(), gen_.next()));
       if (next.hasException()) {
         stream->serverPush((*encode)(std::move(next.exception())));

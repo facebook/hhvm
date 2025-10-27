@@ -1270,9 +1270,10 @@ class prototype_database {
     auto [_, inserted] =
         prototypes_.emplace(std::type_index(typeid(T)), std::move(prototype));
     if (!inserted) {
-      throw std::runtime_error(fmt::format(
-          "Prototype for type '{}' already exists.",
-          boost::core::demangle(typeid(T).name())));
+      throw std::runtime_error(
+          fmt::format(
+              "Prototype for type '{}' already exists.",
+              boost::core::demangle(typeid(T).name())));
     }
   }
 
@@ -1291,15 +1292,17 @@ class prototype_database {
       if (allow_lazy) {
         return this->lazy<T>();
       }
-      throw std::runtime_error(fmt::format(
-          "Prototype for type '{}' does not exist.",
-          boost::core::demangle(typeid(T).name())));
+      throw std::runtime_error(
+          fmt::format(
+              "Prototype for type '{}' does not exist.",
+              boost::core::demangle(typeid(T).name())));
     }
     auto casted = std::dynamic_pointer_cast<const prototype<T>>(found->second);
     if (casted == nullptr) {
-      throw std::runtime_error(fmt::format(
-          "Prototype for type '{}' is of an unexpected type.",
-          boost::core::demangle(typeid(T).name())));
+      throw std::runtime_error(
+          fmt::format(
+              "Prototype for type '{}' is of an unexpected type.",
+              boost::core::demangle(typeid(T).name())));
     }
     return casted;
   }

@@ -37,8 +37,9 @@ std::atomic<uint32_t> HeaderServerChannel::sample_(0);
 
 HeaderServerChannel::HeaderServerChannel(
     const std::shared_ptr<folly::AsyncTransport>& transport)
-    : HeaderServerChannel(std::shared_ptr<Cpp2Channel>(Cpp2Channel::newChannel(
-          transport, make_unique<ServerFramingHandler>(*this)))) {}
+    : HeaderServerChannel(
+          std::shared_ptr<Cpp2Channel>(Cpp2Channel::newChannel(
+              transport, make_unique<ServerFramingHandler>(*this)))) {}
 
 HeaderServerChannel::HeaderServerChannel(
     const std::shared_ptr<Cpp2Channel>& cpp2Channel)

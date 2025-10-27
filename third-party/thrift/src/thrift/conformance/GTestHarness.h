@@ -51,8 +51,7 @@
 // client providers in clientFns.
 #define THRIFT_CONFORMANCE_TEST(suites, clientFns, nonconforming)           \
   static ::apache::thrift::conformance::detail::ConformanceTestRegistration \
-      __suite_reg_##__LINE__(                                               \
-          suites, clientFns, nonconforming, __FILE__, __LINE__)
+  __suite_reg_##__LINE__(suites, clientFns, nonconforming, __FILE__, __LINE__)
 
 namespace apache::thrift::conformance {
 

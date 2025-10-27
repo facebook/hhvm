@@ -165,27 +165,30 @@ TEST_F(StreamingTest, ClientStreamBridge) {
     {
       folly::CancellationSource cancelSource;
       auto gen = client->sync_range(0, 10).toAsyncGenerator();
-      folly::coro::blockingWait(folly::coro::co_withCancellation(
-          cancelSource.getToken(), [&]() mutable -> folly::coro::Task<void> {
-            auto next = co_await gen.next();
-            EXPECT_EQ(0, *next);
-            cancelSource.requestCancellation();
-            EXPECT_THROW(co_await gen.next(), folly::OperationCancelled);
-          }()));
+      folly::coro::blockingWait(
+          folly::coro::co_withCancellation(
+              cancelSource.getToken(),
+              [&]() mutable -> folly::coro::Task<void> {
+                auto next = co_await gen.next();
+                EXPECT_EQ(0, *next);
+                cancelSource.requestCancellation();
+                EXPECT_THROW(co_await gen.next(), folly::OperationCancelled);
+              }()));
     }
 
     {
       auto bufferedStream = client->sync_slowRange(0, 10, 1000);
       folly::CancellationSource cancelSource;
       auto gen = std::move(bufferedStream).toAsyncGenerator();
-      folly::coro::blockingWait(folly::coro::co_withCancellation(
-          cancelSource.getToken(),
-          folly::coro::co_invoke([&]() mutable -> folly::coro::Task<void> {
-            (co_await folly::coro::co_current_executor)->add([&]() {
-              cancelSource.requestCancellation();
-            });
-            EXPECT_THROW(co_await gen.next(), folly::OperationCancelled);
-          })));
+      folly::coro::blockingWait(
+          folly::coro::co_withCancellation(
+              cancelSource.getToken(),
+              folly::coro::co_invoke([&]() mutable -> folly::coro::Task<void> {
+                (co_await folly::coro::co_current_executor)->add([&]() {
+                  cancelSource.requestCancellation();
+                });
+                EXPECT_THROW(co_await gen.next(), folly::OperationCancelled);
+              })));
     }
 #endif // FOLLY_HAS_COROUTINES
 
@@ -928,8 +931,9 @@ TEST_F(StreamingTest, ServerCompletesFirstResponseAfterClientDisconnects) {
   folly::EventBase evb;
 
   auto makeChannel = [&] {
-    return RocketClientChannel::newChannel(folly::AsyncSocket::UniquePtr(
-        new folly::AsyncSocket(&evb, "::1", port_)));
+    return RocketClientChannel::newChannel(
+        folly::AsyncSocket::UniquePtr(
+            new folly::AsyncSocket(&evb, "::1", port_)));
   };
 
   {
@@ -958,8 +962,9 @@ TEST_F(StreamingTest, ServerCompletesFirstResponseAfterClientTimeout) {
   folly::EventBase evb;
 
   auto makeChannel = [&] {
-    return RocketClientChannel::newChannel(folly::AsyncSocket::UniquePtr(
-        new folly::AsyncSocket(&evb, "::1", port_)));
+    return RocketClientChannel::newChannel(
+        folly::AsyncSocket::UniquePtr(
+            new folly::AsyncSocket(&evb, "::1", port_)));
   };
 
   StreamServiceAsyncClient client{makeChannel()};
@@ -1027,7 +1032,9 @@ TEST_F(StreamingTest, SetMaxRequestsStreamCancel) {
 
     EXPECT_ANY_THROW(client->sync_range(rpcOptions, 0, 10));
 
-    { auto _ = std::move(stream2); }
+    {
+      auto _ = std::move(stream2);
+    }
 
     auto stream3 = client->sync_range(rpcOptions, 0, 10);
 
@@ -1041,8 +1048,9 @@ TEST_F(StreamingTest, LeakCallback) {
       client->sync_leakCallback();
       ADD_FAILURE() << "Didn't throw";
     } catch (const TApplicationException& ex) {
-      EXPECT_TRUE(folly::StringPiece(ex.what()).contains(
-          "HandlerCallback not completed"));
+      EXPECT_TRUE(
+          folly::StringPiece(ex.what()).contains(
+              "HandlerCallback not completed"));
     }
   });
 }

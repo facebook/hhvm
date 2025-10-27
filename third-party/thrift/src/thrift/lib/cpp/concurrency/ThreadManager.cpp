@@ -1057,9 +1057,10 @@ class PriorityThreadManager::PriorityImpl
     : public PriorityThreadManager,
       public folly::DefaultKeepAliveExecutor {
  public:
-  explicit PriorityImpl(const std::array<
-                        std::pair<std::shared_ptr<ThreadFactory>, size_t>,
-                        N_PRIORITIES>& factories) {
+  explicit PriorityImpl(
+      const std::array<
+          std::pair<std::shared_ptr<ThreadFactory>, size_t>,
+          N_PRIORITIES>& factories) {
     executors_.reserve(N_PRIORITIES * N_SOURCES);
     for (int i = 0; i < N_PRIORITIES; i++) {
       auto m = std::make_unique<ThreadManager::Impl>();

@@ -19,8 +19,9 @@ namespace facebook::common::mysql_client::mysql_protocol {
 MysqlConnectOperationImpl::MysqlConnectOperationImpl(
     MysqlClientBase* mysql_client,
     std::shared_ptr<const ConnectionKey> conn_key)
-    : OperationBase(std::make_unique<MysqlOperationImpl::OwnedConnection>(
-          mysql_client->createConnection(conn_key))),
+    : OperationBase(
+          std::make_unique<MysqlOperationImpl::OwnedConnection>(
+              mysql_client->createConnection(conn_key))),
       ConnectOperationImpl(mysql_client, std::move(conn_key)),
       flags_(CLIENT_MULTI_STATEMENTS),
       active_in_client_(true),

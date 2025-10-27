@@ -86,8 +86,7 @@ template <
     class T,
     class K,
     class V,
-    template <class, class, class, class>
-    class Table>
+    template <class, class, class, class> class Table>
 struct MapTableLayout
     : public Table<T, std::pair<const K, V>, KeyExtractor<T, K, V>, K> {
   typedef Table<T, std::pair<const K, V>, KeyExtractor<T, K, V>, K> Base;

@@ -382,6 +382,10 @@ void phpDebuggerStepIn() {
   auto flow_filter = getFlowFilter();
   flow_filter->clear();
 
+  // Initialize flow depth to current stack depth to ensure correct
+  // stack disposition calculations in phpDebuggerOpcodeHook
+  req_data.setDebuggerFlowDepth(req_data.getDebuggerStackDepth());
+
   // Check if the site is valid.
   ActRec* fp = vmfp();
   PC pc = vmpc();

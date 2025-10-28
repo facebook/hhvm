@@ -53,13 +53,13 @@ exception MethodException {
 
 service TestBidiService {
   // @lint-ignore THRIFTCHECKS new unreleased feature
-  sink<string>, stream<string> echo();
+  sink<string>, stream<string> echo(1: double serverDelay);
 
   // @lint-ignore THRIFTCHECKS new unreleased feature
   string, sink<string>, stream<string> echoWithResponse(1: string initial);
 
   // @lint-ignore THRIFTCHECKS new unreleased feature
-  sink<string>, stream<i32> intStream();
+  sink<string>, stream<i32> intStream(double serverDelay);
 
   // @lint-ignore THRIFTCHECKS new unreleased feature
   FirstResponse, sink<SinkChunk>, stream<StreamChunk> structBidi(

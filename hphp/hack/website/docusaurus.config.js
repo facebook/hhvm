@@ -4,8 +4,8 @@
 
 /* eslint-disable */
 
-const lightCodeTheme = require('prism-react-renderer/themes/github');
-const darkCodeTheme = require('prism-react-renderer/themes/vsDark');
+const lightCodeTheme = require('prism-react-renderer').themes.github;
+const darkCodeTheme = require('prism-react-renderer').themes.vsDark;
 
 // With JSDoc @type annotations, IDEs can provide config autocompletion
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
@@ -13,13 +13,13 @@ const darkCodeTheme = require('prism-react-renderer/themes/vsDark');
   title: 'Hack & HHVM Documentation',
   tagline: 'Moving fast with high-performance Hack, a programming language for building reliable websites at epic scale',
   url: 'https://internalfb.com',
-  baseUrl: '/',
-  onBrokenLinks: 'warn',
+  baseUrl: process.env.DOCUSAURUS_BASE_URL || '/',
+  onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   trailingSlash: true,
   favicon: 'img/favicon.ico',
   organizationName: 'facebook',
-  projectName: 'Hack',
+  projectName: 'hack',
   customFields: {
     fbRepoName: 'fbsource',
     ossRepoPath: 'fbcode/hphp/hack/website',

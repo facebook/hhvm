@@ -11,6 +11,9 @@ export default function prismIncludeLanguages(PrismObject) {
   // You can mutate PrismObject: registering plugins, deleting languages... As
   // long as you don't re-assign it
   globalThis.Prism = PrismObject;
+
+  require('prismjs/components/prism-markup-templating');
+
   additionalLanguages.forEach((lang) => {
     // eslint-disable-next-line global-require, import/no-dynamic-require
     require(`prismjs/components/prism-${lang}`);

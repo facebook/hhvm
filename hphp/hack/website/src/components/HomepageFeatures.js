@@ -11,7 +11,7 @@ import styles from './HomepageFeatures.module.css';
 const FeatureList = [
   {
     title: 'Hack Documentation',
-    href: '/hack-overview',
+    href: 'docs/hack-overview',
     Svg: require('../../static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
@@ -21,7 +21,7 @@ const FeatureList = [
   },
   {
     title: 'HHVM Documentation',
-    href: '/hhvm-overview',
+    href: 'docs/hhvm-overview',
     Svg: require('../../static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
@@ -31,7 +31,7 @@ const FeatureList = [
   },
   {
     title: 'Library Reference',
-    href: '/hsl/overview',
+    href: 'docs/hsl/overview',
     Svg: require('../../static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>

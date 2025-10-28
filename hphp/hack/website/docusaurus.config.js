@@ -32,7 +32,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/vsDark');
       ({
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
-          routeBasePath: '/',
+          routeBasePath: 'docs',
           path: '../manual/',
           editUrl: 'https://www.internalfb.com/code/fbsource/fbcode/hphp/hack/website',
         },
@@ -98,19 +98,19 @@ const darkCodeTheme = require('prism-react-renderer/themes/vsDark');
             items: [
               {
                 label: 'Overview',
-                to: '/hack-overview',
+                to: '/docs/hack-overview',
               },
               {
                 label: 'Getting Started',
-                to: '/hack/getting-started/quick-start',
+                to: '/docs/hack/getting-started/quick-start',
               },
               {
                 label: 'Tools',
-                to: '/hack/getting-started/tools',
+                to: '/docs/hack/getting-started/tools',
               },
               {
                 label: 'API Reference',
-                to: '/apis/overview',
+                to: '/docs/apis/overview',
               },
             ],
           },
@@ -119,19 +119,19 @@ const darkCodeTheme = require('prism-react-renderer/themes/vsDark');
             items: [
               {
                 label: 'Overview',
-                to: '/hhvm-overview',
+                to: '/docs/hhvm-overview',
               },
               {
                 label: 'Installation',
-                to: '/hhvm/installation/introduction',
+                to: '/docs/hhvm/installation/introduction',
               },
               {
                 label: 'Basic Usage',
-                to: '/hhvm/basic-usage/introduction',
+                to: '/docs/hhvm/basic-usage/introduction',
               },
               {
                 label: 'Configuration',
-                to: '/hhvm/configuration/introduction',
+                to: '/docs/hhvm/configuration/introduction',
               },
             ],
           },

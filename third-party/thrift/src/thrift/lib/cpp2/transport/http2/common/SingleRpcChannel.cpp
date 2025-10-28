@@ -397,6 +397,7 @@ void SingleRpcChannel::onThriftRequest() noexcept {
       nullptr,
       worker_.get(),
       worker_->getServer()->getServiceInterceptors().size());
+  connContext->setTransportType(Cpp2ConnContext::TransportType::HTTP2);
   processor_->onThriftRequest(
       std::move(metadata),
       std::move(contents_),

@@ -468,6 +468,7 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
   friend class Cpp2Connection;
   friend class rocket::ThriftRocketServerHandler;
   friend class HTTP2RoutingHandler;
+  friend class SingleRpcChannel;
   friend class detail::Cpp2ConnContextInternalAPI;
 
   /**

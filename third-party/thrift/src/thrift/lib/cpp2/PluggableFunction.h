@@ -171,6 +171,11 @@ class PluggableFunction<Ret(Args...)> {
   extern const ::apache::thrift::detail::PluggableFunction<_ret(__VA_ARGS__)> \
       _name
 
+#define THRIFT_PLUGGABLE_FUNC_DECLARE_NOEXCEPT(_ret, _name, ...)              \
+  _ret THRIFT__PLUGGABLE_FUNC_DEFAULT_##_name(__VA_ARGS__) noexcept;          \
+  extern const ::apache::thrift::detail::PluggableFunction<_ret(__VA_ARGS__)> \
+      _name
+
 #define THRIFT_PLUGGABLE_FUNC_REGISTER(_ret, _name, ...)                     \
   FOLLY_STORAGE_CONSTEXPR const ::apache::thrift::detail::PluggableFunction< \
       _ret(__VA_ARGS__)>                                                     \

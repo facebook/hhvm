@@ -610,18 +610,6 @@ class python_mstch_service : public mstch_service {
   }
 };
 
-class python_mstch_interaction : public python_mstch_service {
- public:
-  using ast_type = t_interaction;
-
-  python_mstch_interaction(
-      const t_interaction* interaction,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      const t_service* containing_service)
-      : python_mstch_service(interaction, ctx, pos, containing_service) {}
-};
-
 // Generator-specific validator that enforces that a reserved key is not used
 // as a namespace component.
 void validate_no_reserved_key_in_namespace(
@@ -1267,7 +1255,6 @@ class t_mstch_python_generator : public t_mstch_python_prototypes_generator {
 void t_mstch_python_generator::set_mstch_factories() {
   mstch_context_.add<python_mstch_program>();
   mstch_context_.add<python_mstch_service>();
-  mstch_context_.add<python_mstch_interaction>();
   mstch_context_.add<python_mstch_struct>();
 }
 

@@ -35,16 +35,13 @@ def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str,
         {{/each}}
     }
 
-{{^service:interaction?}}
 @staticmethod
 def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+{{#if service:interaction?}}
+    return {{program:module_mangle}}__thrift_metadata.gen_metadata_service_{{parent_service_name}}_{{interaction:name}}()
+{{#else}}
     return {{program:module_mangle}}__thrift_metadata.gen_metadata_service_{{service:name}}()
-{{/service:interaction?}}
-{{#service:interaction?}}
-@staticmethod
-def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-    return {{program:module_mangle}}__thrift_metadata.gen_metadata_service_{{service:parent_service_name}}_{{service:name}}()
-{{/service:interaction?}}
+{{/if service:interaction?}}
 
 class Async({{#service:extends}}{{!
     }}{{> services/client_module_path}}.Async{{!
@@ -60,16 +57,13 @@ class Async({{#service:extends}}{{!
         return {{#service:uri}}"{{service:uri}}"{{/service:uri}}{{!
             }}{{^service:uri}}None{{/service:uri}}
 
-    {{^service:interaction?}}
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+    {{#if service:interaction?}}
+        return {{program:module_mangle}}__thrift_metadata.gen_metadata_service_{{parent_service_name}}_{{interaction:name}}()
+    {{#else}}
         return {{program:module_mangle}}__thrift_metadata.gen_metadata_service_{{service:name}}()
-    {{/service:interaction?}}
-    {{#service:interaction?}}
-    @staticmethod
-    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return {{program:module_mangle}}__thrift_metadata.gen_metadata_service_{{service:parent_service_name}}_{{service:name}}()
-    {{/service:interaction?}}
+    {{/if service:interaction?}}
     {{#service:supported_functions}}
 
     async def {{function:name}}(
@@ -89,8 +83,8 @@ class Async({{#service:extends}}{{!
         _fbthrift_interaction = self.create{{function:created_interaction.name}}()
         {{/function:creates_interaction?}}
         _fbthrift_resp = await self._send_request(
-            {{^service:interaction?}}"{{service:name}}"{{/service:interaction?}}{{#service:interaction?}}"{{service:parent_service_name}}"{{/service:interaction?}},
-            {{#service:interaction?}}"{{service:name}}.{{function:name}}",{{/service:interaction?}}{{^service:interaction?}}"{{function:name}}",{{/service:interaction?}}
+            {{#if service:interaction?}}"{{parent_service_name}}"{{#else}}"{{service:name}}"{{/if}},
+            {{#if service:interaction?}}"{{interaction:name}}.{{function:name}}",{{#else}}"{{function:name}}",{{/if}}
             {{> types/function_args_type}}({{#function:args}}
                 {{field:py_name}}={{field:py_name}},{{/function:args}}),
             {{> clients/client_return_type}},
@@ -142,16 +136,25 @@ class Async({{#service:extends}}{{!
         {{/function:return_type}}
     {{/service:supported_functions}}
 
-    {{#service:interactions}}
-    def create{{service:name}}(
-        self #{{service:parent_service_name}}
-    ) -> {{service:parent_service_name}}_{{service:name}}.Async:
-        return self._create_interaction("{{service:name}}", {{service:parent_service_name}}_{{service:name}}.Async)
-    async def async_create{{service:name}}(
-        self #{{service:parent_service_name}}
-    ) -> {{service:parent_service_name}}_{{service:name}}.Async:
-        return self.create{{service:name}}()
-    {{/service:interactions}}
+    {{#each service:interactions as |interaction|}}
+      {{!
+        This template is used for both interaction and non-interaction clients.
+        If the client is an interaction client, then it won't have interactions
+        but it will have a parent_service_name.
+        If it's not an interaction client, it might have inner interactions but
+        we don't want to overwrite parent_service_name in the outer scope.
+      }}
+      {{#let parent_service_name = service:name}}
+      {{#let interaction_name = interaction.self.name}}
+    def create{{interaction_name}}(
+        self #{{parent_service_name}}
+    ) -> {{parent_service_name}}_{{interaction_name}}.Async:
+        return self._create_interaction("{{interaction_name}}", {{parent_service_name}}_{{interaction_name}}.Async)
+    async def async_create{{interaction_name}}(
+        self #{{parent_service_name}}
+    ) -> {{parent_service_name}}_{{interaction_name}}.Async:
+        return self.create{{interaction_name}}()
+    {{/each}}
 
 {{#service:supported_functions}}
 # pyre-ignore[4]: Missing annotation.{{! Adding an annotation here would require way too much duplication }}
@@ -178,16 +181,13 @@ class Sync({{#service:extends}}{{!
         return {{#service:uri}}"{{service:uri}}"{{/service:uri}}{{!
             }}{{^service:uri}}None{{/service:uri}}
 
-    {{^service:interaction?}}
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+    {{#if service:interaction?}}
+        return {{program:module_mangle}}__thrift_metadata.gen_metadata_service_{{parent_service_name}}_{{interaction:name}}()
+    {{#else}}
         return {{program:module_mangle}}__thrift_metadata.gen_metadata_service_{{service:name}}()
-    {{/service:interaction?}}
-    {{#service:interaction?}}
-    @staticmethod
-    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return {{program:module_mangle}}__thrift_metadata.gen_metadata_service_{{service:parent_service_name}}_{{service:name}}()
-    {{/service:interaction?}}
+    {{/if service:interaction?}}
     {{#service:supported_functions}}
     {{#let async_only? = (or service:interaction? function:sink_or_stream? function:starts_interaction? function:creates_interaction?)}}
     {{#if (not async_only?)}}

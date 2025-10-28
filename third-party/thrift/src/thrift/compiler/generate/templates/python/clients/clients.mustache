@@ -78,8 +78,14 @@ class {{service:name}}(_fbthrift_python_Client["{{service:name}}.Async", "{{serv
     })
     {{> clients/client_body }}
 
+{{!
+  For legacy reasons, in mstch, interactions also support `service:foo` fields so within
+  the loop body, `service:name` will get the interaction name so we need to capture the
+  current value. Also used by the client_body template for interactions.
+}}
+{{#let parent_service_name = service:name}}
 {{#service:interactions}}
-class {{service:parent_service_name}}_{{service:name}}(_fbthrift_python_Client["{{service:parent_service_name}}_{{service:name}}.Async", "{{service:parent_service_name}}_{{service:name}}.Sync"]):
+class {{parent_service_name}}_{{interaction:name}}(_fbthrift_python_Client["{{parent_service_name}}_{{interaction:name}}.Async", "{{parent_service_name}}_{{interaction:name}}.Sync"]):
     {{> clients/client_body }}
 
 {{/service:interactions}}

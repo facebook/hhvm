@@ -89,11 +89,12 @@ def _fbthrift_gen_metadata_service_{{service:name}}({{!
 }}metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
     {{> metadata/service_metadata }}
 
+{{#let parent_service_name = service:name}}
 {{#service:interactions}}
-def gen_metadata_service_{{service:parent_service_name}}_{{service:name}}() -> _fbthrift_metadata.ThriftMetadata:
-    return _fbthrift_gen_metadata_service_{{service:parent_service_name}}_{{service:name}}(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
+def gen_metadata_service_{{parent_service_name}}_{{interaction:name}}() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_service_{{parent_service_name}}_{{interaction:name}}(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
 
-def _fbthrift_gen_metadata_service_{{service:parent_service_name}}_{{service:name}}({{!
+def _fbthrift_gen_metadata_service_{{parent_service_name}}_{{interaction:name}}({{!
 }}metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
     {{> metadata/service_metadata }}
 

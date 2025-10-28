@@ -141,7 +141,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
             p.write_struct_end();
         }
     }
-    {{/function:stream?}}{{#function:sink?}}
+    {{/function:stream?}}{{#function:sink?}}{{^function:bidirectional_stream?}}
 
     pub struct {{function:upcamel}}SinkResult {
         {{#function:sink_has_first_response?}}
@@ -187,6 +187,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
             self
         }
     }
+    {{/function:bidirectional_stream?}}
 
     #[derive(Clone, Debug)]
     pub enum {{function:upcamel}}SinkExn {
@@ -367,6 +368,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
             )
         }
     }
+    {{^function:bidirectional_stream?}}
 
     #[derive(Clone, Debug)]
     pub enum {{function:upcamel}}SinkFinalExn {
@@ -486,6 +488,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
             p.write_struct_end();
         }
     }
+    {{/function:bidirectional_stream?}}
     {{/function:sink?}}
 
     #[derive(Clone, Debug)]
@@ -587,19 +590,18 @@ pub mod {{service:snake}} {{> lib/block}}{{!
 
     impl ::fbthrift::help::SerializeExn for {{function:upcamel}}Exn {
         type Success = {{!
-            }}{{^function:sink?}}{{^function:stream?}}{{> lib/server_ok_type}}{{/function:stream?}}{{/function:sink?}}{{!
-            }}{{#function:stream?}}{{!
-                }}{{#function:stream_has_first_response?}}{{!
-                    }}{{#function:return_type}}{{#function:stream_first_response_type}}{{> lib/type}}{{/function:stream_first_response_type}}{{/function:return_type}}{{!
-                }}{{/function:stream_has_first_response?}}{{!
-                }}{{^function:stream_has_first_response?}}(){{/function:stream_has_first_response?}}{{!
-            }}{{/function:stream?}}{{!
-            }}{{#function:sink?}}{{!
-                }}{{#function:sink_has_first_response?}}{{!
-                    }}{{#function:return_type}}{{#function:sink_first_response_type}}{{> lib/type}}{{/function:sink_first_response_type}}{{/function:return_type}}{{!
-                }}{{/function:sink_has_first_response?}}{{!
-                }}{{^function:sink_has_first_response?}}(){{/function:sink_has_first_response?}}{{!
-            }}{{/function:sink?}}{{!
+}}{{#function:bidirectional_stream?}}{{#function:sink_has_first_response?}}{{#function:return_type}}{{#function:sink_first_response_type}}{{> lib/type}}{{/function:sink_first_response_type}}{{/function:return_type}}{{/function:sink_has_first_response?}}{{^function:sink_has_first_response?}}(){{/function:sink_has_first_response?}}{{/function:bidirectional_stream?}}{{!
+}}{{^function:bidirectional_stream?}}{{!
+}}{{^function:sink?}}{{^function:stream?}}{{> lib/server_ok_type}}{{/function:stream?}}{{/function:sink?}}{{!
+}}{{#function:stream?}}{{!
+}}{{#function:stream_has_first_response?}}{{#function:return_type}}{{#function:stream_first_response_type}}{{> lib/type}}{{/function:stream_first_response_type}}{{/function:return_type}}{{/function:stream_has_first_response?}}{{!
+}}{{^function:stream_has_first_response?}}(){{/function:stream_has_first_response?}}{{!
+}}{{/function:stream?}}{{!
+}}{{#function:sink?}}{{!
+}}{{#function:sink_has_first_response?}}{{#function:return_type}}{{#function:sink_first_response_type}}{{> lib/type}}{{/function:sink_first_response_type}}{{/function:return_type}}{{/function:sink_has_first_response?}}{{!
+}}{{^function:sink_has_first_response?}}(){{/function:sink_has_first_response?}}{{!
+}}{{/function:sink?}}{{!
+}}{{/function:bidirectional_stream?}}{{!
         }};
 
         fn write_result<P>(
@@ -618,23 +620,34 @@ pub mod {{service:snake}} {{> lib/block}}{{!
             match res {
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", {{!
-                        }}{{^function:sink?}}{{^function:stream?}}{{!
-                            }}{{#function:return_type}}{{> lib/ttype}}{{/function:return_type}}{{!
-                        }}{{/function:stream?}}{{/function:sink?}}{{!
-                        }}{{#function:stream?}}{{!
-                            }}{{#function:stream_has_first_response?}}{{!
-                                }}{{#function:return_type}}{{#function:stream_first_response_type}}{{> lib/ttype}}{{/function:stream_first_response_type}}{{/function:return_type}}{{!
-                            }}{{/function:stream_has_first_response?}}{{!
-                            }}{{^function:stream_has_first_response?}}::fbthrift::TType::Void{{/function:stream_has_first_response?}}{{!
-                        }}{{/function:stream?}}{{!
-                        }}{{#function:sink?}}{{!
+                        }}{{#function:bidirectional_stream?}}{{!
                             }}{{#function:sink_has_first_response?}}{{!
                                 }}{{#function:return_type}}{{#function:sink_first_response_type}}{{> lib/ttype}}{{/function:sink_first_response_type}}{{/function:return_type}}{{!
                             }}{{/function:sink_has_first_response?}}{{!
                             }}{{^function:sink_has_first_response?}}::fbthrift::TType::Void{{/function:sink_has_first_response?}}{{!
-                        }}{{/function:sink?}}{{!
+                        }}{{/function:bidirectional_stream?}}{{!
+                        }}{{^function:bidirectional_stream?}}{{!
+                            }}{{^function:sink?}}{{^function:stream?}}{{!
+                                }}{{#function:return_type}}{{> lib/ttype}}{{/function:return_type}}{{!
+                            }}{{/function:stream?}}{{/function:sink?}}{{!
+                            }}{{#function:stream?}}{{!
+                                }}{{#function:stream_has_first_response?}}{{!
+                                    }}{{#function:return_type}}{{#function:stream_first_response_type}}{{> lib/ttype}}{{/function:stream_first_response_type}}{{/function:return_type}}{{!
+                                }}{{/function:stream_has_first_response?}}{{!
+                                }}{{^function:stream_has_first_response?}}::fbthrift::TType::Void{{/function:stream_has_first_response?}}{{!
+                            }}{{/function:stream?}}{{!
+                            }}{{#function:sink?}}{{!
+                                }}{{#function:sink_has_first_response?}}{{!
+                                    }}{{#function:return_type}}{{#function:sink_first_response_type}}{{> lib/ttype}}{{/function:sink_first_response_type}}{{/function:return_type}}{{!
+                                }}{{/function:sink_has_first_response?}}{{!
+                                }}{{^function:sink_has_first_response?}}::fbthrift::TType::Void{{/function:sink_has_first_response?}}{{!
+                            }}{{/function:sink?}}{{!
+                        }}{{/function:bidirectional_stream?}}{{!
                     }}, 0i16);
-                    {{^function:sink?}}{{^function:stream?}}
+                    {{#function:bidirectional_stream?}}{{#function:sink_has_first_response?}}
+                    ::fbthrift::Serialize::rs_thrift_write(_success, p);
+                    {{/function:sink_has_first_response?}}{{/function:bidirectional_stream?}}
+                    {{^function:bidirectional_stream?}}{{^function:sink?}}{{^function:stream?}}
                     ::fbthrift::Serialize::rs_thrift_write({{#function:return_type}}{{!
                         }}{{#type:has_adapter?}}{{!
                             }}&{{> lib/adapter/qualified}}::to_thrift_field::<::fbthrift::metadata::NoThriftAnnotations>(_success, 0){{!
@@ -647,7 +660,7 @@ pub mod {{service:snake}} {{> lib/block}}{{!
                     {{/function:stream_has_first_response?}}{{/function:stream?}}
                     {{#function:sink?}}{{#function:sink_has_first_response?}}
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
-                    {{/function:sink_has_first_response?}}{{/function:sink?}}
+                    {{/function:sink_has_first_response?}}{{/function:sink?}}{{/function:bidirectional_stream?}}
                     p.write_field_end();
                 }
                 {{#function:exceptions}}

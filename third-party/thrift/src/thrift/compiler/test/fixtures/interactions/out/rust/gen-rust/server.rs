@@ -89,7 +89,8 @@ pub trait MyInteraction: ::std::marker::Send + ::std::marker::Sync + 'static {
     }
     async fn truthify(
         &self,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction::TruthifyStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction::TruthifyStreamExn>>
 , crate::services::my_interaction::TruthifyExn> {
         ::std::result::Result::Err(crate::services::my_interaction::TruthifyExn::ApplicationException(
             ::fbthrift::ApplicationException::unimplemented_method(
@@ -130,7 +131,8 @@ where
     }
     async fn truthify(
         &self,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction::TruthifyStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction::TruthifyStreamExn>>
 , crate::services::my_interaction::TruthifyExn> {
         (**self).truthify(
         ).await
@@ -165,7 +167,8 @@ where
     }
     async fn truthify(
         &self,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction::TruthifyStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction::TruthifyStreamExn>>
 , crate::services::my_interaction::TruthifyExn> {
         (**self).truthify(
         ).await
@@ -304,7 +307,8 @@ pub trait MyInteractionFast: ::std::marker::Send + ::std::marker::Sync + 'static
     }
     async fn truthify(
         &self,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction_fast::TruthifyStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction_fast::TruthifyStreamExn>>
 , crate::services::my_interaction_fast::TruthifyExn> {
         ::std::result::Result::Err(crate::services::my_interaction_fast::TruthifyExn::ApplicationException(
             ::fbthrift::ApplicationException::unimplemented_method(
@@ -345,7 +349,8 @@ where
     }
     async fn truthify(
         &self,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction_fast::TruthifyStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction_fast::TruthifyStreamExn>>
 , crate::services::my_interaction_fast::TruthifyExn> {
         (**self).truthify(
         ).await
@@ -380,7 +385,8 @@ where
     }
     async fn truthify(
         &self,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction_fast::TruthifyStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::bool, crate::services::my_interaction_fast::TruthifyStreamExn>>
 , crate::services::my_interaction_fast::TruthifyExn> {
         (**self).truthify(
         ).await
@@ -2060,7 +2066,8 @@ pub trait MyService: ::std::marker::Send + ::std::marker::Sync + 'static {
     }
     async fn serialize(
         &self,
-    ) -> ::std::result::Result<(::std::boxed::Box<dyn SerialInteraction>, (
+    ) -> ::std::result::Result<(::std::boxed::Box<dyn SerialInteraction>, 
+(
     ::std::primitive::i32,
     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::my_service::SerializeStreamExn>>
 )
@@ -2116,7 +2123,8 @@ where
     }
     async fn serialize(
         &self,
-    ) -> ::std::result::Result<(::std::boxed::Box<dyn SerialInteraction>, (
+    ) -> ::std::result::Result<(::std::boxed::Box<dyn SerialInteraction>, 
+(
     ::std::primitive::i32,
     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::my_service::SerializeStreamExn>>
 )
@@ -2168,7 +2176,8 @@ where
     }
     async fn serialize(
         &self,
-    ) -> ::std::result::Result<(::std::boxed::Box<dyn SerialInteraction>, (
+    ) -> ::std::result::Result<(::std::boxed::Box<dyn SerialInteraction>, 
+(
     ::std::primitive::i32,
     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::my_service::SerializeStreamExn>>
 )
@@ -4337,7 +4346,8 @@ pub trait Factories: ::std::marker::Send + ::std::marker::Sync + 'static {
     }
     async fn serialize(
         &self,
-    ) -> ::std::result::Result<(::std::boxed::Box<dyn SerialInteraction>, (
+    ) -> ::std::result::Result<(::std::boxed::Box<dyn SerialInteraction>, 
+(
     ::std::primitive::i32,
     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::factories::SerializeStreamExn>>
 )
@@ -4378,7 +4388,8 @@ where
     }
     async fn serialize(
         &self,
-    ) -> ::std::result::Result<(::std::boxed::Box<dyn SerialInteraction>, (
+    ) -> ::std::result::Result<(::std::boxed::Box<dyn SerialInteraction>, 
+(
     ::std::primitive::i32,
     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::factories::SerializeStreamExn>>
 )
@@ -4415,7 +4426,8 @@ where
     }
     async fn serialize(
         &self,
-    ) -> ::std::result::Result<(::std::boxed::Box<dyn SerialInteraction>, (
+    ) -> ::std::result::Result<(::std::boxed::Box<dyn SerialInteraction>, 
+(
     ::std::primitive::i32,
     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::factories::SerializeStreamExn>>
 )

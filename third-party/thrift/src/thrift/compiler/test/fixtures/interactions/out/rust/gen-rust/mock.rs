@@ -680,7 +680,7 @@ pub mod r#impl {
             }
 
             pub fn ret(&self, _value: (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)) {
-                unimplemented!("Mocking streams is not yet implemented, as value isn't cloneable")
+                unimplemented!("Mocking streams is not yet implemented, as value isn't cloneable");
             }
 
             pub fn mock(&self, mut mock: impl ::std::ops::FnMut() -> (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>) + ::std::marker::Send + ::std::marker::Sync + 'mock) {
@@ -862,7 +862,7 @@ pub mod r#impl {
             }
 
             pub fn ret(&self, _value: (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>)) {
-                unimplemented!("Mocking streams is not yet implemented, as value isn't cloneable")
+                unimplemented!("Mocking streams is not yet implemented, as value isn't cloneable");
             }
 
             pub fn mock(&self, mut mock: impl ::std::ops::FnMut() -> (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::factories::SerializeStreamError>>) + ::std::marker::Send + ::std::marker::Sync + 'mock) {

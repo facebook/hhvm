@@ -29,7 +29,8 @@ pub trait PubSubStreamingService: ::std::marker::Send + ::std::marker::Sync + 's
         &self,
         _i32_from: ::std::primitive::i32,
         _i32_to: ::std::primitive::i32,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ReturnstreamStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ReturnstreamStreamExn>>
 , crate::services::pub_sub_streaming_service::ReturnstreamExn> {
         ::std::result::Result::Err(crate::services::pub_sub_streaming_service::ReturnstreamExn::ApplicationException(
             ::fbthrift::ApplicationException::unimplemented_method(
@@ -41,7 +42,8 @@ pub trait PubSubStreamingService: ::std::marker::Send + ::std::marker::Sync + 's
     async fn streamthrows(
         &self,
         _foo: ::std::primitive::i32,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::StreamthrowsStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::StreamthrowsStreamExn>>
 , crate::services::pub_sub_streaming_service::StreamthrowsExn> {
         ::std::result::Result::Err(crate::services::pub_sub_streaming_service::StreamthrowsExn::ApplicationException(
             ::fbthrift::ApplicationException::unimplemented_method(
@@ -53,7 +55,8 @@ pub trait PubSubStreamingService: ::std::marker::Send + ::std::marker::Sync + 's
     async fn servicethrows(
         &self,
         _foo: ::std::primitive::i32,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ServicethrowsStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ServicethrowsStreamExn>>
 , crate::services::pub_sub_streaming_service::ServicethrowsExn> {
         ::std::result::Result::Err(crate::services::pub_sub_streaming_service::ServicethrowsExn::ApplicationException(
             ::fbthrift::ApplicationException::unimplemented_method(
@@ -65,7 +68,8 @@ pub trait PubSubStreamingService: ::std::marker::Send + ::std::marker::Sync + 's
     async fn servicethrows2(
         &self,
         _foo: ::std::primitive::i32,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::Servicethrows2StreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::Servicethrows2StreamExn>>
 , crate::services::pub_sub_streaming_service::Servicethrows2Exn> {
         ::std::result::Result::Err(crate::services::pub_sub_streaming_service::Servicethrows2Exn::ApplicationException(
             ::fbthrift::ApplicationException::unimplemented_method(
@@ -77,7 +81,8 @@ pub trait PubSubStreamingService: ::std::marker::Send + ::std::marker::Sync + 's
     async fn boththrows(
         &self,
         _foo: ::std::primitive::i32,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::BoththrowsStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::BoththrowsStreamExn>>
 , crate::services::pub_sub_streaming_service::BoththrowsExn> {
         ::std::result::Result::Err(crate::services::pub_sub_streaming_service::BoththrowsExn::ApplicationException(
             ::fbthrift::ApplicationException::unimplemented_method(
@@ -89,7 +94,8 @@ pub trait PubSubStreamingService: ::std::marker::Send + ::std::marker::Sync + 's
     async fn responseandstreamstreamthrows(
         &self,
         _foo: ::std::primitive::i32,
-    ) -> ::std::result::Result<(
+    ) -> ::std::result::Result<
+(
     ::std::primitive::i32,
     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamExn>>
 )
@@ -104,7 +110,8 @@ pub trait PubSubStreamingService: ::std::marker::Send + ::std::marker::Sync + 's
     async fn responseandstreamservicethrows(
         &self,
         _foo: ::std::primitive::i32,
-    ) -> ::std::result::Result<(
+    ) -> ::std::result::Result<
+(
     ::std::primitive::i32,
     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamExn>>
 )
@@ -119,7 +126,8 @@ pub trait PubSubStreamingService: ::std::marker::Send + ::std::marker::Sync + 's
     async fn responseandstreamboththrows(
         &self,
         _foo: ::std::primitive::i32,
-    ) -> ::std::result::Result<(
+    ) -> ::std::result::Result<
+(
     ::std::primitive::i32,
     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsStreamExn>>
 )
@@ -135,7 +143,8 @@ pub trait PubSubStreamingService: ::std::marker::Send + ::std::marker::Sync + 's
         &self,
         _i32_from: ::std::primitive::i32,
         _i32_to: ::std::primitive::i32,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ReturnstreamFastStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ReturnstreamFastStreamExn>>
 , crate::services::pub_sub_streaming_service::ReturnstreamFastExn> {
         ::std::result::Result::Err(crate::services::pub_sub_streaming_service::ReturnstreamFastExn::ApplicationException(
             ::fbthrift::ApplicationException::unimplemented_method(
@@ -155,7 +164,8 @@ where
         &self,
         i32_from: ::std::primitive::i32,
         i32_to: ::std::primitive::i32,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ReturnstreamStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ReturnstreamStreamExn>>
 , crate::services::pub_sub_streaming_service::ReturnstreamExn> {
         (**self).returnstream(
             i32_from,
@@ -165,7 +175,8 @@ where
     async fn streamthrows(
         &self,
         foo: ::std::primitive::i32,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::StreamthrowsStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::StreamthrowsStreamExn>>
 , crate::services::pub_sub_streaming_service::StreamthrowsExn> {
         (**self).streamthrows(
             foo,
@@ -174,7 +185,8 @@ where
     async fn servicethrows(
         &self,
         foo: ::std::primitive::i32,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ServicethrowsStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ServicethrowsStreamExn>>
 , crate::services::pub_sub_streaming_service::ServicethrowsExn> {
         (**self).servicethrows(
             foo,
@@ -183,7 +195,8 @@ where
     async fn servicethrows2(
         &self,
         foo: ::std::primitive::i32,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::Servicethrows2StreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::Servicethrows2StreamExn>>
 , crate::services::pub_sub_streaming_service::Servicethrows2Exn> {
         (**self).servicethrows2(
             foo,
@@ -192,7 +205,8 @@ where
     async fn boththrows(
         &self,
         foo: ::std::primitive::i32,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::BoththrowsStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::BoththrowsStreamExn>>
 , crate::services::pub_sub_streaming_service::BoththrowsExn> {
         (**self).boththrows(
             foo,
@@ -201,7 +215,8 @@ where
     async fn responseandstreamstreamthrows(
         &self,
         foo: ::std::primitive::i32,
-    ) -> ::std::result::Result<(
+    ) -> ::std::result::Result<
+(
     ::std::primitive::i32,
     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamExn>>
 )
@@ -213,7 +228,8 @@ where
     async fn responseandstreamservicethrows(
         &self,
         foo: ::std::primitive::i32,
-    ) -> ::std::result::Result<(
+    ) -> ::std::result::Result<
+(
     ::std::primitive::i32,
     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamExn>>
 )
@@ -225,7 +241,8 @@ where
     async fn responseandstreamboththrows(
         &self,
         foo: ::std::primitive::i32,
-    ) -> ::std::result::Result<(
+    ) -> ::std::result::Result<
+(
     ::std::primitive::i32,
     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsStreamExn>>
 )
@@ -238,7 +255,8 @@ where
         &self,
         i32_from: ::std::primitive::i32,
         i32_to: ::std::primitive::i32,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ReturnstreamFastStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ReturnstreamFastStreamExn>>
 , crate::services::pub_sub_streaming_service::ReturnstreamFastExn> {
         (**self).returnstreamFast(
             i32_from,
@@ -256,7 +274,8 @@ where
         &self,
         i32_from: ::std::primitive::i32,
         i32_to: ::std::primitive::i32,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ReturnstreamStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ReturnstreamStreamExn>>
 , crate::services::pub_sub_streaming_service::ReturnstreamExn> {
         (**self).returnstream(
             i32_from,
@@ -266,7 +285,8 @@ where
     async fn streamthrows(
         &self,
         foo: ::std::primitive::i32,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::StreamthrowsStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::StreamthrowsStreamExn>>
 , crate::services::pub_sub_streaming_service::StreamthrowsExn> {
         (**self).streamthrows(
             foo,
@@ -275,7 +295,8 @@ where
     async fn servicethrows(
         &self,
         foo: ::std::primitive::i32,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ServicethrowsStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ServicethrowsStreamExn>>
 , crate::services::pub_sub_streaming_service::ServicethrowsExn> {
         (**self).servicethrows(
             foo,
@@ -284,7 +305,8 @@ where
     async fn servicethrows2(
         &self,
         foo: ::std::primitive::i32,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::Servicethrows2StreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::Servicethrows2StreamExn>>
 , crate::services::pub_sub_streaming_service::Servicethrows2Exn> {
         (**self).servicethrows2(
             foo,
@@ -293,7 +315,8 @@ where
     async fn boththrows(
         &self,
         foo: ::std::primitive::i32,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::BoththrowsStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::BoththrowsStreamExn>>
 , crate::services::pub_sub_streaming_service::BoththrowsExn> {
         (**self).boththrows(
             foo,
@@ -302,7 +325,8 @@ where
     async fn responseandstreamstreamthrows(
         &self,
         foo: ::std::primitive::i32,
-    ) -> ::std::result::Result<(
+    ) -> ::std::result::Result<
+(
     ::std::primitive::i32,
     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamExn>>
 )
@@ -314,7 +338,8 @@ where
     async fn responseandstreamservicethrows(
         &self,
         foo: ::std::primitive::i32,
-    ) -> ::std::result::Result<(
+    ) -> ::std::result::Result<
+(
     ::std::primitive::i32,
     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamExn>>
 )
@@ -326,7 +351,8 @@ where
     async fn responseandstreamboththrows(
         &self,
         foo: ::std::primitive::i32,
-    ) -> ::std::result::Result<(
+    ) -> ::std::result::Result<
+(
     ::std::primitive::i32,
     ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsStreamExn>>
 )
@@ -339,7 +365,8 @@ where
         &self,
         i32_from: ::std::primitive::i32,
         i32_to: ::std::primitive::i32,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ReturnstreamFastStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ReturnstreamFastStreamExn>>
 , crate::services::pub_sub_streaming_service::ReturnstreamFastExn> {
         (**self).returnstreamFast(
             i32_from,

@@ -641,7 +641,7 @@ pub mod r#impl {
             }
 
             pub fn ret(&self, _value: ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::errors::my_service::StreamByIdStreamError>>) {
-                unimplemented!("Mocking streams is not yet implemented, as value isn't cloneable")
+                unimplemented!("Mocking streams is not yet implemented, as value isn't cloneable");
             }
 
             pub fn mock(&self, mut mock: impl ::std::ops::FnMut(::std::primitive::i64) -> ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::errors::my_service::StreamByIdStreamError>> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
@@ -686,7 +686,7 @@ pub mod r#impl {
             }
 
             pub fn ret(&self, _value: ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::errors::my_service::StreamByIdWithExceptionStreamError>>) {
-                unimplemented!("Mocking streams is not yet implemented, as value isn't cloneable")
+                unimplemented!("Mocking streams is not yet implemented, as value isn't cloneable");
             }
 
             pub fn mock(&self, mut mock: impl ::std::ops::FnMut(::std::primitive::i64) -> ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::errors::my_service::StreamByIdWithExceptionStreamError>> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
@@ -731,7 +731,7 @@ pub mod r#impl {
             }
 
             pub fn ret(&self, _value: (crate::types::MyDataItem, ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::errors::my_service::StreamByIdWithResponseStreamError>>)) {
-                unimplemented!("Mocking streams is not yet implemented, as value isn't cloneable")
+                unimplemented!("Mocking streams is not yet implemented, as value isn't cloneable");
             }
 
             pub fn mock(&self, mut mock: impl ::std::ops::FnMut(::std::primitive::i64) -> (crate::types::MyDataItem, ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::errors::my_service::StreamByIdWithResponseStreamError>>) + ::std::marker::Send + ::std::marker::Sync + 'mock) {

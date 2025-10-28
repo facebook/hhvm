@@ -18,7 +18,10 @@
 ::std::result::Result<{{!
     }}{{#function:return_type}}{{!
         }}{{#function:creates_interaction?}}{{!
-            }}{{#function:stream?}}{{!
+            }}{{#function:bidirectional_stream?}}{{!
+                }}(::std::boxed::Box<dyn {{function:interaction_name}}>, {{> lib/server_ok_type}}){{!
+            }}{{/function:bidirectional_stream?}}{{!
+            }}{{^function:bidirectional_stream?}}{{#function:stream?}}{{!
                 }}(::std::boxed::Box<dyn {{function:interaction_name}}>, {{> lib/server_ok_type}}){{!
             }}{{/function:stream?}}{{!
             }}{{^function:stream?}}{{!
@@ -27,7 +30,7 @@
                 }}{{/type:void?}}{{^type:void?}}{{!
                     }}(::std::boxed::Box<dyn {{function:interaction_name}}>, {{> lib/server_ok_type}}){{!
                 }}{{/type:void?}}{{!
-            }}{{/function:stream?}}{{!
+            }}{{/function:stream?}}{{/function:bidirectional_stream?}}{{!
         }}{{/function:creates_interaction?}}{{^function:creates_interaction?}}{{!
             }}{{> lib/server_ok_type}}{{!
         }}{{/function:creates_interaction?}}{{!

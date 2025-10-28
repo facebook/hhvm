@@ -384,7 +384,7 @@ pub mod r#impl {
     crate::types::FinalResponse,
     crate::errors::sink_service::MethodSinkFinalError,
 >) {
-                unimplemented!("Mocking sinks is not yet implemented, as value isn't cloneable")
+                unimplemented!("Mocking sinks is not yet implemented, as value isn't cloneable");
             }
 
             pub fn mock(&self, mut mock: impl ::std::ops::FnMut() -> ::fbthrift::SinkResult<
@@ -453,7 +453,7 @@ pub mod r#impl {
     crate::types::FinalResponse,
     crate::errors::sink_service::MethodAndReponseSinkFinalError,
 >) {
-                unimplemented!("Mocking sinks is not yet implemented, as value isn't cloneable")
+                unimplemented!("Mocking sinks is not yet implemented, as value isn't cloneable");
             }
 
             pub fn mock(&self, mut mock: impl ::std::ops::FnMut() -> ::fbthrift::SinkResult<
@@ -522,7 +522,7 @@ pub mod r#impl {
     crate::types::FinalResponse,
     crate::errors::sink_service::MethodThrowSinkFinalError,
 >) {
-                unimplemented!("Mocking sinks is not yet implemented, as value isn't cloneable")
+                unimplemented!("Mocking sinks is not yet implemented, as value isn't cloneable");
             }
 
             pub fn mock(&self, mut mock: impl ::std::ops::FnMut() -> ::fbthrift::SinkResult<
@@ -591,7 +591,7 @@ pub mod r#impl {
     crate::types::FinalResponse,
     crate::errors::sink_service::MethodSinkThrowSinkFinalError,
 >) {
-                unimplemented!("Mocking sinks is not yet implemented, as value isn't cloneable")
+                unimplemented!("Mocking sinks is not yet implemented, as value isn't cloneable");
             }
 
             pub fn mock(&self, mut mock: impl ::std::ops::FnMut() -> ::fbthrift::SinkResult<
@@ -660,7 +660,7 @@ pub mod r#impl {
     crate::types::FinalResponse,
     crate::errors::sink_service::MethodFinalThrowSinkFinalError,
 >) {
-                unimplemented!("Mocking sinks is not yet implemented, as value isn't cloneable")
+                unimplemented!("Mocking sinks is not yet implemented, as value isn't cloneable");
             }
 
             pub fn mock(&self, mut mock: impl ::std::ops::FnMut() -> ::fbthrift::SinkResult<
@@ -729,7 +729,7 @@ pub mod r#impl {
     crate::types::FinalResponse,
     crate::errors::sink_service::MethodBothThrowSinkFinalError,
 >) {
-                unimplemented!("Mocking sinks is not yet implemented, as value isn't cloneable")
+                unimplemented!("Mocking sinks is not yet implemented, as value isn't cloneable");
             }
 
             pub fn mock(&self, mut mock: impl ::std::ops::FnMut() -> ::fbthrift::SinkResult<
@@ -798,7 +798,7 @@ pub mod r#impl {
     crate::types::FinalResponse,
     crate::errors::sink_service::MethodFastSinkFinalError,
 >) {
-                unimplemented!("Mocking sinks is not yet implemented, as value isn't cloneable")
+                unimplemented!("Mocking sinks is not yet implemented, as value isn't cloneable");
             }
 
             pub fn mock(&self, mut mock: impl ::std::ops::FnMut() -> ::fbthrift::SinkResult<

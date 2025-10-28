@@ -20,6 +20,10 @@
 {{#service:rustFunctions}}{{^function:starts_interaction?}}
             ::fbthrift::processor::MethodMetadata{
               interaction_type: ::fbthrift::processor::InteractionType::None,
+              {{#function:bidirectional_stream?}}
+              rpc_kind: ::fbthrift::processor::RpcKind::BIDIRECTIONAL_STREAM,
+              {{/function:bidirectional_stream?}}
+              {{^function:bidirectional_stream?}}
               {{#function:stream?}}
               rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
               {{/function:stream?}}
@@ -34,6 +38,7 @@
               rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
               {{/function:oneway?}}
               {{/function:sink?}}{{/function:stream?}}
+              {{/function:bidirectional_stream?}}
               name: "{{function:name}}",
               starts_interaction: {{#function:creates_interaction?}}true{{/function:creates_interaction?}}{{^function:creates_interaction?}}false{{/function:creates_interaction?}},
               interaction_name: {{#function:creates_interaction?}}Some("{{function:interaction_name}}"){{/function:creates_interaction?}}{{^function:creates_interaction?}}None{{/function:creates_interaction?}},
@@ -42,6 +47,10 @@
 {{#service:interactions}}{{#service:rustFunctions}}
             ::fbthrift::processor::MethodMetadata{
               interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              {{#function:bidirectional_stream?}}
+              rpc_kind: ::fbthrift::processor::RpcKind::BIDIRECTIONAL_STREAM,
+              {{/function:bidirectional_stream?}}
+              {{^function:bidirectional_stream?}}
               {{#function:stream?}}
               rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
               {{/function:stream?}}
@@ -56,6 +65,7 @@
               rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
               {{/function:oneway?}}
               {{/function:sink?}}{{/function:stream?}}
+              {{/function:bidirectional_stream?}}
               name: "{{service:name}}.{{function:name}}",
               starts_interaction: false,
               interaction_name: Some("{{service:name}}"),

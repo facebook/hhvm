@@ -18,7 +18,13 @@
   If we ever add a type here which may not have a Send or Sync impl, the
   unsafe impls in structimpl.mustache need to be revisited.
   ====
-}}{{^function:sink?}}{{^function:stream?}}{{> lib/type}}{{/function:stream?}}{{/function:sink?}}{{!
+}}{{#function:bidirectional_stream?}}{{!
+}}(::futures::stream::BoxStream<'static, ::std::result::Result<{{!
+        }}{{#function:stream_elem_type}}{{> lib/type}}{{/function:stream_elem_type}}, {{!
+        }}{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}StreamError{{!
+    }}>>, Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<{{#function:sink_elem_type}}{{> lib/type}}{{/function:sink_elem_type}}, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError>> + ::std::marker::Send>){{!
+}}{{/function:bidirectional_stream?}}{{!
+}}{{^function:bidirectional_stream?}}{{^function:sink?}}{{^function:stream?}}{{> lib/type}}{{/function:stream?}}{{/function:sink?}}{{!
 }}{{#function:stream?}}{{!
     }}{{#function:stream_has_first_response?}}{{!
         }}({{#function:stream_first_response_type}}{{> lib/type}}{{/function:stream_first_response_type}}, {{!
@@ -39,4 +45,4 @@
     {{#function:sink_final_response_type}}{{> lib/type}}{{/function:sink_final_response_type}},
     {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkFinalError,
 >{{!
-}}{{/function:sink?}}
+}}{{/function:sink?}}{{/function:bidirectional_stream?}}

@@ -274,7 +274,7 @@ pub mod r#impl {
             }
 
             pub fn ret(&self, _value: ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::number, crate::errors::c::NumbersStreamError>>) {
-                unimplemented!("Mocking streams is not yet implemented, as value isn't cloneable")
+                unimplemented!("Mocking streams is not yet implemented, as value isn't cloneable");
             }
 
             pub fn mock(&self, mut mock: impl ::std::ops::FnMut() -> ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::number, crate::errors::c::NumbersStreamError>> + ::std::marker::Send + ::std::marker::Sync + 'mock) {

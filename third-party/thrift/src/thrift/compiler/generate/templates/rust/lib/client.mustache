@@ -96,15 +96,20 @@ where
     ) -> {{> lib/client_return_type}} {
         use ::tracing::Instrument as _;
         use ::futures::FutureExt as _;
-        {{#function:stream?}}
-        use ::futures::StreamExt as _;
-        use ::fbthrift::Deserialize as _;
-        {{/function:stream?}}
-        {{#function:sink?}}
+        {{#function:bidirectional_stream?}}
         use ::futures::StreamExt as _;
         use ::fbthrift::Deserialize as _;
         use ::futures::TryFutureExt as _;
-        {{/function:sink?}}
+        {{/function:bidirectional_stream?}}
+        {{^function:bidirectional_stream?}}{{#function:stream?}}
+        use ::futures::StreamExt as _;
+        use ::fbthrift::Deserialize as _;
+        {{/function:stream?}}{{/function:bidirectional_stream?}}
+        {{#function:sink?}}{{^function:bidirectional_stream?}}
+        use ::futures::StreamExt as _;
+        use ::fbthrift::Deserialize as _;
+        use ::futures::TryFutureExt as _;
+        {{/function:bidirectional_stream?}}{{/function:sink?}}
 
         let service_name = {{!
             }}{{^service:interaction?}}c"{{service:name}}"{{/service:interaction?}}{{!
@@ -142,22 +147,52 @@ where
             ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
         };
 
-        {{#function:stream?}}
-        let call_stream = transport
-            .call_stream(service_name, service_method_name, request_env, rpc_options)
-            .instrument(::tracing::trace_span!("call_stream", method = "{{service:name}}.{{function:name}}"));
-        {{/function:stream?}}{{#function:sink?}}
+        {{#function:bidirectional_stream?}}
         let call_sink = transport
             .call_sink(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call_sink", method = "{{service:name}}.{{function:name}}"));
-        {{/function:sink?}}{{^function:sink?}}{{^function:stream?}}
+        {{/function:bidirectional_stream?}}{{^function:bidirectional_stream?}}{{#function:stream?}}
+        let call_stream = transport
+            .call_stream(service_name, service_method_name, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call_stream", method = "{{service:name}}.{{function:name}}"));
+        {{/function:stream?}}{{/function:bidirectional_stream?}}{{#function:sink?}}{{^function:bidirectional_stream?}}
+        let call_sink = transport
+            .call_sink(service_name, service_method_name, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call_sink", method = "{{service:name}}.{{function:name}}"));
+        {{/function:bidirectional_stream?}}{{/function:sink?}}{{^function:sink?}}{{^function:stream?}}
         let call = transport
             .call(service_name, service_method_name, request_env, rpc_options)
             .instrument(::tracing::trace_span!("call", method = "{{service:name}}.{{function:name}}"));
         {{/function:stream?}}{{/function:sink?}}
 
         async move {
-            {{#function:stream?}}{{!
+            {{#function:bidirectional_stream?}}{{!
+
+            ******************************
+            *** BIDIRECTIONAL BODY ******
+            ******************************
+
+            }}
+            // TODO: Implement bidirectional streaming client support
+            // Bidirectional streaming is an unreleased feature that requires
+            // additional transport API support. For now, return an error.
+            let res: ::std::result::Result<(
+                ::futures::stream::BoxStream<'static, ::std::result::Result<{{!
+                    }}{{#function:stream_elem_type}}{{> lib/type}}{{/function:stream_elem_type}}, {{!
+                    }}{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}StreamError{{!
+                }}>>,
+                Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<{{!
+                    }}{{#function:sink_elem_type}}{{> lib/type}}{{/function:sink_elem_type}}, {{!
+                    }}{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError{{!
+                }}>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), {{!
+                    }}{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError{{!
+                }}>> + ::std::marker::Send>
+            ), {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error> = ::std::result::Result::Err(
+                {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error::ThriftError(
+                    ::anyhow::anyhow!("Bidirectional streaming is not yet supported in Rust Thrift client")
+                )
+            );
+            {{/function:bidirectional_stream?}}{{^function:bidirectional_stream?}}{{#function:stream?}}{{!
 
             ******************************
             ******* STREAMING BODY *******
@@ -202,7 +237,7 @@ where
                     }}{{#function:stream_has_first_response?}}move |initial| (initial, new_stream){{/function:stream_has_first_response?}}{{!
                     }}{{^function:stream_has_first_response?}}move |_| new_stream{{/function:stream_has_first_response?}}{{!
                 }});
-            {{/function:stream?}}{{#function:sink?}}{{!
+            {{/function:stream?}}{{/function:bidirectional_stream?}}{{#function:sink?}}{{^function:bidirectional_stream?}}{{!
 
             ******************************
             **** SINK BODY ****
@@ -275,7 +310,7 @@ where
                 initial_response,
                 sink: Box::new(sink_helper_fn),
             });
-            {{/function:sink?}}{{^function:sink?}}{{^function:stream?}}{{!
+            {{/function:bidirectional_stream?}}{{/function:sink?}}{{^function:sink?}}{{^function:stream?}}{{!
 
             ******************************
             **** SINGLE RESPONSE BODY ****

@@ -40,7 +40,8 @@ pub trait C: ::std::marker::Send + ::std::marker::Sync + 'static {
     #[doc = "Streaming function"]
     async fn numbers(
         &self,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::number, crate::services::c::NumbersStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::number, crate::services::c::NumbersStreamExn>>
 , crate::services::c::NumbersExn> {
         ::std::result::Result::Err(crate::services::c::NumbersExn::ApplicationException(
             ::fbthrift::ApplicationException::unimplemented_method(
@@ -78,7 +79,8 @@ where
     }
     async fn numbers(
         &self,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::number, crate::services::c::NumbersStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::number, crate::services::c::NumbersStreamExn>>
 , crate::services::c::NumbersExn> {
         (**self).numbers(
         ).await
@@ -110,7 +112,8 @@ where
     }
     async fn numbers(
         &self,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::number, crate::services::c::NumbersStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::number, crate::services::c::NumbersStreamExn>>
 , crate::services::c::NumbersExn> {
         (**self).numbers(
         ).await

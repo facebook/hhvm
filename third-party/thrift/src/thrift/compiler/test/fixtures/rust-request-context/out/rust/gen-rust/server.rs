@@ -437,7 +437,8 @@ pub trait MyService: ::std::marker::Send + ::std::marker::Sync + 'static {
         &self,
         _request_context: &Self::RequestContext,
         _id: ::std::primitive::i64,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdStreamExn>>
 , crate::services::my_service::StreamByIdExn> {
         ::std::result::Result::Err(crate::services::my_service::StreamByIdExn::ApplicationException(
             ::fbthrift::ApplicationException::unimplemented_method(
@@ -450,7 +451,8 @@ pub trait MyService: ::std::marker::Send + ::std::marker::Sync + 'static {
         &self,
         _request_context: &Self::RequestContext,
         _id: ::std::primitive::i64,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdWithExceptionStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdWithExceptionStreamExn>>
 , crate::services::my_service::StreamByIdWithExceptionExn> {
         ::std::result::Result::Err(crate::services::my_service::StreamByIdWithExceptionExn::ApplicationException(
             ::fbthrift::ApplicationException::unimplemented_method(
@@ -463,7 +465,8 @@ pub trait MyService: ::std::marker::Send + ::std::marker::Sync + 'static {
         &self,
         _request_context: &Self::RequestContext,
         _id: ::std::primitive::i64,
-    ) -> ::std::result::Result<(
+    ) -> ::std::result::Result<
+(
     crate::types::MyDataItem,
     ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdWithResponseStreamExn>>
 )
@@ -562,7 +565,8 @@ where
         &self,
         request_context: &Self::RequestContext,
         id: ::std::primitive::i64,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdStreamExn>>
 , crate::services::my_service::StreamByIdExn> {
         (**self).streamById(
             request_context,
@@ -573,7 +577,8 @@ where
         &self,
         request_context: &Self::RequestContext,
         id: ::std::primitive::i64,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdWithExceptionStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdWithExceptionStreamExn>>
 , crate::services::my_service::StreamByIdWithExceptionExn> {
         (**self).streamByIdWithException(
             request_context,
@@ -584,7 +589,8 @@ where
         &self,
         request_context: &Self::RequestContext,
         id: ::std::primitive::i64,
-    ) -> ::std::result::Result<(
+    ) -> ::std::result::Result<
+(
     crate::types::MyDataItem,
     ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdWithResponseStreamExn>>
 )
@@ -678,7 +684,8 @@ where
         &self,
         request_context: &Self::RequestContext,
         id: ::std::primitive::i64,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdStreamExn>>
 , crate::services::my_service::StreamByIdExn> {
         (**self).streamById(
             request_context,
@@ -689,7 +696,8 @@ where
         &self,
         request_context: &Self::RequestContext,
         id: ::std::primitive::i64,
-    ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdWithExceptionStreamExn>>
+    ) -> ::std::result::Result<
+    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdWithExceptionStreamExn>>
 , crate::services::my_service::StreamByIdWithExceptionExn> {
         (**self).streamByIdWithException(
             request_context,
@@ -700,7 +708,8 @@ where
         &self,
         request_context: &Self::RequestContext,
         id: ::std::primitive::i64,
-    ) -> ::std::result::Result<(
+    ) -> ::std::result::Result<
+(
     crate::types::MyDataItem,
     ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdWithResponseStreamExn>>
 )

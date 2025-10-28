@@ -330,18 +330,20 @@ pub mod r#impl {{> lib/block}}{{!
                 }}&self, {{!
                 }}{{#function:stream?}}_{{/function:stream?}}{{#function:sink?}}_{{/function:sink?}}value: {{#function:return_type}}{{> lib/return_type}}{{/function:return_type}}{{!
             }}) {
-                {{#function:stream?}}
-                unimplemented!("Mocking streams is not yet implemented, as value isn't cloneable")
-                {{/function:stream?}}{{#function:sink?}}
-                unimplemented!("Mocking sinks is not yet implemented, as value isn't cloneable")
-                {{/function:sink?}}{{^function:sink?}}{{^function:stream?}}
+                {{#function:bidirectional_stream?}}
+                unimplemented!("Mocking bidirectional streams is not yet implemented, as value isn't cloneable");
+                {{/function:bidirectional_stream?}}{{^function:bidirectional_stream?}}{{#function:stream?}}
+                unimplemented!("Mocking streams is not yet implemented, as value isn't cloneable");
+                {{/function:stream?}}{{^function:stream?}}{{#function:sink?}}
+                unimplemented!("Mocking sinks is not yet implemented, as value isn't cloneable");
+                {{/function:sink?}}{{^function:sink?}}
                 self.mock(move |{{!
                     }}{{#function:args}}{{!
                     }}_: {{#field:type}}{{> lib/type}}{{/field:type}}{{!
                     }}{{^last?}}, {{/last?}}{{!
                     }}{{/function:args}}{{!
                 }}| value.clone());
-                {{/function:stream?}}{{/function:sink?}}
+                {{/function:sink?}}{{/function:stream?}}{{/function:bidirectional_stream?}}
             }
 
             pub fn mock(&self, mut mock: impl ::std::ops::FnMut({{!

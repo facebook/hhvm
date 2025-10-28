@@ -17,6 +17,7 @@
 #include <memory>
 
 #include <folly/python/error.h>
+#include <folly/python/import.h>
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/python/server/PythonAsyncProcessor.h>
 #include <thrift/lib/python/server/python_async_processor_api.h> // @manual
@@ -29,9 +30,12 @@ using apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest;
 
 namespace {
 
-void do_import() {
-  if (0 != import_thrift__python__server_impl__python_async_processor()) {
-    throw std::runtime_error(
+void do_python_import() {
+  static ::folly::python::import_cache_nocapture import(
+      (::import_thrift__python__server_impl__python_async_processor));
+  if (!import()) {
+    // converts python error to thrown std::runtime_error
+    ::folly::python::handlePythonError(
         "import thrift.python.server_impl.python_async_processor failed");
   }
 }
@@ -54,7 +58,7 @@ ServiceInterceptorOnRequestArguments emptyInterceptorsArguments() {
 } // namespace
 
 std::unique_ptr<folly::IOBuf> PythonAsyncProcessor::getPythonMetadata() {
-  [[maybe_unused]] static bool done = (do_import(), false);
+  do_python_import();
   return getSerializedPythonMetadata(python_server_);
 }
 
@@ -65,7 +69,7 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::handlePythonServerCallback(
     apache::thrift::RpcKind kind,
     apache::thrift::HandlerCallback<std::unique_ptr<::folly::IOBuf>>::Ptr
         callback) {
-  [[maybe_unused]] static bool done = (do_import(), false);
+  do_python_import();
   auto [promise, future] =
       folly::makePromiseContract<std::unique_ptr<folly::IOBuf>>();
   const int retcode = handleServerCallback(
@@ -96,7 +100,7 @@ PythonAsyncProcessor::handlePythonServerCallbackStreaming(
     ::apache::thrift::HandlerCallback<::apache::thrift::ResponseAndServerStream<
         std::unique_ptr<::folly::IOBuf>,
         std::unique_ptr<::folly::IOBuf>>>::Ptr callback) {
-  [[maybe_unused]] static bool done = (do_import(), false);
+  do_python_import();
   auto [promise, future] =
       folly::makePromiseContract<::apache::thrift::ResponseAndServerStream<
           std::unique_ptr<::folly::IOBuf>,
@@ -130,7 +134,7 @@ PythonAsyncProcessor::handlePythonServerCallbackSink(
         std::unique_ptr<::folly::IOBuf>,
         std::unique_ptr<::folly::IOBuf>,
         std::unique_ptr<::folly::IOBuf>>>::Ptr callback) {
-  [[maybe_unused]] static bool done = (do_import(), false);
+  do_python_import();
   auto [promise, future] =
       folly::makePromiseContract<::apache::thrift::ResponseAndSinkConsumer<
           std::unique_ptr<::folly::IOBuf>,
@@ -166,7 +170,7 @@ PythonAsyncProcessor::handlePythonServerCallbackBidi(
             std::unique_ptr<::folly::IOBuf>,
             std::unique_ptr<::folly::IOBuf>,
             std::unique_ptr<::folly::IOBuf>>>::Ptr callback) {
-  [[maybe_unused]] static bool done = (do_import(), false);
+  do_python_import();
   auto [promise, future] = folly::makePromiseContract<
       ::apache::thrift::ResponseAndStreamTransformation<
           std::unique_ptr<::folly::IOBuf>,
@@ -198,7 +202,7 @@ PythonAsyncProcessor::handlePythonServerCallbackOneway(
     apache::thrift::SerializedRequest serializedRequest,
     apache::thrift::RpcKind kind,
     apache::thrift::HandlerCallbackBase::Ptr callback) {
-  [[maybe_unused]] static bool done = (do_import(), false);
+  do_python_import();
   auto [promise, future] = folly::makePromiseContract<folly::Unit>();
   const int retcode = handleServerCallbackOneway(
       functions_.at(context->getMethodName()).second,

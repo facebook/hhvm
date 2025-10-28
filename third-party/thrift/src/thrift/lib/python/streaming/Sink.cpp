@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-#include <stdexcept>
-
 #include <folly/Portability.h>
 #include <folly/python/error.h>
+#include <folly/python/import.h>
 #include <thrift/lib/python/streaming/Sink.h>
 #include <thrift/lib/python/streaming/sink_api.h> // @manual
 
@@ -25,9 +24,12 @@ namespace apache::thrift::python {
 
 namespace {
 
-void do_import() {
-  if (0 != import_thrift__python__streaming__sink()) {
-    throw std::runtime_error("import_thrift__python__sink__cancel failed");
+void do_python_import() {
+  static ::folly::python::import_cache_nocapture import(
+      (::import_thrift__python__streaming__sink));
+  if (!import()) {
+    ::folly::python::handlePythonError(
+        "import error: thrift.python.streaming.sink");
   }
 }
 
@@ -83,7 +85,7 @@ folly::coro::AsyncGenerator<TChunk&&> toAsyncGeneratorImpl(
 folly::Function<folly::coro::Task<std::unique_ptr<folly::IOBuf>>(
     folly::coro::AsyncGenerator<std::unique_ptr<folly::IOBuf>&&>)>
 makeSinkCallback(PyObject* sink_callback, folly::Executor* exec) {
-  [[maybe_unused]] static bool done = (do_import(), false);
+  do_python_import();
 
   // Must create this here to hold a KeepAlive for executor
   // and to create a new reference for the sink_callback py function.
@@ -112,7 +114,7 @@ makeSinkCallback(PyObject* sink_callback, folly::Executor* exec) {
 } // namespace
 
 void cancelPythonGenerator(PyObject* iter) {
-  [[maybe_unused]] static bool done = (do_import(), false);
+  do_python_import();
   cancelAsyncGenerator(iter);
 }
 

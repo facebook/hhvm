@@ -1,0 +1,4 @@
+ERROR: File "multiple_bounds_on_recursive.php", line 7, characters 11-17:
+Cyclic type definition (Typing[4498])
+  File "multiple_bounds_on_recursive.php", line 5, characters 27-33:
+  Cyclic use is here

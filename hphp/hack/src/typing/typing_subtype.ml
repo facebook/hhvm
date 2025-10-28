@@ -5284,6 +5284,27 @@ end = struct
                    * be changed *)
                 {
                   empty_expand_env with
+                  type_expansions =
+                    (* Subtyping can be called when localizing
+                       a union type, since we attempt to simplify it.
+                       Since case types are encoded as union types,
+                       a cyclic reference to the same case type will
+                       lead to infinite looping. The chain is:
+                         localize -> simplify_union -> sub_type -> localize
+
+                       The expand environment is not threaded through the
+                       whole way, so we won't be able to tell we entered a cycle.
+
+                       For this reason we want to report cycles on the
+                       case type we are currently expanding. If a cycle
+                       occurs we say the proposition is invalid, but
+                       don't report an error, since that will be done
+                       during well-formedness checks on type defs *)
+                    Type_expansions.empty_w_cycle_report
+                      ~report_cycle:
+                        (Some
+                           ( Pos.none,
+                             Type_expansions.Expandable.Type_alias name_super ));
                   substs =
                     (if List.is_empty lty_supers then
                       SMap.empty

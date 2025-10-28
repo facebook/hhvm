@@ -983,17 +983,25 @@ SchemaBackedResolver::~SchemaBackedResolver() = default;
 
 const ProgramNode& IncrementalResolver::programOf(
     const type::ProgramId& id) const {
+  if (disableReadLockOnProgramOfMethodForAGivenThread_ ==
+      std::this_thread::get_id()) {
+    return index_->programOf(id);
+  }
+  auto schemaReadGuard = schema_.rlock();
   return index_->programOf(id);
 }
 const protocol::Value& IncrementalResolver::valueOf(
     const type::ValueId& id) const {
+  auto schemaReadGuard = schema_.rlock();
   return index_->valueOf(id);
 }
 const DefinitionNode* IncrementalResolver::definitionOf(
     const type::DefinitionKey& key) const {
+  auto schemaReadGuard = schema_.rlock();
   return index_->definitionOf(key);
 }
 ProgramNode::IncludesList IncrementalResolver::programs() const {
+  auto schemaReadGuard = schema_.rlock();
   return index_->programs();
 }
 
@@ -1019,6 +1027,11 @@ void IncrementalResolver::readSchema(
       std::make_move_iterator(src.definitionsMap()->begin()),
       std::make_move_iterator(src.definitionsMap()->end()));
 
+  // Poor-man's recursive lock. Consider replacing with an actual recursive
+  // shared lock.
+  disableReadLockOnProgramOfMethodForAGivenThread_ = std::this_thread::get_id();
+  auto guard = folly::makeGuard(
+      [&] { disableReadLockOnProgramOfMethodForAGivenThread_ = {}; });
   index_->updateIndices(dst);
 }
 

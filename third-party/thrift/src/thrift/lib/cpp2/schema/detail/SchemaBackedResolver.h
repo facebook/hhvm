@@ -105,6 +105,7 @@ class IncrementalResolver : public SchemaBackedResolver {
       folly::span<const std::string_view> bundle) const;
 
   mutable folly::Synchronized<type::Schema> schema_;
+  mutable std::thread::id disableReadLockOnProgramOfMethodForAGivenThread_;
 };
 
 template <typename T>

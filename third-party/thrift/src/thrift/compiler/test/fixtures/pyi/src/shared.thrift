@@ -46,6 +46,14 @@ exception MessageException {
 
 typedef list<SimpleStruct> ListOfSimpleStructs
 
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "empty": "1",
+    "so_you_can": "Thrift annotate",
+    "some_int": "1",
+    "while_you": "type annotate",
+  },
+}
 struct SimpleStruct {
   1: required bool is_on;
   2: required byte tiny_int = 5;
@@ -55,14 +63,15 @@ struct SimpleStruct {
   5: i64 big_int;
   6: float coarse_real = 0.0;
   7: double precise_real;
-  8: string a_str (yo_dawg = "I herd u like annotations");
-  8000: optional binary a_bytes (so_I_put = "some Thrift annotations here");
-} (
-  so_you_can = "Thrift annotate",
-  while_you = "type annotate",
-  empty,
-  some_int = 1,
-)
+  @thrift.DeprecatedUnvalidatedAnnotations{
+    items = {"yo_dawg": "I herd u like annotations"},
+  }
+  8: string a_str;
+  @thrift.DeprecatedUnvalidatedAnnotations{
+    items = {"so_I_put": "some Thrift annotations here"},
+  }
+  8000: optional binary a_bytes;
+}
 
 struct ComplexStruct {
   1: required SimpleStruct structOne;

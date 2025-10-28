@@ -359,7 +359,12 @@ void ReconnectingRequestChannel::connectErr(
 }
 
 bool ReconnectingRequestChannel::isChannelGood() {
-  return impl_ && impl_->good();
+  if (impl_ && !isReconnecting_) {
+    // If we're not reconnecting, rely on channel to tell us if it's broken.
+    return impl_->good();
+  }
+
+  return false;
 }
 
 void ReconnectingRequestChannel::reconnectRequestChannel() {
@@ -372,6 +377,8 @@ void ReconnectingRequestChannel::reconnectRequestChannelWithCallback() {
     return;
   }
   isReconnecting_ = true;
+  // Creator might call connectSuccess/connectErr inline, so we protect
+  // against that via isCreatingChannel_.
   isCreatingChannel_ = true;
   impl_ = implCreatorWithCallback_(evb_, *this);
   isCreatingChannel_ = false;

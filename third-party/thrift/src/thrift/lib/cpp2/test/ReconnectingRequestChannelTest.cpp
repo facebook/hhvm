@@ -233,3 +233,43 @@ TEST_F(ReconnectingRequestChannelTest, sinkReconnect) {
   }());
 }
 #endif
+
+#if FOLLY_HAS_COROUTINES
+TEST_F(ReconnectingRequestChannelTest, RequestsDuringReconnect) {
+  folly::coro::blockingWait([&]() -> folly::coro::Task<void> {
+    folly::AsyncSocket::ConnectCallback* cbPtr;
+    folly::coro::Baton baton;
+
+    auto executor = co_await folly::coro::co_current_executor;
+    auto channel = PooledRequestChannel::newChannel(
+        executor, ioThread_, [&](folly::EventBase& evb) {
+          return ReconnectingRequestChannel::newChannel(
+              evb,
+              [&](folly::EventBase& evb,
+                  folly::AsyncSocket::ConnectCallback& cb) {
+                // Do not connect yet
+                cbPtr = &cb;
+                baton.post();
+
+                auto socket =
+                    AsyncSocket::UniquePtr(new AsyncSocket(&evb, up_addr));
+                return RocketClientChannel::newChannel(std::move(socket));
+              });
+        });
+    auto client = std::make_shared<TestServiceAsyncClient>(std::move(channel));
+
+    // This will 'hang' due to connection not being connected
+    auto request1 = client->semifuture_echoInt(1);
+
+    // To make sure connect attempt is in progress
+    co_await baton;
+
+    auto request2 = client->semifuture_echoInt(1);
+    ioThread_->getEventBase()->runImmediatelyOrRunInEventBaseThreadAndWait(
+        [&] { cbPtr->connectSuccess(); });
+
+    co_await std::move(request1);
+    co_await std::move(request2);
+  }());
+}
+#endif

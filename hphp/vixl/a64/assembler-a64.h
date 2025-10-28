@@ -1144,7 +1144,7 @@ class Assembler {
             const MemOperand& dst);
 
   // Load Add - Large System Extension
-  void ldaddal(const Register& rs, const Register& rt, const MemOperand& src);
+  void ldadd(const Register& rs, const Register& rt, const MemOperand& src);
 
   // Load literal to register.
   void ldr(const Register& rt, uint64_t imm);

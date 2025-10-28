@@ -1004,7 +1004,7 @@ void Vgen::emit(const decqmlock& i) {
   a->SetScratchRegisters(vixl::NoReg, vixl::NoReg);
   if (Cfg::Jit::ArmLse) {
     a->Mov(rVixlScratch0, -1);
-    a->ldaddal(rVixlScratch0, rVixlScratch0, adr);
+    a->ldadd(rVixlScratch0, rVixlScratch0, adr);
     a->Sub(rAsm, rVixlScratch0, 1, SetFlags);
   } else {
     vixl::Label again;
@@ -1025,7 +1025,7 @@ void Vgen::emit(const decqmlocknosf& i) {
   a->SetScratchRegisters(vixl::NoReg, vixl::NoReg);
   if (Cfg::Jit::ArmLse) {
     a->Mov(rVixlScratch0, -1);
-    a->ldaddal(rVixlScratch0, rVixlScratch0, adr);
+    a->ldadd(rVixlScratch0, rVixlScratch0, adr);
     a->Sub(rAsm, rVixlScratch0, 1, LeaveFlags);
   } else {
     vixl::Label again;

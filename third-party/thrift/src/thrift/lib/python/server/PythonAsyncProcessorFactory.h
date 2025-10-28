@@ -37,13 +37,16 @@ class PythonAsyncProcessorFactory
   folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;
   folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 
+  PythonAsyncProcessorFactory(PythonAsyncProcessorFactory&&) = delete;
+  PythonAsyncProcessorFactory(const PythonAsyncProcessorFactory&) = delete;
+  PythonAsyncProcessorFactory& operator=(PythonAsyncProcessorFactory&&) =
+      delete;
+  PythonAsyncProcessorFactory& operator=(const PythonAsyncProcessorFactory&) =
+      delete;
+
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override {
     return std::make_unique<PythonAsyncProcessor>(
-        python_server_,
-        functions_,
-        executor,
-        serviceName_,
-        functionFullNameMap_);
+        python_server_, functions_, executor, serviceName_);
   }
 
   std::vector<apache::thrift::ServiceHandlerBase*> getServiceHandlers()
@@ -76,7 +79,6 @@ class PythonAsyncProcessorFactory
   const std::vector<PyObject*> lifecycleFuncs_;
   folly::Executor::KeepAlive<> executor;
   std::string serviceName_;
-  std::unordered_map<std::string, std::string> functionFullNameMap_;
 
   /**
    * Callers must use the create() factory function to create a
@@ -93,12 +95,7 @@ class PythonAsyncProcessorFactory
         functions_(std::move(functions)),
         lifecycleFuncs_(std::move(lifecycleFuncs)),
         executor(std::move(executor)),
-        serviceName_(std::move(serviceName)) {
-    for (const auto& function : functions_) {
-      functionFullNameMap_.insert(
-          {function.first, fmt::format("{}.{}", serviceName_, function.first)});
-    }
-  }
+        serviceName_(std::move(serviceName)) {}
 };
 
 } // namespace apache::thrift::python

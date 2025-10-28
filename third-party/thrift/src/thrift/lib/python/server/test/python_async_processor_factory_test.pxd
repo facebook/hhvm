@@ -21,8 +21,9 @@ from libcpp.vector cimport vector as cvector
 from libcpp.string cimport string
 
 from folly.executor cimport cAsyncioExecutor
+from thrift.python.protocol cimport RpcKind
 from thrift.python.server_impl.async_processor cimport AsyncProcessorFactory
-from thrift.python.server_impl.python_async_processor cimport RpcKind
+from thrift.python.server_impl.python_async_processor cimport HandlerFunc
 
 ctypedef PyObject* PyObjPtr
 
@@ -41,7 +42,7 @@ cdef extern from "thrift/lib/python/server/PythonAsyncProcessorFactory.h":
     cdef shared_ptr[cPythonAsyncProcessorFactory] \
         cCreatePythonAsyncProcessorFactory "::apache::thrift::python::PythonAsyncProcessorFactory::create"(
             PyObject* server,
-            cmap[string, pair[RpcKind, PyObjPtr]] funcs,
+            cmap[string, HandlerFunc] funcs,
             cvector[PyObjPtr] lifecycle,
             cAsyncioExecutor* executor,
             string serviceName,

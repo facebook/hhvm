@@ -35,6 +35,13 @@ from folly.executor cimport cAsyncioExecutor
 ctypedef PyObject* PyObjPtr
 
 
+cdef extern from "thrift/lib/python/server/PythonAsyncProcessor.h" namespace "::apache::thrift::python":
+    struct HandlerFunc:
+        RpcKind kind
+        PyObjPtr funcObject
+        string fullName
+
+    HandlerFunc makeHandlerFunc(RpcKind kind, PyObjPtr funcObject, const string& serviceName, const string& functionName)
 
 cdef extern from "thrift/lib/python/server/PythonAsyncProcessorFactory.h" namespace "::apache::thrift::python":
     cdef cppclass cPythonAsyncProcessorFactory "::apache::thrift::python::PythonAsyncProcessorFactory"(cAsyncProcessorFactory):
@@ -43,7 +50,7 @@ cdef extern from "thrift/lib/python/server/PythonAsyncProcessorFactory.h" namesp
     cdef shared_ptr[cPythonAsyncProcessorFactory] \
         cCreatePythonAsyncProcessorFactory "::apache::thrift::python::PythonAsyncProcessorFactory::create"(
             PyObject* server,
-            cmap[string, pair[RpcKind, PyObjPtr]] funcs,
+            cmap[string, HandlerFunc] funcs,
             cvector[PyObjPtr] lifecycle,
             cAsyncioExecutor* executor,
             string serviceName,

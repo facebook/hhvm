@@ -18,17 +18,17 @@ from libcpp.memory cimport shared_ptr
 from libcpp.utility cimport move as cmove
 from libcpp cimport bool as cbool
 from folly.executor cimport get_executor
-import unittest
-import inspect
-import functools
+from thrift.python.server_impl.python_async_processor cimport makeHandlerFunc
 
 cdef cCreateMethodMetadataResult create(string function_name, RpcKind rpc_kind):
-    cdef cmap[string, pair[RpcKind, PyObjPtr]] funcs
+    cdef cmap[string, HandlerFunc] funcs
     cdef cvector[PyObjPtr] lifecycle
     cdef object server = None
     cdef string serviceName
 
-    funcs[<string>function_name] = pair[RpcKind, PyObjPtr](<RpcKind>rpc_kind, <PyObject*>None)
+    funcs[<string>function_name] = makeHandlerFunc(
+        <RpcKind>rpc_kind, <PyObject*>None, serviceName, <string>function_name,
+    )
 
     cdef shared_ptr[cPythonAsyncProcessorFactory] obj = cCreatePythonAsyncProcessorFactory(
         <PyObject*>server,

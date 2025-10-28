@@ -88,7 +88,7 @@ PythonAsyncProcessorFactory::createMethodMetadata() {
   AsyncProcessorFactory::MethodMetadataMap result;
 
   for (const auto& [methodName, function] : functions_) {
-    auto rpcKind = function.first;
+    auto rpcKind = function.kind;
     switch (rpcKind) {
       case apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE:
       case apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE:

@@ -33,8 +33,19 @@ namespace apache::thrift::python {
 
 enum class LifecycleFunc;
 
-using FunctionMapType =
-    std::map<std::string, std::pair<apache::thrift::RpcKind, PyObject*>>;
+struct HandlerFunc {
+  apache::thrift::RpcKind kind;
+  PyObject* funcObject;
+  std::string fullName; // <serviceName>.<functionName>
+};
+
+HandlerFunc makeHandlerFunc(
+    apache::thrift::RpcKind kind,
+    PyObject* funcObject,
+    const std::string& serviceName,
+    const std::string& functionName);
+
+using FunctionMapType = std::map<std::string, HandlerFunc>;
 
 class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
                              public apache::thrift::ServerInterface {
@@ -43,13 +54,16 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
       PyObject* python_server,
       const FunctionMapType& functions,
       folly::Executor::KeepAlive<> executor,
-      std::string serviceName,
-      const std::unordered_map<std::string, std::string>& functionFullNameMap)
+      std::string serviceName)
       : python_server_(python_server),
-        functionFullNameMap_(functionFullNameMap),
         functions_(functions),
         executor_(std::move(executor)),
         serviceName_(std::move(serviceName)) {}
+
+  PythonAsyncProcessor(PythonAsyncProcessor&&) = delete;
+  PythonAsyncProcessor(const PythonAsyncProcessor&) = delete;
+  PythonAsyncProcessor& operator=(PythonAsyncProcessor&&) = delete;
+  PythonAsyncProcessor& operator=(const PythonAsyncProcessor&) = delete;
 
   struct PythonMetadata final
       : public apache::thrift::AsyncProcessorFactory::MethodMetadata {
@@ -115,7 +129,6 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
 
  private:
   PyObject* python_server_;
-  const std::unordered_map<std::string, std::string>& functionFullNameMap_;
   const FunctionMapType& functions_;
   folly::Executor::KeepAlive<> executor_;
   std::string serviceName_;

@@ -57,6 +57,18 @@ ServiceInterceptorOnRequestArguments emptyInterceptorsArguments() {
 
 } // namespace
 
+HandlerFunc makeHandlerFunc(
+    apache::thrift::RpcKind kind,
+    PyObject* funcObject,
+    const std::string& serviceName,
+    const std::string& functionName) {
+  return HandlerFunc{
+      kind,
+      funcObject,
+      fmt::format("{}.{}", serviceName, functionName),
+  };
+}
+
 std::unique_ptr<folly::IOBuf> PythonAsyncProcessor::getPythonMetadata() {
   do_python_import();
   return getSerializedPythonMetadata(python_server_);
@@ -73,7 +85,7 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::handlePythonServerCallback(
   auto [promise, future] =
       folly::makePromiseContract<std::unique_ptr<folly::IOBuf>>();
   const int retcode = handleServerCallback(
-      functions_.at(context->getMethodName()).second,
+      functions_.at(context->getMethodName()).funcObject,
       serviceName_ + "." + context->getMethodName(),
       context,
       std::move(promise),
@@ -106,7 +118,7 @@ PythonAsyncProcessor::handlePythonServerCallbackStreaming(
           std::unique_ptr<::folly::IOBuf>,
           std::unique_ptr<::folly::IOBuf>>>();
   const int retcode = handleServerStreamCallback(
-      functions_.at(context->getMethodName()).second,
+      functions_.at(context->getMethodName()).funcObject,
       serviceName_ + "." + context->getMethodName(),
       context,
       std::move(promise),
@@ -141,7 +153,7 @@ PythonAsyncProcessor::handlePythonServerCallbackSink(
           std::unique_ptr<::folly::IOBuf>,
           std::unique_ptr<::folly::IOBuf>>>();
   const int retcode = handleServerSinkCallback(
-      functions_.at(context->getMethodName()).second,
+      functions_.at(context->getMethodName()).funcObject,
       serviceName_ + "." + context->getMethodName(),
       context,
       std::move(promise),
@@ -177,7 +189,7 @@ PythonAsyncProcessor::handlePythonServerCallbackBidi(
           std::unique_ptr<::folly::IOBuf>,
           std::unique_ptr<::folly::IOBuf>>>();
   const int retcode = handleServerBidiCallback(
-      functions_.at(context->getMethodName()).second,
+      functions_.at(context->getMethodName()).funcObject,
       serviceName_ + "." + context->getMethodName(),
       context,
       std::move(promise),
@@ -205,7 +217,7 @@ PythonAsyncProcessor::handlePythonServerCallbackOneway(
   do_python_import();
   auto [promise, future] = folly::makePromiseContract<folly::Unit>();
   const int retcode = handleServerCallbackOneway(
-      functions_.at(context->getMethodName()).second,
+      functions_.at(context->getMethodName()).funcObject,
       serviceName_ + "." + context->getMethodName(),
       context,
       std::move(promise),
@@ -269,7 +281,7 @@ void PythonAsyncProcessor::executeRequest(
   auto ctxStack = apache::thrift::ContextStack::create(
       this->getEventHandlersSharedPtr(),
       serviceName,
-      functionFullNameMap_.at(ctx->getMethodName()).c_str(),
+      functions_.at(ctx->getMethodName()).fullName.c_str(),
       ctx);
 
   auto serializedRequest =
@@ -296,7 +308,7 @@ void PythonAsyncProcessor::executeRequest(
         std::move(req),
         ctx,
         eb,
-        functionFullNameMap_.at(ctx->getMethodName()).c_str());
+        functions_.at(ctx->getMethodName()).fullName.c_str());
     return;
   }
 

@@ -313,8 +313,7 @@ prototype<t_field>::ptr t_whisker_generator::make_prototype_for_field(
   auto def = prototype_builder<h_field>::extends(proto.of<t_named>());
   def.property("id", [](const t_field& self) { return i64(self.id()); });
   def.property("type", [&](const t_field& self) {
-    // return resolve_derived_t_type(proto, self.type().deref());
-    return proto.create<t_type>(*self.type());
+    return resolve_derived_t_type(proto, self.type().deref());
   });
   def.property("default_value", [&](const t_field& self) {
     return proto.create_nullable<t_const_value>(self.default_value());

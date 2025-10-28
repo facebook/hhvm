@@ -23,7 +23,8 @@
 }}
 {{#let export partial param_type |param|}}
 {{#pragma ignore-newlines}}
-apache::thrift::detail::DecoratorArgType<{{param.type.cpp_type}}>::type
+{{! type:cpp_type to explicitly up-cast typedefs to also use type:cpp_type rather than typedef:cpp_type }}
+apache::thrift::detail::DecoratorArgType<{{param.type.type:cpp_type}}>::type
 {{/let partial}}
 
 {{!

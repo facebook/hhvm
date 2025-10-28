@@ -61,7 +61,6 @@ class cpp_name_resolver {
     return detail::get_or_gen(
         type_cache_, &node, [&]() { return gen_type(node); });
   }
-  const std::string& get_native_type(const t_typedef& node);
   // Returns C++ type name for the given Thrift field.
   const std::string& get_native_type(
       const t_field& field, const t_structured& parent);

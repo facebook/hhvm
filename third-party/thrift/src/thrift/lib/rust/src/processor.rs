@@ -75,6 +75,13 @@ where
         impl FnOnce(SerializedStreamElement<FramingEncodedFinal<F>>) + Send,
     );
 
+    fn send_bidirectional_reply(
+        &self,
+        first_response: FramingEncodedFinal<F>,
+        stream: BoxStream<'static, SerializedStreamElement<FramingEncodedFinal<F>>>,
+        protocol_id: ProtocolID,
+    ) -> futures::stream::BoxStream<'static, Result<FramingDecoded<F>, crate::ApplicationException>>;
+
     fn set_interaction_processor(
         &self,
         _processor: Arc<
@@ -112,6 +119,7 @@ pub enum RpcKind {
     SINGLE_REQUEST_STREAMING_RESPONSE = 4,
     // STREAMING_REQUEST_STREAMING_RESPONSE = 5,
     SINK = 6,
+    BIDIRECTIONAL_STREAM = 7,
 }
 
 pub struct MethodMetadata {

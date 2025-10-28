@@ -415,8 +415,7 @@ string t_java_deprecated_generator::render_const_value(
   type = type->get_true_type();
   std::ostringstream render;
   if (const auto* primitive = type->try_as<t_primitive_type>()) {
-    t_primitive_type::type tbase = primitive->primitive_type();
-    switch (tbase) {
+    switch (primitive->primitive_type()) {
       case t_primitive_type::type::t_string:
       case t_primitive_type::type::t_binary:
         render << '"';
@@ -441,7 +440,7 @@ string t_java_deprecated_generator::render_const_value(
           }
         }
         render << '"';
-        if (tbase == t_primitive_type::type::t_binary) {
+        if (primitive->primitive_type() == t_primitive_type::type::t_binary) {
           render << ".getBytes()";
         }
         break;
@@ -476,8 +475,7 @@ string t_java_deprecated_generator::render_const_value(
         break;
       default:
         throw std::runtime_error(
-            "compiler error: no const of base type " +
-            t_primitive_type::type_name(tbase));
+            "compiler error: no const of base type " + primitive->name());
     }
   } else if (type->is<t_enum>()) {
     std::string namespace_prefix =
@@ -3238,8 +3236,7 @@ void t_java_deprecated_generator::generate_deserialize_field(
                 << ".findByValue(iprot.readI32());" << endl;
   } else if (const auto* primitive = type->try_as<t_primitive_type>()) {
     indent(out) << name << " = iprot.";
-    t_primitive_type::type tbase = primitive->primitive_type();
-    switch (tbase) {
+    switch (primitive->primitive_type()) {
       case t_primitive_type::type::t_void:
         throw std::runtime_error(
             "compiler error: cannot serialize void field in a struct: " + name);
@@ -3272,8 +3269,7 @@ void t_java_deprecated_generator::generate_deserialize_field(
         break;
       default:
         throw std::runtime_error(
-            "compiler error: no Java name for base type " +
-            t_primitive_type::type_name(tbase));
+            "compiler error: no Java name for base type " + primitive->name());
     }
     out << endl;
   } else {
@@ -3457,8 +3453,7 @@ void t_java_deprecated_generator::generate_serialize_field(
     string name = prefix + tfield->name();
     indent(out) << "oprot.";
 
-    t_primitive_type::type tbase = primitive->primitive_type();
-    switch (tbase) {
+    switch (primitive->primitive_type()) {
       case t_primitive_type::type::t_void:
         throw std::runtime_error(
             "compiler error: cannot serialize void field in a struct: " + name);
@@ -3491,8 +3486,7 @@ void t_java_deprecated_generator::generate_serialize_field(
         break;
       default:
         throw std::runtime_error(
-            "compiler error: no Java name for base type " +
-            t_primitive_type::type_name(tbase));
+            "compiler error: no Java name for base type " + primitive->name());
     }
     out << endl;
   } else {
@@ -3681,10 +3675,8 @@ string t_java_deprecated_generator::type_name(
  */
 string t_java_deprecated_generator::base_type_name(
     t_primitive_type* type, bool in_container) {
-  t_primitive_type::type tbase = type->primitive_type();
   bool boxedPrimitive = in_container || generate_boxed_primitive;
-
-  switch (tbase) {
+  switch (type->primitive_type()) {
     case t_primitive_type::type::t_void:
       return "void";
     case t_primitive_type::type::t_string:
@@ -3707,8 +3699,7 @@ string t_java_deprecated_generator::base_type_name(
       return (boxedPrimitive ? "Float" : "float");
     default:
       throw std::runtime_error(
-          "compiler error: no C++ name for base type " +
-          t_primitive_type::type_name(tbase));
+          "compiler error: no C++ name for base type " + type->name());
   }
 }
 

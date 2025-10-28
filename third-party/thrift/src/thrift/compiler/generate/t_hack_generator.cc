@@ -1341,7 +1341,7 @@ void t_hack_generator::generate_json_field(
       default:
         throw std::runtime_error(
             "compiler error: no PHP reader for base type " +
-            t_primitive_type::type_name(tbase_type->primitive_type()) + name);
+            tbase_type->name() + name);
     }
 
     if (number_limit.empty()) {
@@ -2012,8 +2012,7 @@ std::string t_hack_generator::render_const_value_helper(
         break;
       default:
         throw std::runtime_error(
-            "compiler error: no const of base type " +
-            t_primitive_type::type_name(tbase_type->primitive_type()));
+            "compiler error: no const of base type " + tbase_type->name());
     }
     out << exclude_delimiter;
   } else if (const auto* tenum = dynamic_cast<const t_enum*>(type)) {
@@ -2268,8 +2267,7 @@ std::string t_hack_generator::render_default_value(const t_type* type) {
   std::string dval;
   type = type->get_true_type();
   if (const auto* tbase_type = type->try_as<t_primitive_type>()) {
-    t_primitive_type::type tbase = tbase_type->primitive_type();
-    switch (tbase) {
+    switch (tbase_type->primitive_type()) {
       case t_primitive_type::type::t_string:
       case t_primitive_type::type::t_binary:
         dval = "''";
@@ -2289,8 +2287,7 @@ std::string t_hack_generator::render_default_value(const t_type* type) {
         break;
       default:
         throw std::runtime_error(
-            "compiler error: no const of base type " +
-            t_primitive_type::type_name(tbase));
+            "compiler error: no const of base type " + tbase_type->name());
     }
   } else if (type->is<t_enum>()) {
     dval = "null";
@@ -2350,7 +2347,7 @@ t_hack_generator::ThriftPrimitiveType t_hack_generator::base_to_t_primitive(
     default:
       throw std::invalid_argument(
           "compiler error: no ThriftPrimitiveType mapped to base type " +
-          t_primitive_type::type_name(tbase->primitive_type()));
+          tbase->name());
   }
 }
 
@@ -7423,7 +7420,7 @@ std::string t_hack_generator::declare_field(
         default:
           throw std::runtime_error(
               "compiler error: no Hack initializer for base type " +
-              t_primitive_type::type_name(tbase_type->primitive_type()));
+              tbase_type->name());
       }
     } else if (type->is<t_enum>()) {
       result += " = null";

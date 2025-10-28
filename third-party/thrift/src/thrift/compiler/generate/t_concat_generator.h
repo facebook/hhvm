@@ -94,7 +94,7 @@ class t_concat_generator : public t_generator {
    */
   virtual std::string thrift_type_name(const t_type* ttype) {
     if (const auto* tbase = ttype->try_as<t_primitive_type>()) {
-      return t_primitive_type::type_name(tbase->primitive_type());
+      return tbase->name();
     }
 
     if (ttype->is<t_container>()) {

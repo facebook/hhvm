@@ -437,10 +437,9 @@ void t_py_generator::generate_json_field(
     generate_json_enum(out, enum_, name, prefix_json);
   } else if (const auto* primitive = type->try_as<t_primitive_type>()) {
     string conversion_function;
-    t_primitive_type::type tbase = primitive->primitive_type();
     string number_limit;
     string number_negative_limit;
-    switch (tbase) {
+    switch (primitive->primitive_type()) {
       case t_primitive_type::type::t_void:
       case t_primitive_type::type::t_string:
       case t_primitive_type::type::t_binary:
@@ -468,7 +467,7 @@ void t_py_generator::generate_json_field(
       default:
         throw std::runtime_error(
             "compiler error: no python reader for base type " +
-            t_primitive_type::type_name(tbase) + name);
+            primitive->name() + name);
     }
 
     string value = prefix_json;
@@ -600,8 +599,7 @@ void t_py_generator::generate_json_collection_element(
   type = type->get_true_type();
 
   if (const auto* primitive = type->try_as<t_primitive_type>()) {
-    t_primitive_type::type tbase = primitive->primitive_type();
-    switch (tbase) {
+    switch (primitive->primitive_type()) {
       // Explicitly cast into float because there is an asymetry
       // between serializing and deserializing NaN.
       case t_primitive_type::type::t_double:
@@ -648,12 +646,11 @@ void t_py_generator::generate_json_map_key(
                 << ", " << parsed_key << ")" << endl;
     indent_down();
   } else if (const auto* primitive = type->try_as<t_primitive_type>()) {
-    t_primitive_type::type tbase = primitive->primitive_type();
     string conversion_function;
     string number_limit;
     string number_negative_limit;
     bool generate_assignment = true;
-    switch (tbase) {
+    switch (primitive->primitive_type()) {
       case t_primitive_type::type::t_string:
       case t_primitive_type::type::t_binary:
         break;
@@ -698,8 +695,7 @@ void t_py_generator::generate_json_map_key(
         break;
       default:
         throw std::runtime_error(
-            "compiler error: no C++ reader for base type " +
-            t_primitive_type::type_name(tbase));
+            "compiler error: no C++ reader for base type " + primitive->name());
     }
 
     string value = raw_key;
@@ -1189,8 +1185,7 @@ string t_py_generator::render_const_value(
   std::ostringstream out;
 
   if (const auto* primitive = type->try_as<t_primitive_type>()) {
-    t_primitive_type::type tbase = primitive->primitive_type();
-    switch (tbase) {
+    switch (primitive->primitive_type()) {
       case t_primitive_type::type::t_string:
       case t_primitive_type::type::t_binary:
         out << render_string(value->get_string());
@@ -1215,8 +1210,7 @@ string t_py_generator::render_const_value(
         break;
       default:
         throw std::runtime_error(
-            "compiler error: no const of base type " +
-            t_primitive_type::type_name(tbase));
+            "compiler error: no const of base type " + primitive->name());
     }
   } else if (type->is<t_enum>()) {
     indent(out) << value->get_integer();
@@ -3268,8 +3262,7 @@ void t_py_generator::generate_deserialize_field(
     indent(out) << name << " = iprot.";
 
     if (const auto* primitive = type->try_as<t_primitive_type>()) {
-      t_primitive_type::type tbase = primitive->primitive_type();
-      switch (tbase) {
+      switch (primitive->primitive_type()) {
         case t_primitive_type::type::t_void:
           throw std::runtime_error(
               "compiler error: cannot serialize void field in a struct: " +
@@ -3305,7 +3298,7 @@ void t_py_generator::generate_deserialize_field(
         default:
           throw std::runtime_error(
               "compiler error: no Python name for base type " +
-              t_primitive_type::type_name(tbase));
+              primitive->name());
       }
     } else if (type->is<t_enum>()) {
       out << "readI32()";
@@ -3494,8 +3487,7 @@ void t_py_generator::generate_serialize_field(
     indent(out) << "oprot.";
 
     if (const auto* primitive = type->try_as<t_primitive_type>()) {
-      t_primitive_type::type tbase = primitive->primitive_type();
-      switch (tbase) {
+      switch (primitive->primitive_type()) {
         case t_primitive_type::type::t_void:
           throw std::runtime_error(
               "compiler error: cannot serialize void field in a struct: " +
@@ -3532,7 +3524,7 @@ void t_py_generator::generate_serialize_field(
         default:
           throw std::runtime_error(
               "compiler error: no Python name for base type " +
-              t_primitive_type::type_name(tbase));
+              primitive->name());
       }
     } else if (type->is<t_enum>()) {
       out << "writeI32(" << name << ")";

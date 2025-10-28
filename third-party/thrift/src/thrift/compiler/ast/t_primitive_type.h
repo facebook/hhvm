@@ -55,21 +55,13 @@ class t_primitive_type : public t_type {
   static const t_primitive_type& t_double();
   static const t_primitive_type& t_float();
 
-  // Returns the name for the given type.
-  using t_type::type_name;
-  static const std::string& type_name(type primitive_type) {
-    return type_name(static_cast<t_type::type>(primitive_type));
-  }
-
   type primitive_type() const { return primitive_type_; }
 
   // TODO(afuller): Disable copy constructor, and use
   // 'anonymous' typdefs instead.
   // t_primitive_type(const t_primitive_type&) = delete;
 
-  std::string get_full_name() const override {
-    return type_name(primitive_type_);
-  }
+  std::string get_full_name() const override { return name(); }
 
   ~t_primitive_type() override;
 

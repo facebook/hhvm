@@ -769,9 +769,8 @@ void t_cocoa_generator::generate_cocoa_struct_init_with_coder_method(
       out << "[decoder decodeIntForKey: @\"" << field.name() << "\"];"
           << std::endl;
     } else {
-      t_primitive_type::type tbase =
-          t->try_as<t_primitive_type>()->primitive_type();
-      switch (tbase) {
+      const t_primitive_type& tbase = t->as<t_primitive_type>();
+      switch (tbase.primitive_type()) {
         case t_primitive_type::type::t_bool:
           out << "[decoder decodeBoolForKey: @\"" << field.name() << "\"];"
               << std::endl;
@@ -799,7 +798,7 @@ void t_cocoa_generator::generate_cocoa_struct_init_with_coder_method(
         default:
           throw std::runtime_error(
               "compiler error: don't know how to decode thrift type: " +
-              t_primitive_type::type_name(tbase));
+              tbase.name());
       }
     }
     out << indent() << kFieldPrefix << field.name() << kSetPostfix << " = YES;"
@@ -839,9 +838,8 @@ void t_cocoa_generator::generate_cocoa_struct_encode_with_coder_method(
       out << indent() << "[encoder encodeInt: " << kFieldPrefix << field.name()
           << " forKey: @\"" << field.name() << "\"];" << std::endl;
     } else {
-      t_primitive_type::type tbase =
-          t->try_as<t_primitive_type>()->primitive_type();
-      switch (tbase) {
+      const t_primitive_type& tbase = t->as<t_primitive_type>();
+      switch (tbase.primitive_type()) {
         case t_primitive_type::type::t_bool:
           out << indent() << "[encoder encodeBool: " << kFieldPrefix
               << field.name() << " forKey: @\"" << field.name() << "\"];"
@@ -875,7 +873,7 @@ void t_cocoa_generator::generate_cocoa_struct_encode_with_coder_method(
         default:
           throw std::runtime_error(
               "compiler error: don't know how to encode thrift type: " +
-              t_primitive_type::type_name(tbase));
+              tbase.name());
       }
     }
     scope_down(out);
@@ -2191,8 +2189,7 @@ void t_cocoa_generator::generate_deserialize_field(
     indent(out) << type_name(type) << " " << fieldName << " = [inProtocol ";
 
     if (const auto* primitive = type->try_as<t_primitive_type>()) {
-      t_primitive_type::type tbase = primitive->primitive_type();
-      switch (tbase) {
+      switch (primitive->primitive_type()) {
         case t_primitive_type::type::t_void:
           throw std::runtime_error(
               "compiler error: cannot serialize void field in a struct: " +
@@ -2224,7 +2221,7 @@ void t_cocoa_generator::generate_deserialize_field(
         default:
           throw std::runtime_error(
               "compiler error: no Objective-C name for base type " +
-              t_primitive_type::type_name(tbase));
+              primitive->name());
       }
     } else if (type->is<t_enum>()) {
       out << "readI32];";
@@ -2451,8 +2448,7 @@ void t_cocoa_generator::generate_serialize_field(
     indent(out) << "[outProtocol ";
 
     if (const auto* primitive = type->try_as<t_primitive_type>()) {
-      t_primitive_type::type tbase = primitive->primitive_type();
-      switch (tbase) {
+      switch (primitive->primitive_type()) {
         case t_primitive_type::type::t_void:
           throw std::runtime_error(
               "compiler error: cannot serialize void field in a struct: " +
@@ -2484,7 +2480,7 @@ void t_cocoa_generator::generate_serialize_field(
         default:
           throw std::runtime_error(
               "compiler error: no Objective-C name for base type " +
-              t_primitive_type::type_name(tbase));
+              primitive->name());
       }
     } else if (type->is<t_enum>()) {
       out << "writeI32: " << fieldName << "];";
@@ -2697,9 +2693,7 @@ std::string t_cocoa_generator::type_name(const t_type* ttype, bool class_ref) {
  * @param tbase The base type
  */
 std::string t_cocoa_generator::base_type_name(t_primitive_type* type) {
-  t_primitive_type::type tbase = type->primitive_type();
-
-  switch (tbase) {
+  switch (type->primitive_type()) {
     case t_primitive_type::type::t_void:
       return "void";
     case t_primitive_type::type::t_string:
@@ -2720,8 +2714,7 @@ std::string t_cocoa_generator::base_type_name(t_primitive_type* type) {
       return "double";
     default:
       throw std::runtime_error(
-          "compiler error: no Objective-C name for base type " +
-          t_primitive_type::type_name(tbase));
+          "compiler error: no Objective-C name for base type " + type->name());
   }
 }
 
@@ -2859,8 +2852,7 @@ std::string t_cocoa_generator::render_const_value(
   std::ostringstream render;
 
   if (const auto* primitive = type->try_as<t_primitive_type>()) {
-    t_primitive_type::type tbase = primitive->primitive_type();
-    switch (tbase) {
+    switch (primitive->primitive_type()) {
       case t_primitive_type::type::t_string:
       case t_primitive_type::type::t_binary:
         // We must handle binary constant but the syntax of IDL defines
@@ -2885,8 +2877,7 @@ std::string t_cocoa_generator::render_const_value(
         break;
       default:
         throw std::runtime_error(
-            "compiler error: no const of base type " +
-            t_primitive_type::type_name(tbase));
+            "compiler error: no const of base type " + primitive->name());
     }
   } else if (type->is<t_enum>()) {
     render << value->get_integer();

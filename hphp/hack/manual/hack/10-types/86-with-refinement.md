@@ -82,7 +82,7 @@ and avoid assertions that objects returned by Box’s `get` methods are
 numbers (`int` or `float`).
 
 Finally, you can also use
-[generics](/hack/generics/introduction) in
+[generics](/docs/hack/generics/introduction) in
 bounds; e.g., the above function could have signature
 
 ```

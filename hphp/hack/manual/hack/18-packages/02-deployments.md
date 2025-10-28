@@ -23,7 +23,7 @@ packages=["production"]
 packages=["test", "production"] # Since the test package includes production, they must be deployed together.
 ```
 
-When building in [repo authoritative](/hack/../hhvm/advanced-usage/repo-authoritative) mode, you can pass in the build configuration `Eval.ActiveDeployment = <deployment>` to set the active deployment. HHVM will then include only the files in the active deployment when building.
+When building in [repo authoritative](/docs/hack/../hhvm/advanced-usage/repo-authoritative) mode, you can pass in the build configuration `Eval.ActiveDeployment = <deployment>` to set the active deployment. HHVM will then include only the files in the active deployment when building.
 
 ## Deployment domains
 In CLI-server mode, HHVM can direct different domains to different deployments, allowing you to treat a web request as if it were built in repo mode with a specific deployment. You can set the `domains` value of to any deployment to a list of regexes:

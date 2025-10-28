@@ -146,7 +146,7 @@ class Dog extends Animal {
 This allows `new Dog()` but not `new Animal()`.
 
 Abstract classes are similar to
-[interfaces](/hack/traits-and-interfaces/implementing-an-interface), but they can include
+[interfaces](/docs/hack/traits-and-interfaces/implementing-an-interface), but they can include
 implementations of methods.
 
 ## Final Classes

@@ -22,4 +22,4 @@ Several other packages are available:
 - `brew install hhvm-VERSION`: install a specific x.y version; for example,
   `brew install hhvm-4.56` or `brew install hhvm-4.32`
 
-You can also [manually build from source](/hhvm/installation/building-from-source#building-hhvm__macos).
+You can also [manually build from source](/docs/hhvm/installation/building-from-source#building-hhvm__macos).

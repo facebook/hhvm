@@ -13,7 +13,7 @@ Generators can be `async` functions; an async generator behaves similarly to a n
 To yield values or key/value pairs from async generators, we return [HH\AsyncIterator](/apis/interface/HH.AsyncIterator/) or
 [HH\AsyncKeyedIterator](/apis/interface/HH.AsyncKeyedIterator/), respectively.
 
-Here is an example of using the [async utility function](/hack/asynchronous-operations/utility-functions)
+Here is an example of using the [async utility function](/docs/hack/asynchronous-operations/utility-functions)
 [`usleep`](/apis/function/HH.Asio.usleep/) to imitate a second-by-second countdown clock. Note that in the
 `happy_new_year` `foreach` loop we have the syntax `await as`. This is shorthand for calling `await $ait->next()`.
 

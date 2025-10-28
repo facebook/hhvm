@@ -1,23 +1,23 @@
 # Introduction
 
-HHVM is officially supported on most major [Linux platforms](/hhvm/installation/linux), with limited support for [MacOS](/hhvm/installation/mac).
+HHVM is officially supported on most major [Linux platforms](/docs/hhvm/installation/linux), with limited support for [MacOS](/docs/hhvm/installation/mac).
 
 ## Prebuilt Packages
 
 The easiest way to get going with HHVM is to use one of our supported prebuilt packages. Currently prebuilt packages are available for:
 
-* [Several versions of Debian and Ubuntu](/hhvm/installation/linux)
-* [MacOS](/hhvm/installation/mac)
+* [Several versions of Debian and Ubuntu](/docs/hhvm/installation/linux)
+* [MacOS](/docs/hhvm/installation/mac)
 
 ### LTS Releases
 
-In addition to the normal stable packages, there are supported [LTS releases](/hhvm/installation/linux#obtaining-lts-releases) for the above distributions; see [the release schedule](/hhvm/installation/release-schedule#Lifecycle) for details.
+In addition to the normal stable packages, there are supported [LTS releases](/docs/hhvm/installation/linux#obtaining-lts-releases) for the above distributions; see [the release schedule](/docs/hhvm/installation/release-schedule#Lifecycle) for details.
 
 ## Compiling HHVM
 
-For normal usage, using a [prebuilt package](#prebuilt-packages) is the best course of action for ease of installation and stability. However, if you want to live on the bleeding edge and get the latest and greatest code as it is checked into [GitHub](https://github.com/facebook/hhvm/), you can compile HHVM straight from source. Check the [compilation instructions](/hhvm/installation/building-from-source) for both the supported Linux and Mac OS X distros.
+For normal usage, using a [prebuilt package](#prebuilt-packages) is the best course of action for ease of installation and stability. However, if you want to live on the bleeding edge and get the latest and greatest code as it is checked into [GitHub](https://github.com/facebook/hhvm/), you can compile HHVM straight from source. Check the [compilation instructions](/docs/hhvm/installation/building-from-source) for both the supported Linux and Mac OS X distros.
 
-If we support a prebuilt package for a distribution, we support [compiling](/hhvm/installation/building-from-source) it from source as well.
+If we support a prebuilt package for a distribution, we support [compiling](/docs/hhvm/installation/building-from-source) it from source as well.
 
 ### Hack Typechecker
 

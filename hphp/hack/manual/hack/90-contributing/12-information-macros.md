@@ -17,7 +17,7 @@ The `noreturn` type can be upcasted to `dynamic`.
 ```yamlmeta
 {
   "tip": [
-    "To start learning Hack, read our [Getting Started](/hack/getting-started/getting-started) documentation!"
+    "To start learning Hack, read our [Getting Started](/docs/hack/getting-started/getting-started) documentation!"
   ]
 }
 ```

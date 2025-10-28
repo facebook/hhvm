@@ -57,7 +57,7 @@ provided, preferably under 15 lines.
 We assume the reader has a relatively recent version of
 HHVM. References to very old features will be removed, but we provide
 [Docker images of historical site
-versions](/hack/contributing/introduction#running-an-old-instance) if
+versions](/docs/hack/contributing/introduction#running-an-old-instance) if
 needed.
 
 It's not necessary to document all the incorrect ways a feature can be

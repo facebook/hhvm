@@ -1,7 +1,7 @@
 # Guidelines
 
-Here are some general guidelines to know and follow when using XHP. In addition to its [basic usage](/hack/xhp/basic-usage),
-[available methods](/hack/xhp/methods) and [extending XHP with your own objects](/hack/xhp/extending), these are other tips to make the best use of XHP.
+Here are some general guidelines to know and follow when using XHP. In addition to its [basic usage](/docs/hack/xhp/basic-usage),
+[available methods](/docs/hack/xhp/methods) and [extending XHP with your own objects](/docs/hack/xhp/extending), these are other tips to make the best use of XHP.
 
 ## Validation of Attributes and Children
 

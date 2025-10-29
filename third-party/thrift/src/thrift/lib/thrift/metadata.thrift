@@ -34,6 +34,8 @@ include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/hack.thrift"
 include "thrift/annotation/java.thrift"
 
+cpp_include "thrift/lib/thrift/detail/MetadataAdapter.h"
+
 package "facebook.com/thrift/metadata"
 
 enum ThriftPrimitiveType {
@@ -61,6 +63,8 @@ union ThriftConstValue {
   3: double cv_double;
   4: string cv_string;
   5: list<ThriftConstValuePair> cv_map;
+
+  @cpp.Type{template = "::apache::thrift::metadata::detail::LimitedVector"}
   6: list<ThriftConstValue> cv_list;
   7: ThriftConstStruct cv_struct;
 }

@@ -250,7 +250,7 @@ ThriftConstValue cvDouble(double value);
 ThriftConstValue cvString(const char* value);
 
 ThriftConstValue cvMap(std::vector<ThriftConstValuePair>&& value);
-ThriftConstValue cvList(std::vector<ThriftConstValue>&& value);
+ThriftConstValue cvList(std::initializer_list<ThriftConstValue> value);
 ThriftConstValue cvStruct(
     const char* name, std::map<std::string, ThriftConstValue>&& fields);
 

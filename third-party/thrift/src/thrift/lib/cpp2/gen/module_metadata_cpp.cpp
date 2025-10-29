@@ -50,9 +50,11 @@ ThriftConstValue cvMap(std::vector<ThriftConstValuePair>&& value) {
   return ret;
 }
 
-ThriftConstValue cvList(std::vector<ThriftConstValue>&& value) {
+ThriftConstValue cvList(std::initializer_list<ThriftConstValue> value) {
   ThriftConstValue ret;
-  ret.cv_list() = std::move(value);
+  ret.cv_list().emplace().assign(
+      std::make_move_iterator(value.begin()),
+      std::make_move_iterator(value.end()));
   return ret;
 }
 

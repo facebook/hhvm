@@ -110,6 +110,8 @@ bool container_supports_incomplete_params(const t_type& type) {
 
              "std::forward_list",
              "std::list",
+
+             "::apache::thrift::metadata::detail::LimitedVector",
          }) {
       types.insert(type);
       types.insert(fmt::format("::{}", type));

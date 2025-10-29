@@ -382,6 +382,7 @@ void ReconnectingRequestChannel::reconnectRequestChannelWithCallback() {
   isCreatingChannel_ = true;
   impl_ = implCreatorWithCallback_(evb_, *this);
   isCreatingChannel_ = false;
+  // If we connected inline, send any pending requests immediately.
   sendQueuedRequests();
 }
 

@@ -74,46 +74,9 @@ class AssignPatch : public BaseAssignPatch<Patch, AssignPatch<Patch>> {
     return *this;
   }
 
-  void apply(T& val) const {
-    if (dynPatch_) {
-      auto value = protocol::asValueStruct<Tag>(val);
-      dynPatch_->apply(value);
-      val = protocol::fromValueStruct<Tag>(value);
-    } else if (auto p = data_.assign()) {
-      val = data_.assign().value();
-    }
-  }
+  void apply(T& val) const;
 
-  void merge(AssignPatch other) {
-    if (dynPatch_ && other.dynPatch_) {
-      XLOG_EVERY_MS(CRITICAL, 10000)
-          << "Merging dynamic patch is not implemented. "
-             "The merged result will be incorrect.\n"
-             "First Patch = "
-          << folly::toPrettyJson(
-                 apache::thrift::protocol::toDynamic(dynPatch_->toObject()))
-          << "\nSecond Patch = "
-          << folly::toPrettyJson(
-                 apache::thrift::protocol::toDynamic(
-                     other.dynPatch_->toObject()));
-
-      // Do nothing, which is the old behavior
-      return;
-    }
-
-    if (!other.dynPatch_) {
-      if (auto p = other.data_.assign()) {
-        assign(std::move(*p));
-      }
-      return;
-    }
-
-    if (auto p = data_.assign()) {
-      other.apply(*p);
-    } else {
-      dynPatch_ = std::move(other.dynPatch_);
-    }
-  }
+  void merge(AssignPatch other);
 
   /// @cond
   template <class Protocol>

@@ -45,3 +45,11 @@ h2 {
   padding-bottom: 0.5rem;
   border-bottom: 1px solid #ccc;
 }
+
+html[data-theme='dark'] .main-wrapper {
+  background-color: var(--ifm-navbar-background-color);
+}
+
+.footer {
+  background-color: #242424;
+}

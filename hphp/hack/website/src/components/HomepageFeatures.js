@@ -12,27 +12,31 @@ const FeatureList = [
   {
     title: 'Hack Documentation',
     href: 'docs/hack-overview',
-    Svg: require('../../static/img/undraw_docusaurus_mountain.svg').default,
+    Svg: require('../../static/img/hack.svg').default,
     description: (
       <>
         Install Hack, run your first program, and get introduced to the tools.
+        <br /><br />
+        Website: <a href="https://hacklang.org/" target="_blank">hacklang.org</a>
       </>
     ),
   },
   {
     title: 'HHVM Documentation',
     href: 'docs/hhvm-overview',
-    Svg: require('../../static/img/undraw_docusaurus_tree.svg').default,
+    Svg: require('../../static/img/hhvm.svg').default,
     description: (
       <>
         Install HHVM on a supported platform, and learn about ways to run and configure HHVM.
+        <br /><br />
+        Website: <a href="https://hhvm.com/" target="_blank">hhvm.com</a>
       </>
     ),
   },
   {
     title: 'Library Reference',
     href: 'docs/hsl/overview',
-    Svg: require('../../static/img/undraw_docusaurus_react.svg').default,
+    Svg: require('../../static/img/hsl.svg').default,
     description: (
       <>
         Documentation for all functions, classes, interfaces, and traits in the Hack Standard Library (HSL).
@@ -45,7 +49,9 @@ function Feature({Svg, title, description, href}) {
   return (
     <div className={clsx('col col--4')}>
       <div className="text--center">
-        <Svg className={styles.featureSvg} alt={title} />
+        <a href={href}>
+          <Svg className={styles.featureSvg} alt={title} />
+        </a>
       </div>
       <div className="text--center padding-horiz--md">
         <h3><a href={href}>{title}</a></h3>

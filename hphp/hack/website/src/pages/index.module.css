@@ -16,6 +16,7 @@
 }
 
 html[data-theme='dark'] .heroBanner {
+  background-color: var(--ifm-background-surface-color);
   color: #fff;
 }
 

@@ -98,6 +98,12 @@ const darkCodeTheme = require('prism-react-renderer').themes.vsDark;
       },
       footer: {
         style: 'dark',
+        logo: {
+          alt: 'Meta Open Source Logo',
+          src: 'img/meta_open_source_logo.svg',
+          target: '_blank',
+          href: 'https://opensource.fb.com/',
+        },
         links: [
           {
             title: 'Hack',
@@ -145,6 +151,10 @@ const darkCodeTheme = require('prism-react-renderer').themes.vsDark;
             title: 'Community',
             items: [
               {
+                label: 'Hack & HHVM GitHub',
+                href: 'https://github.com/facebook/hhvm',
+              },
+              {
                 label: 'Facebook Group',
                 href: 'https://www.facebook.com/groups/hhvm.general',
               },
@@ -156,17 +166,17 @@ const darkCodeTheme = require('prism-react-renderer').themes.vsDark;
                 label: 'HHVM Twitter',
                 href: 'https://twitter.com/HipHopVM',
               },
-              {
-                label: 'Slack',
-                href: 'https://hhvm.com/slack',
-              },
             ],
           },
           {
             title: 'Resources',
             items: [
               {
-                label: 'Blog',
+                label: 'Source for this Site',
+                href: 'https://github.com/hhvm/user-documentation',
+              },
+              {
+                label: 'HHVM Blog',
                 href: 'http://hhvm.com/blog',
               },
               {
@@ -177,27 +187,27 @@ const darkCodeTheme = require('prism-react-renderer').themes.vsDark;
                 label: 'HHVM Website',
                 href: 'http://hhvm.com/',
               },
-              {
-                label: 'Facebook Page',
-                href: 'https://www.facebook.com/hhvm',
-              },
             ],
           },
           {
-            title: 'GitHub',
+            title: 'Legal',
             items: [
               {
-                label: 'Hack and HHVM',
-                href: 'https://github.com/facebook/hhvm',
+              label: 'Privacy',
+                href: 'https://opensource.facebook.com/legal/privacy/',
+                target: '_blank',
+                rel: 'noreferrer noopener',
               },
               {
-                label: 'Source for this Site',
-                href: 'https://github.com/hhvm/user-documentation',
+                label: 'Terms',
+                href: 'https://opensource.facebook.com/legal/terms/',
+                target: '_blank',
+                rel: 'noreferrer noopener',
               },
             ],
           },
         ],
-        copyright: `Copyright &#169; ${new Date().getFullYear()} Meta Platforms, Inc.`,
+        copyright: `Copyright &#169; ${new Date().getFullYear()} Meta Platforms, Inc. Built with Docusaurus.`,
       },
       prism: {
         theme: lightCodeTheme,

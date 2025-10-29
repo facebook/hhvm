@@ -31,7 +31,7 @@ export default function Home() {
       title={`Hack and HHVM Documentation`}
       description="Offical documentation for Hack and HHVM">
       <HomepageHeader />
-      <main>
+      <main className={styles.mainSection}>
         <HomepageFeatures />
       </main>
     </Layout>

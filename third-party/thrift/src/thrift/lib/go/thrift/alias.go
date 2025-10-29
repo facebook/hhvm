@@ -113,10 +113,6 @@ func Pointerize[T types.ThriftPointerizable](v T) *T {
 	return types.Pointerize(v)
 }
 
-func NewTransportExceptionFromError(err error) types.TransportException {
-	return types.NewTransportExceptionFromError(err)
-}
-
 func NewCompactFormat(readWriter types.ReadWriteSizer) types.Format {
 	return format.NewCompactFormat(readWriter)
 }

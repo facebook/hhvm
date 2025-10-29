@@ -60,7 +60,10 @@ func DecodeResponsePayload(msg payload.Payload) (*responsePayload, error) {
 	result := &responsePayload{metadata: metadata, data: dataBytes}
 	if metadata.PayloadMetadata != nil && metadata.PayloadMetadata.ExceptionMetadata != nil {
 		exception := newRocketException(metadata.PayloadMetadata.ExceptionMetadata)
-		if !exception.IsDeclared() {
+		if exception.ExceptionType == RocketExceptionAppUnknown {
+			// a.k.a. undeclared exception (ApplicaitonException)
+			return result, types.NewApplicationException(types.UNKNOWN_APPLICATION_EXCEPTION, exception.What)
+		} else if !exception.IsDeclared() {
 			exception.SerializedException = dataBytes
 			return result, exception
 		}
@@ -70,28 +73,43 @@ func DecodeResponsePayload(msg payload.Payload) (*responsePayload, error) {
 
 // EncodeResponsePayload encodes a response payload.
 func EncodeResponsePayload(
-	name string,
-	messageType types.MessageType,
 	headers map[string]string,
 	compression rpcmetadata.CompressionAlgorithm,
 	dataBytes []byte,
 ) (payload.Payload, error) {
-	payloadMetadata := rpcmetadata.NewPayloadMetadata()
-	if messageType == types.EXCEPTION {
-		exceptionMetadata := newUnknownPayloadExceptionMetadataBase(name, string(dataBytes))
-		payloadMetadata.SetExceptionMetadata(exceptionMetadata)
-	} else {
-		responseMetadata := rpcmetadata.NewPayloadResponseMetadata()
-		payloadMetadata.SetResponseMetadata(responseMetadata)
-	}
+	responseMetadata := rpcmetadata.NewPayloadResponseMetadata()
+	payloadMetadata := rpcmetadata.NewPayloadMetadata().
+		SetResponseMetadata(responseMetadata)
 
 	metadata := rpcmetadata.NewResponseRpcMetadata().
 		SetOtherMetadata(headers).
 		SetCompression(&compression).
 		SetPayloadMetadata(payloadMetadata)
 
-	if messageType == types.EXCEPTION {
-		return EncodePayloadMetadataAndData(metadata, nil /* dataBytes */, compression)
-	}
 	return EncodePayloadMetadataAndData(metadata, dataBytes, compression)
+}
+
+// EncodeResponseApplicationErrorPayload encodes a response error payload.
+func EncodeResponseApplicationErrorPayload(
+	appException *types.ApplicationException,
+	headers map[string]string,
+	compression rpcmetadata.CompressionAlgorithm,
+) (payload.Payload, error) {
+	exceptionMetadata := NewPayloadExceptionMetadataBase(
+		"ApplicationException",
+		appException.Error(),
+		RocketExceptionAppUnknown,
+		rpcmetadata.ErrorKind_UNSPECIFIED,
+		rpcmetadata.ErrorBlame_UNSPECIFIED,
+		rpcmetadata.ErrorSafety_UNSPECIFIED,
+	)
+	payloadMetadata := rpcmetadata.NewPayloadMetadata().
+		SetExceptionMetadata(exceptionMetadata)
+
+	metadata := rpcmetadata.NewResponseRpcMetadata().
+		SetOtherMetadata(headers).
+		SetCompression(&compression).
+		SetPayloadMetadata(payloadMetadata)
+
+	return EncodePayloadMetadataAndData(metadata, nil /* dataBytes */, compression)
 }

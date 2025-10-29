@@ -275,17 +275,20 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 		protocol.setRequestHeader(LoadHeaderKey, fmt.Sprintf("%d", loadFn(s.stats, s.totalActiveRequestCount)))
 
 		responseCompressionAlgo := rocket.CompressionAlgorithmFromCompressionConfig(metadata.GetCompressionConfig())
-		dataBytes := protocol.Bytes()
+		var payload payload.Payload
 		if appException != nil {
-			dataBytes = []byte(appException.Error())
+			payload, err = rocket.EncodeResponseApplicationErrorPayload(
+				appException,
+				protocol.getRequestHeaders(),
+				responseCompressionAlgo,
+			)
+		} else {
+			payload, err = rocket.EncodeResponsePayload(
+				protocol.getRequestHeaders(),
+				responseCompressionAlgo,
+				protocol.Bytes(),
+			)
 		}
-		payload, err := rocket.EncodeResponsePayload(
-			rpcFuncName,
-			protocol.messageType,
-			protocol.getRequestHeaders(),
-			responseCompressionAlgo,
-			dataBytes,
-		)
 
 		// Track actual handler execution time
 		processTime := time.Since(processStartTime)
@@ -417,27 +420,31 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 			responseCompressionAlgo := rocket.CompressionAlgorithmFromCompressionConfig(metadata.GetCompressionConfig())
 
 			onFirstResponse := func(respStruct WritableStruct) {
-				messageType := types.REPLY
-				if _, ok := respStruct.(*types.ApplicationException); ok {
-					messageType = types.EXCEPTION
-				}
 				protocol, err := newProtocolBuffer(protoID, nil)
 				if err != nil {
 					s.log("rocketServer requestStream newProtocolBuffer error: %v", err)
 					return
 				}
-				err = sendWritableStruct(protocol, rpcFuncName, messageType, 0, respStruct)
+				err = sendWritableStruct(protocol, rpcFuncName, types.REPLY, 0, respStruct)
 				if err != nil {
 					s.log("rocketServer requestStream sendWritableStruct error: %v", err)
 					return
 				}
-				payload, err := rocket.EncodeResponsePayload(
-					rpcFuncName,
-					messageType,
-					protocol.getRequestHeaders(),
-					responseCompressionAlgo,
-					protocol.Bytes(),
-				)
+				var payload payload.Payload
+				appException, isAppException := respStruct.(*types.ApplicationException)
+				if isAppException {
+					payload, err = rocket.EncodeResponseApplicationErrorPayload(
+						appException,
+						protocol.getRequestHeaders(),
+						responseCompressionAlgo,
+					)
+				} else {
+					payload, err = rocket.EncodeResponsePayload(
+						protocol.getRequestHeaders(),
+						responseCompressionAlgo,
+						protocol.Bytes(),
+					)
+				}
 				if err != nil {
 					s.log("rocketServer requestStream EncodeResponsePayload error: %v", err)
 					return

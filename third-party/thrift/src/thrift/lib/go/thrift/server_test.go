@@ -33,6 +33,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	dummyif "github.com/facebook/fbthrift/thrift/test/go/if/dummy"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -721,8 +722,9 @@ func TestProcessorScenarios(t *testing.T) {
 		client := dummyif.NewDummyChannelClient(channel)
 		err := client.GetUndeclaredException(context.Background())
 		require.Error(t, err)
-		// Extra quotes are intentional, until Rocket errors match the spec
-		require.ErrorContains(t, err, "\"Internal error processing GetUndeclaredException: undeclared exception\"")
+		var appEx *types.ApplicationException
+		require.ErrorAs(t, err, &appEx)
+		require.EqualError(t, appEx, "Internal error processing GetUndeclaredException: undeclared exception")
 	})
 	t.Run("declared_exception", func(t *testing.T) {
 		client := dummyif.NewDummyChannelClient(channel)

@@ -311,8 +311,8 @@ void HQServer::stop() {
   server_->shutdown();
 }
 
-void HQServer::rejectNewConnections(bool reject) {
-  server_->rejectNewConnections([reject]() { return reject; });
+void HQServer::rejectNewConnections(std::function<bool()> rejectFn) {
+  server_->rejectNewConnections(std::move(rejectFn));
 }
 
 void HQServer::setHostId(uint32_t hostId) {

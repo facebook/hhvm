@@ -35,6 +35,7 @@ cdef extern from "thrift/test/python_capi/gen-cpp2/module_types.h" namespace "th
     cppclass StringPair
     cppclass VapidStruct
     cppclass SomeBinary
+    cppclass Float32
 
 cdef extern from "thrift/test/python_capi/gen-python-capi/containers/thrift_types_capi.h":
     cppclass TemplateNs "thrift__test__python_capi__containers::NamespaceTag" 
@@ -109,6 +110,9 @@ def roundtrip_SerializedStruct(object x):
 
 def roundtrip_SomeBinary(object x):
     return __shim__roundtrip[SomeBinary, ModuleNs](x)
+
+def roundtrip_Float32(object x):
+    return __shim__roundtrip[Float32, ModuleNs](x)
 
 def gen_SerializedStruct(int64_t len_):
     return __shim__gen_SerializedStruct(len_)

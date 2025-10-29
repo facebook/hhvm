@@ -115,9 +115,17 @@ class TestMarshalPrimitives(MarshalFixture):
             else:
                 self.assertEqual(x, fixture.roundtrip_float(x))
         self.assert_type_error(fixture.roundtrip_float, None, "oops")
-        self.assert_overflow(
-            fixture.roundtrip_float, max_float32 * 2.0, -max_float32 * 2.0
-        )
+
+        for x in (
+            2.0**128,
+            -max_float32 * 2.0,
+            -(2.0**128),
+            max_float32 * 2.0,
+            float("inf"),
+            float("-inf"),
+        ):
+            # to match serializer behavior, overflowing float32 converted to +/- inf.
+            self.assertEqual(math.copysign(1, x) * math.inf, fixture.roundtrip_float(x))
 
     def test_float64(self) -> None:
         for x in (

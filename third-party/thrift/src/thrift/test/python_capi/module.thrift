@@ -226,3 +226,9 @@ union SomeBinary {
   @cpp.AllowLegacyNonOptionalRef
   3: IOBuf iobufRef;
 }
+
+struct Float32 {
+  1: float scalar;
+  2: list<float> vector;
+  3: list<list<float>> matrix;
+}

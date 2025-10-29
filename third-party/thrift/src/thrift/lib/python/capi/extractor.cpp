@@ -27,17 +27,10 @@ constexpr std::enable_if_t<std::is_integral_v<T>, bool> numericOverflow(V x) {
 
 template <typename T, typename V>
 constexpr std::enable_if_t<std::is_floating_point_v<T>, bool> numericOverflow(
-    V x) {
-  // python 'float' is C `double`, so no chance of overflow
-  if constexpr (std::is_same_v<T, double>) {
-    return false;
-  } else {
-    if (std::isnan(x) || std::isinf(x)) {
-      return false;
-    }
-    return x < -std::numeric_limits<T>::max() ||
-        x > std::numeric_limits<T>::max();
-  }
+    V) {
+  // python 'float' is 64-bit, so no chance of overflow
+  // for 32-bit float, preferred behavior is casting to +/-inf
+  return false;
 }
 
 template <typename R>

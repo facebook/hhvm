@@ -36,6 +36,7 @@ from thrift.test.python_capi.module.thrift_types import (
     ComposeStruct,
     DoubledPair,
     EmptyStruct,
+    Float32,
     ListStruct,
     MapStruct,
     MyDataItem,
@@ -216,6 +217,18 @@ class PythonCapiFixture(unittest.TestCase):
             serial_error=SerializedError(msg="tldr"),
         )
 
+    def float32_overflow(self) -> Float32:
+        overflow = 2**128
+        return Float32(
+            scalar=overflow,
+            vector=[overflow, overflow, overflow],
+            matrix=[
+                [overflow, overflow, overflow],
+                [overflow, overflow, overflow],
+                [overflow, overflow, overflow],
+            ],
+        )
+
 
 class PythonCapiRoundtrip(PythonCapiFixture):
     def test_roundtrip_struct(self) -> None:
@@ -292,6 +305,19 @@ class PythonCapiRoundtrip(PythonCapiFixture):
         ## Failure on creation of thrift-python object (existing behavior)
         with self.assertRaises(OverflowError):
             fixture.roundtrip_PrimitiveStruct(PrimitiveStruct(shorty=2**15))
+
+    def test_roundtrip_float32_overflow(self) -> None:
+        # in the special case of float32 > FLT_MAX, the IEEE 754 standard
+        # states that it becomes +inf (or -inf if negative).
+
+        # serialization already follows this standard, so verify that c-api conversion does as well.
+
+        roundtrip_marshal = fixture.roundtrip_Float32(self.float32_overflow())
+        for proto in [Protocol.BINARY, Protocol.COMPACT, Protocol.JSON]:
+            roundtrip_serialize = deserialize(
+                Float32, serialize(roundtrip_marshal, proto), proto
+            )
+            self.assertEqual(roundtrip_marshal, roundtrip_serialize)
 
     def test_roundtrip_marshal_PrimitiveStruct(self) -> None:
         self.assertEqual(

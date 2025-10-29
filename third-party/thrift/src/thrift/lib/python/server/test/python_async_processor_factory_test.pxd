@@ -24,6 +24,7 @@ from folly.executor cimport cAsyncioExecutor
 from thrift.python.protocol cimport RpcKind
 from thrift.python.server_impl.async_processor cimport AsyncProcessorFactory
 from thrift.python.server_impl.python_async_processor cimport HandlerFunc
+from thrift.python.std_libcpp cimport string_view
 
 ctypedef PyObject* PyObjPtr
 
@@ -42,7 +43,7 @@ cdef extern from "thrift/lib/python/server/PythonAsyncProcessorFactory.h":
     cdef shared_ptr[cPythonAsyncProcessorFactory] \
         cCreatePythonAsyncProcessorFactory "::apache::thrift::python::PythonAsyncProcessorFactory::create"(
             PyObject* server,
-            cmap[string, HandlerFunc] funcs,
+            cmap[string_view, HandlerFunc] funcs,
             cvector[PyObjPtr] lifecycle,
             cAsyncioExecutor* executor,
             string serviceName,

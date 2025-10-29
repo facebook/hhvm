@@ -19,15 +19,17 @@ from libcpp.utility cimport move as cmove
 from libcpp cimport bool as cbool
 from folly.executor cimport get_executor
 from thrift.python.server_impl.python_async_processor cimport makeHandlerFunc
+from thrift.python.std_libcpp cimport bytes_to_string_view
 
-cdef cCreateMethodMetadataResult create(string function_name, RpcKind rpc_kind):
-    cdef cmap[string, HandlerFunc] funcs
+cdef cCreateMethodMetadataResult create(bytes function_name, RpcKind rpc_kind):
+    cdef cmap[string_view, HandlerFunc] funcs
     cdef cvector[PyObjPtr] lifecycle
     cdef object server = None
     cdef string serviceName
+    cdef string_view function_name_view = bytes_to_string_view(function_name)
 
-    funcs[<string>function_name] = makeHandlerFunc(
-        <RpcKind>rpc_kind, <PyObject*>None, serviceName, <string>function_name,
+    funcs[function_name_view] = makeHandlerFunc(
+        rpc_kind, <PyObject*>None, serviceName, function_name_view,
     )
 
     cdef shared_ptr[cPythonAsyncProcessorFactory] obj = cCreatePythonAsyncProcessorFactory(
@@ -44,7 +46,7 @@ cdef class PythonAsyncProcessorFactoryCTest:
     def __cinit__(self, object unit_test):
         self.ut = unit_test
 
-    def test_create_method_metadata(self, string function_name, RpcKind rpc_kind, string expected) -> None:
+    def test_create_method_metadata(self, bytes function_name, RpcKind rpc_kind, string expected) -> None:
         create_method_metadata_result = create(function_name, rpc_kind)
         actual = cAsyncProcessorFactory.describe(create_method_metadata_result)
         self.ut.maxDiff = None

@@ -19,13 +19,14 @@ from libcpp.map cimport map as cmap
 from libcpp.pair cimport pair
 from libcpp.vector cimport vector as cvector
 from folly.iobuf cimport cIOBuf
+from thrift.python.exceptions cimport cException
 from thrift.python.protocol cimport RpcKind
 from thrift.python.types cimport ServiceInterface as cServiceInterface
 from thrift.python.server_impl.async_processor cimport (
     cAsyncProcessorFactory,
     AsyncProcessorFactory,
 )
-from thrift.python.exceptions cimport cException
+from thrift.python.std_libcpp cimport string_view
 from libcpp.memory cimport shared_ptr
 from libcpp cimport bool as cbool
 from folly.executor cimport cAsyncioExecutor
@@ -41,7 +42,12 @@ cdef extern from "thrift/lib/python/server/PythonAsyncProcessor.h" namespace "::
         PyObjPtr funcObject
         string fullName
 
-    HandlerFunc makeHandlerFunc(RpcKind kind, PyObjPtr funcObject, const string& serviceName, const string& functionName)
+    HandlerFunc makeHandlerFunc(
+        RpcKind kind,
+        PyObjPtr funcObject,
+        const string& serviceName,
+        string_view functionName
+    )
 
 cdef extern from "thrift/lib/python/server/PythonAsyncProcessorFactory.h" namespace "::apache::thrift::python":
     cdef cppclass cPythonAsyncProcessorFactory "::apache::thrift::python::PythonAsyncProcessorFactory"(cAsyncProcessorFactory):
@@ -50,7 +56,7 @@ cdef extern from "thrift/lib/python/server/PythonAsyncProcessorFactory.h" namesp
     cdef shared_ptr[cPythonAsyncProcessorFactory] \
         cCreatePythonAsyncProcessorFactory "::apache::thrift::python::PythonAsyncProcessorFactory::create"(
             PyObject* server,
-            cmap[string, HandlerFunc] funcs,
+            cmap[string_view, HandlerFunc] funcs,
             cvector[PyObjPtr] lifecycle,
             cAsyncioExecutor* executor,
             string serviceName,

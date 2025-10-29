@@ -57,6 +57,7 @@ from thrift.py3.stream cimport (
 )
 from thrift.python.types cimport ServiceInterface as cServiceInterface
 from thrift.python.protocol cimport Protocol
+from thrift.python.std_libcpp cimport bytes_to_string_view
 from thrift.python.streaming.py_promise cimport (
     Promise_IOBuf,
     Promise_Optional_IOBuf,
@@ -437,18 +438,20 @@ cdef api unique_ptr[cIOBuf] getSerializedPythonMetadata(object server):
 cdef class PythonAsyncProcessorFactory(AsyncProcessorFactory):
     @staticmethod
     cdef PythonAsyncProcessorFactory create(cServiceInterface server):
-        cdef cmap[string, HandlerFunc] funcs
+        cdef cmap[string_view, HandlerFunc] funcs
         cdef cvector[PyObject*] lifecycle
+        cdef string_view name_view
 
         cdef dict funcMap = server.getFunctionTable()
         cdef list lifecycleFuncs = [server.onStartServing, server.onStopRequested]
 
         for name, (rpc_kind, func) in funcMap.items():
-            funcs[<string>name] = makeHandlerFunc(
+            name_view = bytes_to_string_view(name)
+            funcs[name_view] = makeHandlerFunc(
                 <RpcKind>rpc_kind,
                 <PyObject*>func,
                 <bytes>server.service_name(),
-                <string>name,
+                name_view,
             )
 
         for lifecycle_func in lifecycleFuncs:

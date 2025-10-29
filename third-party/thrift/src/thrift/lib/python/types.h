@@ -18,7 +18,6 @@
 
 #include <Python.h>
 
-#include <limits>
 #include <memory>
 #include <string>
 #include <vector>

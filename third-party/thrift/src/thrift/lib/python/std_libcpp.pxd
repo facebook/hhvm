@@ -15,6 +15,7 @@
 # distutils: language = c++
 
 # stdlib functions that have not been wrapped in the cython distribution
+from cpython.ref cimport PyObject
 from libc.stdint cimport int64_t
 from libcpp cimport bool as cbool
 
@@ -97,3 +98,11 @@ cdef extern from "":
 
 cdef inline str sv_to_str(string_view sv) except +:
     return __Pyx_PyBytes_FromStringAndSize(sv.data(), sv.size()).decode("utf-8")
+
+cdef extern from "thrift/lib/python/std_libcpp.h" namespace "::apache::thrift::python":
+    cdef string_view extractStringViewFromBytes(PyObject*) 
+
+cdef inline string_view bytes_to_string_view(bytes s) except+:
+    return extractStringViewFromBytes(<PyObject*>s)
+
+    

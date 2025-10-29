@@ -61,7 +61,7 @@ HandlerFunc makeHandlerFunc(
     apache::thrift::RpcKind kind,
     PyObject* funcObject,
     const std::string& serviceName,
-    const std::string& functionName) {
+    std::string_view functionName) {
   return HandlerFunc{
       kind,
       funcObject,

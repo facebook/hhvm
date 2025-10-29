@@ -43,9 +43,9 @@ HandlerFunc makeHandlerFunc(
     apache::thrift::RpcKind kind,
     PyObject* funcObject,
     const std::string& serviceName,
-    const std::string& functionName);
+    std::string_view functionName);
 
-using FunctionMapType = std::map<std::string, HandlerFunc>;
+using FunctionMapType = std::map<std::string_view, HandlerFunc>;
 
 class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
                              public apache::thrift::ServerInterface {

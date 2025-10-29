@@ -75,6 +75,9 @@ class PythonAsyncProcessorFactory
   folly::SemiFuture<folly::Unit> callLifecycle(LifecycleFunc);
 
   PyObject* python_server_;
+  // note that the key is std::string_view, which a view into buffer owned by
+  // Python bytes keys of `dict funcMap` owned by cython `cdef class
+  // PythonAsyncProcessorFactory`
   const FunctionMapType functions_;
   const std::vector<PyObject*> lifecycleFuncs_;
   folly::Executor::KeepAlive<> executor;

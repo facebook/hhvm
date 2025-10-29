@@ -86,6 +86,9 @@ install_manifest.txt
 /hphp/hack/test/.mypy_cache
 /hphp/util/generated-hhjs-babel-transform.txt
 
+# Generated core systemlib
+/hphp/runtime/ext/core/ext_core.php
+
 # CPack
 CPackConfig.cmake
 CPackSourceConfig.cmake

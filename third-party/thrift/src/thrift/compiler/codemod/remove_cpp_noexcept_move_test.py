@@ -26,7 +26,7 @@ from xplat.thrift.compiler.codemod.test_utils import read_file, run_binary, writ
 
 
 # TODO(urielrivas): We can use clangr's unit-test formatting in the future.
-class RemoveCppNoexceptMove(unittest.TestCase):
+class RemoveCppNoexceptMoveTest(unittest.TestCase):
     def setUp(self):
         tmp = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, tmp, True)

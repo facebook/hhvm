@@ -26,7 +26,7 @@ from xplat.thrift.compiler.codemod.test_utils import read_file, run_binary, writ
 
 
 # TODO(urielrivas): We can use clangr's unit-test formatting in the future.
-class CppRefToUnstructured(unittest.TestCase):
+class CppRefToUnstructuredTest(unittest.TestCase):
     def setUp(self):
         tmp = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, tmp, True)

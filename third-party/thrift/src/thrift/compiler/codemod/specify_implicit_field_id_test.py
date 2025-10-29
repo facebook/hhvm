@@ -25,7 +25,7 @@ import pkg_resources
 from xplat.thrift.compiler.codemod.test_utils import read_file, run_binary, write_file
 
 
-class HoistAnnotatedTypes(unittest.TestCase):
+class HoistAnnotatedTypesTest(unittest.TestCase):
     def setUp(self):
         tmp = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, tmp, True)

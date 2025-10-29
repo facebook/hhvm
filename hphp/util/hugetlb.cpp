@@ -220,7 +220,7 @@ HugePageInfo read_hugepage_info(size_t pagesize, int node /* = -1 */) {
     assert(strlen("nr_overcommit_hugepages") == 23); // extra \0 byte
     nr_overcommit = readNumFrom(fileName);
 
-    return HugePageInfo{nr_huge, free_huge + nr_overcommit};
+    return HugePageInfo{nr_huge + nr_overcommit, free_huge + nr_overcommit};
   }
   // All nodes
 #ifdef HAVE_NUMA

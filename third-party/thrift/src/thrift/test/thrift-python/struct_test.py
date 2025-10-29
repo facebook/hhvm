@@ -274,6 +274,24 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
             # pyre-ignore[6]: Intentional for test
             TestStructImmutable(unqualified_string=42)
 
+    def test_float32_overflow(self) -> None:
+        float32_overflow = 2.0**128
+        overflow_struct = TestStructAllThriftPrimitiveTypesImmutable(
+            unqualified_float=float32_overflow,
+        )
+        self.assertEqual(overflow_struct.unqualified_float, float32_overflow)
+
+        # BAD: we lose the float32 value on serialization roundtrip. Instead, it becomes `Inf`
+        with self.assertRaises(AssertionError):
+            _thrift_serialization_round_trip(
+                self, immutable_serializer, overflow_struct
+            )
+
+        roundtrip = immutable_serializer.deserialize(
+            overflow_struct.__class__, immutable_serializer.serialize(overflow_struct)
+        )
+        self.assertEqual(roundtrip.unqualified_float, float("inf"))
+
     def test_equality_and_hashability(self) -> None:
         # Equality
         w_new = TestStructImmutable(unqualified_string="hello, world!")
@@ -681,6 +699,31 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         w.fbthrift_reset()
         self.assertIsNone(w.optional_integer)
         self.assertEqual(w.unqualified_integer, 42)
+
+    def test_float32_overflow(self) -> None:
+        float32_overflow = 2.0**128
+        overflow_struct = TestStructAllThriftPrimitiveTypesMutable(
+            unqualified_float=float32_overflow,
+        )
+        self.assertEqual(overflow_struct.unqualified_float, float32_overflow)
+
+        # BAD: we lose the float32 value on serialization roundtrip. Instead, it becomes `Inf`
+        with self.assertRaises(AssertionError):
+            _thrift_serialization_round_trip(self, mutable_serializer, overflow_struct)
+
+        roundtrip = mutable_serializer.deserialize(
+            overflow_struct.__class__, mutable_serializer.serialize(overflow_struct)
+        )
+        self.assertEqual(roundtrip.unqualified_float, float("inf"))
+
+        # mutable thrift-python uses serialization for deepcopy in __call__ operator
+        called = overflow_struct()
+        # BAD: `.unqualified_float` value is inconsistent before vs after call
+        self.assertEqual(called.unqualified_float, float("inf"))
+
+        copied = copy.deepcopy(overflow_struct)
+        # BAD: `.unqualified_float` value changes during deepcopy
+        self.assertEqual(copied.unqualified_float, float("inf"))
 
     def test_equality_and_hashability(self) -> None:
         # Equality

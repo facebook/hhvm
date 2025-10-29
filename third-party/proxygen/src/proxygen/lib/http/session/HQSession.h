@@ -2008,7 +2008,7 @@ class HQSession
       {SettingsId::WT_INITIAL_MAX_DATA, std::numeric_limits<size_t>::max()},
   };
   HTTPSettings ingressSettings_;
-  size_t wtInitialSendWindow_;
+  size_t wtInitialSendWindow_{std::numeric_limits<size_t>::max()};
   // Maximum Stream/Push ID that we are allowed to open, from GOAWAY
   quic::StreamId peerMinUnseenId_{hq::kMaxClientBidiStreamId};
   uint64_t minUnseenIncomingPushId_{0};

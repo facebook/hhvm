@@ -87,13 +87,12 @@ func TestChainInterceptors(t *testing.T) {
 		pfunc types.ProcessorFunction,
 		args types.ReadableStruct,
 	) (types.WritableStruct, error) {
+		ws, ae := pfunc.RunContext(ctx, args)
 		if methodName == "Echo" {
-			ws, ae := pfunc.RunContext(ctx, args)
 			echoResp := ws.(*dummyif.DummyEchoResultDeprecated)
 			echoResp.Success = Pointerize(*echoResp.Success + "-intercepted1")
-			return ws, ae
 		}
-		return pfunc.RunContext(ctx, args)
+		return ws, ae
 	}
 	dummyInterceptor2 := func(
 		ctx context.Context,
@@ -101,13 +100,12 @@ func TestChainInterceptors(t *testing.T) {
 		pfunc types.ProcessorFunction,
 		args types.ReadableStruct,
 	) (types.WritableStruct, error) {
+		ws, ae := pfunc.RunContext(ctx, args)
 		if methodName == "Echo" {
-			ws, ae := pfunc.RunContext(ctx, args)
 			echoResp := ws.(*dummyif.DummyEchoResultDeprecated)
 			echoResp.Success = Pointerize(*echoResp.Success + "-intercepted2")
-			return ws, ae
 		}
-		return pfunc.RunContext(ctx, args)
+		return ws, ae
 	}
 	dummyInterceptor3 := func(
 		ctx context.Context,
@@ -115,13 +113,12 @@ func TestChainInterceptors(t *testing.T) {
 		pfunc types.ProcessorFunction,
 		args types.ReadableStruct,
 	) (types.WritableStruct, error) {
+		ws, ae := pfunc.RunContext(ctx, args)
 		if methodName == "Echo" {
-			ws, ae := pfunc.RunContext(ctx, args)
 			echoResp := ws.(*dummyif.DummyEchoResultDeprecated)
 			echoResp.Success = Pointerize(*echoResp.Success + "-intercepted3")
-			return ws, ae
 		}
-		return pfunc.RunContext(ctx, args)
+		return ws, ae
 	}
 
 	t.Run("three interceptors", func(t *testing.T) {

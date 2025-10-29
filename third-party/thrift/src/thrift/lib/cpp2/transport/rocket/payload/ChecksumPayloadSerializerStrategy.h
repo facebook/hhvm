@@ -272,20 +272,54 @@ class ChecksumPayloadSerializerStrategy final
   FOLLY_ALWAYS_INLINE folly::Try<T> unpackImpl(
       Payload&& payload, DelegateFunc func) {
     if (payload.hasNonemptyMetadata()) {
-      folly::Try<T> t = func(std::move(payload));
-      bool compressed = isDataCompressed(&t.value().metadata);
-      folly::IOBuf& buf = *t->payload.get();
-      if (t.hasException() || compressed) {
-        return t;
-      } else if (validateChecksum(buf, t->metadata.checksum())) {
-        return t;
-      } else {
-        if (FOLLY_LIKELY(t->metadata.checksum().has_value())) {
-          validateInvalidChecksum(t->metadata.checksum().value());
+      // Wrap the entire unpack and validation pipeline in try-catch to prevent
+      // exceptions from escaping into noexcept contexts
+      // (e.g., RocketClientChannel::onResponsePayload).
+      // This catches:
+      // 1. TProtocolException from delegate's unpack() (truncated data)
+      // 2. TApplicationException from validateChecksum() (unsupported
+      // algorithm)
+      // 3. Any other exceptions during deserialization or validation
+      try {
+        folly::Try<T> t = func(std::move(payload));
+        bool compressed = isDataCompressed(&t.value().metadata);
+        folly::IOBuf& buf = *t->payload.get();
+        if (t.hasException() || compressed) {
+          return t;
+        } else if (validateChecksum(buf, t->metadata.checksum())) {
+          return t;
+        } else {
+          if (FOLLY_LIKELY(t->metadata.checksum().has_value())) {
+            validateInvalidChecksum(t->metadata.checksum().value());
+          }
+          return folly::Try<T>(
+              folly::make_exception_wrapper<TApplicationException>(
+                  TApplicationException::CHECKSUM_MISMATCH,
+                  "Checksum mismatch"));
         }
-        return folly::Try<T>(
-            folly::make_exception_wrapper<TApplicationException>(
-                TApplicationException::CHECKSUM_MISMATCH, "Checksum mismatch"));
+      } catch (...) {
+        // Catch and wrap any exceptions to prevent termination in noexcept
+        // contexts
+        auto ex = std::current_exception();
+        try {
+          std::rethrow_exception(ex);
+        } catch (const std::exception& e) {
+          // Log detailed information to help identify the source of malformed
+          // responses
+          XLOG(ERR)
+              << "ChecksumPayloadSerializer: Exception during unpack/validation. "
+              << "Exception type: " << folly::demangle(typeid(e))
+              << ", Message: " << e.what() << ", Payload metadata size: "
+              << (payload.hasNonemptyMetadata() ? payload.metadataSize() : 0)
+              << ", Payload data size: " << payload.dataSize();
+        } catch (...) {
+          XLOG(ERR)
+              << "ChecksumPayloadSerializer: Unknown exception during unpack/validation. "
+              << "Payload metadata size: "
+              << (payload.hasNonemptyMetadata() ? payload.metadataSize() : 0)
+              << ", Payload data size: " << payload.dataSize();
+        }
+        return folly::Try<T>(folly::exception_wrapper(ex));
       }
     } else {
       return func(std::move(payload));

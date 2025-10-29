@@ -15,7 +15,7 @@ omitted, we cannot access the object directly inside the block.
 
 Within the block, there are limits to what we can do with `$f1`. Specifically, we *cannot* assign to it again or make copies of it.  And to
 pass it to a function, we must mark the function's corresponding parameter with the
-[attribute __AcceptDisposable](/docs/hack/attributes/predefined-attributes#__AcceptDisposable).  We can also call methods on the object
+[attribute __AcceptDisposable](/docs/hack/attributes/predefined-attributes#__acceptdisposable).  We can also call methods on the object
 that `$f1` designates.  Consider the following:
 
 ```hack no-extract

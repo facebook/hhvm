@@ -8,7 +8,7 @@ Method Name     | Description
 [`__construct`](/docs/hack/classes/constructors) | A constructor
 [`__dispose`](#method-__dispose) | Performs object-cleanup
 [`__disposeAsync`](#method-__disposeasync) | Performs object-cleanup
-[`__toString`](#method-__tostring) | Returns a string representation of the instance on which it is called
+`__toString` | Returns a string representation of the instance on which it is called
 
 ## Method __construct
 

@@ -4,4 +4,4 @@ The following distributions are only supported for [LTS releases](/docs/hhvm/ins
 
 ### Ubuntu 16.04 Xenial
 
-Follow instructions for installing [LTS releases](/docs/hhvm/installation/linux#obtaining-lts-releases).
+Follow instructions for installing [LTS releases](/docs/hhvm/installation/linux#obtaining-the-latest-stable-version).

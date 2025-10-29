@@ -9,7 +9,7 @@ An *include file* is a file that is suitable for *inclusion* by another file. Th
 the *including file*, while the one being included is the *included file*. A file can be either an including file or
 an included file, both, or neither.
 
-The recommended way to approach this is to [use an autoloader](/docs/hack/getting-started/starting-a-real-project#starting-a-real-project__autoloading) - however, first you need to include
+The recommended way to approach this is to [use an autoloader](/docs/hack/getting-started/starting-a-real-project#autoloading) - however, first you need to include
 the autoloader itself.
 
 The `require_once()` directive is used for this:

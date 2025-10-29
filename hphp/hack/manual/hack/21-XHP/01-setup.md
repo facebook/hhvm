@@ -66,5 +66,5 @@ Make sure to also use the correct version of XHP-Lib based on whether XHP namesp
 ## HHVM Configuration Flags
 These are not enabled by default in any HHVM version, but we recommend enabling them in any new Hack projects:
 
-- `disable_xhp_children_declarations = true` disables the old way of declaring allowed children, which has been deprecated in favor of the `Facebook\XHP\ChildValidation\Validation` trait. See [Children](/docs/hack/xhp/extending#children) for more information.
+- `disable_xhp_children_declarations = true` disables the old way of declaring allowed children, which has been deprecated in favor of the `Facebook\XHP\ChildValidation\Validation` trait. See [Children](/docs/hack/XHP/extending#children) for more information.
 - `check_xhp_attribute = true` enables the typechecker to check that all required attributes are provided. Otherwise, these would only be errors at runtime.

@@ -19,7 +19,7 @@ interface Box {
 
 one can write a function for which Hack statically guarantees the
 returned `Set` is
-[valid](/apis/class/HH.Set/), i.e., it
+[valid](/docs/apis/class/HH.Set/), i.e., it
 only contains integers and/or strings, and not objects of any other type:
 
 ```hack file:box-with-type+ctx.hack

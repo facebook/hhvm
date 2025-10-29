@@ -89,7 +89,7 @@ library function `sprintf`).
 
 If the source value is `null`, the result value is an empty string.
 
-If the source is an object, then if that object's class has a [`__toString` method](/docs/hack/classes/methods-with-predefined-semantics#method-__toString), the
+If the source is an object, then if that object's class has a [`__toString` method](/docs/hack/classes/methods-with-predefined-semantics), the
 result value is the
 string returned by that method; otherwise, the conversion is invalid.
 

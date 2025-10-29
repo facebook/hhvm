@@ -14,7 +14,7 @@ function something_went_wrong(): noreturn {
 
 `noreturn` informs the typesystem that code execution can not continue past a certain line.
 In combination with a conditional, you can refine variables, since the typesystem will take note.
-This is actually how [invariant](/docs/hack/expressions-and-operators/invariant) is [implemented](/apis/function/HH.invariant).
+This is actually how [invariant](/docs/hack/expressions-and-operators/invariant) is [implemented](/docs/apis/function/HH.invariant).
 
 ```hack
 <<__EntryPoint>>

@@ -22,7 +22,7 @@ Operator | Description | Associativity
 `*` `/` `%` | [Multiplication, Division, and Modulo](/docs/hack/expressions-and-operators/arithmetic) | Left
 `.`, `+` `-` (two arguments) | [String concatenation](/docs/hack/expressions-and-operators/string-concatenation) and [Addition / Subtraction](/docs/hack/expressions-and-operators/arithmetic) | Left
 `<<` `>>` | [Bitwise shifting](/docs/hack/expressions-and-operators/bitwise-operators) (left and right) | Left
-`<` `<=` `>` `>=`, `<=>` | [Comparison operators](/docs/hack/expressions-and-operators/comparisons) and [Spaceship operator](/docs/hack/expressions-and-operators/equality#the-spaceship-operator) | None
+`<` `<=` `>` `>=`, `<=>` | [Comparison operators](/docs/hack/expressions-and-operators/comparisons) and [Spaceship operator](/docs/hack/expressions-and-operators/comparisons/#the-spaceship-operator) | None
 `===` `!==` `==` `!=` | [Equality operators](/docs/hack/expressions-and-operators/equality) | None
 `&` | [Bitwise AND](/docs/hack/expressions-and-operators/bitwise-operators) | Left
 `^` | [Bitwise XOR](/docs/hack/expressions-and-operators/bitwise-operators) | Left

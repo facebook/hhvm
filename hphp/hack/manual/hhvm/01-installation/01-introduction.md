@@ -11,7 +11,7 @@ The easiest way to get going with HHVM is to use one of our supported prebuilt p
 
 ### LTS Releases
 
-In addition to the normal stable packages, there are supported [LTS releases](/docs/hhvm/installation/linux#obtaining-lts-releases) for the above distributions; see [the release schedule](/docs/hhvm/installation/release-schedule#Lifecycle) for details.
+In addition to the normal stable packages, there are supported [LTS releases](/docs/hhvm/installation/linux#obtaining-the-latest-stable-version) for the above distributions; see [the release schedule](/docs/hhvm/installation/release-schedule) for details.
 
 ## Compiling HHVM
 

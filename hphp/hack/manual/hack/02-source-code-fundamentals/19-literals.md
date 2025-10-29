@@ -111,7 +111,7 @@ substitution rules](#variable-substitution)*.
 ### Heredoc String Literals
 
 A heredoc string literal is a string literal delimited by `<<< id` and `id`. The literal can contain any source character.
-Certain other (and sometimes non-printable) characters can also be expressed as [escape sequences](#string-literals__double-quoted-string-literals).
+Certain other (and sometimes non-printable) characters can also be expressed as [escape sequences](#double-quoted-string-literals).
 
 For example:
 
@@ -136,7 +136,7 @@ When working with heredoc literals, keep the following rules in mind:
 
 ### Nowdoc String Literals
 
-A nowdoc string literal looks like a [heredoc string literal](#string-literals__heredoc-string-literals) except that in the former the start
+A nowdoc string literal looks like a [heredoc string literal](#heredoc-string-literals) except that in the former the start
 `id` is enclosed in single quotes (`'`).
 
 For example:

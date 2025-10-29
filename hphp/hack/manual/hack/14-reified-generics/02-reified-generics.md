@@ -155,7 +155,7 @@ function foo(): Box<vec<string>> {
 }
 ```
 
-# Limitations
+## Limitations
 
 * No support for subtyping (reified type parameter on classes are invariant, they cannot be co/contra-variant
 
@@ -198,6 +198,6 @@ function foo(): void {
 }
 ```
 
-# Migration Features
+## Migration Features
 
 In order to make migrating to reified generics easier, we have added some [Migration Features](/docs/hack/reified-generics/reified-generics-migration).

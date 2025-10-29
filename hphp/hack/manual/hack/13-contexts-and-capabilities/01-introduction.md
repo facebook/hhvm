@@ -100,6 +100,6 @@ function throws_foo_or_bar_exception(bool $cond)[
 
 The above would indicate that throws_foo_or_bar_exception may throw any of the listed exception classes.
 
-# Implications for Backwards Compatibility
+## Implications for Backwards Compatibility
 
 We may add additional capabilities in the future. As capabilities are specified in terms of what's permitted rather than what is not, the more restrictive your capability annotations are, the more likely it is that future changes will be incompatible with your code. This is especially true for functions that have the empty capability set. This should be considered as a tradeoff against increased confidence in more restricted code.

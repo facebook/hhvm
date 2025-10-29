@@ -14,8 +14,7 @@ const darkCodeTheme = require('prism-react-renderer').themes.vsDark;
   tagline: 'Moving fast with high-performance Hack, a programming language for building reliable websites at epic scale',
   url: 'https://internalfb.com',
   baseUrl: process.env.DOCUSAURUS_BASE_URL || '/',
-  onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
+  onBrokenLinks: 'warn', // TODO: change back to 'throw' ones apis/* (and hsl/*) have been populated
   trailingSlash: true,
   favicon: 'img/favicon.ico',
   organizationName: 'facebook',
@@ -24,7 +23,15 @@ const darkCodeTheme = require('prism-react-renderer').themes.vsDark;
     fbRepoName: 'fbsource',
     ossRepoPath: 'fbcode/hphp/hack/website',
   },
-
+  markdown: {
+   hooks: {
+      onBrokenMarkdownLinks: 'warn',
+      onBrokenMarkdownImages: 'throw',
+    },
+    anchors: {
+      maintainCase: false,
+    },
+  },
   presets: [
     [
       'docusaurus-plugin-internaldocs-fb/docusaurus-preset',
@@ -48,7 +55,6 @@ const darkCodeTheme = require('prism-react-renderer').themes.vsDark;
       }),
     ],
   ],
-
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({

@@ -363,6 +363,17 @@ void HQServer::pauseRead() {
   server_->pauseRead();
 }
 
+void HQServer::setFizzContext(
+    std::shared_ptr<const fizz::server::FizzServerContext> ctx) {
+  server_->setFizzContext(std::move(ctx));
+}
+
+void HQServer::setFizzContext(
+    folly::EventBase* evb,
+    std::shared_ptr<const fizz::server::FizzServerContext> ctx) {
+  server_->setFizzContext(evb, std::move(ctx));
+}
+
 ScopedHQServer::ScopedHQServer(HQServerParams params,
                                const folly::SocketAddress& localAddress,
                                HTTPTransactionHandlerProvider handlerProvider,

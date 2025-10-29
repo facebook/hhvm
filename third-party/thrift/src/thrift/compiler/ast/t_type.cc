@@ -16,10 +16,7 @@
 
 #include <thrift/compiler/ast/t_type.h>
 
-#include <array>
-#include <sstream>
 #include <stdexcept>
-#include <string>
 
 #include <thrift/compiler/ast/t_enum.h>
 #include <thrift/compiler/ast/t_primitive_type.h>
@@ -27,31 +24,6 @@
 #include <thrift/compiler/ast/t_typedef.h>
 
 namespace apache::thrift::compiler {
-
-const std::string& t_type::type_name(type t) {
-  static const auto& kTypeNames =
-      *new std::array<std::string, t_type::kTypeCount>(
-          {{"void",
-            "string",
-            "bool",
-            "byte",
-            "i16",
-            "i32",
-            "i64",
-            "double",
-            "enum",
-            "list",
-            "set",
-            "map",
-            "struct",
-            "service",
-            "program",
-            "float",
-            "", // unused [sink]
-            "", // unused [stream]
-            "binary"}});
-  return kTypeNames.at(static_cast<size_t>(t));
-}
 
 const t_type* t_type::get_true_type() const {
   return t_typedef::find_type_if(

@@ -153,9 +153,6 @@ class t_type : public t_named {
     t_service = 13,
   };
 
-  static constexpr size_t kTypeCount = 19;
-  static const std::string& type_name(type t);
-
   // TODO: Rename function.
   virtual type get_type_value() const = 0;
 

@@ -57,6 +57,9 @@ func GetRequestRpcMetadataHeaders(metadata *rpcmetadata.RequestRpcMetadata) map[
 	if metadata.IsSetClientTimeoutMs() {
 		headersMap["client_timeout"] = fmt.Sprintf("%d", metadata.GetClientTimeoutMs())
 	}
+	if metadata.IsSetServiceTraceMeta() {
+		headersMap["service_trace_meta"] = metadata.GetServiceTraceMeta()
+	}
 	return headersMap
 }
 

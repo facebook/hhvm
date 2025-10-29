@@ -23,6 +23,7 @@ import (
 	"net"
 	"os"
 	"runtime"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -36,11 +37,11 @@ import (
 
 type closeConn struct {
 	net.Conn
-	closed chan struct{}
+	closed atomic.Bool
 }
 
 func (c *closeConn) Close() error {
-	c.closed <- struct{}{}
+	c.closed.Store(true)
 	return c.Conn.Close()
 }
 
@@ -60,7 +61,7 @@ func TestRocketClientClose(t *testing.T) {
 	conn, err := net.Dial(addr.Network(), addr.String())
 	require.NoError(t, err)
 
-	cconn := &closeConn{Conn: conn, closed: make(chan struct{}, 10)}
+	cconn := &closeConn{Conn: conn}
 	channel, err := newRocketClient(cconn, types.ProtocolIDCompact, 0, nil)
 	require.NoError(t, err)
 
@@ -70,11 +71,7 @@ func TestRocketClientClose(t *testing.T) {
 	require.Equal(t, "hello", result)
 
 	go client.Close()
-	select {
-	case <-cconn.closed:
-	case <-time.After(3 * time.Second):
-		panic("connection was not closed")
-	}
+	require.Eventually(t, func() bool { return cconn.closed.Load() }, 3*time.Second, 10*time.Millisecond)
 	cancel()
 	<-errChan
 }

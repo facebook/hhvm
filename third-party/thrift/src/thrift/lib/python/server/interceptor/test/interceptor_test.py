@@ -102,9 +102,27 @@ class TestServer:
 
 
 class BaseInterceptorTestCase(TestCase):
-    server: TestServer = TestServer()
+    server: TestServer | None = None
     client_class: Type[AsyncClient] = AsyncClient
     observer: AbstractServiceInterceptor[object, object] | None = None
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        # Python 3.14+ requires explicit event loop management.
+        # Reuse existing loop if available, otherwise create a new one.
+        try:
+            _ = asyncio.get_running_loop()
+            cls.loop = None
+        except RuntimeError:
+            cls.loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(cls.loop)
+
+        cls.server = TestServer()
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        if cls.loop:
+            cls.loop.close()
 
     def setUp(self) -> None:
         if self.observer is None:
@@ -116,6 +134,7 @@ class BaseInterceptorTestCase(TestCase):
         self.module.add_service_interceptor(
             PyObservableServiceInterceptor(self.observer)
         )
+        self.assertIsNotNone(self.server)
         self.server.server.add_server_module(self.module)
         super().setUp()
 

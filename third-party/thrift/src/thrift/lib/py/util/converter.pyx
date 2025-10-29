@@ -15,12 +15,11 @@
 
 
 from thrift.py3.types cimport Struct as py3_Struct, Union as py3_Union
-from thrift.py3.types import Enum as py3_Enum
 import thrift.py3.reflection as py3_reflection
 cimport thrift.python.types as python_types
 cimport thrift.python.mutable_types as python_mutable_types
 from thrift.Thrift import TType
-from thrift.python.types import Enum
+from thrift.python.types import Enum, BadEnum
 from thrift.util import parse_struct_spec
 
 
@@ -107,6 +106,6 @@ cdef object _to_py_field(object field_type, object type_args, object obj):
             )
             for k, v in obj.items()
         }
-    if isinstance(obj, py3_Enum) or isinstance(obj, Enum):
+    if isinstance(obj, (Enum, BadEnum)):
         return obj.value
     return obj

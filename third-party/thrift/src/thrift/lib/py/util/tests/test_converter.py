@@ -25,6 +25,7 @@ import convertible.types as py3_types
 
 from parameterized import parameterized
 from thrift.python.mutable_types import to_thrift_list, to_thrift_map, to_thrift_set
+from thrift.python.types import BadEnum
 from thrift.util.converter import to_py_struct
 
 
@@ -46,6 +47,14 @@ class Py3ToPyDeprecatedConverterTest(unittest.TestCase):
         self.assertEqual(simple.strToIntMap, {"one": 1, "two": 2})
         self.assertEqual(simple.color, py_deprecated_types.Color.GREEN)
         self.assertEqual(simple.name, "renamed")
+
+    def test_bad_enum(self) -> None:
+        # pyre-ignore[6]: deliberately passing a bad enum value
+        bad_enum = py_deprecated_types.Simple(color=42)
+        bad_enum_py3 = bad_enum._to_py3()
+        self.assertIsInstance(bad_enum_py3.color, BadEnum)
+        roundtrip = bad_enum_py3._to_py_deprecated()
+        self.assertEqual(roundtrip.color, 42)
 
     def test_nested(self) -> None:
         nested = py3_types.Nested(

@@ -187,3 +187,16 @@ func generateSelfSignedCerts() (clientConfig *tls.Config, serverConfig *tls.Conf
 
 	return clientConfig, serverConfig, nil
 }
+
+func getClientTransportOption(serverTransport TransportID) ClientOption {
+	switch serverTransport {
+	case TransportIDHeader:
+		return WithHeader()
+	case TransportIDUpgradeToRocket:
+		return WithUpgradeToRocket()
+	case TransportIDRocket:
+		return WithRocket()
+	default:
+		panic("unsupported transport!")
+	}
+}

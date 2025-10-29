@@ -77,17 +77,7 @@ func TestServerCancellation(t *testing.T) {
 
 func TestBasicServerFunctionalityTCP(t *testing.T) {
 	runBasicServerTestFunc := func(t *testing.T, serverTransport TransportID) {
-		var clientTransportOption ClientOption
-		switch serverTransport {
-		case TransportIDHeader:
-			clientTransportOption = WithHeader()
-		case TransportIDUpgradeToRocket:
-			clientTransportOption = WithUpgradeToRocket()
-		case TransportIDRocket:
-			clientTransportOption = WithRocket()
-		default:
-			panic("unsupported transport!")
-		}
+		clientTransportOption := getClientTransportOption(serverTransport)
 
 		listener, err := net.Listen("tcp", "[::]:0")
 		require.NoError(t, err)
@@ -136,17 +126,7 @@ func TestBasicServerFunctionalityTCP(t *testing.T) {
 
 func TestBasicServerFunctionalityUDX(t *testing.T) {
 	runBasicServerTestFunc := func(t *testing.T, serverTransport TransportID) {
-		var clientTransportOption ClientOption
-		switch serverTransport {
-		case TransportIDHeader:
-			clientTransportOption = WithHeader()
-		case TransportIDUpgradeToRocket:
-			clientTransportOption = WithUpgradeToRocket()
-		case TransportIDRocket:
-			clientTransportOption = WithRocket()
-		default:
-			panic("unsupported transport!")
-		}
+		clientTransportOption := getClientTransportOption(serverTransport)
 
 		path := fmt.Sprintf("/tmp/test%s.sock", rand.Text())
 		defer os.Remove(path)
@@ -202,17 +182,7 @@ func TestBasicServerFunctionalityTLS(t *testing.T) {
 	require.NoError(t, err)
 
 	runBasicServerTestFunc := func(t *testing.T, serverTransport TransportID) {
-		var clientTransportOption ClientOption
-		switch serverTransport {
-		case TransportIDHeader:
-			clientTransportOption = WithHeader()
-		case TransportIDUpgradeToRocket:
-			clientTransportOption = WithUpgradeToRocket()
-		case TransportIDRocket:
-			clientTransportOption = WithRocket()
-		default:
-			panic("unsupported transport!")
-		}
+		clientTransportOption := getClientTransportOption(serverTransport)
 
 		listener, err := tls.Listen("tcp", "[::]:0", serverConfig)
 		require.NoError(t, err)
@@ -324,17 +294,7 @@ func TestALPN(t *testing.T) {
 
 func TestUexHeaderFunctionality(t *testing.T) {
 	runUexTestFunc := func(t *testing.T, serverTransport TransportID) {
-		var clientTransportOption ClientOption
-		switch serverTransport {
-		case TransportIDHeader:
-			clientTransportOption = WithHeader()
-		case TransportIDUpgradeToRocket:
-			clientTransportOption = WithUpgradeToRocket()
-		case TransportIDRocket:
-			clientTransportOption = WithRocket()
-		default:
-			panic("unsupported transport!")
-		}
+		clientTransportOption := getClientTransportOption(serverTransport)
 
 		listener, err := net.Listen("tcp", "[::]:0")
 		require.NoError(t, err)
@@ -392,17 +352,7 @@ func TestUexHeaderFunctionality(t *testing.T) {
 
 func TestPanics(t *testing.T) {
 	runPanicTestFunc := func(t *testing.T, serverTransport TransportID) {
-		var clientTransportOption ClientOption
-		switch serverTransport {
-		case TransportIDHeader:
-			clientTransportOption = WithHeader()
-		case TransportIDUpgradeToRocket:
-			clientTransportOption = WithUpgradeToRocket()
-		case TransportIDRocket:
-			clientTransportOption = WithRocket()
-		default:
-			panic("unsupported transport!")
-		}
+		clientTransportOption := getClientTransportOption(serverTransport)
 
 		listener, err := net.Listen("tcp", "[::]:0")
 		require.NoError(t, err)
@@ -452,17 +402,7 @@ func TestPanics(t *testing.T) {
 
 func TestGoroutinePerRequest(t *testing.T) {
 	runTestFunc := func(t *testing.T, serverTransport TransportID) {
-		var clientTransportOption ClientOption
-		switch serverTransport {
-		case TransportIDHeader:
-			clientTransportOption = WithHeader()
-		case TransportIDUpgradeToRocket:
-			clientTransportOption = WithUpgradeToRocket()
-		case TransportIDRocket:
-			clientTransportOption = WithRocket()
-		default:
-			panic("unsupported transport!")
-		}
+		clientTransportOption := getClientTransportOption(serverTransport)
 
 		listener, err := net.Listen("tcp", "[::]:0")
 		require.NoError(t, err)

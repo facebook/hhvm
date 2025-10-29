@@ -17,7 +17,7 @@
 import typing
 
 from thrift.python.exceptions import Error
-from thrift.python.types import Struct
+from thrift.python.types import Struct, Union
 
 # Base class for mutable structs and mutable unions
 class MutableStructOrUnion:
@@ -41,7 +41,8 @@ class MutableStruct(
         self, *args: typing.Any, **changes: typing.Any
     ) -> MutableStruct: ...
 
-class MutableUnion(MutableStructOrUnion, metaclass=MutableUnionMeta): ...
+class MutableUnion(MutableStructOrUnion, metaclass=MutableUnionMeta):
+    def _to_python(self) -> Union: ...
 
 MutableStructOrError = typing.Union[MutableStruct, MutableGeneratedError]
 

@@ -1328,10 +1328,13 @@ void RocketServerConnection::freeStream(
 
   bufferedFragments_.erase(streamId);
 
-  DCHECK(streams_.find(streamId) != streams_.end());
-  streams_.erase(streamId);
-  if (markRequestComplete) {
-    requestComplete();
+  if (auto it = streams_.find(streamId); it != streams_.end()) {
+    streams_.erase(it);
+
+    // We won't mark request complete if the stream was already erased
+    if (markRequestComplete) {
+      requestComplete();
+    }
   }
 }
 

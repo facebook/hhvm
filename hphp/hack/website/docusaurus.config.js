@@ -212,7 +212,7 @@ const darkCodeTheme = require('prism-react-renderer').themes.vsDark;
       prism: {
         theme: lightCodeTheme,
         darkTheme: darkCodeTheme,
-        additionalLanguages: ['php'],
+        additionalLanguages: ['php', 'bash', 'markdown', 'json', 'sql', 'toml', 'yaml'],
       },
     }),
 });

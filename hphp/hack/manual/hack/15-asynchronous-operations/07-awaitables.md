@@ -1,11 +1,5 @@
 # Awaitables
 
-<!-- ```yamlmeta
-{
-  "namespace": "HH\\Asio"
-}
-``` -->
-
 An *awaitable* is the key construct in `async` code. An awaitable is a first-class object that represents a possibly asynchronous
 operation that may or may not have completed. We `await` the awaitable until the operation has completed.
 

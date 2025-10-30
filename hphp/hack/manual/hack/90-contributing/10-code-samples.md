@@ -1,8 +1,22 @@
 # Code Samples
 
-All code samples are automatically type checked and executed, to ensure they're correct.
+All code samples are automatically type checked and executed, to ensure they are correct.
 
-## Basic Usage
+<FbInfo>
+
+When working in `fbsource`, you can trigger this manually and check the results before submitting a diff (see more details on [the internal wiki](https://www.internalfb.com/wiki/Hack_Developer_Guide/Contributing_to_HHVM_Documentation/)):
+
+```bash
+# Or wherever you have fbsource checked out
+$ cd ~/fbsource/fbcode
+$ buck2 run //hphp/hack/src/hh_manual:hh_manual extract hphp/hack/manual/hack/
+$ buck2 test //hphp/hack/test/typecheck:extracted_from_manual
+$ buck2 test //hphp/hack/test/typecheck:extracted_from_manual_error
+```
+
+</FbInfo>
+
+## Basic usage
 
 Code samples require triple backticks, and a file name.
 
@@ -29,7 +43,7 @@ echo "Hello world!\n";
 ```
 ~~~
 
-## Opting Out
+## Opting out
 
 If you really need to write a code sample that isn't checked or executed, you can omit the file name. The code sample will be included in the docs without any checking.
 
@@ -40,7 +54,16 @@ If you really need to write a code sample that isn't checked or executed, you ca
 ```
 ~~~
 
-## Sharing Code
+To maintain syntax highlighting, you want to retain the language specifier.
+In those cases, you can also opt-out of extraction entirely using the `no-extract` specifier. E.g., the below example will be shown on the website with Hack syntax highlighting, but the type checker will ignore it when the validation job is run.
+
+~~~
+```hack no-extract
+I am in the manual, but not checked.
+```
+~~~
+
+## Sharing code
 
 By default, each extracted example file has its own namespace based on the file name. This allows multiple examples to define the same class or function.
 
@@ -115,7 +138,7 @@ This can also be more convenient because we can rely on the automatic
 boilerplate addition by the build script, instead of manually writing the
 `<<__EntryPoint>>` function header.
 
-## Examples with Hack Errors
+## Examples with Hack errors
 
 Examples that are expected to fail typechecking should use the `.type-errors`
 extension:
@@ -129,7 +152,7 @@ function missing_return_type() {}
 The build script will run the Hack typechecker and include its output in the
 rendered HTML (instead of HHVM runtime output).
 
-## Supporting Files
+## Supporting files
 
 An example code block may specify additional files to be extracted alongside the
 example code using the following format:
@@ -145,7 +168,7 @@ Your lucky number is: %d
 ~~~
 
 Supported extensions are inherited from the
-[HHVM test runner](https://github.com/facebook/hhvm/blob/master/hphp/test/README#file-layout):
+[HHVM test runner](https://github.com/facebook/hhvm/blob/master/hphp/test/README.md#file-layout):
 
 - `.hhconfig` if the example requires specific *typechecker* flags
   (e.g. demonstrating a feature that is not yet enabled by default)
@@ -168,7 +191,7 @@ Supported extensions are inherited from the
   MySQL server running), otherwise print nothing
 
 
-## Testing Changes
+## Testing changes
 
 We have a test suite to ensure consistency across the changes we make to the guides, API references, and examples.
 
@@ -178,7 +201,7 @@ You can run it as follows:
 $ vendor/bin/hacktest tests/
 ```
 
-## Running the Examples
+## Running the examples
 
 Nearly all of the code examples you see in the guides and API documentation are actual Hack or PHP source files that are embedded at site build time into the content itself.
 
@@ -239,7 +262,7 @@ object(HH\Vector)#10 (5) {
 Time non lazy: 0.0096559524536133
 ```
 
-### Using the HHVM Test Runner
+### Using the HHVM test runner
 
 Each example is structured to be run with the [HHVM test runner](https://github.com/facebook/hhvm/blob/master/hphp/test/README). We use the test runner internally to ensure that any changes made to HHVM do not cause a regression. The examples in the documentation here can be used for that purpose as well.
 

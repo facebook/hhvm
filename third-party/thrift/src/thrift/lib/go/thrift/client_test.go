@@ -110,7 +110,7 @@ func TestNewClientConnectionScenarios(t *testing.T) {
 	client, err := NewClient(
 		WithRocket(),
 		WithDialer(func() (net.Conn, error) {
-			return net.Dial(addr.Network(), addr.String())
+			return net.DialTimeout(addr.Network(), addr.String(), 5*time.Second)
 		}),
 	)
 	require.NoError(t, err)
@@ -121,7 +121,7 @@ func TestNewClientConnectionScenarios(t *testing.T) {
 	client, err = NewClient(
 		WithRocket(),
 		WithDialer(func() (net.Conn, error) {
-			return net.Dial("unix", "/tmp/non_existent_garbage_socket_12345")
+			return net.DialTimeout("unix", "/tmp/non_existent_garbage_socket_12345", 5*time.Second)
 		}),
 	)
 	expectedErrMsg := "dial unix /tmp/non_existent_garbage_socket_12345: connect: no such file or directory"
@@ -134,7 +134,7 @@ func TestNewClientConnectionScenarios(t *testing.T) {
 		// Invalid protocol that intentionally breaks client creation
 		WithProtocolID(types.ProtocolID(12345)),
 		WithDialer(func() (net.Conn, error) {
-			return net.Dial(addr.Network(), addr.String())
+			return net.DialTimeout(addr.Network(), addr.String(), 5*time.Second)
 		}),
 	)
 	expectedErrMsg = "unsupported ProtocolID: 12345"
@@ -170,7 +170,7 @@ func TestNewClientCreation(t *testing.T) {
 		channel, err := NewClient(
 			WithRocket(),
 			WithDialer(func() (net.Conn, error) {
-				return net.Dial(addr.Network(), addr.String())
+				return net.DialTimeout(addr.Network(), addr.String(), 5*time.Second)
 			}),
 		)
 		require.NoError(t, err)
@@ -184,7 +184,7 @@ func TestNewClientCreation(t *testing.T) {
 		channel, err := NewClient(
 			WithUpgradeToRocket(),
 			WithDialer(func() (net.Conn, error) {
-				return net.Dial(addr.Network(), addr.String())
+				return net.DialTimeout(addr.Network(), addr.String(), 5*time.Second)
 			}),
 		)
 		require.NoError(t, err)
@@ -197,7 +197,7 @@ func TestNewClientCreation(t *testing.T) {
 		channel, err := NewClient(
 			WithHeader(),
 			WithDialer(func() (net.Conn, error) {
-				return net.Dial(addr.Network(), addr.String())
+				return net.DialTimeout(addr.Network(), addr.String(), 5*time.Second)
 			}),
 		)
 		require.NoError(t, err)

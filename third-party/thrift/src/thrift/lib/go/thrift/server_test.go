@@ -251,7 +251,7 @@ func TestALPN(t *testing.T) {
 		addr.String(), 1*time.Second, clientConfig,
 	)
 	plaintextDialerOption := WithDialer(func() (net.Conn, error) {
-		return net.Dial("tcp", addr.String())
+		return net.DialTimeout("tcp", addr.String(), 5*time.Second)
 	})
 
 	createAlpnClient := func(opts ...ClientOption) (dummyif.DummyClient, error) {

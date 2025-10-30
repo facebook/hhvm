@@ -20,8 +20,6 @@ import (
 	"context"
 	"fmt"
 	"net"
-	"runtime"
-	"sync/atomic"
 )
 
 // Server is a thrift server
@@ -50,21 +48,6 @@ func NewServer(processor Processor, listener net.Listener, transportType Transpo
 	default:
 		panic(fmt.Sprintf("Server does not support: %v", transportType))
 	}
-}
-
-// This counter is what powers client side load balancing.
-// loadFn is a function that reports system load.  It must report the
-// server load as an unsigned integer.  Higher numbers mean the server
-// is more loaded.  Clients choose the servers that report the lowest
-// load.
-// NOTE: if you run multiple servers with different capacities, you
-// should ensure your load numbers are comparable and account for this
-// (i.e. divide by NumCPU)
-// NOTE: loadFn is called on every single response.  it should be fast.
-func loadFn(totalActiveRequests *atomic.Int64) uint {
-	working := totalActiveRequests.Load()
-	denominator := float64(runtime.NumCPU())
-	return uint(1000. * float64(working) / denominator)
 }
 
 var loadSheddingError = NewApplicationException(

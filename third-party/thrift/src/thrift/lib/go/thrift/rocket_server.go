@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"math"
 	"net"
+	"runtime"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -165,6 +166,21 @@ func (s *rocketServer) isOverloaded() bool {
 	return countWithNewRequest > s.maxRequests
 }
 
+// This counter is what powers client side load balancing.
+// loadFn is a function that reports system load.  It must report the
+// server load as an unsigned integer.  Higher numbers mean the server
+// is more loaded.  Clients choose the servers that report the lowest
+// load.
+// NOTE: if you run multiple servers with different capacities, you
+// should ensure your load numbers are comparable and account for this
+// (i.e. divide by NumCPU)
+// NOTE: loadFn is called on every single response.  it should be fast.
+func (s *rocketServer) loadFn() uint {
+	working := s.totalActiveRequestCount.Load()
+	denominator := float64(runtime.NumCPU())
+	return uint(1000. * float64(working) / denominator)
+}
+
 func (s *rocketServer) metadataPush(msg payload.Payload) {
 	// TODO: this clone helps prevent a race-condition where the payload gets
 	// released by the underlying rsocket layer before we are done with it.
@@ -242,7 +258,7 @@ func (s *rocketServer) requestResponse(msg payload.Payload) mono.Mono {
 			return nil, err
 		}
 
-		protocol.setRequestHeader(LoadHeaderKey, fmt.Sprintf("%d", loadFn(&s.totalActiveRequestCount)))
+		protocol.setRequestHeader(LoadHeaderKey, fmt.Sprintf("%d", s.loadFn()))
 
 		responseCompressionAlgo := rocket.CompressionAlgorithmFromCompressionConfig(metadata.GetCompressionConfig())
 		var payload payload.Payload

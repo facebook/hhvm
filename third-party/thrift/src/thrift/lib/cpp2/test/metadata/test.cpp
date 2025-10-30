@@ -32,6 +32,7 @@
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
 namespace {
+using apache::thrift::metadata::findStructuredAnnotationOrThrow;
 using apache::thrift::metadata::ThriftConstStruct;
 using apache::thrift::metadata::ThriftConstValue;
 using apache::thrift::metadata::ThriftConstValuePair;
@@ -165,7 +166,8 @@ TEST_F(ServiceMetadataTest, SimpleStructsTest) {
 
   // structured annotation of the field
   EXPECT_EQ(
-      s1.fields()[3].structured_annotations()->at(0),
+      findStructuredAnnotationOrThrow(
+          *s1.fields()[3].structured_annotations(), "simple_structs_test.Nat"),
       *cons("Abbr_field").cv_struct());
   EXPECT_EQ(s1.fields()[3].structured_annotations()->size(), 1);
 
@@ -173,13 +175,18 @@ TEST_F(ServiceMetadataTest, SimpleStructsTest) {
   auto tf = s1.fields()[3].type()->get_t_typedef();
   EXPECT_EQ(tf.name(), "simple_structs_test.Abbreviations");
   EXPECT_EQ(
-      tf.structured_annotations()->at(0), *cons("Abbr_typedef").cv_struct());
+      findStructuredAnnotationOrThrow(
+          *tf.structured_annotations(), "simple_structs_test.Nat"),
+      *cons("Abbr_typedef").cv_struct());
   EXPECT_EQ(tf.structured_annotations()->size(), 1);
 
   auto s2 = metadata.structs()->at("simple_structs_test.City");
   EXPECT_EQ(*s2.name(), "simple_structs_test.City");
   EXPECT_EQ(s2.structured_annotations()->size(), 1);
-  EXPECT_EQ(s2.structured_annotations()->at(0), *cons("struct").cv_struct());
+  EXPECT_EQ(
+      findStructuredAnnotationOrThrow(
+          *s2.structured_annotations(), "simple_structs_test.Nat"),
+      *cons("struct").cv_struct());
   EXPECT_EQ(*s2.fields()[0].id(), 1);
   EXPECT_EQ(*s2.fields()[0].name(), "name");
   EXPECT_EQ(s2.fields()[0].type()->getType(), ThriftType::Type::t_primitive);
@@ -193,7 +200,10 @@ TEST_F(ServiceMetadataTest, SimpleStructsTest) {
   m.cv_map().ensure().push_back(pair(0, "0"));
   m.cv_map()->push_back(pair(1, "1"));
   cs.fields()->emplace("value", std::move(m));
-  EXPECT_EQ(s2.fields()[0].structured_annotations()->at(0), cs);
+  EXPECT_EQ(
+      findStructuredAnnotationOrThrow(
+          *s2.fields()[0].structured_annotations(), "simple_structs_test.Map"),
+      cs);
 
   EXPECT_EQ(*s2.fields()[1].id(), 2);
   EXPECT_EQ(*s2.fields()[1].name(), "country");
@@ -203,7 +213,8 @@ TEST_F(ServiceMetadataTest, SimpleStructsTest) {
       ThriftPrimitiveType::THRIFT_STRING_TYPE);
   EXPECT_EQ(s2.fields()[1].structured_annotations()->size(), 1);
   EXPECT_EQ(
-      s2.fields()[1].structured_annotations()->at(0),
+      findStructuredAnnotationOrThrow(
+          *s2.fields()[1].structured_annotations(), "simple_structs_test.Nat"),
       *cons("2", cons("1", cons("0"))).cv_struct());
 
   EXPECT_EQ(*s2.fields()[2].id(), 3);
@@ -548,14 +559,20 @@ TEST_F(ServiceMetadataTest, ServiceTest) {
   EXPECT_EQ(*p.name(), "service_test.ParentService");
   EXPECT_TRUE(p.uri()->empty());
   EXPECT_EQ(p.structured_annotations()->size(), 1);
-  EXPECT_EQ(p.structured_annotations()->at(0), *cons("service").cv_struct());
+  EXPECT_EQ(
+      findStructuredAnnotationOrThrow(
+          *p.structured_annotations(), "simple_structs_test.Nat"),
+      *cons("service").cv_struct());
   EXPECT_EQ(p.functions()->size(), 1);
   EXPECT_EQ(apache::thrift::get_pointer(p.parent()), nullptr);
 
   const auto& f = p.functions()[0];
   EXPECT_EQ(*f.name(), "parentFun");
   EXPECT_EQ(f.structured_annotations()->size(), 1);
-  EXPECT_EQ(f.structured_annotations()->at(0), *cons("function").cv_struct());
+  EXPECT_EQ(
+      findStructuredAnnotationOrThrow(
+          *f.structured_annotations(), "simple_structs_test.Nat"),
+      *cons("function").cv_struct());
   EXPECT_EQ(f.return_type()->getType(), ThriftType::Type::t_primitive);
   EXPECT_EQ(
       f.return_type()->get_t_primitive(), ThriftPrimitiveType::THRIFT_I32_TYPE);
@@ -594,7 +611,9 @@ TEST_F(ServiceMetadataTest, ServiceTest) {
       "typedef_test.StringMap");
   EXPECT_EQ(f1.arguments()[0].structured_annotations()->size(), 1);
   EXPECT_EQ(
-      f1.arguments()[0].structured_annotations()->at(0),
+      findStructuredAnnotationOrThrow(
+          *f1.arguments()[0].structured_annotations(),
+          "simple_structs_test.Nat"),
       *cons("argument").cv_struct());
   EXPECT_EQ(*f1.exceptions()[0].id(), 1);
   EXPECT_EQ(*f1.exceptions()[0].name(), "ex");

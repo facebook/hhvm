@@ -42,14 +42,16 @@ TEST(City, structured_metadata) {
       get_struct_metadata<::metadata::test::simple_structs::City>();
 
   const metadata::ThriftConstStruct& struct_annotation =
-      metadata.structured_annotations()->at(0);
+      findStructuredAnnotationOrThrow(
+          *metadata.structured_annotations(), "simple_structs_test.Nat");
   EXPECT_EQ(struct_annotation.type()->name(), "simple_structs_test.Nat");
   const metadata::ThriftConstValue& value =
       struct_annotation.fields()->at("data");
   EXPECT_EQ(value.cv_string(), "struct");
 
   const metadata::ThriftField& field = metadata.fields()->at(0);
-  const auto field_annotation = field.structured_annotations()->at(0);
+  const auto field_annotation = findStructuredAnnotationOrThrow(
+      *field.structured_annotations(), "simple_structs_test.Map");
   EXPECT_EQ(field_annotation.type()->name(), "simple_structs_test.Map");
   auto field_value = field_annotation.fields()->at("value");
   for (auto kv : *field_value.cv_map()) {

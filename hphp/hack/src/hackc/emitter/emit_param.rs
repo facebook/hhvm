@@ -200,19 +200,20 @@ fn from_ast<'a>(
 pub fn emit_param_default_value_setter<'a>(
     emitter: &mut Emitter,
     env: &Env<'a>,
-    pos: &Pos,
     params: &[(Param, Option<(Label, a::Expr)>)],
+    ast_params: &[a::FunParam],
 ) -> Result<(InstrSeq, InstrSeq)> {
     let setters = params
         .iter()
+        .zip(ast_params.into_iter())
         .enumerate()
-        .filter_map(|(i, (_, dv))| {
+        .filter_map(|(i, ((_, dv), ast_param))| {
             // LocalIds for params are numbered from 0.
             dv.as_ref().map(|(lbl, expr)| {
                 let param_local = Local::new(i);
                 let instrs = InstrSeq::gather(vec![
                     emit_expression::emit_expr(emitter, env, expr)?,
-                    emit_pos::emit_pos(pos),
+                    emit_pos::emit_pos(&ast_param.pos),
                     instr::verify_param_type(param_local),
                     instr::set_l(param_local),
                     instr::pop_c(),

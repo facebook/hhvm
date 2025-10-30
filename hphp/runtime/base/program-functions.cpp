@@ -1529,7 +1529,17 @@ std::vector<int> get_executable_lines(const Unit* compiled) {
 
     auto start = func->entry();
     auto pc = start;
-    auto end = pc + func->bclen();
+
+    // Do not include default value initialization in generated lines
+    auto endOff = [&]() {
+      for (auto const& param : func->params()) {
+        if (param.funcletOff != kInvalidOffset) {
+          return param.funcletOff;
+        }
+      }
+      return func->bclen();
+    }();
+    auto end = pc + endOff;
 
     while (pc < end) {
       auto op = peek_op(pc);

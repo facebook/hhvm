@@ -5285,14 +5285,29 @@ void recordCodeCoverage(PC pc) {
   if (!CodeCoverage::isCoverable(peek_op(pc))) return;
 
   auto const func = vmfp()->func();
+
+  auto shouldRecord = [&]() {
+    // If there is any Default value initilizer we don't want to record
+    // if we are running that code
+    for (auto const& param : func->params()) {
+      if (param.funcletOff != kInvalidOffset) {
+        return pcOff() < param.funcletOff;
+      }
+    }
+
+    return true;
+  };
+
   Unit* unit = func->unit();
   assertx(unit != nullptr);
   if (RI().m_coverage.m_should_use_per_file_coverage) {
-    if (unit->isCoverageEnabled()) {
+    if (unit->isCoverageEnabled() && shouldRecord()) {
       unit->recordCoverage(func->getLineNumber(pcOff()));
     }
     return;
   }
+
+  if (!shouldRecord()) return;
 
   int line = func->getLineNumber(pcOff());
   assertx(line != -1);

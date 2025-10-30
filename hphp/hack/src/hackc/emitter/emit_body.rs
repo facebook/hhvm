@@ -214,7 +214,7 @@ fn make_body_instrs<'a>(
     };
 
     let (begin_label, default_value_setters) =
-        emit_param::emit_param_default_value_setter(emitter, env, pos, params)?;
+        emit_param::emit_param_default_value_setter(emitter, env, params, ast_params)?;
 
     let header_content = make_header_content(
         emitter,

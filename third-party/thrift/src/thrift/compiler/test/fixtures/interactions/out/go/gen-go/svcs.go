@@ -250,7 +250,7 @@ func (p *procFuncMyInteractionTruthify) NewReqArgs() thrift.ReadableStruct {
 }
 
 func (p *procFuncMyInteractionTruthify) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
-    return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
+    return nil, errors.New("not supported")
 }
 
 func (p *procFuncMyInteractionTruthify) RunStreamContext(
@@ -512,7 +512,7 @@ func (p *procFuncMyInteractionFastTruthify) NewReqArgs() thrift.ReadableStruct {
 }
 
 func (p *procFuncMyInteractionFastTruthify) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
-    return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
+    return nil, errors.New("not supported")
 }
 
 func (p *procFuncMyInteractionFastTruthify) RunStreamContext(

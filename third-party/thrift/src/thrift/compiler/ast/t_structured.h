@@ -93,10 +93,6 @@ class t_structured : public t_type {
 
   const std::vector<t_field*>& get_members() const { return fields_raw_; }
 
-  const t_field* get_member(std::string_view name) const {
-    return get_field_by_name(name);
-  }
-
  protected:
   std::vector<t_field*> fields_raw_;
 };

@@ -48,12 +48,12 @@ func New{{service:go_name}}Processor(handler {{service:go_name}}) *{{service:go_
     }
     {{#service:functions}}
     {{#function:go_server_supported?}}
-    p.AddToProcessorFunctionMap("{{function:name}}", &{{> svc/proc_func_name}}{handler: handler})
+    p.AddToProcessorFunctionMap("{{> svc/func_rpc_name}}", &{{> svc/proc_func_name}}{handler: handler})
     {{/function:go_server_supported?}}
     {{/service:functions}}
     {{#service:functions}}
     {{#function:go_server_supported?}}
-    p.AddToFunctionServiceMap("{{function:name}}", "{{service:go_name}}")
+    p.AddToFunctionServiceMap("{{> svc/func_rpc_name}}", "{{service:go_name}}")
     {{/function:go_server_supported?}}
     {{/service:functions}}
 

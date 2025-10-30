@@ -1602,84 +1602,6 @@ impl RewriteState {
                     desugar_expr,
                 }
             }
-            // Source: MyDsl`<foo my-attr="stuff">text <foo-child/> </foo>`
-            // Virtualized: <foo my-attr={MyDsl::stringType()}>{MyDsl::stringType()} <foo-child/> </foo>
-            // Desugared:
-            //   $0v->visitXhp(
-            //     new ExprPos(...),
-            //     nameof :foo,
-            //     dict["my-attr" => $0v->visitString(...)],
-            //     vec[
-            //       $0v->visitString(..., "text ")],
-            //       $0v->visitXhp(..., nameof :foo-child, ...),
-            //     ],
-            //   )
-            Xml(xml) => {
-                let (hint, attrs, children) = *xml;
-
-                let mut virtual_attrs = vec![];
-                let mut desugar_attrs = vec![];
-                for attr in attrs {
-                    match attr {
-                        aast::XhpAttribute::XhpSimple(xs) => {
-                            let (attr_name_pos, attr_name) = xs.name.clone();
-                            let dict_key = Expr::new(
-                                (),
-                                attr_name_pos,
-                                Expr_::String(BString::from(attr_name)),
-                            );
-
-                            let rewritten_attr_expr = self.rewrite_expr(xs.expr, visitor_name);
-                            desugar_attrs.push((dict_key, rewritten_attr_expr.desugar_expr));
-                            virtual_attrs.push(aast::XhpAttribute::XhpSimple(aast::XhpSimple {
-                                expr: rewritten_attr_expr.virtual_expr,
-                                ..xs
-                            }))
-                        }
-                        aast::XhpAttribute::XhpSpread(e) => {
-                            self.errors.push((
-                                e.1,
-                                "Expression trees do not support attribute spread syntax.".into(),
-                            ));
-                        }
-                    }
-                }
-
-                let (virtual_children, desugar_children) =
-                    self.rewrite_exprs(children, visitor_name);
-
-                // Construct nameof :foo.
-                let hint_pos = hint.0.clone();
-                let hint_class = Expr_::mk_nameof(ClassId(
-                    (),
-                    hint_pos.clone(),
-                    ClassId_::CIexpr(Expr::new(
-                        (),
-                        hint_pos.clone(),
-                        Expr_::mk_id(ast_defs::Id(hint_pos.clone(), hint.1.clone())),
-                    )),
-                ));
-
-                let virtual_expr = Expr(
-                    (),
-                    pos.clone(),
-                    Expr_::mk_xml(hint, virtual_attrs, virtual_children),
-                );
-                let desugar_expr = v_meth_call(
-                    et::VISIT_XHP,
-                    vec![
-                        pos_expr,
-                        Expr((), pos.clone(), hint_class),
-                        dict_literal(&pos, desugar_attrs),
-                        vec_literal(desugar_children),
-                    ],
-                    &pos,
-                );
-                RewriteResult {
-                    virtual_expr,
-                    desugar_expr,
-                }
-            }
             // Source: MyDsl`ClientMap {...}`
             // Virtualized: ClientMap::__make(...)
             // Desugared: $0v->visitKeyedCollection('ClientMap', ...)
@@ -2038,6 +1960,11 @@ impl RewriteState {
                     pos,
                     "Global constants are not supported in expression trees.".into(),
                 ));
+                unchanged_result
+            }
+            Xml(_) => {
+                self.errors
+                    .push((pos, "xhp is not supported in expression trees.".into()));
                 unchanged_result
             }
             Omitted | Invalid(_) | ClassGet(_) | PrefixedString(_) | Upcast(_)

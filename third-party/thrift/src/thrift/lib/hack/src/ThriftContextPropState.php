@@ -39,8 +39,6 @@ final class ThriftContextPropState {
   private static ?ThriftContextPropState $instance = null;
   private ThriftFrameworkMetadata $storage;
   private dict<int, string> $serializedStorage;
-  public static ?bool $setFBUserIdInPSP = null;
-  public static ?bool $setIGUserIdInPSP = null;
 
   private function __construct()[write_props] {
     $this->storage = ThriftFrameworkMetadata::withDefaultValues();
@@ -511,7 +509,6 @@ final class ThriftContextPropState {
       $baggage->user_ids ?? ContextProp\UserIds::withDefaultValues();
     $baggage->user_ids->fb_user_id = $fb_user_id;
 
-    self::$setFBUserIdInPSP = PSP()->isRunning();
     $this->dirty();
   }
 
@@ -524,7 +521,6 @@ final class ThriftContextPropState {
       $baggage->user_ids ?? ContextProp\UserIds::withDefaultValues();
     $baggage->user_ids->ig_user_id = $ig_user_id;
 
-    self::$setIGUserIdInPSP = PSP()->isRunning();
     $this->dirty();
   }
 

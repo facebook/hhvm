@@ -130,67 +130,24 @@ func (s *rocketServer) acceptor(ctx context.Context, setup payload.SetupPayload,
 		return nil, err
 	}
 	sendingSocket.MetadataPush(serverMetadataPush)
-	socket := newRocketServerSocket(
-		ctx,
-		s.proc,
-		s.log,
-		s.stats,
-		s.pstats,
-		s.observer,
-		s.maxRequests,
-		&s.totalActiveRequestCount,
-	)
 	return rsocket.NewAbstractSocket(
-		rsocket.MetadataPush(socket.metadataPush),
-		rsocket.RequestResponse(socket.requestResponse),
-		rsocket.FireAndForget(socket.fireAndForget),
-		rsocket.RequestStream(socket.requestStream),
+		rsocket.MetadataPush(s.metadataPush),
+		rsocket.RequestResponse(s.requestResponse),
+		rsocket.FireAndForget(s.fireAndForget),
+		rsocket.RequestStream(s.requestStream),
 	), nil
-}
-
-type rocketServerSocket struct {
-	ctx                     context.Context
-	proc                    Processor
-	log                     func(format string, args ...any)
-	stats                   *stats.ServerStats
-	pstats                  map[string]*stats.TimingSeries
-	observer                ServerObserver
-	maxRequests             int64
-	totalActiveRequestCount *atomic.Int64
-}
-
-func newRocketServerSocket(
-	ctx context.Context,
-	proc Processor,
-	log func(format string, args ...any),
-	stats *stats.ServerStats,
-	pstats map[string]*stats.TimingSeries,
-	observer ServerObserver,
-	maxRequests int64,
-	totalActiveRequestCount *atomic.Int64,
-) *rocketServerSocket {
-	return &rocketServerSocket{
-		ctx:                     ctx,
-		proc:                    proc,
-		log:                     log,
-		stats:                   stats,
-		pstats:                  pstats,
-		observer:                observer,
-		maxRequests:             maxRequests,
-		totalActiveRequestCount: totalActiveRequestCount,
-	}
 }
 
 // incrementActiveRequests increments the server-level active request counter and
 // notifies the observer with the current total count across all sockets
-func (s *rocketServerSocket) incrementActiveRequests() {
+func (s *rocketServer) incrementActiveRequests() {
 	current := s.totalActiveRequestCount.Add(1)
 	s.observer.ActiveRequests(int(current))
 }
 
 // decrementActiveRequests decrements the server-level active request counter and
 // notifies the observer with the current total count across all sockets
-func (s *rocketServerSocket) decrementActiveRequests() {
+func (s *rocketServer) decrementActiveRequests() {
 	current := s.totalActiveRequestCount.Add(-1)
 	s.observer.ActiveRequests(int(current))
 }
@@ -199,7 +156,7 @@ func (s *rocketServerSocket) decrementActiveRequests() {
 // Returns true if the server should reject new requests due to high load
 //
 // TODO: align with C++ implementation
-func (s *rocketServerSocket) isOverloaded() bool {
+func (s *rocketServer) isOverloaded() bool {
 	// If maxRequests is 0 (default), overload protection is disabled
 	if s.maxRequests == 0 {
 		return false
@@ -208,7 +165,7 @@ func (s *rocketServerSocket) isOverloaded() bool {
 	return countWithNewRequest > s.maxRequests
 }
 
-func (s *rocketServerSocket) metadataPush(msg payload.Payload) {
+func (s *rocketServer) metadataPush(msg payload.Payload) {
 	// TODO: this clone helps prevent a race-condition where the payload gets
 	// released by the underlying rsocket layer before we are done with it.
 	msg = payload.Clone(msg)
@@ -229,7 +186,7 @@ func (s *rocketServerSocket) metadataPush(msg payload.Payload) {
 	}
 }
 
-func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
+func (s *rocketServer) requestResponse(msg payload.Payload) mono.Mono {
 	// TODO: this clone helps prevent a race-condition where the payload gets
 	// released by the underlying rsocket layer before we are done with it.
 	msg = payload.Clone(msg)
@@ -285,7 +242,7 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 			return nil, err
 		}
 
-		protocol.setRequestHeader(LoadHeaderKey, fmt.Sprintf("%d", loadFn(s.stats, s.totalActiveRequestCount)))
+		protocol.setRequestHeader(LoadHeaderKey, fmt.Sprintf("%d", loadFn(s.stats, &s.totalActiveRequestCount)))
 
 		responseCompressionAlgo := rocket.CompressionAlgorithmFromCompressionConfig(metadata.GetCompressionConfig())
 		var payload payload.Payload
@@ -317,7 +274,7 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 	return mono.FromFunc(workItem)
 }
 
-func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
+func (s *rocketServer) fireAndForget(msg payload.Payload) {
 	// TODO: this clone helps prevent a race-condition where the payload gets
 	// released by the underlying rsocket layer before we are done with it.
 	msg = payload.Clone(msg)
@@ -365,7 +322,7 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 	s.observer.ProcessDelay(processDelay)
 
 	// TODO: support pipelining
-	if _, err := process(s.ctx, s.proc, protocol, s.pstats, s.observer); err != nil {
+	if _, err := process(context.Background(), s.proc, protocol, s.pstats, s.observer); err != nil {
 		// Notify observer that connection was dropped due to unparseable message begin
 		s.observer.ConnDropped()
 		s.log("rocketServer fireAndForget process error: %v", err)
@@ -377,7 +334,7 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 	s.observer.ProcessTime(processTime)
 }
 
-func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
+func (s *rocketServer) requestStream(msg payload.Payload) flux.Flux {
 	// TODO: this clone helps prevent a race-condition where the payload gets
 	// released by the underlying rsocket layer before we are done with it.
 	msg = payload.Clone(msg)

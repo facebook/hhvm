@@ -736,6 +736,10 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
     return interactionCreate_;
   }
 
+  const server::TServerObserver::PreHandlerTimestamps& getTimestamps() const {
+    return timestamps_;
+  }
+
   server::TServerObserver::PreHandlerTimestamps& getTimestamps() {
     return timestamps_;
   }

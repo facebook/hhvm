@@ -138,6 +138,165 @@ func (c *myInteractionClientImpl) Truthify(ctx context.Context) (<-chan bool /* 
 }
 
 
+type MyInteractionProcessor struct {
+    processorFunctionMap map[string]thrift.ProcessorFunction
+    functionServiceMap   map[string]string
+    handler              MyInteraction
+}
+
+func NewMyInteractionProcessor(handler MyInteraction) *MyInteractionProcessor {
+    p := &MyInteractionProcessor{
+        handler:              handler,
+        processorFunctionMap: make(map[string]thrift.ProcessorFunction),
+        functionServiceMap:   make(map[string]string),
+    }
+    p.AddToProcessorFunctionMap("MyInteraction.frobnicate", &procFuncMyInteractionFrobnicate{handler: handler})
+    p.AddToProcessorFunctionMap("MyInteraction.ping", &procFuncMyInteractionPing{handler: handler})
+    p.AddToProcessorFunctionMap("MyInteraction.truthify", &procFuncMyInteractionTruthify{handler: handler})
+    p.AddToFunctionServiceMap("MyInteraction.frobnicate", "MyInteraction")
+    p.AddToFunctionServiceMap("MyInteraction.ping", "MyInteraction")
+    p.AddToFunctionServiceMap("MyInteraction.truthify", "MyInteraction")
+
+    return p
+}
+
+func (p *MyInteractionProcessor) AddToProcessorFunctionMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
+}
+
+func (p *MyInteractionProcessor) AddToFunctionServiceMap(key, service string) {
+    p.functionServiceMap[key] = service
+}
+
+func (p *MyInteractionProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
+    return p.processorFunctionMap[key]
+}
+
+func (p *MyInteractionProcessor) ProcessorFunctionMap() map[string]thrift.ProcessorFunction {
+    return p.processorFunctionMap
+}
+
+func (p *MyInteractionProcessor) FunctionServiceMap() map[string]string {
+    return p.functionServiceMap
+}
+
+func (p *MyInteractionProcessor) PackageName() string {
+    return "module"
+}
+
+func (p *MyInteractionProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
+    return GetThriftMetadataForService("module.MyInteraction")
+}
+
+
+type procFuncMyInteractionFrobnicate struct {
+    handler MyInteraction
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncMyInteractionFrobnicate)(nil)
+
+func (p *procFuncMyInteractionFrobnicate) NewReqArgs() thrift.ReadableStruct {
+    return newReqMyInteractionFrobnicate()
+}
+
+func (p *procFuncMyInteractionFrobnicate) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    result := newRespMyInteractionFrobnicate()
+    retval, err := p.handler.Frobnicate(ctx)
+    if err != nil {
+        switch v := err.(type) {
+        case *CustomException:
+            result.Ex = v
+            return result, nil
+        default:
+            internalErr := fmt.Errorf("Internal error processing Frobnicate: %w", err)
+            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+            return x, internalErr
+        }
+    }
+
+    result.Success = &retval
+    return result, nil
+}
+
+type procFuncMyInteractionPing struct {
+    handler MyInteraction
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncMyInteractionPing)(nil)
+
+func (p *procFuncMyInteractionPing) NewReqArgs() thrift.ReadableStruct {
+    return newReqMyInteractionPing()
+}
+
+func (p *procFuncMyInteractionPing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    err := p.handler.Ping(ctx)
+    if err != nil {
+        internalErr := fmt.Errorf("Internal error processing Ping: %w", err)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        return x, internalErr
+    }
+
+    return nil, nil
+}
+
+type procFuncMyInteractionTruthify struct {
+    handler MyInteraction
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncMyInteractionTruthify)(nil)
+
+func (p *procFuncMyInteractionTruthify) NewReqArgs() thrift.ReadableStruct {
+    return newReqMyInteractionTruthify()
+}
+
+func (p *procFuncMyInteractionTruthify) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
+}
+
+func (p *procFuncMyInteractionTruthify) RunStreamContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onStreamNext func(thrift.WritableStruct),
+    onStreamComplete func(),
+) {
+    firstResponse := newRespMyInteractionTruthify()
+    elemProducerFunc, initialErr := p.handler.Truthify(ctx)
+    if initialErr != nil {
+        internalErr := fmt.Errorf("Internal error processing Truthify: %w", initialErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFirstResponse(x)
+        onStreamComplete()
+        return
+    }
+
+    onFirstResponse(firstResponse)
+
+    fbthriftElemChan := make(chan bool, thrift.DefaultStreamBufferSize)
+    var senderWg sync.WaitGroup
+    senderWg.Add(1)
+    // Sender goroutine (receives elements on the channel and sends them out via onStreamNext)
+    go func() {
+        defer senderWg.Done()
+        for elem := range fbthriftElemChan {
+            streamWrapStruct := newStreamMyInteractionTruthify()
+            streamWrapStruct.Success = &elem
+            onStreamNext(streamWrapStruct)
+        }
+    }()
+
+    streamErr := elemProducerFunc(ctx, fbthriftElemChan)
+    // Stream is complete. Close the channel and wait for the sender goroutine to finish.
+    close(fbthriftElemChan)
+    senderWg.Wait()
+    if streamErr != nil {
+        internalErr := fmt.Errorf("Internal stream handler error Truthify: %w", streamErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onStreamNext(x)
+    }
+    onStreamComplete()
+}
+
 type MyInteractionFast interface {
     Frobnicate(ctx context.Context) (int32, error)
     Ping(ctx context.Context) (error)
@@ -247,6 +406,159 @@ func (c *myInteractionFastClientImpl) Truthify(ctx context.Context) (<-chan bool
 }
 
 
+type MyInteractionFastProcessor struct {
+    processorFunctionMap map[string]thrift.ProcessorFunction
+    functionServiceMap   map[string]string
+    handler              MyInteractionFast
+}
+
+func NewMyInteractionFastProcessor(handler MyInteractionFast) *MyInteractionFastProcessor {
+    p := &MyInteractionFastProcessor{
+        handler:              handler,
+        processorFunctionMap: make(map[string]thrift.ProcessorFunction),
+        functionServiceMap:   make(map[string]string),
+    }
+    p.AddToProcessorFunctionMap("MyInteractionFast.frobnicate", &procFuncMyInteractionFastFrobnicate{handler: handler})
+    p.AddToProcessorFunctionMap("MyInteractionFast.ping", &procFuncMyInteractionFastPing{handler: handler})
+    p.AddToProcessorFunctionMap("MyInteractionFast.truthify", &procFuncMyInteractionFastTruthify{handler: handler})
+    p.AddToFunctionServiceMap("MyInteractionFast.frobnicate", "MyInteractionFast")
+    p.AddToFunctionServiceMap("MyInteractionFast.ping", "MyInteractionFast")
+    p.AddToFunctionServiceMap("MyInteractionFast.truthify", "MyInteractionFast")
+
+    return p
+}
+
+func (p *MyInteractionFastProcessor) AddToProcessorFunctionMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
+}
+
+func (p *MyInteractionFastProcessor) AddToFunctionServiceMap(key, service string) {
+    p.functionServiceMap[key] = service
+}
+
+func (p *MyInteractionFastProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
+    return p.processorFunctionMap[key]
+}
+
+func (p *MyInteractionFastProcessor) ProcessorFunctionMap() map[string]thrift.ProcessorFunction {
+    return p.processorFunctionMap
+}
+
+func (p *MyInteractionFastProcessor) FunctionServiceMap() map[string]string {
+    return p.functionServiceMap
+}
+
+func (p *MyInteractionFastProcessor) PackageName() string {
+    return "module"
+}
+
+func (p *MyInteractionFastProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
+    return GetThriftMetadataForService("module.MyInteractionFast")
+}
+
+
+type procFuncMyInteractionFastFrobnicate struct {
+    handler MyInteractionFast
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncMyInteractionFastFrobnicate)(nil)
+
+func (p *procFuncMyInteractionFastFrobnicate) NewReqArgs() thrift.ReadableStruct {
+    return newReqMyInteractionFastFrobnicate()
+}
+
+func (p *procFuncMyInteractionFastFrobnicate) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    result := newRespMyInteractionFastFrobnicate()
+    retval, err := p.handler.Frobnicate(ctx)
+    if err != nil {
+        internalErr := fmt.Errorf("Internal error processing Frobnicate: %w", err)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        return x, internalErr
+    }
+
+    result.Success = &retval
+    return result, nil
+}
+
+type procFuncMyInteractionFastPing struct {
+    handler MyInteractionFast
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncMyInteractionFastPing)(nil)
+
+func (p *procFuncMyInteractionFastPing) NewReqArgs() thrift.ReadableStruct {
+    return newReqMyInteractionFastPing()
+}
+
+func (p *procFuncMyInteractionFastPing) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    err := p.handler.Ping(ctx)
+    if err != nil {
+        internalErr := fmt.Errorf("Internal error processing Ping: %w", err)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        return x, internalErr
+    }
+
+    return nil, nil
+}
+
+type procFuncMyInteractionFastTruthify struct {
+    handler MyInteractionFast
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncMyInteractionFastTruthify)(nil)
+
+func (p *procFuncMyInteractionFastTruthify) NewReqArgs() thrift.ReadableStruct {
+    return newReqMyInteractionFastTruthify()
+}
+
+func (p *procFuncMyInteractionFastTruthify) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    return nil, thrift.NewApplicationException(thrift.INTERNAL_ERROR, "not supported")
+}
+
+func (p *procFuncMyInteractionFastTruthify) RunStreamContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onStreamNext func(thrift.WritableStruct),
+    onStreamComplete func(),
+) {
+    firstResponse := newRespMyInteractionFastTruthify()
+    elemProducerFunc, initialErr := p.handler.Truthify(ctx)
+    if initialErr != nil {
+        internalErr := fmt.Errorf("Internal error processing Truthify: %w", initialErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFirstResponse(x)
+        onStreamComplete()
+        return
+    }
+
+    onFirstResponse(firstResponse)
+
+    fbthriftElemChan := make(chan bool, thrift.DefaultStreamBufferSize)
+    var senderWg sync.WaitGroup
+    senderWg.Add(1)
+    // Sender goroutine (receives elements on the channel and sends them out via onStreamNext)
+    go func() {
+        defer senderWg.Done()
+        for elem := range fbthriftElemChan {
+            streamWrapStruct := newStreamMyInteractionFastTruthify()
+            streamWrapStruct.Success = &elem
+            onStreamNext(streamWrapStruct)
+        }
+    }()
+
+    streamErr := elemProducerFunc(ctx, fbthriftElemChan)
+    // Stream is complete. Close the channel and wait for the sender goroutine to finish.
+    close(fbthriftElemChan)
+    senderWg.Wait()
+    if streamErr != nil {
+        internalErr := fmt.Errorf("Internal stream handler error Truthify: %w", streamErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onStreamNext(x)
+    }
+    onStreamComplete()
+}
+
 type SerialInteraction interface {
     Frobnicate(ctx context.Context) (error)
 }
@@ -292,6 +604,75 @@ func (c *serialInteractionClientImpl) Frobnicate(ctx context.Context) (error) {
 }
 
 
+type SerialInteractionProcessor struct {
+    processorFunctionMap map[string]thrift.ProcessorFunction
+    functionServiceMap   map[string]string
+    handler              SerialInteraction
+}
+
+func NewSerialInteractionProcessor(handler SerialInteraction) *SerialInteractionProcessor {
+    p := &SerialInteractionProcessor{
+        handler:              handler,
+        processorFunctionMap: make(map[string]thrift.ProcessorFunction),
+        functionServiceMap:   make(map[string]string),
+    }
+    p.AddToProcessorFunctionMap("SerialInteraction.frobnicate", &procFuncSerialInteractionFrobnicate{handler: handler})
+    p.AddToFunctionServiceMap("SerialInteraction.frobnicate", "SerialInteraction")
+
+    return p
+}
+
+func (p *SerialInteractionProcessor) AddToProcessorFunctionMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
+}
+
+func (p *SerialInteractionProcessor) AddToFunctionServiceMap(key, service string) {
+    p.functionServiceMap[key] = service
+}
+
+func (p *SerialInteractionProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
+    return p.processorFunctionMap[key]
+}
+
+func (p *SerialInteractionProcessor) ProcessorFunctionMap() map[string]thrift.ProcessorFunction {
+    return p.processorFunctionMap
+}
+
+func (p *SerialInteractionProcessor) FunctionServiceMap() map[string]string {
+    return p.functionServiceMap
+}
+
+func (p *SerialInteractionProcessor) PackageName() string {
+    return "module"
+}
+
+func (p *SerialInteractionProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
+    return GetThriftMetadataForService("module.SerialInteraction")
+}
+
+
+type procFuncSerialInteractionFrobnicate struct {
+    handler SerialInteraction
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncSerialInteractionFrobnicate)(nil)
+
+func (p *procFuncSerialInteractionFrobnicate) NewReqArgs() thrift.ReadableStruct {
+    return newReqSerialInteractionFrobnicate()
+}
+
+func (p *procFuncSerialInteractionFrobnicate) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    result := newRespSerialInteractionFrobnicate()
+    err := p.handler.Frobnicate(ctx)
+    if err != nil {
+        internalErr := fmt.Errorf("Internal error processing Frobnicate: %w", err)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        return x, internalErr
+    }
+
+    return result, nil
+}
+
 type BoxedInteraction interface {
     GetABox(ctx context.Context) (*ShouldBeBoxed, error)
 }
@@ -336,6 +717,76 @@ func (c *boxedInteractionClientImpl) GetABox(ctx context.Context) (*ShouldBeBoxe
     return fbthriftResp.GetSuccess(), nil
 }
 
+
+type BoxedInteractionProcessor struct {
+    processorFunctionMap map[string]thrift.ProcessorFunction
+    functionServiceMap   map[string]string
+    handler              BoxedInteraction
+}
+
+func NewBoxedInteractionProcessor(handler BoxedInteraction) *BoxedInteractionProcessor {
+    p := &BoxedInteractionProcessor{
+        handler:              handler,
+        processorFunctionMap: make(map[string]thrift.ProcessorFunction),
+        functionServiceMap:   make(map[string]string),
+    }
+    p.AddToProcessorFunctionMap("BoxedInteraction.getABox", &procFuncBoxedInteractionGetABox{handler: handler})
+    p.AddToFunctionServiceMap("BoxedInteraction.getABox", "BoxedInteraction")
+
+    return p
+}
+
+func (p *BoxedInteractionProcessor) AddToProcessorFunctionMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
+}
+
+func (p *BoxedInteractionProcessor) AddToFunctionServiceMap(key, service string) {
+    p.functionServiceMap[key] = service
+}
+
+func (p *BoxedInteractionProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
+    return p.processorFunctionMap[key]
+}
+
+func (p *BoxedInteractionProcessor) ProcessorFunctionMap() map[string]thrift.ProcessorFunction {
+    return p.processorFunctionMap
+}
+
+func (p *BoxedInteractionProcessor) FunctionServiceMap() map[string]string {
+    return p.functionServiceMap
+}
+
+func (p *BoxedInteractionProcessor) PackageName() string {
+    return "module"
+}
+
+func (p *BoxedInteractionProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
+    return GetThriftMetadataForService("module.BoxedInteraction")
+}
+
+
+type procFuncBoxedInteractionGetABox struct {
+    handler BoxedInteraction
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncBoxedInteractionGetABox)(nil)
+
+func (p *procFuncBoxedInteractionGetABox) NewReqArgs() thrift.ReadableStruct {
+    return newReqBoxedInteractionGetABox()
+}
+
+func (p *procFuncBoxedInteractionGetABox) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    result := newRespBoxedInteractionGetABox()
+    retval, err := p.handler.GetABox(ctx)
+    if err != nil {
+        internalErr := fmt.Errorf("Internal error processing GetABox: %w", err)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        return x, internalErr
+    }
+
+    result.Success = retval
+    return result, nil
+}
 
 
 type MyService interface {

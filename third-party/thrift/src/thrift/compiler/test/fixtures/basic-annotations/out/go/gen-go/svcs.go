@@ -72,6 +72,75 @@ func (c *badInteractionClientImpl) Foo(ctx context.Context) (error) {
 }
 
 
+type BadInteractionProcessor struct {
+    processorFunctionMap map[string]thrift.ProcessorFunction
+    functionServiceMap   map[string]string
+    handler              BadInteraction
+}
+
+func NewBadInteractionProcessor(handler BadInteraction) *BadInteractionProcessor {
+    p := &BadInteractionProcessor{
+        handler:              handler,
+        processorFunctionMap: make(map[string]thrift.ProcessorFunction),
+        functionServiceMap:   make(map[string]string),
+    }
+    p.AddToProcessorFunctionMap("BadInteraction.foo", &procFuncBadInteractionFoo{handler: handler})
+    p.AddToFunctionServiceMap("BadInteraction.foo", "BadInteraction")
+
+    return p
+}
+
+func (p *BadInteractionProcessor) AddToProcessorFunctionMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
+}
+
+func (p *BadInteractionProcessor) AddToFunctionServiceMap(key, service string) {
+    p.functionServiceMap[key] = service
+}
+
+func (p *BadInteractionProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
+    return p.processorFunctionMap[key]
+}
+
+func (p *BadInteractionProcessor) ProcessorFunctionMap() map[string]thrift.ProcessorFunction {
+    return p.processorFunctionMap
+}
+
+func (p *BadInteractionProcessor) FunctionServiceMap() map[string]string {
+    return p.functionServiceMap
+}
+
+func (p *BadInteractionProcessor) PackageName() string {
+    return "module"
+}
+
+func (p *BadInteractionProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
+    return GetThriftMetadataForService("module.BadInteraction")
+}
+
+
+type procFuncBadInteractionFoo struct {
+    handler BadInteraction
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncBadInteractionFoo)(nil)
+
+func (p *procFuncBadInteractionFoo) NewReqArgs() thrift.ReadableStruct {
+    return newReqBadInteractionFoo()
+}
+
+func (p *procFuncBadInteractionFoo) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    result := newRespBadInteractionFoo()
+    err := p.handler.Foo(ctx)
+    if err != nil {
+        internalErr := fmt.Errorf("Internal error processing Foo: %w", err)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        return x, internalErr
+    }
+
+    return result, nil
+}
+
 
 type MyService interface {
     Ping(ctx context.Context) (error)

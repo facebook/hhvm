@@ -223,12 +223,10 @@ void validateServiceName(
 template <class AsyncClientT>
 std::unique_ptr<AsyncClientT> ScopedServerInterfaceThread::newStickyClient(
     folly::Executor* callbackExecutor,
-    ScopedServerInterfaceThread::MakeChannelFunc makeChannel) const {
-  return std::make_unique<AsyncClientT>(newChannel(
-      callbackExecutor,
-      std::move(makeChannel),
-      1,
-      protocol::T_BINARY_PROTOCOL));
+    ScopedServerInterfaceThread::MakeChannelFunc makeChannel,
+    protocol::PROTOCOL_TYPES prot) const {
+  return std::make_unique<AsyncClientT>(
+      newChannel(callbackExecutor, std::move(makeChannel), 1, prot));
 }
 
 template <class AsyncClientT>

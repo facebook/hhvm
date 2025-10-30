@@ -242,7 +242,7 @@ func (s *rocketServer) requestResponse(msg payload.Payload) mono.Mono {
 			return nil, err
 		}
 
-		protocol.setRequestHeader(LoadHeaderKey, fmt.Sprintf("%d", loadFn(s.stats, &s.totalActiveRequestCount)))
+		protocol.setRequestHeader(LoadHeaderKey, fmt.Sprintf("%d", loadFn(&s.totalActiveRequestCount)))
 
 		responseCompressionAlgo := rocket.CompressionAlgorithmFromCompressionConfig(metadata.GetCompressionConfig())
 		var payload payload.Payload

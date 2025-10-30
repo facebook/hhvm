@@ -22,8 +22,6 @@ import (
 	"net"
 	"runtime"
 	"sync/atomic"
-
-	thriftstats "github.com/facebook/fbthrift/thrift/lib/go/thrift/stats"
 )
 
 // Server is a thrift server
@@ -63,14 +61,8 @@ func NewServer(processor Processor, listener net.Listener, transportType Transpo
 // should ensure your load numbers are comparable and account for this
 // (i.e. divide by NumCPU)
 // NOTE: loadFn is called on every single response.  it should be fast.
-func loadFn(stats *thriftstats.ServerStats, totalActiveRequests *atomic.Int64) uint {
-	var working int64
-	if totalActiveRequests != nil {
-		working = totalActiveRequests.Load()
-	} else {
-		// TODO: remove this once header server is gone
-		working = stats.WorkingCount.Get()
-	}
+func loadFn(totalActiveRequests *atomic.Int64) uint {
+	working := totalActiveRequests.Load()
 	denominator := float64(runtime.NumCPU())
 	return uint(1000. * float64(working) / denominator)
 }

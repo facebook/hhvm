@@ -221,7 +221,13 @@ ParseFactsResult extract_facts(
     throwErrno("Failed to extract facts: Could not get FileStreamWrapper.");
   }
   const auto f = w->open(StrNR(filename), "r", 0, nullptr);
-  if (!f) throwErrno("Failed to extract facts: Could not read source code.");
+  if (!f) { 
+    throwErrno(
+      folly::sformat(
+        "Failed to extract facts: Could not read source code for %s", 
+        filename
+      ).c_str());
+  }
   auto const str = f->read();
   auto const source_text = str.get()->slice();
   auto actual_sha1 = string_sha1(source_text);

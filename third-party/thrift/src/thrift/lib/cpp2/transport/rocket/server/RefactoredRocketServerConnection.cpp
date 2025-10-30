@@ -54,7 +54,6 @@
 #include <thrift/lib/cpp2/transport/rocket/server/detail/OutgoingFrameHandler.h>
 
 THRIFT_FLAG_DECLARE_bool(enable_rocket_connection_observers);
-THRIFT_FLAG_DECLARE_bool(enable_stream_graceful_shutdown);
 THRIFT_FLAG_DECLARE_bool(thrift_enable_stream_counters);
 THRIFT_FLAG_DEFINE_bool(rocket_use_outgoing_frame_handler, true);
 
@@ -374,14 +373,12 @@ void RefactoredRocketServerConnection::closeIfNeeded() {
     folly::variant_match(
         callback,
         [&](const std::unique_ptr<RocketStreamClientCallback>& callback) {
-          if (THRIFT_FLAG(enable_stream_graceful_shutdown)) {
-            sendErrorAfterDrain(
-                callback->streamId(),
-                RocketException(
-                    ErrorCode::CANCELED,
-                    getPayloadSerializer()->packCompact(
-                        getStreamConnectionClosingError())));
-          }
+          sendErrorAfterDrain(
+              callback->streamId(),
+              RocketException(
+                  ErrorCode::CANCELED,
+                  getPayloadSerializer()->packCompact(
+                      getStreamConnectionClosingError())));
           callback->onStreamCancel();
         },
         [](const std::unique_ptr<RocketSinkClientCallback>& callback) {

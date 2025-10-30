@@ -53,7 +53,6 @@
 #include <thrift/lib/cpp2/transport/rocket/server/RocketStreamClientCallback.h>
 
 THRIFT_FLAG_DEFINE_bool(enable_rocket_connection_observers, false);
-THRIFT_FLAG_DEFINE_bool(enable_stream_graceful_shutdown, true);
 THRIFT_FLAG_DEFINE_bool(thrift_enable_stream_counters, true);
 
 namespace apache::thrift::rocket {
@@ -389,14 +388,12 @@ void RocketServerConnection::closeIfNeeded() {
     folly::variant_match(
         callback,
         [&](const std::unique_ptr<RocketStreamClientCallback>& callback) {
-          if (THRIFT_FLAG(enable_stream_graceful_shutdown)) {
-            sendErrorAfterDrain(
-                callback->streamId(),
-                RocketException(
-                    ErrorCode::CANCELED,
-                    getPayloadSerializer()->packCompact(
-                        getStreamConnectionClosingError())));
-          }
+          sendErrorAfterDrain(
+              callback->streamId(),
+              RocketException(
+                  ErrorCode::CANCELED,
+                  getPayloadSerializer()->packCompact(
+                      getStreamConnectionClosingError())));
           callback->onStreamCancel();
         },
         [](const std::unique_ptr<RocketSinkClientCallback>& callback) {

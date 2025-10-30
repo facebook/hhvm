@@ -242,9 +242,6 @@ func (s *rocketServer) requestResponse(msg payload.Payload) mono.Mono {
 		s.incrementActiveRequests()
 		defer s.decrementActiveRequests()
 
-		s.stats.WorkingCount.Incr()
-		defer s.stats.WorkingCount.Decr()
-
 		// Track process delay from request received to processing start
 		processStartTime := time.Now()
 		processDelay := processStartTime.Sub(requestReceivedTime)

@@ -28,18 +28,12 @@ type ServerStats struct {
 
 	// counters
 	PanicCount *TimingSeries // event where clients thrift handler panic'd
-
-	// Instantaneous counts of current number of requests being worked on
-	WorkingCount *AtomicCounter
 }
 
 // NewServerStats creates a new ServerStats object.
 func NewServerStats(cfg *TimingConfig, statsPeriod time.Duration) *ServerStats {
 	return &ServerStats{
 		statsPeriod: statsPeriod,
-
-		// instantaneous counters
-		WorkingCount: &AtomicCounter{Counter: 0},
 
 		// events/duration stats
 		PanicCount: NewTimingSeries(cfg),
@@ -49,9 +43,6 @@ func NewServerStats(cfg *TimingConfig, statsPeriod time.Duration) *ServerStats {
 // GetInts returns a map of server stats, ready for export.
 func (stats *ServerStats) GetInts() map[string]int64 {
 	ints := map[string]int64{}
-
-	// instantaneous workers
-	ints["running_workers"] = stats.WorkingCount.Get()
 
 	// server event counters
 	periodStr := fmt.Sprintf("%d", stats.statsPeriod/time.Second)

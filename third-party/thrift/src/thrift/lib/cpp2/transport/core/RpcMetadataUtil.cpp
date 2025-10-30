@@ -137,6 +137,13 @@ RequestRpcMetadata makeRequestRpcMetadata(
     writeHeaders.erase(secLoadIt);
   }
 
+  auto stopperMetricIt =
+      writeHeaders.find(transport::THeader::QUERY_STOPPER_METRIC);
+  if (stopperMetricIt != writeHeaders.end()) {
+    metadata.stopperMetric() = std::move(stopperMetricIt->second);
+    writeHeaders.erase(stopperMetricIt);
+  }
+
   if (!writeHeaders.empty()) {
     metadata.otherMetadata() = std::move(writeHeaders);
   }
@@ -209,6 +216,13 @@ void fillTHeaderFromResponseRpcMetadata(
         folly::to<std::string>(*load));
   }
 
+  if (auto stopperMetric = responseMetadata.stopperMetric()) {
+    header.setStopperMetricValue(*stopperMetric);
+    header.setReadHeader(
+        transport::THeader::QUERY_STOPPER_METRIC,
+        folly::to<std::string>(*stopperMetric));
+  }
+
   if (auto crc32c = responseMetadata.crc32c()) {
     header.setCrc32c(*crc32c);
   }
@@ -261,6 +275,15 @@ void fillResponseRpcMetadataFromTHeader(
     if (secLoadIt != otherMetadata.end()) {
       responseMetadata.secondaryLoad() = folly::to<int64_t>(secLoadIt->second);
       otherMetadata.erase(secLoadIt);
+    }
+  }
+  {
+    auto stopperMetricIt =
+        otherMetadata.find(transport::THeader::QUERY_STOPPER_METRIC);
+    if (stopperMetricIt != otherMetadata.end()) {
+      responseMetadata.stopperMetric() =
+          folly::to<int64_t>(stopperMetricIt->second);
+      otherMetadata.erase(stopperMetricIt);
     }
   }
   if (auto crc32c = header.getCrc32c()) {

@@ -318,6 +318,8 @@ struct RequestRpcMetadata {
   27: optional string secondaryLoadMetric;
   // Quota report config
   28: optional QuotaReportConfig quotaReportConfig;
+  // FB303 metric name to allow SR to restrict convergence
+  29: optional string stopperMetric;
 }
 
 struct ErrorClassification {
@@ -418,6 +420,8 @@ struct ResponseRpcMetadata {
   // Load returned by server in response to fb303 metric from
   // request header 'secondary_load'
   15: optional i64 secondaryLoad;
+  // stopper Metric value returned by server in response
+  16: optional i64 stopperMetric;
 }
 
 enum ResponseRpcErrorCategory {

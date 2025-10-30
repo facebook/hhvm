@@ -462,6 +462,36 @@ void doLoadHeaderTest(bool isRocket) {
     }
   };
 
+  auto checkStopperMetricHeader =
+      [](const auto& header, folly::Optional<std::string> stopperMetric) {
+        auto& headers = header.getHeaders();
+        auto metricVal = [&]() -> folly::Optional<int64_t> {
+          auto value = header.getStopperMetricValue();
+          if (value) {
+            return value;
+          }
+          if (auto* loadPtr =
+                  folly::get_ptr(headers, THeader::QUERY_STOPPER_METRIC)) {
+            return folly::to<int64_t>(*loadPtr);
+          }
+          return {};
+        }();
+        ASSERT_EQ(stopperMetric.hasValue(), metricVal.has_value());
+
+        if (!stopperMetric) {
+          return;
+        }
+
+        folly::StringPiece metricSp(*stopperMetric);
+        if (metricSp.removePrefix("custom_stopper_metric_")) {
+          EXPECT_EQ(metricSp, std::to_string(*metricVal));
+        } else if (metricSp.empty()) {
+          EXPECT_EQ(kEmptyMetricLoad, *metricVal);
+        } else {
+          FAIL() << "Unexpected stopper metric";
+        }
+      };
+
   class BlockInterface : public apache::thrift::ServiceHandler<TestService> {
    public:
     folly::Optional<folly::Baton<>> block;
@@ -477,7 +507,8 @@ void doLoadHeaderTest(bool isRocket) {
       std::make_shared<BlockInterface>(), "::1", 0, [&nCalls](auto& server) {
         server.setGetLoad([](const std::string& metric) {
           folly::StringPiece metricPiece(metric);
-          if (metricPiece.removePrefix("custom_load_metric_")) {
+          if (metricPiece.removePrefix("custom_load_metric_") ||
+              metricPiece.removePrefix("custom_stopper_metric_")) {
             return folly::to<int32_t>(metricPiece.toString());
           } else if (metricPiece.empty()) {
             return kEmptyMetricLoad;
@@ -501,31 +532,38 @@ void doLoadHeaderTest(bool isRocket) {
     auto [_, header] = client->header_semifuture_voidResponse(options).get();
     checkLoadHeader(*header, folly::none);
     checkLoadHeader(*header, folly::none, true /*isSecondaryLoad*/);
+    checkStopperMetricHeader(*header, folly::none);
   }
 
   {
-    // Empty load and secondary load header
+    // Empty load, secondary load and stopper metric header
     RpcOptions options;
     const std::string kEmptyLoadMetric;
+    const std::string kEmptyStopperMetric;
     options.setWriteHeader(THeader::QUERY_LOAD_HEADER, kEmptyLoadMetric);
     options.setWriteHeader(
         THeader::QUERY_SECONDARY_LOAD_HEADER, kEmptyLoadMetric);
+    options.setWriteHeader(THeader::QUERY_STOPPER_METRIC, kEmptyStopperMetric);
     auto [_, header] = client->header_semifuture_voidResponse(options).get();
     checkLoadHeader(*header, kEmptyLoadMetric);
     checkLoadHeader(*header, kEmptyLoadMetric, true /*isSecondaryLoad*/);
+    checkStopperMetricHeader(*header, kEmptyStopperMetric);
   }
 
   {
-    // Custom load and secondary load header
+    // Custom load, secondary load and stopper metric header
     RpcOptions options;
     const std::string kLoadMetric{"custom_load_metric_789"};
     const std::string kSecondaryLoadMetric{"custom_load_metric_99"};
+    const std::string kStopperMetric{"custom_stopper_metric_11"};
     options.setWriteHeader(THeader::QUERY_LOAD_HEADER, kLoadMetric);
     options.setWriteHeader(
         THeader::QUERY_SECONDARY_LOAD_HEADER, kSecondaryLoadMetric);
+    options.setWriteHeader(THeader::QUERY_STOPPER_METRIC, kStopperMetric);
     auto [_, header] = client->header_semifuture_voidResponse(options).get();
     checkLoadHeader(*header, kLoadMetric);
     checkLoadHeader(*header, kSecondaryLoadMetric, true /*isSecondaryLoad*/);
+    checkStopperMetricHeader(*header, kStopperMetric);
   }
 
   {

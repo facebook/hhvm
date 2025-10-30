@@ -269,6 +269,14 @@ void Cpp2Connection::setServerHeaders(
     writeHeaders[THeader::QUERY_SECONDARY_LOAD_HEADER] =
         folly::to<std::string>(load);
   }
+
+  // set stopper metric header
+  auto ptrSm = folly::get_ptr(readHeaders, THeader::QUERY_STOPPER_METRIC);
+  if (ptrSm) {
+    auto metricValue = getWorker()->getServer()->getLoad(*ptrSm);
+    writeHeaders[THeader::QUERY_STOPPER_METRIC] =
+        folly::to<std::string>(metricValue);
+  }
 }
 
 void Cpp2Connection::requestTimeoutExpired() {

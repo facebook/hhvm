@@ -15,6 +15,7 @@
  */
 
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
+#include <thrift/lib/cpp2/dynamic/TypeSystemTraits.h>
 
 #include <folly/Memory.h>
 
@@ -82,6 +83,19 @@ UnionNode::UnionNode(
     }
   }
 }
+
+FieldDefinition::FieldDefinition(
+    FieldIdentity identity,
+    PresenceQualifier presence,
+    TypeRef type,
+    std::optional<SerializableRecord> customDefaultPartialRecord,
+    AnnotationsMap annotations)
+    : identity_(std::move(identity)),
+      presence_(presence),
+      type_(std::move(type)),
+      wireType_(ToTTypeFn{}(type_)),
+      customDefaultPartialRecord_(std::move(customDefaultPartialRecord)),
+      annotations_(std::move(annotations)) {}
 
 namespace detail {
 

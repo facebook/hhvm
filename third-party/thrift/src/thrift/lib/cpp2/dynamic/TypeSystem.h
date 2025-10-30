@@ -851,12 +851,7 @@ class FieldDefinition final : folly::MoveOnly {
       PresenceQualifier presence,
       TypeRef type,
       std::optional<SerializableRecord> customDefaultPartialRecord,
-      AnnotationsMap annotations)
-      : identity_(std::move(identity)),
-        presence_(presence),
-        type_(std::move(type)),
-        customDefaultPartialRecord_(std::move(customDefaultPartialRecord)),
-        annotations_(std::move(annotations)) {}
+      AnnotationsMap annotations);
 
   const FieldIdentity& identity() const { return identity_; }
   PresenceQualifier presence() const { return presence_; }
@@ -874,10 +869,13 @@ class FieldDefinition final : folly::MoveOnly {
     return folly::get_ptr(annotations_, uri);
   }
 
+  protocol::TType wireType() const { return wireType_; }
+
  private:
   FieldIdentity identity_;
   PresenceQualifier presence_;
   TypeRef type_;
+  protocol::TType wireType_;
   std::optional<SerializableRecord> customDefaultPartialRecord_;
   AnnotationsMap annotations_;
 };

@@ -36,7 +36,18 @@ let fetch_old_decls_via_file_hashes
   (* TODO(bobren): names should really be a list of deps *)
   let file_hashes =
     List.filter_map
-      ~f:(fun name -> Utils.name_to_file_hash_opt ~name ~db_path)
+      ~f:(fun name ->
+        match Utils.name_to_file_hash_opt ~name ~db_path with
+        | Some (path, hash) ->
+          Hh_logger.log
+            "Fetching decl for %s defined in %s from blob %s"
+            name
+            Relative_path.(suffix path)
+            hash;
+          Some (path, hash)
+        | None ->
+          Hh_logger.log "Missing entry for %s" name;
+          None)
       names
   in
   let popt = Provider_context.get_popt ctx in

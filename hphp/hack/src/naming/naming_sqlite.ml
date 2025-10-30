@@ -1021,10 +1021,10 @@ let get_decl_hash_wrapper
 let get_file_hash_wrapper
     (result :
       (Relative_path.t * Naming_types.name_kind * string * string) option) :
-    string option =
+    (Relative_path.t * string) option =
   match result with
   | None -> None
-  | Some (_, _, _, file_hash) -> Some file_hash
+  | Some (path, _, _, file_hash) -> Some (path, file_hash)
 
 let get_type_path_by_name (db_path : db_path) name =
   let (db, stmt_cache) =

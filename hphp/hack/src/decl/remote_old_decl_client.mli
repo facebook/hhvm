@@ -13,7 +13,9 @@ val fetch_old_decls :
 
 module Utils : sig
   val name_to_file_hash_opt :
-    name:string -> db_path:Naming_sqlite.db_path -> string option
+    name:string ->
+    db_path:Naming_sqlite.db_path ->
+    (Relative_path.t * string) option
 
   val db_path_of_ctx : ctx:Provider_context.t -> Naming_sqlite.db_path option
 end

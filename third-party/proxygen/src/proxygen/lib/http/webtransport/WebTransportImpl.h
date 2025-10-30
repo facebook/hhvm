@@ -11,6 +11,7 @@
 #include <proxygen/lib/http/codec/HTTPCodec.h>
 #include <proxygen/lib/http/webtransport/FlowController.h>
 #include <proxygen/lib/http/webtransport/WebTransport.h>
+#include <quic/QuicConstants.h>
 
 namespace {
 constexpr uint64_t kDefaultWTReceiveWindow = 1'048'576;
@@ -94,8 +95,8 @@ class WebTransportImpl : public WebTransport {
 
     virtual bool usesEncodedApplicationErrorCodes() = 0;
 
-    virtual size_t getWTInitialSendWindow() const {
-      return std::numeric_limits<size_t>::max();
+    virtual uint64_t getWTInitialSendWindow() const {
+      return quic::kMaxVarInt;
     }
   };
 
@@ -341,13 +342,13 @@ class WebTransportImpl : public WebTransport {
   WTIngressStreamMap wtIngressStreams_;
   // Initialize flow controllers with max value for backward compatibility and
   // to ensure no functional change yet.
-  FlowController sendFlowController_{std::numeric_limits<size_t>::max()};
-  FlowController recvFlowController_{std::numeric_limits<size_t>::max()};
+  FlowController sendFlowController_{quic::kMaxVarInt};
+  FlowController recvFlowController_{quic::kMaxVarInt};
   folly::Optional<uint32_t> sessionCloseError_;
   uint64_t bytesRead_{};
 
   struct StreamFlowControl {
-    uint64_t maxStreamID{std::numeric_limits<uint64_t>::max()};
+    uint64_t maxStreamID{quic::kMaxVarInt};
     uint64_t numClosedStreams{};
     uint64_t targetConcurrentStreams{kDefaultTargetConcurrentStreams};
   };
@@ -403,9 +404,8 @@ class WebTransportImpl : public WebTransport {
     return (id & 0b10) == 0;
   }
 
-  void setFlowControlLimits(
-      size_t sendWindow = std::numeric_limits<size_t>::max(),
-      size_t recvWindow = std::numeric_limits<size_t>::max()) {
+  void setFlowControlLimits(uint64_t sendWindow = quic::kMaxVarInt,
+                            uint64_t recvWindow = quic::kMaxVarInt) {
     sendFlowController_ = FlowController(sendWindow);
     recvFlowController_ = FlowController(recvWindow);
   }

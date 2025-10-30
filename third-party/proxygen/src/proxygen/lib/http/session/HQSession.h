@@ -32,6 +32,7 @@
 #include <proxygen/lib/http/session/QuicProtocolInfo.h>
 #include <proxygen/lib/http/session/ServerPushLifecycle.h>
 #include <proxygen/lib/utils/ConditionalGate.h>
+#include <quic/QuicConstants.h>
 #include <quic/api/QuicSocket.h>
 #include <quic/common/BufUtil.h>
 #include <quic/common/events/FollyQuicEventBase.h>
@@ -1845,7 +1846,7 @@ class HQSession
     folly::Expected<folly::Unit, WebTransport::ErrorCode> sendDatagram(
         std::unique_ptr<folly::IOBuf> datagram) override;
 
-    size_t getWTInitialSendWindow() const override {
+    uint64_t getWTInitialSendWindow() const override {
       return session_.wtInitialSendWindow_;
     }
 
@@ -2005,10 +2006,10 @@ class HQSession
       {SettingsId::MAX_HEADER_LIST_SIZE, hq::kDefaultEgressMaxHeaderListSize},
       {SettingsId::_HQ_QPACK_BLOCKED_STREAMS,
        hq::kDefaultEgressQpackBlockedStream},
-      {SettingsId::WT_INITIAL_MAX_DATA, std::numeric_limits<size_t>::max()},
+      {SettingsId::WT_INITIAL_MAX_DATA, quic::kMaxVarInt},
   };
   HTTPSettings ingressSettings_;
-  size_t wtInitialSendWindow_{std::numeric_limits<size_t>::max()};
+  uint64_t wtInitialSendWindow_{quic::kMaxVarInt};
   // Maximum Stream/Push ID that we are allowed to open, from GOAWAY
   quic::StreamId peerMinUnseenId_{hq::kMaxClientBidiStreamId};
   uint64_t minUnseenIncomingPushId_{0};

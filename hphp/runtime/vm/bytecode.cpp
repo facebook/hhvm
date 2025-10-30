@@ -5281,7 +5281,9 @@ void PrintTCCallerInfo() {
 static __thread Unit* s_prev_unit;
 static __thread int s_prev_line;
 
-void recordCodeCoverage(PC /*pc*/) {
+void recordCodeCoverage(PC pc) {
+  if (!CodeCoverage::isCoverable(peek_op(pc))) return;
+
   auto const func = vmfp()->func();
   Unit* unit = func->unit();
   assertx(unit != nullptr);

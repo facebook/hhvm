@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/req-hash-map.h"
 #include "hphp/runtime/base/req-bitset.h"
+#include "hphp/runtime/vm/hhbc.h"
 
 #include "hphp/util/optional.h"
 
@@ -65,6 +66,15 @@ struct CodeCoverage {
    * Causes CodeCoverage to dump any coverage data onSessionExit()
    */
   void dumpOnExit() { shouldDump = true; }
+
+  /*
+   * Whether or not this opcode should be covered.
+   * The reason we don't cover all opcodes is because some opcodes are just
+   * internal. We want the opcodes that call a function, jumps, assign to local
+   * and so on to matter. Also by only doing code coverage on some bytecodes
+   * makes running HHVM with codecoverage faster.
+   */
+  static bool isCoverable(Op op);
 
   /*
    * Whether or not coverage should use per file coverage

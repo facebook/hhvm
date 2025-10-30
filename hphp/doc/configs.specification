@@ -710,6 +710,8 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - bool Eval.EnableFuncCoverage = false, UNKNOWN
 
+- bool Eval.EnableCodeCoveragePerBytecode = true, emil
+
 - uint64_t Eval.FactsWorkers, UNKNOWN
 
   The number of worker threads to spawn for facts extraction.

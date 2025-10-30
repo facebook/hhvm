@@ -17,12 +17,10 @@ dict(2) {
     int(1)
   }
   [%s]=>
-  dict(5) {
+  dict(4) {
     [4]=>
     int(1)
     [5]=>
-    int(1)
-    [14]=>
     int(1)
     [15]=>
     int(1)
@@ -40,12 +38,10 @@ dict(2) {
     int(1)
   }
   [%s]=>
-  dict(5) {
+  dict(4) {
     [4]=>
     int(1)
     [5]=>
-    int(1)
-    [14]=>
     int(1)
     [15]=>
     int(1)
@@ -66,12 +62,10 @@ dict(2) {
     int(1)
   }
   [%s]=>
-  dict(5) {
+  dict(4) {
     [4]=>
     int(1)
     [5]=>
-    int(1)
-    [14]=>
     int(1)
     [15]=>
     int(1)
@@ -98,10 +92,9 @@ dict(2) {
     int(8)
   }
   ["%s/test_per_file_coverage.php"]=>
-  vec(7) {
+  vec(6) {
     int(5)
     int(6)
-    int(19)
     int(20)
     int(21)
     int(22)

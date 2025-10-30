@@ -1,8 +1,6 @@
 string(5) "hello"
 Coverage:
-dict(3) {
-  [4]=>
-  int(1)
+dict(2) {
   [5]=>
   int(1)
   [6]=>

@@ -1516,7 +1516,7 @@ static void set_stack_size() {
 }
 
 std::vector<int> get_executable_lines(const Unit* compiled) {
-  std::vector<int> lines;
+  hphp_fast_set<int> lines_set;
 
   compiled->forEachFunc([&](const Func* func) {
     if(func->isGenerated() || func->isAbstract()) {
@@ -1526,16 +1526,29 @@ std::vector<int> get_executable_lines(const Unit* compiled) {
       // closing curly braces show as executable)
       return false;
     }
-    auto const lineTable = func->getOrLoadLineTableCopy();
-    lines.reserve(lines.size() + lineTable.size());
-    for (auto& ent : lineTable) lines.push_back(ent.val());
+
+    auto start = func->entry();
+    auto pc = start;
+    auto end = pc + func->bclen();
+
+    while (pc < end) {
+      auto op = peek_op(pc);
+      if (CodeCoverage::isCoverable(op)) {
+        auto line = func->getLineNumber(pc - start);
+        if (line > 0) {
+          lines_set.insert(line);
+        }
+      }
+
+      pc += instrLen(pc);
+    }
+
     return false;
   });
 
-  std::sort(lines.begin(), lines.end());
-  auto const last = std::unique(lines.begin(), lines.end());
-  lines.erase(last, lines.end());
-  return lines;
+  std::vector<int> lines_vector(lines_set.begin(), lines_set.end());
+  std::sort(lines_vector.begin(), lines_vector.end());
+  return lines_vector;
 }
 
 static int execute_program_impl(int argc, char** argv) {

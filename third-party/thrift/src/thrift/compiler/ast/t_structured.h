@@ -91,17 +91,6 @@ class t_structured : public t_type {
   // Tries to append the gieven field, throwing an exception on failure.
   void append(std::unique_ptr<t_field> elem);
 
-  const t_field* get_field_named(std::string_view name) const {
-    const auto* result = get_field_by_name(name);
-    assert(result != nullptr);
-    return result;
-  }
-
-  t_field* get_field(size_t index) { return fields_.at(index).get(); }
-  const t_field* get_field(size_t index) const {
-    return fields_.at(index).get();
-  }
-
   const std::vector<t_field*>& get_members() const { return fields_raw_; }
 
   const std::vector<t_field*>& get_sorted_members() const {
@@ -110,14 +99,6 @@ class t_structured : public t_type {
 
   const t_field* get_member(std::string_view name) const {
     return get_field_by_name(name);
-  }
-
-  bool has_field_named(std::string_view name) const {
-    return get_field_by_name(name) != nullptr;
-  }
-
-  bool validate_field(t_field* field) {
-    return get_field_by_id(field->id()) == nullptr;
   }
 
  protected:

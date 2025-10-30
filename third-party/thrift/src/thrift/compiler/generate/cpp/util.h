@@ -161,7 +161,7 @@ void for_each_transitive_field(const t_structured* s, F f) {
       fields.pop_back();
       continue;
     }
-    const t_field* field = fi.owner->get_field(fi.index);
+    const t_field* field = &fi.owner->fields()[fi.index];
     ++fi.index;
     if (seen.emplace(field).second == false) {
       continue;
@@ -169,8 +169,7 @@ void for_each_transitive_field(const t_structured* s, F f) {
     if (!f(field)) {
       return;
     }
-    if (const auto* sub =
-            dynamic_cast<const t_structured*>(field->type().get_type())) {
+    if (const t_structured* sub = field->type()->try_as<t_structured>()) {
       fields.push_back({sub, 0});
     }
   }

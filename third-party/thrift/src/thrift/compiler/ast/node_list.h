@@ -145,6 +145,7 @@ class node_list_view {
   // Create an std::vector with the same contents as this span.
   constexpr std::vector<T*> copy() const noexcept {
     std::vector<T*> result;
+    result.reserve(size_);
     for (size_t i = 0; i < size_; ++i) {
       result.emplace_back(&begin_[i]);
     }

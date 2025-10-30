@@ -1331,7 +1331,7 @@ void t_py_generator::generate_py_struct(
 void t_py_generator::generate_py_union(
     ofstream& out, const t_structured* tstruct) {
   const vector<t_field*>& members = tstruct->get_members();
-  const vector<t_field*>& sorted_members = tstruct->get_sorted_members();
+  const vector<const t_field*>& sorted_members = tstruct->fields_id_order();
 
   out << "class " << rename_reserved_keywords(tstruct->name())
       << "(object):" << endl;
@@ -1557,9 +1557,9 @@ void t_py_generator::generate_py_union(
 
 void t_py_generator::generate_py_thrift_spec(
     ofstream& out, const t_structured* tstruct, bool /*is_exception*/) {
-  const vector<t_field*>& members = tstruct->get_members();
-  const vector<t_field*>& sorted_members = tstruct->get_sorted_members();
-  vector<t_field*>::const_iterator m_iter;
+  const vector<const t_field*> members = tstruct->fields().copy();
+  const vector<const t_field*>& sorted_members = tstruct->fields_id_order();
+  vector<const t_field*>::const_iterator m_iter;
 
   indent(out) << "all_structs.append("
               << rename_reserved_keywords(tstruct->name()) << ")" << endl
@@ -1714,8 +1714,8 @@ void t_py_generator::generate_py_annotation_dict(
 
 void t_py_generator::generate_py_annotations(
     std::ofstream& out, const t_structured* tstruct) {
-  const vector<t_field*>& sorted_members = tstruct->get_sorted_members();
-  vector<t_field*>::const_iterator m_iter;
+  const vector<const t_field*>& sorted_members = tstruct->fields_id_order();
+  vector<const t_field*>::const_iterator m_iter;
 
   indent(out) << rename_reserved_keywords(tstruct->name())
               << ".thrift_struct_annotations = {" << endl;
@@ -1751,8 +1751,8 @@ void t_py_generator::generate_py_struct_definition(
     bool is_exception,
     bool /*is_result*/) {
   const vector<t_field*>& members = tstruct->get_members();
-  const vector<t_field*>& sorted_members = tstruct->get_sorted_members();
-  vector<t_field*>::const_iterator m_iter;
+  const vector<const t_field*>& sorted_members = tstruct->fields_id_order();
+  vector<const t_field*>::const_iterator m_iter;
 
   out << "class " << rename_reserved_keywords(tstruct->name());
   if (is_exception) {
@@ -2119,8 +2119,8 @@ void t_py_generator::generate_py_struct_reader(
 void t_py_generator::generate_py_struct_writer(
     ofstream& out, const t_structured* tstruct) {
   const string& name = tstruct->name();
-  const vector<t_field*>& fields = tstruct->get_sorted_members();
-  vector<t_field*>::const_iterator f_iter;
+  const vector<const t_field*>& fields = tstruct->fields_id_order();
+  vector<const t_field*>::const_iterator f_iter;
 
   indent(out) << "def write(self, oprot):" << endl;
   indent_up();
@@ -3951,7 +3951,7 @@ int32_t t_py_generator::get_thrift_spec_key(
   //
   // In this case, to get thrift_spec of corresponding field, we need to add
   // offset to field id: `thrift_spec[id + offset]`
-  const int32_t smallest_id = s->get_sorted_members()[0]->id();
+  const int32_t smallest_id = s->fields_id_order()[0]->id();
   const int32_t offset = -std::min(smallest_id, 0);
   return f->id() + offset;
 }

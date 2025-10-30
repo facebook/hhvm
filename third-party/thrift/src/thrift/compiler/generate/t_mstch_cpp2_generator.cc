@@ -359,17 +359,24 @@ class cpp2_generator_context {
         field_context_map_[&field] = field_ctx;
       }
 
-      const std::vector<t_field*>& serialization_order =
-          node.has_structured_annotation(kSerializeInFieldIdOrderUri)
-          ? node.get_sorted_members()
-          : node.get_members();
-      const t_field* prev = nullptr;
-      for (const t_field* curr : serialization_order) {
-        if (prev) {
-          field_context_map_[prev].serialization_next = curr;
-          field_context_map_[curr].serialization_prev = prev;
+      if (node.has_structured_annotation(kSerializeInFieldIdOrderUri)) {
+        const t_field* prev = nullptr;
+        for (const t_field* curr : node.fields_id_order()) {
+          if (prev != nullptr) {
+            field_context_map_[prev].serialization_next = curr;
+            field_context_map_[curr].serialization_prev = prev;
+          }
+          prev = curr;
         }
-        prev = curr;
+      } else {
+        const t_field* prev = nullptr;
+        for (const t_field& curr : node.fields()) {
+          if (prev != nullptr) {
+            field_context_map_[prev].serialization_next = &curr;
+            field_context_map_[&curr].serialization_prev = prev;
+          }
+          prev = &curr;
+        }
       }
     });
   }

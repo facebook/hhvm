@@ -1743,8 +1743,8 @@ void t_java_deprecated_generator::generate_java_struct_writer(
       << endl;
   indent_up();
 
-  const vector<t_field*>& fields = tstruct->get_sorted_members();
-  vector<t_field*>::const_iterator f_iter;
+  const vector<const t_field*>& fields = tstruct->fields_id_order();
+  vector<const t_field*>::const_iterator f_iter;
 
   // performs various checks (e.g. check that all required fields are set)
   indent(out) << "validate();" << endl << endl;
@@ -1804,8 +1804,8 @@ void t_java_deprecated_generator::generate_java_struct_result_writer(
       << endl;
   indent_up();
 
-  const vector<t_field*>& fields = tstruct->get_sorted_members();
-  vector<t_field*>::const_iterator f_iter;
+  const vector<const t_field*>& fields = tstruct->fields_id_order();
+  vector<const t_field*>::const_iterator f_iter;
 
   indent(out) << "oprot.writeStructBegin(STRUCT_DESC);" << endl;
 

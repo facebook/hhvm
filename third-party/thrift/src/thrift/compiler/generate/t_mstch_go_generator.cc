@@ -502,21 +502,15 @@ class mstch_go_struct : public mstch_struct {
     return "premadeStructMetadata_" + struct_->name();
   }
   mstch::node fields_sorted() {
-    auto fields_in_id_order = struct_->get_sorted_members();
     // Fields (optionally) in the most optimal (memory-saving) layout order.
-    auto minimizePadding =
-        struct_->has_structured_annotation(kGoMinimizePaddingUri);
-    if (minimizePadding) {
-      std::vector<t_field*> fields_in_layout_order;
-      std::copy(
-          fields_in_id_order.begin(),
-          fields_in_id_order.end(),
-          std::back_inserter(fields_in_layout_order));
+    if (struct_->has_structured_annotation(kGoMinimizePaddingUri)) {
+      std::vector<const t_field*> fields_in_layout_order =
+          struct_->fields_id_order();
       go::optimize_fields_layout(
           fields_in_layout_order, struct_->is<t_union>());
       return make_mstch_fields(fields_in_layout_order);
     }
-    return make_mstch_fields(fields_in_id_order);
+    return make_mstch_fields(struct_->fields_id_order());
   }
   mstch::node should_use_reflect_codec() {
     auto use_reflect_codec_annotation =

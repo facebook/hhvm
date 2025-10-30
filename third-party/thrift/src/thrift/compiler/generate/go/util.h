@@ -163,6 +163,6 @@ const std::string* get_go_name_annotation(const t_named* node);
 const std::string* get_go_tag_annotation(const t_named* node);
 
 int get_field_size(const t_field* field, bool is_inside_union);
-void optimize_fields_layout(std::vector<t_field*>& fields, bool is_union);
+void optimize_fields_layout(std::vector<const t_field*>& fields, bool is_union);
 
 } // namespace apache::thrift::compiler::go

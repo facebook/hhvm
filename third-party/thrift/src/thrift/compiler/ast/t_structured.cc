@@ -48,8 +48,6 @@ bool t_structured::try_append_field(std::unique_ptr<t_field>& field) {
   fields_id_order_.emplace(existing.first, field.get());
 
   fields_raw_.push_back(field.get());
-  fields_raw_id_order_.insert(
-      find_by_id(fields_raw_id_order_, field->id()).first, field.get());
 
   // Take ownership.
   fields_.push_back(std::move(field));

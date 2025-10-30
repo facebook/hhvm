@@ -21,10 +21,6 @@
 
 #include <folly/MapUtil.h>
 
-THRIFT_FLAG_DEFINE_FOLLY_SETTING(server_header_reject_framed, bool, true);
-THRIFT_FLAG_DEFINE_FOLLY_SETTING(server_header_reject_unframed, bool, true);
-THRIFT_FLAG_DEFINE_FOLLY_SETTING(server_header_reject_all, bool, true);
-
 namespace {
 using namespace apache::thrift;
 using namespace apache::thrift::detail;
@@ -121,20 +117,12 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
   return {};
 }
 
-THRIFT_PLUGGABLE_FUNC_REGISTER(void, initThriftFlagFollySettings) {
-  // Set OSS default values
-  FOLLY_SETTING(thriftflag, server_header_reject_framed).set(false);
-  FOLLY_SETTING(thriftflag, server_header_reject_unframed).set(false);
-  FOLLY_SETTING(thriftflag, server_header_reject_all).set(false);
-}
-
 apache::thrift::detail::FlagsBackend& getFlagsBackend() {
   static auto& obj = *[] {
     auto backend = createFlagsBackend();
     if (!backend) {
       backend = std::make_unique<FlagsBackendDummy>();
     }
-    initThriftFlagFollySettings();
     return backend.release();
   }();
   return obj;

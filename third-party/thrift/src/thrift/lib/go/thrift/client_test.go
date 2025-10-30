@@ -18,6 +18,7 @@ package thrift
 
 import (
 	"context"
+	"errors"
 	"net"
 	"runtime"
 	"testing"
@@ -31,16 +32,65 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestWithPersistentHeader(t *testing.T) {
-	opts := []ClientOption{WithRocket(), WithPersistentHeader("foo", "bar")}
-	config := newClientConfig(opts...)
-	require.Subset(t, config.persistentHeaders, map[string]string{"foo": "bar"})
+func TestDefaultClientConfig(t *testing.T) {
+	config := newClientConfig()
+	require.Equal(t, TransportIDUnknown, config.transport)
+	require.Equal(t, types.ProtocolIDCompact, config.protocol)
+	require.Equal(t, NoTimeout, config.ioTimeout)
+	require.NotNil(t, config.persistentHeaders)
+	require.Empty(t, config.persistentHeaders)
+	require.Nil(t, config.dialerFn)
+	require.Nil(t, config.tlsConfig)
 }
 
-func TestWithPersistentHeaders(t *testing.T) {
-	opts := []ClientOption{WithRocket(), WithPersistentHeaders(map[string]string{"foo": "123", "bar": "456"})}
-	config := newClientConfig(opts...)
-	require.Subset(t, config.persistentHeaders, map[string]string{"foo": "123", "bar": "456"})
+func TestCustomClientOptions(t *testing.T) {
+	t.Run("WithProtocolID", func(t *testing.T) {
+		config := newClientConfig(WithProtocolID(types.ProtocolIDBinary))
+		require.Equal(t, types.ProtocolIDBinary, config.protocol)
+	})
+	t.Run("WithHeader", func(t *testing.T) {
+		config := newClientConfig(WithHeader())
+		require.Equal(t, TransportIDHeader, config.transport)
+	})
+	t.Run("WithUpgradeToRocket", func(t *testing.T) {
+		config := newClientConfig(WithUpgradeToRocket())
+		require.Equal(t, TransportIDUpgradeToRocket, config.transport)
+	})
+	t.Run("WithRocket", func(t *testing.T) {
+		config := newClientConfig(WithRocket())
+		require.Equal(t, TransportIDRocket, config.transport)
+	})
+	t.Run("WithPersistentHeader", func(t *testing.T) {
+		config := newClientConfig(WithPersistentHeader("foo", "bar"))
+		require.Subset(t, config.persistentHeaders, map[string]string{"foo": "bar"})
+	})
+	t.Run("WithPersistentHeaders", func(t *testing.T) {
+		config := newClientConfig(WithPersistentHeaders(map[string]string{"foo": "123", "bar": "456"}))
+		require.Subset(t, config.persistentHeaders, map[string]string{"foo": "123", "bar": "456"})
+	})
+	t.Run("WithIdentity", func(t *testing.T) {
+		config := newClientConfig(WithIdentity("foo"))
+		require.Subset(t, config.persistentHeaders, map[string]string{IdentityHeader: "foo"})
+	})
+	t.Run("WithIoTimeout", func(t *testing.T) {
+		config := newClientConfig(WithIoTimeout(time.Second))
+		require.Equal(t, time.Second, config.ioTimeout)
+	})
+	t.Run("WithDialer", func(t *testing.T) {
+		dialerFn := func() (net.Conn, error) { return nil, errors.New("foo") }
+		config := newClientConfig(WithDialer(dialerFn))
+		// Functions cannot be compared for equality, so use the following workaround:
+		res, err := config.dialerFn()
+		require.Nil(t, res)
+		require.EqualError(t, err, "foo")
+	})
+	t.Run("WithTLS", func(t *testing.T) {
+		clientConfig, _, err := generateSelfSignedCerts()
+		require.NoError(t, err)
+		config := newClientConfig(WithTLS("foo", time.Second, clientConfig))
+		require.Equal(t, clientConfig, config.tlsConfig)
+		require.NotNil(t, config.dialerFn)
+	})
 }
 
 func TestNewClientConnectionScenarios(t *testing.T) {
@@ -59,10 +109,6 @@ func TestNewClientConnectionScenarios(t *testing.T) {
 	// Testing successful client connection
 	client, err := NewClient(
 		WithRocket(),
-		WithIoTimeout(time.Second),
-		WithProtocolID(types.ProtocolIDCompact),
-		WithPersistentHeader("foo", "bar"),
-		WithIdentity("client_test"),
 		WithDialer(func() (net.Conn, error) {
 			return net.Dial(addr.Network(), addr.String())
 		}),

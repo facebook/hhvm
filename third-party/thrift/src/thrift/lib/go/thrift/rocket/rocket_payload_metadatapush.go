@@ -73,27 +73,3 @@ func validateServerPushMetadata(metadata *rpcmetadata.ServerPushMetadata) error 
 	}
 	return nil
 }
-
-// DecodeClientMetadataPush decodes the client metadata push.
-func DecodeClientMetadataPush(msg payload.Payload) (*rpcmetadata.ClientPushMetadata, error) {
-	msg = payload.Clone(msg)
-
-	metadata := &rpcmetadata.ClientPushMetadata{}
-	err := DecodePayloadMetadata(msg, metadata)
-	if err != nil {
-		return nil, fmt.Errorf("unable to decode ClientPushMetadata: %w", err)
-	}
-	if err := validateClientPushMetadata(metadata); err != nil {
-		return nil, err
-	}
-	return metadata, nil
-}
-
-func validateClientPushMetadata(metadata *rpcmetadata.ClientPushMetadata) error {
-	if metadata.InteractionTerminate != nil {
-		return fmt.Errorf("unsupported InteractionTerminate metadata type")
-	} else if metadata.StreamHeadersPush != nil {
-		return fmt.Errorf("unsupported StreamHeadersPush metadata type")
-	}
-	return nil
-}

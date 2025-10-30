@@ -209,11 +209,24 @@ func (s *rocketServerSocket) isOverloaded() bool {
 }
 
 func (s *rocketServerSocket) metadataPush(msg payload.Payload) {
-	_, err := rocket.DecodeClientMetadataPush(msg)
+	// TODO: this clone helps prevent a race-condition where the payload gets
+	// released by the underlying rsocket layer before we are done with it.
+	msg = payload.Clone(msg)
+
+	metadata := &rpcmetadata.ClientPushMetadata{}
+	err := rocket.DecodePayloadMetadata(msg, metadata)
 	if err != nil {
-		panic(err)
+		s.log("unable to decode ClientPushMetadata: %v", err)
+		return
 	}
-	// This is usually something like transportMetadata = map[deciding_accessors:IP=...], but we do not handle it.
+
+	if metadata.InteractionTerminate != nil {
+		s.log("unsupported InteractionTerminate metadata type")
+	} else if metadata.StreamHeadersPush != nil {
+		s.log("unsupported StreamHeadersPush metadata type")
+	} else if metadata.TransportMetadataPush != nil {
+		s.log("unsupported TransportMetadataPush metadata type")
+	}
 }
 
 func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {

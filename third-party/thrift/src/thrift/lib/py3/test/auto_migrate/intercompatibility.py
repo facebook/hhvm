@@ -104,11 +104,14 @@ class PicklingCompatibilityTest(unittest.TestCase):
         self.assertEqual(300, h.an_int.small)
 
     def test_python_to_py3_unpickle(self) -> None:
-        python_pickled = dumps(self.make_hard())
-        py3_pickled = dumps(self.make_hard()._to_py3())
-        self.assertEqual(self.pickled_python(), python_pickled)
-        if not is_auto_migrated():
-            self.assertEqual(self.pickled_py3(), py3_pickled)
+        # !!! This is not true for all time. pickle is a moving target its not a stable serialization format between python versions !!!
+        # python_pickled = dumps(self.make_hard())
+        # py3_pickled = dumps(self.make_hard()._to_py3())
+        # self.assertEqual(self.pickled_python(), python_pickled)
+        # if not is_auto_migrated():
+        #    self.assertEqual(self.pickled_py3(), py3_pickled)
+
+        # But you should be able unpickle it
 
         python_hard = loads(self.pickled_python())
         self.assertTrue(

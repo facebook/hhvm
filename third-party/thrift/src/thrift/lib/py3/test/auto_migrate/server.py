@@ -87,28 +87,18 @@ class Handler(TestingServiceInterface):
         return "Testing"
 
 
-class ServicesTests(unittest.TestCase):
-    def test_handler_acontext(self) -> None:
-        loop = asyncio.get_event_loop()
+class ServicesTests(unittest.IsolatedAsyncioTestCase):
+    async def test_handler_acontext(self) -> None:
+        async with Handler() as h:
+            self.assertTrue(h.initalized)
 
-        async def inner() -> None:
-            async with Handler() as h:
-                self.assertTrue(h.initalized)
-
-        loop.run_until_complete(inner())
-
-    def test_get_address(self) -> None:
-        loop = asyncio.get_event_loop()
-        coro = self.get_address(loop)
-        self.assertIsInstance(loop.run_until_complete(coro), SocketAddress)
-
-    async def get_address(self, loop: asyncio.AbstractEventLoop) -> SocketAddress:
+    async def test_get_address(self) -> None:
         server = ThriftServer(Handler(), port=0)
-        serve_task = loop.create_task(server.serve())
+        serve_task = asyncio.create_task(server.serve())
         addy = await server.get_address()
+        self.assertIsInstance(addy, SocketAddress)
         server.stop()
         await serve_task
-        return addy
 
     @brokenInAutoMigrate()
     def test_annotations(self) -> None:
@@ -122,17 +112,15 @@ class ServicesTests(unittest.TestCase):
             # You can't set attributes on builtin/extension types
             TestingServiceInterface.annotations = {}
 
-    def test_unittest_call(self) -> None:
+    async def test_unittest_call(self) -> None:
         h = Handler()
-        loop = asyncio.get_event_loop()
         call = 5
-        ret = loop.run_until_complete(h.complex_action("", "", call, ""))
+        ret = await h.complex_action("", "", call, "")
         self.assertEqual(call, ret)
 
-    def test_unittest_call_renamed_func(self) -> None:
+    async def test_unittest_call_renamed_func(self) -> None:
         h = Handler()
-        loop = asyncio.get_event_loop()
-        ret = loop.run_until_complete(h.renamed_func(True))
+        ret = await h.renamed_func(True)
         self.assertTrue(ret)
 
     def test_server_manipulate_config(self) -> None:
@@ -181,17 +169,14 @@ class ServicesTests(unittest.TestCase):
         self.assertTrue(helper.check_overload("overloaded_method"))
         self.assertFalse(helper.check_overload("not_overloaded_method"))
 
-    def test_lifecycle_hooks(self) -> None:
-        async def inner() -> None:
-            handler = Handler()
-            self.assertFalse(handler.on_start_serving_called)
-            self.assertFalse(handler.on_stop_requested_called)
-            server = ThriftServer(handler, port=0)
-            serve_task = asyncio.get_event_loop().create_task(server.serve())
-            await server.get_address()
-            self.assertTrue(handler.on_start_serving_called)
-            server.stop()
-            await serve_task
-            self.assertTrue(handler.on_stop_requested_called)
-
-        asyncio.get_event_loop().run_until_complete(inner())
+    async def test_lifecycle_hooks(self) -> None:
+        handler = Handler()
+        self.assertFalse(handler.on_start_serving_called)
+        self.assertFalse(handler.on_stop_requested_called)
+        server = ThriftServer(handler, port=0)
+        serve_task = asyncio.get_event_loop().create_task(server.serve())
+        await server.get_address()
+        self.assertTrue(handler.on_start_serving_called)
+        server.stop()
+        await serve_task
+        self.assertTrue(handler.on_stop_requested_called)

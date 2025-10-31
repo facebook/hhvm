@@ -314,6 +314,33 @@ class BidiTests(IsolatedAsyncioTestCase):
 
     @parameterized.expand(
         [
+            # (True,), TODO(T243497155, T243497257): fix cpp state bugs surfaced by IDL-declared exception
+            (False,)
+        ]
+    )
+    async def test_bidi_server_first_response_throws(
+        self, expected_throw: bool
+    ) -> None:
+        async with local_server() as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(
+                TestBidiService,
+                host=ip,
+                port=port,
+                client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
+            ) as client:
+                base_msg = "first response throws"
+                expected_ex_cls, msg = (
+                    (MethodException, base_msg)
+                    if expected_throw
+                    else (ApplicationError, "unexpected " + base_msg)
+                )
+                with self.assertRaisesRegex(expected_ex_cls, msg):
+                    await client.canThrow(ThrowWhere.FIRST_RESPONSE, expected_throw)
+
+    @parameterized.expand(
+        [
             (
                 ThrowWhere.STREAM_BEFORE_FIRST_CHUNK,
                 True,
@@ -356,8 +383,6 @@ class BidiTests(IsolatedAsyncioTestCase):
                 )
                 with self.assertRaisesRegex(expected_ex_cls, expected_msg):
                     await self.assert_stream(bidi.stream, (i for i in range(1, 3)))
-
-            # TODO: client.canThrow(2)
 
     @parameterized.expand(
         [
@@ -495,8 +520,13 @@ class BidiHandler(TestBidiServiceInterface):
         [AsyncGenerator[int, None]],
         AsyncGenerator[int, None],
     ]:
-        if where == 0:
-            raise MethodException(message="method throws")
+        if where == ThrowWhere.FIRST_RESPONSE:
+            msg = "first response throws"
+            raise (
+                MethodException(message=msg)
+                if expected_throw
+                else RuntimeError("unexpected " + msg)
+            )
 
         async def callback(
             agen: AsyncGenerator[int, None],

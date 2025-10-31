@@ -159,9 +159,22 @@ void SingleRpcChannel::sendThriftResponse(
   if (httpTransaction_) {
     HTTPMessage msg;
     msg.setStatusCode(200);
+
+    if (auto load = metadata.load()) {
+      metadata.otherMetadata().ensure().emplace(
+          transport::THeader::QUERY_LOAD_HEADER, folly::to<std::string>(*load));
+    }
+
+    if (auto load = metadata.secondaryLoad()) {
+      metadata.otherMetadata().ensure().emplace(
+          transport::THeader::QUERY_SECONDARY_LOAD_HEADER,
+          folly::to<std::string>(*load));
+    }
+
     if (auto otherMetadata = metadata.otherMetadata()) {
       encodeHeaders(std::move(*otherMetadata), msg);
     }
+
     httpTransaction_->sendHeaders(msg);
     httpTransaction_->sendBody(std::move(payload));
     httpTransaction_->sendEOM();
@@ -486,6 +499,17 @@ void SingleRpcChannel::extractHeaderInfo(
   transport::THeader::StringToStringMap headers;
   decodeHeaders(*headers_, headers, metadata);
   detail::handleFrameworkMetadataHTTPHeader(headers, metadata);
+
+  if (const auto& loadIt = headers.find(transport::THeader::QUERY_LOAD_HEADER);
+      loadIt != headers.end()) {
+    metadata->loadMetric() = loadIt->second;
+  }
+
+  if (const auto& secLoadIt =
+          headers.find(transport::THeader::QUERY_SECONDARY_LOAD_HEADER);
+      secLoadIt != headers.end()) {
+    metadata->secondaryLoadMetric() = secLoadIt->second;
+  }
 
   if (!headers.empty()) {
     metadata->otherMetadata() = std::move(headers);

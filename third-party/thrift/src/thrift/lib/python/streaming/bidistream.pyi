@@ -28,10 +28,3 @@ class BidirectionalStream(Generic[TSinkChunk, TStreamChunk]):
     sink: ClientSink[TSinkChunk, None]
     stream: ClientBufferedStream[TStreamChunk]
     def __init__(self) -> None: ...
-
-# Client class for bidirectional streaming with first response
-class ResponseAndBidirectionalStream(Generic[TResponse, TSinkChunk, TStreamChunk]):
-    response: TResponse
-    sink: ClientSink[TSinkChunk, None]
-    stream: ClientBufferedStream[TStreamChunk]
-    def __init__(self) -> None: ...

@@ -69,24 +69,6 @@ cdef class BidirectionalStream:
         Protocol protocol,
     )
 
-cdef class ResponseAndBidirectionalStream:
-    cdef object _response
-    cdef ClientSink _sink
-    cdef ClientBufferedStream _stream
-    cdef _response_cls
-    cdef _sink_elem_cls
-    cdef _stream_elem_cls
-
-    @staticmethod
-    cdef _fbthrift_create(
-        object response,
-        unique_ptr[cIOBufClientSink]&& client_sink,
-        unique_ptr[cIOBufClientBufferedStream] stream,
-        response_cls,
-        sink_elem_cls,
-        stream_elem_cls,
-        Protocol protocol,
-    )
 
 cdef api int invoke_server_bidi_callback(
     object bidi_callback,

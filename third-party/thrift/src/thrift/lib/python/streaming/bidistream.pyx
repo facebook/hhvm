@@ -70,50 +70,6 @@ cdef class BidirectionalStream:
         return self._stream
 
 
-cdef class ResponseAndBidirectionalStream:
-    @staticmethod
-    cdef _fbthrift_create(
-        object response,
-        unique_ptr[cIOBufClientSink]&& client_sink,
-        unique_ptr[cIOBufClientBufferedStream] stream,
-        response_cls,
-        sink_elem_cls,
-        stream_elem_cls,
-        Protocol protocol,
-    ):
-        inst = <ResponseAndBidirectionalStream>ResponseAndBidirectionalStream.__new__(ResponseAndBidirectionalStream)
-        inst._response = response
-        inst._sink = ClientSink._fbthrift_create(
-            cmove(client_sink),
-            sink_elem_cls,
-            None,  # BidirectionalStream sink doesn't return a final response
-            protocol,
-        )
-        inst._stream = ClientBufferedStream._fbthrift_create(
-            cmove(stream),
-            stream_elem_cls,
-            protocol,
-        )
-        inst._response_cls = response_cls
-        inst._sink_elem_cls = sink_elem_cls
-        inst._stream_elem_cls = stream_elem_cls
-        return inst
-
-    def __init__(self):
-        raise RuntimeError("Do not instantiate ResponseAndBidirectionalStream from Python")
-
-    @property
-    def response(self):
-        return self._response
-
-    @property
-    def sink(self):
-        return self._sink
-
-    @property
-    def stream(self):
-        return self._stream
-
 async def invokeBidiTransformCallback(
     bidi_callback,
     ServerSinkGenerator input_gen,

@@ -189,6 +189,11 @@ class AsyncMysqlClient : public MysqlClientBase {
     return false;
   }
 
+  virtual std::string_view getBaseClient() const noexcept override {
+    static constexpr std::string_view kSyncClient{"AsyncMysqlClient"};
+    return kSyncClient;
+  }
+
  protected:
   AsyncMysqlClient(
       std::unique_ptr<db::SquangleLoggerBase> db_logger,

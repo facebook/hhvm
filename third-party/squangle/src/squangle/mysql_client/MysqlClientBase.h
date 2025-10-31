@@ -158,6 +158,8 @@ class MysqlClientBase {
     return true;
   }
 
+  virtual std::string_view getBaseClient() const noexcept = 0;
+
  protected:
   friend class Connection;
   friend class OperationBase;

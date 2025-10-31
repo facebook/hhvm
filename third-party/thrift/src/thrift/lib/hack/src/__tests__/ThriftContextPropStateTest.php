@@ -19,6 +19,44 @@
 <<Oncalls('thrift')>>
 final class ThriftContextPropStateTest extends WWWTest {
   use ClassLevelTest;
+
+  public static function dataProviderForInvalidUserIds(): dict<string, (int)> {
+    return dict[
+      'zero user id' => tuple(0),
+      'negative user id' => tuple(-123),
+    ];
+  }
+  <<DataProvider('dataProviderForInvalidUserIds')>>
+  public function testUpdateIGUserIdWithInvalidId___DPRS_ACH_TEST(
+    int $invalid_id,
+  ): void {
+    // Arrange
+    $tcps = ThriftContextPropState::get();
+    $tcps->clear();
+    // Mock to ensure any positive ID is considered valid for the initial setup
+    self::mockFunction(IgidUtils::isUserFbid<>)->mockReturn(true);
+    $initial_valid_id = 54321;
+    ThriftContextPropState::updateIGUserId(
+      $initial_valid_id,
+      'test_setup',
+      UserIdSource::VIEWER_CONTEXT,
+    );
+    expect($tcps->getIGUserId())->toEqual($initial_valid_id);
+
+    // Act
+    $result = ThriftContextPropState::updateIGUserId(
+      $invalid_id,
+      'test_invalid',
+      UserIdSource::VIEWER_CONTEXT,
+    );
+
+    // Assert
+    // The original code should reject the invalid (zero or negative) ID and not change the state.
+    // The mutant version accepts any non-null ID, so it will update the state and this test will fail.
+    expect($result)->toBeFalse();
+    expect($tcps->getIGUserId())->toEqual($initial_valid_id);
+  }
+
   public function testClearDoesNotClearSerializedCache___DPRS_ACH_TEST(): void {
     $tcps = ThriftContextPropState::get();
     $tcps->clear();

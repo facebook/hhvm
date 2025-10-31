@@ -21,7 +21,6 @@
 #include <folly/Random.h>
 #include <folly/init/Init.h>
 
-#include <thrift/lib/cpp/test/loadgen/QpsMonitor.h>
 #include <thrift/lib/cpp/test/loadgen/RNG.h>
 #include <thrift/perf/cpp/AsyncClientWorker2.h>
 #include <thrift/perf/cpp/ClientLoadConfig.h>

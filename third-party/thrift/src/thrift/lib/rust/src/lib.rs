@@ -74,6 +74,7 @@ pub use crate::binary_protocol::BinaryProtocol;
 pub use crate::bufext::BufExt;
 pub use crate::bufext::BufMutExt;
 pub use crate::bufext::DeserializeSource;
+pub use crate::client::BidiReply;
 pub use crate::client::ClientFactory;
 pub use crate::client::ClientStreamElement;
 pub use crate::client::SinkReply;

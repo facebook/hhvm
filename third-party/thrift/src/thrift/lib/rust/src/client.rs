@@ -79,6 +79,23 @@ where
     >,
 }
 
+#[allow(dead_code)]
+pub struct BidiReply<P>
+where
+    P: Framing,
+{
+    pub initial_response: FramingDecoded<P>,
+    pub stream: BoxStream<'static, Result<ClientStreamElement<FramingDecoded<P>>, anyhow::Error>>,
+    pub sink_processor: Box<
+        dyn FnOnce(
+                BoxStream<'static, ClientStreamElement<FramingEncodedFinal<P>>>,
+            )
+                -> BoxFuture<'static, Result<FramingDecoded<P>, crate::NonthrowingFunctionError>>
+            + Send
+            + 'static,
+    >,
+}
+
 pub trait ClientFactory {
     type Api: ?Sized;
 
@@ -139,6 +156,19 @@ pub trait Transport: Framing + Send + Sync + Sized + 'static {
     ) -> BoxFuture<'static, anyhow::Result<SinkReply<Self>>> {
         future::err(anyhow::Error::msg(
             "Sink is not supported by this transport",
+        ))
+        .boxed()
+    }
+
+    fn call_bidirectional(
+        &self,
+        _service_name: &'static CStr,
+        _fn_name: &'static CStr,
+        _req: FramingEncodedFinal<Self>,
+        _rpc_options: Self::RpcOptions,
+    ) -> BoxFuture<'static, anyhow::Result<BidiReply<Self>>> {
+        future::err(anyhow::Error::msg(
+            "Bidirectional streaming is not supported by this transport",
         ))
         .boxed()
     }

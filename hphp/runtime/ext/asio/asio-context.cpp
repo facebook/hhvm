@@ -175,6 +175,7 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
   assertx(wait_handle);
   assertx(wait_handle->getContext() == this);
 
+  // Cache frequently-accessed TLS values to reduce repeated %fs segment lookups
   auto session = AsioSession::Get();
   auto ete_queue = session->getExternalThreadEventQueue();
 
@@ -186,11 +187,11 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
   // provided func in the given context state. Maintains the session context idx
   // while processing.
   auto const whIdx = wait_handle->getContextStateIndex();
-  auto const tryInContext = [&](auto f, AsioContextState &state,
+  auto const tryInContext = [&, session](auto f, AsioContextState &state,
                                 ContextStateIndex ctxStateIdx) {
-    auto const currentIdx = AsioSession::Get()->getCurrentContextStateIndex();
-    SCOPE_EXIT { AsioSession::Get()->setCurrentContextStateIndex(currentIdx); };
-    AsioSession::Get()->setCurrentContextStateIndex(ctxStateIdx);
+    auto const currentIdx = session->getCurrentContextStateIndex();
+    SCOPE_EXIT { session->setCurrentContextStateIndex(currentIdx); };
+    session->setCurrentContextStateIndex(ctxStateIdx);
     return f(state);
   };
 

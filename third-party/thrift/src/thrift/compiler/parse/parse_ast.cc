@@ -636,9 +636,6 @@ class ast_builder : public parser_actions {
     }
 
     if (ret.sink && ret.stream) {
-      if (!params_.allow_unreleased_streaming) {
-        diags_.error(range.begin, "Only one of sink or stream is allowed");
-      }
       if (ret.sink->final_response_type()) {
         diags_.error(
             range.begin,

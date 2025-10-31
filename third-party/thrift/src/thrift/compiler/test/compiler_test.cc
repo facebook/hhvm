@@ -3248,8 +3248,7 @@ TEST(CompilerTest, bidirectional_streaming) {
         I, sink<i32>, stream<i32> baz();
         I, i32, sink<i32>, stream<i32> qux();
       }
-      )",
-      {"--allow-unreleased-streaming"});
+      )");
 
   check_compile(
       R"(
@@ -3257,8 +3256,7 @@ TEST(CompilerTest, bidirectional_streaming) {
       service S {
         stream<i32>, sink<i32> foo(); # expected-error: expected 'sink' before 'stream'
       }
-      )",
-      {"--allow-unreleased-streaming"});
+      )");
 
   check_compile(
       R"(
@@ -3266,8 +3264,7 @@ TEST(CompilerTest, bidirectional_streaming) {
       service S {
         i32, stream<i32>, sink<i32> foo(); # expected-error: expected 'sink' before 'stream'
       }
-      )",
-      {"--allow-unreleased-streaming"});
+      )");
 
   check_compile(
       R"(
@@ -3275,8 +3272,7 @@ TEST(CompilerTest, bidirectional_streaming) {
       service S {
         sink<i32>, stream<i32>, i32 foo(); # expected-error: expected identifier
       }
-      )",
-      {"--allow-unreleased-streaming"});
+      )");
 
   check_compile(
       R"(
@@ -3284,8 +3280,7 @@ TEST(CompilerTest, bidirectional_streaming) {
       service S {
         sink<i32>, sink<i32>, stream<i32> foo(); # expected-error: duplicate 'sink'
       }
-      )",
-      {"--allow-unreleased-streaming"});
+      )");
 
   check_compile(
       R"(
@@ -3293,8 +3288,7 @@ TEST(CompilerTest, bidirectional_streaming) {
       service S {
         sink<i32>, stream<i32>, stream<i32> foo(); # expected-error: duplicate 'stream'
       }
-      )",
-      {"--allow-unreleased-streaming"});
+      )");
 
   check_compile(
       R"(
@@ -3302,8 +3296,7 @@ TEST(CompilerTest, bidirectional_streaming) {
       service S {
         i32, sink<i32>, stream<i32>, stream<i32> foo(); # expected-error: expected identifier
       }
-      )",
-      {"--allow-unreleased-streaming"});
+      )");
 
   check_compile(
       R"(
@@ -3311,15 +3304,14 @@ TEST(CompilerTest, bidirectional_streaming) {
       service S {
         i32, sink<i32, i32>, stream<i32> foo(); # expected-error: Final response type is not allowed with bidirectional streaming
       }
-      )",
-      {"--allow-unreleased-streaming"});
+      )");
 
   check_compile(
       R"(
       package "facebook.com/thrift/test"
       service S {
         i32, sink<i32> foo(); # expected-error: Final response type is required
-        i32, sink<i32>, stream<i32> foo(); # expected-error: Only one of sink or stream is allowed
+        i32, sink<i32>, stream<i32> foo();
       }
       )");
 }

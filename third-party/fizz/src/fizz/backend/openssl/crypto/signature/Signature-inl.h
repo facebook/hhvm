@@ -116,6 +116,7 @@ inline void OpenSSLSignature<Type>::verify(
     case KeyType::RSA:
       return detail::rsaPssVerify(
           data, signature, pkey_, SigAlg<Scheme>::HashNid);
+    case KeyType::ED25519:
     default:
       folly::assume_unreachable();
   }

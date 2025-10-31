@@ -347,7 +347,6 @@ func (s *rocketServer) fireAndForget(msg payload.Payload) {
 	processDelay := processStartTime.Sub(requestReceivedTime)
 	s.observer.ProcessDelay(processDelay)
 
-	// TODO: support pipelining
 	if _, err := process(context.Background(), s.proc, protocol, s.pstats, s.observer); err != nil {
 		// Notify observer that connection was dropped due to unparseable message begin
 		s.observer.ConnDropped()

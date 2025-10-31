@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c69ac5a899ddbf2d3624479844ccf121>>
+// @generated SignedSource<<f17f1e1149daf9a794e7e528493d642f>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -101,18 +101,6 @@ pub enum Primary {
     CrossPkgAccessWithRequirepackage {
         use_file: patt_file::PattFile,
         decl_file: patt_file::PattFile,
-    },
-    #[rust_to_ocaml(prefix = "patt_")]
-    #[rust_to_ocaml(name = "Module_cross_package_access")]
-    ModuleCrossPackageAccess {
-        use_file: patt_file::PattFile,
-        decl_file: patt_file::PattFile,
-        module_file: patt_file::PattFile,
-        package_file: patt_file::PattFile,
-        current_module: patt_string::PattString,
-        current_package: patt_string::PattString,
-        target_module: patt_string::PattString,
-        target_package: patt_string::PattString,
     },
 }
 

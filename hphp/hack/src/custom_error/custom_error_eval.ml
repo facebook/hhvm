@@ -522,65 +522,6 @@ let matches_typing_error t ~scrut ~env =
         matches_file patt_use_file ~scrut:(Pos.filename pos) ~env >>= fun env ->
         matches_file patt_decl_file ~scrut:(Pos_or_decl.filename decl_pos) ~env)
     | (Cross_pkg_access_with_requirepackage _, _) -> Match.no_match
-    (* -- Module errors ----------------------------------------------------- *)
-    | ( Module_cross_package_access
-          {
-            patt_use_file;
-            patt_decl_file;
-            patt_module_file;
-            patt_package_file;
-            patt_current_module;
-            patt_current_package;
-            patt_target_module;
-            patt_target_package;
-          },
-        Typing_error.Primary.Modules
-          (Typing_error.Primary.Modules.Module_cross_pkg_access
-            {
-              pos;
-              decl_pos;
-              module_pos;
-              package_pos;
-              current_module_opt;
-              current_package_opt;
-              target_module_opt;
-              target_package_opt;
-            }) ) ->
-      Match.(
-        matches_file patt_use_file ~scrut:(Pos.filename pos) ~env >>= fun env ->
-        matches_file patt_decl_file ~scrut:(Pos_or_decl.filename decl_pos) ~env
-        >>= fun env ->
-        matches_file
-          patt_module_file
-          ~scrut:(Pos_or_decl.filename module_pos)
-          ~env
-        >>= fun env ->
-        matches_file patt_package_file ~scrut:(Pos.filename package_pos) ~env
-        >>= fun env ->
-        match_opt
-          matches_string
-          patt_current_module
-          ~scrut:current_module_opt
-          ~env
-        >>= fun env ->
-        match_opt
-          matches_string
-          patt_current_package
-          ~scrut:current_package_opt
-          ~env
-        >>= fun env ->
-        match_opt
-          matches_string
-          patt_target_module
-          ~scrut:target_module_opt
-          ~env
-        >>= fun env ->
-        match_opt
-          matches_string
-          patt_target_package
-          ~scrut:target_package_opt
-          ~env)
-    | (Module_cross_package_access _, _) -> Match.no_match
   (* -- Secondary errors ---------------------------------------------------- *)
   and aux_secondary t err_snd ~env =
     match (t, err_snd) with

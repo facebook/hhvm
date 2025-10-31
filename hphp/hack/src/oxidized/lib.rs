@@ -106,6 +106,7 @@ pub use r#gen::patt_binding_ty;
 pub use r#gen::patt_error;
 pub use r#gen::patt_file;
 pub use r#gen::patt_locl_ty;
+pub use r#gen::patt_member_name;
 pub use r#gen::patt_name;
 pub use r#gen::patt_naming_error;
 pub use r#gen::patt_string;

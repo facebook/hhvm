@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f17f1e1149daf9a794e7e528493d642f>>
+// @generated SignedSource<<159d1e150a5d57c9ea222a7d75a93704>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -87,7 +87,7 @@ pub enum Primary {
         is_static: Option<StaticPattern>,
         kind: MemberKindPattern,
         class_name: patt_name::PattName,
-        member_name: patt_string::PattString,
+        member_name: patt_member_name::PattMemberName,
         visibility: Option<VisibilityPattern>,
     },
     #[rust_to_ocaml(prefix = "patt_")]

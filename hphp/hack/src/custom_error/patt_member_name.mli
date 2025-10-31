@@ -5,9 +5,16 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+
 type t =
-  | Name
-  | Ty
-  | File
-  | Member_name
+  | Member_name of { patt_string: Patt_string.t }
+  | As of {
+      lbl: Patt_var.t;
+      patt: t;
+    }
+  | Wildcard
+  | Invalid of {
+      errs: Validation_err.t list;
+      patt: t;
+    }
 [@@deriving compare, eq, sexp, show]

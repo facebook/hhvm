@@ -29,6 +29,7 @@ use crate::patt_locl_ty::Prim;
 use crate::patt_locl_ty::ShapeField;
 use crate::patt_locl_ty::ShapeFields;
 use crate::patt_locl_ty::ShapeLabel;
+use crate::patt_member_name::PattMemberName;
 use crate::patt_name::Namespace;
 use crate::patt_name::PattName;
 use crate::patt_naming_error::PattNameContext;
@@ -417,6 +418,41 @@ impl Validatable for Namespace {
     }
 }
 
+impl Validatable for PattMemberName {
+    fn validate(&mut self, env: &mut ValidationEnv) -> bool {
+        match self {
+            Self::As { lbl, patt } => {
+                let errs = env
+                    .add(lbl, PattBindingTy::MemberName)
+                    .map_or(vec![], |e| vec![e]);
+                let valid = patt.validate(env);
+                self.invalidate(&errs);
+                valid && errs.is_empty()
+            }
+            Self::MemberName { patt_string } => patt_string.validate(env),
+            Self::Invalid { .. } => false,
+            Self::Wildcard => true,
+        }
+    }
+}
+
+impl Invalidatable for PattMemberName {
+    fn invalidate(&mut self, errs_in: &[ValidationErr]) {
+        if !errs_in.is_empty() {
+            match self {
+                Self::Invalid { errs, .. } => errs.extend(errs_in.to_vec()),
+                _ => {
+                    let patt = std::mem::replace(self, PattMemberName::Wildcard);
+                    *self = PattMemberName::Invalid {
+                        errs: errs_in.to_vec(),
+                        patt: Box::new(patt),
+                    };
+                }
+            }
+        }
+    }
+}
+
 // -- File patterns ------------------------------------------------------------
 
 impl Validatable for PattFile {
@@ -488,6 +524,7 @@ impl Validatable for Elem {
             Self::TyVar(name) => matches!(env.get(name), Some(PattBindingTy::Ty)),
             Self::NameVar(name) => matches!(env.get(name), Some(PattBindingTy::Name)),
             Self::FileVar(name) => matches!(env.get(name), Some(PattBindingTy::File)),
+            Self::MemberNameVar(name) => matches!(env.get(name), Some(PattBindingTy::MemberName)),
             Self::Lit(_) => true,
         }
     }

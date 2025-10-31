@@ -378,7 +378,9 @@ let test_member_not_found_instance_method_pattern _ =
                      patt_namespace = Patt_name.Root;
                      patt_name = Patt_string.Exactly class_name;
                    };
-               patt_member_name = Patt_string.Exactly method_name;
+               patt_member_name =
+                 Patt_member_name.(
+                   Member_name { patt_string = Patt_string.Exactly method_name });
                patt_visibility = None;
              }))
   in
@@ -432,7 +434,10 @@ let test_member_not_found_instance_property_pattern _ =
                      patt_namespace = Patt_name.Root;
                      patt_name = Patt_string.Exactly class_name;
                    };
-               patt_member_name = Patt_string.Exactly property_name;
+               patt_member_name =
+                 Patt_member_name.(
+                   Member_name
+                     { patt_string = Patt_string.Exactly property_name });
                patt_visibility = None;
              }))
   in
@@ -486,7 +491,9 @@ let test_member_not_found_static_method_pattern _ =
                      patt_namespace = Patt_name.Root;
                      patt_name = Patt_string.Exactly class_name;
                    };
-               patt_member_name = Patt_string.Exactly method_name;
+               patt_member_name =
+                 Patt_member_name.(
+                   Member_name { patt_string = Patt_string.Exactly method_name });
                patt_visibility = None;
              }))
   in
@@ -540,7 +547,10 @@ let test_member_not_found_class_constant_pattern _ =
                      patt_namespace = Patt_name.Root;
                      patt_name = Patt_string.Exactly class_name;
                    };
-               patt_member_name = Patt_string.Exactly constant_name;
+               patt_member_name =
+                 Patt_member_name.(
+                   Member_name
+                     { patt_string = Patt_string.Exactly constant_name });
                patt_visibility = None;
              }))
   in
@@ -594,7 +604,10 @@ let test_member_not_found_static_property_pattern _ =
                      patt_namespace = Patt_name.Root;
                      patt_name = Patt_string.Exactly class_name;
                    };
-               patt_member_name = Patt_string.Exactly property_name;
+               patt_member_name =
+                 Patt_member_name.(
+                   Member_name
+                     { patt_string = Patt_string.Exactly property_name });
                patt_visibility = None;
              }))
   in
@@ -648,7 +661,10 @@ let test_member_not_found_class_typeconst_pattern _ =
                      patt_namespace = Patt_name.Root;
                      patt_name = Patt_string.Exactly class_name;
                    };
-               patt_member_name = Patt_string.Exactly typeconst_name;
+               patt_member_name =
+                 Patt_member_name.(
+                   Member_name
+                     { patt_string = Patt_string.Exactly typeconst_name });
                patt_visibility = None;
              }))
   in
@@ -702,7 +718,9 @@ let test_member_wildcard_patterns _ =
                      patt_namespace = Patt_name.Root;
                      patt_name = Patt_string.Exactly class_name;
                    };
-               patt_member_name = Patt_string.Exactly method_name;
+               patt_member_name =
+                 Patt_member_name.(
+                   Member_name { patt_string = Patt_string.Exactly method_name });
                patt_visibility = None;
              }))
   in
@@ -756,7 +774,10 @@ let test_member_name_patterns _ =
                      patt_namespace = Patt_name.Root;
                      patt_name = Patt_string.Contains "Test";
                    };
-               patt_member_name = Patt_string.Starts_with "render";
+               patt_member_name =
+                 Patt_member_name.(
+                   Member_name
+                     { patt_string = Patt_string.Starts_with "render" });
                patt_visibility = None;
              }))
   in
@@ -811,7 +832,9 @@ let test_member_pattern_specificity _ =
                      patt_namespace = Patt_name.Root;
                      patt_name = Patt_string.Exactly class_name;
                    };
-               patt_member_name = Patt_string.Exactly method_name;
+               patt_member_name =
+                 Patt_member_name.(
+                   Member_name { patt_string = Patt_string.Exactly method_name });
                patt_visibility = None;
              }))
   in
@@ -831,7 +854,9 @@ let test_member_pattern_specificity _ =
                      patt_namespace = Patt_name.Root;
                      patt_name = Patt_string.Exactly class_name;
                    };
-               patt_member_name = Patt_string.Exactly method_name;
+               patt_member_name =
+                 Patt_member_name.(
+                   Member_name { patt_string = Patt_string.Exactly method_name });
                patt_visibility = None;
              }))
   in
@@ -907,7 +932,9 @@ let test_member_pattern_no_match _ =
                      patt_namespace = Patt_name.Root;
                      patt_name = Patt_string.Exactly class_name;
                    };
-               patt_member_name = Patt_string.Exactly method_name;
+               patt_member_name =
+                 Patt_member_name.(
+                   Member_name { patt_string = Patt_string.Exactly method_name });
                patt_visibility = None;
              }))
   in
@@ -967,11 +994,16 @@ let test_member_complex_string_patterns _ =
                          ];
                    };
                patt_member_name =
-                 Patt_string.And
-                   [
-                     Patt_string.Starts_with "render";
-                     Patt_string.Contains "String";
-                   ];
+                 Patt_member_name.(
+                   Member_name
+                     {
+                       patt_string =
+                         Patt_string.And
+                           [
+                             Patt_string.Starts_with "render";
+                             Patt_string.Contains "String";
+                           ];
+                     });
                patt_visibility = None;
              }))
   in

@@ -43,7 +43,9 @@ let test_instance_method_pattern () =
                      patt_namespace = Patt_name.Root;
                      patt_name = Patt_string.Exactly class_name;
                    };
-               patt_member_name = Patt_string.Exactly method_name;
+               patt_member_name =
+                 Patt_member_name.(
+                   Member_name { patt_string = Patt_string.Exactly method_name });
                patt_visibility = None;
              }))
   in

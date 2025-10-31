@@ -132,6 +132,7 @@ run_hh_oxidize \
   hphp/hack/src/custom_error/patt_file.ml                                      \
   hphp/hack/src/custom_error/patt_locl_ty.ml                                  \
   hphp/hack/src/custom_error/patt_name.ml                                     \
+  hphp/hack/src/custom_error/patt_member_name.ml                              \
   hphp/hack/src/custom_error/patt_string.ml                                   \
   hphp/hack/src/custom_error/patt_var.ml                                      \
   hphp/hack/src/custom_error/validation_err.ml                                \

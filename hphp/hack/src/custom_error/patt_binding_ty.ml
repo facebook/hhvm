@@ -11,4 +11,5 @@ type t =
   | Name
   | Ty
   | File
+  | Member_name
 [@@deriving compare, eq, sexp, show]

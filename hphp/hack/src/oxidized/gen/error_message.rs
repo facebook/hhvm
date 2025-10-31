@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<16c8a5c505a644bfbab83f6ceb7c7b0d>>
+// @generated SignedSource<<01506e150f65465e18d80e6b49328191>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -43,6 +43,8 @@ pub enum Elem {
     NameVar(patt_var::PattVar),
     #[rust_to_ocaml(name = "File_var")]
     FileVar(patt_var::PattVar),
+    #[rust_to_ocaml(name = "Member_name_var")]
+    MemberNameVar(patt_var::PattVar),
 }
 
 #[derive(

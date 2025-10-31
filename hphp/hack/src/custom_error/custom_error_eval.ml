@@ -18,6 +18,7 @@ module Value = struct
     | Ty of (Ty.locl_ty[@compare.ignore] [@sexp.opaque])
     | Name of ((Pos_or_decl.t[@opaque]) * string)
     | File of (Relative_path.t[@opaque])
+    | Member_name of string
   [@@deriving compare, sexp]
 end
 
@@ -74,6 +75,9 @@ module Env = struct
   let add_ty t ~lbl ~ty = add t ~lbl ~data:(Value.Ty ty)
 
   let add_file t ~lbl ~file = add t ~lbl ~data:(Value.File file)
+
+  let add_member_name t ~lbl ~member_name =
+    add t ~lbl ~data:(Value.Member_name member_name)
 
   let get (Env t) lbl = Map.find_exn t lbl
 end
@@ -182,6 +186,18 @@ let matches_string t ~scrut ~env =
     Match.no_match
 
 (* -- Names ----------------------------------------------------------------- *)
+
+let rec matches_member_name t ~scrut ~env =
+  let open Patt_member_name in
+  match t with
+  | Wildcard -> Match.matched env
+  | Member_name { patt_string } -> matches_string patt_string ~scrut ~env
+  | As { lbl; patt } ->
+    Match.(
+      matches_member_name patt ~scrut ~env
+      |> map_err ~f:(fun _ -> assert false)
+      |> map ~f:(Env.add_member_name ~lbl ~member_name:scrut))
+  | Invalid { errs; _ } -> Match.match_err errs
 
 let split_namespace (_pos, name) =
   let ls =
@@ -488,7 +504,8 @@ let matches_typing_error t ~scrut ~env =
         >>= fun env ->
         matches_member_kind_instance patt_kind ~scrut:kind ~env >>= fun env ->
         matches_name patt_class_name ~scrut:(class_pos, class_name) ~env
-        >>= fun env -> matches_string patt_member_name ~scrut:member_name ~env)
+        >>= fun env ->
+        matches_member_name patt_member_name ~scrut:member_name ~env)
     | ( Member_not_found
           {
             patt_is_static;
@@ -503,7 +520,8 @@ let matches_typing_error t ~scrut ~env =
         matches_static_pattern patt_is_static ~scrut:`static ~env >>= fun env ->
         matches_member_kind_static patt_kind ~scrut:kind ~env >>= fun env ->
         matches_name patt_class_name ~scrut:(class_pos, class_name) ~env
-        >>= fun env -> matches_string patt_member_name ~scrut:member_name ~env)
+        >>= fun env ->
+        matches_member_name patt_member_name ~scrut:member_name ~env)
     | (Member_not_found _, _) -> Match.no_match
     (* -- Package errors ---------------------------------------------------- *)
     | ( Cross_pkg_access { patt_use_file; patt_decl_file },
@@ -608,7 +626,8 @@ let eval_error_message Error_message.{ message } ~env =
     | Lit str -> Either.First str
     | File_var var
     | Ty_var var
-    | Name_var var ->
+    | Name_var var
+    | Member_name_var var ->
       Either.Second (Env.get env var)
   in
   List.map ~f message

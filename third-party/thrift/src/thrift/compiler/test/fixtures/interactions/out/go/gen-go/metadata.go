@@ -45,6 +45,11 @@ var (
             TPrimitive:
                 thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
         }
+    premadeThriftType_i32 =
+        &metadata.ThriftType{
+            TPrimitive:
+                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+        }
 )
 
 // Premade struct metadatas
@@ -82,6 +87,7 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap["module.ShouldBeBoxed"] = premadeThriftType_module_ShouldBeBoxed
     fbthriftThriftTypesMap["module.CustomException"] = premadeThriftType_module_CustomException
     fbthriftThriftTypesMap["void"] = premadeThriftType_void
+    fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
     return fbthriftThriftTypesMap
 }()
 

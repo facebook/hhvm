@@ -93,6 +93,16 @@ class t_mstch_go_generator : public t_mstch_generator {
   }
 
   go::codegen_data data_;
+
+  prototype<t_interaction>::ptr make_prototype_for_interaction(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_interaction(proto);
+    auto def = whisker::dsl::prototype_builder<h_interaction>::extends(base);
+    def.property("go_name", [](const t_interaction& self) {
+      return go::munge_ident(self.name());
+    });
+    return std::move(def).make();
+  }
 };
 
 class mstch_go_program : public mstch_program {

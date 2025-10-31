@@ -89,6 +89,8 @@ func (c *cClientImpl) Numbers(ctx context.Context) (<-chan Number /* elem stream
     }
     fbthriftResp := newRespCNumbers()
 
+    fbthriftChannel := c.ch
+
     fbthriftErrChan := make(chan error, 1)
     fbthriftElemChan := make(chan Number, thrift.DefaultStreamBufferSize)
 
@@ -113,7 +115,7 @@ func (c *cClientImpl) Numbers(ctx context.Context) (<-chan Number /* elem stream
         close(fbthriftErrChan)
     }
 
-    fbthriftErr := c.ch.SendRequestStream(
+    fbthriftErr := fbthriftChannel.SendRequestStream(
         fbthriftStreamCtx,
         "numbers",
         fbthriftReq,

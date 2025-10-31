@@ -27,7 +27,12 @@ func (c *{{service:go_client_name}}) {{> svc/client_func_signature}} {
         {{/field:type}}
         {{/function:args}}
     }
+    {{#if function:creates_interaction?}}
+    fbthriftChannel := thrift.NewInteractionChannel(c.ch, "{{function:created_interaction.name}}")
+    fbthriftInteractionClient := New{{function:created_interaction.go_name}}ChannelClient(fbthriftChannel)
+    {{#else}}
     fbthriftChannel := c.ch
+    {{/if function:creates_interaction?}}
     fbthriftResp := newResp{{service:go_name}}{{function:go_name}}()
     fbthriftErr := fbthriftChannel.SendRequestResponse(
         {{function:ctx_arg_name}},
@@ -36,9 +41,9 @@ func (c *{{service:go_client_name}}) {{> svc/client_func_signature}} {
         fbthriftResp,
     )
     if fbthriftErr != nil {
-        return {{#function:return_type}}{{^type:void?}}{{> common/go_zero_value}}, {{/type:void?}}{{/function:return_type}}fbthriftErr
+        return {{#function:creates_interaction?}}nil, {{/function:creates_interaction?}}{{#function:return_type}}{{^type:void?}}{{> common/go_zero_value}}, {{/type:void?}}{{/function:return_type}}fbthriftErr
     } else if fbthriftEx := fbthriftResp.Exception(); fbthriftEx != nil {
-        return {{#function:return_type}}{{^type:void?}}{{> common/go_zero_value}}, {{/type:void?}}{{/function:return_type}}fbthriftEx
+        return {{#function:creates_interaction?}}nil, {{/function:creates_interaction?}}{{#function:return_type}}{{^type:void?}}{{> common/go_zero_value}}, {{/type:void?}}{{/function:return_type}}fbthriftEx
     }
-    return {{#function:return_type}}{{^type:void?}}fbthriftResp.Get{{function:retval_field_name}}(), {{/type:void?}}{{/function:return_type}}nil
+    return {{#function:creates_interaction?}}fbthriftInteractionClient, {{/function:creates_interaction?}}{{#function:return_type}}{{^type:void?}}fbthriftResp.Get{{function:retval_field_name}}(), {{/type:void?}}{{/function:return_type}}nil
 }

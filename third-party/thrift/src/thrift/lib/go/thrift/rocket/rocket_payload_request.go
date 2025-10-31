@@ -21,13 +21,14 @@ import (
 	"fmt"
 	"maps"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 	"github.com/rsocket/rsocket-go/payload"
 )
 
 // EncodeRequestPayload encodes a request payload.
 func EncodeRequestPayload(
-	_ context.Context,
+	ctx context.Context,
 	name string,
 	protoID rpcmetadata.ProtocolId,
 	rpcKind rpcmetadata.RpcKind,
@@ -41,6 +42,19 @@ func EncodeRequestPayload(
 		SetKind(&rpcKind).
 		SetCompression(&compression).
 		SetOtherMetadata(maps.Clone(headers))
+
+	if interactionID, ok := types.GetInteractionIDFromContext(ctx); ok {
+		if interactionName, ok := types.GetInteractionCreateFromContext(ctx); ok {
+			// New interaction (not yet created)
+			metadata.SetInteractionCreate(&rpcmetadata.InteractionCreate{
+				InteractionId:   interactionID,
+				InteractionName: interactionName,
+			})
+		} else {
+			// Existing interaction (already created)
+			metadata.SetInteractionId(&interactionID)
+		}
+	}
 
 	return EncodePayloadMetadataAndData(metadata, dataBytes, compression)
 }

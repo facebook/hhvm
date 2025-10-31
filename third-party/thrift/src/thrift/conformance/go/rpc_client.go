@@ -390,13 +390,56 @@ func (t *rpcClientConformanceTester) InteractionConstructor(ctx context.Context)
 }
 
 func (t *rpcClientConformanceTester) InteractionFactoryFunction(ctx context.Context) error {
-	return errors.New("not supported")
+	_, _ = t.client.BasicInteractionFactoryFunction(ctx, t.instruction.InteractionFactoryFunction.InitialSum)
+	responseValue := rpc.NewInteractionFactoryFunctionClientTestResult()
+	clientTestResult := rpc.NewClientTestResult().
+		SetInteractionFactoryFunction(responseValue)
+	return t.client.SendTestResult(ctx, clientTestResult)
 }
 
 func (t *rpcClientConformanceTester) InteractionPersistsState(ctx context.Context) error {
-	return errors.New("not supported")
+	if t.instruction.InteractionPersistsState.InitialSum == nil {
+		return errors.New("initial sum is nil")
+	}
+	interactionClient, err := t.client.BasicInteractionFactoryFunction(ctx, *t.instruction.InteractionPersistsState.InitialSum)
+	if err != nil {
+		return err
+	}
+	responses := make([]int32, 0)
+	for _, value := range t.instruction.InteractionPersistsState.ValuesToAdd {
+		resp, err := interactionClient.Add(ctx, value)
+		if err != nil {
+			return err
+		}
+		responses = append(responses, resp)
+	}
+
+	responseValue := rpc.NewInteractionPersistsStateClientTestResult().
+		SetResponses(responses)
+	clientTestResult := rpc.NewClientTestResult().
+		SetInteractionPersistsState(responseValue)
+	return t.client.SendTestResult(ctx, clientTestResult)
 }
 
 func (t *rpcClientConformanceTester) InteractionTermination(ctx context.Context) error {
-	return errors.New("not supported")
+	if t.instruction.InteractionTermination.InitialSum == nil {
+		return errors.New("initial sum is nil")
+	}
+	interactionClient, err := t.client.BasicInteractionFactoryFunction(ctx, *t.instruction.InteractionTermination.InitialSum)
+	if err != nil {
+		return err
+	}
+	err = interactionClient.Init(ctx)
+	if err != nil {
+		return err
+	}
+	err = interactionClient.Close()
+	if err != nil {
+		return err
+	}
+
+	responseValue := rpc.NewInteractionTerminationClientTestResult()
+	clientTestResult := rpc.NewClientTestResult().
+		SetInteractionTermination(responseValue)
+	return t.client.SendTestResult(ctx, clientTestResult)
 }

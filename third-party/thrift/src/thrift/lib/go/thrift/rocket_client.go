@@ -48,6 +48,7 @@ type rocketClient struct {
 }
 
 var _ RequestChannel = (*rocketClient)(nil)
+var _ types.RequestChannelExtended = (*rocketClient)(nil)
 
 func newRocketClient(
 	conn net.Conn,

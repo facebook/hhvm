@@ -1,6 +1,6 @@
 Defined in namespace `C`
 ---
-function count(readonly Container<mixed> $container)[]: int
+function count(readonly ~Container<mixed> $container)[]: int
 ---
 Returns the number of elements in the given Container.
 

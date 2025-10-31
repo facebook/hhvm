@@ -16,7 +16,7 @@ SORT TEXT: none
 C\count
   INSERT C\count(
   INSERT )
-  (function(readonly Container<mixed> $container)[]: int)
+  (function(readonly ~Container<mixed> $container)[]: int)
 SORT TEXT: none
 C\every
   INSERT C\every(
@@ -61,7 +61,7 @@ SORT TEXT: none
 C\is_empty
   INSERT C\is_empty(
   INSERT )
-  (function<T>(readonly Container<T> $container)[]: bool)
+  (function<T>(readonly ~Container<T> $container)[]: bool)
 SORT TEXT: none
 C\is_sorted
   INSERT C\is_sorted(

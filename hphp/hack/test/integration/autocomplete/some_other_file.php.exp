@@ -15,8 +15,8 @@ valueOf
   function<TEnum super this, TType>(HH\EnumClass\Label<TEnum, TType> $label)[HH\Contexts\write_props]: ~HH\MemberOf<TEnum, TType>
 SORT TEXT: none
 nameOf
-  INSERT nameOf(${1:#label})
-  function<TType>(HH\EnumClass\Label<this, TType> $label)[]: string
+  INSERT nameOf(${1:\$label})
+  function<TType>(~HH\EnumClass\Label<this, TType> $label)[]: string
 SORT TEXT: none
 getValues
   INSERT getValues()

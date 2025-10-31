@@ -63,7 +63,7 @@ module Make (Provider : Decl_enforceability.ShallowProvider) = struct
       ({
          Shallow_decl_defs.sm_name;
          sm_type;
-         sm_visibility = _;
+         sm_visibility;
          sm_deprecated = _;
          sm_flags;
          sm_attributes;
@@ -85,6 +85,15 @@ module Make (Provider : Decl_enforceability.ShallowProvider) = struct
            Naming_special_names.UserAttributes.uaNoAutoLikes
            sm_attributes
     in
+    let cannot_override =
+      match this_class with
+      | Some c ->
+        c.Shallow_decl_defs.sc_final
+        || Shallow_decl_defs.MethodFlags.get_final sm_flags
+        || sm_visibility = Ast_defs.Private
+           && not (c.Shallow_decl_defs.sc_kind = Ctrait)
+      | None -> true
+    in
     {
       Typing_defs.fe_module = None;
       fe_package = None;
@@ -104,6 +113,7 @@ module Make (Provider : Decl_enforceability.ShallowProvider) = struct
                 Decl_enforceability.Concrete_method)
             ~this_class
             ~no_auto_likes:fe_no_auto_likes
+            ~cannot_override
             ctx
             pos
             sm_type

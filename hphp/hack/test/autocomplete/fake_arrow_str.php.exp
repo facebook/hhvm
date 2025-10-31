@@ -21,7 +21,7 @@ SORT TEXT: none
 Str\capitalize
   INSERT Str\capitalize(
   INSERT )
-  (function(string $string)[]: string)
+  (function(~string $string)[]: string)
 SORT TEXT: none
 Str\capitalize_words
   INSERT Str\capitalize_words(
@@ -66,17 +66,17 @@ SORT TEXT: none
 Str\is_empty
   INSERT Str\is_empty(
   INSERT )
-  (function(?string $string)[]: bool)
+  (function(~?string $string)[]: bool)
 SORT TEXT: none
 Str\length
   INSERT Str\length(
   INSERT )
-  (function(string $string)[]: int)
+  (function(~string $string)[]: int)
 SORT TEXT: none
 Str\lowercase
   INSERT Str\lowercase(
   INSERT )
-  (function(string $string)[]: string)
+  (function(~string $string)[]: string)
 SORT TEXT: none
 Str\pad_left
   INSERT Str\pad_left(
@@ -126,7 +126,7 @@ SORT TEXT: none
 Str\reverse
   INSERT Str\reverse(
   INSERT )
-  (function(string $string)[]: string)
+  (function(~string $string)[]: string)
 SORT TEXT: none
 Str\search
   INSERT Str\search(
@@ -181,7 +181,7 @@ SORT TEXT: none
 Str\to_int
   INSERT Str\to_int(
   INSERT )
-  (function(string $string)[]: ?int)
+  (function(~string $string)[]: ?int)
 SORT TEXT: none
 Str\trim
   INSERT Str\trim(
@@ -201,7 +201,7 @@ SORT TEXT: none
 Str\uppercase
   INSERT Str\uppercase(
   INSERT )
-  (function(string $string)[]: string)
+  (function(~string $string)[]: string)
 SORT TEXT: none
 Str\example_for_testing_named_params_fake_arrow
   INSERT Str\example_for_testing_named_params_fake_arrow(

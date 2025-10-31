@@ -10,7 +10,7 @@
     "kind": "primitive",
     "name": "string"
   },
-  "expected_type": "bool",
+  "expected_type": "~bool",
   "full_expected_type": {
     "src_pos": {
       "filename": "/return_expr_only.php",

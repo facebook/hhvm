@@ -557,9 +557,21 @@ module Pessimize (Provider : ShallowProvider) = struct
    * which we pessimise regardless of enforcement, because override doesn't
    * preserve enforcement e.g. `inout int` might beoverridden by `inout C::MyTypeConstant`
    *)
-  let pessimise_param_type fp =
+  let pessimise_param_type ~pessimise_param fp =
     match get_fp_mode fp with
-    | FPnormal -> fp
+    | FPnormal ->
+      if pessimise_param then
+        {
+          fp with
+          fp_type =
+            make_like_type
+              ~reason:(Reason.support_dynamic_type_assume fp.fp_pos)
+              ~intersect_with:None
+              ~return_from_async:false
+              fp.fp_type;
+        }
+      else
+        fp
     | FPinout ->
       {
         fp with
@@ -584,7 +596,8 @@ module Pessimize (Provider : ShallowProvider) = struct
     avoid hierarchy errors.
 
   *)
-  let pessimise_fun_type ~fun_kind ~this_class ~no_auto_likes (ctx : ctx) p ty =
+  let pessimise_fun_type
+      ~fun_kind ~this_class ~no_auto_likes ~cannot_override (ctx : ctx) p ty =
     match get_node ty with
     | Tfun ft ->
       let ft =
@@ -595,8 +608,30 @@ module Pessimize (Provider : ShallowProvider) = struct
       else
         let return_from_async = get_ft_async ft in
         let ret_ty = ft.ft_ret in
+        let pessimise_param =
+          List.length ft.ft_params <= 1
+          &&
+          match fun_kind with
+          | Function ->
+            (match
+               E.get_enforcement ~return_from_async ~this_class ctx ret_ty
+             with
+            | Enforced _ -> true
+            | _ -> false)
+          | Concrete_method when cannot_override ->
+            (match
+               E.get_enforcement ~return_from_async ~this_class ctx ret_ty
+             with
+            | Enforced _ -> true
+            | _ -> false)
+          | _ -> false
+        in
         let ft =
-          { ft with ft_params = List.map ft.ft_params ~f:pessimise_param_type }
+          {
+            ft with
+            ft_params =
+              List.map ft.ft_params ~f:(pessimise_param_type ~pessimise_param);
+          }
         in
         (* For the this type, although not enforced (because of generics), it's very
          * unlikely that we will get errors if we do not pessimise it.

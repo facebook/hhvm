@@ -4,7 +4,7 @@ fb_disable_code_coverage
 SORT TEXT: none
 fb_double_metaphone
   INSERT fb_double_metaphone(${1:\$word})
-  (function(string $word): string)
+  (function(~string $word): string)
 SORT TEXT: none
 fb_double_metaphone_with_vowel
   INSERT fb_double_metaphone_with_vowel(${1:\$word}, ${2:\$include_vowels})
@@ -40,11 +40,11 @@ fb_folly_varint_decode_group
 SORT TEXT: none
 fb_folly_varint_encode
   INSERT fb_folly_varint_encode(${1:\$value})
-  (function(int $value): string)
+  (function(~int $value): string)
 SORT TEXT: none
 fb_folly_varint_encode_group
   INSERT fb_folly_varint_encode_group(${1:\$values})
-  (function(ConstVector<int> $values): string)
+  (function(~ConstVector<int> $values): string)
 SORT TEXT: none
 fb_gen_user_func
   INSERT fb_gen_user_func(${1:\$initialDoc}, ${2:\$function})
@@ -308,7 +308,7 @@ flatbuffer_encode
 SORT TEXT: none
 floatval
   INSERT floatval(${1:\$v})
-  (function(HH\FIXME\MISSING_PARAM_TYPE $v)[]: float)
+  (function(~HH\FIXME\MISSING_PARAM_TYPE $v)[]: float)
 SORT TEXT: none
 flock
   INSERT flock(${1:\$handle}, ${2:\$operation}, ${3:\$wouldblock})
@@ -316,7 +316,7 @@ flock
 SORT TEXT: none
 floor
   INSERT floor(${1:\$value})
-  (function(HH\FIXME\MISSING_PARAM_TYPE $value)[]: float)
+  (function(~HH\FIXME\MISSING_PARAM_TYPE $value)[]: float)
 SORT TEXT: none
 flush
   INSERT flush()

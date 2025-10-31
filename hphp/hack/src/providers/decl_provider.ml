@@ -215,6 +215,7 @@ let maybe_pessimise_fun_decl ctx fun_decl =
             ~fun_kind:Decl_enforceability.Function
             ~this_class:None
             ~no_auto_likes
+            ~cannot_override:true
             ctx
             fun_decl.fe_pos
             fun_decl.fe_type;

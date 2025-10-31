@@ -1214,7 +1214,7 @@ class MyStruct final  {
   using __fbthrift_list_of_field_with_annotation = folly::tag_t<
     ::apache::thrift::type::field_id<1>
   >;
-  using __fbthrift_field_annotations = folly::tag_t<
+  using __fbthrift_annotations_on_fields = folly::tag_t<
     folly::tag_t<
       ::test::fixtures::basic_structured_annotations::runtime_annotation
     >

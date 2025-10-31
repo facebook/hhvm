@@ -158,7 +158,7 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
     ::apache::thrift::type::field_id<{{field:id}}>{{^last?}}, {{/last?}}
 {{/struct:fields_with_runtime_annotation}}
   >;
-  using __fbthrift_field_annotations = folly::tag_t<
+  using __fbthrift_annotations_on_fields = folly::tag_t<
 {{#struct:fields_with_runtime_annotation}}
     folly::tag_t<
 {{#field:structured_runtime_annotations}}{{#constant:type}}

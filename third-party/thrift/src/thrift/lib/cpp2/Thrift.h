@@ -163,7 +163,7 @@ struct struct_private_access {
             Annotation,
             folly::type_list_element_t<
                 index,
-                typename T::__fbthrift_field_annotations>>;
+                typename T::__fbthrift_annotations_on_fields>>;
       }
     }
     return false;

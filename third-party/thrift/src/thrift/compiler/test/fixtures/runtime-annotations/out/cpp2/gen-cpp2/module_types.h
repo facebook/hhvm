@@ -222,7 +222,7 @@ class MyStruct final  {
   using __fbthrift_list_of_field_with_annotation = folly::tag_t<
     ::apache::thrift::type::field_id<1>
   >;
-  using __fbthrift_field_annotations = folly::tag_t<
+  using __fbthrift_annotations_on_fields = folly::tag_t<
     folly::tag_t<
       ::facebook::thrift::test::MyAnnotation
     >
@@ -366,7 +366,7 @@ class MyUnion final  {
   using __fbthrift_list_of_field_with_annotation = folly::tag_t<
     ::apache::thrift::type::field_id<1>
   >;
-  using __fbthrift_field_annotations = folly::tag_t<
+  using __fbthrift_annotations_on_fields = folly::tag_t<
     folly::tag_t<
       ::facebook::thrift::test::MyAnnotation
     >
@@ -510,7 +510,7 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
   using __fbthrift_list_of_field_with_annotation = folly::tag_t<
     ::apache::thrift::type::field_id<1>
   >;
-  using __fbthrift_field_annotations = folly::tag_t<
+  using __fbthrift_annotations_on_fields = folly::tag_t<
     folly::tag_t<
       ::facebook::thrift::test::MyAnnotation
     >

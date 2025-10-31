@@ -5,11 +5,11 @@ class C {
   // CHECK: define .wrapper C.myfn2($this: .notnull *C, $a: .notnull *HackInt) : *void {
   // CHECK: local $b: *void, $c: *void
   // CHECK: #b0:
-  // CHECK: // .column 10
+  // CHECK: // .column 37
   // CHECK:   store &$b <- $builtins.hack_int(1): *HackMixed
-  // CHECK: // .column 10
+  // CHECK: // .column 49
   // CHECK:   store &$c <- $builtins.hack_int(2): *HackMixed
-  // CHECK: // .column 10
+  // CHECK: // .column 49
   // CHECK:   jmp b1
   // CHECK: #b1:
   // CHECK:   n0: *HackMixed = load &$a
@@ -24,9 +24,9 @@ class C {
   // CHECK: define .wrapper C.myfn2($this: .notnull *C, $a: .notnull *HackInt, $b: .notnull *HackInt) : *void {
   // CHECK: local $c: *void
   // CHECK: #b0:
-  // CHECK: // .column 10
+  // CHECK: // .column 49
   // CHECK:   store &$c <- $builtins.hack_int(2): *HackMixed
-  // CHECK: // .column 10
+  // CHECK: // .column 49
   // CHECK:   jmp b1
   // CHECK: #b1:
   // CHECK:   n0: *HackMixed = load &$a
@@ -60,11 +60,11 @@ class C {
 // CHECK: define .wrapper $root.myfn($this: *void, $a: .notnull *HackInt) : *void {
 // CHECK: local $b: *void, $c: *void
 // CHECK: #b0:
-// CHECK: // .column 1
+// CHECK: // .column 27
 // CHECK:   store &$b <- $builtins.hack_int(1): *HackMixed
-// CHECK: // .column 1
+// CHECK: // .column 39
 // CHECK:   store &$c <- $builtins.hack_int(2): *HackMixed
-// CHECK: // .column 1
+// CHECK: // .column 39
 // CHECK:   jmp b1
 // CHECK: #b1:
 // CHECK:   n0: *HackMixed = load &$a
@@ -78,9 +78,9 @@ class C {
 // CHECK: define .wrapper $root.myfn($this: *void, $a: .notnull *HackInt, $b: .notnull *HackInt) : *void {
 // CHECK: local $c: *void
 // CHECK: #b0:
-// CHECK: // .column 1
+// CHECK: // .column 39
 // CHECK:   store &$c <- $builtins.hack_int(2): *HackMixed
-// CHECK: // .column 1
+// CHECK: // .column 39
 // CHECK:   jmp b1
 // CHECK: #b1:
 // CHECK:   n0: *HackMixed = load &$a

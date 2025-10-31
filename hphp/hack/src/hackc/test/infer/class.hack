@@ -367,11 +367,11 @@ trait T0 {
   // CHECK: define .wrapper T0$static.with_optional_argument($this: .notnull *T0$static, self: *HackMixed) : *void {
   // CHECK: local $opt1: *void, $opt2: *void
   // CHECK: #b0:
-  // CHECK: // .column 17
+  // CHECK: // .column 53
   // CHECK:   store &$opt1 <- $builtins.hack_int(0): *HackMixed
-  // CHECK: // .column 17
+  // CHECK: // .column 66
   // CHECK:   store &$opt2 <- $builtins.hack_int(1): *HackMixed
-  // CHECK: // .column 17
+  // CHECK: // .column 66
   // CHECK:   jmp b1
   // CHECK: #b1:
   // CHECK:   n0: *HackMixed = load &$opt1
@@ -393,9 +393,9 @@ trait T0 {
   // CHECK: define .wrapper T0$static.with_optional_argument($this: .notnull *T0$static, $opt1: .notnull *HackInt, self: *HackMixed) : *void {
   // CHECK: local $opt2: *void
   // CHECK: #b0:
-  // CHECK: // .column 17
+  // CHECK: // .column 66
   // CHECK:   store &$opt2 <- $builtins.hack_int(1): *HackMixed
-  // CHECK: // .column 17
+  // CHECK: // .column 66
   // CHECK:   jmp b1
   // CHECK: #b1:
   // CHECK:   n0: *HackMixed = load &$opt1

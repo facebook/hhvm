@@ -23,6 +23,7 @@ import (
 	"net"
 	"runtime"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -54,6 +55,10 @@ type rocketServer struct {
 	observer                ServerObserver
 	maxRequests             int64
 	totalActiveRequestCount atomic.Int64
+
+	// InteractionID to interaction processor map
+	interactions      map[int64]Processor
+	interactionsMutex sync.Mutex
 }
 
 func newRocketServer(proc Processor, listener net.Listener, opts *serverOptions) Server {
@@ -72,6 +77,8 @@ func newRocketServer(proc Processor, listener net.Listener, opts *serverOptions)
 		stats:       opts.serverStats,
 		observer:    opts.serverObserver,
 		maxRequests: opts.maxRequests,
+
+		interactions: make(map[int64]Processor),
 	}
 }
 
@@ -91,6 +98,8 @@ func newUpgradeToRocketServer(proc Processor, listener net.Listener, opts *serve
 		stats:       opts.serverStats,
 		observer:    opts.serverObserver,
 		maxRequests: opts.maxRequests,
+
+		interactions: make(map[int64]Processor),
 	}
 }
 
@@ -194,7 +203,11 @@ func (s *rocketServer) metadataPush(msg payload.Payload) {
 	}
 
 	if metadata.InteractionTerminate != nil {
-		s.log("unsupported InteractionTerminate metadata type")
+		interactionID := metadata.InteractionTerminate.InteractionId
+		s.interactionsMutex.Lock()
+		delete(s.interactions, interactionID)
+		s.interactionsMutex.Unlock()
+		s.log("receive interaction terminate signal for ID %d", interactionID)
 	} else if metadata.StreamHeadersPush != nil {
 		s.log("unsupported StreamHeadersPush metadata type")
 	} else if metadata.TransportMetadataPush != nil {

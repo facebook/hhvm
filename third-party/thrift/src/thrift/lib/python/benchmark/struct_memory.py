@@ -17,6 +17,8 @@
 
 from __future__ import annotations
 
+import gc
+
 import os
 import time
 from typing import Generator
@@ -256,6 +258,39 @@ def immutable_string_set_impl(size: int) -> None:
 @click.option("--size", default=1000, help="Number of structs to create")
 def immutable_string_set(size: int) -> None:
     immutable_string_set_impl(size)
+
+
+def immutable_map_impl(leak: bool) -> None:
+    lst = []
+    for _ in range(10000):
+        my_struct = MyStructImmutable(
+            val_map={1000 + i: str(i) for i in range(1000)},
+            str_map={str(i): str(i) for i in range(1000)},
+            int_map={i: i + 1 for i in range(1000)},
+        )
+        if not leak:
+            lst.append(my_struct)
+        for protocol in all_protocols():
+            buf: bytes = immutable_serializer.serialize(my_struct, protocol=protocol)
+            for _ in range(10):
+                my_struct_s = immutable_serializer.deserialize(
+                    MyStructImmutable, buf, protocol=protocol
+                )
+                if not leak:
+                    lst.append(my_struct_s)
+
+    time.sleep(1)
+    gc.collect()
+
+
+@cli.command()
+def immutable_map() -> None:
+    immutable_map_impl(leak=False)
+
+
+@cli.command()
+def immutable_map_leak() -> None:
+    immutable_map_impl(leak=True)
 
 
 def main() -> None:

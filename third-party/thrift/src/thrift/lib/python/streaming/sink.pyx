@@ -136,11 +136,10 @@ cdef void sink_final_resp_callback(
     PyObject* user_data,
 ):
     future, final_resp_cls, sink_elem_cls, protocol = <object> user_data
-    # Bidirectional stream don't have final response. Set the future to None and return.
-    if final_resp_cls is None:
-        future.set_result(None)
-        return
+    
     try:
+        # Note: need to check result exception, even in BiDi streams,
+        # to process exceptions raised from sink elements on client side
         if res.hasException():
             # PythonUserException denotes an expected (IDL-declared) exception
             user_ex_buf = extractPyUserExceptionIOBuf(res.exception())
@@ -157,8 +156,12 @@ cdef void sink_final_resp_callback(
             res.exception().throw_exception()
 
 
-        res_buf = iobuf_from_unique_ptr(cmove(res.value()))
+        # In BiDi streams, there is no final response
+        if final_resp_cls is None:
+            future.set_result(None)
+            return
 
+        res_buf = iobuf_from_unique_ptr(cmove(res.value()))
         final_resp = deserialize_buf(final_resp_cls, res_buf, protocol)
 
         if final_resp.success is not None:

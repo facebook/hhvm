@@ -151,12 +151,23 @@ class BiDiServiceInterface(
                         iobuf_item,
                         protocol
                     )
+                    if sink_elem.success is not None:
+                        yield sink_elem.success
+                        continue
+                    for _ex_fld_name, ex in sink_elem:
+                        if ex is not None:
+                            raise ex
                     assert sink_elem.success is not None, "unexpected empty sink element"
-                    yield sink_elem.success
 
             async def _handle_stream(stream_generator: _typing.AsyncIterator[builtins.int]) -> _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]:
-                async for item in stream_generator:
-                    yield serialize_iobuf(_fbthrift__module__thrift_types._fbthrift_BiDiService_canThrow_result_stream_elem(success=item), protocol)
+                try:
+                    async for item in stream_generator:
+                        yield serialize_iobuf(_fbthrift__module__thrift_types._fbthrift_BiDiService_canThrow_result_stream_elem(success=item), protocol)
+                except _fbthrift__module__thrift_types.BiDiStreamException as e:
+                    return_struct = _fbthrift__module__thrift_types._fbthrift_BiDiService_canThrow_result_stream_elem(_ex0__ex=e)
+                    buf = serialize_iobuf(return_struct, protocol)
+                    exp = PythonUserException('BiDiStreamException', str(e), buf)
+                    raise exp
             return _handle_stream(handler_bidi_callback(_handle_sink()))
 
         return _fbthrift_iobuf_bidi_callback

@@ -51,6 +51,13 @@ exception MethodException {
   1: string message;
 }
 
+enum ThrowWhere {
+  FIRST_RESPONSE = 0,
+  FROM_SINK = 1,
+  STREAM_BEFORE_FIRST_CHUNK = 2,
+  STREAM_AFTER_FIRST_CHUNK = 3,
+}
+
 service TestBidiService {
   // @lint-ignore THRIFTCHECKS new unreleased feature
   sink<string>, stream<string> echo(1: double serverDelay);
@@ -68,9 +75,13 @@ service TestBidiService {
 
   // Method that throws an exception:
   // if where is 0, throws on the method
-  // if where is 1, throws on the stream
+  // if where is 1, throws on the stream before first chunk
+  // if where is 2, throws on the stream after first chunk
+  // otherwise, doesn't throw
   // @lint-ignore THRIFTCHECKS new unreleased feature
   sink<i64 throws (1: SinkException sinkEx)>, stream<
-    i64 throws (1: StreamException sinkEx)
-  > canThrow(1: i32 where) throws (1: MethodException methodEx);
+    i64 throws (1: StreamException streamEx)
+  > canThrow(1: ThrowWhere where, 2: bool expected_throw) throws (
+    1: MethodException methodEx,
+  );
 }

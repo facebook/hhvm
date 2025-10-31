@@ -18,9 +18,12 @@
 from __future__ import annotations
 
 import asyncio
+import sys
 
 from typing import AsyncGenerator, Callable, Generator, Tuple, TypeVar
 from unittest import IsolatedAsyncioTestCase
+
+from parameterized import parameterized
 
 from thrift.lib.python.test.test_server import TestServer
 from thrift.python.bidi_service.thrift_clients import TestBidiService
@@ -28,11 +31,16 @@ from thrift.python.bidi_service.thrift_services import TestBidiServiceInterface
 from thrift.python.bidi_service.thrift_types import (
     FirstRequest,
     FirstResponse,
+    MethodException,
     SinkChunk,
+    SinkException,
     StreamChunk,
+    StreamException,
+    ThrowWhere,
 )
 
 from thrift.python.client import ClientType, get_client
+from thrift.python.exceptions import ApplicationError, ApplicationErrorType
 
 from thrift.python.streaming.bidistream import BidirectionalStream
 from thrift.python.streaming.stream import ClientBufferedStream
@@ -42,20 +50,50 @@ def local_server() -> TestServer:
     return TestServer(handler=BidiHandler(), ip="::1")
 
 
+async def yield_ints(
+    start: int, stop: int, delay: float = 0.0
+) -> AsyncGenerator[int, None]:
+    for i in range(start, stop):
+        await asyncio.sleep(delay)
+        yield i
+
+
+async def yield_ints_throw(
+    start: int,
+    throw: int,
+    throw_expected: bool,
+    delay: float = 0.0,
+) -> AsyncGenerator[int, None]:
+    if throw < start:
+        msg = "throw before start"
+        raise (
+            SinkException(message=msg)
+            if throw_expected
+            else RuntimeError("unexpected " + msg)
+        )
+    async for i in yield_ints(start, throw + 1, delay):
+        if i == throw:
+            print("About to throw from sink")
+            msg = f"throw at integer {i}"
+            raise (
+                SinkException(message=msg)
+                if throw_expected
+                else RuntimeError("unexpected " + msg)
+            )
+        yield i
+
+
 async def yield_strs(
     start: int, stop: int, delay: float = 0.0
 ) -> AsyncGenerator[str, None]:
-    for i in range(start, stop):
-        await asyncio.sleep(delay)
-        print(f"client yielding {i}")
+    async for i in yield_ints(start, stop, delay):
         yield str(i)
 
 
 async def yield_structs(
     start: int, stop: int, delay: float = 0.0
 ) -> AsyncGenerator[SinkChunk, None]:
-    for i in range(start, stop):
-        await asyncio.sleep(delay)
+    async for i in yield_ints(start, stop, delay):
         yield SinkChunk(value=str(i))
 
 
@@ -71,7 +109,11 @@ class BidiTests(IsolatedAsyncioTestCase):
         count = 0
         async for item in stream:
             print(f"Client stream received {item} from server")
-            self.assertEqual(item, next(expected_gen))
+            try:
+                expected = next(expected_gen)
+            except StopIteration:
+                break
+            self.assertEqual(item, expected)
             count += 1
 
         return count
@@ -270,6 +312,113 @@ class BidiTests(IsolatedAsyncioTestCase):
 
                 self.assertEqual(total_items, stop - start)
 
+    @parameterized.expand(
+        [
+            (
+                ThrowWhere.STREAM_BEFORE_FIRST_CHUNK,
+                True,
+                "stream throws before consume sink",
+            ),
+            (
+                ThrowWhere.STREAM_BEFORE_FIRST_CHUNK,
+                False,
+                "unexpected stream throws before consume sink",
+            ),
+            (
+                ThrowWhere.STREAM_AFTER_FIRST_CHUNK,
+                True,
+                "stream throws after yielding 1 from sink",
+            ),
+            (
+                ThrowWhere.STREAM_AFTER_FIRST_CHUNK,
+                False,
+                "unexpected stream throws after yielding 1 from sink",
+            ),
+        ]
+    )
+    async def test_bidi_server_stream_throws(
+        self, where: ThrowWhere, throw_expected: bool, expected_msg: str
+    ) -> None:
+        async with local_server() as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(
+                TestBidiService,
+                host=ip,
+                port=port,
+                client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
+            ) as client:
+                bidi = await client.canThrow(where, throw_expected)
+                await bidi.sink.sink(yield_ints(1, 3))
+
+                expected_ex_cls = (
+                    StreamException if throw_expected else ApplicationError
+                )
+                with self.assertRaisesRegex(expected_ex_cls, expected_msg):
+                    await self.assert_stream(bidi.stream, (i for i in range(1, 3)))
+
+            # TODO: client.canThrow(2)
+
+    @parameterized.expand(
+        [
+            (0, True, "throw before start"),
+            (0, False, "unexpected throw before start"),
+            (3, True, "throw at integer 3"),
+            (3, False, "unexpected throw at integer 3"),
+        ]
+    )
+    async def test_bidi_server_sink_throws(
+        self, throw_at: int, throw_expected: bool, expected_msg: str
+    ) -> None:
+        async with local_server() as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(
+                TestBidiService,
+                host=ip,
+                port=port,
+                client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
+            ) as client:
+                bidi = await client.canThrow(ThrowWhere.FROM_SINK, throw_expected)
+
+                start = 1
+                (sink_ex, stream_ex) = await asyncio.gather(
+                    bidi.sink.sink(
+                        yield_ints_throw(start, throw_at, throw_expected=throw_expected)
+                    ),
+                    self.assert_stream(
+                        bidi.stream, (i for i in range(start, throw_at))
+                    ),
+                    return_exceptions=True,
+                )
+
+                expected_sink_ex_cls = (
+                    SinkException if throw_expected else ApplicationError
+                )
+                assert isinstance(sink_ex, Exception)  # ffs pyre
+                with self.assertRaisesRegex(expected_sink_ex_cls, expected_msg):
+                    raise sink_ex
+
+                # if we don't have any delays, there's a race where the sink closes, meaning the
+                # sink async generator in the server callback stops. In this case the handler will return 0.
+                # Most of the time, the server gets the sink exception and reflects it back as ApplicationError
+                # before the stream python handler code returns without exception.
+
+                # NOTE: this only happens on Python 3.10, in local stress runs
+                if stream_ex == 0 and sys.version_info.minor < 12:
+                    return
+
+                self.assertIsInstance(stream_ex, ApplicationError)
+                assert isinstance(stream_ex, ApplicationError)  # ffs pyre
+                # both the `sink.sink` method and stream will throw.
+                # the "correct" type for the stream throw is ambiguous
+                # ApplicationError is fine for now
+                self.assertEqual(stream_ex.type, ApplicationErrorType.UNKNOWN)
+                self.assertRegex(
+                    stream_ex.message,
+                    f"apache::thrift::TApplicationException: .*'{expected_msg}'",
+                )
+
 
 class BidiHandler(TestBidiServiceInterface):
     async def echo(
@@ -337,3 +486,36 @@ class BidiHandler(TestBidiServiceInterface):
                 yield StreamChunk(value=item.value)
 
         return FirstResponse(value=request.value), callback
+
+    async def canThrow(
+        self,
+        where: ThrowWhere,
+        expected_throw: bool,
+    ) -> Callable[
+        [AsyncGenerator[int, None]],
+        AsyncGenerator[int, None],
+    ]:
+        if where == 0:
+            raise MethodException(message="method throws")
+
+        async def callback(
+            agen: AsyncGenerator[int, None],
+        ) -> AsyncGenerator[int, None]:
+            if where == ThrowWhere.STREAM_BEFORE_FIRST_CHUNK:
+                msg = "stream throws before consume sink"
+                raise (
+                    StreamException(message=msg)
+                    if expected_throw
+                    else RuntimeError("unexpected " + msg)
+                )
+            async for i in agen:
+                yield i
+                if where == ThrowWhere.STREAM_AFTER_FIRST_CHUNK:
+                    msg = f"stream throws after yielding {i} from sink"
+                    raise (
+                        StreamException(message=msg)
+                        if expected_throw
+                        else RuntimeError("unexpected " + msg)
+                    )
+
+        return callback

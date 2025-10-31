@@ -711,4 +711,82 @@ final class ThriftContextPropStateTest extends WWWTest {
     expect($tcps->getRequestIdEncoded())->toEqual("0");
   }
 
+  public function testTraceSizeEstimationBreadthDepthProduct(): void {
+    $tcps = ThriftContextPropState::get();
+    $tcps->clear();
+    expect($tcps->getBreadthDepthProduct())->toBeNull();
+
+    // Set breadth depth product
+    $tcps->setBreadthDepthProduct(100);
+    expect($tcps->getBreadthDepthProduct())->toEqual(100);
+
+    // Override existing value
+    $tcps->setBreadthDepthProduct(200);
+    expect($tcps->getBreadthDepthProduct())->toEqual(200);
+
+    // Verify it's properly nested in the baggage structure
+    expect($tcps->getBaggage())->toNotBeNull();
+    expect($tcps->getTraceContext())->toNotBeNull();
+    expect($tcps->getTraceContext()?->tracing_context)->toNotBeNull();
+    expect($tcps->getTraceContext()?->tracing_context?->estimate)
+      ->toNotBeNull();
+  }
+
+  public function testTraceSizeEstimationDepth(): void {
+    $tcps = ThriftContextPropState::get();
+    $tcps->clear();
+    expect($tcps->getDepth())->toBeNull();
+
+    // Set depth
+    $tcps->setDepth(10);
+    expect($tcps->getDepth())->toEqual(10);
+
+    // Override existing value
+    $tcps->setDepth(20);
+    expect($tcps->getDepth())->toEqual(20);
+
+    // Verify it's properly nested in the baggage structure
+    expect($tcps->getBaggage())->toNotBeNull();
+    expect($tcps->getTraceContext())->toNotBeNull();
+    expect($tcps->getTraceContext()?->tracing_context)->toNotBeNull();
+    expect($tcps->getTraceContext()?->tracing_context?->estimate)
+      ->toNotBeNull();
+  }
+
+  public function testTraceSizeEstimationBothFields(): void {
+    $tcps = ThriftContextPropState::get();
+    $tcps->clear();
+
+    // Set both fields
+    $tcps->setBreadthDepthProduct(500);
+    $tcps->setDepth(25);
+
+    // Verify both fields are set correctly
+    expect($tcps->getBreadthDepthProduct())->toEqual(500);
+    expect($tcps->getDepth())->toEqual(25);
+
+    // Verify the estimate struct exists
+    $estimate = $tcps->getTraceContext()?->tracing_context?->estimate;
+    expect($estimate)->toNotBeNull();
+    expect($estimate?->breadthDepthProduct)->toEqual(500);
+    expect($estimate?->depth)->toEqual(25);
+  }
+
+  public function testTraceSizeEstimationDirtiesCache(): void {
+    $tcps = ThriftContextPropState::get();
+    $tcps->clear();
+
+    // Serialize the initial state to populate the cache
+    $serialized_before = $tcps->getSerialized();
+
+    // Set breadth depth product, which should dirty the cache
+    $tcps->setBreadthDepthProduct(300);
+
+    // Serialize the state again
+    $serialized_after = $tcps->getSerialized();
+
+    // The serialized strings should be different because the cache was dirtied
+    expect($serialized_before)->toNotEqual($serialized_after);
+  }
+
 }

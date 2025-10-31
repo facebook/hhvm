@@ -565,6 +565,56 @@ final class ThriftContextPropState {
     return null;
   }
 
+  public function getBreadthDepthProduct()[]: ?int {
+    $estimate = $this->getTraceContext()?->tracing_context?->estimate;
+    if ($estimate is nonnull) {
+      return $estimate->breadthDepthProduct;
+    }
+    return null;
+  }
+
+  public function setBreadthDepthProduct(
+    int $breadth_depth_product,
+  )[write_props]: void {
+    $this->storage->baggage =
+      $this->storage->baggage ?? ContextProp\Baggage::withDefaultValues();
+    $baggage = $this->storage->baggage as nonnull;
+    $baggage->trace_context =
+      $baggage->trace_context ?? ContextProp\TraceContext::withDefaultValues();
+    $trace_context = $baggage->trace_context;
+    $trace_context->tracing_context = $trace_context->tracing_context ??
+      ContextProp\ArtilleryTracingContext::withDefaultValues();
+    $tracing_context = $trace_context->tracing_context;
+    $tracing_context->estimate = $tracing_context->estimate ??
+      ContextProp\TraceSizeEstimation::withDefaultValues();
+    $tracing_context->estimate->breadthDepthProduct = $breadth_depth_product;
+    $this->dirty();
+  }
+
+  public function getDepth()[]: ?int {
+    $estimate = $this->getTraceContext()?->tracing_context?->estimate;
+    if ($estimate is nonnull) {
+      return $estimate->depth;
+    }
+    return null;
+  }
+
+  public function setDepth(int $depth)[write_props]: void {
+    $this->storage->baggage =
+      $this->storage->baggage ?? ContextProp\Baggage::withDefaultValues();
+    $baggage = $this->storage->baggage as nonnull;
+    $baggage->trace_context =
+      $baggage->trace_context ?? ContextProp\TraceContext::withDefaultValues();
+    $trace_context = $baggage->trace_context;
+    $trace_context->tracing_context = $trace_context->tracing_context ??
+      ContextProp\ArtilleryTracingContext::withDefaultValues();
+    $tracing_context = $trace_context->tracing_context;
+    $tracing_context->estimate = $tracing_context->estimate ??
+      ContextProp\TraceSizeEstimation::withDefaultValues();
+    $tracing_context->estimate->depth = $depth;
+    $this->dirty();
+  }
+
   public static function getOriginIdResolver()[]: (function()[leak_safe]: int) {
     return ()[leak_safe] ==> (
       readonly ThriftContextPropState::getReadonlyIfInitialized()

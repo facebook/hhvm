@@ -75,7 +75,9 @@ StructMetadata<::cpp2::MyStructNestedAnnotation>::gen(ThriftMetadata& metadata) 
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_MyStructNestedAnnotation.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -121,7 +123,9 @@ StructMetadata<::cpp2::detail::YourStruct>::gen(ThriftMetadata& metadata) {
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_MyStruct.fields()->push_back(std::move(field));
   }
   module_MyStruct.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("YourStruct") } }).cv_struct());
@@ -146,7 +150,9 @@ StructMetadata<::cpp2::SecretStruct>::gen(ThriftMetadata& metadata) {
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_SecretStruct.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -232,9 +238,9 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_p
   module_MyService_putDataById_data_2.id() = 2;
   module_MyService_putDataById_data_2.name() = "data";
   module_MyService_putDataById_data_2.is_optional() = false;
-  module_MyService_putDataById_data_2.structured_annotations() = {
+  module_MyService_putDataById_data_2.structured_annotations().emplace().assign({
       *cvStruct("module.MyStructNestedAnnotation", { {"name", cvString("argument") } }).cv_struct(),
-  };
+  });
   auto module_MyService_putDataById_data_2_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   module_MyService_putDataById_data_2_type->writeAndGenType(*module_MyService_putDataById_data_2.type(), metadata);
   func.arguments()->push_back(std::move(module_MyService_putDataById_data_2));

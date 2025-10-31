@@ -53,7 +53,9 @@ StructMetadata<::cpp2_struct_footprint::SimpleStruct>::gen(ThriftMetadata& metad
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_SimpleStruct.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -75,7 +77,9 @@ StructMetadata<::cpp2_struct_footprint::ComplexStruct>::gen(ThriftMetadata& meta
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_ComplexStruct.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -147,7 +151,9 @@ StructMetadata<::cpp2_struct_footprint::ExStruct>::gen(ThriftMetadata& metadata)
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_ExStruct.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -169,7 +175,9 @@ StructMetadata<::cpp2_struct_footprint::TestUnion>::gen(ThriftMetadata& metadata
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_TestUnion.fields()->push_back(std::move(field));
   }
   return res.metadata;

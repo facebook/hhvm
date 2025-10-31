@@ -69,7 +69,9 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::StructLevelTer
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     deprecated_terse_write_StructLevelTerseStruct.fields()->push_back(std::move(field));
   }
   deprecated_terse_write_StructLevelTerseStruct.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {  }).cv_struct());
@@ -92,7 +94,9 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::FieldLevelTers
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     deprecated_terse_write_FieldLevelTerseStruct.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -114,7 +118,9 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::CppRefStructFi
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     deprecated_terse_write_CppRefStructFields.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -136,7 +142,9 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTers
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     deprecated_terse_write_DeprecatedTerseWriteWithCustomDefault.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -158,7 +166,9 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTers
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     deprecated_terse_write_DeprecatedTerseWriteWithRedundantCustomDefault.fields()->push_back(std::move(field));
   }
   return res.metadata;

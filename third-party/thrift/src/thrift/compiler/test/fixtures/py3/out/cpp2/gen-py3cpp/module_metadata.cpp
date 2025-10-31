@@ -77,7 +77,9 @@ StructMetadata<::py3::simple::SimpleException>::gen(ThriftMetadata& metadata) {
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_SimpleException.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -99,7 +101,9 @@ StructMetadata<::py3::simple::OptionalRefStruct>::gen(ThriftMetadata& metadata) 
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_OptionalRefStruct.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -121,7 +125,9 @@ StructMetadata<::py3::simple::SimpleStruct>::gen(ThriftMetadata& metadata) {
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_SimpleStruct.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -143,7 +149,9 @@ StructMetadata<::py3::simple::HiddenTypeFieldsStruct>::gen(ThriftMetadata& metad
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_HiddenTypeFieldsStruct.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -165,7 +173,9 @@ StructMetadata<::py3::simple::detail::AdaptedUnion>::gen(ThriftMetadata& metadat
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_AdaptedUnion.fields()->push_back(std::move(field));
   }
   module_AdaptedUnion.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("Adapter") } }).cv_struct());
@@ -188,7 +198,9 @@ StructMetadata<::py3::simple::HiddenException>::gen(ThriftMetadata& metadata) {
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_HiddenException.fields()->push_back(std::move(field));
   }
   module_HiddenException.structured_annotations()->push_back(*cvStruct("python.Py3Hidden", {  }).cv_struct());
@@ -211,7 +223,9 @@ StructMetadata<::py3::simple::ComplexStruct>::gen(ThriftMetadata& metadata) {
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_ComplexStruct.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -233,7 +247,9 @@ StructMetadata<::py3::simple::BinaryUnion>::gen(ThriftMetadata& metadata) {
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_BinaryUnion.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -255,7 +271,9 @@ StructMetadata<::py3::simple::BinaryUnionStruct>::gen(ThriftMetadata& metadata) 
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_BinaryUnionStruct.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -277,7 +295,9 @@ StructMetadata<::py3::simple::CustomFields>::gen(ThriftMetadata& metadata) {
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_CustomFields.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -299,7 +319,9 @@ StructMetadata<::py3::simple::CustomTypedefFields>::gen(ThriftMetadata& metadata
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_CustomTypedefFields.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -321,7 +343,9 @@ StructMetadata<::py3::simple::AdaptedTypedefFields>::gen(ThriftMetadata& metadat
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_AdaptedTypedefFields.fields()->push_back(std::move(field));
   }
   return res.metadata;

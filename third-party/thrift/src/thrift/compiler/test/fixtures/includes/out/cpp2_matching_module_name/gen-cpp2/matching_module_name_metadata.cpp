@@ -43,7 +43,9 @@ StructMetadata<::matching_module_name::MyStruct>::gen(ThriftMetadata& metadata) 
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     matching_module_name_MyStruct.fields()->push_back(std::move(field));
   }
   return res.metadata;

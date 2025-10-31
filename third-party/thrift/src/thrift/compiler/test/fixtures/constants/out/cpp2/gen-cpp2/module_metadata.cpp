@@ -61,7 +61,9 @@ StructMetadata<::cpp2::Internship>::gen(ThriftMetadata& metadata) {
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_Internship.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -83,7 +85,9 @@ StructMetadata<::cpp2::Range>::gen(ThriftMetadata& metadata) {
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_Range.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -105,7 +109,9 @@ StructMetadata<::cpp2::struct1>::gen(ThriftMetadata& metadata) {
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_struct1.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -127,7 +133,9 @@ StructMetadata<::cpp2::struct2>::gen(ThriftMetadata& metadata) {
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_struct2.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -149,7 +157,9 @@ StructMetadata<::cpp2::struct3>::gen(ThriftMetadata& metadata) {
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_struct3.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -171,7 +181,9 @@ StructMetadata<::cpp2::struct4>::gen(ThriftMetadata& metadata) {
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_struct4.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -193,7 +205,9 @@ StructMetadata<::cpp2::union1>::gen(ThriftMetadata& metadata) {
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_union1.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -215,7 +229,9 @@ StructMetadata<::cpp2::union2>::gen(ThriftMetadata& metadata) {
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_union2.fields()->push_back(std::move(field));
   }
   return res.metadata;

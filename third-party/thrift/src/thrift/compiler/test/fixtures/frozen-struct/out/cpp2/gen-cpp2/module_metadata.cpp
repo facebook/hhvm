@@ -49,7 +49,9 @@ StructMetadata<::some::ns::ModuleA>::gen(ThriftMetadata& metadata) {
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_ModuleA.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -71,7 +73,9 @@ StructMetadata<::some::ns::ModuleB>::gen(ThriftMetadata& metadata) {
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_ModuleB.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -93,7 +97,9 @@ StructMetadata<::some::ns::detail::DirectlyAdapted>::gen(ThriftMetadata& metadat
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_DirectlyAdapted.fields()->push_back(std::move(field));
   }
   module_DirectlyAdapted.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter") } }).cv_struct());
@@ -116,7 +122,9 @@ StructMetadata<::some::ns::CppRef>::gen(ThriftMetadata& metadata) {
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_CppRef.fields()->push_back(std::move(field));
   }
   return res.metadata;

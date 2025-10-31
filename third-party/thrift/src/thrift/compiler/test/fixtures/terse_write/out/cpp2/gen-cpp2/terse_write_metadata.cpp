@@ -59,7 +59,9 @@ StructMetadata<::facebook::thrift::test::terse_write::MyUnion>::gen(ThriftMetada
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     terse_write_MyUnion.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -81,7 +83,9 @@ StructMetadata<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     terse_write_MyStructWithCustomDefault.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -103,7 +107,9 @@ StructMetadata<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::g
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     terse_write_StructLevelTerseStruct.fields()->push_back(std::move(field));
   }
   terse_write_StructLevelTerseStruct.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {  }).cv_struct());
@@ -126,7 +132,9 @@ StructMetadata<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::ge
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     terse_write_FieldLevelTerseStruct.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -148,7 +156,9 @@ StructMetadata<::facebook::thrift::test::terse_write::AdaptedFields>::gen(Thrift
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     terse_write_AdaptedFields.fields()->push_back(std::move(field));
   }
   terse_write_AdaptedFields.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {  }).cv_struct());
@@ -171,7 +181,9 @@ StructMetadata<::facebook::thrift::test::terse_write::TerseException>::gen(Thrif
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     terse_write_TerseException.fields()->push_back(std::move(field));
   }
   terse_write_TerseException.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {  }).cv_struct());

@@ -76,7 +76,9 @@ StructMetadata<::test::fixtures::basic::MyStruct>::gen(ThriftMetadata& metadata)
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_MyStruct.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -98,7 +100,9 @@ StructMetadata<::test::fixtures::basic::Containers>::gen(ThriftMetadata& metadat
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_Containers.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -130,7 +134,9 @@ StructMetadata<::test::fixtures::basic::MyUnion>::gen(ThriftMetadata& metadata) 
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_MyUnion.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -152,7 +158,9 @@ StructMetadata<::test::fixtures::basic::MyException>::gen(ThriftMetadata& metada
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_MyException.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -174,7 +182,9 @@ StructMetadata<::test::fixtures::basic::MyExceptionWithMessage>::gen(ThriftMetad
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_MyExceptionWithMessage.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -196,7 +206,9 @@ StructMetadata<::test::fixtures::basic::ReservedKeyword>::gen(ThriftMetadata& me
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_ReservedKeyword.fields()->push_back(std::move(field));
   }
   module_ReservedKeyword.structured_annotations()->push_back(*cvStruct("hack.Name", { {"name", cvString("MyRenamedStruct") } }).cv_struct());
@@ -219,7 +231,9 @@ StructMetadata<::test::fixtures::basic::UnionToBeRenamed>::gen(ThriftMetadata& m
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_UnionToBeRenamed.fields()->push_back(std::move(field));
   }
   module_UnionToBeRenamed.structured_annotations()->push_back(*cvStruct("hack.Name", { {"name", cvString("MyRenamedUnion") } }).cv_struct());
@@ -311,9 +325,9 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::F
   module_FB303Service_simple_rpc_int_parameter_1.id() = 1;
   module_FB303Service_simple_rpc_int_parameter_1.name() = "int_parameter";
   module_FB303Service_simple_rpc_int_parameter_1.is_optional() = false;
-  module_FB303Service_simple_rpc_int_parameter_1.structured_annotations() = {
+  module_FB303Service_simple_rpc_int_parameter_1.structured_annotations().emplace().assign({
       *cvStruct("hack.Name", { {"name", cvString("renamed_parameter") } }).cv_struct(),
-  };
+  });
   auto module_FB303Service_simple_rpc_int_parameter_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   module_FB303Service_simple_rpc_int_parameter_1_type->writeAndGenType(*module_FB303Service_simple_rpc_int_parameter_1.type(), metadata);
   func.arguments()->push_back(std::move(module_FB303Service_simple_rpc_int_parameter_1));

@@ -117,6 +117,7 @@ struct ThriftTypedefType {
   @rust.Box
   @cpp.Ref{type = cpp.RefType.Unique}
   2: optional ThriftType underlyingType;
+  @cpp.Type{template = "::apache::thrift::metadata::detail::LimitedVector"}
   3: list<ThriftConstStruct> structured_annotations;
 }
 
@@ -163,6 +164,7 @@ union ThriftType {
 struct ThriftEnum {
   1: string name;
   2: map<i32, string> elements;
+  @cpp.Type{template = "::apache::thrift::metadata::detail::LimitedVector"}
   3: list<ThriftConstStruct> structured_annotations;
 }
 
@@ -171,6 +173,7 @@ struct ThriftField {
   2: ThriftType type;
   3: string name;
   4: bool is_optional;
+  @cpp.Type{template = "::apache::thrift::metadata::detail::LimitedVector"}
   5: list<ThriftConstStruct> structured_annotations;
   6: optional map<string, string> unstructured_annotations;
 }
@@ -179,12 +182,14 @@ struct ThriftStruct {
   1: string name;
   2: list<ThriftField> fields;
   3: bool is_union;
+  @cpp.Type{template = "::apache::thrift::metadata::detail::LimitedVector"}
   4: list<ThriftConstStruct> structured_annotations;
 }
 
 struct ThriftException {
   1: string name;
   2: list<ThriftField> fields;
+  @cpp.Type{template = "::apache::thrift::metadata::detail::LimitedVector"}
   3: list<ThriftConstStruct> structured_annotations;
 }
 
@@ -194,6 +199,7 @@ struct ThriftFunction {
   3: list<ThriftField> arguments;
   4: list<ThriftField> exceptions;
   5: bool is_oneway;
+  @cpp.Type{template = "::apache::thrift::metadata::detail::LimitedVector"}
   6: list<ThriftConstStruct> structured_annotations;
 }
 
@@ -201,6 +207,7 @@ struct ThriftService {
   1: string name;
   2: list<ThriftFunction> functions;
   3: optional string parent;
+  @cpp.Type{template = "::apache::thrift::metadata::detail::LimitedVector"}
   4: list<ThriftConstStruct> structured_annotations;
   // Universal identifier will be empty when there's no @thrift.uri annotation,
   // nor package name set in the thrift file.

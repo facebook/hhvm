@@ -94,7 +94,9 @@ StructMetadata<::some::valid::ns::ASimpleStruct>::gen(ThriftMetadata& metadata) 
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_ASimpleStruct.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -116,7 +118,9 @@ StructMetadata<::some::valid::ns::ASimpleStructNoexcept>::gen(ThriftMetadata& me
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_ASimpleStructNoexcept.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -138,7 +142,9 @@ StructMetadata<::some::valid::ns::MyStruct>::gen(ThriftMetadata& metadata) {
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_MyStruct.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -160,7 +166,9 @@ StructMetadata<::some::valid::ns::SimpleUnion>::gen(ThriftMetadata& metadata) {
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_SimpleUnion.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -182,7 +190,9 @@ StructMetadata<::some::valid::ns::ComplexUnion>::gen(ThriftMetadata& metadata) {
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_ComplexUnion.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -204,7 +214,9 @@ StructMetadata<::some::valid::ns::AnException>::gen(ThriftMetadata& metadata) {
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_AnException.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -226,7 +238,9 @@ StructMetadata<::some::valid::ns::AnotherException>::gen(ThriftMetadata& metadat
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_AnotherException.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -248,7 +262,9 @@ StructMetadata<::some::valid::ns::containerStruct>::gen(ThriftMetadata& metadata
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_containerStruct.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -270,7 +286,9 @@ StructMetadata<::some::valid::ns::MyIncludedStruct>::gen(ThriftMetadata& metadat
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_MyIncludedStruct.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -292,7 +310,9 @@ StructMetadata<::some::valid::ns::AnnotatedStruct>::gen(ThriftMetadata& metadata
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_AnnotatedStruct.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -314,7 +334,9 @@ StructMetadata<::some::valid::ns::ComplexContainerStruct>::gen(ThriftMetadata& m
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_ComplexContainerStruct.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -336,7 +358,9 @@ StructMetadata<::some::valid::ns::FloatStruct>::gen(ThriftMetadata& metadata) {
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_FloatStruct.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -358,7 +382,9 @@ StructMetadata<::some::valid::ns::FloatUnion>::gen(ThriftMetadata& metadata) {
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_FloatUnion.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -380,7 +406,9 @@ StructMetadata<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct>::gen(ThriftM
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_AllRequiredNoExceptMoveCtrStruct.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -1279,9 +1307,9 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamSe
   module_ParamService_annotatedParams_list_i32_template_10.id() = 10;
   module_ParamService_annotatedParams_list_i32_template_10.name() = "list_i32_template";
   module_ParamService_annotatedParams_list_i32_template_10.is_optional() = false;
-  module_ParamService_annotatedParams_list_i32_template_10.structured_annotations() = {
+  module_ParamService_annotatedParams_list_i32_template_10.structured_annotations().emplace().assign({
       *cvStruct("cpp.Type", { {"template", cvString("std::list") } }).cv_struct(),
-  };
+  });
   auto module_ParamService_annotatedParams_list_i32_template_10_type = std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE));
   module_ParamService_annotatedParams_list_i32_template_10_type->writeAndGenType(*module_ParamService_annotatedParams_list_i32_template_10.type(), metadata);
   func.arguments()->push_back(std::move(module_ParamService_annotatedParams_list_i32_template_10));
@@ -1289,9 +1317,9 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamSe
   module_ParamService_annotatedParams_list_string_template_11.id() = 11;
   module_ParamService_annotatedParams_list_string_template_11.name() = "list_string_template";
   module_ParamService_annotatedParams_list_string_template_11.is_optional() = false;
-  module_ParamService_annotatedParams_list_string_template_11.structured_annotations() = {
+  module_ParamService_annotatedParams_list_string_template_11.structured_annotations().emplace().assign({
       *cvStruct("cpp.Type", { {"template", cvString("std::deque") } }).cv_struct(),
-  };
+  });
   auto module_ParamService_annotatedParams_list_string_template_11_type = std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE));
   module_ParamService_annotatedParams_list_string_template_11_type->writeAndGenType(*module_ParamService_annotatedParams_list_string_template_11.type(), metadata);
   func.arguments()->push_back(std::move(module_ParamService_annotatedParams_list_string_template_11));
@@ -1299,9 +1327,9 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamSe
   module_ParamService_annotatedParams_set_template_12.id() = 12;
   module_ParamService_annotatedParams_set_template_12.name() = "set_template";
   module_ParamService_annotatedParams_set_template_12.is_optional() = false;
-  module_ParamService_annotatedParams_set_template_12.structured_annotations() = {
+  module_ParamService_annotatedParams_set_template_12.structured_annotations().emplace().assign({
       *cvStruct("cpp.Type", { {"template", cvString("folly::sorted_vector_set") } }).cv_struct(),
-  };
+  });
   auto module_ParamService_annotatedParams_set_template_12_type = std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE));
   module_ParamService_annotatedParams_set_template_12_type->writeAndGenType(*module_ParamService_annotatedParams_set_template_12.type(), metadata);
   func.arguments()->push_back(std::move(module_ParamService_annotatedParams_set_template_12));
@@ -1309,9 +1337,9 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamSe
   module_ParamService_annotatedParams_map_template_13.id() = 13;
   module_ParamService_annotatedParams_map_template_13.name() = "map_template";
   module_ParamService_annotatedParams_map_template_13.is_optional() = false;
-  module_ParamService_annotatedParams_map_template_13.structured_annotations() = {
+  module_ParamService_annotatedParams_map_template_13.structured_annotations().emplace().assign({
       *cvStruct("cpp.Type", { {"template", cvString("folly::sorted_vector_map") } }).cv_struct(),
-  };
+  });
   auto module_ParamService_annotatedParams_map_template_13_type = std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE));
   module_ParamService_annotatedParams_map_template_13_type->writeAndGenType(*module_ParamService_annotatedParams_map_template_13.type(), metadata);
   func.arguments()->push_back(std::move(module_ParamService_annotatedParams_map_template_13));

@@ -43,7 +43,9 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::Tri
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_TrivialStruct.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -65,7 +67,9 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::Str
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_StructWithNoCustomDefaultValues.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -87,7 +91,9 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::Str
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_StructWithCustomDefaultValues.fields()->push_back(std::move(field));
   }
   return res.metadata;

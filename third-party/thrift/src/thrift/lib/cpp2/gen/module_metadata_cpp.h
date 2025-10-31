@@ -180,7 +180,8 @@ class Typedef : public MetadataTypeInterface {
     ::apache::thrift::metadata::ThriftTypedefType tyTypedef;
     tyTypedef.name() = name_;
     tyTypedef.underlyingType() = ::std::make_unique<ThriftType>();
-    tyTypedef.structured_annotations() = structured_annotations_;
+    tyTypedef.structured_annotations().emplace().assign(
+        structured_annotations_.begin(), structured_annotations_.end());
     underlyingType_->writeAndGenType(*tyTypedef.underlyingType(), metadata);
     ty.t_typedef() = ::std::move(tyTypedef);
   }

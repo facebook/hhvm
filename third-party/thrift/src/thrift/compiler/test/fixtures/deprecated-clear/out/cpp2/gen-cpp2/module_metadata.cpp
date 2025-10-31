@@ -49,7 +49,9 @@ StructMetadata<::apache::thrift::test::StructWithDefaultStruct>::gen(ThriftMetad
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_StructWithDefaultStruct.fields()->push_back(std::move(field));
   }
   return res.metadata;

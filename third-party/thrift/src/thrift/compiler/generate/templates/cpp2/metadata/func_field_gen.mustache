@@ -19,11 +19,11 @@
 {{> metadata/func_field_name}}.name() = "{{field:name}}";
 {{> metadata/func_field_name}}.is_optional() = false;
 {{#field:structured_annotations}}
-{{> metadata/func_field_name}}.structured_annotations() = {
+{{> metadata/func_field_name}}.structured_annotations().emplace().assign({
 {{#constant:type.self.structured?}}
     {{> metadata/const_struct}},
 {{/constant:type.self.structured?}}
-};
+});
 {{/field:structured_annotations}}
 {{#field:type}}
 auto {{> metadata/func_field_name}}_type = {{> metadata/type_gen}};

@@ -66,7 +66,9 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_structured_annotation_inline.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -88,7 +90,9 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_structured_annotation_with_default.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -110,7 +114,9 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_structured_annotation_recursive.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -132,7 +138,9 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_structured_annotation_forward.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -154,7 +162,9 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_structured_annotation_nested.fields()->push_back(std::move(field));
   }
   return res.metadata;
@@ -176,7 +186,9 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyStruct>::gen(Th
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_MyStruct.fields()->push_back(std::move(field));
   }
   module_MyStruct.structured_annotations()->push_back(*cvStruct("module.structured_annotation_inline", { {"count", cvInteger(2) } }).cv_struct());
@@ -204,7 +216,9 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyException>::gen
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_MyException.fields()->push_back(std::move(field));
   }
   module_MyException.structured_annotations()->push_back(*cvStruct("module.structured_annotation_nested", { {"name", cvString("nesty") } }).cv_struct());
@@ -227,7 +241,9 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyUnion>::gen(Thr
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
     module_MyUnion.fields()->push_back(std::move(field));
   }
   module_MyUnion.structured_annotations()->push_back(*cvStruct("module.structured_annotation_nested", { {"name", cvString("nesty") }, {"nest", cvStruct("module.structured_annotation_with_default", {  }) } }).cv_struct());
@@ -271,9 +287,9 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_st
   module_MyService_second_count_1.id() = 1;
   module_MyService_second_count_1.name() = "count";
   module_MyService_second_count_1.is_optional() = false;
-  module_MyService_second_count_1.structured_annotations() = {
+  module_MyService_second_count_1.structured_annotations().emplace().assign({
       *cvStruct("module.structured_annotation_inline", { {"count", cvInteger(4) } }).cv_struct(),
-  };
+  });
   auto module_MyService_second_count_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_MyService_second_count_1_type->writeAndGenType(*module_MyService_second_count_1.type(), metadata);
   func.arguments()->push_back(std::move(module_MyService_second_count_1));

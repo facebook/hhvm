@@ -141,6 +141,37 @@ class BidiTests(IsolatedAsyncioTestCase):
 
                 self.assertEqual(total_items, stop - start)
 
+    async def test_bidi_service_unused_stream(self) -> None:
+        async with local_server() as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(
+                TestBidiService,
+                host=ip,
+                port=port,
+                client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
+            ) as client:
+                bidi = await client.echo(0.0)
+                # if we call method but don't start the sink we crash
+                await bidi.sink.sink(yield_strs(1, 5, 0.1))
+
+    async def test_bidi_service_partial_consume_stream(self) -> None:
+        async with local_server() as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(
+                TestBidiService,
+                host=ip,
+                port=port,
+                client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
+            ) as client:
+                bidi = await client.echo(0.0)
+                await bidi.sink.sink(yield_strs(1, 5, 0.1))
+
+                async for item in bidi.stream:
+                    self.assertEqual(item, "1")
+                    break
+
     async def test_bidi_first_response(self) -> None:
         async with local_server() as sa:
             ip, port = sa.ip, sa.port

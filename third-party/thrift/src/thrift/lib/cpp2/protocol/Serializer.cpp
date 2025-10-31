@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <folly/lang/Switch.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 
 namespace apache::thrift {
@@ -28,17 +29,19 @@ std::unique_ptr<folly::IOBuf> serializeErrorStruct(
     return queue.move();
   };
 
-  switch (protId) {
-    case apache::thrift::protocol::T_BINARY_PROTOCOL: {
-      return f(BinaryProtocolWriter{});
+  FOLLY_NON_EXHAUSTIVE_SWITCH({
+    switch (protId) {
+      case apache::thrift::protocol::T_BINARY_PROTOCOL: {
+        return f(BinaryProtocolWriter{});
+      }
+      case apache::thrift::protocol::T_COMPACT_PROTOCOL: {
+        return f(CompactProtocolWriter{});
+      }
+      default: {
+        LOG(ERROR) << "Invalid protocol from client";
+      }
     }
-    case apache::thrift::protocol::T_COMPACT_PROTOCOL: {
-      return f(CompactProtocolWriter{});
-    }
-    default: {
-      LOG(ERROR) << "Invalid protocol from client";
-    }
-  }
+  });
   return nullptr;
 }
 

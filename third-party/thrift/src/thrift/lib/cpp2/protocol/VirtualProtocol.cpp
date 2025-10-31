@@ -19,22 +19,24 @@
 #include <stdexcept>
 
 #include <folly/Conv.h>
+#include <folly/lang/Switch.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 
 namespace apache::thrift {
 
 std::unique_ptr<VirtualReaderBase> makeVirtualReader(ProtocolType type) {
-  switch (type) {
-    case ProtocolType::T_BINARY_PROTOCOL:
-      return std::make_unique<VirtualReader<BinaryProtocolReader>>();
-    case ProtocolType::T_COMPACT_PROTOCOL:
-      return std::make_unique<VirtualReader<CompactProtocolReader>>();
-    default:
-      break;
-  }
-  throw std::invalid_argument(
-      folly::to<std::string>("Invalid protocol type ", type));
+  FOLLY_NON_EXHAUSTIVE_SWITCH({
+    switch (type) {
+      case ProtocolType::T_BINARY_PROTOCOL:
+        return std::make_unique<VirtualReader<BinaryProtocolReader>>();
+      case ProtocolType::T_COMPACT_PROTOCOL:
+        return std::make_unique<VirtualReader<CompactProtocolReader>>();
+      default:
+        throw std::invalid_argument(
+            folly::to<std::string>("Invalid protocol type ", type));
+    }
+  });
 }
 
 } // namespace apache::thrift

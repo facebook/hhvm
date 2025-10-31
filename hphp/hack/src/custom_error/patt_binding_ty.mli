@@ -8,4 +8,5 @@
 type t =
   | Name
   | Ty
+  | File
 [@@deriving compare, eq, sexp, show]

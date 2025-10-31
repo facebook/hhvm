@@ -9,6 +9,7 @@ type elem =
   | Lit of string
   | Ty_var of Patt_var.t
   | Name_var of Patt_var.t
+  | File_var of Patt_var.t
 [@@deriving eq, show]
 
 type t = { message: elem list } [@@deriving eq, show]

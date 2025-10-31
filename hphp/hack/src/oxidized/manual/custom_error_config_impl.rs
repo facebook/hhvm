@@ -21,6 +21,8 @@ use crate::error_message::Elem;
 use crate::error_message::ErrorMessage;
 use crate::patt_binding_ty::PattBindingTy;
 use crate::patt_error::PattError;
+use crate::patt_file::FilePath;
+use crate::patt_file::PattFile;
 use crate::patt_locl_ty::Params;
 use crate::patt_locl_ty::PattLoclTy;
 use crate::patt_locl_ty::Prim;
@@ -90,6 +92,15 @@ pub trait Validatable {
 
 trait Invalidatable {
     fn invalidate(&mut self, errs: &[ValidationErr]);
+}
+
+impl<T: Validatable> Validatable for Option<T> {
+    fn validate(&mut self, env: &mut ValidationEnv) -> bool {
+        match self {
+            Self::Some(t) => t.validate(env),
+            Self::None => true,
+        }
+    }
 }
 
 // -- Validation environment ---------------------------------------------------
@@ -244,8 +255,23 @@ impl Validatable for Secondary {
 }
 
 impl Validatable for Primary {
-    fn validate(&mut self, _env: &mut ValidationEnv) -> bool {
-        true
+    fn validate(&mut self, env: &mut ValidationEnv) -> bool {
+        match self {
+            Self::AnyPrim => true,
+            Self::MemberNotFound {
+                class_name,
+                member_name,
+                ..
+            } => class_name.validate(env) && member_name.validate(env),
+            Self::CrossPkgAccess {
+                use_file,
+                decl_file,
+            } => use_file.validate(env) && decl_file.validate(env),
+            Self::CrossPkgAccessWithRequirepackage {
+                use_file,
+                decl_file,
+            } => use_file.validate(env) && decl_file.validate(env),
+        }
     }
 }
 
@@ -391,6 +417,55 @@ impl Validatable for Namespace {
     }
 }
 
+// -- File patterns ------------------------------------------------------------
+
+impl Validatable for PattFile {
+    fn validate(&mut self, env: &mut ValidationEnv) -> bool {
+        match self {
+            Self::As { lbl, patt } => {
+                let errs = env
+                    .add(lbl, PattBindingTy::File)
+                    .map_or(vec![], |e| vec![e]);
+                let valid = patt.validate(env);
+                self.invalidate(&errs);
+                valid && errs.is_empty()
+            }
+            Self::Name {
+                path,
+                name,
+                extension,
+            } => path.validate(env) && name.validate(env) && extension.validate(env),
+            Self::Invalid { .. } => false,
+            Self::Wildcard => true,
+        }
+    }
+}
+
+impl Invalidatable for PattFile {
+    fn invalidate(&mut self, errs_in: &[ValidationErr]) {
+        if !errs_in.is_empty() {
+            match self {
+                Self::Invalid { errs, .. } => errs.extend(errs_in.to_vec()),
+                _ => {
+                    let patt = std::mem::replace(self, Self::Wildcard);
+                    *self = Self::Invalid {
+                        errs: errs_in.to_vec(),
+                        patt: Box::new(patt),
+                    };
+                }
+            }
+        }
+    }
+}
+
+impl Validatable for FilePath {
+    fn validate(&mut self, env: &mut ValidationEnv) -> bool {
+        match self {
+            Self::Dot => true,
+            Self::Slash { prefix, segment } => prefix.validate(env) && segment.validate(env),
+        }
+    }
+}
 // -- String patterns ----------------------------------------------------------
 
 impl Validatable for PattString {
@@ -412,6 +487,7 @@ impl Validatable for Elem {
         match self {
             Self::TyVar(name) => matches!(env.get(name), Some(PattBindingTy::Ty)),
             Self::NameVar(name) => matches!(env.get(name), Some(PattBindingTy::Name)),
+            Self::FileVar(name) => matches!(env.get(name), Some(PattBindingTy::File)),
             Self::Lit(_) => true,
         }
     }

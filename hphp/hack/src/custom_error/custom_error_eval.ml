@@ -606,6 +606,7 @@ let eval_error_message Error_message.{ message } ~env =
   let f t =
     match t with
     | Lit str -> Either.First str
+    | File_var var
     | Ty_var var
     | Name_var var ->
       Either.Second (Env.get env var)

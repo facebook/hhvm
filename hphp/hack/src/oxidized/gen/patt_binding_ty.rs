@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2cbe2266287365a807b80cf724b5dde4>>
+// @generated SignedSource<<855387f57d947143cda5f08a880ea84a>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -42,6 +42,7 @@ use crate::*;
 pub enum PattBindingTy {
     Name,
     Ty,
+    File,
 }
 impl TrivialDrop for PattBindingTy {}
 arena_deserializer::impl_deserialize_in_arena!(PattBindingTy);

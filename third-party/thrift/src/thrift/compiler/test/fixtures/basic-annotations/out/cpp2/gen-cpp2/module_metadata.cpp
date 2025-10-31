@@ -69,16 +69,21 @@ StructMetadata<::cpp2::MyStructNestedAnnotation>::gen(ThriftMetadata& metadata) 
   static const auto* const
   module_MyStructNestedAnnotation_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
+  std::size_t i = 0;
   for (const auto& f : *module_MyStructNestedAnnotation_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
+    auto& field = module_MyStructNestedAnnotation.fields()[i];
+    DCHECK_EQ(*field.id(), f.id);
     field.name() = f.name;
     field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
-    module_MyStructNestedAnnotation.fields()->push_back(std::move(field));
+
+    // writeAndGenType will modify metadata, which might invalidate `field` reference
+    // We need to store the result in a separate `type` variable.
+    apache::thrift::metadata::ThriftType type;
+    f.metadata_type_interface->writeAndGenType(type, metadata);
+    module_MyStructNestedAnnotation.fields()[i++].type() = std::move(type);
   }
   return res.metadata;
 }
@@ -117,16 +122,21 @@ StructMetadata<::cpp2::detail::YourStruct>::gen(ThriftMetadata& metadata) {
   static const auto* const
   module_MyStruct_fields = new std::array<EncodedThriftField, 9>{ {
     { 2, "major", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Name", { {"value", cvString("majorVer") } }).cv_struct(), *cvStruct("go.Name", { {"name", cvString("MajorVer") } }).cv_struct(), }},    { 1, "abstract", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("go.Name", { {"name", cvString("AbstractName") } }).cv_struct(), *cvStruct("go.Tag", { {"tag", cvString("tag:\"some_abstract\"") } }).cv_struct(), }},    { 3, "annotation_with_quote", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("go.Tag", { {"tag", cvString("tag:\"somevalue\"") } }).cv_struct(), }},    { 4, "class_", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 5, "annotation_with_trailing_comma", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 6, "empty_annotations", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 7, "my_enum", false, std::make_unique<Enum<::cpp2::YourEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{ }},    { 8, "cpp_type_annotation", false, std::make_unique<Typedef>("module.list_string_6884", std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("std::deque<std::string>") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 9, "my_union", false, std::make_unique<Union<::cpp2::detail::YourUnion>>("module.MyUnion"), std::vector<ThriftConstStruct>{ }},  }};
+  std::size_t i = 0;
   for (const auto& f : *module_MyStruct_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
+    auto& field = module_MyStruct.fields()[i];
+    DCHECK_EQ(*field.id(), f.id);
     field.name() = f.name;
     field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
-    module_MyStruct.fields()->push_back(std::move(field));
+
+    // writeAndGenType will modify metadata, which might invalidate `field` reference
+    // We need to store the result in a separate `type` variable.
+    apache::thrift::metadata::ThriftType type;
+    f.metadata_type_interface->writeAndGenType(type, metadata);
+    module_MyStruct.fields()[i++].type() = std::move(type);
   }
   module_MyStruct.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("YourStruct") } }).cv_struct());
   module_MyStruct.structured_annotations()->push_back(*cvStruct("hack.Attributes", { {"attributes", cvList({ cvString("\\SomeClass(\\AnotherClass::class)") }) } }).cv_struct());
@@ -144,16 +154,21 @@ StructMetadata<::cpp2::SecretStruct>::gen(ThriftMetadata& metadata) {
   static const auto* const
   module_SecretStruct_fields = new std::array<EncodedThriftField, 2>{ {
     { 1, "id", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "password", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.DeprecatedUnvalidatedAnnotations", { {"items", cvMap({ cvPair(cvString("java.sensitive"), cvString("1")) }) } }).cv_struct(), }},  }};
+  std::size_t i = 0;
   for (const auto& f : *module_SecretStruct_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
+    auto& field = module_SecretStruct.fields()[i];
+    DCHECK_EQ(*field.id(), f.id);
     field.name() = f.name;
     field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
-    module_SecretStruct.fields()->push_back(std::move(field));
+
+    // writeAndGenType will modify metadata, which might invalidate `field` reference
+    // We need to store the result in a separate `type` variable.
+    apache::thrift::metadata::ThriftType type;
+    f.metadata_type_interface->writeAndGenType(type, metadata);
+    module_SecretStruct.fields()[i++].type() = std::move(type);
   }
   return res.metadata;
 }

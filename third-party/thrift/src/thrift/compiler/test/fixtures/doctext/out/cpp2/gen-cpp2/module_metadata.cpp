@@ -48,16 +48,21 @@ StructMetadata<::cpp2::A>::gen(ThriftMetadata& metadata) {
   static const auto* const
   module_A_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "useless_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
+  std::size_t i = 0;
   for (const auto& f : *module_A_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
+    auto& field = module_A.fields()[i];
+    DCHECK_EQ(*field.id(), f.id);
     field.name() = f.name;
     field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
-    module_A.fields()->push_back(std::move(field));
+
+    // writeAndGenType will modify metadata, which might invalidate `field` reference
+    // We need to store the result in a separate `type` variable.
+    apache::thrift::metadata::ThriftType type;
+    f.metadata_type_interface->writeAndGenType(type, metadata);
+    module_A.fields()[i++].type() = std::move(type);
   }
   return res.metadata;
 }
@@ -72,16 +77,21 @@ StructMetadata<::cpp2::U>::gen(ThriftMetadata& metadata) {
   static const auto* const
   module_U_fields = new std::array<EncodedThriftField, 2>{ {
     { 1, "i", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "s", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
+  std::size_t i = 0;
   for (const auto& f : *module_U_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
+    auto& field = module_U.fields()[i];
+    DCHECK_EQ(*field.id(), f.id);
     field.name() = f.name;
     field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
-    module_U.fields()->push_back(std::move(field));
+
+    // writeAndGenType will modify metadata, which might invalidate `field` reference
+    // We need to store the result in a separate `type` variable.
+    apache::thrift::metadata::ThriftType type;
+    f.metadata_type_interface->writeAndGenType(type, metadata);
+    module_U.fields()[i++].type() = std::move(type);
   }
   return res.metadata;
 }
@@ -96,16 +106,21 @@ StructMetadata<::cpp2::Bang>::gen(ThriftMetadata& metadata) {
   static const auto* const
   module_Bang_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
+  std::size_t i = 0;
   for (const auto& f : *module_Bang_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
+    auto& field = module_Bang.fields()[i];
+    DCHECK_EQ(*field.id(), f.id);
     field.name() = f.name;
     field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
-    module_Bang.fields()->push_back(std::move(field));
+
+    // writeAndGenType will modify metadata, which might invalidate `field` reference
+    // We need to store the result in a separate `type` variable.
+    apache::thrift::metadata::ThriftType type;
+    f.metadata_type_interface->writeAndGenType(type, metadata);
+    module_Bang.fields()[i++].type() = std::move(type);
   }
   return res.metadata;
 }
@@ -119,13 +134,18 @@ void ExceptionMetadata<::cpp2::Bang>::gen(ThriftMetadata& metadata) {
   static const auto* const
   module_Bang_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
+  std::size_t i = 0;
   for (const auto& f : *module_Bang_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
+    auto& field = module_Bang.fields()[i];
+    DCHECK_EQ(*field.id(), f.id);
     field.name() = f.name;
     field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    module_Bang.fields()->push_back(std::move(field));
+
+    // writeAndGenType will modify metadata, which might invalidate `field` reference
+    // We need to store the result in a separate `type` variable.
+    apache::thrift::metadata::ThriftType type;
+    f.metadata_type_interface->writeAndGenType(type, metadata);
+    module_Bang.fields()[i++].type() = std::move(type);
   }
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::gen_f([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {

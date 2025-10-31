@@ -37,16 +37,21 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::Tri
   static const auto* const
   module_TrivialStruct_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "int_value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
+  std::size_t i = 0;
   for (const auto& f : *module_TrivialStruct_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
+    auto& field = module_TrivialStruct.fields()[i];
+    DCHECK_EQ(*field.id(), f.id);
     field.name() = f.name;
     field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
-    module_TrivialStruct.fields()->push_back(std::move(field));
+
+    // writeAndGenType will modify metadata, which might invalidate `field` reference
+    // We need to store the result in a separate `type` variable.
+    apache::thrift::metadata::ThriftType type;
+    f.metadata_type_interface->writeAndGenType(type, metadata);
+    module_TrivialStruct.fields()[i++].type() = std::move(type);
   }
   return res.metadata;
 }
@@ -61,16 +66,21 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::Str
   static const auto* const
   module_StructWithNoCustomDefaultValues_fields = new std::array<EncodedThriftField, 6>{ {
     { 1, "unqualified_integer", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "optional_integer", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "required_integer", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 4, "unqualified_struct", false, std::make_unique<Struct<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>>("module.TrivialStruct"), std::vector<ThriftConstStruct>{ }},    { 5, "optional_struct", true, std::make_unique<Struct<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>>("module.TrivialStruct"), std::vector<ThriftConstStruct>{ }},    { 6, "required_struct", false, std::make_unique<Struct<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>>("module.TrivialStruct"), std::vector<ThriftConstStruct>{ }},  }};
+  std::size_t i = 0;
   for (const auto& f : *module_StructWithNoCustomDefaultValues_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
+    auto& field = module_StructWithNoCustomDefaultValues.fields()[i];
+    DCHECK_EQ(*field.id(), f.id);
     field.name() = f.name;
     field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
-    module_StructWithNoCustomDefaultValues.fields()->push_back(std::move(field));
+
+    // writeAndGenType will modify metadata, which might invalidate `field` reference
+    // We need to store the result in a separate `type` variable.
+    apache::thrift::metadata::ThriftType type;
+    f.metadata_type_interface->writeAndGenType(type, metadata);
+    module_StructWithNoCustomDefaultValues.fields()[i++].type() = std::move(type);
   }
   return res.metadata;
 }
@@ -85,16 +95,21 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::Str
   static const auto* const
   module_StructWithCustomDefaultValues_fields = new std::array<EncodedThriftField, 6>{ {
     { 1, "unqualified_integer", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "optional_integer", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowUnsafeOptionalCustomDefaultValue", {  }).cv_struct(), }},    { 3, "required_integer", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 4, "unqualified_struct", false, std::make_unique<Struct<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>>("module.TrivialStruct"), std::vector<ThriftConstStruct>{ }},    { 5, "optional_struct", true, std::make_unique<Struct<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>>("module.TrivialStruct"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowUnsafeOptionalCustomDefaultValue", {  }).cv_struct(), }},    { 6, "required_struct", false, std::make_unique<Struct<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>>("module.TrivialStruct"), std::vector<ThriftConstStruct>{ }},  }};
+  std::size_t i = 0;
   for (const auto& f : *module_StructWithCustomDefaultValues_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
+    auto& field = module_StructWithCustomDefaultValues.fields()[i];
+    DCHECK_EQ(*field.id(), f.id);
     field.name() = f.name;
     field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
-    module_StructWithCustomDefaultValues.fields()->push_back(std::move(field));
+
+    // writeAndGenType will modify metadata, which might invalidate `field` reference
+    // We need to store the result in a separate `type` variable.
+    apache::thrift::metadata::ThriftType type;
+    f.metadata_type_interface->writeAndGenType(type, metadata);
+    module_StructWithCustomDefaultValues.fields()[i++].type() = std::move(type);
   }
   return res.metadata;
 }

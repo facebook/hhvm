@@ -113,6 +113,11 @@ static auto genStructuredInMetadataMap(
     return ret;
   }
   ret.metadata.name() = std::move(name);
+  ret.metadata.fields()->reserve(node.fields().size());
+  for (auto& field : node.fields()) {
+    auto& f = ret.metadata.fields()->emplace_back();
+    f.id() = folly::to_underlying(field.id());
+  }
   // TODO: add other information
   return ret;
 }

@@ -37,16 +37,21 @@ StructMetadata<::cpp2::Mixin1>::gen(ThriftMetadata& metadata) {
   static const auto* const
   module_Mixin1_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "field1", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
+  std::size_t i = 0;
   for (const auto& f : *module_Mixin1_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
+    auto& field = module_Mixin1.fields()[i];
+    DCHECK_EQ(*field.id(), f.id);
     field.name() = f.name;
     field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
-    module_Mixin1.fields()->push_back(std::move(field));
+
+    // writeAndGenType will modify metadata, which might invalidate `field` reference
+    // We need to store the result in a separate `type` variable.
+    apache::thrift::metadata::ThriftType type;
+    f.metadata_type_interface->writeAndGenType(type, metadata);
+    module_Mixin1.fields()[i++].type() = std::move(type);
   }
   return res.metadata;
 }
@@ -61,16 +66,21 @@ StructMetadata<::cpp2::Mixin2>::gen(ThriftMetadata& metadata) {
   static const auto* const
   module_Mixin2_fields = new std::array<EncodedThriftField, 2>{ {
     { 1, "m1", false, std::make_unique<Struct<::cpp2::Mixin1>>("module.Mixin1"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.Mixin", {  }).cv_struct(), }},    { 2, "field2", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
+  std::size_t i = 0;
   for (const auto& f : *module_Mixin2_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
+    auto& field = module_Mixin2.fields()[i];
+    DCHECK_EQ(*field.id(), f.id);
     field.name() = f.name;
     field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
-    module_Mixin2.fields()->push_back(std::move(field));
+
+    // writeAndGenType will modify metadata, which might invalidate `field` reference
+    // We need to store the result in a separate `type` variable.
+    apache::thrift::metadata::ThriftType type;
+    f.metadata_type_interface->writeAndGenType(type, metadata);
+    module_Mixin2.fields()[i++].type() = std::move(type);
   }
   return res.metadata;
 }
@@ -85,16 +95,21 @@ StructMetadata<::cpp2::Mixin3Base>::gen(ThriftMetadata& metadata) {
   static const auto* const
   module_Mixin3Base_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "field3", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
+  std::size_t i = 0;
   for (const auto& f : *module_Mixin3Base_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
+    auto& field = module_Mixin3Base.fields()[i];
+    DCHECK_EQ(*field.id(), f.id);
     field.name() = f.name;
     field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
-    module_Mixin3Base.fields()->push_back(std::move(field));
+
+    // writeAndGenType will modify metadata, which might invalidate `field` reference
+    // We need to store the result in a separate `type` variable.
+    apache::thrift::metadata::ThriftType type;
+    f.metadata_type_interface->writeAndGenType(type, metadata);
+    module_Mixin3Base.fields()[i++].type() = std::move(type);
   }
   return res.metadata;
 }
@@ -109,16 +124,21 @@ StructMetadata<::cpp2::Foo>::gen(ThriftMetadata& metadata) {
   static const auto* const
   module_Foo_fields = new std::array<EncodedThriftField, 3>{ {
     { 1, "field4", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "m2", false, std::make_unique<Struct<::cpp2::Mixin2>>("module.Mixin2"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.Mixin", {  }).cv_struct(), }},    { 3, "m3", false, std::make_unique<Typedef>("module.Mixin3", std::make_unique<Struct<::cpp2::Mixin3Base>>("module.Mixin3Base"), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ *cvStruct("thrift.Mixin", {  }).cv_struct(), }},  }};
+  std::size_t i = 0;
   for (const auto& f : *module_Foo_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
+    auto& field = module_Foo.fields()[i];
+    DCHECK_EQ(*field.id(), f.id);
     field.name() = f.name;
     field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
-    module_Foo.fields()->push_back(std::move(field));
+
+    // writeAndGenType will modify metadata, which might invalidate `field` reference
+    // We need to store the result in a separate `type` variable.
+    apache::thrift::metadata::ThriftType type;
+    f.metadata_type_interface->writeAndGenType(type, metadata);
+    module_Foo.fields()[i++].type() = std::move(type);
   }
   return res.metadata;
 }

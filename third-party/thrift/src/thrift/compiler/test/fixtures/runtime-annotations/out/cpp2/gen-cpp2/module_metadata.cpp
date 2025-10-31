@@ -56,16 +56,21 @@ StructMetadata<::facebook::thrift::test::MyStruct>::gen(ThriftMetadata& metadata
   static const auto* const
   module_MyStruct_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("module.MyAnnotation", {  }).cv_struct(), }},  }};
+  std::size_t i = 0;
   for (const auto& f : *module_MyStruct_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
+    auto& field = module_MyStruct.fields()[i];
+    DCHECK_EQ(*field.id(), f.id);
     field.name() = f.name;
     field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
-    module_MyStruct.fields()->push_back(std::move(field));
+
+    // writeAndGenType will modify metadata, which might invalidate `field` reference
+    // We need to store the result in a separate `type` variable.
+    apache::thrift::metadata::ThriftType type;
+    f.metadata_type_interface->writeAndGenType(type, metadata);
+    module_MyStruct.fields()[i++].type() = std::move(type);
   }
   module_MyStruct.structured_annotations()->push_back(*cvStruct("module.MyAnnotation", {  }).cv_struct());
   return res.metadata;
@@ -81,16 +86,21 @@ StructMetadata<::facebook::thrift::test::MyUnion>::gen(ThriftMetadata& metadata)
   static const auto* const
   module_MyUnion_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("module.MyAnnotation", {  }).cv_struct(), }},  }};
+  std::size_t i = 0;
   for (const auto& f : *module_MyUnion_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
+    auto& field = module_MyUnion.fields()[i];
+    DCHECK_EQ(*field.id(), f.id);
     field.name() = f.name;
     field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
-    module_MyUnion.fields()->push_back(std::move(field));
+
+    // writeAndGenType will modify metadata, which might invalidate `field` reference
+    // We need to store the result in a separate `type` variable.
+    apache::thrift::metadata::ThriftType type;
+    f.metadata_type_interface->writeAndGenType(type, metadata);
+    module_MyUnion.fields()[i++].type() = std::move(type);
   }
   module_MyUnion.structured_annotations()->push_back(*cvStruct("module.MyAnnotation", {  }).cv_struct());
   return res.metadata;
@@ -106,16 +116,21 @@ StructMetadata<::facebook::thrift::test::MyException>::gen(ThriftMetadata& metad
   static const auto* const
   module_MyException_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("module.MyAnnotation", {  }).cv_struct(), }},  }};
+  std::size_t i = 0;
   for (const auto& f : *module_MyException_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
+    auto& field = module_MyException.fields()[i];
+    DCHECK_EQ(*field.id(), f.id);
     field.name() = f.name;
     field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
-    module_MyException.fields()->push_back(std::move(field));
+
+    // writeAndGenType will modify metadata, which might invalidate `field` reference
+    // We need to store the result in a separate `type` variable.
+    apache::thrift::metadata::ThriftType type;
+    f.metadata_type_interface->writeAndGenType(type, metadata);
+    module_MyException.fields()[i++].type() = std::move(type);
   }
   module_MyException.structured_annotations()->push_back(*cvStruct("module.MyAnnotation", {  }).cv_struct());
   return res.metadata;
@@ -130,13 +145,18 @@ void ExceptionMetadata<::facebook::thrift::test::MyException>::gen(ThriftMetadat
   static const auto* const
   module_MyException_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("module.MyAnnotation", {  }).cv_struct(), }},  }};
+  std::size_t i = 0;
   for (const auto& f : *module_MyException_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
+    auto& field = module_MyException.fields()[i];
+    DCHECK_EQ(*field.id(), f.id);
     field.name() = f.name;
     field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    module_MyException.fields()->push_back(std::move(field));
+
+    // writeAndGenType will modify metadata, which might invalidate `field` reference
+    // We need to store the result in a separate `type` variable.
+    apache::thrift::metadata::ThriftType type;
+    f.metadata_type_interface->writeAndGenType(type, metadata);
+    module_MyException.fields()[i++].type() = std::move(type);
   }
   module_MyException.structured_annotations()->push_back(*cvStruct("module.MyAnnotation", {  }).cv_struct());
 }

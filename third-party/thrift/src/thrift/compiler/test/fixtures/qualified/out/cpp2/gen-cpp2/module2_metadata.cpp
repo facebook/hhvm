@@ -37,16 +37,21 @@ StructMetadata<::module2::Struct>::gen(ThriftMetadata& metadata) {
   static const auto* const
   module2_Struct_fields = new std::array<EncodedThriftField, 2>{ {
     { 1, "first", false, std::make_unique<Struct<::module0::Struct>>("module0.Struct"), std::vector<ThriftConstStruct>{ }},    { 2, "second", false, std::make_unique<Struct<::module1::Struct>>("module1.Struct"), std::vector<ThriftConstStruct>{ }},  }};
+  std::size_t i = 0;
   for (const auto& f : *module2_Struct_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
+    auto& field = module2_Struct.fields()[i];
+    DCHECK_EQ(*field.id(), f.id);
     field.name() = f.name;
     field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
-    module2_Struct.fields()->push_back(std::move(field));
+
+    // writeAndGenType will modify metadata, which might invalidate `field` reference
+    // We need to store the result in a separate `type` variable.
+    apache::thrift::metadata::ThriftType type;
+    f.metadata_type_interface->writeAndGenType(type, metadata);
+    module2_Struct.fields()[i++].type() = std::move(type);
   }
   return res.metadata;
 }
@@ -61,16 +66,21 @@ StructMetadata<::module2::BigStruct>::gen(ThriftMetadata& metadata) {
   static const auto* const
   module2_BigStruct_fields = new std::array<EncodedThriftField, 2>{ {
     { 1, "s", false, std::make_unique<Struct<::module2::Struct>>("module2.Struct"), std::vector<ThriftConstStruct>{ }},    { 2, "id", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
+  std::size_t i = 0;
   for (const auto& f : *module2_BigStruct_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
+    auto& field = module2_BigStruct.fields()[i];
+    DCHECK_EQ(*field.id(), f.id);
     field.name() = f.name;
     field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
-    module2_BigStruct.fields()->push_back(std::move(field));
+
+    // writeAndGenType will modify metadata, which might invalidate `field` reference
+    // We need to store the result in a separate `type` variable.
+    apache::thrift::metadata::ThriftType type;
+    f.metadata_type_interface->writeAndGenType(type, metadata);
+    module2_BigStruct.fields()[i++].type() = std::move(type);
   }
   return res.metadata;
 }

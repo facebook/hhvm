@@ -37,16 +37,21 @@ StructMetadata<::facebook::thrift::test::InterceptedFields>::gen(ThriftMetadata&
   static const auto* const
   module_InterceptedFields_fields = new std::array<EncodedThriftField, 6>{ {
     { 1, "access_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.FieldInterceptor", { {"name", cvString("my::FieldInterceptor") }, {"noinline", cvBool(true) } }).cv_struct(), }},    { 2, "access_shared_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.FieldInterceptor", { {"name", cvString("my::FieldInterceptor") } }).cv_struct(), *cvStruct("cpp.Ref", { {"type", cvInteger(2) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 3, "access_optional_shared_field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.FieldInterceptor", { {"name", cvString("my::FieldInterceptor") } }).cv_struct(), *cvStruct("cpp.Ref", { {"type", cvInteger(2) } }).cv_struct(), }},    { 4, "access_shared_const_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.FieldInterceptor", { {"name", cvString("my::FieldInterceptor") } }).cv_struct(), *cvStruct("cpp.Ref", { {"type", cvInteger(1) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 5, "access_optional_shared_const_field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.FieldInterceptor", { {"name", cvString("my::FieldInterceptor") } }).cv_struct(), *cvStruct("cpp.Ref", { {"type", cvInteger(1) } }).cv_struct(), }},    { 6, "access_optional_boxed_field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.FieldInterceptor", { {"name", cvString("my::FieldInterceptor") } }).cv_struct(), *cvStruct("thrift.Box", {  }).cv_struct(), }},  }};
+  std::size_t i = 0;
   for (const auto& f : *module_InterceptedFields_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
+    auto& field = module_InterceptedFields.fields()[i];
+    DCHECK_EQ(*field.id(), f.id);
     field.name() = f.name;
     field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
-    module_InterceptedFields.fields()->push_back(std::move(field));
+
+    // writeAndGenType will modify metadata, which might invalidate `field` reference
+    // We need to store the result in a separate `type` variable.
+    apache::thrift::metadata::ThriftType type;
+    f.metadata_type_interface->writeAndGenType(type, metadata);
+    module_InterceptedFields.fields()[i++].type() = std::move(type);
   }
   return res.metadata;
 }

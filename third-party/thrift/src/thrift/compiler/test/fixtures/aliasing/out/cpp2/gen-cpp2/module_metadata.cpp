@@ -37,16 +37,21 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::aliasing::Foo>::gen
   static const auto* const
   module_Foo_fields = new std::array<EncodedThriftField, 2>{ {
     { 1, "other_foo", false, std::make_unique<Struct<::cpp2::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{ }},    { 2, "yet_another_foo", false, std::make_unique<Struct<::cpp2::Foo>>("not_module.Foo"), std::vector<ThriftConstStruct>{ }},  }};
+  std::size_t i = 0;
   for (const auto& f : *module_Foo_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
+    auto& field = module_Foo.fields()[i];
+    DCHECK_EQ(*field.id(), f.id);
     field.name() = f.name;
     field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
-    module_Foo.fields()->push_back(std::move(field));
+
+    // writeAndGenType will modify metadata, which might invalidate `field` reference
+    // We need to store the result in a separate `type` variable.
+    apache::thrift::metadata::ThriftType type;
+    f.metadata_type_interface->writeAndGenType(type, metadata);
+    module_Foo.fields()[i++].type() = std::move(type);
   }
   return res.metadata;
 }

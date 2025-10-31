@@ -148,9 +148,9 @@ where
         };
 
         {{#function:bidirectional_stream?}}
-        let call_sink = transport
-            .call_sink(service_name, service_method_name, request_env, rpc_options)
-            .instrument(::tracing::trace_span!("call_sink", method = "{{service:name}}.{{function:name}}"));
+        let call_bidirectional = transport
+            .call_bidirectional(service_name, service_method_name, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call_bidirectional", method = "{{service:name}}.{{function:name}}"));
         {{/function:bidirectional_stream?}}{{^function:bidirectional_stream?}}{{#function:stream?}}
         let call_stream = transport
             .call_stream(service_name, service_method_name, request_env, rpc_options)
@@ -173,25 +173,82 @@ where
             ******************************
 
             }}
-            // TODO: Implement bidirectional streaming client support
-            // Bidirectional streaming is an unreleased feature that requires
-            // additional transport API support. For now, return an error.
-            let res: ::std::result::Result<(
-                ::futures::stream::BoxStream<'static, ::std::result::Result<{{!
-                    }}{{#function:stream_elem_type}}{{> lib/type}}{{/function:stream_elem_type}}, {{!
-                    }}{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}StreamError{{!
-                }}>>,
-                Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<{{!
-                    }}{{#function:sink_elem_type}}{{> lib/type}}{{/function:sink_elem_type}}, {{!
-                    }}{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError{{!
-                }}>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), {{!
-                    }}{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError{{!
-                }}>> + ::std::marker::Send>
-            ), {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error> = ::std::result::Result::Err(
-                {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error::ThriftError(
-                    ::anyhow::anyhow!("Bidirectional streaming is not yet supported in Rust Thrift client")
-                )
-            );
+            let ::fbthrift::BidiReply {
+                initial_response: _initial_response,
+                stream,
+                sink_processor,
+            } = call_bidirectional.await?;
+
+            // Deserialize the initial response (should be empty for bidirectional)
+            let de = P::deserializer(_initial_response);
+            let _initial_result = ::fbthrift::help::async_deserialize_response_envelope::<P, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Reader, S>(de).await??;
+
+            // Process the server-to-client stream
+            let server_stream = stream.then(|item_res| {
+                async move {
+                    match item_res {
+                        ::std::result::Result::Err(err) =>
+                            ::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}StreamError::from(err)),
+                        ::std::result::Result::Ok(item_enc) => {
+                            S::spawn(move || {
+                                match item_enc {
+                                    ::fbthrift::ClientStreamElement::Reply(payload) => {
+                                        let mut de = P::deserializer(payload);
+                                        <{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}StreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                                    }
+                                    ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
+                                        let mut de = P::deserializer(payload);
+                                        let aexn = ::fbthrift::ApplicationException::rs_thrift_read(&mut de)?;
+                                        ::std::result::Result::Ok(::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}StreamError::ApplicationException(aexn)))
+                                    }
+                                    ::fbthrift::ClientStreamElement::DeclaredEx(payload) => {
+                                        let mut de = P::deserializer(payload);
+                                        <{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}StreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                                    }
+                                }
+                            }).await.map_err(::anyhow::Error::from)??
+                        }
+                    }
+                }
+            })
+            .boxed();
+
+            // Create the sink handler that accepts client stream and sends to server
+            let sink_helper_fn = move |stream: ::futures::stream::BoxStream<'static, ::std::result::Result<
+                {{#function:sink_elem_type}}{{> lib/type}}{{/function:sink_elem_type}},
+                {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError
+            >>| {
+                let new_stream = stream.map(|item| {
+                    match item {
+                        ::std::result::Result::Ok(res) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError>(::std::result::Result::Ok(res), "{{#service:interaction?}}{{service:name}}.{{/service:interaction?}}{{function:name}}");
+                            ::fbthrift::ClientStreamElement::Reply(enc)
+                        }
+                        ::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError::ApplicationException(aexn)) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError>(::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError::ApplicationException(aexn)), "{{#service:interaction?}}{{service:name}}.{{/service:interaction?}}{{function:name}}");
+                            ::fbthrift::ClientStreamElement::ApplicationEx(enc)
+                        }
+                        ::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError::ThriftError(err)) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError>(::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError::ThriftError(err)), "{{#service:interaction?}}{{service:name}}.{{/service:interaction?}}{{function:name}}");
+                            ::fbthrift::ClientStreamElement::ApplicationEx(enc)
+                        }
+                        {{#if (not (array.empty? function:sink.exceptions))}}
+                        ::std::result::Result::Err(other_err) => {
+                            let enc = ::fbthrift::help::serialize_stream_item::<P, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError>(::std::result::Result::Err(other_err), "{{#service:interaction?}}{{service:name}}.{{/service:interaction?}}{{function:name}}");
+                            ::fbthrift::ClientStreamElement::DeclaredEx(enc)
+                        }
+                        {{/if (not (array.empty? function:sink.exceptions))}}
+                    }
+                }).boxed();
+                let sinker = sink_processor;
+                async move {
+                    let _payload = (sinker)(new_stream).await?;
+                    // For bidirectional streaming, we don't expect a final response
+                    ::std::result::Result::Ok(())
+                }.boxed()
+            };
+
+            let res = ::std::result::Result::Ok((server_stream, Box::new(sink_helper_fn) as Box<dyn ::std::ops::FnOnce(::futures::stream::BoxStream<'static, ::std::result::Result<{{#function:sink_elem_type}}{{> lib/type}}{{/function:sink_elem_type}}, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError>>) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(), {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkError>> + ::std::marker::Send>));
             {{/function:bidirectional_stream?}}{{^function:bidirectional_stream?}}{{#function:stream?}}{{!
 
             ******************************

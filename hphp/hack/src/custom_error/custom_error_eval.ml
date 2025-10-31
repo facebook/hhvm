@@ -9,10 +9,6 @@
 open Core
 module Ty = Typing_defs
 
-exception Invalid_pattern of string * Validation_err.t list
-
-exception Illegal_name of string
-
 module Value = struct
   type t =
     | Ty of (Ty.locl_ty[@compare.ignore] [@sexp.opaque])
@@ -219,7 +215,7 @@ let rec matches_name ?(env = Env.empty) t ~scrut =
       Match.(
         matches_string patt_name ~scrut:name ~env >>= fun _ ->
         matches_namespace patt_namespace ~scrut:namespace ~env)
-    | _ -> raise (Illegal_name (snd scrut)))
+    | _ -> Match.no_match)
   | As { lbl; patt } ->
     Match.(
       matches_name patt ~scrut ~env

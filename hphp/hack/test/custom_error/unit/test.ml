@@ -1023,6 +1023,62 @@ let test_member_complex_string_patterns _ =
     (Eval.eval_typing_error custom_config ~err)
     [[Either.First "React render method not found"]]
 
+(* Test handling of malformed class names *)
+let test_malformed_class_name _ =
+  let class_name = "\\\\\\" in
+  let method_name = "whatever" in
+
+  let prim_err =
+    Typing_error.Primary.Member_not_found
+      {
+        pos = Pos.none;
+        kind = `method_;
+        class_name;
+        class_pos = Pos_or_decl.none;
+        member_name = method_name;
+        hint = lazy None;
+        reason = lazy [];
+      }
+  in
+
+  let err = Typing_error.primary prim_err in
+
+  let patt =
+    Custom_error.Error_v1
+      Patt_typing_error.(
+        Primary
+          (Member_not_found
+             {
+               patt_is_static = Some Instance_only;
+               patt_kind = Method_only;
+               patt_class_name =
+                 Patt_name.Name
+                   {
+                     patt_namespace = Patt_name.Root;
+                     patt_name = Patt_string.Exactly "RealClassName";
+                   };
+               patt_member_name =
+                 Patt_member_name.(
+                   Member_name { patt_string = Patt_string.Exactly method_name });
+               patt_visibility = None;
+             }))
+  in
+
+  let error_message =
+    Custom_error.Message_v1
+      Error_message.{ message = [Lit "React render method not found"] }
+  in
+  let custom_err = Custom_error.{ name = "test"; patt; error_message } in
+  let custom_config =
+    Custom_error_config.{ valid = [custom_err]; invalid = [] }
+  in
+
+  let open Core in
+  assert_equal
+    ~cmp:[%compare.equal: (string, Eval.Value.t) Either.t list list]
+    (Eval.eval_typing_error custom_config ~err)
+    (* NoMatch *)
+    []
 (* == Package errors ======================================================== *)
 
 let test_cross_pkg_access _ =
@@ -1284,6 +1340,7 @@ let tests =
     "test_cross_pkg_access" >:: test_cross_pkg_access;
     "test_cross_pkg_access_with_requirepackage"
     >:: test_cross_pkg_access_with_requirepackage;
+    "test_malformed_class_name" >:: test_malformed_class_name;
   ]
 
 let () = "custom_error_unit_tests" >::: tests |> run_test_tt_main

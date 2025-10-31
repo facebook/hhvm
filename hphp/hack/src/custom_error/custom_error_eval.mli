@@ -6,8 +6,6 @@
  *
  *)
 
-exception Invalid_pattern of string * Validation_err.t list
-
 module Value : sig
   type t =
     | Ty of Typing_defs_core.locl_ty

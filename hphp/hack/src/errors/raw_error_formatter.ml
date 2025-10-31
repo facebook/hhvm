@@ -54,7 +54,7 @@ let to_string (error : Errors.finalized_error) : string =
     reasons;
     explanation = _;
     quickfixes = _;
-    custom_msgs = _;
+    custom_msgs;
     is_fixmed = _;
     function_pos = _;
   } =
@@ -77,11 +77,12 @@ let to_string (error : Errors.finalized_error) : string =
       reasons
   in
   let custom_msgs =
-    match error.User_error.custom_msgs with
+    match custom_msgs with
     | [] -> []
     | msgs ->
-      (Tty.Normal Tty.Default, "\n")
-      :: List.map ~f:(fun msg -> (Tty.Normal Tty.Cyan, msg)) msgs
+      let indent = (Tty.Normal Tty.Default, "  ") in
+      List.concat_map msgs ~f:(fun msg ->
+          indent :: (Tty.Normal Tty.Default, msg) :: [newline])
   in
   let to_print = severity_txt @ claim @ reasons @ custom_msgs in
   if Unix.isatty Unix.stdout then

@@ -240,5 +240,9 @@ let to_string
   if not @@ List.is_empty custom_msgs then
     Buffer.add_string
       buf
-      (String.concat ~sep:"\n" error.User_error.custom_msgs ^ "\n");
+      (String.concat
+         ~sep:"\n"
+         (List.map error.User_error.custom_msgs ~f:(fun msg ->
+              Markdown_lite.render ~add_bold:true ~color:Tty.Default msg))
+      ^ "\n");
   Buffer.contents buf

@@ -1229,7 +1229,8 @@ let ide_diagnostics_to_lsp_diagnostics
     in
     let first_loc = fst first_message in
     let custom_errors =
-      List.map custom_msgs ~f:(fun relatedMessage ->
+      List.map custom_msgs ~f:(fun msg ->
+          let relatedMessage = Markdown_lite.render msg in
           PublishDiagnostics.{ relatedLocation = first_loc; relatedMessage })
     in
     let relatedInformation = relatedInformation @ custom_errors in

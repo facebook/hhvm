@@ -204,8 +204,7 @@ async def invokeCallbackWithGenerator(
             yield elem
 
     try:
-        gen = invoke_cpp_iobuf_gen()
-        final_resp_iobuf = await sink_callback(gen)
+        final_resp_iobuf = await sink_callback(invoke_cpp_iobuf_gen)
         assert isinstance(final_resp_iobuf, IOBuf), f"Expected IOBuf, got {type(final_resp_iobuf)}"
         promise.complete(final_resp_iobuf)
     except PythonUserException as pyex:

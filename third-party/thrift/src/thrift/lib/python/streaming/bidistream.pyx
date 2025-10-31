@@ -127,8 +127,7 @@ async def invokeBidiTransformCallback(
             yield elem
 
     try:
-        input_gen_wrapper = invoke_cpp_iobuf_gen()
-        output_gen = await bidi_callback(input_gen_wrapper)
+        output_gen = await bidi_callback(invoke_cpp_iobuf_gen)
         promise.complete(output_gen)
     except ApplicationError as ex:
         promise.error_ta(

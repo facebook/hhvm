@@ -67,7 +67,7 @@ class BiDiServiceInterface(
             _iobuf_agen: _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None],
         ) -> _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]:
             async def _handle_sink() -> _typing.AsyncGenerator[builtins.int, None]:
-                async for iobuf_item in _iobuf_agen:
+                async for iobuf_item in _iobuf_agen():
                     sink_elem = deserialize(
                         _fbthrift__module__thrift_types._fbthrift_BiDiService_simple_result_sink_elem,
                         iobuf_item,
@@ -106,7 +106,7 @@ class BiDiServiceInterface(
             _iobuf_agen: _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None],
         ) -> _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]:
             async def _handle_sink() -> _typing.AsyncGenerator[builtins.int, None]:
-                async for iobuf_item in _iobuf_agen:
+                async for iobuf_item in _iobuf_agen():
                     sink_elem = deserialize(
                         _fbthrift__module__thrift_types._fbthrift_BiDiService_response_result_sink_elem,
                         iobuf_item,
@@ -145,7 +145,7 @@ class BiDiServiceInterface(
             _iobuf_agen: _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None],
         ) -> _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]:
             async def _handle_sink() -> _typing.AsyncGenerator[builtins.int, None]:
-                async for iobuf_item in _iobuf_agen:
+                async for iobuf_item in _iobuf_agen():
                     sink_elem = deserialize(
                         _fbthrift__module__thrift_types._fbthrift_BiDiService_canThrow_result_sink_elem,
                         iobuf_item,

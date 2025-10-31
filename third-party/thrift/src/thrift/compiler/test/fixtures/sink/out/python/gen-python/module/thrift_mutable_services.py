@@ -71,7 +71,7 @@ class SinkServiceInterface(
             _iobuf_agen: _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None],
         ) -> _fbthrift_iobuf.IOBuf:
             async def _handler_agen() -> _typing.AsyncGenerator[_fbthrift__module__thrift_mutable_types.SinkPayload, None]:
-                async for iobuf_item in _iobuf_agen:
+                async for iobuf_item in _iobuf_agen():
                     sink_elem = deserialize(
                         _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_method_result_sink_elem,
                         iobuf_item,
@@ -110,7 +110,7 @@ class SinkServiceInterface(
             _iobuf_agen: _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None],
         ) -> _fbthrift_iobuf.IOBuf:
             async def _handler_agen() -> _typing.AsyncGenerator[_fbthrift__module__thrift_mutable_types.SinkPayload, None]:
-                async for iobuf_item in _iobuf_agen:
+                async for iobuf_item in _iobuf_agen():
                     sink_elem = deserialize(
                         _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodAndReponse_result_sink_elem,
                         iobuf_item,
@@ -149,7 +149,7 @@ class SinkServiceInterface(
             _iobuf_agen: _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None],
         ) -> _fbthrift_iobuf.IOBuf:
             async def _handler_agen() -> _typing.AsyncGenerator[_fbthrift__module__thrift_mutable_types.SinkPayload, None]:
-                async for iobuf_item in _iobuf_agen:
+                async for iobuf_item in _iobuf_agen():
                     sink_elem = deserialize(
                         _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodThrow_result_sink_elem,
                         iobuf_item,
@@ -194,7 +194,7 @@ class SinkServiceInterface(
             _iobuf_agen: _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None],
         ) -> _fbthrift_iobuf.IOBuf:
             async def _handler_agen() -> _typing.AsyncGenerator[_fbthrift__module__thrift_mutable_types.SinkPayload, None]:
-                async for iobuf_item in _iobuf_agen:
+                async for iobuf_item in _iobuf_agen():
                     sink_elem = deserialize(
                         _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodSinkThrow_result_sink_elem,
                         iobuf_item,
@@ -238,7 +238,7 @@ class SinkServiceInterface(
             _iobuf_agen: _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None],
         ) -> _fbthrift_iobuf.IOBuf:
             async def _handler_agen() -> _typing.AsyncGenerator[_fbthrift__module__thrift_mutable_types.SinkPayload, None]:
-                async for iobuf_item in _iobuf_agen:
+                async for iobuf_item in _iobuf_agen():
                     sink_elem = deserialize(
                         _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodFinalThrow_result_sink_elem,
                         iobuf_item,
@@ -280,7 +280,7 @@ class SinkServiceInterface(
             _iobuf_agen: _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None],
         ) -> _fbthrift_iobuf.IOBuf:
             async def _handler_agen() -> _typing.AsyncGenerator[_fbthrift__module__thrift_mutable_types.SinkPayload, None]:
-                async for iobuf_item in _iobuf_agen:
+                async for iobuf_item in _iobuf_agen():
                     sink_elem = deserialize(
                         _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodBothThrow_result_sink_elem,
                         iobuf_item,
@@ -327,7 +327,7 @@ class SinkServiceInterface(
             _iobuf_agen: _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None],
         ) -> _fbthrift_iobuf.IOBuf:
             async def _handler_agen() -> _typing.AsyncGenerator[_fbthrift__module__thrift_mutable_types.SinkPayload, None]:
-                async for iobuf_item in _iobuf_agen:
+                async for iobuf_item in _iobuf_agen():
                     sink_elem = deserialize(
                         _fbthrift__module__thrift_mutable_types._fbthrift_SinkService_methodFast_result_sink_elem,
                         iobuf_item,

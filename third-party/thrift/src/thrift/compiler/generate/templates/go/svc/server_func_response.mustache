@@ -26,7 +26,7 @@ func (p *{{> svc/proc_func_name}}) RunContext(ctx context.Context, reqStruct thr
     {{^function:oneway?}}
     result := newResp{{service:go_name}}{{function:go_name}}()
     {{/function:oneway?}}
-    {{^function:void?}}retval, {{/function:void?}}err := p.handler.{{function:go_name}}({{!
+    {{#function:return_type}}{{^type:void?}}retval, {{/type:void?}}{{/function:return_type}}err := p.handler.{{function:go_name}}({{!
         }}ctx{{#if function:params.fields?}}, {{/if}}{{!
         }}{{#function:args}}{{!
           }}args.{{field:go_name}}{{!
@@ -53,11 +53,11 @@ func (p *{{> svc/proc_func_name}}) RunContext(ctx context.Context, reqStruct thr
         {{/function:exceptions?}}
     }
 
-    {{^function:void?}}
     {{#function:return_type}}
+    {{^type:void?}}
     result.{{function:retval_field_name}} = {{^type:nilable?}}&{{/type:nilable?}}retval
+    {{/type:void?}}
     {{/function:return_type}}
-    {{/function:void?}}
     {{#function:oneway?}}
     return nil, nil
     {{/function:oneway?}}

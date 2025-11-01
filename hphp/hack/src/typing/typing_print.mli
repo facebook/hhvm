@@ -43,8 +43,6 @@ val full_strip_ns_decl :
 val full_decl :
   ?msg:bool -> TypecheckerOptions.t -> Typing_defs.decl_ty -> string
 
-val fun_type : TypecheckerOptions.t -> Typing_defs.decl_fun_type -> string
-
 (** Pretty print a type and all of its associated declaration information. *)
 val full_with_identity :
   hide_internals:bool ->

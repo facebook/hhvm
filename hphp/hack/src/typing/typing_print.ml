@@ -1459,22 +1459,6 @@ module Full = struct
     let ty = decl_ty ~verbose_fun:false in
     to_string ~fuel ~ty Doc.text Declenv x
 
-  let fun_to_string ~fuel (x : decl_fun_type) =
-    let ty = decl_ty ~verbose_fun:false in
-    let (fuel, _, _async_doc, doc) =
-      fun_type
-        ~fuel
-        ~ty
-        Doc.text
-        Tvid.Set.empty
-        Declenv
-        ~verbose:false
-        x
-        (fun_decl_implicit_params ~verbose_fun:false)
-    in
-    let str = Libhackfmt.format_doc_unbroken format_env doc |> String.strip in
-    (fuel, str)
-
   (** For functions and methods, interpret supportdyn as use of <<__SupportDynamicType>> attribute *)
   let add_supportdyn_prefix (type ph) env (x : ph ty) occurrence prefix :
       _ * ph ty =
@@ -1949,8 +1933,6 @@ let debug env ty = full_strip_ns ~hide_internals:false env ty
 let debug_decl env ty = full_strip_ns_decl ~verbose_fun:true env ty
 
 let debug_i env ty = full_strip_ns_i ~hide_internals:false env ty
-
-let fun_type tcopt f = supply_fuel tcopt (Full.fun_to_string f)
 
 let constraints_for_type ~hide_internals env ty =
   supply_fuel env.genv.tcopt (fun ~fuel ->

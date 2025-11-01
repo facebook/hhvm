@@ -20,12 +20,10 @@ import types
 import typing
 import unittest
 from datetime import datetime
-from sys import platform
 
 import thrift.python.mutable_serializer as mutable_serializer
 
 import thrift.python.serializer as immutable_serializer
-import thrift.python.types
 
 from folly.iobuf import IOBuf
 
@@ -291,6 +289,30 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
             overflow_struct.__class__, immutable_serializer.serialize(overflow_struct)
         )
         self.assertEqual(roundtrip.unqualified_float, float("inf"))
+
+    def test_float32_rounding(self) -> None:
+        float64_third = 1.0 / 3.0
+        rounding_struct = TestStructAllThriftPrimitiveTypesImmutable(
+            unqualified_float=float64_third,
+        )
+        self.assertEqual(rounding_struct.unqualified_float, float64_third)
+        # implementation detail: note we don't allocate a new Python object
+        self.assertIs(rounding_struct.unqualified_float, float64_third)
+
+        # BAD: we lose precision on float value on serialization roundtrip.
+        with self.assertRaises(AssertionError):
+            _thrift_serialization_round_trip(
+                self, immutable_serializer, rounding_struct
+            )
+
+        roundtrip = immutable_serializer.deserialize(
+            rounding_struct.__class__, immutable_serializer.serialize(rounding_struct)
+        )
+        # decimal representation of float32 rounding of 1/3
+        float32_third = 0.3333333432674408
+        # they differ by just less than 1e-8
+        self.assertNotEqual(float64_third, float32_third)
+        self.assertEqual(roundtrip.unqualified_float, float32_third)
 
     def test_equality_and_hashability(self) -> None:
         # Equality
@@ -724,6 +746,37 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         copied = copy.deepcopy(overflow_struct)
         # BAD: `.unqualified_float` value changes during deepcopy
         self.assertEqual(copied.unqualified_float, float("inf"))
+
+    def test_float32_rounding(self) -> None:
+        float64_third = 1.0 / 3.0
+        rounding_struct = TestStructAllThriftPrimitiveTypesMutable(
+            unqualified_float=float64_third,
+        )
+        self.assertEqual(rounding_struct.unqualified_float, float64_third)
+        # implementation detail: note we don't allocate a new Python object
+        self.assertIs(rounding_struct.unqualified_float, float64_third)
+
+        # BAD: we lose precision on float value on serialization roundtrip.
+        with self.assertRaises(AssertionError):
+            _thrift_serialization_round_trip(self, mutable_serializer, rounding_struct)
+
+        roundtrip = mutable_serializer.deserialize(
+            rounding_struct.__class__, mutable_serializer.serialize(rounding_struct)
+        )
+        # decimal representation of float32 rounding of 1/3
+        float32_third = 0.3333333432674408
+        # they differ by just less than 1e-8
+        self.assertNotEqual(float64_third, float32_third)
+        self.assertEqual(roundtrip.unqualified_float, float32_third)
+
+        # # mutable thrift-python uses serialization for deepcopy in __call__ operator
+        called = rounding_struct()
+        # # BAD: `.unqualified_float` value is inconsistent before vs after call
+        self.assertEqual(called.unqualified_float, float32_third)
+
+        copied = copy.deepcopy(rounding_struct)
+        # # BAD: `.unqualified_float` value changes during deepcopy
+        self.assertEqual(copied.unqualified_float, float32_third)
 
     def test_equality_and_hashability(self) -> None:
         # Equality

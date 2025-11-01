@@ -4,6 +4,7 @@
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #  @generated
 #
+_fbthrift__py3_module_name = "module.types"
 from module.thrift_types import (
     SimpleException,
     OptionalRefStruct,
@@ -61,7 +62,6 @@ from module.thrift_types import (
     AdaptedMap,
     AdaptedStruct,
 )
-_fbthrift__py3_module_name = "module.types"
 import importlib
 import thrift.python.types as _fbthrift_python_types
 import module.thrift_types as _module_thrift_types

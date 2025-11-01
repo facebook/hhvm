@@ -4,6 +4,7 @@
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #  @generated
 #
+_fbthrift__py3_module_name = "includes.types"
 from includes.thrift_types import (
     Included,
     ExampleIncluded,
@@ -11,4 +12,3 @@ from includes.thrift_types import (
     IncludedInt64,
     TransitiveFoo,
 )
-_fbthrift__py3_module_name = "includes.types"

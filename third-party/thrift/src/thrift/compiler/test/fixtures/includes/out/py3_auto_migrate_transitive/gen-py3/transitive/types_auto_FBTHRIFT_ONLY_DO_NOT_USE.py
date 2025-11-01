@@ -4,8 +4,8 @@
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #  @generated
 #
+_fbthrift__py3_module_name = "transitive.types"
 from transitive.thrift_types import (
     Foo,
     ExampleFoo,
 )
-_fbthrift__py3_module_name = "transitive.types"

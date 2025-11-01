@@ -34,6 +34,8 @@ want to include.
 }}
 {{> common/auto_generated_py}}
 {{#program:auto_migrate?}}
+{{! Note this is needed even if IDL defines no types, in the case where service has arguments that are container<primitive>}}
+_fbthrift__py3_module_name = "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types"
 {{#program:has_types?}}
 from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types import (
     {{#program:structs}}
@@ -46,7 +48,6 @@ from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:nam
     {{typedef:name}},
     {{/program:typedefs}}
 )
-_fbthrift__py3_module_name = "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types"
 {{/program:has_types?}}
 {{#program:hasContainerTypes}}
 import importlib

@@ -4,8 +4,8 @@
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #  @generated
 #
+_fbthrift__py3_module_name = "service.types"
 from service.thrift_types import (
     IncludesIncluded,
     IncludesTransitiveFoo,
 )
-_fbthrift__py3_module_name = "service.types"

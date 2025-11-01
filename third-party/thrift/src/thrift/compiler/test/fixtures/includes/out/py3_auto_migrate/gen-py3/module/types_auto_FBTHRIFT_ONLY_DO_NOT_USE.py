@@ -4,7 +4,7 @@
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #  @generated
 #
+_fbthrift__py3_module_name = "module.types"
 from module.thrift_types import (
     MyStruct,
 )
-_fbthrift__py3_module_name = "module.types"

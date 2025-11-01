@@ -93,4 +93,55 @@ class TProcessorEventHandler {
     Exception $exception,
   ): void {
   }
+
+  /**
+   * Invoked only for streaming applications.
+   * Invoked once the first response is sent and the stream has begun, but prior to generating the first data chunks.
+   */
+  public function postStreamStart(
+    mixed $handler_context,
+    string $fn_name,
+  ): void {}
+
+  /**
+   * Invoked only for streaming applications.
+   * Called after the async generator creates the next chunk.
+   */
+  public function postStreamPayloadGenerate(
+    mixed $handler_context,
+    string $fn_name,
+    mixed $result,
+  ): void {}
+
+  /**
+   * Invoked only for streaming applications.
+   * Called after the next chunk is written to the transport.
+   */
+  public function postStreamPayloadWrite(
+    mixed $handler_context,
+    string $fn_name,
+    mixed $payload,
+  ): void {}
+
+  /**
+   * Invoked only for streaming applications.
+   * Called if (and only if) the async generator threw an unexpected exception.
+   * Note: This method is NOT called if the handler threw an
+   * exception that is declared in the thrift service specification
+   */
+  public function postStreamPayloadError(
+    mixed $handler_context,
+    string $fn_name,
+    Exception $exception,
+  ): void {}
+
+  /**
+  * Invoked only for streaming applications.
+  * Called if the async generator threw an expected $exception.
+  */
+  public function postStreamPayloadException(
+    mixed $handler_context,
+    string $fn_name,
+    Exception $exception,
+  ): void {}
 }

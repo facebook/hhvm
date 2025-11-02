@@ -15,7 +15,10 @@
  */
 
 #include <gtest/gtest.h>
+#include <thrift/lib/cpp2/gen/module_metadata_cpp.h>
+#include <thrift/lib/cpp2/runtime/SchemaRegistry.h>
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/annotations_metadata.h>
+#include <thrift/lib/cpp2/util/DebugTree.h>
 
 namespace apache::thrift::test {
 
@@ -83,6 +86,94 @@ TEST(Annotations, Enum) {
   metadata::ThriftMetadata md;
   detail::md::EnumMetadata<TestEnum>::gen(md);
   EXPECT_EQ(md.enums()["annotations.TestEnum"], expectedEnum());
+}
+
+TEST(Annotations, Normalization) {
+  auto annotationType =
+      syntax_graph::TypeRef::of(SchemaRegistry::get().getNode<Annotation>());
+  auto fooType =
+      syntax_graph::TypeRef::of(SchemaRegistry::get().getNode<Foo>());
+  {
+    std::vector<metadata::ThriftConstStruct> lhs;
+    lhs.emplace_back().type()->name() = "annotations.Annotation";
+    lhs.emplace_back().type()->name() = "annotations.Foo";
+    std::vector<metadata::ThriftConstStruct> rhs = {lhs[1], lhs[0]};
+    std::vector<syntax_graph::TypeRef> types = {annotationType, fooType};
+
+    EXPECT_TRUE(detail::md::structuredAnnotationsEquality(lhs, rhs, types));
+  }
+  {
+    metadata::ThriftConstStruct lhs;
+    lhs.type()->name() = "annotations.Annotation";
+    lhs.fields()["boolField"].cv_bool() = false;
+
+    metadata::ThriftConstStruct rhs;
+    rhs.type()->name() = "annotations.Annotation";
+    rhs.fields()["boolField"].cv_bool() = true;
+
+    EXPECT_FALSE(
+        detail::md::structuredAnnotationsEquality(
+            {lhs}, {rhs}, {annotationType}));
+  }
+  {
+    metadata::ThriftConstStruct lhs;
+    lhs.type()->name() = "annotations.Annotation";
+    lhs.fields()["listField"].cv_list().emplace();
+    lhs.fields()["listField"].cv_list()->emplace_back().cv_integer() = 2;
+    lhs.fields()["listField"].cv_list()->emplace_back().cv_integer() = 1;
+
+    metadata::ThriftConstStruct rhs;
+    rhs.type()->name() = "annotations.Annotation";
+    rhs.fields()["listField"].cv_list().emplace();
+    rhs.fields()["listField"].cv_list()->emplace_back().cv_integer() = 1;
+    rhs.fields()["listField"].cv_list()->emplace_back().cv_integer() = 2;
+
+    EXPECT_FALSE(
+        detail::md::structuredAnnotationsEquality(
+            {lhs}, {rhs}, {annotationType}));
+  }
+  {
+    metadata::ThriftConstStruct lhs;
+    lhs.type()->name() = "annotations.Annotation";
+    lhs.fields()["setField"].cv_list().emplace();
+    lhs.fields()["setField"].cv_list()->emplace_back().cv_integer() = 2;
+    lhs.fields()["setField"].cv_list()->emplace_back().cv_integer() = 1;
+
+    metadata::ThriftConstStruct rhs;
+    rhs.type()->name() = "annotations.Annotation";
+    rhs.fields()["setField"].cv_list().emplace();
+    rhs.fields()["setField"].cv_list()->emplace_back().cv_integer() = 1;
+    rhs.fields()["setField"].cv_list()->emplace_back().cv_integer() = 2;
+
+    EXPECT_TRUE(
+        detail::md::structuredAnnotationsEquality(
+            {lhs}, {rhs}, {annotationType}));
+  }
+  {
+    metadata::ThriftConstStruct lhs;
+    lhs.type()->name() = "annotations.Annotation";
+    lhs.fields()["mapField"].cv_map().emplace();
+    lhs.fields()["mapField"].cv_map()->emplace_back();
+    lhs.fields()["mapField"].cv_map()->back().key()->cv_integer() = 2;
+    lhs.fields()["mapField"].cv_map()->back().value()->cv_string() = "20";
+    lhs.fields()["mapField"].cv_map()->emplace_back();
+    lhs.fields()["mapField"].cv_map()->back().key()->cv_integer() = 1;
+    lhs.fields()["mapField"].cv_map()->back().value()->cv_string() = "10";
+
+    metadata::ThriftConstStruct rhs;
+    rhs.type()->name() = "annotations.Annotation";
+    rhs.fields()["mapField"].cv_map().emplace();
+    rhs.fields()["mapField"].cv_map()->emplace_back();
+    rhs.fields()["mapField"].cv_map()->back().key()->cv_integer() = 1;
+    rhs.fields()["mapField"].cv_map()->back().value()->cv_string() = "10";
+    rhs.fields()["mapField"].cv_map()->emplace_back();
+    rhs.fields()["mapField"].cv_map()->back().key()->cv_integer() = 2;
+    rhs.fields()["mapField"].cv_map()->back().value()->cv_string() = "20";
+
+    EXPECT_TRUE(
+        detail::md::structuredAnnotationsEquality(
+            {lhs}, {rhs}, {annotationType}));
+  }
 }
 
 } // namespace apache::thrift::test

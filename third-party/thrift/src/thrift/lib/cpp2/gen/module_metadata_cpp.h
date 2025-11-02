@@ -310,4 +310,12 @@ metadata::ThriftService genServiceMetadata() {
   return genServiceMetadata(getDefinitionNodeWithLock<Tag>().asService());
 }
 
+// A Helper function to check whether two list of structured annotations have
+// same data. We can not rely on `std::vector::operator==` directly since
+// Annotations' order, as well as the order of `set`/`map` in the annotation
+// fields might not be preserved.
+bool structuredAnnotationsEquality(
+    std::vector<ThriftConstStruct> lhsAnnotations,
+    std::vector<ThriftConstStruct> rhsAnnotations,
+    const std::vector<syntax_graph::TypeRef>& annotationTypes);
 } // namespace apache::thrift::detail::md

@@ -140,4 +140,75 @@ metadata::ThriftService genServiceMetadata(
   return ret;
 }
 
+namespace {
+// In ThriftConstValue, `set`/`map` are stored as list.
+// This function sort `set`/`map` so that we can do equality comparison.
+void normalizeThriftConstValue(
+    ThriftConstValue& t, const syntax_graph::TypeRef& type);
+
+void normalizeThriftConstStruct(
+    ThriftConstStruct& t, const syntax_graph::TypeRef& type) {
+  std::unordered_map<std::string, syntax_graph::TypeRef> fieldType;
+  for (auto& field : type.asStructured().fields()) {
+    fieldType.emplace(field.name(), field.type());
+  }
+  for (auto& [name, value] : *t.fields()) {
+    normalizeThriftConstValue(value, fieldType.at(name));
+  }
+}
+void normalizeThriftConstValue(
+    ThriftConstValue& t, const syntax_graph::TypeRef& type) {
+  if (type.isList()) {
+    for (auto& i : *t.cv_list()) {
+      normalizeThriftConstValue(i, type.asList().elementType());
+    }
+  }
+
+  if (type.isSet()) {
+    for (auto& i : *t.cv_list()) {
+      normalizeThriftConstValue(i, type.asSet().elementType());
+    }
+    std::sort(t.cv_list()->begin(), t.cv_list()->end());
+  }
+
+  if (type.isMap()) {
+    auto keyType = type.asMap().keyType();
+    auto valueType = type.asMap().valueType();
+    for (auto& i : *t.cv_map()) {
+      normalizeThriftConstValue(*i.key(), keyType);
+      normalizeThriftConstValue(*i.value(), valueType);
+    }
+    std::sort(t.cv_map()->begin(), t.cv_map()->end());
+  }
+
+  if (type.isStructured()) {
+    normalizeThriftConstStruct(*t.cv_struct(), type);
+  }
+}
+
+// This function will sort structured annotations, as well as sorting
+// `set`/`map` inside annotations so that we can do equality comparison.
+std::vector<ThriftConstStruct> normalizeStructuredAnnotations(
+    std::vector<ThriftConstStruct> annotations,
+    const std::unordered_map<std::string, syntax_graph::TypeRef>& nameToType) {
+  for (auto& i : annotations) {
+    normalizeThriftConstStruct(i, nameToType.at(*i.type()->name()));
+  }
+  std::sort(annotations.begin(), annotations.end());
+  return annotations;
+}
+} // namespace
+
+bool structuredAnnotationsEquality(
+    std::vector<ThriftConstStruct> lhsAnnotations,
+    std::vector<ThriftConstStruct> rhsAnnotations,
+    const std::vector<syntax_graph::TypeRef>& annotationTypes) {
+  std::unordered_map<std::string, syntax_graph::TypeRef> nameToType;
+  for (const auto& i : annotationTypes) {
+    nameToType.emplace(getName(i.asStructured()), i);
+  }
+  return normalizeStructuredAnnotations(
+             std::move(lhsAnnotations), nameToType) ==
+      normalizeStructuredAnnotations(std::move(rhsAnnotations), nameToType);
+}
 } // namespace apache::thrift::detail::md

@@ -6,6 +6,7 @@
  */
 #include <thrift/lib/cpp2/gen/module_metadata_cpp.h>
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/reflection_metadata.h"
+#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/reflection_data.h"
 
 // some of these functions can be so large that the compiler gives up optimizing
 // them - and issues a warning which may be treated as an error!

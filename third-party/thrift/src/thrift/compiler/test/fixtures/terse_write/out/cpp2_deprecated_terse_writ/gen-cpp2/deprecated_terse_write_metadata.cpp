@@ -6,6 +6,7 @@
  */
 #include <thrift/lib/cpp2/gen/module_metadata_cpp.h>
 #include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/deprecated_terse_write_metadata.h"
+#include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/deprecated_terse_write_data.h"
 
 // some of these functions can be so large that the compiler gives up optimizing
 // them - and issues a warning which may be treated as an error!
@@ -26,7 +27,7 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 void EnumMetadata<::facebook::thrift::test::terse_write::deprecated::MyEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::facebook::thrift::test::terse_write::deprecated::MyEnum>(metadata);
+  auto res = genEnumMetadata<::facebook::thrift::test::terse_write::deprecated::MyEnum>(metadata, false);
   if (res.preExists) {
     return;
   }

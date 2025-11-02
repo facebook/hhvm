@@ -6,6 +6,7 @@
  */
 #include <thrift/lib/cpp2/gen/module_metadata_cpp.h>
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_metadata.h"
+#include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_data.h"
 
 // some of these functions can be so large that the compiler gives up optimizing
 // them - and issues a warning which may be treated as an error!
@@ -41,19 +42,19 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 void EnumMetadata<::py3::simple::AnEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::py3::simple::AnEnum>(metadata);
+  auto res = genEnumMetadata<::py3::simple::AnEnum>(metadata, false);
   if (res.preExists) {
     return;
   }
 }
 void EnumMetadata<::py3::simple::AnEnumRenamed>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::py3::simple::AnEnumRenamed>(metadata);
+  auto res = genEnumMetadata<::py3::simple::AnEnumRenamed>(metadata, false);
   if (res.preExists) {
     return;
   }
 }
 void EnumMetadata<::py3::simple::Flags>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::py3::simple::Flags>(metadata);
+  auto res = genEnumMetadata<::py3::simple::Flags>(metadata, false);
   if (res.preExists) {
     return;
   }

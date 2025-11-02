@@ -6,6 +6,7 @@
  */
 #include <thrift/lib/cpp2/gen/module_metadata_cpp.h>
 #include "thrift/compiler/test/fixtures/enums/gen-cpp2/module_metadata.h"
+#include "thrift/compiler/test/fixtures/enums/gen-cpp2/module_data.h"
 
 // some of these functions can be so large that the compiler gives up optimizing
 // them - and issues a warning which may be treated as an error!
@@ -26,44 +27,44 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 void EnumMetadata<::test::fixtures::enums::Metasyntactic>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::enums::Metasyntactic>(metadata);
+  auto res = genEnumMetadata<::test::fixtures::enums::Metasyntactic>(metadata, false);
   if (res.preExists) {
     return;
   }
 }
 void EnumMetadata<::test::fixtures::enums::MyEnum1>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::enums::MyEnum1>(metadata);
+  auto res = genEnumMetadata<::test::fixtures::enums::MyEnum1>(metadata, false);
   if (res.preExists) {
     return;
   }
 }
 void EnumMetadata<::test::fixtures::enums::MyEnum2>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::enums::MyEnum2>(metadata);
+  auto res = genEnumMetadata<::test::fixtures::enums::MyEnum2>(metadata, false);
   if (res.preExists) {
     return;
   }
 }
 void EnumMetadata<::test::fixtures::enums::MyEnum3>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::enums::MyEnum3>(metadata);
+  auto res = genEnumMetadata<::test::fixtures::enums::MyEnum3>(metadata, false);
   if (res.preExists) {
     return;
   }
 }
 void EnumMetadata<::test::fixtures::enums::MyEnum4>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::enums::MyEnum4>(metadata);
+  auto res = genEnumMetadata<::test::fixtures::enums::MyEnum4>(metadata, false);
   if (res.preExists) {
     return;
   }
 }
 void EnumMetadata<::test::fixtures::enums::MyBitmaskEnum1>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::enums::MyBitmaskEnum1>(metadata);
+  auto res = genEnumMetadata<::test::fixtures::enums::MyBitmaskEnum1>(metadata, false);
   if (res.preExists) {
     return;
   }
   res.metadata.structured_annotations()->push_back(*cvStruct("thrift.BitmaskEnum", {  }).cv_struct());
 }
 void EnumMetadata<::test::fixtures::enums::MyBitmaskEnum2>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::enums::MyBitmaskEnum2>(metadata);
+  auto res = genEnumMetadata<::test::fixtures::enums::MyBitmaskEnum2>(metadata, false);
   if (res.preExists) {
     return;
   }

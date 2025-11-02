@@ -6,6 +6,7 @@
  */
 #include <thrift/lib/cpp2/gen/module_metadata_cpp.h>
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include1_metadata.h"
+#include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include1_data.h"
 
 // some of these functions can be so large that the compiler gives up optimizing
 // them - and issues a warning which may be treated as an error!

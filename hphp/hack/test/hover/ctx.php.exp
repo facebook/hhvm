@@ -4,7 +4,7 @@ function any<T>(
   Traversable<T> $traversable,
   optional ?(function(
     T
-  )[T/[ctx $predicate]]: ~bool) $predicate
+  )[T/[ctx $predicate]]: bool) $predicate
 )[T/[ctx $predicate]ctx $predicate]: bool
 ---
 Instantiation:

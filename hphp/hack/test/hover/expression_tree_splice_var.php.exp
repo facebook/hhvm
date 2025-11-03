@@ -14,6 +14,4 @@ Defined in `ExampleDsl`
 public static function lift<
   THack as TInfer as ?ExampleAutoLiftable,
   TInfer
->(ExampleUnion<THack, TInfer> $e): ~ExampleExpression<
-  TInfer
->
+>(ExampleUnion<THack, TInfer> $e): ExampleExpression<TInfer>

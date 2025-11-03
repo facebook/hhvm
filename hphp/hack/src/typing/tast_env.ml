@@ -55,6 +55,7 @@ let print_ty_with_identity env ty sym_occurrence sym_definition =
 let print_decl_ty_with_identity env ty sym_occurrence sym_definition =
   Typing_print.full_decl_with_identity
     ~verbose_fun:false
+    ~omit_likes:true
     env
     ty
     sym_occurrence

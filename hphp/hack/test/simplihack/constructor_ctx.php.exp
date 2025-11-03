@@ -7,16 +7,16 @@ constructor_ctx.php
   T1 $three,
   optional ?T2 $four
 ): void
-      methods: public instance method getFour defined in SomeClass: function getFour(): ~?T2
+      methods: public instance method getFour defined in SomeClass: function getFour(): ?T2
 public instance method getOne defined in SomeClass: function getOne(): int
-public instance method getThree defined in SomeClass: function getThree(): ~T1
-public instance method getTwo defined in SomeClass: function getTwo(): ~vec<string>
+public instance method getThree defined in SomeClass: function getThree(): T1
+public instance method getTwo defined in SomeClass: function getTwo(): vec<string>
       static methods: public static method getFive defined in SomeClass: function getFive(): int
-public static method getSix defined in SomeClass: function getSix(): ~vec<string>
-      fields: public instance field four defined in SomeClass: ~?T2
+public static method getSix defined in SomeClass: function getSix(): vec<string>
+      fields: public instance field four defined in SomeClass: ?T2
 public instance field one defined in SomeClass: int
-public instance field three defined in SomeClass: ~T1
-public instance field two defined in SomeClass: ~vec<string>
+public instance field three defined in SomeClass: T1
+public instance field two defined in SomeClass: vec<string>
       static fields: The class SomeClass does not have any static fields.
     
   [2:3-40] 
@@ -26,15 +26,15 @@ public instance field two defined in SomeClass: ~vec<string>
   T1 $three,
   optional ?T2 $four
 ): void
-      methods: public instance method getFour defined in SomeClass: function getFour(): ~?T2
+      methods: public instance method getFour defined in SomeClass: function getFour(): ?T2
 public instance method getOne defined in SomeClass: function getOne(): int
-public instance method getThree defined in SomeClass: function getThree(): ~T1
-public instance method getTwo defined in SomeClass: function getTwo(): ~vec<string>
+public instance method getThree defined in SomeClass: function getThree(): T1
+public instance method getTwo defined in SomeClass: function getTwo(): vec<string>
       static methods: public static method getFive defined in SomeClass: function getFive(): int
-public static method getSix defined in SomeClass: function getSix(): ~vec<string>
-      fields: public instance field four defined in SomeClass: ~?T2
+public static method getSix defined in SomeClass: function getSix(): vec<string>
+      fields: public instance field four defined in SomeClass: ?T2
 public instance field one defined in SomeClass: int
-public instance field three defined in SomeClass: ~T1
-public instance field two defined in SomeClass: ~vec<string>
+public instance field three defined in SomeClass: T1
+public instance field two defined in SomeClass: vec<string>
       static fields: The class SomeClass does not have any static fields.
     

@@ -812,14 +812,28 @@ module Full = struct
   (* Prints a decl_ty. If there isn't enough fuel, the type is omitted. Each
      recursive call to print a type depletes the fuel by one. *)
   let rec decl_ty ~fuel :
-      _ -> _ -> _ -> verbose_fun:bool -> decl_ty -> Fuel.t * Doc.t =
-   fun to_doc st penv ~verbose_fun x ->
-    Fuel.provide fuel (decl_ty_ to_doc st penv ~verbose_fun (get_node x))
+      _ ->
+      _ ->
+      _ ->
+      verbose_fun:bool ->
+      omit_likes:bool ->
+      decl_ty ->
+      Fuel.t * Doc.t =
+   fun to_doc st penv ~verbose_fun ~omit_likes x ->
+    Fuel.provide
+      fuel
+      (decl_ty_ to_doc st penv ~verbose_fun ~omit_likes (get_node x))
 
   and decl_ty_ ~fuel :
-      _ -> _ -> _ -> verbose_fun:bool -> decl_phase ty_ -> Fuel.t * Doc.t =
-   fun to_doc st penv ~verbose_fun x ->
-    let ty = decl_ty ~verbose_fun in
+      _ ->
+      _ ->
+      _ ->
+      verbose_fun:bool ->
+      omit_likes:bool ->
+      decl_phase ty_ ->
+      Fuel.t * Doc.t =
+   fun to_doc st penv ~verbose_fun ~omit_likes x ->
+    let ty = decl_ty ~verbose_fun ~omit_likes in
     let k ~fuel x = ty ~fuel to_doc st penv x in
     match x with
     | Tany _ -> (fuel, text "_")
@@ -845,7 +859,12 @@ module Full = struct
       (fuel, option_doc)
     | Tlike x ->
       let (fuel, ty_doc) = k ~fuel x in
-      let like_doc = Concat [text "~"; ty_doc] in
+      let like_doc =
+        if omit_likes then
+          ty_doc
+        else
+          Concat [text "~"; ty_doc]
+      in
       (fuel, like_doc)
     | Tprim x -> (fuel, tprim x)
     | Tfun ft ->
@@ -857,7 +876,7 @@ module Full = struct
         penv
         ~verbose:verbose_fun
         ft
-        (fun_decl_implicit_params ~verbose_fun)
+        (fun_decl_implicit_params ~verbose_fun ~omit_likes)
     | Tapply ((_, n), [ty])
       when String.equal n SN.Classes.cSupportDyn
            && not (show_supportdyn_penv penv) ->
@@ -900,9 +919,9 @@ module Full = struct
       let class_ptr_doc = Concat [text "class<"; ty_doc; text ">"] in
       (fuel, class_ptr_doc)
 
-  and fun_decl_implicit_params ~fuel ~verbose_fun =
+  and fun_decl_implicit_params ~fuel ~verbose_fun ~omit_likes =
     fun_implicit_params
-      (decl_ty ~verbose_fun)
+      (decl_ty ~verbose_fun ~omit_likes)
       (Typing_make_type.default_capability_decl Pos_or_decl.none)
       ~fuel
 
@@ -1456,7 +1475,7 @@ module Full = struct
     to_string ~fuel ~ty text_strip_ns env x
 
   let to_string_decl ~fuel (x : decl_ty) =
-    let ty = decl_ty ~verbose_fun:false in
+    let ty = decl_ty ~verbose_fun:false ~omit_likes:false in
     to_string ~fuel ~ty Doc.text Declenv x
 
   (** For functions and methods, interpret supportdyn as use of <<__SupportDynamicType>> attribute *)
@@ -1620,12 +1639,13 @@ module Full = struct
       definition_opt
 
   let to_string_decl_with_identity
-      ~fuel ~verbose_fun env (x : decl_ty) occurrence definition_opt =
+      ~fuel ~verbose_fun ~omit_likes env (x : decl_ty) occurrence definition_opt
+      =
     to_string_with_identity
       ~fuel
       env
       x
-      (decl_ty ~verbose_fun)
+      (decl_ty ~verbose_fun ~omit_likes)
       ~default_capability:
         (Typing_make_type.default_capability_decl Pos_or_decl.none)
       ~constraints:Nothing
@@ -1903,7 +1923,10 @@ let full_strip_ns_decl ?(msg = true) ~verbose_fun env ty =
   supply_fuel
     ~msg
     env.genv.tcopt
-    (Full.to_string_strip_ns ~ty:(Full.decl_ty ~verbose_fun) (Loclenv env) ty)
+    (Full.to_string_strip_ns
+       ~ty:(Full.decl_ty ~verbose_fun ~omit_likes:false)
+       (Loclenv env)
+       ty)
 
 let full_with_identity ~hide_internals env x occurrence definition_opt =
   supply_fuel
@@ -1915,11 +1938,13 @@ let full_with_identity ~hide_internals env x occurrence definition_opt =
        occurrence
        definition_opt)
 
-let full_decl_with_identity env ~verbose_fun x occurrence definition_opt =
+let full_decl_with_identity
+    env ~omit_likes ~verbose_fun x occurrence definition_opt =
   supply_fuel
     env.genv.tcopt
     (Full.to_string_decl_with_identity
        ~verbose_fun
+       ~omit_likes
        env
        x
        occurrence

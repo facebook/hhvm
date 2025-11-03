@@ -1,7 +1,7 @@
 function app<Ta, Tr>(
   HH\EnumClass\Label<Funcs, Func<Ta, Tr>> $l,
   Ta $arg
-): ~Tr
+): Tr
 ---
 Instantiation:
   Ta = (int, int);

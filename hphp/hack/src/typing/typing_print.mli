@@ -55,6 +55,7 @@ val full_with_identity :
 (** Pretty print a type and all of its associated declaration information. *)
 val full_decl_with_identity :
   env ->
+  omit_likes:bool ->
   verbose_fun:bool ->
   Typing_defs.decl_ty ->
   'b SymbolOccurrence.t ->

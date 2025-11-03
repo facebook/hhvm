@@ -101,10 +101,6 @@ class t_typedef : public t_type {
   // backwards compatibility.
  public:
   const t_type* get_type() const { return type_.get_type(); }
-
-  t_type::type get_type_value() const override {
-    return get_type()->get_type_value();
-  }
 };
 
 // A placeholder for a type that can't be resolved at parse time.

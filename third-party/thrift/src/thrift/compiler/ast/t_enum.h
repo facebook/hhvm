@@ -80,11 +80,6 @@ class t_enum : public t_type {
     values_.push_back(std::move(enum_value));
     constants_.push_back(std::move(constant));
   }
-
-  // TODO(T227540797): These methods are only provided for backwards
-  // compatibility. Update all references and remove everything below.
- public:
-  type get_type_value() const override { return type::t_enum; }
 };
 
 } // namespace apache::thrift::compiler

@@ -37,13 +37,6 @@ class t_container : public t_type {
 
  protected:
   t_container() = default;
-
-  // TODO(T227540797): Remove everything below here. It is provided only for
-  // backwards compatibility.
- public:
-  t_type::type get_type_value() const override {
-    return static_cast<t_type::type>(container_type());
-  }
 };
 
 } // namespace apache::thrift::compiler

@@ -44,11 +44,6 @@ class t_service : public t_interface {
  private:
   const t_service* extends_ = nullptr;
   source_range extends_range_;
-
-  // TODO(T227540797): Remove everything below this comment. It is only provided
-  // for backwards compatibility.
- public:
-  type get_type_value() const override { return type::t_service; }
 };
 
 } // namespace apache::thrift::compiler

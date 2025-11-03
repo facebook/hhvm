@@ -96,10 +96,6 @@ class t_primitive_type : public t_type {
   bool is_string() const override { return primitive_type_ == type::t_string; }
 
   bool is_binary() const override { return primitive_type_ == type::t_binary; }
-
-  t_type::type get_type_value() const override {
-    return static_cast<t_type::type>(primitive_type_);
-  }
 };
 
 } // namespace apache::thrift::compiler

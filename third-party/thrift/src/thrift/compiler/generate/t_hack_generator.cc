@@ -76,16 +76,7 @@ class t_result_struct final : public t_structured {
       : t_structured(program, std::move(name)),
         result_return_type{std::move(result_return_type)} {}
 
-  std::string getResultReturnType() const { return result_return_type; }
-
-  // Both get_type_value() and is_struct_or_union() are implemented below for
-  // historical reasons: t_result_struct used to be a subclass of t_struct. It
-  // was moved to this anonymous namespace because it is only used in this
-  // file, and made to inherit from t_structured (as we are decoupling all
-  // other types from t_struct).
-  t_type::type get_type_value() const override {
-    return t_type::type::t_structured;
-  }
+  const std::string& getResultReturnType() const { return result_return_type; }
 
  private:
   std::string result_return_type;
@@ -5212,8 +5203,7 @@ void t_hack_generator::_generate_php_struct_definition(
     out << " extends \\TException";
   }
   bool is_async = is_async_struct(tstruct);
-  const t_result_struct* result_struct =
-      dynamic_cast<const t_result_struct*>(tstruct);
+  const t_result_struct* result_struct = tstruct->try_as<t_result_struct>();
   bool is_result = result_struct != nullptr;
   if (is_result) {
     out << " extends \\Thrift" << (is_async ? "Async" : "Sync");

@@ -226,6 +226,10 @@ uint64_t get_legacy_structured_type_id(const t_structured& node) {
   // unsigned integer value
   static constexpr size_t kTypeBits = 5;
   static constexpr uint64_t kTypeMask = (1ULL << kTypeBits) - 1;
+  // We only support calling this function with a `t_structured` node. The
+  // corresponding runtime value is `apache::thrift::protocol::TType::T_STRUCT`
+  // in `lib/cpp/protocol/TType.h`
+  static constexpr int kStructuredTypeValue = 12;
 
   std::string name = node.get_full_name();
   std::array<unsigned char, SHA_DIGEST_LENGTH> buf{};
@@ -238,7 +242,7 @@ uint64_t get_legacy_structured_type_id(const t_structured& node) {
 #if !defined(_WIN32) && __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__
   hash = __builtin_bswap64(hash);
 #endif
-  return (hash & ~kTypeMask) | static_cast<int>(node.get_type_value());
+  return (hash & ~kTypeMask) | kStructuredTypeValue;
 }
 
 // Compute the set of types that appear anywhere in the service

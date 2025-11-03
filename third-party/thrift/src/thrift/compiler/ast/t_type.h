@@ -153,9 +153,6 @@ class t_type : public t_named {
     t_service = 13,
   };
 
-  // TODO: Rename function.
-  virtual type get_type_value() const = 0;
-
   /**
    * Default returns for every thrift type
    */

@@ -24,7 +24,10 @@
 #include <folly/FBString.h>
 #include <thrift/compiler/ast/t_const_value.h>
 #include <thrift/compiler/ast/t_enum.h>
-#include <thrift/compiler/ast/t_service.h>
+#include <thrift/compiler/ast/t_list.h>
+#include <thrift/compiler/ast/t_map.h>
+#include <thrift/compiler/ast/t_primitive_type.h>
+#include <thrift/compiler/ast/t_set.h>
 #include <thrift/compiler/ast/t_structured.h>
 #include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/thrift/gen-cpp2/protocol_types.h>
@@ -142,128 +145,131 @@ inline void hydrate_const(protocol::Object& out, const t_const_value& val) {
 // Assigns a t_const_value to a Value.
 inline protocol::Value const_to_value(const t_const_value& val) {
   protocol::Value ret;
-  auto type = val.ttype() ? val.ttype()->get_type_value() : [&] {
+  const t_type* ttype = [&]() -> const t_type* {
+    if (val.ttype()) {
+      return val.ttype()->get_true_type();
+    }
     switch (val.kind()) {
+      // Primitives have singleton instances, so we can unify the nullptr cases
       case t_const_value::CV_BOOL:
-        return t_type::type::t_bool;
+        return &t_primitive_type::t_bool();
       case t_const_value::CV_INTEGER:
-        return t_type::type::t_i64;
+        return &t_primitive_type::t_i64();
       case t_const_value::CV_DOUBLE:
-        return t_type::type::t_double;
+        return &t_primitive_type::t_double();
       case t_const_value::CV_STRING:
-        return t_type::type::t_string;
+        return &t_primitive_type::t_string();
       case t_const_value::CV_LIST:
-        return t_type::type::t_list;
       case t_const_value::CV_MAP:
-        return t_type::type::t_map;
+        // We handle these via checking val.kind() if ttype is nullptr, rather
+        // than using an arbitrary t_list/t_map instance and having to manage
+        // the lifetime
+        return nullptr;
       case t_const_value::CV_IDENTIFIER:
         assert(false);
-        return t_type::type::t_void;
+        return &t_primitive_type::t_void();
     }
   }();
-  switch (type) {
-    case t_type::type::t_bool:
-      ret.emplace_bool();
-      if (val.kind() == t_const_value::CV_BOOL) {
-        ret.as_bool() = val.get_bool();
-      } else if (val.kind() == t_const_value::CV_INTEGER) {
-        auto value = val.get_integer();
-        assert(value == 0 || value == 1);
-        ret.as_bool() = value;
-      }
-      break;
-    case t_type::type::t_byte:
-      ret.emplace_byte(val.get_integer());
-      break;
-    case t_type::type::t_i16:
-      ret.emplace_i16(val.get_integer());
-      break;
-    case t_type::type::t_i32:
-      ret.emplace_i32(val.get_integer());
-      break;
-    case t_type::type::t_i64:
-      ret.emplace_i64(val.get_integer());
-      break;
-    case t_type::type::t_float:
-      ret.emplace_float(
-          val.kind() == t_const_value::t_const_value_kind::CV_DOUBLE
-              ? val.get_double()
-              : val.get_integer());
-      break;
-    case t_type::type::t_double:
-      ret.emplace_double(
-          val.kind() == t_const_value::t_const_value_kind::CV_DOUBLE
-              ? val.get_double()
-              : val.get_integer());
-      break;
-    case t_type::type::t_string:
-      ret.emplace_string(val.get_string());
-      break;
-    case t_type::type::t_binary:
-      ret.emplace_binary(
-          folly::IOBuf(folly::IOBuf::CopyBufferOp{}, val.get_string()));
-      break;
-    case t_type::type::t_list: {
-      auto valList = val.get_list_or_empty_map();
-      auto& list = ret.emplace_list();
-      list.reserve(valList.size());
-      for (const auto& list_elem : valList) {
-        list.push_back(const_to_value(*list_elem));
-      }
-      break;
+
+  // Check if ttype is t_list; if not available, whether it's a list value
+  // If target is a set (also `kind == CV_LIST`), ttype needs to be non-null
+  if (ttype != nullptr ? ttype->is<t_list>()
+                       : val.kind() == t_const_value::CV_LIST) {
+    auto valList = val.get_list_or_empty_map();
+    auto& list = ret.emplace_list();
+    list.reserve(valList.size());
+    for (const auto& list_elem : valList) {
+      list.push_back(const_to_value(*list_elem));
     }
-    case t_type::type::t_set: {
-      const auto& valList = val.get_list_or_empty_map();
-      auto& set = ret.emplace_set();
-      set.reserve(valList.size());
-      for (const auto& list_elem : val.get_list_or_empty_map()) {
-        set.insert(const_to_value(*list_elem));
+    return ret;
+  }
+  // Check if ttype is t_map; if not available, whether it's a map value
+  // If target is a struct (also `kind == CV_MAP`), ttype needs to be non-null
+  if (ttype != nullptr ? ttype->is<t_map>()
+                       : val.kind() == t_const_value::CV_MAP) {
+    auto& map = ret.emplace_map();
+    if (val.kind() == t_const_value::CV_MAP) {
+      map.reserve(val.get_map().size());
+      for (const auto& map_elem : val.get_map()) {
+        map.emplace(
+            const_to_value(*map_elem.first), const_to_value(*map_elem.second));
       }
-      break;
     }
-    case t_type::type::t_map: {
-      auto& map = ret.emplace_map();
-      if (val.kind() == t_const_value::CV_MAP) {
-        map.reserve(val.get_map().size());
-        for (const auto& map_elem : val.get_map()) {
-          map.emplace(
-              const_to_value(*map_elem.first),
-              const_to_value(*map_elem.second));
+    return ret;
+  }
+
+  // After handling the list/map cases, either we assigned a primitive type
+  // pointer, or val.ttype() was non-null
+  assert(ttype != nullptr);
+  if (const t_primitive_type* primitive = ttype->try_as<t_primitive_type>()) {
+    switch (primitive->primitive_type()) {
+      case t_primitive_type::type::t_bool:
+        ret.emplace_bool();
+        if (val.kind() == t_const_value::CV_BOOL) {
+          ret.as_bool() = val.get_bool();
+        } else if (val.kind() == t_const_value::CV_INTEGER) {
+          auto value = val.get_integer();
+          assert(value == 0 || value == 1);
+          ret.as_bool() = value;
         }
-      }
-      break;
+        break;
+      case t_primitive_type::type::t_byte:
+        ret.emplace_byte(val.get_integer());
+        break;
+      case t_primitive_type::type::t_i16:
+        ret.emplace_i16(val.get_integer());
+        break;
+      case t_primitive_type::type::t_i32:
+        ret.emplace_i32(val.get_integer());
+        break;
+      case t_primitive_type::type::t_i64:
+        ret.emplace_i64(val.get_integer());
+        break;
+      case t_primitive_type::type::t_float:
+        ret.emplace_float(
+            val.kind() == t_const_value::t_const_value_kind::CV_DOUBLE
+                ? val.get_double()
+                : val.get_integer());
+        break;
+      case t_primitive_type::type::t_double:
+        ret.emplace_double(
+            val.kind() == t_const_value::t_const_value_kind::CV_DOUBLE
+                ? val.get_double()
+                : val.get_integer());
+        break;
+      case t_primitive_type::type::t_string:
+        ret.emplace_string(val.get_string());
+        break;
+      case t_primitive_type::type::t_binary:
+        ret.emplace_binary(
+            folly::IOBuf(folly::IOBuf::CopyBufferOp{}, val.get_string()));
+        break;
+      case t_primitive_type::type::t_void:
+        throw std::runtime_error("Unexpected type");
     }
-    case t_type::type::t_enum:
-      ret.emplace_i32(val.get_integer());
-      break;
-    case t_type::type::t_structured:
-      if (val.ttype()) {
-        auto& obj = ret.emplace_object();
-        const auto& obj_type = *val.ttype()->get_true_type();
-        obj.type() = !obj_type.uri().empty() ? obj_type.uri() : obj_type.name();
-        auto& strct = static_cast<const t_structured&>(obj_type);
-        for (const auto& map_elem : val.get_map()) {
-          auto field = strct.get_field_by_name(map_elem.first->get_string());
-          if (!field) {
-            throw std::out_of_range(
-                fmt::format(
-                    "invalid field name: {}", map_elem.first->get_string()));
-          }
-          obj[FieldId{field->id()}] = const_to_value(*map_elem.second);
-        }
-      } else {
-        auto& map = ret.emplace_map();
-        map.reserve(val.get_map().size());
-        for (const auto& map_elem : val.get_map()) {
-          map.emplace(
-              const_to_value(*map_elem.first),
-              const_to_value(*map_elem.second));
-        }
+  } else if (ttype->is<t_set>()) {
+    const auto& valList = val.get_list_or_empty_map();
+    auto& set = ret.emplace_set();
+    set.reserve(valList.size());
+    for (const auto& list_elem : val.get_list_or_empty_map()) {
+      set.insert(const_to_value(*list_elem));
+    }
+  } else if (ttype->is<t_enum>()) {
+    ret.emplace_i32(val.get_integer());
+  } else if (const t_structured* strct = ttype->try_as<t_structured>()) {
+    auto& obj = ret.emplace_object();
+    obj.type() = !strct->uri().empty() ? strct->uri() : strct->name();
+    for (const auto& map_elem : val.get_map()) {
+      auto field = strct->get_field_by_name(map_elem.first->get_string());
+      if (!field) {
+        throw std::out_of_range(
+            fmt::format(
+                "invalid field name: {}", map_elem.first->get_string()));
       }
-      break;
-    case t_type::type::t_void:
-    case t_type::type::t_service:
-      throw std::runtime_error("Unexpected type");
+      obj[FieldId{field->id()}] = const_to_value(*map_elem.second);
+    }
+  } else {
+    throw std::runtime_error("Unexpected type");
   }
   return ret;
 }

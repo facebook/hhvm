@@ -6,7 +6,6 @@
  */
 #include <thrift/lib/cpp2/gen/module_metadata_cpp.h>
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_metadata.h"
-#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_data.h"
 
 // some of these functions can be so large that the compiler gives up optimizing
 // them - and issues a warning which may be treated as an error!
@@ -42,27 +41,27 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 void EnumMetadata<::some::valid::ns::MyEnumA>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::some::valid::ns::MyEnumA>(metadata, false);
+  auto res = genEnumMetadata<::some::valid::ns::MyEnumA>(metadata);
   if (res.preExists) {
     return;
   }
 }
 void EnumMetadata<::some::valid::ns::AnnotatedEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::some::valid::ns::AnnotatedEnum>(metadata, false);
+  auto res = genEnumMetadata<::some::valid::ns::AnnotatedEnum>(metadata);
   if (res.preExists) {
     return;
   }
   res.metadata.structured_annotations()->push_back(*cvStruct("cpp.EnumType", { {"type", cvInteger(4) } }).cv_struct());
 }
 void EnumMetadata<::some::valid::ns::AnnotatedEnum2>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::some::valid::ns::AnnotatedEnum2>(metadata, false);
+  auto res = genEnumMetadata<::some::valid::ns::AnnotatedEnum2>(metadata);
   if (res.preExists) {
     return;
   }
   res.metadata.structured_annotations()->push_back(*cvStruct("cpp.EnumType", { {"type", cvInteger(2) } }).cv_struct());
 }
 void EnumMetadata<::some::valid::ns::MyEnumB>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::some::valid::ns::MyEnumB>(metadata, false);
+  auto res = genEnumMetadata<::some::valid::ns::MyEnumB>(metadata);
   if (res.preExists) {
     return;
   }

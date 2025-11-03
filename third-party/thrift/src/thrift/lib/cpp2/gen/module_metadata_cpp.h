@@ -279,13 +279,11 @@ const auto& getDefinitionNodeWithLock() {
 
 // Generate metadata of `node` inside `md`, return the generated metadata.
 GenMetadataResult<metadata::ThriftEnum> genEnumMetadata(
-    metadata::ThriftMetadata& md,
-    const syntax_graph::EnumNode& node,
-    bool genAnnotations);
+    metadata::ThriftMetadata& md, const syntax_graph::EnumNode& node);
 
 template <class E>
-auto genEnumMetadata(metadata::ThriftMetadata& md, bool genAnnotations) {
-  return genEnumMetadata(md, getNodeWithLock<E>(), genAnnotations);
+auto genEnumMetadata(metadata::ThriftMetadata& md) {
+  return genEnumMetadata(md, getNodeWithLock<E>());
 }
 
 GenMetadataResult<metadata::ThriftStruct> genStructMetadata(
@@ -310,14 +308,6 @@ metadata::ThriftService genServiceMetadata(
 template <class Tag>
 metadata::ThriftService genServiceMetadata() {
   return genServiceMetadata(getDefinitionNodeWithLock<Tag>().asService());
-}
-
-std::vector<syntax_graph::TypeRef> getAnnotationTypes(
-    folly::span<const syntax_graph::Annotation> annotations);
-
-template <class T>
-auto getAnnotationTypes() {
-  return getAnnotationTypes(getDefinitionNodeWithLock<T>().annotations());
 }
 
 // A Helper function to check whether two list of structured annotations have

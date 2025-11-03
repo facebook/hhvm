@@ -6,7 +6,6 @@
  */
 #include <thrift/lib/cpp2/gen/module_metadata_cpp.h>
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/matching_module_name_metadata.h"
-#include "thrift/compiler/test/fixtures/includes/gen-cpp2/matching_module_name_data.h"
 
 // some of these functions can be so large that the compiler gives up optimizing
 // them - and issues a warning which may be treated as an error!

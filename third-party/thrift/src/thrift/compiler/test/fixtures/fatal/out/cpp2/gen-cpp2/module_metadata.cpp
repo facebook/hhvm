@@ -6,7 +6,6 @@
  */
 #include <thrift/lib/cpp2/gen/module_metadata_cpp.h>
 #include "thrift/compiler/test/fixtures/fatal/gen-cpp2/module_metadata.h"
-#include "thrift/compiler/test/fixtures/fatal/gen-cpp2/module_data.h"
 
 // some of these functions can be so large that the compiler gives up optimizing
 // them - and issues a warning which may be treated as an error!
@@ -47,25 +46,25 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 void EnumMetadata<::test_cpp2::cpp_reflection::enum1>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum1>(metadata, false);
+  auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum1>(metadata);
   if (res.preExists) {
     return;
   }
 }
 void EnumMetadata<::test_cpp2::cpp_reflection::enum2>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum2>(metadata, false);
+  auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum2>(metadata);
   if (res.preExists) {
     return;
   }
 }
 void EnumMetadata<::test_cpp2::cpp_reflection::enum3>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum3>(metadata, false);
+  auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum3>(metadata);
   if (res.preExists) {
     return;
   }
 }
 void EnumMetadata<::test_cpp2::cpp_reflection::enum_with_special_names>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum_with_special_names>(metadata, false);
+  auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum_with_special_names>(metadata);
   if (res.preExists) {
     return;
   }

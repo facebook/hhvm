@@ -6,7 +6,6 @@
  */
 #include <thrift/lib/cpp2/gen/module_metadata_cpp.h>
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_no_uri_metadata.h"
-#include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_no_uri_data.h"
 
 // some of these functions can be so large that the compiler gives up optimizing
 // them - and issues a warning which may be treated as an error!

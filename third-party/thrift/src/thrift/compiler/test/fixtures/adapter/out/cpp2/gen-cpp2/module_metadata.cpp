@@ -6,7 +6,6 @@
  */
 #include <thrift/lib/cpp2/gen/module_metadata_cpp.h>
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_metadata.h"
-#include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_data.h"
 
 // some of these functions can be so large that the compiler gives up optimizing
 // them - and issues a warning which may be treated as an error!
@@ -37,13 +36,13 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 void EnumMetadata<::facebook::thrift::test::Color>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::facebook::thrift::test::Color>(metadata, false);
+  auto res = genEnumMetadata<::facebook::thrift::test::Color>(metadata);
   if (res.preExists) {
     return;
   }
 }
 void EnumMetadata<::facebook::thrift::test::ThriftAdaptedEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::facebook::thrift::test::ThriftAdaptedEnum>(metadata, false);
+  auto res = genEnumMetadata<::facebook::thrift::test::ThriftAdaptedEnum>(metadata);
   if (res.preExists) {
     return;
   }

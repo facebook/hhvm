@@ -6,7 +6,6 @@
  */
 #include <thrift/lib/cpp2/gen/module_metadata_cpp.h>
 #include "thrift/compiler/test/fixtures/single_file_service/gen-cpp2/module_structs_metadata.h"
-#include "thrift/compiler/test/fixtures/single_file_service/gen-cpp2/module_structs_data.h"
 
 // some of these functions can be so large that the compiler gives up optimizing
 // them - and issues a warning which may be treated as an error!

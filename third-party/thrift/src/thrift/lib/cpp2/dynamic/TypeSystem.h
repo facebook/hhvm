@@ -1176,6 +1176,8 @@ class DefinitionRef final {
         return asStruct();
       case Kind::UNION:
         return asUnion();
+      case Kind::ENUM:
+      case Kind::OPAQUE_ALIAS:
       default:
         break;
     }

@@ -22,17 +22,6 @@ namespace apache::thrift::compiler {
 
 class t_container : public t_type {
  public:
-  /**
-   * The subset of t_type::type values that are containers.
-   */
-  enum class type {
-    t_list = int(t_type::type::t_list),
-    t_set = int(t_type::type::t_set),
-    t_map = int(t_type::type::t_map),
-  };
-
-  virtual type container_type() const = 0;
-
   ~t_container() override;
 
  protected:

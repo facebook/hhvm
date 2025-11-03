@@ -1573,26 +1573,21 @@ struct ValidateAnnotationPositions {
     }
   }
   void operator()(sema_context& ctx, const t_container& type) {
-    switch (type.container_type()) {
-      case t_container::type::t_list:
-        if (owns_annotations(static_cast<const t_list&>(type).elem_type())) {
-          err(ctx);
-        }
-        break;
-      case t_container::type::t_set:
-        if (owns_annotations(static_cast<const t_set&>(type).elem_type())) {
-          err(ctx);
-        }
-        break;
-      case t_container::type::t_map: {
-        const auto& t = static_cast<const t_map&>(type);
-        if (owns_annotations(t.key_type()) || owns_annotations(t.val_type())) {
-          err(ctx);
-        }
-        break;
+    if (const t_list* list = type.try_as<t_list>()) {
+      if (owns_annotations(list->elem_type())) {
+        err(ctx);
       }
-      default:
-        assert(false && "Unknown container type");
+    } else if (const t_set* set = type.try_as<t_set>()) {
+      if (owns_annotations(set->elem_type())) {
+        err(ctx);
+      }
+    } else if (const t_map* map = type.try_as<t_map>()) {
+      if (owns_annotations(map->key_type()) ||
+          owns_annotations(map->val_type())) {
+        err(ctx);
+      }
+    } else {
+      assert(false && "Unknown container type");
     }
   }
   void operator()(sema_context& ctx, const t_field& node) {

@@ -344,23 +344,19 @@ bool cpp_name_resolver::can_resolve_to_scalar(const t_type& node) {
 }
 
 const std::string& cpp_name_resolver::default_template(
-    t_container::type ctype) {
-  switch (ctype) {
-    case t_container::type::t_list: {
-      static const auto& value = *new std::string("::std::vector");
-      return value;
-    }
-    case t_container::type::t_set: {
-      static const auto& value = *new std::string("::std::set");
-      return value;
-    }
-    case t_container::type::t_map: {
-      static const auto& value = *new std::string("::std::map");
-      return value;
-    }
+    const t_container& ctype) {
+  if (ctype.is<t_list>()) {
+    static const auto& value = *new std::string("::std::vector");
+    return value;
+  } else if (ctype.is<t_set>()) {
+    static const auto& value = *new std::string("::std::set");
+    return value;
+  } else if (ctype.is<t_map>()) {
+    static const auto& value = *new std::string("::std::map");
+    return value;
   }
   throw std::runtime_error(
-      "unknown container type: " + std::to_string(static_cast<int>(ctype)));
+      fmt::format("unknown container type: {}", typeid(ctype).name()));
 }
 
 const std::string& cpp_name_resolver::default_type(
@@ -515,8 +511,7 @@ std::string cpp_name_resolver::gen_container_type(
     type_resolve_fn resolve_fn,
     const std::string* val) {
   val = val ? val : find_template(node);
-  const auto& template_name =
-      val ? *val : default_template(node.container_type());
+  const auto& template_name = val ? *val : default_template(node);
 
   if (const t_list* list = node.try_as<t_list>()) {
     return detail::gen_template_type(

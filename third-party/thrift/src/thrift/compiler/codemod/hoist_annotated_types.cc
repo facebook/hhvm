@@ -75,56 +75,46 @@ class hoist_annotated_types {
   void visit_type(const t_container& type) {
     std::string replacement;
 
-    switch (type.container_type()) {
-      case t_container::type::t_list: {
-        const auto& t = static_cast<const t_list&>(type);
-        if (!needs_replacement(t.elem_type())) {
-          return;
-        }
-        auto name = maybe_create_typedef(t.elem_type());
-        replacement = fmt::format("list<{}>", name);
-        // We modify the AST in case we're visiting a nested type, so that the
-        // outer type will render correctly without us needing to propagate this
-        // state.
-        const_cast<t_type_ref&>(t.elem_type()) =
-            t_type_ref::from_ptr(typedefs_.at(name).ptr);
-        break;
+    if (const t_list* list = type.try_as<t_list>()) {
+      if (!needs_replacement(list->elem_type())) {
+        return;
       }
-      case t_container::type::t_set: {
-        const auto& t = static_cast<const t_set&>(type);
-        if (!needs_replacement(t.elem_type())) {
-          return;
-        }
-        auto name = maybe_create_typedef(t.elem_type());
-        replacement = fmt::format("set<{}>", name);
-        const_cast<t_type_ref&>(t.elem_type()) =
-            t_type_ref::from_ptr(typedefs_.at(name).ptr);
-        break;
+      auto name = maybe_create_typedef(list->elem_type());
+      replacement = fmt::format("list<{}>", name);
+      // We modify the AST in case we're visiting a nested type, so that the
+      // outer type will render correctly without us needing to propagate this
+      // state.
+      const_cast<t_type_ref&>(list->elem_type()) =
+          t_type_ref::from_ptr(typedefs_.at(name).ptr);
+    } else if (const t_set* set = type.try_as<t_set>()) {
+      if (!needs_replacement(set->elem_type())) {
+        return;
       }
-      case t_container::type::t_map: {
-        const auto& t = static_cast<const t_map&>(type);
-        if (!needs_replacement(t.key_type()) &&
-            !needs_replacement(t.val_type())) {
-          return;
-        }
-        auto name = maybe_create_typedef(t.key_type());
-        if (auto it = typedefs_.find(name); it != typedefs_.end()) {
-          const_cast<t_type_ref&>(t.key_type()) =
-              t_type_ref::from_ptr(it->second.ptr);
-        }
-        name = maybe_create_typedef(t.val_type());
-        if (auto it = typedefs_.find(name); it != typedefs_.end()) {
-          const_cast<t_type_ref&>(t.val_type()) =
-              t_type_ref::from_ptr(it->second.ptr);
-        }
-        replacement = fmt::format(
-            "map<{}, {}>",
-            maybe_create_typedef(t.key_type()),
-            maybe_create_typedef(t.val_type()));
-        break;
+      auto name = maybe_create_typedef(set->elem_type());
+      replacement = fmt::format("set<{}>", name);
+      const_cast<t_type_ref&>(set->elem_type()) =
+          t_type_ref::from_ptr(typedefs_.at(name).ptr);
+    } else if (const t_map* map = type.try_as<t_map>()) {
+      if (!needs_replacement(map->key_type()) &&
+          !needs_replacement(map->val_type())) {
+        return;
       }
-      default:
-        throw std::runtime_error("Unknown container type");
+      auto name = maybe_create_typedef(map->key_type());
+      if (auto it = typedefs_.find(name); it != typedefs_.end()) {
+        const_cast<t_type_ref&>(map->key_type()) =
+            t_type_ref::from_ptr(it->second.ptr);
+      }
+      name = maybe_create_typedef(map->val_type());
+      if (auto it = typedefs_.find(name); it != typedefs_.end()) {
+        const_cast<t_type_ref&>(map->val_type()) =
+            t_type_ref::from_ptr(it->second.ptr);
+      }
+      replacement = fmt::format(
+          "map<{}, {}>",
+          maybe_create_typedef(map->key_type()),
+          maybe_create_typedef(map->val_type()));
+    } else {
+      throw std::runtime_error("Unknown container type");
     }
     auto range = type.src_range();
     fm_.add({range.begin.offset(), range.end.offset(), replacement});

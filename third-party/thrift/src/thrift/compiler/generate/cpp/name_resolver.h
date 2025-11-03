@@ -215,7 +215,7 @@ class cpp_name_resolver {
       const t_named& node, const char* uri, const char* key);
 
   static const std::string& default_type(t_primitive_type::type btype);
-  static const std::string& default_template(t_container::type ctype);
+  static const std::string& default_template(const t_container& ctype);
 
   // Generating functions.
   std::string gen_type(const t_type& node);

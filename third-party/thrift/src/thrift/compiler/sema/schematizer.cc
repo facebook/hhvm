@@ -750,20 +750,13 @@ const char* protocol_value_type_name(const t_type& ty) {
       default:
         break;
     }
-  }
-
-  if (const auto* container = ty.try_as<t_container>()) {
-    switch (container->container_type()) {
-      case t_container::type::t_list:
-        return kListTypeName;
-      case t_container::type::t_set:
-        return kSetTypeName;
-      case t_container::type::t_map:
-        return kMapTypeName;
-    }
-  }
-
-  if (ty.is<t_enum>()) {
+  } else if (ty.is<t_list>()) {
+    return kListTypeName;
+  } else if (ty.is<t_set>()) {
+    return kSetTypeName;
+  } else if (ty.is<t_map>()) {
+    return kMapTypeName;
+  } else if (ty.is<t_enum>()) {
     return kI32TypeName;
   }
 

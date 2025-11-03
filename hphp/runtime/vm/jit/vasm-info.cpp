@@ -247,6 +247,7 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::sar:
     case Vinstr::sarq:
     case Vinstr::sarqi:
+    case Vinstr::sbfizq:
     case Vinstr::setcc:
     case Vinstr::shl:
     case Vinstr::shr:

@@ -211,7 +211,7 @@ func (s *rocketServer) metadataPush(msg payload.Payload) {
 	} else if metadata.StreamHeadersPush != nil {
 		s.log("unsupported StreamHeadersPush metadata type")
 	} else if metadata.TransportMetadataPush != nil {
-		s.log("unsupported TransportMetadataPush metadata type")
+		// s.log("unsupported TransportMetadataPush metadata type")
 	}
 }
 

@@ -38,10 +38,10 @@ cdef class Perform_SerialInteraction(thrift.py3.client.Client):
 cdef class InteractWithShared(thrift.py3.client.Client):
     pass
 
-cdef class InteractWithShared_SharedInteraction(thrift.py3.client.Client):
+cdef class InteractWithShared_MyInteraction(thrift.py3.client.Client):
     pass
 
-cdef class InteractWithShared_MyInteraction(thrift.py3.client.Client):
+cdef class InteractWithShared_SharedInteraction(thrift.py3.client.Client):
     pass
 
 cdef class BoxService(thrift.py3.client.Client):

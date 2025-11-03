@@ -237,34 +237,10 @@ class InteractWithShared(thrift.py3.client.Client):
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> _test_fixtures_another_interactions_shared_types.DoSomethingResult: ...
 
-    def createSharedInteraction(self) -> InteractWithShared_SharedInteraction: ...
-    def async_createSharedInteraction(self) -> InteractWithShared_SharedInteraction: ...
     def createMyInteraction(self) -> InteractWithShared_MyInteraction: ...
     def async_createMyInteraction(self) -> InteractWithShared_MyInteraction: ...
-
-_InteractWithShared_SharedInteraction = _typing.TypeVar('_InteractWithShared_SharedInteraction', bound='InteractWithShared_SharedInteraction')
-
-
-class InteractWithShared_SharedInteraction(thrift.py3.client.Client):
-
-    async def init(
-        self,
-        *,
-        rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
-    ) -> int: ...
-
-    async def do_something(
-        self,
-        *,
-        rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
-    ) -> _test_fixtures_another_interactions_shared_types.DoSomethingResult: ...
-
-    async def tear_down(
-        self,
-        *,
-        rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
-    ) -> None: ...
-
+    def createSharedInteraction(self) -> InteractWithShared_SharedInteraction: ...
+    def async_createSharedInteraction(self) -> InteractWithShared_SharedInteraction: ...
 
 _InteractWithShared_MyInteraction = _typing.TypeVar('_InteractWithShared_MyInteraction', bound='InteractWithShared_MyInteraction')
 
@@ -288,6 +264,30 @@ class InteractWithShared_MyInteraction(thrift.py3.client.Client):
         *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> _test_fixtures_interactions_module_types.ClientBufferedStream__bool: ...
+
+
+_InteractWithShared_SharedInteraction = _typing.TypeVar('_InteractWithShared_SharedInteraction', bound='InteractWithShared_SharedInteraction')
+
+
+class InteractWithShared_SharedInteraction(thrift.py3.client.Client):
+
+    async def init(
+        self,
+        *,
+        rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
+    ) -> int: ...
+
+    async def do_something(
+        self,
+        *,
+        rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
+    ) -> _test_fixtures_another_interactions_shared_types.DoSomethingResult: ...
+
+    async def tear_down(
+        self,
+        *,
+        rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
+    ) -> None: ...
 
 
 

@@ -103,8 +103,8 @@ class InteractWithSharedWrapper : virtual public InteractWithSharedSvIf {
   public:
     explicit InteractWithSharedWrapper(PyObject *if_object, folly::Executor *exc);
     void async_tm_do_some_similar_things(apache::thrift::HandlerCallbackPtr<std::unique_ptr<::thrift::shared_interactions::DoSomethingResult>> callback) override;
-    std::unique_ptr<SharedInteractionIf> createSharedInteraction() override;
     std::unique_ptr<MyInteractionIf> createMyInteraction() override;
+    std::unique_ptr<SharedInteractionIf> createSharedInteraction() override;
 folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;
 folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 };

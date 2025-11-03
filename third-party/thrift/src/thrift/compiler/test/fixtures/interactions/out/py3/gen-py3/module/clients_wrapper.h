@@ -183,21 +183,6 @@ class InteractWithSharedClientWrapper : public ::thrift::py3::ClientWrapper {
     folly::Future<::thrift::shared_interactions::DoSomethingResult> do_some_similar_things(
       apache::thrift::RpcOptions& rpcOptions);
 
-    class SharedInteractionInteractionWrapper : public ClientWrapper {
-      public:
-        SharedInteractionInteractionWrapper(
-          std::unique_ptr<apache::thrift::GeneratedAsyncClient> async_client,
-           std::shared_ptr<apache::thrift::RequestChannel> channel)
-           : ClientWrapper(std::move(async_client), channel) {}
-
-        folly::Future<int32_t> init(
-          apache::thrift::RpcOptions& rpcOptions);
-        folly::Future<::thrift::shared_interactions::DoSomethingResult> do_something(
-          apache::thrift::RpcOptions& rpcOptions);
-        folly::Future<folly::Unit> tear_down(
-          apache::thrift::RpcOptions& rpcOptions);
-    };
-
     class MyInteractionInteractionWrapper : public ClientWrapper {
       public:
         MyInteractionInteractionWrapper(
@@ -212,8 +197,23 @@ class InteractWithSharedClientWrapper : public ::thrift::py3::ClientWrapper {
         folly::Future<apache::thrift::ClientBufferedStream<bool>> truthify(
           apache::thrift::RpcOptions& rpcOptions);
     };
-    folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>> createSharedInteraction();
+
+    class SharedInteractionInteractionWrapper : public ClientWrapper {
+      public:
+        SharedInteractionInteractionWrapper(
+          std::unique_ptr<apache::thrift::GeneratedAsyncClient> async_client,
+           std::shared_ptr<apache::thrift::RequestChannel> channel)
+           : ClientWrapper(std::move(async_client), channel) {}
+
+        folly::Future<int32_t> init(
+          apache::thrift::RpcOptions& rpcOptions);
+        folly::Future<::thrift::shared_interactions::DoSomethingResult> do_something(
+          apache::thrift::RpcOptions& rpcOptions);
+        folly::Future<folly::Unit> tear_down(
+          apache::thrift::RpcOptions& rpcOptions);
+    };
     folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>> createMyInteraction();
+    folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>> createSharedInteraction();
 };
 
 

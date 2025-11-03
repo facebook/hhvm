@@ -318,10 +318,10 @@ void InteractWithSharedWrapper::async_tm_do_some_similar_things(
         });
     });
 }
-std::unique_ptr<InteractWithSharedSvIf::SharedInteractionIf> InteractWithSharedWrapper::createSharedInteraction() {
+std::unique_ptr<InteractWithSharedSvIf::MyInteractionIf> InteractWithSharedWrapper::createMyInteraction() {
   throw std::runtime_error("Py3 server doesn't support interactions.");
 }
-std::unique_ptr<InteractWithSharedSvIf::MyInteractionIf> InteractWithSharedWrapper::createMyInteraction() {
+std::unique_ptr<InteractWithSharedSvIf::SharedInteractionIf> InteractWithSharedWrapper::createSharedInteraction() {
   throw std::runtime_error("Py3 server doesn't support interactions.");
 }
 std::shared_ptr<apache::thrift::ServerInterface> InteractWithSharedInterface(PyObject *if_object, folly::Executor *exc) {

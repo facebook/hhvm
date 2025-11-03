@@ -82,11 +82,11 @@ cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_cli
       pass
 
 cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_clients.h" namespace "::cpp2":
-  cdef cppclass cInteractWithSharedAsyncClient_SharedInteraction "::cpp2::InteractWithSharedAsyncClient::SharedInteraction":
+  cdef cppclass cInteractWithSharedAsyncClient_MyInteraction "::cpp2::InteractWithSharedAsyncClient::MyInteraction":
       pass
 
 cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_clients.h" namespace "::cpp2":
-  cdef cppclass cInteractWithSharedAsyncClient_MyInteraction "::cpp2::InteractWithSharedAsyncClient::MyInteraction":
+  cdef cppclass cInteractWithSharedAsyncClient_SharedInteraction "::cpp2::InteractWithSharedAsyncClient::SharedInteraction":
       pass
 
 cdef extern from "<utility>" namespace "std":
@@ -188,16 +188,8 @@ cdef extern from "thrift/compiler/test/fixtures/interactions/gen-py3/module/clie
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)
 
     cFollyFuture[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult] do_some_similar_things(cRpcOptions, )
-    cFollyFuture[unique_ptr[cClientWrapper]]& createSharedInteraction()
     cFollyFuture[unique_ptr[cClientWrapper]]& createMyInteraction()
-
-  cdef cppclass cInteractWithSharedClientWrapper_SharedInteractionInteractionWrapper "::cpp2::InteractWithSharedClientWrapper::SharedInteractionInteractionWrapper"(cClientWrapper):
-    void setPersistentHeader(const string& key, const string& value)
-    void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)
-
-    cFollyFuture[cint32_t] init(cRpcOptions, )
-    cFollyFuture[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult] do_something(cRpcOptions, )
-    cFollyFuture[cFollyUnit] tear_down(cRpcOptions, )
+    cFollyFuture[unique_ptr[cClientWrapper]]& createSharedInteraction()
 
   cdef cppclass cInteractWithSharedClientWrapper_MyInteractionInteractionWrapper "::cpp2::InteractWithSharedClientWrapper::MyInteractionInteractionWrapper"(cClientWrapper):
     void setPersistentHeader(const string& key, const string& value)
@@ -206,6 +198,14 @@ cdef extern from "thrift/compiler/test/fixtures/interactions/gen-py3/module/clie
     cFollyFuture[cint32_t] frobnicate(cRpcOptions, )
     cFollyFuture[cFollyUnit] ping(cRpcOptions, )
     cFollyFuture[cClientBufferedStream[cbool]] truthify(cRpcOptions, )
+
+  cdef cppclass cInteractWithSharedClientWrapper_SharedInteractionInteractionWrapper "::cpp2::InteractWithSharedClientWrapper::SharedInteractionInteractionWrapper"(cClientWrapper):
+    void setPersistentHeader(const string& key, const string& value)
+    void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)
+
+    cFollyFuture[cint32_t] init(cRpcOptions, )
+    cFollyFuture[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult] do_something(cRpcOptions, )
+    cFollyFuture[cFollyUnit] tear_down(cRpcOptions, )
 
 
   cdef cppclass cBoxServiceClientWrapper "::cpp2::BoxServiceClientWrapper":

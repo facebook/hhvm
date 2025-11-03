@@ -73,8 +73,8 @@ from test.fixtures.interactions.module.clients_wrapper cimport cPerformClientWra
 from test.fixtures.interactions.module.clients_wrapper cimport cPerformClientWrapper_MyInteractionFastInteractionWrapper
 from test.fixtures.interactions.module.clients_wrapper cimport cPerformClientWrapper_SerialInteractionInteractionWrapper
 from test.fixtures.interactions.module.clients_wrapper cimport cInteractWithSharedAsyncClient, cInteractWithSharedClientWrapper
-from test.fixtures.interactions.module.clients_wrapper cimport cInteractWithSharedClientWrapper_SharedInteractionInteractionWrapper
 from test.fixtures.interactions.module.clients_wrapper cimport cInteractWithSharedClientWrapper_MyInteractionInteractionWrapper
+from test.fixtures.interactions.module.clients_wrapper cimport cInteractWithSharedClientWrapper_SharedInteractionInteractionWrapper
 from test.fixtures.interactions.module.clients_wrapper cimport cBoxServiceAsyncClient, cBoxServiceClientWrapper
 
 
@@ -1406,23 +1406,6 @@ cdef class InteractWithShared(thrift.py3.client.Client):
         return asyncio_shield(__future)
 
 
-    def createSharedInteraction(
-            InteractWithShared self
-    ):
-        interaction = InteractWithShared_SharedInteraction()
-        bridgeFutureWith[unique_ptr[cClientWrapper]](
-            interaction._executor,
-            down_cast_ptr[cInteractWithSharedClientWrapper, cClientWrapper](self._client.get()).createSharedInteraction(),
-            thrift.py3.client.interactions_callback,
-            <PyObject *> interaction
-        )
-        return interaction
-
-    async def async_createSharedInteraction(
-            InteractWithShared self
-    ):
-        return self.createSharedInteraction()
-
     def createMyInteraction(
             InteractWithShared self
     ):
@@ -1440,6 +1423,23 @@ cdef class InteractWithShared(thrift.py3.client.Client):
     ):
         return self.createMyInteraction()
 
+    def createSharedInteraction(
+            InteractWithShared self
+    ):
+        interaction = InteractWithShared_SharedInteraction()
+        bridgeFutureWith[unique_ptr[cClientWrapper]](
+            interaction._executor,
+            down_cast_ptr[cInteractWithSharedClientWrapper, cClientWrapper](self._client.get()).createSharedInteraction(),
+            thrift.py3.client.interactions_callback,
+            <PyObject *> interaction
+        )
+        return interaction
+
+    async def async_createSharedInteraction(
+            InteractWithShared self
+    ):
+        return self.createSharedInteraction()
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
@@ -1449,72 +1449,6 @@ cdef class InteractWithShared(thrift.py3.client.Client):
     @staticmethod
     def __get_thrift_name__():
         return "module.InteractWithShared"
-
-@cython.auto_pickle(False)
-cdef class InteractWithShared_SharedInteraction(thrift.py3.client.Client):
-
-    @cython.always_allow_keywords(True)
-    def init(
-            InteractWithShared_SharedInteraction self,
-            *,
-            __RpcOptions rpc_options=None
-    ):
-        if rpc_options is None:
-            rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
-        self._check_connect_future()
-        __loop = self._loop
-        __future = __loop.create_future()
-        __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[cint32_t](
-            self._executor,
-            down_cast_ptr[cInteractWithSharedClientWrapper_SharedInteractionInteractionWrapper, cClientWrapper](self._client.get()).init(rpc_options._cpp_obj, 
-            ),
-            InteractWithShared_SharedInteraction_init_callback,
-            <PyObject *> __userdata
-        )
-        return asyncio_shield(__future)
-
-    @cython.always_allow_keywords(True)
-    def do_something(
-            InteractWithShared_SharedInteraction self,
-            *,
-            __RpcOptions rpc_options=None
-    ):
-        if rpc_options is None:
-            rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
-        self._check_connect_future()
-        __loop = self._loop
-        __future = __loop.create_future()
-        __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult](
-            self._executor,
-            down_cast_ptr[cInteractWithSharedClientWrapper_SharedInteractionInteractionWrapper, cClientWrapper](self._client.get()).do_something(rpc_options._cpp_obj, 
-            ),
-            InteractWithShared_SharedInteraction_do_something_callback,
-            <PyObject *> __userdata
-        )
-        return asyncio_shield(__future)
-
-    @cython.always_allow_keywords(True)
-    def tear_down(
-            InteractWithShared_SharedInteraction self,
-            *,
-            __RpcOptions rpc_options=None
-    ):
-        if rpc_options is None:
-            rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
-        self._check_connect_future()
-        __loop = self._loop
-        __future = __loop.create_future()
-        __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[cFollyUnit](
-            self._executor,
-            down_cast_ptr[cInteractWithSharedClientWrapper_SharedInteractionInteractionWrapper, cClientWrapper](self._client.get()).tear_down(rpc_options._cpp_obj, 
-            ),
-            InteractWithShared_SharedInteraction_tear_down_callback,
-            <PyObject *> __userdata
-        )
-        return asyncio_shield(__future)
 
 @cython.auto_pickle(False)
 cdef class InteractWithShared_MyInteraction(thrift.py3.client.Client):
@@ -1578,6 +1512,72 @@ cdef class InteractWithShared_MyInteraction(thrift.py3.client.Client):
             down_cast_ptr[cInteractWithSharedClientWrapper_MyInteractionInteractionWrapper, cClientWrapper](self._client.get()).truthify(rpc_options._cpp_obj, 
             ),
             InteractWithShared_MyInteraction_truthify_callback,
+            <PyObject *> __userdata
+        )
+        return asyncio_shield(__future)
+
+@cython.auto_pickle(False)
+cdef class InteractWithShared_SharedInteraction(thrift.py3.client.Client):
+
+    @cython.always_allow_keywords(True)
+    def init(
+            InteractWithShared_SharedInteraction self,
+            *,
+            __RpcOptions rpc_options=None
+    ):
+        if rpc_options is None:
+            rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
+        self._check_connect_future()
+        __loop = self._loop
+        __future = __loop.create_future()
+        __userdata = (self, __future, rpc_options)
+        bridgeFutureWith[cint32_t](
+            self._executor,
+            down_cast_ptr[cInteractWithSharedClientWrapper_SharedInteractionInteractionWrapper, cClientWrapper](self._client.get()).init(rpc_options._cpp_obj, 
+            ),
+            InteractWithShared_SharedInteraction_init_callback,
+            <PyObject *> __userdata
+        )
+        return asyncio_shield(__future)
+
+    @cython.always_allow_keywords(True)
+    def do_something(
+            InteractWithShared_SharedInteraction self,
+            *,
+            __RpcOptions rpc_options=None
+    ):
+        if rpc_options is None:
+            rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
+        self._check_connect_future()
+        __loop = self._loop
+        __future = __loop.create_future()
+        __userdata = (self, __future, rpc_options)
+        bridgeFutureWith[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult](
+            self._executor,
+            down_cast_ptr[cInteractWithSharedClientWrapper_SharedInteractionInteractionWrapper, cClientWrapper](self._client.get()).do_something(rpc_options._cpp_obj, 
+            ),
+            InteractWithShared_SharedInteraction_do_something_callback,
+            <PyObject *> __userdata
+        )
+        return asyncio_shield(__future)
+
+    @cython.always_allow_keywords(True)
+    def tear_down(
+            InteractWithShared_SharedInteraction self,
+            *,
+            __RpcOptions rpc_options=None
+    ):
+        if rpc_options is None:
+            rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
+        self._check_connect_future()
+        __loop = self._loop
+        __future = __loop.create_future()
+        __userdata = (self, __future, rpc_options)
+        bridgeFutureWith[cFollyUnit](
+            self._executor,
+            down_cast_ptr[cInteractWithSharedClientWrapper_SharedInteractionInteractionWrapper, cClientWrapper](self._client.get()).tear_down(rpc_options._cpp_obj, 
+            ),
+            InteractWithShared_SharedInteraction_tear_down_callback,
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)

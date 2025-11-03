@@ -616,18 +616,6 @@ InteractWithSharedClientWrapper::do_some_similar_things(
 
 
 folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>>
-InteractWithSharedClientWrapper::createSharedInteraction() {
-  return folly::via(
-      channel_->getEventBase(),
-      [=]() -> std::unique_ptr<::thrift::py3::ClientWrapper> {
-        auto interaction_client = static_cast<std::unique_ptr<apache::thrift::GeneratedAsyncClient>>(std::make_unique<InteractWithSharedAsyncClient::SharedInteraction>(((InteractWithSharedAsyncClient*)async_client_.get())->createSharedInteraction()));
-        return static_cast<std::unique_ptr<::thrift::py3::ClientWrapper>>(std::make_unique<SharedInteractionInteractionWrapper>(std::move(interaction_client), channel_));
-      }
-  );
-}
-
-
-folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>>
 InteractWithSharedClientWrapper::createMyInteraction() {
   return folly::via(
       channel_->getEventBase(),
@@ -638,70 +626,16 @@ InteractWithSharedClientWrapper::createMyInteraction() {
   );
 }
 
-folly::Future<int32_t>
-InteractWithSharedClientWrapper::SharedInteractionInteractionWrapper::init(
-    apache::thrift::RpcOptions& rpcOptions) {
-  auto* client = static_cast<::thrift::shared_interactions::InteractWithSharedAsyncClient::SharedInteraction*>(async_client_.get());
-  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<int32_t>;
-  folly::Promise<CallbackHelper::PromiseResult> _promise;
-  auto _future = _promise.getFuture();
-  auto callback = std::make_unique<::thrift::py3::FutureCallback<int32_t>>(
-    std::move(_promise), rpcOptions, client->recv_wrapped_init, channel_);
-  try {
-    client->init(
-      rpcOptions,
-      std::move(callback)
-    );
-  } catch (...) {
-    return folly::makeFuture<int32_t>(folly::exception_wrapper(
-      std::current_exception()
-    ));
-  }
-  return std::move(_future).thenValue(CallbackHelper::extractResult);
-}
 
-folly::Future<::thrift::shared_interactions::DoSomethingResult>
-InteractWithSharedClientWrapper::SharedInteractionInteractionWrapper::do_something(
-    apache::thrift::RpcOptions& rpcOptions) {
-  auto* client = static_cast<::thrift::shared_interactions::InteractWithSharedAsyncClient::SharedInteraction*>(async_client_.get());
-  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::thrift::shared_interactions::DoSomethingResult>;
-  folly::Promise<CallbackHelper::PromiseResult> _promise;
-  auto _future = _promise.getFuture();
-  auto callback = std::make_unique<::thrift::py3::FutureCallback<::thrift::shared_interactions::DoSomethingResult>>(
-    std::move(_promise), rpcOptions, client->recv_wrapped_do_something, channel_);
-  try {
-    client->do_something(
-      rpcOptions,
-      std::move(callback)
-    );
-  } catch (...) {
-    return folly::makeFuture<::thrift::shared_interactions::DoSomethingResult>(folly::exception_wrapper(
-      std::current_exception()
-    ));
-  }
-  return std::move(_future).thenValue(CallbackHelper::extractResult);
-}
-
-folly::Future<folly::Unit>
-InteractWithSharedClientWrapper::SharedInteractionInteractionWrapper::tear_down(
-    apache::thrift::RpcOptions& rpcOptions) {
-  auto* client = static_cast<::thrift::shared_interactions::InteractWithSharedAsyncClient::SharedInteraction*>(async_client_.get());
-  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
-  folly::Promise<CallbackHelper::PromiseResult> _promise;
-  auto _future = _promise.getFuture();
-  auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
-    std::move(_promise), rpcOptions, client->recv_wrapped_tear_down, channel_);
-  try {
-    client->tear_down(
-      rpcOptions,
-      std::move(callback)
-    );
-  } catch (...) {
-    return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception()
-    ));
-  }
-  return std::move(_future).thenValue(CallbackHelper::extractResult);
+folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>>
+InteractWithSharedClientWrapper::createSharedInteraction() {
+  return folly::via(
+      channel_->getEventBase(),
+      [=]() -> std::unique_ptr<::thrift::py3::ClientWrapper> {
+        auto interaction_client = static_cast<std::unique_ptr<apache::thrift::GeneratedAsyncClient>>(std::make_unique<InteractWithSharedAsyncClient::SharedInteraction>(((InteractWithSharedAsyncClient*)async_client_.get())->createSharedInteraction()));
+        return static_cast<std::unique_ptr<::thrift::py3::ClientWrapper>>(std::make_unique<SharedInteractionInteractionWrapper>(std::move(interaction_client), channel_));
+      }
+  );
 }
 
 folly::Future<int32_t>
@@ -764,6 +698,72 @@ InteractWithSharedClientWrapper::MyInteractionInteractionWrapper::truthify(
     );
   } catch (...) {
     return folly::makeFuture<apache::thrift::ClientBufferedStream<bool>>(folly::exception_wrapper(
+      std::current_exception()
+    ));
+  }
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::Future<int32_t>
+InteractWithSharedClientWrapper::SharedInteractionInteractionWrapper::init(
+    apache::thrift::RpcOptions& rpcOptions) {
+  auto* client = static_cast<::thrift::shared_interactions::InteractWithSharedAsyncClient::SharedInteraction*>(async_client_.get());
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<int32_t>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
+  auto _future = _promise.getFuture();
+  auto callback = std::make_unique<::thrift::py3::FutureCallback<int32_t>>(
+    std::move(_promise), rpcOptions, client->recv_wrapped_init, channel_);
+  try {
+    client->init(
+      rpcOptions,
+      std::move(callback)
+    );
+  } catch (...) {
+    return folly::makeFuture<int32_t>(folly::exception_wrapper(
+      std::current_exception()
+    ));
+  }
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::Future<::thrift::shared_interactions::DoSomethingResult>
+InteractWithSharedClientWrapper::SharedInteractionInteractionWrapper::do_something(
+    apache::thrift::RpcOptions& rpcOptions) {
+  auto* client = static_cast<::thrift::shared_interactions::InteractWithSharedAsyncClient::SharedInteraction*>(async_client_.get());
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::thrift::shared_interactions::DoSomethingResult>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
+  auto _future = _promise.getFuture();
+  auto callback = std::make_unique<::thrift::py3::FutureCallback<::thrift::shared_interactions::DoSomethingResult>>(
+    std::move(_promise), rpcOptions, client->recv_wrapped_do_something, channel_);
+  try {
+    client->do_something(
+      rpcOptions,
+      std::move(callback)
+    );
+  } catch (...) {
+    return folly::makeFuture<::thrift::shared_interactions::DoSomethingResult>(folly::exception_wrapper(
+      std::current_exception()
+    ));
+  }
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
+}
+
+folly::Future<folly::Unit>
+InteractWithSharedClientWrapper::SharedInteractionInteractionWrapper::tear_down(
+    apache::thrift::RpcOptions& rpcOptions) {
+  auto* client = static_cast<::thrift::shared_interactions::InteractWithSharedAsyncClient::SharedInteraction*>(async_client_.get());
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
+  auto _future = _promise.getFuture();
+  auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
+    std::move(_promise), rpcOptions, client->recv_wrapped_tear_down, channel_);
+  try {
+    client->tear_down(
+      rpcOptions,
+      std::move(callback)
+    );
+  } catch (...) {
+    return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
       std::current_exception()
     ));
   }

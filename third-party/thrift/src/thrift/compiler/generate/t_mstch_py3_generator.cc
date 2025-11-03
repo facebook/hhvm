@@ -448,6 +448,12 @@ class py3_mstch_program : public mstch_program {
   std::vector<const t_function*> response_and_stream_functions_;
 };
 
+struct interaction_name_less {
+  bool operator()(const t_interaction* lhs, const t_interaction* rhs) const {
+    return lhs->name() < rhs->name();
+  }
+};
+
 class py3_mstch_service : public mstch_service {
  public:
   py3_mstch_service(
@@ -542,7 +548,7 @@ class py3_mstch_service : public mstch_service {
 
  protected:
   const t_program* prog_;
-  std::set<const t_interaction*> supported_interactions_;
+  std::set<const t_interaction*, interaction_name_less> supported_interactions_;
 };
 
 class py3_mstch_interaction : public py3_mstch_service {

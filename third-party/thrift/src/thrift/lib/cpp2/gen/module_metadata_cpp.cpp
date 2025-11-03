@@ -149,7 +149,7 @@ void normalizeThriftConstValue(
 void normalizeThriftConstStruct(
     ThriftConstStruct& t, const syntax_graph::TypeRef& type) {
   std::unordered_map<std::string, syntax_graph::TypeRef> fieldType;
-  for (auto& field : type.asStructured().fields()) {
+  for (auto& field : type.trueType().asStructured().fields()) {
     fieldType.emplace(field.name(), field.type());
   }
   for (auto& [name, value] : *t.fields()) {
@@ -157,7 +157,8 @@ void normalizeThriftConstStruct(
   }
 }
 void normalizeThriftConstValue(
-    ThriftConstValue& t, const syntax_graph::TypeRef& type) {
+    ThriftConstValue& t, const syntax_graph::TypeRef& ref) {
+  const auto& type = ref.trueType();
   if (type.isList()) {
     for (auto& i : *t.cv_list()) {
       normalizeThriftConstValue(i, type.asList().elementType());
@@ -205,7 +206,7 @@ bool structuredAnnotationsEquality(
     const std::vector<syntax_graph::TypeRef>& annotationTypes) {
   std::unordered_map<std::string, syntax_graph::TypeRef> nameToType;
   for (const auto& i : annotationTypes) {
-    nameToType.emplace(getName(i.asStructured()), i);
+    nameToType.emplace(getName(i.trueType().asStructured()), i);
   }
   return normalizeStructuredAnnotations(
              std::move(lhsAnnotations), nameToType) ==

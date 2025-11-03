@@ -38,6 +38,8 @@ enum MyEnum {
   second = 2,
 }
 
+typedef set<i32> SetOfI32
+
 struct Annotation {
   1: bool boolField;
   2: i16 i16Field;
@@ -49,9 +51,11 @@ struct Annotation {
   8: MyUnion unionField;
   9: MyEnum enumField;
   10: list<i32> listField;
-  11: set<i32> setField;
+  11: SetOfI32 setField;
   12: map<i32, string> mapField;
 }
+
+typedef Foo FooTypedef
 
 @Annotation{
   boolField = true,
@@ -67,7 +71,7 @@ struct Annotation {
   setField = [2, 1],
   mapField = {2: "20", 1: "10"},
 }
-@Foo{bar = Bar{baz = "123"}}
+@FooTypedef{bar = Bar{baz = "123"}}
 enum TestEnum {
   foo = 1,
   bar = 2,

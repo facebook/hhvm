@@ -522,17 +522,18 @@ class SerializerTests(unittest.TestCase):
         s = self.serializer.deserialize(
             self.UnicodeContainers, json_bytes, Protocol.JSON
         )
-        if self.is_mutable_run:
-            # mutable thrift-python lazily converts elements when accessed
-            self.assertIn("good", s.stringSet)
-            with self.assertRaises(UnicodeDecodeError):
-                list(s.stringSet)
-
-        else:
-            # immutable thrift-python eagerly converts all elements on field access
-            with self.assertRaises(UnicodeDecodeError):
-                s.stringSet
-
+        # Both mutable and immutable thrift-python now pass internal
+        # set/frozenset directly for sets with string elements
+        # Accessing the set field succeeds (no eager conversion)
+        set_field = s.stringSet
+        # Membership with valid string works
+        self.assertIn("good", set_field)
+        # Iteration triggers validation and raises on bad Unicode
+        with self.assertRaises(UnicodeDecodeError):
+            list(set_field)
+        # validate it raises consistently
+        with self.assertRaises(UnicodeDecodeError):
+            list(set_field)
         # can't compare round-trip serialized set because ordering is random
 
     def test_non_utf8_container_map_bad_key(self) -> None:

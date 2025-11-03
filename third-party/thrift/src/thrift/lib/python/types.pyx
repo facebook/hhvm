@@ -737,7 +737,24 @@ cdef class SetTypeInfo(TypeInfoBase):
     cpdef to_python_value(self, object value):
         cdef Set inst = Set.__new__(Set)
         inst._fbthrift_val_info = self.val_info
-        inst._fbthrift_elements = value if to_container_elements_no_convert(self.val_info) else self.to_python_from_values(value, <TypeInfoBase>self.val_info)
+
+        # Elements need no conversion (e.g., int, float, double, binary):
+        # Pass frozenset directly, no validation needed.
+        if to_container_elements_no_convert(self.val_info):
+            inst._fbthrift_elements = value
+            inst._fbthrift_needs_lazy_validation = False
+        # String elements: Use lazy validation to defer Unicode check.
+        # Elements are str (valid) or bytes (invalid). Validation happens
+        # on first access that requires all elements.
+        # See Set doc for operations triggering validation.
+        elif isinstance(self.val_info, StringTypeInfo):
+            inst._fbthrift_elements = value
+            inst._fbthrift_needs_lazy_validation = True
+        # Elements need conversion (e.g., structs, containers):
+        # Convert eagerly.
+        else:
+            inst._fbthrift_elements = self.to_python_from_values(value, <TypeInfoBase>self.val_info)
+            inst._fbthrift_needs_lazy_validation = False
         return inst
 
     def to_container_value(self, object value not None):
@@ -2108,7 +2125,7 @@ cdef class ListTypeFactory:
 
 cdef class List(Container):
     """
-    A immutable container used to prepresent a Thrift list. It has compatible
+    A immutable container used to represent a Thrift list. It has compatible
     API with a Python list but has additional API to interact with other Python
     iterators
     """
@@ -2209,9 +2226,26 @@ cdef class SetTypeFactory:
 
 cdef class Set(Container):
     """
-    A immutable set used to prepresent a Thrift set. It has compatible
-    API with a Python set but has additional API to interact with other Python
-    iterators
+    Immutable set used to prepresent a Thrift set. It has compatible API with a
+    Python set but has additional API to interact with other Python iterators.
+
+    Lazy Validation for String Sets:
+    String sets defer Unicode validation until the set is accessed in ways
+    requiring all elements to be valid. Elements are str (valid Unicode)
+    or bytes (failed to decode during deserialization).
+
+    Operations without validation:
+    - Membership: "item" in my_set
+    - Length: len(my_set)
+
+    Operations triggering validation:
+    - Iteration: for elem in my_set, list(my_set)
+    - Hashing: hash(my_set)
+    - Comparison: my_set == other, my_set < other
+    - Set operations: my_set & other, my_set | other, my_set - other
+    - String representation: str(my_set), repr(my_set)
+
+    Once validation succeeds, subsequent operations skip re-validation.
     """
     def __init__(self, val_info, values):
         self._fbthrift_val_info = val_info
@@ -2221,46 +2255,47 @@ cdef class Set(Container):
                 "_typing.Sequence[str] field, explicitly convert it first."
             )
         self._fbthrift_elements = frozenset(val_info.to_container_value(v) for v in values)
+        self._fbthrift_needs_lazy_validation = False
 
-    def __hash__(self):
-        return hash(self._fbthrift_elements)
+    def __hash__(Set self):
+        return hash(self._fbthrift_get_elements())
 
     def __and__(Set self, other):
-        return Set(self._fbthrift_val_info, self._fbthrift_elements & other)
+        return Set(self._fbthrift_val_info, self._fbthrift_get_elements() & other)
 
     def __rand__(Set self, other):
-        return other & self._fbthrift_elements
+        return other & self._fbthrift_get_elements()
 
     def __sub__(Set self, other):
-        return Set(self._fbthrift_val_info, self._fbthrift_elements - other)
+        return Set(self._fbthrift_val_info, self._fbthrift_get_elements() - other)
 
     def __rsub__(Set self, other):
-        return other - self._fbthrift_elements
+        return other - self._fbthrift_get_elements()
 
     def __or__(Set self, other):
-        return Set(self._fbthrift_val_info, self._fbthrift_elements | other)
+        return Set(self._fbthrift_val_info, self._fbthrift_get_elements() | other)
 
     def __ror__(Set self, other):
-        return other | self._fbthrift_elements
+        return other | self._fbthrift_get_elements()
 
     def __xor__(Set self, other):
-        return Set(self._fbthrift_val_info, self._fbthrift_elements ^ other)
+        return Set(self._fbthrift_val_info, self._fbthrift_get_elements() ^ other)
 
     def __rxor__(Set self, other):
-        return other ^ self._fbthrift_elements
+        return other ^ self._fbthrift_get_elements()
 
     def __eq__(Set self, other):
-        return self._fbthrift_elements == other
+        return self._fbthrift_get_elements() == other
 
     def __lt__(Set self, other):
-        return self._fbthrift_elements < other
+        return self._fbthrift_get_elements() < other
 
     def __gt__(Set self, other):
-        # For sets, `x > y` or `x >= y` can not be implemented using `not (x <= y)` or `not (x < y)`. 
+        # For sets, `x > y` or `x >= y` can not be implemented using `not (x <= y)` or `not (x < y)`.
         # Because `<` for sets form partial order unlike integers which form total order.
-        # For example if `x > y` was implemented as `not (x <= y)` => `not (x == y or x < y)`, then we can 
+        # For example if `x > y` was implemented as `not (x <= y)` => `not (x == y or x < y)`, then we can
         # find a counter example. Let `x={0}` and `y={1}`: `x > y` is False, but `not (x == y or x < y)` is True.
-        return self._fbthrift_elements > other
+        return self._fbthrift_get_elements() > other
 
     def __le__(Set self, other):
         return self == other or self < other
@@ -2268,48 +2303,81 @@ cdef class Set(Container):
     def __ge__(Set self, other):
         return self == other or self > other
 
-    def __repr__(self):
+    def __repr__(Set self):
         if not self:
             return 'iset()'
         return f'i{{{", ".join(map(repr, self))}}}'
 
-    def __reduce__(self):
+    def __reduce__(Set self):
         return (Set, (self._fbthrift_val_info, set(self),))
 
-    def __contains__(self, item):
+    def __contains__(Set self, item):
         if item is None:
             return False
         return item in self._fbthrift_elements
 
-    def __iter__(self):
-        return iter(self._fbthrift_elements)
+    def __iter__(Set self):
+        return iter(self._fbthrift_get_elements())
 
-    def __reversed__(self):
-        return reversed(self._fbthrift_elements)
+    def __reversed__(Set self):
+        return reversed(self._fbthrift_get_elements())
 
-    def isdisjoint(self, other):
+    def isdisjoint(Set self, other):
         return len(self & other) == 0
 
-    def union(self, other):
+    def union(Set self, other):
         return self | other
 
-    def intersection(self, other):
+    def intersection(Set self, other):
         return self & other
 
-    def difference(self, other):
+    def difference(Set self, other):
         return self - other
 
-    def symmetric_difference(self, other):
+    def symmetric_difference(Set self, other):
         return self ^ other
 
-    def issubset(self, other):
+    def issubset(Set self, other):
         return self <= other
 
-    def issuperset(self, other):
+    def issuperset(Set self, other):
         return self >= other
 
-    def _fbthrift_same_type(self, other_elem_type):
+    def _fbthrift_same_type(Set self, other_elem_type):
         return self._fbthrift_val_info.same_as(other_elem_type)
+
+    cdef frozenset _fbthrift_get_elements(Set self):
+        """
+        Get the internal frozenset, validating string elements on first access.
+
+        For string sets using lazy validation, performs one-time Unicode check
+        on first call, then marks the set as validated. Non-string sets skip
+        validation entirely.
+
+        Elements from deserialization are str (valid Unicode) or bytes (invalid
+        Unicode that failed to decode). We call to_python_value() which raises
+        on bytes, discarding results for str since they're already converted.
+
+        After successful validation, sets _fbthrift_needs_lazy_validation=False to prevent
+        re-validation on subsequent calls.
+
+        Returns:
+            frozenset: Internal elements
+
+        Raises:
+            UnicodeDecodeError: If the set contains any bytes elements
+        """
+        if not self._fbthrift_needs_lazy_validation:
+            return self._fbthrift_elements
+
+        # Validate all elements - lazy is only used for str now
+        cdef TypeInfoBase val_type_info = <TypeInfoBase>self._fbthrift_val_info
+        for elem in self._fbthrift_elements:
+            val_type_info.to_python_value(elem)
+
+        # Validation succeeded, no need to check again
+        self._fbthrift_needs_lazy_validation = False
+        return self._fbthrift_elements
 
 pySet.register(Set)
 

@@ -302,7 +302,8 @@ cdef class List(Container):
     pass
 
 cdef class Set(Container):
-    pass
+    cdef bint _fbthrift_needs_lazy_validation
+    cdef frozenset _fbthrift_get_elements(self)
 
 cdef class Map(Container):
     cdef object _fbthrift_key_info

@@ -193,7 +193,7 @@ QuicWebTransport::sendDatagram(std::unique_ptr<folly::IOBuf> datagram) {
   XCHECK(quicSocket_);
   auto writeRes = quicSocket_->writeDatagram(std::move(datagram));
   if (writeRes.hasError()) {
-    LOG(ERROR) << "Failed to send datagram";
+    LOG(ERROR) << "Failed to send datagram, error code: " << writeRes.error();
     return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
   }
   return folly::unit;

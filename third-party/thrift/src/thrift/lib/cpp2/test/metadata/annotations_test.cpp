@@ -176,4 +176,30 @@ TEST(Annotations, Normalization) {
   }
 }
 
+metadata::ThriftStruct expectedStruct() {
+  metadata::ThriftStruct ret;
+  ret.name() = "annotations.TestStruct";
+  ret.is_union() = false;
+  metadata::ThriftField field;
+  field.id() = 1;
+  field.name() = "field_1";
+  field.type()->t_primitive() =
+      metadata::ThriftPrimitiveType::THRIFT_STRING_TYPE;
+  ret.fields()->push_back(field);
+  field.id() = 2;
+  field.name() = "field_2";
+  field.type()->t_primitive() = metadata::ThriftPrimitiveType::THRIFT_I32_TYPE;
+  auto annotations = expectedAnnotations();
+  field.structured_annotations().emplace().assign(
+      annotations.begin(), annotations.end());
+  ret.fields()->push_back(field);
+  return ret;
+}
+
+TEST(Annotations, Field) {
+  metadata::ThriftMetadata md;
+  detail::md::StructMetadata<TestStruct>::gen(md);
+  EXPECT_EQ(md.structs()["annotations.TestStruct"], expectedStruct());
+}
+
 } // namespace apache::thrift::test

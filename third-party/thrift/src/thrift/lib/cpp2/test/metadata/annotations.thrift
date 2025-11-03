@@ -72,3 +72,24 @@ enum TestEnum {
   foo = 1,
   bar = 2,
 }
+
+struct TestStruct {
+  1: string field_1;
+
+  @Annotation{
+    boolField = true,
+    i16Field = 16,
+    i32Field = 32,
+    floatField = 10.0,
+    doubleField = 20.0,
+    binaryField = "binary",
+    structField = MyStruct{stringField = "struct"},
+    unionField = MyUnion{stringField = "union"},
+    enumField = MyEnum.second,
+    listField = [2, 1, 2],
+    setField = [2, 1],
+    mapField = {2: "20", 1: "10"},
+  }
+  @Foo{bar = Bar{baz = "123"}}
+  2: i32 field_2;
+}

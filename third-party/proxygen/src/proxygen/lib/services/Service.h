@@ -108,8 +108,13 @@ class Service {
    * If the service does not stop on its own after stopAccepting() is called,
    * then proxygen might call dropConnections() several times to gradually
    * stop all processing before finally calling forceStop().
+   *
+   * Spread the stop over "dropDuration" milliseconds with intervals chosen by
+   * each service.
    */
-  virtual void dropConnections(double /*pct*/) {
+  virtual void dropConnections(double /*pct*/,
+                               std::chrono::milliseconds /*dropDuration*/ =
+                                   std::chrono::milliseconds(0)) {
   }
 
   /**

@@ -892,10 +892,9 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
       tyl_compare ~sort:normalize_lists ~normalize_lists tyl1 tyl2
     | (Ttuple t1, Ttuple t2) -> tuple_type_compare t1 t2
     | (Tgeneric n1, Tgeneric n2) -> String.compare n1 n2
-    | (Tnewtype (id, tyl, cstr1), Tnewtype (id2, tyl2, cstr2)) -> begin
+    | (Tnewtype (id, tyl, _), Tnewtype (id2, tyl2, _)) -> begin
       chain_compare (String.compare id id2) (fun _ ->
-          chain_compare (tyl_compare ~sort:false tyl tyl2) (fun _ ->
-              ty_compare cstr1 cstr2))
+          tyl_compare ~sort:false tyl tyl2)
     end
     | (Tdependent (d1, cstr1), Tdependent (d2, cstr2)) -> begin
       chain_compare (compare_dependent_type d1 d2) (fun _ ->

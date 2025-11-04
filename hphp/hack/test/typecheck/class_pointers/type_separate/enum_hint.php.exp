@@ -10,7 +10,7 @@ Invalid return type (Typing[4110])
   Expected `int`
   File "enum_hint.php", line 13, characters 17-22:
   But got `arraykey`
-  File "enum_hint.php", line 13, characters 17-22:
+  File "enum_hint.php", line 3, characters 6-11:
     by the definition of `Opaque` arising from an implicit `as arraykey` constraint on this type
 ERROR: File "enum_hint.php", line 17, characters 10-11:
 Invalid return type (Typing[4110])
@@ -22,5 +22,5 @@ Invalid return type (Typing[4110])
   But got `arraykey`
   File "BuiltinEnum.hhi", line 77, characters 44-44:
     via this generic `T`
-  File "enum_hint.php", line 16, characters 24-29:
+  File "enum_hint.php", line 3, characters 6-11:
     by the definition of `Opaque` arising from an implicit `as arraykey` constraint on this type

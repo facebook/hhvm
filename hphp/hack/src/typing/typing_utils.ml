@@ -418,12 +418,8 @@ let get_newtype_super env r name tyargs =
           (env, MakeType.mixed r)
       in
       ( env,
-        (* It's not helpful to report the trivial bound for FunctionRef. Also,
-         * preserve the reason for opaque types created during localization *)
-        if
-          String.equal name Naming_special_names.Classes.cFunctionRef
-          || Typing_reason.Predicates.is_opaque_type_from_module r
-        then
+        (* Preserve the reason for opaque types created during localization *)
+        if Typing_reason.Predicates.is_opaque_type_from_module r then
           with_reason bound r
         else
           bound )

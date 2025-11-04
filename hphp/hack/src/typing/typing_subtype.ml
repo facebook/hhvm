@@ -1230,17 +1230,31 @@ end = struct
         end)
     end
     | (_, Taccess _) -> invalid ~fail env
-    | (r, Tnewtype (n, _tyl, ty)) ->
+    | (r, Tnewtype (n, tyl, _)) ->
       let mk_prop ~subtype_env ~this_ty ~lhs ~rhs env =
         simplify ~subtype_env ~this_ty ~lhs ~rhs env
       in
-      Common.simplify_newtype_l
-        ~subtype_env
-        ~this_ty
-        ~mk_prop
-        (sub_supportdyn, r, n, ty)
-        rhs
-        env (*  *)
+      let (env, ty) = Typing_utils.get_newtype_super env r n tyl in
+      (match
+         Subtype_env.check_infinite_recursion
+           subtype_env
+           { Subtype_recursion_tracker.Subtype_op.ty_sub = lty_sub; ty_super }
+       with
+      | Error _ ->
+        (* We've essentially proven by recursion that this subypting relationship holds.
+           For details, see Figure 21-4 p. 395 of Pierce's Types and Programming Languages.
+           The subtyping relationship would only fail to hold if the recursive types are not
+           contractive.
+           We're checking for contractiveness in check_invalid_recursive_case_type *)
+        valid env
+      | Ok subtype_env ->
+        Common.simplify_newtype_l
+          ~subtype_env
+          ~this_ty
+          ~mk_prop
+          (sub_supportdyn, r, n, ty)
+          rhs
+          env)
     | (r, Tdependent (dep_ty, ty)) ->
       let mk_prop ~subtype_env ~this_ty ~lhs ~rhs env =
         simplify ~subtype_env ~this_ty ~lhs ~rhs env

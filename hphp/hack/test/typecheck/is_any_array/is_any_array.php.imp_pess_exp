@@ -3,7 +3,7 @@ Invalid argument (Typing[4110])
   File "is_any_array.php", line 18, characters 20-29:
   Expected `vec<mixed>`
   File "is_any_array.php", line 4, characters 7-21:
-  But got `AnyArray<arraykey, mixed>`
+  But got `AnyArray<arraykey, mixed>` from the argument to this \HH\is_any_array test
 ERROR: File "is_any_array.php", line 13, characters 21-22:
 Invalid argument (Typing[4110])
   File "is_any_array.php", line 17, characters 26-41:

@@ -426,7 +426,8 @@ let go
     env
   |> ServerCommandTypes.Done_or_retry.map_env ~f:(fun refs ->
          let changes =
-           let fold_to_positions_and_patches (positions, patches) (_, pos) =
+           let fold_to_positions_and_patches
+               (positions, patches) SearchTypes.Find_refs.{ name = _; pos } =
              if Pos.Set.mem pos positions then
                (* Don't rename at the same position twice. Double-renames were happening (~~T157645473~~) because
                 * ServerRename uses ServerFindRefs which searches the tast, which thinks Self::TWhatever
@@ -486,12 +487,9 @@ let go_for_localvar ctx action new_name =
     let changes =
       ServerFindRefs.go_for_localvar ctx action
       >>| List.fold_left
-            ~f:(fun acc x ->
+            ~f:(fun acc SearchTypes.Find_refs.{ name = _; pos } ->
               let replacement =
-                {
-                  pos = Pos.to_absolute (snd x);
-                  text = maybe_add_dollar new_name;
-                }
+                { pos = Pos.to_absolute pos; text = maybe_add_dollar new_name }
               in
               let patch = Replace replacement in
               patch :: acc)
@@ -574,15 +572,15 @@ let go_for_single_file
         refs
         ~f:
           begin
-            fun acc x ->
+            fun acc SearchTypes.Find_refs.{ name = _; pos } ->
               let replacement =
                 {
-                  pos = Pos.to_absolute (snd x);
+                  pos = Pos.to_absolute pos;
                   text =
                     new_name_for_symbol_definition
                       ~symbol_definition
                       ~filename
-                      ~pos:(snd x)
+                      ~pos
                       ~new_name;
                 }
               in
@@ -656,9 +654,9 @@ let go_ide_with_find_refs_action
              refs
              ~f:
                begin
-                 fun acc x ->
+                 fun acc SearchTypes.Find_refs.{ name = _; pos } ->
                    let replacement =
-                     { pos = Pos.to_absolute (snd x); text = new_name }
+                     { pos = Pos.to_absolute pos; text = new_name }
                    in
                    let patch = Replace replacement in
                    patch :: acc

@@ -25,7 +25,7 @@ let from_absolute (pos : Pos.absolute) : half_open_one_based =
 let pos_to_one_based_json
     ?(timestamp : float option)
     ~(half_open_interval : bool)
-    ((name, pos) : string * Pos.absolute) : Hh_json.json =
+    SearchTypes.Find_refs.{ name; pos } : Hh_json.json =
   let { filename; line; char_start; char_end } =
     if half_open_interval then
       from_absolute pos
@@ -61,7 +61,7 @@ let half_open_one_based_json_to_pos_exn (json : Hh_json.json) :
 
 (** Produced by "hh --ide-find-refs-by-symbol" and parsed by clientLsp *)
 module IdeShellout = struct
-  let to_string (results : (string * Pos.absolute) list) : string =
+  let to_string (results : SearchTypes.Find_refs.absolute list) : string =
     let entries =
       List.map results ~f:(pos_to_one_based_json ~half_open_interval:true)
     in
@@ -76,16 +76,17 @@ end
 (** Used by hh_server's findRefsService to write to a streaming file, read by clientLsp *)
 module Ide_stream = struct
   let lock_and_append
-      (fd : Unix.file_descr) (results : (string * Pos.absolute) list) : unit =
+      (fd : Unix.file_descr) (results : SearchTypes.Find_refs.absolute list) :
+      unit =
     if List.is_empty results then
       ()
     else begin
       let bytes =
-        List.map results ~f:(fun (name, pos) ->
+        List.map results ~f:(fun { name; pos } ->
             Printf.sprintf
               "%s\n"
               (pos_to_one_based_json
-                 (name, pos)
+                 { name; pos }
                  ~half_open_interval:true
                  ~timestamp:(Unix.gettimeofday ())
               |> Hh_json.json_to_string))
@@ -128,7 +129,7 @@ end
 (** Used by "hh --find-refs" *)
 module CliHumanReadable = struct
   let print_results results =
-    List.iter results ~f:(fun (name, pos) ->
+    List.iter results ~f:(fun SearchTypes.Find_refs.{ name; pos } ->
         Printf.printf "%s %s\n" (Pos.string pos) name);
     Printf.printf "%d total results\n" (List.length results)
 end

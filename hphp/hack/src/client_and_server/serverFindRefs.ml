@@ -21,7 +21,9 @@ let add_ns name =
   else
     "\\" ^ name
 
-let strip_ns results = List.map results ~f:(fun (s, p) -> (Utils.strip_ns s, p))
+let strip_ns results =
+  List.map results ~f:(fun r ->
+      SearchTypes.Find_refs.{ r with name = Utils.strip_ns r.name })
 
 let search ctx target include_defs ~hints ~files ~stream_file genv =
   let hints_set = Relative_path.Set.of_list hints in
@@ -111,7 +113,7 @@ let search_member
     ~(stream_file : Path.t option)
     ~(hints : Relative_path.t list)
     (genv : genv)
-    (env : env) : env * (string * Pos.t) list t =
+    (env : env) : env * SearchTypes.Find_refs.t list t =
   let dep_member_of member =
     let open Typing_deps.Dep.Member in
     match member with
@@ -157,7 +159,7 @@ let search_member
 
 let search_single_file_for_member
     ctx (class_name : string) (member : member) (filename : Relative_path.t) :
-    (string * Pos.t) list =
+    SearchTypes.Find_refs.t list =
   let class_name = add_ns class_name in
   let origin_class_name =
     FindRefsService.get_origin_class_name ctx class_name member
@@ -235,7 +237,8 @@ let search_localvar ~ctx ~entry pos =
   | first_pos :: _ ->
     let content = Provider_context.read_file_contents_exn entry in
     let var_text = Pos.get_text_from_pos ~content first_pos in
-    List.map results ~f:(fun x -> (var_text, x))
+    List.map results ~f:(fun x ->
+        SearchTypes.Find_refs.{ name = var_text; pos = x })
   | [] -> []
 
 let is_local = function
@@ -326,7 +329,9 @@ let go_for_localvar ctx action =
     Ok (search_localvar ~ctx ~entry pos)
   | _ -> Error action
 
-let to_absolute res = List.map res ~f:(fun (r, pos) -> (r, Pos.to_absolute pos))
+let to_absolute res =
+  List.map res ~f:(fun r ->
+      SearchTypes.Find_refs.{ r with pos = Pos.to_absolute r.pos })
 
 let get_action symbol (filename, file_content, pos) =
   let module SO = SymbolOccurrence in

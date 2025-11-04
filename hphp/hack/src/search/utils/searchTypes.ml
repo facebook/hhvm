@@ -164,4 +164,14 @@ module Find_refs = struct
         pos: File_content.Position.t;
       }
   [@@deriving show]
+
+  type 'a result = {
+    name: string;
+    pos: 'a Pos.pos;
+  }
+
+  (* Read: Pos.t and Pos.absolute *)
+  type t = Relative_path.t result
+
+  type absolute = string result
 end

@@ -16,7 +16,9 @@ let findrefs_member_of_member = function
 
 let supported_test_framework_classes = SSet.of_list ["WWWTest"]
 
-let strip_ns results = List.map results ~f:(fun (s, p) -> (Utils.strip_ns s, p))
+let strip_ns results =
+  List.map results ~f:(fun r ->
+      SearchTypes.Find_refs.{ r with name = Utils.strip_ns r.name })
 
 let is_test_file ctx file_path file_nast =
   let is_test_class class_name =
@@ -84,7 +86,7 @@ let search_member
     (member : member)
     ~(include_defs : bool)
     (genv : genv)
-    (env : env) : (string * Pos.t) list =
+    (env : env) : SearchTypes.Find_refs.t list =
   let dep_member_of member =
     let open Typing_deps.Dep.Member in
     match member with
@@ -205,7 +207,9 @@ let get_references
         genv
         env
   in
-  let resolve_found_position (acc_symbol_defs, acc_files) (_, referencing_pos) =
+  let resolve_found_position
+      (acc_symbol_defs, acc_files)
+      SearchTypes.Find_refs.{ name = _; pos = referencing_pos } =
     let relative_path = Pos.filename referencing_pos in
     let path = Relative_path.suffix relative_path in
 

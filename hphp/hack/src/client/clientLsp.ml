@@ -1783,14 +1783,15 @@ let ide_rpc
   before starting a new file! *)
 let watch_refs_stream_file
     (file : Path.t)
-    ~(open_file_results : (string * Pos.absolute) list Lsp.UriMap.t) :
+    ~(open_file_results : SearchTypes.Find_refs.absolute list Lsp.UriMap.t) :
     FindRefsWireFormat.half_open_one_based list Lwt_stream.t =
   let (q, add) = Lwt_stream.create () in
   let ide_results =
     open_file_results
     |> UriMap.values
     |> List.concat
-    |> List.map ~f:(fun (_name, pos) -> FindRefsWireFormat.from_absolute pos)
+    |> List.map ~f:(fun SearchTypes.Find_refs.{ name = _; pos } ->
+           FindRefsWireFormat.from_absolute pos)
   in
   if not (List.is_empty ide_results) then add (Some ide_results);
   let rec watch_loop fd file_pos =
@@ -2759,7 +2760,7 @@ let do_findReferences
         params.FindReferences.loc.TextDocumentPositionParams.textDocument
     in
     let positions =
-      List.map positions ~f:(fun (_name, pos) ->
+      List.map positions ~f:(fun SearchTypes.Find_refs.{ name = _; pos } ->
           hack_pos_to_lsp_location ~default_path:filename pos)
     in
     respond_jsonrpc
@@ -2786,7 +2787,9 @@ let do_findReferences
     in
     (* The [open_file_results] included the SymbolOccurrence text for each ref. We won't need that... *)
     let ide_calculated_positions =
-      UriMap.map (List.map ~f:snd) open_file_results
+      UriMap.map
+        (List.map ~f:(fun SearchTypes.Find_refs.{ name = _; pos } -> pos))
+        open_file_results
     in
     let shellable_type =
       Run_env.FindRefs

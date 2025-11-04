@@ -133,9 +133,9 @@ end
 module Find_refs = struct
   include SearchTypes.Find_refs
 
-  type server_result = (string * Pos.t) list
+  type server_result = SearchTypes.Find_refs.t list
 
-  type result = (string * Pos.absolute) list
+  type result = SearchTypes.Find_refs.absolute list
 
   type server_result_or_retry = server_result Done_or_retry.t
 

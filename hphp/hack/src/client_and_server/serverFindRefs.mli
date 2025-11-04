@@ -75,6 +75,6 @@ val go_from_file_ctx :
 val go_for_localvar :
   Provider_context.t ->
   action ->
-  ((string * Pos.t) list, action) Hh_prelude.result
+  (SearchTypes.Find_refs.t list, action) Hh_prelude.result
 
 val to_absolute : server_result -> result

@@ -53,7 +53,7 @@ type find_refs_result =
           this action will specifiy what hh_server shoud look for. *)
       hint_suffixes: string list;
           (** in case of a shell-out, we will suggest hh_server to look in these root-relative paths first. *)
-      open_file_results: (string * Pos.absolute) list Lsp.UriMap.t;
+      open_file_results: SearchTypes.Find_refs.absolute list Lsp.UriMap.t;
           (** All references that were found in all open files in clientIdeDaemon. *)
     }
 

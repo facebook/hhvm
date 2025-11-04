@@ -21,14 +21,15 @@ let parallel_limit = 10
 
 let find_positions_of_classes
     (ctx : Provider_context.t)
-    (acc : (string * Pos.t) list)
-    (child_classes : string list) : (string * Pos.t) list =
+    (acc : SearchTypes.Find_refs.t list)
+    (child_classes : string list) : SearchTypes.Find_refs.t list =
   acc
   @ List.map child_classes ~f:(fun child_class ->
         match Naming_provider.get_type_pos ctx child_class with
         | None ->
           failwith ("Could not find definition of child class: " ^ child_class)
-        | Some (FileInfo.Full pos) -> (child_class, pos)
+        | Some (FileInfo.Full pos) ->
+          SearchTypes.Find_refs.{ name = child_class; pos }
         | Some (FileInfo.File (FileInfo.Class, path)) ->
           (match
              Ast_provider.find_class_in_file ctx path child_class ~full:false
@@ -39,7 +40,8 @@ let find_positions_of_classes
                  "Could not find class %s in %s"
                  child_class
                  (Relative_path.to_absolute path))
-          | Some { Aast.c_name = (name_pos, _); _ } -> (child_class, name_pos))
+          | Some { Aast.c_name = (name_pos, _); _ } ->
+            SearchTypes.Find_refs.{ name = child_class; pos = name_pos })
         | Some FileInfo.(File ((Fun | Typedef | Const | Module), _path)) ->
           failwith
             (Printf.sprintf
@@ -49,7 +51,7 @@ let find_positions_of_classes
 let parallel_find_positions_of_classes
     (ctx : Provider_context.t)
     (child_classes : string list)
-    (workers : MultiWorker.worker list option) : (string * Pos.t) list =
+    (workers : MultiWorker.worker list option) : SearchTypes.Find_refs.t list =
   MultiWorker.call
     workers
     ~job:(find_positions_of_classes ctx)
@@ -59,8 +61,12 @@ let parallel_find_positions_of_classes
 
 let add_if_valid_origin ctx class_elt child_class method_name result =
   if String.equal class_elt.ce_origin child_class then
-    ( method_name,
-      Lazy.force class_elt.ce_pos |> Naming_provider.resolve_position ctx )
+    SearchTypes.Find_refs.
+      {
+        name = method_name;
+        pos =
+          Lazy.force class_elt.ce_pos |> Naming_provider.resolve_position ctx;
+      }
     :: result
   else
     let origin_decl = Decl_provider.get_class ctx class_elt.ce_origin in
@@ -68,8 +74,13 @@ let add_if_valid_origin ctx class_elt child_class method_name result =
     | Decl_entry.Found origin_decl ->
       let origin_kind = Folded_class.kind origin_decl in
       if Ast_defs.is_c_trait origin_kind then
-        ( method_name,
-          Lazy.force class_elt.ce_pos |> Naming_provider.resolve_position ctx )
+        SearchTypes.Find_refs.
+          {
+            name = method_name;
+            pos =
+              Lazy.force class_elt.ce_pos
+              |> Naming_provider.resolve_position ctx;
+          }
         :: result
       else
         result
@@ -80,8 +91,8 @@ let add_if_valid_origin ctx class_elt child_class method_name result =
 let find_positions_of_methods
     (ctx : Provider_context.t)
     (method_name : string)
-    (acc : (string * Pos.t) list)
-    (child_classes : string list) : (string * Pos.t) list =
+    (acc : SearchTypes.Find_refs.t list)
+    (child_classes : string list) : SearchTypes.Find_refs.t list =
   List.fold child_classes ~init:acc ~f:(fun result child_class ->
       let class_decl = Decl_provider.get_class ctx child_class in
       match class_decl with
@@ -104,7 +115,7 @@ let parallel_find_positions_of_methods
     (ctx : Provider_context.t)
     (child_classes : string list)
     (method_name : string)
-    (workers : MultiWorker.worker list option) : (string * Pos.t) list =
+    (workers : MultiWorker.worker list option) : SearchTypes.Find_refs.t list =
   MultiWorker.call
     workers
     ~job:(find_positions_of_methods ctx method_name)
@@ -201,7 +212,9 @@ let search_member
           method_name
           genv.workers
     in
-    List.dedup_and_sort results ~compare:(fun (_, pos1) (_, pos2) ->
+    List.dedup_and_sort
+      results
+      ~compare:(fun { name = _; pos = pos1 } { name = _; pos = pos2 } ->
         Pos.compare pos1 pos2)
   | Property _
   | Class_const _
@@ -225,7 +238,9 @@ let search_single_file_for_member
       find_child_classes_in_file ctx class_name naming_table filename
     in
     let results = find_positions_of_methods ctx method_name [] child_classes in
-    List.dedup_and_sort results ~compare:(fun (_, pos1) (_, pos2) ->
+    List.dedup_and_sort
+      results
+      ~compare:(fun { name = _; pos = pos1 } { name = _; pos = pos2 } ->
         Pos.compare pos1 pos2)
   | Property _
   | Class_const _

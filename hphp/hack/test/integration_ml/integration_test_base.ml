@@ -323,7 +323,8 @@ let assert_response loop_output =
 let assert_find_refs loop_output expected =
   let results = assert_response loop_output in
   let results =
-    List.map results ~f:(fun (name, pos) -> name ^ ": " ^ Pos.string pos)
+    List.map results ~f:(fun SearchTypes.Find_refs.{ name; pos } ->
+        name ^ ": " ^ Pos.string pos)
   in
   let results_as_string = list_to_string results in
   let expected_as_string = list_to_string expected in

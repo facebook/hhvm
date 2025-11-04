@@ -34,7 +34,7 @@ let highlight_symbol ctx entry pos symbol =
     match get_target symbol with
     | Some target ->
       let results = FindRefsService.find_refs_ctx ~ctx ~entry ~target in
-      List.rev (List.map results ~f:snd)
+      List.rev (List.map results ~f:(fun { name = _; pos } -> pos))
     | None
       when SymbolOccurrence.equal_kind
              symbol.SymbolOccurrence.type_

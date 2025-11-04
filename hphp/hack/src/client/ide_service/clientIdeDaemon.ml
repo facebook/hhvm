@@ -866,7 +866,8 @@ let handle_request
                       ~naming_table:istate.naming_table
                       ~filename
                     |> ServerFindRefs.to_absolute
-                    |> List.map ~f:snd
+                    |> List.map
+                         ~f:(fun SearchTypes.Find_refs.{ name = _; pos } -> pos)
                   in
                   let urikey =
                     Lsp_helpers.path_string_to_lsp_uri
@@ -989,7 +990,9 @@ let handle_request
                       failwith err
                     | positions ->
                       let filename =
-                        List.hd_exn positions |> snd |> Pos.filename
+                        List.hd_exn positions
+                        |> (fun SearchTypes.Find_refs.{ name = _; pos } -> pos)
+                        |> Pos.filename
                       in
                       let uri =
                         Lsp_helpers.path_string_to_lsp_uri

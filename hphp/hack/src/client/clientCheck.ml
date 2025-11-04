@@ -45,7 +45,8 @@ module SaveNamingResultPrinter = ClientResultPrinter.Make (struct
       ]
 end)
 
-let print_refs (results : (string * Pos.absolute) list) ~(json : bool) : unit =
+let print_refs (results : SearchTypes.Find_refs.absolute list) ~(json : bool) :
+    unit =
   if json then
     FindRefsWireFormat.HackAst.to_json results
     |> Hh_json.json_to_string

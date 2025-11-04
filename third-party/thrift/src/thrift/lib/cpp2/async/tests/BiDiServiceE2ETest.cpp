@@ -444,4 +444,50 @@ CO_TEST_F(BiDiServiceE2ETest, IgnoreInputProduceOutput) {
       stream.sink.sink(std::move(sinkGen)), std::move(streamTask));
 }
 
+CO_TEST_F(BiDiServiceE2ETest, ConsumeInputNoOutput) {
+  constexpr int64_t kTestLimit = 10000;
+
+  struct Handler : public ServiceHandler<detail::test::TestBiDiService> {
+    folly::coro::Task<StreamTransformation<int64_t, int64_t>> co_intStream()
+        override {
+      co_return StreamTransformation<int64_t, int64_t>{
+          [this](folly::coro::AsyncGenerator<int64_t&&> input)
+              -> folly::coro::AsyncGenerator<int64_t&&> {
+            while (auto item = co_await input.next()) {
+              ++counter;
+            }
+            co_return;
+          }};
+    }
+
+    int64_t counter = 0;
+  };
+
+  auto handler = std::make_shared<Handler>();
+  testConfig({handler});
+
+  auto client = makeClient<detail::test::TestBiDiService>();
+  BidirectionalStream<int64_t, int64_t> stream =
+      co_await client->co_intStream();
+
+  auto sinkGen =
+      folly::coro::co_invoke([]() -> folly::coro::AsyncGenerator<int64_t&&> {
+        for (int64_t i = 0; i < kTestLimit; ++i) {
+          co_yield int64_t(i);
+        }
+      });
+
+  auto streamTask = folly::coro::co_invoke(
+      [&, streamGen = std::move(stream.stream).toAsyncGenerator()]() mutable
+          -> folly::coro::Task<void> {
+        while (auto item = co_await streamGen.next()) {
+          CO_FAIL() << "Expected stream to be empty";
+        }
+      });
+
+  co_await folly::coro::collectAll(
+      stream.sink.sink(std::move(sinkGen)), std::move(streamTask));
+  EXPECT_EQ(handler->counter, kTestLimit);
+}
+
 } // namespace apache::thrift

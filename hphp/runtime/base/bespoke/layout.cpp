@@ -606,7 +606,7 @@ ArrayData* maybeBespokifyForTesting(ArrayData* ad,
 
   ArrayData* current = nullptr;
   if (cache.compare_exchange_strong(current, result)) return result;
-  Cfg::Eval::LowStaticArrays ? low_free(result) : uncounted_free(result);
+  Cfg::Eval::LowStaticArrays ? lower_free(result) : uncounted_free(result);
   return current;
 }
 

@@ -316,7 +316,7 @@ LoggingArray* LoggingArray::MakeStatic(ArrayData* ad, LoggingProfile* profile) {
 
   auto const size = sizeof(LoggingArray);
   auto lad = static_cast<LoggingArray*>(
-    Cfg::Eval::LowStaticArrays ? low_malloc(size) : uncounted_malloc(size));
+    Cfg::Eval::LowStaticArrays ? lower_malloc(size) : uncounted_malloc(size));
   auto const flags = ad->isLegacyArray() ? kLegacyArray : 0;
   auto const aux = packSizeIndexAndAuxBits(kSizeIndex, flags);
 

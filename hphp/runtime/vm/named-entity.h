@@ -82,7 +82,7 @@ struct NamedType {
                                NamedType,
                                string_data_hash,
                                ahm_string_data_tsame,
-                               LowAllocator<char>>;
+                               LowerAllocator<char>>;
 
   /////////////////////////////////////////////////////////////////////////////
   // Constructors.
@@ -221,7 +221,7 @@ struct NamedFunc {
                                NamedFunc,
                                string_data_hash,
                                ahm_string_data_fsame,
-                               LowAllocator<char>>;
+                               LowerAllocator<char>>;
 
   /////////////////////////////////////////////////////////////////////////////
   // Constructors & Assignment.

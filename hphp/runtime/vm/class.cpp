@@ -4054,7 +4054,7 @@ void Class::setInterfaceVtables() {
         //
         // Instance methods do not have this issue, as iface vtable of object
         // instance's class is used to invoke them, which is never abstract.
-        low_free(vtableVec);
+        lower_free(vtableVec);
         m_vtableVecLen = 0;
         m_vtableVec = nullptr;
         return;

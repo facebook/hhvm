@@ -30,7 +30,6 @@ using RangeStateStorage = std::aligned_storage<sizeof(RangeState), 64>::type;
 
 RangeArenaStorage g_smallArena{};
 RangeArenaStorage g_lowerArena{};
-RangeArenaStorage g_lowArena{};
 RangeArenaStorage g_highArena{};
 RangeArenaStorage g_coldArena{};
 RangeStateStorage g_ranges[AddrRangeClass::NumRangeClasses];

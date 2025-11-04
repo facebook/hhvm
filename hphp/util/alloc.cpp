@@ -128,14 +128,12 @@ void* mallocx_on_node(size_t size, int node, size_t align) {
 
 #ifdef USE_JEMALLOC
 unsigned small_arena = 0;
-unsigned low_arena = 0;
 unsigned lower_arena = 0;
 unsigned high_arena = 0;
 unsigned high_cold_arena = 0;
 __thread unsigned local_arena = 0;
 
 int small_arena_flags = 0;
-int low_arena_flags = 0;
 int lower_arena_flags = 0;
 int high_arena_flags = 0;
 int high_cold_arena_flags = 0;
@@ -298,16 +296,6 @@ void setup_low_arena(PageSpec s) {
   lower_arena = ma->id();
   lower_arena_flags = MALLOCX_ARENA(lower_arena) | MALLOCX_TCACHE_NONE;
 
-  ma = LowArena::CreateAt(&g_lowArena);
-#ifdef USE_PACKEDPTR
-  ma->appendMapper(midMapper);
-#endif
-  ma->appendMapper(lowMapper);
-  ma->appendMapper(veryLowMapper);
-  ma->appendMapper(emergencyMapper);
-  low_arena = ma->id();
-  low_arena_flags = MALLOCX_ARENA(low_arena) | MALLOCX_TCACHE_NONE;
-
   ma = LowArena::CreateAt(&g_smallArena);
   ma->appendMapper(veryLowMapper);
   ma->appendMapper(lowMapper);
@@ -368,7 +356,7 @@ void setup_auto_arenas(PageSpec s) {
   unsigned auto_arenas = 0;
   mallctlRead<unsigned>("opt.narenas", &auto_arenas);
   for (unsigned i = 0; i < auto_arenas; ++i) {
-    auto a = PreMappedArena::AttachTo(low_malloc(sizeof(PreMappedArena)),
+    auto a = PreMappedArena::AttachTo(lower_malloc(sizeof(PreMappedArena)),
                                       i, mapper);
     g_auto_arenas.push_back(a);
   }
@@ -473,7 +461,7 @@ void setup_local_arenas(PageSpec spec, unsigned slabs) {
     mallctlRead<unsigned>("arenas.create", &arena);
     always_assert(arena == base_arena + i);
     if (slabs) {
-      auto mem = low_malloc(sizeof(SlabManager));
+      auto mem = lower_malloc(sizeof(SlabManager));
       s_slab_managers.push_back(new (mem) SlabManager);
     } else {
       s_slab_managers.push_back(nullptr);
@@ -518,7 +506,7 @@ void setup_local_arenas(PageSpec spec, unsigned slabs) {
                                  1u << i,
                                  i);
     range->setLowMapper(mapper);
-    auto arena = PreMappedArena::CreateAt(low_malloc(sizeof(PreMappedArena)),
+    auto arena = PreMappedArena::CreateAt(lower_malloc(sizeof(PreMappedArena)),
                                           mapper);
 
     // Allocate some slabs first, which are not given to the arena, but managed

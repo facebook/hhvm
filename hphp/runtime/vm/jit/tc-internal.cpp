@@ -361,7 +361,7 @@ void processInit() {
   auto codeLock = lockCode();
   auto metaLock = lockMetadata();
 
-  g_code = new(low_malloc(sizeof(CodeCache))) CodeCache();
+  g_code = new(lower_malloc(sizeof(CodeCache))) CodeCache();
   g_ustubs.emitAll(*g_code, *Debug::DebugInfo::Get());
   g_JitMaturityCounter = ServiceData::createCounter("jit.maturity");
 

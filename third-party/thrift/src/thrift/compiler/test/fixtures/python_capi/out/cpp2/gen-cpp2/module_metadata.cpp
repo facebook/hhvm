@@ -6,6 +6,7 @@
  */
 #include <thrift/lib/cpp2/gen/module_metadata_cpp.h>
 #include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/module_metadata.h"
+#include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/module_data.h"
 
 // some of these functions can be so large that the compiler gives up optimizing
 // them - and issues a warning which may be treated as an error!
@@ -26,13 +27,13 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 void EnumMetadata<::test::fixtures::python_capi::MyEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::python_capi::MyEnum>(metadata);
+  auto res = genEnumMetadata<::test::fixtures::python_capi::MyEnum>(metadata, false);
   if (res.preExists) {
     return;
   }
 }
 void EnumMetadata<::test::fixtures::python_capi::NormalDecentEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::python_capi::NormalDecentEnum>(metadata);
+  auto res = genEnumMetadata<::test::fixtures::python_capi::NormalDecentEnum>(metadata, false);
   if (res.preExists) {
     return;
   }

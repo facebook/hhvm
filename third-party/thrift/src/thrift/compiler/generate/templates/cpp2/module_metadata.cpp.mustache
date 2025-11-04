@@ -19,6 +19,7 @@
 {{> Autogen}}
 #include <thrift/lib/cpp2/gen/module_metadata_cpp.h>
 #include "{{program:include_prefix}}{{program:name}}_metadata.h"
+#include "{{program:include_prefix}}{{program:name}}_data.h"
 
 // some of these functions can be so large that the compiler gives up optimizing
 // them - and issues a warning which may be treated as an error!
@@ -43,7 +44,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 {{#program:enums}}
 void EnumMetadata<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::{{program:qualified_namespace}}::{{enum:cpp_name}}>(metadata);
+  auto res = genEnumMetadata<::{{program:qualified_namespace}}::{{enum:cpp_name}}>(metadata, false);
   if (res.preExists) {
     return;
   }

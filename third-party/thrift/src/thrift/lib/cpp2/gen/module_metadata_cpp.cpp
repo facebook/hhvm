@@ -87,8 +87,206 @@ static std::string getName(const Node& node) {
   return fmt::format("{}.{}", def.program().name(), def.name());
 }
 
+namespace {
+// Helper functions to convert
+// syntax_graph::Annotation --> metadata::ThriftConstStruct
+//
+// Considering
+//
+//   struct Bar { 1: string baz; }
+//   struct Foo { 1: Bar bar; }
+//   @Foo{bar = Bar{baz = "123"}}
+//   struct MyStruct {};
+//
+// In this case, SyntaxGraph::Annotation will have Type:
+//
+//   StructNode 'Foo'
+//   ╰─ FieldNode(id = 1, presence = UNQUALIFIED, name = 'bar')
+//      ╰─ type = StructNode 'Bar'
+//         ╰─ FieldNode(id = 1, presence = UNQUALIFIED, name = 'baz')
+//            ╰─ type = STRING
+//
+// With value:
+//
+//   {"bar": {"baz": "123"}}
+//
+// On the other hand, metadata::ThriftConstStruct will have value
+//
+//   <Struct: ThriftConstStruct (metadata.thrift)>
+//   ├─ type
+//   │  ╰─ <Struct: ThriftStructType (metadata.thrift)>
+//   │     ╰─ name
+//   │        ╰─ annotations.Foo
+//   ╰─ fields
+//      ╰─ <Map>
+//         ├─ Key #0
+//         │  ╰─ bar
+//         ╰─ Value #0
+//            ╰─ <Union: ThriftConstValue (metadata.thrift)>
+//               ╰─ cv_struct
+//                  ╰─ <Struct: ThriftConstStruct (metadata.thrift)>
+//                     ├─ type
+//                     │  ╰─ <Struct: ThriftStructType (metadata.thrift)>
+//                     │     ╰─ name
+//                     │        ╰─ annotations.Bar
+//                     ╰─ fields
+//                        ╰─ <Map>
+//                           ├─ Key #0
+//                           │  ╰─ baz
+//                           ╰─ Value #0
+//                              ╰─ <Union: ThriftConstValue (metadata.thrift)>
+//                                 ╰─ cv_string
+//                                    ╰─ 123
+class AnnotationConverter {
+ public:
+  static ThriftConstStruct convert(const syntax_graph::Annotation&);
+
+ private:
+  static metadata::detail::LimitedVector<ThriftConstValue> convertListOrSet(
+      const syntax_graph::TypeRef& element, const folly::dynamic&);
+  static std::vector<ThriftConstValuePair> convertMap(
+      const syntax_graph::Map&, const folly::dynamic&);
+  static ThriftConstStruct convertStructured(
+      const syntax_graph::StructuredNode&, const folly::dynamic&);
+
+  static ThriftConstValue convertValue(
+      const syntax_graph::TypeRef&, const folly::dynamic&);
+  static ThriftConstValue convertMapKey(
+      const syntax_graph::TypeRef&, std::string_view);
+};
+
+ThriftConstStruct AnnotationConverter::convert(
+    const syntax_graph::Annotation& annotation) {
+  return convertStructured(
+      annotation.type().trueType().asStructured(), annotation.value());
+}
+
+ThriftConstStruct AnnotationConverter::convertStructured(
+    const syntax_graph::StructuredNode& node, const folly::dynamic& dynamic) {
+  ThriftConstStruct ret;
+  ret.type().ensure().name() = getName(node);
+
+  if (dynamic.empty()) {
+    return ret;
+  }
+
+  for (const auto& field : node.fields()) {
+    auto iter = dynamic.find(field.name());
+    if (iter != dynamic.items().end()) {
+      ret.fields()[std::string(field.name())] =
+          convertValue(field.type(), iter->second);
+    }
+  }
+  return ret;
+}
+ThriftConstValue AnnotationConverter::convertValue(
+    const syntax_graph::TypeRef& refInput, const folly::dynamic& dynamic) {
+  const auto& ref = refInput.trueType();
+  ThriftConstValue ret;
+
+  if (dynamic.isBool()) {
+    ret.cv_bool() = dynamic.asBool();
+    return ret;
+  }
+
+  if (dynamic.isInt()) {
+    ret.cv_integer() = dynamic.asInt();
+    return ret;
+  }
+
+  if (dynamic.isDouble()) {
+    ret.cv_double() = dynamic.asDouble();
+    return ret;
+  }
+
+  if (dynamic.isString()) {
+    ret.cv_string() = dynamic.asString();
+    return ret;
+  }
+
+  if (ref.isList()) {
+    ret.cv_list() = convertListOrSet(ref.asList().elementType(), dynamic);
+    return ret;
+  }
+
+  if (ref.isSet()) {
+    ret.cv_list() = convertListOrSet(ref.asSet().elementType(), dynamic);
+    return ret;
+  }
+
+  if (ref.isMap()) {
+    ret.cv_map() = convertMap(ref.asMap(), dynamic);
+    return ret;
+  }
+
+  if (ref.isStructured()) {
+    ret.cv_struct() = convertStructured(ref.asStructured(), dynamic);
+    return ret;
+  }
+
+  folly::throw_exception_fmt_format<std::logic_error>(
+      "Mismatched annotation type and value");
+}
+
+metadata::detail::LimitedVector<ThriftConstValue>
+AnnotationConverter::convertListOrSet(
+    const syntax_graph::TypeRef& element, const folly::dynamic& dynamic) {
+  metadata::detail::LimitedVector<ThriftConstValue> ret;
+  for (const auto& i : dynamic) {
+    ret.push_back(convertValue(element, i));
+  }
+  return ret;
+}
+std::vector<ThriftConstValuePair> AnnotationConverter::convertMap(
+    const syntax_graph::Map& map, const folly::dynamic& dynamic) {
+  std::vector<ThriftConstValuePair> ret;
+  for (const auto& [k, v] : dynamic.items()) {
+    ThriftConstValuePair pair;
+    pair.key() = convertMapKey(map.keyType(), k.asString());
+    pair.value() = convertValue(map.valueType(), v);
+    ret.push_back(std::move(pair));
+  }
+  return ret;
+}
+ThriftConstValue AnnotationConverter::convertMapKey(
+    const syntax_graph::TypeRef& ref, std::string_view s) {
+  ThriftConstValue ret;
+  switch (ref.asPrimitive()) {
+    case syntax_graph::Primitive::BOOL:
+      ret.cv_bool() = folly::to<bool>(s);
+      break;
+    case syntax_graph::Primitive::BYTE:
+    case syntax_graph::Primitive::I16:
+    case syntax_graph::Primitive::I32:
+    case syntax_graph::Primitive::I64:
+      ret.cv_integer() = folly::to<std::int64_t>(s);
+      break;
+    case syntax_graph::Primitive::FLOAT:
+    case syntax_graph::Primitive::DOUBLE:
+      ret.cv_double() = folly::to<double>(s);
+      break;
+    case syntax_graph::Primitive::STRING:
+    case syntax_graph::Primitive::BINARY:
+      ret.cv_string() = s;
+      break;
+  }
+  return ret;
+}
+
+metadata::detail::LimitedVector<ThriftConstStruct> genStructuredAnnotations(
+    folly::span<const syntax_graph::Annotation> annotations) {
+  metadata::detail::LimitedVector<ThriftConstStruct> ret;
+  for (const auto& i : annotations) {
+    ret.push_back(AnnotationConverter::convert(i));
+  }
+  return ret;
+}
+} // namespace
+
 GenMetadataResult<metadata::ThriftEnum> genEnumMetadata(
-    metadata::ThriftMetadata& md, const syntax_graph::EnumNode& node) {
+    metadata::ThriftMetadata& md,
+    const syntax_graph::EnumNode& node,
+    bool genAnnotations) {
   auto name = getName(node);
   auto res = md.enums()->try_emplace(name);
   GenMetadataResult<metadata::ThriftEnum> ret{!res.second, res.first->second};
@@ -98,6 +296,10 @@ GenMetadataResult<metadata::ThriftEnum> genEnumMetadata(
   ret.metadata.name() = std::move(name);
   for (const auto& value : node.values()) {
     ret.metadata.elements()[value.i32()] = value.name();
+  }
+  if (genAnnotations) {
+    ret.metadata.structured_annotations() =
+        genStructuredAnnotations(node.definition().annotations());
   }
   return ret;
 }
@@ -141,6 +343,16 @@ metadata::ThriftService genServiceMetadata(
     ret.parent() = getName(*p);
   }
   // TODO: add other information
+  return ret;
+}
+
+std::vector<syntax_graph::TypeRef> getAnnotationTypes(
+    folly::span<const syntax_graph::Annotation> annotations) {
+  std::vector<syntax_graph::TypeRef> ret;
+  ret.reserve(annotations.size());
+  for (auto& annotation : annotations) {
+    ret.push_back(annotation.type());
+  }
   return ret;
 }
 

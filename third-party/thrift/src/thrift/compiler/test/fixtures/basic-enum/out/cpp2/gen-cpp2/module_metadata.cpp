@@ -6,6 +6,7 @@
  */
 #include <thrift/lib/cpp2/gen/module_metadata_cpp.h>
 #include "thrift/compiler/test/fixtures/basic-enum/gen-cpp2/module_metadata.h"
+#include "thrift/compiler/test/fixtures/basic-enum/gen-cpp2/module_data.h"
 
 // some of these functions can be so large that the compiler gives up optimizing
 // them - and issues a warning which may be treated as an error!
@@ -26,26 +27,26 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 void EnumMetadata<::test::fixtures::enumstrict::EmptyEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::enumstrict::EmptyEnum>(metadata);
+  auto res = genEnumMetadata<::test::fixtures::enumstrict::EmptyEnum>(metadata, false);
   if (res.preExists) {
     return;
   }
 }
 void EnumMetadata<::test::fixtures::enumstrict::MyEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::enumstrict::MyEnum>(metadata);
+  auto res = genEnumMetadata<::test::fixtures::enumstrict::MyEnum>(metadata, false);
   if (res.preExists) {
     return;
   }
 }
 void EnumMetadata<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum>(metadata);
+  auto res = genEnumMetadata<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum>(metadata, false);
   if (res.preExists) {
     return;
   }
   res.metadata.structured_annotations()->push_back(*cvStruct("java.UseIntrinsicDefault", {  }).cv_struct());
 }
 void EnumMetadata<::test::fixtures::enumstrict::MyBigEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::enumstrict::MyBigEnum>(metadata);
+  auto res = genEnumMetadata<::test::fixtures::enumstrict::MyBigEnum>(metadata, false);
   if (res.preExists) {
     return;
   }

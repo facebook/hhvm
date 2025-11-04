@@ -6,6 +6,7 @@
  */
 #include <thrift/lib/cpp2/gen/module_metadata_cpp.h>
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/enums_metadata.h"
+#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/enums_data.h"
 
 // some of these functions can be so large that the compiler gives up optimizing
 // them - and issues a warning which may be treated as an error!
@@ -26,31 +27,31 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 void EnumMetadata<::facebook::ns::qwerty::AnEnumA>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumA>(metadata);
+  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumA>(metadata, false);
   if (res.preExists) {
     return;
   }
 }
 void EnumMetadata<::facebook::ns::qwerty::AnEnumB>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumB>(metadata);
+  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumB>(metadata, false);
   if (res.preExists) {
     return;
   }
 }
 void EnumMetadata<::facebook::ns::qwerty::AnEnumC>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumC>(metadata);
+  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumC>(metadata, false);
   if (res.preExists) {
     return;
   }
 }
 void EnumMetadata<::facebook::ns::qwerty::AnEnumD>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumD>(metadata);
+  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumD>(metadata, false);
   if (res.preExists) {
     return;
   }
 }
 void EnumMetadata<::facebook::ns::qwerty::AnEnumE>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumE>(metadata);
+  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumE>(metadata, false);
   if (res.preExists) {
     return;
   }

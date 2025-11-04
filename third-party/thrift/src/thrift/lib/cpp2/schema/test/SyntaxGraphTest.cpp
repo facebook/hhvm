@@ -42,6 +42,17 @@ namespace apache::thrift::syntax_graph {
 
 namespace {
 
+const Annotation& findAnnotationOrThrow(
+    folly::span<const Annotation> annotations, std::string_view name) {
+  for (auto& i : annotations) {
+    if (i.type().asStruct().definition().name() == name) {
+      return i;
+    }
+  }
+
+  throw std::out_of_range{std::string(name) + " not found"};
+}
+
 class ServiceSchemaTest : public testing::Test {
  public:
   template <typename ServiceTag>
@@ -604,30 +615,33 @@ TEST_F(ServiceSchemaTest, Interaction) {
 void checkAnnotationsOnTestUnion(const UnionNode& node) {
   const auto& annotations = node.definition().annotations();
   EXPECT_EQ(annotations.size(), 2);
+  auto& withUri =
+      findAnnotationOrThrow(annotations, "TestStructuredAnnotation");
   EXPECT_EQ(
-      &annotations[0].type().asStruct(),
+      &withUri.type().asStruct(),
       &node.definition()
            .program()
            .definitionsByName()
            .at("TestStructuredAnnotation")
            ->asStruct());
-  EXPECT_EQ(annotations[0].value().size(), 2);
-  EXPECT_EQ(annotations[0].value()["field1"].asInt(), 3);
-  EXPECT_TRUE(annotations[0].value()["field2"].isObject());
+  EXPECT_EQ(withUri.value().size(), 2);
+  EXPECT_EQ(withUri.value()["field1"].asInt(), 3);
+  EXPECT_TRUE(withUri.value()["field2"].isObject());
   const auto& innerField = annotations[0].value()["field2"];
   EXPECT_EQ(innerField["field1"].asInt(), 4);
 
+  auto& complex = findAnnotationOrThrow(annotations, "ComplexAnnotation");
   EXPECT_EQ(
-      &annotations[1].type().asStruct(),
+      &complex.type().asStruct(),
       &node.definition()
            .program()
            .definitionsByName()
            .at("ComplexAnnotation")
            ->asStruct());
-  EXPECT_EQ(annotations[1].value().size(), 3);
-  EXPECT_EQ(annotations[1].value()["l"][0]["field1"].asInt(), 1);
-  EXPECT_EQ(annotations[1].value()["s"][0], "foo");
-  EXPECT_EQ(annotations[1].value()["m"]["bar"]["field1"].asInt(), 2);
+  EXPECT_EQ(complex.value().size(), 3);
+  EXPECT_EQ(complex.value()["l"][0]["field1"].asInt(), 1);
+  EXPECT_EQ(complex.value()["s"][0], "foo");
+  EXPECT_EQ(complex.value()["m"]["bar"]["field1"].asInt(), 2);
 }
 
 TEST_F(ServiceSchemaTest, StructuredAnnotation) {
@@ -646,13 +660,15 @@ TEST_F(ServiceSchemaTest, StructuredAnnotationWithoutUri) {
 
   const auto& annotations = testException->annotations();
   EXPECT_EQ(annotations.size(), 2);
+  const auto& withoutUri =
+      findAnnotationOrThrow(annotations, "TestStructuredAnnotationWithoutUri");
   EXPECT_EQ(
-      &annotations[0].type().asStruct(),
+      &withoutUri.type().asStruct(),
       &program.definitionsByName()
            .at("TestStructuredAnnotationWithoutUri")
            ->asStruct());
-  EXPECT_EQ(annotations[0].value().size(), 1);
-  EXPECT_EQ(annotations[0].value()["field1"].asInt(), 3);
+  EXPECT_EQ(withoutUri.value().size(), 1);
+  EXPECT_EQ(withoutUri.value()["field1"].asInt(), 3);
 }
 
 TEST_F(ServiceSchemaTest, StructuredAnnotationWhichIsATypedef) {

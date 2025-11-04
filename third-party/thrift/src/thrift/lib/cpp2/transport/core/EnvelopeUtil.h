@@ -86,7 +86,7 @@ class EnvelopeUtil {
           LOG(ERROR) << "Unknown protocol: " << protByte;
           return folly::none;
       }
-    } catch (const TException& ex) {
+    } catch (const std::exception& ex) {
       LOG(ERROR) << "Invalid envelope: " << ex.what();
       return folly::none;
     }

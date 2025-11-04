@@ -318,7 +318,8 @@ class t_py_generator : public t_concat_generator {
 
   std::string get_priority(
       const t_named* obj, const std::string& def = "NORMAL");
-  const std::vector<t_function*>& get_functions(const t_service* tservice);
+  const std::vector<const t_function*>& get_functions(
+      const t_service* tservice);
 
  private:
   /**
@@ -376,7 +377,7 @@ class t_py_generator : public t_concat_generator {
 
   std::filesystem::path package_dir_;
 
-  std::map<std::string, const std::vector<t_function*>> func_map_;
+  std::map<std::string, const std::vector<const t_function*>> func_map_;
 
   void generate_json_reader_fn_signature(ofstream& out);
   static int32_t get_thrift_spec_key(const t_structured*, const t_field*);
@@ -2353,7 +2354,7 @@ void t_py_generator::generate_service_interface(
     f_service_ << indent() << "}" << endl << endl;
   }
   std::string service_priority = get_priority(tservice);
-  const std::vector<t_function*>& functions = get_functions(tservice);
+  const std::vector<const t_function*>& functions = get_functions(tservice);
   if (functions.empty()) {
     f_service_ << indent() << "pass" << endl;
   } else {
@@ -2560,7 +2561,7 @@ void t_py_generator::generate_service_client(const t_service* tservice) {
 
   // Generate client method implementations
   const auto& functions = get_functions(tservice);
-  vector<t_function*>::const_iterator f_iter;
+  vector<const t_function*>::const_iterator f_iter;
   for (f_iter = functions.begin(); f_iter != functions.end(); ++f_iter) {
     const t_paramlist& arg_struct = (*f_iter)->params();
     const vector<t_field*>& fields = arg_struct.get_members();
@@ -2834,7 +2835,7 @@ void t_py_generator::generate_service_remote(const t_service* tservice) {
        cur_service = cur_service->extends()) {
     const string& svc_name = cur_service->name();
     const auto& functions = get_functions(cur_service);
-    for (vector<t_function*>::const_iterator it = functions.begin();
+    for (vector<const t_function*>::const_iterator it = functions.begin();
          it != functions.end();
          ++it) {
       const t_function* fn = *it;
@@ -3913,17 +3914,17 @@ std::string t_py_generator::get_priority(
  * Returns the functions that are supported, leaving unsupported functions
  * (e.g. stream and sink functions).
  */
-const std::vector<t_function*>& t_py_generator::get_functions(
+const std::vector<const t_function*>& t_py_generator::get_functions(
     const t_service* tservice) {
   auto name = tservice->get_full_name();
   auto found = func_map_.find(name);
   if (found != func_map_.end()) {
     return found->second;
   }
-  std::vector<t_function*> funcs;
-  for (auto func : tservice->get_functions()) {
-    if (!func->sink_or_stream() && !func->is_interaction_constructor()) {
-      funcs.push_back(func);
+  std::vector<const t_function*> funcs;
+  for (const auto& func : tservice->functions()) {
+    if (!func.sink_or_stream() && !func.is_interaction_constructor()) {
+      funcs.push_back(&func);
     }
   }
   auto inserted = func_map_.emplace(name, std::move(funcs));

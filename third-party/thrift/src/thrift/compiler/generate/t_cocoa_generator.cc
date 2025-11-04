@@ -1647,13 +1647,11 @@ void t_cocoa_generator::generate_service(const t_service* tservice) {
  */
 void t_cocoa_generator::generate_cocoa_service_helpers(
     const t_service* tservice) {
-  std::vector<t_function*> functions = tservice->get_functions();
-  std::vector<t_function*>::iterator f_iter;
-  for (f_iter = functions.begin(); f_iter != functions.end(); ++f_iter) {
-    const t_paramlist& ts = (*f_iter)->params();
+  for (const t_function& function : tservice->functions()) {
+    const t_paramlist& ts = function.params();
     generate_cocoa_struct_interface(f_impl_, &ts, false);
     generate_cocoa_struct_implementation(f_impl_, &ts, false, false);
-    generate_function_helpers(*f_iter);
+    generate_function_helpers(&function);
   }
 }
 
@@ -1711,9 +1709,9 @@ void t_cocoa_generator::generate_cocoa_service_protocol(
   out << "@protocol " << cocoa_prefix_ << tservice->name() << " <NSObject>"
       << std::endl;
 
-  for (const auto* function : tservice->get_functions()) {
-    out << "- " << function_signature(function) << ";" << "  // throws ";
-    for (const t_field& x : get_elems(function->exceptions())) {
+  for (const t_function& function : tservice->functions()) {
+    out << "- " << function_signature(&function) << ";" << "  // throws ";
+    for (const t_field& x : get_elems(function.exceptions())) {
       out << type_name(x.type().get_type()) + ", ";
     }
     out << "TException" << std::endl;
@@ -1808,16 +1806,16 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
   out << std::endl;
 
   // generate client method implementations
-  for (const auto* function : tservice->get_functions()) {
-    const std::string& funname = function->name();
+  for (const t_function& function : tservice->functions()) {
+    const std::string& funname = function.name();
 
     t_function send_function(
         nullptr,
         t_type_ref::from_req_ptr(&t_primitive_type::t_void()),
-        "send_" + function->name(),
-        function->params().clone_DO_NOT_USE());
+        "send_" + function.name(),
+        function.params().clone_DO_NOT_USE());
 
-    std::string argsname = function->name() + "_args";
+    std::string argsname = function.name() + "_args";
 
     // Open function
     indent(out) << "- " << function_signature(&send_function) << std::endl;
@@ -1832,7 +1830,7 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
         << "\"];" << std::endl;
 
     // write out function parameters
-    for (const auto& param : function->params().fields()) {
+    for (const auto& param : function.params().fields()) {
       const std::string& fieldName = param.name();
       if (type_can_be_null(param.type().get_type())) {
         out << indent() << "if (" << fieldName << " != nil)";
@@ -1863,10 +1861,10 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
     scope_down(out);
     out << std::endl;
 
-    if (function->qualifier() != t_function_qualifier::oneway) {
+    if (function.qualifier() != t_function_qualifier::oneway) {
       t_function recv_function(
-          program_, function->return_type(), "recv_" + function->name());
-      if (const t_throws* exceptions = function->exceptions()) {
+          program_, function.return_type(), "recv_" + function.name());
+      if (const t_throws* exceptions = function.exceptions()) {
         recv_function.set_exceptions(exceptions->clone_DO_NOT_USE());
       }
       // Open function
@@ -1891,7 +1889,7 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
           << indent() << "}" << std::endl;
 
       // FIXME - could optimize here to reduce creation of temporary objects.
-      std::string resultname = function_result_helper_struct_type(function);
+      std::string resultname = function_result_helper_struct_type(&function);
       out << indent() << cocoa_prefix_ << resultname << " * result = [[["
           << cocoa_prefix_ << resultname << " alloc] init] autorelease_stub];"
           << std::endl;
@@ -1899,14 +1897,14 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
       indent(out) << "[inProtocol readMessageEnd];" << std::endl;
 
       // Careful, only return _result if not a void function
-      if (!function->return_type()->is_void()) {
+      if (!function.return_type()->is_void()) {
         out << indent() << "if ([result successIsSet]) {" << std::endl
             << indent() << "  return [result success];" << std::endl
             << indent() << "}" << std::endl;
       }
 
-      if (function->exceptions() != nullptr) {
-        for (const auto& x : function->exceptions()->fields()) {
+      if (function.exceptions() != nullptr) {
+        for (const auto& x : function.exceptions()->fields()) {
           out << indent() << "if ([result " << x.name() << "IsSet]) {"
               << std::endl
               << indent() << "  @throw [result " << x.name() << "];"
@@ -1916,7 +1914,7 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
       }
 
       // If you get here it's an exception, unless a void function
-      if (function->return_type()->is_void()) {
+      if (function.return_type()->is_void()) {
         indent(out) << "return;" << std::endl;
       } else {
         out << indent()
@@ -1925,7 +1923,7 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
             << std::endl
             << indent()
             << "                                         reason: @\""
-            << function->name() << " failed: unknown result\"];" << std::endl;
+            << function.name() << " failed: unknown result\"];" << std::endl;
       }
 
       // Close function
@@ -1934,13 +1932,13 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
     }
 
     // Open function
-    indent(out) << "- " << function_signature(function) << std::endl;
+    indent(out) << "- " << function_signature(&function) << std::endl;
     scope_up(out);
     indent(out) << "[self send_" << funname;
 
     // Declare the function arguments
     bool first = true;
-    for (const auto& param : function->params().fields()) {
+    for (const auto& param : function.params().fields()) {
       const std::string& fieldName = param.name();
       out << " ";
       if (first) {
@@ -1952,9 +1950,9 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
     }
     out << "];" << std::endl;
 
-    if (function->qualifier() != t_function_qualifier::oneway) {
+    if (function.qualifier() != t_function_qualifier::oneway) {
       out << indent();
-      if (!function->return_type()->is_void()) {
+      if (!function.return_type()->is_void()) {
         out << "return ";
       }
       out << "[self recv_" << funname << "];" << std::endl;
@@ -1994,8 +1992,8 @@ void t_cocoa_generator::generate_cocoa_service_server_implementation(
   // retain_stub];" << std::endl;
 
   // generate method std::map for routing incoming calls
-  for (const auto* function : tservice->get_functions()) {
-    const std::string& funname = function->name();
+  for (const t_function& function : tservice->functions()) {
+    const std::string& funname = function.name();
     scope_up(out);
     out << indent() << "SEL s = @selector(process_" << funname
         << "_withSequenceID:inProtocol:outProtocol:);" << std::endl;
@@ -2087,37 +2085,37 @@ void t_cocoa_generator::generate_cocoa_service_server_implementation(
 
   // generate a process_XXXX method for each service function, which reads args,
   // calls the service, and writes results
-  for (const auto* function : tservice->get_functions()) {
+  for (const t_function& function : tservice->functions()) {
     out << std::endl;
-    const std::string& funname = function->name();
+    const std::string& funname = function.name();
     out << indent() << "- (void) process_" << funname
         << "_withSequenceID: (int32_t) seqID inProtocol: (id<TProtocol>) "
            "inProtocol outProtocol: (id<TProtocol>) outProtocol"
         << std::endl;
     scope_up(out);
     std::string argstype =
-        cocoa_prefix_ + function_args_helper_struct_type(function);
+        cocoa_prefix_ + function_args_helper_struct_type(&function);
     out << indent() << argstype << " * args = [[" << argstype
         << " alloc] init];" << std::endl;
     out << indent() << "[args read: inProtocol];" << std::endl;
     out << indent() << "[inProtocol readMessageEnd];" << std::endl;
 
     // prepare the result if not oneway
-    if (function->qualifier() != t_function_qualifier::oneway) {
+    if (function.qualifier() != t_function_qualifier::oneway) {
       std::string resulttype =
-          cocoa_prefix_ + function_result_helper_struct_type(function);
+          cocoa_prefix_ + function_result_helper_struct_type(&function);
       out << indent() << resulttype << " * result = [[" << resulttype
           << " alloc] init];" << std::endl;
     }
 
     // make the call to the actual service object
     out << indent();
-    if (!function->return_type()->is_void()) {
+    if (!function.return_type()->is_void()) {
       out << "[result setSuccess: ";
     }
     out << "[mService " << funname;
     bool first = true;
-    for (const auto& param : function->params().fields()) {
+    for (const auto& param : function.params().fields()) {
       const std::string& fieldName = param.name();
       if (first) {
         first = false;
@@ -2127,13 +2125,13 @@ void t_cocoa_generator::generate_cocoa_service_server_implementation(
       }
     }
     out << "]";
-    if (!function->return_type()->is_void()) {
+    if (!function.return_type()->is_void()) {
       out << "]";
     }
     out << ";" << std::endl;
 
     // write out the result if not oneway
-    if (function->qualifier() != t_function_qualifier::oneway) {
+    if (function.qualifier() != t_function_qualifier::oneway) {
       out << indent() << "[outProtocol writeMessageBeginWithName: @\""
           << funname << "\"" << std::endl;
       out << indent()

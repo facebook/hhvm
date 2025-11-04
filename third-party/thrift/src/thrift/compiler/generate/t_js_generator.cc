@@ -776,9 +776,6 @@ void t_js_generator::generate_service(const t_service* tservice) {
  * @param tservice The service to generate a server for.
  */
 void t_js_generator::generate_service_processor(const t_service* tservice) {
-  vector<t_function*> functions = tservice->get_functions();
-  vector<t_function*>::iterator f_iter;
-
   f_service_ << js_namespace(tservice->program()) << service_name_
              << "Processor = " << "exports.Processor = function(handler) ";
 
@@ -829,8 +826,8 @@ void t_js_generator::generate_service_processor(const t_service* tservice) {
   f_service_ << endl;
 
   // Generate the process subfunctions
-  for (f_iter = functions.begin(); f_iter != functions.end(); ++f_iter) {
-    generate_process_function(tservice, *f_iter);
+  for (const t_function& func : tservice->functions()) {
+    generate_process_function(tservice, &func);
   }
 }
 
@@ -908,15 +905,12 @@ void t_js_generator::generate_process_function(
  * @param tservice The service to generate a header definition for
  */
 void t_js_generator::generate_service_helpers(const t_service* tservice) {
-  vector<t_function*> functions = tservice->get_functions();
-  vector<t_function*>::iterator f_iter;
-
   f_service_ << "//HELPER FUNCTIONS AND STRUCTURES" << endl << endl;
   std::string prefix = service_name_ + "_";
-  for (f_iter = functions.begin(); f_iter != functions.end(); ++f_iter) {
-    const t_paramlist& ts = (*f_iter)->params();
+  for (const t_function& func : tservice->functions()) {
+    const t_paramlist& ts = func.params();
     generate_js_struct_definition(f_service_, &ts, false, false, prefix);
-    generate_js_function_helpers(*f_iter);
+    generate_js_function_helpers(&func);
   }
 }
 
@@ -1004,19 +998,16 @@ void t_js_generator::generate_service_client(const t_service* tservice) {
   }
 
   // Generate client method implementations
-  vector<t_function*> functions = tservice->get_functions();
-  vector<t_function*>::const_iterator f_iter;
-  for (f_iter = functions.begin(); f_iter != functions.end(); ++f_iter) {
-    const t_paramlist& arg_struct = (*f_iter)->params();
+  for (const t_function& func : tservice->functions()) {
+    const t_paramlist& arg_struct = func.params();
     const vector<t_field*>& fields = arg_struct.get_members();
-    vector<t_field*>::const_iterator fld_iter;
-    string funname = (*f_iter)->name();
+    string funname = func.name();
     string arglist = argument_list(arg_struct);
 
     // Open function
     f_service_ << js_namespace(tservice->program()) << service_name_
                << "Client.prototype."
-               << function_signature(*f_iter, "", gen_node_ || gen_jquery_)
+               << function_signature(&func, "", gen_node_ || gen_jquery_)
                << " {" << endl;
 
     indent_up();
@@ -1032,9 +1023,9 @@ void t_js_generator::generate_service_client(const t_service* tservice) {
     f_service_ << indent() << "this.send_" << funname << "(" << arglist << ");"
                << endl;
 
-    if (!gen_node_ && (*f_iter)->qualifier() != t_function_qualifier::oneway) {
+    if (!gen_node_ && func.qualifier() != t_function_qualifier::oneway) {
       f_service_ << indent();
-      if (!(*f_iter)->return_type()->is_void()) {
+      if (!func.return_type()->is_void()) {
         f_service_ << "return ";
       }
       f_service_ << "this.recv_" << funname << "();" << endl;
@@ -1064,7 +1055,7 @@ void t_js_generator::generate_service_client(const t_service* tservice) {
     // Send function
     f_service_ << js_namespace(tservice->program()) << service_name_
                << "Client.prototype.send_"
-               << function_signature(*f_iter, "", gen_jquery_) << " {" << endl;
+               << function_signature(&func, "", gen_jquery_) << " {" << endl;
 
     indent_up();
 
@@ -1077,19 +1068,18 @@ void t_js_generator::generate_service_client(const t_service* tservice) {
       outputVar = "this.output";
     }
 
-    std::string argsname = js_namespace(program_) + service_name_ + "_" +
-        (*f_iter)->name() + "_args";
+    std::string argsname =
+        js_namespace(program_) + service_name_ + "_" + func.name() + "_args";
 
     // Serialize the request header
-    f_service_ << indent() << outputVar << ".writeMessageBegin('"
-               << (*f_iter)->name()
+    f_service_ << indent() << outputVar << ".writeMessageBegin('" << func.name()
                << "', Thrift.MessageType.CALL, this.seqid);" << endl;
 
     f_service_ << indent() << "var args = new " << argsname << "();" << endl;
 
-    for (fld_iter = fields.begin(); fld_iter != fields.end(); ++fld_iter) {
-      f_service_ << indent() << "args." << (*fld_iter)->name() << " = "
-                 << (*fld_iter)->name() << ";" << endl;
+    for (const t_field* field : fields) {
+      f_service_ << indent() << "args." << field->name() << " = "
+                 << field->name() << ";" << endl;
     }
 
     // Write to the stream
@@ -1113,19 +1103,19 @@ void t_js_generator::generate_service_client(const t_service* tservice) {
 
     f_service_ << "};" << endl;
 
-    if ((*f_iter)->qualifier() != t_function_qualifier::oneway) {
+    if (func.qualifier() != t_function_qualifier::oneway) {
       std::string resultname = js_namespace(tservice->program()) +
-          service_name_ + "_" + (*f_iter)->name() + "_result";
+          service_name_ + "_" + func.name() + "_result";
 
       if (gen_node_) {
         // Open function
         f_service_ << endl
                    << js_namespace(tservice->program()) << service_name_
-                   << "Client.prototype.recv_" << (*f_iter)->name()
+                   << "Client.prototype.recv_" << func.name()
                    << " = function(input,mtype,rseqid) {" << endl;
       } else {
         t_function recv_function(
-            program_, (*f_iter)->return_type(), "recv_" + (*f_iter)->name());
+            program_, func.return_type(), "recv_" + func.name());
         // Open function
         f_service_ << endl
                    << js_namespace(tservice->program()) << service_name_
@@ -1171,7 +1161,7 @@ void t_js_generator::generate_service_client(const t_service* tservice) {
       f_service_ << indent() << inputVar << ".readMessageEnd();" << endl
                  << endl;
 
-      for (const t_field& x : get_elems((*f_iter)->exceptions())) {
+      for (const t_field& x : get_elems(func.exceptions())) {
         f_service_ << indent() << "if (null !== result." << x.name() << ") {"
                    << endl
                    << indent() << "  "
@@ -1180,14 +1170,14 @@ void t_js_generator::generate_service_client(const t_service* tservice) {
       }
 
       // Careful, only return result if not a void function
-      if (!(*f_iter)->return_type()->is_void()) {
+      if (!func.return_type()->is_void()) {
         f_service_ << indent() << "if (null !== result.success) {" << endl
                    << indent() << "  " << render_recv_return("result.success")
                    << endl
                    << indent() << "}" << endl;
         f_service_ << indent()
                    << render_recv_throw(
-                          "'" + (*f_iter)->name() + " failed: unknown result'")
+                          "'" + func.name() + " failed: unknown result'")
                    << endl;
       } else {
         if (gen_node_) {

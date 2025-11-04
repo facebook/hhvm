@@ -2388,16 +2388,13 @@ void t_java_deprecated_generator::generate_service_interface(
              << endl
              << endl;
   indent_up();
-  vector<t_function*> functions = tservice->get_functions();
-  vector<t_function*>::iterator f_iter;
-  for (f_iter = functions.begin(); f_iter != functions.end(); ++f_iter) {
-    if (!can_generate_method(*f_iter)) {
+  for (const t_function& func : tservice->functions()) {
+    if (!can_generate_method(&func)) {
       continue;
     }
 
-    generate_java_doc(f_service_, *f_iter);
-    indent(f_service_) << "public " << function_signature(*f_iter) << ";"
-                       << endl
+    generate_java_doc(f_service_, &func);
+    indent(f_service_) << "public " << function_signature(&func) << ";" << endl
                        << endl;
   }
   indent_down();
@@ -2417,15 +2414,12 @@ void t_java_deprecated_generator::generate_service_async_interface(
              << " {" << endl
              << endl;
   indent_up();
-  vector<t_function*> functions = tservice->get_functions();
-  vector<t_function*>::iterator f_iter;
-  for (f_iter = functions.begin(); f_iter != functions.end(); ++f_iter) {
-    if (!can_generate_method(*f_iter)) {
+  for (const t_function& func : tservice->functions()) {
+    if (!can_generate_method(&func)) {
       continue;
     }
     indent(f_service_) << "public "
-                       << function_signature_async(
-                              *f_iter, "resultHandler", true)
+                       << function_signature_async(&func, "resultHandler", true)
                        << " throws TException;" << endl
                        << endl;
   }
@@ -2440,17 +2434,15 @@ void t_java_deprecated_generator::generate_service_async_interface(
  */
 void t_java_deprecated_generator::generate_service_helpers(
     const t_service* tservice) {
-  vector<t_function*> functions = tservice->get_functions();
-  vector<t_function*>::iterator f_iter;
-  for (f_iter = functions.begin(); f_iter != functions.end(); ++f_iter) {
-    if (!can_generate_method(*f_iter)) {
+  for (const t_function& func : tservice->functions()) {
+    if (!can_generate_method(&func)) {
       continue;
     }
-    const t_paramlist& ts = (*f_iter)->params();
+    const t_paramlist& ts = func.params();
     StructGenParams params;
     params.in_class = true;
     generate_java_struct_definition(f_service_, &ts, params);
-    generate_function_helpers(*f_iter);
+    generate_function_helpers(&func);
   }
 }
 
@@ -2516,17 +2508,15 @@ void t_java_deprecated_generator::generate_service_client(
   }
 
   // Generate client method implementations
-  vector<t_function*> functions = tservice->get_functions();
-  vector<t_function*>::const_iterator f_iter;
-  for (f_iter = functions.begin(); f_iter != functions.end(); ++f_iter) {
-    if (!can_generate_method(*f_iter)) {
+  for (const t_function& func : tservice->functions()) {
+    if (!can_generate_method(&func)) {
       continue;
     }
-    string funname = (*f_iter)->name();
+    const string& funname = func.name();
     string service_func_name =
-        "\"" + tservice->name() + "." + (*f_iter)->name() + "\"";
+        "\"" + tservice->name() + "." + func.name() + "\"";
     // Open function
-    indent(f_service_) << "public " << function_signature(*f_iter) << endl;
+    indent(f_service_) << "public " << function_signature(&func) << endl;
     scope_up(f_service_);
 
     f_service_ << indent() << "ContextStack ctx = getContextStack("
@@ -2535,7 +2525,7 @@ void t_java_deprecated_generator::generate_service_client(
                << indent() << "send_" << funname << "(";
 
     // Get the struct of function call params
-    const t_paramlist& arg_struct = (*f_iter)->params();
+    const t_paramlist& arg_struct = func.params();
 
     // Declare the function arguments
     const vector<t_field*>& fields = arg_struct.get_members();
@@ -2551,9 +2541,9 @@ void t_java_deprecated_generator::generate_service_client(
     }
     f_service_ << ");" << endl;
 
-    if ((*f_iter)->qualifier() != t_function_qualifier::oneway) {
+    if (func.qualifier() != t_function_qualifier::oneway) {
       f_service_ << indent();
-      if (!(*f_iter)->return_type()->is_void()) {
+      if (!func.return_type()->is_void()) {
         f_service_ << "return ";
       }
       f_service_ << "recv_" << funname << "();" << endl;
@@ -2565,10 +2555,10 @@ void t_java_deprecated_generator::generate_service_client(
     t_function send_function(
         nullptr,
         t_type_ref::from_req_ptr(&t_primitive_type::t_void()),
-        string("send_") + (*f_iter)->name(),
-        (*f_iter)->params().clone_DO_NOT_USE());
+        string("send_") + func.name(),
+        func.params().clone_DO_NOT_USE());
 
-    string argsname = (*f_iter)->name() + "_args";
+    string argsname = func.name() + "_args";
 
     // Open function
     indent(f_service_) << "public " << function_signature(&send_function)
@@ -2593,7 +2583,7 @@ void t_java_deprecated_generator::generate_service_client(
 
     string bytes = tmp("_bytes");
 
-    string flush = (*f_iter)->qualifier() == t_function_qualifier::oneway
+    string flush = func.qualifier() == t_function_qualifier::oneway
         ? "onewayFlush"
         : "flush";
     f_service_ << indent() << "args.write(oprot_);" << endl
@@ -2607,15 +2597,15 @@ void t_java_deprecated_generator::generate_service_client(
     f_service_ << endl;
 
     // Generate recv function only if not a oneway function
-    if ((*f_iter)->qualifier() != t_function_qualifier::oneway) {
-      string resultname = (*f_iter)->name() + "_result";
+    if (func.qualifier() != t_function_qualifier::oneway) {
+      string resultname = func.name() + "_result";
 
       t_function recv_function(
           nullptr,
-          (*f_iter)->return_type(),
-          "recv_" + (*f_iter)->name(),
+          func.return_type(),
+          "recv_" + func.name(),
           std::make_unique<t_paramlist>(program_));
-      if (const t_throws* exceptions = (*f_iter)->exceptions()) {
+      if (const t_throws* exceptions = func.exceptions()) {
         recv_function.set_exceptions(exceptions->clone_DO_NOT_USE());
       }
       // Open the recv function
@@ -2658,14 +2648,14 @@ void t_java_deprecated_generator::generate_service_client(
                  << endl;
 
       // Careful, only return _result if not a void function
-      if (!(*f_iter)->return_type()->is_void()) {
+      if (!func.return_type()->is_void()) {
         f_service_ << indent() << "if (result."
                    << generate_isset_check("success") << ") {" << endl
                    << indent() << "  return result.success;" << endl
                    << indent() << "}" << endl;
       }
 
-      for (const auto& x : get_elems((*f_iter)->exceptions())) {
+      for (const auto& x : get_elems(func.exceptions())) {
         f_service_ << indent() << "if (result." << x.name() << " != null) {"
                    << endl
                    << indent() << "  throw result." << x.name() << ";" << endl
@@ -2673,14 +2663,14 @@ void t_java_deprecated_generator::generate_service_client(
       }
 
       // If you get here it's an exception, unless a void function
-      if ((*f_iter)->return_type()->is_void()) {
+      if (func.return_type()->is_void()) {
         indent(f_service_) << "return;" << endl;
       } else {
         f_service_
             << indent()
             << "throw new "
                "TApplicationException(TApplicationException.MISSING_RESULT, \""
-            << (*f_iter)->name() << " failed: unknown result\");" << endl;
+            << func.name() << " failed: unknown result\");" << endl;
       }
 
       // Close function
@@ -2735,20 +2725,18 @@ void t_java_deprecated_generator::generate_service_async_client(
   indent(f_service_) << "}" << endl << endl;
 
   // Generate client method implementations
-  vector<t_function*> functions = tservice->get_functions();
-  vector<t_function*>::const_iterator f_iter;
-  for (f_iter = functions.begin(); f_iter != functions.end(); ++f_iter) {
-    if (!can_generate_method(*f_iter)) {
+  for (const t_function& func : tservice->functions()) {
+    if (!can_generate_method(&func)) {
       continue;
     }
-    string funname = (*f_iter)->name();
-    const t_type& ret_type = *(*f_iter)->return_type();
-    const t_paramlist& arg_struct = (*f_iter)->params();
+    string funname = func.name();
+    const t_type& ret_type = *func.return_type();
+    const t_paramlist& arg_struct = func.params();
     string funclassname = funname + "_call";
     const vector<t_field*>& fields = arg_struct.get_members();
     vector<t_field*>::const_iterator fld_iter;
-    string args_name = (*f_iter)->name() + "_args";
-    string result_name = (*f_iter)->name() + "_result";
+    string args_name = func.name() + "_args";
+    string result_name = func.name() + "_result";
     string result_handler_symbol;
     string client_sybmol = tmp("client");
     string protocol_factory_symbol = tmp("protocolFactory");
@@ -2757,14 +2745,12 @@ void t_java_deprecated_generator::generate_service_async_client(
     // Main method body
     result_handler_symbol = tmp("resultHandler");
     f_service_ << indent() << "public "
-               << function_signature_async(
-                      *f_iter, result_handler_symbol, false)
+               << function_signature_async(&func, result_handler_symbol, false)
                << " throws TException {" << endl
                << indent() << "  checkReady();" << endl
                << indent() << "  " << funclassname << " method_call = new "
                << funclassname << "("
-               << async_argument_list(
-                      *f_iter, arg_struct, result_handler_symbol)
+               << async_argument_list(&func, arg_struct, result_handler_symbol)
                << ", this, ___protocolFactory, ___transport);" << endl
                << indent() << "  this.___currentMethod = method_call;" << endl
                << indent() << "  ___manager.call(method_call);" << endl
@@ -2791,8 +2777,7 @@ void t_java_deprecated_generator::generate_service_async_client(
     // Constructor
     result_handler_symbol = tmp("resultHandler");
     indent(f_service_) << "public " + funclassname + "(" +
-            async_argument_list(
-                              *f_iter, arg_struct, result_handler_symbol, true)
+            async_argument_list(&func, arg_struct, result_handler_symbol, true)
                        << ", TAsyncClient " << client_sybmol
                        << ", TProtocolFactory " << protocol_factory_symbol
                        << ", TNonblockingTransport " << transport_symbol
@@ -2800,8 +2785,7 @@ void t_java_deprecated_generator::generate_service_async_client(
     indent(f_service_) << "  super(" << client_sybmol << ", "
                        << protocol_factory_symbol << ", " << transport_symbol
                        << ", " << result_handler_symbol << ", "
-                       << ((*f_iter)->qualifier() ==
-                                   t_function_qualifier::oneway
+                       << (func.qualifier() == t_function_qualifier::oneway
                                ? "true"
                                : "false")
                        << ");" << endl;
@@ -2841,7 +2825,7 @@ void t_java_deprecated_generator::generate_service_async_client(
     // Return method
     indent(f_service_) << "public " + type_name(&ret_type) +
             " getResult() throws ";
-    for (const t_field& x : get_elems((*f_iter)->exceptions())) {
+    for (const t_field& x : get_elems(func.exceptions())) {
       f_service_ << type_name(x.type().get_type(), false, false) + ", ";
     }
     f_service_ << "TException {" << endl;
@@ -2861,7 +2845,7 @@ void t_java_deprecated_generator::generate_service_async_client(
         << "TProtocol prot = "
            "super.client.getProtocolFactory().getProtocol(memoryTransport);"
         << endl;
-    if ((*f_iter)->qualifier() != t_function_qualifier::oneway) {
+    if (func.qualifier() != t_function_qualifier::oneway) {
       indent(f_service_);
       if (!ret_type.is_void()) {
         f_service_ << "return ";
@@ -2890,10 +2874,6 @@ void t_java_deprecated_generator::generate_service_async_client(
  */
 void t_java_deprecated_generator::generate_service_server(
     const t_service* tservice) {
-  // Generate the dispatch methods
-  vector<t_function*> functions = tservice->get_functions();
-  vector<t_function*>::iterator f_iter;
-
   // Extends stuff
   string extends;
   string extends_processor;
@@ -2925,12 +2905,13 @@ void t_java_deprecated_generator::generate_service_server(
         << endl;
   }
 
-  for (f_iter = functions.begin(); f_iter != functions.end(); ++f_iter) {
-    if (!can_generate_method(*f_iter)) {
+  // Generate the dispatch methods
+  for (const t_function& func : tservice->functions()) {
+    if (!can_generate_method(&func)) {
       continue;
     }
-    f_service_ << indent() << "processMap_.put(\"" << (*f_iter)->name()
-               << "\", new " << (*f_iter)->name() << "());" << endl;
+    f_service_ << indent() << "processMap_.put(\"" << func.name() << "\", new "
+               << func.name() << "());" << endl;
   }
 
   scope_down(f_service_);
@@ -3010,11 +2991,11 @@ void t_java_deprecated_generator::generate_service_server(
   f_service_ << endl;
 
   // Generate the process subfunctions
-  for (f_iter = functions.begin(); f_iter != functions.end(); ++f_iter) {
-    if (!can_generate_method(*f_iter)) {
+  for (const t_function& func : tservice->functions()) {
+    if (!can_generate_method(&func)) {
       continue;
     }
-    generate_process_function(tservice, *f_iter);
+    generate_process_function(tservice, &func);
   }
 
   indent_down();

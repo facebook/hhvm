@@ -719,23 +719,23 @@ void t_json_generator::generate_service(const t_service* tservice) {
       *tservice,
       /*add_heading_comma=*/false,
       /*add_trailing_comma=*/true);
-  vector<t_function*> functions = tservice->get_functions();
-  vector<t_function*>::iterator fn_iter = functions.begin();
+  node_list_view<const t_function> functions = tservice->functions();
+  node_list_view<const t_function>::iterator fn_iter = functions.begin();
   f_out_ << indent() << "\"functions\" : {" << endl;
   indent_up();
   for (; fn_iter != functions.end(); fn_iter++) {
     if (fn_iter != functions.begin()) {
       f_out_ << "," << endl;
     }
-    string fn_name = (*fn_iter)->name();
+    const t_function* fun = std::addressof(*fn_iter);
+    string fn_name = fun->name();
     indent(f_out_) << "\"" << service_name_ << "." << fn_name << "\" : {"
                    << endl;
     indent_up();
     indent(f_out_) << "\"return_type\" : {" << endl;
     indent_up();
-    const t_function* fun = *fn_iter;
     if (fun->is_interaction_constructor()) {
-      print_spec(static_cast<const t_service*>(fun->interaction().get_type()));
+      print_spec(&fun->interaction()->as<t_interaction>());
     } else {
       print_spec(fun->return_type().get_type());
     }
@@ -744,8 +744,8 @@ void t_json_generator::generate_service(const t_service* tservice) {
     indent(f_out_) << "}," << endl;
 
     indent(f_out_) << "\"args\" : [";
-    vector<t_field*> args = (*fn_iter)->params().get_members();
-    vector<t_field*>::iterator arg_iter = args.begin();
+    node_list_view<const t_field> args = fun->params().fields();
+    node_list_view<const t_field>::iterator arg_iter = args.begin();
     if (arg_iter != args.end()) {
       f_out_ << endl;
       indent_up();
@@ -755,14 +755,14 @@ void t_json_generator::generate_service(const t_service* tservice) {
         }
         indent(f_out_) << "{" << endl;
         indent_up();
-        print_name((*arg_iter)->name());
-        print_spec((*arg_iter)->type().get_type());
-        if ((*arg_iter)->default_value() != nullptr) {
+        print_name((*arg_iter).name());
+        print_spec((*arg_iter).type().get_type());
+        if ((*arg_iter).default_value() != nullptr) {
           f_out_ << "," << endl << indent() << "\"value\" : ";
-          print_const_value((*arg_iter)->default_value());
+          print_const_value((*arg_iter).default_value());
         }
         print_node_annotations(
-            **arg_iter,
+            *arg_iter,
             /*add_heading_comma=*/true,
             /*add_trailing_comma=*/false);
         f_out_ << endl;
@@ -776,7 +776,7 @@ void t_json_generator::generate_service(const t_service* tservice) {
     f_out_ << "]," << endl;
 
     indent(f_out_) << "\"throws\" : [";
-    auto exceptions = get_elems((*fn_iter)->exceptions());
+    auto exceptions = get_elems(fun->exceptions());
     if (!exceptions.empty()) {
       f_out_ << endl;
       indent_up();
@@ -793,11 +793,11 @@ void t_json_generator::generate_service(const t_service* tservice) {
     }
     f_out_ << "]";
     print_node_annotations(
-        **fn_iter,
+        *fun,
         /*add_heading_comma=*/true,
         /*add_trailing_comma=*/false);
     f_out_ << "," << endl;
-    print_source_range((*fn_iter)->src_range());
+    print_source_range(fun->src_range());
     indent_down();
     indent(f_out_) << "}";
   }

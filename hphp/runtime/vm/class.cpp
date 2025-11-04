@@ -111,7 +111,7 @@ void Class::setNewClassId() {
 Class::PropInitVec::~PropInitVec() {
   if (m_capacity > 0) {
     // allocated in low heap
-    lower_free(m_data);
+    low_free(m_data);
   }
 }
 
@@ -158,7 +158,7 @@ Class::PropInitVec::operator=(const PropInitVec& piv) {
     if (m_size == 0) return *this;
 
     m_data = reinterpret_cast<ObjectProps*>(
-      lower_malloc(props_size + bits_size)
+      low_malloc(props_size + bits_size)
     );
     // These are two distinct memcpys because the props and deep init bits
     // aren't necessarily contiguous in src (because capacity >= size)
@@ -182,7 +182,7 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
     auto const bits_size = BitsetView<true>::sizeFor(newCap);
 
     auto newData = reinterpret_cast<char*>(
-      lower_malloc(props_size + bits_size)
+      low_malloc(props_size + bits_size)
     );
 
     auto const oldSize = ObjectProps::sizeFor(m_size);
@@ -197,7 +197,7 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
       memcpy(newData + props_size,
              deepInitBits().buffer(),
              (m_size + 7) / 8);
-      lower_free(m_data);
+      low_free(m_data);
     }
 
     m_data = reinterpret_cast<ObjectProps*>(newData);
@@ -337,7 +337,7 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
   auto const size = sizeof_Class + prefix_sz
                     + sizeof(m_classVec[0]) * classVecLen;
 
-  auto const mem = lower_malloc(size);
+  auto const mem = low_malloc(size);
   MemoryStats::LogAlloc(AllocKind::Class, size);
   auto const classPtr = reinterpret_cast<void*>(
     reinterpret_cast<uintptr_t>(mem) + prefix_sz
@@ -346,7 +346,7 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
     return new (classPtr) Class(preClass, parent, std::move(usedTraits),
                                 classVecLen, funcVecLen);
   } catch (...) {
-    lower_sized_free(mem, size);
+    low_sized_free(mem, size);
     throw;
   }
 }
@@ -530,7 +530,7 @@ void Class::atomicRelease() {
   assertx(!m_cachedClass.bound());
   assertx(!getCount());
   this->~Class();
-  lower_free(mallocPtr());
+  low_free(mallocPtr());
 }
 
 Class::~Class() {
@@ -4054,7 +4054,7 @@ void Class::setInterfaceVtables() {
         //
         // Instance methods do not have this issue, as iface vtable of object
         // instance's class is used to invoke them, which is never abstract.
-        lower_free(vtableVec);
+        low_free(vtableVec);
         m_vtableVecLen = 0;
         m_vtableVec = nullptr;
         return;

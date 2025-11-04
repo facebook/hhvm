@@ -60,8 +60,10 @@ size_t getLowMapped() {
 #if USE_JEMALLOC
   // The low range [1G, 4G) is divided into two ranges, and shared by 3
   // arenas.
-  low_mapped += alloc::getRange(alloc::AddrRangeClass::VeryLow).used();
   low_mapped += alloc::getRange(alloc::AddrRangeClass::Low).used();
+#ifdef USE_PACKEDPTR
+  low_mapped += alloc::getRange(alloc::AddrRangeClass::LowSmall).used();
+#endif
   low_mapped += alloc::getRange(alloc::AddrRangeClass::LowEmergency).used();
 #endif
   return low_mapped;

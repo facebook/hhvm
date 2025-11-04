@@ -155,7 +155,7 @@ void* Func::allocFuncMem(int numParams) {
     - sizeof(m_prologueTable);
 
   MemoryStats::LogAlloc(AllocKind::Func, funcSize);
-  return lower_malloc(funcSize);
+  return low_malloc(funcSize);
 }
 
 void Func::destroy(Func* func) {
@@ -180,13 +180,13 @@ void Func::destroy(Func* func) {
   if (s_treadmill.load(std::memory_order_acquire)) {
     Treadmill::enqueue([func](){
       func->~Func();
-      lower_free(func);
+      low_free(func);
     });
     return;
   }
 
   func->~Func();
-  lower_free(func);
+  low_free(func);
 }
 
 void Func::freeClone() {

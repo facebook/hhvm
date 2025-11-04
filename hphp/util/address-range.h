@@ -31,30 +31,28 @@ namespace HPHP {
 //
 // LowPtr mode
 // --------------------------------------------------------------------------
-// Start Addr                           Lower       Low         Small
+// Start Addr                           Low         Small
 // --------------------------------------------------------------------------
-// 1 GB                                 1           2           1
-// 2 GB                                 2           1           2
-// 4 GB - Emergency                     3           3           3
+// 1 GB                                 1           1
+// 4 GB - Emergency                     2           2
 // 4 GB
 // --------------------------------------------------------------------------
 //
-// PackedPtr mode                       Lower       Low         Small
+// PackedPtr mode                       Lower       Small
 // --------------------------------------------------------------------------
-// 1 GB                                 1           2           1
-// 4 GB - Emergency - Small             3           3           2
-// 4 GB - Emergency                     4           4           3
-// 4 GB                                 2           1
+// 1 GB                                 1           1
+// 4 GB - Emergency - Small             3           2
+// 4 GB - Emergency                     4           3
+// 4 GB                                 2
 // 32 GB
 // --------------------------------------------------------------------------
 //
 // FullPtr mode
 // --------------------------------------------------------------------------
-// Start Addr                           Lower       Low         Small
+// Start Addr                           Lower       Small
 // --------------------------------------------------------------------------
-// 1 GB                                 1           2           1
-// 2 GB                                 2           1           2
-// 64 GB - Emergency                    3           3           3
+// 1 GB                                 1           1
+// 64 GB - Emergency                    2           2
 // 64 GB
 // --------------------------------------------------------------------------
 //
@@ -72,20 +70,17 @@ constexpr size_t kLowEmergencySize = 128 << 20;
 #ifdef USE_LOWPTR
 #ifdef USE_PACKEDPTR
 constexpr uintptr_t kLowArenaMaxAddr = 1ull << 32;
-constexpr uintptr_t kLowSmallArenaSize = 512 << 20;
-constexpr uintptr_t kVeryLowArenaMaxAddr = kLowArenaMaxAddr -
-  kLowEmergencySize -
-  kLowSmallArenaSize;
 constexpr uintptr_t kMidArenaMaxAddr = 32ull << 30;
+constexpr size_t kLowSmallArenaSize = 512 << 20;
 #else
 constexpr uintptr_t kLowArenaMaxAddr = 1ull << 32;
-constexpr uintptr_t kVeryLowArenaMaxAddr = 2ull << 30;
 constexpr uintptr_t kMidArenaMaxAddr = kLowArenaMaxAddr;
+constexpr size_t kLowSmallArenaSize = 0;
 #endif
 #else
 constexpr uintptr_t kLowArenaMaxAddr = 64ull << 30;
-constexpr uintptr_t kVeryLowArenaMaxAddr = 2ull << 30;
 constexpr uintptr_t kMidArenaMaxAddr = kLowArenaMaxAddr;
+constexpr size_t kLowSmallArenaSize = 0;
 #endif
 
 constexpr unsigned kUncountedMaxShift = 38;
@@ -113,8 +108,8 @@ namespace alloc {
 
 // List of address ranges ManagedArena can manage.
 enum AddrRangeClass : uint32_t {
-  VeryLow = 0,                     // [.., kVeryLowArenaMaxAddr)
-  Low,                             // [kVeryLowArenaMaxAddr, kLowArenaMaxAddr - kLowEmergencySize)
+  Low = 0,                         // [.., kLowArenaMaxAddr - kLowEmergencySize - kLowSmallArenaSize)
+  LowSmall,                        // [kLowArenaMaxAddr - kLowEmergencySize - kLowSmallArenaSize, kLowArenaMaxAddr - kLowEmergencySize) 
   LowEmergency,                    // [kLowArenaMaxAddr - kLowEmergencySize, kLowArenaMaxAddr)
   Mid,                             // [kLowArenaMaxAddr, kMidArenaMaxAddr) (Only exists in USE_PACKEDPTR builds)
   Uncounted,                       // [kMidArenaMaxAddr, kHighArenaMaxAddr)

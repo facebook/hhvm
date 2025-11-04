@@ -67,7 +67,7 @@ namespace HPHP::rds {
  * within [1G, 4G) offset from the persistent
  * base (0 if RDS_FIXED_PERSISTENT_BASE is       +-------------+ <-- tl_base
  * defined as 1, which is safe if address from   |  Header     |
- * lower_malloc() is below 4G).                  +-------------+
+ * low_malloc() is below 4G).                    +-------------+
  *                                               |             |
  * The normal region is perhaps analogous to     |  Normal     |
  * .bss, while the persistent region is          |    region   |

@@ -127,14 +127,14 @@ void* mallocx_on_node(size_t size, int node, size_t align) {
 #endif
 
 #ifdef USE_JEMALLOC
-unsigned small_arena = 0;
-unsigned lower_arena = 0;
+unsigned low_arena = 0;
+unsigned low_small_arena = 0;
 unsigned high_arena = 0;
 unsigned high_cold_arena = 0;
 __thread unsigned local_arena = 0;
 
-int small_arena_flags = 0;
-int lower_arena_flags = 0;
+int low_arena_flags = 0;
+int low_small_arena_flags = 0;
 int high_arena_flags = 0;
 int high_cold_arena_flags = 0;
 __thread int local_arena_flags = 0;
@@ -247,31 +247,31 @@ void setup_low_arena(PageSpec s) {
                      "low arena min addr ({}) must be <= 2GB",
                      lowArenaStart);
   // Initialize mappers for the VeryLow and Low address ranges.
-  auto& veryLowRange = getRange(AddrRangeClass::VeryLow);
   auto& lowRange = getRange(AddrRangeClass::Low);
-  auto& emergencyRange = getRange(AddrRangeClass::LowEmergency);
-  auto veryLowMapperNumHugePages = std::min(
-    s.n1GPages,
-    (uint32_t)(veryLowRange.capacity() / size1g));
+  auto& lowEmergencyRange = getRange(AddrRangeClass::LowEmergency);
   auto lowMapperNumHugePages = std::min(
-    s.n1GPages - veryLowMapperNumHugePages,
+    s.n1GPages,
     (uint32_t)(lowRange.capacity() / size1g));
-  auto veryLowMapper =
-    getMapperChain(veryLowRange,
-                   veryLowMapperNumHugePages,
-                   true, s.n2MPages,    // 2M
-                   true,                // 4K
-                   numa_node_set, 0);
   auto lowMapper =
     getMapperChain(lowRange,
                    lowMapperNumHugePages,
+                   true, s.n2MPages,    // 2M
+                   true,                // 4K
+                   numa_node_set, 0);
+  lowRange.setLowMapper(lowMapper);
+
+#ifdef USE_PACKEDPTR
+  auto& lowSmallRange = getRange(AddrRangeClass::LowSmall);
+  auto lowSmallMapper =
+    getMapperChain(lowSmallRange,
+                   lowMapperNumHugePages,
                    true, 0,             // 2M
                    true,                // 4K
-                   numa_node_set, 1);
-#ifdef USE_PACKEDPTR
+                   numa_node_set, 0);
+  lowSmallRange.setLowMapper(lowSmallMapper);
+
   auto& midRange = getRange(AddrRangeClass::Mid);
   auto midMapperNumHugePages = s.n1GPages -
-    veryLowMapperNumHugePages -
     lowMapperNumHugePages;
   auto midMapper =
     getMapperChain(midRange,
@@ -279,29 +279,31 @@ void setup_low_arena(PageSpec s) {
                    true, 0,             // 2M
                    true,                // 4K
                    numa_node_set, 0);
+  midRange.setLowMapper(midMapper);
 #endif
-  auto emergencyMapper =
-    new BumpEmergencyMapper([]{ kill(getpid(), SIGTERM);}, emergencyRange);
-  veryLowRange.setLowMapper(veryLowMapper);
-  lowRange.setLowMapper(lowMapper);
-  emergencyRange.setLowMapper(emergencyMapper);
 
-  auto ma = LowArena::CreateAt(&g_lowerArena);
-  ma->appendMapper(veryLowMapper);
+  auto lowEmergencyMapper =
+    new BumpEmergencyMapper([]{ kill(getpid(), SIGTERM);}, lowEmergencyRange);
+  lowEmergencyRange.setLowMapper(lowEmergencyMapper);
+
+  auto ma = LowArena::CreateAt(&g_lowArena);
+  ma->appendMapper(lowMapper);
 #ifdef USE_PACKEDPTR
   ma->appendMapper(midMapper);
+  ma->appendMapper(lowSmallMapper);
 #endif
-  ma->appendMapper(lowMapper);
-  ma->appendMapper(emergencyMapper);
-  lower_arena = ma->id();
-  lower_arena_flags = MALLOCX_ARENA(lower_arena) | MALLOCX_TCACHE_NONE;
+  ma->appendMapper(lowEmergencyMapper);
+  low_arena = ma->id();
+  low_arena_flags = MALLOCX_ARENA(low_arena) | MALLOCX_TCACHE_NONE;
 
-  ma = LowArena::CreateAt(&g_smallArena);
-  ma->appendMapper(veryLowMapper);
+  ma = LowArena::CreateAt(&g_lowSmallArena);
   ma->appendMapper(lowMapper);
-  ma->appendMapper(emergencyMapper);
-  small_arena = ma->id();
-  small_arena_flags = MALLOCX_ARENA(small_arena) | MALLOCX_TCACHE_NONE;
+#ifdef USE_PACKEDPTR
+  ma->appendMapper(lowSmallMapper);
+#endif
+  ma->appendMapper(lowEmergencyMapper);
+  low_small_arena = ma->id();
+  low_small_arena_flags = MALLOCX_ARENA(low_small_arena) | MALLOCX_TCACHE_NONE;
 }
 
 void setup_high_arena(PageSpec s) {
@@ -356,7 +358,7 @@ void setup_auto_arenas(PageSpec s) {
   unsigned auto_arenas = 0;
   mallctlRead<unsigned>("opt.narenas", &auto_arenas);
   for (unsigned i = 0; i < auto_arenas; ++i) {
-    auto a = PreMappedArena::AttachTo(lower_malloc(sizeof(PreMappedArena)),
+    auto a = PreMappedArena::AttachTo(low_malloc(sizeof(PreMappedArena)),
                                       i, mapper);
     g_auto_arenas.push_back(a);
   }
@@ -461,7 +463,7 @@ void setup_local_arenas(PageSpec spec, unsigned slabs) {
     mallctlRead<unsigned>("arenas.create", &arena);
     always_assert(arena == base_arena + i);
     if (slabs) {
-      auto mem = lower_malloc(sizeof(SlabManager));
+      auto mem = low_malloc(sizeof(SlabManager));
       s_slab_managers.push_back(new (mem) SlabManager);
     } else {
       s_slab_managers.push_back(nullptr);
@@ -506,7 +508,7 @@ void setup_local_arenas(PageSpec spec, unsigned slabs) {
                                  1u << i,
                                  i);
     range->setLowMapper(mapper);
-    auto arena = PreMappedArena::CreateAt(lower_malloc(sizeof(PreMappedArena)),
+    auto arena = PreMappedArena::CreateAt(low_malloc(sizeof(PreMappedArena)),
                                           mapper);
 
     // Allocate some slabs first, which are not given to the arena, but managed
@@ -696,8 +698,8 @@ static JEMallocInitializer initJEMalloc MAX_CONSTRUCTOR_PRIORITY;
 
 void low_2m_pages(uint32_t pages) {
 #if USE_JEMALLOC
-  pages -= allocate2MPagesToRange(AddrRangeClass::VeryLow, pages);
-  allocate2MPagesToRange(AddrRangeClass::Low, pages);
+  pages -= allocate2MPagesToRange(AddrRangeClass::Low, pages);
+  allocate2MPagesToRange(AddrRangeClass::Mid, pages);
 #endif
 }
 

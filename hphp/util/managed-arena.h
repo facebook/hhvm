@@ -94,8 +94,8 @@ using LowArena = RangeArena;
 using HighArena = RangeArena;
 static_assert(alignof(RangeArena) <= 64, "");
 using RangeArenaStorage = std::aligned_storage<sizeof(RangeArena), 64>::type;
-extern RangeArenaStorage g_smallArena;
-extern RangeArenaStorage g_lowerArena;
+extern RangeArenaStorage g_lowArena;
+extern RangeArenaStorage g_lowSmallArena;
 extern RangeArenaStorage g_highArena;
 extern RangeArenaStorage g_coldArena;
 
@@ -121,7 +121,7 @@ template<typename T> inline T* GetByArenaId(unsigned id) {
 }
 
 inline LowArena* lowArena() {
-  auto p = reinterpret_cast<LowArena*>(&g_lowerArena);
+  auto p = reinterpret_cast<LowArena*>(&g_lowArena);
   if (p->id()) return p;
   return nullptr;
 }

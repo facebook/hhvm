@@ -102,14 +102,14 @@ uintptr_t tc_start_address();
 // arenas are served using default malloc(), and no assumption about the
 // resulting address range can be made.
 
-extern unsigned small_arena;
-extern unsigned lower_arena;
+extern unsigned low_arena;
+extern unsigned low_small_arena;
 extern unsigned high_arena;
 extern unsigned high_cold_arena;
 extern __thread unsigned local_arena;
 
-extern int small_arena_flags;
-extern int lower_arena_flags;
+extern int low_arena_flags;
+extern int low_small_arena_flags;
 extern int high_arena_flags;
 extern int high_cold_arena_flags;
 extern __thread int local_arena_flags;
@@ -383,8 +383,8 @@ DEF_ALLOC_FUNCS(apc, HIGH_ARENA_FLAGS, APC)
 // Thread-local allocations that are not accessed outside the thread.
 DEF_ALLOC_FUNCS(local, local_arena_flags, Local)
 
-DEF_ALLOC_FUNCS(lower, lower_arena_flags, Lower)
-DEF_ALLOC_FUNCS(small, small_arena_flags, Small)
+DEF_ALLOC_FUNCS(low, low_arena_flags, Low)
+DEF_ALLOC_FUNCS(small, low_small_arena_flags, Small)
 
 #undef DEF_ALLOC_FUNCS
 

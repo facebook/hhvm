@@ -214,7 +214,7 @@ struct HashTable : HashTableCommon {
     extra = (extra + 15) & ~15ull;
     auto const size = computeAllocBytes(scale) + extra;
     auto const mem = Cfg::Eval::LowStaticArrays
-      ? lower_malloc(size)
+      ? low_malloc(size)
       : uncounted_malloc(size);
     return reinterpret_cast<ArrayType*>(reinterpret_cast<char*>(mem) + extra);
   }

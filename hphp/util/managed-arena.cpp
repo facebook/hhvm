@@ -28,8 +28,8 @@ static_assert(sizeof(RangeState) <= 64, "");
 static_assert(alignof(RangeState) <= 64, "");
 using RangeStateStorage = std::aligned_storage<sizeof(RangeState), 64>::type;
 
-RangeArenaStorage g_smallArena{};
-RangeArenaStorage g_lowerArena{};
+RangeArenaStorage g_lowArena{};
+RangeArenaStorage g_lowSmallArena{};
 RangeArenaStorage g_highArena{};
 RangeArenaStorage g_coldArena{};
 RangeStateStorage g_ranges[AddrRangeClass::NumRangeClasses];
@@ -48,10 +48,10 @@ NEVER_INLINE RangeState& getRange(AddrRangeClass index) {
       // safety in case someone starts to abuse the code.
     }
     if (!result->high()) {
-      new (&(g_ranges[AddrRangeClass::VeryLow]))
-        RangeState(lowArenaMinAddr(), kVeryLowArenaMaxAddr);
       new (&(g_ranges[AddrRangeClass::Low]))
-        RangeState(kVeryLowArenaMaxAddr, kLowArenaMaxAddr - kLowEmergencySize);
+        RangeState(lowArenaMinAddr(), kLowArenaMaxAddr - kLowEmergencySize - kLowSmallArenaSize);
+      new (&(g_ranges[AddrRangeClass::LowSmall]))
+        RangeState(kLowArenaMaxAddr - kLowEmergencySize - kLowSmallArenaSize, kLowArenaMaxAddr - kLowEmergencySize);
       new (&(g_ranges[AddrRangeClass::LowEmergency]))
         RangeState(kLowArenaMaxAddr - kLowEmergencySize, kLowArenaMaxAddr);
       new (&(g_ranges[AddrRangeClass::Mid]))

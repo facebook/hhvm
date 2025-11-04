@@ -1,0 +1,4 @@
+-d hhvm.log.level=Verbose
+-vServer.TrackRequestFanout=true
+-vServer.RequestFanoutLimit=1000000
+-vServer.ThreadCount=1

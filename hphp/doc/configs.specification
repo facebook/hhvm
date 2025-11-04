@@ -72,6 +72,18 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - int Server.IOThreadCount = 1, UNKNOWN
 - int Server.HighQueueingThreshold = 60, UNKNOWN, nobind
 - int Server.HugeThreadCount = 0, UNKNOWN
+
+- int Server.RequestFanoutLimit = INT_MAX, yichenzhou
+
+  Maximum number of concurrent total xbox threads (including those spawn recursively)
+  each hhvmworker requests are allowed to spin up.
+
+- bool Server.TrackRequestFanout = true, yichenzhou
+
+  Enable request-fanout-limit class that maintains a map of root hhvmworker request id
+  to the number of xbox threads it has spawned.This is for rollout purposes, and only
+  enables instantiation of the class WITHOUT actual logging or enforcement.
+
 - std::string Server.SecondaryType = "", UNKNOWN
 - int Server.SecondaryPort = 0, UNKNOWN
 

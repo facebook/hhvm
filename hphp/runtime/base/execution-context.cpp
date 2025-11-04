@@ -41,6 +41,8 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/request-fanout-limit-wrapper.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
@@ -1462,6 +1464,11 @@ void ExecutionContext::requestInit() {
 }
 
 void ExecutionContext::requestExit() {
+  RequestInfo *ti = RequestInfo::s_requestInfo.getNoCheck();
+  if (ti->getRootRequestId() != ti->m_id || m_xboxTasksStarted > 0) {
+    requestFanoutLimitDecrement(ti->getRootRequestId());
+  }
+
   apcExtension::purgeDeferred(std::move(m_apcDeferredExpire));
 
   autoTypecheckRequestExit();

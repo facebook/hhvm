@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/request-fanout-limit-wrapper.h"
 #include "hphp/runtime/server/xbox-request-handler.h"
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/server/job-queue-vm-stack.h"
@@ -203,6 +204,10 @@ void XboxServer::Restart() {
             counters["xbox_queued_requests"] = stats.queuedJobCount;
           }
       );
+      if (Cfg::Server::TrackRequestFanout) {
+        requestFanoutLimitInit(Cfg::Server::RequestFanoutLimit, Cfg::Server::ThreadCount);
+      }
+      
     }
     if (Cfg::Xbox::ServerInfoLogInfo) {
       Logger::Info("xbox server started");
@@ -310,6 +315,10 @@ OptResource XboxServer::TaskStart(
       if (event) {
         job->setAsioEvent(event);
         event->setJob(job);
+      }
+
+      if (Cfg::Server::TrackRequestFanout) {
+        requestFanoutLimitIncrement(root_req_id);
       }
 
       assertx(s_dispatcher);

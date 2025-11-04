@@ -155,6 +155,13 @@ cdef class TypeInfoBase:
         """
         return False
 
+cdef inline make_to_internal_data_type_error(value, allowed_pytypes):
+    return TypeError(
+        f'value {value} is not a {allowed_pytypes !r}, is actually of type '
+        f'{type(value)}'
+    )
+
+
 @_cython__final
 cdef class TypeInfo(TypeInfoBase):
     @staticmethod
@@ -177,10 +184,8 @@ cdef class TypeInfo(TypeInfoBase):
         if value_type is self.true_pytype:
             return value
         if not issubclass(value_type, self.allowed_pytypes):
-            raise TypeError(
-                f'value {value} is not a {self.allowed_pytypes !r}, is actually of type '
-                f'{type(value)}'
-            )
+            raise make_to_internal_data_type_error(value, self.allowed_pytypes)
+
         return self.true_pytype(value)
 
     # convert deserialized data to user format
@@ -354,6 +359,47 @@ cdef class IOBufTypeInfo(TypeInfoBase):
     def __reduce__(self):
         return self.singleton_name
 
+@_cython__final
+cdef class Float32TypeInfo(TypeInfoBase):
+    @staticmethod
+    cdef create(const cTypeInfo& cpp_obj, str singleton_name):
+        cdef Float32TypeInfo inst = Float32TypeInfo.__new__(Float32TypeInfo)
+        inst.cpp_obj = &cpp_obj
+        inst.singleton_name = singleton_name
+        return inst
+
+    cpdef to_internal_data(self, object value):
+        cdef type value_type = type(value)
+        if value_type is float:
+            # avoid creating new `float` py object if already 
+            # representable as float32 without rounding
+            if pyFloatIsFloat32(value):
+                return value
+            else:
+                return <float> value
+        elif issubclass(value_type, (float, int)):
+            return <float> value
+
+        raise make_to_internal_data_type_error(value, (float, int))
+
+    cpdef to_python_value(self, object value):
+        return value
+
+    def to_container_value(self, value):
+        return self.to_internal_data(value)
+
+    cdef const cTypeInfo* get_cTypeInfo(self):
+        return self.cpp_obj
+
+    def same_as(Float32TypeInfo self, other):
+        if other is self:
+            return True
+
+        return isinstance(other, Float32TypeInfo)
+
+    def __reduce__(self):
+        return self.singleton_name
+
 
 typeinfo_bool = TypeInfo.create(boolTypeInfo, pbool, (), "typeinfo_bool")
 typeinfo_byte = IntegerTypeInfo.create(byteTypeInfo, -128, 127, "typeinfo_byte")
@@ -362,6 +408,10 @@ typeinfo_i32 = IntegerTypeInfo.create(i32TypeInfo, -1<<31, (1<<31)-1, "typeinfo_
 typeinfo_i64 = IntegerTypeInfo.create(i64TypeInfo, -1<<63, (1<<63)-1, "typeinfo_i64")
 typeinfo_double = TypeInfo.create(doubleTypeInfo, pfloat, (pint,), "typeinfo_double")
 typeinfo_float = TypeInfo.create(floatTypeInfo, pfloat, (pint,), "typeinfo_float")
+# legacy float typeinfo, where Thrift float was represented with 64-bit python float
+# WARNING: when legacy float type info is removed, the below should read
+# `typeinfo_float_legacy = typeinfo_float` for compatibility with pickled and stored data
+typeinfo_float_legacy = TypeInfo.create(floatTypeInfo, pfloat, (pint,), "typeinfo_float_legacy")
 typeinfo_string = StringTypeInfo.create(stringTypeInfo, "typeinfo_string")
 typeinfo_binary = TypeInfo.create(binaryTypeInfo, bytes, (), "typeinfo_binary")
 typeinfo_iobuf = IOBufTypeInfo.create(iobufTypeInfo, "typeinfo_iobuf")
@@ -629,8 +679,20 @@ cdef inline const cTypeInfo* getCTypeInfo(type_info):
         return (<TypeInfoBase>type_info).get_cTypeInfo()
 
 
+# Note: this should only be called in context of `to_python_value`, i.e.,
+# when used with deserialized data.
+#
+# Using this with user-provided data from `__init__`, `__call__`, etc., will
+# result in skipping type and overflow checks, as well as float32 conversion.
+
+# StringTypeInfo is *excluded* because of deferred UnicodeDecodeError after
+# deserialize.
 cdef to_container_elements_no_convert(type_info):
-    return isinstance(type_info, (TypeInfo, IntegerTypeInfo)) or type_info is typeinfo_iobuf
+    return (
+        isinstance(type_info, (TypeInfo, IntegerTypeInfo))
+        or type_info is typeinfo_iobuf
+        or type_info is typeinfo_float
+    )
 
 
 @_cython__final

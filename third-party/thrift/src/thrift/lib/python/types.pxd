@@ -116,6 +116,8 @@ cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::pyth
     # invokes make_unique[Child] using args in C++ but returns unique_ptr[Base]
     unique_ptr[Base] make_unique_base[Base, Child](...) except+
 
+    cdef int16_t pyFloatIsFloat32(object) except -1
+
 
 cdef extern from "<Python.h>":
     cdef const char * PyUnicode_AsUTF8(object unicode)
@@ -137,6 +139,15 @@ cdef class TypeInfo(TypeInfoBase):
         tuple allowed_pytypes,
         str singleton_name
     )
+    cpdef to_internal_data(self, object)
+    cpdef to_python_value(self, object)
+    cdef const cTypeInfo* get_cTypeInfo(self)
+
+cdef class Float32TypeInfo(TypeInfoBase):
+    cdef const cTypeInfo* cpp_obj
+    cdef str singleton_name
+    @staticmethod
+    cdef create(const cTypeInfo& cpp_obj, str singleton_name)
     cpdef to_internal_data(self, object)
     cpdef to_python_value(self, object)
     cdef const cTypeInfo* get_cTypeInfo(self)

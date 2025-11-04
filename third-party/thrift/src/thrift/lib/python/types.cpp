@@ -1951,6 +1951,15 @@ void tag_object_as_mapping(PyTypeObject* type_object) {
   type_object->tp_flags |= Py_TPFLAGS_MAPPING;
 #endif
 }
+
+int16_t pyFloatIsFloat32(PyObject* obj) {
+  const double val = PyFloat_AsDouble(obj);
+  if (val == -1.0 && PyErr_Occurred()) {
+    return -1;
+  }
+  return val == static_cast<float>(val);
+}
+
 } // namespace apache::thrift::python
 
 namespace apache::thrift::python::capi {

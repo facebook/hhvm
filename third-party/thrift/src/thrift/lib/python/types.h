@@ -998,6 +998,14 @@ std::unique_ptr<Base> make_unique_base(Args&&... args) {
   return std::make_unique<Child>(std::forward<Args>(args)...);
 }
 
+/**
+ * Given a Python `float` object (`PyFloatObject`), returns:
+ *   * 0: float cannot be represented as a float32 without rounding
+ *   * 1: float object that is representable as float32 without rounding
+ *   * -1: Python error (not a float, or not convertible to float)
+ */
+int16_t pyFloatIsFloat32(PyObject* obj);
+
 namespace capi {
 /**
  * Retrieves internal _fbthrift_data from `StructOrUnion`. On import failure,

@@ -684,49 +684,49 @@ class mstch_java_service : public mstch_service {
     return java::mangle_java_name(service_->name(), true);
   }
   mstch::node get_oneway_functions() {
-    std::vector<t_function*> funcs;
-    for (auto func : service_->get_functions()) {
-      if (func->qualifier() == t_function_qualifier::oneway) {
-        funcs.push_back(func);
+    std::vector<const t_function*> funcs;
+    for (auto& func : service_->functions()) {
+      if (func.qualifier() == t_function_qualifier::oneway) {
+        funcs.push_back(&func);
       }
     }
     return make_mstch_functions(funcs);
   }
   mstch::node get_request_response_functions() {
-    std::vector<t_function*> funcs;
-    for (auto func : service_->get_functions()) {
-      if (!func->sink_or_stream() && !func->is_interaction_constructor() &&
-          func->qualifier() != t_function_qualifier::oneway) {
-        funcs.push_back(func);
+    std::vector<const t_function*> funcs;
+    for (auto& func : service_->functions()) {
+      if (!func.sink_or_stream() && !func.is_interaction_constructor() &&
+          func.qualifier() != t_function_qualifier::oneway) {
+        funcs.push_back(&func);
       }
     }
     return make_mstch_functions(funcs);
   }
   mstch::node get_single_request_functions() {
-    std::vector<t_function*> funcs;
-    for (auto func : service_->get_functions()) {
-      if (!func->sink_or_stream() && !func->is_interaction_constructor()) {
-        funcs.push_back(func);
+    std::vector<const t_function*> funcs;
+    for (auto& func : service_->functions()) {
+      if (!func.sink_or_stream() && !func.is_interaction_constructor()) {
+        funcs.push_back(&func);
       }
     }
     return make_mstch_functions(funcs);
   }
 
   mstch::node get_streaming_functions() {
-    std::vector<t_function*> funcs;
-    for (auto func : service_->get_functions()) {
-      if (func->stream()) {
-        funcs.push_back(func);
+    std::vector<const t_function*> funcs;
+    for (auto& func : service_->functions()) {
+      if (func.stream()) {
+        funcs.push_back(&func);
       }
     }
     return make_mstch_functions(funcs);
   }
 
   mstch::node get_sink_functions() {
-    std::vector<t_function*> funcs;
-    for (auto func : service_->get_functions()) {
-      if (func->sink()) {
-        funcs.push_back(func);
+    std::vector<const t_function*> funcs;
+    for (auto& func : service_->functions()) {
+      if (func.sink()) {
+        funcs.push_back(&func);
       }
     }
     return make_mstch_functions(funcs);

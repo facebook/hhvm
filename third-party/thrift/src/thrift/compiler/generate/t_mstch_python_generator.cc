@@ -584,12 +584,12 @@ class python_mstch_service : public mstch_service {
         });
   }
 
-  std::vector<t_function*> get_supported_functions(
+  std::vector<const t_function*> get_supported_functions(
       const std::function<bool(const t_function*)>& func_filter) {
-    std::vector<t_function*> funcs;
-    for (auto func : service_->get_functions()) {
-      if (func_filter(func)) {
-        funcs.push_back(func);
+    std::vector<const t_function*> funcs;
+    for (const auto& func : service_->functions()) {
+      if (func_filter(&func)) {
+        funcs.push_back(&func);
       }
     }
     return funcs;

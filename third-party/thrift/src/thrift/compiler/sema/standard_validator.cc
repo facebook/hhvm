@@ -1161,19 +1161,19 @@ void validate_exception_message_annotation(
 
 void validate_interaction_nesting(
     sema_context& ctx, const t_interaction& node) {
-  for (auto* func : node.get_functions()) {
-    if (func->interaction()) {
-      ctx.error(*func, "Nested interactions are forbidden: {}", func->name());
+  for (auto& func : node.functions()) {
+    if (func.interaction()) {
+      ctx.error(func, "Nested interactions are forbidden: {}", func.name());
     }
   }
 }
 
 void validate_interaction_annotations(
     sema_context& ctx, const t_interaction& node) {
-  for (auto* func : node.get_functions()) {
+  for (auto& func : node.functions()) {
     ctx.check(
-        !func->has_unstructured_annotation("thread") &&
-            !func->has_structured_annotation(kCppProcessInEbThreadUri),
+        !func.has_unstructured_annotation("thread") &&
+            !func.has_structured_annotation(kCppProcessInEbThreadUri),
         "Interaction methods cannot be individually annotated with "
         "thread='eb'. Use process_in_event_base on the interaction instead.");
   }

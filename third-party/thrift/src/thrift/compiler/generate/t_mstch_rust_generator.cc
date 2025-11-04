@@ -1232,8 +1232,8 @@ class rust_mstch_service : public mstch_service {
       const t_service* containing_service = nullptr)
       : mstch_service(service, ctx, pos, containing_service),
         options_(*options) {
-    for (auto function : service->get_functions()) {
-      function_upcamel_names_.insert(camelcase(function->name()));
+    for (const auto& function : service->functions()) {
+      function_upcamel_names_.insert(camelcase(function.name()));
     }
     register_methods(
         this,
@@ -2422,7 +2422,7 @@ class rust_mstch_typedef : public mstch_typedef {
 
 mstch::node rust_mstch_service::rust_functions() {
   return make_mstch_array(
-      service_->get_functions(),
+      service_->functions().copy(),
       rust_mstch_function_factory(),
       function_upcamel_names_);
 }

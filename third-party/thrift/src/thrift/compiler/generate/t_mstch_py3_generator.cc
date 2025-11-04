@@ -484,11 +484,10 @@ class py3_mstch_service : public mstch_service {
         });
 
     // Collect supported interactions
-    for (const auto* function : get_functions()) {
-      if (function->is_interaction_constructor()) {
+    for (const auto& function : service_->functions()) {
+      if (function.is_interaction_constructor()) {
         supported_interactions_.insert(
-            dynamic_cast<const t_interaction*>(
-                function->interaction().get_type()));
+            &function.interaction()->as<t_interaction>());
       }
     }
   }
@@ -515,12 +514,12 @@ class py3_mstch_service : public mstch_service {
         "::" + cpp2::get_name(service_);
   }
 
-  std::vector<t_function*> supportedFunctions() {
-    std::vector<t_function*> funcs;
+  std::vector<const t_function*> supportedFunctions() {
+    std::vector<const t_function*> funcs;
     bool no_stream = has_option("no_stream");
-    for (auto* func : service_->get_functions()) {
-      if (is_func_supported(no_stream, func)) {
-        funcs.push_back(func);
+    for (const auto& func : service_->functions()) {
+      if (is_func_supported(no_stream, &func)) {
+        funcs.push_back(&func);
       }
     }
     return funcs;

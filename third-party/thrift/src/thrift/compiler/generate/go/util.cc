@@ -145,14 +145,14 @@ void codegen_data::compute_struct_to_field_names() {
 void codegen_data::compute_req_resp_structs() {
   for (auto service : current_program_->services()) {
     auto svcGoName = go::munge_ident(service->name());
-    for (auto func : service->get_functions()) {
-      make_func_req_resp_structs(func, svcGoName, req_resp_structs);
+    for (const auto& func : service->functions()) {
+      make_func_req_resp_structs(&func, svcGoName, req_resp_structs);
     }
   }
   for (auto interaction : current_program_->interactions()) {
     auto interactionGoName = go::munge_ident(interaction->name());
-    for (auto func : interaction->get_functions()) {
-      make_func_req_resp_structs(func, interactionGoName, req_resp_structs);
+    for (const auto& func : interaction->functions()) {
+      make_func_req_resp_structs(&func, interactionGoName, req_resp_structs);
     }
   }
 

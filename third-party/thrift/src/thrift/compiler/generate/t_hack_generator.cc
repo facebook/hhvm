@@ -1051,9 +1051,9 @@ class t_hack_generator : public t_concat_generator {
   std::vector<const t_function*> get_supported_server_functions(
       const t_service* tservice, bool async) {
     std::vector<const t_function*> funcs;
-    for (auto func : tservice->get_functions()) {
-      if (is_function_supported(func, false, async)) {
-        funcs.push_back(func);
+    for (const auto& func : tservice->functions()) {
+      if (is_function_supported(&func, false, async)) {
+        funcs.push_back(&func);
       }
     }
     return funcs;
@@ -1062,9 +1062,9 @@ class t_hack_generator : public t_concat_generator {
   std::vector<const t_function*> get_supported_client_functions(
       const t_service* tservice) {
     std::vector<const t_function*> funcs;
-    for (auto func : tservice->get_functions()) {
-      if (is_function_supported(func, true)) {
-        funcs.push_back(func);
+    for (const auto& func : tservice->functions()) {
+      if (is_function_supported(&func, true)) {
+        funcs.push_back(&func);
       }
     }
     return funcs;
@@ -1090,10 +1090,9 @@ class t_hack_generator : public t_concat_generator {
   std::vector<const t_service*> get_interactions(
       const t_service* tservice) const {
     std::vector<const t_service*> interactions;
-    for (const auto& func : tservice->get_functions()) {
-      if (func->is_interaction_constructor()) {
-        interactions.push_back(
-            dynamic_cast<const t_service*>(func->interaction().get_type()));
+    for (const auto& func : tservice->functions()) {
+      if (func.is_interaction_constructor()) {
+        interactions.push_back(&func.interaction()->as<t_interaction>());
       }
     }
     return interactions;

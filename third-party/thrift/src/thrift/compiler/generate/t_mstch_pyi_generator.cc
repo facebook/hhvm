@@ -280,8 +280,8 @@ class pyi_mstch_program : public mstch_program {
   void visit_return_types() {
     std::set<std::string> visited;
     for (const auto* service : mstch_program::program_->services()) {
-      for (const auto* function : service->get_functions()) {
-        const auto* return_type = function->return_type().get_type();
+      for (const auto& function : service->functions()) {
+        const auto* return_type = function.return_type().get_type();
         std::string name = to_flat_type_name(return_type);
 
         if (visited.find(name) == visited.end()) {

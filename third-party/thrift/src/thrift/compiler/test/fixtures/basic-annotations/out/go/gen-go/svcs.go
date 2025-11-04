@@ -141,6 +141,13 @@ func (p *procFuncBadInteractionFoo) RunContext(ctx context.Context, reqStruct th
     return result, nil
 }
 
+func (p *BadInteractionProcessor) OnTermination() {
+    // If the underlying handler implements OnTermination()
+    if terminable, ok := p.handler.(thrift.Terminable); ok {
+        terminable.OnTermination()
+    }
+}
+
 
 type MyService interface {
     Ping(ctx context.Context) (error)

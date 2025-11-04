@@ -22,3 +22,8 @@ const (
 	interactionCreateKey interactionContextKey = 1
 	interactionIDKey     interactionContextKey = 2
 )
+
+// Terminable is implemented by an interaction processor.
+type Terminable interface {
+	OnTermination()
+}

@@ -205,9 +205,15 @@ func (s *rocketServer) metadataPush(msg payload.Payload) {
 	if metadata.InteractionTerminate != nil {
 		interactionID := metadata.InteractionTerminate.InteractionId
 		s.interactionsMutex.Lock()
+		interaction, ok := s.interactions[interactionID]
 		delete(s.interactions, interactionID)
 		s.interactionsMutex.Unlock()
 		s.log("receive interaction terminate signal for ID %d", interactionID)
+		if ok {
+			if terminable, isTerminable := interaction.(types.Terminable); isTerminable {
+				terminable.OnTermination()
+			}
+		}
 	} else if metadata.StreamHeadersPush != nil {
 		s.log("unsupported StreamHeadersPush metadata type")
 	} else if metadata.TransportMetadataPush != nil {

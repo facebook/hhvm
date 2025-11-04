@@ -299,6 +299,13 @@ func (p *procFuncMyInteractionTruthify) RunStreamContext(
     onStreamComplete()
 }
 
+func (p *MyInteractionProcessor) OnTermination() {
+    // If the underlying handler implements OnTermination()
+    if terminable, ok := p.handler.(thrift.Terminable); ok {
+        terminable.OnTermination()
+    }
+}
+
 type MyInteractionFast interface {
     Frobnicate(ctx context.Context) (int32, error)
     Ping(ctx context.Context) (error)
@@ -563,6 +570,13 @@ func (p *procFuncMyInteractionFastTruthify) RunStreamContext(
     onStreamComplete()
 }
 
+func (p *MyInteractionFastProcessor) OnTermination() {
+    // If the underlying handler implements OnTermination()
+    if terminable, ok := p.handler.(thrift.Terminable); ok {
+        terminable.OnTermination()
+    }
+}
+
 type SerialInteraction interface {
     Frobnicate(ctx context.Context) (error)
 }
@@ -675,6 +689,13 @@ func (p *procFuncSerialInteractionFrobnicate) RunContext(ctx context.Context, re
     }
 
     return result, nil
+}
+
+func (p *SerialInteractionProcessor) OnTermination() {
+    // If the underlying handler implements OnTermination()
+    if terminable, ok := p.handler.(thrift.Terminable); ok {
+        terminable.OnTermination()
+    }
 }
 
 type BoxedInteraction interface {
@@ -790,6 +811,13 @@ func (p *procFuncBoxedInteractionGetABox) RunContext(ctx context.Context, reqStr
 
     result.Success = retval
     return result, nil
+}
+
+func (p *BoxedInteractionProcessor) OnTermination() {
+    // If the underlying handler implements OnTermination()
+    if terminable, ok := p.handler.(thrift.Terminable); ok {
+        terminable.OnTermination()
+    }
 }
 
 

@@ -99,3 +99,12 @@ func (p *{{service:go_name}}Processor) GetThriftMetadata() *{{program:metadata_q
 
 {{/function:go_server_supported?}}
 {{/service:functions}}
+{{#service:interaction?}}
+
+func (p *{{service:go_name}}Processor) OnTermination() {
+    // If the underlying handler implements OnTermination()
+    if terminable, ok := p.handler.(thrift.Terminable); ok {
+        terminable.OnTermination()
+    }
+}
+{{/service:interaction?}}

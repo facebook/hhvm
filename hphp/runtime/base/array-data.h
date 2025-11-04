@@ -533,6 +533,13 @@ public:
   ArrayData* copy() const;
 
   /////////////////////////////////////////////////////////////////////////////
+  // Allocation for static arrays
+
+  static void* AllocStatic(size_t size);
+
+  static void FreeStatic(void* ptr);
+
+  /////////////////////////////////////////////////////////////////////////////
   // Other functions.
   //
   // You should avoid adding methods to this section.  If the logic you're

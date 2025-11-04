@@ -485,7 +485,7 @@ MonotypeDict<Key>* MonotypeDict<Key>::MakeReserve(
   auto const alloc = [&]{
     if (!Static) return tl_heap->objMallocIndex(index);
     auto const size = MemoryManager::sizeIndex2Size(index);
-    return Cfg::Eval::LowStaticArrays ? lower_malloc(size) : uncounted_malloc(size);
+    return ArrayData::AllocStatic(size);
   }();
 
   auto const mad = static_cast<MonotypeDict<Key>*>(alloc);

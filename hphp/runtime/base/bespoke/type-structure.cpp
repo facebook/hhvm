@@ -194,10 +194,10 @@ void TypeStructure::InitializeLayouts() {
 template <bool Static>
 TypeStructure* TypeStructure::MakeReserve(bool legacy, Kind kind) {
   auto const index = sizeIndex(kind);
-  auto const size = MemoryManager::sizeIndex2Size(index);
   auto const alloc = [&]{
     if (!Static) return tl_heap->objMallocIndex(index);
-    return Cfg::Eval::LowStaticArrays ? lower_malloc(size) : uncounted_malloc(size);
+    auto const size = MemoryManager::sizeIndex2Size(index);
+    return ArrayData::AllocStatic(size);
   }();
 
   auto const tad = static_cast<TypeStructure*>(alloc);
@@ -462,7 +462,7 @@ TypeStructure* TypeStructure::copy() const {
   auto const heapSize = MemoryManager::sizeIndex2Size(sizeIdx);
   auto const mem = [&]{
     if (!Static) return tl_heap->objMallocIndex(sizeIdx);
-    return Cfg::Eval::LowStaticArrays ? lower_malloc(heapSize) : uncounted_malloc(heapSize);
+    return ArrayData::AllocStatic(heapSize);
   }();
   auto const ad = static_cast<TypeStructure*>(mem);
 

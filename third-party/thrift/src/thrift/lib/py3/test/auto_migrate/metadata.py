@@ -250,9 +250,19 @@ class MetadataTests(unittest.TestCase):
 
     def test_metadata_services_structured_annotations(self) -> None:
         annotations = gen_metadata(TestingService).structuredAnnotations
-        self.assertEqual(len(annotations), 2)
+        self.assertEqual(len(annotations), 3)
 
         annotation = annotations[0]
+        self.assertEqual(annotation.name, "thrift.DeprecatedUnvalidatedAnnotations")
+        self.assertEqual(["items"], list(annotation.fields.keys()))
+
+        items_map = annotation.fields["items"].as_map()
+        self.assertEqual(len(list(items_map)), 3)
+        self.assertEqual('"""', items_map["double_quotes"].as_string())
+        self.assertEqual("yes", items_map["fun_times"].as_string())
+        self.assertEqual("'", items_map["single_quote"].as_string())
+
+        annotation = annotations[1]
         self.assertEqual(annotation.name, "testing.StructuredAnnotation")
         self.assertEqual(len(list(annotation.fields)), 4)
 

@@ -265,6 +265,7 @@ union ValueOrError {
   3: HardError error;
 }
 
+@thrift.DeprecatedUnvalidatedAnnotations{items = {"anno1": "foo", "bar": "1"}}
 struct easy {
   3: optional string name;
   1: i32 val;
@@ -272,7 +273,7 @@ struct easy {
   4: Integers an_int;
   @python.Py3Hidden{}
   5: i64 py3_hidden;
-} (anno1 = "foo", bar)
+}
 
 struct PrivateCppRefField {
   # (cpp.experimental.lazy) field is always private
@@ -321,10 +322,11 @@ union ComplexUnion {
   14: map<float, float> float_map;
 }
 
+@thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.noncomparable": "1"}}
 union IOBufUnion {
   @cpp.Type{name = "folly::IOBuf"}
   1: binary buf;
-} (cpp.noncomparable)
+}
 
 struct hard {
   1: i32 val;
@@ -472,18 +474,23 @@ struct EdgeCaseStruct {
   1: map<Reserved, list<i64>> reservedValues;
 }
 
+@thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.noncomparable": "1"}}
 struct SlowCompare {
   1: string field1;
   2: i32 field2;
   3: Color field3;
-} (cpp.noncomparable)
+}
 
+@thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.noncopyable": "1"}}
 struct NonCopyable {
   1: i64 num;
-} (cpp.noncopyable)
+}
 
 struct Messy {
-  1: optional string opt_field (some = "annotation", a.b.c = "d.e.f");
+  @thrift.DeprecatedUnvalidatedAnnotations{
+    items = {"a.b.c": "d.e.f", "some": "annotation"},
+  }
+  1: optional string opt_field;
   3: string unq_field = "xyzzy";
   4: Runtime struct_field = {
     "bool_val": true,
@@ -580,6 +587,9 @@ struct StructuredAnnotation {
   5: optional StructuredAnnotation recurse;
 }
 
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {"double_quotes": '"""', "fun_times": "yes", "single_quote": "'"},
+}
 @StructuredAnnotation{
   first = {1.1: 2},
   second = 3,
@@ -601,10 +611,12 @@ service TestingService {
     2: string second,
     @StructuredAnnotation{second = 42}
     3: i64 third,
-    4: string fourth (iv = "4"),
+    @thrift.DeprecatedUnvalidatedAnnotations{items = {"iv": "4"}}
+    4: string fourth,
   );
   void takes_a_list(1: I32List ints) throws (1: SimpleError e);
-  void take_it_easy(1: i32 how, 2: easy what) (a = "b.c.d");
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"a": "b.c.d"}}
+  void take_it_easy(1: i32 how, 2: easy what);
   void pick_a_color(1: Color color);
   void int_sizes(1: byte one, 2: i16 two, 3: i32 three, 4: i64 four);
 
@@ -612,7 +624,7 @@ service TestingService {
   @cpp.Name{value = "renamed_func_in_cpp"}
   bool renamed_func(1: bool ret);
   i32 getPriority();
-} (fun_times = "yes", single_quote = "'", double_quotes = '"""')
+}
 
 @cpp.Name{value = "TestingServiceChildRenamed"}
 service TestingServiceChild extends TestingService {
@@ -641,10 +653,11 @@ union Misordered {
 @cpp.Type{name = "folly::IOBuf"}
 typedef binary IOBuf
 
+@thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.noncomparable": "1"}}
 @python.Py3Hidden
 struct IOBufListStruct {
   1: list<IOBuf> iobufs;
-} (cpp.noncomparable)
+}
 
 // StructOrder* should have same fields when sorted in key order.
 // They exist to test whether deserialize is insensitive to declartion order.

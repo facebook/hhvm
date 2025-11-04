@@ -39,17 +39,16 @@ func main() {
 		syscall.SIGINT,
 	)
 
-	handler := &rpcConformanceServiceHandler{}
-	proc := rpc.NewRPCConformanceServiceProcessor(handler)
-	ts, addr, err := newServer(
-		proc,
-		"[::]:0",
-	)
+	listener, err := net.Listen("tcp", "[::]:0")
 	if err != nil {
-		glog.Fatalf("failed to start server: %v", err)
+		glog.Fatalf("failed to create listener: %v", err)
 	}
 
-	fmt.Println(addr.(*net.TCPAddr).Port)
+	handler := &rpcConformanceServiceHandler{}
+	proc := rpc.NewRPCConformanceServiceProcessor(handler)
+	ts := thrift.NewServer(proc, listener, thrift.TransportIDRocket)
+
+	fmt.Println(listener.Addr().(*net.TCPAddr).Port)
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
 		err := ts.ServeContext(ctx)
@@ -61,14 +60,6 @@ func main() {
 	<-sigc
 	cancel()
 	os.Exit(0)
-}
-
-func newServer(processor thrift.Processor, addr string) (thrift.Server, net.Addr, error) {
-	listener, err := net.Listen("tcp", addr)
-	if err != nil {
-		return nil, nil, err
-	}
-	return thrift.NewServer(processor, listener, thrift.TransportIDRocket), listener.Addr(), nil
 }
 
 type rpcConformanceServiceHandler struct {

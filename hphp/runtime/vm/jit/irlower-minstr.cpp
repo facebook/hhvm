@@ -904,6 +904,11 @@ irlower::LvalPtrs implVecElemLval(IRLS& env, Vreg rarr,
     v << lea{ridx[ridx * 8], ridx_times_9};
     auto const type_offset = VanillaVec::entriesOffset() + offsetof(UnalignedTypedValue, m_type);
     auto const data_offset = VanillaVec::entriesOffset() + offsetof(UnalignedTypedValue, m_data);
+    if (arch() == Arch::ARM) {
+      auto new_base = v.makeReg();
+      v << lea{rarr[ridx_times_9], new_base};
+      return {new_base + type_offset, new_base + data_offset};
+    }
     return {rarr[ridx_times_9] + type_offset, rarr[ridx_times_9] + data_offset};
   } else {
     // See PackedBlock::LvalAt for an explanation of this math.

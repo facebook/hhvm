@@ -183,6 +183,18 @@ class BidiTests(IsolatedAsyncioTestCase):
 
                 self.assertEqual(total_items, stop - start)
 
+    async def test_bidi_service_ignore_return(self) -> None:
+        async with local_server() as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(
+                TestBidiService,
+                host=ip,
+                port=port,
+                client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
+            ) as client:
+                await client.echo(0.0)
+
     async def test_bidi_service_unused_stream(self) -> None:
         async with local_server() as sa:
             ip, port = sa.ip, sa.port
@@ -194,8 +206,32 @@ class BidiTests(IsolatedAsyncioTestCase):
                 client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
             ) as client:
                 bidi = await client.echo(0.0)
-                # if we call method but don't start the sink we crash
                 await bidi.sink.sink(yield_strs(1, 5, 0.1))
+
+    async def test_bidi_service_stream_without_sink(self) -> None:
+        async with local_server() as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(
+                TestBidiService,
+                host=ip,
+                port=port,
+                client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
+            ) as client:
+                bidi = await client.echo(0.0)
+
+                def empty_generator() -> Generator[str, None, None]:
+                    yield ""
+
+                expected_err = (
+                    TimeoutError
+                    if sys.version_info.minor >= 12
+                    else asyncio.exceptions.TimeoutError  # remove this when we drop python 3.10
+                )
+                with self.assertRaises(expected_err):
+                    await asyncio.wait_for(
+                        self.assert_stream(bidi.stream, empty_generator()), 0.2
+                    )
 
     async def test_bidi_service_partial_consume_stream(self) -> None:
         async with local_server() as sa:
@@ -312,12 +348,7 @@ class BidiTests(IsolatedAsyncioTestCase):
 
                 self.assertEqual(total_items, stop - start)
 
-    @parameterized.expand(
-        [
-            # (True,), TODO(T243497155, T243497257): fix cpp state bugs surfaced by IDL-declared exception
-            (False,)
-        ]
-    )
+    @parameterized.expand([(True,), (False,)])
     async def test_bidi_server_first_response_throws(
         self, expected_throw: bool
     ) -> None:

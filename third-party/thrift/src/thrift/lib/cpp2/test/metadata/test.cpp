@@ -583,7 +583,7 @@ TEST_F(ServiceMetadataTest, ServiceTest) {
       metadata.services()->at(*response_.services()->front().service_name());
   EXPECT_EQ(*s.name(), "service_test.MyTestService");
   EXPECT_TRUE(p.uri()->empty());
-  EXPECT_EQ(s.functions()->size(), 3);
+  EXPECT_EQ(s.functions()->size(), 4);
   EXPECT_EQ(
       *apache::thrift::get_pointer(s.parent()), "service_test.ParentService");
 
@@ -627,6 +627,15 @@ TEST_F(ServiceMetadataTest, ServiceTest) {
   const auto& f2 = s.functions()[2];
   EXPECT_EQ(*f2.name(), "noReturn");
   EXPECT_TRUE(*f2.is_oneway());
+
+  const auto& f3 = s.functions()[3];
+  EXPECT_EQ(*f3.name(), "open");
+  EXPECT_EQ(f3.return_type()->getType(), ThriftType::Type::t_primitive);
+  EXPECT_EQ(
+      *f3.return_type()->t_primitive(), ThriftPrimitiveType::THRIFT_VOID_TYPE);
+  EXPECT_EQ(f3.arguments()->size(), 1);
+  EXPECT_EQ(f3.exceptions()->size(), 0);
+  EXPECT_FALSE(*f3.is_oneway());
 }
 
 TEST_F(ServiceMetadataTest, ServiceNameTestWithUri) {

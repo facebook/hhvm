@@ -29,6 +29,15 @@ service ParentService {
   i32 parentFun();
 }
 
+interaction FileAccess {
+  void seek(1: i32 delta);
+}
+
+interaction LegacyFileAccessConstructor {
+  void legacyOpen(1: string path);
+  void legacySeek(1: i32 delta);
+}
+
 service MyTestService extends ParentService {
   list<typedef_test.Types> getAllTypes();
   typedef_test.Types getType(
@@ -36,4 +45,7 @@ service MyTestService extends ParentService {
     1: typedef_test.StringMap stringMap,
   ) throws (1: CutoffException ex);
   oneway void noReturn();
+
+  FileAccess open(1: string path);
+  performs LegacyFileAccessConstructor;
 }

@@ -466,7 +466,8 @@ class mstch_service : public mstch_base {
       const t_service* containing_service = nullptr)
       : mstch_base(ctx, pos),
         service_(s),
-        containing_service_(containing_service) {
+        containing_service_(containing_service),
+        functions_(s->functions().copy()) {
     assert(containing_service_ == nullptr || service_->is<t_interaction>());
 
     register_methods(
@@ -496,12 +497,12 @@ class mstch_service : public mstch_base {
     // Collect performed interactions and cache them.
     std::set<const t_interaction*> seen;
     for (const auto* function : get_functions()) {
-      if (const auto& interaction = function->interaction()) {
-        auto* ptr = dynamic_cast<const t_interaction*>(interaction.get_type());
-        if (!seen.insert(ptr).second) {
+      if (const t_type_ref& interaction_ref = function->interaction()) {
+        const t_interaction& interaction = interaction_ref->as<t_interaction>();
+        if (!seen.insert(&interaction).second) {
           continue; // Already seen this interaction.
         }
-        interactions_.push_back(ptr);
+        interactions_.push_back(&interaction);
       }
     }
   }
@@ -568,12 +569,20 @@ class mstch_service : public mstch_base {
   const t_service* containing_service_ = nullptr;
 
   mstch::node make_mstch_extended_service_cached(const t_service* service);
-  virtual const std::vector<t_function*>& get_functions() const {
-    return service_->get_functions();
+  virtual const std::vector<const t_function*>& get_functions() const {
+    // Ideally, we would make this return node_list_view<const t_function> (i.e.
+    // service_->functions() directly), but the cpp2 generator overrides this
+    // method with an implementation returning a subset.
+    // Since node_list_view<T> must be over an std::vector<std::unique_ptr<T>>,
+    // and we can't steal ownership of all the functions, we must make a copy.
+    return functions_;
   }
   const t_service* parent_service() const {
     return service_->is<t_interaction>() ? containing_service_ : service_;
   }
+
+ private:
+  std::vector<const t_function*> functions_;
 };
 
 class mstch_function : public mstch_base {

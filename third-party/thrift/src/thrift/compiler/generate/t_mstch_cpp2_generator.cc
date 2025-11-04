@@ -1034,9 +1034,9 @@ class cpp_mstch_program : public mstch_program {
     for (const auto* service : program_->services()) {
       // function annotations are not currently included.
       unique_names.emplace(get_fatal_string_short_id(service), service->name());
-      for (const auto* f : service->get_functions()) {
-        unique_names.emplace(get_fatal_string_short_id(f), f->name());
-        for (const auto& p : f->params().fields()) {
+      for (const auto& f : service->functions()) {
+        unique_names.emplace(get_fatal_string_short_id(&f), f.name());
+        for (const auto& p : f.params().fields()) {
           unique_names.emplace(get_fatal_string_short_id(&p), p.name());
         }
       }
@@ -1221,7 +1221,7 @@ class cpp_mstch_service : public mstch_service {
 
     const auto all_functions = mstch_service::get_functions();
     for (size_t id = split_id; id < all_functions.size(); id += split_count) {
-      functions_.push_back(all_functions[id]);
+      split_functions_.push_back(all_functions[id]);
     }
   }
   std::string get_service_namespace(const t_program* program) override {
@@ -1291,11 +1291,11 @@ class cpp_mstch_service : public mstch_service {
   }
 
  private:
-  const std::vector<t_function*>& get_functions() const override {
-    return functions_;
+  const std::vector<const t_function*>& get_functions() const override {
+    return split_functions_;
   }
 
-  std::vector<t_function*> functions_;
+  std::vector<const t_function*> split_functions_;
   source_manager& sm_;
 };
 
@@ -3122,7 +3122,7 @@ class validate_splits {
     for (const t_service* s : services) {
       auto iter = client_name_to_split_count_.find(s->name());
       if (iter != client_name_to_split_count_.end() &&
-          iter->second > static_cast<int32_t>(s->get_functions().size())) {
+          iter->second > static_cast<int32_t>(s->functions().size())) {
         ctx.report(
             *s,
             "more-splits-than-functions-rule",
@@ -3131,7 +3131,7 @@ class validate_splits {
             "can not be greater than the number of functions, which is {}.",
             iter->second,
             s->name(),
-            s->get_functions().size());
+            s->functions().size());
       }
     }
   }

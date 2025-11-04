@@ -920,3 +920,101 @@ class DisableFieldCache implements \IThriftSyncStruct, \IThriftStructMetadata {
 
 }
 
+/**
+ * UNSAFE: Enables unconstrained operations on 32-bit floating-point values.
+ * 
+ * By default, in the absence of this annotation, thrift-python types ensure
+ * that all values assigned to (or accessed from) single precision
+ * floating-point (i.e., `float` in Thrift IDL) fields have the correct
+ * precision, constraining them as needed.
+ * 
+ * This is necessary because Python's native floating-point number type
+ * (`float`) may have more precision that 32 bits. Indeed, while the exact
+ * precision is implementation-specified, it typically corresponds to `double`
+ * in C, i.e. 64 bits (see
+ * https://docs.python.org/3/library/stdtypes.html#typesnumeric). Ensuring that
+ * such native values are valid 32-bit Thrift `float`s requires them to be
+ * properly constrained, by either:
+ * 1. rounding them to the closest 32-bit number, if they are in range, or
+ * 2. bounding them to +/-Inf if they are greater/less than the max/min
+ *    representable 32-bit number.
+ * 
+ * Note that NaN is *never* a valid Thrift floating point number, as specified
+ * in the [Thrift Object Model](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#primitive-types).
+ * The behavior of Thrift operations in presence of native Python NaN values is
+ * left undefined.
+ * 
+ * This annotation is STRONGLY DISCOURAGED, and is introduced merely to allow
+ * existing unsafe operations to be grandfathered into the new correct behavior
+ * described above.
+ * 
+ * The presence of this annotation on a `float` field (or a collection whose
+ * items have `float`) suppresses the constraining logic above. This can result
+ * in unexpected behavior, including mismatching values before and after
+ * serialization.
+ * 
+ * This annotation MUST NOT be applied on fields whose [Thrift IDL Type](https://github.com/facebook/fbthrift/blob/main/thrift/doc/glossary/kinds-of-types.md#thrift-idl-types)
+ * is not `float`, or a container whose item type(s) are not `float` (or
+ * containers that satisfy this property, recursively).
+ *
+ * Original thrift struct:-
+ * EnableUnsafeUnconstrainedFloat32
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/python/EnableUnsafeUnconstrainedFloat32'))>>
+class EnableUnsafeUnconstrainedFloat32 implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'EnableUnsafeUnconstrainedFloat32';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "python.EnableUnsafeUnconstrainedFloat32",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+

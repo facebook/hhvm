@@ -25,6 +25,7 @@ namespace python {
   ::apache::thrift::detail::md::StructMetadata<DeprecatedSortSetOnSerialize>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<DeprecatedKeySortMapOnSerialize>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<DisableFieldCache>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<EnableUnsafeUnconstrainedFloat32>::gen(metadata);
   return metadata;
 }
 } // namespace facebook

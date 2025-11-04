@@ -52,7 +52,7 @@ class ThriftEnumWrapper(int):
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'Py3Hidden', 'PyDeprecatedHidden', 'Flags', 'Name', 'Adapter', 'UseCAPI', 'Py3EnableCppAdapter', 'MigrationBlockingAllowInheritance', 'DeprecatedSortSetOnSerialize', 'DeprecatedKeySortMapOnSerialize', 'DisableFieldCache']
+__all__ = ['UTF8STRINGS', 'Py3Hidden', 'PyDeprecatedHidden', 'Flags', 'Name', 'Adapter', 'UseCAPI', 'Py3EnableCppAdapter', 'MigrationBlockingAllowInheritance', 'DeprecatedSortSetOnSerialize', 'DeprecatedKeySortMapOnSerialize', 'DisableFieldCache', 'EnableUnsafeUnconstrainedFloat32']
 
 class Py3Hidden:
   r"""
@@ -1302,6 +1302,140 @@ class DisableFieldCache:
   def _to_py_deprecated(self):
     return self
 
+class EnableUnsafeUnconstrainedFloat32:
+  r"""
+  UNSAFE: Enables unconstrained operations on 32-bit floating-point values.
+  
+  By default, in the absence of this annotation, thrift-python types ensure
+  that all values assigned to (or accessed from) single precision
+  floating-point (i.e., `float` in Thrift IDL) fields have the correct
+  precision, constraining them as needed.
+  
+  This is necessary because Python's native floating-point number type
+  (`float`) may have more precision that 32 bits. Indeed, while the exact
+  precision is implementation-specified, it typically corresponds to `double`
+  in C, i.e. 64 bits (see
+  https://docs.python.org/3/library/stdtypes.html#typesnumeric). Ensuring that
+  such native values are valid 32-bit Thrift `float`s requires them to be
+  properly constrained, by either:
+  1. rounding them to the closest 32-bit number, if they are in range, or
+  2. bounding them to +/-Inf if they are greater/less than the max/min
+     representable 32-bit number.
+  
+  Note that NaN is *never* a valid Thrift floating point number, as specified
+  in the [Thrift Object Model](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#primitive-types).
+  The behavior of Thrift operations in presence of native Python NaN values is
+  left undefined.
+  
+  This annotation is STRONGLY DISCOURAGED, and is introduced merely to allow
+  existing unsafe operations to be grandfathered into the new correct behavior
+  described above.
+  
+  The presence of this annotation on a `float` field (or a collection whose
+  items have `float`) suppresses the constraining logic above. This can result
+  in unexpected behavior, including mismatching values before and after
+  serialization.
+  
+  This annotation MUST NOT be applied on fields whose [Thrift IDL Type](https://github.com/facebook/fbthrift/blob/main/thrift/doc/glossary/kinds-of-types.md#thrift-idl-types)
+  is not `float`, or a container whose item type(s) are not `float` (or
+  containers that satisfy this property, recursively).
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('EnableUnsafeUnconstrainedFloat32')
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    kwargs_copy = dict(kwargs)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', not wrap_enum_constants))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+    )
+
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.annotation.python.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.EnableUnsafeUnconstrainedFloat32, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.python.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.EnableUnsafeUnconstrainedFloat32, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.annotation.python.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.EnableUnsafeUnconstrainedFloat32, self)
+
+  def _to_py_deprecated(self):
+    return self
+
 all_structs.append(Py3Hidden)
 Py3Hidden.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 )))
@@ -1454,6 +1588,15 @@ DisableFieldCache.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 DisableFieldCache.thrift_struct_annotations = {
 }
 DisableFieldCache.thrift_field_annotations = {
+}
+
+all_structs.append(EnableUnsafeUnconstrainedFloat32)
+EnableUnsafeUnconstrainedFloat32.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
+
+EnableUnsafeUnconstrainedFloat32.thrift_struct_annotations = {
+}
+EnableUnsafeUnconstrainedFloat32.thrift_field_annotations = {
 }
 
 fix_spec(all_structs)

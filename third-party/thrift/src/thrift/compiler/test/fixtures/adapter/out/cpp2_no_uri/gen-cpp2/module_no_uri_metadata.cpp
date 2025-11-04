@@ -40,10 +40,11 @@ StructMetadata<::cpp2::RefUnion>::gen(ThriftMetadata& metadata) {
     { 1, "field1", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("cpp.Ref", { {"type", cvInteger(2) } }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_no_uri_RefUnion_fields) {
-    auto& field = module_no_uri_RefUnion.fields()[i];
+    [[maybe_unused]] auto& field = module_no_uri_RefUnion.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());

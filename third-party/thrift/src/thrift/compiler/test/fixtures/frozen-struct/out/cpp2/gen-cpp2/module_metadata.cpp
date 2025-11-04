@@ -46,10 +46,11 @@ StructMetadata<::some::ns::ModuleA>::gen(ThriftMetadata& metadata) {
     { 1, "i32Field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "strField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "listField", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{ }},    { 4, "mapField", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 5, "inclAField", false, std::make_unique<Struct<::some::ns::IncludedA>>("include1.IncludedA"), std::vector<ThriftConstStruct>{ }},    { 6, "inclBField", false, std::make_unique<Struct<::some::ns::IncludedB>>("include2.IncludedB"), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_ModuleA_fields) {
-    auto& field = module_ModuleA.fields()[i];
+    [[maybe_unused]] auto& field = module_ModuleA.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -75,10 +76,11 @@ StructMetadata<::some::ns::ModuleB>::gen(ThriftMetadata& metadata) {
     { 1, "i32Field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "inclEnumB", false, std::make_unique<Enum<::some::ns::EnumB>>("module.EnumB"), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_ModuleB_fields) {
-    auto& field = module_ModuleB.fields()[i];
+    [[maybe_unused]] auto& field = module_ModuleB.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -104,10 +106,11 @@ StructMetadata<::some::ns::detail::DirectlyAdapted>::gen(ThriftMetadata& metadat
     { 1, "field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_DirectlyAdapted_fields) {
-    auto& field = module_DirectlyAdapted.fields()[i];
+    [[maybe_unused]] auto& field = module_DirectlyAdapted.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -134,10 +137,11 @@ StructMetadata<::some::ns::CppRef>::gen(ThriftMetadata& metadata) {
     { 1, "shared_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(2) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 2, "shared_const_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(1) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 3, "opt_shared_field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(2) } }).cv_struct(), }},    { 4, "opt_shared_const_field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(1) } }).cv_struct(), }},    { 5, "boxed_field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.Box", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_CppRef_fields) {
-    auto& field = module_CppRef.fields()[i];
+    [[maybe_unused]] auto& field = module_CppRef.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());

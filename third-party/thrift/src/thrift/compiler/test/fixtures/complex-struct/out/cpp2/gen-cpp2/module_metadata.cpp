@@ -46,10 +46,11 @@ StructMetadata<::cpp2::MyStructFloatFieldThrowExp>::gen(ThriftMetadata& metadata
     { 1, "myLongField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "MyByteField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "myStringField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 4, "myFloatField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyStructFloatFieldThrowExp_fields) {
-    auto& field = module_MyStructFloatFieldThrowExp.fields()[i];
+    [[maybe_unused]] auto& field = module_MyStructFloatFieldThrowExp.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -75,10 +76,11 @@ StructMetadata<::cpp2::MyStructMapFloatThrowExp>::gen(ThriftMetadata& metadata) 
     { 1, "myLongField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "mapListOfFloats", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<List>(std::make_unique<List>(std::make_unique<Typedef>("module.floatTypedef", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{  })))), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyStructMapFloatThrowExp_fields) {
-    auto& field = module_MyStructMapFloatThrowExp.fields()[i];
+    [[maybe_unused]] auto& field = module_MyStructMapFloatThrowExp.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -104,10 +106,11 @@ StructMetadata<::cpp2::MyStruct>::gen(ThriftMetadata& metadata) {
     { 1, "MyIntField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "MyStringField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "MyDataField", false, std::make_unique<Struct<::cpp2::MyDataItem>>("module.MyDataItem"), std::vector<ThriftConstStruct>{ }},    { 4, "myEnum", false, std::make_unique<Enum<::cpp2::MyEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{ }},    { 5, "MyBoolField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ }},    { 6, "MyByteField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{ }},    { 7, "MyShortField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{ }},    { 8, "MyLongField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 9, "MyDoubleField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ }},    { 10, "lDouble", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{ }},    { 11, "lShort", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{ }},    { 12, "lInteger", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 13, "lLong", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{ }},    { 14, "lString", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ }},    { 15, "lBool", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE)), std::vector<ThriftConstStruct>{ }},    { 16, "lByte", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE)), std::vector<ThriftConstStruct>{ }},    { 17, "mShortString", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ }},    { 18, "mIntegerString", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ }},    { 19, "mStringMyStruct", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct")), std::vector<ThriftConstStruct>{ }},    { 20, "mStringBool", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE)), std::vector<ThriftConstStruct>{ }},    { 21, "mIntegerInteger", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 22, "mIntegerBool", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE)), std::vector<ThriftConstStruct>{ }},    { 23, "sShort", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{ }},    { 24, "sMyStruct", false, std::make_unique<Set>(std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct")), std::vector<ThriftConstStruct>{ }},    { 25, "sLong", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{ }},    { 26, "sString", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ }},    { 27, "sByte", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE)), std::vector<ThriftConstStruct>{ }},    { 28, "mListList", false, std::make_unique<Map>(std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE))), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyStruct_fields) {
-    auto& field = module_MyStruct.fields()[i];
+    [[maybe_unused]] auto& field = module_MyStruct.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -133,10 +136,11 @@ StructMetadata<::cpp2::SimpleStruct>::gen(ThriftMetadata& metadata) {
     { 1, "age", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_SimpleStruct_fields) {
-    auto& field = module_SimpleStruct.fields()[i];
+    [[maybe_unused]] auto& field = module_SimpleStruct.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -162,10 +166,11 @@ StructMetadata<::cpp2::defaultStruct>::gen(ThriftMetadata& metadata) {
     { 1, "myLongDFset", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "myLongDF", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "portDFset", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 4, "portNum", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 5, "myBinaryDFset", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ }},    { 6, "myBinary", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ }},    { 7, "myByteDFSet", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{ }},    { 8, "myByte", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{ }},    { 9, "myDoubleDFset", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ }},    { 10, "myDoubleDFZero", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ }},    { 12, "myDouble", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ }},    { 13, "field3", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ }},    { 14, "myList", false, std::make_unique<List>(std::make_unique<Enum<::cpp2::MyEnum>>("module.MyEnum")), std::vector<ThriftConstStruct>{ }},    { 15, "mySet", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ }},    { 16, "simpleStruct", false, std::make_unique<Struct<::cpp2::SimpleStruct>>("module.SimpleStruct"), std::vector<ThriftConstStruct>{ }},    { 17, "listStructDFset", false, std::make_unique<List>(std::make_unique<Struct<::cpp2::SimpleStruct>>("module.SimpleStruct")), std::vector<ThriftConstStruct>{ }},    { 18, "myUnion", false, std::make_unique<Union<::cpp2::MyUnion>>("module.MyUnion"), std::vector<ThriftConstStruct>{ }},    { 19, "listUnionDFset", false, std::make_unique<List>(std::make_unique<Union<::cpp2::MyUnion>>("module.MyUnion")), std::vector<ThriftConstStruct>{ }},    { 20, "mapNestlistStructDfSet", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<List>(std::make_unique<Struct<::cpp2::SimpleStruct>>("module.SimpleStruct"))), std::vector<ThriftConstStruct>{ }},    { 21, "mapJavaTypeDFset", false, std::make_unique<Typedef>("module.map_i64_string_5732", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},    { 22, "emptyMap", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 23, "enumMapDFset", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Enum<::cpp2::MyEnum>>("module.MyEnum"))), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_defaultStruct_fields) {
-    auto& field = module_defaultStruct.fields()[i];
+    [[maybe_unused]] auto& field = module_defaultStruct.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -191,10 +196,11 @@ StructMetadata<::cpp2::MyStructTypeDef>::gen(ThriftMetadata& metadata) {
     { 1, "myLongField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "myLongTypeDef", false, std::make_unique<Typedef>("module.longTypeDef", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},    { 3, "myStringField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 4, "myStringTypedef", false, std::make_unique<Typedef>("module.stringTypedef", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},    { 5, "myMapField", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ }},    { 6, "myMapTypedef", false, std::make_unique<Typedef>("module.mapTypedef", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},    { 7, "myListField", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{ }},    { 8, "myListTypedef", false, std::make_unique<Typedef>("module.listTypedef", std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},    { 9, "myMapListOfTypeDef", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::make_unique<List>(std::make_unique<Typedef>("module.listTypedef", std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{  }))), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyStructTypeDef_fields) {
-    auto& field = module_MyStructTypeDef.fields()[i];
+    [[maybe_unused]] auto& field = module_MyStructTypeDef.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -230,10 +236,11 @@ StructMetadata<::cpp2::MyUnion>::gen(ThriftMetadata& metadata) {
     { 1, "myEnum", false, std::make_unique<Enum<::cpp2::MyEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{ }},    { 2, "myStruct", false, std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct"), std::vector<ThriftConstStruct>{ }},    { 3, "myDataItem", false, std::make_unique<Struct<::cpp2::MyDataItem>>("module.MyDataItem"), std::vector<ThriftConstStruct>{ }},    { 4, "complexNestedStruct", false, std::make_unique<Struct<::cpp2::ComplexNestedStruct>>("module.ComplexNestedStruct"), std::vector<ThriftConstStruct>{ }},    { 5, "longValue", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 6, "intValue", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyUnion_fields) {
-    auto& field = module_MyUnion.fields()[i];
+    [[maybe_unused]] auto& field = module_MyUnion.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -259,10 +266,11 @@ StructMetadata<::cpp2::MyUnionFloatFieldThrowExp>::gen(ThriftMetadata& metadata)
     { 1, "myEnum", false, std::make_unique<Enum<::cpp2::MyEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{ }},    { 2, "setFloat", false, std::make_unique<List>(std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE))), std::vector<ThriftConstStruct>{ }},    { 3, "myDataItem", false, std::make_unique<Struct<::cpp2::MyDataItem>>("module.MyDataItem"), std::vector<ThriftConstStruct>{ }},    { 4, "complexNestedStruct", false, std::make_unique<Struct<::cpp2::ComplexNestedStruct>>("module.ComplexNestedStruct"), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyUnionFloatFieldThrowExp_fields) {
-    auto& field = module_MyUnionFloatFieldThrowExp.fields()[i];
+    [[maybe_unused]] auto& field = module_MyUnionFloatFieldThrowExp.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -288,10 +296,11 @@ StructMetadata<::cpp2::ComplexNestedStruct>::gen(ThriftMetadata& metadata) {
     { 1, "setOfSetOfInt", false, std::make_unique<Set>(std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE))), std::vector<ThriftConstStruct>{ }},    { 2, "listofListOfListOfListOfEnum", false, std::make_unique<List>(std::make_unique<List>(std::make_unique<List>(std::make_unique<List>(std::make_unique<Enum<::cpp2::MyEnum>>("module.MyEnum"))))), std::vector<ThriftConstStruct>{ }},    { 3, "listOfListOfMyStruct", false, std::make_unique<List>(std::make_unique<List>(std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct"))), std::vector<ThriftConstStruct>{ }},    { 4, "setOfListOfListOfLong", false, std::make_unique<Set>(std::make_unique<List>(std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)))), std::vector<ThriftConstStruct>{ }},    { 5, "setOfSetOfsetOfLong", false, std::make_unique<Set>(std::make_unique<Set>(std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)))), std::vector<ThriftConstStruct>{ }},    { 6, "mapStructListOfListOfLong", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<List>(std::make_unique<List>(std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct")))), std::vector<ThriftConstStruct>{ }},    { 7, "mKeyStructValInt", false, std::make_unique<Map>(std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct"), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 8, "listOfMapKeyIntValInt", false, std::make_unique<List>(std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE))), std::vector<ThriftConstStruct>{ }},    { 9, "listOfMapKeyStrValList", false, std::make_unique<List>(std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<List>(std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct")))), std::vector<ThriftConstStruct>{ }},    { 10, "mapKeySetValLong", false, std::make_unique<Map>(std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{ }},    { 11, "mapKeyListValLong", false, std::make_unique<Map>(std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 12, "mapKeyMapValMap", false, std::make_unique<Map>(std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE))), std::vector<ThriftConstStruct>{ }},    { 13, "mapKeySetValMap", false, std::make_unique<Map>(std::make_unique<Set>(std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE))), std::make_unique<Map>(std::make_unique<List>(std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE))), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE))), std::vector<ThriftConstStruct>{ }},    { 14, "NestedMaps", false, std::make_unique<Map>(std::make_unique<Map>(std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE))), std::vector<ThriftConstStruct>{ }},    { 15, "mapKeyIntValList", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<List>(std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct"))), std::vector<ThriftConstStruct>{ }},    { 16, "mapKeyIntValSet", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE))), std::vector<ThriftConstStruct>{ }},    { 17, "mapKeySetValInt", false, std::make_unique<Map>(std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE)), std::make_unique<Enum<::cpp2::MyEnum>>("module.MyEnum")), std::vector<ThriftConstStruct>{ }},    { 18, "mapKeyListValSet", false, std::make_unique<Map>(std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::make_unique<Set>(std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)))), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_ComplexNestedStruct_fields) {
-    auto& field = module_ComplexNestedStruct.fields()[i];
+    [[maybe_unused]] auto& field = module_ComplexNestedStruct.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -317,10 +326,11 @@ StructMetadata<::cpp2::TypeRemapped>::gen(ThriftMetadata& metadata) {
     { 1, "lsMap", false, std::make_unique<Typedef>("module.map_i64_string_5732", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},    { 2, "ioMap", false, std::make_unique<Typedef>("module.map_i32_FMap_6797", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Typedef>("module.FMap", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{  })), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},    { 3, "BigInteger", false, std::make_unique<Typedef>("module.i32_1194", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},    { 4, "binaryTestBuffer", false, std::make_unique<Typedef>("module.binary_4918", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_TypeRemapped_fields) {
-    auto& field = module_TypeRemapped.fields()[i];
+    [[maybe_unused]] auto& field = module_TypeRemapped.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -356,10 +366,11 @@ StructMetadata<::cpp2::reqXcep>::gen(ThriftMetadata& metadata) {
     { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "errorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_reqXcep_fields) {
-    auto& field = module_reqXcep.fields()[i];
+    [[maybe_unused]] auto& field = module_reqXcep.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -385,10 +396,11 @@ StructMetadata<::cpp2::optXcep>::gen(ThriftMetadata& metadata) {
     { 1, "message", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "errorCode", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_optXcep_fields) {
-    auto& field = module_optXcep.fields()[i];
+    [[maybe_unused]] auto& field = module_optXcep.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -414,10 +426,11 @@ StructMetadata<::cpp2::complexException>::gen(ThriftMetadata& metadata) {
     { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "listStrings", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ }},    { 3, "errorEnum", false, std::make_unique<Enum<::cpp2::MyEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{ }},    { 4, "unionError", true, std::make_unique<Union<::cpp2::MyUnion>>("module.MyUnion"), std::vector<ThriftConstStruct>{ }},    { 5, "structError", false, std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct"), std::vector<ThriftConstStruct>{ }},    { 6, "lsMap", false, std::make_unique<Typedef>("module.map_i64_string_5732", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_complexException_fields) {
-    auto& field = module_complexException.fields()[i];
+    [[maybe_unused]] auto& field = module_complexException.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -443,10 +456,11 @@ StructMetadata<::cpp2::Containers>::gen(ThriftMetadata& metadata) {
     { 1, "struct_list", false, std::make_unique<List>(std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct")), std::vector<ThriftConstStruct>{ }},    { 2, "union_list", false, std::make_unique<List>(std::make_unique<Union<::cpp2::MyUnion>>("module.MyUnion")), std::vector<ThriftConstStruct>{ }},    { 3, "enum_list", false, std::make_unique<List>(std::make_unique<Enum<::cpp2::MyEnum>>("module.MyEnum")), std::vector<ThriftConstStruct>{ }},    { 4, "struct_set", false, std::make_unique<Set>(std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct")), std::vector<ThriftConstStruct>{ }},    { 5, "union_set", false, std::make_unique<Set>(std::make_unique<Union<::cpp2::MyUnion>>("module.MyUnion")), std::vector<ThriftConstStruct>{ }},    { 6, "enum_set", false, std::make_unique<Set>(std::make_unique<Enum<::cpp2::MyEnum>>("module.MyEnum")), std::vector<ThriftConstStruct>{ }},    { 7, "struct_map", false, std::make_unique<Map>(std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct"), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{ }},    { 8, "union_map", false, std::make_unique<Map>(std::make_unique<Union<::cpp2::MyUnion>>("module.MyUnion"), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{ }},    { 9, "enum_map", false, std::make_unique<Map>(std::make_unique<Enum<::cpp2::MyEnum>>("module.MyEnum"), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{ }},    { 10, "struct_map_2", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct")), std::vector<ThriftConstStruct>{ }},    { 11, "union_map_2", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Union<::cpp2::MyUnion>>("module.MyUnion")), std::vector<ThriftConstStruct>{ }},    { 12, "enum_map_2", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Enum<::cpp2::MyEnum>>("module.MyEnum")), std::vector<ThriftConstStruct>{ }},    { 13, "list_map", false, std::make_unique<Map>(std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 14, "list_map_2", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE))), std::vector<ThriftConstStruct>{ }},    { 15, "set_map", false, std::make_unique<Map>(std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 16, "set_map_2", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE))), std::vector<ThriftConstStruct>{ }},    { 17, "map_map", false, std::make_unique<Map>(std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 18, "map_map_2", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE))), std::vector<ThriftConstStruct>{ }},    { 19, "list_list_i32", false, std::make_unique<List>(std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE))), std::vector<ThriftConstStruct>{ }},    { 20, "list_list_struct", false, std::make_unique<List>(std::make_unique<List>(std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct"))), std::vector<ThriftConstStruct>{ }},    { 21, "list_set_i32", false, std::make_unique<List>(std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE))), std::vector<ThriftConstStruct>{ }},    { 22, "list_set_struct", false, std::make_unique<List>(std::make_unique<Set>(std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct"))), std::vector<ThriftConstStruct>{ }},    { 23, "list_map_i32_i32", false, std::make_unique<List>(std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE))), std::vector<ThriftConstStruct>{ }},    { 24, "list_map_i32_struct", false, std::make_unique<List>(std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct"))), std::vector<ThriftConstStruct>{ }},    { 25, "list_map_struct_i32", false, std::make_unique<List>(std::make_unique<Map>(std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct"), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE))), std::vector<ThriftConstStruct>{ }},    { 26, "set_list_i32", false, std::make_unique<Set>(std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE))), std::vector<ThriftConstStruct>{ }},    { 27, "set_list_struct", false, std::make_unique<Set>(std::make_unique<List>(std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct"))), std::vector<ThriftConstStruct>{ }},    { 28, "set_set_i32", false, std::make_unique<Set>(std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE))), std::vector<ThriftConstStruct>{ }},    { 29, "set_set_struct", false, std::make_unique<Set>(std::make_unique<Set>(std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct"))), std::vector<ThriftConstStruct>{ }},    { 30, "set_map_i32_i32", false, std::make_unique<Set>(std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE))), std::vector<ThriftConstStruct>{ }},    { 31, "set_map_i32_struct", false, std::make_unique<Set>(std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct"))), std::vector<ThriftConstStruct>{ }},    { 32, "set_map_struct_i32", false, std::make_unique<Set>(std::make_unique<Map>(std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct"), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE))), std::vector<ThriftConstStruct>{ }},    { 33, "map_i32_map_i32_i32", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE))), std::vector<ThriftConstStruct>{ }},    { 34, "map_i32_map_struct_i32", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Map>(std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct"), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE))), std::vector<ThriftConstStruct>{ }},    { 35, "map_i32_map_i32_struct", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct"))), std::vector<ThriftConstStruct>{ }},    { 36, "map_i32_map_list_i32_i32", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<List>(std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)))), std::vector<ThriftConstStruct>{ }},    { 37, "map_i32_map_list_struct_i32", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<List>(std::make_unique<Map>(std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct"), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)))), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_Containers_fields) {
-    auto& field = module_Containers.fields()[i];
+    [[maybe_unused]] auto& field = module_Containers.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -478,10 +492,10 @@ void ExceptionMetadata<::cpp2::reqXcep>::gen(ThriftMetadata& metadata) {
     { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "errorCode", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_reqXcep_fields) {
-    auto& field = module_reqXcep.fields()[i];
+    [[maybe_unused]] auto& field = module_reqXcep.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -501,10 +515,10 @@ void ExceptionMetadata<::cpp2::optXcep>::gen(ThriftMetadata& metadata) {
     { 1, "message", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "errorCode", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_optXcep_fields) {
-    auto& field = module_optXcep.fields()[i];
+    [[maybe_unused]] auto& field = module_optXcep.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -524,10 +538,10 @@ void ExceptionMetadata<::cpp2::complexException>::gen(ThriftMetadata& metadata) 
     { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "listStrings", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ }},    { 3, "errorEnum", false, std::make_unique<Enum<::cpp2::MyEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{ }},    { 4, "unionError", true, std::make_unique<Union<::cpp2::MyUnion>>("module.MyUnion"), std::vector<ThriftConstStruct>{ }},    { 5, "structError", false, std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct"), std::vector<ThriftConstStruct>{ }},    { 6, "lsMap", false, std::make_unique<Typedef>("module.map_i64_string_5732", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_complexException_fields) {
-    auto& field = module_complexException.fields()[i];
+    [[maybe_unused]] auto& field = module_complexException.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.

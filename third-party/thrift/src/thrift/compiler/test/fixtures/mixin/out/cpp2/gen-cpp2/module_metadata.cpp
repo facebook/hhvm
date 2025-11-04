@@ -40,10 +40,11 @@ StructMetadata<::cpp2::Mixin1>::gen(ThriftMetadata& metadata) {
     { 1, "field1", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_Mixin1_fields) {
-    auto& field = module_Mixin1.fields()[i];
+    [[maybe_unused]] auto& field = module_Mixin1.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -69,10 +70,11 @@ StructMetadata<::cpp2::Mixin2>::gen(ThriftMetadata& metadata) {
     { 1, "m1", false, std::make_unique<Struct<::cpp2::Mixin1>>("module.Mixin1"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.Mixin", {  }).cv_struct(), }},    { 2, "field2", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_Mixin2_fields) {
-    auto& field = module_Mixin2.fields()[i];
+    [[maybe_unused]] auto& field = module_Mixin2.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -98,10 +100,11 @@ StructMetadata<::cpp2::Mixin3Base>::gen(ThriftMetadata& metadata) {
     { 1, "field3", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_Mixin3Base_fields) {
-    auto& field = module_Mixin3Base.fields()[i];
+    [[maybe_unused]] auto& field = module_Mixin3Base.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -127,10 +130,11 @@ StructMetadata<::cpp2::Foo>::gen(ThriftMetadata& metadata) {
     { 1, "field4", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "m2", false, std::make_unique<Struct<::cpp2::Mixin2>>("module.Mixin2"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.Mixin", {  }).cv_struct(), }},    { 3, "m3", false, std::make_unique<Typedef>("module.Mixin3", std::make_unique<Struct<::cpp2::Mixin3Base>>("module.Mixin3Base"), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ *cvStruct("thrift.Mixin", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_Foo_fields) {
-    auto& field = module_Foo.fields()[i];
+    [[maybe_unused]] auto& field = module_Foo.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());

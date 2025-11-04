@@ -70,10 +70,11 @@ StructMetadata<::cpp2::Request>::gen(ThriftMetadata& metadata) {
     { 1, "id", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_Request_fields) {
-    auto& field = module_Request.fields()[i];
+    [[maybe_unused]] auto& field = module_Request.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -99,10 +100,11 @@ StructMetadata<::cpp2::detail::AdaptedRequest>::gen(ThriftMetadata& metadata) {
     { 1, "id", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_AdaptedRequest_fields) {
-    auto& field = module_AdaptedRequest.fields()[i];
+    [[maybe_unused]] auto& field = module_AdaptedRequest.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -129,10 +131,11 @@ StructMetadata<::cpp2::Response>::gen(ThriftMetadata& metadata) {
     { 1, "text", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_Response_fields) {
-    auto& field = module_Response.fields()[i];
+    [[maybe_unused]] auto& field = module_Response.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());

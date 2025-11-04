@@ -56,10 +56,11 @@ StructMetadata<::cpp2::MyStruct>::gen(ThriftMetadata& metadata) {
     { 1, "MyIntField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "MyStringField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "MyDataField", false, std::make_unique<Struct<::cpp2::MyDataItem>>("module.MyDataItem"), std::vector<ThriftConstStruct>{ }},    { 4, "myEnum", false, std::make_unique<Enum<::cpp2::MyEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{ }},    { 5, "oneway", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ }},    { 6, "readonly", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ }},    { 7, "idempotent", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyStruct_fields) {
-    auto& field = module_MyStruct.fields()[i];
+    [[maybe_unused]] auto& field = module_MyStruct.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -95,10 +96,11 @@ StructMetadata<::cpp2::MyUnion>::gen(ThriftMetadata& metadata) {
     { 1, "myEnum", false, std::make_unique<Enum<::cpp2::MyEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{ }},    { 2, "myStruct", false, std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct"), std::vector<ThriftConstStruct>{ }},    { 3, "myDataItem", false, std::make_unique<Struct<::cpp2::MyDataItem>>("module.MyDataItem"), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyUnion_fields) {
-    auto& field = module_MyUnion.fields()[i];
+    [[maybe_unused]] auto& field = module_MyUnion.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());

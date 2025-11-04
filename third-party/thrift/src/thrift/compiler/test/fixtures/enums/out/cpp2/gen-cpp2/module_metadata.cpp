@@ -84,10 +84,11 @@ StructMetadata<::test::fixtures::enums::SomeStruct>::gen(ThriftMetadata& metadat
     { 1, "reasonable", false, std::make_unique<Enum<::test::fixtures::enums::Metasyntactic>>("module.Metasyntactic"), std::vector<ThriftConstStruct>{ }},    { 2, "fine", false, std::make_unique<Enum<::test::fixtures::enums::Metasyntactic>>("module.Metasyntactic"), std::vector<ThriftConstStruct>{ }},    { 3, "questionable", false, std::make_unique<Enum<::test::fixtures::enums::Metasyntactic>>("module.Metasyntactic"), std::vector<ThriftConstStruct>{ }},    { 4, "tags", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_SomeStruct_fields) {
-    auto& field = module_SomeStruct.fields()[i];
+    [[maybe_unused]] auto& field = module_SomeStruct.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -113,10 +114,11 @@ StructMetadata<::test::fixtures::enums::MyStruct>::gen(ThriftMetadata& metadata)
     { 1, "me2_3", false, std::make_unique<Enum<::test::fixtures::enums::MyEnum2>>("module.MyEnum2"), std::vector<ThriftConstStruct>{ }},    { 2, "me3_n3", false, std::make_unique<Enum<::test::fixtures::enums::MyEnum3>>("module.MyEnum3"), std::vector<ThriftConstStruct>{ }},    { 4, "me1_t1", false, std::make_unique<Enum<::test::fixtures::enums::MyEnum1>>("module.MyEnum1"), std::vector<ThriftConstStruct>{ }},    { 6, "me1_t2", false, std::make_unique<Enum<::test::fixtures::enums::MyEnum1>>("module.MyEnum1"), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyStruct_fields) {
-    auto& field = module_MyStruct.fields()[i];
+    [[maybe_unused]] auto& field = module_MyStruct.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());

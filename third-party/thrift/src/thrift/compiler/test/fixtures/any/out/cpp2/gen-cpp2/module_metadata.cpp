@@ -40,10 +40,11 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::any::detail::MyStru
     { 1, "myString", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyStruct_fields) {
-    auto& field = module_MyStruct.fields()[i];
+    [[maybe_unused]] auto& field = module_MyStruct.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -70,10 +71,11 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyUnion>::gen(
     { 1, "myString", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyUnion_fields) {
-    auto& field = module_MyUnion.fields()[i];
+    [[maybe_unused]] auto& field = module_MyUnion.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -99,10 +101,11 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>::
     { 1, "myString", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyException_fields) {
-    auto& field = module_MyException.fields()[i];
+    [[maybe_unused]] auto& field = module_MyException.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -127,10 +130,10 @@ void ExceptionMetadata<::facebook::thrift::compiler::test::fixtures::any::MyExce
     { 1, "myString", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyException_fields) {
-    auto& field = module_MyException.fields()[i];
+    [[maybe_unused]] auto& field = module_MyException.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.

@@ -46,10 +46,11 @@ StructMetadata<::a::different::ns::AStruct>::gen(ThriftMetadata& metadata) {
     { 1, "FieldA", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *includes_AStruct_fields) {
-    auto& field = includes_AStruct.fields()[i];
+    [[maybe_unused]] auto& field = includes_AStruct.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -75,10 +76,11 @@ StructMetadata<::a::different::ns::AStructB>::gen(ThriftMetadata& metadata) {
     { 1, "FieldA", false, std::make_unique<Struct<::a::different::ns::AStruct>>("includes.AStruct"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(1) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *includes_AStructB_fields) {
-    auto& field = includes_AStructB.fields()[i];
+    [[maybe_unused]] auto& field = includes_AStructB.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());

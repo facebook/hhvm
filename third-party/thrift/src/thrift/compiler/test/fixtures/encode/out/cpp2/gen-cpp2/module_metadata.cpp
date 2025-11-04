@@ -46,10 +46,11 @@ StructMetadata<::facebook::thrift::test::Foo>::gen(ThriftMetadata& metadata) {
     { 1, "field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_Foo_fields) {
-    auto& field = module_Foo.fields()[i];
+    [[maybe_unused]] auto& field = module_Foo.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -75,10 +76,11 @@ StructMetadata<::facebook::thrift::test::Bar>::gen(ThriftMetadata& metadata) {
     { 1, "list_field", false, std::make_unique<List>(std::make_unique<Typedef>("module.AdaptedFoo", std::make_unique<Struct<::facebook::thrift::test::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  })), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_Bar_fields) {
-    auto& field = module_Bar.fields()[i];
+    [[maybe_unused]] auto& field = module_Bar.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -105,10 +107,11 @@ StructMetadata<::facebook::thrift::test::Baz>::gen(ThriftMetadata& metadata) {
     { 1, "list_field", false, std::make_unique<List>(std::make_unique<Typedef>("module.AdaptedFoo", std::make_unique<Struct<::facebook::thrift::test::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  })), std::vector<ThriftConstStruct>{ }},    { 2, "nested_list_field", false, std::make_unique<List>(std::make_unique<List>(std::make_unique<Typedef>("module.AdaptedFoo", std::make_unique<Struct<::facebook::thrift::test::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  }))), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_Baz_fields) {
-    auto& field = module_Baz.fields()[i];
+    [[maybe_unused]] auto& field = module_Baz.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -134,10 +137,11 @@ StructMetadata<::facebook::thrift::test::OpEncodeStruct>::gen(ThriftMetadata& me
     { 1, "int_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "enum_field", false, std::make_unique<Enum<::facebook::thrift::test::Enum>>("module.Enum"), std::vector<ThriftConstStruct>{ }},    { 3, "foo_field", false, std::make_unique<Struct<::facebook::thrift::test::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{ }},    { 4, "adapted_field", false, std::make_unique<Typedef>("module.AdaptedFoo", std::make_unique<Struct<::facebook::thrift::test::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 5, "list_field", false, std::make_unique<List>(std::make_unique<Typedef>("module.AdaptedFoo", std::make_unique<Struct<::facebook::thrift::test::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  })), std::vector<ThriftConstStruct>{ }},    { 6, "list_shared_ptr_field", true, std::make_unique<List>(std::make_unique<Typedef>("module.AdaptedFoo", std::make_unique<Struct<::facebook::thrift::test::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  })), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(1) } }).cv_struct(), }},    { 7, "list_cpp_type_field", false, std::make_unique<List>(std::make_unique<Typedef>("module.AdaptedFoo", std::make_unique<Struct<::facebook::thrift::test::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  })), std::vector<ThriftConstStruct>{ }},    { 8, "set_field", false, std::make_unique<Set>(std::make_unique<Typedef>("module.AdaptedFoo", std::make_unique<Struct<::facebook::thrift::test::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  })), std::vector<ThriftConstStruct>{ }},    { 9, "map_field", false, std::make_unique<Map>(std::make_unique<Typedef>("module.AdaptedFoo", std::make_unique<Struct<::facebook::thrift::test::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  }), std::make_unique<Typedef>("module.AdaptedFoo", std::make_unique<Struct<::facebook::thrift::test::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  })), std::vector<ThriftConstStruct>{ }},    { 10, "nested_field", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<List>(std::make_unique<Typedef>("module.AdaptedFoo", std::make_unique<Struct<::facebook::thrift::test::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  }))), std::vector<ThriftConstStruct>{ }},    { 11, "bar_field", false, std::make_unique<Struct<::facebook::thrift::test::Bar>>("module.Bar"), std::vector<ThriftConstStruct>{ }},    { 12, "adapted_list_field", false, std::make_unique<List>(std::make_unique<Typedef>("module.AdaptedFoo", std::make_unique<Struct<::facebook::thrift::test::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  })), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::FieldAdapter") } }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_OpEncodeStruct_fields) {
-    auto& field = module_OpEncodeStruct.fields()[i];
+    [[maybe_unused]] auto& field = module_OpEncodeStruct.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());

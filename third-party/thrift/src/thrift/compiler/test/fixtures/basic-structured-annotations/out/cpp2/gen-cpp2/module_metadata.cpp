@@ -63,10 +63,11 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     { 1, "count", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_structured_annotation_inline_fields) {
-    auto& field = module_structured_annotation_inline.fields()[i];
+    [[maybe_unused]] auto& field = module_structured_annotation_inline.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -92,10 +93,11 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     { 1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_structured_annotation_with_default_fields) {
-    auto& field = module_structured_annotation_with_default.fields()[i];
+    [[maybe_unused]] auto& field = module_structured_annotation_with_default.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -121,10 +123,11 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     { 1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "recurse", true, std::make_unique<Struct<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>>("module.structured_annotation_recursive"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), }},    { 3, "forward", false, std::make_unique<Struct<::test::fixtures::basic_structured_annotations::structured_annotation_forward>>("module.structured_annotation_forward"), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_structured_annotation_recursive_fields) {
-    auto& field = module_structured_annotation_recursive.fields()[i];
+    [[maybe_unused]] auto& field = module_structured_annotation_recursive.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -150,10 +153,11 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     { 1, "count", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_structured_annotation_forward_fields) {
-    auto& field = module_structured_annotation_forward.fields()[i];
+    [[maybe_unused]] auto& field = module_structured_annotation_forward.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -179,10 +183,11 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     { 1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "nest", false, std::make_unique<Struct<::test::fixtures::basic_structured_annotations::structured_annotation_with_default>>("module.structured_annotation_with_default"), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_structured_annotation_nested_fields) {
-    auto& field = module_structured_annotation_nested.fields()[i];
+    [[maybe_unused]] auto& field = module_structured_annotation_nested.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -208,10 +213,11 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyStruct>::gen(Th
     { 1, "annotated_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("module.structured_annotation_inline", { {"count", cvInteger(1) }, {"name", cvString("counter") } }).cv_struct(), *cvStruct("module.runtime_annotation", {  }).cv_struct(), }},    { 2, "annotated_type", false, std::make_unique<Typedef>("module.annotated_inline_string", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("module.structured_annotation_inline", { {"count", cvInteger(1) } }).cv_struct(), *cvStruct("module.structured_annotation_with_default", { {"name", cvString("abc") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 3, "annotated_recursive", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("module.structured_annotation_recursive", { {"name", cvString("abc") }, {"recurse", cvStruct("module.structured_annotation_recursive", { {"name", cvString("cba") } }) }, {"forward", cvStruct("module.structured_annotation_forward", { {"count", cvInteger(3) } }) } }).cv_struct(), }},    { 4, "annotated_nested", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("module.structured_annotation_nested", { {"name", cvString("nesty") } }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyStruct_fields) {
-    auto& field = module_MyStruct.fields()[i];
+    [[maybe_unused]] auto& field = module_MyStruct.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -243,10 +249,11 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyException>::gen
     { 1, "context", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("module.structured_annotation_with_default", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyException_fields) {
-    auto& field = module_MyException.fields()[i];
+    [[maybe_unused]] auto& field = module_MyException.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -273,10 +280,11 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyUnion>::gen(Thr
     { 1, "first", false, std::make_unique<Typedef>("module.annotated_inline_string", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("module.structured_annotation_inline", { {"count", cvInteger(1) } }).cv_struct(), *cvStruct("module.structured_annotation_with_default", { {"name", cvString("abc") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("module.structured_annotation_with_default", {  }).cv_struct(), }},    { 2, "second", false, std::make_unique<Typedef>("module.annotated_inline_i64", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("module.structured_annotation_inline", { {"count", cvInteger(2) } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("module.structured_annotation_with_default", { {"name", cvString("aba") } }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyUnion_fields) {
-    auto& field = module_MyUnion.fields()[i];
+    [[maybe_unused]] auto& field = module_MyUnion.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -302,10 +310,10 @@ void ExceptionMetadata<::test::fixtures::basic_structured_annotations::MyExcepti
     { 1, "context", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("module.structured_annotation_with_default", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyException_fields) {
-    auto& field = module_MyException.fields()[i];
+    [[maybe_unused]] auto& field = module_MyException.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.

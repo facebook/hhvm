@@ -40,10 +40,11 @@ StructMetadata<::apache::thrift::test::A>::gen(ThriftMetadata& metadata) {
     { 1, "some_map", true, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Struct<::apache::thrift::test::B>>("module.B")), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("std::unordered_map") } }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_A_fields) {
-    auto& field = module_A.fields()[i];
+    [[maybe_unused]] auto& field = module_A.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -69,10 +70,11 @@ StructMetadata<::apache::thrift::test::B>::gen(ThriftMetadata& metadata) {
     { 1, "field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_B_fields) {
-    auto& field = module_B.fields()[i];
+    [[maybe_unused]] auto& field = module_B.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());

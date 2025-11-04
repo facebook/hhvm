@@ -40,10 +40,11 @@ StructMetadata<::cpp2::MyStruct>::gen(ThriftMetadata& metadata) {
     { 1, "MyIncludedField", false, std::make_unique<Struct<::cpp2::Included>>("includes.Included"), std::vector<ThriftConstStruct>{ }},    { 2, "MyOtherIncludedField", false, std::make_unique<Struct<::cpp2::Included>>("includes.Included"), std::vector<ThriftConstStruct>{ }},    { 3, "MyIncludedInt", false, std::make_unique<Typedef>("includes.IncludedInt64", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyStruct_fields) {
-    auto& field = module_MyStruct.fields()[i];
+    [[maybe_unused]] auto& field = module_MyStruct.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());

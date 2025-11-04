@@ -45,10 +45,11 @@ StructMetadata<::cpp2::InitialResponse>::gen(ThriftMetadata& metadata) {
     { 1, "content", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_InitialResponse_fields) {
-    auto& field = module_InitialResponse.fields()[i];
+    [[maybe_unused]] auto& field = module_InitialResponse.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -74,10 +75,11 @@ StructMetadata<::cpp2::FinalResponse>::gen(ThriftMetadata& metadata) {
     { 1, "content", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_FinalResponse_fields) {
-    auto& field = module_FinalResponse.fields()[i];
+    [[maybe_unused]] auto& field = module_FinalResponse.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -103,10 +105,11 @@ StructMetadata<::cpp2::SinkPayload>::gen(ThriftMetadata& metadata) {
     { 1, "content", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_SinkPayload_fields) {
-    auto& field = module_SinkPayload.fields()[i];
+    [[maybe_unused]] auto& field = module_SinkPayload.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -132,10 +135,11 @@ StructMetadata<::cpp2::CompatibleWithKeywordSink>::gen(ThriftMetadata& metadata)
     { 1, "sink", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_CompatibleWithKeywordSink_fields) {
-    auto& field = module_CompatibleWithKeywordSink.fields()[i];
+    [[maybe_unused]] auto& field = module_CompatibleWithKeywordSink.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -161,10 +165,11 @@ StructMetadata<::cpp2::InitialException>::gen(ThriftMetadata& metadata) {
     { 1, "reason", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_InitialException_fields) {
-    auto& field = module_InitialException.fields()[i];
+    [[maybe_unused]] auto& field = module_InitialException.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -190,10 +195,11 @@ StructMetadata<::cpp2::SinkException1>::gen(ThriftMetadata& metadata) {
     { 1, "reason", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_SinkException1_fields) {
-    auto& field = module_SinkException1.fields()[i];
+    [[maybe_unused]] auto& field = module_SinkException1.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -219,10 +225,11 @@ StructMetadata<::cpp2::SinkException2>::gen(ThriftMetadata& metadata) {
     { 1, "reason", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_SinkException2_fields) {
-    auto& field = module_SinkException2.fields()[i];
+    [[maybe_unused]] auto& field = module_SinkException2.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -247,10 +254,10 @@ void ExceptionMetadata<::cpp2::InitialException>::gen(ThriftMetadata& metadata) 
     { 1, "reason", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_InitialException_fields) {
-    auto& field = module_InitialException.fields()[i];
+    [[maybe_unused]] auto& field = module_InitialException.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -270,10 +277,10 @@ void ExceptionMetadata<::cpp2::SinkException1>::gen(ThriftMetadata& metadata) {
     { 1, "reason", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_SinkException1_fields) {
-    auto& field = module_SinkException1.fields()[i];
+    [[maybe_unused]] auto& field = module_SinkException1.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -293,10 +300,10 @@ void ExceptionMetadata<::cpp2::SinkException2>::gen(ThriftMetadata& metadata) {
     { 1, "reason", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_SinkException2_fields) {
-    auto& field = module_SinkException2.fields()[i];
+    [[maybe_unused]] auto& field = module_SinkException2.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.

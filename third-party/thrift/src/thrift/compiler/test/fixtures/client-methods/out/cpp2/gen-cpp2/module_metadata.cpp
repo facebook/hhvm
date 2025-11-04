@@ -50,10 +50,11 @@ StructMetadata<::cpp2::EchoRequest>::gen(ThriftMetadata& metadata) {
     { 1, "text", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_EchoRequest_fields) {
-    auto& field = module_EchoRequest.fields()[i];
+    [[maybe_unused]] auto& field = module_EchoRequest.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -79,10 +80,11 @@ StructMetadata<::cpp2::EchoResponse>::gen(ThriftMetadata& metadata) {
     { 1, "text", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_EchoResponse_fields) {
-    auto& field = module_EchoResponse.fields()[i];
+    [[maybe_unused]] auto& field = module_EchoResponse.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());

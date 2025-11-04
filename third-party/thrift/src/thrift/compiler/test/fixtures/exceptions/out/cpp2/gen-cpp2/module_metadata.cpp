@@ -45,10 +45,11 @@ StructMetadata<::cpp2::Fiery>::gen(ThriftMetadata& metadata) {
     { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_Fiery_fields) {
-    auto& field = module_Fiery.fields()[i];
+    [[maybe_unused]] auto& field = module_Fiery.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -74,10 +75,11 @@ StructMetadata<::cpp2::Serious>::gen(ThriftMetadata& metadata) {
     { 1, "sonnet", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct(), *cvStruct("python.Name", { {"name", cvString("not_sonnet") } }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_Serious_fields) {
-    auto& field = module_Serious.fields()[i];
+    [[maybe_unused]] auto& field = module_Serious.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -103,10 +105,11 @@ StructMetadata<::cpp2::ComplexFieldNames>::gen(ThriftMetadata& metadata) {
     { 1, "error_message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "internal_error_message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_ComplexFieldNames_fields) {
-    auto& field = module_ComplexFieldNames.fields()[i];
+    [[maybe_unused]] auto& field = module_ComplexFieldNames.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -132,10 +135,11 @@ StructMetadata<::cpp2::CustomFieldNames>::gen(ThriftMetadata& metadata) {
     { 1, "error_message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "internal_error_message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_CustomFieldNames_fields) {
-    auto& field = module_CustomFieldNames.fields()[i];
+    [[maybe_unused]] auto& field = module_CustomFieldNames.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -161,10 +165,11 @@ StructMetadata<::cpp2::ExceptionWithPrimitiveField>::gen(ThriftMetadata& metadat
     { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct(), }},    { 2, "error_code", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_ExceptionWithPrimitiveField_fields) {
-    auto& field = module_ExceptionWithPrimitiveField.fields()[i];
+    [[maybe_unused]] auto& field = module_ExceptionWithPrimitiveField.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -190,10 +195,11 @@ StructMetadata<::cpp2::ExceptionWithStructuredAnnotation>::gen(ThriftMetadata& m
     { 1, "message_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct(), }},    { 2, "error_code", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_ExceptionWithStructuredAnnotation_fields) {
-    auto& field = module_ExceptionWithStructuredAnnotation.fields()[i];
+    [[maybe_unused]] auto& field = module_ExceptionWithStructuredAnnotation.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -228,10 +234,10 @@ void ExceptionMetadata<::cpp2::Fiery>::gen(ThriftMetadata& metadata) {
     { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_Fiery_fields) {
-    auto& field = module_Fiery.fields()[i];
+    [[maybe_unused]] auto& field = module_Fiery.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -251,10 +257,10 @@ void ExceptionMetadata<::cpp2::Serious>::gen(ThriftMetadata& metadata) {
     { 1, "sonnet", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct(), *cvStruct("python.Name", { {"name", cvString("not_sonnet") } }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_Serious_fields) {
-    auto& field = module_Serious.fields()[i];
+    [[maybe_unused]] auto& field = module_Serious.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -274,10 +280,10 @@ void ExceptionMetadata<::cpp2::ComplexFieldNames>::gen(ThriftMetadata& metadata)
     { 1, "error_message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "internal_error_message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_ComplexFieldNames_fields) {
-    auto& field = module_ComplexFieldNames.fields()[i];
+    [[maybe_unused]] auto& field = module_ComplexFieldNames.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -297,10 +303,10 @@ void ExceptionMetadata<::cpp2::CustomFieldNames>::gen(ThriftMetadata& metadata) 
     { 1, "error_message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "internal_error_message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_CustomFieldNames_fields) {
-    auto& field = module_CustomFieldNames.fields()[i];
+    [[maybe_unused]] auto& field = module_CustomFieldNames.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -320,10 +326,10 @@ void ExceptionMetadata<::cpp2::ExceptionWithPrimitiveField>::gen(ThriftMetadata&
     { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct(), }},    { 2, "error_code", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_ExceptionWithPrimitiveField_fields) {
-    auto& field = module_ExceptionWithPrimitiveField.fields()[i];
+    [[maybe_unused]] auto& field = module_ExceptionWithPrimitiveField.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -343,10 +349,10 @@ void ExceptionMetadata<::cpp2::ExceptionWithStructuredAnnotation>::gen(ThriftMet
     { 1, "message_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct(), }},    { 2, "error_code", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_ExceptionWithStructuredAnnotation_fields) {
-    auto& field = module_ExceptionWithStructuredAnnotation.fields()[i];
+    [[maybe_unused]] auto& field = module_ExceptionWithStructuredAnnotation.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.

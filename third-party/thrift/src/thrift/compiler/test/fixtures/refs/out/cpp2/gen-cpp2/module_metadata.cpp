@@ -53,10 +53,11 @@ StructMetadata<::cpp2::MyUnion>::gen(ThriftMetadata& metadata) {
     { 1, "anInteger", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 2, "aString", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyUnion_fields) {
-    auto& field = module_MyUnion.fields()[i];
+    [[maybe_unused]] auto& field = module_MyUnion.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -82,10 +83,11 @@ StructMetadata<::cpp2::NonTriviallyDestructibleUnion>::gen(ThriftMetadata& metad
     { 1, "int_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(2) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_NonTriviallyDestructibleUnion_fields) {
-    auto& field = module_NonTriviallyDestructibleUnion.fields()[i];
+    [[maybe_unused]] auto& field = module_NonTriviallyDestructibleUnion.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -111,10 +113,11 @@ StructMetadata<::cpp2::MyField>::gen(ThriftMetadata& metadata) {
     { 1, "opt_value", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), }},    { 2, "value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 3, "req_value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 4, "opt_enum_value", true, std::make_unique<Enum<::cpp2::MyEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), }},    { 5, "enum_value", false, std::make_unique<Enum<::cpp2::MyEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 6, "req_enum_value", false, std::make_unique<Enum<::cpp2::MyEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 7, "opt_str_value", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), }},    { 8, "str_value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 9, "req_str_value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyField_fields) {
-    auto& field = module_MyField.fields()[i];
+    [[maybe_unused]] auto& field = module_MyField.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -140,10 +143,11 @@ StructMetadata<::cpp2::MyStruct>::gen(ThriftMetadata& metadata) {
     { 1, "opt_ref", true, std::make_unique<Struct<::cpp2::MyField>>("module.MyField"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), }},    { 2, "ref", false, std::make_unique<Struct<::cpp2::MyField>>("module.MyField"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 3, "req_ref", false, std::make_unique<Struct<::cpp2::MyField>>("module.MyField"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyStruct_fields) {
-    auto& field = module_MyStruct.fields()[i];
+    [[maybe_unused]] auto& field = module_MyStruct.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -169,10 +173,11 @@ StructMetadata<::cpp2::StructWithUnion>::gen(ThriftMetadata& metadata) {
     { 1, "u", false, std::make_unique<Union<::cpp2::MyUnion>>("module.MyUnion"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 2, "aDouble", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 3, "f", false, std::make_unique<Struct<::cpp2::MyField>>("module.MyField"), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_StructWithUnion_fields) {
-    auto& field = module_StructWithUnion.fields()[i];
+    [[maybe_unused]] auto& field = module_StructWithUnion.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -198,10 +203,11 @@ StructMetadata<::cpp2::RecursiveStruct>::gen(ThriftMetadata& metadata) {
     { 1, "mes", true, std::make_unique<List>(std::make_unique<Struct<::cpp2::RecursiveStruct>>("module.RecursiveStruct")), std::vector<ThriftConstStruct>{ *cvStruct("java.Recursive", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_RecursiveStruct_fields) {
-    auto& field = module_RecursiveStruct.fields()[i];
+    [[maybe_unused]] auto& field = module_RecursiveStruct.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -227,10 +233,11 @@ StructMetadata<::cpp2::StructWithContainers>::gen(ThriftMetadata& metadata) {
     { 1, "list_ref", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 2, "set_ref", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 3, "map_ref", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 4, "list_ref_unique", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 5, "set_ref_shared", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(2) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 6, "list_ref_shared_const", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(1) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_StructWithContainers_fields) {
-    auto& field = module_StructWithContainers.fields()[i];
+    [[maybe_unused]] auto& field = module_StructWithContainers.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -256,10 +263,11 @@ StructMetadata<::cpp2::StructWithSharedConst>::gen(ThriftMetadata& metadata) {
     { 1, "opt_shared_const", true, std::make_unique<Struct<::cpp2::MyField>>("module.MyField"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(1) } }).cv_struct(), }},    { 2, "shared_const", false, std::make_unique<Struct<::cpp2::MyField>>("module.MyField"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(1) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 3, "req_shared_const", false, std::make_unique<Struct<::cpp2::MyField>>("module.MyField"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(1) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_StructWithSharedConst_fields) {
-    auto& field = module_StructWithSharedConst.fields()[i];
+    [[maybe_unused]] auto& field = module_StructWithSharedConst.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -295,10 +303,11 @@ StructMetadata<::cpp2::StructWithRef>::gen(ThriftMetadata& metadata) {
     { 1, "def_field", false, std::make_unique<Struct<::cpp2::Empty>>("module.Empty"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 2, "opt_field", true, std::make_unique<Struct<::cpp2::Empty>>("module.Empty"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), }},    { 3, "req_field", false, std::make_unique<Struct<::cpp2::Empty>>("module.Empty"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_StructWithRef_fields) {
-    auto& field = module_StructWithRef.fields()[i];
+    [[maybe_unused]] auto& field = module_StructWithRef.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -324,10 +333,11 @@ StructMetadata<::cpp2::StructWithBox>::gen(ThriftMetadata& metadata) {
     { 1, "a", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.Box", {  }).cv_struct(), }},    { 2, "b", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("thrift.Box", {  }).cv_struct(), }},    { 3, "c", true, std::make_unique<Struct<::cpp2::StructWithRef>>("module.StructWithRef"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.Box", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_StructWithBox_fields) {
-    auto& field = module_StructWithBox.fields()[i];
+    [[maybe_unused]] auto& field = module_StructWithBox.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -353,10 +363,11 @@ StructMetadata<::cpp2::StructWithInternBox>::gen(ThriftMetadata& metadata) {
     { 1, "field1", false, std::make_unique<Struct<::cpp2::Empty>>("module.Empty"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.InternBox", {  }).cv_struct(), }},    { 2, "field2", false, std::make_unique<Struct<::cpp2::MyField>>("module.MyField"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.InternBox", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_StructWithInternBox_fields) {
-    auto& field = module_StructWithInternBox.fields()[i];
+    [[maybe_unused]] auto& field = module_StructWithInternBox.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -382,10 +393,11 @@ StructMetadata<::cpp2::StructWithTerseInternBox>::gen(ThriftMetadata& metadata) 
     { 1, "field1", false, std::make_unique<Struct<::cpp2::Empty>>("module.Empty"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.InternBox", {  }).cv_struct(), *cvStruct("thrift.TerseWrite", {  }).cv_struct(), }},    { 2, "field2", false, std::make_unique<Struct<::cpp2::MyField>>("module.MyField"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.InternBox", {  }).cv_struct(), *cvStruct("thrift.TerseWrite", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_StructWithTerseInternBox_fields) {
-    auto& field = module_StructWithTerseInternBox.fields()[i];
+    [[maybe_unused]] auto& field = module_StructWithTerseInternBox.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -412,10 +424,11 @@ StructMetadata<::cpp2::AdaptedStructWithInternBox>::gen(ThriftMetadata& metadata
     { 1, "field1", false, std::make_unique<Struct<::cpp2::Empty>>("module.Empty"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("thrift.InternBox", {  }).cv_struct(), }},    { 2, "field2", false, std::make_unique<Struct<::cpp2::MyField>>("module.MyField"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("thrift.InternBox", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_AdaptedStructWithInternBox_fields) {
-    auto& field = module_AdaptedStructWithInternBox.fields()[i];
+    [[maybe_unused]] auto& field = module_AdaptedStructWithInternBox.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -441,10 +454,11 @@ StructMetadata<::cpp2::AdaptedStructWithTerseInternBox>::gen(ThriftMetadata& met
     { 1, "field1", false, std::make_unique<Struct<::cpp2::Empty>>("module.Empty"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("thrift.InternBox", {  }).cv_struct(), *cvStruct("thrift.TerseWrite", {  }).cv_struct(), }},    { 2, "field2", false, std::make_unique<Struct<::cpp2::MyField>>("module.MyField"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("thrift.InternBox", {  }).cv_struct(), *cvStruct("thrift.TerseWrite", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_AdaptedStructWithTerseInternBox_fields) {
-    auto& field = module_AdaptedStructWithTerseInternBox.fields()[i];
+    [[maybe_unused]] auto& field = module_AdaptedStructWithTerseInternBox.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -471,10 +485,11 @@ StructMetadata<::cpp2::StructWithRefTypeUnique>::gen(ThriftMetadata& metadata) {
     { 1, "def_field", false, std::make_unique<Struct<::cpp2::Empty>>("module.Empty"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 2, "opt_field", true, std::make_unique<Struct<::cpp2::Empty>>("module.Empty"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), }},    { 3, "req_field", false, std::make_unique<Struct<::cpp2::Empty>>("module.Empty"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_StructWithRefTypeUnique_fields) {
-    auto& field = module_StructWithRefTypeUnique.fields()[i];
+    [[maybe_unused]] auto& field = module_StructWithRefTypeUnique.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -500,10 +515,11 @@ StructMetadata<::cpp2::StructWithRefTypeShared>::gen(ThriftMetadata& metadata) {
     { 1, "def_field", false, std::make_unique<Struct<::cpp2::Empty>>("module.Empty"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(2) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 2, "opt_field", true, std::make_unique<Struct<::cpp2::Empty>>("module.Empty"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(2) } }).cv_struct(), }},    { 3, "req_field", false, std::make_unique<Struct<::cpp2::Empty>>("module.Empty"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(2) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_StructWithRefTypeShared_fields) {
-    auto& field = module_StructWithRefTypeShared.fields()[i];
+    [[maybe_unused]] auto& field = module_StructWithRefTypeShared.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -529,10 +545,11 @@ StructMetadata<::cpp2::StructWithRefTypeSharedConst>::gen(ThriftMetadata& metada
     { 1, "def_field", false, std::make_unique<Struct<::cpp2::Empty>>("module.Empty"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(1) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 2, "opt_field", true, std::make_unique<Struct<::cpp2::Empty>>("module.Empty"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(1) } }).cv_struct(), }},    { 3, "req_field", false, std::make_unique<Struct<::cpp2::Empty>>("module.Empty"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(1) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_StructWithRefTypeSharedConst_fields) {
-    auto& field = module_StructWithRefTypeSharedConst.fields()[i];
+    [[maybe_unused]] auto& field = module_StructWithRefTypeSharedConst.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -558,10 +575,11 @@ StructMetadata<::cpp2::StructWithRefAndAnnotCppNoexceptMoveCtor>::gen(ThriftMeta
     { 1, "def_field", false, std::make_unique<Struct<::cpp2::Empty>>("module.Empty"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_StructWithRefAndAnnotCppNoexceptMoveCtor_fields) {
-    auto& field = module_StructWithRefAndAnnotCppNoexceptMoveCtor.fields()[i];
+    [[maybe_unused]] auto& field = module_StructWithRefAndAnnotCppNoexceptMoveCtor.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -587,10 +605,11 @@ StructMetadata<::cpp2::StructWithString>::gen(ThriftMetadata& metadata) {
     { 1, "def_unique_string_ref", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 2, "def_shared_string_ref", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(2) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 3, "def_shared_string_const_ref", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(1) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 4, "unique_string_ref", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 5, "shared_string_ref", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(2) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_StructWithString_fields) {
-    auto& field = module_StructWithString.fields()[i];
+    [[maybe_unused]] auto& field = module_StructWithString.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());

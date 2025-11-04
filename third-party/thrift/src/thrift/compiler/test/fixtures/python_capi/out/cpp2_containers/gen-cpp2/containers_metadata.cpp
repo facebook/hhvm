@@ -40,10 +40,11 @@ StructMetadata<::test::fixtures::python_capi::TemplateLists>::gen(ThriftMetadata
     { 1, "std_string", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("std::vector") } }).cv_struct(), }},    { 2, "deque_string", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("std::deque") } }).cv_struct(), }},    { 3, "small_vector_iobuf", false, std::make_unique<Typedef>("containers.small_vector_iobuf", std::make_unique<List>(std::make_unique<Typedef>("containers.IOBuf", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Type", { {"name", cvString("folly::IOBuf") } }).cv_struct(),  })), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Type", { {"template", cvString("folly::small_vector") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 4, "nested_small_vector", false, std::make_unique<List>(std::make_unique<Typedef>("containers.fbvector_string", std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Type", { {"template", cvString("folly::fbvector") } }).cv_struct(),  })), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::small_vector") } }).cv_struct(), }},    { 5, "small_vector_tensor", false, std::make_unique<List>(std::make_unique<Typedef>("containers.fbvector_fbvector_string", std::make_unique<List>(std::make_unique<Typedef>("containers.fbvector_string", std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Type", { {"template", cvString("folly::fbvector") } }).cv_struct(),  })), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Type", { {"template", cvString("folly::fbvector") } }).cv_struct(),  })), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::fbvector") } }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *containers_TemplateLists_fields) {
-    auto& field = containers_TemplateLists.fields()[i];
+    [[maybe_unused]] auto& field = containers_TemplateLists.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -69,10 +70,11 @@ StructMetadata<::test::fixtures::python_capi::TemplateSets>::gen(ThriftMetadata&
     { 1, "std_set", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("std::set") } }).cv_struct(), }},    { 2, "std_unordered", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("std::unordered_set") } }).cv_struct(), }},    { 3, "folly_fast", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::F14FastSet") } }).cv_struct(), }},    { 4, "folly_node", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::F14NodeSet") } }).cv_struct(), }},    { 5, "folly_value", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::F14ValueSet") } }).cv_struct(), }},    { 6, "folly_vector", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::F14VectorSet") } }).cv_struct(), }},    { 7, "folly_sorted_vector", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::sorted_vector_set") } }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *containers_TemplateSets_fields) {
-    auto& field = containers_TemplateSets.fields()[i];
+    [[maybe_unused]] auto& field = containers_TemplateSets.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -99,10 +101,11 @@ StructMetadata<::test::fixtures::python_capi::TemplateMaps>::gen(ThriftMetadata&
     { 1, "std_map", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("std::map") } }).cv_struct(), }},    { 2, "std_unordered", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("std::unordered_map") } }).cv_struct(), }},    { 3, "folly_fast", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::F14FastMap") } }).cv_struct(), }},    { 4, "folly_node", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::F14NodeMap") } }).cv_struct(), }},    { 5, "folly_value", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::F14ValueMap") } }).cv_struct(), }},    { 6, "folly_vector", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::F14VectorMap") } }).cv_struct(), }},    { 7, "folly_sorted_vector", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::sorted_vector_map") } }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *containers_TemplateMaps_fields) {
-    auto& field = containers_TemplateMaps.fields()[i];
+    [[maybe_unused]] auto& field = containers_TemplateMaps.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -129,10 +132,11 @@ StructMetadata<::test::fixtures::python_capi::TWrapped>::gen(ThriftMetadata& met
     { 1, "fieldA", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "fieldB", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *containers_TWrapped_fields) {
-    auto& field = containers_TWrapped.fields()[i];
+    [[maybe_unused]] auto& field = containers_TWrapped.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -158,10 +162,11 @@ StructMetadata<::test::fixtures::python_capi::IndirectionA>::gen(ThriftMetadata&
     { 1, "lst", false, std::make_unique<Typedef>("containers.ListOfWrapped", std::make_unique<List>(std::make_unique<Struct<::test::fixtures::python_capi::TWrapped>>("containers.TWrapped")), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *containers_IndirectionA_fields) {
-    auto& field = containers_IndirectionA.fields()[i];
+    [[maybe_unused]] auto& field = containers_IndirectionA.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -187,10 +192,11 @@ StructMetadata<::test::fixtures::python_capi::IndirectionB>::gen(ThriftMetadata&
     { 1, "lst", false, std::make_unique<Typedef>("containers.VecOfWrapped", std::make_unique<List>(std::make_unique<Struct<::test::fixtures::python_capi::TWrapped>>("containers.TWrapped")), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Type", { {"template", cvString("std::vector") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *containers_IndirectionB_fields) {
-    auto& field = containers_IndirectionB.fields()[i];
+    [[maybe_unused]] auto& field = containers_IndirectionB.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -216,10 +222,11 @@ StructMetadata<::test::fixtures::python_capi::IndirectionC>::gen(ThriftMetadata&
     { 1, "lst", false, std::make_unique<Typedef>("containers.ListOfWrappedAlias", std::make_unique<Typedef>("containers.ListOfWrapped", std::make_unique<List>(std::make_unique<Struct<::test::fixtures::python_capi::TWrapped>>("containers.TWrapped")), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *containers_IndirectionC_fields) {
-    auto& field = containers_IndirectionC.fields()[i];
+    [[maybe_unused]] auto& field = containers_IndirectionC.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());

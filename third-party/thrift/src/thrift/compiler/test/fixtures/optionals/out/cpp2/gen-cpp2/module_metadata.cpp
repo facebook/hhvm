@@ -46,10 +46,11 @@ StructMetadata<::cpp2::Color>::gen(ThriftMetadata& metadata) {
     { 1, "red", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "green", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "blue", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ }},    { 4, "alpha", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_Color_fields) {
-    auto& field = module_Color.fields()[i];
+    [[maybe_unused]] auto& field = module_Color.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -75,10 +76,11 @@ StructMetadata<::cpp2::Vehicle>::gen(ThriftMetadata& metadata) {
     { 1, "color", false, std::make_unique<Struct<::cpp2::Color>>("module.Color"), std::vector<ThriftConstStruct>{ }},    { 2, "licensePlate", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "description", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 4, "name", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 5, "hasAC", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowUnsafeOptionalCustomDefaultValue", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_Vehicle_fields) {
-    auto& field = module_Vehicle.fields()[i];
+    [[maybe_unused]] auto& field = module_Vehicle.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -104,10 +106,11 @@ StructMetadata<::cpp2::Person>::gen(ThriftMetadata& metadata) {
     { 1, "id", false, std::make_unique<Typedef>("module.PersonID", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},    { 2, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "age", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{ }},    { 4, "address", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 5, "favoriteColor", true, std::make_unique<Struct<::cpp2::Color>>("module.Color"), std::vector<ThriftConstStruct>{ }},    { 6, "friends", true, std::make_unique<Set>(std::make_unique<Typedef>("module.PersonID", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{  })), std::vector<ThriftConstStruct>{ }},    { 7, "bestFriend", true, std::make_unique<Typedef>("module.PersonID", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},    { 8, "petNames", true, std::make_unique<Map>(std::make_unique<Enum<::cpp2::Animal>>("module.Animal"), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ }},    { 9, "afraidOfAnimal", true, std::make_unique<Enum<::cpp2::Animal>>("module.Animal"), std::vector<ThriftConstStruct>{ }},    { 10, "vehicles", true, std::make_unique<List>(std::make_unique<Struct<::cpp2::Vehicle>>("module.Vehicle")), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_Person_fields) {
-    auto& field = module_Person.fields()[i];
+    [[maybe_unused]] auto& field = module_Person.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());

@@ -40,10 +40,11 @@ StructMetadata<::cpp2::Fields>::gen(ThriftMetadata& metadata) {
     { 100, "injected_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_Fields_fields) {
-    auto& field = module_Fields.fields()[i];
+    [[maybe_unused]] auto& field = module_Fields.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -69,10 +70,11 @@ StructMetadata<::cpp2::FieldsInjectedToEmptyStruct>::gen(ThriftMetadata& metadat
     { -1100, "injected_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_FieldsInjectedToEmptyStruct_fields) {
-    auto& field = module_FieldsInjectedToEmptyStruct.fields()[i];
+    [[maybe_unused]] auto& field = module_FieldsInjectedToEmptyStruct.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -99,10 +101,11 @@ StructMetadata<::cpp2::FieldsInjectedToStruct>::gen(ThriftMetadata& metadata) {
     { 1, "string_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { -1100, "injected_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_FieldsInjectedToStruct_fields) {
-    auto& field = module_FieldsInjectedToStruct.fields()[i];
+    [[maybe_unused]] auto& field = module_FieldsInjectedToStruct.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -129,10 +132,11 @@ StructMetadata<::cpp2::FieldsInjectedWithIncludedStruct>::gen(ThriftMetadata& me
     { 1, "string_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { -1100, "injected_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { -1101, "injected_structured_annotation_field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.Box", {  }).cv_struct(), }},    { -1102, "injected_unstructured_annotation_field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.Box", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_FieldsInjectedWithIncludedStruct_fields) {
-    auto& field = module_FieldsInjectedWithIncludedStruct.fields()[i];
+    [[maybe_unused]] auto& field = module_FieldsInjectedWithIncludedStruct.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -159,10 +163,11 @@ StructMetadata<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct>::gen(ThriftMe
     { 1, "string_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { -1001, "injected_field", false, std::make_unique<Struct<::cpp2::InjectedField>>("injected_field.InjectedField"), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_FieldsInjectedWithFieldsWithIncludedStruct_fields) {
-    auto& field = module_FieldsInjectedWithFieldsWithIncludedStruct.fields()[i];
+    [[maybe_unused]] auto& field = module_FieldsInjectedWithFieldsWithIncludedStruct.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());

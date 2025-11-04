@@ -45,10 +45,11 @@ StructMetadata<::thrift::shared_interactions::DoSomethingResult>::gen(ThriftMeta
     { 1, "s_res", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "i_res", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *shared_DoSomethingResult_fields) {
-    auto& field = shared_DoSomethingResult.fields()[i];
+    [[maybe_unused]] auto& field = shared_DoSomethingResult.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());

@@ -50,10 +50,11 @@ StructMetadata<::cpp2_struct_footprint::SimpleStruct>::gen(ThriftMetadata& metad
     { 1, "field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_SimpleStruct_fields) {
-    auto& field = module_SimpleStruct.fields()[i];
+    [[maybe_unused]] auto& field = module_SimpleStruct.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -79,10 +80,11 @@ StructMetadata<::cpp2_struct_footprint::ComplexStruct>::gen(ThriftMetadata& meta
     { 1, "nested", false, std::make_unique<Struct<::cpp2_struct_footprint::SimpleStruct>>("module.SimpleStruct"), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_ComplexStruct_fields) {
-    auto& field = module_ComplexStruct.fields()[i];
+    [[maybe_unused]] auto& field = module_ComplexStruct.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -158,10 +160,11 @@ StructMetadata<::cpp2_struct_footprint::ExStruct>::gen(ThriftMetadata& metadata)
     { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_ExStruct_fields) {
-    auto& field = module_ExStruct.fields()[i];
+    [[maybe_unused]] auto& field = module_ExStruct.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -187,10 +190,11 @@ StructMetadata<::cpp2_struct_footprint::TestUnion>::gen(ThriftMetadata& metadata
     { 1, "int_value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "struct_value", false, std::make_unique<Struct<::cpp2_struct_footprint::SimpleStruct>>("module.SimpleStruct"), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_TestUnion_fields) {
-    auto& field = module_TestUnion.fields()[i];
+    [[maybe_unused]] auto& field = module_TestUnion.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -215,10 +219,10 @@ void ExceptionMetadata<::cpp2_struct_footprint::ExStruct>::gen(ThriftMetadata& m
     { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_ExStruct_fields) {
-    auto& field = module_ExStruct.fields()[i];
+    [[maybe_unused]] auto& field = module_ExStruct.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.

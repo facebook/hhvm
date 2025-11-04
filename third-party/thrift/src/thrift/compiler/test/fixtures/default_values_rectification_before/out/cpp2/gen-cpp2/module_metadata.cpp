@@ -50,10 +50,11 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values_rect
     { 1, "unqualified_int_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "unqualified_bool_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "unqualified_list_field", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 4, "unqualified_struct_field", false, std::make_unique<Struct<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>>("module.EmptyStruct"), std::vector<ThriftConstStruct>{ }},    { 5, "optional_int_field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowUnsafeOptionalCustomDefaultValue", {  }).cv_struct(), }},    { 6, "optional_bool_field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowUnsafeOptionalCustomDefaultValue", {  }).cv_struct(), }},    { 7, "optional_list_field", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowUnsafeOptionalCustomDefaultValue", {  }).cv_struct(), }},    { 8, "optional_struct_field", true, std::make_unique<Struct<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>>("module.EmptyStruct"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowUnsafeOptionalCustomDefaultValue", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_TestStruct_fields) {
-    auto& field = module_TestStruct.fields()[i];
+    [[maybe_unused]] auto& field = module_TestStruct.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());

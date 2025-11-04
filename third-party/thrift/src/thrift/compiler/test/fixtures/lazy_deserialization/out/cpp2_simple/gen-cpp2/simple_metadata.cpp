@@ -40,10 +40,11 @@ StructMetadata<::apache::thrift::test::Foo>::gen(ThriftMetadata& metadata) {
     { 1, "field1", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{ }},    { 2, "field2", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 3, "field3", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{ }},    { 4, "field4", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *simple_Foo_fields) {
-    auto& field = simple_Foo.fields()[i];
+    [[maybe_unused]] auto& field = simple_Foo.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -69,10 +70,11 @@ StructMetadata<::apache::thrift::test::LazyFoo>::gen(ThriftMetadata& metadata) {
     { 1, "field1", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{ }},    { 2, "field2", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 3, "field3", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Lazy", {  }).cv_struct(), }},    { 4, "field4", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Lazy", { {"ref", cvBool(true) } }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *simple_LazyFoo_fields) {
-    auto& field = simple_LazyFoo.fields()[i];
+    [[maybe_unused]] auto& field = simple_LazyFoo.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -98,10 +100,11 @@ StructMetadata<::apache::thrift::test::OptionalFoo>::gen(ThriftMetadata& metadat
     { 1, "field1", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{ }},    { 2, "field2", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 3, "field3", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{ }},    { 4, "field4", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *simple_OptionalFoo_fields) {
-    auto& field = simple_OptionalFoo.fields()[i];
+    [[maybe_unused]] auto& field = simple_OptionalFoo.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -127,10 +130,11 @@ StructMetadata<::apache::thrift::test::OptionalLazyFoo>::gen(ThriftMetadata& met
     { 1, "field1", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{ }},    { 2, "field2", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 3, "field3", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Lazy", {  }).cv_struct(), }},    { 4, "field4", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Lazy", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *simple_OptionalLazyFoo_fields) {
-    auto& field = simple_OptionalLazyFoo.fields()[i];
+    [[maybe_unused]] auto& field = simple_OptionalLazyFoo.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -156,10 +160,11 @@ StructMetadata<::apache::thrift::test::OptionalBoxedLazyFoo>::gen(ThriftMetadata
     { 1, "field1", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("thrift.Box", {  }).cv_struct(), }},    { 2, "field2", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("thrift.Box", {  }).cv_struct(), }},    { 3, "field3", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("thrift.Box", {  }).cv_struct(), *cvStruct("cpp.Lazy", {  }).cv_struct(), }},    { 4, "field4", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Lazy", {  }).cv_struct(), *cvStruct("thrift.Box", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *simple_OptionalBoxedLazyFoo_fields) {
-    auto& field = simple_OptionalBoxedLazyFoo.fields()[i];
+    [[maybe_unused]] auto& field = simple_OptionalBoxedLazyFoo.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -185,10 +190,11 @@ StructMetadata<::apache::thrift::test::LazyCppRef>::gen(ThriftMetadata& metadata
     { 1, "field1", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Lazy", {  }).cv_struct(), *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), }},    { 2, "field2", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Lazy", {  }).cv_struct(), *cvStruct("cpp.Ref", { {"type", cvInteger(2) } }).cv_struct(), }},    { 3, "field3", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Lazy", {  }).cv_struct(), *cvStruct("cpp.Ref", { {"type", cvInteger(1) } }).cv_struct(), }},    { 4, "field4", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Lazy", {  }).cv_struct(), *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *simple_LazyCppRef_fields) {
-    auto& field = simple_LazyCppRef.fields()[i];
+    [[maybe_unused]] auto& field = simple_LazyCppRef.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -214,10 +220,11 @@ StructMetadata<::apache::thrift::test::IndexedFoo>::gen(ThriftMetadata& metadata
     { 100, "serialized_data_size", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ }},    { 1, "field1", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{ }},    { 2, "field2", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 3, "field3", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{ }},    { 4, "field4", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 101, "field_id_to_size", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *simple_IndexedFoo_fields) {
-    auto& field = simple_IndexedFoo.fields()[i];
+    [[maybe_unused]] auto& field = simple_IndexedFoo.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -243,10 +250,11 @@ StructMetadata<::apache::thrift::test::OptionalIndexedFoo>::gen(ThriftMetadata& 
     { 100, "serialized_data_size", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ }},    { 1, "field1", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{ }},    { 2, "field2", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 3, "field3", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{ }},    { 4, "field4", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 101, "field_id_to_size", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *simple_OptionalIndexedFoo_fields) {
-    auto& field = simple_OptionalIndexedFoo.fields()[i];
+    [[maybe_unused]] auto& field = simple_OptionalIndexedFoo.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());

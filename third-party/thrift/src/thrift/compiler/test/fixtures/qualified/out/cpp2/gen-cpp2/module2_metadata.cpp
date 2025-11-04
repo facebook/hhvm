@@ -40,10 +40,11 @@ StructMetadata<::module2::Struct>::gen(ThriftMetadata& metadata) {
     { 1, "first", false, std::make_unique<Struct<::module0::Struct>>("module0.Struct"), std::vector<ThriftConstStruct>{ }},    { 2, "second", false, std::make_unique<Struct<::module1::Struct>>("module1.Struct"), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module2_Struct_fields) {
-    auto& field = module2_Struct.fields()[i];
+    [[maybe_unused]] auto& field = module2_Struct.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
@@ -69,10 +70,11 @@ StructMetadata<::module2::BigStruct>::gen(ThriftMetadata& metadata) {
     { 1, "s", false, std::make_unique<Struct<::module2::Struct>>("module2.Struct"), std::vector<ThriftConstStruct>{ }},    { 2, "id", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module2_BigStruct_fields) {
-    auto& field = module2_BigStruct.fields()[i];
+    [[maybe_unused]] auto& field = module2_BigStruct.fields()[i];
     DCHECK_EQ(*field.id(), f.id);
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());

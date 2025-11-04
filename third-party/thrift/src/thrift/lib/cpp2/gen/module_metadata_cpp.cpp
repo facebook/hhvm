@@ -319,6 +319,9 @@ static auto genStructuredInMetadataMap(
   for (auto& field : node.fields()) {
     auto& f = ret.metadata.fields()->emplace_back();
     f.id() = folly::to_underlying(field.id());
+    f.name() = field.name();
+    f.is_optional() =
+        (field.presence() == syntax_graph::FieldPresenceQualifier::OPTIONAL_);
   }
   // TODO: add other information
   return ret;

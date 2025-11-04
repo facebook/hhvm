@@ -97,6 +97,14 @@ bool QueryArgument::isThreeTuple() const {
   return std::holds_alternative<AliasedQualifiedColumn>(value_);
 }
 
+bool QueryArgument::isAggregateColumn() const {
+  return std::holds_alternative<AggregateColumn>(value_);
+}
+
+bool QueryArgument::isAliasedAggregateColumn() const {
+  return std::holds_alternative<AliasedAggregateColumn>(value_);
+}
+
 QueryArgument&& QueryArgument::operator()(
     folly::StringPiece q1,
     const QueryArgument& q2) {
@@ -208,6 +216,14 @@ const AliasedQualifiedColumn& QueryArgument::getThreeTuple() const {
   return std::get<AliasedQualifiedColumn>(value_);
 }
 
+const AggregateColumn& QueryArgument::getAggregateColumn() const {
+  return std::get<AggregateColumn>(value_);
+}
+
+const AliasedAggregateColumn& QueryArgument::getAliasedAggregateColumn() const {
+  return std::get<AliasedAggregateColumn>(value_);
+}
+
 void QueryArgument::initFromDynamic(const folly::dynamic& param) {
   // Convert to basic values and get type
   if (param.isObject()) {
@@ -280,6 +296,58 @@ void appendComment(folly::fbstring* s, const QueryArgument& d) {
   s->append(str);
 }
 
+std::string_view resolveAggregateFunctionName(
+    const AggregateFunction& aggFunc) {
+  switch (aggFunc) {
+    case AggregateFunction::AVG:
+      return "AVG(";
+    case AggregateFunction::AVG_DISTINCT:
+      return "AVG(DISTINCT ";
+    case AggregateFunction::BIT_AND:
+      return "BIT_AND(";
+    case AggregateFunction::BIT_OR:
+      return "BIT_OR(";
+    case AggregateFunction::BIT_XOR:
+      return "BIT_XOR(";
+    case AggregateFunction::COUNT:
+      return "COUNT(";
+    case AggregateFunction::COUNT_DISTINCT:
+      return "COUNT(DISTINCT ";
+    case AggregateFunction::GROUP_CONCAT:
+      return "GROUP_CONCAT(";
+    case AggregateFunction::GROUP_CONCAT_DISTINCT:
+      return "GROUP_CONCAT(DISTINCT ";
+    case AggregateFunction::JSON_ARRAYAGG:
+      return "JSON_ARRAYAGG(";
+    case AggregateFunction::MAX:
+      return "MAX(";
+    case AggregateFunction::MAX_DISTINCT:
+      return "MAX(DISTINCT ";
+    case AggregateFunction::MIN:
+      return "MIN(";
+    case AggregateFunction::MIN_DISTINCT:
+      return "MIN(DISTINCT ";
+    case AggregateFunction::STD:
+      return "STD(";
+    case AggregateFunction::STDDEV:
+      return "STDDEV(";
+    case AggregateFunction::STDDEV_POP:
+      return "STDDEV_POP(";
+    case AggregateFunction::STDDEV_SAMP:
+      return "STDDEV_SAMP(";
+    case AggregateFunction::SUM:
+      return "SUM(";
+    case AggregateFunction::SUM_DISTINCT:
+      return "SUM(DISTINCT ";
+    case AggregateFunction::VAR_POP:
+      return "VAR_POP(";
+    case AggregateFunction::VAR_SAMP:
+      return "VAR_SAMP(";
+    case AggregateFunction::VARIANCE:
+      return "VARIANCE(";
+  }
+}
+
 void appendColumnTableName(folly::fbstring* s, const QueryArgument& d) {
   if (d.isString()) {
     folly::grow_capacity_by(*s, d.getString().size() + 4);
@@ -307,6 +375,20 @@ void appendColumnTableName(folly::fbstring* s, const QueryArgument& d) {
     appendColumnTableName(s, std::get<1>(t));
     s->append(" AS ");
     appendColumnTableName(s, std::get<2>(t));
+  } else if (d.isAggregateColumn()) {
+    auto t = d.getAggregateColumn();
+    s->append(resolveAggregateFunctionName(std::get<0>(t)));
+    appendColumnTableName(s, std::get<1>(t));
+    s->push_back(')');
+  } else if (d.isAliasedAggregateColumn()) {
+    auto t = d.getAliasedAggregateColumn();
+    s->append(resolveAggregateFunctionName(std::get<0>(t)));
+    auto& [tableName, columnName, AliasName] = std::get<1>(t);
+    appendColumnTableName(s, tableName);
+    s->push_back('.');
+    appendColumnTableName(s, columnName);
+    s->append(") AS ");
+    appendColumnTableName(s, AliasName);
   } else {
     s->append(d.asString());
   }

@@ -96,11 +96,41 @@ namespace facebook::common::mysql_client {
 class QueryArgument;
 class InternalConnection;
 
+enum class AggregateFunction {
+  AVG = 0,
+  AVG_DISTINCT = 1,
+  BIT_AND = 2,
+  BIT_OR = 3,
+  BIT_XOR = 4,
+  COUNT = 5,
+  COUNT_DISTINCT = 6,
+  GROUP_CONCAT = 7,
+  GROUP_CONCAT_DISTINCT = 8,
+  JSON_ARRAYAGG = 9,
+  MAX = 10,
+  MAX_DISTINCT = 11,
+  MIN = 12,
+  MIN_DISTINCT = 13,
+  STD = 14,
+  STDDEV = 15,
+  STDDEV_POP = 16,
+  STDDEV_SAMP = 17,
+  SUM = 18,
+  SUM_DISTINCT = 19,
+  VAR_POP = 20,
+  VAR_SAMP = 21,
+  VARIANCE = 22,
+};
+
 using ArgumentPair = std::pair<folly::fbstring, QueryArgument>;
+using QueryAttributes = AttributeMap;
+
 using QualifiedColumn = std::tuple<folly::fbstring, folly::fbstring>;
 using AliasedQualifiedColumn =
     std::tuple<folly::fbstring, folly::fbstring, folly::fbstring>;
-using QueryAttributes = AttributeMap;
+using AggregateColumn = std::tuple<AggregateFunction, QualifiedColumn>;
+using AliasedAggregateColumn =
+    std::tuple<AggregateFunction, AliasedQualifiedColumn>;
 
 /*
  * This class will be responsible of passing various per query options.
@@ -449,7 +479,9 @@ class QueryArgument {
       std::vector<QueryArgument>,
       std::vector<ArgumentPair>,
       QualifiedColumn,
-      AliasedQualifiedColumn>
+      AliasedQualifiedColumn,
+      AggregateColumn,
+      AliasedAggregateColumn>
       value_;
 
  public:
@@ -478,6 +510,9 @@ class QueryArgument {
   /* implicit */ QueryArgument(std::vector<QueryArgument> arg_list);
   /* implicit */ QueryArgument(QualifiedColumn tup) : value_(std::move(tup)) {}
   /* implicit */ QueryArgument(AliasedQualifiedColumn tup)
+      : value_(std::move(tup)) {}
+  /* implicit */ QueryArgument(AggregateColumn tup) : value_(std::move(tup)) {}
+  /* implicit */ QueryArgument(AliasedAggregateColumn tup)
       : value_(std::move(tup)) {}
   /* implicit */ QueryArgument(std::nullptr_t /*n*/) : value_() {}
 
@@ -554,6 +589,8 @@ class QueryArgument {
   const std::vector<QueryArgument>& getList() const;
   const QualifiedColumn& getTwoTuple() const;
   const AliasedQualifiedColumn& getThreeTuple() const;
+  const AggregateColumn& getAggregateColumn() const;
+  const AliasedAggregateColumn& getAliasedAggregateColumn() const;
 
   bool isString() const;
   bool isQuery() const;
@@ -565,6 +602,8 @@ class QueryArgument {
   bool isInt() const;
   bool isTwoTuple() const;
   bool isThreeTuple() const;
+  bool isAggregateColumn() const;
+  bool isAliasedAggregateColumn() const;
 
   std::string_view typeName() const;
 

@@ -256,6 +256,10 @@ void emitTypeTest(Vout& v, IRLS& env, Type type,
 
     auto const base = type.unspecialize();
     if (type == TStaticStr)     return test(KindOfString);
+    // On Arm targets comparisons with arbitrary bitmasks are more efficient
+    // with cmp than test.
+    if (arch() == Arch::ARM && !type.isUnion())
+      return cmp(type.toDataType(), CC_E);
     if (type.isKnownDataType()) return test(type.toDataType());
     if (base == TArrLike)       return cmp(KindOfKeyset, CC_BE);
     if (type == (TVec|TDict))   return cmp(KindOfVec, CC_BE);

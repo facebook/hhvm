@@ -758,9 +758,11 @@ void Vgen::emit(const copy2& i) {
   assertx(d0 != d1);
   if (d0 == s1) {
     if (d1 == s0) {
-      a->Eor(X(d0), X(d0), X(s0));
-      a->Eor(X(s0), X(d0), X(s0));
-      a->Eor(X(d0), X(d0), X(s0));
+      a->SetScratchRegisters(vixl::NoReg, vixl::NoReg);
+      a->Mov(rVixlScratch0, X(d0));
+      a->Mov(X(d0), X(s0));
+      a->Mov(X(s0), rVixlScratch0);
+      a->SetScratchRegisters(rVixlScratch0, rVixlScratch1);
     } else {
       // could do this in a simplify pass
       if (s1 != d1) a->Mov(X(s1), X(d1)); // save s1 first; d1 != s0

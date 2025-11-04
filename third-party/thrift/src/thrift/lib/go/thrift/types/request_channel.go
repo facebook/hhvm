@@ -79,13 +79,6 @@ type interactionChannel struct {
 // Compile time interface enforcer
 var _ RequestChannel = (*interactionChannel)(nil)
 
-type interactionContextKey int
-
-const (
-	interactionCreateKey interactionContextKey = 1
-	interactionIDKey     interactionContextKey = 2
-)
-
 // NewInteractionChannel creates a new interaction channel.
 func NewInteractionChannel(channel RequestChannel, interactionName string) RequestChannel {
 	interactionID := nextInteractionID.Add(1)

@@ -35,7 +35,7 @@ end
 
 (** Used "hh --find-refs --json" and read by HackAst and other tools *)
 module HackAst : sig
-  val to_string : (string * Pos.absolute) list -> string
+  val to_json : (string * Pos.absolute) list -> Hh_json.json
 end
 
 (** Used by "hh --find-refs" *)

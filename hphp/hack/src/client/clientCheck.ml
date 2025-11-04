@@ -47,7 +47,9 @@ end)
 
 let print_refs (results : (string * Pos.absolute) list) ~(json : bool) : unit =
   if json then
-    FindRefsWireFormat.HackAst.to_string results |> print_endline
+    FindRefsWireFormat.HackAst.to_json results
+    |> Hh_json.json_to_string
+    |> print_endline
   else
     FindRefsWireFormat.CliHumanReadable.print_results results
 
@@ -1020,6 +1022,33 @@ let main_internal
     | Error error ->
       Printf.eprintf "%s\n" error;
       Lwt.return (Exit_status.Input_error, telemtry))
+  | ClientEnv.MODE_PACKAGE_LINT file ->
+    let file = expand_path file in
+    let%lwt results =
+      rpc_with_retry args @@ ServerCommandTypes.PACKAGE_LINT file
+    in
+    let describe =
+      ServerCommandTypes.Find_refs.(
+        function
+        | Class n -> ("CLASSISH", n)
+        | Function n -> ("FUNCTION", n)
+        | GConst n -> ("GLOBAL_CONSTANT", n)
+        | _ -> ("error", ""))
+    in
+    Hh_json.(
+      array_
+        (fun (def, refs) ->
+          let (kind, name) = describe def in
+          JSON_Object
+            [
+              ("def", string_ name);
+              ("kind", string_ kind);
+              ("refs", FindRefsWireFormat.HackAst.to_json refs);
+            ])
+        results)
+    |> Hh_json.json_to_multiline
+    |> print_endline;
+    Lwt.return (Exit_status.No_error, Telemetry.create ())
 
 let rec flush_event_logger () : unit Lwt.t =
   let%lwt () = Lwt_unix.sleep 1.0 in

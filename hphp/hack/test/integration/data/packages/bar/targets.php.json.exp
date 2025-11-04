@@ -1,0 +1,61 @@
+[
+  {
+    "def": "\\BAR_CONST",
+    "kind": "GLOBAL_CONSTANT",
+    "refs": [
+      {
+        "name": "BAR_CONST",
+        "filename": "/bar/caller.php",
+        "line": 24,
+        "char_start": 3,
+        "char_end": 11
+      }
+    ]
+  },
+  {
+    "def": "\\Bar_class",
+    "kind": "CLASSISH",
+    "refs": [
+      {
+        "name": "Bar_class",
+        "filename": "/bar/caller.php",
+        "line": 27,
+        "char_start": 3,
+        "char_end": 11
+      },
+      {
+        "name": "Bar_class",
+        "filename": "/bar/caller.php",
+        "line": 26,
+        "char_start": 7,
+        "char_end": 15
+      }
+    ]
+  },
+  {
+    "def": "\\bar_fun",
+    "kind": "FUNCTION",
+    "refs": [
+      {
+        "name": "bar_fun",
+        "filename": "/bar/caller.php",
+        "line": 25,
+        "char_start": 3,
+        "char_end": 9
+      }
+    ]
+  },
+  {
+    "def": "\\bar_typedef",
+    "kind": "CLASSISH",
+    "refs": [
+      {
+        "name": "bar_typedef",
+        "filename": "/bar/caller.php",
+        "line": 22,
+        "char_start": 3,
+        "char_end": 13
+      }
+    ]
+  }
+]

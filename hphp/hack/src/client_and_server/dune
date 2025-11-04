@@ -166,7 +166,7 @@
 (library
  (name server_find_refs)
  (wrapped false)
- (modules serverFindRefs serverDepsInBatch)
+ (modules serverFindRefs serverDepsInBatch serverPackageLint)
  (libraries
   provider_context
   server_command_types

@@ -118,11 +118,11 @@ end
 
 (** Used "hh --find-refs --json" and read by HackAst and other tools *)
 module HackAst = struct
-  let to_string results =
+  let to_json results =
     let entries =
       List.map results ~f:(pos_to_one_based_json ~half_open_interval:false)
     in
-    Hh_json.JSON_Array entries |> Hh_json.json_to_string
+    Hh_json.JSON_Array entries
 end
 
 (** Used by "hh --find-refs" *)

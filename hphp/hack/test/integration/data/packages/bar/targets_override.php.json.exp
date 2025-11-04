@@ -1,0 +1,61 @@
+[
+  {
+    "def": "\\FOO_OVERRIDE_CONST",
+    "kind": "GLOBAL_CONSTANT",
+    "refs": [
+      {
+        "name": "FOO_OVERRIDE_CONST",
+        "filename": "/bar/caller.php",
+        "line": 15,
+        "char_start": 3,
+        "char_end": 20
+      }
+    ]
+  },
+  {
+    "def": "\\Foo_override_class",
+    "kind": "CLASSISH",
+    "refs": [
+      {
+        "name": "Foo_override_class",
+        "filename": "/bar/caller.php",
+        "line": 18,
+        "char_start": 3,
+        "char_end": 20
+      },
+      {
+        "name": "Foo_override_class",
+        "filename": "/bar/caller.php",
+        "line": 17,
+        "char_start": 7,
+        "char_end": 24
+      }
+    ]
+  },
+  {
+    "def": "\\foo_override_fun",
+    "kind": "FUNCTION",
+    "refs": [
+      {
+        "name": "foo_override_fun",
+        "filename": "/bar/caller.php",
+        "line": 16,
+        "char_start": 3,
+        "char_end": 18
+      }
+    ]
+  },
+  {
+    "def": "\\foo_override_typedef",
+    "kind": "CLASSISH",
+    "refs": [
+      {
+        "name": "foo_override_typedef",
+        "filename": "/bar/caller.php",
+        "line": 13,
+        "char_start": 3,
+        "char_end": 22
+      }
+    ]
+  }
+]

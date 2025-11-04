@@ -582,6 +582,9 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
       ( "--outline",
         Arg.Unit (fun () -> set_mode MODE_OUTLINE),
         " (mode) prints an outline of the text on stdin" );
+      ( "--package-lint",
+        Arg.String (fun x -> set_mode (MODE_PACKAGE_LINT x)),
+        "Support for linting of __PackageOverride annotations" );
       Common_argspecs.prechecked prechecked;
       Common_argspecs.no_prechecked prechecked;
       Common_argspecs.with_mini_state mini_state;

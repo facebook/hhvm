@@ -1,0 +1,9 @@
+[packages]
+[packages.foo]
+include_paths=["//foo/"]
+
+[packages.bar]
+include_paths=["//bar/"]
+includes=["foo"]
+
+[deployments]

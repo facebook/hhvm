@@ -286,17 +286,17 @@ class CommonTestDriver(TestDriver):
     ) -> Tuple[str, str, int]:
         options = [] if options is None else options
         root = self.repo_dir + os.path.sep
+        args = [
+            hh_client,
+            "check",
+            "--retries",
+            "240",
+            "--error-format",
+            "raw",
+            self.repo_dir,
+        ] + list(map(lambda x: x.format(root=root), options))
         return self.proc_call(
-            [
-                hh_client,
-                "check",
-                "--retries",
-                "240",
-                "--error-format",
-                "raw",
-                self.repo_dir,
-            ]
-            + list(map(lambda x: x.format(root=root), options)),
+            args,
             stdin=stdin,
         )
 

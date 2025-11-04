@@ -142,6 +142,12 @@ module Find_refs = struct
   type result_or_retry = result Done_or_retry.t
 end
 
+module Package_lint = struct
+  type result = (Find_refs.action * Find_refs.result) list
+
+  type result_or_retry = result Done_or_retry.t
+end
+
 module Find_my_tests = struct
   type result_entry = {
     file_path: string;
@@ -415,6 +421,7 @@ type _ t =
       (string * int * int) list
       -> Find_refs.result_or_retry list t
   | FIND_MY_TESTS : (int * string list) -> Find_my_tests.result t
+  | PACKAGE_LINT : string -> Package_lint.result_or_retry t
 
 type cmd_metadata = {
   from: string;
@@ -505,6 +512,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | FILE_DEPENDENTS _ -> true
   | VERBOSE _ -> false
   | DEPS_IN_BATCH _ -> true
+  | PACKAGE_LINT _ -> true
 
 let use_priority_pipe (command : 'result t) : bool =
   not (rpc_command_needs_full_check command)

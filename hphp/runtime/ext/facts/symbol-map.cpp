@@ -1550,11 +1550,6 @@ void SymbolMap::updateDBPath(
   }
 
   if (!facts.package_membership.empty()) {
-    XLOGF(
-        ERR,
-        "{} -> package override {}",
-        path.native().c_str(),
-        std::string(facts.package_membership));
     db.insertPackageMembership(path, as_slice(facts.package_membership));
   }
 

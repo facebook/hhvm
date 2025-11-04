@@ -126,33 +126,6 @@ class t_type : public t_named {
   // TODO(T227540797): Delete everything below this point. It's only here for
   // backwards compatibility.
  public:
-  /*
-   * All the thrift supported types
-   */
-  enum class type {
-    // Base types.
-    t_void = 0,
-    t_bool = 2,
-    t_byte = 3,
-    t_i16 = 4,
-    t_i32 = 5,
-    t_i64 = 6,
-    t_float = 15,
-    t_double = 7,
-    t_string = 1,
-    t_binary = 18,
-
-    // Container types.
-    t_list = 9,
-    t_set = 10,
-    t_map = 11,
-
-    // Declared types
-    t_enum = 8,
-    t_structured = 12,
-    t_service = 13,
-  };
-
   /**
    * Default returns for every thrift type
    */

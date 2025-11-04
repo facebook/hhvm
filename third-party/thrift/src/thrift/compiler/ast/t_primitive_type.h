@@ -27,20 +27,18 @@ namespace apache::thrift::compiler {
  */
 class t_primitive_type : public t_type {
  public:
-  /**
-   * The subset of t_type::type that are primitive types.
-   */
+  /** The types of primitive a `t_primitive_type` instance can represent. */
   enum class type {
-    t_void = int(t_type::type::t_void),
-    t_string = int(t_type::type::t_string),
-    t_bool = int(t_type::type::t_bool),
-    t_byte = int(t_type::type::t_byte),
-    t_i16 = int(t_type::type::t_i16),
-    t_i32 = int(t_type::type::t_i32),
-    t_i64 = int(t_type::type::t_i64),
-    t_double = int(t_type::type::t_double),
-    t_float = int(t_type::type::t_float),
-    t_binary = int(t_type::type::t_binary),
+    t_void,
+    t_string,
+    t_bool,
+    t_byte,
+    t_i16,
+    t_i32,
+    t_i64,
+    t_double,
+    t_float,
+    t_binary,
   };
 
   // A singleton per type.

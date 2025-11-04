@@ -459,7 +459,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
-  module_ExtendedFootprintService.parent() = "module.FootprintTestService";
+  DCHECK_EQ(*module_ExtendedFootprintService.parent(), "module.FootprintTestService");
   ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>>::genRecurse(metadata, services);
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.ExtendedFootprintService", std::move(module_ExtendedFootprintService));

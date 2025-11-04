@@ -136,6 +136,10 @@ metadata::ThriftService genServiceMetadata(
     const syntax_graph::ServiceNode& node) {
   metadata::ThriftService ret;
   ret.name() = getName(node);
+  ret.uri() = node.uri();
+  if (const auto* p = node.baseService()) {
+    ret.parent() = getName(*p);
+  }
   // TODO: add other information
   return ret;
 }

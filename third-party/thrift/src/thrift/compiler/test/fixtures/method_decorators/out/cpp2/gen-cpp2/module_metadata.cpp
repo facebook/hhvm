@@ -465,7 +465,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
-  module_DecoratedService_ExtendsUndecoratedService.parent() = "module.UndecoratedService";
+  DCHECK_EQ(*module_DecoratedService_ExtendsUndecoratedService.parent(), "module.UndecoratedService");
   ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService>>::genRecurse(metadata, services);
   module_DecoratedService_ExtendsUndecoratedService.structured_annotations()->push_back(*cvStruct("cpp.GenerateServiceMethodDecorator", {  }).cv_struct());
   ThriftServiceContextRef& context = services[selfIndex];
@@ -506,7 +506,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
-  module_DecoratedService_ExtendsDecoratedService.parent() = "module.DecoratedService";
+  DCHECK_EQ(*module_DecoratedService_ExtendsDecoratedService.parent(), "module.DecoratedService");
   ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>::genRecurse(metadata, services);
   module_DecoratedService_ExtendsDecoratedService.structured_annotations()->push_back(*cvStruct("cpp.GenerateServiceMethodDecorator", {  }).cv_struct());
   ThriftServiceContextRef& context = services[selfIndex];
@@ -547,7 +547,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
-  module_UndecoratedService_ExtendsDecoratedService.parent() = "module.DecoratedService";
+  DCHECK_EQ(*module_UndecoratedService_ExtendsDecoratedService.parent(), "module.DecoratedService");
   ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>::genRecurse(metadata, services);
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.UndecoratedService_ExtendsDecoratedService", std::move(module_UndecoratedService_ExtendsDecoratedService));
@@ -594,7 +594,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
-  module_DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService.parent() = "module.UndecoratedService_ExtendsDecoratedService";
+  DCHECK_EQ(*module_DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService.parent(), "module.UndecoratedService_ExtendsDecoratedService");
   ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService_ExtendsDecoratedService>>::genRecurse(metadata, services);
   module_DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService.structured_annotations()->push_back(*cvStruct("cpp.GenerateServiceMethodDecorator", {  }).cv_struct());
   ThriftServiceContextRef& context = services[selfIndex];

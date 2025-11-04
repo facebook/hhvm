@@ -1184,7 +1184,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
-  module_DerivedService.parent() = "module.SimpleService";
+  DCHECK_EQ(*module_DerivedService.parent(), "module.SimpleService");
   ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::genRecurse(metadata, services);
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.DerivedService", std::move(module_DerivedService));
@@ -1224,7 +1224,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
-  module_RederivedService.parent() = "module.DerivedService";
+  DCHECK_EQ(*module_RederivedService.parent(), "module.DerivedService");
   ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedService>>::genRecurse(metadata, services);
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.RederivedService", std::move(module_RederivedService));

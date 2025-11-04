@@ -168,7 +168,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_PrimitivesService = genServiceMetadata<::facebook::thrift::test::PrimitivesService>();
-  module_PrimitivesService.uri() = "facebook.com/thrift/test/PrimitivesService";
+  DCHECK_EQ(*module_PrimitivesService.uri(), "facebook.com/thrift/test/PrimitivesService");
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>>::gen_init,
     ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>>::gen_method_that_throws,
@@ -223,7 +223,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_ExtendedService = genServiceMetadata<::facebook::thrift::test::ExtendedService>();
-  module_ExtendedService.uri() = "facebook.com/thrift/test/ExtendedService";
+  DCHECK_EQ(*module_ExtendedService.uri(), "facebook.com/thrift/test/ExtendedService");
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>>::gen_init,
   };
@@ -233,7 +233,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
-  module_ExtendedService.parent() = "extend.BaseService";
+  DCHECK_EQ(*module_ExtendedService.parent(), "extend.BaseService");
   ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::BaseService>>::genRecurse(metadata, services);
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.ExtendedService", std::move(module_ExtendedService));

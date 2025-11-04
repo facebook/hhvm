@@ -110,7 +110,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
-  module_MyNode.parent() = "module.MyRoot";
+  DCHECK_EQ(*module_MyNode.parent(), "module.MyRoot");
   ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyRoot>>::genRecurse(metadata, services);
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.MyNode", std::move(module_MyNode));
@@ -150,7 +150,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
-  module_MyLeaf.parent() = "module.MyNode";
+  DCHECK_EQ(*module_MyLeaf.parent(), "module.MyNode");
   ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyNode>>::genRecurse(metadata, services);
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.MyLeaf", std::move(module_MyLeaf));

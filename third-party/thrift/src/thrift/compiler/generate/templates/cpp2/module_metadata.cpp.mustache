@@ -179,7 +179,7 @@ void ServiceMetadata<::{{> service_common/service_class_name}}>::gen(::apache::t
 const ThriftServiceContextRef* ServiceMetadata<::{{> service_common/service_class_name}}>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService {{service:metadata_name}} = genServiceMetadata<{{service:qualified_name}}>();
   {{#if (not (string.empty? service:uri))}}
-  {{service:metadata_name}}.uri() = "{{service:uri}}";
+  DCHECK_EQ(*{{service:metadata_name}}.uri(), "{{service:uri}}");
   {{/if (not (string.empty? service:uri))}}
 {{#service:functions?}}
   static const ThriftFunctionGenerator functions[] = {
@@ -195,7 +195,7 @@ const ThriftServiceContextRef* ServiceMetadata<::{{> service_common/service_clas
   auto selfIndex = services.size();
   services.emplace_back();
 {{#service:extends?}}
-  {{service:metadata_name}}.parent() = "{{#service:extends}}{{service:program_name}}.{{service:name}}{{/service:extends}}";
+  DCHECK_EQ(*{{service:metadata_name}}.parent(), "{{#service:extends}}{{service:program_name}}.{{service:name}}{{/service:extends}}");
 {{#service:extends}}
   ServiceMetadata<::{{> service_common/service_class_name}}>::genRecurse(metadata, services);
 {{/service:extends}}

@@ -1007,7 +1007,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::Service>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_Service = genServiceMetadata<::facebook::thrift::test::Service>();
-  module_Service.uri() = "facebook.com/thrift/test/Service";
+  DCHECK_EQ(*module_Service.uri(), "facebook.com/thrift/test/Service");
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::Service>>::gen_func,
   };
@@ -1061,7 +1061,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
   ::apache::thrift::metadata::ThriftService module_AdapterService = genServiceMetadata<::facebook::thrift::test::AdapterService>();
-  module_AdapterService.uri() = "facebook.com/thrift/test/AdapterService";
+  DCHECK_EQ(*module_AdapterService.uri(), "facebook.com/thrift/test/AdapterService");
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>>::gen_count,
     ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>>::gen_adaptedTypes,

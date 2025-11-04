@@ -298,7 +298,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
-  extra_services_ExtraService.parent() = "module.ParamService";
+  DCHECK_EQ(*extra_services_ExtraService.parent(), "module.ParamService");
   ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamService>>::genRecurse(metadata, services);
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("extra_services.ExtraService", std::move(extra_services_ExtraService));

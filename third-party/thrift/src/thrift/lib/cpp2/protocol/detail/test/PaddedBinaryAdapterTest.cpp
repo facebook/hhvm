@@ -27,6 +27,48 @@ namespace {
 
 class PaddedBinaryAdapterTest : public testing::Test {};
 
+TEST_F(PaddedBinaryAdapterTest, SerializedSize) {
+  std::string testData = "Test data for single padded field";
+  PaddedBinaryData paddedData(4, folly::IOBuf::copyBuffer(testData));
+  PaddedBinaryData nullData(4, nullptr);
+  PaddedBinaryData emptyData(4, folly::IOBuf::create(0));
+  PaddedBinaryData zeroPaddingData(0, folly::IOBuf::copyBuffer(testData));
+
+  BinaryProtocolWriter binaryWriter;
+  uint32_t size = PaddedBinaryAdapter::serializedSize<false, std::string>(
+      binaryWriter, paddedData);
+  EXPECT_EQ(size, 4);
+  size = PaddedBinaryAdapter::serializedSize<true, std::string>(
+      binaryWriter, paddedData);
+  EXPECT_EQ(size, 4);
+  size = PaddedBinaryAdapter::serializedSize<false, std::string>(
+      binaryWriter, nullData);
+  EXPECT_EQ(size, 0);
+  size = PaddedBinaryAdapter::serializedSize<true, std::string>(
+      binaryWriter, nullData);
+  EXPECT_EQ(size, 0);
+  size = PaddedBinaryAdapter::serializedSize<false, std::string>(
+      binaryWriter, emptyData);
+  EXPECT_EQ(size, 4);
+  size = PaddedBinaryAdapter::serializedSize<true, std::string>(
+      binaryWriter, emptyData);
+  EXPECT_EQ(size, 4);
+  size = PaddedBinaryAdapter::serializedSize<false, std::string>(
+      binaryWriter, zeroPaddingData);
+  EXPECT_EQ(size, 37);
+  size = PaddedBinaryAdapter::serializedSize<true, std::string>(
+      binaryWriter, zeroPaddingData);
+  EXPECT_EQ(size, 37);
+
+  CompactProtocolWriter compactWriter;
+  size = PaddedBinaryAdapter::serializedSize<false, std::string>(
+      compactWriter, paddedData);
+  EXPECT_EQ(size, 38);
+  size = PaddedBinaryAdapter::serializedSize<true, std::string>(
+      compactWriter, paddedData);
+  EXPECT_EQ(size, 38);
+}
+
 TEST_F(PaddedBinaryAdapterTest, SinglePaddedField) {
   std::string testData = "Test data for single padded field";
   SingleAlignedBinary original;

@@ -28,6 +28,8 @@
 namespace apache::thrift::protocol {
 
 /**
+ * You most likely DO NOT want to use this adapter. Please contact the Thrift
+ * team if you think you need this.
  * PaddedBinaryAdapter adds a  wrapper around IOBuf that prepends user specified
  * padding to the serialized data.
  * Using this without obeying the following rules will result in your data not
@@ -70,6 +72,11 @@ struct PaddedBinaryData {
       uint32_t paddingBytes, std::unique_ptr<folly::IOBuf>&& data)
       : paddingBytes(paddingBytes), buf(std::move(data)) {}
 
+  bool canAddPadding() const {
+    return paddingBytes > 0 && buf != nullptr &&
+        buf->computeChainDataLength() > 0;
+  }
+
   uint32_t paddingBytes{0};
   std::unique_ptr<folly::IOBuf> buf{nullptr};
 };
@@ -89,8 +96,7 @@ struct PaddedBinaryAdapter {
       // We only add padding if:
       // 1. The data buffer exists and is not empty
       // 2. There is a valid padding to be added
-      if (data.paddingBytes > 0 && data.buf != nullptr &&
-          data.buf->computeChainDataLength() > 0) {
+      if (data.canAddPadding()) {
         // We'll add the magic and the padding efficiently using a new IOBuf.
         uint32_t paddingBufSize =
             PaddedBinaryData::kPaddingHeaderBytes + data.paddingBytes;
@@ -107,8 +113,9 @@ struct PaddedBinaryAdapter {
         // Append the data buf to the padding buf
         paddedDataBuf->appendToChain(data.buf->clone());
 
-        // Write the padded buf using the protocol
-        return prot.writeBinary(paddedDataBuf);
+        // Write the padded buf using the protocol. We want to preserve the
+        // IOBuf chain to allow for frame relative alignment.
+        return prot.writeBinary(paddedDataBuf, /* pack */ false);
       }
     }
 
@@ -152,25 +159,39 @@ struct PaddedBinaryAdapter {
 
       // Read the padding bytes next
       data.paddingBytes = cursor.readBE<uint32_t>();
-      uint32_t extraBytes =
+      uint32_t bytesToSkip =
           PaddedBinaryData::kPaddingHeaderBytes + data.paddingBytes;
-      DCHECK(extraBytes <= data.buf->computeChainDataLength());
+      DCHECK(bytesToSkip <= data.buf->computeChainDataLength());
       // Invalid padding, just return the data
       if (data.paddingBytes > data.buf->computeChainDataLength()) {
         return;
       }
 
-      // Move the data pointer to the start of the actual user data
-      data.buf->trimStart(extraBytes);
+      // Move the data pointer to the start of the actual user data, by
+      // going through the IOBuf chain and trimming padding.
+      folly::IOBufQueue queue;
+      queue.append(std::move(data.buf));
+      queue.trimStart(bytesToSkip);
+      data.buf = queue.move();
     } else {
       FB_LOG_ONCE(WARNING)
           << "Using PaddedBinaryAdapter with unsupported protocol";
     }
   }
 
-  template <bool ZC, typename Tag, typename Protocol, typename T>
-  static uint32_t serializedSize(Protocol&, const PaddedBinaryData& data) {
-    return ZC ? 0 : data.buf->computeChainDataLength();
+  template <bool ZC, typename Tag, typename Protocol>
+  static uint32_t serializedSize(Protocol& prot, const PaddedBinaryData& data) {
+    if constexpr (std::is_same_v<
+                      std::remove_cv_t<Protocol>,
+                      BinaryProtocolWriter>) {
+      return ZC ? prot.serializedSizeZCBinary(
+                      data.buf, /* pack */ !data.canAddPadding())
+                : prot.serializedSizeBinary(
+                      data.buf, /* pack */ !data.canAddPadding());
+    } else {
+      return ZC ? prot.serializedSizeZCBinary(data.buf)
+                : prot.serializedSizeBinary(data.buf);
+    }
   }
 };
 

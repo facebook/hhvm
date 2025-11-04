@@ -106,8 +106,9 @@ class BinaryProtocolWriter : public detail::ProtocolBase {
   uint32_t writeString(folly::StringPiece str);
   uint32_t writeBinary(folly::StringPiece str);
   uint32_t writeBinary(folly::ByteRange str);
-  uint32_t writeBinary(const std::unique_ptr<folly::IOBuf>& str);
-  uint32_t writeBinary(const folly::IOBuf& str);
+  uint32_t writeBinary(
+      const std::unique_ptr<folly::IOBuf>& str, bool pack = true);
+  uint32_t writeBinary(const folly::IOBuf& str, bool pack = true);
   uint32_t writeRaw(const IOBuf& buf);
   uint32_t writeRaw(folly::io::Cursor cursor, uint32_t size);
 
@@ -144,12 +145,15 @@ class BinaryProtocolWriter : public detail::ProtocolBase {
   uint32_t serializedSizeString(folly::StringPiece str) const;
   uint32_t serializedSizeBinary(folly::StringPiece str) const;
   uint32_t serializedSizeBinary(folly::ByteRange) const;
-  uint32_t serializedSizeBinary(const std::unique_ptr<folly::IOBuf>& v) const;
-  uint32_t serializedSizeBinary(const folly::IOBuf& v) const;
+  uint32_t serializedSizeBinary(
+      const std::unique_ptr<folly::IOBuf>& v, bool pack = true) const;
+  uint32_t serializedSizeBinary(const folly::IOBuf& v, bool pack = true) const;
   uint32_t serializedSizeZCBinary(folly::StringPiece str) const;
   uint32_t serializedSizeZCBinary(folly::ByteRange v) const;
-  uint32_t serializedSizeZCBinary(const std::unique_ptr<folly::IOBuf>&) const;
-  uint32_t serializedSizeZCBinary(const folly::IOBuf& /*v*/) const;
+  uint32_t serializedSizeZCBinary(
+      const std::unique_ptr<folly::IOBuf>& v, bool pack = true) const;
+  uint32_t serializedSizeZCBinary(
+      const folly::IOBuf& v, bool pack = true) const;
 
   void rewriteDouble(double dub, int64_t offset);
 
@@ -162,7 +166,7 @@ class BinaryProtocolWriter : public detail::ProtocolBase {
  private:
   static void checkBinarySize(uint64_t size);
   template <bool kWriteSize>
-  FOLLY_ERASE uint32_t writeBinaryImpl(const folly::IOBuf& str);
+  FOLLY_ERASE uint32_t writeBinaryImpl(const folly::IOBuf& str, bool pack);
 
   /**
    * Cursor to write the data out to.

@@ -463,6 +463,7 @@ TypeRef SchemaIndex::typeOf(const type::TypeStruct& type) {
         }
         return Map(typeOf(params[0]), typeOf(params[1]));
       }
+      case T::__EMPTY__:
       default:
         folly::throw_exception<InvalidSyntaxGraphError>(
             fmt::format("Unknown TypeName '{}'", enumNameSafe(t)));
@@ -955,6 +956,9 @@ const type::Type* SchemaIndex::tryGetAnnotationType(
         typeName.exceptionType() = createTypeUri(definitionKey);
         return createUnparamedType(std::move(typeName));
       }
+      case T::constDef:
+      case T::serviceDef:
+      case T::__EMPTY__:
       default:
         FOLLY_SAFE_FATAL(
             "Structured annotation does not refer to a type definition");

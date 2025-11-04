@@ -160,7 +160,11 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
         // Stream was cancelled by the client.
         return;
       }
-      await $server_stream->genStream<TStreamType>($stream, $payload_encoder);
+      await $this->genStream<TStreamType>(
+        $server_stream,
+        $stream,
+        $payload_encoder,
+      );
     } catch (Exception $ex) {
       $payload_encoder =
         ThriftStreamingSerializationHelpers::encodeStreamHelper(
@@ -197,6 +201,47 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
       }
       return $payload_encoder($payload, $ex);
     };
+  }
+
+  final protected async function genStream<TStreamType>(
+    \TServerStream $server_stream,
+    HH\AsyncGenerator<null, TStreamType, void> $payload_generator,
+    (function(?TStreamType, ?Exception): (string, ?bool)) $payload_encode,
+  ): Awaitable<void> {
+    $should_continue = false;
+    while ($should_continue !== null) {
+      if ($should_continue === false) {
+        // wait till stream resumes or credits are received;
+        $should_continue = await $server_stream->genIsStreamReady();
+        continue;
+      }
+
+      try {
+        $item = await $payload_generator->next();
+        if ($item === null) {
+          // send stream complete and return.
+          return $server_stream->sendStreamComplete();
+        }
+        list($_, $pld) = $item;
+
+        list($encoded_str, $_) = $payload_encode($pld, null);
+        $should_continue =
+          await $server_stream->genSendStreamPayload($encoded_str);
+
+      } catch (Exception $ex) {
+        // If async generator throws any error,
+        // exception should be encoded and sent to client before throwing
+        list($encoded_ex, $is_application_ex) = $payload_encode(null, $ex);
+
+        $server_stream->sendServerException(
+          $encoded_ex,
+          $ex->getMessage(),
+          Classnames::get($ex) as nonnull,
+          !$is_application_ex,
+        );
+        return;
+      }
+    }
   }
 
   final public function isSupportedMethod(string $fname_with_prefix)[]: bool {

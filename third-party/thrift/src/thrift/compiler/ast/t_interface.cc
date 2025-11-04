@@ -16,22 +16,24 @@
 
 #include <thrift/compiler/ast/t_interface.h>
 
+#include <cassert>
 #include <thrift/compiler/ast/t_interaction.h>
 
 namespace apache::thrift::compiler {
 
 void t_interface::set_functions(node_list<t_function> functions) {
   functions_ = std::move(functions);
-  old_functions_raw_.clear();
+#ifndef NDEBUG
+  // Assert is no-op when NDEBUG is defined. Check pointers in debug mode, avoid
+  // unused variable warning-as-error in release mode
   for (const auto& func : functions_) {
     assert(func != nullptr);
-    old_functions_raw_.push_back(func.get());
   }
+#endif
 }
 
 void t_interface::add_function(std::unique_ptr<t_function> func) {
   assert(func != nullptr);
-  old_functions_raw_.push_back(func.get());
   functions_.push_back(std::move(func));
 }
 

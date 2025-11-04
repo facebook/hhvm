@@ -48,15 +48,6 @@ class t_interface : public t_type {
 
  private:
   node_list<t_function> functions_;
-
-  // TODO(T227540797): Remove everything below this comment. It is only provided
-  // for backwards compatibility.
-  std::vector<t_function*> old_functions_raw_;
-
- public:
-  const std::vector<t_function*>& get_functions() const {
-    return old_functions_raw_;
-  }
 };
 
 } // namespace apache::thrift::compiler

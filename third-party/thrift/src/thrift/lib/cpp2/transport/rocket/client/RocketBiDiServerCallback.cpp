@@ -105,6 +105,15 @@ bool RocketBiDiServerCallback::onStreamCancel() {
   return alive;
 }
 
+void RocketBiDiServerCallback::onConnectionClosed(folly::exception_wrapper ew) {
+  if (state_.streamAlive()) {
+    onStreamError(std::move(ew));
+  }
+  if (state_.sinkAlive()) {
+    onSinkCancel();
+  }
+}
+
 bool RocketBiDiServerCallback::onStreamPayload(StreamPayload&& payload) {
   return clientCallback_->onStreamNext(std::move(payload));
 }

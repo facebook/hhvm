@@ -1636,8 +1636,22 @@ void RocketClient::closeNowImpl() noexcept {
                           decltype(serverCallback),
                           RocketSinkServerCallback*>) {
           serverCallback->onFinalResponseError(error_);
-        } else {
+        } else if constexpr (
+            std::is_same_v<
+                decltype(serverCallback),
+                RocketStreamServerCallback*> ||
+            std::is_same_v<
+                decltype(serverCallback),
+                RocketStreamServerCallbackWithChunkTimeout*>) {
           serverCallback->onStreamError(error_);
+        } else if constexpr (std::is_same_v<
+                                 decltype(serverCallback),
+                                 RocketBiDiServerCallback*>) {
+          serverCallback->onConnectionClosed(error_);
+        } else {
+          static_assert(
+              folly::always_false<decltype(serverCallback)>,
+              "Impossible server callback type for stream");
         }
       }
     });

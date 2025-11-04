@@ -65,6 +65,9 @@ class RocketBiDiServerCallback : public BiDiServerCallback {
   bool onStreamRequestN(uint64_t tokens) override;
   bool onStreamCancel() override;
 
+  // Connection close special case
+  void onConnectionClosed(folly::exception_wrapper);
+
   FOLLY_NODISCARD bool onStreamPayload(StreamPayload&&);
   FOLLY_NODISCARD bool onStreamFinalPayload(StreamPayload&&);
   FOLLY_NODISCARD bool onStreamComplete();

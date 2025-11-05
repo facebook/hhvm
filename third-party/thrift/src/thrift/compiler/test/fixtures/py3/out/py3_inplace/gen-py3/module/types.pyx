@@ -59,6 +59,7 @@ import module.types_inplace_FBTHRIFT_ONLY_DO_NOT_USE as _fbthrift_types_inplace
 SimpleException = _fbthrift_types_inplace.SimpleException
 OptionalRefStruct = _fbthrift_types_inplace.OptionalRefStruct
 SimpleStruct = _fbthrift_types_inplace.SimpleStruct
+Float32Struct = _fbthrift_types_inplace.Float32Struct
 HiddenTypeFieldsStruct = _fbthrift_types_inplace.HiddenTypeFieldsStruct
 ComplexStruct = _fbthrift_types_inplace.ComplexStruct
 BinaryUnion = _fbthrift_types_inplace.BinaryUnion
@@ -91,6 +92,8 @@ List__binary = _fbthrift_types_inplace.List__binary
 Set__binary = _fbthrift_types_inplace.Set__binary
 List__AnEnum = _fbthrift_types_inplace.List__AnEnum
 _std_unordered_map__Map__i32_i32 = _fbthrift_types_inplace._std_unordered_map__Map__i32_i32
+List__float = _fbthrift_types_inplace.List__float
+Map__string_List__float = _fbthrift_types_inplace.Map__string_List__float
 _MyType__List__i32 = _fbthrift_types_inplace._MyType__List__i32
 _MyType__Set__i32 = _fbthrift_types_inplace._MyType__Set__i32
 _MyType__Map__i32_i32 = _fbthrift_types_inplace._MyType__Map__i32_i32
@@ -119,6 +122,7 @@ ANOTHER_CONST_MAP = _fbthrift_types_inplace.ANOTHER_CONST_MAP
 
 IOBufPtr = _fbthrift_iobuf.IOBuf
 IOBuf = _fbthrift_iobuf.IOBuf
+LegacyFloat32 = float
 AdaptedTypeDef = SimpleStruct
 foo_bar = bytes
 CustomBool = bool
@@ -608,6 +612,50 @@ cdef object _std_unordered_map__Map__i32_i32__from_cpp(const _module_cbindings._
         iter.genNextKeyVal(ckey, cval)
         py_items[ckey] = cval
     return _std_unordered_map__Map__i32_i32(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
+
+cdef vector[float] List__float__make_instance(object items) except *:
+    cdef vector[float] c_inst
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, (float, int)):
+            raise TypeError(f"{item!r} is not of type float")
+        c_inst.push_back(item)
+    return cmove(c_inst)
+
+cdef object List__float__from_cpp(const vector[float]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    for idx in range(c_vec.size()):
+        py_list.append(c_vec[idx])
+    return List__float(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+
+cdef cmap[string,vector[float]] Map__string_List__float__make_instance(object items) except *:
+    cdef cmap[string,vector[float]] c_inst
+    cdef string c_key
+    if items is None:
+        return cmove(c_inst)
+    for key, item in items.items():
+        if not isinstance(key, str):
+            raise TypeError(f"{key!r} is not of type str")
+        c_key = key.encode('UTF-8')
+        if item is None:
+            raise TypeError("None is not of type _typing.Sequence[float]")
+        if not isinstance(item, List__float):
+            item = List__float(item)
+
+        c_inst[c_key] = List__float__make_instance(item)
+    return cmove(c_inst)
+
+cdef object Map__string_List__float__from_cpp(const cmap[string,vector[float]]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[string,vector[float]]] iter = __map_iter[cmap[string,vector[float]]](c_map)
+    cdef string ckey
+    cdef vector[float] cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[__init_unicode_from_cpp(ckey)] = List__float__from_cpp(cval)
+    return Map__string_List__float(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
 cdef _module_cbindings._MyType _MyType__List__i32__make_instance(object items) except *:
     cdef _module_cbindings._MyType c_inst

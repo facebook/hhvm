@@ -88,6 +88,20 @@ cdef class __SimpleStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_10(self, _fbthrift_value) except *
 
 
+ctypedef void (*__Float32Struct_FieldsSetterFunc)(__Float32Struct_FieldsSetter, object) except *
+
+cdef class __Float32Struct_FieldsSetter(__StructFieldsSetter):
+    cdef _module_cbindings.cFloat32Struct* _struct_cpp_obj
+    cdef cumap[__cstring_view, __Float32Struct_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __Float32Struct_FieldsSetter _fbthrift_create(_module_cbindings.cFloat32Struct* struct_cpp_obj)
+    cdef void _set_field_0(self, _fbthrift_value) except *
+    cdef void _set_field_1(self, _fbthrift_value) except *
+    cdef void _set_field_2(self, _fbthrift_value) except *
+    cdef void _set_field_3(self, _fbthrift_value) except *
+
+
 ctypedef void (*__HiddenTypeFieldsStruct_FieldsSetterFunc)(__HiddenTypeFieldsStruct_FieldsSetter, object) except *
 
 cdef class __HiddenTypeFieldsStruct_FieldsSetter(__StructFieldsSetter):

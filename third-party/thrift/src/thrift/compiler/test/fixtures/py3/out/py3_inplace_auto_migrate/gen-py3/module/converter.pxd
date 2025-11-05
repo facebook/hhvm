@@ -19,6 +19,9 @@ cdef object OptionalRefStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cOpt
 cdef shared_ptr[_fbthrift_cbindings.cSimpleStruct] SimpleStruct_convert_to_cpp(object inst) except*
 cdef object SimpleStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cSimpleStruct]& c_struct)
 
+cdef shared_ptr[_fbthrift_cbindings.cFloat32Struct] Float32Struct_convert_to_cpp(object inst) except*
+cdef object Float32Struct_from_cpp(const shared_ptr[_fbthrift_cbindings.cFloat32Struct]& c_struct)
+
 cdef shared_ptr[_fbthrift_cbindings.cHiddenTypeFieldsStruct] HiddenTypeFieldsStruct_convert_to_cpp(object inst) except*
 cdef object HiddenTypeFieldsStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cHiddenTypeFieldsStruct]& c_struct)
 

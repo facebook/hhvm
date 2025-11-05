@@ -43,6 +43,14 @@ cdef object SimpleStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cSimpleSt
     _py_struct = _module_thrift_converter.SimpleStruct_from_cpp(deref(const_pointer_cast(c_struct)))
     return _py_struct
 
+cdef shared_ptr[_fbthrift_cbindings.cFloat32Struct] Float32Struct_convert_to_cpp(object inst) except*:
+    return make_shared[_fbthrift_cbindings.cFloat32Struct](
+        _module_thrift_converter.Float32Struct_convert_to_cpp(inst)
+    )
+cdef object Float32Struct_from_cpp(const shared_ptr[_fbthrift_cbindings.cFloat32Struct]& c_struct):
+    _py_struct = _module_thrift_converter.Float32Struct_from_cpp(deref(const_pointer_cast(c_struct)))
+    return _py_struct
+
 cdef shared_ptr[_fbthrift_cbindings.cHiddenTypeFieldsStruct] HiddenTypeFieldsStruct_convert_to_cpp(object inst) except*:
     return make_shared[_fbthrift_cbindings.cHiddenTypeFieldsStruct](
         _module_thrift_converter.HiddenTypeFieldsStruct_convert_to_cpp(inst)
@@ -387,6 +395,33 @@ cdef _module_cbindings._std_unordered_map[cint32_t,cint32_t] _std_unordered_map_
             item = <cint32_t> item
     
             c_inst[c_key] = item
+        return cmove(c_inst)
+
+cdef vector[float] List__float__make_instance(object items) except *:
+        cdef vector[float] c_inst
+        if items is None:
+            return cmove(c_inst)
+        for item in items:
+            if not isinstance(item, (float, int)):
+                raise TypeError(f"{item!r} is not of type float")
+            c_inst.push_back(item)
+        return cmove(c_inst)
+
+cdef cmap[string,vector[float]] Map__string_List__float__make_instance(object items) except *:
+        cdef cmap[string,vector[float]] c_inst
+        cdef string c_key
+        if items is None:
+            return cmove(c_inst)
+        for key, item in items.items():
+            if not isinstance(key, str):
+                raise TypeError(f"{key!r} is not of type str")
+            c_key = key.encode('UTF-8')
+            if item is None:
+                raise TypeError("None is not of type _typing.Sequence[float]")
+            if not isinstance(item, _module_types.List__float):
+                item = _module_types.List__float(item)
+    
+            c_inst[c_key] = List__float__make_instance(item)
         return cmove(c_inst)
 
 cdef _module_cbindings._MyType _MyType__List__i32__make_instance(object items) except *:

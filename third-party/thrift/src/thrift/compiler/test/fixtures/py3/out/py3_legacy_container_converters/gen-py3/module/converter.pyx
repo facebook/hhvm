@@ -42,6 +42,14 @@ cdef shared_ptr[_fbthrift_cbindings.cSimpleStruct] SimpleStruct_convert_to_cpp(o
 cdef object SimpleStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cSimpleStruct]& c_struct):
     return _fbthrift_ctypes.SimpleStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
+cdef shared_ptr[_fbthrift_cbindings.cFloat32Struct] Float32Struct_convert_to_cpp(object inst) except*:
+    return make_shared[_fbthrift_cbindings.cFloat32Struct](deref(
+        (<_fbthrift_ctypes.Float32Struct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    ))
+
+cdef object Float32Struct_from_cpp(const shared_ptr[_fbthrift_cbindings.cFloat32Struct]& c_struct):
+    return _fbthrift_ctypes.Float32Struct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+
 cdef shared_ptr[_fbthrift_cbindings.cHiddenTypeFieldsStruct] HiddenTypeFieldsStruct_convert_to_cpp(object inst) except*:
     return make_shared[_fbthrift_cbindings.cHiddenTypeFieldsStruct](deref(
         (<_fbthrift_ctypes.HiddenTypeFieldsStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
@@ -164,6 +172,12 @@ cdef vector[_module_cbindings.cAnEnum] List__AnEnum__make_instance(object items)
 
 cdef _module_cbindings._std_unordered_map[cint32_t,cint32_t] _std_unordered_map__Map__i32_i32__make_instance(object items) except *:
     return _fbthrift_ctypes._std_unordered_map__Map__i32_i32__make_instance(items)
+
+cdef vector[float] List__float__make_instance(object items) except *:
+    return _fbthrift_ctypes.List__float__make_instance(items)
+
+cdef cmap[string,vector[float]] Map__string_List__float__make_instance(object items) except *:
+    return _fbthrift_ctypes.Map__string_List__float__make_instance(items)
 
 cdef _module_cbindings._MyType _MyType__List__i32__make_instance(object items) except *:
     return _fbthrift_ctypes._MyType__List__i32__make_instance(items)

@@ -31,6 +31,9 @@ bool ensure_module_imported() {
   static constexpr std::int16_t _fbthrift__SimpleStruct__tuple_pos[12] = {
     1, 2, 3, 4, 5, 6, 7, 9, 8, 10, 11, 12
   };
+  static constexpr std::int16_t _fbthrift__Float32Struct__tuple_pos[4] = {
+    1, 2, 3, 4
+  };
   static constexpr std::int16_t _fbthrift__HiddenException__tuple_pos[1] = {
     1
   };
@@ -452,6 +455,127 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
           *fbthrift_data,
           _fbthrift__SimpleStruct__tuple_pos[11],
           *_fbthrift__opt_default_enum) == -1) {
+    return nullptr;
+  }
+  return std::move(fbthrift_data).release();
+}
+
+
+ExtractorResult<::py3::simple::Float32Struct>
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::py3::simple::Float32Struct, ::module::NamespaceTag>>::operator()(PyObject* obj) {
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a Float32Struct");
+      }
+      return extractorError<::py3::simple::Float32Struct>(
+          "Marshal error: Float32Struct");
+  }
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::py3::simple::Float32Struct, ::module::NamespaceTag>>{}(*fbThriftData);
+}
+
+ExtractorResult<::py3::simple::Float32Struct>
+Extractor<::apache::thrift::python::capi::ComposedStruct<
+    ::py3::simple::Float32Struct, ::module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
+  ::py3::simple::Float32Struct cpp;
+  std::optional<std::string_view> error;
+  Extractor<float>{}.extractInto(
+      cpp.float32_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Float32Struct__tuple_pos[0]),
+      error);
+  Extractor<float>{}.extractInto(
+      cpp.float64_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Float32Struct__tuple_pos[1]),
+      error);
+  Extractor<list<float>>{}.extractInto(
+      cpp.float_list_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Float32Struct__tuple_pos[2]),
+      error);
+  Extractor<map<::apache::thrift::python::capi::FallibleString, list<float>>>{}.extractInto(
+      cpp.float_map_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Float32Struct__tuple_pos[3]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
+  }
+  return cpp;
+}
+
+
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::py3::simple::Float32Struct, ::module::NamespaceTag>>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module module import error");
+  }
+  int result =
+      can_extract__module__Float32Struct(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: Float32Struct");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::py3::simple::Float32Struct, ::module::NamespaceTag>>::operator()(
+    const ::py3::simple::Float32Struct& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::Float32Struct, ::module::NamespaceTag>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
+  }
+  return init__module__Float32Struct(*fbthrift_data);
+}
+
+PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::Float32Struct, ::module::NamespaceTag>>::operator()(
+    [[maybe_unused]] const ::py3::simple::Float32Struct& val) {
+  StrongRef fbthrift_data(createStructTuple(4));
+  StrongRef _fbthrift__float32(
+    Constructor<float>{}
+    .constructFrom(val.float32_ref()));
+  if (!_fbthrift__float32 ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Float32Struct__tuple_pos[0],
+          *_fbthrift__float32) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__float64(
+    Constructor<float>{}
+    .constructFrom(val.float64_ref()));
+  if (!_fbthrift__float64 ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Float32Struct__tuple_pos[1],
+          *_fbthrift__float64) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__float_list(
+    Constructor<list<float>>{}
+    .constructFrom(val.float_list_ref()));
+  if (!_fbthrift__float_list ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Float32Struct__tuple_pos[2],
+          *_fbthrift__float_list) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__float_map(
+    Constructor<map<::apache::thrift::python::capi::FallibleString, list<float>>>{}
+    .constructFrom(val.float_map_ref()));
+  if (!_fbthrift__float_map ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Float32Struct__tuple_pos[3],
+          *_fbthrift__float_map) == -1) {
     return nullptr;
   }
   return std::move(fbthrift_data).release();

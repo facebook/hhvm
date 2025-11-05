@@ -75,6 +75,25 @@ struct VisitByFieldId<::py3::simple::SimpleStruct> {
 };
 
 template <>
+struct VisitByFieldId<::py3::simple::Float32Struct> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).float32_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).float64_ref());
+    case 3:
+      return f(2, static_cast<T&&>(t).float_list_ref());
+    case 4:
+      return f(3, static_cast<T&&>(t).float_map_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::py3::simple::Float32Struct");
+    }
+  }
+};
+
+template <>
 struct VisitByFieldId<::py3::simple::HiddenTypeFieldsStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {

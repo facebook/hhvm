@@ -304,6 +304,14 @@ struct Optionals {
   1: optional list<string> values;
 }
 
+@python.EnableUnsafeUnconstrainedFloat32
+typedef float LegacyFloat32
+
+struct LegacyFloat32Struct {
+  1: LegacyFloat32 float64;
+  2: float float32;
+}
+
 union ComplexUnion {
   1: Color color;
   2: easy easy_struct;

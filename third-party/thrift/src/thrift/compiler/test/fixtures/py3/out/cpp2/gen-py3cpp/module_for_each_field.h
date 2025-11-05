@@ -49,6 +49,17 @@ struct ForEachField<::py3::simple::SimpleStruct> {
 };
 
 template <>
+struct ForEachField<::py3::simple::Float32Struct> {
+  template <typename F, typename... T>
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
+    f(0, static_cast<T&&>(t).float32_ref()...);
+    f(1, static_cast<T&&>(t).float64_ref()...);
+    f(2, static_cast<T&&>(t).float_list_ref()...);
+    f(3, static_cast<T&&>(t).float_map_ref()...);
+  }
+};
+
+template <>
 struct ForEachField<::py3::simple::HiddenTypeFieldsStruct> {
   template <typename F, typename... T>
   void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {

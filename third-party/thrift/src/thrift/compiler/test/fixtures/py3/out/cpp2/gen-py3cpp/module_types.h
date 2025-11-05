@@ -25,6 +25,10 @@ struct hidden_field;
 struct opt_default_int;
 struct opt_default_str;
 struct opt_default_enum;
+struct float32;
+struct float64;
+struct float_list;
+struct float_map;
 struct field1;
 struct field2;
 struct field3;
@@ -125,6 +129,22 @@ APACHE_THRIFT_DEFINE_ACCESSOR(opt_default_str);
 #ifndef APACHE_THRIFT_ACCESSOR_opt_default_enum
 #define APACHE_THRIFT_ACCESSOR_opt_default_enum
 APACHE_THRIFT_DEFINE_ACCESSOR(opt_default_enum);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_float32
+#define APACHE_THRIFT_ACCESSOR_float32
+APACHE_THRIFT_DEFINE_ACCESSOR(float32);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_float64
+#define APACHE_THRIFT_ACCESSOR_float64
+APACHE_THRIFT_DEFINE_ACCESSOR(float64);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_float_list
+#define APACHE_THRIFT_ACCESSOR_float_list
+APACHE_THRIFT_DEFINE_ACCESSOR(float_list);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_float_map
+#define APACHE_THRIFT_ACCESSOR_float_map
+APACHE_THRIFT_DEFINE_ACCESSOR(float_map);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_field1
 #define APACHE_THRIFT_ACCESSOR_field1
@@ -439,6 +459,7 @@ namespace py3::simple {
 class SimpleException;
 class OptionalRefStruct;
 class SimpleStruct;
+class Float32Struct;
 class HiddenTypeFieldsStruct;
 namespace detail {
 class AdaptedUnion;
@@ -470,6 +491,8 @@ using ::apache::thrift::detail::operator>=;
 using IOBufPtr = std::unique_ptr<folly::IOBuf>;
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "IOBuf", "kind": "typedef" } */
 using IOBuf = folly::IOBuf;
+/** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "LegacyFloat32", "kind": "typedef" } */
+using LegacyFloat32 = float;
 
 /** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "SimpleStruct", "kind": "struct" } */
 class SimpleStruct final  {
@@ -1685,6 +1708,299 @@ class OptionalRefStruct final  {
 
 template <class Protocol_>
 unsigned long OptionalRefStruct::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
+/** Glean {"file": "thrift/compiler/test/fixtures/py3/src/module.thrift", "name": "Float32Struct", "kind": "struct" } */
+class Float32Struct final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
+  static constexpr std::size_t __fbthrift_num_fields = 4;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
+    ::apache::thrift::ident::float32,
+    ::apache::thrift::ident::float64,
+    ::apache::thrift::ident::float_list,
+    ::apache::thrift::ident::float_map
+  >;
+
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::float_t,
+    ::apache::thrift::type::float_t,
+    ::apache::thrift::type::list<::apache::thrift::type::float_t>,
+    ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::list<::apache::thrift::type::float_t>>
+  >;
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = Float32Struct;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  Float32Struct();
+
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  Float32Struct(apache::thrift::FragileConstructor, float float32__arg, ::py3::simple::LegacyFloat32 float64__arg, ::std::vector<::py3::simple::LegacyFloat32> float_list__arg, ::std::map<::std::string, ::std::vector<::py3::simple::LegacyFloat32>> float_map__arg);
+
+  Float32Struct(Float32Struct&&) noexcept;
+
+  Float32Struct(const Float32Struct& src);
+
+
+  Float32Struct& operator=(Float32Struct&&) noexcept;
+  Float32Struct& operator=(const Float32Struct& src);
+
+  ~Float32Struct();
+
+ private:
+  float __fbthrift_field_float32;
+ private:
+  ::py3::simple::LegacyFloat32 __fbthrift_field_float64;
+ private:
+  ::std::vector<::py3::simple::LegacyFloat32> __fbthrift_field_float_list;
+ private:
+  ::std::map<::std::string, ::std::vector<::py3::simple::LegacyFloat32>> __fbthrift_field_float_map;
+ private:
+  apache::thrift::detail::isset_bitset<4, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+
+ public:
+
+  bool operator==(const Float32Struct&) const;
+  bool operator<(const Float32Struct&) const;
+
+  /** Glean { "field": "float32" } */
+  template <typename..., typename fbthrift_T = float>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> float32_ref() const& {
+    return {this->__fbthrift_field_float32, __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "float32" } */
+  template <typename..., typename fbthrift_T = float>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> float32_ref() & {
+    return {this->__fbthrift_field_float32, __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "float32" } */
+  template <typename..., typename fbthrift_T = float>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> float32_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_float32), __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "float32" } */
+  template <typename..., typename fbthrift_T = float>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> float32() const& {
+    return {this->__fbthrift_field_float32, __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "float32" } */
+  template <typename..., typename fbthrift_T = float>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> float32() & {
+    return {this->__fbthrift_field_float32, __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "float32" } */
+  template <typename..., typename fbthrift_T = float>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> float32() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_float32), __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "float64" } */
+  template <typename..., typename fbthrift_T = ::py3::simple::LegacyFloat32>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> float64_ref() const& {
+    return {this->__fbthrift_field_float64, __isset.at(1), __isset.bit(1)};
+  }
+
+  /** Glean { "field": "float64" } */
+  template <typename..., typename fbthrift_T = ::py3::simple::LegacyFloat32>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> float64_ref() & {
+    return {this->__fbthrift_field_float64, __isset.at(1), __isset.bit(1)};
+  }
+
+  /** Glean { "field": "float64" } */
+  template <typename..., typename fbthrift_T = ::py3::simple::LegacyFloat32>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> float64_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_float64), __isset.at(1), __isset.bit(1)};
+  }
+
+  /** Glean { "field": "float64" } */
+  template <typename..., typename fbthrift_T = ::py3::simple::LegacyFloat32>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> float64() const& {
+    return {this->__fbthrift_field_float64, __isset.at(1), __isset.bit(1)};
+  }
+
+  /** Glean { "field": "float64" } */
+  template <typename..., typename fbthrift_T = ::py3::simple::LegacyFloat32>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> float64() & {
+    return {this->__fbthrift_field_float64, __isset.at(1), __isset.bit(1)};
+  }
+
+  /** Glean { "field": "float64" } */
+  template <typename..., typename fbthrift_T = ::py3::simple::LegacyFloat32>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> float64() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_float64), __isset.at(1), __isset.bit(1)};
+  }
+
+  /** Glean { "field": "float_list" } */
+  template <typename..., typename fbthrift_T = ::std::vector<::py3::simple::LegacyFloat32>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> float_list_ref() const& {
+    return {this->__fbthrift_field_float_list, __isset.at(2), __isset.bit(2)};
+  }
+
+  /** Glean { "field": "float_list" } */
+  template <typename..., typename fbthrift_T = ::std::vector<::py3::simple::LegacyFloat32>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> float_list_ref() & {
+    return {this->__fbthrift_field_float_list, __isset.at(2), __isset.bit(2)};
+  }
+
+  /** Glean { "field": "float_list" } */
+  template <typename..., typename fbthrift_T = ::std::vector<::py3::simple::LegacyFloat32>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> float_list_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_float_list), __isset.at(2), __isset.bit(2)};
+  }
+
+  /** Glean { "field": "float_list" } */
+  template <typename..., typename fbthrift_T = ::std::vector<::py3::simple::LegacyFloat32>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> float_list() const& {
+    return {this->__fbthrift_field_float_list, __isset.at(2), __isset.bit(2)};
+  }
+
+  /** Glean { "field": "float_list" } */
+  template <typename..., typename fbthrift_T = ::std::vector<::py3::simple::LegacyFloat32>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> float_list() & {
+    return {this->__fbthrift_field_float_list, __isset.at(2), __isset.bit(2)};
+  }
+
+  /** Glean { "field": "float_list" } */
+  template <typename..., typename fbthrift_T = ::std::vector<::py3::simple::LegacyFloat32>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> float_list() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_float_list), __isset.at(2), __isset.bit(2)};
+  }
+
+  /** Glean { "field": "float_map" } */
+  template <typename..., typename fbthrift_T = ::std::map<::std::string, ::std::vector<::py3::simple::LegacyFloat32>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> float_map_ref() const& {
+    return {this->__fbthrift_field_float_map, __isset.at(3), __isset.bit(3)};
+  }
+
+  /** Glean { "field": "float_map" } */
+  template <typename..., typename fbthrift_T = ::std::map<::std::string, ::std::vector<::py3::simple::LegacyFloat32>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> float_map_ref() & {
+    return {this->__fbthrift_field_float_map, __isset.at(3), __isset.bit(3)};
+  }
+
+  /** Glean { "field": "float_map" } */
+  template <typename..., typename fbthrift_T = ::std::map<::std::string, ::std::vector<::py3::simple::LegacyFloat32>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> float_map_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_float_map), __isset.at(3), __isset.bit(3)};
+  }
+
+  /** Glean { "field": "float_map" } */
+  template <typename..., typename fbthrift_T = ::std::map<::std::string, ::std::vector<::py3::simple::LegacyFloat32>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> float_map() const& {
+    return {this->__fbthrift_field_float_map, __isset.at(3), __isset.bit(3)};
+  }
+
+  /** Glean { "field": "float_map" } */
+  template <typename..., typename fbthrift_T = ::std::map<::std::string, ::std::vector<::py3::simple::LegacyFloat32>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> float_map() & {
+    return {this->__fbthrift_field_float_map, __isset.at(3), __isset.bit(3)};
+  }
+
+  /** Glean { "field": "float_map" } */
+  template <typename..., typename fbthrift_T = ::std::map<::std::string, ::std::vector<::py3::simple::LegacyFloat32>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> float_map() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_float_map), __isset.at(3), __isset.bit(3)};
+  }
+
+  /** Glean { "field": "float32" } */
+  [[deprecated("Use `FOO.float32().value()` instead of `FOO.get_float32()`")]]
+  float get_float32() const;
+
+  /** Glean { "field": "float32" } */
+  [[deprecated("Use `FOO.float32() = BAR` instead of `FOO.set_float32(BAR)`")]]
+  float& set_float32(float float32_);
+
+  /** Glean { "field": "float64" } */
+  [[deprecated("Use `FOO.float64().value()` instead of `FOO.get_float64()`")]]
+  ::py3::simple::LegacyFloat32 get_float64() const;
+
+  /** Glean { "field": "float64" } */
+  [[deprecated("Use `FOO.float64() = BAR` instead of `FOO.set_float64(BAR)`")]]
+  ::py3::simple::LegacyFloat32& set_float64(::py3::simple::LegacyFloat32 float64_);
+
+  /** Glean { "field": "float_list" } */
+  [[deprecated("Use `FOO.float_list().value()` instead of `FOO.get_float_list()`")]]
+  const ::std::vector<::py3::simple::LegacyFloat32>& get_float_list() const&;
+
+  /** Glean { "field": "float_list" } */
+  [[deprecated("Use `FOO.float_list().value()` instead of `FOO.get_float_list()`")]]
+  ::std::vector<::py3::simple::LegacyFloat32> get_float_list() &&;
+
+  /** Glean { "field": "float_list" } */
+  template <typename T_Float32Struct_float_list_struct_setter = ::std::vector<::py3::simple::LegacyFloat32>>
+  [[deprecated("Use `FOO.float_list() = BAR` instead of `FOO.set_float_list(BAR)`")]]
+  ::std::vector<::py3::simple::LegacyFloat32>& set_float_list(T_Float32Struct_float_list_struct_setter&& float_list_) {
+    float_list_ref() = std::forward<T_Float32Struct_float_list_struct_setter>(float_list_);
+    return __fbthrift_field_float_list;
+  }
+
+  /** Glean { "field": "float_map" } */
+  [[deprecated("Use `FOO.float_map().value()` instead of `FOO.get_float_map()`")]]
+  const ::std::map<::std::string, ::std::vector<::py3::simple::LegacyFloat32>>& get_float_map() const&;
+
+  /** Glean { "field": "float_map" } */
+  [[deprecated("Use `FOO.float_map().value()` instead of `FOO.get_float_map()`")]]
+  ::std::map<::std::string, ::std::vector<::py3::simple::LegacyFloat32>> get_float_map() &&;
+
+  /** Glean { "field": "float_map" } */
+  template <typename T_Float32Struct_float_map_struct_setter = ::std::map<::std::string, ::std::vector<::py3::simple::LegacyFloat32>>>
+  [[deprecated("Use `FOO.float_map() = BAR` instead of `FOO.set_float_map(BAR)`")]]
+  ::std::map<::std::string, ::std::vector<::py3::simple::LegacyFloat32>>& set_float_map(T_Float32Struct_float_map_struct_setter&& float_map_) {
+    float_map_ref() = std::forward<T_Float32Struct_float_map_struct_setter>(float_map_);
+    return __fbthrift_field_float_map;
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<Float32Struct>;
+  friend void swap(Float32Struct& a, Float32Struct& b);
+};
+
+template <class Protocol_>
+unsigned long Float32Struct::read(Protocol_* iprot) {
   auto _xferStart = iprot->getCursorPosition();
   readNoXfer(iprot);
   return iprot->getCursorPosition() - _xferStart;
@@ -4655,77 +4971,82 @@ template <> struct TEnumTraits<::py3::simple::BinaryUnion::Type> {
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::py3::simple::SimpleException, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8607107063930754448;
-  static constexpr ::std::string_view definitionKey = {"\x84\x77\xe7\xf8\x6d\xa8\x4b\x72\xea\xfb\xff\x66\x6b\x18\x6c\x7a", 16};
+  static constexpr int64_t programId = 2451960936538487616;
+  static constexpr ::std::string_view definitionKey = {"\x95\x98\x02\xe3\x97\xc7\xdf\x9b\xf2\x43\x9e\xb0\x6d\xa3\xbf\x4f", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::OptionalRefStruct, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8607107063930754448;
-  static constexpr ::std::string_view definitionKey = {"\x8c\xcb\x4d\x67\x40\x0f\xb0\x54\x32\x3e\xe1\xc4\xc3\xaf\x7b\x78", 16};
+  static constexpr int64_t programId = 2451960936538487616;
+  static constexpr ::std::string_view definitionKey = {"\xfc\x91\x07\x8c\x79\x9a\x75\xcd\x6a\x9b\xba\xba\xa7\xbe\x47\x5e", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::SimpleStruct, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8607107063930754448;
-  static constexpr ::std::string_view definitionKey = {"\xb3\x76\x2f\xe4\xc4\xc5\xe5\x2f\xf3\x4f\x72\x3e\xf3\x45\x8d\x17", 16};
+  static constexpr int64_t programId = 2451960936538487616;
+  static constexpr ::std::string_view definitionKey = {"\x0c\x95\x66\x8c\xd8\x71\x33\xe7\x75\x77\x8c\xcc\x3d\x6d\x1f\xf3", 16};
+};
+template <> struct TSchemaAssociation<::py3::simple::Float32Struct, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = 2451960936538487616;
+  static constexpr ::std::string_view definitionKey = {"\x3f\xe6\x2d\xfe\xf4\x4f\xd5\x1b\xda\x04\x45\x95\x14\x7c\x8e\xb2", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::HiddenTypeFieldsStruct, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8607107063930754448;
-  static constexpr ::std::string_view definitionKey = {"\x21\x50\xd1\xa6\xcd\x34\x43\x25\xcb\x21\xe9\x7d\x05\x75\xeb\x26", 16};
+  static constexpr int64_t programId = 2451960936538487616;
+  static constexpr ::std::string_view definitionKey = {"\x45\xf0\xc1\xf9\xe3\xb5\x65\xfd\x6a\xd8\x14\x8f\xc9\xb6\x07\xa3", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::detail::AdaptedUnion, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8607107063930754448;
-  static constexpr ::std::string_view definitionKey = {"\x7b\xc9\x33\x91\x29\x3d\x12\xac\x28\x15\x43\x02\x3f\x11\x82\x0c", 16};
+  static constexpr int64_t programId = 2451960936538487616;
+  static constexpr ::std::string_view definitionKey = {"\x5d\xc8\x4f\xc1\x5d\x2d\x95\x5d\xf0\x63\x1c\xf1\x87\xc0\x1f\x95", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::HiddenException, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8607107063930754448;
-  static constexpr ::std::string_view definitionKey = {"\xd4\x0f\xaa\x81\xcf\x9e\x31\xa7\x19\xe2\x62\x02\xad\x8f\x2e\x76", 16};
+  static constexpr int64_t programId = 2451960936538487616;
+  static constexpr ::std::string_view definitionKey = {"\xe5\xc6\x0e\xf6\x9f\x57\x06\x1a\xf3\x05\x68\x4f\x8c\xb7\xbd\x8e", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::ComplexStruct, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8607107063930754448;
-  static constexpr ::std::string_view definitionKey = {"\x73\x12\x2a\xa3\xe5\xf8\x2a\xa9\xa8\x99\x1d\x3d\x44\xf6\x6e\x59", 16};
+  static constexpr int64_t programId = 2451960936538487616;
+  static constexpr ::std::string_view definitionKey = {"\x12\xcc\x6e\x9d\x78\xe8\x43\x22\x19\xe2\x7e\x58\xdc\xcd\x2b\x77", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::BinaryUnion, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8607107063930754448;
-  static constexpr ::std::string_view definitionKey = {"\x92\x91\x41\xeb\x12\x3e\x8e\xf2\x59\xd9\x78\xe6\x27\x8d\x09\x27", 16};
+  static constexpr int64_t programId = 2451960936538487616;
+  static constexpr ::std::string_view definitionKey = {"\x0f\x96\xd1\xbe\x1b\x27\x46\x60\x8c\x70\xb3\x4a\xb4\x39\x88\xcf", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::BinaryUnionStruct, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8607107063930754448;
-  static constexpr ::std::string_view definitionKey = {"\x72\xba\x3a\xec\x18\xf2\x67\x00\xe8\x2a\xbd\x07\xb5\x49\x47\xa4", 16};
+  static constexpr int64_t programId = 2451960936538487616;
+  static constexpr ::std::string_view definitionKey = {"\x37\x06\xbf\x6f\xcc\x20\xf2\xa9\x0e\x7a\x91\xc6\x2d\xe5\x5d\xb4", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::CustomFields, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8607107063930754448;
-  static constexpr ::std::string_view definitionKey = {"\x02\x10\xb5\x39\x8b\x23\xca\xfc\xd2\x4f\xdc\x7f\x7a\xc0\xfa\x20", 16};
+  static constexpr int64_t programId = 2451960936538487616;
+  static constexpr ::std::string_view definitionKey = {"\xaf\x47\x6c\x74\x95\x55\x18\x29\x94\x5e\x01\x4f\x86\x02\x3c\xc6", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::CustomTypedefFields, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8607107063930754448;
-  static constexpr ::std::string_view definitionKey = {"\xac\xad\xfb\x85\x91\x4d\xa6\x26\xe2\xec\x2d\x5e\xa7\x16\xc0\x8f", 16};
+  static constexpr int64_t programId = 2451960936538487616;
+  static constexpr ::std::string_view definitionKey = {"\x13\x22\xb6\x8d\x1b\x82\x84\xfb\x95\xb0\x84\x39\x57\xf1\x85\x3e", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::AdaptedTypedefFields, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8607107063930754448;
-  static constexpr ::std::string_view definitionKey = {"\x62\xe8\x0f\xf3\x43\xc3\xb3\x98\x00\x97\x12\x93\x2f\x17\x60\x28", 16};
+  static constexpr int64_t programId = 2451960936538487616;
+  static constexpr ::std::string_view definitionKey = {"\xec\xc5\xcc\xa1\xb4\x54\x25\xd9\x26\xbc\x5b\x30\x3a\xcc\x1a\x3f", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::AnEnum, true> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8607107063930754448;
-  static constexpr ::std::string_view definitionKey = {"\x7b\x48\xbd\xe9\x65\x9b\x4f\x16\x4c\xe3\xe4\xa5\x29\x9f\x61\xd3", 16};
+  static constexpr int64_t programId = 2451960936538487616;
+  static constexpr ::std::string_view definitionKey = {"\x73\x89\xa0\xb3\xe9\x53\x09\x2d\x99\x33\x3b\x4d\xee\xfa\x37\xd2", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::AnEnumRenamed, true> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8607107063930754448;
-  static constexpr ::std::string_view definitionKey = {"\xa1\xbc\x0a\xab\x0a\xd1\xed\xf1\x90\x37\xbc\x58\x4b\x29\x3b\xbe", 16};
+  static constexpr int64_t programId = 2451960936538487616;
+  static constexpr ::std::string_view definitionKey = {"\x51\xc1\x1d\xa7\xfd\x74\xa7\xb8\x9d\x2e\x68\xcc\xc0\x58\xc0\x7d", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::Flags, true> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8607107063930754448;
-  static constexpr ::std::string_view definitionKey = {"\xbf\x90\x08\x33\x6d\xa9\xd8\xcc\x3b\x14\x24\x22\x3c\x91\x2c\x9a", 16};
+  static constexpr int64_t programId = 2451960936538487616;
+  static constexpr ::std::string_view definitionKey = {"\xfa\x69\x37\x88\x14\x0e\xf4\xa9\x76\x94\x68\xaa\x26\x3c\xc1\xa5", 16};
 };
 } // namespace apache::thrift::detail

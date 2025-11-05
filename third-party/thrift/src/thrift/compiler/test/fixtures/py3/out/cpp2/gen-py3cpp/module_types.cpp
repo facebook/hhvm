@@ -520,6 +520,127 @@ void swap([[maybe_unused]] SimpleStruct& a, [[maybe_unused]] SimpleStruct& b) {
 
 namespace py3::simple {
 
+std::string_view Float32Struct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<Float32Struct>::fields_names[folly::to_underlying(ord) - 1];
+}
+std::string_view Float32Struct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<Float32Struct>::name;
+}
+
+Float32Struct::Float32Struct(const Float32Struct&) = default;
+Float32Struct& Float32Struct::operator=(const Float32Struct&) = default;
+Float32Struct::Float32Struct() :
+    __fbthrift_field_float32(),
+    __fbthrift_field_float64() {
+}
+
+
+Float32Struct::~Float32Struct() {}
+
+Float32Struct::Float32Struct([[maybe_unused]] Float32Struct&& other) noexcept :
+    __fbthrift_field_float32(std::move(other.__fbthrift_field_float32)),
+    __fbthrift_field_float64(std::move(other.__fbthrift_field_float64)),
+    __fbthrift_field_float_list(std::move(other.__fbthrift_field_float_list)),
+    __fbthrift_field_float_map(std::move(other.__fbthrift_field_float_map)),
+    __isset(other.__isset) {
+}
+
+Float32Struct& Float32Struct::operator=([[maybe_unused]] Float32Struct&& other) noexcept {
+    this->__fbthrift_field_float32 = std::move(other.__fbthrift_field_float32);
+    this->__fbthrift_field_float64 = std::move(other.__fbthrift_field_float64);
+    this->__fbthrift_field_float_list = std::move(other.__fbthrift_field_float_list);
+    this->__fbthrift_field_float_map = std::move(other.__fbthrift_field_float_map);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+Float32Struct::Float32Struct(apache::thrift::FragileConstructor, float float32__arg, ::py3::simple::LegacyFloat32 float64__arg, ::std::vector<::py3::simple::LegacyFloat32> float_list__arg, ::std::map<::std::string, ::std::vector<::py3::simple::LegacyFloat32>> float_map__arg) :
+    __fbthrift_field_float32(std::move(float32__arg)),
+    __fbthrift_field_float64(std::move(float64__arg)),
+    __fbthrift_field_float_list(std::move(float_list__arg)),
+    __fbthrift_field_float_map(std::move(float_map__arg)) { 
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+  __isset.set(folly::index_constant<2>(), true);
+  __isset.set(folly::index_constant<3>(), true);
+}
+
+void Float32Struct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_float32 = float();
+  this->__fbthrift_field_float64 = ::py3::simple::LegacyFloat32();
+  this->__fbthrift_field_float_list.clear();
+  this->__fbthrift_field_float_map.clear();
+  __isset = {};
+}
+
+void Float32Struct::__fbthrift_clear_terse_fields() {
+}
+
+bool Float32Struct::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool Float32Struct::operator==([[maybe_unused]] const Float32Struct& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+bool Float32Struct::operator<([[maybe_unused]] const Float32Struct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+
+float Float32Struct::get_float32() const {
+  return __fbthrift_field_float32;
+}
+
+float& Float32Struct::set_float32(float float32_) {
+  float32_ref() = float32_;
+  return __fbthrift_field_float32;
+}
+
+::py3::simple::LegacyFloat32 Float32Struct::get_float64() const {
+  return __fbthrift_field_float64;
+}
+
+::py3::simple::LegacyFloat32& Float32Struct::set_float64(::py3::simple::LegacyFloat32 float64_) {
+  float64_ref() = float64_;
+  return __fbthrift_field_float64;
+}
+
+const ::std::vector<::py3::simple::LegacyFloat32>& Float32Struct::get_float_list() const& {
+  return __fbthrift_field_float_list;
+}
+
+::std::vector<::py3::simple::LegacyFloat32> Float32Struct::get_float_list() && {
+  return static_cast<::std::vector<::py3::simple::LegacyFloat32>&&>(__fbthrift_field_float_list);
+}
+
+const ::std::map<::std::string, ::std::vector<::py3::simple::LegacyFloat32>>& Float32Struct::get_float_map() const& {
+  return __fbthrift_field_float_map;
+}
+
+::std::map<::std::string, ::std::vector<::py3::simple::LegacyFloat32>> Float32Struct::get_float_map() && {
+  return static_cast<::std::map<::std::string, ::std::vector<::py3::simple::LegacyFloat32>>&&>(__fbthrift_field_float_map);
+}
+
+void swap([[maybe_unused]] Float32Struct& a, [[maybe_unused]] Float32Struct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_float32, b.__fbthrift_field_float32);
+  swap(a.__fbthrift_field_float64, b.__fbthrift_field_float64);
+  swap(a.__fbthrift_field_float_list, b.__fbthrift_field_float_list);
+  swap(a.__fbthrift_field_float_map, b.__fbthrift_field_float_map);
+  swap(a.__isset, b.__isset);
+}
+
+
+} // namespace py3::simple
+
+
+namespace py3::simple {
+
 std::string_view HiddenTypeFieldsStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<HiddenTypeFieldsStruct>::fields_names[folly::to_underlying(ord) - 1];

@@ -385,6 +385,21 @@ cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_types_cust
         __optional_field_ref[cAnEnum] opt_default_enum_ref "opt_default_enum_ref" ()
 
 
+    cdef cppclass cFloat32Struct "::py3::simple::Float32Struct":
+        cFloat32Struct() except +
+        cFloat32Struct(const cFloat32Struct&) except +
+        bint operator==(cFloat32Struct&)
+        bint operator!=(cFloat32Struct&)
+        bint operator<(cFloat32Struct&)
+        bint operator>(cFloat32Struct&)
+        bint operator<=(cFloat32Struct&)
+        bint operator>=(cFloat32Struct&)
+        __field_ref[float] float32_ref "float32_ref" ()
+        __field_ref[float] float64_ref "float64_ref" ()
+        __field_ref[vector[float]] float_list_ref "float_list_ref" ()
+        __field_ref[cmap[string,vector[float]]] float_map_ref "float_map_ref" ()
+
+
     cdef cppclass cHiddenTypeFieldsStruct "::py3::simple::HiddenTypeFieldsStruct":
         cHiddenTypeFieldsStruct() except +
         cHiddenTypeFieldsStruct(const cHiddenTypeFieldsStruct&) except +

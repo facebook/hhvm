@@ -84,6 +84,8 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     Set__binary,
     List__AnEnum,
     _std_unordered_map__Map__i32_i32,
+    List__float,
+    Map__string_List__float,
     _MyType__List__i32,
     _MyType__Set__i32,
     _MyType__Map__i32_i32,
@@ -537,6 +539,147 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.SimpleStruct, self)
+
+@__cython.auto_pickle(False)
+@__cython.final
+cdef class Float32Struct(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
+    def __init__(Float32Struct self, **kwargs):
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cFloat32Struct]()
+        self._fields_setter = _fbthrift_types_fields.__Float32Struct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
+        super().__init__(**kwargs)
+
+    def __call__(Float32Struct self, **kwargs):
+        if not kwargs:
+            return self
+        cdef Float32Struct __fbthrift_inst = Float32Struct.__new__(Float32Struct)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cFloat32Struct](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Float32Struct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
+        for __fbthrift_name, _fbthrift_value in kwargs.items():
+            (<thrift.py3.types.Struct>__fbthrift_inst)._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+        return __fbthrift_inst
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return _fbthrift_IsSet("Float32Struct", {
+          "float32": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).float32_ref().has_value(),
+          "float64": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).float64_ref().has_value(),
+          "float_list": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).float_list_ref().has_value(),
+          "float_map": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).float_map_ref().has_value(),
+        })
+
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFloat32Struct] cpp_obj):
+        __fbthrift_inst = <Float32Struct>Float32Struct.__new__(Float32Struct)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
+        return __fbthrift_inst
+
+    cdef inline float32_impl(self):
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).float32_ref().value()
+
+    @property
+    def float32(self):
+        return self.float32_impl()
+
+    cdef inline float64_impl(self):
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).float64_ref().value()
+
+    @property
+    def float64(self):
+        return self.float64_impl()
+
+    cdef inline float_list_impl(self):
+        if self.__fbthrift_cached_float_list is None:
+            self.__fbthrift_cached_float_list = List__float__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).float_list_ref().ref())
+        return self.__fbthrift_cached_float_list
+
+    @property
+    def float_list(self):
+        return self.float_list_impl()
+
+    cdef inline float_map_impl(self):
+        if self.__fbthrift_cached_float_map is None:
+            self.__fbthrift_cached_float_map = Map__string_List__float__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).float_map_ref().ref())
+        return self.__fbthrift_cached_float_map
+
+    @property
+    def float_map(self):
+        return self.float_map_impl()
+
+
+    def __hash__(Float32Struct self):
+        return super().__hash__()
+
+    def __repr__(Float32Struct self):
+        return super().__repr__()
+
+    def __str__(Float32Struct self):
+        return super().__str__()
+
+
+    def __copy__(Float32Struct self):
+        return self
+
+    def __richcmp__(self, other, int op):
+        r = self._fbthrift_cmp_sametype(other, op)
+        return __richcmp[_module_cbindings.cFloat32Struct](
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<Float32Struct>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            op,
+        ) if r is None else r
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Float32Struct()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        _module_cbindings.StructMetadata[_module_cbindings.cFloat32Struct].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.Float32Struct"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[_module_cbindings.cFloat32Struct](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 4
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(Float32Struct self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[_module_cbindings.cFloat32Struct](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(Float32Struct self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cFloat32Struct]()
+        with nogil:
+            needed = serializer.cdeserialize[_module_cbindings.cFloat32Struct](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+        return needed
+
+
+    def _to_python(self):
+        return thrift.python.converter.to_python_struct(
+            _fbthrift_python_types.Float32Struct,
+            self,
+        )
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.Float32Struct, self)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -2103,6 +2246,50 @@ cdef object _std_unordered_map__Map__i32_i32__from_cpp(const _module_cbindings._
         py_items[ckey] = cval
     return _std_unordered_map__Map__i32_i32(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
+cdef vector[float] List__float__make_instance(object items) except *:
+    cdef vector[float] c_inst
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, (float, int)):
+            raise TypeError(f"{item!r} is not of type float")
+        c_inst.push_back(item)
+    return cmove(c_inst)
+
+cdef object List__float__from_cpp(const vector[float]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    for idx in range(c_vec.size()):
+        py_list.append(c_vec[idx])
+    return List__float(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+
+cdef cmap[string,vector[float]] Map__string_List__float__make_instance(object items) except *:
+    cdef cmap[string,vector[float]] c_inst
+    cdef string c_key
+    if items is None:
+        return cmove(c_inst)
+    for key, item in items.items():
+        if not isinstance(key, str):
+            raise TypeError(f"{key!r} is not of type str")
+        c_key = key.encode('UTF-8')
+        if item is None:
+            raise TypeError("None is not of type _typing.Sequence[float]")
+        if not isinstance(item, List__float):
+            item = List__float(item)
+
+        c_inst[c_key] = List__float__make_instance(item)
+    return cmove(c_inst)
+
+cdef object Map__string_List__float__from_cpp(const cmap[string,vector[float]]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[string,vector[float]]] iter = __map_iter[cmap[string,vector[float]]](c_map)
+    cdef string ckey
+    cdef vector[float] cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[__init_unicode_from_cpp(ckey)] = List__float__from_cpp(cval)
+    return Map__string_List__float(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
+
 cdef _module_cbindings._MyType _MyType__List__i32__make_instance(object items) except *:
     cdef _module_cbindings._MyType c_inst
     if items is None:
@@ -2322,6 +2509,7 @@ A_CONST_MAP = Map__string_SimpleStruct__from_cpp(_module_cbindings.cA_CONST_MAP(
 ANOTHER_CONST_MAP = Map__AnEnumRenamed_i32__from_cpp(_module_cbindings.cANOTHER_CONST_MAP())
 IOBufPtr = _fbthrift_iobuf.IOBuf
 IOBuf = _fbthrift_iobuf.IOBuf
+LegacyFloat32 = float
 AdaptedTypeDef = SimpleStruct
 foo_bar = bytes
 CustomBool = bool

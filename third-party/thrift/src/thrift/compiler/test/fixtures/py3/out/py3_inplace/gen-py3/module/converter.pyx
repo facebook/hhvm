@@ -59,6 +59,20 @@ cdef object SimpleStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cSimpleSt
     _py_struct = _module_types.SimpleStruct.from_python(_py_struct)
     return _py_struct
 
+cdef shared_ptr[_fbthrift_cbindings.cFloat32Struct] Float32Struct_convert_to_cpp(object inst) except*:
+    try:
+        inst = inst._fbthrift__inner
+    except AttributeError:
+        pass
+
+    return make_shared[_fbthrift_cbindings.cFloat32Struct](
+        _module_thrift_converter.Float32Struct_convert_to_cpp(inst)
+    )
+cdef object Float32Struct_from_cpp(const shared_ptr[_fbthrift_cbindings.cFloat32Struct]& c_struct):
+    _py_struct = _module_thrift_converter.Float32Struct_from_cpp(deref(const_pointer_cast(c_struct)))
+    _py_struct = _module_types.Float32Struct.from_python(_py_struct)
+    return _py_struct
+
 cdef shared_ptr[_fbthrift_cbindings.cHiddenTypeFieldsStruct] HiddenTypeFieldsStruct_convert_to_cpp(object inst) except*:
     try:
         inst = inst._fbthrift__inner

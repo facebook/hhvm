@@ -52,6 +52,8 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     Set__binary,
     List__AnEnum,
     _std_unordered_map__Map__i32_i32,
+    List__float,
+    Map__string_List__float,
     _MyType__List__i32,
     _MyType__Set__i32,
     _MyType__Map__i32_i32,
@@ -247,6 +249,59 @@ cdef class __SimpleStruct_FieldsSetter(__StructFieldsSetter):
         if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, _module_types.AnEnum):
             raise TypeError(f'field opt_default_enum value: {repr(_fbthrift_value)} is not of the enum type { _module_types.AnEnum }.')
         deref(self._struct_cpp_obj).opt_default_enum_ref().assign(<_module_cbindings.cAnEnum><int>_fbthrift_value)
+
+
+@__cython.auto_pickle(False)
+cdef class __Float32Struct_FieldsSetter(__StructFieldsSetter):
+
+    @staticmethod
+    cdef __Float32Struct_FieldsSetter _fbthrift_create(_module_cbindings.cFloat32Struct* struct_cpp_obj):
+        cdef __Float32Struct_FieldsSetter __fbthrift_inst = __Float32Struct_FieldsSetter.__new__(__Float32Struct_FieldsSetter)
+        __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
+        __fbthrift_inst._setters[__cstring_view(<const char*>"float32")] = __Float32Struct_FieldsSetter._set_field_0
+        __fbthrift_inst._setters[__cstring_view(<const char*>"float64")] = __Float32Struct_FieldsSetter._set_field_1
+        __fbthrift_inst._setters[__cstring_view(<const char*>"float_list")] = __Float32Struct_FieldsSetter._set_field_2
+        __fbthrift_inst._setters[__cstring_view(<const char*>"float_map")] = __Float32Struct_FieldsSetter._set_field_3
+        return __fbthrift_inst
+
+    cdef void set_field(__Float32Struct_FieldsSetter self, const char* name, object value) except *:
+        cdef __cstring_view cname = __cstring_view(name)
+        cdef cumap[__cstring_view, __Float32Struct_FieldsSetterFunc].iterator found = self._setters.find(cname)
+        if found == self._setters.end():
+            raise TypeError(f"invalid field name {name.decode('utf-8')}")
+        deref(found).second(self, value)
+
+    cdef void _set_field_0(self, _fbthrift_value) except *:
+        # for field float32
+        if _fbthrift_value is None:
+            __reset_field[_module_cbindings.cFloat32Struct](deref(self._struct_cpp_obj), 0)
+            return
+        if not isinstance(_fbthrift_value, (float, int)):
+            raise TypeError(f'float32 is not a { float !r}.')
+        deref(self._struct_cpp_obj).float32_ref().assign(_fbthrift_value)
+
+    cdef void _set_field_1(self, _fbthrift_value) except *:
+        # for field float64
+        if _fbthrift_value is None:
+            __reset_field[_module_cbindings.cFloat32Struct](deref(self._struct_cpp_obj), 1)
+            return
+        if not isinstance(_fbthrift_value, (float, int)):
+            raise TypeError(f'float64 is not a { float !r}.')
+        deref(self._struct_cpp_obj).float64_ref().assign(_fbthrift_value)
+
+    cdef void _set_field_2(self, _fbthrift_value) except *:
+        # for field float_list
+        if _fbthrift_value is None:
+            __reset_field[_module_cbindings.cFloat32Struct](deref(self._struct_cpp_obj), 2)
+            return
+        deref(self._struct_cpp_obj).float_list_ref().assign(_module_types.List__float__make_instance(_fbthrift_value))
+
+    cdef void _set_field_3(self, _fbthrift_value) except *:
+        # for field float_map
+        if _fbthrift_value is None:
+            __reset_field[_module_cbindings.cFloat32Struct](deref(self._struct_cpp_obj), 3)
+            return
+        deref(self._struct_cpp_obj).float_map_ref().assign(_module_types.Map__string_List__float__make_instance(_fbthrift_value))
 
 
 @__cython.auto_pickle(False)

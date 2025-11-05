@@ -107,6 +107,32 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 12> TStructDataStorage<
   11,
 }};
 
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::py3::simple::Float32Struct>::name = "Float32Struct";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 4> TStructDataStorage<::py3::simple::Float32Struct>::fields_names = { {
+  "float32"sv,
+  "float64"sv,
+  "float_list"sv,
+  "float_map"sv,
+}};
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 4> TStructDataStorage<::py3::simple::Float32Struct>::fields_ids = { {
+  1,
+  2,
+  3,
+  4,
+}};
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 4> TStructDataStorage<::py3::simple::Float32Struct>::fields_types = { {
+  TType::T_FLOAT,
+  TType::T_FLOAT,
+  TType::T_LIST,
+  TType::T_MAP,
+}};
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 4> TStructDataStorage<::py3::simple::Float32Struct>::isset_indexes = { {
+  0,
+  1,
+  2,
+  3,
+}};
+
 THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::py3::simple::HiddenTypeFieldsStruct>::name = "HiddenTypeFieldsStruct";
 THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 3> TStructDataStorage<::py3::simple::HiddenTypeFieldsStruct>::fields_names = { {
   "field1"sv,
@@ -386,20 +412,21 @@ namespace detail {
 
 
 
+
 template <> struct TSchemaAssociation<::py3::simple::SimpleService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8607107063930754448;
-  static constexpr ::std::string_view definitionKey = {"\xdf\xb1\xae\x13\x68\x8d\x49\x6b\x34\x02\x72\x3d\xba\xb1\x90\xf6", 16};
+  static constexpr int64_t programId = 2451960936538487616;
+  static constexpr ::std::string_view definitionKey = {"\x03\xb4\x71\xc1\x48\x3d\xe3\x5c\x94\x5a\xa7\xc3\x61\x06\xed\x42", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::DerivedService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8607107063930754448;
-  static constexpr ::std::string_view definitionKey = {"\xb6\xfb\x1c\x3a\xe8\x84\xfa\xaa\x15\xd1\xba\xd9\x15\x60\x63\x2f", 16};
+  static constexpr int64_t programId = 2451960936538487616;
+  static constexpr ::std::string_view definitionKey = {"\x6b\xe0\xff\xc7\xfc\xef\x4f\x5e\xb3\x4e\xf2\x62\xc3\xe8\x1e\x36", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::RederivedService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8607107063930754448;
-  static constexpr ::std::string_view definitionKey = {"\x0e\x71\x8a\x50\x92\x6e\xa8\xf0\xca\x6b\x29\x99\x82\x5b\xd2\x1d", 16};
+  static constexpr int64_t programId = 2451960936538487616;
+  static constexpr ::std::string_view definitionKey = {"\x53\x51\x9a\x26\x25\x25\xbb\x99\x09\x8b\xa0\x12\x70\x32\xf5\x0b", 16};
 };
 } // namespace detail
 } // namespace apache::thrift

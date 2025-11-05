@@ -13,6 +13,7 @@ namespace py3::simple {
 class SimpleException;
 class OptionalRefStruct;
 class SimpleStruct;
+class Float32Struct;
 class HiddenTypeFieldsStruct;
 namespace detail {
 class AdaptedUnion;

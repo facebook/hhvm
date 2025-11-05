@@ -1128,6 +1128,10 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
       return adapter_node(
           proto, self, find_structured_adapter_annotation(self));
     });
+    def.property("legacy_float_behavior?", [](const t_type& self) {
+      return self.has_structured_annotation(
+          kPythonEnableUnsafeUnconstrainedFloat32);
+    });
 
     return std::move(def).make();
   }

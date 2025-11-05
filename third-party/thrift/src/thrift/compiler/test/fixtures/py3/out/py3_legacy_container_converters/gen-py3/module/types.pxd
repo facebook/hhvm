@@ -95,6 +95,21 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
 
 
 
+cdef class Float32Struct(thrift.py3.types.Struct):
+    cdef shared_ptr[_module_cbindings.cFloat32Struct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef _fbthrift_types_fields.__Float32Struct_FieldsSetter _fields_setter
+    cdef inline object float32_impl(self)
+    cdef inline object float64_impl(self)
+    cdef inline object float_list_impl(self)
+    cdef inline object float_map_impl(self)
+    cdef object __fbthrift_cached_float_list
+    cdef object __fbthrift_cached_float_map
+
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFloat32Struct])
+
+
+
 cdef class HiddenTypeFieldsStruct(thrift.py3.types.Struct):
     cdef shared_ptr[_module_cbindings.cHiddenTypeFieldsStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__HiddenTypeFieldsStruct_FieldsSetter _fields_setter
@@ -284,6 +299,12 @@ cdef object List__AnEnum__from_cpp(const vector[_module_cbindings.cAnEnum]&) exc
 
 cdef _module_cbindings._std_unordered_map[cint32_t,cint32_t] _std_unordered_map__Map__i32_i32__make_instance(object items) except *
 cdef object _std_unordered_map__Map__i32_i32__from_cpp(const _module_cbindings._std_unordered_map[cint32_t,cint32_t]&) except *
+
+cdef vector[float] List__float__make_instance(object items) except *
+cdef object List__float__from_cpp(const vector[float]&) except *
+
+cdef cmap[string,vector[float]] Map__string_List__float__make_instance(object items) except *
+cdef object Map__string_List__float__from_cpp(const cmap[string,vector[float]]&) except *
 
 cdef _module_cbindings._MyType _MyType__List__i32__make_instance(object items) except *
 cdef object _MyType__List__i32__from_cpp(const _module_cbindings._MyType&) except *

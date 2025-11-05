@@ -20,18 +20,18 @@ namespace thrift {
 namespace detail {
 template <> struct TSchemaAssociation<::py3::simple::SimpleService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8607107063930754448;
-  static constexpr ::std::string_view definitionKey = {"\xdf\xb1\xae\x13\x68\x8d\x49\x6b\x34\x02\x72\x3d\xba\xb1\x90\xf6", 16};
+  static constexpr int64_t programId = 2451960936538487616;
+  static constexpr ::std::string_view definitionKey = {"\x03\xb4\x71\xc1\x48\x3d\xe3\x5c\x94\x5a\xa7\xc3\x61\x06\xed\x42", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::DerivedService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8607107063930754448;
-  static constexpr ::std::string_view definitionKey = {"\xb6\xfb\x1c\x3a\xe8\x84\xfa\xaa\x15\xd1\xba\xd9\x15\x60\x63\x2f", 16};
+  static constexpr int64_t programId = 2451960936538487616;
+  static constexpr ::std::string_view definitionKey = {"\x6b\xe0\xff\xc7\xfc\xef\x4f\x5e\xb3\x4e\xf2\x62\xc3\xe8\x1e\x36", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::RederivedService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -8607107063930754448;
-  static constexpr ::std::string_view definitionKey = {"\x0e\x71\x8a\x50\x92\x6e\xa8\xf0\xca\x6b\x29\x99\x82\x5b\xd2\x1d", 16};
+  static constexpr int64_t programId = 2451960936538487616;
+  static constexpr ::std::string_view definitionKey = {"\x53\x51\x9a\x26\x25\x25\xbb\x99\x09\x8b\xa0\x12\x70\x32\xf5\x0b", 16};
 };
 namespace md {
 using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
@@ -148,6 +148,36 @@ StructMetadata<::py3::simple::SimpleStruct>::gen(ThriftMetadata& metadata) {
     apache::thrift::metadata::ThriftType type;
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_SimpleStruct.fields()[i++].type() = std::move(type);
+  }
+  return res.metadata;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::py3::simple::Float32Struct>::gen(ThriftMetadata& metadata) {
+  auto res = genStructMetadata<::py3::simple::Float32Struct>(metadata);
+  if (res.preExists) {
+    return res.metadata;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_Float32Struct = res.metadata;
+  module_Float32Struct.is_union() = false;
+  static const auto* const
+  module_Float32Struct_fields = new std::array<EncodedThriftField, 4>{ {
+    { 1, "float32", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "float64", false, std::make_unique<Typedef>("module.LegacyFloat32", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("python.EnableUnsafeUnconstrainedFloat32", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 3, "float_list", false, std::make_unique<List>(std::make_unique<Typedef>("module.LegacyFloat32", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("python.EnableUnsafeUnconstrainedFloat32", {  }).cv_struct(),  })), std::vector<ThriftConstStruct>{ }},    { 4, "float_map", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<List>(std::make_unique<Typedef>("module.LegacyFloat32", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("python.EnableUnsafeUnconstrainedFloat32", {  }).cv_struct(),  }))), std::vector<ThriftConstStruct>{ }},  }};
+  std::size_t i = 0;
+  for (const auto& f : *module_Float32Struct_fields) {
+    [[maybe_unused]] auto& field = module_Float32Struct.fields()[i];
+    DCHECK_EQ(*field.id(), f.id);
+    DCHECK_EQ(*field.name(), f.name);
+    DCHECK_EQ(*field.is_optional(), f.is_optional);
+
+    field.structured_annotations().emplace().assign(
+        f.structured_annotations.begin(),
+        f.structured_annotations.end());
+
+    // writeAndGenType will modify metadata, which might invalidate `field` reference
+    // We need to store the result in a separate `type` variable.
+    apache::thrift::metadata::ThriftType type;
+    f.metadata_type_interface->writeAndGenType(type, metadata);
+    module_Float32Struct.fields()[i++].type() = std::move(type);
   }
   return res.metadata;
 }

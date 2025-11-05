@@ -117,6 +117,12 @@ cdef object List__AnEnum__from_cpp(const vector[_module_cbindings.cAnEnum]&) exc
 cdef _module_cbindings._std_unordered_map[cint32_t,cint32_t] _std_unordered_map__Map__i32_i32__make_instance(object items) except *
 cdef object _std_unordered_map__Map__i32_i32__from_cpp(const _module_cbindings._std_unordered_map[cint32_t,cint32_t]&) except *
 
+cdef vector[float] List__float__make_instance(object items) except *
+cdef object List__float__from_cpp(const vector[float]&) except *
+
+cdef cmap[string,vector[float]] Map__string_List__float__make_instance(object items) except *
+cdef object Map__string_List__float__from_cpp(const cmap[string,vector[float]]&) except *
+
 cdef _module_cbindings._MyType _MyType__List__i32__make_instance(object items) except *
 cdef object _MyType__List__i32__from_cpp(const _module_cbindings._MyType&) except *
 

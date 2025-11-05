@@ -1306,6 +1306,123 @@ Mapping.register(_std_unordered_map__Map__i32_i32)
 
 __all__.append("_std_unordered_map__Map__i32_i32")
 
+class List__float(thrift.py3.types.List):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
+            _py_obj = items
+        elif isinstance(items, List__float):
+            _py_obj = list(items)
+        elif items is None:
+            _py_obj = []
+        else:
+            check_method = List__float._check_item_type_or_raise
+            _py_obj = [check_method(item) for item in items]
+
+        super().__init__(_py_obj, List__float)
+
+    @staticmethod
+    def _check_item_type_or_raise(item):
+        if not (
+            isinstance(item, (float, int))
+        ):
+            raise TypeError(f"{item!r} is not of type float")
+        return item
+
+    @staticmethod
+    def _check_item_type_or_none(item):
+        if item is None:
+            return None
+        if isinstance(item, float):
+            return item
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__List__float()
+
+    @staticmethod
+    def from_python(python_list: thrift.python.types.List) -> List__float:
+        _items = [
+            _fbthrift__round_float32(item)
+            for item in python_list
+        ]
+        return List__float(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
+        )
+
+
+Sequence.register(List__float)
+
+
+__all__.append("List__float")
+
+class Map__string_List__float(thrift.py3.types.Map):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    _FBTHRIFT_USE_SORTED_REPR = True
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_map_private_ctor:
+            _py_obj = items
+        elif isinstance(items, Map__string_List__float):
+            _py_obj = dict(items)
+        elif items is None:
+            _py_obj = dict()
+        else:
+            check_key = Map__string_List__float._check_key_type_or_raise
+            check_val = Map__string_List__float._check_val_type_or_raise
+            _py_obj = {check_key(k) : check_val(v) for k, v in items.items()}
+
+        super().__init__(_py_obj, Map__string_List__float)
+
+    @staticmethod
+    def _check_key_type_or_raise(key):
+        if not (
+            isinstance(key, str)
+        ):
+            raise TypeError(f"{key!r} is not of type str")
+        return key
+
+    @staticmethod
+    def _check_key_type_or_none(key):
+        if key is None:
+            return None
+        if isinstance(key, str):
+            return key
+
+    @staticmethod
+    def _check_val_type_or_raise(item):
+        if item is None:
+            raise TypeError("None is not of the type _typing.Sequence[float]")
+        if not isinstance(item, List__float):
+            item = List__float(item)
+        return item
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Map__string_List__float()
+
+    @staticmethod
+    def from_python(python_map: thrift.python.types.Map) -> Map__string_List__float:
+        _keys = python_map.keys()
+        _values = (
+            List__float.from_python(item)
+            for item in python_map.values()
+        )
+        return Map__string_List__float(
+            items=dict(zip(_keys, _values)),
+            private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor,
+        )
+
+
+Mapping.register(Map__string_List__float)
+
+__all__.append("Map__string_List__float")
+
 class _MyType__List__i32(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -2177,6 +2294,150 @@ class SimpleStruct(thrift.py3.types.Struct):
 
 
 __all__.append("SimpleStruct")
+
+class Float32Struct(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+    __slots__ = (
+        "_fbthrift__inner",
+        "_fbthrift_inner__float32",
+        "_fbthrift_inner__float64",
+        "_fbthrift_inner__float_list",
+        "_fbthrift_inner__float_map",
+    )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.Float32Struct
+    _FBTHRIFT__FIELD_NAMES = (
+        "float32",
+        "float64",
+        "float_list",
+        "float_map",
+    )
+    _fbthrift__inner : _fbthrift_python_types.Float32Struct
+    _fbthrift_inner__float32 : float | None
+    _fbthrift_inner__float64 : float | None
+    _fbthrift_inner__float_list : _typing.Sequence[float] | None
+    _fbthrift_inner__float_map : _typing.Mapping[str, _typing.Sequence[float]] | None
+
+
+    def __init__(self, *args, **kwargs) -> None:
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.Float32Struct(*args, **kwargs)
+        except TypeError:
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.Float32Struct(*args, **kwargs)
+
+
+    def __new__(_fbthrift__cls, *args, **kwargs) -> Float32Struct:
+        instance = super().__new__(_fbthrift__cls)
+        instance._fbthrift_inner__float32 = None
+        instance._fbthrift_inner__float64 = None
+        instance._fbthrift_inner__float_list = None
+        instance._fbthrift_inner__float_map = None
+        return instance
+
+    def __call__(self, **kwargs) -> Float32Struct:
+        return Float32Struct.from_python(self._fbthrift__inner(**kwargs))
+
+    @staticmethod
+    def from_python(thrift_python_inner: _fbthrift_python_types.Float32Struct) -> Float32Struct:
+        inst = Float32Struct.__new__(Float32Struct)
+        inst._fbthrift__inner = thrift_python_inner
+        return inst
+
+    def _to_py3(self) -> Float32Struct:
+        return self
+
+    def _to_python(self) -> _fbthrift_python_types.Float32Struct:
+        return self._fbthrift__inner
+
+    def _to_py_deprecated(self):
+        py_deprecated_types = _get_py_deprecated_module()
+        return thrift.util.converter.to_py_struct(py_deprecated_types.Float32Struct, self)
+
+    def _fbthrift__isset(self) -> dict[str, bool]:
+        return thrift.python.types.isset(self._fbthrift__inner)
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Float32Struct()
+
+    @staticmethod
+    def __get_metadata__():
+        return Float32Struct._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.Float32Struct"
+
+    @_python__property
+    def float32(self) -> float:
+        if self._fbthrift_inner__float32 is None:
+            __python_val = self._fbthrift__inner.float32
+            self._fbthrift_inner__float32 = _fbthrift__round_float32(__python_val)
+
+        return self._fbthrift_inner__float32
+
+    @_python__property
+    def float64(self) -> float:
+        if self._fbthrift_inner__float64 is None:
+            __python_val = self._fbthrift__inner.float64
+            self._fbthrift_inner__float64 = _fbthrift__round_float32(__python_val)
+
+        return self._fbthrift_inner__float64
+
+    @_python__property
+    def float_list(self) -> _typing.Sequence[float]:
+        if self._fbthrift_inner__float_list is None:
+            __python_val = self._fbthrift__inner.float_list
+            self._fbthrift_inner__float_list = List__float.from_python(__python_val)
+
+        return self._fbthrift_inner__float_list
+
+    @_python__property
+    def float_map(self) -> _typing.Mapping[str, _typing.Sequence[float]]:
+        if self._fbthrift_inner__float_map is None:
+            __python_val = self._fbthrift__inner.float_map
+            self._fbthrift_inner__float_map = Map__string_List__float.from_python(__python_val)
+
+        return self._fbthrift_inner__float_map
+
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 4
+
+    def __eq__(self, other):
+        if type(self) != type(other):
+            return False
+
+        for (_, self_val), (_, other_val) in zip(self, other):
+            if self_val != other_val:
+                return False
+        return True
+
+
+    def __lt__(self, other):
+        if not isinstance(other, Float32Struct):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, Float32Struct):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
+
+    def __copy__(self):
+        return self
+
+
+__all__.append("Float32Struct")
 
 class HiddenTypeFieldsStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__

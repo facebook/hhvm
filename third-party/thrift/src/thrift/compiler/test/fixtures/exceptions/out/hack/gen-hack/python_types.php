@@ -1002,7 +1002,7 @@ class EnableUnsafeUnconstrainedFloat32 implements \IThriftSyncStruct, \IThriftSt
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::fromShape(
+        '\facebook\thrift\annotation\Typedef' => \facebook\thrift\annotation\Typedef::fromShape(
           shape(
           )
         ),

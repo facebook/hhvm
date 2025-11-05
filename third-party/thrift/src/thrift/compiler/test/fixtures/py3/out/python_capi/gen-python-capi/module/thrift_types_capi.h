@@ -115,6 +115,37 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 };
 
 template <>
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::py3::simple::Float32Struct, ::module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::py3::simple::Float32Struct, ::module::NamespaceTag>> {
+  static const bool kUsingMarshal = true;
+  ExtractorResult<::py3::simple::Float32Struct> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::Float32Struct, ::module::NamespaceTag >>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::Float32Struct, ::module::NamespaceTag>> {
+  ExtractorResult<::py3::simple::Float32Struct> operator()(PyObject* obj);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::py3::simple::Float32Struct, ::module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::py3::simple::Float32Struct, ::module::NamespaceTag>> {
+  static const bool kUsingMarshal = true;
+  PyObject* operator()(const ::py3::simple::Float32Struct& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::Float32Struct, ::module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::Float32Struct, ::module::NamespaceTag>> {
+  PyObject* operator()(const ::py3::simple::Float32Struct& val);
+};
+
+template <>
 struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::py3::simple::HiddenTypeFieldsStruct, ::module::NamespaceTag>>
     : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::py3::simple::HiddenTypeFieldsStruct, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = false;

@@ -63,6 +63,22 @@ class SimpleStruct_Builder(thrift.py3.builder.StructBuilder):
         yield "opt_default_str", self.opt_default_str
         yield "opt_default_enum", self.opt_default_enum
 
+_fbthrift_struct_type__Float32Struct = _module_types.Float32Struct
+class Float32Struct_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _fbthrift_struct_type__Float32Struct
+
+    def __init__(self):
+        self.float32: _typing.Optional[float] = None
+        self.float64: _typing.Optional[float] = None
+        self.float_list: _typing.Optional[list] = None
+        self.float_map: _typing.Optional[dict] = None
+
+    def __iter__(self):
+        yield "float32", self.float32
+        yield "float64", self.float64
+        yield "float_list", self.float_list
+        yield "float_map", self.float_map
+
 _fbthrift_struct_type__HiddenTypeFieldsStruct = _module_types.HiddenTypeFieldsStruct
 class HiddenTypeFieldsStruct_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _fbthrift_struct_type__HiddenTypeFieldsStruct

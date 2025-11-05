@@ -176,5 +176,5 @@ struct DisableFieldCache {}
 /// This annotation MUST NOT be applied on fields whose [Thrift IDL Type](https://github.com/facebook/fbthrift/blob/main/thrift/doc/glossary/kinds-of-types.md#thrift-idl-types)
 /// is not `float`, or a container whose item type(s) are not `float` (or
 /// containers that satisfy this property, recursively).
-@scope.Field
+@scope.Typedef
 struct EnableUnsafeUnconstrainedFloat32 {}

@@ -9,6 +9,7 @@ from module.thrift_types import (
     SimpleException,
     OptionalRefStruct,
     SimpleStruct,
+    Float32Struct,
     HiddenTypeFieldsStruct,
     AdaptedUnion,
     HiddenException,
@@ -39,6 +40,7 @@ from module.thrift_types import (
     ANOTHER_CONST_MAP,
     IOBufPtr,
     IOBuf,
+    LegacyFloat32,
     AdaptedTypeDef,
     HiddenTypeDef,
     ImplicitlyHiddenTypeDef,
@@ -713,6 +715,65 @@ class _std_unordered_map__Map__i32_i32(_fbthrift_python_types.Map, metaclass=_st
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection___std_unordered_map__Map__i32_i32()
+
+class List__float__Meta(type):
+    def _fbthrift_type_info(cls):
+        return (
+            _fbthrift_python_types.typeinfo_float,
+        )
+
+    def __instancecheck__(cls, instance):
+        return (
+            isinstance(instance, _fbthrift_python_types.List) and
+            instance._fbthrift_same_type(*cls._fbthrift_type_info())
+        )
+
+class List__float(_fbthrift_python_types.List, metaclass=List__float__Meta):
+    __module__ = _fbthrift__py3_module_name
+    __slots__ = ()
+
+    def __init__(self, *args, **kwargs):
+        if not args and not kwargs:
+            args = ((),)
+        super().__init__(
+            *List__float._fbthrift_type_info(),
+            *args,
+            **kwargs,
+        )
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__List__float()
+
+class Map__string_List__float__Meta(type):
+    def _fbthrift_type_info(cls):
+        return (
+            _fbthrift_python_types.typeinfo_string,
+            _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_float),
+        )
+
+    def __instancecheck__(cls, instance):
+        return (
+            isinstance(instance, _fbthrift_python_types.Map) and
+            instance._fbthrift_same_type(*cls._fbthrift_type_info())
+        )
+
+class Map__string_List__float(_fbthrift_python_types.Map, metaclass=Map__string_List__float__Meta):
+    __module__ = _fbthrift__py3_module_name
+    __slots__ = ()
+
+    def __init__(self, *args, **kwargs):
+        if not args and not kwargs:
+            args = ({},)
+        super().__init__(
+            *Map__string_List__float._fbthrift_type_info(),
+            *args,
+            **kwargs,
+        )
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Map__string_List__float()
 
 class _MyType__List__i32__Meta(type):
     def _fbthrift_type_info(cls):

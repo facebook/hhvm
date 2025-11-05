@@ -18,6 +18,7 @@ namespace simple {
   ::apache::thrift::detail::md::ExceptionMetadata<SimpleException>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<OptionalRefStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<SimpleStruct>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<Float32Struct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<HiddenTypeFieldsStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<ComplexStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<BinaryUnion>::gen(metadata);

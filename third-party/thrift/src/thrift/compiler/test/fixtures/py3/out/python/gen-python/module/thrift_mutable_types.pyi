@@ -175,6 +175,50 @@ class SimpleStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_pytho
 _fbthrift_SimpleStruct = SimpleStruct
 
 @_typing.final
+class Float32Struct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.Float32Struct):
+    @property
+    def float32(self) -> builtins.float: ...
+    @float32.setter
+    def float32(self, value: builtins.float) -> None: ...
+
+    @property
+    def float64(self) -> builtins.float: ...
+    @float64.setter
+    def float64(self, value: builtins.float) -> None: ...
+
+    @property
+    def float_list(self) -> _fbthrift_python_mutable_containers.MutableList[builtins.float]: ...
+    @float_list.setter
+    def float_list(self, value: _fbthrift_python_mutable_containers.MutableList[builtins.float] | _fbthrift_python_mutable_types._ThriftListWrapper) -> None: ...
+
+    @property
+    def float_map(self) -> _fbthrift_python_mutable_containers.MutableMap[builtins.str, _fbthrift_python_mutable_containers.MutableList[builtins.float]]: ...
+    @float_map.setter
+    def float_map(self, value: _fbthrift_python_mutable_containers.MutableMap[builtins.str, _fbthrift_python_mutable_containers.MutableList[builtins.float]] | _fbthrift_python_mutable_types._ThriftMapWrapper) -> None: ...
+
+    def __init__(
+        self, *,
+        float32: _typing.Optional[builtins.float]=...,
+        float64: _typing.Optional[builtins.float]=...,
+        float_list: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[builtins.float] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
+        float_map: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[builtins.str, _fbthrift_python_mutable_containers.MutableList[builtins.float]] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        float32: _typing.Optional[builtins.float]=...,
+        float64: _typing.Optional[builtins.float]=...,
+        float_list: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[builtins.float] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
+        float_map: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[builtins.str, _fbthrift_python_mutable_containers.MutableList[builtins.float]] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...
+    ) -> _typing.Self: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.float, builtins.float, _fbthrift_python_mutable_containers.MutableList[builtins.float], _fbthrift_python_mutable_containers.MutableMap[builtins.str, _fbthrift_python_mutable_containers.MutableList[builtins.float]]]]]: ...
+    def _to_python(self) -> "module.thrift_types.Float32Struct": ...  # type: ignore
+    def _to_mutable_python(self) -> _typing.Self: ...
+    def _to_py3(self) -> "module.types.Float32Struct": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.Float32Struct": ...  # type: ignore
+_fbthrift_Float32Struct = Float32Struct
+
+@_typing.final
 class HiddenTypeFieldsStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstract_types.HiddenTypeFieldsStruct):
     @property
     def field1(self) -> _fbthrift_SimpleStruct: ...
@@ -660,6 +704,7 @@ ANOTHER_CONST_MAP: _typing.Mapping[_fbthrift_AnEnumRenamed, builtins.int] = ...
 
 IOBufPtr = _fbthrift_iobuf.IOBuf
 IOBuf = _fbthrift_iobuf.IOBuf
+LegacyFloat32 = builtins.float
 AdaptedTypeDef = _fbthrift_SimpleStruct
 HiddenTypeDef = _fbthrift_SimpleStruct
 ImplicitlyHiddenTypeDef = _fbthrift_AdaptedUnion

@@ -43,7 +43,12 @@ _fbthrift_python_types.typeinfo_i64
   {{#else if type:double?}}
 _fbthrift_python_types.typeinfo_double
   {{#else if type:float?}}
+    {{#type:legacy_float_behavior?}}
+_fbthrift_python_types.typeinfo_float_legacy
+    {{/type:legacy_float_behavior?}}
+    {{^type:legacy_float_behavior?}}
 _fbthrift_python_types.typeinfo_float
+    {{/type:legacy_float_behavior?}}
   {{#else if type:string?}}
 _fbthrift_python_types.typeinfo_string
   {{#else if type:binary?}}

@@ -79,6 +79,25 @@ inline void reset_field<::py3::simple::SimpleStruct>(
 }
 
 template<>
+inline void reset_field<::py3::simple::Float32Struct>(
+    ::py3::simple::Float32Struct& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.float32_ref().copy_from(default_inst<::py3::simple::Float32Struct>().float32_ref());
+      return;
+    case 1:
+      obj.float64_ref().copy_from(default_inst<::py3::simple::Float32Struct>().float64_ref());
+      return;
+    case 2:
+      obj.float_list_ref().copy_from(default_inst<::py3::simple::Float32Struct>().float_list_ref());
+      return;
+    case 3:
+      obj.float_map_ref().copy_from(default_inst<::py3::simple::Float32Struct>().float_map_ref());
+      return;
+  }
+}
+
+template<>
 inline void reset_field<::py3::simple::HiddenTypeFieldsStruct>(
     ::py3::simple::HiddenTypeFieldsStruct& obj, uint16_t index) {
   switch (index) {
@@ -254,6 +273,16 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::py3::simple::SimpleStruct>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::py3::simple::Float32Struct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

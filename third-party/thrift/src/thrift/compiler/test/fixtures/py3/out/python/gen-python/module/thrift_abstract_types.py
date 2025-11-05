@@ -119,6 +119,34 @@ class SimpleStruct(_abc.ABC):
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.SimpleStruct": ...  # type: ignore
 _fbthrift_SimpleStruct = SimpleStruct
+class Float32Struct(_abc.ABC):
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
+    @_abc.abstractmethod
+    def float32(self) -> builtins.float: ...
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
+    @_abc.abstractmethod
+    def float64(self) -> builtins.float: ...
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
+    @_abc.abstractmethod
+    def float_list(self) -> _typing.Sequence[builtins.float]: ...
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
+    @_abc.abstractmethod
+    def float_map(self) -> _typing.Mapping[builtins.str, _typing.Sequence[builtins.float]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[builtins.float, builtins.float, _typing.Sequence[builtins.float], _typing.Mapping[builtins.str, _typing.Sequence[builtins.float]]]]]: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.Float32Struct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "module.thrift_types.Float32Struct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "module.types.Float32Struct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.Float32Struct": ...  # type: ignore
+_fbthrift_Float32Struct = Float32Struct
 class HiddenTypeFieldsStruct(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
@@ -422,6 +450,7 @@ _fbthrift_AdaptedTypedefFields = AdaptedTypedefFields
 
 IOBufPtr = _fbthrift_iobuf.IOBuf
 IOBuf = _fbthrift_iobuf.IOBuf
+LegacyFloat32 = builtins.float
 AdaptedTypeDef = _fbthrift_SimpleStruct
 HiddenTypeDef = _fbthrift_SimpleStruct
 ImplicitlyHiddenTypeDef = _fbthrift_AdaptedUnion

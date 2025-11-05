@@ -692,6 +692,7 @@ cdef to_container_elements_no_convert(type_info):
         isinstance(type_info, (TypeInfo, IntegerTypeInfo))
         or type_info is typeinfo_iobuf
         or type_info is typeinfo_float
+        or type_info is typeinfo_float_legacy
     )
 
 
@@ -1785,7 +1786,7 @@ cdef inline int _fbthrift_get_Union_type_int(Union u):
 cdef inline pbool _strict_type_info_mismatch(value, type_info):
     if isinstance(type_info, IntegerTypeInfo):
         return isinstance(value, (float, bool))
-    if type_info is typeinfo_float or type_info is typeinfo_double:
+    if type_info is typeinfo_float or type_info is typeinfo_double or type_info is typeinfo_float_legacy:
         return not isinstance(value, float)
     return False
 

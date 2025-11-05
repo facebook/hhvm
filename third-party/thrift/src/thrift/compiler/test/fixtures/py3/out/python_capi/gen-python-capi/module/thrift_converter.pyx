@@ -30,6 +30,12 @@ cdef cSimpleStruct SimpleStruct_convert_to_cpp(object inst) except *:
 cdef object SimpleStruct_from_cpp(const cSimpleStruct& c_struct):
     return cpp_to_python[cSimpleStruct, _fbthrift__NamespaceTag](c_struct)
 
+cdef cFloat32Struct Float32Struct_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cFloat32Struct, _fbthrift__NamespaceTag](inst))
+
+cdef object Float32Struct_from_cpp(const cFloat32Struct& c_struct):
+    return cpp_to_python[cFloat32Struct, _fbthrift__NamespaceTag](c_struct)
+
 cdef cHiddenTypeFieldsStruct HiddenTypeFieldsStruct_convert_to_cpp(object inst) except *:
     return cmove(python_to_cpp[cHiddenTypeFieldsStruct, _fbthrift__NamespaceTag](inst))
 

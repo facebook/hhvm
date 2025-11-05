@@ -59,6 +59,9 @@ struct OptionalRefStruct {
   1: optional IOBufPtr optional_blob;
 }
 
+@python.EnableUnsafeUnconstrainedFloat32
+typedef float LegacyFloat32
+
 struct SimpleStruct {
   1: bool is_on;
   2: byte tiny_int;
@@ -81,6 +84,13 @@ struct SimpleStruct {
   // @lint-ignore THRIFTCHECKS
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   12: optional AnEnum opt_default_enum = AnEnum.THREE;
+}
+
+struct Float32Struct {
+  1: float float32;
+  2: LegacyFloat32 float64;
+  3: list<LegacyFloat32> float_list;
+  4: map<string, list<LegacyFloat32>> float_map;
 }
 
 @cpp.Adapter{name = "Adapter"}

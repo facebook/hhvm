@@ -311,6 +311,92 @@ class SimpleStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.SimpleStruct, SimpleStruct)
 _fbthrift_SimpleStruct = SimpleStruct
 
+class Float32Struct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "float32",  # name
+            "float32",  # python name (from @python.Name annotation)
+            _fbthrift_python_types.typeinfo_float,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            True, # field type is primitive
+            6, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "float64",  # name
+            "float64",  # python name (from @python.Name annotation)
+            _fbthrift_python_types.typeinfo_float_legacy,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            True, # field type is primitive
+            6, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            3,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "float_list",  # name
+            "float_list",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_types.typeinfo_float_legacy),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            14, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            4,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "float_map",  # name
+            "float_map",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_types.typeinfo_float_legacy)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.Float32Struct"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return None
+
+    @staticmethod
+    def __get_metadata__():
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
+
+
+    def _to_python(self):
+        from thrift.python import converter
+        import importlib
+        immutable_types = importlib.import_module("module.thrift_types")
+        return converter.to_python_struct(immutable_types.Float32Struct, self)
+
+    def _to_mutable_python(self):
+        return self
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        from thrift.util import converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return converter.to_py_struct(py_deprecated_types.Float32Struct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return converter.to_py_struct(py_asyncio_types.Float32Struct, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.Float32Struct, Float32Struct)
+_fbthrift_Float32Struct = Float32Struct
+
 class HiddenTypeFieldsStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1181,6 +1267,7 @@ _fbthrift_all_structs = [
     SimpleException,
     OptionalRefStruct,
     SimpleStruct,
+    Float32Struct,
     HiddenTypeFieldsStruct,
     AdaptedUnion,
     HiddenException,
@@ -1228,6 +1315,7 @@ ANOTHER_CONST_MAP = _fbthrift_python_types.Map(_fbthrift_python_types.EnumTypeIn
 
 IOBufPtr = _fbthrift_iobuf.IOBuf
 IOBuf = _fbthrift_iobuf.IOBuf
+LegacyFloat32 = float
 AdaptedTypeDef = _fbthrift_SimpleStruct
 HiddenTypeDef = _fbthrift_SimpleStruct
 ImplicitlyHiddenTypeDef = _fbthrift_AdaptedUnion

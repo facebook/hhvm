@@ -218,6 +218,66 @@ def get_reflection__SimpleStruct() -> __StructSpec:
         ),
     )
     return spec
+def get_reflection__Float32Struct() -> __StructSpec:
+    spec: __StructSpec = __StructSpec._fbthrift_create(
+        name="Float32Struct",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=1,
+            name="float32",
+            py_name="float32",
+            type=float,
+            kind=__NumberType.FLOAT,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=2,
+            name="float64",
+            py_name="float64",
+            type=float,
+            kind=__NumberType.FLOAT,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=3,
+            name="float_list",
+            py_name="float_list",
+            type=_module_types.List__float,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=4,
+            name="float_map",
+            py_name="float_map",
+            type=_module_types.Map__string_List__float,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    return spec
 def get_reflection__HiddenTypeFieldsStruct() -> __StructSpec:
     spec: __StructSpec = __StructSpec._fbthrift_create(
         name="HiddenTypeFieldsStruct",
@@ -914,6 +974,20 @@ def get_reflection___std_unordered_map__Map__i32_i32() -> __MapSpec:
         key_kind=__NumberType.I32,
         value=int,
         value_kind=__NumberType.I32,
+    )
+
+def get_reflection__List__float() -> __ListSpec :
+    return __ListSpec._fbthrift_create(
+        value=float,
+        kind=__NumberType.FLOAT,
+    )
+
+def get_reflection__Map__string_List__float() -> __MapSpec:
+    return __MapSpec._fbthrift_create(
+        key=str,
+        key_kind=__NumberType.NOT_A_NUMBER,
+        value=_module_types.List__float,
+        value_kind=__NumberType.NOT_A_NUMBER,
     )
 
 def get_reflection___MyType__List__i32() -> __ListSpec :

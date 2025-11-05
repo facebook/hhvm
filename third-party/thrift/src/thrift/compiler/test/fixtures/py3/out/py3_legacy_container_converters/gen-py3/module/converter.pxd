@@ -37,6 +37,9 @@ cdef object OptionalRefStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cOpt
 cdef shared_ptr[_fbthrift_cbindings.cSimpleStruct] SimpleStruct_convert_to_cpp(object inst) except*
 cdef object SimpleStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cSimpleStruct]& c_struct)
 
+cdef shared_ptr[_fbthrift_cbindings.cFloat32Struct] Float32Struct_convert_to_cpp(object inst) except*
+cdef object Float32Struct_from_cpp(const shared_ptr[_fbthrift_cbindings.cFloat32Struct]& c_struct)
+
 cdef shared_ptr[_fbthrift_cbindings.cHiddenTypeFieldsStruct] HiddenTypeFieldsStruct_convert_to_cpp(object inst) except*
 cdef object HiddenTypeFieldsStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cHiddenTypeFieldsStruct]& c_struct)
 
@@ -80,6 +83,8 @@ cdef vector[string] List__binary__make_instance(object items) except *
 cdef cset[string] Set__binary__make_instance(object items) except *
 cdef vector[_module_cbindings.cAnEnum] List__AnEnum__make_instance(object items) except *
 cdef _module_cbindings._std_unordered_map[cint32_t,cint32_t] _std_unordered_map__Map__i32_i32__make_instance(object items) except *
+cdef vector[float] List__float__make_instance(object items) except *
+cdef cmap[string,vector[float]] Map__string_List__float__make_instance(object items) except *
 cdef _module_cbindings._MyType _MyType__List__i32__make_instance(object items) except *
 cdef _module_cbindings._MyType _MyType__Set__i32__make_instance(object items) except *
 cdef _module_cbindings._MyType _MyType__Map__i32_i32__make_instance(object items) except *

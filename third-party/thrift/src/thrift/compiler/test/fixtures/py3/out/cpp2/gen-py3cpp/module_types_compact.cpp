@@ -23,6 +23,11 @@ template uint32_t SimpleStruct::write<>(apache::thrift::CompactProtocolWriter*) 
 template uint32_t SimpleStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t SimpleStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+template void Float32Struct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t Float32Struct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t Float32Struct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t Float32Struct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
 template void HiddenTypeFieldsStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t HiddenTypeFieldsStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t HiddenTypeFieldsStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;

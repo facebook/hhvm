@@ -31,6 +31,8 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     Set__binary,
     List__AnEnum,
     _std_unordered_map__Map__i32_i32,
+    List__float,
+    Map__string_List__float,
     _MyType__List__i32,
     _MyType__Set__i32,
     _MyType__Map__i32_i32,

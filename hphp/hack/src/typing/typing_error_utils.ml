@@ -6607,11 +6607,12 @@ end = struct
       tvar_pos pos_with_generic generic_reason generic_name =
     let reasons =
       lazy
-        (( pos_with_generic,
-           Format.sprintf
-             "A higher rank generic `%s` will escape its scope"
-             generic_name )
-         :: Typing_reason.to_string "" generic_reason
+        ((pos_with_generic, "Expected a first-class polymorphic function type.")
+         :: Typing_reason.to_string
+              (Format.sprintf
+                 "A higher rank generic `%s` will escape its scope"
+                 generic_name)
+              generic_reason
         @ [(tvar_pos, "Please make this type explicit")])
     in
     create ~code:Error_code.RigidTVarEscape ~reasons ()

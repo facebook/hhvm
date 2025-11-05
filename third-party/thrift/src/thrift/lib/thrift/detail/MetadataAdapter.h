@@ -44,6 +44,11 @@ class LimitedVector : public std::vector<T> {
     ensureInsideCython();
     return std::vector<T>::at(idx);
   }
+
+  decltype(auto) front() const {
+    ensureInsideCython();
+    return std::vector<T>::front();
+  }
 };
 
 } // namespace detail

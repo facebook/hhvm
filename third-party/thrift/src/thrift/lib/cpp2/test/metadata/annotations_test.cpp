@@ -22,52 +22,53 @@
 
 namespace apache::thrift::test {
 
-std::vector<metadata::ThriftConstStruct> expectedAnnotations() {
-  std::vector<metadata::ThriftConstStruct> ret{2};
-  ret[0].type()->name() = "annotations.Annotation";
-  ret[0].fields()["boolField"].cv_bool() = true;
-  ret[0].fields()["i16Field"].cv_integer() = 16;
-  ret[0].fields()["i32Field"].cv_integer() = 32;
-  ret[0].fields()["floatField"].cv_double() = 10;
-  ret[0].fields()["binaryField"].cv_string() = "binary";
-  ret[0].fields()["doubleField"].cv_double() = 20;
+using metadata::detail::LimitedVector;
 
-  ret[0].fields()["structField"].cv_struct().emplace().type()->name() =
+LimitedVector<metadata::ThriftConstStruct> expectedAnnotations() {
+  LimitedVector<metadata::ThriftConstStruct> ret;
+  metadata::ThriftConstStruct* last = &ret.emplace_back();
+  last->type()->name() = "annotations.Annotation";
+  last->fields()["boolField"].cv_bool() = true;
+  last->fields()["i16Field"].cv_integer() = 16;
+  last->fields()["i32Field"].cv_integer() = 32;
+  last->fields()["floatField"].cv_double() = 10;
+  last->fields()["binaryField"].cv_string() = "binary";
+  last->fields()["doubleField"].cv_double() = 20;
+
+  last->fields()["structField"].cv_struct().emplace().type()->name() =
       "annotations.MyStruct";
-  ret[0]
-      .fields()["structField"]
+  last->fields()["structField"]
       .cv_struct()
       ->fields()["stringField"]
       .cv_string() = "struct";
-  ret[0].fields()["unionField"].cv_struct().emplace().type()->name() =
+  last->fields()["unionField"].cv_struct().emplace().type()->name() =
       "annotations.MyUnion";
-  ret[0]
-      .fields()["unionField"]
+  last->fields()["unionField"]
       .cv_struct()
       ->fields()["stringField"]
       .cv_string() = "union";
 
-  ret[0].fields()["enumField"].cv_integer() = 2;
-  ret[0].fields()["listField"].cv_list().emplace();
-  ret[0].fields()["listField"].cv_list()->emplace_back().cv_integer() = 2;
-  ret[0].fields()["listField"].cv_list()->emplace_back().cv_integer() = 1;
-  ret[0].fields()["listField"].cv_list()->emplace_back().cv_integer() = 2;
-  ret[0].fields()["setField"].cv_list().emplace();
-  ret[0].fields()["setField"].cv_list()->emplace_back().cv_integer() = 2;
-  ret[0].fields()["setField"].cv_list()->emplace_back().cv_integer() = 1;
-  ret[0].fields()["mapField"].cv_map().emplace();
-  ret[0].fields()["mapField"].cv_map()->emplace_back();
-  ret[0].fields()["mapField"].cv_map()->back().key()->cv_integer() = 2;
-  ret[0].fields()["mapField"].cv_map()->back().value()->cv_string() = "20";
-  ret[0].fields()["mapField"].cv_map()->emplace_back();
-  ret[0].fields()["mapField"].cv_map()->back().key()->cv_integer() = 1;
-  ret[0].fields()["mapField"].cv_map()->back().value()->cv_string() = "10";
+  last->fields()["enumField"].cv_integer() = 2;
+  last->fields()["listField"].cv_list().emplace();
+  last->fields()["listField"].cv_list()->emplace_back().cv_integer() = 2;
+  last->fields()["listField"].cv_list()->emplace_back().cv_integer() = 1;
+  last->fields()["listField"].cv_list()->emplace_back().cv_integer() = 2;
+  last->fields()["setField"].cv_list().emplace();
+  last->fields()["setField"].cv_list()->emplace_back().cv_integer() = 2;
+  last->fields()["setField"].cv_list()->emplace_back().cv_integer() = 1;
+  last->fields()["mapField"].cv_map().emplace();
+  last->fields()["mapField"].cv_map()->emplace_back();
+  last->fields()["mapField"].cv_map()->back().key()->cv_integer() = 2;
+  last->fields()["mapField"].cv_map()->back().value()->cv_string() = "20";
+  last->fields()["mapField"].cv_map()->emplace_back();
+  last->fields()["mapField"].cv_map()->back().key()->cv_integer() = 1;
+  last->fields()["mapField"].cv_map()->back().value()->cv_string() = "10";
 
-  ret[1].type()->name() = "annotations.Foo";
-  ret[1].fields()["bar"].cv_struct().emplace().type()->name() =
+  last = &ret.emplace_back();
+  last->type()->name() = "annotations.Foo";
+  last->fields()["bar"].cv_struct().emplace().type()->name() =
       "annotations.Bar";
-  ret[1].fields()["bar"].cv_struct()->fields()["baz"].cv_string() = "123";
-
+  last->fields()["bar"].cv_struct()->fields()["baz"].cv_string() = "123";
   return ret;
 }
 
@@ -76,9 +77,7 @@ metadata::ThriftEnum expectedEnum() {
   ret.name() = "annotations.TestEnum";
   ret.elements()[1] = "foo";
   ret.elements()[2] = "bar";
-  auto annotations = expectedAnnotations();
-  ret.structured_annotations().emplace().assign(
-      annotations.begin(), annotations.end());
+  ret.structured_annotations() = expectedAnnotations();
   return ret;
 }
 
@@ -198,9 +197,7 @@ metadata::ThriftStruct expectedStruct() {
   field.id() = 2;
   field.name() = "field_2";
   field.type()->t_primitive() = metadata::ThriftPrimitiveType::THRIFT_I32_TYPE;
-  auto annotations = expectedAnnotations();
-  field.structured_annotations().emplace().assign(
-      annotations.begin(), annotations.end());
+  field.structured_annotations() = expectedAnnotations();
   ret.fields()->push_back(field);
   return ret;
 }

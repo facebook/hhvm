@@ -21,6 +21,7 @@
 #include <wangle/ssl/SSLContextConfig.h>
 
 #include <thrift/conformance/stresstest/util/IoUringUtil.h>
+#include <thrift/lib/cpp2/transport/rocket/server/RocketRoutingHandler.h>
 #include "common/services/cpp/TLSConfig.h"
 
 #include <folly/executors/CPUThreadPoolExecutor.h>
@@ -92,6 +93,10 @@ DEFINE_bool(
     disable_active_request_tracking, false, "Disabled Active Request Tracking");
 DEFINE_bool(enable_checksum, false, "Enable Server Side Checksum support");
 DEFINE_bool(aligned_parser, false, "Enable AlignedParser");
+DEFINE_string(
+    plaintext_parser,
+    "",
+    "Parser override to use for plaintext connections (strategy, allocating, aligned)");
 
 #if FOLLY_HAVE_WEAK_SYMBOLS
 FOLLY_ATTR_WEAK int callback_assign_func(
@@ -102,6 +107,18 @@ static int callback_assign_func(
   return -1;
 }
 #endif
+
+namespace apache::thrift::detail {
+THRIFT_PLUGGABLE_FUNC_SET(
+    std::string, getSocketParser, folly::AsyncTransport& socket) {
+  if (socket.getUnderlyingTransport<fizz::AsyncFizzBase>() ||
+      socket.getUnderlyingTransport<folly::AsyncSSLSocket>()) {
+    return THRIFT_FLAG(rocket_frame_parser);
+  }
+  return FLAGS_plaintext_parser.empty() ? THRIFT_FLAG(rocket_frame_parser)
+                                        : FLAGS_plaintext_parser;
+}
+} // namespace apache::thrift::detail
 
 namespace apache::thrift::stress {
 

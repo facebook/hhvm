@@ -291,7 +291,7 @@ class DOMElement extends DOMNode {
     HH\FIXME\MISSING_PARAM_TYPE $value = null,
     HH\FIXME\MISSING_PARAM_TYPE $namespaceuri = null,
   );
-  public function getAttribute(string $name): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getAttribute(string $name): string;
   public function getAttributeNode(string $name): HH\FIXME\MISSING_RETURN_TYPE;
   public function getAttributeNodeNS(
     string $namespaceuri,

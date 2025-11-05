@@ -199,13 +199,29 @@ metadata::ThriftStruct expectedStruct() {
   field.type()->t_primitive() = metadata::ThriftPrimitiveType::THRIFT_I32_TYPE;
   field.structured_annotations() = expectedAnnotations();
   ret.fields()->push_back(field);
+  ret.structured_annotations() = expectedAnnotations();
   return ret;
 }
 
-TEST(Annotations, Field) {
+metadata::ThriftException expectedException() {
+  metadata::ThriftException ret;
+  ret.name() = "annotations.TestException";
+  ret.fields() = *expectedStruct().fields();
+  ret.fields()[1].structured_annotations()->clear();
+  ret.structured_annotations() = expectedAnnotations();
+  return ret;
+}
+
+TEST(Annotations, Struct) {
   metadata::ThriftMetadata md;
   detail::md::StructMetadata<TestStruct>::gen(md);
   EXPECT_EQ(md.structs()["annotations.TestStruct"], expectedStruct());
+}
+
+TEST(Annotations, Exception) {
+  metadata::ThriftMetadata md;
+  detail::md::ExceptionMetadata<TestException>::gen(md);
+  EXPECT_EQ(md.exceptions()["annotations.TestException"], expectedException());
 }
 
 } // namespace apache::thrift::test

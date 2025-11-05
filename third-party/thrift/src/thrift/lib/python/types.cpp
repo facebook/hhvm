@@ -496,7 +496,8 @@ UniquePyObjectPtr getStandardDefaultValueForType(
       ptr = Variant == PythonVariant::Mutable ? PyList_New(0) : PyTuple_New(0);
       break;
     case protocol::TType::T_MAP:
-      ptr = Variant == PythonVariant::Mutable ? PyDict_New() : PyTuple_New(0);
+      ptr = Variant == PythonVariant::Mutable ? PyDict_New()
+                                              : ImmutableInternalDict_New();
       break;
     case protocol::TType::T_SET:
       // For sets, the default value is an empty `frozenset`.
@@ -1247,6 +1248,11 @@ PyObject* createUnionDataHolder() {
 
 } // namespace
 
+PyObject* ImmutableInternalDict_New() {
+  ensureImportOrThrow();
+  return createImmutableInternalMap();
+}
+
 // DO_BEFORE(aristidis,20240920): For consistency, rename method to
 // createImmutableUnionDataHolder() - and update references.
 PyObject* createUnionTuple() {
@@ -1600,14 +1606,20 @@ void SetTypeInfo_consumeElem(
   Py_SET_REFCNT(*pyObjPtr, currentRefCnt);
 }
 
+void* ImmutableMapHandler::clear(void* object) {
+  if (!setPyObject(object, UniquePyObjectPtr{ImmutableInternalDict_New()})) {
+    THRIFT_PY3_CHECK_ERROR();
+  }
+  return object;
+}
+
 void ImmutableMapHandler::read(
     const void* context,
     void* objectPtr,
     std::uint32_t mapSize,
     void (*keyReader)(const void* context, void* key),
     void (*valueReader)(const void* context, void* val)) {
-  // use a tuple to represent a map for immutablitity and hashability
-  UniquePyObjectPtr map{PyTuple_New(mapSize)};
+  UniquePyObjectPtr map{ImmutableInternalDict_New()};
   if (!map) {
     THRIFT_PY3_CHECK_ERROR();
   }
@@ -1619,13 +1631,9 @@ void ImmutableMapHandler::read(
   for (std::uint32_t i = 0; i < mapSize; ++i) {
     UniquePyObjectPtr mkey = read(keyReader);
     UniquePyObjectPtr mvalue = read(valueReader);
-    UniquePyObjectPtr elem{PyTuple_New(2)};
-    if (!elem) {
+    if (PyDict_SetItem(map.get(), mkey.get(), mvalue.get()) == -1) {
       THRIFT_PY3_CHECK_ERROR();
     }
-    PyTuple_SET_ITEM(elem.get(), 0, mkey.release());
-    PyTuple_SET_ITEM(elem.get(), 1, mvalue.release());
-    PyTuple_SET_ITEM(map.get(), i, elem.release());
   }
   setPyObject(objectPtr, std::move(map));
 }
@@ -1661,11 +1669,11 @@ size_t ImmutableMapHandler::writeUnsorted(
         const void* context, const void* keyElem, const void* valueElem)) {
   size_t written = 0;
   PyObject* map = const_cast<PyObject*>(toPyObject(object));
-  const Py_ssize_t size = PyTuple_GET_SIZE(map);
-  for (std::uint32_t i = 0; i < size; ++i) {
-    PyObject* pair = PyTuple_GET_ITEM(map, i);
-    PyObject* key = PyTuple_GET_ITEM(pair, 0);
-    PyObject* value = PyTuple_GET_ITEM(pair, 1);
+  PyObject* key = nullptr;
+  PyObject* value = nullptr;
+  Py_ssize_t pos = 0;
+
+  while (PyDict_Next(map, &pos, &key, &value)) {
     written += writer(context, &key, &value);
   }
   return written;
@@ -1677,22 +1685,20 @@ void ImmutableMapHandler::consumeElem(
     void (*keyReader)(const void* context, void* key),
     void (*valueReader)(const void* context, void* val)) {
   PyObject** pyObjPtr = toPyObjectPtr(objectPtr);
-  CHECK_NOTNULL(*pyObjPtr);
+  DCHECK(*pyObjPtr != nullptr);
   PyObject* mkey = nullptr;
   keyReader(context, &mkey);
+  DCHECK(mkey != nullptr);
   PyObject* mval = nullptr;
   valueReader(context, &mval);
-  UniquePyObjectPtr elem{PyTuple_New(2)};
-  if (!elem) {
+  DCHECK(mval != nullptr);
+
+  const int setResult = PyDict_SetItem(*pyObjPtr, mkey, mval);
+  Py_DECREF(mkey);
+  Py_DECREF(mval);
+  if (setResult == -1) {
     THRIFT_PY3_CHECK_ERROR();
   }
-  PyTuple_SET_ITEM(elem.get(), 0, mkey);
-  PyTuple_SET_ITEM(elem.get(), 1, mval);
-  const Py_ssize_t currentSize = PyTuple_GET_SIZE(*pyObjPtr);
-  if (_PyTuple_Resize(pyObjPtr, currentSize + 1) == -1) {
-    THRIFT_PY3_CHECK_ERROR();
-  }
-  PyTuple_SET_ITEM(*pyObjPtr, currentSize, elem.release());
 }
 
 void MutableMapHandler::read(

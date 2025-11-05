@@ -694,24 +694,22 @@ class MapTypeInfoImpl final : public MapTypeInfoBase {
 class ImmutableMapHandler {
  public:
   static int64_t size(const PyObject* object) {
-    return PyTuple_GET_SIZE(object);
+    return PyDict_Size(const_cast<PyObject*>(object));
   }
 
   // Result is used by writeMapSorted as input to PySequence_list
-  // Since immutable map representation is tuple, this is a no-op.
   // Since maps can't have duplicate keys, the value (second value in tuple)
   // will never be used for comparison, only the first value of each.
-  static UniquePyObjectPtr toItemList(PyObject* dictTuple) {
-    // copy the tuple of key-value pairs into list of key-value pairs
-    PyObject* list = PySequence_List(dictTuple);
-    if (!list) {
+  // Returns sortable list of key-value pairs from dict
+  static UniquePyObjectPtr toItemList(PyObject* dict) {
+    PyObject* itemList = PyDict_Items(dict);
+    if (itemList == nullptr) {
       THRIFT_PY3_CHECK_ERROR();
     }
-    // the UniquePyObjectPtr will free the list when done
-    return UniquePyObjectPtr(list);
+    return UniquePyObjectPtr(itemList);
   }
 
-  static void* clear(void* object) { return setContainer(object); }
+  static void* clear(void* object);
 
   static void read(
       const void* context,
@@ -1005,6 +1003,8 @@ std::unique_ptr<Base> make_unique_base(Args&&... args) {
  *   * -1: Python error (not a float, or not convertible to float)
  */
 int16_t pyFloatIsFloat32(PyObject* obj);
+
+PyObject* ImmutableInternalDict_New();
 
 namespace capi {
 /**

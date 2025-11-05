@@ -36,6 +36,7 @@ import cython
 import enum
 import itertools
 import typing
+import types
 
 from folly cimport cFollyIsDebug
 from thrift.python.exceptions cimport GeneratedError
@@ -371,7 +372,7 @@ cdef class Float32TypeInfo(TypeInfoBase):
     cpdef to_internal_data(self, object value):
         cdef type value_type = type(value)
         if value_type is float:
-            # avoid creating new `float` py object if already 
+            # avoid creating new `float` py object if already
             # representable as float32 without rounding
             if pyFloatIsFloat32(value):
                 return value
@@ -695,6 +696,9 @@ cdef to_container_elements_no_convert(type_info):
         or type_info is typeinfo_float_legacy
     )
 
+cdef to_map_elements_no_convert(key_type_info, value_type_info):
+    return (to_container_elements_no_convert(key_type_info) and
+        to_container_elements_no_convert(value_type_info))
 
 @_cython__final
 cdef class ListTypeInfo(TypeInfoBase):
@@ -881,12 +885,20 @@ cdef class MapTypeInfo(TypeInfoBase):
 
         return self.to_internal_from_values(value)
 
-    # convert deserialized data to user format
     cpdef to_python_value(self, object value):
         cdef Map inst = Map.__new__(Map)
         inst._fbthrift_key_info = self.key_info
         inst._fbthrift_val_info = self.val_info
-        inst._fbthrift_elements = self.to_python_from_values(value)
+
+        # Elements need no conversion (e.g., int, float, double, binary):
+        # Pass dict as MappingProxyType directly, no conversion needed.
+        if to_map_elements_no_convert(self.key_info, self.val_info):
+            inst._fbthrift_elements = types.MappingProxyType(value)
+        # Elements need conversion (e.g., structs, unions, containers):
+        # Convert internal dict values to proper Python types.
+        else:
+            inst._fbthrift_elements = self.to_python_from_values(value)
+
         return inst
 
     def to_container_value(self, object value not None):
@@ -897,22 +909,21 @@ cdef class MapTypeInfo(TypeInfoBase):
     cdef to_internal_from_values(self, object values):
         cdef TypeInfoBase key_type_info = self.key_info
         cdef TypeInfoBase val_type_info = self.val_info
-        cdef int idx = 0
-        cdef tuple tpl = PyTuple_New(len(values))
-        for idx, (key, value) in enumerate(values.items()):
+        cdef ImmutableInternalMap internal_dict = ImmutableInternalMap({})
+
+        for key, value in values.items():
             internal_key_data = key_type_info.to_internal_data(key)
             internal_value_data = val_type_info.to_internal_data(value)
-            internal_data = (internal_key_data, internal_value_data)
-            Py_INCREF(internal_data)
-            PyTuple_SET_ITEM(tpl, idx, internal_data)
+            internal_dict[internal_key_data] = internal_value_data
 
-        return tpl
+        return internal_dict
 
     cdef to_python_from_values(self, object values):
         cdef TypeInfoBase key_type_info = self.key_info
         cdef TypeInfoBase val_type_info = self.val_info
         return {
-            key_type_info.to_python_value(k): val_type_info.to_python_value(v) for k, v in values
+            key_type_info.to_python_value(k): val_type_info.to_python_value(v)
+            for k, v in (<dict>values).items()
         }
 
     def same_as(MapTypeInfo self, other):
@@ -2457,6 +2468,16 @@ cdef class MapTypeFactory:
             values = {}
         return Map(self.key_info, self.val_info, values)
 
+cdef public api object createImmutableInternalMap():
+    return ImmutableInternalMap({})
+
+@_cython__final
+cdef class ImmutableInternalMap(dict):
+    def __init__(self, dict_data):
+        self.update(dict_data)
+
+    def __hash__(self):
+        return hash(tuple(self.items()))
 
 cdef class Map(Container):
     """

@@ -327,13 +327,13 @@ struct Extractor<map<KeyT, ValT, CppT>>
   using map_t = map<KeyT, ValT, CppT>;
   ExtractorResult<map_t> operator()(PyObject* obj) {
     if constexpr (folly::kIsDebug) {
-      if (PyTuple_Check(obj) != 1) {
-        PyErr_SetString(PyExc_TypeError, CAPI_LOCATED_ERROR("Not a tuple"));
-        return EXTRACTOR_ERROR(map_t, "Not a tuple");
+      if (PyDict_Check(obj) != 1) {
+        PyErr_SetString(PyExc_TypeError, CAPI_LOCATED_ERROR("Not a dict"));
+        return EXTRACTOR_ERROR(map_t, "Not a dict");
       }
     }
     CppT ret;
-    Py_ssize_t size = PyTuple_GET_SIZE(obj);
+    Py_ssize_t size = PyDict_Size(obj);
     if (size == 0) {
       return ret;
     }
@@ -343,15 +343,18 @@ struct Extractor<map<KeyT, ValT, CppT>>
     }
     Extractor<KeyT> key_extractor;
     Extractor<ValT> val_extractor;
-    for (Py_ssize_t i = 0; i < size; ++i) {
-      // Note PyTuple_GET_ITEM returns a borrowed reference
-      auto kv_tuple = PyTuple_GET_ITEM(obj, i);
-      auto key = key_extractor(PyTuple_GET_ITEM(kv_tuple, 0));
+    PyObject* dict_key = nullptr;
+    PyObject* dict_value = nullptr;
+    Py_ssize_t pos = 0;
+
+    // note PyDict_Next returns a borrowed reference
+    while (PyDict_Next(obj, &pos, &dict_key, &dict_value)) {
+      auto key = key_extractor(dict_key);
       if (!key.hasValue()) {
         // Extraction failed. Abort
         return extractorError<map_t>(key.error());
       }
-      auto val = val_extractor(PyTuple_GET_ITEM(kv_tuple, 1));
+      auto val = val_extractor(dict_value);
       if (!val.hasValue()) {
         // Extraction failed. Abort
         return extractorError<map_t>(val.error());
@@ -368,21 +371,25 @@ struct Extractor<map<KeyT, ValT, CppT>>
   }
 
   int typeCheck(PyObject* obj) {
-    if (PyTuple_Check(obj) != 1) {
+    if (PyDict_Check(obj) != 1) {
       return 0;
     }
-    const Py_ssize_t size = PyTuple_GET_SIZE(obj);
+    const Py_ssize_t size = PyDict_Size(obj);
     // Just check the first element given type checking inherent in
     // thrift-python struct construction; thrift consts
     if (size == 0) {
       return 1;
     }
-    PyObject* front_kv = PyTuple_GET_ITEM(obj, 0);
-    if (!front_kv) {
+    PyObject* dict_key = nullptr;
+    PyObject* dict_value = nullptr;
+    Py_ssize_t pos = 0;
+
+    if (!PyDict_Next(obj, &pos, &dict_key, &dict_value)) {
       return 0;
     }
-    return Extractor<KeyT>{}.typeCheck(PyTuple_GET_ITEM(front_kv, 0)) &&
-        Extractor<ValT>{}.typeCheck(PyTuple_GET_ITEM(front_kv, 1));
+
+    return Extractor<KeyT>{}.typeCheck(dict_key) &&
+        Extractor<ValT>{}.typeCheck(dict_value);
   }
 };
 

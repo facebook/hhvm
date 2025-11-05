@@ -24,6 +24,7 @@
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp2/FieldRefTraits.h>
 #include <thrift/lib/python/capi/types.h>
+#include <thrift/lib/python/types.h>
 
 namespace apache::thrift::python::capi {
 /**
@@ -223,14 +224,13 @@ template <typename KeyT, typename ValT, typename CppT>
 struct Constructor<map<KeyT, ValT, CppT>>
     : public BaseConstructor<map<KeyT, ValT, CppT>> {
   PyObject* FOLLY_NULLABLE operator()(const CppT& cpp_map) {
-    StrongRef dict(PyTuple_New(cpp_map.size()));
+    StrongRef dict(ImmutableInternalDict_New());
     if (!dict) {
       return nullptr;
     }
     Constructor<KeyT> key_ctor{};
     Constructor<ValT> val_ctor{};
     auto it = cpp_map.begin();
-    size_t idx = 0;
     while (it != cpp_map.end()) {
       StrongRef key(key_ctor(it->first));
       if (!key) {
@@ -243,14 +243,10 @@ struct Constructor<map<KeyT, ValT, CppT>>
         // StrongRef DECREFs the dict and key on scope exit
         return nullptr;
       }
-      PyObject* kv_tuple = PyTuple_New(2);
-      if (kv_tuple == nullptr) {
+      // PyDict_SetItem borrows key and val, so we don't release them.
+      if (PyDict_SetItem(*dict, *key, *val) == -1) {
         return nullptr;
       }
-      // PyTuple_SET_ITEM steals, so have to release StrongRefs
-      PyTuple_SET_ITEM(kv_tuple, 0, std::move(key).release());
-      PyTuple_SET_ITEM(kv_tuple, 1, std::move(val).release());
-      PyTuple_SET_ITEM(*dict, idx++, kv_tuple);
     }
     return std::move(dict).release();
   }

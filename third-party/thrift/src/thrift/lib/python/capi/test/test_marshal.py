@@ -20,6 +20,8 @@ import unittest
 from sys import float_info, getrefcount
 from typing import Callable
 
+import thrift.python.types  # noqa: F401
+
 from folly.iobuf import IOBuf
 from thrift.python.marshal import marshal_fixture as fixture
 from thrift.python.marshal.marshal_fixture import (
@@ -339,10 +341,10 @@ class TestMarshalMap(MarshalFixture):
         false_refcount = getrefcount(False)
 
         def make_dict():
-            return tuple((x, x % 2 == 0) for x in [INT32_MIN, -1, 0, INT32_MAX])
+            return {x: x % 2 == 0 for x in [INT32_MIN, -1, 0, INT32_MAX]}
 
         self.assertEqual(make_dict(), fixture.roundtrip_int32_bool_map(make_dict()))
-        self.assertEqual((), fixture.roundtrip_int32_bool_map(()))
+        self.assertEqual({}, fixture.roundtrip_int32_bool_map({}))
         # no leaks!
         self.assertEqual(nil_refcount, getrefcount(0))
         self.assertEqual(int_refcount, getrefcount(-1))
@@ -356,10 +358,10 @@ class TestMarshalMap(MarshalFixture):
         ace_refcount = getrefcount(1)
 
         def make_dict():
-            return tuple((x, x / 13.0) for x in [INT8_MIN, -1, 0, 1, INT8_MAX])
+            return {x: x / 13.0 for x in [INT8_MIN, -1, 0, 1, INT8_MAX]}
 
         self.assertEqual(make_dict(), fixture.roundtrip_byte_float_map(make_dict()))
-        self.assertEqual((), fixture.roundtrip_byte_float_map(()))
+        self.assertEqual({}, fixture.roundtrip_byte_float_map({}))
         # no leaks!
         self.assertEqual(nil_refcount, getrefcount(0))
         self.assertEqual(int_refcount, getrefcount(-1))
@@ -372,16 +374,10 @@ class TestMarshalMap(MarshalFixture):
         ace_refcount = getrefcount(1)
 
         def make_dict():
-            return ((b"", -1), (b"asdfwe", 0), (b"wdfwe", 1))
+            return {b"": -1, b"asdfwe": 0, b"wdfwe": 1}
 
-        # This fixture uses F14FastMap to exercise the path for containers that don't
-        # provide extract(). F14FastMap iter uses LIFO order for better erase semantics
-        # and speed, thereby reversing the ordering
-        self.assertEqual(
-            make_dict(),
-            tuple(reversed(fixture.roundtrip_bytes_key_map(make_dict()))),
-        )
-        self.assertEqual((), fixture.roundtrip_bytes_key_map(()))
+        self.assertEqual(make_dict(), fixture.roundtrip_bytes_key_map(make_dict()))
+        self.assertEqual({}, fixture.roundtrip_bytes_key_map({}))
 
         # no leaks!
         self.assertEqual(nil_refcount, getrefcount(0))
@@ -395,10 +391,10 @@ class TestMarshalMap(MarshalFixture):
         ace_refcount = getrefcount(1)
 
         def make_dict():
-            return ((-1, b""), (0, b"asdfwe"), (1, b"wdfwe"))
+            return {-1: b"", 0: b"asdfwe", 1: b"wdfwe"}
 
         self.assertEqual(make_dict(), fixture.roundtrip_bytes_val_map(make_dict()))
-        self.assertEqual((), fixture.roundtrip_bytes_val_map(()))
+        self.assertEqual({}, fixture.roundtrip_bytes_val_map({}))
 
         # no leaks!
         self.assertEqual(nil_refcount, getrefcount(0))
@@ -412,10 +408,10 @@ class TestMarshalMap(MarshalFixture):
         ace_refcount = getrefcount(1)
 
         def make_dict():
-            return (("", -1), ("asdfwe", 0), ("wdfwe", 1))
+            return {"": -1, "asdfwe": 0, "wdfwe": 1}
 
         self.assertEqual(make_dict(), fixture.roundtrip_unicode_key_map(make_dict()))
-        self.assertEqual((), fixture.roundtrip_unicode_key_map(()))
+        self.assertEqual({}, fixture.roundtrip_unicode_key_map({}))
 
         # no leaks!
         self.assertEqual(nil_refcount, getrefcount(0))
@@ -430,16 +426,13 @@ class TestMarshalMap(MarshalFixture):
         empty_refcount = getrefcount("")
 
         def make_dict():
-            return ((-1, ""), (0, "asdfwe"), (1, "wdfwe"))
+            return {-1: "", 0: "asdfwe", 1: "wdfwe"}
 
-        # This fixture uses F14FastMap to exercise the path for containers that don't
-        # provide extract(). F14FastMap iter uses LIFO order for better erase semantics
-        # and speed, thereby reversing the ordering
         self.assertEqual(
             make_dict(),
-            tuple(reversed(fixture.roundtrip_unicode_val_map(make_dict()))),
+            fixture.roundtrip_unicode_val_map(make_dict()),
         )
-        self.assertEqual((), fixture.roundtrip_unicode_val_map(()))
+        self.assertEqual({}, fixture.roundtrip_unicode_val_map({}))
 
         # no leaks!
         self.assertEqual(nil_refcount, getrefcount(0))
@@ -447,7 +440,7 @@ class TestMarshalMap(MarshalFixture):
         self.assertEqual(ace_refcount, getrefcount(1))
 
         with self.assertRaises(UnicodeDecodeError):
-            fixture.make_unicode_val_map(((-1, b""), (0, b"a"), (1, b"\xe2\x82")))
+            fixture.make_unicode_val_map({-1: b"", 0: b"a", 1: b"\xe2\x82"})
 
         self.assertEqual(nil_refcount, getrefcount(0))
         self.assertEqual(int_refcount, getrefcount(-1))

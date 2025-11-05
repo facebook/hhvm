@@ -1,16 +1,2 @@
 ERROR: File "self_static_method_call.php", line 13, characters 28-43:
-Static method calls in expression trees require explicit class names. (Parsing[1002])
-ERROR: File "self_static_method_call.php", line 13, characters 28-43:
-Invalid return type (Typing[4110])
-  File "expr_tree.php", line 86, characters 21-26:
-  Expected `string`
-  File "expr_tree.php", line 99, characters 28-43:
-    resulting from expanding the type constant `ExampleDsl::TAst`
-  File "self_static_method_call.php", line 8, characters 6-89:
-  But got `Awaitable<ExampleExpression<ExampleFunction<(function(string): int)>>>`
-ERROR: File "self_static_method_call.php", line 13, characters 38-42:
-Invalid argument (Typing[4110])
-  File "self_static_method_call.php", line 7, characters 5-18:
-  Expected `ExampleContext`
-  File "self_static_method_call.php", line 13, characters 38-42:
-  But got `string`
+Expression trees only support static method calls on `static` and named classes. (Parsing[1002])

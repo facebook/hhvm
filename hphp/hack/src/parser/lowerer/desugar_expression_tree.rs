@@ -113,7 +113,6 @@ pub fn desugar(
         static_method_pointers: vec![],
         errors: vec![],
         contains_spliced_await: false,
-        codegen: env.codegen,
     };
     let rewritten_expr = state.rewrite_expr(e, visitor_name);
 
@@ -773,7 +772,6 @@ struct RewriteState {
     static_method_pointers: Vec<Expr>,
     errors: Vec<(Pos, String)>,
     contains_spliced_await: bool,
-    codegen: oxidized::namespace_env::Mode,
 }
 
 impl RewriteState {
@@ -1223,44 +1221,20 @@ impl RewriteState {
                     // Virtualized: (MyDsl::symbolType($0smXX)->__unwrap())()
                     // Desugared: $0v->visitCall(new ExprPos(...), $0v->visitStaticMethod(new ExprPos(...), $0smXX, vec[])
                     ClassConst(box (cid, s)) => {
-                        match self.codegen {
-                            oxidized::namespace_env::Mode::ForTypecheck => {
-                                if let ClassId_::CIexpr(Expr(_, _, Id(sid))) = &cid.2 {
-                                    if sid.1 == classes::PARENT
-                                        || sid.1 == classes::SELF
-                                        || sid.1 == classes::STATIC
-                                    {
-                                        self.errors.push((
-                                            pos,
-                                            "Static method calls in expression trees require explicit class names.".into(),
-                                        ));
-                                        return unchanged_result;
-                                    }
-                                } else {
-                                    self.errors.push((
-                                        pos,
-                                        "Expression trees only support function calls and static method calls on named classes.".into(),
-                                    ));
-                                    return unchanged_result;
-                                };
-                            }
-                            oxidized::namespace_env::Mode::ForCodegen => {
-                                let is_supported = match &cid {
-                                    ClassId(
-                                        _,
-                                        _,
-                                        ClassId_::CIexpr(Expr(_, _, Id(box ast_defs::Id(_, name)))),
-                                    ) => name != classes::PARENT && name != classes::SELF,
-                                    _ => false,
-                                };
+                        let is_supported = match &cid {
+                            ClassId(
+                                _,
+                                _,
+                                ClassId_::CIexpr(Expr(_, _, Id(box ast_defs::Id(_, name)))),
+                            ) => name != classes::PARENT && name != classes::SELF,
+                            _ => false,
+                        };
 
-                                if !is_supported {
-                                    self.errors.push((
-                                        pos.clone(),
-                                        "Expression trees only support static method calls on `static` and named classes.".into(),
-                                    ));
-                                }
-                            }
+                        if !is_supported {
+                            self.errors.push((
+                                pos.clone(),
+                                "Expression trees only support static method calls on `static` and named classes.".into(),
+                            ));
                         }
 
                         let len = self.static_method_pointers.len();
@@ -1717,46 +1691,19 @@ impl RewriteState {
             // Virtualized: ${MyClass::FOO}
             // Desugared: $0v->visitClassConstant(new ExprPos(...), nameof MyClass, 'FOO', MyClass::FOO)
             ClassConst(box (cid, s)) => {
-                match self.codegen {
-                    oxidized::namespace_env::Mode::ForTypecheck => {
-                        let is_supported = match &cid {
-                            ClassId(
-                                _,
-                                _,
-                                ClassId_::CIexpr(Expr(_, _, Id(box ast_defs::Id(_, name)))),
-                            ) => {
-                                name != classes::PARENT
-                                    && name != classes::SELF
-                                    && name != classes::STATIC
-                            }
-                            _ => false,
-                        };
-
-                        if !is_supported {
-                            self.errors.push((
-                                pos.clone(),
-                                "Expression trees only support constants on named classes.".into(),
-                            ));
-                        }
+                let is_supported = match &cid {
+                    ClassId(_, _, ClassId_::CIexpr(Expr(_, _, Id(box ast_defs::Id(_, name))))) => {
+                        name != classes::PARENT && name != classes::SELF
                     }
-                    oxidized::namespace_env::Mode::ForCodegen => {
-                        let is_supported = match &cid {
-                            ClassId(
-                                _,
-                                _,
-                                ClassId_::CIexpr(Expr(_, _, Id(box ast_defs::Id(_, name)))),
-                            ) => name != classes::PARENT && name != classes::SELF,
-                            _ => false,
-                        };
+                    _ => false,
+                };
 
-                        if !is_supported {
-                            self.errors.push((
-                                pos.clone(),
-                                "Expression trees only support constants on `static` and named classes."
-                                    .into(),
-                            ));
-                        }
-                    }
+                if !is_supported {
+                    self.errors.push((
+                        pos.clone(),
+                        "Expression trees only support constants on `static` and named classes."
+                            .into(),
+                    ));
                 }
 
                 let class_const = Expr::new(

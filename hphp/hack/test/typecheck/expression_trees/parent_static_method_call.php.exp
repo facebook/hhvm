@@ -1,16 +1,4 @@
 ERROR: File "parent_static_method_call.php", line 15, characters 28-45:
-Static method calls in expression trees require explicit class names. (Parsing[1002])
-ERROR: File "parent_static_method_call.php", line 15, characters 28-45:
-Invalid return type (Typing[4110])
-  File "expr_tree.php", line 86, characters 21-26:
-  Expected `string`
-  File "expr_tree.php", line 99, characters 28-43:
-    resulting from expanding the type constant `ExampleDsl::TAst`
-  File "parent_static_method_call.php", line 8, characters 6-89:
-  But got `Awaitable<ExampleExpression<ExampleFunction<(function(string): int)>>>`
-ERROR: File "parent_static_method_call.php", line 15, characters 40-44:
-Invalid argument (Typing[4110])
-  File "parent_static_method_call.php", line 7, characters 5-18:
-  Expected `ExampleContext`
-  File "parent_static_method_call.php", line 15, characters 40-44:
-  But got `string`
+Expression trees only support static method calls on `static` and named classes. (Parsing[1002])
+ERROR: File "parent_static_method_call.php", line 15, characters 28-33:
+Cannot use `parent::` in a function pointer due to class context ambiguity. Consider using `MyParent::bar` instead (Naming[2112])

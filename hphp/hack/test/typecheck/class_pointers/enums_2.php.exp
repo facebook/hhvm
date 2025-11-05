@@ -20,7 +20,7 @@ Invalid argument (Typing[4110])
   Expected `class<HH\BuiltinEnum<int>>`
   File "enums_2.php", line 25, characters 5-12:
   But got `string`
-  File "classname.hhi", line 21, characters 28-38:
+  File "enums_2.php", line 25, characters 5-12:
     by the definition of `classname`
-  File "classname.hhi", line 14, characters 27-32:
+  File "enums_2.php", line 25, characters 5-12:
     by the definition of `typename`

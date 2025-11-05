@@ -157,40 +157,40 @@ bool find_hugetlbfs_path() {
 }
 
 HugePageInfo read_hugepage_info(size_t pagesize, int node /* = -1 */) {
-  unsigned nr_huge = 0, free_huge = 0, nr_overcommit = 0;
+  unsigned nr_huge = 0, free_huge = 0;
   if (pagesize != size2m && pagesize != size1g) { // only 2M and 1G supported
     return HugePageInfo{0, 0};
   }
 #ifdef __linux__
-  if (node >= 0) {
-    auto const readNumFrom = [] (const char* path) {
-      unsigned result = 0;
-      char buffer[32];
-      memset(buffer, 0, sizeof(buffer));
-      int fd = open(path, O_RDONLY);
-      if (fd < 0) return result;
-      bool done = false;
-      do {
-        ssize_t bytes = read(fd, buffer, 20);
-        if (bytes == 0) break;          // EOF
-        if (bytes < 0) {
-          if (errno == EINTR) continue; // try again
-          break;                        // totally failed
+  auto const readNumFrom = [](const char* path) {
+    unsigned result = 0;
+    char buffer[32];
+    memset(buffer, 0, sizeof(buffer));
+    int fd = open(path, O_RDONLY);
+    if (fd < 0) return result;
+    bool done = false;
+    do {
+      ssize_t bytes = read(fd, buffer, 20);
+      if (bytes == 0) break;          // EOF
+      if (bytes < 0) {
+        if (errno == EINTR) continue; // try again
+        break;                        // totally failed
+      }
+      for (ssize_t i = 0; i < bytes; ++i) {
+        char c = buffer[i];
+        // only read numbers, and stop on white space, etc.
+        if (c < '0' || c > '9') {
+          done = true;
+          break;
         }
-        for (ssize_t i = 0; i < bytes; ++i) {
-          char c = buffer[i];
-          // only read numbers, and stop on white space, etc.
-          if (c < '0' || c > '9') {
-            done = true;
-            break;
-          }
-          result = result * 10 + c - '0';
-        }
-      } while (!done);
-      close(fd);
-      return result;
-    };
+        result = result * 10 + c - '0';
+      }
+    } while (!done);
+    close(fd);
+    return result;
+  };
 
+  if (node >= 0) {
     char fileName[256];
     memcpy(fileName, "/sys/devices/system/node/node", 29);
     assert(strlen("/sys/devices/system/node/node") == 29);
@@ -216,11 +216,7 @@ HugePageInfo read_hugepage_info(size_t pagesize, int node /* = -1 */) {
     assert(strlen("free_hugepages") == 14); // extra \0 byte
     free_huge = readNumFrom(fileName);
 
-    memcpy(p, "nr_overcommit_hugepages", 24);
-    assert(strlen("nr_overcommit_hugepages") == 23); // extra \0 byte
-    nr_overcommit = readNumFrom(fileName);
-
-    return HugePageInfo{nr_huge + nr_overcommit, free_huge + nr_overcommit};
+    return HugePageInfo{nr_huge, free_huge};
   }
   // All nodes
 #ifdef HAVE_NUMA
@@ -234,6 +230,19 @@ HugePageInfo read_hugepage_info(size_t pagesize, int node /* = -1 */) {
     auto const info = read_hugepage_info(pagesize, i);
     nr_huge += info.nr_hugepages;
     free_huge += info.free_hugepages;
+  }
+  char* overcommit_path = nullptr;
+  if (pagesize == size1g) {
+    overcommit_path =
+    "/sys/kernel/mm/hugepages/hugepages-1048576kB/nr_overcommit_hugepages";
+  } else if (pagesize == size2m) {
+    overcommit_path =
+    "/sys/kernel/mm/hugepages/hugepages-2048kB/nr_overcommit_hugepages";
+  }
+  if (overcommit_path) {
+    unsigned nr_overcommit = readNumFrom(overcommit_path);
+    nr_huge += nr_overcommit;
+    free_huge += nr_overcommit;
   }
 #endif
   return HugePageInfo{nr_huge, free_huge};
@@ -480,7 +489,11 @@ int remap_interleaved_2m_pages(void* addr, size_t pages) {
 void* mmap_1g(void* addr, int node, bool map_fixed) {
 #ifdef __linux__
   if (s_num1GPages >= kMaxNum1GPages) return nullptr;
-  if (get_huge1g_info(node).free_hugepages <= 0) return nullptr;
+  if (get_huge1g_info(node).free_hugepages <= 0) {
+    if (numa_num_nodes > 1) return nullptr;
+    // We allow allocation from overcommit if there is only one node.
+    if (get_huge1g_info().free_hugepages <= 0) return nullptr;
+  }
   if (node >= 0 && !numa_node_allowed(node)) return nullptr;
 #ifdef HAVE_NUMA
   SavedNumaPolicy numaPolicy;

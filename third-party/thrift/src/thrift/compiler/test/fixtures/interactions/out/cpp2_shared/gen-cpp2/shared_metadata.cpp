@@ -34,7 +34,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::thrift::shared_interactions::DoSomethingResult>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::thrift::shared_interactions::DoSomethingResult>(metadata);
+  auto res = genStructMetadata<::thrift::shared_interactions::DoSomethingResult>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

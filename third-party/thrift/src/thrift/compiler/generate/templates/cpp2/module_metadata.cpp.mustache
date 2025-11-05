@@ -59,7 +59,7 @@ void EnumMetadata<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::gen(Thr
 {{#program:structs}}
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<{{struct:cpp_fullname}}>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<{{struct:cpp_fullname}}>(metadata);
+  auto res = genStructMetadata<{{struct:cpp_fullname}}>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

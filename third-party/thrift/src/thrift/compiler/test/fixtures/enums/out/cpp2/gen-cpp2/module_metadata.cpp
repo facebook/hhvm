@@ -73,7 +73,7 @@ void EnumMetadata<::test::fixtures::enums::MyBitmaskEnum2>::gen(ThriftMetadata& 
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::enums::SomeStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::enums::SomeStruct>(metadata);
+  auto res = genStructMetadata<::test::fixtures::enums::SomeStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -103,7 +103,7 @@ StructMetadata<::test::fixtures::enums::SomeStruct>::gen(ThriftMetadata& metadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::enums::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::enums::MyStruct>(metadata);
+  auto res = genStructMetadata<::test::fixtures::enums::MyStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

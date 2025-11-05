@@ -35,7 +35,7 @@ void EnumMetadata<::apache::thrift::test::MyEnum>::gen(ThriftMetadata& metadata)
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::StructWithDefaultStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::StructWithDefaultStruct>(metadata);
+  auto res = genStructMetadata<::apache::thrift::test::StructWithDefaultStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

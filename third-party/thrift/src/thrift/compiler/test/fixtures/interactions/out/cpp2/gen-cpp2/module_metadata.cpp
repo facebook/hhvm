@@ -54,7 +54,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::CustomException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::CustomException>(metadata);
+  auto res = genStructMetadata<::cpp2::CustomException>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -84,7 +84,7 @@ StructMetadata<::cpp2::CustomException>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::ShouldBeBoxed>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::ShouldBeBoxed>(metadata);
+  auto res = genStructMetadata<::cpp2::ShouldBeBoxed>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

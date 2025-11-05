@@ -35,7 +35,7 @@ void EnumMetadata<::a::different::ns::AnEnum>::gen(ThriftMetadata& metadata) {
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::a::different::ns::AStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::a::different::ns::AStruct>(metadata);
+  auto res = genStructMetadata<::a::different::ns::AStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -65,7 +65,7 @@ StructMetadata<::a::different::ns::AStruct>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::a::different::ns::AStructB>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::a::different::ns::AStructB>(metadata);
+  auto res = genStructMetadata<::a::different::ns::AStructB>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

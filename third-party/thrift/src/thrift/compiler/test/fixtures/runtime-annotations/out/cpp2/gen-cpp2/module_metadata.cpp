@@ -36,7 +36,7 @@ void EnumMetadata<::facebook::thrift::test::MyEnum>::gen(ThriftMetadata& metadat
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::MyAnnotation>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::MyAnnotation>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::MyAnnotation>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -48,7 +48,7 @@ StructMetadata<::facebook::thrift::test::MyAnnotation>::gen(ThriftMetadata& meta
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::MyStruct>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::MyStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -79,7 +79,7 @@ StructMetadata<::facebook::thrift::test::MyStruct>::gen(ThriftMetadata& metadata
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::MyUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::MyUnion>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::MyUnion>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -110,7 +110,7 @@ StructMetadata<::facebook::thrift::test::MyUnion>::gen(ThriftMetadata& metadata)
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::MyException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::MyException>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::MyException>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

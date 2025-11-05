@@ -59,7 +59,7 @@ void EnumMetadata<::facebook::ns::qwerty::AnEnumE>::gen(ThriftMetadata& metadata
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::ns::qwerty::SomeStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::ns::qwerty::SomeStruct>(metadata);
+  auto res = genStructMetadata<::facebook::ns::qwerty::SomeStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

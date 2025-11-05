@@ -45,7 +45,7 @@ void EnumMetadata<::facebook::thrift::test::Result>::gen(ThriftMetadata& metadat
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::CustomException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::CustomException>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::CustomException>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

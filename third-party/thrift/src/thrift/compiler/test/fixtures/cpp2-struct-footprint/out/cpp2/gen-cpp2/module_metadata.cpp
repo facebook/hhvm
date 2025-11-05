@@ -39,7 +39,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2_struct_footprint::SimpleStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2_struct_footprint::SimpleStruct>(metadata);
+  auto res = genStructMetadata<::cpp2_struct_footprint::SimpleStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -69,7 +69,7 @@ StructMetadata<::cpp2_struct_footprint::SimpleStruct>::gen(ThriftMetadata& metad
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2_struct_footprint::ComplexStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2_struct_footprint::ComplexStruct>(metadata);
+  auto res = genStructMetadata<::cpp2_struct_footprint::ComplexStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -99,7 +99,7 @@ StructMetadata<::cpp2_struct_footprint::ComplexStruct>::gen(ThriftMetadata& meta
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2_struct_footprint::Struct1>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2_struct_footprint::Struct1>(metadata);
+  auto res = genStructMetadata<::cpp2_struct_footprint::Struct1>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -109,7 +109,7 @@ StructMetadata<::cpp2_struct_footprint::Struct1>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2_struct_footprint::Struct2>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2_struct_footprint::Struct2>(metadata);
+  auto res = genStructMetadata<::cpp2_struct_footprint::Struct2>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -119,7 +119,7 @@ StructMetadata<::cpp2_struct_footprint::Struct2>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2_struct_footprint::Struct3>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2_struct_footprint::Struct3>(metadata);
+  auto res = genStructMetadata<::cpp2_struct_footprint::Struct3>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -129,7 +129,7 @@ StructMetadata<::cpp2_struct_footprint::Struct3>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2_struct_footprint::Struct4>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2_struct_footprint::Struct4>(metadata);
+  auto res = genStructMetadata<::cpp2_struct_footprint::Struct4>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -139,7 +139,7 @@ StructMetadata<::cpp2_struct_footprint::Struct4>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2_struct_footprint::Struct5>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2_struct_footprint::Struct5>(metadata);
+  auto res = genStructMetadata<::cpp2_struct_footprint::Struct5>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -149,7 +149,7 @@ StructMetadata<::cpp2_struct_footprint::Struct5>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2_struct_footprint::ExStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2_struct_footprint::ExStruct>(metadata);
+  auto res = genStructMetadata<::cpp2_struct_footprint::ExStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -179,7 +179,7 @@ StructMetadata<::cpp2_struct_footprint::ExStruct>::gen(ThriftMetadata& metadata)
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2_struct_footprint::TestUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2_struct_footprint::TestUnion>(metadata);
+  auto res = genStructMetadata<::cpp2_struct_footprint::TestUnion>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

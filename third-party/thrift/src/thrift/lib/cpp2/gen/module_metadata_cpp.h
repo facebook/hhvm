@@ -289,11 +289,13 @@ auto genEnumMetadata(metadata::ThriftMetadata& md, bool genAnnotations) {
 }
 
 GenMetadataResult<metadata::ThriftStruct> genStructMetadata(
-    metadata::ThriftMetadata& md, const syntax_graph::StructuredNode& node);
+    metadata::ThriftMetadata& md,
+    const syntax_graph::StructuredNode& node,
+    bool genAnnotations);
 
 template <class T>
-auto genStructMetadata(metadata::ThriftMetadata& md) {
-  return genStructMetadata(md, getNodeWithLock<T>());
+auto genStructMetadata(metadata::ThriftMetadata& md, bool genAnnotations) {
+  return genStructMetadata(md, getNodeWithLock<T>(), genAnnotations);
 }
 
 GenMetadataResult<metadata::ThriftException> genExceptionMetadata(
@@ -318,6 +320,14 @@ std::vector<syntax_graph::TypeRef> getAnnotationTypes(
 template <class T>
 auto getAnnotationTypes() {
   return getAnnotationTypes(getDefinitionNodeWithLock<T>().annotations());
+}
+
+std::vector<syntax_graph::TypeRef> getFieldAnnotationTypes(
+    const syntax_graph::StructuredNode& node, size_t position, std::int16_t id);
+
+template <class T>
+auto getFieldAnnotationTypes(size_t position, std::int16_t id) {
+  return getFieldAnnotationTypes(getNodeWithLock<T>(), position, id);
 }
 
 // A Helper function to check whether two list of structured annotations have

@@ -34,7 +34,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::InitialResponse>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::InitialResponse>(metadata);
+  auto res = genStructMetadata<::cpp2::InitialResponse>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -64,7 +64,7 @@ StructMetadata<::cpp2::InitialResponse>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::FinalResponse>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::FinalResponse>(metadata);
+  auto res = genStructMetadata<::cpp2::FinalResponse>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -94,7 +94,7 @@ StructMetadata<::cpp2::FinalResponse>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::SinkPayload>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::SinkPayload>(metadata);
+  auto res = genStructMetadata<::cpp2::SinkPayload>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -124,7 +124,7 @@ StructMetadata<::cpp2::SinkPayload>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::CompatibleWithKeywordSink>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::CompatibleWithKeywordSink>(metadata);
+  auto res = genStructMetadata<::cpp2::CompatibleWithKeywordSink>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -154,7 +154,7 @@ StructMetadata<::cpp2::CompatibleWithKeywordSink>::gen(ThriftMetadata& metadata)
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::InitialException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::InitialException>(metadata);
+  auto res = genStructMetadata<::cpp2::InitialException>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -184,7 +184,7 @@ StructMetadata<::cpp2::InitialException>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::SinkException1>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::SinkException1>(metadata);
+  auto res = genStructMetadata<::cpp2::SinkException1>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -214,7 +214,7 @@ StructMetadata<::cpp2::SinkException1>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::SinkException2>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::SinkException2>(metadata);
+  auto res = genStructMetadata<::cpp2::SinkException2>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

@@ -29,7 +29,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -60,7 +60,7 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::any::detail::MyStru
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyUnion>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyUnion>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -90,7 +90,7 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyUnion>::gen(
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

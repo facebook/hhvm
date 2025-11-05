@@ -39,7 +39,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::EchoRequest>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::EchoRequest>(metadata);
+  auto res = genStructMetadata<::cpp2::EchoRequest>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -69,7 +69,7 @@ StructMetadata<::cpp2::EchoRequest>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::EchoResponse>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::EchoResponse>(metadata);
+  auto res = genStructMetadata<::cpp2::EchoResponse>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

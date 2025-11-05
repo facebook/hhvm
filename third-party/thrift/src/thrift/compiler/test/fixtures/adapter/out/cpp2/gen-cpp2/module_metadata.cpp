@@ -51,7 +51,7 @@ void EnumMetadata<::facebook::thrift::test::ThriftAdaptedEnum>::gen(ThriftMetada
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::MyAnnotation>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::MyAnnotation>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::MyAnnotation>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -83,7 +83,7 @@ StructMetadata<::facebook::thrift::test::MyAnnotation>::gen(ThriftMetadata& meta
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::Foo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::Foo>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::Foo>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -114,7 +114,7 @@ StructMetadata<::facebook::thrift::test::Foo>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::Baz>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::Baz>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::Baz>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -145,7 +145,7 @@ StructMetadata<::facebook::thrift::test::Baz>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::Bar>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::Bar>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::Bar>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -175,7 +175,7 @@ StructMetadata<::facebook::thrift::test::Bar>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::detail::DirectlyAdapted>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::detail::DirectlyAdapted>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::detail::DirectlyAdapted>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -207,7 +207,7 @@ StructMetadata<::facebook::thrift::test::detail::DirectlyAdapted>::gen(ThriftMet
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::detail::IndependentDirectlyAdapted>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::detail::IndependentDirectlyAdapted>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -238,7 +238,7 @@ StructMetadata<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::ge
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::StructWithFieldAdapter>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::StructWithFieldAdapter>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::StructWithFieldAdapter>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -268,7 +268,7 @@ StructMetadata<::facebook::thrift::test::StructWithFieldAdapter>::gen(ThriftMeta
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::TerseAdaptedFields>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::TerseAdaptedFields>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::TerseAdaptedFields>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -298,7 +298,7 @@ StructMetadata<::facebook::thrift::test::TerseAdaptedFields>::gen(ThriftMetadata
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::B>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::B>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::B>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -328,7 +328,7 @@ StructMetadata<::facebook::thrift::test::B>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::A>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::A>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::A>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -338,7 +338,7 @@ StructMetadata<::facebook::thrift::test::A>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::Config>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::Config>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::Config>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -372,7 +372,7 @@ StructMetadata<::facebook::thrift::test::Config>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::MyStruct>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::MyStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -403,7 +403,7 @@ StructMetadata<::facebook::thrift::test::MyStruct>::gen(ThriftMetadata& metadata
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::AdaptTestStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::AdaptTestStruct>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::AdaptTestStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -433,7 +433,7 @@ StructMetadata<::facebook::thrift::test::AdaptTestStruct>::gen(ThriftMetadata& m
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::AdaptTemplatedTestStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::AdaptTemplatedTestStruct>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::AdaptTemplatedTestStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -463,7 +463,7 @@ StructMetadata<::facebook::thrift::test::AdaptTemplatedTestStruct>::gen(ThriftMe
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -493,7 +493,7 @@ StructMetadata<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>::gen(Th
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::ThriftAdaptTestUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::ThriftAdaptTestUnion>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::ThriftAdaptTestUnion>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -524,7 +524,7 @@ StructMetadata<::facebook::thrift::test::ThriftAdaptTestUnion>::gen(ThriftMetada
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::ThriftAdaptedStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::ThriftAdaptedStruct>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::ThriftAdaptedStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -555,7 +555,7 @@ StructMetadata<::facebook::thrift::test::ThriftAdaptedStruct>::gen(ThriftMetadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::detail::DirectlyAdaptedStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::detail::DirectlyAdaptedStruct>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::detail::DirectlyAdaptedStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -586,7 +586,7 @@ StructMetadata<::facebook::thrift::test::detail::DirectlyAdaptedStruct>::gen(Thr
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::StructFieldAdaptedStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::StructFieldAdaptedStruct>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::StructFieldAdaptedStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -616,7 +616,7 @@ StructMetadata<::facebook::thrift::test::StructFieldAdaptedStruct>::gen(ThriftMe
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::CircularAdaptee>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::CircularAdaptee>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::CircularAdaptee>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -646,7 +646,7 @@ StructMetadata<::facebook::thrift::test::CircularAdaptee>::gen(ThriftMetadata& m
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::CircularStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::CircularStruct>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::CircularStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -676,7 +676,7 @@ StructMetadata<::facebook::thrift::test::CircularStruct>::gen(ThriftMetadata& me
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::ReorderedStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::ReorderedStruct>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::ReorderedStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -706,7 +706,7 @@ StructMetadata<::facebook::thrift::test::ReorderedStruct>::gen(ThriftMetadata& m
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::detail::DeclaredAfterStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::detail::DeclaredAfterStruct>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::detail::DeclaredAfterStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -717,7 +717,7 @@ StructMetadata<::facebook::thrift::test::detail::DeclaredAfterStruct>::gen(Thrif
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::UnderlyingRenamedStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::UnderlyingRenamedStruct>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::UnderlyingRenamedStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -748,7 +748,7 @@ StructMetadata<::facebook::thrift::test::UnderlyingRenamedStruct>::gen(ThriftMet
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::UnderlyingSameNamespaceStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::UnderlyingSameNamespaceStruct>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::UnderlyingSameNamespaceStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -779,7 +779,7 @@ StructMetadata<::facebook::thrift::test::UnderlyingSameNamespaceStruct>::gen(Thr
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::detail::HeapAllocated>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::detail::HeapAllocated>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::detail::HeapAllocated>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -790,7 +790,7 @@ StructMetadata<::facebook::thrift::test::detail::HeapAllocated>::gen(ThriftMetad
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::MoveOnly>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::MoveOnly>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::MoveOnly>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -820,7 +820,7 @@ StructMetadata<::facebook::thrift::test::MoveOnly>::gen(ThriftMetadata& metadata
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::AlsoMoveOnly>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::AlsoMoveOnly>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::AlsoMoveOnly>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -850,7 +850,7 @@ StructMetadata<::facebook::thrift::test::AlsoMoveOnly>::gen(ThriftMetadata& meta
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::ApplyAdapter>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::ApplyAdapter>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::ApplyAdapter>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -862,7 +862,7 @@ StructMetadata<::facebook::thrift::test::ApplyAdapter>::gen(ThriftMetadata& meta
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::detail::TransitiveAdapted>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::detail::TransitiveAdapted>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::detail::TransitiveAdapted>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -873,7 +873,7 @@ StructMetadata<::facebook::thrift::test::detail::TransitiveAdapted>::gen(ThriftM
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::CountingStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::CountingStruct>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::CountingStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -903,7 +903,7 @@ StructMetadata<::facebook::thrift::test::CountingStruct>::gen(ThriftMetadata& me
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::Person>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::Person>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::Person>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -935,7 +935,7 @@ StructMetadata<::facebook::thrift::test::Person>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::Person2>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::Person2>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::Person2>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -965,7 +965,7 @@ StructMetadata<::facebook::thrift::test::Person2>::gen(ThriftMetadata& metadata)
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::Renamed>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::Renamed>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::Renamed>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

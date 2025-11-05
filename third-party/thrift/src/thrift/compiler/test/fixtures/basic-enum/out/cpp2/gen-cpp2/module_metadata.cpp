@@ -54,7 +54,7 @@ void EnumMetadata<::test::fixtures::enumstrict::MyBigEnum>::gen(ThriftMetadata& 
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::enumstrict::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::enumstrict::MyStruct>(metadata);
+  auto res = genStructMetadata<::test::fixtures::enumstrict::MyStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

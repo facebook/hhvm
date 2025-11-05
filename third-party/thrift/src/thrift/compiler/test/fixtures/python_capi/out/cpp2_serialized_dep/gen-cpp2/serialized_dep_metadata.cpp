@@ -29,7 +29,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::SerializedStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::SerializedStruct>(metadata);
+  auto res = genStructMetadata<::test::fixtures::python_capi::SerializedStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -60,7 +60,7 @@ StructMetadata<::test::fixtures::python_capi::SerializedStruct>::gen(ThriftMetad
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::SerializedUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::SerializedUnion>(metadata);
+  auto res = genStructMetadata<::test::fixtures::python_capi::SerializedUnion>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -91,7 +91,7 @@ StructMetadata<::test::fixtures::python_capi::SerializedUnion>::gen(ThriftMetada
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::SerializedError>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::SerializedError>(metadata);
+  auto res = genStructMetadata<::test::fixtures::python_capi::SerializedError>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -122,7 +122,7 @@ StructMetadata<::test::fixtures::python_capi::SerializedError>::gen(ThriftMetada
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::MarshalStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::MarshalStruct>(metadata);
+  auto res = genStructMetadata<::test::fixtures::python_capi::MarshalStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -153,7 +153,7 @@ StructMetadata<::test::fixtures::python_capi::MarshalStruct>::gen(ThriftMetadata
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::MarshalUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::MarshalUnion>(metadata);
+  auto res = genStructMetadata<::test::fixtures::python_capi::MarshalUnion>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -184,7 +184,7 @@ StructMetadata<::test::fixtures::python_capi::MarshalUnion>::gen(ThriftMetadata&
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::MarshalError>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::MarshalError>(metadata);
+  auto res = genStructMetadata<::test::fixtures::python_capi::MarshalError>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

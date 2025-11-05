@@ -29,7 +29,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Default>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Default>(metadata);
+  auto res = genStructMetadata<::cpp2::Default>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -60,7 +60,7 @@ StructMetadata<::cpp2::Default>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::NonAtomic>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::NonAtomic>(metadata);
+  auto res = genStructMetadata<::cpp2::NonAtomic>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -91,7 +91,7 @@ StructMetadata<::cpp2::NonAtomic>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Atomic>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Atomic>(metadata);
+  auto res = genStructMetadata<::cpp2::Atomic>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -122,7 +122,7 @@ StructMetadata<::cpp2::Atomic>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::AtomicFoo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::AtomicFoo>(metadata);
+  auto res = genStructMetadata<::cpp2::AtomicFoo>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

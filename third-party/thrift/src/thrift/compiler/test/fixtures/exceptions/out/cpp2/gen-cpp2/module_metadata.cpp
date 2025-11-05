@@ -34,7 +34,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Fiery>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Fiery>(metadata);
+  auto res = genStructMetadata<::cpp2::Fiery>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -64,7 +64,7 @@ StructMetadata<::cpp2::Fiery>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Serious>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Serious>(metadata);
+  auto res = genStructMetadata<::cpp2::Serious>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -94,7 +94,7 @@ StructMetadata<::cpp2::Serious>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::ComplexFieldNames>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::ComplexFieldNames>(metadata);
+  auto res = genStructMetadata<::cpp2::ComplexFieldNames>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -124,7 +124,7 @@ StructMetadata<::cpp2::ComplexFieldNames>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::CustomFieldNames>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::CustomFieldNames>(metadata);
+  auto res = genStructMetadata<::cpp2::CustomFieldNames>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -154,7 +154,7 @@ StructMetadata<::cpp2::CustomFieldNames>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::ExceptionWithPrimitiveField>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::ExceptionWithPrimitiveField>(metadata);
+  auto res = genStructMetadata<::cpp2::ExceptionWithPrimitiveField>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -184,7 +184,7 @@ StructMetadata<::cpp2::ExceptionWithPrimitiveField>::gen(ThriftMetadata& metadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::ExceptionWithStructuredAnnotation>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::ExceptionWithStructuredAnnotation>(metadata);
+  auto res = genStructMetadata<::cpp2::ExceptionWithStructuredAnnotation>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -214,7 +214,7 @@ StructMetadata<::cpp2::ExceptionWithStructuredAnnotation>::gen(ThriftMetadata& m
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Banal>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Banal>(metadata);
+  auto res = genStructMetadata<::cpp2::Banal>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

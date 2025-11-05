@@ -29,7 +29,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Mixin1>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Mixin1>(metadata);
+  auto res = genStructMetadata<::cpp2::Mixin1>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -59,7 +59,7 @@ StructMetadata<::cpp2::Mixin1>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Mixin2>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Mixin2>(metadata);
+  auto res = genStructMetadata<::cpp2::Mixin2>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -89,7 +89,7 @@ StructMetadata<::cpp2::Mixin2>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Mixin3Base>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Mixin3Base>(metadata);
+  auto res = genStructMetadata<::cpp2::Mixin3Base>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -119,7 +119,7 @@ StructMetadata<::cpp2::Mixin3Base>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Foo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Foo>(metadata);
+  auto res = genStructMetadata<::cpp2::Foo>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

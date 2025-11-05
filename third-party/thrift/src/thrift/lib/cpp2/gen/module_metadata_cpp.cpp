@@ -307,7 +307,8 @@ GenMetadataResult<metadata::ThriftEnum> genEnumMetadata(
 template <class Metadata>
 static auto genStructuredInMetadataMap(
     const syntax_graph::StructuredNode& node,
-    std::map<std::string, Metadata>& metadataMap) {
+    std::map<std::string, Metadata>& metadataMap,
+    bool genAnnotations) {
   auto name = getName(node);
   auto res = metadataMap.try_emplace(name);
   GenMetadataResult<Metadata> ret{!res.second, res.first->second};
@@ -322,19 +323,25 @@ static auto genStructuredInMetadataMap(
     f.name() = field.name();
     f.is_optional() =
         (field.presence() == syntax_graph::FieldPresenceQualifier::OPTIONAL_);
+    if (genAnnotations) {
+      f.structured_annotations() =
+          genStructuredAnnotations(field.annotations());
+    }
   }
   // TODO: add other information
   return ret;
 }
 
 GenMetadataResult<metadata::ThriftStruct> genStructMetadata(
-    metadata::ThriftMetadata& md, const syntax_graph::StructuredNode& node) {
-  return genStructuredInMetadataMap(node, *md.structs());
+    metadata::ThriftMetadata& md,
+    const syntax_graph::StructuredNode& node,
+    bool genAnnotations) {
+  return genStructuredInMetadataMap(node, *md.structs(), genAnnotations);
 }
 
 GenMetadataResult<metadata::ThriftException> genExceptionMetadata(
     metadata::ThriftMetadata& md, const syntax_graph::ExceptionNode& node) {
-  return genStructuredInMetadataMap(node, *md.exceptions());
+  return genStructuredInMetadataMap(node, *md.exceptions(), false);
 }
 
 metadata::ThriftService genServiceMetadata(
@@ -357,6 +364,16 @@ std::vector<syntax_graph::TypeRef> getAnnotationTypes(
     ret.push_back(annotation.type());
   }
   return ret;
+}
+
+std::vector<syntax_graph::TypeRef> getFieldAnnotationTypes(
+    const syntax_graph::StructuredNode& node,
+    size_t position,
+    std::int16_t id) {
+  DCHECK_LT(position, node.fields().size());
+  const auto& field = node.fields()[position];
+  DCHECK_EQ(static_cast<std::int16_t>(field.id()), id);
+  return getAnnotationTypes(field.annotations());
 }
 
 namespace {

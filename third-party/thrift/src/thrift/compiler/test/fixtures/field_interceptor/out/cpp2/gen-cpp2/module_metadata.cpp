@@ -29,7 +29,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::InterceptedFields>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::InterceptedFields>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::InterceptedFields>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

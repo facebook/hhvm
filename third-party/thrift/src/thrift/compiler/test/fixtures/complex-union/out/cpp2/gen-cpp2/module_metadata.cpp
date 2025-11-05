@@ -29,7 +29,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::ComplexUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::ComplexUnion>(metadata);
+  auto res = genStructMetadata<::cpp2::ComplexUnion>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -59,7 +59,7 @@ StructMetadata<::cpp2::ComplexUnion>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::ListUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::ListUnion>(metadata);
+  auto res = genStructMetadata<::cpp2::ListUnion>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -89,7 +89,7 @@ StructMetadata<::cpp2::ListUnion>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::DataUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::DataUnion>(metadata);
+  auto res = genStructMetadata<::cpp2::DataUnion>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -119,7 +119,7 @@ StructMetadata<::cpp2::DataUnion>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Val>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Val>(metadata);
+  auto res = genStructMetadata<::cpp2::Val>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -149,7 +149,7 @@ StructMetadata<::cpp2::Val>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::ValUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::ValUnion>(metadata);
+  auto res = genStructMetadata<::cpp2::ValUnion>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -179,7 +179,7 @@ StructMetadata<::cpp2::ValUnion>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::VirtualComplexUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::VirtualComplexUnion>(metadata);
+  auto res = genStructMetadata<::cpp2::VirtualComplexUnion>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -209,7 +209,7 @@ StructMetadata<::cpp2::VirtualComplexUnion>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::NonCopyableStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::NonCopyableStruct>(metadata);
+  auto res = genStructMetadata<::cpp2::NonCopyableStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -239,7 +239,7 @@ StructMetadata<::cpp2::NonCopyableStruct>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::NonCopyableUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::NonCopyableUnion>(metadata);
+  auto res = genStructMetadata<::cpp2::NonCopyableUnion>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

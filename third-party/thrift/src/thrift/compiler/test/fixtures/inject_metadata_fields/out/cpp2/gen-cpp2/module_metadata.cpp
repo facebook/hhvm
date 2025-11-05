@@ -29,7 +29,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Fields>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Fields>(metadata);
+  auto res = genStructMetadata<::cpp2::Fields>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -59,7 +59,7 @@ StructMetadata<::cpp2::Fields>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::FieldsInjectedToEmptyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::FieldsInjectedToEmptyStruct>(metadata);
+  auto res = genStructMetadata<::cpp2::FieldsInjectedToEmptyStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -90,7 +90,7 @@ StructMetadata<::cpp2::FieldsInjectedToEmptyStruct>::gen(ThriftMetadata& metadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::FieldsInjectedToStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::FieldsInjectedToStruct>(metadata);
+  auto res = genStructMetadata<::cpp2::FieldsInjectedToStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -121,7 +121,7 @@ StructMetadata<::cpp2::FieldsInjectedToStruct>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::FieldsInjectedWithIncludedStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::FieldsInjectedWithIncludedStruct>(metadata);
+  auto res = genStructMetadata<::cpp2::FieldsInjectedWithIncludedStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -152,7 +152,7 @@ StructMetadata<::cpp2::FieldsInjectedWithIncludedStruct>::gen(ThriftMetadata& me
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct>(metadata);
+  auto res = genStructMetadata<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

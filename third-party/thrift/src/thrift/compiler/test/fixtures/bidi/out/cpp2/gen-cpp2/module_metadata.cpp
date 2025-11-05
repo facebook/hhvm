@@ -34,7 +34,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::BiDiSinkException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::BiDiSinkException>(metadata);
+  auto res = genStructMetadata<::cpp2::BiDiSinkException>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -64,7 +64,7 @@ StructMetadata<::cpp2::BiDiSinkException>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::BiDiStreamException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::BiDiStreamException>(metadata);
+  auto res = genStructMetadata<::cpp2::BiDiStreamException>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -94,7 +94,7 @@ StructMetadata<::cpp2::BiDiStreamException>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::BiDiMethodException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::BiDiMethodException>(metadata);
+  auto res = genStructMetadata<::cpp2::BiDiMethodException>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

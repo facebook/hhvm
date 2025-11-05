@@ -45,7 +45,7 @@ void EnumMetadata<::cpp2::MyEnum>::gen(ThriftMetadata& metadata) {
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::MyStruct>(metadata);
+  auto res = genStructMetadata<::cpp2::MyStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -75,7 +75,7 @@ StructMetadata<::cpp2::MyStruct>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::MyDataItem>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::MyDataItem>(metadata);
+  auto res = genStructMetadata<::cpp2::MyDataItem>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -85,7 +85,7 @@ StructMetadata<::cpp2::MyDataItem>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::MyUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::MyUnion>(metadata);
+  auto res = genStructMetadata<::cpp2::MyUnion>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

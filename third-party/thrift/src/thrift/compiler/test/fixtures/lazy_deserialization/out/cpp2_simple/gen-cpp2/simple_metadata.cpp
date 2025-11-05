@@ -29,7 +29,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::Foo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::Foo>(metadata);
+  auto res = genStructMetadata<::apache::thrift::test::Foo>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -59,7 +59,7 @@ StructMetadata<::apache::thrift::test::Foo>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::LazyFoo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::LazyFoo>(metadata);
+  auto res = genStructMetadata<::apache::thrift::test::LazyFoo>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -89,7 +89,7 @@ StructMetadata<::apache::thrift::test::LazyFoo>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::OptionalFoo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::OptionalFoo>(metadata);
+  auto res = genStructMetadata<::apache::thrift::test::OptionalFoo>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -119,7 +119,7 @@ StructMetadata<::apache::thrift::test::OptionalFoo>::gen(ThriftMetadata& metadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::OptionalLazyFoo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::OptionalLazyFoo>(metadata);
+  auto res = genStructMetadata<::apache::thrift::test::OptionalLazyFoo>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -149,7 +149,7 @@ StructMetadata<::apache::thrift::test::OptionalLazyFoo>::gen(ThriftMetadata& met
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::OptionalBoxedLazyFoo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::OptionalBoxedLazyFoo>(metadata);
+  auto res = genStructMetadata<::apache::thrift::test::OptionalBoxedLazyFoo>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -179,7 +179,7 @@ StructMetadata<::apache::thrift::test::OptionalBoxedLazyFoo>::gen(ThriftMetadata
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::LazyCppRef>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::LazyCppRef>(metadata);
+  auto res = genStructMetadata<::apache::thrift::test::LazyCppRef>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -209,7 +209,7 @@ StructMetadata<::apache::thrift::test::LazyCppRef>::gen(ThriftMetadata& metadata
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::IndexedFoo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::IndexedFoo>(metadata);
+  auto res = genStructMetadata<::apache::thrift::test::IndexedFoo>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -239,7 +239,7 @@ StructMetadata<::apache::thrift::test::IndexedFoo>::gen(ThriftMetadata& metadata
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::OptionalIndexedFoo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::OptionalIndexedFoo>(metadata);
+  auto res = genStructMetadata<::apache::thrift::test::OptionalIndexedFoo>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -269,7 +269,7 @@ StructMetadata<::apache::thrift::test::OptionalIndexedFoo>::gen(ThriftMetadata& 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::Empty>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::Empty>(metadata);
+  auto res = genStructMetadata<::apache::thrift::test::Empty>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

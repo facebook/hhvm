@@ -34,7 +34,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::FooStreamEx>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::FooStreamEx>(metadata);
+  auto res = genStructMetadata<::cpp2::FooStreamEx>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -44,7 +44,7 @@ StructMetadata<::cpp2::FooStreamEx>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::FooEx>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::FooEx>(metadata);
+  auto res = genStructMetadata<::cpp2::FooEx>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -54,7 +54,7 @@ StructMetadata<::cpp2::FooEx>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::FooEx2>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::FooEx2>(metadata);
+  auto res = genStructMetadata<::cpp2::FooEx2>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

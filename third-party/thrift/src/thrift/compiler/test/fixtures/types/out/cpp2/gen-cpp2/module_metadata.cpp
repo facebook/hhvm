@@ -52,7 +52,7 @@ void EnumMetadata<::apache::thrift::fixtures::types::MyForwardRefEnum>::gen(Thri
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::empty_struct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::empty_struct>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::empty_struct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -62,7 +62,7 @@ StructMetadata<::apache::thrift::fixtures::types::empty_struct>::gen(ThriftMetad
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::decorated_struct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::decorated_struct>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::decorated_struct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -92,7 +92,7 @@ StructMetadata<::apache::thrift::fixtures::types::decorated_struct>::gen(ThriftM
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::ContainerStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::ContainerStruct>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::ContainerStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -123,7 +123,7 @@ StructMetadata<::apache::thrift::fixtures::types::ContainerStruct>::gen(ThriftMe
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::CppTypeStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::CppTypeStruct>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::CppTypeStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -153,7 +153,7 @@ StructMetadata<::apache::thrift::fixtures::types::CppTypeStruct>::gen(ThriftMeta
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::VirtualStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::VirtualStruct>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::VirtualStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -183,7 +183,7 @@ StructMetadata<::apache::thrift::fixtures::types::VirtualStruct>::gen(ThriftMeta
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -213,7 +213,7 @@ StructMetadata<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::g
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::TrivialNumeric>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::TrivialNumeric>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::TrivialNumeric>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -243,7 +243,7 @@ StructMetadata<::apache::thrift::fixtures::types::TrivialNumeric>::gen(ThriftMet
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::TrivialNestedWithDefault>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::TrivialNestedWithDefault>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -273,7 +273,7 @@ StructMetadata<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::gen
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::ComplexString>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::ComplexString>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::ComplexString>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -303,7 +303,7 @@ StructMetadata<::apache::thrift::fixtures::types::ComplexString>::gen(ThriftMeta
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::ComplexNestedWithDefault>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::ComplexNestedWithDefault>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -333,7 +333,7 @@ StructMetadata<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::gen
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::MinPadding>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::MinPadding>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::MinPadding>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -364,7 +364,7 @@ StructMetadata<::apache::thrift::fixtures::types::MinPadding>::gen(ThriftMetadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::MinPaddingWithCustomType>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::MinPaddingWithCustomType>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -397,7 +397,7 @@ StructMetadata<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::gen
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::MyStruct>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::MyStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -427,7 +427,7 @@ StructMetadata<::apache::thrift::fixtures::types::MyStruct>::gen(ThriftMetadata&
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::MyDataItem>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::MyDataItem>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::MyDataItem>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -437,7 +437,7 @@ StructMetadata<::apache::thrift::fixtures::types::MyDataItem>::gen(ThriftMetadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::Renamed>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::Renamed>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::Renamed>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -468,7 +468,7 @@ StructMetadata<::apache::thrift::fixtures::types::Renamed>::gen(ThriftMetadata& 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::AnnotatedTypes>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::AnnotatedTypes>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::AnnotatedTypes>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -499,7 +499,7 @@ StructMetadata<::apache::thrift::fixtures::types::AnnotatedTypes>::gen(ThriftMet
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::ForwardUsageRoot>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::ForwardUsageRoot>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::ForwardUsageRoot>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -529,7 +529,7 @@ StructMetadata<::apache::thrift::fixtures::types::ForwardUsageRoot>::gen(ThriftM
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::ForwardUsageStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::ForwardUsageStruct>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::ForwardUsageStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -559,7 +559,7 @@ StructMetadata<::apache::thrift::fixtures::types::ForwardUsageStruct>::gen(Thrif
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::ForwardUsageByRef>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::ForwardUsageByRef>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::ForwardUsageByRef>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -589,7 +589,7 @@ StructMetadata<::apache::thrift::fixtures::types::ForwardUsageByRef>::gen(Thrift
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::IncompleteMap>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::IncompleteMap>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::IncompleteMap>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -619,7 +619,7 @@ StructMetadata<::apache::thrift::fixtures::types::IncompleteMap>::gen(ThriftMeta
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::IncompleteMapDep>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::IncompleteMapDep>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::IncompleteMapDep>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -629,7 +629,7 @@ StructMetadata<::apache::thrift::fixtures::types::IncompleteMapDep>::gen(ThriftM
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::CompleteMap>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::CompleteMap>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::CompleteMap>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -660,7 +660,7 @@ StructMetadata<::apache::thrift::fixtures::types::CompleteMap>::gen(ThriftMetada
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::CompleteMapDep>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::CompleteMapDep>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::CompleteMapDep>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -670,7 +670,7 @@ StructMetadata<::apache::thrift::fixtures::types::CompleteMapDep>::gen(ThriftMet
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::IncompleteList>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::IncompleteList>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::IncompleteList>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -700,7 +700,7 @@ StructMetadata<::apache::thrift::fixtures::types::IncompleteList>::gen(ThriftMet
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::IncompleteListDep>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::IncompleteListDep>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::IncompleteListDep>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -710,7 +710,7 @@ StructMetadata<::apache::thrift::fixtures::types::IncompleteListDep>::gen(Thrift
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::CompleteList>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::CompleteList>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::CompleteList>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -740,7 +740,7 @@ StructMetadata<::apache::thrift::fixtures::types::CompleteList>::gen(ThriftMetad
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::CompleteListDep>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::CompleteListDep>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::CompleteListDep>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -750,7 +750,7 @@ StructMetadata<::apache::thrift::fixtures::types::CompleteListDep>::gen(ThriftMe
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::AdaptedList>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::AdaptedList>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::AdaptedList>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -780,7 +780,7 @@ StructMetadata<::apache::thrift::fixtures::types::AdaptedList>::gen(ThriftMetada
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::detail::AdaptedListDep>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::detail::AdaptedListDep>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::detail::AdaptedListDep>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -811,7 +811,7 @@ StructMetadata<::apache::thrift::fixtures::types::detail::AdaptedListDep>::gen(T
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::DependentAdaptedList>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::DependentAdaptedList>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::DependentAdaptedList>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -841,7 +841,7 @@ StructMetadata<::apache::thrift::fixtures::types::DependentAdaptedList>::gen(Thr
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -872,7 +872,7 @@ StructMetadata<::apache::thrift::fixtures::types::detail::DependentAdaptedListDe
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::AllocatorAware>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::AllocatorAware>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::AllocatorAware>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -902,7 +902,7 @@ StructMetadata<::apache::thrift::fixtures::types::AllocatorAware>::gen(ThriftMet
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::AllocatorAware2>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::AllocatorAware2>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::AllocatorAware2>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -932,7 +932,7 @@ StructMetadata<::apache::thrift::fixtures::types::AllocatorAware2>::gen(ThriftMe
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::TypedefStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::TypedefStruct>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::TypedefStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -962,7 +962,7 @@ StructMetadata<::apache::thrift::fixtures::types::TypedefStruct>::gen(ThriftMeta
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>(metadata);
+  auto res = genStructMetadata<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

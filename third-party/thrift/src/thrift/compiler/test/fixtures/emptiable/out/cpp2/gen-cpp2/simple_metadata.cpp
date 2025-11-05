@@ -35,7 +35,7 @@ void EnumMetadata<::apache::thrift::test::MyEnum>::gen(ThriftMetadata& metadata)
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::MyStruct>(metadata);
+  auto res = genStructMetadata<::apache::thrift::test::MyStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -45,7 +45,7 @@ StructMetadata<::apache::thrift::test::MyStruct>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::EmptiableStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::EmptiableStruct>(metadata);
+  auto res = genStructMetadata<::apache::thrift::test::EmptiableStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -75,7 +75,7 @@ StructMetadata<::apache::thrift::test::EmptiableStruct>::gen(ThriftMetadata& met
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::EmptiableTerseStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::EmptiableTerseStruct>(metadata);
+  auto res = genStructMetadata<::apache::thrift::test::EmptiableTerseStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -107,7 +107,7 @@ StructMetadata<::apache::thrift::test::EmptiableTerseStruct>::gen(ThriftMetadata
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::NotEmptiableStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::NotEmptiableStruct>(metadata);
+  auto res = genStructMetadata<::apache::thrift::test::NotEmptiableStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

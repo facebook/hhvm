@@ -35,7 +35,7 @@ void EnumMetadata<::cpp2::MyEnum>::gen(ThriftMetadata& metadata) {
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::MyStructFloatFieldThrowExp>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::MyStructFloatFieldThrowExp>(metadata);
+  auto res = genStructMetadata<::cpp2::MyStructFloatFieldThrowExp>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -65,7 +65,7 @@ StructMetadata<::cpp2::MyStructFloatFieldThrowExp>::gen(ThriftMetadata& metadata
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::MyStructMapFloatThrowExp>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::MyStructMapFloatThrowExp>(metadata);
+  auto res = genStructMetadata<::cpp2::MyStructMapFloatThrowExp>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -95,7 +95,7 @@ StructMetadata<::cpp2::MyStructMapFloatThrowExp>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::MyStruct>(metadata);
+  auto res = genStructMetadata<::cpp2::MyStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -125,7 +125,7 @@ StructMetadata<::cpp2::MyStruct>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::SimpleStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::SimpleStruct>(metadata);
+  auto res = genStructMetadata<::cpp2::SimpleStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -155,7 +155,7 @@ StructMetadata<::cpp2::SimpleStruct>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::defaultStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::defaultStruct>(metadata);
+  auto res = genStructMetadata<::cpp2::defaultStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -185,7 +185,7 @@ StructMetadata<::cpp2::defaultStruct>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::MyStructTypeDef>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::MyStructTypeDef>(metadata);
+  auto res = genStructMetadata<::cpp2::MyStructTypeDef>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -215,7 +215,7 @@ StructMetadata<::cpp2::MyStructTypeDef>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::MyDataItem>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::MyDataItem>(metadata);
+  auto res = genStructMetadata<::cpp2::MyDataItem>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -225,7 +225,7 @@ StructMetadata<::cpp2::MyDataItem>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::MyUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::MyUnion>(metadata);
+  auto res = genStructMetadata<::cpp2::MyUnion>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -255,7 +255,7 @@ StructMetadata<::cpp2::MyUnion>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::MyUnionFloatFieldThrowExp>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::MyUnionFloatFieldThrowExp>(metadata);
+  auto res = genStructMetadata<::cpp2::MyUnionFloatFieldThrowExp>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -285,7 +285,7 @@ StructMetadata<::cpp2::MyUnionFloatFieldThrowExp>::gen(ThriftMetadata& metadata)
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::ComplexNestedStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::ComplexNestedStruct>(metadata);
+  auto res = genStructMetadata<::cpp2::ComplexNestedStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -315,7 +315,7 @@ StructMetadata<::cpp2::ComplexNestedStruct>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::TypeRemapped>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::TypeRemapped>(metadata);
+  auto res = genStructMetadata<::cpp2::TypeRemapped>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -345,7 +345,7 @@ StructMetadata<::cpp2::TypeRemapped>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::emptyXcep>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::emptyXcep>(metadata);
+  auto res = genStructMetadata<::cpp2::emptyXcep>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -355,7 +355,7 @@ StructMetadata<::cpp2::emptyXcep>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::reqXcep>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::reqXcep>(metadata);
+  auto res = genStructMetadata<::cpp2::reqXcep>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -385,7 +385,7 @@ StructMetadata<::cpp2::reqXcep>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::optXcep>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::optXcep>(metadata);
+  auto res = genStructMetadata<::cpp2::optXcep>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -415,7 +415,7 @@ StructMetadata<::cpp2::optXcep>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::complexException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::complexException>(metadata);
+  auto res = genStructMetadata<::cpp2::complexException>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -445,7 +445,7 @@ StructMetadata<::cpp2::complexException>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Containers>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Containers>(metadata);
+  auto res = genStructMetadata<::cpp2::Containers>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

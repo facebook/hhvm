@@ -41,7 +41,7 @@ void EnumMetadata<::test::fixtures::basic_structured_annotations::MyEnum>::gen(T
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic_structured_annotations::runtime_annotation>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::runtime_annotation>(metadata);
+  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::runtime_annotation>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -52,7 +52,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::runtime_annotatio
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_inline>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_inline>(metadata);
+  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_inline>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -82,7 +82,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_with_default>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_with_default>(metadata);
+  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_with_default>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -112,7 +112,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>(metadata);
+  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -142,7 +142,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_forward>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_forward>(metadata);
+  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_forward>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -172,7 +172,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_nested>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_nested>(metadata);
+  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_nested>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -202,7 +202,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic_structured_annotations::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::MyStruct>(metadata);
+  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::MyStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -238,7 +238,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyStruct>::gen(Th
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic_structured_annotations::MyException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::MyException>(metadata);
+  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::MyException>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -269,7 +269,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyException>::gen
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic_structured_annotations::MyUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::MyUnion>(metadata);
+  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::MyUnion>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

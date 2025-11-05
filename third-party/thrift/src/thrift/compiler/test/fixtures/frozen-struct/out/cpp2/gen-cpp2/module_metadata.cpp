@@ -35,7 +35,7 @@ void EnumMetadata<::some::ns::EnumB>::gen(ThriftMetadata& metadata) {
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::ns::ModuleA>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::ns::ModuleA>(metadata);
+  auto res = genStructMetadata<::some::ns::ModuleA>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -65,7 +65,7 @@ StructMetadata<::some::ns::ModuleA>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::ns::ModuleB>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::ns::ModuleB>(metadata);
+  auto res = genStructMetadata<::some::ns::ModuleB>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -95,7 +95,7 @@ StructMetadata<::some::ns::ModuleB>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::ns::detail::DirectlyAdapted>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::ns::detail::DirectlyAdapted>(metadata);
+  auto res = genStructMetadata<::some::ns::detail::DirectlyAdapted>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -126,7 +126,7 @@ StructMetadata<::some::ns::detail::DirectlyAdapted>::gen(ThriftMetadata& metadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::ns::CppRef>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::ns::CppRef>(metadata);
+  auto res = genStructMetadata<::some::ns::CppRef>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

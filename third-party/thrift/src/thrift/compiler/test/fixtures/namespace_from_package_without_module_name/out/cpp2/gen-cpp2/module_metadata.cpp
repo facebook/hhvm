@@ -34,7 +34,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::namespace_from_package_without_module_name::Foo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::namespace_from_package_without_module_name::Foo>(metadata);
+  auto res = genStructMetadata<::test::namespace_from_package_without_module_name::Foo>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

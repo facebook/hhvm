@@ -35,7 +35,7 @@ void EnumMetadata<::facebook::thrift::test::terse_write::MyEnum>::gen(ThriftMeta
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::MyStruct>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::MyStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -45,7 +45,7 @@ StructMetadata<::facebook::thrift::test::terse_write::MyStruct>::gen(ThriftMetad
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::MyUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::MyUnion>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::MyUnion>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -75,7 +75,7 @@ StructMetadata<::facebook::thrift::test::terse_write::MyUnion>::gen(ThriftMetada
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -105,7 +105,7 @@ StructMetadata<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::StructLevelTerseStruct>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::StructLevelTerseStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -136,7 +136,7 @@ StructMetadata<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::g
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -166,7 +166,7 @@ StructMetadata<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::ge
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::AdaptedFields>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::AdaptedFields>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::AdaptedFields>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -197,7 +197,7 @@ StructMetadata<::facebook::thrift::test::terse_write::AdaptedFields>::gen(Thrift
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::TerseException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::TerseException>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::TerseException>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

@@ -35,7 +35,7 @@ void EnumMetadata<::facebook::thrift::test::Enum>::gen(ThriftMetadata& metadata)
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::Foo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::Foo>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::Foo>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -65,7 +65,7 @@ StructMetadata<::facebook::thrift::test::Foo>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::Bar>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::Bar>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::Bar>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -96,7 +96,7 @@ StructMetadata<::facebook::thrift::test::Bar>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::Baz>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::Baz>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::Baz>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -126,7 +126,7 @@ StructMetadata<::facebook::thrift::test::Baz>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::OpEncodeStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::OpEncodeStruct>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::OpEncodeStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

@@ -61,7 +61,7 @@ void EnumMetadata<::cpp2::YourEnum>::gen(ThriftMetadata& metadata) {
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::MyStructNestedAnnotation>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::MyStructNestedAnnotation>(metadata);
+  auto res = genStructMetadata<::cpp2::MyStructNestedAnnotation>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -91,7 +91,7 @@ StructMetadata<::cpp2::MyStructNestedAnnotation>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::detail::YourUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::detail::YourUnion>(metadata);
+  auto res = genStructMetadata<::cpp2::detail::YourUnion>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -103,7 +103,7 @@ StructMetadata<::cpp2::detail::YourUnion>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::detail::YourException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::detail::YourException>(metadata);
+  auto res = genStructMetadata<::cpp2::detail::YourException>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -115,7 +115,7 @@ StructMetadata<::cpp2::detail::YourException>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::detail::YourStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::detail::YourStruct>(metadata);
+  auto res = genStructMetadata<::cpp2::detail::YourStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -148,7 +148,7 @@ StructMetadata<::cpp2::detail::YourStruct>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::SecretStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::SecretStruct>(metadata);
+  auto res = genStructMetadata<::cpp2::SecretStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

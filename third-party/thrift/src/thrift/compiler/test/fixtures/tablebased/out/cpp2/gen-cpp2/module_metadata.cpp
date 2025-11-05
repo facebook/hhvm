@@ -35,7 +35,7 @@ void EnumMetadata<::test::fixtures::tablebased::ExampleEnum>::gen(ThriftMetadata
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::tablebased::TrivialTypesStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::tablebased::TrivialTypesStruct>(metadata);
+  auto res = genStructMetadata<::test::fixtures::tablebased::TrivialTypesStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -65,7 +65,7 @@ StructMetadata<::test::fixtures::tablebased::TrivialTypesStruct>::gen(ThriftMeta
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::tablebased::ContainerStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::tablebased::ContainerStruct>(metadata);
+  auto res = genStructMetadata<::test::fixtures::tablebased::ContainerStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -95,7 +95,7 @@ StructMetadata<::test::fixtures::tablebased::ContainerStruct>::gen(ThriftMetadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::tablebased::ExampleUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::tablebased::ExampleUnion>(metadata);
+  auto res = genStructMetadata<::test::fixtures::tablebased::ExampleUnion>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

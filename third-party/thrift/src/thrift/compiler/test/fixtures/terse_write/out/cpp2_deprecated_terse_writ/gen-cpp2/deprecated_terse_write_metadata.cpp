@@ -35,7 +35,7 @@ void EnumMetadata<::facebook::thrift::test::terse_write::deprecated::MyEnum>::ge
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::deprecated::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::MyStruct>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::MyStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -45,7 +45,7 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::MyStruct>::gen
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::deprecated::MyUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::MyUnion>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::MyUnion>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -55,7 +55,7 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::MyUnion>::gen(
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -86,7 +86,7 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::StructLevelTer
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -116,7 +116,7 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::FieldLevelTers
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::deprecated::CppRefStructFields>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::CppRefStructFields>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::CppRefStructFields>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -146,7 +146,7 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::CppRefStructFi
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -176,7 +176,7 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTers
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

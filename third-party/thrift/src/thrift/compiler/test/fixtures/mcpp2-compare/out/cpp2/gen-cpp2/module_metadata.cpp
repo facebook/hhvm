@@ -70,7 +70,7 @@ void EnumMetadata<::some::valid::ns::MyEnumB>::gen(ThriftMetadata& metadata) {
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::Empty>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::Empty>(metadata);
+  auto res = genStructMetadata<::some::valid::ns::Empty>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -80,7 +80,7 @@ StructMetadata<::some::valid::ns::Empty>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::ASimpleStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::ASimpleStruct>(metadata);
+  auto res = genStructMetadata<::some::valid::ns::ASimpleStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -110,7 +110,7 @@ StructMetadata<::some::valid::ns::ASimpleStruct>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::ASimpleStructNoexcept>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::ASimpleStructNoexcept>(metadata);
+  auto res = genStructMetadata<::some::valid::ns::ASimpleStructNoexcept>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -140,7 +140,7 @@ StructMetadata<::some::valid::ns::ASimpleStructNoexcept>::gen(ThriftMetadata& me
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::MyStruct>(metadata);
+  auto res = genStructMetadata<::some::valid::ns::MyStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -170,7 +170,7 @@ StructMetadata<::some::valid::ns::MyStruct>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::SimpleUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::SimpleUnion>(metadata);
+  auto res = genStructMetadata<::some::valid::ns::SimpleUnion>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -200,7 +200,7 @@ StructMetadata<::some::valid::ns::SimpleUnion>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::ComplexUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::ComplexUnion>(metadata);
+  auto res = genStructMetadata<::some::valid::ns::ComplexUnion>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -230,7 +230,7 @@ StructMetadata<::some::valid::ns::ComplexUnion>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::AnException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::AnException>(metadata);
+  auto res = genStructMetadata<::some::valid::ns::AnException>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -260,7 +260,7 @@ StructMetadata<::some::valid::ns::AnException>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::AnotherException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::AnotherException>(metadata);
+  auto res = genStructMetadata<::some::valid::ns::AnotherException>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -290,7 +290,7 @@ StructMetadata<::some::valid::ns::AnotherException>::gen(ThriftMetadata& metadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::containerStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::containerStruct>(metadata);
+  auto res = genStructMetadata<::some::valid::ns::containerStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -320,7 +320,7 @@ StructMetadata<::some::valid::ns::containerStruct>::gen(ThriftMetadata& metadata
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::MyIncludedStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::MyIncludedStruct>(metadata);
+  auto res = genStructMetadata<::some::valid::ns::MyIncludedStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -350,7 +350,7 @@ StructMetadata<::some::valid::ns::MyIncludedStruct>::gen(ThriftMetadata& metadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::AnnotatedStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::AnnotatedStruct>(metadata);
+  auto res = genStructMetadata<::some::valid::ns::AnnotatedStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -380,7 +380,7 @@ StructMetadata<::some::valid::ns::AnnotatedStruct>::gen(ThriftMetadata& metadata
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::ComplexContainerStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::ComplexContainerStruct>(metadata);
+  auto res = genStructMetadata<::some::valid::ns::ComplexContainerStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -410,7 +410,7 @@ StructMetadata<::some::valid::ns::ComplexContainerStruct>::gen(ThriftMetadata& m
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::FloatStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::FloatStruct>(metadata);
+  auto res = genStructMetadata<::some::valid::ns::FloatStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -440,7 +440,7 @@ StructMetadata<::some::valid::ns::FloatStruct>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::FloatUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::FloatUnion>(metadata);
+  auto res = genStructMetadata<::some::valid::ns::FloatUnion>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -470,7 +470,7 @@ StructMetadata<::some::valid::ns::FloatUnion>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct>(metadata);
+  auto res = genStructMetadata<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

@@ -62,7 +62,7 @@ void EnumMetadata<::test::fixtures::basic::HackEnum>::gen(ThriftMetadata& metada
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic::MyStruct>(metadata);
+  auto res = genStructMetadata<::test::fixtures::basic::MyStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -92,7 +92,7 @@ StructMetadata<::test::fixtures::basic::MyStruct>::gen(ThriftMetadata& metadata)
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::Containers>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic::Containers>(metadata);
+  auto res = genStructMetadata<::test::fixtures::basic::Containers>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -122,7 +122,7 @@ StructMetadata<::test::fixtures::basic::Containers>::gen(ThriftMetadata& metadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::MyDataItem>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic::MyDataItem>(metadata);
+  auto res = genStructMetadata<::test::fixtures::basic::MyDataItem>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -132,7 +132,7 @@ StructMetadata<::test::fixtures::basic::MyDataItem>::gen(ThriftMetadata& metadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::MyUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic::MyUnion>(metadata);
+  auto res = genStructMetadata<::test::fixtures::basic::MyUnion>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -162,7 +162,7 @@ StructMetadata<::test::fixtures::basic::MyUnion>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::MyException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic::MyException>(metadata);
+  auto res = genStructMetadata<::test::fixtures::basic::MyException>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -192,7 +192,7 @@ StructMetadata<::test::fixtures::basic::MyException>::gen(ThriftMetadata& metada
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::MyExceptionWithMessage>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic::MyExceptionWithMessage>(metadata);
+  auto res = genStructMetadata<::test::fixtures::basic::MyExceptionWithMessage>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -222,7 +222,7 @@ StructMetadata<::test::fixtures::basic::MyExceptionWithMessage>::gen(ThriftMetad
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::ReservedKeyword>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic::ReservedKeyword>(metadata);
+  auto res = genStructMetadata<::test::fixtures::basic::ReservedKeyword>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -253,7 +253,7 @@ StructMetadata<::test::fixtures::basic::ReservedKeyword>::gen(ThriftMetadata& me
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::UnionToBeRenamed>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic::UnionToBeRenamed>(metadata);
+  auto res = genStructMetadata<::test::fixtures::basic::UnionToBeRenamed>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

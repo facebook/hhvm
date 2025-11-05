@@ -29,7 +29,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -59,7 +59,7 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::Tri
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::StructWithNoCustomDefaultValues>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::StructWithNoCustomDefaultValues>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::StructWithNoCustomDefaultValues>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }
@@ -89,7 +89,7 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::Str
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues>(metadata);
+  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

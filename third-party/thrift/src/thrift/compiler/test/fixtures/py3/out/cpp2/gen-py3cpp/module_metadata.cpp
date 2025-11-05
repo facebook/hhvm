@@ -153,7 +153,7 @@ StructMetadata<::py3::simple::SimpleStruct>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::Float32Struct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::py3::simple::Float32Struct>(metadata);
+  auto res = genStructMetadata<::py3::simple::Float32Struct>(metadata, false);
   if (res.preExists) {
     return res.metadata;
   }

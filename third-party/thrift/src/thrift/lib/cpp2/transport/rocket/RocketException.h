@@ -18,9 +18,11 @@
 
 #include <exception>
 #include <memory>
+#include <string>
 #include <utility>
 
 #include <folly/Range.h>
+#include <folly/String.h>
 #include <folly/io/IOBuf.h>
 
 #include <thrift/lib/cpp2/transport/rocket/framing/ErrorCode.h>
@@ -30,10 +32,12 @@ namespace apache::thrift::rocket {
 class FOLLY_EXPORT RocketException : public std::exception {
  public:
   explicit RocketException(ErrorCode errorCode)
-      : rsocketErrorCode_(errorCode) {}
+      : rsocketErrorCode_(errorCode), whatMessage_(buildWhatMessage()) {}
 
   RocketException(ErrorCode errorCode, std::unique_ptr<folly::IOBuf> errorData)
-      : rsocketErrorCode_(errorCode), errorData_(std::move(errorData)) {}
+      : rsocketErrorCode_(errorCode),
+        errorData_(std::move(errorData)),
+        whatMessage_(buildWhatMessage()) {}
 
   RocketException(ErrorCode errorCode, folly::StringPiece errorData)
       : RocketException(errorCode, folly::IOBuf::copyBuffer(errorData)) {}
@@ -41,11 +45,12 @@ class FOLLY_EXPORT RocketException : public std::exception {
   RocketException(RocketException&&) = default;
   RocketException(const RocketException& other)
       : rsocketErrorCode_(other.rsocketErrorCode_),
-        errorData_(other.errorData_ ? other.errorData_->clone() : nullptr) {}
+        errorData_(other.errorData_ ? other.errorData_->clone() : nullptr),
+        whatMessage_(other.whatMessage_) {}
 
   ErrorCode getErrorCode() const noexcept { return rsocketErrorCode_; }
 
-  const char* what() const noexcept override { return "RocketException"; }
+  const char* what() const noexcept override { return whatMessage_.c_str(); }
 
   std::unique_ptr<folly::IOBuf> moveErrorData() {
     return std::move(errorData_);
@@ -56,8 +61,25 @@ class FOLLY_EXPORT RocketException : public std::exception {
   }
 
  private:
+  std::string buildWhatMessage() const {
+    std::string message = "RocketException: ";
+    message += toString(rsocketErrorCode_);
+
+    if (hasErrorData()) {
+      message += " (";
+      auto errorDataStr = errorData_->cloneCoalescedAsValue();
+      message += folly::cEscape<std::string>(folly::StringPiece(
+          reinterpret_cast<const char*>(errorDataStr.data()),
+          errorDataStr.length()));
+      message += ")";
+    }
+
+    return message;
+  }
+
   ErrorCode rsocketErrorCode_{ErrorCode::RESERVED};
   std::unique_ptr<folly::IOBuf> errorData_;
+  std::string whatMessage_;
 };
 
 } // namespace apache::thrift::rocket

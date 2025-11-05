@@ -227,6 +227,11 @@ TEST(Annotations, Struct) {
             detail::md::getFieldAnnotationTypes<TestStruct>(
                 i, *res.metadata.fields()[i].id())));
   }
+  EXPECT_TRUE(
+      detail::md::structuredAnnotationsEquality(
+          *res.metadata.structured_annotations(),
+          *expectedStruct().structured_annotations(),
+          detail::md::getAnnotationTypes<TestStruct>()));
 }
 
 TEST(Annotations, Exception) {

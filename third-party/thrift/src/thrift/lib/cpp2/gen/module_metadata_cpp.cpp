@@ -328,7 +328,10 @@ static auto genStructuredInMetadataMap(
           genStructuredAnnotations(field.annotations());
     }
   }
-  // TODO: add other information
+  if (genAnnotations) {
+    ret.metadata.structured_annotations() =
+        genStructuredAnnotations(node.definition().annotations());
+  }
   return ret;
 }
 

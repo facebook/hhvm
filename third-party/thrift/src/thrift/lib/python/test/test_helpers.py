@@ -22,7 +22,10 @@ from typing import Any, Type
 import testing.thrift_mutable_types as mutable_test_types
 import testing.thrift_types as immutable_test_types
 from parameterized import parameterized, parameterized_class
-from thrift.python.test_helpers import round_thrift_to_float32
+from thrift.python.test_helpers import (
+    round_thrift_float32_if_rollout,
+    round_thrift_to_float32,
+)
 
 
 def to_float32(val: float) -> float:
@@ -252,3 +255,9 @@ class RoundThriftToFloat32Test(unittest.TestCase):
         result = round_thrift_to_float32(val)
         # pyre-ignore[29]: validator is a callable
         self.assertTrue(validator(result))
+
+    def test_conditional_float32_rounding(
+        self,
+    ) -> None:
+        self.assertNotEqual(round_thrift_to_float32(1.1), 1.1)
+        self.assertEqual(round_thrift_float32_if_rollout(1.1), 1.1)

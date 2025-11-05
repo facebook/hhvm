@@ -15,7 +15,7 @@
 from collections.abc import Iterable, Mapping
 from enum import IntEnum
 
-from thrift.python.types import Enum, Struct, Union
+from thrift.python.types import Enum, Struct, Union, typeinfo_float, Float32TypeInfo
 from thrift.python.types cimport List, Set, Map
 from thrift.python.mutable_types import MutableStruct, MutableUnion
 
@@ -71,7 +71,6 @@ def round_thrift_to_float32(val, convert_int=False):
     if issubclass(val_type, Iterable):
         return val_type((round_thrift_to_float32(x) for x in val))
 
-
     if issubclass(val_type, (Union, MutableUnion)):
         if val.fbthrift_current_value is None:
             return val
@@ -80,7 +79,14 @@ def round_thrift_to_float32(val, convert_int=False):
             fld_val = val.fbthrift_current_value
             return val_type(**{fld_name: round_thrift_to_float32(fld_val)})
 
+    return val
 
+cdef inline _is_float32_enforced():
+    return isinstance(typeinfo_float, Float32TypeInfo)
+
+def round_thrift_float32_if_rollout(val, convert_int=False):
+    if _is_float32_enforced():
+        return round_thrift_to_float32(val, convert_int)
 
     return val
     

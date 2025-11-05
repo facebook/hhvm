@@ -366,7 +366,7 @@ inline constexpr FieldId get_field_id_v = get_field_id<T, Id>::value;
 
 /// Calls the given function with each field_id<{id}> in a Thrift struct.
 template <typename T, typename F>
-void for_each_field_id(F&& f) {
+constexpr void for_each_field_id(F&& f) {
   for_each_ordinal<T>([&](auto ord) { f(get_field_id<T, decltype(ord)>{}); });
 }
 
@@ -390,7 +390,7 @@ using get_ident = apache::thrift::detail::
 /// Calls the given function with each folly::tag<apache::thrift::ident::*> in a
 /// Thrift structured type.
 template <typename T, typename F>
-void for_each_ident(F&& f) {
+constexpr void for_each_ident(F&& f) {
   for_each_ordinal<T>(
       [&](auto ord) { f(folly::tag_t<get_ident<T, decltype(ord)>>{}); });
 }

@@ -217,7 +217,7 @@ cdef class ListTypeInfo(TypeInfoBase):
     cpdef to_internal_data(self, object)
     cpdef to_python_value(self, object)
     cdef to_internal_from_values(self, object values, TypeInfoBase val_type_info)
-    cdef to_python_from_values(self, object values, TypeInfoBase val_type_info)
+    cdef to_python_from_values(self, tuple values, TypeInfoBase val_type_info)
 
 cdef class SetTypeInfo(TypeInfoBase):
     cdef object val_info
@@ -226,7 +226,7 @@ cdef class SetTypeInfo(TypeInfoBase):
     cpdef to_internal_data(self, object)
     cpdef to_python_value(self, object)
     cdef to_internal_from_values(self, object values, TypeInfoBase val_type_info)
-    cdef to_python_from_values(self, object values, TypeInfoBase val_type_info)
+    cdef to_python_from_values(self, frozenset values, TypeInfoBase val_type_info)
 
 cdef class MapTypeInfo(TypeInfoBase):
     cdef object key_info
@@ -236,7 +236,7 @@ cdef class MapTypeInfo(TypeInfoBase):
     cpdef to_internal_data(self, object)
     cpdef to_python_value(self, object)
     cdef to_internal_from_values(self, object)
-    cdef to_python_from_values(self, object)
+    cdef to_python_from_values(self, ImmutableInternalMap)
 
 cdef class StructTypeInfo(TypeInfoBase):
     cdef cTypeInfo cpp_obj
@@ -307,16 +307,21 @@ cdef class BadEnum:
 
 cdef class Container:
     cdef object _fbthrift_val_info
-    cdef object _fbthrift_elements
 
 cdef class List(Container):
-    pass
+    cdef tuple _fbthrift_elements
 
 cdef class Set(Container):
+    cdef frozenset _fbthrift_elements
     cdef bint _fbthrift_needs_lazy_validation
     cdef frozenset _fbthrift_get_elements(self)
 
+cdef class ImmutableInternalMap(dict):
+    pass
+
 cdef class Map(Container):
+    # may be dict, ImmutableInternalMap, or MappingProxyType
+    cdef object _fbthrift_elements 
     cdef object _fbthrift_key_info
 
 cdef void set_struct_field(tuple struct_tuple, int16_t index, value) except *

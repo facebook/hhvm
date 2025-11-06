@@ -753,7 +753,7 @@ cdef class ListTypeInfo(TypeInfoBase):
 
         return tpl
 
-    cdef to_python_from_values(self, object values, TypeInfoBase val_type_info):
+    cdef to_python_from_values(self, tuple values, TypeInfoBase val_type_info):
         cdef size_t idx = 0
         cdef tuple tpl = PyTuple_New(len(values))
         for idx, value in enumerate(values):
@@ -836,7 +836,7 @@ cdef class SetTypeInfo(TypeInfoBase):
 
         return frozen_set
 
-    cdef to_python_from_values(self, object values, TypeInfoBase val_type_info):
+    cdef to_python_from_values(self, frozenset values, TypeInfoBase val_type_info):
         cdef frozenset frozen_set = PyFrozenSet_New(<object>NULL)
         for value in values:
             PySet_Add(frozen_set, val_type_info.to_python_value(value))
@@ -918,7 +918,7 @@ cdef class MapTypeInfo(TypeInfoBase):
 
         return internal_dict
 
-    cdef to_python_from_values(self, object values):
+    cdef to_python_from_values(self, ImmutableInternalMap values):
         cdef TypeInfoBase key_type_info = self.key_info
         cdef TypeInfoBase val_type_info = self.val_info
         return {
@@ -2156,9 +2156,6 @@ cdef class Container:
     def __deepcopy__(Container self, _memo):
         return self
 
-    def __len__(Container self):
-        return len(self._fbthrift_elements)
-
 # TODO: unify List and MutableList so `self` can be typed
 cdef list_eq(object self, object other):
     if (
@@ -2203,7 +2200,7 @@ cdef class List(Container):
     API with a Python list but has additional API to interact with other Python
     iterators
     """
-    def __init__(self, val_info, values):
+    def __init__(List self, val_info, values):
         self._fbthrift_val_info = val_info
         if isinstance(values, (str, bytes)):
             raise TypeError(
@@ -2212,8 +2209,11 @@ cdef class List(Container):
             )
         self._fbthrift_elements = tuple(val_info.to_container_value(v) for v in values)
 
-    def __hash__(self):
+    def __hash__(List self):
         return hash(self._fbthrift_elements)
+
+    def __len__(List self):
+        return len(self._fbthrift_elements)
 
     def __add__(List self, other):
         return list(itertools.chain(self, other))
@@ -2221,65 +2221,69 @@ cdef class List(Container):
     def __radd__(List self, other):
         return type(other)(itertools.chain(other, self))
 
-    def __eq__(self, other):
+    def __eq__(List self, other):
         return list_eq(self, other)
 
-    def __ne__(self, other):
+    def __ne__(List self, other):
         return not list_eq(self, other)
 
-    def __lt__(self, other):
+    def __lt__(List self, other):
         return list_lt(self, other)
 
-    def __gt__(self, other):
+    def __gt__(List self, other):
         return list_lt(other, self)
 
-    def __le__(self, other):
+    def __le__(List self, other):
         result = list_lt(other, self)
         if result is NotImplemented:
             return NotImplemented
 
         return not result
 
-    def __ge__(self, other):
+    def __ge__(List self, other):
         result = list_lt(self, other)
         if result is NotImplemented:
             return NotImplemented
 
         return not result
 
-    def __repr__(self):
+    def __repr__(List self):
         if not self:
             return 'i[]'
         return f'i[{", ".join(map(repr, self))}]'
 
-    def __reduce__(self):
+    def __reduce__(List self):
         return (List, (self._fbthrift_val_info, list(self),))
 
-    def __getitem__(self, object index_obj):
+    def __getitem__(List self, object index_obj):
+        if isinstance(index_obj, int):
+            return (self._fbthrift_elements)[<int>index_obj]
         if not isinstance(index_obj, slice):
-            return self._fbthrift_elements[index_obj]
-        return List(self._fbthrift_val_info, self._fbthrift_elements[index_obj])
+            raise TypeError(
+                f"List indices must be integers or slices, not {type(index_obj).__name__}"
+            )
+        return List(self._fbthrift_val_info, (self._fbthrift_elements)[index_obj])
 
-    def __contains__(self, item):
+    def __contains__(List self, item):
         if item is None:
             return False
         return item in self._fbthrift_elements
 
-    def __iter__(self):
+    def __iter__(List self):
         return iter(self._fbthrift_elements)
 
-    def __reversed__(self):
+    def __reversed__(List self):
         return reversed(self._fbthrift_elements)
 
-    def index(self, item, start=0, stop=None):
+    def index(List self, item, start=0, stop=None):
         if stop is None:
             stop = len(self)
         return self._fbthrift_elements.index(item, start, stop)
 
-    def count(self, item):
+    def count(List self, item):
         return self._fbthrift_elements.count(item)
 
-    def _fbthrift_same_type(self, other_elem_type):
+    def _fbthrift_same_type(List self, other_elem_type):
         return self._fbthrift_val_info.same_as(other_elem_type)
 
 tag_object_as_sequence(<PyTypeObject*>List)
@@ -2333,6 +2337,9 @@ cdef class Set(Container):
 
     def __hash__(Set self):
         return hash(self._fbthrift_get_elements())
+
+    def __len__(Set self):
+        return len(self._fbthrift_elements)
 
     def __and__(Set self, other):
         return Set(self._fbthrift_val_info, self._fbthrift_get_elements() & other)
@@ -2496,6 +2503,9 @@ cdef class Map(Container):
     def __hash__(self):
         return hash(tuple(self.items()))
 
+    def __len__(Map self):
+        return len(self._fbthrift_elements)
+
     def __eq__(Map self, other):
         if not isinstance(other, Mapping):
             return False
@@ -2508,7 +2518,7 @@ cdef class Map(Container):
                 return False
         return True
 
-    def __repr__(self):
+    def __repr__(Map self):
         if not self:
             return 'i{}'
         return f'i{{{", ".join(map(lambda i: f"{repr(i[0])}: {repr(i[1])}", self.items()))}}}'
@@ -2519,7 +2529,7 @@ cdef class Map(Container):
     def __getitem__(Map self, object key):
         return self._fbthrift_elements[key]
 
-    def __contains__(self, key):
+    def __contains__(Map self, key):
         if key is None:
             return False
         return key in self._fbthrift_elements
@@ -2533,7 +2543,7 @@ cdef class Map(Container):
     def values(Map self):
         return self._fbthrift_elements.values()
 
-    def items(self):
+    def items(Map self):
         return self._fbthrift_elements.items()
 
     def get(Map self, key, default=None):
@@ -2542,7 +2552,7 @@ cdef class Map(Container):
         except KeyError:
             return default
 
-    def _fbthrift_same_type(self, other_key_type, other_val_type):
+    def _fbthrift_same_type(Map self, other_key_type, other_val_type):
         return (
             self._fbthrift_key_info.same_as(other_key_type) and
             self._fbthrift_val_info.same_as(other_val_type)

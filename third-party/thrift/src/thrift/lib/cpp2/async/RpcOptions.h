@@ -196,6 +196,26 @@ class RpcOptions {
   RpcOptions& setRoutingObjectiveKey(std::string routingKey);
   const std::string& getRoutingObjectiveKey() const;
 
+  /**
+   * You most likely DO NOT want to use this adapter. Please contact the Thrift
+   * team if you think you need this.
+   *
+   * This controls if during frame serialization we would try to align the data
+   * portion of the first field in the request struct w.r.t. the frame start.
+   * This would only be done if all of the following hold true:
+   * 1. The alignment can only be requested for the first entry of the of the
+   * first parameter of the Thrift RPC call.
+   * 2. The first field is a binary field and is using the PaddedBinaryAdapter.
+   * 3. The first field is sufficiently padded using the PaddedBinaryAdapter
+   * (padding must be >= requested alignment).
+   * 4. Binary protocol must be used for data serialization.
+   * 5. Frame type must be REQUEST_RESPONSE.
+   * 6. The frame must NOT be fragmented.
+   * 7. Rocket must be used for transport.
+   */
+  RpcOptions& setFrameRelativeDataAlignment(uint32_t alignment);
+  uint32_t getFrameRelativeDataAlignment() const;
+
  private:
   using timeout_ms_t = uint32_t;
   timeout_ms_t timeout_{0};
@@ -243,6 +263,10 @@ class RpcOptions {
 
   // A routing objective key that affects the global routing behavior.
   std::string routingObjectiveKey_;
+
+  // This controls the alignment of the data portion of the first entry
+  // of the first parameter of the Thrift RPC call w.r.t. the frame start.
+  uint32_t frameRelativeDataAlignmentBytes_{0};
 };
 
 } // namespace apache::thrift

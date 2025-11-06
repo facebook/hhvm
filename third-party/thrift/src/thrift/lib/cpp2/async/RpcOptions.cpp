@@ -314,4 +314,14 @@ RpcOptions& RpcOptions::setRoutingObjectiveKey(
 const std::string& RpcOptions::getRoutingObjectiveKey() const {
   return routingObjectiveKey_;
 }
+
+RpcOptions& RpcOptions::setFrameRelativeDataAlignment(uint32_t alignment) {
+  frameRelativeDataAlignmentBytes_ = alignment;
+  return *this;
+}
+
+uint32_t RpcOptions::getFrameRelativeDataAlignment() const {
+  return frameRelativeDataAlignmentBytes_;
+}
+
 } // namespace apache::thrift

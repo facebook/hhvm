@@ -1015,6 +1015,12 @@ void RocketClientChannel::sendThriftRequest(
         rpcOptions.copySocketFdsToSend(),
         encodeMetadataUsingBinary(),
         getTransportWrapper());
+    requestPayload.setDataFirstFieldAlignment(
+        rpcOptions.getFrameRelativeDataAlignment());
+    if (metadata.protocol()) {
+      requestPayload.setDataSerializationProtocol(
+          static_cast<ProtocolType>(*metadata.protocol()));
+    }
   } catch (std::exception const& ex) {
     auto err = folly::make_exception_wrapper<transport::TTransportException>(
         transport::TTransportException::TTransportExceptionType::UNKNOWN,

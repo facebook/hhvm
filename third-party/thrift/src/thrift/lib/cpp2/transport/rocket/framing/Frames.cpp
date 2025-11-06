@@ -39,6 +39,8 @@
 
 namespace apache::thrift::rocket {
 
+// You most likely DO NOT want to use this. If you think you do, please contact
+// the Thrift team.
 THRIFT_FLAG_DEFINE_bool(rocket_enable_frame_relative_alignment, false);
 
 namespace {

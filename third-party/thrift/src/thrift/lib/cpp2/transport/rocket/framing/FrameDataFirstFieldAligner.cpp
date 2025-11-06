@@ -59,6 +59,13 @@ bool FrameDataFirstFieldAligner<Frame>::validateAlignmentRequest() {
     return false;
   }
 
+  DCHECK(frame_.payload().metadataAndDataSize() <= kMaxFragmentedPayloadSize)
+      << "Fragmented payload";
+  if (frame_.payload().metadataAndDataSize() > kMaxFragmentedPayloadSize) {
+    FB_LOG_ONCE(ERROR) << "Fragmented payload cannot be aligned!";
+    return false;
+  }
+
   DCHECK(frame_.payload().dataSerializationProtocol() != std::nullopt)
       << "No data serialization protocol specified!";
   if (frame_.payload().dataSerializationProtocol() == std::nullopt) {

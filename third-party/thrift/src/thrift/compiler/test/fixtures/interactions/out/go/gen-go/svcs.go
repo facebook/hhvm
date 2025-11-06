@@ -823,6 +823,9 @@ func (p *BoxedInteractionProcessor) OnTermination() {
 
 type MyService interface {
     Foo(ctx context.Context) (error)
+    Interact(ctx context.Context, arg int32) (*MyInteractionProcessor, error)
+    InteractFast(ctx context.Context) (*MyInteractionFastProcessor, int32, error)
+    Serialize(ctx context.Context) (*SerialInteractionProcessor, int32, func(context.Context, chan<- int32) error, error)
 }
 
 type MyServiceClient interface {
@@ -981,7 +984,13 @@ func NewMyServiceProcessor(handler MyService) *MyServiceProcessor {
         functionServiceMap:   make(map[string]string),
     }
     p.AddToProcessorFunctionMap("foo", &procFuncMyServiceFoo{handler: handler})
+    p.AddToProcessorFunctionMap("interact", &procFuncMyServiceInteract{handler: handler})
+    p.AddToProcessorFunctionMap("interactFast", &procFuncMyServiceInteractFast{handler: handler})
+    p.AddToProcessorFunctionMap("serialize", &procFuncMyServiceSerialize{handler: handler})
     p.AddToFunctionServiceMap("foo", "MyService")
+    p.AddToFunctionServiceMap("interact", "MyService")
+    p.AddToFunctionServiceMap("interactFast", "MyService")
+    p.AddToFunctionServiceMap("serialize", "MyService")
 
     return p
 }
@@ -1037,8 +1046,119 @@ func (p *procFuncMyServiceFoo) RunContext(ctx context.Context, reqStruct thrift.
     return result, nil
 }
 
+type procFuncMyServiceInteract struct {
+    handler MyService
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncMyServiceInteract)(nil)
+
+func (p *procFuncMyServiceInteract) NewReqArgs() thrift.ReadableStruct {
+    return newReqMyServiceInteract()
+}
+
+func (p *procFuncMyServiceInteract) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    args := reqStruct.(*reqMyServiceInteract)
+    result := newRespMyServiceInteract()
+    fbthriftInteraction, err := p.handler.Interact(ctx, args.Arg)
+    if err != nil {
+        internalErr := fmt.Errorf("Internal error processing Interact: %w", err)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        return x, internalErr
+    }
+
+    thrift.SetInteractionCreateProcessor(ctx, fbthriftInteraction)
+    return result, nil
+}
+
+type procFuncMyServiceInteractFast struct {
+    handler MyService
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncMyServiceInteractFast)(nil)
+
+func (p *procFuncMyServiceInteractFast) NewReqArgs() thrift.ReadableStruct {
+    return newReqMyServiceInteractFast()
+}
+
+func (p *procFuncMyServiceInteractFast) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    result := newRespMyServiceInteractFast()
+    fbthriftInteraction, retval, err := p.handler.InteractFast(ctx)
+    if err != nil {
+        internalErr := fmt.Errorf("Internal error processing InteractFast: %w", err)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        return x, internalErr
+    }
+
+    thrift.SetInteractionCreateProcessor(ctx, fbthriftInteraction)
+    result.Success = &retval
+    return result, nil
+}
+
+type procFuncMyServiceSerialize struct {
+    handler MyService
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncMyServiceSerialize)(nil)
+
+func (p *procFuncMyServiceSerialize) NewReqArgs() thrift.ReadableStruct {
+    return newReqMyServiceSerialize()
+}
+
+func (p *procFuncMyServiceSerialize) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    return nil, errors.New("not supported")
+}
+
+func (p *procFuncMyServiceSerialize) RunStreamContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onStreamNext func(thrift.WritableStruct),
+    onStreamComplete func(),
+) {
+    firstResponse := newRespMyServiceSerialize()
+    fbthriftInteraction, retval, elemProducerFunc, initialErr := p.handler.Serialize(ctx)
+    if initialErr != nil {
+        internalErr := fmt.Errorf("Internal error processing Serialize: %w", initialErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFirstResponse(x)
+        onStreamComplete()
+        return
+    }
+
+    thrift.SetInteractionCreateProcessor(ctx, fbthriftInteraction)
+    firstResponse.Success = &retval
+    onFirstResponse(firstResponse)
+
+    fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
+    var senderWg sync.WaitGroup
+    senderWg.Add(1)
+    // Sender goroutine (receives elements on the channel and sends them out via onStreamNext)
+    go func() {
+        defer senderWg.Done()
+        for elem := range fbthriftElemChan {
+            streamWrapStruct := newStreamMyServiceSerialize()
+            streamWrapStruct.Success = &elem
+            onStreamNext(streamWrapStruct)
+        }
+    }()
+
+    streamErr := elemProducerFunc(ctx, fbthriftElemChan)
+    // Stream is complete. Close the channel and wait for the sender goroutine to finish.
+    close(fbthriftElemChan)
+    senderWg.Wait()
+    if streamErr != nil {
+        internalErr := fmt.Errorf("Internal stream handler error Serialize: %w", streamErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onStreamNext(x)
+    }
+    onStreamComplete()
+}
+
 type Factories interface {
     Foo(ctx context.Context) (error)
+    Interact(ctx context.Context, arg int32) (*MyInteractionProcessor, error)
+    InteractFast(ctx context.Context) (*MyInteractionFastProcessor, int32, error)
+    Serialize(ctx context.Context) (*SerialInteractionProcessor, int32, func(context.Context, chan<- int32) error, error)
 }
 
 type FactoriesClient interface {
@@ -1197,7 +1317,13 @@ func NewFactoriesProcessor(handler Factories) *FactoriesProcessor {
         functionServiceMap:   make(map[string]string),
     }
     p.AddToProcessorFunctionMap("foo", &procFuncFactoriesFoo{handler: handler})
+    p.AddToProcessorFunctionMap("interact", &procFuncFactoriesInteract{handler: handler})
+    p.AddToProcessorFunctionMap("interactFast", &procFuncFactoriesInteractFast{handler: handler})
+    p.AddToProcessorFunctionMap("serialize", &procFuncFactoriesSerialize{handler: handler})
     p.AddToFunctionServiceMap("foo", "Factories")
+    p.AddToFunctionServiceMap("interact", "Factories")
+    p.AddToFunctionServiceMap("interactFast", "Factories")
+    p.AddToFunctionServiceMap("serialize", "Factories")
 
     return p
 }
@@ -1251,6 +1377,114 @@ func (p *procFuncFactoriesFoo) RunContext(ctx context.Context, reqStruct thrift.
     }
 
     return result, nil
+}
+
+type procFuncFactoriesInteract struct {
+    handler Factories
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncFactoriesInteract)(nil)
+
+func (p *procFuncFactoriesInteract) NewReqArgs() thrift.ReadableStruct {
+    return newReqFactoriesInteract()
+}
+
+func (p *procFuncFactoriesInteract) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    args := reqStruct.(*reqFactoriesInteract)
+    result := newRespFactoriesInteract()
+    fbthriftInteraction, err := p.handler.Interact(ctx, args.Arg)
+    if err != nil {
+        internalErr := fmt.Errorf("Internal error processing Interact: %w", err)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        return x, internalErr
+    }
+
+    thrift.SetInteractionCreateProcessor(ctx, fbthriftInteraction)
+    return result, nil
+}
+
+type procFuncFactoriesInteractFast struct {
+    handler Factories
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncFactoriesInteractFast)(nil)
+
+func (p *procFuncFactoriesInteractFast) NewReqArgs() thrift.ReadableStruct {
+    return newReqFactoriesInteractFast()
+}
+
+func (p *procFuncFactoriesInteractFast) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    result := newRespFactoriesInteractFast()
+    fbthriftInteraction, retval, err := p.handler.InteractFast(ctx)
+    if err != nil {
+        internalErr := fmt.Errorf("Internal error processing InteractFast: %w", err)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        return x, internalErr
+    }
+
+    thrift.SetInteractionCreateProcessor(ctx, fbthriftInteraction)
+    result.Success = &retval
+    return result, nil
+}
+
+type procFuncFactoriesSerialize struct {
+    handler Factories
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncFactoriesSerialize)(nil)
+
+func (p *procFuncFactoriesSerialize) NewReqArgs() thrift.ReadableStruct {
+    return newReqFactoriesSerialize()
+}
+
+func (p *procFuncFactoriesSerialize) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    return nil, errors.New("not supported")
+}
+
+func (p *procFuncFactoriesSerialize) RunStreamContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onStreamNext func(thrift.WritableStruct),
+    onStreamComplete func(),
+) {
+    firstResponse := newRespFactoriesSerialize()
+    fbthriftInteraction, retval, elemProducerFunc, initialErr := p.handler.Serialize(ctx)
+    if initialErr != nil {
+        internalErr := fmt.Errorf("Internal error processing Serialize: %w", initialErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFirstResponse(x)
+        onStreamComplete()
+        return
+    }
+
+    thrift.SetInteractionCreateProcessor(ctx, fbthriftInteraction)
+    firstResponse.Success = &retval
+    onFirstResponse(firstResponse)
+
+    fbthriftElemChan := make(chan int32, thrift.DefaultStreamBufferSize)
+    var senderWg sync.WaitGroup
+    senderWg.Add(1)
+    // Sender goroutine (receives elements on the channel and sends them out via onStreamNext)
+    go func() {
+        defer senderWg.Done()
+        for elem := range fbthriftElemChan {
+            streamWrapStruct := newStreamFactoriesSerialize()
+            streamWrapStruct.Success = &elem
+            onStreamNext(streamWrapStruct)
+        }
+    }()
+
+    streamErr := elemProducerFunc(ctx, fbthriftElemChan)
+    // Stream is complete. Close the channel and wait for the sender goroutine to finish.
+    close(fbthriftElemChan)
+    senderWg.Wait()
+    if streamErr != nil {
+        internalErr := fmt.Errorf("Internal stream handler error Serialize: %w", streamErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onStreamNext(x)
+    }
+    onStreamComplete()
 }
 
 type Perform interface {
@@ -1483,6 +1717,7 @@ func (p *procFuncInteractWithSharedDoSomeSimilarThings) RunContext(ctx context.C
 }
 
 type BoxService interface {
+    GetABoxSession(ctx context.Context, req *ShouldBeBoxed) (*BoxedInteractionProcessor, *ShouldBeBoxed, error)
 }
 
 type BoxServiceClient interface {
@@ -1540,6 +1775,8 @@ func NewBoxServiceProcessor(handler BoxService) *BoxServiceProcessor {
         processorFunctionMap: make(map[string]thrift.ProcessorFunction),
         functionServiceMap:   make(map[string]string),
     }
+    p.AddToProcessorFunctionMap("getABoxSession", &procFuncBoxServiceGetABoxSession{handler: handler})
+    p.AddToFunctionServiceMap("getABoxSession", "BoxService")
 
     return p
 }
@@ -1572,4 +1809,29 @@ func (p *BoxServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.BoxService")
 }
 
+
+type procFuncBoxServiceGetABoxSession struct {
+    handler BoxService
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncBoxServiceGetABoxSession)(nil)
+
+func (p *procFuncBoxServiceGetABoxSession) NewReqArgs() thrift.ReadableStruct {
+    return newReqBoxServiceGetABoxSession()
+}
+
+func (p *procFuncBoxServiceGetABoxSession) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    args := reqStruct.(*reqBoxServiceGetABoxSession)
+    result := newRespBoxServiceGetABoxSession()
+    fbthriftInteraction, retval, err := p.handler.GetABoxSession(ctx, args.Req)
+    if err != nil {
+        internalErr := fmt.Errorf("Internal error processing GetABoxSession: %w", err)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        return x, internalErr
+    }
+
+    thrift.SetInteractionCreateProcessor(ctx, fbthriftInteraction)
+    result.Success = retval
+    return result, nil
+}
 

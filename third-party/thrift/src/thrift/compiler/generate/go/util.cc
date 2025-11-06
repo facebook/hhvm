@@ -524,8 +524,7 @@ bool is_func_go_client_supported(const t_function* func) {
 
 bool is_func_go_server_supported(const t_function* func) {
   // "Interaction constructor" is a legacy API, which we will not support.
-  return !func->sink() && !func->interaction() &&
-      !func->is_interaction_constructor();
+  return !func->sink() && !func->is_interaction_constructor();
 }
 
 bool is_go_reserved_word(const std::string& value) {

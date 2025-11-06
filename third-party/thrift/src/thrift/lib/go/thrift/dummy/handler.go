@@ -129,3 +129,16 @@ func (h *DummyHandler) ResponseAndStreamWithUndeclaredException(_ context.Contex
 	}
 	return 0, elemProducerFunc, errors.New("undeclared exception")
 }
+
+func (h *DummyHandler) CreateSummer(_ context.Context) (*dummy.SummerProcessor, error) {
+	return dummy.NewSummerProcessor(&SummerHandler{}), nil
+}
+
+type SummerHandler struct {
+	sum int32
+}
+
+func (h *SummerHandler) Add(_ context.Context, val int32) (int32, error) {
+	h.sum += val
+	return h.sum, nil
+}

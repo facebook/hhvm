@@ -26,7 +26,7 @@ func (p *{{> svc/proc_func_name}}) RunContext(ctx context.Context, reqStruct thr
     {{^function:oneway?}}
     result := newResp{{service:go_name}}{{function:go_name}}()
     {{/function:oneway?}}
-    {{#function:return_type}}{{^type:void?}}retval, {{/type:void?}}{{/function:return_type}}err := p.handler.{{function:go_name}}({{!
+    {{#function:creates_interaction?}}fbthriftInteraction, {{/function:creates_interaction?}}{{#function:return_type}}{{^type:void?}}retval, {{/type:void?}}{{/function:return_type}}err := p.handler.{{function:go_name}}({{!
         }}ctx{{#if function:params.fields?}}, {{/if}}{{!
         }}{{#function:args}}{{!
           }}args.{{field:go_name}}{{!
@@ -53,6 +53,9 @@ func (p *{{> svc/proc_func_name}}) RunContext(ctx context.Context, reqStruct thr
         {{/function:exceptions?}}
     }
 
+    {{#function:creates_interaction?}}
+    thrift.SetInteractionCreateProcessor(ctx, fbthriftInteraction)
+    {{/function:creates_interaction?}}
     {{#function:return_type}}
     {{^type:void?}}
     result.{{function:retval_field_name}} = {{^type:nilable?}}&{{/type:nilable?}}retval

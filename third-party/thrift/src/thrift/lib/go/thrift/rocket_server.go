@@ -55,10 +55,6 @@ type rocketServer struct {
 	observer                ServerObserver
 	maxRequests             int64
 	totalActiveRequestCount atomic.Int64
-
-	// InteractionID to interaction processor map
-	interactions      map[int64]Processor
-	interactionsMutex sync.Mutex
 }
 
 func newRocketServer(proc Processor, listener net.Listener, opts *serverOptions) Server {
@@ -77,8 +73,6 @@ func newRocketServer(proc Processor, listener net.Listener, opts *serverOptions)
 		stats:       opts.serverStats,
 		observer:    opts.serverObserver,
 		maxRequests: opts.maxRequests,
-
-		interactions: make(map[int64]Processor),
 	}
 }
 
@@ -98,8 +92,6 @@ func newUpgradeToRocketServer(proc Processor, listener net.Listener, opts *serve
 		stats:       opts.serverStats,
 		observer:    opts.serverObserver,
 		maxRequests: opts.maxRequests,
-
-		interactions: make(map[int64]Processor),
 	}
 }
 
@@ -140,11 +132,12 @@ func (s *rocketServer) acceptor(ctx context.Context, setup payload.SetupPayload,
 		return nil, err
 	}
 	sendingSocket.MetadataPush(serverMetadataPush)
+	socket := newRocketServerSocket(s)
 	return rsocket.NewAbstractSocket(
-		rsocket.MetadataPush(s.metadataPush),
-		rsocket.RequestResponse(s.requestResponse),
-		rsocket.FireAndForget(s.fireAndForget),
-		rsocket.RequestStream(s.requestStream),
+		rsocket.MetadataPush(socket.metadataPush),
+		rsocket.RequestResponse(socket.requestResponse),
+		rsocket.FireAndForget(socket.fireAndForget),
+		rsocket.RequestStream(socket.requestStream),
 	), nil
 }
 
@@ -190,7 +183,24 @@ func (s *rocketServer) loadFn() uint {
 	return uint(1000. * float64(working) / denominator)
 }
 
-func (s *rocketServer) metadataPush(msg payload.Payload) {
+type rocketServerSocket struct {
+	*rocketServer
+
+	// InteractionID to interaction processor map
+	interactions      map[int64]Processor
+	interactionsMutex sync.Mutex
+}
+
+func newRocketServerSocket(
+	server *rocketServer,
+) *rocketServerSocket {
+	return &rocketServerSocket{
+		rocketServer: server,
+		interactions: make(map[int64]Processor),
+	}
+}
+
+func (s *rocketServerSocket) metadataPush(msg payload.Payload) {
 	// TODO: this clone helps prevent a race-condition where the payload gets
 	// released by the underlying rsocket layer before we are done with it.
 	msg = payload.Clone(msg)
@@ -221,7 +231,7 @@ func (s *rocketServer) metadataPush(msg payload.Payload) {
 	}
 }
 
-func (s *rocketServer) requestResponse(msg payload.Payload) mono.Mono {
+func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 	// TODO: this clone helps prevent a race-condition where the payload gets
 	// released by the underlying rsocket layer before we are done with it.
 	msg = payload.Clone(msg)
@@ -266,12 +276,35 @@ func (s *rocketServer) requestResponse(msg payload.Payload) mono.Mono {
 		processDelay := processStartTime.Sub(requestReceivedTime)
 		s.observer.ProcessDelay(processDelay)
 
+		processor := s.proc
+		if metadata.InteractionCreate != nil {
+			ctx = types.WithInteractionCreateContext(ctx)
+		} else if metadata.InteractionId != nil {
+			s.interactionsMutex.Lock()
+			interactionProcessor, ok := s.interactions[*metadata.InteractionId]
+			s.interactionsMutex.Unlock()
+			if !ok {
+				return nil, fmt.Errorf("unknown interaction id: %d", *metadata.InteractionId)
+			}
+			processor = interactionProcessor
+		}
+
 		// Track actual handler execution time
-		appException, err := process(ctx, s.proc, protocol, s.pstats, s.observer)
+		appException, err := process(ctx, processor, protocol, s.pstats, s.observer)
 		if err != nil {
 			// Notify observer that connection was dropped due to unparseable message begin
 			s.observer.ConnDropped()
 			return nil, err
+		}
+
+		if metadata.InteractionCreate != nil && appException == nil {
+			proc := types.GetInteractionCreateProcessor(ctx).(Processor)
+			if proc == nil {
+				return nil, fmt.Errorf("handler returned nil interaction processor: %d", metadata.InteractionCreate.InteractionId)
+			}
+			s.interactionsMutex.Lock()
+			s.interactions[metadata.InteractionCreate.InteractionId] = proc
+			s.interactionsMutex.Unlock()
 		}
 
 		protocol.setRequestHeader(LoadHeaderKey, fmt.Sprintf("%d", s.loadFn()))
@@ -306,7 +339,7 @@ func (s *rocketServer) requestResponse(msg payload.Payload) mono.Mono {
 	return mono.FromFunc(workItem)
 }
 
-func (s *rocketServer) fireAndForget(msg payload.Payload) {
+func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 	// TODO: this clone helps prevent a race-condition where the payload gets
 	// released by the underlying rsocket layer before we are done with it.
 	msg = payload.Clone(msg)
@@ -365,7 +398,7 @@ func (s *rocketServer) fireAndForget(msg payload.Payload) {
 	s.observer.ProcessTime(processTime)
 }
 
-func (s *rocketServer) requestStream(msg payload.Payload) flux.Flux {
+func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 	// TODO: this clone helps prevent a race-condition where the payload gets
 	// released by the underlying rsocket layer before we are done with it.
 	msg = payload.Clone(msg)

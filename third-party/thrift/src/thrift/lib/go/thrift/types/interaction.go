@@ -16,14 +16,40 @@
 
 package types
 
+import (
+	"context"
+)
+
 type interactionContextKey int
 
 const (
-	interactionCreateKey interactionContextKey = 1
-	interactionIDKey     interactionContextKey = 2
+	interactionCreateKey interactionContextKey = iota + 1
+	interactionIDKey
+	interactionServerCreateKey
 )
 
 // Terminable is implemented by an interaction processor.
 type Terminable interface {
 	OnTermination()
+}
+
+// Note: Processor propagation via context is a temporary workaround.
+// It's not very idiomatic or clean, but it allows us to support
+// interactions a lot easier than if we had to change the codegen API.
+
+func WithInteractionCreateContext(ctx context.Context) context.Context {
+	value := map[int64]any{}
+	return context.WithValue(ctx, interactionServerCreateKey, value)
+}
+
+func GetInteractionCreateProcessor(ctx context.Context) any {
+	value := ctx.Value(interactionServerCreateKey).(map[int64]any)
+	return value[0]
+}
+
+func SetInteractionCreateProcessor(ctx context.Context, proc any) {
+	value := ctx.Value(interactionServerCreateKey).(map[int64]any)
+	if value != nil {
+		value[0] = proc
+	}
 }

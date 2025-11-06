@@ -196,6 +196,28 @@ func (h *rpcConformanceServiceHandler) StreamInitialTimeout(ctx context.Context,
 	return nil, errors.New("not supported")
 }
 
+func (h *rpcConformanceServiceHandler) BasicInteractionFactoryFunction(ctx context.Context, initialSum int32) (*rpc.BasicInteractionProcessor, error) {
+	if h.instruction.InteractionFactoryFunction != nil {
+		requestValue := rpc.NewInteractionFactoryFunctionServerTestResult().SetInitialSum(initialSum)
+		h.result = rpc.NewServerTestResult().
+			SetInteractionFactoryFunction(requestValue)
+	} else if h.instruction.InteractionPersistsState != nil {
+		requestValue := rpc.NewInteractionPersistsStateServerTestResult()
+		h.result = rpc.NewServerTestResult().
+			SetInteractionPersistsState(requestValue)
+	} else if h.instruction.InteractionTermination != nil {
+		requestValue := rpc.NewInteractionTerminationServerTestResult().SetTerminationReceived(false)
+		h.result = rpc.NewServerTestResult().
+			SetInteractionTermination(requestValue)
+	}
+
+	interaction := &basicInteractionImpl{
+		initialSum: initialSum,
+		handler: h,
+	}
+	return rpc.NewBasicInteractionProcessor(interaction), nil
+}
+
 func (h *rpcConformanceServiceHandler) SendTestCase(ctx context.Context, testCase *rpc.RpcTestCase) error {
 	h.instruction = testCase.ServerInstruction
 	return nil
@@ -211,4 +233,31 @@ func (h *rpcConformanceServiceHandler) GetTestCase(ctx context.Context) (*rpc.Rp
 
 func (h *rpcConformanceServiceHandler) SendTestResult(ctx context.Context, result *rpc.ClientTestResult) error {
 	return errors.New("not implemented")
+}
+
+type basicInteractionImpl struct {
+	initialSum int32
+	// Parent handler
+	handler *rpcConformanceServiceHandler
+}
+
+// Compile time interface enforcer
+var _ rpc.BasicInteraction = (*basicInteractionImpl)(nil)
+
+func (b *basicInteractionImpl) Init(ctx context.Context) error {
+	b.initialSum = 0
+	return nil
+}
+
+func (b *basicInteractionImpl) Add(ctx context.Context, i int32) (int32, error) {
+	b.initialSum += i
+	return b.initialSum, nil
+}
+
+func (b *basicInteractionImpl) OnTermination() {
+	if b.handler.instruction.InteractionTermination != nil {
+		requestValue := rpc.NewInteractionTerminationServerTestResult().SetTerminationReceived(true)
+		b.handler.result = rpc.NewServerTestResult().
+			SetInteractionTermination(requestValue)
+	}
 }

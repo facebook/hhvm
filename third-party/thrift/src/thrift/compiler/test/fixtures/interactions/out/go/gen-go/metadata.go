@@ -119,6 +119,34 @@ var serviceMetadatas = func() []*metadata.ThriftService {
                     IsOneway:   false,
                     ReturnType: premadeThriftType_void,
                 },
+                &metadata.ThriftFunction{
+                    Name:       "interact",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_void,
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "arg",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i32,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "interactFast",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_i32,
+                },
+                &metadata.ThriftFunction{
+                    Name:       "serialize",
+                    IsOneway:   false,
+                    ReturnType: &metadata.ThriftType{
+                        TStream: &metadata.ThriftStreamType{
+                            ElemType: premadeThriftType_i32,
+                            InitialResponseType: premadeThriftType_i32,
+                        },
+                    },
+                },
             },
         },
     )
@@ -130,6 +158,34 @@ var serviceMetadatas = func() []*metadata.ThriftService {
                     Name:       "foo",
                     IsOneway:   false,
                     ReturnType: premadeThriftType_void,
+                },
+                &metadata.ThriftFunction{
+                    Name:       "interact",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_void,
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "arg",
+                            IsOptional: false,
+                            Type:       premadeThriftType_i32,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "interactFast",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_i32,
+                },
+                &metadata.ThriftFunction{
+                    Name:       "serialize",
+                    IsOneway:   false,
+                    ReturnType: &metadata.ThriftType{
+                        TStream: &metadata.ThriftStreamType{
+                            ElemType: premadeThriftType_i32,
+                            InitialResponseType: premadeThriftType_i32,
+                        },
+                    },
                 },
             },
         },
@@ -162,6 +218,19 @@ var serviceMetadatas = func() []*metadata.ThriftService {
         &metadata.ThriftService{
             Name:      "module.BoxService",
             Functions: []*metadata.ThriftFunction{
+                &metadata.ThriftFunction{
+                    Name:       "getABoxSession",
+                    IsOneway:   false,
+                    ReturnType: premadeThriftType_module_ShouldBeBoxed,
+                    Arguments:  []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "req",
+                            IsOptional: false,
+                            Type:       premadeThriftType_module_ShouldBeBoxed,
+                        },
+                    },
+                },
             },
         },
     )

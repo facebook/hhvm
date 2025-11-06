@@ -38,6 +38,10 @@ safe permanent server exception DummyException {
   1: string message;
 }
 
+interaction Summer {
+  i32 add(1: i32 val);
+}
+
 service Dummy {
   void Ping();
   string Echo(1: string value);
@@ -55,6 +59,8 @@ service Dummy {
     1: DummyException ex,
   );
   i32, stream<i32> ResponseAndStreamWithUndeclaredException();
+
+  Summer createSummer();
 }
 
 service DummyTwo {

@@ -773,4 +773,22 @@ func TestProcessorScenarios(t *testing.T) {
 		require.Error(t, err)
 		require.ErrorContains(t, err, "undeclared exception")
 	})
+	t.Run("interaction", func(t *testing.T) {
+		client := dummyif.NewDummyChannelClient(channel)
+
+		summerChannel, err := client.CreateSummer(context.Background())
+		require.NoError(t, err)
+		res, err := summerChannel.Add(context.Background(), 5)
+		require.NoError(t, err)
+		require.EqualValues(t, 5, res)
+		res, err = summerChannel.Add(context.Background(), 7)
+		require.NoError(t, err)
+		require.EqualValues(t, 12, res)
+		res, err = summerChannel.Add(context.Background(), 8)
+		require.NoError(t, err)
+		require.EqualValues(t, 20, res)
+
+		err = client.Close()
+		require.NoError(t, err)
+	})
 }

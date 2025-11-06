@@ -217,6 +217,12 @@ enum EmptyEnum {
 
 union EmptyUnion {}
 
+struct SimpleStruct {
+  1: string name;
+  2: i32 value;
+  3: string city;
+}
+
 struct StringBucket {
   1: string one;
   2: optional string two;

@@ -68,6 +68,7 @@ from testing.thrift_types import (
     Perm,
     Reserved,
     Runtime,
+    SimpleStruct,
     StringBucket,
     StructDisabledFieldCache,
     StructuredAnnotation,
@@ -642,6 +643,35 @@ class StructTests(unittest.TestCase):
                     "a.b.c.val": 256,
                 },
             )
+
+    def test_isset_struct_for_equality_and_hash(self) -> None:
+        """
+        Test that isset flags don't affect struct equality and hash.
+        """
+        # Create s1 with some fields explicitly set to default value (isset=true)
+        s1 = SimpleStruct(value=0, name="", city="NY")
+
+        # Create s2 without setting the value and name (isset=false, uses default)
+        s2 = SimpleStruct(city="NY")
+
+        self.assertEqual(s1, s2)
+        self.assertEqual(hash(s1), hash(s2))
+        self.assertEqual(len({s1, s2}), 1)
+
+        # But isset flags should differ
+        self.assertNotEqual(isset(s1), isset(s2))
+
+        # s1 has fields explicitly set
+        self.assertTrue(isset(s1)["value"])
+        self.assertTrue(isset(s1)["name"])
+        self.assertTrue(isset(s1)["city"])
+        self.assertEqual(isset(s1), {"name": True, "value": True, "city": True})
+
+        # s2 has fields unset (using defaults)
+        self.assertFalse(isset(s2)["value"])
+        self.assertFalse(isset(s2)["name"])
+        self.assertTrue(isset(s2)["city"])
+        self.assertEqual(isset(s2), {"name": False, "value": False, "city": True})
 
 
 @parameterized_class(

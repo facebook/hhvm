@@ -20,18 +20,18 @@ namespace thrift {
 namespace detail {
 template <> struct TSchemaAssociation<::some::valid::ns::EmptyService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 7015249176354003585;
-  static constexpr ::std::string_view definitionKey = {"\x55\x93\x05\x8b\x4e\x1d\x3f\x2c\xf1\x08\x21\xb9\xf4\x2d\x0c\x15", 16};
+  static constexpr int64_t programId = 7310692166277539174;
+  static constexpr ::std::string_view definitionKey = {"\xf0\x86\x30\xf7\xab\x0b\xe7\x2b\xaa\xf5\x14\x74\x1e\xd7\xb2\x00", 16};
 };
 template <> struct TSchemaAssociation<::some::valid::ns::ReturnService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 7015249176354003585;
-  static constexpr ::std::string_view definitionKey = {"\x4e\xc4\x42\xc9\x22\xaa\x49\x12\x4b\x56\x6b\x0c\xf6\x79\x5f\x8a", 16};
+  static constexpr int64_t programId = 7310692166277539174;
+  static constexpr ::std::string_view definitionKey = {"\xf8\x47\xee\x58\x80\xaf\x95\xc6\xb2\x68\x9e\x73\x3f\xf5\x07\xec", 16};
 };
 template <> struct TSchemaAssociation<::some::valid::ns::ParamService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 7015249176354003585;
-  static constexpr ::std::string_view definitionKey = {"\x9b\xf2\x42\x9a\x0a\xd1\x3d\xda\xeb\xaf\xf8\xf4\x7f\xb1\x09\xb6", 16};
+  static constexpr int64_t programId = 7310692166277539174;
+  static constexpr ::std::string_view definitionKey = {"\x8b\xd3\x86\xa6\xb7\xe2\xdf\xa5\xad\x73\xc9\x7d\xa3\xad\xb8\xf5", 16};
 };
 namespace md {
 using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
@@ -52,6 +52,7 @@ void EnumMetadata<::some::valid::ns::AnnotatedEnum>::gen(ThriftMetadata& metadat
   if (res.preExists) {
     return;
   }
+  res.metadata.structured_annotations()->push_back(*cvStruct("thrift.DeprecatedUnvalidatedAnnotations", { {"items", cvMap({ cvPair(cvString("cpp.declare_bitwise_ops"), cvString("1")) }) } }).cv_struct());
   res.metadata.structured_annotations()->push_back(*cvStruct("cpp.EnumType", { {"type", cvInteger(4) } }).cv_struct());
 }
 void EnumMetadata<::some::valid::ns::AnnotatedEnum2>::gen(ThriftMetadata& metadata) {
@@ -59,6 +60,7 @@ void EnumMetadata<::some::valid::ns::AnnotatedEnum2>::gen(ThriftMetadata& metada
   if (res.preExists) {
     return;
   }
+  res.metadata.structured_annotations()->push_back(*cvStruct("thrift.DeprecatedUnvalidatedAnnotations", { {"items", cvMap({ cvPair(cvString("cpp.declare_bitwise_ops"), cvString("1")) }) } }).cv_struct());
   res.metadata.structured_annotations()->push_back(*cvStruct("cpp.EnumType", { {"type", cvInteger(2) } }).cv_struct());
 }
 void EnumMetadata<::some::valid::ns::MyEnumB>::gen(ThriftMetadata& metadata) {
@@ -106,6 +108,7 @@ StructMetadata<::some::valid::ns::ASimpleStruct>::gen(ThriftMetadata& metadata) 
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_ASimpleStruct.fields()[i++].type() = std::move(type);
   }
+  module_ASimpleStruct.structured_annotations()->push_back(*cvStruct("thrift.DeprecatedUnvalidatedAnnotations", { {"items", cvMap({ cvPair(cvString("no_default_comparators"), cvString("1")) }) } }).cv_struct());
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -196,6 +199,7 @@ StructMetadata<::some::valid::ns::SimpleUnion>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_SimpleUnion.fields()[i++].type() = std::move(type);
   }
+  module_SimpleUnion.structured_annotations()->push_back(*cvStruct("thrift.DeprecatedUnvalidatedAnnotations", { {"items", cvMap({ cvPair(cvString("cpp.virtual"), cvString("1")) }) } }).cv_struct());
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -226,6 +230,7 @@ StructMetadata<::some::valid::ns::ComplexUnion>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_ComplexUnion.fields()[i++].type() = std::move(type);
   }
+  module_ComplexUnion.structured_annotations()->push_back(*cvStruct("thrift.DeprecatedUnvalidatedAnnotations", { {"items", cvMap({ cvPair(cvString("cpp.methods"), cvString("void foo(const std::string& bar) {}")) }) } }).cv_struct());
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -286,6 +291,7 @@ StructMetadata<::some::valid::ns::AnotherException>::gen(ThriftMetadata& metadat
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_AnotherException.fields()[i++].type() = std::move(type);
   }
+  module_AnotherException.structured_annotations()->push_back(*cvStruct("thrift.DeprecatedUnvalidatedAnnotations", { {"items", cvMap({ cvPair(cvString("cpp.virtual"), cvString("1")) }) } }).cv_struct());
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -316,6 +322,7 @@ StructMetadata<::some::valid::ns::containerStruct>::gen(ThriftMetadata& metadata
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_containerStruct.fields()[i++].type() = std::move(type);
   }
+  module_containerStruct.structured_annotations()->push_back(*cvStruct("thrift.DeprecatedUnvalidatedAnnotations", { {"items", cvMap({ cvPair(cvString("cpp.methods"), cvString("void foo(const std::string& bar) {}")), cvPair(cvString("cpp.noncopyable"), cvString("1")) }) } }).cv_struct());
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -346,6 +353,7 @@ StructMetadata<::some::valid::ns::MyIncludedStruct>::gen(ThriftMetadata& metadat
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_MyIncludedStruct.fields()[i++].type() = std::move(type);
   }
+  module_MyIncludedStruct.structured_annotations()->push_back(*cvStruct("thrift.DeprecatedUnvalidatedAnnotations", { {"items", cvMap({ cvPair(cvString("cpp2.declare_equal_to"), cvString("1")), cvPair(cvString("cpp2.declare_hash"), cvString("1")) }) } }).cv_struct());
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -376,6 +384,7 @@ StructMetadata<::some::valid::ns::AnnotatedStruct>::gen(ThriftMetadata& metadata
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_AnnotatedStruct.fields()[i++].type() = std::move(type);
   }
+  module_AnnotatedStruct.structured_annotations()->push_back(*cvStruct("thrift.DeprecatedUnvalidatedAnnotations", { {"items", cvMap({ cvPair(cvString("cpp.declare_equal_to"), cvString("1")), cvPair(cvString("cpp.declare_hash"), cvString("1")), cvPair(cvString("cpp.methods"), cvString("void foo(const std::string& bar) {}")), cvPair(cvString("cpp.noncopyable"), cvString("1")), cvPair(cvString("cpp.virtual"), cvString("1")) }) } }).cv_struct());
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -544,6 +553,7 @@ void ExceptionMetadata<::some::valid::ns::AnotherException>::gen(ThriftMetadata&
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_AnotherException.fields()[i++].type() = std::move(type);
   }
+  module_AnotherException.structured_annotations()->push_back(*cvStruct("thrift.DeprecatedUnvalidatedAnnotations", { {"items", cvMap({ cvPair(cvString("cpp.virtual"), cvString("1")) }) } }).cv_struct());
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::EmptyService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {

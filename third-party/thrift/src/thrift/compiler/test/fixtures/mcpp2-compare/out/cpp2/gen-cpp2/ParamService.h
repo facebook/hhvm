@@ -474,8 +474,8 @@ class ServiceHandler<::some::valid::ns::ParamService> : public apache::thrift::S
 namespace detail {
 template <> struct TSchemaAssociation<::some::valid::ns::ParamService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 7015249176354003585;
-  static constexpr ::std::string_view definitionKey = {"\x9b\xf2\x42\x9a\x0a\xd1\x3d\xda\xeb\xaf\xf8\xf4\x7f\xb1\x09\xb6", 16};
+  static constexpr int64_t programId = 7310692166277539174;
+  static constexpr ::std::string_view definitionKey = {"\x8b\xd3\x86\xa6\xb7\xe2\xdf\xa5\xad\x73\xc9\x7d\xa3\xad\xb8\xf5", 16};
 };
 }
 } // namespace apache::thrift

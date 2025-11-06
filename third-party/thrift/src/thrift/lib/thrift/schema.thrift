@@ -549,6 +549,11 @@ struct Function {
 
   /** The interaction type created by the function. */
   8: InterfaceRef interactionType;
+
+  /**
+   * Whether this function is an interaction constructor created by performs syntax.
+   */
+  9: bool isPerforms;
 }
 
 /**

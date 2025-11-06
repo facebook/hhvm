@@ -1310,6 +1310,12 @@ class FunctionNode final : folly::MoveOnly,
   folly::span<const Param> params() const { return params_; }
   folly::span<const Exception> exceptions() const;
 
+  /**
+   * Whether this function is an interaction constructor created by performs
+   * syntax.
+   */
+  bool isPerforms() const;
+
   FunctionNode(
       const detail::Resolver& resolver,
       const apache::thrift::type::DefinitionKey& parent,
@@ -1317,7 +1323,8 @@ class FunctionNode final : folly::MoveOnly,
       Response&& response,
       std::string_view name,
       std::vector<Param>&& params,
-      std::vector<Exception>&& exceptions);
+      std::vector<Exception>&& exceptions,
+      bool isPerforms);
 
   void printTo(
       tree_printer::scope& scope, detail::VisitationTracker& visited) const;
@@ -1327,6 +1334,7 @@ class FunctionNode final : folly::MoveOnly,
   Response response_;
   std::vector<Param> params_;
   std::vector<Exception> exceptions_;
+  bool isPerforms_;
 };
 
 class RpcInterfaceNode : detail::WithDefinition, detail::WithUri {

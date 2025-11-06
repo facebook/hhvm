@@ -550,6 +550,11 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
       ref->add_map(val("uri"), type_uri(*interaction));
       func_schema->add_map(val("interactionType"), std::move(ref));
     }
+    if (func.is_interaction_constructor()) {
+      auto is_performs = std::make_unique<t_const_value>();
+      is_performs->set_bool(true);
+      func_schema->add_map(val("isPerforms"), std::move(is_performs));
+    }
     if (!func.has_void_initial_response() ||
         (!func.sink_or_stream() && !func.interaction())) {
       const t_type* type = func.return_type().get_type();

@@ -296,14 +296,16 @@ FunctionNode::FunctionNode(
     Response&& response,
     std::string_view name,
     std::vector<Param>&& params,
-    std::vector<Exception>&& exceptions)
+    std::vector<Exception>&& exceptions,
+    bool isPerforms)
     : detail::WithResolver(resolver),
       detail::WithName(name),
       detail::WithAnnotations(std::move(annotations)),
       parent_(parent),
       response_(std::move(response)),
       params_(std::move(params)),
-      exceptions_(std::move(exceptions)) {}
+      exceptions_(std::move(exceptions)),
+      isPerforms_(isPerforms) {}
 
 const RpcInterfaceNode& FunctionNode::parent() const {
   return detail::lazyResolve(resolver(), parent_).asRpcInterface();
@@ -311,6 +313,10 @@ const RpcInterfaceNode& FunctionNode::parent() const {
 
 folly::span<const FunctionNode::Exception> FunctionNode::exceptions() const {
   return exceptions_;
+}
+
+bool FunctionNode::isPerforms() const {
+  return isPerforms_;
 }
 
 const ServiceNode* FOLLY_NULLABLE ServiceNode::baseService() const {

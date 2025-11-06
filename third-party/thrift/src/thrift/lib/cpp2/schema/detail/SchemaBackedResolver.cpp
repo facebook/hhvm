@@ -877,7 +877,8 @@ FunctionNode SchemaIndex::createFunction(
           std::move(sinkOrStream)),
       *function.name(),
       std::move(params),
-      collectExceptions(*function.exceptions()));
+      collectExceptions(*function.exceptions()),
+      *function.isPerforms());
 }
 
 std::vector<Annotation> SchemaIndex::createAnnotations(

@@ -113,6 +113,7 @@ service TestService {
   TestInteraction createInteraction();
   i32, stream<i32> createStream();
   TestInteraction, i32, stream<i32> createInteractionAndStream();
+  performs TestInteraction;
 }
 
 @thrift.Uri{value = "meta.com/thrift_test/StructWithCustomDefault"}

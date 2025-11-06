@@ -1260,6 +1260,19 @@ class FunctionPatch(
             self._patch,
             8,
             _fbthrift_python_types.StructTypeInfo(_fbthrift__apache__thrift__type__schema__thrift_types.InterfaceRef))
+    @property
+    def isPerforms(self) -> UnqualifiedFieldPatch[
+            builtins.bool,
+            BoolPatch]:
+
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> BoolPatch:
+            return patch.as_bool_patch()
+
+        return UnqualifiedFieldPatch(
+            cast_dynamic_patch_to_typed_field_patch,
+            self._patch,
+            9,
+            _fbthrift_python_types.typeinfo_bool)
 
     def to_safe_patch(self) -> _fbthrift_safe_patch_types.FunctionSafePatch:
         return _fbthrift_safe_patch_types.FunctionSafePatch(

@@ -71,7 +71,7 @@ constexpr size_t kLowEmergencySize = 128 << 20;
 #ifdef USE_PACKEDPTR
 constexpr uintptr_t kLowArenaMaxAddr = 1ull << 32;
 constexpr uintptr_t kMidArenaMaxAddr = 32ull << 30;
-constexpr size_t kLowSmallArenaSize = 512 << 20;
+constexpr size_t kLowSmallArenaSize = 128 << 20;
 #else
 constexpr uintptr_t kLowArenaMaxAddr = 1ull << 32;
 constexpr uintptr_t kMidArenaMaxAddr = kLowArenaMaxAddr;

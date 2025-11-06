@@ -38,20 +38,18 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_q
   DCHECK_EQ(*func.name() , "query");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField service_MyService_query_s_1;
-  service_MyService_query_s_1.id() = 1;
-  service_MyService_query_s_1.name() = "s";
-  service_MyService_query_s_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &service_MyService_query_s_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*service_MyService_query_s_1.id(), 1);
+  DCHECK_EQ(*service_MyService_query_s_1.name(), "s");
   auto service_MyService_query_s_1_type = std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct");
   service_MyService_query_s_1_type->writeAndGenType(*service_MyService_query_s_1.type(), metadata);
-  func.arguments()->push_back(std::move(service_MyService_query_s_1));
-  ::apache::thrift::metadata::ThriftField service_MyService_query_i_2;
-  service_MyService_query_i_2.id() = 2;
-  service_MyService_query_i_2.name() = "i";
-  service_MyService_query_i_2.is_optional() = false;
+  ::apache::thrift::metadata::ThriftField &service_MyService_query_i_2 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*service_MyService_query_i_2.id(), 2);
+  DCHECK_EQ(*service_MyService_query_i_2.name(), "i");
   auto service_MyService_query_i_2_type = std::make_unique<Struct<::cpp2::Included>>("includes.Included");
   service_MyService_query_i_2_type->writeAndGenType(*service_MyService_query_i_2.type(), metadata);
-  func.arguments()->push_back(std::move(service_MyService_query_i_2));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_has_arg_docs([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -59,20 +57,18 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_h
   DCHECK_EQ(*func.name() , "has_arg_docs");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField service_MyService_has_arg_docs_s_1;
-  service_MyService_has_arg_docs_s_1.id() = 1;
-  service_MyService_has_arg_docs_s_1.name() = "s";
-  service_MyService_has_arg_docs_s_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &service_MyService_has_arg_docs_s_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*service_MyService_has_arg_docs_s_1.id(), 1);
+  DCHECK_EQ(*service_MyService_has_arg_docs_s_1.name(), "s");
   auto service_MyService_has_arg_docs_s_1_type = std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct");
   service_MyService_has_arg_docs_s_1_type->writeAndGenType(*service_MyService_has_arg_docs_s_1.type(), metadata);
-  func.arguments()->push_back(std::move(service_MyService_has_arg_docs_s_1));
-  ::apache::thrift::metadata::ThriftField service_MyService_has_arg_docs_i_2;
-  service_MyService_has_arg_docs_i_2.id() = 2;
-  service_MyService_has_arg_docs_i_2.name() = "i";
-  service_MyService_has_arg_docs_i_2.is_optional() = false;
+  ::apache::thrift::metadata::ThriftField &service_MyService_has_arg_docs_i_2 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*service_MyService_has_arg_docs_i_2.id(), 2);
+  DCHECK_EQ(*service_MyService_has_arg_docs_i_2.name(), "i");
   auto service_MyService_has_arg_docs_i_2_type = std::make_unique<Struct<::cpp2::Included>>("includes.Included");
   service_MyService_has_arg_docs_i_2_type->writeAndGenType(*service_MyService_has_arg_docs_i_2.type(), metadata);
-  func.arguments()->push_back(std::move(service_MyService_has_arg_docs_i_2));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 

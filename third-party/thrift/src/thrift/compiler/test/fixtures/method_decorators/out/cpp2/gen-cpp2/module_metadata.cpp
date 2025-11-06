@@ -154,6 +154,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>
   DCHECK_EQ(*func.name() , "noop");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>::gen_echo([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -161,13 +163,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>
   DCHECK_EQ(*func.name() , "echo");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_DecoratedService_echo_text_1;
-  module_DecoratedService_echo_text_1.id() = 1;
-  module_DecoratedService_echo_text_1.name() = "text";
-  module_DecoratedService_echo_text_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_DecoratedService_echo_text_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_DecoratedService_echo_text_1.id(), 1);
+  DCHECK_EQ(*module_DecoratedService_echo_text_1.name(), "text");
   auto module_DecoratedService_echo_text_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   module_DecoratedService_echo_text_1_type->writeAndGenType(*module_DecoratedService_echo_text_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_DecoratedService_echo_text_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>::gen_increment([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -175,13 +177,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>
   DCHECK_EQ(*func.name() , "increment");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_DecoratedService_increment_num_1;
-  module_DecoratedService_increment_num_1.id() = 1;
-  module_DecoratedService_increment_num_1.name() = "num";
-  module_DecoratedService_increment_num_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_DecoratedService_increment_num_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_DecoratedService_increment_num_1.id(), 1);
+  DCHECK_EQ(*module_DecoratedService_increment_num_1.name(), "num");
   auto module_DecoratedService_increment_num_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_DecoratedService_increment_num_1_type->writeAndGenType(*module_DecoratedService_increment_num_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_DecoratedService_increment_num_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>::gen_sum([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -189,13 +191,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>
   DCHECK_EQ(*func.name() , "sum");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_DecoratedService_sum_nums_1;
-  module_DecoratedService_sum_nums_1.id() = 1;
-  module_DecoratedService_sum_nums_1.name() = "nums";
-  module_DecoratedService_sum_nums_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_DecoratedService_sum_nums_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_DecoratedService_sum_nums_1.id(), 1);
+  DCHECK_EQ(*module_DecoratedService_sum_nums_1.name(), "nums");
   auto module_DecoratedService_sum_nums_1_type = std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE));
   module_DecoratedService_sum_nums_1_type->writeAndGenType(*module_DecoratedService_sum_nums_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_DecoratedService_sum_nums_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>::gen_withStruct([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -203,13 +205,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>
   DCHECK_EQ(*func.name() , "withStruct");
   auto func_ret_type = std::make_unique<Struct<::cpp2::Response>>("module.Response");
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_DecoratedService_withStruct_request_1;
-  module_DecoratedService_withStruct_request_1.id() = 1;
-  module_DecoratedService_withStruct_request_1.name() = "request";
-  module_DecoratedService_withStruct_request_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_DecoratedService_withStruct_request_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_DecoratedService_withStruct_request_1.id(), 1);
+  DCHECK_EQ(*module_DecoratedService_withStruct_request_1.name(), "request");
   auto module_DecoratedService_withStruct_request_1_type = std::make_unique<Struct<::cpp2::Request>>("module.Request");
   module_DecoratedService_withStruct_request_1_type->writeAndGenType(*module_DecoratedService_withStruct_request_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_DecoratedService_withStruct_request_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>::gen_multiParam([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -217,27 +219,23 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>
   DCHECK_EQ(*func.name() , "multiParam");
   auto func_ret_type = std::make_unique<Struct<::cpp2::Response>>("module.Response");
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_DecoratedService_multiParam_text_1;
-  module_DecoratedService_multiParam_text_1.id() = 1;
-  module_DecoratedService_multiParam_text_1.name() = "text";
-  module_DecoratedService_multiParam_text_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_DecoratedService_multiParam_text_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_DecoratedService_multiParam_text_1.id(), 1);
+  DCHECK_EQ(*module_DecoratedService_multiParam_text_1.name(), "text");
   auto module_DecoratedService_multiParam_text_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   module_DecoratedService_multiParam_text_1_type->writeAndGenType(*module_DecoratedService_multiParam_text_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_DecoratedService_multiParam_text_1));
-  ::apache::thrift::metadata::ThriftField module_DecoratedService_multiParam_num_2;
-  module_DecoratedService_multiParam_num_2.id() = 2;
-  module_DecoratedService_multiParam_num_2.name() = "num";
-  module_DecoratedService_multiParam_num_2.is_optional() = false;
+  ::apache::thrift::metadata::ThriftField &module_DecoratedService_multiParam_num_2 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_DecoratedService_multiParam_num_2.id(), 2);
+  DCHECK_EQ(*module_DecoratedService_multiParam_num_2.name(), "num");
   auto module_DecoratedService_multiParam_num_2_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_DecoratedService_multiParam_num_2_type->writeAndGenType(*module_DecoratedService_multiParam_num_2.type(), metadata);
-  func.arguments()->push_back(std::move(module_DecoratedService_multiParam_num_2));
-  ::apache::thrift::metadata::ThriftField module_DecoratedService_multiParam_request_3;
-  module_DecoratedService_multiParam_request_3.id() = 3;
-  module_DecoratedService_multiParam_request_3.name() = "request";
-  module_DecoratedService_multiParam_request_3.is_optional() = false;
+  ::apache::thrift::metadata::ThriftField &module_DecoratedService_multiParam_request_3 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_DecoratedService_multiParam_request_3.id(), 3);
+  DCHECK_EQ(*module_DecoratedService_multiParam_request_3.name(), "request");
   auto module_DecoratedService_multiParam_request_3_type = std::make_unique<Struct<::cpp2::Request>>("module.Request");
   module_DecoratedService_multiParam_request_3_type->writeAndGenType(*module_DecoratedService_multiParam_request_3.type(), metadata);
-  func.arguments()->push_back(std::move(module_DecoratedService_multiParam_request_3));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>::gen_echoInteraction([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -245,6 +243,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>
   DCHECK_EQ(*func.name() , "echoInteraction");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 
@@ -290,6 +290,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService
   DCHECK_EQ(*func.name() , "noop");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService>>::gen_echo([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -297,13 +299,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService
   DCHECK_EQ(*func.name() , "echo");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_UndecoratedService_echo_text_1;
-  module_UndecoratedService_echo_text_1.id() = 1;
-  module_UndecoratedService_echo_text_1.name() = "text";
-  module_UndecoratedService_echo_text_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_UndecoratedService_echo_text_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_UndecoratedService_echo_text_1.id(), 1);
+  DCHECK_EQ(*module_UndecoratedService_echo_text_1.name(), "text");
   auto module_UndecoratedService_echo_text_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   module_UndecoratedService_echo_text_1_type->writeAndGenType(*module_UndecoratedService_echo_text_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_UndecoratedService_echo_text_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService>>::gen_increment([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -311,13 +313,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService
   DCHECK_EQ(*func.name() , "increment");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_UndecoratedService_increment_num_1;
-  module_UndecoratedService_increment_num_1.id() = 1;
-  module_UndecoratedService_increment_num_1.name() = "num";
-  module_UndecoratedService_increment_num_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_UndecoratedService_increment_num_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_UndecoratedService_increment_num_1.id(), 1);
+  DCHECK_EQ(*module_UndecoratedService_increment_num_1.name(), "num");
   auto module_UndecoratedService_increment_num_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_UndecoratedService_increment_num_1_type->writeAndGenType(*module_UndecoratedService_increment_num_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_UndecoratedService_increment_num_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService>>::gen_sum([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -325,13 +327,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService
   DCHECK_EQ(*func.name() , "sum");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_UndecoratedService_sum_nums_1;
-  module_UndecoratedService_sum_nums_1.id() = 1;
-  module_UndecoratedService_sum_nums_1.name() = "nums";
-  module_UndecoratedService_sum_nums_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_UndecoratedService_sum_nums_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_UndecoratedService_sum_nums_1.id(), 1);
+  DCHECK_EQ(*module_UndecoratedService_sum_nums_1.name(), "nums");
   auto module_UndecoratedService_sum_nums_1_type = std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE));
   module_UndecoratedService_sum_nums_1_type->writeAndGenType(*module_UndecoratedService_sum_nums_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_UndecoratedService_sum_nums_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService>>::gen_withStruct([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -339,13 +341,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService
   DCHECK_EQ(*func.name() , "withStruct");
   auto func_ret_type = std::make_unique<Struct<::cpp2::Response>>("module.Response");
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_UndecoratedService_withStruct_request_1;
-  module_UndecoratedService_withStruct_request_1.id() = 1;
-  module_UndecoratedService_withStruct_request_1.name() = "request";
-  module_UndecoratedService_withStruct_request_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_UndecoratedService_withStruct_request_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_UndecoratedService_withStruct_request_1.id(), 1);
+  DCHECK_EQ(*module_UndecoratedService_withStruct_request_1.name(), "request");
   auto module_UndecoratedService_withStruct_request_1_type = std::make_unique<Struct<::cpp2::Request>>("module.Request");
   module_UndecoratedService_withStruct_request_1_type->writeAndGenType(*module_UndecoratedService_withStruct_request_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_UndecoratedService_withStruct_request_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService>>::gen_multiParam([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -353,27 +355,23 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService
   DCHECK_EQ(*func.name() , "multiParam");
   auto func_ret_type = std::make_unique<Struct<::cpp2::Response>>("module.Response");
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_UndecoratedService_multiParam_text_1;
-  module_UndecoratedService_multiParam_text_1.id() = 1;
-  module_UndecoratedService_multiParam_text_1.name() = "text";
-  module_UndecoratedService_multiParam_text_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_UndecoratedService_multiParam_text_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_UndecoratedService_multiParam_text_1.id(), 1);
+  DCHECK_EQ(*module_UndecoratedService_multiParam_text_1.name(), "text");
   auto module_UndecoratedService_multiParam_text_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   module_UndecoratedService_multiParam_text_1_type->writeAndGenType(*module_UndecoratedService_multiParam_text_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_UndecoratedService_multiParam_text_1));
-  ::apache::thrift::metadata::ThriftField module_UndecoratedService_multiParam_num_2;
-  module_UndecoratedService_multiParam_num_2.id() = 2;
-  module_UndecoratedService_multiParam_num_2.name() = "num";
-  module_UndecoratedService_multiParam_num_2.is_optional() = false;
+  ::apache::thrift::metadata::ThriftField &module_UndecoratedService_multiParam_num_2 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_UndecoratedService_multiParam_num_2.id(), 2);
+  DCHECK_EQ(*module_UndecoratedService_multiParam_num_2.name(), "num");
   auto module_UndecoratedService_multiParam_num_2_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_UndecoratedService_multiParam_num_2_type->writeAndGenType(*module_UndecoratedService_multiParam_num_2.type(), metadata);
-  func.arguments()->push_back(std::move(module_UndecoratedService_multiParam_num_2));
-  ::apache::thrift::metadata::ThriftField module_UndecoratedService_multiParam_request_3;
-  module_UndecoratedService_multiParam_request_3.id() = 3;
-  module_UndecoratedService_multiParam_request_3.name() = "request";
-  module_UndecoratedService_multiParam_request_3.is_optional() = false;
+  ::apache::thrift::metadata::ThriftField &module_UndecoratedService_multiParam_request_3 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_UndecoratedService_multiParam_request_3.id(), 3);
+  DCHECK_EQ(*module_UndecoratedService_multiParam_request_3.name(), "request");
   auto module_UndecoratedService_multiParam_request_3_type = std::make_unique<Struct<::cpp2::Request>>("module.Request");
   module_UndecoratedService_multiParam_request_3_type->writeAndGenType(*module_UndecoratedService_multiParam_request_3.type(), metadata);
-  func.arguments()->push_back(std::move(module_UndecoratedService_multiParam_request_3));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService>>::gen_adaptedRequest([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -381,13 +379,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService
   DCHECK_EQ(*func.name() , "adaptedRequest");
   auto func_ret_type = std::make_unique<Struct<::cpp2::Response>>("module.Response");
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_UndecoratedService_adaptedRequest_request_1;
-  module_UndecoratedService_adaptedRequest_request_1.id() = 1;
-  module_UndecoratedService_adaptedRequest_request_1.name() = "request";
-  module_UndecoratedService_adaptedRequest_request_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_UndecoratedService_adaptedRequest_request_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_UndecoratedService_adaptedRequest_request_1.id(), 1);
+  DCHECK_EQ(*module_UndecoratedService_adaptedRequest_request_1.name(), "request");
   auto module_UndecoratedService_adaptedRequest_request_1_type = std::make_unique<Struct<::cpp2::detail::AdaptedRequest>>("module.AdaptedRequest");
   module_UndecoratedService_adaptedRequest_request_1_type->writeAndGenType(*module_UndecoratedService_adaptedRequest_request_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_UndecoratedService_adaptedRequest_request_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 
@@ -432,6 +430,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_E
   DCHECK_EQ(*func.name() , "extension");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 
@@ -473,6 +473,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_E
   DCHECK_EQ(*func.name() , "extension");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 
@@ -514,6 +516,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService
   DCHECK_EQ(*func.name() , "extension");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 
@@ -554,13 +558,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_E
   DCHECK_EQ(*func.name() , "secondExtension");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService_secondExtension_input_1;
-  module_DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService_secondExtension_input_1.id() = 1;
-  module_DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService_secondExtension_input_1.name() = "input";
-  module_DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService_secondExtension_input_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService_secondExtension_input_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService_secondExtension_input_1.id(), 1);
+  DCHECK_EQ(*module_DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService_secondExtension_input_1.name(), "input");
   auto module_DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService_secondExtension_input_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   module_DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService_secondExtension_input_1_type->writeAndGenType(*module_DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService_secondExtension_input_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService_secondExtension_input_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 

@@ -48,6 +48,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyRoot>>::gen_do_r
   DCHECK_EQ(*func.name() , "do_root");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 
@@ -86,6 +88,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyNode>>::gen_do_m
   DCHECK_EQ(*func.name() , "do_mid");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 
@@ -126,6 +130,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyLeaf>>::gen_do_l
   DCHECK_EQ(*func.name() , "do_leaf");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 

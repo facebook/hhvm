@@ -191,13 +191,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_p
   DCHECK_EQ(*func.name() , "ping");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_MyService_ping_myExcept_1;
-  module_MyService_ping_myExcept_1.id() = 1;
-  module_MyService_ping_myExcept_1.name() = "myExcept";
-  module_MyService_ping_myExcept_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_MyService_ping_myExcept_1 = func.exceptions()[exceptionIndex++];
+  DCHECK_EQ(*module_MyService_ping_myExcept_1.id(), 1);
+  DCHECK_EQ(*module_MyService_ping_myExcept_1.name(), "myExcept");
   auto module_MyService_ping_myExcept_1_type = std::make_unique<Struct<::cpp2::detail::YourException>>("module.MyException");
   module_MyService_ping_myExcept_1_type->writeAndGenType(*module_MyService_ping_myExcept_1.type(), metadata);
-  func.exceptions()->push_back(std::move(module_MyService_ping_myExcept_1));
   ExceptionMetadata<::cpp2::YourException>::gen(metadata);
   func.is_oneway() = false;
 }
@@ -206,6 +206,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_g
   DCHECK_EQ(*func.name() , "getRandomData");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_hasDataById([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -213,13 +215,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_h
   DCHECK_EQ(*func.name() , "hasDataById");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_MyService_hasDataById_id_1;
-  module_MyService_hasDataById_id_1.id() = 1;
-  module_MyService_hasDataById_id_1.name() = "id";
-  module_MyService_hasDataById_id_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_MyService_hasDataById_id_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_MyService_hasDataById_id_1.id(), 1);
+  DCHECK_EQ(*module_MyService_hasDataById_id_1.name(), "id");
   auto module_MyService_hasDataById_id_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_MyService_hasDataById_id_1_type->writeAndGenType(*module_MyService_hasDataById_id_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_MyService_hasDataById_id_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_getDataById([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -227,13 +229,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_g
   DCHECK_EQ(*func.name() , "getDataById");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_MyService_getDataById_id_1;
-  module_MyService_getDataById_id_1.id() = 1;
-  module_MyService_getDataById_id_1.name() = "id";
-  module_MyService_getDataById_id_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_MyService_getDataById_id_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_MyService_getDataById_id_1.id(), 1);
+  DCHECK_EQ(*module_MyService_getDataById_id_1.name(), "id");
   auto module_MyService_getDataById_id_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_MyService_getDataById_id_1_type->writeAndGenType(*module_MyService_getDataById_id_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_MyService_getDataById_id_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
   func.structured_annotations()->push_back(*cvStruct("go.Name", { {"name", cvString("GoGetDataById") } }).cv_struct());
 }
@@ -242,23 +244,21 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_p
   DCHECK_EQ(*func.name() , "putDataById");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_MyService_putDataById_id_1;
-  module_MyService_putDataById_id_1.id() = 1;
-  module_MyService_putDataById_id_1.name() = "id";
-  module_MyService_putDataById_id_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_MyService_putDataById_id_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_MyService_putDataById_id_1.id(), 1);
+  DCHECK_EQ(*module_MyService_putDataById_id_1.name(), "id");
   auto module_MyService_putDataById_id_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_MyService_putDataById_id_1_type->writeAndGenType(*module_MyService_putDataById_id_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_MyService_putDataById_id_1));
-  ::apache::thrift::metadata::ThriftField module_MyService_putDataById_data_2;
-  module_MyService_putDataById_data_2.id() = 2;
-  module_MyService_putDataById_data_2.name() = "data";
-  module_MyService_putDataById_data_2.is_optional() = false;
+  ::apache::thrift::metadata::ThriftField &module_MyService_putDataById_data_2 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_MyService_putDataById_data_2.id(), 2);
+  DCHECK_EQ(*module_MyService_putDataById_data_2.name(), "data");
   module_MyService_putDataById_data_2.structured_annotations().emplace().assign({
       *cvStruct("module.MyStructNestedAnnotation", { {"name", cvString("argument") } }).cv_struct(),
   });
   auto module_MyService_putDataById_data_2_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   module_MyService_putDataById_data_2_type->writeAndGenType(*module_MyService_putDataById_data_2.type(), metadata);
-  func.arguments()->push_back(std::move(module_MyService_putDataById_data_2));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_lobDataById([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -266,20 +266,18 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_l
   DCHECK_EQ(*func.name() , "lobDataById");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_MyService_lobDataById_id_1;
-  module_MyService_lobDataById_id_1.id() = 1;
-  module_MyService_lobDataById_id_1.name() = "id";
-  module_MyService_lobDataById_id_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_MyService_lobDataById_id_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_MyService_lobDataById_id_1.id(), 1);
+  DCHECK_EQ(*module_MyService_lobDataById_id_1.name(), "id");
   auto module_MyService_lobDataById_id_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_MyService_lobDataById_id_1_type->writeAndGenType(*module_MyService_lobDataById_id_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_MyService_lobDataById_id_1));
-  ::apache::thrift::metadata::ThriftField module_MyService_lobDataById_data_2;
-  module_MyService_lobDataById_data_2.id() = 2;
-  module_MyService_lobDataById_data_2.name() = "data";
-  module_MyService_lobDataById_data_2.is_optional() = false;
+  ::apache::thrift::metadata::ThriftField &module_MyService_lobDataById_data_2 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_MyService_lobDataById_data_2.id(), 2);
+  DCHECK_EQ(*module_MyService_lobDataById_data_2.name(), "data");
   auto module_MyService_lobDataById_data_2_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   module_MyService_lobDataById_data_2_type->writeAndGenType(*module_MyService_lobDataById_data_2.type(), metadata);
-  func.arguments()->push_back(std::move(module_MyService_lobDataById_data_2));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = true;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_cppDoNothing([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -287,6 +285,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_c
   DCHECK_EQ(*func.name() , "doNothing");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
   func.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("cppDoNothing") } }).cv_struct());
   func.structured_annotations()->push_back(*cvStruct("go.Name", { {"name", cvString("GoDoNothing") } }).cv_struct());
@@ -333,6 +333,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioParen
   DCHECK_EQ(*func.name() , "ping");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
   func.structured_annotations()->push_back(*cvStruct("thrift.Priority", { {"level", cvInteger(2) } }).cv_struct());
 }
@@ -341,6 +343,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioParen
   DCHECK_EQ(*func.name() , "pong");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
   func.structured_annotations()->push_back(*cvStruct("thrift.Priority", { {"level", cvInteger(0) } }).cv_struct());
 }
@@ -381,6 +385,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioChild
   DCHECK_EQ(*func.name() , "pang");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
   func.structured_annotations()->push_back(*cvStruct("thrift.Priority", { {"level", cvInteger(4) } }).cv_struct());
 }
@@ -422,6 +428,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::GoodService>>::gen
   DCHECK_EQ(*func.name() , "bar");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 
@@ -461,6 +469,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>>
   DCHECK_EQ(*func.name() , "foo");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
   func.structured_annotations()->push_back(*cvStruct("go.Name", { {"name", cvString("FooStructured") } }).cv_struct());
 }
@@ -469,6 +479,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>>
   DCHECK_EQ(*func.name() , "bar");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
   func.structured_annotations()->push_back(*cvStruct("go.Name", { {"name", cvString("BarNonStructured") } }).cv_struct());
 }
@@ -477,6 +489,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>>
   DCHECK_EQ(*func.name() , "baz");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 

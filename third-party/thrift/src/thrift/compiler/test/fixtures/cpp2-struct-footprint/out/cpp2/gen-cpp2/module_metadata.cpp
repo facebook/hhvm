@@ -236,27 +236,23 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::F
   DCHECK_EQ(*func.name() , "processIOBuf");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_FootprintTestService_processIOBuf_buf_1;
-  module_FootprintTestService_processIOBuf_buf_1.id() = 1;
-  module_FootprintTestService_processIOBuf_buf_1.name() = "buf";
-  module_FootprintTestService_processIOBuf_buf_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_FootprintTestService_processIOBuf_buf_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_FootprintTestService_processIOBuf_buf_1.id(), 1);
+  DCHECK_EQ(*module_FootprintTestService_processIOBuf_buf_1.name(), "buf");
   auto module_FootprintTestService_processIOBuf_buf_1_type = std::make_unique<Typedef>("module.IOBuf", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("folly::IOBuf") } }).cv_struct(),  });
   module_FootprintTestService_processIOBuf_buf_1_type->writeAndGenType(*module_FootprintTestService_processIOBuf_buf_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_FootprintTestService_processIOBuf_buf_1));
-  ::apache::thrift::metadata::ThriftField module_FootprintTestService_processIOBuf_ptr_2;
-  module_FootprintTestService_processIOBuf_ptr_2.id() = 2;
-  module_FootprintTestService_processIOBuf_ptr_2.name() = "ptr";
-  module_FootprintTestService_processIOBuf_ptr_2.is_optional() = false;
+  ::apache::thrift::metadata::ThriftField &module_FootprintTestService_processIOBuf_ptr_2 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_FootprintTestService_processIOBuf_ptr_2.id(), 2);
+  DCHECK_EQ(*module_FootprintTestService_processIOBuf_ptr_2.name(), "ptr");
   auto module_FootprintTestService_processIOBuf_ptr_2_type = std::make_unique<Typedef>("module.IOBufPtr", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("std::unique_ptr<folly::IOBuf>") } }).cv_struct(),  });
   module_FootprintTestService_processIOBuf_ptr_2_type->writeAndGenType(*module_FootprintTestService_processIOBuf_ptr_2.type(), metadata);
-  func.arguments()->push_back(std::move(module_FootprintTestService_processIOBuf_ptr_2));
-  ::apache::thrift::metadata::ThriftField module_FootprintTestService_processIOBuf_alias_3;
-  module_FootprintTestService_processIOBuf_alias_3.id() = 3;
-  module_FootprintTestService_processIOBuf_alias_3.name() = "alias";
-  module_FootprintTestService_processIOBuf_alias_3.is_optional() = false;
+  ::apache::thrift::metadata::ThriftField &module_FootprintTestService_processIOBuf_alias_3 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_FootprintTestService_processIOBuf_alias_3.id(), 3);
+  DCHECK_EQ(*module_FootprintTestService_processIOBuf_alias_3.name(), "alias");
   auto module_FootprintTestService_processIOBuf_alias_3_type = std::make_unique<Typedef>("module.I32Alias", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("SimpleStruct") } }).cv_struct(),  });
   module_FootprintTestService_processIOBuf_alias_3_type->writeAndGenType(*module_FootprintTestService_processIOBuf_alias_3.type(), metadata);
-  func.arguments()->push_back(std::move(module_FootprintTestService_processIOBuf_alias_3));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>>::gen_getStruct([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -264,6 +260,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::F
   DCHECK_EQ(*func.name() , "getStruct");
   auto func_ret_type = std::make_unique<Struct<::cpp2_struct_footprint::SimpleStruct>>("module.SimpleStruct");
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>>::gen_setStruct([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -271,13 +269,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::F
   DCHECK_EQ(*func.name() , "setStruct");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_FootprintTestService_setStruct_input_1;
-  module_FootprintTestService_setStruct_input_1.id() = 1;
-  module_FootprintTestService_setStruct_input_1.name() = "input";
-  module_FootprintTestService_setStruct_input_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_FootprintTestService_setStruct_input_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_FootprintTestService_setStruct_input_1.id(), 1);
+  DCHECK_EQ(*module_FootprintTestService_setStruct_input_1.name(), "input");
   auto module_FootprintTestService_setStruct_input_1_type = std::make_unique<Struct<::cpp2_struct_footprint::SimpleStruct>>("module.SimpleStruct");
   module_FootprintTestService_setStruct_input_1_type->writeAndGenType(*module_FootprintTestService_setStruct_input_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_FootprintTestService_setStruct_input_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>>::gen_setStructList([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -285,13 +283,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::F
   DCHECK_EQ(*func.name() , "setStructList");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_FootprintTestService_setStructList_items_1;
-  module_FootprintTestService_setStructList_items_1.id() = 1;
-  module_FootprintTestService_setStructList_items_1.name() = "items";
-  module_FootprintTestService_setStructList_items_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_FootprintTestService_setStructList_items_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_FootprintTestService_setStructList_items_1.id(), 1);
+  DCHECK_EQ(*module_FootprintTestService_setStructList_items_1.name(), "items");
   auto module_FootprintTestService_setStructList_items_1_type = std::make_unique<List>(std::make_unique<Struct<::cpp2_struct_footprint::SimpleStruct>>("module.SimpleStruct"));
   module_FootprintTestService_setStructList_items_1_type->writeAndGenType(*module_FootprintTestService_setStructList_items_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_FootprintTestService_setStructList_items_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>>::gen_getStructList([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -299,6 +297,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::F
   DCHECK_EQ(*func.name() , "getStructList");
   auto func_ret_type = std::make_unique<List>(std::make_unique<Struct<::cpp2_struct_footprint::SimpleStruct>>("module.SimpleStruct"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>>::gen_getNestedContainer([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -306,6 +306,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::F
   DCHECK_EQ(*func.name() , "getNestedContainer");
   auto func_ret_type = std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<List>(std::make_unique<Struct<::cpp2_struct_footprint::SimpleStruct>>("module.SimpleStruct")));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>>::gen_getTypedefStruct([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -313,6 +315,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::F
   DCHECK_EQ(*func.name() , "getTypedefStruct");
   auto func_ret_type = std::make_unique<Typedef>("module.MyStruct", std::make_unique<Struct<::cpp2_struct_footprint::SimpleStruct>>("module.SimpleStruct"), std::vector<ThriftConstStruct>{  });
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>>::gen_getTypedefList([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -320,6 +324,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::F
   DCHECK_EQ(*func.name() , "getTypedefList");
   auto func_ret_type = std::make_unique<Typedef>("module.StructList", std::make_unique<List>(std::make_unique<Struct<::cpp2_struct_footprint::SimpleStruct>>("module.SimpleStruct")), std::vector<ThriftConstStruct>{  });
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>>::gen_getUnion([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -327,6 +333,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::F
   DCHECK_EQ(*func.name() , "getUnion");
   auto func_ret_type = std::make_unique<Union<::cpp2_struct_footprint::TestUnion>>("module.TestUnion");
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>>::gen_getCalculator([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -334,6 +342,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::F
   DCHECK_EQ(*func.name() , "getCalculator");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>>::gen_streamStructs([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -341,6 +351,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::F
   DCHECK_EQ(*func.name() , "streamStructs");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Struct<::cpp2_struct_footprint::SimpleStruct>>("module.SimpleStruct"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>>::gen_streamWithSinkInitial([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -348,13 +360,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::F
   DCHECK_EQ(*func.name() , "streamWithSinkInitial");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Struct<::cpp2_struct_footprint::SimpleStruct>>("module.SimpleStruct"), std::make_unique<Struct<::cpp2_struct_footprint::Struct1>>("module.Struct1"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_FootprintTestService_streamWithSinkInitial_input_1;
-  module_FootprintTestService_streamWithSinkInitial_input_1.id() = 1;
-  module_FootprintTestService_streamWithSinkInitial_input_1.name() = "input";
-  module_FootprintTestService_streamWithSinkInitial_input_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_FootprintTestService_streamWithSinkInitial_input_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_FootprintTestService_streamWithSinkInitial_input_1.id(), 1);
+  DCHECK_EQ(*module_FootprintTestService_streamWithSinkInitial_input_1.name(), "input");
   auto module_FootprintTestService_streamWithSinkInitial_input_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   module_FootprintTestService_streamWithSinkInitial_input_1_type->writeAndGenType(*module_FootprintTestService_streamWithSinkInitial_input_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_FootprintTestService_streamWithSinkInitial_input_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>>::gen_streamWithSinkException([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -362,20 +374,18 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::F
   DCHECK_EQ(*func.name() , "streamWithSinkException");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Struct<::cpp2_struct_footprint::SimpleStruct>>("module.SimpleStruct"), std::make_unique<Struct<::cpp2_struct_footprint::Struct1>>("module.Struct1"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_FootprintTestService_streamWithSinkException_input_1;
-  module_FootprintTestService_streamWithSinkException_input_1.id() = 1;
-  module_FootprintTestService_streamWithSinkException_input_1.name() = "input";
-  module_FootprintTestService_streamWithSinkException_input_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_FootprintTestService_streamWithSinkException_input_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_FootprintTestService_streamWithSinkException_input_1.id(), 1);
+  DCHECK_EQ(*module_FootprintTestService_streamWithSinkException_input_1.name(), "input");
   auto module_FootprintTestService_streamWithSinkException_input_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   module_FootprintTestService_streamWithSinkException_input_1_type->writeAndGenType(*module_FootprintTestService_streamWithSinkException_input_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_FootprintTestService_streamWithSinkException_input_1));
-  ::apache::thrift::metadata::ThriftField module_FootprintTestService_streamWithSinkException_ex__1;
-  module_FootprintTestService_streamWithSinkException_ex__1.id() = -1;
-  module_FootprintTestService_streamWithSinkException_ex__1.name() = "ex";
-  module_FootprintTestService_streamWithSinkException_ex__1.is_optional() = false;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_FootprintTestService_streamWithSinkException_ex__1 = func.exceptions()[exceptionIndex++];
+  DCHECK_EQ(*module_FootprintTestService_streamWithSinkException_ex__1.id(), -1);
+  DCHECK_EQ(*module_FootprintTestService_streamWithSinkException_ex__1.name(), "ex");
   auto module_FootprintTestService_streamWithSinkException_ex__1_type = std::make_unique<Struct<::cpp2_struct_footprint::ExStruct>>("module.ExStruct");
   module_FootprintTestService_streamWithSinkException_ex__1_type->writeAndGenType(*module_FootprintTestService_streamWithSinkException_ex__1.type(), metadata);
-  func.exceptions()->push_back(std::move(module_FootprintTestService_streamWithSinkException_ex__1));
   ExceptionMetadata<::cpp2_struct_footprint::ExStruct>::gen(metadata);
   func.is_oneway() = false;
 }
@@ -427,6 +437,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::E
   DCHECK_EQ(*func.name() , "getComplexMap");
   auto func_ret_type = std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<List>(std::make_unique<Struct<::cpp2_struct_footprint::ComplexStruct>>("module.ComplexStruct")));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 

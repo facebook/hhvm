@@ -360,6 +360,20 @@ metadata::ThriftService genServiceMetadata(
       continue;
     }
     ret.functions()->emplace_back().name() = func.name();
+    for (const auto& param : func.params()) {
+      auto& i = ret.functions()->back().arguments()->emplace_back();
+      i.id() = static_cast<std::int16_t>(param.id());
+      i.name() = param.name();
+      i.is_optional() = false;
+      // TODO: add other information
+    }
+    for (const auto& exception : func.exceptions()) {
+      auto& i = ret.functions()->back().exceptions()->emplace_back();
+      i.id() = static_cast<std::int16_t>(exception.id());
+      i.name() = exception.name();
+      i.is_optional() = false;
+      // TODO: add other information
+    }
     // TODO: add other information
   }
   return ret;

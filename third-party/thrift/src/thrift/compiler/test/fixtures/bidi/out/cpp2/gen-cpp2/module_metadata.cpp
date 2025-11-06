@@ -197,6 +197,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen
   DCHECK_EQ(*func.name() , "simple");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen_response([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -204,6 +206,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen
   DCHECK_EQ(*func.name() , "response");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen_canThrow([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -211,13 +215,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen
   DCHECK_EQ(*func.name() , "canThrow");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_BiDiService_canThrow_ex_1;
-  module_BiDiService_canThrow_ex_1.id() = 1;
-  module_BiDiService_canThrow_ex_1.name() = "ex";
-  module_BiDiService_canThrow_ex_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_BiDiService_canThrow_ex_1 = func.exceptions()[exceptionIndex++];
+  DCHECK_EQ(*module_BiDiService_canThrow_ex_1.id(), 1);
+  DCHECK_EQ(*module_BiDiService_canThrow_ex_1.name(), "ex");
   auto module_BiDiService_canThrow_ex_1_type = std::make_unique<Struct<::cpp2::BiDiMethodException>>("module.BiDiMethodException");
   module_BiDiService_canThrow_ex_1_type->writeAndGenType(*module_BiDiService_canThrow_ex_1.type(), metadata);
-  func.exceptions()->push_back(std::move(module_BiDiService_canThrow_ex_1));
   ExceptionMetadata<::cpp2::BiDiMethodException>::gen(metadata);
   func.is_oneway() = false;
 }

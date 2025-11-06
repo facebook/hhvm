@@ -328,6 +328,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_st
   DCHECK_EQ(*func.name() , "first");
   auto func_ret_type = std::make_unique<Typedef>("module.annotated_inline_string", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("module.structured_annotation_inline", { {"count", cvInteger(1) } }).cv_struct(), *cvStruct("module.structured_annotation_with_default", { {"name", cvString("abc") } }).cv_struct(),  });
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
   func.structured_annotations()->push_back(*cvStruct("module.structured_annotation_with_default", {  }).cv_struct());
 }
@@ -336,16 +338,16 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_st
   DCHECK_EQ(*func.name() , "second");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_MyService_second_count_1;
-  module_MyService_second_count_1.id() = 1;
-  module_MyService_second_count_1.name() = "count";
-  module_MyService_second_count_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_MyService_second_count_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_MyService_second_count_1.id(), 1);
+  DCHECK_EQ(*module_MyService_second_count_1.name(), "count");
   module_MyService_second_count_1.structured_annotations().emplace().assign({
       *cvStruct("module.structured_annotation_inline", { {"count", cvInteger(4) } }).cv_struct(),
   });
   auto module_MyService_second_count_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_MyService_second_count_1_type->writeAndGenType(*module_MyService_second_count_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_MyService_second_count_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
   func.structured_annotations()->push_back(*cvStruct("module.structured_annotation_inline", { {"count", cvInteger(2) } }).cv_struct());
 }

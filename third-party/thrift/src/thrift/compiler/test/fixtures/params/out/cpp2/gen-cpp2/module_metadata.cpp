@@ -38,13 +38,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NestedContainers>>
   DCHECK_EQ(*func.name() , "mapList");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_NestedContainers_mapList_foo_1;
-  module_NestedContainers_mapList_foo_1.id() = 1;
-  module_NestedContainers_mapList_foo_1.name() = "foo";
-  module_NestedContainers_mapList_foo_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_NestedContainers_mapList_foo_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_NestedContainers_mapList_foo_1.id(), 1);
+  DCHECK_EQ(*module_NestedContainers_mapList_foo_1.name(), "foo");
   auto module_NestedContainers_mapList_foo_1_type = std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)));
   module_NestedContainers_mapList_foo_1_type->writeAndGenType(*module_NestedContainers_mapList_foo_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_NestedContainers_mapList_foo_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NestedContainers>>::gen_mapSet([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -52,13 +52,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NestedContainers>>
   DCHECK_EQ(*func.name() , "mapSet");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_NestedContainers_mapSet_foo_1;
-  module_NestedContainers_mapSet_foo_1.id() = 1;
-  module_NestedContainers_mapSet_foo_1.name() = "foo";
-  module_NestedContainers_mapSet_foo_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_NestedContainers_mapSet_foo_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_NestedContainers_mapSet_foo_1.id(), 1);
+  DCHECK_EQ(*module_NestedContainers_mapSet_foo_1.name(), "foo");
   auto module_NestedContainers_mapSet_foo_1_type = std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)));
   module_NestedContainers_mapSet_foo_1_type->writeAndGenType(*module_NestedContainers_mapSet_foo_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_NestedContainers_mapSet_foo_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NestedContainers>>::gen_listMap([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -66,13 +66,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NestedContainers>>
   DCHECK_EQ(*func.name() , "listMap");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_NestedContainers_listMap_foo_1;
-  module_NestedContainers_listMap_foo_1.id() = 1;
-  module_NestedContainers_listMap_foo_1.name() = "foo";
-  module_NestedContainers_listMap_foo_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_NestedContainers_listMap_foo_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_NestedContainers_listMap_foo_1.id(), 1);
+  DCHECK_EQ(*module_NestedContainers_listMap_foo_1.name(), "foo");
   auto module_NestedContainers_listMap_foo_1_type = std::make_unique<List>(std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)));
   module_NestedContainers_listMap_foo_1_type->writeAndGenType(*module_NestedContainers_listMap_foo_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_NestedContainers_listMap_foo_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NestedContainers>>::gen_listSet([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -80,13 +80,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NestedContainers>>
   DCHECK_EQ(*func.name() , "listSet");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_NestedContainers_listSet_foo_1;
-  module_NestedContainers_listSet_foo_1.id() = 1;
-  module_NestedContainers_listSet_foo_1.name() = "foo";
-  module_NestedContainers_listSet_foo_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_NestedContainers_listSet_foo_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_NestedContainers_listSet_foo_1.id(), 1);
+  DCHECK_EQ(*module_NestedContainers_listSet_foo_1.name(), "foo");
   auto module_NestedContainers_listSet_foo_1_type = std::make_unique<List>(std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)));
   module_NestedContainers_listSet_foo_1_type->writeAndGenType(*module_NestedContainers_listSet_foo_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_NestedContainers_listSet_foo_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NestedContainers>>::gen_turtles([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -94,13 +94,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NestedContainers>>
   DCHECK_EQ(*func.name() , "turtles");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_NestedContainers_turtles_foo_1;
-  module_NestedContainers_turtles_foo_1.id() = 1;
-  module_NestedContainers_turtles_foo_1.name() = "foo";
-  module_NestedContainers_turtles_foo_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_NestedContainers_turtles_foo_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_NestedContainers_turtles_foo_1.id(), 1);
+  DCHECK_EQ(*module_NestedContainers_turtles_foo_1.name(), "foo");
   auto module_NestedContainers_turtles_foo_1_type = std::make_unique<List>(std::make_unique<List>(std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE))))));
   module_NestedContainers_turtles_foo_1_type->writeAndGenType(*module_NestedContainers_turtles_foo_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_NestedContainers_turtles_foo_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 

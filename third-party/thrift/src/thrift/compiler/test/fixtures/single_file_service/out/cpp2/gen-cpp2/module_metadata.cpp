@@ -78,6 +78,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::A>>::gen_foo([[may
   DCHECK_EQ(*func.name() , "foo");
   auto func_ret_type = std::make_unique<Struct<::cpp2::Foo>>("module.Foo");
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 
@@ -116,13 +118,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen_bar([[may
   DCHECK_EQ(*func.name() , "bar");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_B_bar_foo_1;
-  module_B_bar_foo_1.id() = 1;
-  module_B_bar_foo_1.name() = "foo";
-  module_B_bar_foo_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_B_bar_foo_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_B_bar_foo_1.id(), 1);
+  DCHECK_EQ(*module_B_bar_foo_1.name(), "foo");
   auto module_B_bar_foo_1_type = std::make_unique<Struct<::cpp2::Foo>>("module.Foo");
   module_B_bar_foo_1_type->writeAndGenType(*module_B_bar_foo_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_B_bar_foo_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen_stream_stuff([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -130,6 +132,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen_stream_st
   DCHECK_EQ(*func.name() , "stream_stuff");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen_sink_stuff([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -137,6 +141,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen_sink_stuf
   DCHECK_EQ(*func.name() , "sink_stuff");
   auto func_ret_type = std::make_unique<Sink>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 

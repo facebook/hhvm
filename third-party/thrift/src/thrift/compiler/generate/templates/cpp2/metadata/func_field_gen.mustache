@@ -14,10 +14,8 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}::apache::thrift::metadata::ThriftField {{> metadata/func_field_name}};
-{{> metadata/func_field_name}}.id() = {{field:id}};
-{{> metadata/func_field_name}}.name() = "{{field:name}}";
-{{> metadata/func_field_name}}.is_optional() = false;
+}}DCHECK_EQ(*{{> metadata/func_field_name}}.id(), {{field:id}});
+DCHECK_EQ(*{{> metadata/func_field_name}}.name(), "{{field:name}}");
 {{#field:structured_annotations}}
 {{> metadata/func_field_name}}.structured_annotations().emplace().assign({
 {{#constant:type.self.structured?}}

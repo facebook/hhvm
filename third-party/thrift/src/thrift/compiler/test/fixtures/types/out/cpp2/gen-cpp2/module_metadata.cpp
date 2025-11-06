@@ -996,13 +996,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures
   DCHECK_EQ(*func.name() , "bounce_map");
   auto func_ret_type = std::make_unique<Typedef>("included.SomeMap", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Type", { {"template", cvString("std::unordered_map") } }).cv_struct(),  });
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_SomeService_bounce_map_m_1;
-  module_SomeService_bounce_map_m_1.id() = 1;
-  module_SomeService_bounce_map_m_1.name() = "m";
-  module_SomeService_bounce_map_m_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_SomeService_bounce_map_m_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_SomeService_bounce_map_m_1.id(), 1);
+  DCHECK_EQ(*module_SomeService_bounce_map_m_1.name(), "m");
   auto module_SomeService_bounce_map_m_1_type = std::make_unique<Typedef>("included.SomeMap", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Type", { {"template", cvString("std::unordered_map") } }).cv_struct(),  });
   module_SomeService_bounce_map_m_1_type->writeAndGenType(*module_SomeService_bounce_map_m_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_SomeService_bounce_map_m_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>>::gen_binary_keyed_map([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -1010,13 +1010,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures
   DCHECK_EQ(*func.name() , "binary_keyed_map");
   auto func_ret_type = std::make_unique<Map>(std::make_unique<Typedef>("module.TBinary", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  }), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_SomeService_binary_keyed_map_r_1;
-  module_SomeService_binary_keyed_map_r_1.id() = 1;
-  module_SomeService_binary_keyed_map_r_1.name() = "r";
-  module_SomeService_binary_keyed_map_r_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_SomeService_binary_keyed_map_r_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_SomeService_binary_keyed_map_r_1.id(), 1);
+  DCHECK_EQ(*module_SomeService_binary_keyed_map_r_1.name(), "r");
   auto module_SomeService_binary_keyed_map_r_1_type = std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE));
   module_SomeService_binary_keyed_map_r_1_type->writeAndGenType(*module_SomeService_binary_keyed_map_r_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_SomeService_binary_keyed_map_r_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 

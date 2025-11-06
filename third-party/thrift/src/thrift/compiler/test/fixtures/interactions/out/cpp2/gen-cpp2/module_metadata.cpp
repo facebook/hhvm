@@ -141,6 +141,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_f
   DCHECK_EQ(*func.name() , "foo");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_interact([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -148,13 +150,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_i
   DCHECK_EQ(*func.name() , "interact");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_MyService_interact_arg_1;
-  module_MyService_interact_arg_1.id() = 1;
-  module_MyService_interact_arg_1.name() = "arg";
-  module_MyService_interact_arg_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_MyService_interact_arg_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_MyService_interact_arg_1.id(), 1);
+  DCHECK_EQ(*module_MyService_interact_arg_1.name(), "arg");
   auto module_MyService_interact_arg_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   module_MyService_interact_arg_1_type->writeAndGenType(*module_MyService_interact_arg_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_MyService_interact_arg_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_interactFast([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -162,6 +164,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_i
   DCHECK_EQ(*func.name() , "interactFast");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_serialize([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -169,6 +173,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_s
   DCHECK_EQ(*func.name() , "serialize");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 
@@ -210,6 +216,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Factories>>::gen_f
   DCHECK_EQ(*func.name() , "foo");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Factories>>::gen_interact([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -217,13 +225,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Factories>>::gen_i
   DCHECK_EQ(*func.name() , "interact");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_Factories_interact_arg_1;
-  module_Factories_interact_arg_1.id() = 1;
-  module_Factories_interact_arg_1.name() = "arg";
-  module_Factories_interact_arg_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_Factories_interact_arg_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_Factories_interact_arg_1.id(), 1);
+  DCHECK_EQ(*module_Factories_interact_arg_1.name(), "arg");
   auto module_Factories_interact_arg_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   module_Factories_interact_arg_1_type->writeAndGenType(*module_Factories_interact_arg_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_Factories_interact_arg_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Factories>>::gen_interactFast([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -231,6 +239,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Factories>>::gen_i
   DCHECK_EQ(*func.name() , "interactFast");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Factories>>::gen_serialize([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -238,6 +248,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Factories>>::gen_s
   DCHECK_EQ(*func.name() , "serialize");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 
@@ -279,6 +291,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Perform>>::gen_foo
   DCHECK_EQ(*func.name() , "foo");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 
@@ -317,6 +331,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::InteractWithShared
   DCHECK_EQ(*func.name() , "do_some_similar_things");
   auto func_ret_type = std::make_unique<Struct<::thrift::shared_interactions::DoSomethingResult>>("shared.DoSomethingResult");
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 
@@ -355,13 +371,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BoxService>>::gen_
   DCHECK_EQ(*func.name() , "getABoxSession");
   auto func_ret_type = std::make_unique<Struct<::cpp2::ShouldBeBoxed>>("module.ShouldBeBoxed");
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_BoxService_getABoxSession_req_1;
-  module_BoxService_getABoxSession_req_1.id() = 1;
-  module_BoxService_getABoxSession_req_1.name() = "req";
-  module_BoxService_getABoxSession_req_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_BoxService_getABoxSession_req_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_BoxService_getABoxSession_req_1.id(), 1);
+  DCHECK_EQ(*module_BoxService_getABoxSession_req_1.name(), "req");
   auto module_BoxService_getABoxSession_req_1_type = std::make_unique<Struct<::cpp2::ShouldBeBoxed>>("module.ShouldBeBoxed");
   module_BoxService_getABoxSession_req_1_type->writeAndGenType(*module_BoxService_getABoxSession_req_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_BoxService_getABoxSession_req_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 

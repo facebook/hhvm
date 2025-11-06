@@ -68,13 +68,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::namespace_from_pac
   DCHECK_EQ(*func.name() , "init");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_TestService_init_int1_1;
-  module_TestService_init_int1_1.id() = 1;
-  module_TestService_init_int1_1.name() = "int1";
-  module_TestService_init_int1_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_TestService_init_int1_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_TestService_init_int1_1.id(), 1);
+  DCHECK_EQ(*module_TestService_init_int1_1.name(), "int1");
   auto module_TestService_init_int1_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_TestService_init_int1_1_type->writeAndGenType(*module_TestService_init_int1_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_TestService_init_int1_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 

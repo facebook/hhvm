@@ -317,6 +317,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen
   DCHECK_EQ(*func.name() , "method");
   auto func_ret_type = std::make_unique<Sink>(std::make_unique<Struct<::cpp2::SinkPayload>>("module.SinkPayload"), std::make_unique<Struct<::cpp2::FinalResponse>>("module.FinalResponse"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_methodAndReponse([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -324,6 +326,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen
   DCHECK_EQ(*func.name() , "methodAndReponse");
   auto func_ret_type = std::make_unique<Sink>(std::make_unique<Struct<::cpp2::SinkPayload>>("module.SinkPayload"), std::make_unique<Struct<::cpp2::FinalResponse>>("module.FinalResponse"), std::make_unique<Struct<::cpp2::InitialResponse>>("module.InitialResponse"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_methodThrow([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -331,13 +335,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen
   DCHECK_EQ(*func.name() , "methodThrow");
   auto func_ret_type = std::make_unique<Sink>(std::make_unique<Struct<::cpp2::SinkPayload>>("module.SinkPayload"), std::make_unique<Struct<::cpp2::FinalResponse>>("module.FinalResponse"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_SinkService_methodThrow_ex_1;
-  module_SinkService_methodThrow_ex_1.id() = 1;
-  module_SinkService_methodThrow_ex_1.name() = "ex";
-  module_SinkService_methodThrow_ex_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_SinkService_methodThrow_ex_1 = func.exceptions()[exceptionIndex++];
+  DCHECK_EQ(*module_SinkService_methodThrow_ex_1.id(), 1);
+  DCHECK_EQ(*module_SinkService_methodThrow_ex_1.name(), "ex");
   auto module_SinkService_methodThrow_ex_1_type = std::make_unique<Struct<::cpp2::InitialException>>("module.InitialException");
   module_SinkService_methodThrow_ex_1_type->writeAndGenType(*module_SinkService_methodThrow_ex_1.type(), metadata);
-  func.exceptions()->push_back(std::move(module_SinkService_methodThrow_ex_1));
   ExceptionMetadata<::cpp2::InitialException>::gen(metadata);
   func.is_oneway() = false;
 }
@@ -346,6 +350,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen
   DCHECK_EQ(*func.name() , "methodSinkThrow");
   auto func_ret_type = std::make_unique<Sink>(std::make_unique<Struct<::cpp2::SinkPayload>>("module.SinkPayload"), std::make_unique<Struct<::cpp2::FinalResponse>>("module.FinalResponse"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_methodFinalThrow([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -353,6 +359,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen
   DCHECK_EQ(*func.name() , "methodFinalThrow");
   auto func_ret_type = std::make_unique<Sink>(std::make_unique<Struct<::cpp2::SinkPayload>>("module.SinkPayload"), std::make_unique<Struct<::cpp2::FinalResponse>>("module.FinalResponse"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_methodBothThrow([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -360,6 +368,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen
   DCHECK_EQ(*func.name() , "methodBothThrow");
   auto func_ret_type = std::make_unique<Sink>(std::make_unique<Struct<::cpp2::SinkPayload>>("module.SinkPayload"), std::make_unique<Struct<::cpp2::FinalResponse>>("module.FinalResponse"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_methodFast([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -367,6 +377,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen
   DCHECK_EQ(*func.name() , "methodFast");
   auto func_ret_type = std::make_unique<Sink>(std::make_unique<Struct<::cpp2::SinkPayload>>("module.SinkPayload"), std::make_unique<Struct<::cpp2::FinalResponse>>("module.FinalResponse"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
   func.structured_annotations()->push_back(*cvStruct("cpp.ProcessInEbThreadUnsafe", {  }).cv_struct());
 }

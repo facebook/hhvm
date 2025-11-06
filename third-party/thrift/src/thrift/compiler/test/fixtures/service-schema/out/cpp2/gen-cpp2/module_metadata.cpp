@@ -102,20 +102,18 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
   DCHECK_EQ(*func.name() , "init");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_PrimitivesService_init_param0_1;
-  module_PrimitivesService_init_param0_1.id() = 1;
-  module_PrimitivesService_init_param0_1.name() = "param0";
-  module_PrimitivesService_init_param0_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_PrimitivesService_init_param0_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_PrimitivesService_init_param0_1.id(), 1);
+  DCHECK_EQ(*module_PrimitivesService_init_param0_1.name(), "param0");
   auto module_PrimitivesService_init_param0_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_PrimitivesService_init_param0_1_type->writeAndGenType(*module_PrimitivesService_init_param0_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_PrimitivesService_init_param0_1));
-  ::apache::thrift::metadata::ThriftField module_PrimitivesService_init_param1_2;
-  module_PrimitivesService_init_param1_2.id() = 2;
-  module_PrimitivesService_init_param1_2.name() = "param1";
-  module_PrimitivesService_init_param1_2.is_optional() = false;
+  ::apache::thrift::metadata::ThriftField &module_PrimitivesService_init_param1_2 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_PrimitivesService_init_param1_2.id(), 2);
+  DCHECK_EQ(*module_PrimitivesService_init_param1_2.name(), "param1");
   auto module_PrimitivesService_init_param1_2_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_PrimitivesService_init_param1_2_type->writeAndGenType(*module_PrimitivesService_init_param1_2.type(), metadata);
-  func.arguments()->push_back(std::move(module_PrimitivesService_init_param1_2));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>>::gen_method_that_throws([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -123,13 +121,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
   DCHECK_EQ(*func.name() , "method_that_throws");
   auto func_ret_type = std::make_unique<Enum<::facebook::thrift::test::Result>>("module.Result");
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_PrimitivesService_method_that_throws_e_1;
-  module_PrimitivesService_method_that_throws_e_1.id() = 1;
-  module_PrimitivesService_method_that_throws_e_1.name() = "e";
-  module_PrimitivesService_method_that_throws_e_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_PrimitivesService_method_that_throws_e_1 = func.exceptions()[exceptionIndex++];
+  DCHECK_EQ(*module_PrimitivesService_method_that_throws_e_1.id(), 1);
+  DCHECK_EQ(*module_PrimitivesService_method_that_throws_e_1.name(), "e");
   auto module_PrimitivesService_method_that_throws_e_1_type = std::make_unique<Struct<::facebook::thrift::test::CustomException>>("module.CustomException");
   module_PrimitivesService_method_that_throws_e_1_type->writeAndGenType(*module_PrimitivesService_method_that_throws_e_1.type(), metadata);
-  func.exceptions()->push_back(std::move(module_PrimitivesService_method_that_throws_e_1));
   ExceptionMetadata<::facebook::thrift::test::CustomException>::gen(metadata);
   func.is_oneway() = false;
 }
@@ -138,20 +136,18 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
   DCHECK_EQ(*func.name() , "return_void_method");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_PrimitivesService_return_void_method_id_1;
-  module_PrimitivesService_return_void_method_id_1.id() = 1;
-  module_PrimitivesService_return_void_method_id_1.name() = "id";
-  module_PrimitivesService_return_void_method_id_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_PrimitivesService_return_void_method_id_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_PrimitivesService_return_void_method_id_1.id(), 1);
+  DCHECK_EQ(*module_PrimitivesService_return_void_method_id_1.name(), "id");
   auto module_PrimitivesService_return_void_method_id_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_PrimitivesService_return_void_method_id_1_type->writeAndGenType(*module_PrimitivesService_return_void_method_id_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_PrimitivesService_return_void_method_id_1));
-  ::apache::thrift::metadata::ThriftField module_PrimitivesService_return_void_method_i_2;
-  module_PrimitivesService_return_void_method_i_2.id() = 2;
-  module_PrimitivesService_return_void_method_i_2.name() = "i";
-  module_PrimitivesService_return_void_method_i_2.is_optional() = false;
+  ::apache::thrift::metadata::ThriftField &module_PrimitivesService_return_void_method_i_2 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_PrimitivesService_return_void_method_i_2.id(), 2);
+  DCHECK_EQ(*module_PrimitivesService_return_void_method_i_2.name(), "i");
   auto module_PrimitivesService_return_void_method_i_2_type = std::make_unique<Struct<::cpp2::I>>("include.I");
   module_PrimitivesService_return_void_method_i_2_type->writeAndGenType(*module_PrimitivesService_return_void_method_i_2.type(), metadata);
-  func.arguments()->push_back(std::move(module_PrimitivesService_return_void_method_i_2));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 
@@ -193,20 +189,18 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
   DCHECK_EQ(*func.name() , "init");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_ExtendedService_init_param0_1;
-  module_ExtendedService_init_param0_1.id() = 1;
-  module_ExtendedService_init_param0_1.name() = "param0";
-  module_ExtendedService_init_param0_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_ExtendedService_init_param0_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_ExtendedService_init_param0_1.id(), 1);
+  DCHECK_EQ(*module_ExtendedService_init_param0_1.name(), "param0");
   auto module_ExtendedService_init_param0_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_ExtendedService_init_param0_1_type->writeAndGenType(*module_ExtendedService_init_param0_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_ExtendedService_init_param0_1));
-  ::apache::thrift::metadata::ThriftField module_ExtendedService_init_param1_2;
-  module_ExtendedService_init_param1_2.id() = 2;
-  module_ExtendedService_init_param1_2.name() = "param1";
-  module_ExtendedService_init_param1_2.is_optional() = false;
+  ::apache::thrift::metadata::ThriftField &module_ExtendedService_init_param1_2 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_ExtendedService_init_param1_2.id(), 2);
+  DCHECK_EQ(*module_ExtendedService_init_param1_2.name(), "param1");
   auto module_ExtendedService_init_param1_2_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_ExtendedService_init_param1_2_type->writeAndGenType(*module_ExtendedService_init_param1_2.type(), metadata);
-  func.arguments()->push_back(std::move(module_ExtendedService_init_param1_2));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 

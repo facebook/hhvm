@@ -403,6 +403,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen
   DCHECK_EQ(*func.name() , "method");
   auto func_ret_type = std::make_unique<Sink>(std::make_unique<Struct<::cpp2::SinkPayload>>("module.SinkPayload"), std::make_unique<Struct<::cpp2::FinalResponse>>("module.FinalResponse"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_methodAndReponse([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -410,6 +412,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen
   DCHECK_EQ(*func.name() , "methodAndReponse");
   auto func_ret_type = std::make_unique<Sink>(std::make_unique<Struct<::cpp2::SinkPayload>>("module.SinkPayload"), std::make_unique<Struct<::cpp2::FinalResponse>>("module.FinalResponse"), std::make_unique<Struct<::cpp2::InitialResponse>>("module.InitialResponse"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_methodThrow([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -417,13 +421,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen
   DCHECK_EQ(*func.name() , "methodThrow");
   auto func_ret_type = std::make_unique<Sink>(std::make_unique<Struct<::cpp2::SinkPayload>>("module.SinkPayload"), std::make_unique<Struct<::cpp2::FinalResponse>>("module.FinalResponse"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_SinkService_methodThrow_ex_1;
-  module_SinkService_methodThrow_ex_1.id() = 1;
-  module_SinkService_methodThrow_ex_1.name() = "ex";
-  module_SinkService_methodThrow_ex_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_SinkService_methodThrow_ex_1 = func.exceptions()[exceptionIndex++];
+  DCHECK_EQ(*module_SinkService_methodThrow_ex_1.id(), 1);
+  DCHECK_EQ(*module_SinkService_methodThrow_ex_1.name(), "ex");
   auto module_SinkService_methodThrow_ex_1_type = std::make_unique<Struct<::cpp2::InitialException>>("module.InitialException");
   module_SinkService_methodThrow_ex_1_type->writeAndGenType(*module_SinkService_methodThrow_ex_1.type(), metadata);
-  func.exceptions()->push_back(std::move(module_SinkService_methodThrow_ex_1));
   ExceptionMetadata<::cpp2::InitialException>::gen(metadata);
   func.is_oneway() = false;
 }
@@ -432,6 +436,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen
   DCHECK_EQ(*func.name() , "methodSinkThrow");
   auto func_ret_type = std::make_unique<Sink>(std::make_unique<Struct<::cpp2::SinkPayload>>("module.SinkPayload"), std::make_unique<Struct<::cpp2::FinalResponse>>("module.FinalResponse"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_methodFinalThrow([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -439,6 +445,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen
   DCHECK_EQ(*func.name() , "methodFinalThrow");
   auto func_ret_type = std::make_unique<Sink>(std::make_unique<Struct<::cpp2::SinkPayload>>("module.SinkPayload"), std::make_unique<Struct<::cpp2::FinalResponse>>("module.FinalResponse"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_methodBothThrow([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -446,6 +454,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen
   DCHECK_EQ(*func.name() , "methodBothThrow");
   auto func_ret_type = std::make_unique<Sink>(std::make_unique<Struct<::cpp2::SinkPayload>>("module.SinkPayload"), std::make_unique<Struct<::cpp2::FinalResponse>>("module.FinalResponse"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_methodFast([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -453,6 +463,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen
   DCHECK_EQ(*func.name() , "methodFast");
   auto func_ret_type = std::make_unique<Sink>(std::make_unique<Struct<::cpp2::SinkPayload>>("module.SinkPayload"), std::make_unique<Struct<::cpp2::FinalResponse>>("module.FinalResponse"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
   func.structured_annotations()->push_back(*cvStruct("cpp.ProcessInEbThreadUnsafe", {  }).cv_struct());
 }
@@ -498,20 +510,18 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingSer
   DCHECK_EQ(*func.name() , "returnstream");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Struct<::cpp2::StreamItem>>("module.StreamItem"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_PubSubStreamingService_returnstream_from_1;
-  module_PubSubStreamingService_returnstream_from_1.id() = 1;
-  module_PubSubStreamingService_returnstream_from_1.name() = "from";
-  module_PubSubStreamingService_returnstream_from_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_returnstream_from_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_PubSubStreamingService_returnstream_from_1.id(), 1);
+  DCHECK_EQ(*module_PubSubStreamingService_returnstream_from_1.name(), "from");
   auto module_PubSubStreamingService_returnstream_from_1_type = std::make_unique<Struct<::cpp2::StreamItem>>("module.StreamItem");
   module_PubSubStreamingService_returnstream_from_1_type->writeAndGenType(*module_PubSubStreamingService_returnstream_from_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_PubSubStreamingService_returnstream_from_1));
-  ::apache::thrift::metadata::ThriftField module_PubSubStreamingService_returnstream_to_2;
-  module_PubSubStreamingService_returnstream_to_2.id() = 2;
-  module_PubSubStreamingService_returnstream_to_2.name() = "to";
-  module_PubSubStreamingService_returnstream_to_2.is_optional() = false;
+  ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_returnstream_to_2 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_PubSubStreamingService_returnstream_to_2.id(), 2);
+  DCHECK_EQ(*module_PubSubStreamingService_returnstream_to_2.name(), "to");
   auto module_PubSubStreamingService_returnstream_to_2_type = std::make_unique<Struct<::cpp2::StreamItem>>("module.StreamItem");
   module_PubSubStreamingService_returnstream_to_2_type->writeAndGenType(*module_PubSubStreamingService_returnstream_to_2.type(), metadata);
-  func.arguments()->push_back(std::move(module_PubSubStreamingService_returnstream_to_2));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_streamthrows([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -519,13 +529,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingSer
   DCHECK_EQ(*func.name() , "streamthrows");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Struct<::cpp2::StreamItem>>("module.StreamItem"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_PubSubStreamingService_streamthrows_foo_1;
-  module_PubSubStreamingService_streamthrows_foo_1.id() = 1;
-  module_PubSubStreamingService_streamthrows_foo_1.name() = "foo";
-  module_PubSubStreamingService_streamthrows_foo_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_streamthrows_foo_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_PubSubStreamingService_streamthrows_foo_1.id(), 1);
+  DCHECK_EQ(*module_PubSubStreamingService_streamthrows_foo_1.name(), "foo");
   auto module_PubSubStreamingService_streamthrows_foo_1_type = std::make_unique<Struct<::cpp2::StreamItem>>("module.StreamItem");
   module_PubSubStreamingService_streamthrows_foo_1_type->writeAndGenType(*module_PubSubStreamingService_streamthrows_foo_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_PubSubStreamingService_streamthrows_foo_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_servicethrows([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -533,20 +543,18 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingSer
   DCHECK_EQ(*func.name() , "servicethrows");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Struct<::cpp2::StreamItem>>("module.StreamItem"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_PubSubStreamingService_servicethrows_foo_1;
-  module_PubSubStreamingService_servicethrows_foo_1.id() = 1;
-  module_PubSubStreamingService_servicethrows_foo_1.name() = "foo";
-  module_PubSubStreamingService_servicethrows_foo_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_servicethrows_foo_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_PubSubStreamingService_servicethrows_foo_1.id(), 1);
+  DCHECK_EQ(*module_PubSubStreamingService_servicethrows_foo_1.name(), "foo");
   auto module_PubSubStreamingService_servicethrows_foo_1_type = std::make_unique<Struct<::cpp2::StreamItem>>("module.StreamItem");
   module_PubSubStreamingService_servicethrows_foo_1_type->writeAndGenType(*module_PubSubStreamingService_servicethrows_foo_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_PubSubStreamingService_servicethrows_foo_1));
-  ::apache::thrift::metadata::ThriftField module_PubSubStreamingService_servicethrows_e_1;
-  module_PubSubStreamingService_servicethrows_e_1.id() = 1;
-  module_PubSubStreamingService_servicethrows_e_1.name() = "e";
-  module_PubSubStreamingService_servicethrows_e_1.is_optional() = false;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_servicethrows_e_1 = func.exceptions()[exceptionIndex++];
+  DCHECK_EQ(*module_PubSubStreamingService_servicethrows_e_1.id(), 1);
+  DCHECK_EQ(*module_PubSubStreamingService_servicethrows_e_1.name(), "e");
   auto module_PubSubStreamingService_servicethrows_e_1_type = std::make_unique<Struct<::cpp2::FooEx>>("module.FooEx");
   module_PubSubStreamingService_servicethrows_e_1_type->writeAndGenType(*module_PubSubStreamingService_servicethrows_e_1.type(), metadata);
-  func.exceptions()->push_back(std::move(module_PubSubStreamingService_servicethrows_e_1));
   ExceptionMetadata<::cpp2::FooEx>::gen(metadata);
   func.is_oneway() = false;
 }
@@ -555,28 +563,24 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingSer
   DCHECK_EQ(*func.name() , "servicethrows2");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Struct<::cpp2::StreamItem>>("module.StreamItem"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_PubSubStreamingService_servicethrows2_foo_1;
-  module_PubSubStreamingService_servicethrows2_foo_1.id() = 1;
-  module_PubSubStreamingService_servicethrows2_foo_1.name() = "foo";
-  module_PubSubStreamingService_servicethrows2_foo_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_servicethrows2_foo_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_PubSubStreamingService_servicethrows2_foo_1.id(), 1);
+  DCHECK_EQ(*module_PubSubStreamingService_servicethrows2_foo_1.name(), "foo");
   auto module_PubSubStreamingService_servicethrows2_foo_1_type = std::make_unique<Struct<::cpp2::StreamItem>>("module.StreamItem");
   module_PubSubStreamingService_servicethrows2_foo_1_type->writeAndGenType(*module_PubSubStreamingService_servicethrows2_foo_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_PubSubStreamingService_servicethrows2_foo_1));
-  ::apache::thrift::metadata::ThriftField module_PubSubStreamingService_servicethrows2_e1_1;
-  module_PubSubStreamingService_servicethrows2_e1_1.id() = 1;
-  module_PubSubStreamingService_servicethrows2_e1_1.name() = "e1";
-  module_PubSubStreamingService_servicethrows2_e1_1.is_optional() = false;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_servicethrows2_e1_1 = func.exceptions()[exceptionIndex++];
+  DCHECK_EQ(*module_PubSubStreamingService_servicethrows2_e1_1.id(), 1);
+  DCHECK_EQ(*module_PubSubStreamingService_servicethrows2_e1_1.name(), "e1");
   auto module_PubSubStreamingService_servicethrows2_e1_1_type = std::make_unique<Struct<::cpp2::FooEx>>("module.FooEx");
   module_PubSubStreamingService_servicethrows2_e1_1_type->writeAndGenType(*module_PubSubStreamingService_servicethrows2_e1_1.type(), metadata);
-  func.exceptions()->push_back(std::move(module_PubSubStreamingService_servicethrows2_e1_1));
   ExceptionMetadata<::cpp2::FooEx>::gen(metadata);
-  ::apache::thrift::metadata::ThriftField module_PubSubStreamingService_servicethrows2_e2_2;
-  module_PubSubStreamingService_servicethrows2_e2_2.id() = 2;
-  module_PubSubStreamingService_servicethrows2_e2_2.name() = "e2";
-  module_PubSubStreamingService_servicethrows2_e2_2.is_optional() = false;
+  ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_servicethrows2_e2_2 = func.exceptions()[exceptionIndex++];
+  DCHECK_EQ(*module_PubSubStreamingService_servicethrows2_e2_2.id(), 2);
+  DCHECK_EQ(*module_PubSubStreamingService_servicethrows2_e2_2.name(), "e2");
   auto module_PubSubStreamingService_servicethrows2_e2_2_type = std::make_unique<Struct<::cpp2::FooEx2>>("module.FooEx2");
   module_PubSubStreamingService_servicethrows2_e2_2_type->writeAndGenType(*module_PubSubStreamingService_servicethrows2_e2_2.type(), metadata);
-  func.exceptions()->push_back(std::move(module_PubSubStreamingService_servicethrows2_e2_2));
   ExceptionMetadata<::cpp2::FooEx2>::gen(metadata);
   func.is_oneway() = false;
 }
@@ -585,20 +589,18 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingSer
   DCHECK_EQ(*func.name() , "boththrows");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Struct<::cpp2::StreamItem>>("module.StreamItem"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_PubSubStreamingService_boththrows_foo_1;
-  module_PubSubStreamingService_boththrows_foo_1.id() = 1;
-  module_PubSubStreamingService_boththrows_foo_1.name() = "foo";
-  module_PubSubStreamingService_boththrows_foo_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_boththrows_foo_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_PubSubStreamingService_boththrows_foo_1.id(), 1);
+  DCHECK_EQ(*module_PubSubStreamingService_boththrows_foo_1.name(), "foo");
   auto module_PubSubStreamingService_boththrows_foo_1_type = std::make_unique<Struct<::cpp2::StreamItem>>("module.StreamItem");
   module_PubSubStreamingService_boththrows_foo_1_type->writeAndGenType(*module_PubSubStreamingService_boththrows_foo_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_PubSubStreamingService_boththrows_foo_1));
-  ::apache::thrift::metadata::ThriftField module_PubSubStreamingService_boththrows_e_1;
-  module_PubSubStreamingService_boththrows_e_1.id() = 1;
-  module_PubSubStreamingService_boththrows_e_1.name() = "e";
-  module_PubSubStreamingService_boththrows_e_1.is_optional() = false;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_boththrows_e_1 = func.exceptions()[exceptionIndex++];
+  DCHECK_EQ(*module_PubSubStreamingService_boththrows_e_1.id(), 1);
+  DCHECK_EQ(*module_PubSubStreamingService_boththrows_e_1.name(), "e");
   auto module_PubSubStreamingService_boththrows_e_1_type = std::make_unique<Struct<::cpp2::FooEx>>("module.FooEx");
   module_PubSubStreamingService_boththrows_e_1_type->writeAndGenType(*module_PubSubStreamingService_boththrows_e_1.type(), metadata);
-  func.exceptions()->push_back(std::move(module_PubSubStreamingService_boththrows_e_1));
   ExceptionMetadata<::cpp2::FooEx>::gen(metadata);
   func.is_oneway() = false;
 }
@@ -607,13 +609,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingSer
   DCHECK_EQ(*func.name() , "responseandstreamstreamthrows");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Struct<::cpp2::StreamItem>>("module.StreamItem"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_PubSubStreamingService_responseandstreamstreamthrows_foo_1;
-  module_PubSubStreamingService_responseandstreamstreamthrows_foo_1.id() = 1;
-  module_PubSubStreamingService_responseandstreamstreamthrows_foo_1.name() = "foo";
-  module_PubSubStreamingService_responseandstreamstreamthrows_foo_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_responseandstreamstreamthrows_foo_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_PubSubStreamingService_responseandstreamstreamthrows_foo_1.id(), 1);
+  DCHECK_EQ(*module_PubSubStreamingService_responseandstreamstreamthrows_foo_1.name(), "foo");
   auto module_PubSubStreamingService_responseandstreamstreamthrows_foo_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   module_PubSubStreamingService_responseandstreamstreamthrows_foo_1_type->writeAndGenType(*module_PubSubStreamingService_responseandstreamstreamthrows_foo_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_PubSubStreamingService_responseandstreamstreamthrows_foo_1));
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_responseandstreamservicethrows([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -621,20 +623,18 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingSer
   DCHECK_EQ(*func.name() , "responseandstreamservicethrows");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Struct<::cpp2::StreamItem>>("module.StreamItem"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_PubSubStreamingService_responseandstreamservicethrows_foo_1;
-  module_PubSubStreamingService_responseandstreamservicethrows_foo_1.id() = 1;
-  module_PubSubStreamingService_responseandstreamservicethrows_foo_1.name() = "foo";
-  module_PubSubStreamingService_responseandstreamservicethrows_foo_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_responseandstreamservicethrows_foo_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_PubSubStreamingService_responseandstreamservicethrows_foo_1.id(), 1);
+  DCHECK_EQ(*module_PubSubStreamingService_responseandstreamservicethrows_foo_1.name(), "foo");
   auto module_PubSubStreamingService_responseandstreamservicethrows_foo_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   module_PubSubStreamingService_responseandstreamservicethrows_foo_1_type->writeAndGenType(*module_PubSubStreamingService_responseandstreamservicethrows_foo_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_PubSubStreamingService_responseandstreamservicethrows_foo_1));
-  ::apache::thrift::metadata::ThriftField module_PubSubStreamingService_responseandstreamservicethrows_e_1;
-  module_PubSubStreamingService_responseandstreamservicethrows_e_1.id() = 1;
-  module_PubSubStreamingService_responseandstreamservicethrows_e_1.name() = "e";
-  module_PubSubStreamingService_responseandstreamservicethrows_e_1.is_optional() = false;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_responseandstreamservicethrows_e_1 = func.exceptions()[exceptionIndex++];
+  DCHECK_EQ(*module_PubSubStreamingService_responseandstreamservicethrows_e_1.id(), 1);
+  DCHECK_EQ(*module_PubSubStreamingService_responseandstreamservicethrows_e_1.name(), "e");
   auto module_PubSubStreamingService_responseandstreamservicethrows_e_1_type = std::make_unique<Struct<::cpp2::FooEx>>("module.FooEx");
   module_PubSubStreamingService_responseandstreamservicethrows_e_1_type->writeAndGenType(*module_PubSubStreamingService_responseandstreamservicethrows_e_1.type(), metadata);
-  func.exceptions()->push_back(std::move(module_PubSubStreamingService_responseandstreamservicethrows_e_1));
   ExceptionMetadata<::cpp2::FooEx>::gen(metadata);
   func.is_oneway() = false;
 }
@@ -643,20 +643,18 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingSer
   DCHECK_EQ(*func.name() , "responseandstreamboththrows");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Struct<::cpp2::StreamItem>>("module.StreamItem"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_PubSubStreamingService_responseandstreamboththrows_foo_1;
-  module_PubSubStreamingService_responseandstreamboththrows_foo_1.id() = 1;
-  module_PubSubStreamingService_responseandstreamboththrows_foo_1.name() = "foo";
-  module_PubSubStreamingService_responseandstreamboththrows_foo_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_responseandstreamboththrows_foo_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_PubSubStreamingService_responseandstreamboththrows_foo_1.id(), 1);
+  DCHECK_EQ(*module_PubSubStreamingService_responseandstreamboththrows_foo_1.name(), "foo");
   auto module_PubSubStreamingService_responseandstreamboththrows_foo_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   module_PubSubStreamingService_responseandstreamboththrows_foo_1_type->writeAndGenType(*module_PubSubStreamingService_responseandstreamboththrows_foo_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_PubSubStreamingService_responseandstreamboththrows_foo_1));
-  ::apache::thrift::metadata::ThriftField module_PubSubStreamingService_responseandstreamboththrows_e_1;
-  module_PubSubStreamingService_responseandstreamboththrows_e_1.id() = 1;
-  module_PubSubStreamingService_responseandstreamboththrows_e_1.name() = "e";
-  module_PubSubStreamingService_responseandstreamboththrows_e_1.is_optional() = false;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_responseandstreamboththrows_e_1 = func.exceptions()[exceptionIndex++];
+  DCHECK_EQ(*module_PubSubStreamingService_responseandstreamboththrows_e_1.id(), 1);
+  DCHECK_EQ(*module_PubSubStreamingService_responseandstreamboththrows_e_1.name(), "e");
   auto module_PubSubStreamingService_responseandstreamboththrows_e_1_type = std::make_unique<Struct<::cpp2::FooEx>>("module.FooEx");
   module_PubSubStreamingService_responseandstreamboththrows_e_1_type->writeAndGenType(*module_PubSubStreamingService_responseandstreamboththrows_e_1.type(), metadata);
-  func.exceptions()->push_back(std::move(module_PubSubStreamingService_responseandstreamboththrows_e_1));
   ExceptionMetadata<::cpp2::FooEx>::gen(metadata);
   func.is_oneway() = false;
 }

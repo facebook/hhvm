@@ -157,6 +157,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::gen_f([[maybe
   DCHECK_EQ(*func.name() , "f");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::gen_numbers([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -164,6 +166,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::gen_numbers([
   DCHECK_EQ(*func.name() , "numbers");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Typedef>("module.number", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("rust.NewType", {  }).cv_struct(),  }));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
   func.is_oneway() = false;
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::gen_thing([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -171,34 +175,28 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::gen_thing([[m
   DCHECK_EQ(*func.name() , "thing");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
-  ::apache::thrift::metadata::ThriftField module_C_thing_a_1;
-  module_C_thing_a_1.id() = 1;
-  module_C_thing_a_1.name() = "a";
-  module_C_thing_a_1.is_optional() = false;
+  [[maybe_unused]] std::size_t argumentIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_C_thing_a_1 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_C_thing_a_1.id(), 1);
+  DCHECK_EQ(*module_C_thing_a_1.name(), "a");
   auto module_C_thing_a_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   module_C_thing_a_1_type->writeAndGenType(*module_C_thing_a_1.type(), metadata);
-  func.arguments()->push_back(std::move(module_C_thing_a_1));
-  ::apache::thrift::metadata::ThriftField module_C_thing_b_2;
-  module_C_thing_b_2.id() = 2;
-  module_C_thing_b_2.name() = "b";
-  module_C_thing_b_2.is_optional() = false;
+  ::apache::thrift::metadata::ThriftField &module_C_thing_b_2 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_C_thing_b_2.id(), 2);
+  DCHECK_EQ(*module_C_thing_b_2.name(), "b");
   auto module_C_thing_b_2_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   module_C_thing_b_2_type->writeAndGenType(*module_C_thing_b_2.type(), metadata);
-  func.arguments()->push_back(std::move(module_C_thing_b_2));
-  ::apache::thrift::metadata::ThriftField module_C_thing_c_3;
-  module_C_thing_c_3.id() = 3;
-  module_C_thing_c_3.name() = "c";
-  module_C_thing_c_3.is_optional() = false;
+  ::apache::thrift::metadata::ThriftField &module_C_thing_c_3 = func.arguments()[argumentIndex++];
+  DCHECK_EQ(*module_C_thing_c_3.id(), 3);
+  DCHECK_EQ(*module_C_thing_c_3.name(), "c");
   auto module_C_thing_c_3_type = std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE));
   module_C_thing_c_3_type->writeAndGenType(*module_C_thing_c_3.type(), metadata);
-  func.arguments()->push_back(std::move(module_C_thing_c_3));
-  ::apache::thrift::metadata::ThriftField module_C_thing_bang_1;
-  module_C_thing_bang_1.id() = 1;
-  module_C_thing_bang_1.name() = "bang";
-  module_C_thing_bang_1.is_optional() = false;
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
+  ::apache::thrift::metadata::ThriftField &module_C_thing_bang_1 = func.exceptions()[exceptionIndex++];
+  DCHECK_EQ(*module_C_thing_bang_1.id(), 1);
+  DCHECK_EQ(*module_C_thing_bang_1.name(), "bang");
   auto module_C_thing_bang_1_type = std::make_unique<Struct<::cpp2::Bang>>("module.Bang");
   module_C_thing_bang_1_type->writeAndGenType(*module_C_thing_bang_1.type(), metadata);
-  func.exceptions()->push_back(std::move(module_C_thing_bang_1));
   ExceptionMetadata<::cpp2::Bang>::gen(metadata);
   func.is_oneway() = false;
 }

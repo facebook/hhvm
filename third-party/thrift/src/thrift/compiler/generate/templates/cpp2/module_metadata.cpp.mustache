@@ -145,13 +145,15 @@ void ServiceMetadata<::{{> service_common/service_class_name}}>::gen_{{function:
   auto func_ret_type = {{> metadata/return_type_gen}};
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
 {{/function:return_type}}
+  [[maybe_unused]] std::size_t argumentIndex = 0;
 {{#function:args}}
+  ::apache::thrift::metadata::ThriftField &{{> metadata/func_field_name}} = func.arguments()[argumentIndex++];
   {{> metadata/func_field_gen}}
-  func.arguments()->push_back(std::move({{> metadata/func_field_name}}));
 {{/function:args}}
+  [[maybe_unused]] std::size_t exceptionIndex = 0;
 {{#function:exceptions}}
+  ::apache::thrift::metadata::ThriftField &{{> metadata/func_field_name}} = func.exceptions()[exceptionIndex++];
   {{> metadata/func_field_gen}}
-  func.exceptions()->push_back(std::move({{> metadata/func_field_name}}));
 {{#field:type}}
 {{#type:structured?}}
   ExceptionMetadata<{{type:cpp_fullname}}>::gen(metadata);

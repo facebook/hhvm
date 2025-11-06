@@ -1,36 +1,90 @@
 # Deployments
 
-Once you've defined a set of packages, you can deploy them using **deployments**.
+## What is a Deployment?
 
-## Deployments
-A **deployment** is defined as a set of packages. Deployments are also defined in PACKAGES.toml:
+A **deployment** is a set of packages built and deployed together. One may think of it as a build target configuration telling HHVM which code to compile and run.
+
+**Key requirements:**
+- A deployment must be **transitively closed** with respect to package dependencies
+- If package A includes package B, and A is deployed, B must also be explicitly deployed
+
+## Defining Deployments
+
+Deployments are defined in the `[deployments]` section of `PACKAGES.toml`:
 
 ```toml PACKAGES.toml
 [packages]
 
 [packages.production]
-uses=["prod.*", "my_prod"] # Package contains all modules that start with `prod`, and the module "my_prod".
+include_paths = ["//flib/"]
 
 [packages.test]
-uses=["test.*"]
-includes=["production"] # Package depends on the production package
+include_paths = ["//flib/test/"]
+includes = ["production"]
 
 [deployments]
+
 [deployments.production]
-packages=["production"]
+packages = ["production"]
 
 [deployments.test]
-packages=["test", "production"] # Since the test package includes production, they must be deployed together.
+packages = ["test", "production"]  # Must include production since test depends on it
 ```
 
-When building in [repo authoritative](/docs/hack/../hhvm/advanced-usage/repo-authoritative) mode, you can pass in the build configuration `Eval.ActiveDeployment = <deployment>` to set the active deployment. HHVM will then include only the files in the active deployment when building.
+### Transitive Closure Requirement
 
-## Deployment domains
-In CLI-server mode, HHVM can direct different domains to different deployments, allowing you to treat a web request as if it were built in repo mode with a specific deployment. You can set the `domains` value of to any deployment to a list of regexes:
+The `packages` list must include all transitive dependencies:
+
+```toml
+[packages.core]
+include_paths = ["//flib/core/"]
+
+[packages.utils]
+include_paths = ["//flib/utils/"]
+includes = ["core"]
+
+[packages.app]
+include_paths = ["//flib/app/"]
+includes = ["utils"]
+
+[deployments.app]
+# Error: Missing core
+# packages = ["app", "utils"]
+
+# Correct: Includes all transitive dependencies
+packages = ["app", "utils", "core"]
+```
+
+Even though `app` only directly includes `utils`, the deployment must explicitly list all three packages.
+
+## Using Deployments with HHVM
+
+Specify the active deployment:
+
+```ini
+Eval.Runtime.ActiveDeployment = production
+```
+
+When running in [repo authoritative](/docs/hhvm/advanced-usage/repo-authoritative) mode, HHVM only compiles and runs files from packages in the specified deployment. References to undeployed packages cause runtime errors (e.g., "Class not found" or "Call to undefined function"). When running in other modes, the active deployment serves only to modify semantics of `package` checks and the `__RequirePackage` attribute.
+
+
+### Force Symbol References (Legacy)
+
+For migration purposes, one can use the `ForceEnableSymbolRefs` option to allow additional "symbolically-referenced" files to be built alongside the active deployment. Note that this only affects [repo authoritative](/docs/hhvm/advanced-usage/repo-authoritative) mode.
+
+## Soft Packages (Migration Support)
+
+Deployments can specify `soft_packages` for files intended to be later excluded:
 
 ```toml
 [deployments.production]
-packages=["production"]
-domains=["^.*my_website\.com"]
+packages = ["production"]
+soft_packages = ["legacy_code"]
 ```
-The domains field matches on the `Host` field of any web request that HHVM serves. In this example, traffic that hits `my_website.com` will be treated as if the active deployment were production. Note that a hostname can match multiple regexes, but the **first** deployment listed which has a regex that matches the hostname will be used.
+
+Accessing soft-deployed package symbols logs a warning instead of throwing an error, allowing identification of dynamic boundary violations.
+
+**Rules:**
+- Soft-included packages must be at least soft-deployed
+- Hard-included packages must be hard-deployed
+- `package_exists()` returns `false` for soft packages. See [Cross Package Usage](/docs/hack/packages/cross-package-calls) for details.

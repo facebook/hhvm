@@ -1,80 +1,247 @@
-# Configuration Specification
+# Configuration Reference
 
-This page has detailed documentation of each field in PACKAGES.toml.
+This page provides a comprehensive reference for all fields in `PACKAGES.toml`.
 
-```
+## File Structure
+
+`PACKAGES.toml` contains two main sections: `[packages]` and `[deployments]`.
+
+```toml
 # PACKAGES.toml
 [packages]
 
-[packages.prod]
-uses = ["prod.*"]
-includes = ["default"]
-soft_includes = ["test_soft"]
+[packages.production]
+include_paths = ["//flib/prod/"]
+soft_includes = ["test_actually_prod"]
 
-[packages.test_strict]
-uses = ["test.*"]
-includes = ["prod", "test_soft", "default"]
+[packages.test]
+include_paths = ["//flib/test/"]
+includes = ["production"]
 
-# Code that’s in test but may be dynamically called from prod
-[packages.test_soft]
-uses = ["test_soft.*"]
-includes = ["prod", "default"]
+[packages.test_actually_prod]
+includes = ["production"]
 
-[packages.default] # default package with everything else
-uses=[".*"]
+[deployments]
 
-[deployments.test-website]
-packages = ["test_strict", "test_soft", "prod", "default"]
-domains = ['.*test\.my-website\.com']
+[deployments.production]
+packages = ["production"]
+soft_packages = ["test_actually_prod"]
 
-[deployments.prod-website]
-packages = ["prod", "default"]
-soft_packages = ["test_soft"]
-domains = ['.*\.my-website\.com']
+[deployments.test]
+packages = ["test", "test_actually_prod", "production"]
 ```
 
-## Packages section
+## Packages Section
 
-A PACKAGES.toml file contains two main sections: packages and deployments.
-The packages section lists all available packages and their respective dependencies. Each package is defined as a nested table with a unique name, and can have these fields:
+Defines all packages and their relationships. Each package is a nested table with a unique name.
 
-- **uses:** a list of module globs that this package depends on. For example, `prod.*` means that this package uses the module `prod` and all modules that start with `prod.*`. A module can only be part of a single package, and match the most specific glob when deciding which package it’s a part of.
+### Package Name
 
-- **includes:** a string list of other package names that this package depends on. Any package `A` that is included by a package `B` must be deployed in any deployment that B is present in.
+Package names must be unique. The reserved name `"default"` cannot be used.
 
-- **soft_includes:** a string list of package names that this package may depend on dynamically. Accessing a package that’s soft included from this package will raise a Hack error. Any package `A` that is soft included by a package `B` must be at least soft deployed in any deployment that `B` is present in.
-
-## Deployments section
-
-The deployments section lists all deployments and their respective packages and domains. Each deployment is defined as a nested table with a unique name, and can have these fields:
-
-- **packages**: a list of packages that are in this deployment. The list must be transitively closed, that is, any package that is (non softly) included by any package in this list must also be in the list.
-
-- **soft_packages:** a list of packages that are included in this deployment at runtime, but will log when accessed. Any packages that are soft included by any package in the deployment must be either in this list or the list of hard included packages above.
-
-- **domains**: a list of domains where this deployment is accessible on sandboxes. A domain is listed as a list of regular expressions. In sandboxes, HHVM matches these regular expressions on the Host field of any request. When choosing which deployment is considered active in sandbox mode, HHVM will take the first eligible deployment which contains a domain regex that matches a given host.
-
-## Notes
-
-Note that any code that isn’t in a module is considered part of the default module, which is simply a module with the name `default`. The default module can be globbed into any package, the same way any other module can be:
-
-```
-[[packages.with_default]]
-uses=["default", "prod.*"] # prod can call code outside of modules
-
-[[packages.no_default]] # foo cannot call code outside of modules
-uses=["foo"]
+```toml
+[packages.my_package]  # "my_package" is the package name
 ```
 
+### `include_paths`
 
-A common use case is to put the default module into a default package which globs ".*", which contains the default module. Then you can include that package in all deployments (and have other packages depend on it).
+**Type:** List of strings (optional)
 
+**Purpose:** Specifies files and directories belonging to this package.
+
+**Syntax:**
+- Paths start with `//`, the root directory where `PACKAGES.toml` is located
+- A path ending with `/` (e.g., `"//flib/"`) includes all files recursively in that directory
+- A path without trailing `/` (e.g., `"//flib/foo.php"`) includes only that specific file
+- Paths must be normalized (no `"../"` or `"./"`)
+
+**Rules:**
+- Each path must be unique across all packages (parse error otherwise)
+- Each path must resolve to a valid location (parse error otherwise)
+
+**Example:**
+```toml
+[packages.production]
+include_paths = [
+  "//flib/",                    # All files in flib/ recursively
+  "//config/prod_config.php"    # Single specific file
+]
 ```
-[packages.default] # default package with everything else
-uses=[".*"]
 
+### `includes`
 
-[packages.foo]
-uses=["foo.*"]
-includes=["default"]
+**Type:** List of strings (optional)
+
+**Purpose:** Lists packages this package depends on. Code can access included package symbols.
+
+**Syntax:** Package names, double-quoted and comma-separated
+
+**Rules:** Must be **explicitly closed with respect to transitivity** (if A includes B, and B includes C, then A must explicitly list C)
+
+**Example:**
+```toml
+[packages.core]
+include_paths = ["//core/"]
+
+[packages.utils]
+include_paths = ["//utils/"]
+includes = ["core"]
+
+[packages.app]
+include_paths = ["//app/"]
+includes = ["utils", "core"]  # Must explicitly include both utils AND core
+```
+
+### `soft_includes`
+
+**Type:** List of strings (optional)
+
+**Purpose:** Lists dynamic dependencies for migration. Accessing soft-included package symbols raises typechecker errors.
+
+**Use Case:** When removing dependencies between packages. Change `includes = ["B"]` to `soft_includes = ["B"]` to identify all statically known places where A accesses B's symbols.
+
+**Syntax:** Package names, double-quoted and comma-separated
+
+**Rules:** Soft-included packages must be at least soft-deployed where the including package is present
+
+**Example:**
+```toml
+[packages.production]
+include_paths = ["//flib/prod/"]
+soft_includes = ["migrate_me"]  # Want to remove this dependency
+
+[packages.migrate_me]
+include_paths = ["//flib/legacy/"]
+includes = ["production"]
+```
+
+Here:
+- Typechecker errors on production code accessing `migrate_me` symbols
+- At runtime, `migrate_me` is still deployed (via `soft_packages`), so existing dynamic references won't fatal
+- Developers systematically fix typechecker errors to remove the dependency
+
+## Deployments Section
+
+Defines which packages are built and deployed together. Each deployment is a nested table with a unique name.
+
+### Deployment Name
+
+Deployment names must be unique.
+
+```toml
+[deployments.production]  # "production" is the deployment name
+```
+
+### `packages`
+
+**Type:** List of strings (required)
+
+**Purpose:** Lists packages in this deployment.
+
+**Syntax:** Package names, double-quoted and comma-separated
+
+**Rules:** Must be **transitively closed** (if A is deployed and A includes B, then B must be deployed)
+
+**Example:**
+```toml
+[packages.core]
+include_paths = ["//core/"]
+
+[packages.utils]
+include_paths = ["//utils/"]
+includes = ["core"]
+
+[packages.app]
+include_paths = ["//app/"]
+includes = ["utils", "core"]
+
+[deployments.app]
+# All three must be listed because of transitive dependencies
+packages = ["app", "utils", "core"]
+```
+
+### `soft_packages`
+
+**Type:** List of strings (optional)
+
+**Purpose:** Packages deployed at runtime that log warnings when accessed.
+
+**Use Case:** When migrating away from a dependency, move a package from `packages` to `soft_packages`. It remains deployed (preventing runtime fatals) while ones identifies and fix all accesses.
+
+**Syntax:** Package names, double-quoted and comma-separated
+
+**Rules:**
+- Soft-included packages must be in either the `soft_packages` or `packages` list
+- `package soft_package_name` returns `false` for soft packages
+
+**Example:**
+```toml
+[packages.production]
+include_paths = ["//flib/prod/"]
+soft_includes = ["legacy"]
+
+[packages.legacy]
+include_paths = ["//flib/legacy/"]
+
+[deployments.production]
+packages = ["production"]
+soft_packages = ["legacy"]  # legacy is deployed but accessing it logs warnings
+```
+
+## Complete Example
+
+Here's a complete example showing all configuration options:
+
+```toml
+# PACKAGES.toml
+
+[packages]
+
+# Core production package
+[packages.core]
+include_paths = ["//flib/core/"]
+
+# Production utilities that depend on core
+[packages.prod_utils]
+include_paths = ["//flib/utils/"]
+includes = ["core"]
+
+# Main production application
+[packages.production]
+include_paths = ["//flib/prod/"]
+includes = ["prod_utils", "core"]
+soft_includes = ["legacy_feature"]  # Migrating away from this
+
+# Legacy feature being phased out
+[packages.legacy_feature]
+include_paths = ["//flib/legacy/"]
+includes = ["core"]
+
+# Test package
+[packages.test]
+include_paths = ["//flib/test/"]
+includes = ["production", "prod_utils", "core"]
+
+# Files in test that temporarily need to be in production
+[packages.test_actually_prod]
+# No include_paths - files use __PackageOverride to join this package
+includes = ["production", "prod_utils", "core"]
+
+[deployments]
+
+# Production deployment (minimal)
+[deployments.production]
+packages = ["production", "prod_utils", "core"]
+soft_packages = ["legacy_feature", "test_actually_prod"]
+
+# Test deployment (includes everything)
+[deployments.test]
+packages = [
+  "test",
+  "production",
+  "prod_utils",
+  "core",
+  "test_actually_prod",
+  "legacy_feature"
+]
 ```

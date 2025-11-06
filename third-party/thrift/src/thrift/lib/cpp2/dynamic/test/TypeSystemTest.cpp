@@ -1564,4 +1564,45 @@ TEST(TypeSystemTest, AnyTypeInterop) {
       type::map<type::i32_t, type::string_t>{});
 }
 
+TEST(TypeSystemTest, MatchKind) {
+  TypeSystemBuilder builder;
+
+  builder.addType("meta.com/thrift/test/MyStruct", def::Struct({}));
+  builder.addType(
+      "meta.com/thrift/test/MyAlias", def::OpaqueAlias(TypeIds::String));
+
+  auto typeSystem = std::move(builder).build();
+
+  {
+    auto type = TypeRef::fromDefinition(
+        typeSystem->getUserDefinedTypeOrThrow("meta.com/thrift/test/MyStruct"));
+    auto result = type.matchKind([](auto tag) {
+      using Kind = TypeRef::Kind;
+      if constexpr (decltype(tag)::value == Kind::STRUCT) {
+        return "struct";
+      } else {
+        return "other";
+      }
+    });
+    EXPECT_EQ(result, "struct");
+  }
+
+  // Test opaque alias - access target type directly
+  {
+    auto aliasDef =
+        typeSystem->getUserDefinedTypeOrThrow("meta.com/thrift/test/MyAlias");
+    EXPECT_TRUE(aliasDef.isOpaqueAlias());
+    auto targetType = aliasDef.asOpaqueAlias().targetType();
+    auto result = targetType.matchKind([](auto tag) {
+      using Kind = TypeRef::Kind;
+      if constexpr (decltype(tag)::value == Kind::STRING) {
+        return "string";
+      } else {
+        return "other";
+      }
+    });
+    EXPECT_EQ(result, "string");
+  }
+}
+
 } // namespace apache::thrift::type_system

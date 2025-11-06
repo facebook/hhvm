@@ -201,4 +201,7 @@ template <typename Tag>
 TypeRef resolveTag(const TypeSystem& ts, Tag) {
   return TypeRef(detail::TagResolver{ts}(Tag{}));
 }
+template <typename Tag>
+using TypeRefType =
+    decltype(detail::TagResolver{std::declval<TypeSystem>()}(Tag{}));
 } // namespace apache::thrift::type_system

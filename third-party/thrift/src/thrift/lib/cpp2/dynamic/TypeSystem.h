@@ -801,6 +801,12 @@ class TypeRef final {
         [](const T& value) -> const T& { return value; },
         [&](auto&&) -> const T& { throwAccessInactiveKind(); });
   }
+  template <Kind k>
+  const std::variant_alternative_t<folly::to_underlying(k), Alternative>&
+  asKind() const {
+    return asType<
+        std::variant_alternative_t<folly::to_underlying(k), Alternative>>();
+  }
 
   // TypeRef to primitives
   explicit TypeRef(Bool) noexcept : type_(std::in_place_type<Bool>) {}
@@ -833,6 +839,25 @@ class TypeRef final {
    * Creates a reference to a user-defined type.
    */
   static TypeRef fromDefinition(DefinitionRef);
+
+  template <Kind k>
+  using KindConstant = std::integral_constant<Kind, k>;
+  /**
+   * Invokes the provided visitor function with `KindConstant<kind>` where
+   * `kind` is provided at runtime. For example:
+   *
+   *     matchKind(
+   *       []<Kind k>(KindConstant<k>) {
+   *         // This will be called with k == Kind::I32
+   *       }
+   *     );
+   *
+   * Preconditions:
+   *   - Kind is one of the enumerated (named) values. Otherwise,
+   *     the behavior is undefined.
+   */
+  template <typename... F>
+  FOLLY_ALWAYS_INLINE decltype(auto) matchKind(F&&... visitors) const;
 
  private:
   Alternative type_;
@@ -1317,6 +1342,51 @@ inline TypeRef TypeSystem::MapOf(TypeRef keyType, TypeRef valueType) const {
 
 inline TypeRef TypeSystem::UserDefined(UriView uri) const {
   return TypeRef::fromDefinition(this->getUserDefinedTypeOrThrow(uri));
+}
+
+// TypeRef::matchKind implementation (defined after OpaqueAliasNode is complete)
+template <typename... F>
+FOLLY_ALWAYS_INLINE decltype(auto) TypeRef::matchKind(F&&... visitors) const {
+  const auto invokeWith = [&](auto tag) -> decltype(auto) {
+    return std::invoke(folly::overload(std::forward<F>(visitors)...), tag);
+  };
+  switch (kind()) {
+    case Kind::BOOL:
+      return invokeWith(KindConstant<Kind::BOOL>{});
+    case Kind::BYTE:
+      return invokeWith(KindConstant<Kind::BYTE>{});
+    case Kind::I16:
+      return invokeWith(KindConstant<Kind::I16>{});
+    case Kind::I32:
+      return invokeWith(KindConstant<Kind::I32>{});
+    case Kind::I64:
+      return invokeWith(KindConstant<Kind::I64>{});
+    case Kind::FLOAT:
+      return invokeWith(KindConstant<Kind::FLOAT>{});
+    case Kind::DOUBLE:
+      return invokeWith(KindConstant<Kind::DOUBLE>{});
+    case Kind::STRING:
+      return invokeWith(KindConstant<Kind::STRING>{});
+    case Kind::BINARY:
+      return invokeWith(KindConstant<Kind::BINARY>{});
+    case Kind::ANY:
+      return invokeWith(KindConstant<Kind::ANY>{});
+    case Kind::LIST:
+      return invokeWith(KindConstant<Kind::LIST>{});
+    case Kind::SET:
+      return invokeWith(KindConstant<Kind::SET>{});
+    case Kind::MAP:
+      return invokeWith(KindConstant<Kind::MAP>{});
+    case Kind::STRUCT:
+      return invokeWith(KindConstant<Kind::STRUCT>{});
+    case Kind::UNION:
+      return invokeWith(KindConstant<Kind::UNION>{});
+    case Kind::ENUM:
+      return invokeWith(KindConstant<Kind::ENUM>{});
+    case Kind::OPAQUE_ALIAS:
+      return asOpaqueAliasUnchecked().targetType().matchKind(
+          std::forward<F>(visitors)...);
+  }
 }
 
 } // namespace apache::thrift::type_system

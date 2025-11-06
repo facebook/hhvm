@@ -5231,12 +5231,12 @@ dependencies = [
 
 [[package]]
 name = "textwrap"
-version = "0.16.0"
+version = "0.16.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "222a222a5bfe1bba4a77b45ec488a741b3cb8872e5e499451fd7d0129c9c7c3d"
+checksum = "c13547615a44dc9c452a8a534638acdf07120d4b6847c8178705da06306a3057"
 dependencies = [
- "terminal_size 0.2.6",
- "unicode-width 0.1.12",
+ "terminal_size 0.4.2",
+ "unicode-width 0.2.1",
 ]
 
 [[package]]

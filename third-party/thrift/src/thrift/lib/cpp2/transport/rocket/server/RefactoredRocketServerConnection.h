@@ -191,6 +191,28 @@ class RefactoredRocketServerConnection final : public IRocketServerConnection {
       folly::HHWheelTimer::Callback*,
       std::chrono::milliseconds timeout) override;
 
+  // ====== EXISTING STREAM FRAME HANDLING METHODS ======
+  // These methods handle concrete callback logic where concrete types are
+  // available
+
+  /**
+   * Handle REQUEST_N frame for an existing stream.
+   * Returns true if successful, false if should close connection.
+   */
+  bool handleRequestNFrame(RequestNFrame&& frame);
+
+  /**
+   * Handle CANCEL frame for an existing stream.
+   * Returns true if successful, false if should close connection.
+   */
+  bool handleCancelFrame(CancelFrame&& frame);
+
+  /**
+   * Handle EXT frame for an existing stream.
+   * Returns true if successful, false if should close connection.
+   */
+  bool handleExtFrame(ExtFrame&& frame);
+
   void incInflightFinalResponse() override { inflightSinkFinalResponses_++; }
   void decInflightFinalResponse() override {
     DCHECK(inflightSinkFinalResponses_ != 0);
@@ -517,15 +539,45 @@ class RefactoredRocketServerConnection final : public IRocketServerConnection {
       apache::thrift::rocket::ConnectionAdapter>
       requestResponseHandler_;
 
+  RequestFnfHandler<
+      RefactoredRocketServerConnection,
+      apache::thrift::rocket::ConnectionAdapter,
+      RocketServerFrameContext>
+      requestFnfHandler_;
+
   MetadataPushHandler<
       RefactoredRocketServerConnection,
       apache::thrift::rocket::ConnectionAdapter>
       metadataPushHandler_;
 
+  // STREAMING-ONLY handlers for REQUEST_STREAM functionality
+  StreamCallbackManager<
+      RefactoredRocketServerConnection,
+      apache::thrift::rocket::ConnectionAdapter,
+      RocketStreamClientCallback>
+      streamCallbackManager_;
+
+  RequestStreamHandler<
+      RefactoredRocketServerConnection,
+      apache::thrift::rocket::ConnectionAdapter,
+      RocketServerFrameContext>
+      requestStreamHandler_;
+
+  ExistingStreamFrameHandler<
+      RefactoredRocketServerConnection,
+      apache::thrift::rocket::ConnectionAdapter,
+      RocketStreamClientCallback,
+      RocketSinkClientCallback,
+      RocketServerFrameContext>
+      existingStreamFrameHandler_;
+
   using IncomingFrameHandler = apache::thrift::rocket::IncomingFrameHandler<
       RefactoredRocketServerConnection,
       apache::thrift::rocket::ConnectionAdapter,
-      RocketServerHandler>;
+      RocketServerHandler,
+      RocketStreamClientCallback,
+      RocketSinkClientCallback,
+      RocketServerFrameContext>;
   IncomingFrameHandler incomingFrameHandler_;
 
   using IncomingFrameBatcher = apache::thrift::rocket::IncomingFrameBatcher<

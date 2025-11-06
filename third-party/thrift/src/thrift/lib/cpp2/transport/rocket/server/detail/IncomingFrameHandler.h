@@ -16,18 +16,25 @@
 
 #pragma once
 
+#include <fmt/core.h>
+#include <folly/Overload.h>
 #include <folly/String.h>
 #include <folly/io/Cursor.h>
 #include <folly/lang/Bits.h>
 #include <folly/logging/xlog.h>
+#include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/core/FrameUtil.h>
 #include <thrift/lib/cpp2/transport/rocket/core/StreamUtil.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/ConnectionAdapter.h>
+#include <thrift/lib/cpp2/transport/rocket/server/detail/ExistingStreamFrameHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/KeepAliveHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/MetadataPushHandler.h>
+#include <thrift/lib/cpp2/transport/rocket/server/detail/RequestFnfHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/RequestResponseHandler.h>
+#include <thrift/lib/cpp2/transport/rocket/server/detail/RequestStreamHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/SetupFrameAcceptor.h>
+#include <thrift/lib/cpp2/transport/rocket/server/detail/StreamCallbackManager.h>
 
 namespace apache::thrift::rocket {
 
@@ -58,7 +65,10 @@ parseFrameType(folly::IOBuf& frame) noexcept {
 template <
     typename ConnectionT,
     template <typename> class ConnectionAdapter,
-    typename RocketServerHandler>
+    typename RocketServerHandler,
+    typename RequestStreamCallback,
+    typename RequestChannelCallback,
+    typename RocketServerFrameContext>
 class IncomingFrameHandler {
   using Connection = ConnectionAdapter<ConnectionT>;
 
@@ -69,13 +79,35 @@ class IncomingFrameHandler {
           setupFrameAcceptor,
       RequestResponseHandler<ConnectionT, ConnectionAdapter>&
           requestResponseHandler,
+      RequestFnfHandler<
+          ConnectionT,
+          ConnectionAdapter,
+          RocketServerFrameContext>& requestFnfHandler,
       KeepAliveHandler<ConnectionT, ConnectionAdapter>& keepAliveFrameHandler,
-      MetadataPushHandler<ConnectionT, ConnectionAdapter>& metadataPushHandler)
+      MetadataPushHandler<ConnectionT, ConnectionAdapter>& metadataPushHandler,
+      StreamCallbackManager<
+          ConnectionT,
+          ConnectionAdapter,
+          RocketStreamClientCallback>& streamCallbackManager,
+      RequestStreamHandler<
+          ConnectionT,
+          ConnectionAdapter,
+          RocketServerFrameContext>& requestStreamHandler,
+      ExistingStreamFrameHandler<
+          ConnectionT,
+          ConnectionAdapter,
+          RequestStreamCallback,
+          RequestChannelCallback,
+          RocketServerFrameContext>& existingStreamFrameHandler)
       : connection_(&connection),
         setupFrameAcceptor_(&setupFrameAcceptor),
         requestResponseHandler_(&requestResponseHandler),
+        requestFnfHandler_(&requestFnfHandler),
         keepAliveHandler_(&keepAliveFrameHandler),
-        metadataPushHandler_(&metadataPushHandler) {}
+        metadataPushHandler_(&metadataPushHandler),
+        streamCallbackManager_(&streamCallbackManager),
+        requestStreamHandler_(&requestStreamHandler),
+        existingStreamFrameHandler_(&existingStreamFrameHandler) {}
 
   void handle(std::unique_ptr<folly::IOBuf>&& frame) {
     // hexDumpFrame(*frame);
@@ -88,22 +120,26 @@ class IncomingFrameHandler {
         handleFrame<FrameType::REQUEST_RESPONSE>(
             std::move(frame), requestResponseHandler_);
         break;
+      case FrameType::REQUEST_STREAM:
+        handleFrame<FrameType::REQUEST_STREAM>(
+            std::move(frame), requestStreamHandler_);
+        break;
+      case FrameType::REQUEST_N:
+        handleFrame<FrameType::REQUEST_N>(
+            std::move(frame), existingStreamFrameHandler_);
+        break;
+      case FrameType::CANCEL:
+        handleFrame<FrameType::CANCEL>(
+            std::move(frame), existingStreamFrameHandler_);
+        break;
+      case FrameType::REQUEST_FNF:
+        handleFrame<FrameType::REQUEST_FNF>(
+            std::move(frame), requestFnfHandler_);
+        break;
       // TODO Add Support for other frame types
-      // case FrameType::REQUEST_FNF:
-      //   handleFrame<FrameType::REQUEST_FNF>(std::move(frame),
-      //   streamHandler_); break;
-      // case FrameType::REQUEST_STREAM:
-      //   handleFrame<FrameType::REQUEST_STREAM>(std::move(frame),
-      //   streamHandler_); break;
       // case FrameType::REQUEST_CHANNEL:
       //   handleFrame<FrameType::REQUEST_CHANNEL>(std::move(frame),
       //   streamHandler_); break;
-      // case FrameType::REQUEST_N:
-      //   handleFrame<FrameType::REQUEST_N>(std::move(frame), streamHandler_);
-      //   break;
-      // case FrameType::CANCEL:
-      //   handleFrame<FrameType::CANCEL>(std::move(frame), streamHandler_);
-      //   break;
       // case FrameType::PAYLOAD:
       //   handleFrame<FrameType::PAYLOAD>(std::move(frame), streamHandler_);
       //   break;
@@ -118,6 +154,9 @@ class IncomingFrameHandler {
         handleFrame<FrameType::KEEPALIVE>(std::move(frame), keepAliveHandler_);
         break;
       case FrameType::EXT:
+        handleFrame<FrameType::EXT>(
+            std::move(frame), existingStreamFrameHandler_);
+        break;
       default:
         hexDumpFrame(*frame);
         handleUnknownFrame(frameType);
@@ -132,8 +171,24 @@ class IncomingFrameHandler {
       setupFrameAcceptor_;
   RequestResponseHandler<ConnectionT, ConnectionAdapter>*
       requestResponseHandler_;
+  RequestFnfHandler<ConnectionT, ConnectionAdapter, RocketServerFrameContext>*
+      requestFnfHandler_;
   KeepAliveHandler<ConnectionT, ConnectionAdapter>* keepAliveHandler_;
   MetadataPushHandler<ConnectionT, ConnectionAdapter>* metadataPushHandler_;
+  StreamCallbackManager<
+      ConnectionT,
+      ConnectionAdapter,
+      RocketStreamClientCallback>* streamCallbackManager_;
+  RequestStreamHandler<
+      ConnectionT,
+      ConnectionAdapter,
+      RocketServerFrameContext>* requestStreamHandler_;
+  ExistingStreamFrameHandler<
+      ConnectionT,
+      ConnectionAdapter,
+      RequestStreamCallback,
+      RequestChannelCallback,
+      RocketServerFrameContext>* existingStreamFrameHandler_;
 
   FOLLY_ALWAYS_INLINE void hexDumpFrame(folly::IOBuf& frame) const noexcept {
     // if constexpr (folly::kIsDebug) {

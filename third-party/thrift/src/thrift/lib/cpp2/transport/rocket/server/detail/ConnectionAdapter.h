@@ -51,10 +51,15 @@ class ConnectionAdapter {
   ConnectionAdapter(ConnectionAdapter&&) noexcept = default;
   ConnectionAdapter& operator=(ConnectionAdapter&&) noexcept = default;
 
-  template <typename RequestFrame>
-  void emplacePartialFrame(StreamId streamId, RequestFrame&& frame) {
-    connection_->partialRequestFrames_.emplace(
-        streamId, std::forward<RequestFrame>(frame));
+  folly::F14NodeMap<
+      StreamId,
+      std::variant<
+          RequestResponseFrame,
+          RequestFnfFrame,
+          RequestStreamFrame,
+          RequestChannelFrame>>&
+  getPartialRequestFrames() noexcept {
+    return connection_->partialRequestFrames_;
   }
 
   auto getDestructorGuard() { return connection_->getDestructorGuard(); }
@@ -98,6 +103,83 @@ class ConnectionAdapter {
   void pauseStreams() { connection_->pauseStreams(); }
   void resumeStreams() { connection_->resumeStreams(); }
 
+  // ====== STREAMING SUPPORT METHODS ======
+
+  /**
+   * Get access to the streams container for stream lookup.
+   * Used by streaming handlers to find existing RocketStreamClientCallback
+   * instances.
+   */
+  auto& getStreams() { return connection_->streams_; }
+
+  /**
+   * Get access to buffered fragments for partial frame handling.
+   * Used by streaming handlers to manage fragmented REQUEST_STREAM frames.
+   */
+  auto& getBufferedFragments() { return connection_->bufferedFragments_; }
+
+  /**
+   * Check if streams are currently paused due to backpressure.
+   */
+  void setStreamsPaused(bool paused) { connection_->streamsPaused_ = paused; }
+
+  /**
+   * Get the stream metric callback for stream metrics tracking.
+   */
+  auto& getStreamMetricCallback() { return connection_->streamMetricCallback_; }
+
+  /**
+   * Create a stream client callback for REQUEST_STREAM handling.
+   * Returns true if successful, false if streamId is already in use.
+   * Delegates to the underlying connection to avoid circular dependencies.
+   */
+  bool createStreamClientCallback(StreamId streamId, uint32_t initialRequestN) {
+    // Delegate to underlying connection's method which handles concrete types
+    auto result = connection_->createStreamClientCallback(
+        streamId, *connection_, initialRequestN);
+    return result != nullptr;
+  }
+
+  /**
+   * Schedule a stream timeout callback.
+   * Used by streaming handlers to manage stream starvation timeouts.
+   */
+  void scheduleStreamTimeout(void* timeoutCallback) {
+    // Cast back to concrete type and delegate to underlying connection
+    connection_->scheduleStreamTimeout(
+        static_cast<folly::HHWheelTimer::Callback*>(timeoutCallback));
+  }
+
+  /**
+   * Emplace a partial frame for hasFollows handling.
+   * Works with any frame type (RequestResponse, RequestFnf, RequestStream,
+   * etc.).
+   */
+  template <typename RequestFrame>
+  void emplacePartialFrame(StreamId streamId, RequestFrame&& frame) {
+    connection_->partialRequestFrames_.emplace(
+        streamId, std::forward<RequestFrame>(frame));
+  }
+
+  /**
+   * Free a stream callback and perform cleanup.
+   * Used by streaming handlers to clean up RocketStreamClientCallback
+   * instances.
+   */
+  void freeStream(StreamId streamId, bool markRequestComplete) {
+    connection_->freeStream(streamId, markRequestComplete);
+  }
+
+  /**
+   * Mark a request as complete.
+   * Used by streaming handlers when processing is finished.
+   */
+  void requestComplete() {
+    if (connection_->frameHandler_) {
+      connection_->frameHandler_->requestComplete();
+    }
+  }
+
   // ====== READ HANDLE SUPPORT METHODS ======
 
   /**
@@ -138,12 +220,14 @@ class ConnectionAdapter {
 
   // Accessor methods for WriteBatcher functionality
   size_t numObservers() { return connection_->numObservers(); }
+
   folly::EventBase& getEventBase() { return connection_->getEventBase(); }
   void flushWrites(
       std::unique_ptr<folly::IOBuf> writes,
       apache::thrift::rocket::WriteBatchContext&& context) {
     connection_->flushWrites(std::move(writes), std::move(context));
   }
+
   void flushWritesWithFds(
       std::unique_ptr<folly::IOBuf> writes,
       apache::thrift::rocket::WriteBatchContext&& context,

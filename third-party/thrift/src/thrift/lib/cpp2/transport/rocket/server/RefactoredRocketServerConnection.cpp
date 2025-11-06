@@ -94,13 +94,21 @@ RefactoredRocketServerConnection::RefactoredRocketServerConnection(
       keepAliveHandler_(connectionAdapter_),
       setupFrameAcceptor_(connectionAdapter_, *frameHandler_),
       requestResponseHandler_(&connectionAdapter_),
+      requestFnfHandler_(&connectionAdapter_),
       metadataPushHandler_(connectionAdapter_),
+      streamCallbackManager_(&connectionAdapter_),
+      requestStreamHandler_(&connectionAdapter_),
+      existingStreamFrameHandler_(&connectionAdapter_),
       incomingFrameHandler_(
           connectionAdapter_,
           setupFrameAcceptor_,
           requestResponseHandler_,
+          requestFnfHandler_,
           keepAliveHandler_,
-          metadataPushHandler_) {
+          metadataPushHandler_,
+          streamCallbackManager_,
+          requestStreamHandler_,
+          existingStreamFrameHandler_) {
   CHECK(socket_);
   CHECK(frameHandler_);
 
@@ -144,19 +152,21 @@ StreamMetricCallback& getNoopStreamMetricCallback() {
 RocketStreamClientCallback* FOLLY_NULLABLE
 RefactoredRocketServerConnection::createStreamClientCallback(
     StreamId streamId,
-    IRocketServerConnection& connection,
+    IRocketServerConnection& /* connection */,
     uint32_t initialRequestN) {
   auto [it, inserted] = streams_.try_emplace(streamId);
   if (!inserted) {
     return nullptr;
   }
+
   auto cb = std::make_unique<RocketStreamClientCallback>(
       streamId,
-      static_cast<RefactoredRocketServerConnection&>(connection),
+      *this,
       initialRequestN,
       THRIFT_FLAG(thrift_enable_stream_counters)
           ? streamMetricCallback_
           : getNoopStreamMetricCallback());
+
   auto cbPtr = cb.get();
   it->second = std::move(cb);
   return cbPtr;
@@ -169,8 +179,7 @@ RefactoredRocketServerConnection::createSinkClientCallback(
   if (!inserted) {
     return nullptr;
   }
-  auto cb = std::make_unique<RocketSinkClientCallback>(
-      streamId, static_cast<RefactoredRocketServerConnection&>(connection));
+  auto cb = std::make_unique<RocketSinkClientCallback>(streamId, connection);
   auto cbPtr = cb.get();
   it->second = std::move(cb);
   return cbPtr;
@@ -831,9 +840,8 @@ void RefactoredRocketServerConnection::closeWhenIdle() {
 
 void RefactoredRocketServerConnection::scheduleStreamTimeout(
     folly::HHWheelTimer::Callback* timeoutCallback) {
-  if (streamStarvationTimeout_ != std::chrono::milliseconds::zero()) {
-    evb_.timer().scheduleTimeout(timeoutCallback, streamStarvationTimeout_);
-  }
+  // Delegate to StreamCallbackManager - STREAMING-ONLY refactoring
+  streamCallbackManager_.scheduleStreamTimeout(timeoutCallback);
 }
 
 void RefactoredRocketServerConnection::scheduleSinkTimeout(
@@ -1034,6 +1042,9 @@ void RefactoredRocketServerConnection::freeStream(
   if (markRequestComplete) {
     requestComplete();
   }
+
+  // Delegate to StreamCallbackManager - STREAMING-ONLY refactoring
+  streamCallbackManager_.freeStream(streamId, markRequestComplete);
 }
 
 void RefactoredRocketServerConnection::applyQosMarking(
@@ -1085,29 +1096,13 @@ void RefactoredRocketServerConnection::applyQosMarking(
 }
 
 void RefactoredRocketServerConnection::pauseStreams() {
-  DCHECK(!streamsPaused_);
-  streamsPaused_ = true;
-  for (auto it = streams_.begin(); it != streams_.end(); it++) {
-    folly::variant_match(
-        it->second,
-        [](const std::unique_ptr<RocketStreamClientCallback>& stream) {
-          stream->pauseStream();
-        },
-        [](const auto&) {});
-  }
+  // Delegate to StreamCallbackManager - STREAMING-ONLY refactoring
+  streamCallbackManager_.pauseStreams();
 }
 
 void RefactoredRocketServerConnection::resumeStreams() {
-  DCHECK(streamsPaused_);
-  streamsPaused_ = false;
-  for (auto it = streams_.begin(); it != streams_.end(); it++) {
-    folly::variant_match(
-        it->second,
-        [](const std::unique_ptr<RocketStreamClientCallback>& stream) {
-          stream->resumeStream();
-        },
-        [](const auto&) {});
-  }
+  // Delegate to StreamCallbackManager - STREAMING-ONLY refactoring
+  streamCallbackManager_.resumeStreams();
 }
 
 bool RefactoredRocketServerConnection::incMemoryUsage(uint32_t memSize) {

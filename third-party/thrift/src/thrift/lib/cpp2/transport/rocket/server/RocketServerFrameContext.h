@@ -32,7 +32,6 @@ class IOBuf;
 namespace apache::thrift::rocket {
 
 class RocketException;
-class RocketServerConnection;
 class RocketSinkClientCallback;
 class RocketStreamClientCallback;
 

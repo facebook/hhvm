@@ -167,15 +167,6 @@ folly::coro::Task<double> ThriftStressTestClient::co_calculateSquares(
   co_return ret;
 }
 
-folly::coro::Task<AlignedResponse> ThriftStressTestClient::co_aligned(
-    const AlignedRequest& req) {
-  AlignedResponse ret;
-  co_await timedExecute([&]() -> folly::coro::Task<void> {
-    ret = co_await client_->co_aligned(req);
-  });
-  co_return ret;
-}
-
 template <class Fn>
 folly::coro::Task<void> ThriftStressTestClient::timedExecute(Fn&& fn) {
   if (!connectionGood_) {
@@ -202,6 +193,17 @@ folly::coro::Task<void> ThriftStressTestClient::timedExecute(Fn&& fn) {
   stats_.latencyHistogram.addValue(
       std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count());
   stats_.numSuccess++;
+}
+
+folly::coro::Task<void> ThriftStressTestClient::co_alignedRequestResponseEb(
+    RpcOptions& rpcOptions, AlignedResponse& resp, const AlignedRequest& req) {
+  co_await timedExecute([&]() -> folly::coro::Task<void> { resp = co_await client_->co_alignedRequestResponseEb(rpcOptions, req); });
+}
+
+folly::coro::Task<void> ThriftStressTestClient::co_alignedRequestResponseTm(
+    RpcOptions& rpcOptions, AlignedResponse& resp, const AlignedRequest& req) {
+  AlignedResponse ret;
+  co_await timedExecute([&]() -> folly::coro::Task<void> { resp = co_await client_->co_alignedRequestResponseTm(rpcOptions, req); });
 }
 
 } // namespace apache::thrift::stress

@@ -69,6 +69,8 @@ DEFINE_string(
     "Compression level value to use. (DEFAULT, LESS, MORE)");
 DEFINE_string(
     thrift_protocol, "COMPACT", "Thrift serialization protocol. Default is COMPACT. (COMPACT, BINARY)");
+DEFINE_bool(
+  enable_rocket_frame_relative_alignment, false, "Enable frame relative alignment. Default is false. (true, false)");
 
 namespace apache::thrift::stress {
 
@@ -185,6 +187,8 @@ protocol::PROTOCOL_TYPES createThriftProtocolFromFlags() {
   config.connConfig = std::move(connCfg);
 
   config.enableChecksum = FLAGS_enable_checksum;
+
+  config.enableRocketFrameRelativeAlignment = FLAGS_enable_rocket_frame_relative_alignment;
 
   return config;
 }

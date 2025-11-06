@@ -19,6 +19,8 @@ namespace hack thrift_stress
 
 include "thrift/annotation/cpp.thrift"
 
+cpp_include "thrift/lib/cpp2/protocol/detail/PaddedBinaryAdapter.h"
+
 @cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
 typedef binary IOBufPtr
 
@@ -67,9 +69,17 @@ struct StreamRequest {
   3: binary payload;
 }
 
+@cpp.Adapter{
+  name = "::apache::thrift::protocol::PaddedBinaryAdapter",
+  adaptedType = "::apache::thrift::protocol::PaddedBinaryData",
+}
+typedef binary PaddedBinaryData
+
+// Request struct with first entry as aligned binary field
 struct AlignedRequest {
-  1: optional binary resv;
-  2: IOBufPtr data_aligned;
+  1: PaddedBinaryData payload;
+  2: i32 alignment;
+  3: ProcessInfo processInfo;
 }
 
 struct AlignedResponse {
@@ -94,6 +104,7 @@ service StressTest {
 
   double calculateSquares(1: i32 count);
 
+  AlignedResponse alignedRequestResponseTm(1: AlignedRequest req);
   @cpp.ProcessInEbThreadUnsafe
-  AlignedResponse aligned(1: AlignedRequest req);
+  AlignedResponse alignedRequestResponseEb(1: AlignedRequest req);
 }

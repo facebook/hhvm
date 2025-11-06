@@ -193,6 +193,19 @@ struct PaddedBinaryAdapter {
                 : prot.serializedSizeBinary(data.buf);
     }
   }
+
+  static bool equal(
+      const PaddedBinaryData& lhs, const PaddedBinaryData& rhs) noexcept {
+    return lhs.paddingBytes == rhs.paddingBytes &&
+        folly::IOBufEqualTo{}(lhs.buf, rhs.buf);
+  }
+
+  // This only relies on data comparison between the IOBufs, and has nothing
+  // to do with the padding.
+  static bool less(
+      const PaddedBinaryData& lhs, const PaddedBinaryData& rhs) noexcept {
+    return folly::IOBufLess{}(lhs.buf, rhs.buf);
+  }
 };
 
 } // namespace apache::thrift::protocol

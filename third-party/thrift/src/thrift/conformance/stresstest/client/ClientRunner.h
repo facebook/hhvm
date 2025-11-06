@@ -26,6 +26,7 @@
 #include <thrift/conformance/stresstest/client/PoissonLoadGenerator.h>
 #include <thrift/conformance/stresstest/client/StressTestBase.h>
 #include <thrift/conformance/stresstest/if/gen-cpp2/StressTest.h>
+#include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 
 namespace apache::thrift::stress {
 

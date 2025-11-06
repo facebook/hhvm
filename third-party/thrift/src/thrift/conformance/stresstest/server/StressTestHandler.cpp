@@ -219,16 +219,21 @@ folly::coro::Task<double> StressTestHandler::co_calculateSquares(
   co_return co_await fanOut();
 }
 
-void StressTestHandler::async_eb_aligned(
+void StressTestHandler::alignedRequestResponseImpl(
     HandlerCallbackPtr<std::unique_ptr<AlignedResponse>> callback,
-    std::unique_ptr<AlignedRequest> request) {
-  AlignedResponse resp;
-  auto& data = request->data_aligned_ref().value();
+    std::unique_ptr<AlignedRequest> request) const {
+  simulateWork(
+      *request->processInfo()->processingTimeMs(),
+      *request->processInfo()->workSimulationMode());
+
+  auto& data = request->payload()->buf;
+  auto alignment = *request->alignment();
   folly::IOBuf* curr = data.get();
+  AlignedResponse resp;
   int i = 0;
   do {
     // Page 0 must have 4 byte aligned address
-    if (curr == data.get() && ((uintptr_t)curr->data() & 0x3) > 0) {
+    if (curr == data.get() && ((uintptr_t)curr->data() & (alignment - 1)) > 0) {
       LOG(ERROR) << fmt::format(
           "IOBuf 0 address is not 4 byte aligned: {:#x}",
           (uintptr_t)curr->data());
@@ -260,8 +265,37 @@ void StressTestHandler::async_eb_aligned(
     i++;
   } while (curr != data.get());
 
-  resp.aligned() = true;
   callback->result(resp);
+}
+
+void StressTestHandler::async_tm_alignedRequestResponseTm(
+    HandlerCallbackPtr<std::unique_ptr<AlignedResponse>> callback,
+    std::unique_ptr<AlignedRequest> request) {
+  if (request->processInfo()->processingMode() == ProcessingMode::Async) {
+    auto* tm = callback->getThreadManager();
+    tm->add([this,
+             callback = std::move(callback),
+             request = std::move(request)]() mutable {
+      alignedRequestResponseImpl(std::move(callback), std::move(request));
+    });
+    return;
+  }
+  alignedRequestResponseImpl(std::move(callback), std::move(request));
+}
+
+void StressTestHandler::async_eb_alignedRequestResponseEb(
+    HandlerCallbackPtr<std::unique_ptr<AlignedResponse>> callback,
+    std::unique_ptr<AlignedRequest> request) {
+  if (request->processInfo()->processingMode() == ProcessingMode::Async) {
+    auto* evb = callback->getEventBase();
+    evb->add([this,
+              callback = std::move(callback),
+              request = std::move(request)]() mutable {
+      alignedRequestResponseImpl(std::move(callback), std::move(request));
+    });
+    return;
+  }
+  alignedRequestResponseImpl(std::move(callback), std::move(request));
 }
 
 } // namespace apache::thrift::stress

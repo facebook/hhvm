@@ -54,7 +54,11 @@ class StressTestHandler : public apache::thrift::ServiceHandler<StressTest> {
 
   folly::coro::Task<double> co_calculateSquares(int32_t count) override;
 
-  void async_eb_aligned(
+  void async_tm_alignedRequestResponseTm(
+      HandlerCallbackPtr<std::unique_ptr<AlignedResponse>> callback,
+      std::unique_ptr<AlignedRequest> request) override;
+
+  void async_eb_alignedRequestResponseEb(
       HandlerCallbackPtr<std::unique_ptr<AlignedResponse>> callback,
       std::unique_ptr<AlignedRequest> request) override;
 
@@ -62,6 +66,10 @@ class StressTestHandler : public apache::thrift::ServiceHandler<StressTest> {
   void requestResponseImpl(
       HandlerCallbackPtr<std::unique_ptr<BasicResponse>> callback,
       std::unique_ptr<BasicRequest> request) const;
+
+  void alignedRequestResponseImpl(
+      HandlerCallbackPtr<std::unique_ptr<AlignedResponse>> callback,
+      std::unique_ptr<AlignedRequest> request) const;
 
   void simulateWork(int64_t timeMs, WorkSimulationMode mode) const;
 

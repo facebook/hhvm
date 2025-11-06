@@ -43,6 +43,7 @@ DECLARE_uint64(gen_load_interval);
 DECLARE_string(compression_config);
 DECLARE_string(compression_level);
 DECLARE_string(thrift_protocol);
+DECLARE_bool(enable_rocket_frame_relative_alignment);
 
 namespace apache::thrift::stress {
 
@@ -77,6 +78,7 @@ struct ClientConfig {
   std::chrono::duration<int64_t, std::milli> gen_load_interval;
   ClientConnectionConfig connConfig;
   bool enableChecksum{false};
+  bool enableRocketFrameRelativeAlignment{false};
 
   static ClientConfig createFromFlags();
 };

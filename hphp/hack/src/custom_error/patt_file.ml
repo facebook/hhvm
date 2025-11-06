@@ -15,7 +15,17 @@ type file_path =
       prefix: file_path;
       segment: Patt_string.t;
     }
+  | Slash_opt of {
+      prefix: file_path;
+      segment: Patt_string.t;
+    }
 [@@deriving compare, eq, sexp, show]
+
+let dot = Dot
+
+let ( </> ) prefix segment = Slash { prefix; segment }
+
+let ( </?> ) prefix segment = Slash_opt { prefix; segment }
 
 type t =
   | As of {
@@ -23,6 +33,7 @@ type t =
       patt: t;
     }
   | Name of {
+      allow_glob: bool;
       patt_file_path: file_path option;
       patt_file_name: Patt_string.t;
       patt_file_extension: Patt_string.t;

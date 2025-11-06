@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6087bc9f3bcec9e61b4d593f102e2461>>
+// @generated SignedSource<<9a3643d525a4f2d460092f114710187d>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -41,6 +41,11 @@ pub enum FilePath {
         prefix: Box<FilePath>,
         segment: patt_string::PattString,
     },
+    #[rust_to_ocaml(name = "Slash_opt")]
+    SlashOpt {
+        prefix: Box<FilePath>,
+        segment: patt_string::PattString,
+    },
 }
 
 #[derive(
@@ -65,11 +70,11 @@ pub enum PattFile {
         lbl: patt_var::PattVar,
         patt: Box<PattFile>,
     },
-    #[rust_to_ocaml(prefix = "patt_file_")]
     Name {
-        path: Option<FilePath>,
-        name: patt_string::PattString,
-        extension: patt_string::PattString,
+        allow_glob: bool,
+        patt_file_path: Option<FilePath>,
+        patt_file_name: patt_string::PattString,
+        patt_file_extension: patt_string::PattString,
     },
     Wildcard,
     Invalid {

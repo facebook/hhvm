@@ -467,10 +467,15 @@ impl Validatable for PattFile {
                 valid && errs.is_empty()
             }
             Self::Name {
-                path,
-                name,
-                extension,
-            } => path.validate(env) && name.validate(env) && extension.validate(env),
+                patt_file_path,
+                patt_file_name,
+                patt_file_extension,
+                ..
+            } => {
+                patt_file_path.validate(env)
+                    && patt_file_name.validate(env)
+                    && patt_file_extension.validate(env)
+            }
             Self::Invalid { .. } => false,
             Self::Wildcard => true,
         }
@@ -499,6 +504,7 @@ impl Validatable for FilePath {
         match self {
             Self::Dot => true,
             Self::Slash { prefix, segment } => prefix.validate(env) && segment.validate(env),
+            Self::SlashOpt { prefix, segment } => prefix.validate(env) && segment.validate(env),
         }
     }
 }

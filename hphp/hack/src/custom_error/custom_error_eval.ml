@@ -235,16 +235,56 @@ and matches_namespace patt_namespace ~scrut ~env =
 
 (* -- Files ----------------------------------------------------------------- *)
 
+(** A [Patt_file.t] matches the prefix of the path [scrut], represented as a list
+    of strings, when we have an elementwise match starting from [Dot] allowing
+    for a non-empty path suffix *)
+let matches_file_path_prefix t ~scrut ~env =
+  let open Patt_file in
+  let rec aux t ~scrut ~env ~k =
+    match t with
+    | Dot -> k (env, scrut)
+    | Slash_opt { prefix; segment } ->
+      aux prefix ~scrut ~env ~k:(function
+          | (env, []) -> Match.Matched env
+          | (env, next :: rest) ->
+            (match matches_string segment ~scrut:next ~env with
+            | Match.Matched env -> k (env, rest)
+            | Match.No_match ->
+              (* For optional segments try to match entire path to the prefix if
+                 we have no match for the current segment *)
+              aux prefix ~scrut ~env ~k
+            | Match.Match_err err -> Match.Match_err err))
+    | Slash { prefix; segment } ->
+      aux prefix ~scrut ~env ~k:(function
+          | (env, []) -> Match.Matched env
+          | (env, next :: rest) ->
+            (match matches_string segment ~scrut:next ~env with
+            | Match.Matched env -> k (env, rest)
+            | res -> res))
+  in
+  aux t ~scrut ~env ~k:(fun (env, _) -> Match.matched env)
+
+(** A [Patt_file.t] matches the prefix of the path [scrut], represented as a list
+    of strings in reverse order, when we have an elementwise match starting
+    from the end of the path *)
 let rec matches_file_path t ~scrut ~env =
   let open Patt_file in
   match (t, scrut) with
   | (Dot, []) -> Match.matched env
   | (Dot, _) -> Match.no_match
+  | (Slash_opt { prefix; segment }, next :: rest) ->
+    (match matches_string segment ~scrut:next ~env with
+    | Match.Matched env -> matches_file_path prefix ~scrut:rest ~env
+    | Match.No_match ->
+      (* For optional segments try to match entire path to the prefix if
+         we have no match for the current segment *)
+      matches_file_path prefix ~scrut ~env
+    | Match.Match_err err -> Match.match_err err)
   | (Slash { prefix; segment }, next :: rest) ->
     Match.(
       matches_string segment ~scrut:next ~env >>= fun env ->
       matches_file_path prefix ~scrut:rest ~env)
-  | (Slash _, []) -> Match.no_match
+  | ((Slash _ | Slash_opt _), []) -> Match.no_match
 
 let rec matches_file t ~(scrut : Relative_path.t) ~env =
   let open Patt_file in
@@ -256,7 +296,8 @@ let rec matches_file t ~(scrut : Relative_path.t) ~env =
       |> map_err ~f:(fun _ -> assert false)
       |> map ~f:(Env.add_file ~lbl ~file:scrut))
   | Invalid { errs; _ } -> Match.match_err errs
-  | Name { patt_file_path; patt_file_name; patt_file_extension } ->
+  | Name { patt_file_path; patt_file_name; patt_file_extension; allow_glob } ->
+    (* Match on complete path *)
     let path = String.split ~on:'/' Relative_path.(suffix scrut) in
     (match List.rev path with
     | name :: scrut_path ->
@@ -265,6 +306,7 @@ let rec matches_file t ~(scrut : Relative_path.t) ~env =
         | Some (name, ext) -> (name, Some ext)
         | None -> (name, None)
       in
+
       Match.(
         matches_string patt_file_name ~scrut:scrut_name ~env >>= fun env ->
         match_opt
@@ -277,7 +319,13 @@ let rec matches_file t ~(scrut : Relative_path.t) ~env =
           patt_file_path
           ~default:(Match.matched env)
           ~f:(fun patt_file_path ->
-            matches_file_path patt_file_path ~scrut:scrut_path ~env))
+            if allow_glob then
+              matches_file_path_prefix
+                patt_file_path
+                ~scrut:(List.rev scrut_path)
+                ~env
+            else
+              matches_file_path patt_file_path ~scrut:scrut_path ~env))
     | _ -> Match.no_match)
 
 (* -- Types ----------------------------------------------------------------- *)

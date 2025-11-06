@@ -619,7 +619,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "clap 4.5.51",
  "heck 0.4.1",
- "indexmap 2.11.4",
+ "indexmap 2.12.0",
  "log",
  "proc-macro2",
  "quote",
@@ -942,7 +942,7 @@ dependencies = [
  "env",
  "hhbc",
  "hhbc_string_utils",
- "indexmap 2.11.4",
+ "indexmap 2.12.0",
  "itertools",
  "naming_special_names_rust",
  "oxidized",
@@ -1110,7 +1110,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "cc",
  "codespan-reporting",
- "indexmap 2.11.4",
+ "indexmap 2.12.0",
  "proc-macro2",
  "quote",
  "scratch",
@@ -1124,7 +1124,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "clap 4.5.51",
  "codespan-reporting",
- "indexmap 2.11.4",
+ "indexmap 2.12.0",
  "proc-macro2",
  "quote",
  "syn 2.0.106",
@@ -1140,7 +1140,7 @@ name = "cxxbridge-macro"
 version = "1.0.160"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "indexmap 2.11.4",
+ "indexmap 2.12.0",
  "proc-macro2",
  "quote",
  "rustversion",
@@ -1559,7 +1559,7 @@ dependencies = [
  "hhbc",
  "hhbc_string_utils",
  "hhvm_types_ffi",
- "indexmap 2.11.4",
+ "indexmap 2.12.0",
  "instruction_sequence",
  "itertools",
  "label_rewriter",
@@ -1614,7 +1614,7 @@ dependencies = [
  "global_state",
  "hhbc",
  "hhbc_string_utils",
- "indexmap 2.11.4",
+ "indexmap 2.12.0",
  "instruction_sequence",
  "naming_special_names_rust",
  "options",
@@ -1665,7 +1665,7 @@ dependencies = [
  "bstr",
  "eq_modulo_pos_derive",
  "hcons",
- "indexmap 2.11.4",
+ "indexmap 2.12.0",
  "ocamlrep_caml_builtins",
 ]
 
@@ -1907,7 +1907,7 @@ dependencies = [
  "decl_enforceability",
  "eq_modulo_pos",
  "hash",
- "indexmap 2.11.4",
+ "indexmap 2.12.0",
  "itertools",
  "oxidized",
  "pos",
@@ -2206,7 +2206,7 @@ name = "hash"
 version = "0.0.0"
 dependencies = [
  "dashmap",
- "indexmap 2.11.4",
+ "indexmap 2.12.0",
  "rustc-hash",
 ]
 
@@ -2256,6 +2256,12 @@ checksum = "bf151400ff0baff5465007dd2f3e717f3fe502074ca563069ce3a6629d07b289"
 dependencies = [
  "foldhash",
 ]
+
+[[package]]
+name = "hashbrown"
+version = "0.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5419bdc4f6a9207fbeba6d11b604d481addf78ecd10c11ad51e76c2f6482748d"
 
 [[package]]
 name = "hashlink"
@@ -2636,13 +2642,13 @@ dependencies = [
 
 [[package]]
 name = "indexmap"
-version = "2.11.4"
+version = "2.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4b0f83760fb341a774ed326568e19f5a863af4a952def8c39f9ab92fd95b88e5"
+checksum = "6717a8d2a5a929a1a2eb43a12812498ed141a0bcfb7e8f7844fbdbe4303bba9f"
 dependencies = [
  "arbitrary",
  "equivalent",
- "hashbrown 0.15.2",
+ "hashbrown 0.16.0",
  "rayon",
  "serde",
  "serde_core",
@@ -2681,7 +2687,7 @@ dependencies = [
  "bincode 1.3.3",
  "fnv",
  "hashbrown 0.14.5",
- "indexmap 2.11.4",
+ "indexmap 2.12.0",
  "once_cell",
  "parking_lot",
  "rand",
@@ -2735,7 +2741,7 @@ dependencies = [
  "hash",
  "hhbc",
  "hhvm_types_ffi",
- "indexmap 2.11.4",
+ "indexmap 2.12.0",
  "intern",
  "macros",
  "maplit",
@@ -3481,7 +3487,7 @@ version = "0.1.0"
 dependencies = [
  "bstr",
  "bumpalo",
- "indexmap 2.11.4",
+ "indexmap 2.12.0",
  "ocamlrep_derive",
  "rustc-hash",
  "serde",
@@ -3837,7 +3843,7 @@ dependencies = [
  "bumpalo",
  "eq_modulo_pos",
  "hh24_types",
- "indexmap 2.11.4",
+ "indexmap 2.12.0",
  "intern",
  "ocamlrep",
  "oxidized",
@@ -5383,7 +5389,7 @@ version = "0.9.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f0dc8b1fb61449e27716ec0e1bdf0f6b8f3e8f6b05391e8497b8b6d7804ea6d8"
 dependencies = [
- "indexmap 2.11.4",
+ "indexmap 2.12.0",
  "serde_core",
  "serde_spanned 1.0.3",
  "toml_datetime 0.7.3",
@@ -5416,7 +5422,7 @@ version = "0.22.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "310068873db2c5b3e7659d2cc35d21855dbafa50d1ce336397c666e3cb08137e"
 dependencies = [
- "indexmap 2.11.4",
+ "indexmap 2.12.0",
  "serde",
  "serde_spanned 0.6.8",
  "toml_datetime 0.6.9",

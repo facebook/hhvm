@@ -24,6 +24,7 @@
 #include <folly/Range.h>
 #include <folly/lang/Exception.h>
 
+#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/ErrorCode.h>
@@ -32,6 +33,8 @@
 #include <thrift/lib/cpp2/transport/rocket/framing/Util.h>
 
 namespace apache::thrift::rocket {
+
+THRIFT_FLAG_DECLARE_bool(rocket_enable_frame_relative_alignment);
 
 class Serializer;
 

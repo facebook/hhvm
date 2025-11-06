@@ -24,6 +24,7 @@
 #include <folly/Range.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/fdsock/SocketFds.h>
+#include <thrift/lib/cpp2/protocol/Protocol.h>
 
 namespace apache::thrift::rocket {
 
@@ -136,6 +137,20 @@ class Payload {
         (hasNonemptyMetadata() ? kBytesForMetadataSize : 0ull);
   }
 
+  uint32_t dataFirstFieldAlignment() const { return dataFirstFieldAlignment_; }
+
+  void setDataFirstFieldAlignment(uint32_t alignment) {
+    dataFirstFieldAlignment_ = alignment;
+  }
+
+  std::optional<ProtocolType> dataSerializationProtocol() const {
+    return dataSerializationProtocol_;
+  }
+
+  void setDataSerializationProtocol(ProtocolType protocol) {
+    dataSerializationProtocol_ = protocol;
+  }
+
   void append(Payload&& other);
 
   bool hasData() const { return buffer_ != nullptr; }
@@ -146,6 +161,8 @@ class Payload {
   std::unique_ptr<folly::IOBuf> buffer_;
   size_t metadataSize_{0};
   size_t metadataAndDataSize_{0};
+  uint32_t dataFirstFieldAlignment_{0};
+  std::optional<ProtocolType> dataSerializationProtocol_{std::nullopt};
 
   explicit Payload(std::unique_ptr<folly::IOBuf> data)
       : buffer_(data ? std::move(data) : std::make_unique<folly::IOBuf>()),

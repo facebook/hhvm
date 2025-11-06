@@ -389,6 +389,7 @@ add_library(
   transport/rocket/flush/FlushManager.cpp
   transport/rocket/framing/parser/AllocatingParserStrategy.cpp
   transport/rocket/framing/ErrorCode.cpp
+  transport/rocket/framing/FrameDataFirstFieldAligner.cpp
   transport/rocket/framing/Frames.cpp
   transport/rocket/framing/Parser.cpp
   transport/rocket/framing/Serializer.cpp

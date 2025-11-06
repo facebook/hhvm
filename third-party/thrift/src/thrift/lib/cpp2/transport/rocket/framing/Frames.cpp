@@ -32,11 +32,14 @@
 #include <folly/io/IOBuf.h>
 
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
+#include <thrift/lib/cpp2/transport/rocket/framing/FrameDataFirstFieldAligner.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/FrameType.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Serializer.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Util.h>
 
 namespace apache::thrift::rocket {
+
+THRIFT_FLAG_DEFINE_bool(rocket_enable_frame_relative_alignment, false);
 
 namespace {
 std::unique_ptr<folly::IOBuf> trimBuffer(
@@ -259,6 +262,10 @@ void SetupFrame::serialize(Serializer& writer) && {
 }
 
 std::unique_ptr<folly::IOBuf> RequestResponseFrame::serialize() && {
+  if (THRIFT_FLAG(rocket_enable_frame_relative_alignment)) {
+    FrameDataFirstFieldAligner<RequestResponseFrame> aligner(*this);
+    aligner.align();
+  }
   return serializeIntoHeadroomIfPossible(std::move(*this));
 }
 

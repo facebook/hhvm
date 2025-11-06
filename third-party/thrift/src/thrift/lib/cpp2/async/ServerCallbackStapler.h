@@ -78,7 +78,6 @@ class ServerCallbackStapler : public BiDiServerCallback,
   }
 
   bool onSinkComplete() override {
-    LOG(INFO) << "onSinkComplete()";
     DeletionGuard guard(this);
     std::ignore = std::exchange(sink_, nullptr)->onSinkComplete();
     return sink_ || stream_;

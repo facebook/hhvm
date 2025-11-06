@@ -29,7 +29,7 @@ using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
 using ThriftType = ::apache::thrift::metadata::ThriftType;
 using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
-using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
+using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 
 const ::apache::thrift::metadata::ThriftStruct&
@@ -192,25 +192,23 @@ void ExceptionMetadata<::cpp2::BiDiMethodException>::gen(ThriftMetadata& metadat
     module_BiDiMethodException.fields()[i++].type() = std::move(type);
   }
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen_simple([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "simple";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen_simple([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "simple");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen_response([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "response";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen_response([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "response");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen_canThrow([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "canThrow";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen_canThrow([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "canThrow");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_BiDiService_canThrow_ex_1;
@@ -222,7 +220,6 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen
   func.exceptions()->push_back(std::move(module_BiDiService_canThrow_ex_1));
   ExceptionMetadata<::cpp2::BiDiMethodException>::gen(metadata);
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -242,8 +239,9 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen_response,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen_canThrow,
   };
+  size_t index = 0;
   for (auto& function_gen : functions) {
-    function_gen(metadata, module_BiDiService);
+    function_gen(metadata, module_BiDiService, index++);
   }
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();

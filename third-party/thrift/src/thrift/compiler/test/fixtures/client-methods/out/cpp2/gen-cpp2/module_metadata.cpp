@@ -34,7 +34,7 @@ using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
 using ThriftType = ::apache::thrift::metadata::ThriftType;
 using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
-using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
+using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 
 const ::apache::thrift::metadata::ThriftStruct&
@@ -98,9 +98,9 @@ StructMetadata<::cpp2::EchoResponse>::gen(ThriftMetadata& metadata) {
   return res.metadata;
 }
 
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService>>::gen_echo([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "echo";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService>>::gen_echo([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "echo");
   auto func_ret_type = std::make_unique<Struct<::cpp2::EchoResponse>>("module.EchoResponse");
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_HeaderClientMethodsAnnotationOnService_echo_request_1;
@@ -111,11 +111,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethod
   module_HeaderClientMethodsAnnotationOnService_echo_request_1_type->writeAndGenType(*module_HeaderClientMethodsAnnotationOnService_echo_request_1.type(), metadata);
   func.arguments()->push_back(std::move(module_HeaderClientMethodsAnnotationOnService_echo_request_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService>>::gen_echo_2([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "echo_2";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService>>::gen_echo_2([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "echo_2");
   auto func_ret_type = std::make_unique<Struct<::cpp2::EchoResponse>>("module.EchoResponse");
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_HeaderClientMethodsAnnotationOnService_echo_2_request_1;
@@ -126,7 +125,6 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethod
   module_HeaderClientMethodsAnnotationOnService_echo_2_request_1_type->writeAndGenType(*module_HeaderClientMethodsAnnotationOnService_echo_2_request_1.type(), metadata);
   func.arguments()->push_back(std::move(module_HeaderClientMethodsAnnotationOnService_echo_2_request_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -145,8 +143,9 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService>>::gen_echo,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService>>::gen_echo_2,
   };
+  size_t index = 0;
   for (auto& function_gen : functions) {
-    function_gen(metadata, module_HeaderClientMethodsAnnotationOnService);
+    function_gen(metadata, module_HeaderClientMethodsAnnotationOnService, index++);
   }
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
@@ -160,9 +159,9 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   context.module() = std::move(module);
   return &context;
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnFunction>>::gen_echo([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "echo";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnFunction>>::gen_echo([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "echo");
   auto func_ret_type = std::make_unique<Struct<::cpp2::EchoResponse>>("module.EchoResponse");
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_HeaderClientMethodsAnnotationOnFunction_echo_request_1;
@@ -174,11 +173,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethod
   func.arguments()->push_back(std::move(module_HeaderClientMethodsAnnotationOnFunction_echo_request_1));
   func.is_oneway() = false;
   func.structured_annotations()->push_back(*cvStruct("cpp.GenerateDeprecatedHeaderClientMethods", {  }).cv_struct());
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnFunction>>::gen_echo_2([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "echo_2";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnFunction>>::gen_echo_2([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "echo_2");
   auto func_ret_type = std::make_unique<Struct<::cpp2::EchoResponse>>("module.EchoResponse");
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_HeaderClientMethodsAnnotationOnFunction_echo_2_request_1;
@@ -189,7 +187,6 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethod
   module_HeaderClientMethodsAnnotationOnFunction_echo_2_request_1_type->writeAndGenType(*module_HeaderClientMethodsAnnotationOnFunction_echo_2_request_1.type(), metadata);
   func.arguments()->push_back(std::move(module_HeaderClientMethodsAnnotationOnFunction_echo_2_request_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnFunction>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -208,8 +205,9 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnFunction>>::gen_echo,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnFunction>>::gen_echo_2,
   };
+  size_t index = 0;
   for (auto& function_gen : functions) {
-    function_gen(metadata, module_HeaderClientMethodsAnnotationOnFunction);
+    function_gen(metadata, module_HeaderClientMethodsAnnotationOnFunction, index++);
   }
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();

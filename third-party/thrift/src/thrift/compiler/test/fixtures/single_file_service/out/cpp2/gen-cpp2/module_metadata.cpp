@@ -39,7 +39,7 @@ using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
 using ThriftType = ::apache::thrift::metadata::ThriftType;
 using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
-using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
+using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 
 const ::apache::thrift::metadata::ThriftStruct&
@@ -73,13 +73,12 @@ StructMetadata<::cpp2::Foo>::gen(ThriftMetadata& metadata) {
   return res.metadata;
 }
 
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::A>>::gen_foo([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "foo";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::A>>::gen_foo([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "foo");
   auto func_ret_type = std::make_unique<Struct<::cpp2::Foo>>("module.Foo");
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::A>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -97,8 +96,9 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::A>>::gen_foo,
   };
+  size_t index = 0;
   for (auto& function_gen : functions) {
-    function_gen(metadata, module_A);
+    function_gen(metadata, module_A, index++);
   }
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
@@ -111,9 +111,9 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   context.module() = std::move(module);
   return &context;
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen_bar([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "bar";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen_bar([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "bar");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_B_bar_foo_1;
@@ -124,23 +124,20 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen_bar([[may
   module_B_bar_foo_1_type->writeAndGenType(*module_B_bar_foo_1.type(), metadata);
   func.arguments()->push_back(std::move(module_B_bar_foo_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen_stream_stuff([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "stream_stuff";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen_stream_stuff([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "stream_stuff");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen_sink_stuff([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "sink_stuff";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen_sink_stuff([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "sink_stuff");
   auto func_ret_type = std::make_unique<Sink>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -160,8 +157,9 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen_stream_stuff,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen_sink_stuff,
   };
+  size_t index = 0;
   for (auto& function_gen : functions) {
-    function_gen(metadata, module_B);
+    function_gen(metadata, module_B, index++);
   }
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
@@ -191,8 +189,9 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   ::apache::thrift::metadata::ThriftService module_C = genServiceMetadata<::cpp2::C>();
   static const ThriftFunctionGenerator functions[] = {
   };
+  size_t index = 0;
   for (auto& function_gen : functions) {
-    function_gen(metadata, module_C);
+    function_gen(metadata, module_C, index++);
   }
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();

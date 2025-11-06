@@ -30,11 +30,11 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NestedContainers>
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_mapList(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_mapSet(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_listMap(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_listSet(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_turtles(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_mapList(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_mapSet(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_listMap(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_listSet(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_turtles(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 };
 } // namespace md
 } // namespace detail

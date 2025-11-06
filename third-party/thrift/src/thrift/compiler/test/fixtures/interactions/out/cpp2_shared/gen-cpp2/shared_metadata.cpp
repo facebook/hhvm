@@ -29,7 +29,7 @@ using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
 using ThriftType = ::apache::thrift::metadata::ThriftType;
 using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
-using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
+using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 
 const ::apache::thrift::metadata::ThriftStruct&
@@ -78,8 +78,9 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   ::apache::thrift::metadata::ThriftService shared_InteractLocally = genServiceMetadata<::thrift::shared_interactions::InteractLocally>();
   static const ThriftFunctionGenerator functions[] = {
   };
+  size_t index = 0;
   for (auto& function_gen : functions) {
-    function_gen(metadata, shared_InteractLocally);
+    function_gen(metadata, shared_InteractLocally, index++);
   }
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();

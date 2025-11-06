@@ -355,7 +355,13 @@ metadata::ThriftService genServiceMetadata(
   if (const auto* p = node.baseService()) {
     ret.parent() = getName(*p);
   }
-  // TODO: add other information
+  for (const auto& func : node.functions()) {
+    if (func.isPerforms()) {
+      continue;
+    }
+    ret.functions()->emplace_back().name() = func.name();
+    // TODO: add other information
+  }
   return ret;
 }
 

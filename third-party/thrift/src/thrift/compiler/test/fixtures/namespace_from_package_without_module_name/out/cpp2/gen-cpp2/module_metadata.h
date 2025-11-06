@@ -35,7 +35,7 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::test::namespace_from_pa
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_init(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_init(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 };
 } // namespace md
 } // namespace detail

@@ -213,7 +213,7 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test:
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_func(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_func(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>> {
@@ -225,8 +225,8 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test:
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_count(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_adaptedTypes(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_count(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_adaptedTypes(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 };
 } // namespace md
 } // namespace detail

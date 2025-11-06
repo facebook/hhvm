@@ -58,10 +58,10 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>> {
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_foo(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_interact(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_interactFast(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_serialize(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_foo(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_interact(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_interactFast(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_serialize(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Factories>> {
@@ -73,10 +73,10 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Factories>> {
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_foo(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_interact(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_interactFast(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_serialize(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_foo(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_interact(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_interactFast(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_serialize(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Perform>> {
@@ -88,7 +88,7 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Perform>> {
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_foo(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_foo(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::InteractWithShared>> {
@@ -100,7 +100,7 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::InteractWithShare
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_do_some_similar_things(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_do_some_similar_things(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BoxService>> {
@@ -112,7 +112,7 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BoxService>> {
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_getABoxSession(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_getABoxSession(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 };
 } // namespace md
 } // namespace detail

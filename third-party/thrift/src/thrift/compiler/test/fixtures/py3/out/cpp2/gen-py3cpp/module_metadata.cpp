@@ -39,7 +39,7 @@ using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
 using ThriftType = ::apache::thrift::metadata::ThriftType;
 using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
-using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
+using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 void EnumMetadata<::py3::simple::AnEnum>::gen(ThriftMetadata& metadata) {
   auto res = genEnumMetadata<::py3::simple::AnEnum>(metadata, false);
@@ -501,17 +501,16 @@ void ExceptionMetadata<::py3::simple::HiddenException>::gen(ThriftMetadata& meta
   }
   module_HiddenException.structured_annotations()->push_back(*cvStruct("python.Py3Hidden", {  }).cv_struct());
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_five([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "get_five";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_five([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "get_five");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_add_five([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "add_five";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_add_five([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "add_five");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_add_five_num_1;
@@ -522,19 +521,17 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_add_five_num_1_type->writeAndGenType(*module_SimpleService_add_five_num_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_add_five_num_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_do_nothing([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "do_nothing";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_do_nothing([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "do_nothing");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_concat([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "concat";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_concat([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "concat");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_concat_first_1;
@@ -552,11 +549,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_concat_second_2_type->writeAndGenType(*module_SimpleService_concat_second_2.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_concat_second_2));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_value([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "get_value";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_value([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "get_value");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_get_value_simple_struct_1;
@@ -567,11 +563,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_get_value_simple_struct_1_type->writeAndGenType(*module_SimpleService_get_value_simple_struct_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_get_value_simple_struct_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_negate([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "negate";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_negate([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "negate");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_negate_input_1;
@@ -582,11 +577,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_negate_input_1_type->writeAndGenType(*module_SimpleService_negate_input_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_negate_input_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_tiny([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "tiny";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_tiny([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "tiny");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_tiny_input_1;
@@ -597,11 +591,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_tiny_input_1_type->writeAndGenType(*module_SimpleService_tiny_input_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_tiny_input_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_small([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "small";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_small([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "small");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_small_input_1;
@@ -612,11 +605,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_small_input_1_type->writeAndGenType(*module_SimpleService_small_input_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_small_input_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_big([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "big";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_big([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "big");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_big_input_1;
@@ -627,11 +619,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_big_input_1_type->writeAndGenType(*module_SimpleService_big_input_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_big_input_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_two([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "two";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_two([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "two");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_two_input_1;
@@ -642,11 +633,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_two_input_1_type->writeAndGenType(*module_SimpleService_two_input_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_two_input_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_expected_exception([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "expected_exception";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_expected_exception([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "expected_exception");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_expected_exception_se_1;
@@ -658,19 +648,17 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   func.exceptions()->push_back(std::move(module_SimpleService_expected_exception_se_1));
   ExceptionMetadata<::py3::simple::SimpleException>::gen(metadata);
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_unexpected_exception([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "unexpected_exception";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_unexpected_exception([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "unexpected_exception");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_sum_i16_list([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "sum_i16_list";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_sum_i16_list([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "sum_i16_list");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_sum_i16_list_numbers_1;
@@ -681,11 +669,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_sum_i16_list_numbers_1_type->writeAndGenType(*module_SimpleService_sum_i16_list_numbers_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_sum_i16_list_numbers_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_sum_i32_list([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "sum_i32_list";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_sum_i32_list([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "sum_i32_list");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_sum_i32_list_numbers_1;
@@ -696,11 +683,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_sum_i32_list_numbers_1_type->writeAndGenType(*module_SimpleService_sum_i32_list_numbers_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_sum_i32_list_numbers_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_sum_i64_list([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "sum_i64_list";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_sum_i64_list([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "sum_i64_list");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_sum_i64_list_numbers_1;
@@ -711,11 +697,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_sum_i64_list_numbers_1_type->writeAndGenType(*module_SimpleService_sum_i64_list_numbers_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_sum_i64_list_numbers_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_concat_many([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "concat_many";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_concat_many([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "concat_many");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_concat_many_words_1;
@@ -726,11 +711,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_concat_many_words_1_type->writeAndGenType(*module_SimpleService_concat_many_words_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_concat_many_words_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_count_structs([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "count_structs";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_count_structs([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "count_structs");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_count_structs_items_1;
@@ -741,11 +725,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_count_structs_items_1_type->writeAndGenType(*module_SimpleService_count_structs_items_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_count_structs_items_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_sum_set([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "sum_set";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_sum_set([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "sum_set");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_sum_set_numbers_1;
@@ -756,11 +739,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_sum_set_numbers_1_type->writeAndGenType(*module_SimpleService_sum_set_numbers_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_sum_set_numbers_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_contains_word([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "contains_word";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_contains_word([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "contains_word");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_contains_word_words_1;
@@ -778,11 +760,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_contains_word_word_2_type->writeAndGenType(*module_SimpleService_contains_word_word_2.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_contains_word_word_2));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_map_value([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "get_map_value";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_map_value([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "get_map_value");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_get_map_value_words_1;
@@ -800,11 +781,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_get_map_value_key_2_type->writeAndGenType(*module_SimpleService_get_map_value_key_2.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_get_map_value_key_2));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_map_length([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "map_length";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_map_length([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "map_length");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_map_length_items_1;
@@ -815,11 +795,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_map_length_items_1_type->writeAndGenType(*module_SimpleService_map_length_items_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_map_length_items_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_sum_map_values([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "sum_map_values";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_sum_map_values([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "sum_map_values");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_sum_map_values_items_1;
@@ -830,11 +809,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_sum_map_values_items_1_type->writeAndGenType(*module_SimpleService_sum_map_values_items_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_sum_map_values_items_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_complex_sum_i32([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "complex_sum_i32";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_complex_sum_i32([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "complex_sum_i32");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_complex_sum_i32_counter_1;
@@ -845,11 +823,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_complex_sum_i32_counter_1_type->writeAndGenType(*module_SimpleService_complex_sum_i32_counter_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_complex_sum_i32_counter_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_repeat_name([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "repeat_name";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_repeat_name([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "repeat_name");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_repeat_name_counter_1;
@@ -860,19 +837,17 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_repeat_name_counter_1_type->writeAndGenType(*module_SimpleService_repeat_name_counter_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_repeat_name_counter_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_struct([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "get_struct";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_struct([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "get_struct");
   auto func_ret_type = std::make_unique<Struct<::py3::simple::SimpleStruct>>("module.SimpleStruct");
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_fib([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "fib";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_fib([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "fib");
   auto func_ret_type = std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_fib_n_1;
@@ -883,11 +858,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_fib_n_1_type->writeAndGenType(*module_SimpleService_fib_n_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_fib_n_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_unique_words([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "unique_words";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_unique_words([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "unique_words");
   auto func_ret_type = std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_unique_words_words_1;
@@ -898,11 +872,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_unique_words_words_1_type->writeAndGenType(*module_SimpleService_unique_words_words_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_unique_words_words_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_words_count([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "words_count";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_words_count([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "words_count");
   auto func_ret_type = std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_words_count_words_1;
@@ -913,11 +886,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_words_count_words_1_type->writeAndGenType(*module_SimpleService_words_count_words_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_words_count_words_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_set_enum([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "set_enum";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_set_enum([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "set_enum");
   auto func_ret_type = std::make_unique<Enum<::py3::simple::AnEnum>>("module.AnEnum");
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_set_enum_in_enum_1;
@@ -928,11 +900,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_set_enum_in_enum_1_type->writeAndGenType(*module_SimpleService_set_enum_in_enum_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_set_enum_in_enum_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_list_of_lists([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "list_of_lists";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_list_of_lists([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "list_of_lists");
   auto func_ret_type = std::make_unique<List>(std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_list_of_lists_num_lists_1;
@@ -950,11 +921,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_list_of_lists_num_items_2_type->writeAndGenType(*module_SimpleService_list_of_lists_num_items_2.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_list_of_lists_num_items_2));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_word_character_frequency([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "word_character_frequency";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_word_character_frequency([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "word_character_frequency");
   auto func_ret_type = std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_word_character_frequency_sentence_1;
@@ -965,11 +935,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_word_character_frequency_sentence_1_type->writeAndGenType(*module_SimpleService_word_character_frequency_sentence_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_word_character_frequency_sentence_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_list_of_sets([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "list_of_sets";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_list_of_sets([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "list_of_sets");
   auto func_ret_type = std::make_unique<List>(std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_list_of_sets_some_words_1;
@@ -980,11 +949,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_list_of_sets_some_words_1_type->writeAndGenType(*module_SimpleService_list_of_sets_some_words_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_list_of_sets_some_words_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_nested_map_argument([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "nested_map_argument";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_nested_map_argument([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "nested_map_argument");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_nested_map_argument_struct_map_1;
@@ -995,11 +963,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_nested_map_argument_struct_map_1_type->writeAndGenType(*module_SimpleService_nested_map_argument_struct_map_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_nested_map_argument_struct_map_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_make_sentence([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "make_sentence";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_make_sentence([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "make_sentence");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_make_sentence_word_chars_1;
@@ -1010,11 +977,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_make_sentence_word_chars_1_type->writeAndGenType(*module_SimpleService_make_sentence_word_chars_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_make_sentence_word_chars_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_union([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "get_union";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_union([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "get_union");
   auto func_ret_type = std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_get_union_sets_1;
@@ -1025,11 +991,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_get_union_sets_1_type->writeAndGenType(*module_SimpleService_get_union_sets_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_get_union_sets_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_keys([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "get_keys";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_keys([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "get_keys");
   auto func_ret_type = std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_get_keys_string_map_1;
@@ -1040,11 +1005,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_get_keys_string_map_1_type->writeAndGenType(*module_SimpleService_get_keys_string_map_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_get_keys_string_map_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_lookup_double([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "lookup_double";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_lookup_double([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "lookup_double");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_lookup_double_key_1;
@@ -1055,11 +1019,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_lookup_double_key_1_type->writeAndGenType(*module_SimpleService_lookup_double_key_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_lookup_double_key_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_retrieve_binary([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "retrieve_binary";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_retrieve_binary([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "retrieve_binary");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_retrieve_binary_something_1;
@@ -1070,11 +1033,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_retrieve_binary_something_1_type->writeAndGenType(*module_SimpleService_retrieve_binary_something_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_retrieve_binary_something_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_contain_binary([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "contain_binary";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_contain_binary([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "contain_binary");
   auto func_ret_type = std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_contain_binary_binaries_1;
@@ -1085,11 +1047,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_contain_binary_binaries_1_type->writeAndGenType(*module_SimpleService_contain_binary_binaries_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_contain_binary_binaries_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_contain_enum([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "contain_enum";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_contain_enum([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "contain_enum");
   auto func_ret_type = std::make_unique<List>(std::make_unique<Enum<::py3::simple::AnEnum>>("module.AnEnum"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_contain_enum_the_enum_1;
@@ -1100,11 +1061,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_contain_enum_the_enum_1_type->writeAndGenType(*module_SimpleService_contain_enum_the_enum_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_contain_enum_the_enum_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_binary_union_struct([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "get_binary_union_struct";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_binary_union_struct([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "get_binary_union_struct");
   auto func_ret_type = std::make_unique<Struct<::py3::simple::BinaryUnionStruct>>("module.BinaryUnionStruct");
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_SimpleService_get_binary_union_struct_u_1;
@@ -1115,16 +1075,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   module_SimpleService_get_binary_union_struct_u_1_type->writeAndGenType(*module_SimpleService_get_binary_union_struct_u_1.type(), metadata);
   func.arguments()->push_back(std::move(module_SimpleService_get_binary_union_struct_u_1));
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_struct_hidden([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "get_struct_hidden";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_struct_hidden([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "get_struct_hidden");
   auto func_ret_type = std::make_unique<Struct<::py3::simple::SimpleStruct>>("module.SimpleStruct");
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   func.is_oneway() = false;
   func.structured_annotations()->push_back(*cvStruct("python.Py3Hidden", {  }).cv_struct());
-  service.functions()->push_back(std::move(func));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -1183,8 +1141,9 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_binary_union_struct,
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_struct_hidden,
   };
+  size_t index = 0;
   for (auto& function_gen : functions) {
-    function_gen(metadata, module_SimpleService);
+    function_gen(metadata, module_SimpleService, index++);
   }
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
@@ -1197,13 +1156,12 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   context.module() = std::move(module);
   return &context;
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedService>>::gen_get_six([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "get_six";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedService>>::gen_get_six([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "get_six");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -1221,8 +1179,9 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedService>>::gen_get_six,
   };
+  size_t index = 0;
   for (auto& function_gen : functions) {
-    function_gen(metadata, module_DerivedService);
+    function_gen(metadata, module_DerivedService, index++);
   }
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
@@ -1237,13 +1196,12 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   context.module() = std::move(module);
   return &context;
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedService>>::gen_get_seven([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "get_seven";
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedService>>::gen_get_seven([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "get_seven");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   func.is_oneway() = false;
-  service.functions()->push_back(std::move(func));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -1261,8 +1219,9 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedService>>::gen_get_seven,
   };
+  size_t index = 0;
   for (auto& function_gen : functions) {
-    function_gen(metadata, module_RederivedService);
+    function_gen(metadata, module_RederivedService, index++);
   }
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();

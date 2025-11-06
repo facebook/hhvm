@@ -100,7 +100,7 @@ class ServiceMetadata<::{{> service_common/service_class_name}}> {
   friend class ServiceMetadata;
 
 {{#service:functions}}{{^function:starts_interaction?}}
-  static void gen_{{function:cpp_name}}(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_{{function:cpp_name}}(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 {{/function:starts_interaction?}}{{/service:functions}}
 };
 {{#else}}

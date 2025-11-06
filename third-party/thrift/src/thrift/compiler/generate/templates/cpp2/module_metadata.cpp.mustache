@@ -40,7 +40,7 @@ using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
 using ThriftType = ::apache::thrift::metadata::ThriftType;
 using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
-using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
+using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 {{#program:enums}}
 void EnumMetadata<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::gen(ThriftMetadata& metadata) {
@@ -138,9 +138,9 @@ void ExceptionMetadata<{{struct:cpp_fullname}}>::gen(ThriftMetadata& metadata) {
 {{/program:structs}}
 {{#program:services}}
 {{#service:functions}}{{^function:starts_interaction?}}
-void ServiceMetadata<::{{> service_common/service_class_name}}>::gen_{{function:cpp_name}}([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service) {
-  ::apache::thrift::metadata::ThriftFunction func;
-  func.name() = "{{function:name}}";
+void ServiceMetadata<::{{> service_common/service_class_name}}>::gen_{{function:cpp_name}}([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+  ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
+  DCHECK_EQ(*func.name() , "{{function:name}}");
 {{#function:return_type}}
   auto func_ret_type = {{> metadata/return_type_gen}};
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
@@ -164,7 +164,6 @@ void ServiceMetadata<::{{> service_common/service_class_name}}>::gen_{{function:
   func.structured_annotations()->push_back({{> metadata/const_struct}});
 {{/constant:type.self.structured?}}
 {{/function:structured_annotations}}
-  service.functions()->push_back(std::move(func));
 }
 {{/function:starts_interaction?}}{{/service:functions}}
 
@@ -189,8 +188,9 @@ const ThriftServiceContextRef* ServiceMetadata<::{{> service_common/service_clas
     ServiceMetadata<::{{> service_common/service_class_name}}>::gen_{{function:cpp_name}},
 {{/function:starts_interaction?}}{{/service:functions}}
   };
+  size_t index = 0;
   for (auto& function_gen : functions) {
-    function_gen(metadata, {{service:metadata_name}});
+    function_gen(metadata, {{service:metadata_name}}, index++);
   }
 {{/service:functions?}}
   // We need to keep the index around because a reference or iterator could be invalidated.

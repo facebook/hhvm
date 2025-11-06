@@ -221,8 +221,8 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixture
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_bounce_map(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_binary_keyed_map(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_bounce_map(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_binary_keyed_map(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 };
 } // namespace md
 } // namespace detail

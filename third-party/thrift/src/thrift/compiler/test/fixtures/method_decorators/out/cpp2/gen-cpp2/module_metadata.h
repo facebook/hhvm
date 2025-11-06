@@ -60,13 +60,13 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_noop(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_echo(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_increment(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_sum(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_withStruct(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_multiParam(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_echoInteraction(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_noop(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_echo(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_increment(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_sum(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_withStruct(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_multiParam(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_echoInteraction(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService>> {
@@ -78,13 +78,13 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedServic
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_noop(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_echo(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_increment(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_sum(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_withStruct(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_multiParam(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_adaptedRequest(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_noop(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_echo(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_increment(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_sum(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_withStruct(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_multiParam(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_adaptedRequest(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>> {
@@ -96,7 +96,7 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_extension(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_extension(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>> {
@@ -108,7 +108,7 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_extension(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_extension(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService_ExtendsDecoratedService>> {
@@ -120,7 +120,7 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedServic
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_extension(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_extension(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>> {
@@ -132,7 +132,7 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_secondExtension(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_secondExtension(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 };
 } // namespace md
 } // namespace detail

@@ -50,9 +50,9 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test:
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_init(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_method_that_throws(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_return_void_method(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_init(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_method_that_throws(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_return_void_method(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>> {
@@ -64,7 +64,7 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test:
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_init(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_init(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 };
 } // namespace md
 } // namespace detail

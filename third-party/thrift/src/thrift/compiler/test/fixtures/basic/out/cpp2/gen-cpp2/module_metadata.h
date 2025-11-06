@@ -99,7 +99,7 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_simple_rpc(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_simple_rpc(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::FB303Service>> {
@@ -111,7 +111,7 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_simple_rpc(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_simple_rpc(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::MyService>> {
@@ -123,16 +123,16 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_ping(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_getRandomData(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_sink(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_putDataById(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_hasDataById(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_getDataById(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_deleteDataById(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_lobDataById(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_invalid_return_for_hack(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_rpc_skipped_codegen(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_ping(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_getRandomData(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_sink(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_putDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_hasDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_getDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_deleteDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_lobDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_invalid_return_for_hack(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_rpc_skipped_codegen(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::DbMixedStackArguments>> {
@@ -144,8 +144,8 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_getDataByKey0(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_getDataByKey1(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_getDataByKey0(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_getDataByKey1(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 };
 } // namespace md
 } // namespace detail

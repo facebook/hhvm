@@ -60,15 +60,15 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingSe
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_returnstream(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_streamthrows(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_servicethrows(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_servicethrows2(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_boththrows(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_responseandstreamstreamthrows(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_responseandstreamservicethrows(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_responseandstreamboththrows(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_returnstreamFast(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_returnstream(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_streamthrows(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_servicethrows(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_servicethrows2(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_boththrows(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_responseandstreamstreamthrows(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_responseandstreamservicethrows(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_responseandstreamboththrows(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_returnstreamFast(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 };
 } // namespace md
 } // namespace detail

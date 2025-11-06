@@ -83,19 +83,19 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_processIOBuf(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_getStruct(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_setStruct(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_setStructList(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_getStructList(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_getNestedContainer(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_getTypedefStruct(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_getTypedefList(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_getUnion(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_getCalculator(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_streamStructs(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_streamWithSinkInitial(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_streamWithSinkException(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_processIOBuf(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_getStruct(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_setStruct(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_setStructList(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_getStructList(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_getNestedContainer(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_getTypedefStruct(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_getTypedefList(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_getUnion(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_getCalculator(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_streamStructs(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_streamWithSinkInitial(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_streamWithSinkException(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::ExtendedFootprintService>> {
@@ -107,7 +107,7 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_getComplexMap(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_getComplexMap(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 };
 } // namespace md
 } // namespace detail

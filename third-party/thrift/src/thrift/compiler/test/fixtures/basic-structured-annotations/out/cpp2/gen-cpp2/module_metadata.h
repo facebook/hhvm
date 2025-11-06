@@ -87,8 +87,8 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_s
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_first(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_second(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_first(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_second(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 };
 } // namespace md
 } // namespace detail

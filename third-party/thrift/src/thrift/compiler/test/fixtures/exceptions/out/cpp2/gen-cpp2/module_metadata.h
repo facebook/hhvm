@@ -100,10 +100,10 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Raiser>> {
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_doBland(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_doRaise(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_get200(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_get500(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_doBland(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_doRaise(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_get200(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_get500(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 };
 } // namespace md
 } // namespace detail

@@ -30,11 +30,11 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>> {
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_ping(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_getRandomData(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_hasDataById(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_getDataById(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_putDataById(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_ping(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_getRandomData(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_hasDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_getDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_putDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
 };
 } // namespace md
 } // namespace detail

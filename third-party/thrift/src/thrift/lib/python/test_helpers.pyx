@@ -12,12 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from collections.abc import Iterable, Mapping
+from collections.abc import Iterable, Mapping, Set as abcSet, Sequence
 from enum import IntEnum
 
+from thrift.py3.types import Struct as py3_Struct
+from thrift.py3.exceptions import GeneratedError as py3_GeneratedError
+from thrift.python.exceptions import GeneratedError
 from thrift.python.types import Enum, Struct, Union, typeinfo_float, Float32TypeInfo
 from thrift.python.types cimport List, Set, Map
 from thrift.python.mutable_types import MutableStruct, MutableUnion
+from thrift.python.mutable_exceptions cimport MutableGeneratedError
 
 ###
 #    This module contains helper functions suitable for migrating customer tests
@@ -89,4 +93,138 @@ def round_thrift_float32_if_rollout(val, convert_int=False):
         return round_thrift_to_float32(val, convert_int)
 
     return val
+
+
+cdef inline assert_equal_type(unittest, result, expected, str field_context):
+    unittest.assertEqual(type(result), type(expected), field_context + ".__name__")
+
+cdef inline format_type_context(result, str field_context):
+    cdef str prefix = field_context + "->" if field_context else ""
+    return f"{prefix}{type(result).__name__}"
+
+def assert_thrift_almost_equal(unittest, result, expected, str field_context=None, **almost_equal_kwargs):
+    """
+        A testing helper that asserts that two thrift types (structs, unions, immutable thrift containers),
+        or containers containing thrift types, are equal.
+
+        Relative to standard unittest, this function has two advantages:
+            - includes context path to first inequality
+            - uses unittest.assertAlmostEqual for `float` and `double` fields
+
+        
+        Params:
+            - unittest: implements assertEqual, assertAlmostEqual, and fail methods
+            - result, expected: objects to compare
+            - field_context: a context string to indicate where the discrepancy occurred
+            - **almost_equal_kwargs: kwargs passed to unittest.assertAlmostEqual 
+
+        Return: None
+
+        Limitations:
+            - py-deprecated currently not supported
+            - float keys for sets and maps--strongly discouraged--require exact equality
+            - raises AssertionError on the first inequality rather than reporting all
+
+    """
+    if isinstance(result, float) or isinstance(expected, float):
+        unittest.assertAlmostEqual(
+            result,
+            expected,
+            msg=field_context,
+            **almost_equal_kwargs,
+        )
+        return
+    # fast path for common scalar types
+    if isinstance(result, (Enum, int, str, bytes)):
+        unittest.assertEqual(result, expected, msg=field_context)
+        return
+
+
+    # convert py3 types to thrift-python. Remember, in thrift-py3, Struct is base class of Union
+    if isinstance(result, (py3_Struct, py3_GeneratedError)):
+        result = result._to_python()
+    if isinstance(expected, (py3_Struct, py3_GeneratedError)):
+        expected = expected._to_python()
+
+    if isinstance(result, (Struct, GeneratedError, MutableStruct, MutableGeneratedError)):
+        type_context = format_type_context(result, field_context) 
+        assert_equal_type(unittest, result, expected, type_context)
+        for fld_name, fld_val in result:
+            expected_val = getattr(expected, fld_name)
+            assert_thrift_almost_equal(
+                unittest,
+                fld_val,
+                expected_val,
+                field_context=f"{type_context}.{fld_name}",
+                **almost_equal_kwargs
+            )
+
+    elif isinstance(result, (Union, MutableUnion)):
+        type_context = format_type_context(result, field_context) 
+        assert_equal_type(unittest, result, expected, type_context)
+        unittest.assertEqual(
+            result.fbthrift_current_field,
+            expected.fbthrift_current_field,
+            msg=type_context + ".fbthrift_current_field",
+        )
+        assert_thrift_almost_equal(
+            unittest,
+            result.fbthrift_current_value,
+            expected.fbthrift_current_value,
+            field_context=f"{type_context}.{result.fbthrift_current_field.name}",
+            **almost_equal_kwargs
+        )
+
+    elif isinstance(result, Mapping):
+        if not isinstance(expected, Mapping):
+            unittest.fail(
+                f"result {type(result)} is a Mapping, but {type(expected)} is not: {field_context}",
+            )
+        type_context = format_type_context(result, field_context)
+        missing_keys = set(result.keys()) ^ set(expected.keys())
+        if missing_keys:
+            unittest.fail(
+                "result and expected have non-empty symmetric difference between "
+                f"key sets: {missing_keys}; {type_context}"
+            )
+        for key, value in result.items():
+            assert_thrift_almost_equal(
+                unittest,
+                value,
+                expected[key],
+                field_context=f"{type_context}[{key}]",
+                **almost_equal_kwargs
+            )
+
+    elif isinstance(result, abcSet):
+        if not isinstance(expected, abcSet):
+            unittest.fail(
+                f"result {type(result)} is a Set, but {type(expected)} is not: {field_context}",
+            )
+        type_context = format_type_context(result, field_context)
+        missing_keys = result ^ expected
+        if missing_keys:
+            unittest.fail(
+                "result and expected have non-empty symmetric difference: "
+                f"{missing_keys}; {type_context}"
+            )
+
+    elif isinstance(result, Sequence):
+        if not isinstance(expected, Sequence):
+            unittest.fail(
+                f"result {type(result)} is a Sequence, but {type(expected)} is not: {field_context}",
+            )
+        type_context = format_type_context(result, field_context)
+        unittest.assertEqual(len(result), len(expected), msg=type_context + ".__len__")
+        for i, value in enumerate(result):
+            assert_thrift_almost_equal(
+                unittest,
+                value,
+                expected[i],
+                field_context=f"{type_context}[{i}]",
+                **almost_equal_kwargs,
+            )
+    else:
+        # all non-float scalar types
+        unittest.assertEqual(result, expected, msg=field_context)
     

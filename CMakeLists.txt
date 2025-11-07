@@ -3,10 +3,6 @@ cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# This needs to be done before any languages are enabled or
-# projects are created.
-INCLUDE("${CMAKE_CURRENT_SOURCE_DIR}/CMake/VisualStudioToolset.cmake")
-
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # includes
@@ -21,10 +17,6 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 PROJECT(hhvm C CXX ASM)
 
 include(HHVMProject)
-
-if (MSVC)
-  enable_language(ASM_MASM)
-endif()
 
 MARK_AS_ADVANCED(CLEAR CMAKE_INSTALL_PREFIX)
 IF(APPLE)
@@ -69,7 +61,6 @@ SET(HPHP_HOME ${CMAKE_CURRENT_SOURCE_DIR})
 SET(TP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third-party")
 SET(TP_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/third-party")
 
-include(MSVCDefaults)
 include(Options)
 include(HPHPCompiler)
 include(HPHPFindLibs)

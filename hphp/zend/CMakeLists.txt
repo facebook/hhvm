@@ -10,7 +10,7 @@ set(HEADER_SOURCES)
 auto_sources(files "*.h" "RECURSE")
 list(APPEND HEADER_SOURCES ${files})
 
-if (NOT MSVC AND NOT APPLE)
+if (NOT APPLE)
   list(REMOVE_ITEM CXX_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/crypt-freesec.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/crypt-sha256.cpp

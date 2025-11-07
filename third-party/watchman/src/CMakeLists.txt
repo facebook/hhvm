@@ -13,13 +13,13 @@ set(CMAKE_MODULE_PATH
   ${CMAKE_MODULE_PATH})
 
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD 20)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
   message(STATUS "setting C++ standard to C++${CMAKE_CXX_STANDARD}")
 endif()
 
 # Explicitly enable coroutine support, since GCC does not enable it
-# by default when targeting C++17.
+# by default when targeting C++17/20.
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fcoroutines>)
 endif()

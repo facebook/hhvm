@@ -757,9 +757,6 @@ void t_py_generator::generate_json_reader(
     return;
   }
 
-  const vector<t_field*>& fields = tstruct->get_members();
-  vector<t_field*>::const_iterator f_iter;
-
   generate_json_reader_fn_signature(out);
   indent(out) << "json_obj = json" << endl;
   indent(out) << "if is_text:" << endl;
@@ -767,16 +764,16 @@ void t_py_generator::generate_json_reader(
   indent(out) << "json_obj = loads(json)" << endl;
   indent_down();
 
-  for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
-    if (is_hidden(**f_iter)) {
+  for (const t_field& f_iter : tstruct->fields()) {
+    if (is_hidden(f_iter)) {
       continue;
     }
-    string field = (*f_iter)->name();
+    string field = f_iter.name();
     indent(out) << "if '" << field << "' in json_obj " << "and json_obj['"
                 << field << "'] is not None:" << endl;
     indent_up();
     generate_json_field(
-        out, *f_iter, "self.", "", "json_obj['" + (*f_iter)->name() + "']");
+        out, &f_iter, "self.", "", "json_obj['" + f_iter.name() + "']");
 
     indent_down();
   }
@@ -1215,18 +1212,16 @@ string t_py_generator::render_const_value(
     }
   } else if (type->is<t_enum>()) {
     indent(out) << value->get_integer();
-  } else if (type->is<t_structured>()) {
+  } else if (const t_structured* structured = type->try_as<t_structured>()) {
     out << rename_reserved_keywords(type_name(type)) << "(**{" << endl;
     indent_up();
-    const vector<t_field*>& fields = ((t_struct*)type)->get_members();
-    vector<t_field*>::const_iterator f_iter;
     const vector<pair<t_const_value*, t_const_value*>>& val = value->get_map();
     vector<pair<t_const_value*, t_const_value*>>::const_iterator v_iter;
     for (v_iter = val.begin(); v_iter != val.end(); ++v_iter) {
       const t_type* field_type = nullptr;
-      for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
-        if ((*f_iter)->name() == v_iter->first->get_string()) {
-          field_type = (*f_iter)->type().get_type();
+      for (const t_field& f_iter : structured->fields()) {
+        if (f_iter.name() == v_iter->first->get_string()) {
+          field_type = f_iter.type().get_type();
         }
       }
       if (field_type == nullptr) {
@@ -1331,7 +1326,7 @@ void t_py_generator::generate_py_struct(
  */
 void t_py_generator::generate_py_union(
     ofstream& out, const t_structured* tstruct) {
-  const vector<t_field*>& members = tstruct->get_members();
+  node_list_view<const t_field> members = tstruct->fields();
   const vector<const t_field*>& sorted_members = tstruct->fields_id_order();
 
   out << "class " << rename_reserved_keywords(tstruct->name())
@@ -1364,21 +1359,21 @@ void t_py_generator::generate_py_union(
 
   // Generate `get_` methods
   for (auto& member : members) {
-    if (is_hidden(*member)) {
+    if (is_hidden(member)) {
       continue;
     }
-    indent(out) << "def get_" << member->name() << "(self):" << endl;
-    indent(out) << "  assert self.field == " << member->id() << endl;
+    indent(out) << "def get_" << member.name() << "(self):" << endl;
+    indent(out) << "  assert self.field == " << member.id() << endl;
     indent(out) << "  return self.value" << endl << endl;
   }
 
   // Generate `set_` methods
   for (auto& member : members) {
-    if (is_hidden(*member)) {
+    if (is_hidden(member)) {
       continue;
     }
-    indent(out) << "def set_" << member->name() << "(self, value):" << endl;
-    indent(out) << "  self.field = " << member->id() << endl;
+    indent(out) << "def set_" << member.name() << "(self, value):" << endl;
+    indent(out) << "  self.field = " << member.id() << endl;
     indent(out) << "  self.value = value" << endl << endl;
   }
 
@@ -1511,14 +1506,14 @@ void t_py_generator::generate_py_union(
     indent(out) << endl;
 
     for (auto& member : members) {
-      if (is_hidden(*member)) {
+      if (is_hidden(member)) {
         continue;
       }
-      const auto& n = member->name();
+      const auto& n = member.name();
       indent(out) << "if '" << n << "' in obj:" << endl;
       indent_up();
       generate_json_field(
-          out, member, prefix_temporary(""), "", "obj['" + n + "']");
+          out, &member, prefix_temporary(""), "", "obj['" + n + "']");
       indent(out) << "self.set_" << n << "("
                   << prefix_temporary(rename_reserved_keywords(n)) << ")"
                   << endl;
@@ -1751,7 +1746,7 @@ void t_py_generator::generate_py_struct_definition(
     const t_structured* tstruct,
     bool is_exception,
     bool /*is_result*/) {
-  const vector<t_field*>& members = tstruct->get_members();
+  node_list_view<const t_field> members = tstruct->fields();
   const vector<const t_field*>& sorted_members = tstruct->fields_id_order();
   vector<const t_field*>::const_iterator m_iter;
 
@@ -1842,10 +1837,10 @@ void t_py_generator::generate_py_struct_definition(
         << indent() << "  L = []" << endl
         << indent() << "  padding = ' ' * 4" << endl;
     for (const auto& member : members) {
-      if (is_hidden(*member)) {
+      if (is_hidden(member)) {
         continue;
       }
-      auto key = rename_reserved_keywords(member->name());
+      auto key = rename_reserved_keywords(member.name());
       auto has_double_underscore = key.find("__") == 0;
       if (has_double_underscore) {
         out << indent() << "  if getattr(self, \"" << key
@@ -2053,9 +2048,6 @@ void t_py_generator::generate_fastproto_read(
  */
 void t_py_generator::generate_py_struct_reader(
     ofstream& out, const t_structured* tstruct) {
-  const vector<t_field*>& fields = tstruct->get_members();
-  vector<t_field*>::const_iterator f_iter;
-
   indent(out) << "def read(self, iprot):" << endl;
   indent_up();
 
@@ -2080,8 +2072,8 @@ void t_py_generator::generate_py_struct_reader(
   bool first = true;
 
   // Generate deserialization code for known cases
-  for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
-    if (is_hidden(**f_iter)) {
+  for (const t_field& f_iter : tstruct->fields()) {
+    if (is_hidden(f_iter)) {
       continue;
     }
     if (first) {
@@ -2090,12 +2082,12 @@ void t_py_generator::generate_py_struct_reader(
     } else {
       out << indent() << "elif ";
     }
-    out << "fid == " << (*f_iter)->id() << ":" << endl;
+    out << "fid == " << f_iter.id() << ":" << endl;
     indent_up();
-    indent(out) << "if ftype == " << type_to_enum((*f_iter)->type().get_type())
+    indent(out) << "if ftype == " << type_to_enum(f_iter.type().get_type())
                 << ":" << endl;
     indent_up();
-    generate_deserialize_field(out, *f_iter, "self.");
+    generate_deserialize_field(out, &f_iter, "self.");
     indent_down();
     out << indent() << "else:" << endl
         << indent() << "  iprot.skip(ftype)" << endl;
@@ -2376,9 +2368,8 @@ void t_py_generator::generate_service_interface(
         indent_up();
         f_service_ << indent() << "fut.set_result(self." << (*f_iter)->name()
                    << "(";
-        const vector<t_field*>& fields = (*f_iter)->params().get_members();
-        for (auto it = fields.begin(); it != fields.end(); ++it) {
-          f_service_ << rename_reserved_keywords((*it)->name()) << ",";
+        for (const t_field& it : (*f_iter)->params().fields()) {
+          f_service_ << rename_reserved_keywords(it.name()) << ",";
         }
         f_service_ << "))" << endl;
         indent_down();
@@ -2564,8 +2555,7 @@ void t_py_generator::generate_service_client(const t_service* tservice) {
   vector<const t_function*>::const_iterator f_iter;
   for (f_iter = functions.begin(); f_iter != functions.end(); ++f_iter) {
     const t_paramlist& arg_struct = (*f_iter)->params();
-    const vector<t_field*>& fields = arg_struct.get_members();
-    vector<t_field*>::const_iterator fld_iter;
+    node_list_view<const t_field> fields = arg_struct.fields();
     string funname = rename_reserved_keywords((*f_iter)->name());
     string argsname = (*f_iter)->name() + "_args";
 
@@ -2579,10 +2569,10 @@ void t_py_generator::generate_service_client(const t_service* tservice) {
       indent(f_service_) << "if (self._fbthrift_cpp_transport):" << endl;
       indent_up();
       f_service_ << indent() << "args = " << argsname << "()" << endl;
-      for (fld_iter = fields.begin(); fld_iter != fields.end(); ++fld_iter) {
+      for (const t_field& fld_iter : fields) {
         f_service_ << indent() << "args."
-                   << rename_reserved_keywords((*fld_iter)->name()) << " = "
-                   << rename_reserved_keywords((*fld_iter)->name()) << endl;
+                   << rename_reserved_keywords(fld_iter.name()) << " = "
+                   << rename_reserved_keywords(fld_iter.name()) << endl;
       }
       f_service_ << indent()
                  << "result = self._fbthrift_cpp_transport._send_request(\""
@@ -2622,13 +2612,13 @@ void t_py_generator::generate_service_client(const t_service* tservice) {
     indent(f_service_) << "self.send_" << funname << "(";
 
     bool first = true;
-    for (fld_iter = fields.begin(); fld_iter != fields.end(); ++fld_iter) {
+    for (const t_field& fld_iter : fields) {
       if (first) {
         first = false;
       } else {
         f_service_ << ", ";
       }
-      f_service_ << rename_reserved_keywords((*fld_iter)->name());
+      f_service_ << rename_reserved_keywords(fld_iter.name());
     }
     f_service_ << ")" << endl;
 
@@ -2663,10 +2653,10 @@ void t_py_generator::generate_service_client(const t_service* tservice) {
 
     f_service_ << indent() << "args = " << argsname << "()" << endl;
 
-    for (fld_iter = fields.begin(); fld_iter != fields.end(); ++fld_iter) {
+    for (const t_field& fld_iter : fields) {
       f_service_ << indent() << "args."
-                 << rename_reserved_keywords((*fld_iter)->name()) << " = "
-                 << rename_reserved_keywords((*fld_iter)->name()) << endl;
+                 << rename_reserved_keywords(fld_iter.name()) << " = "
+                 << rename_reserved_keywords(fld_iter.name()) << endl;
     }
 
     std::string flush = (*f_iter)->qualifier() == t_function_qualifier::oneway
@@ -2857,19 +2847,16 @@ void t_py_generator::generate_service_remote(const t_service* tservice) {
       }
 
       f_remote << "[";
-      const vector<t_field*>& args = fn->params().get_members();
       bool first = true;
-      for (vector<t_field*>::const_iterator it_2 = args.begin();
-           it_2 != args.end();
-           ++it_2) {
+      for (const t_field& it_2 : fn->params().fields()) {
         if (first) {
           first = false;
         } else {
           f_remote << ", ";
         }
-        f_remote << "('" << thrift_type_name((*it_2)->type().get_type())
-                 << "', '" << (*it_2)->name() << "', '"
-                 << thrift_type_name((*it_2)->type()->get_true_type()) << "')";
+        f_remote << "('" << thrift_type_name(it_2.type().get_type()) << "', '"
+                 << it_2.name() << "', '"
+                 << thrift_type_name(it_2.type()->get_true_type()) << "')";
       }
       f_remote << "]),\n";
     }
@@ -3092,9 +3079,6 @@ void t_py_generator::generate_process_function(
 
   if (gen_asyncio_) {
     const t_paramlist& arg_struct = tfunction->params();
-    const std::vector<t_field*>& fields = arg_struct.get_members();
-    vector<t_field*>::const_iterator f_iter;
-
     string handler =
         "self._handler." + rename_reserved_keywords(tfunction->name());
 
@@ -3104,14 +3088,14 @@ void t_py_generator::generate_process_function(
       args_list += "handler_ctx";
       first = false;
     }
-    for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
+    for (const t_field& f_iter : arg_struct.fields()) {
       if (first) {
         first = false;
       } else {
         args_list += ", ";
       }
       args_list += "args.";
-      args_list += rename_reserved_keywords((*f_iter)->name());
+      args_list += rename_reserved_keywords(f_iter.name());
     }
 
     f_service_ << indent() << "if should_run_on_thread(" << handler
@@ -3152,9 +3136,6 @@ void t_py_generator::generate_process_function(
 
     // Generate the function call
     const t_paramlist& arg_struct = tfunction->params();
-    const std::vector<t_field*>& fields = arg_struct.get_members();
-    vector<t_field*>::const_iterator f_iter;
-
     string handler = (future ? "self._handler.future_" : "self._handler.") +
         rename_reserved_keywords(tfunction->name());
 
@@ -3170,13 +3151,13 @@ void t_py_generator::generate_process_function(
       f_service_ << "handler_ctx";
       first = false;
     }
-    for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
+    for (const t_field& f_iter : arg_struct.fields()) {
       if (first) {
         first = false;
       } else {
         f_service_ << ", ";
       }
-      f_service_ << "args." << rename_reserved_keywords((*f_iter)->name());
+      f_service_ << "args." << rename_reserved_keywords(f_iter.name());
     }
     f_service_ << ")" << (future ? ".result()" : "") << endl;
 
@@ -3675,22 +3656,19 @@ void t_py_generator::generate_python_docstring(
     ss << named_node->doc();
   }
 
-  const vector<t_field*>& fields = tstruct->get_members();
-  if (fields.size() > 0) {
+  if (tstruct->has_fields()) {
     if (has_doc) {
       ss << endl;
     }
     has_doc = true;
     ss << subheader << ":\n";
-    vector<t_field*>::const_iterator p_iter;
-    for (p_iter = fields.begin(); p_iter != fields.end(); ++p_iter) {
-      if (is_hidden(**p_iter)) {
+    for (const t_field& p : tstruct->fields()) {
+      if (is_hidden(p)) {
         continue;
       }
-      const t_field* p = *p_iter;
-      ss << " - " << rename_reserved_keywords(p->name());
-      if (p->has_doc()) {
-        ss << ": " << p->doc();
+      ss << " - " << rename_reserved_keywords(p.name());
+      if (p.has_doc()) {
+        ss << ": " << p.doc();
       } else {
         ss << endl;
       }
@@ -3781,18 +3759,15 @@ string t_py_generator::function_signature_if(
  */
 string t_py_generator::argument_list(const t_paramlist& tparamlist) {
   string result;
-
-  const vector<t_field*>& fields = tparamlist.get_members();
-  vector<t_field*>::const_iterator f_iter;
   bool first = true;
-  for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
+  for (const t_field& f_iter : tparamlist.fields()) {
     if (first) {
       first = false;
     } else {
       result += ", ";
     }
-    result += rename_reserved_keywords((*f_iter)->name());
-    result += "=" + render_field_default_value(*f_iter);
+    result += rename_reserved_keywords(f_iter.name());
+    result += "=" + render_field_default_value(&f_iter);
   }
   return result;
 }

@@ -100,6 +100,11 @@ final class ThriftContextPropHandlers {
       }
       $client_handler->addHandler(new ExperimentIdContextHandler());
       $client_handler->addHandler(new ProductIdContextHandler());
+      if (JustKnobs::eval('artillery/sdk_www:enable_trace_size_propagation')) {
+        $client_handler->addHandler(
+          TraceSizeEstimationContextHandler::getInstance(),
+        );
+      }
       //TODO T204080230: add AM handler equivalent
 
       $thrift_client_handler->addHandler(

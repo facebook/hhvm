@@ -124,7 +124,7 @@ StructMetadata<::cpp2::BiDiMethodException>::gen(ThriftMetadata& metadata) {
 }
 
 void ExceptionMetadata<::cpp2::BiDiSinkException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::BiDiSinkException>(metadata);
+  auto res = genExceptionMetadata<::cpp2::BiDiSinkException>(metadata, false);
   if (res.preExists) {
     return;
   }
@@ -147,7 +147,7 @@ void ExceptionMetadata<::cpp2::BiDiSinkException>::gen(ThriftMetadata& metadata)
   }
 }
 void ExceptionMetadata<::cpp2::BiDiStreamException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::BiDiStreamException>(metadata);
+  auto res = genExceptionMetadata<::cpp2::BiDiStreamException>(metadata, false);
   if (res.preExists) {
     return;
   }
@@ -170,7 +170,7 @@ void ExceptionMetadata<::cpp2::BiDiStreamException>::gen(ThriftMetadata& metadat
   }
 }
 void ExceptionMetadata<::cpp2::BiDiMethodException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::BiDiMethodException>(metadata);
+  auto res = genExceptionMetadata<::cpp2::BiDiMethodException>(metadata, false);
   if (res.preExists) {
     return;
   }

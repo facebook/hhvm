@@ -475,14 +475,14 @@ StructMetadata<::cpp2::Containers>::gen(ThriftMetadata& metadata) {
 }
 
 void ExceptionMetadata<::cpp2::emptyXcep>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::emptyXcep>(metadata);
+  auto res = genExceptionMetadata<::cpp2::emptyXcep>(metadata, false);
   if (res.preExists) {
     return;
   }
   [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_emptyXcep = res.metadata;
 }
 void ExceptionMetadata<::cpp2::reqXcep>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::reqXcep>(metadata);
+  auto res = genExceptionMetadata<::cpp2::reqXcep>(metadata, false);
   if (res.preExists) {
     return;
   }
@@ -505,7 +505,7 @@ void ExceptionMetadata<::cpp2::reqXcep>::gen(ThriftMetadata& metadata) {
   }
 }
 void ExceptionMetadata<::cpp2::optXcep>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::optXcep>(metadata);
+  auto res = genExceptionMetadata<::cpp2::optXcep>(metadata, false);
   if (res.preExists) {
     return;
   }
@@ -528,7 +528,7 @@ void ExceptionMetadata<::cpp2::optXcep>::gen(ThriftMetadata& metadata) {
   }
 }
 void ExceptionMetadata<::cpp2::complexException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::complexException>(metadata);
+  auto res = genExceptionMetadata<::cpp2::complexException>(metadata, false);
   if (res.preExists) {
     return;
   }

@@ -120,7 +120,7 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>::
 }
 
 void ExceptionMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>(metadata);
+  auto res = genExceptionMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>(metadata, false);
   if (res.preExists) {
     return;
   }

@@ -114,7 +114,7 @@ StructMetadata<::cpp2::ShouldBeBoxed>::gen(ThriftMetadata& metadata) {
 }
 
 void ExceptionMetadata<::cpp2::CustomException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::CustomException>(metadata);
+  auto res = genExceptionMetadata<::cpp2::CustomException>(metadata, false);
   if (res.preExists) {
     return;
   }

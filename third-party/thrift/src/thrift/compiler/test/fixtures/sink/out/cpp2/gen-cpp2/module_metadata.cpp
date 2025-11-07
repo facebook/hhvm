@@ -244,7 +244,7 @@ StructMetadata<::cpp2::SinkException2>::gen(ThriftMetadata& metadata) {
 }
 
 void ExceptionMetadata<::cpp2::InitialException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::InitialException>(metadata);
+  auto res = genExceptionMetadata<::cpp2::InitialException>(metadata, false);
   if (res.preExists) {
     return;
   }
@@ -267,7 +267,7 @@ void ExceptionMetadata<::cpp2::InitialException>::gen(ThriftMetadata& metadata) 
   }
 }
 void ExceptionMetadata<::cpp2::SinkException1>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::SinkException1>(metadata);
+  auto res = genExceptionMetadata<::cpp2::SinkException1>(metadata, false);
   if (res.preExists) {
     return;
   }
@@ -290,7 +290,7 @@ void ExceptionMetadata<::cpp2::SinkException1>::gen(ThriftMetadata& metadata) {
   }
 }
 void ExceptionMetadata<::cpp2::SinkException2>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::SinkException2>(metadata);
+  auto res = genExceptionMetadata<::cpp2::SinkException2>(metadata, false);
   if (res.preExists) {
     return;
   }

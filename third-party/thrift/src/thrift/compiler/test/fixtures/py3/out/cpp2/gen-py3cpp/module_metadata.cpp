@@ -455,7 +455,7 @@ StructMetadata<::py3::simple::AdaptedTypedefFields>::gen(ThriftMetadata& metadat
 }
 
 void ExceptionMetadata<::py3::simple::SimpleException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::py3::simple::SimpleException>(metadata);
+  auto res = genExceptionMetadata<::py3::simple::SimpleException>(metadata, false);
   if (res.preExists) {
     return;
   }
@@ -478,7 +478,7 @@ void ExceptionMetadata<::py3::simple::SimpleException>::gen(ThriftMetadata& meta
   }
 }
 void ExceptionMetadata<::py3::simple::HiddenException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::py3::simple::HiddenException>(metadata);
+  auto res = genExceptionMetadata<::py3::simple::HiddenException>(metadata, false);
   if (res.preExists) {
     return;
   }

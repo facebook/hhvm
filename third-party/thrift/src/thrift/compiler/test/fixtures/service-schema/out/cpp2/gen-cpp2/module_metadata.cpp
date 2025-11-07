@@ -75,7 +75,7 @@ StructMetadata<::facebook::thrift::test::CustomException>::gen(ThriftMetadata& m
 }
 
 void ExceptionMetadata<::facebook::thrift::test::CustomException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::facebook::thrift::test::CustomException>(metadata);
+  auto res = genExceptionMetadata<::facebook::thrift::test::CustomException>(metadata, false);
   if (res.preExists) {
     return;
   }

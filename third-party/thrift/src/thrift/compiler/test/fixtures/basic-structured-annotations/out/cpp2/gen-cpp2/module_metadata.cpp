@@ -300,7 +300,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyUnion>::gen(Thr
 }
 
 void ExceptionMetadata<::test::fixtures::basic_structured_annotations::MyException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::test::fixtures::basic_structured_annotations::MyException>(metadata);
+  auto res = genExceptionMetadata<::test::fixtures::basic_structured_annotations::MyException>(metadata, false);
   if (res.preExists) {
     return;
   }

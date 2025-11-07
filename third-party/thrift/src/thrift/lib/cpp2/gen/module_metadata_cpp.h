@@ -299,11 +299,13 @@ auto genStructMetadata(metadata::ThriftMetadata& md, bool genAnnotations) {
 }
 
 GenMetadataResult<metadata::ThriftException> genExceptionMetadata(
-    metadata::ThriftMetadata& md, const syntax_graph::ExceptionNode& node);
+    metadata::ThriftMetadata& md,
+    const syntax_graph::ExceptionNode& node,
+    bool genAnnotations);
 
 template <class T>
-auto genExceptionMetadata(metadata::ThriftMetadata& md) {
-  return genExceptionMetadata(md, getNodeWithLock<T>());
+auto genExceptionMetadata(metadata::ThriftMetadata& md, bool genAnnotations) {
+  return genExceptionMetadata(md, getNodeWithLock<T>(), genAnnotations);
 }
 
 metadata::ThriftService genServiceMetadata(

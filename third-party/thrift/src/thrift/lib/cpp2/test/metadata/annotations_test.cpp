@@ -238,6 +238,14 @@ TEST(Annotations, Exception) {
   metadata::ThriftMetadata md;
   detail::md::ExceptionMetadata<TestException>::gen(md);
   EXPECT_EQ(md.exceptions()["annotations.TestException"], expectedException());
+
+  metadata::ThriftMetadata md2;
+  auto res = detail::md::genExceptionMetadata<TestException>(md2, true);
+  EXPECT_TRUE(
+      detail::md::structuredAnnotationsEquality(
+          *res.metadata.structured_annotations(),
+          *expectedException().structured_annotations(),
+          detail::md::getAnnotationTypes<TestException>()));
 }
 
 } // namespace apache::thrift::test

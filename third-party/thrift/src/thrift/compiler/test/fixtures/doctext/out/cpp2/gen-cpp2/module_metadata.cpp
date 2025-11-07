@@ -130,7 +130,7 @@ StructMetadata<::cpp2::Bang>::gen(ThriftMetadata& metadata) {
 }
 
 void ExceptionMetadata<::cpp2::Bang>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::Bang>(metadata);
+  auto res = genExceptionMetadata<::cpp2::Bang>(metadata, false);
   if (res.preExists) {
     return;
   }

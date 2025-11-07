@@ -284,7 +284,7 @@ StructMetadata<::test::fixtures::basic::UnionToBeRenamed>::gen(ThriftMetadata& m
 }
 
 void ExceptionMetadata<::test::fixtures::basic::MyException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::test::fixtures::basic::MyException>(metadata);
+  auto res = genExceptionMetadata<::test::fixtures::basic::MyException>(metadata, false);
   if (res.preExists) {
     return;
   }
@@ -307,7 +307,7 @@ void ExceptionMetadata<::test::fixtures::basic::MyException>::gen(ThriftMetadata
   }
 }
 void ExceptionMetadata<::test::fixtures::basic::MyExceptionWithMessage>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::test::fixtures::basic::MyExceptionWithMessage>(metadata);
+  auto res = genExceptionMetadata<::test::fixtures::basic::MyExceptionWithMessage>(metadata, false);
   if (res.preExists) {
     return;
   }

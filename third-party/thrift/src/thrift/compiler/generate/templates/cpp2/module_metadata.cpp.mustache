@@ -102,7 +102,7 @@ StructMetadata<{{struct:cpp_fullname}}>::gen(ThriftMetadata& metadata) {
 {{#program:structs}}
 {{#struct:exception?}}
 void ExceptionMetadata<{{struct:cpp_fullname}}>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<{{struct:cpp_fullname}}>(metadata);
+  auto res = genExceptionMetadata<{{struct:cpp_fullname}}>(metadata, false);
   if (res.preExists) {
     return;
   }

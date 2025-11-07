@@ -228,7 +228,7 @@ StructMetadata<::facebook::thrift::test::terse_write::TerseException>::gen(Thrif
 }
 
 void ExceptionMetadata<::facebook::thrift::test::terse_write::TerseException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::facebook::thrift::test::terse_write::TerseException>(metadata);
+  auto res = genExceptionMetadata<::facebook::thrift::test::terse_write::TerseException>(metadata, false);
   if (res.preExists) {
     return;
   }

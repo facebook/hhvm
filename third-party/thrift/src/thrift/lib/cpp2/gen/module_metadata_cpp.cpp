@@ -343,8 +343,10 @@ GenMetadataResult<metadata::ThriftStruct> genStructMetadata(
 }
 
 GenMetadataResult<metadata::ThriftException> genExceptionMetadata(
-    metadata::ThriftMetadata& md, const syntax_graph::ExceptionNode& node) {
-  return genStructuredInMetadataMap(node, *md.exceptions(), false);
+    metadata::ThriftMetadata& md,
+    const syntax_graph::ExceptionNode& node,
+    bool genAnnotations) {
+  return genStructuredInMetadataMap(node, *md.exceptions(), genAnnotations);
 }
 
 metadata::ThriftService genServiceMetadata(

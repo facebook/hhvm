@@ -224,7 +224,7 @@ StructMetadata<::cpp2::Banal>::gen(ThriftMetadata& metadata) {
 }
 
 void ExceptionMetadata<::cpp2::Fiery>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::Fiery>(metadata);
+  auto res = genExceptionMetadata<::cpp2::Fiery>(metadata, false);
   if (res.preExists) {
     return;
   }
@@ -247,7 +247,7 @@ void ExceptionMetadata<::cpp2::Fiery>::gen(ThriftMetadata& metadata) {
   }
 }
 void ExceptionMetadata<::cpp2::Serious>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::Serious>(metadata);
+  auto res = genExceptionMetadata<::cpp2::Serious>(metadata, false);
   if (res.preExists) {
     return;
   }
@@ -270,7 +270,7 @@ void ExceptionMetadata<::cpp2::Serious>::gen(ThriftMetadata& metadata) {
   }
 }
 void ExceptionMetadata<::cpp2::ComplexFieldNames>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::ComplexFieldNames>(metadata);
+  auto res = genExceptionMetadata<::cpp2::ComplexFieldNames>(metadata, false);
   if (res.preExists) {
     return;
   }
@@ -293,7 +293,7 @@ void ExceptionMetadata<::cpp2::ComplexFieldNames>::gen(ThriftMetadata& metadata)
   }
 }
 void ExceptionMetadata<::cpp2::CustomFieldNames>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::CustomFieldNames>(metadata);
+  auto res = genExceptionMetadata<::cpp2::CustomFieldNames>(metadata, false);
   if (res.preExists) {
     return;
   }
@@ -316,7 +316,7 @@ void ExceptionMetadata<::cpp2::CustomFieldNames>::gen(ThriftMetadata& metadata) 
   }
 }
 void ExceptionMetadata<::cpp2::ExceptionWithPrimitiveField>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::ExceptionWithPrimitiveField>(metadata);
+  auto res = genExceptionMetadata<::cpp2::ExceptionWithPrimitiveField>(metadata, false);
   if (res.preExists) {
     return;
   }
@@ -339,7 +339,7 @@ void ExceptionMetadata<::cpp2::ExceptionWithPrimitiveField>::gen(ThriftMetadata&
   }
 }
 void ExceptionMetadata<::cpp2::ExceptionWithStructuredAnnotation>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::ExceptionWithStructuredAnnotation>(metadata);
+  auto res = genExceptionMetadata<::cpp2::ExceptionWithStructuredAnnotation>(metadata, false);
   if (res.preExists) {
     return;
   }
@@ -362,7 +362,7 @@ void ExceptionMetadata<::cpp2::ExceptionWithStructuredAnnotation>::gen(ThriftMet
   }
 }
 void ExceptionMetadata<::cpp2::Banal>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::Banal>(metadata);
+  auto res = genExceptionMetadata<::cpp2::Banal>(metadata, false);
   if (res.preExists) {
     return;
   }

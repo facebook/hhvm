@@ -64,21 +64,21 @@ StructMetadata<::cpp2::FooEx2>::gen(ThriftMetadata& metadata) {
 }
 
 void ExceptionMetadata<::cpp2::FooStreamEx>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::FooStreamEx>(metadata);
+  auto res = genExceptionMetadata<::cpp2::FooStreamEx>(metadata, false);
   if (res.preExists) {
     return;
   }
   [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_FooStreamEx = res.metadata;
 }
 void ExceptionMetadata<::cpp2::FooEx>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::FooEx>(metadata);
+  auto res = genExceptionMetadata<::cpp2::FooEx>(metadata, false);
   if (res.preExists) {
     return;
   }
   [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_FooEx = res.metadata;
 }
 void ExceptionMetadata<::cpp2::FooEx2>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::FooEx2>(metadata);
+  auto res = genExceptionMetadata<::cpp2::FooEx2>(metadata, false);
   if (res.preExists) {
     return;
   }

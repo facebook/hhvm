@@ -178,7 +178,7 @@ StructMetadata<::cpp2::SecretStruct>::gen(ThriftMetadata& metadata) {
 }
 
 void ExceptionMetadata<::cpp2::detail::YourException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::detail::YourException>(metadata);
+  auto res = genExceptionMetadata<::cpp2::detail::YourException>(metadata, false);
   if (res.preExists) {
     return;
   }

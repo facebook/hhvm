@@ -209,7 +209,7 @@ StructMetadata<::cpp2_struct_footprint::TestUnion>::gen(ThriftMetadata& metadata
 }
 
 void ExceptionMetadata<::cpp2_struct_footprint::ExStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2_struct_footprint::ExStruct>(metadata);
+  auto res = genExceptionMetadata<::cpp2_struct_footprint::ExStruct>(metadata, false);
   if (res.preExists) {
     return;
   }

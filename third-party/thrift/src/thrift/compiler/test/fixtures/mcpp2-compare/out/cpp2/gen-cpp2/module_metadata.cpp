@@ -509,7 +509,7 @@ StructMetadata<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct>::gen(ThriftM
 }
 
 void ExceptionMetadata<::some::valid::ns::AnException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::some::valid::ns::AnException>(metadata);
+  auto res = genExceptionMetadata<::some::valid::ns::AnException>(metadata, false);
   if (res.preExists) {
     return;
   }
@@ -532,7 +532,7 @@ void ExceptionMetadata<::some::valid::ns::AnException>::gen(ThriftMetadata& meta
   }
 }
 void ExceptionMetadata<::some::valid::ns::AnotherException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::some::valid::ns::AnotherException>(metadata);
+  auto res = genExceptionMetadata<::some::valid::ns::AnotherException>(metadata, false);
   if (res.preExists) {
     return;
   }

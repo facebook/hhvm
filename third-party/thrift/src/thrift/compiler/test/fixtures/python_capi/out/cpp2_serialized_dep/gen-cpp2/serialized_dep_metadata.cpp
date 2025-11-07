@@ -215,7 +215,7 @@ StructMetadata<::test::fixtures::python_capi::MarshalError>::gen(ThriftMetadata&
 }
 
 void ExceptionMetadata<::test::fixtures::python_capi::SerializedError>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::test::fixtures::python_capi::SerializedError>(metadata);
+  auto res = genExceptionMetadata<::test::fixtures::python_capi::SerializedError>(metadata, false);
   if (res.preExists) {
     return;
   }
@@ -239,7 +239,7 @@ void ExceptionMetadata<::test::fixtures::python_capi::SerializedError>::gen(Thri
   serialized_dep_SerializedError.structured_annotations()->push_back(*cvStruct("python.UseCAPI", { {"serialize", cvBool(true) } }).cv_struct());
 }
 void ExceptionMetadata<::test::fixtures::python_capi::MarshalError>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::test::fixtures::python_capi::MarshalError>(metadata);
+  auto res = genExceptionMetadata<::test::fixtures::python_capi::MarshalError>(metadata, false);
   if (res.preExists) {
     return;
   }

@@ -48,7 +48,8 @@ void AsyncStopTLS::start(
       transactionTimeout_ = folly::AsyncTimeout::make(
           *evb, [this]() noexcept { this->stopTLSTimeoutExpired(); });
 
-      transactionTimeout_->scheduleTimeout(timeout);
+      timeout_ = timeout;
+      transactionTimeout_->scheduleTimeout(timeout_);
     }
     if (role == Role::Server) {
       transport->tlsShutdown();
@@ -111,4 +112,19 @@ void AsyncStopTLS::readBufferAvailable(std::unique_ptr<folly::IOBuf>) noexcept {
 void AsyncStopTLS::readErr(const folly::AsyncSocketException& ex) noexcept {
   prepareForTerminalCallback()->stopTLSError(ex);
 }
+
+void AsyncStopTLS::attachEventBase(folly::EventBase* evb) {
+  if (transactionTimeout_) {
+    transactionTimeout_->attachEventBase(evb);
+    transactionTimeout_->scheduleTimeout(timeout_);
+  }
+}
+
+void AsyncStopTLS::detachEventBase() {
+  if (transactionTimeout_) {
+    transactionTimeout_->cancelTimeout();
+    transactionTimeout_->detachEventBase();
+  }
+}
+
 } // namespace apache::thrift

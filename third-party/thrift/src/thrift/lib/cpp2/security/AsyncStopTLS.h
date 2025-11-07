@@ -71,6 +71,9 @@ class AsyncStopTLS : public folly::DelayedDestruction,
       Role role,
       std::chrono::milliseconds timeout);
 
+  void attachEventBase(folly::EventBase* evb);
+  void detachEventBase();
+
  private:
   ~AsyncStopTLS() override {
     // We guarantee that if `start()` was invoked, then the terminal callback
@@ -106,6 +109,7 @@ class AsyncStopTLS : public folly::DelayedDestruction,
 
   Callback* awaiter_{nullptr};
   fizz::AsyncFizzBase* transport_{nullptr};
+  std::chrono::milliseconds timeout_{0};
   std::unique_ptr<folly::AsyncTimeout> transactionTimeout_{nullptr};
 };
 

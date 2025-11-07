@@ -88,11 +88,11 @@ class t_java_deprecated_generator : public t_concat_generator {
   void generate_java_constructor(
       std::ofstream& out,
       const t_structured* tstruct,
-      const std::vector<t_field*>& fields);
+      const std::vector<const t_field*>& fields);
   void generate_java_constructor_using_builder(
       std::ofstream& out,
       const t_structured* tstruct,
-      const std::vector<t_field*>& fields,
+      const std::vector<const t_field*>& fields,
       uint32_t bitset_size,
       bool useDefaultConstructor);
   void generate_java_struct_definition(

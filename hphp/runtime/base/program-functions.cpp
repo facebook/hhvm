@@ -79,6 +79,7 @@
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/runtime-compiler.h"
+#include "hphp/runtime/vm/source-location.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/unit-parser.h"
 
@@ -1541,10 +1542,11 @@ std::vector<int> get_executable_lines(const Unit* compiled) {
     }();
     auto end = pc + endOff;
 
+    auto const lineTable = func->getOrLoadLineTableCopy();
     while (pc < end) {
       auto op = peek_op(pc);
       if (CodeCoverage::isCoverable(op)) {
-        auto line = func->getLineNumber(pc - start);
+        auto line = SourceLocation::getLineInfo(lineTable, pc - start).second;
         if (line > 0) {
           lines_set.insert(line);
         }

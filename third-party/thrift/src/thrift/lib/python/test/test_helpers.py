@@ -306,44 +306,6 @@ class AssertAlmostEqualTestNonThrift(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, "'hello' != 'world'"):
             assert_thrift_almost_equal(self, "hello", "world")
 
-
-@parameterized_class(
-    ("test_types",),
-    [
-        (immutable_test_types,),
-        (mutable_test_types,),
-    ],
-)
-class AssertThriftAlmostEqualTest(unittest.TestCase):
-    """Test suite for assert_thrift_almost_equal helper function."""
-
-    def setUp(self) -> None:
-        self.test_types: Any = self.test_types
-        self.is_mutable_run: bool = self.test_types.__name__.endswith(
-            "thrift_mutable_types"
-        )
-
-    def test_equal_structs_pass(self) -> None:
-        """Test that equal structs pass the assertion."""
-        struct1 = self.test_types.LatLon(lat=51.4769, lon=0.0005)
-        struct2 = self.test_types.LatLon(lat=51.4769, lon=0.0005)
-        assert_thrift_almost_equal(self, struct1, struct2)
-
-    def test_unequal_struct_types_fail_with_context(self) -> None:
-        """Test that structs of different types fail with proper context."""
-        struct1 = self.test_types.LatLon(lat=51.4769, lon=0.0005)
-        struct2 = self.test_types.numerical(int_val=42)
-        with self.assertRaisesRegex(AssertionError, r"LatLon\.__name__"):
-            assert_thrift_almost_equal(self, struct1, struct2)
-
-    def test_unequal_struct_fields_fail_with_field_context(self) -> None:
-        """Test that unequal struct fields fail and include full field path."""
-        struct1 = self.test_types.LatLon(lat=51.4769, lon=0.0005)
-        struct2 = self.test_types.LatLon(lat=51.4769, lon=0.0006)
-        # Should include both the parent context and field name
-        with self.assertRaisesRegex(AssertionError, r"LatLon\.lon"):
-            assert_thrift_almost_equal(self, struct1, struct2, places=5)
-
     def test_equal_lists_pass(self) -> None:
         """Test that equal lists pass the assertion."""
         list1 = [1.0, 2.0, 3.0]
@@ -403,6 +365,62 @@ class AssertThriftAlmostEqualTest(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, "set"):
             assert_thrift_almost_equal(self, set1, set2)
 
+    def test_places_kwarg_is_respected(self) -> None:
+        """Test that the places= kwarg is properly passed to assertAlmostEqual."""
+        # With places=1, these should be equal
+        assert_thrift_almost_equal(self, 1.15, 1.14, places=1)
+
+        # With places=2, these should not be equal
+        with self.assertRaises(AssertionError):
+            assert_thrift_almost_equal(self, 1.15, 1.14, places=2)
+
+    def test_delta_kwarg_is_respected(self) -> None:
+        """Test that the delta= kwarg is properly passed to assertAlmostEqual."""
+        # With delta=0.1, these should be equal
+        assert_thrift_almost_equal(self, 1.15, 1.14, delta=0.1)
+
+        # With delta=0.001, these should not be equal
+        with self.assertRaises(AssertionError):
+            assert_thrift_almost_equal(self, 1.15, 1.14, delta=0.001)
+
+
+@parameterized_class(
+    ("test_types",),
+    [
+        (immutable_test_types,),
+        (mutable_test_types,),
+    ],
+)
+class AssertThriftAlmostEqualTest(unittest.TestCase):
+    """Test suite for assert_thrift_almost_equal helper function."""
+
+    def setUp(self) -> None:
+        self.test_types: Any = self.test_types
+        self.is_mutable_run: bool = self.test_types.__name__.endswith(
+            "thrift_mutable_types"
+        )
+
+    def test_equal_structs_pass(self) -> None:
+        """Test that equal structs pass the assertion."""
+        struct1 = self.test_types.LatLon(lat=51.4769, lon=0.0005)
+        struct2 = self.test_types.LatLon(lat=51.4769, lon=0.0005)
+        assert_thrift_almost_equal(self, struct1, struct2)
+
+    def test_unequal_struct_types_fail_with_context(self) -> None:
+        """Test that structs of different types fail with proper context."""
+        struct1 = self.test_types.LatLon(lat=51.4769, lon=0.0005)
+        struct2 = self.test_types.numerical(int_val=42)
+        with self.assertRaisesRegex(AssertionError, r"LatLon\.__name__"):
+            assert_thrift_almost_equal(self, struct1, struct2)
+
+    def test_unequal_struct_fields_fail_with_field_context(self) -> None:
+        """Test that unequal struct fields fail and include full field path."""
+        struct1 = self.test_types.LatLon(lat=51.4769, lon=0.0005)
+        struct2 = self.test_types.LatLon(lat=51.4769, lon=0.0006)
+        # Should include both the parent context and field name
+        with self.assertRaisesRegex(AssertionError, r"LatLon\.lon"):
+            assert_thrift_almost_equal(self, struct1, struct2, places=5)
+
     def test_equal_unions_pass(self) -> None:
         """Test that equal unions pass the assertion."""
         union1 = self.test_types.ComplexUnion(float_val=3.14)
@@ -429,23 +447,16 @@ class AssertThriftAlmostEqualTest(unittest.TestCase):
         struct2 = self.test_types.LatLon(lat=51.4769, lon=0.0005)
         assert_thrift_almost_equal(self, struct1, struct2, places=5)
 
-    def test_places_kwarg_is_respected(self) -> None:
-        """Test that the places= kwarg is properly passed to assertAlmostEqual."""
-        # With places=1, these should be equal
-        assert_thrift_almost_equal(self, 1.15, 1.14, places=1)
+    def test_rel_tol_kwarg_is_respected(self) -> None:
+        """Test that the rel_tol= kwarg is properly passed to assertAlmostEqual."""
+        # With rel_tol=1e-6, these values should be equal (relative difference is ~1e-9)
+        struct1 = self.test_types.LatLon(lat=1000000.0, lon=2000000.0)
+        struct2 = self.test_types.LatLon(lat=1000000.001, lon=2000000.002)
+        assert_thrift_almost_equal(self, struct1, struct2, rel_tol=1e-6)
 
-        # With places=2, these should not be equal
+        # With rel_tol=1e-9, these should not be equal (relative difference is ~1e-9)
         with self.assertRaises(AssertionError):
-            assert_thrift_almost_equal(self, 1.15, 1.14, places=2)
-
-    def test_delta_kwarg_is_respected(self) -> None:
-        """Test that the delta= kwarg is properly passed to assertAlmostEqual."""
-        # With delta=0.1, these should be equal
-        assert_thrift_almost_equal(self, 1.15, 1.14, delta=0.1)
-
-        # With delta=0.001, these should not be equal
-        with self.assertRaises(AssertionError):
-            assert_thrift_almost_equal(self, 1.15, 1.14, delta=0.001)
+            assert_thrift_almost_equal(self, struct1, struct2, rel_tol=1e-9)
 
     def test_deeply_nested_structure_with_context(self) -> None:
         """Test that deeply nested structures provide full context path on failure."""

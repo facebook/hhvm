@@ -14,6 +14,7 @@
 
 from collections.abc import Iterable, Mapping, Set as abcSet, Sequence
 from enum import IntEnum
+from math import isclose
 
 from thrift.py3.types import Struct as py3_Struct
 from thrift.py3.exceptions import GeneratedError as py3_GeneratedError
@@ -117,6 +118,7 @@ def assert_thrift_almost_equal(unittest, result, expected, str field_context=Non
             - result, expected: objects to compare
             - field_context: a context string to indicate where the discrepancy occurred
             - **almost_equal_kwargs: kwargs passed to unittest.assertAlmostEqual 
+                NOTE: if `rel_tol` kwarg passed, will use `math.isclose` with `rel_tol` kwarg
 
         Return: None
 
@@ -127,12 +129,23 @@ def assert_thrift_almost_equal(unittest, result, expected, str field_context=Non
 
     """
     if isinstance(result, float) or isinstance(expected, float):
-        unittest.assertAlmostEqual(
-            result,
-            expected,
-            msg=field_context,
-            **almost_equal_kwargs,
-        )
+        rel_tol = almost_equal_kwargs.get('rel_tol', None)
+        if rel_tol:
+            unittest.assertTrue(
+                isclose(
+                    result,
+                    expected,
+                    rel_tol=rel_tol
+                ),
+                msg=field_context + "; result {result} is not close to expected {expected} with rel_tol {rel_tol}"
+            )
+        else:
+            unittest.assertAlmostEqual(
+                result,
+                expected,
+                msg=field_context,
+                **almost_equal_kwargs,
+            )
         return
     # fast path for common scalar types
     if isinstance(result, (Enum, int, str, bytes)):

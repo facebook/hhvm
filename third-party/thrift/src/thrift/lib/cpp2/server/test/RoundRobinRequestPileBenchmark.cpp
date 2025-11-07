@@ -19,6 +19,7 @@
 #include <folly/Benchmark.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/init/Init.h>
+#include <folly/system/HardwareConcurrency.h>
 
 #include <thrift/lib/cpp2/server/RoundRobinRequestPile.h>
 #include <thrift/lib/cpp2/server/test/RequestPileTestUtils.h>
@@ -37,7 +38,7 @@ BENCHMARK(DefaultPerf) {
       {1}, RequestPileTestUtils::makePileSelectionFunction());
   RoundRobinRequestPile pile(opts);
 
-  auto numThreads = std::thread::hardware_concurrency();
+  auto numThreads = folly::hardware_concurrency();
   unsigned numRoundEachWorker = 10'000;
 
   folly::CPUThreadPoolExecutor producer(numThreads);
@@ -83,7 +84,7 @@ BENCHMARK(RoundRobinBehavior) {
 
   unsigned numBuckets = 100;
   unsigned numRoundsPerWorker = 100;
-  auto numThreads = std::thread::hardware_concurrency();
+  auto numThreads = folly::hardware_concurrency();
 
   // single bucket, unlimited request pile, with control on
   RoundRobinRequestPile::Options opts(

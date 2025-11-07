@@ -44,6 +44,7 @@
 #include <folly/synchronization/LifoSem.h>
 #include <folly/synchronization/RelaxedAtomic.h>
 #include <folly/synchronization/SmallLocks.h>
+#include <folly/system/HardwareConcurrency.h>
 #include <folly/tracing/StaticTracepoint.h>
 
 FOLLY_GFLAGS_DEFINE_bool(
@@ -1490,7 +1491,7 @@ ThreadManagerExecutorAdapter::ThreadManagerExecutorAdapter(
     auto& executor = executors[i];
     if (!executor) {
       auto tm = ThreadManager::newSimpleThreadManager(
-          i == PRIORITY::NORMAL ? std::thread::hardware_concurrency() : 2);
+          i == PRIORITY::NORMAL ? folly::hardware_concurrency() : 2);
       executor = tm;
       for (int j = 0; j < N_SOURCES; j++) {
         executors_[idxFromPriSrc(i, j)] =

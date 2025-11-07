@@ -43,6 +43,7 @@
 #include <folly/executors/thread_factory/PriorityThreadFactory.h>
 #include <folly/io/GlobalShutdownSocketSet.h>
 #include <folly/portability/Sockets.h>
+#include <folly/system/HardwareConcurrency.h>
 #include <folly/system/Pid.h>
 #include <thrift/lib/cpp/concurrency/InitThreadFactory.h>
 #include <thrift/lib/cpp/concurrency/PosixThreadFactory.h>
@@ -1376,9 +1377,8 @@ void ThriftServer::ensureResourcePools() {
       if (!executor) {
         // If no executor provided for this priority create one.
         executor = std::make_shared<folly::CPUThreadPoolExecutor>(
-            i == concurrency::PRIORITY::NORMAL
-                ? std::thread::hardware_concurrency()
-                : 2,
+            i == concurrency::PRIORITY::NORMAL ? folly::hardware_concurrency()
+                                               : 2,
             ResourcePool::kPreferredExecutorNumPriorities);
       }
       apache::thrift::RoundRobinRequestPile::Options options;

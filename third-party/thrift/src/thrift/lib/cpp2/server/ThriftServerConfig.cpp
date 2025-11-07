@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <folly/system/HardwareConcurrency.h>
 #include <thrift/lib/cpp2/server/ThriftServerConfig.h>
 
 THRIFT_FLAG_DEFINE_int64(server_default_socket_queue_timeout_ms, 100);
@@ -26,7 +27,7 @@ THRIFT_FLAG_DEFINE_bool(server_reject_header_connections, false);
 namespace apache::thrift {
 
 const size_t ThriftServerConfig::T_ASYNC_DEFAULT_WORKER_THREADS =
-    std::thread::hardware_concurrency();
+    folly::hardware_concurrency();
 
 std::string ThriftServerConfig::getCPUWorkerThreadName() const {
   return poolThreadName_.get();

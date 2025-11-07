@@ -408,19 +408,17 @@ string t_js_generator::render_const_value(
     }
   } else if (type->is<t_enum>()) {
     out << value->get_integer();
-  } else if (type->is<t_structured>()) {
+  } else if (const t_structured* structured = type->try_as<t_structured>()) {
     out << "new " << js_type_namespace(type->program()) << type->name() << "({"
         << endl;
     indent_up();
-    const vector<t_field*>& fields = ((t_struct*)type)->get_members();
-    vector<t_field*>::const_iterator f_iter;
     const vector<pair<t_const_value*, t_const_value*>>& val = value->get_map();
     vector<pair<t_const_value*, t_const_value*>>::const_iterator v_iter;
     for (v_iter = val.begin(); v_iter != val.end(); ++v_iter) {
       const t_type* field_type = nullptr;
-      for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
-        if ((*f_iter)->name() == v_iter->first->get_string()) {
-          field_type = (*f_iter)->type().get_type();
+      for (const t_field& f_iter : structured->fields()) {
+        if (f_iter.name() == v_iter->first->get_string()) {
+          field_type = f_iter.type().get_type();
         }
       }
       if (field_type == nullptr) {
@@ -515,8 +513,7 @@ void t_js_generator::generate_js_struct_definition(
     bool is_exception,
     bool is_exported,
     const std::string& name_prefix) {
-  const vector<t_field*>& members = tstruct->get_members();
-  vector<t_field*>::const_iterator m_iter;
+  const node_list_view<const t_field> members = tstruct->fields();
   std::string name = name_prefix + tstruct->name();
   indent_up();
 
@@ -540,13 +537,13 @@ void t_js_generator::generate_js_struct_definition(
   }
 
   // members with arguments
-  for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
-    string dval = declare_field(*m_iter, false, true);
-    const t_type* t = (*m_iter)->type()->get_true_type();
-    if ((*m_iter)->default_value() != nullptr && !(t->is<t_structured>())) {
-      dval = render_const_value(
-          (*m_iter)->type().get_type(), (*m_iter)->default_value());
-      out << indent() << "this." << (*m_iter)->name() << " = " << dval << ";"
+  for (const t_field& m_iter : members) {
+    string dval = declare_field(&m_iter, false, true);
+    const t_type* t = m_iter.type()->get_true_type();
+    if (m_iter.default_value() != nullptr && !t->is<t_structured>()) {
+      dval =
+          render_const_value(m_iter.type().get_type(), m_iter.default_value());
+      out << indent() << "this." << m_iter.name() << " = " << dval << ";"
           << endl;
     } else {
       out << indent() << dval << ";" << endl;
@@ -555,23 +552,23 @@ void t_js_generator::generate_js_struct_definition(
 
   // Generate constructor from array
   if (members.size() > 0) {
-    for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
-      const t_type* t = (*m_iter)->type()->get_true_type();
-      if ((*m_iter)->default_value() != nullptr && (t->is<t_structured>())) {
-        indent(out) << "this." << (*m_iter)->name() << " = "
-                    << render_const_value(t, (*m_iter)->default_value()) << ";"
+    for (const t_field& m_iter : members) {
+      const t_type* t = m_iter.type()->get_true_type();
+      if (m_iter.default_value() != nullptr && t->is<t_structured>()) {
+        indent(out) << "this." << m_iter.name() << " = "
+                    << render_const_value(t, m_iter.default_value()) << ";"
                     << endl;
       }
     }
 
     // Early returns for exceptions
-    for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
-      const t_type* t = (*m_iter)->type()->get_true_type();
+    for (const t_field& m_iter : members) {
+      const t_type* t = m_iter.type()->get_true_type();
       if (t->is<t_exception>()) {
         out << indent() << "if (args instanceof "
             << js_type_namespace(t->program()) << t->name() << ") {" << endl
-            << indent() << indent() << "this." << (*m_iter)->name()
-            << " = args;" << endl
+            << indent() << indent() << "this." << m_iter.name() << " = args;"
+            << endl
             << indent() << indent() << "return;" << endl
             << indent() << "}" << endl;
       }
@@ -579,11 +576,11 @@ void t_js_generator::generate_js_struct_definition(
 
     out << indent() << "if (args) {" << endl;
 
-    for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
-      out << indent() << indent() << "if (args." << (*m_iter)->name()
+    for (const t_field& m_iter : members) {
+      out << indent() << indent() << "if (args." << m_iter.name()
           << " !== undefined) {" << endl
-          << indent() << indent() << indent() << "this." << (*m_iter)->name()
-          << " = args." << (*m_iter)->name() << ";" << endl
+          << indent() << indent() << indent() << "this." << m_iter.name()
+          << " = args." << m_iter.name() << ";" << endl
           << indent() << indent() << "}" << endl;
     }
 
@@ -612,9 +609,7 @@ void t_js_generator::generate_js_struct_definition(
  */
 void t_js_generator::generate_js_struct_reader(
     ofstream& out, const t_structured* tstruct, const std::string& name) {
-  const vector<t_field*>& fields = tstruct->get_members();
-  vector<t_field*>::const_iterator f_iter;
-
+  const node_list_view<const t_field> fields = tstruct->fields();
   out << js_namespace(tstruct->program()) << name
       << ".prototype.read = function(input) {" << endl;
 
@@ -645,14 +640,13 @@ void t_js_generator::generate_js_struct_reader(
     scope_up(out);
 
     // Generate deserialization code for known cases
-    for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
-      indent(out) << "case " << (*f_iter)->id() << ":" << endl;
-      indent(out) << "if (ftype == "
-                  << type_to_enum((*f_iter)->type().get_type()) << ") {"
-                  << endl;
+    for (const t_field& f_iter : fields) {
+      indent(out) << "case " << f_iter.id() << ":" << endl;
+      indent(out) << "if (ftype == " << type_to_enum(f_iter.type().get_type())
+                  << ") {" << endl;
 
       indent_up();
-      generate_deserialize_field(out, *f_iter, "this.");
+      generate_deserialize_field(out, &f_iter, "this.");
       indent_down();
 
       indent(out) << "} else {" << endl;
@@ -693,9 +687,6 @@ void t_js_generator::generate_js_struct_reader(
  */
 void t_js_generator::generate_js_struct_writer(
     ofstream& out, const t_structured* tstruct, const std::string& name) {
-  const vector<t_field*>& fields = tstruct->get_members();
-  vector<t_field*>::const_iterator f_iter;
-
   out << js_namespace(tstruct->program()) << name
       << ".prototype.write = function(output) {" << endl;
 
@@ -703,17 +694,17 @@ void t_js_generator::generate_js_struct_writer(
 
   indent(out) << "output.writeStructBegin('" << name << "');" << endl;
 
-  for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
-    out << indent() << "if (this." << (*f_iter)->name() << " !== null && this."
-        << (*f_iter)->name() << " !== undefined) {" << endl;
+  for (const t_field& f_iter : tstruct->fields()) {
+    out << indent() << "if (this." << f_iter.name() << " !== null && this."
+        << f_iter.name() << " !== undefined) {" << endl;
     indent_up();
 
-    indent(out) << "output.writeFieldBegin(" << "'" << (*f_iter)->name()
-                << "', " << type_to_enum((*f_iter)->type().get_type()) << ", "
-                << (*f_iter)->id() << ");" << endl;
+    indent(out) << "output.writeFieldBegin(" << "'" << f_iter.name() << "', "
+                << type_to_enum(f_iter.type().get_type()) << ", " << f_iter.id()
+                << ");" << endl;
 
     // Write field contents
-    generate_serialize_field(out, *f_iter, "this.");
+    generate_serialize_field(out, &f_iter, "this.");
 
     indent(out) << "output.writeFieldEnd();" << endl;
 
@@ -855,19 +846,16 @@ void t_js_generator::generate_process_function(
 
   // Generate the function call
   const t_paramlist& arg_struct = tfunction->params();
-  const std::vector<t_field*>& fields = arg_struct.get_members();
-  vector<t_field*>::const_iterator f_iter;
-
   f_service_ << indent() << "this._handler." << tfunction->name() << "(";
 
   bool first = true;
-  for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
+  for (const t_field& f_iter : arg_struct.fields()) {
     if (first) {
       first = false;
     } else {
       f_service_ << ", ";
     }
-    f_service_ << "args." << (*f_iter)->name();
+    f_service_ << "args." << f_iter.name();
   }
 
   // Shortcut out here for oneway functions
@@ -1000,7 +988,6 @@ void t_js_generator::generate_service_client(const t_service* tservice) {
   // Generate client method implementations
   for (const t_function& func : tservice->functions()) {
     const t_paramlist& arg_struct = func.params();
-    const vector<t_field*>& fields = arg_struct.get_members();
     string funname = func.name();
     string arglist = argument_list(arg_struct);
 
@@ -1077,9 +1064,9 @@ void t_js_generator::generate_service_client(const t_service* tservice) {
 
     f_service_ << indent() << "var args = new " << argsname << "();" << endl;
 
-    for (const t_field* field : fields) {
-      f_service_ << indent() << "args." << field->name() << " = "
-                 << field->name() << ";" << endl;
+    for (const t_field& field : arg_struct.fields()) {
+      f_service_ << indent() << "args." << field.name() << " = " << field.name()
+                 << ";" << endl;
     }
 
     // Write to the stream
@@ -1687,16 +1674,15 @@ string t_js_generator::argument_list(
     const t_paramlist& tparamlist, bool include_callback) {
   string result;
 
-  const vector<t_field*>& fields = tparamlist.get_members();
-  vector<t_field*>::const_iterator f_iter;
+  const node_list_view<const t_field> fields = tparamlist.fields();
   bool first = true;
-  for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
+  for (const t_field& f_iter : fields) {
     if (first) {
       first = false;
     } else {
       result += ", ";
     }
-    result += (*f_iter)->name();
+    result += f_iter.name();
   }
 
   if (include_callback) {

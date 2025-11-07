@@ -878,6 +878,7 @@ FunctionNode SchemaIndex::createFunction(
       *function.name(),
       std::move(params),
       collectExceptions(*function.exceptions()),
+      *function.qualifier(),
       *function.isPerforms());
 }
 

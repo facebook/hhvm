@@ -466,7 +466,7 @@ TEST_F(ServiceSchemaTest, Service) {
   const ServiceNode& s = testService->asService();
   EXPECT_EQ(s.baseService(), nullptr);
 
-  EXPECT_EQ(s.functions().size(), 5);
+  EXPECT_EQ(s.functions().size(), 6);
 
   EXPECT_EQ(s.functions()[0].name(), "foo");
   EXPECT_EQ(
@@ -479,6 +479,7 @@ TEST_F(ServiceSchemaTest, Service) {
   EXPECT_EQ(s.functions()[0].params()[0].id(), FieldId{1});
   EXPECT_EQ(s.functions()[0].params()[0].name(), "input");
   EXPECT_EQ(s.functions()[0].params()[0].type(), TypeRef::of(Primitive::I32));
+  EXPECT_EQ(s.functions()[0].qualifier(), type::FunctionQualifier::Unspecified);
   EXPECT_FALSE(s.functions()[0].isPerforms());
 
   const InteractionNode& i =
@@ -489,6 +490,7 @@ TEST_F(ServiceSchemaTest, Service) {
   EXPECT_EQ(s.functions()[1].response().sink(), nullptr);
   EXPECT_EQ(s.functions()[1].response().stream(), nullptr);
   EXPECT_EQ(s.functions()[1].response().interaction(), &i);
+  EXPECT_EQ(s.functions()[1].qualifier(), type::FunctionQualifier::Unspecified);
   EXPECT_FALSE(s.functions()[1].isPerforms());
 
   EXPECT_EQ(s.functions()[2].name(), "createStream");
@@ -496,6 +498,7 @@ TEST_F(ServiceSchemaTest, Service) {
   EXPECT_EQ(
       s.functions()[2].response().stream()->payloadType(),
       TypeRef::of(Primitive::I32));
+  EXPECT_EQ(s.functions()[2].qualifier(), type::FunctionQualifier::Unspecified);
   EXPECT_FALSE(s.functions()[2].isPerforms());
 
   EXPECT_EQ(s.functions()[3].name(), "createInteractionAndStream");
@@ -505,6 +508,7 @@ TEST_F(ServiceSchemaTest, Service) {
       s.functions()[3].response().stream()->payloadType(),
       TypeRef::of(Primitive::I32));
   EXPECT_EQ(s.functions()[3].response().sink(), nullptr);
+  EXPECT_EQ(s.functions()[3].qualifier(), type::FunctionQualifier::Unspecified);
   EXPECT_FALSE(s.functions()[3].isPerforms());
 
   EXPECT_EQ(s.functions()[4].name(), "createTestInteraction");
@@ -512,7 +516,17 @@ TEST_F(ServiceSchemaTest, Service) {
   EXPECT_EQ(s.functions()[4].response().sink(), nullptr);
   EXPECT_EQ(s.functions()[4].response().stream(), nullptr);
   EXPECT_EQ(s.functions()[4].response().interaction(), &i);
+  EXPECT_EQ(s.functions()[4].qualifier(), type::FunctionQualifier::Unspecified);
   EXPECT_TRUE(s.functions()[4].isPerforms());
+
+  EXPECT_EQ(s.functions()[5].name(), "noReturn");
+  EXPECT_EQ(s.functions()[5].response().type(), nullptr);
+  EXPECT_EQ(s.functions()[5].response().sink(), nullptr);
+  EXPECT_EQ(s.functions()[5].response().stream(), nullptr);
+  EXPECT_EQ(s.functions()[5].response().interaction(), nullptr);
+  EXPECT_EQ(s.functions()[5].params().size(), 0);
+  EXPECT_EQ(s.functions()[5].qualifier(), type::FunctionQualifier::OneWay);
+  EXPECT_FALSE(s.functions()[5].isPerforms());
 
   folly::not_null<const DefinitionNode*> testService2 =
       program2.definitionsByName().at("TestService2");
@@ -574,10 +588,13 @@ TEST_F(ServiceSchemaTest, Service) {
       "      │     ├─ InteractionNode (name='TestInteraction')\n"
       "      │     ╰─ FunctionNode::Stream\n"
       "      │        ╰─ payloadType = I32\n"
-      "      ╰─ FunctionNode (name='createTestInteraction')\n"
+      "      ├─ FunctionNode (name='createTestInteraction')\n"
+      "      │  ╰─ FunctionNode::Response\n"
+      "      │     ├─ returnType = void\n"
+      "      │     ╰─ InteractionNode (name='TestInteraction')\n"
+      "      ╰─ FunctionNode (name='noReturn')\n"
       "         ╰─ FunctionNode::Response\n"
-      "            ├─ returnType = void\n"
-      "            ╰─ InteractionNode (name='TestInteraction')\n");
+      "            ╰─ returnType = void\n");
 }
 
 TEST_F(ServiceSchemaTest, Interaction) {

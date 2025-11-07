@@ -297,6 +297,7 @@ FunctionNode::FunctionNode(
     std::string_view name,
     std::vector<Param>&& params,
     std::vector<Exception>&& exceptions,
+    type::FunctionQualifier qualifier,
     bool isPerforms)
     : detail::WithResolver(resolver),
       detail::WithName(name),
@@ -305,6 +306,7 @@ FunctionNode::FunctionNode(
       response_(std::move(response)),
       params_(std::move(params)),
       exceptions_(std::move(exceptions)),
+      qualifier_(qualifier),
       isPerforms_(isPerforms) {}
 
 const RpcInterfaceNode& FunctionNode::parent() const {
@@ -317,6 +319,10 @@ folly::span<const FunctionNode::Exception> FunctionNode::exceptions() const {
 
 bool FunctionNode::isPerforms() const {
   return isPerforms_;
+}
+
+type::FunctionQualifier FunctionNode::qualifier() const {
+  return qualifier_;
 }
 
 const ServiceNode* FOLLY_NULLABLE ServiceNode::baseService() const {

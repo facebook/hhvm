@@ -1316,6 +1316,8 @@ class FunctionNode final : folly::MoveOnly,
    */
   bool isPerforms() const;
 
+  type::FunctionQualifier qualifier() const;
+
   FunctionNode(
       const detail::Resolver& resolver,
       const apache::thrift::type::DefinitionKey& parent,
@@ -1324,6 +1326,7 @@ class FunctionNode final : folly::MoveOnly,
       std::string_view name,
       std::vector<Param>&& params,
       std::vector<Exception>&& exceptions,
+      type::FunctionQualifier qualifier,
       bool isPerforms);
 
   void printTo(
@@ -1334,6 +1337,7 @@ class FunctionNode final : folly::MoveOnly,
   Response response_;
   std::vector<Param> params_;
   std::vector<Exception> exceptions_;
+  type::FunctionQualifier qualifier_;
   bool isPerforms_;
 };
 

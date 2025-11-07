@@ -234,6 +234,9 @@ def get_standard_immutable_default_value_for_type(
     type_info: AnyTypeInfo,
 ) -> _DefaultFieldValue: ...
 
+# applies 32-bit float rounding to a Python integer or float
+def round_float32(val: float | int) -> float: ...
+
 class _fbthrift_ResponseStreamResult(Struct, typing.Generic[TChunk]):
     success: typing.Final[TChunk]
 

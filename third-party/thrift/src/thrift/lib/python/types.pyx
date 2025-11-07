@@ -3019,6 +3019,19 @@ class Flag(Enum):
         return cls(res)
 
 
+def round_float32(double num):
+    return <float> num
+
+def _fbthrift_internal_DO_NOT_USE_get_List_typeinfo(List thrift_list):
+    return thrift_list._fbthrift_val_info
+
+def _fbthrift_internal_DO_NOT_USE_get_Set_typeinfo(Set thrift_set):
+    return thrift_set._fbthrift_val_info
+
+def _fbthrift_internal_DO_NOT_USE_get_Map_typeinfo(Map thrift_map):
+    return (thrift_map._fbthrift_key_info, thrift_map._fbthrift_val_info)
+
+
 @cython.auto_pickle(False)
 cdef class ServiceInterface:
     @staticmethod

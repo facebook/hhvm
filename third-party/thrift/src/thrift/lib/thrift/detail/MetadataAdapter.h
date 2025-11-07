@@ -51,6 +51,7 @@ class LimitedVector : public std::vector<T> {
   }
 
   decltype(auto) front() const = delete;
+  decltype(auto) back() const = delete;
 };
 
 } // namespace detail

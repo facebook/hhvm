@@ -845,23 +845,25 @@ end = struct
   end
 
   (* Find the first generic occurring in [ty] with a rank higher than [rank]  *)
-  let find_higher_rank_generic env subtype_env ty rank =
+  let check_rank env subtype_env ty rank =
     (* To avoid this potentially expensive check we record when the sub- or
        supertype _may_ contain a higher rank type parameter. *)
     if Subtype_env.get_check_rank subtype_env then
       let p ty =
         match get_node ty with
         | Tgeneric name -> Env.rank_of_tparam env name > rank
+        | Tvar tv -> Env.rank_of_tvar env tv > rank
         | _ -> false
       in
       let ty_opt = Typing_defs_core.find_locl_ty ty ~p in
       Option.map ty_opt ~f:(fun ty ->
           match deref ty with
-          | (r, Tgeneric name) -> (r, name)
+          | (r, Tgeneric name) -> (r, Some name)
+          | (r, Tvar _) -> (r, None)
           | _ ->
             (* We are guaranteed that if the result if [Some(...)] then the type
                is a [Tgeneric] so something is seriously wrong here *)
-            failwith "find_higher_rank_generic: unexpected type")
+            failwith "check_rank: unexpected type")
     else
       None
 
@@ -1100,7 +1102,7 @@ end = struct
     | (r_sub, Tvar id) -> begin
       (* Ensure that higher-ranked type parameters don't escape their scope *)
       let tvar_rank = Env.rank_of_tvar env id in
-      match find_higher_rank_generic env subtype_env ty_super tvar_rank with
+      match check_rank env subtype_env ty_super tvar_rank with
       | Some (generic_reason, generic_name) ->
         let error =
           Typing_error.Secondary.Higher_rank_tparam_escape
@@ -1195,7 +1197,7 @@ end = struct
               tvar_pos = Typing_reason.to_pos r_super;
               pos_with_generic = Typing_reason.to_pos r_generic;
               generic_reason = r_generic;
-              generic_name = name_sub;
+              generic_name = Some name_sub;
             }
         in
         let fail = Subtype_env.fail_with_secondary_error subtype_env error in
@@ -3403,7 +3405,7 @@ end = struct
         (r_super, Tvar var_super_id) ) -> begin
       (* Ensure that higher-ranked type parameters don't escape their scope *)
       let tvar_rank = Env.rank_of_tvar env var_super_id in
-      match find_higher_rank_generic env subtype_env ty_sub tvar_rank with
+      match check_rank env subtype_env ty_sub tvar_rank with
       | Some (generic_reason, generic_name) ->
         let error =
           Typing_error.Secondary.Higher_rank_tparam_escape
@@ -4060,7 +4062,7 @@ end = struct
             tvar_pos = Typing_reason.to_pos r_sub;
             pos_with_generic = Typing_reason.to_pos r_super;
             generic_reason = r_super;
-            generic_name = tp_sup;
+            generic_name = Some tp_sup;
           }
       in
       let fail = Subtype_env.fail_with_secondary_error subtype_env error in
@@ -9034,7 +9036,7 @@ end = struct
               tvar_pos = Typing_reason.to_pos r_super;
               pos_with_generic = Typing_reason.to_pos r_generic;
               generic_reason = r_generic;
-              generic_name = nm;
+              generic_name = Some nm;
             }
         in
         let fail = Subtype_env.fail_with_secondary_error subtype_env error in

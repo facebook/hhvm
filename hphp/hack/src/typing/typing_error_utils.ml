@@ -6604,16 +6604,24 @@ end = struct
     create ~code:Error_code.EnumClassLabelUnknown ~reasons ()
 
   let higher_rank_tparam_escape
-      tvar_pos pos_with_generic generic_reason generic_name =
+      tvar_pos pos_with_generic generic_reason generic_name_opt =
     let reasons =
-      lazy
-        ((pos_with_generic, "Expected a first-class polymorphic function type.")
-         :: Typing_reason.to_string
-              (Format.sprintf
-                 "A higher rank generic `%s` will escape its scope"
-                 generic_name)
-              generic_reason
-        @ [(tvar_pos, "Please make this type explicit")])
+      match generic_name_opt with
+      | Some generic_name ->
+        let msg = "Expected a first-class polymorphic function type." in
+        let prefix =
+          Format.sprintf
+            "A higher rank generic `%s` will escape its scope"
+            generic_name
+        in
+        lazy
+          ((pos_with_generic, msg)
+           :: Typing_reason.to_string prefix generic_reason
+          @ [(tvar_pos, "Please make this type explicit")])
+      | _ ->
+        let msg = "A higher rank generic will escape its scope" in
+        let pos = Typing_reason.to_pos generic_reason in
+        lazy [(pos, msg); (tvar_pos, "Please make this type explicit")]
     in
     create ~code:Error_code.RigidTVarEscape ~reasons ()
 

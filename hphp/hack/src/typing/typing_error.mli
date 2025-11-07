@@ -1732,7 +1732,7 @@ and Secondary : sig
         tvar_pos: Pos_or_decl.t;
         pos_with_generic: Pos_or_decl.t;
         generic_reason: Typing_reason.t;
-        generic_name: string;
+        generic_name: string option;
       }
   [@@deriving show]
 end

@@ -215,6 +215,7 @@ struct NegotiationParameters {
   1: optional i64 compressionAlgos;
   2: optional bool useStopTLS;
   3: optional bool useStopTLSV2;
+  4: optional bool useStopTLSForTTLSTunnel;
 }
 
 // String type optimized for generated code

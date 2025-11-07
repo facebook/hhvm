@@ -35,6 +35,12 @@ class ThriftParametersContext {
 
   bool getUseStopTLSV2() const { return useStopTLSV2_; }
 
+  void setUseStopTLSForTTLSTunnel(bool useStopTLSForTTLSTunnel) {
+    useStopTLSForTTLSTunnel_ = useStopTLSForTTLSTunnel;
+  }
+
+  bool getUseStopTLSForTTLSTunnel() const { return useStopTLSForTTLSTunnel_; }
+
  private:
   static constexpr std::array<CompressionAlgorithm, 2>
       supportedCompressionAlgos_{{
@@ -43,5 +49,6 @@ class ThriftParametersContext {
       }};
   bool useStopTLS_{false};
   bool useStopTLSV2_{false};
+  bool useStopTLSForTTLSTunnel_{false};
 };
 } // namespace apache::thrift

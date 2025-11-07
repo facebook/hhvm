@@ -46,10 +46,15 @@ class ThriftParametersClientExtension : public fizz::ClientExtensions {
 
   bool getNegotiatedStopTLSV2() const { return negotiatedStopTLSV2_; }
 
+  bool getNegotiatedStopTLSForTTLSTunnel() const {
+    return negotiatedStopTLSForTTLSTunnel_;
+  }
+
  private:
   folly::Optional<CompressionAlgorithm> negotiatedThriftCompressionAlgo_;
   bool negotiatedStopTLS_{false};
   bool negotiatedStopTLSV2_{false}; // Added for StopTLS V2 support
+  bool negotiatedStopTLSForTTLSTunnel_{false};
   std::shared_ptr<ThriftParametersContext> context_;
 };
 } // namespace apache::thrift

@@ -131,45 +131,57 @@ TEST_P(ThriftParametersExtensionStopTLSTest, testServerExtensionStopTLSV2) {
   }
 }
 
-// This test verifies that both StopTLS and StopTLSV2 can be negotiated
-// independently
+// This test verifies that all StopTLS versions can be negotiated independently
 TEST_F(ThriftParametersExtensionStopTLSTest, testCombinedNegotiation) {
   // Test all combinations of StopTLS and StopTLSV2 support
   for (bool clientStopTLS : {false, true}) {
     for (bool clientStopTLSV2 : {false, true}) {
-      for (bool serverStopTLS : {false, true}) {
-        for (bool serverStopTLSV2 : {false, true}) {
-          // Set up client
-          auto context = std::make_shared<ThriftParametersContext>();
-          context->setUseStopTLS(clientStopTLS);
-          context->setUseStopTLSV2(clientStopTLSV2);
-          auto extensions =
-              std::make_shared<ThriftParametersClientExtension>(context);
+      for (bool clientStopTLSForTTLSTunnel : {false, true}) {
+        for (bool serverStopTLS : {false, true}) {
+          for (bool serverStopTLSV2 : {false, true}) {
+            for (bool serverStopTLSForTTLSTunnel : {false, true}) {
+              // Set up client
+              auto context = std::make_shared<ThriftParametersContext>();
+              context->setUseStopTLS(clientStopTLS);
+              context->setUseStopTLSV2(clientStopTLSV2);
+              context->setUseStopTLSForTTLSTunnel(clientStopTLSForTTLSTunnel);
+              auto extensions =
+                  std::make_shared<ThriftParametersClientExtension>(context);
 
-          // Set up server
-          std::vector<fizz::Extension> serverExtensions;
-          NegotiationParameters params;
-          if (serverStopTLS) {
-            params.useStopTLS() = true;
+              // Set up server
+              std::vector<fizz::Extension> serverExtensions;
+              NegotiationParameters params;
+              if (serverStopTLS) {
+                params.useStopTLS() = true;
+              }
+              if (serverStopTLSV2) {
+                params.useStopTLSV2() = true;
+              }
+              if (serverStopTLSForTTLSTunnel) {
+                params.useStopTLSForTTLSTunnel() = true;
+              }
+              ThriftParametersExt paramsExt;
+              paramsExt.params = params;
+              serverExtensions.push_back(encodeThriftExtension(paramsExt));
+
+              extensions->onEncryptedExtensions(serverExtensions);
+
+              // Check StopTLS negotiation
+              EXPECT_EQ(
+                  extensions->getNegotiatedStopTLS(),
+                  clientStopTLS && serverStopTLS);
+
+              // Check StopTLSV2 negotiation
+              EXPECT_EQ(
+                  extensions->getNegotiatedStopTLSV2(),
+                  clientStopTLSV2 && serverStopTLSV2);
+
+              // Check StopTLSForTTLSTunnel negotiation
+              EXPECT_EQ(
+                  extensions->getNegotiatedStopTLSForTTLSTunnel(),
+                  clientStopTLSForTTLSTunnel && serverStopTLSForTTLSTunnel);
+            }
           }
-          if (serverStopTLSV2) {
-            params.useStopTLSV2() = true;
-          }
-          ThriftParametersExt paramsExt;
-          paramsExt.params = params;
-          serverExtensions.push_back(encodeThriftExtension(paramsExt));
-
-          extensions->onEncryptedExtensions(serverExtensions);
-
-          // Check StopTLS negotiation
-          EXPECT_EQ(
-              extensions->getNegotiatedStopTLS(),
-              clientStopTLS && serverStopTLS);
-
-          // Check StopTLSV2 negotiation
-          EXPECT_EQ(
-              extensions->getNegotiatedStopTLSV2(),
-              clientStopTLSV2 && serverStopTLSV2);
         }
       }
     }
@@ -179,6 +191,5 @@ TEST_F(ThriftParametersExtensionStopTLSTest, testCombinedNegotiation) {
 INSTANTIATE_TEST_CASE_P(
     StopTLSNegotationTest,
     ThriftParametersExtensionStopTLSTest,
-    testing::Combine(
-        testing::Values(false, true), testing::Values(false, true)));
+    testing::Combine(testing::Bool(), testing::Bool()));
 } // namespace apache::thrift

@@ -45,6 +45,11 @@ class LimitedVector : public std::vector<T> {
     return std::vector<T>::at(idx);
   }
 
+  decltype(auto) operator[](std::size_t idx) const {
+    ensureInsideCython();
+    return std::vector<T>::operator[](idx);
+  }
+
   decltype(auto) front() const = delete;
 };
 

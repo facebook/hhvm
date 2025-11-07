@@ -269,6 +269,8 @@ class ThriftServerConfig {
   const ServerAttributeDynamic<std::chrono::milliseconds>&
   getMaxResponseWriteTime() const;
 
+  bool getResetConnCtxUserDataOnClose() const;
+
   /**
    * Indicate whether it is safe to modify the server config through setters.
    * This roughly corresponds to whether the IO thread pool could be servicing
@@ -619,6 +621,9 @@ class ThriftServerConfig {
           maxResponseWriteTime,
       AttributeSource source = AttributeSource::OVERRIDE);
 
+  void setResetConnCtxUserDataOnClose(
+      bool value, AttributeSource source = AttributeSource::OVERRIDE);
+
  private:
   friend class ThriftServer;
   template <typename T>
@@ -850,6 +855,8 @@ class ThriftServerConfig {
    */
   ServerAttributeDynamic<std::chrono::milliseconds> maxResponseWriteTime_{
       std::chrono::milliseconds::zero()};
+
+  ServerAttributeStatic<bool> resetConnCtxUserDataOnClose_{false};
 
   ServerAttributeStatic<folly::sorted_vector_set<std::string>>
       methodsBypassMaxRequestsLimit_{{}};

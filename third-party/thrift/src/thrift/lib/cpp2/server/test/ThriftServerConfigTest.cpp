@@ -42,3 +42,11 @@ TEST(ThriftServerConfigTest, UpdateConfigValueHavingDefault) {
   config.resetNumIOWorkerThreads(AttributeSource::BASELINE);
   EXPECT_EQ(config.getNumIOWorkerThreads(), 0);
 }
+
+TEST(ThriftServerConfigTest, ResetConnCtxUserDataOnClose) {
+  ThriftServerConfig config;
+  EXPECT_FALSE(config.getResetConnCtxUserDataOnClose());
+
+  config.setResetConnCtxUserDataOnClose(true);
+  EXPECT_TRUE(config.getResetConnCtxUserDataOnClose());
+}

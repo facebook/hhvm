@@ -57,7 +57,6 @@ const int64_t kRocketServerMinVersion = 8;
 
 THRIFT_FLAG_DEFINE_bool(rocket_server_legacy_protocol_key, true);
 THRIFT_FLAG_DEFINE_int64(rocket_server_max_version, kRocketServerMaxVersion);
-THRIFT_FLAG_DEFINE_bool(rocket_server_reset_connctx_userdata_on_close, false);
 
 namespace apache::thrift::rocket {
 
@@ -109,8 +108,9 @@ ThriftRocketServerHandler::ThriftRocketServerHandler(
                                 ->getThriftServerConfig()
                                 .getMaxResponseWriteTime()
                                 .get()),
-      resetConnCtxUserDataOnClose_(
-          THRIFT_FLAG(rocket_server_reset_connctx_userdata_on_close)) {
+      resetConnCtxUserDataOnClose_(worker_->getServer()
+                                       ->getThriftServerConfig()
+                                       .getResetConnCtxUserDataOnClose()) {
   connContext_.setTransportType(Cpp2ConnContext::TransportType::ROCKET);
   for (const auto& handler : worker_->getServer()->getEventHandlersUnsafe()) {
     handler->newConnection(&connContext_);

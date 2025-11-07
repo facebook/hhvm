@@ -1825,6 +1825,11 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
         folly::observer::makeStaticObserver(std::optional{options}), source);
   }
 
+  void setResetConnCtxUserDataOnClose(
+      bool value, AttributeSource source = AttributeSource::OVERRIDE) {
+    thriftConfig_.setResetConnCtxUserDataOnClose(value, source);
+  }
+
   /**
    * Calls the twin function getTaskExpireTimeForRequest with the
    * clientQueueTimeoutMs and clientTimeoutMs fields retrieved from the THeader.

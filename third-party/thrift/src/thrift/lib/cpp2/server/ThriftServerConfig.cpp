@@ -195,6 +195,10 @@ ThriftServerConfig::getMaxResponseWriteTime() const {
   return maxResponseWriteTime_;
 }
 
+bool ThriftServerConfig::getResetConnCtxUserDataOnClose() const {
+  return resetConnCtxUserDataOnClose_.get();
+}
+
 const ServerAttributeDynamic<bool>& ThriftServerConfig::getEnableCodel() const {
   return enableCodel_;
 }
@@ -534,6 +538,11 @@ void ThriftServerConfig::setMaxResponseWriteTime_Deprecated(
         maxResponseWriteTime,
     AttributeSource source) {
   maxResponseWriteTime_.set(std::move(maxResponseWriteTime), source);
+}
+
+void ThriftServerConfig::setResetConnCtxUserDataOnClose(
+    bool value, AttributeSource source) {
+  setStaticAttribute(resetConnCtxUserDataOnClose_, std::move(value), source);
 }
 
 void ThriftServerConfig::setIngressMemoryLimit(

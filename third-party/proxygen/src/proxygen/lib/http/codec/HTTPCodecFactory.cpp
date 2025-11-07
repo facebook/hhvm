@@ -27,6 +27,10 @@ std::unique_ptr<HTTPCodec> HTTPCodecFactory::getCodec(
       codec->setStrictValidation(strictValidation);
       return codec;
     }
+    case CodecProtocol::HQ:
+    case CodecProtocol::HTTP_3:
+    case CodecProtocol::HTTP_BINARY:
+    case CodecProtocol::TUNNEL_LITE:
     default:
       LOG(FATAL) << "Unreachable";
   }

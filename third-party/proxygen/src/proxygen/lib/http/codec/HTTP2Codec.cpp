@@ -234,9 +234,14 @@ ErrorCode HTTP2Codec::parseFrame(folly::io::Cursor& cursor) {
       return parseCertificateRequest(cursor);
     case http2::FrameType::CERTIFICATE:
       return parseCertificate(cursor);
+    // The following frame types are defined in the enum but not handled here:
+    case http2::FrameType::PRIORITY:
+    case http2::FrameType::PADDING:
+    case http2::FrameType::CERTIFICATE_NEEDED:
+    case http2::FrameType::USE_CERTIFICATE:
     default:
       // Implementations MUST ignore and discard any frame that has a
-      // type that is unknown
+      // type that is unknown or unhandled
       break;
   }
 
@@ -882,6 +887,15 @@ ErrorCode HTTP2Codec::handleSettings(const std::deque<SettingPair>& settings) {
         break;
       case SettingsId::SETTINGS_HTTP_CERT_AUTH:
         break;
+      case SettingsId::H2_WT_MAX_SESSIONS:
+      case SettingsId::_HQ_QPACK_BLOCKED_STREAMS:
+      case SettingsId::_HQ_DATAGRAM:
+      case SettingsId::_HQ_DATAGRAM_DRAFT_8:
+      case SettingsId::_HQ_DATAGRAM_RFC:
+      case SettingsId::ENABLE_WEBTRANSPORT:
+      case SettingsId::H3_WT_MAX_SESSIONS:
+      case SettingsId::WT_INITIAL_MAX_DATA:
+        // These are not handled, fall through to default
       default:
         continue; // ignore unknown setting
     }
@@ -1569,6 +1583,9 @@ size_t HTTP2Codec::generateGoaway(folly::IOBufQueue& writeBuf,
       break;
     case ClosingState::CLOSED:
       LOG(FATAL) << "unreachable";
+      break;
+    default:
+      LOG(FATAL) << "unhandled state";
   }
 
   VLOG(4) << "Sending GOAWAY with last acknowledged stream=" << lastStream
@@ -1653,6 +1670,16 @@ size_t HTTP2Codec::generateSettings(folly::IOBufQueue& writeBuf) {
       case SettingsId::THRIFT_CHANNEL_ID:
       case SettingsId::THRIFT_CHANNEL_ID_DEPRECATED:
         break;
+      case SettingsId::SETTINGS_HTTP_CERT_AUTH:
+      case SettingsId::H2_WT_MAX_SESSIONS:
+      case SettingsId::_HQ_QPACK_BLOCKED_STREAMS:
+      case SettingsId::_HQ_DATAGRAM:
+      case SettingsId::_HQ_DATAGRAM_DRAFT_8:
+      case SettingsId::_HQ_DATAGRAM_RFC:
+      case SettingsId::ENABLE_WEBTRANSPORT:
+      case SettingsId::H3_WT_MAX_SESSIONS:
+      case SettingsId::WT_INITIAL_MAX_DATA:
+        // These are not handled, fall through to default
       default:
         LOG(ERROR) << "ignore unknown settingsId="
                    << std::underlying_type<SettingsId>::type(setting.id)

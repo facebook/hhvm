@@ -236,6 +236,22 @@ bool isValidFrameType(FrameType type) {
       case FrameType::CERTIFICATE_REQUEST:
       case FrameType::CERTIFICATE:
         return true;
+      // The following enums fall through to default (return false):
+      case FrameType::CERTIFICATE_NEEDED:
+      case FrameType::USE_CERTIFICATE:
+      case FrameType::DATA:
+      case FrameType::HEADERS:
+      case FrameType::PRIORITY:
+      case FrameType::RST_STREAM:
+      case FrameType::SETTINGS:
+      case FrameType::PUSH_PROMISE:
+      case FrameType::PING:
+      case FrameType::GOAWAY:
+      case FrameType::WINDOW_UPDATE:
+      case FrameType::CONTINUATION:
+      case FrameType::ALTSVC:
+      case FrameType::RFC9218_PRIORITY:
+      case FrameType::PADDING:
       default:
         return false;
     }
@@ -965,10 +981,20 @@ const char* getFrameTypeString(FrameType type) {
       return "CONTINUATION";
     case FrameType::ALTSVC:
       return "ALTSVC";
+    case FrameType::RFC9218_PRIORITY:
+      return "RFC9218_PRIORITY";
+    case FrameType::PADDING:
+      return "PADDING";
+    case FrameType::EX_HEADERS:
+      return "EX_HEADERS";
     case FrameType::CERTIFICATE_REQUEST:
       return "CERTIFICATE_REQUEST";
     case FrameType::CERTIFICATE:
       return "CERTIFICATE";
+    case FrameType::CERTIFICATE_NEEDED:
+      return "CERTIFICATE_NEEDED";
+    case FrameType::USE_CERTIFICATE:
+      return "USE_CERTIFICATE";
     default:
       // can happen when type was cast from uint8_t
       return "Unknown";

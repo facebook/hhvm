@@ -41,6 +41,9 @@ class StringTypeInfo:
 class IOBufTypeInfo:
     pass
 
+class Float32TypeInfo:
+    pass
+
 class FieldQualifier(enum.Enum):
     Unqualified: FieldQualifier = ...
     Optional: FieldQualifier = ...

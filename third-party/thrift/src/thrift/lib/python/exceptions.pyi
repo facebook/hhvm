@@ -102,7 +102,12 @@ class ProtocolError(LibraryError):
     type: ProtocolErrorType
     message: str
 
-class GeneratedError(Error, typing.Hashable, metaclass=GeneratedErrorMeta):
+class GeneratedError(
+    Error,
+    typing.Hashable,
+    typing.Iterable[typing.Tuple[str, typing.Any]],
+    metaclass=GeneratedErrorMeta,
+):
     def __hash__(self) -> int: ...
     @staticmethod
     def __get_thrift_uri__() -> typing.Optional[str]: ...

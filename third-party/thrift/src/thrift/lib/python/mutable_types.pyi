@@ -14,6 +14,7 @@
 
 # pyre-strict
 
+import enum
 import typing
 
 from thrift.python.exceptions import Error
@@ -43,6 +44,9 @@ class MutableStruct(
 
 class MutableUnion(MutableStructOrUnion, metaclass=MutableUnionMeta):
     def _to_python(self) -> Union: ...
+
+    fbthrift_current_value: object
+    fbthrift_current_field: enum.Enum
 
 MutableStructOrError = typing.Union[MutableStruct, MutableGeneratedError]
 

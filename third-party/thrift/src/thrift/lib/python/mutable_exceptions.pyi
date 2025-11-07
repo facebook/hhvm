@@ -14,7 +14,13 @@
 
 # pyre-strict
 
+import typing
+
 from thrift.python.exceptions import Error
 
-class MutableGeneratedError(Error, metaclass=MutableGeneratedErrorMeta): ...
+class MutableGeneratedError(
+    Error,
+    typing.Iterable[typing.Tuple[str, typing.Any]],
+    metaclass=MutableGeneratedErrorMeta,
+): ...
 class MutableGeneratedErrorMeta(type): ...

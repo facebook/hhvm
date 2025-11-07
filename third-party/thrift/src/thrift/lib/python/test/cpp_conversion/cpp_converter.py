@@ -105,15 +105,15 @@ class CppConverterEcho(unittest.TestCase):
         with self.assertRaises(UnicodeDecodeError):
             rt.strList
 
-        # Currently the conversion from internal data to python value happens
-        # for all key-value pairs in a map at access time.
-        # If we make this lazy, this step will pass, and the UnicodeDecodeError
-        # will be deferred until the corrupted fields are accessed, while the
-        # valid unicode fields will become accessible.
+        # Maps with string keys now pass internal dict directly
+        # Accessing the map field succeeds (no eager conversion)
+        map_s = s.strToStrMap
+        map_rt = rt.strToStrMap
+        # Iteration triggers conversion and raises on corrupted fields
         with self.assertRaises(UnicodeDecodeError):
-            s.strToStrMap
+            list(map_s.items())
         with self.assertRaises(UnicodeDecodeError):
-            rt.strToStrMap
+            list(map_rt.items())
 
     def test_type_error(self) -> None:
         with self.assertRaises(TypeError):

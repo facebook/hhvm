@@ -93,6 +93,9 @@ struct Maps {
   # @lint-ignore THRIFTCHECKS
   35: map<float, float> floatMap;
   8: map<string, string> stringMap;
+  10: map<i32, string> i32_string_map;
+  11: map<float, string> float_string_map;
+  12: map<double, string> double_string_map;
   97: map<binary, binary> binaryMap;
   93: map<IOBuf, IOBuf> iobufMap;
   # @lint-ignore THRIFTCHECKS

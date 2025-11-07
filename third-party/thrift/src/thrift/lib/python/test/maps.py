@@ -22,7 +22,7 @@ import unittest
 
 from collections.abc import ItemsView, KeysView, ValuesView
 
-from enum import Enum
+from enum import Enum, IntEnum
 from typing import Dict, Type, TypeVar
 
 import python_test.containers.thrift_mutable_types as mutable_containers_types
@@ -38,6 +38,7 @@ from parameterized import parameterized_class
 from python_test.containers.thrift_types import (
     Color as ColorType,
     Foo as FooType,
+    Maps as ImmutableMaps,
     Maps as MapsType,
 )
 from python_test.maps.thrift_types import (
@@ -381,6 +382,79 @@ class MapImmutablePythonTests(unittest.TestCase):
         self.assertEqual(cmap.colorMap.get(1), self.Color.blue)
         # pyre-ignore[6]: Intentional for test
         self.assertEqual(cmap.colorMap.get(2), None)
+
+    def test_lazy_map_str_str(self) -> None:
+        # map<str, str>
+        s = ImmutableMaps(stringMap={"1": "1", "2": "2", "3": "3"})
+
+        class StringEnum(str, Enum):
+            one = "1"
+            two = "2"
+
+        self.assertEqual(s.stringMap[StringEnum.one], "1")
+        self.assertEqual(s.stringMap["1"], "1")
+        self.assertEqual(s.stringMap[StringEnum.two], "2")
+        self.assertEqual(s.stringMap["2"], "2")
+        for key, value in s.stringMap.items():
+            self.assertIs(type(key), str)
+            self.assertIs(type(value), str)
+
+    def test_lazy_map_i32_str(self) -> None:
+        # map<i32, str>
+        s = ImmutableMaps(i32_string_map={1: "1", 2: "2", 3: "3"})
+
+        class MyIntEnum(IntEnum):
+            one = 1
+            two = 2
+
+        self.assertEqual(s.i32_string_map[MyIntEnum.one], "1")
+        self.assertEqual(s.i32_string_map[1], "1")
+        self.assertEqual(s.i32_string_map[MyIntEnum.two], "2")
+        self.assertEqual(s.i32_string_map[2], "2")
+
+        for key, value in s.i32_string_map.items():
+            self.assertIs(type(key), int)
+            self.assertIs(type(value), str)
+
+    def test_lazy_map_float_str(self) -> None:
+        # map<float, str>
+        s = ImmutableMaps(float_string_map={1.0: "1", 2.0: "2", 3.0: "3"})
+
+        class MyFloatType(float):
+            def __init__(self, value):
+                self.value = float(value)
+
+            def __float__(self):
+                return float(self.value)
+
+        self.assertEqual(s.float_string_map[MyFloatType(1.0)], "1")
+        self.assertEqual(s.float_string_map[1.0], "1")
+        self.assertEqual(s.float_string_map[MyFloatType(2.0)], "2")
+        self.assertEqual(s.float_string_map[2.0], "2")
+
+        for key, value in s.float_string_map.items():
+            self.assertIs(type(key), float)
+            self.assertIs(type(value), str)
+
+    def test_lazy_map_double_str(self) -> None:
+        # map<double, str>
+        s = ImmutableMaps(double_string_map={1.0: "1", 2.0: "2", 3.0: "3"})
+
+        class MyFloat(float):
+            def __init__(self, value):
+                self.value = float(value)
+
+            def __float__(self):
+                return float(self.value)
+
+        self.assertEqual(s.double_string_map[MyFloat(1.0)], "1")
+        self.assertEqual(s.double_string_map[1.0], "1")
+        self.assertEqual(s.double_string_map[MyFloat(2.0)], "2")
+        self.assertEqual(s.double_string_map[2.0], "2")
+
+        for key, value in s.double_string_map.items():
+            self.assertIs(type(key), float)
+            self.assertIs(type(value), str)
 
 
 # TODO: Collapse these two test cases into parameterized test above

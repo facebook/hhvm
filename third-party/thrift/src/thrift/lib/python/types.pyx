@@ -894,10 +894,23 @@ cdef class MapTypeInfo(TypeInfoBase):
         # Pass dict as MappingProxyType directly, no conversion needed.
         if to_map_elements_no_convert(self.key_info, self.val_info):
             inst._fbthrift_elements = types.MappingProxyType(value)
-        # Elements need conversion (e.g., structs, unions, containers):
-        # Convert internal dict values to proper Python types.
+            inst._fbthrift_needs_lazy_conversion = False
+            inst._fbthrift_internal_elements = None
+        # Keys don't need conversion (or are strings): Use lazy conversion to defer value conversion.
+        # Keys are int/float/etc or str (valid) or bytes (invalid). Conversion happens
+        # on first access that requires all elements.
+        # See Map docstring for operations triggering conversion.
+        elif (to_container_elements_no_convert(self.key_info) or
+                isinstance(self.key_info, StringTypeInfo)):
+            inst._fbthrift_elements = {}
+            inst._fbthrift_needs_lazy_conversion = True
+            inst._fbthrift_internal_elements = types.MappingProxyType(value)
+        # Keys need conversion (e.g., enums, structs, containers):
+        # Convert eagerly.
         else:
             inst._fbthrift_elements = self.to_python_from_values(value)
+            inst._fbthrift_needs_lazy_conversion = False
+            inst._fbthrift_internal_elements = None
 
         return inst
 
@@ -2488,9 +2501,29 @@ cdef class ImmutableInternalMap(dict):
 
 cdef class Map(Container):
     """
-    A immutable container used to represent a Thrift map. It has compatible
+    Immutable container used to represent a Thrift map. It has compatible
     API with a Python map but has additional API to interact with other Python
-    iterators
+    iterators.
+
+    Lazy Conversion:
+    Maps may use lazy conversion to defer type conversion of values until
+    accessed. This optimization applies when keys don't need conversion
+    (int, bool, float, bytes, iobuf, string). Note: string keys may be bytes
+    if deserialization encountered invalid Unicode.
+
+    Operations that convert only accessed elements (lazy-friendly):
+    - Element access: map[key] (converts only that value)
+    - Membership test: key in map (no conversion)
+    - Length: len(map) (no conversion)
+
+    Operations that trigger full conversion of all elements:
+    - Iteration: for k, v in map, map.keys(), map.values(), map.items()
+    - Hashing: hash(map)
+    - Comparison: map1 == map2
+    - String representation: str(map), repr(map), print(map)
+    - Serialization: pickle.dumps(map), map.__reduce__()
+
+    Once conversion succeeds, subsequent operations skip re-conversion.
     """
     def __init__(self, key_info, val_info, values):
         self._fbthrift_key_info = key_info
@@ -2499,12 +2532,17 @@ cdef class Map(Container):
             key_info.to_container_value(k): val_info.to_container_value(v)
             for k, v in values.items()
         }
+        self._fbthrift_needs_lazy_conversion = False
+        self._fbthrift_internal_elements = None
+
+    def __len__(Map self):
+        if self._fbthrift_needs_lazy_conversion:
+            return len(self._fbthrift_internal_elements)
+
+        return len(self._fbthrift_elements)
 
     def __hash__(self):
         return hash(tuple(self.items()))
-
-    def __len__(Map self):
-        return len(self._fbthrift_elements)
 
     def __eq__(Map self, other):
         if not isinstance(other, Mapping):
@@ -2527,24 +2565,33 @@ cdef class Map(Container):
         return (Map, (self._fbthrift_key_info, self._fbthrift_val_info, dict(self),))
 
     def __getitem__(Map self, object key):
-        return self._fbthrift_elements[key]
+        try:
+            return self._fbthrift_elements[key]
+        except KeyError:
+            if self._fbthrift_needs_lazy_conversion:
+                return self._fbthrift_lazy_getitem(key)
+            raise
 
     def __contains__(Map self, key):
         if key is None:
             return False
+
+        if self._fbthrift_needs_lazy_conversion:
+            return key in self._fbthrift_internal_elements
+
         return key in self._fbthrift_elements
 
     def __iter__(Map self):
-        return iter(self._fbthrift_elements)
+        return iter(self._fbthrift_get_elements())
 
     def keys(Map self):
-        return self._fbthrift_elements.keys()
+        return self._fbthrift_get_elements().keys()
 
     def values(Map self):
-        return self._fbthrift_elements.values()
+        return self._fbthrift_get_elements().values()
 
     def items(Map self):
-        return self._fbthrift_elements.items()
+        return self._fbthrift_get_elements().items()
 
     def get(Map self, key, default=None):
         try:
@@ -2557,6 +2604,65 @@ cdef class Map(Container):
             self._fbthrift_key_info.same_as(other_key_type) and
             self._fbthrift_val_info.same_as(other_val_type)
         )
+
+    cdef object _fbthrift_get_elements(Map self):
+        """
+        Get the internal dict, eagerly converting all lazy elements on first access.
+
+        For maps using lazy conversion, performs one-time conversion of all
+        key-value pairs on first call, then marks the map as converted. Non-lazy
+        maps skip conversion entirely.
+
+        After successful conversion, sets _fbthrift_needs_lazy_conversion=False
+        to prevent re-conversion on subsequent calls.
+
+        Raises:
+            UnicodeDecodeError: If the map contains any bytes keys/values (bad Unicode)
+        """
+        if not self._fbthrift_needs_lazy_conversion:
+            return self._fbthrift_elements
+
+        cdef TypeInfoBase key_type_info = self._fbthrift_key_info
+        cdef TypeInfoBase val_type_info = self._fbthrift_val_info
+
+        # Convert all lazy elements to Python values and we need to
+        # convert all elements from scratch to preserve the original insertion order
+        self._fbthrift_elements = {
+            key_type_info.to_python_value(key): val_type_info.to_python_value(value)
+            for key, value in self._fbthrift_internal_elements.items()
+        }
+
+        # Conversion succeeded, no need to convert again
+        self._fbthrift_internal_elements = None
+        self._fbthrift_needs_lazy_conversion = False
+        return self._fbthrift_elements
+
+    cdef _fbthrift_lazy_getitem(Map self, key):
+        """
+        Lazily converts a single map value when accessed by key.
+
+        Called by __getitem__ when key is not yet cached in _fbthrift_elements.
+        Looks up the value in _fbthrift_internal_elements, converts both key
+        and value to Python types, caches in _fbthrift_elements, and returns
+        the converted value.
+
+        Note: Key conversion is performed for consistency since users could use
+        keys with type that extends int, string or float (e.g., IntEnum) and
+        to_internal_data() will handle these cases, though keys requiring
+        conversion would not use lazy mode. String keys may raise UnicodeDecodeError
+        if they are bytes (failed to decode during deserialization).
+
+        Raises:
+            KeyError: If key is not in _fbthrift_internal_elements
+            UnicodeDecodeError: If key or value is bytes (bad Unicode)
+        """
+        cdef TypeInfoBase key_type_info = self._fbthrift_key_info
+        cdef TypeInfoBase val_type_info = self._fbthrift_val_info
+        value = self._fbthrift_internal_elements[key]
+        key = key_type_info.to_internal_data(key)
+        value = val_type_info.to_python_value(value)
+        self._fbthrift_elements[key] = value
+        return value
 
 tag_object_as_mapping(<PyTypeObject*>Map)
 Mapping.register(Map)

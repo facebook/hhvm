@@ -536,45 +536,107 @@ class SerializerTests(unittest.TestCase):
             list(set_field)
         # can't compare round-trip serialized set because ordering is random
 
-    def test_non_utf8_container_map_bad_key(self) -> None:
+    def test_non_utf8_container_map_unicode_error_bad_key(self) -> None:
         json_bytes = b'{"stringList":[],"stringSet":[],"stringMap":{"key":"val","\xc3\x28":"good"}}'
         s = self.serializer.deserialize(
             self.UnicodeContainers, json_bytes, Protocol.JSON
         )
-        if self.is_mutable_run:
-            # mutable thrift-python lazily converts elements when accessed
-            self.assertEqual(s.stringMap["key"], "val")
-            with self.assertRaises(UnicodeDecodeError):
-                # note items() returns a view, need to do something with it
-                list(s.stringMap.items())
-        else:
-            # immutable thrift-python eagerly converts all elements on field access
-            # when we implement lazy behavior, it will match mutable python behavior
-            with self.assertRaises(UnicodeDecodeError):
-                s.stringMap
+        # Both mutable and immutable thrift-python now pass internal
+        # dict directly for maps with string keys
+        # Accessing the map field succeeds (no eager conversion)
+        map_field = s.stringMap
+        # Accessing valid keys works
+        self.assertEqual(map_field["key"], "val")
+        # Iteration triggers conversion and raises on bad key
+        with self.assertRaises(UnicodeDecodeError):
+            list(map_field.items())
+        # validate it raises consistently
+        with self.assertRaises(UnicodeDecodeError):
+            list(map_field.items())
 
         round_trip_bytes = self.serializer.serialize(s, Protocol.JSON)
         self.assertEqual(json_bytes, round_trip_bytes)
 
-    def test_non_utf8_container_map_bad_val(self) -> None:
+    def test_non_utf8_container_map_unicode_error_bad_val(self) -> None:
         json_bytes = b'{"stringList":[],"stringSet":[],"stringMap":{"key":"val","good":"\xc3\x28"}}'
         s = self.serializer.deserialize(
             self.UnicodeContainers, json_bytes, Protocol.JSON
         )
-        if self.is_mutable_run:
-            # mutable thrift-python lazily converts elements when accessed
-            self.assertEqual(s.stringMap["key"], "val")
-            with self.assertRaises(UnicodeDecodeError):
-                # note items() returns a view, need to do something with it
-                s.stringMap["good"]
-        else:
-            # immutable thrift-python eagerly converts all elements on field access
-            # when we implement lazy behavior, it will match mutable python behavior
-            with self.assertRaises(UnicodeDecodeError):
-                s.stringMap
+        # Both mutable and immutable thrift-python now pass internal
+        # dict directly for maps with string keys
+        # Accessing the map field succeeds (no eager conversion)
+        map_field = s.stringMap
+        # Accessing valid keys works
+        self.assertEqual(map_field["key"], "val")
+        # Accessing the bad value triggers conversion and raises error
+        with self.assertRaises(UnicodeDecodeError):
+            map_field["good"]
+        # validate it raises consistently
+        with self.assertRaises(UnicodeDecodeError):
+            map_field["good"]
 
         round_trip_bytes = self.serializer.serialize(s, Protocol.JSON)
         self.assertEqual(json_bytes, round_trip_bytes)
+
+    def test_lazy_map_keyerror_non_existent_key(self) -> None:
+        """Test that accessing non-existent keys raises KeyError in lazy mode."""
+        json_bytes = b'{"stringList":[],"stringSet":[],"stringMap":{"key":"val","good":"\xc3\x28"}}'
+        s = self.serializer.deserialize(
+            self.UnicodeContainers, json_bytes, Protocol.JSON
+        )
+        map_field = s.stringMap
+        # Accessing non-existent key should raise KeyError even in lazy mode
+        with self.assertRaises(KeyError):
+            map_field["nonexistent"]
+        # Map should still be in lazy mode - accessing bad value should
+        # raise UnicodeDecodeError
+        with self.assertRaises(UnicodeDecodeError):
+            map_field["good"]
+
+    def test_lazy_map_membership_no_conversion(self) -> None:
+        """Test that membership operator works without triggering full conversion."""
+        json_bytes = b'{"stringList":[],"stringSet":[],"stringMap":{"key":"val","good":"\xc3\x28"}}'
+        s = self.serializer.deserialize(
+            self.UnicodeContainers, json_bytes, Protocol.JSON
+        )
+        map_field = s.stringMap
+        # Membership testing should work without triggering conversion
+        self.assertTrue("key" in map_field)
+        self.assertTrue("good" in map_field)
+        self.assertFalse("nonexistent" in map_field)
+        # Map should still be in lazy mode - iteration should still raise
+        with self.assertRaises(UnicodeDecodeError):
+            list(map_field.items())
+
+    def test_lazy_map_len_no_conversion(self) -> None:
+        """Test that len() works without triggering full conversion."""
+        json_bytes = b'{"stringList":[],"stringSet":[],"stringMap":{"key":"val","good":"\xc3\x28"}}'
+        s = self.serializer.deserialize(
+            self.UnicodeContainers, json_bytes, Protocol.JSON
+        )
+        map_field = s.stringMap
+        # len() should work without triggering conversion
+        self.assertEqual(len(map_field), 2)
+        # Map should still be in lazy mode - iteration should still raise
+        with self.assertRaises(UnicodeDecodeError):
+            list(map_field.items())
+
+    def test_lazy_map_get_with_default(self) -> None:
+        """Test that get() method works correctly in lazy mode."""
+        json_bytes = b'{"stringList":[],"stringSet":[],"stringMap":{"key":"val","good":"\xc3\x28"}}'
+        s = self.serializer.deserialize(
+            self.UnicodeContainers, json_bytes, Protocol.JSON
+        )
+        map_field = s.stringMap
+        # get() with existing key should work
+        self.assertEqual(map_field.get("key"), "val")
+        # get() with non-existent key should return None
+        self.assertIsNone(map_field.get("nonexistent"))
+        # get() with default should return default for non-existent key
+        self.assertEqual(map_field.get("nonexistent", "default"), "default")
+        # get() with bad value should raise UnicodeDecodeError
+        with self.assertRaises(UnicodeDecodeError):
+            map_field.get("good")
 
     # Test binary field is b64encoded in SimpleJSON protocol.
     def test_binary_serialization_simplejson(self) -> None:

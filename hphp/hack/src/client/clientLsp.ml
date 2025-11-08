@@ -3482,11 +3482,16 @@ let publish_and_report_after_recomputing_live_squiggles
           uris
     in
     let params = ide_diagnostics_to_lsp_diagnostics file_path diagnostics in
+    let activity_id =
+      match trigger with
+      | Initialize_trigger -> None
+      | Message_trigger { metadata; _ } -> Some metadata.activity_id
+    in
     let _ =
       (* Log diagnostics so we can track error lifetime *)
       Option.iter
         (Telemetry.of_json_opt (Lsp_fmt.print_diagnostics params))
-        ~f:HackEventLogger.Diagnostics.log
+        ~f:(HackEventLogger.Diagnostics.log ~activity_id)
     in
     let notification = PublishDiagnosticsNotification params in
     notify_jsonrpc ~powered_by:Serverless_ide notification;

@@ -112,6 +112,9 @@ service TestService {
   TestStruct foo(
     @TypedefToTestStructuredAnnotation{field1 = 4}
     1: i32 input,
+  ) throws (
+    @TypedefToTestStructuredAnnotation{field1 = 5}
+    1: TestException ex,
   );
   TestInteraction createInteraction();
   i32, stream<i32> createStream();

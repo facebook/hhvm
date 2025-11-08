@@ -483,6 +483,12 @@ TEST_F(ServiceSchemaTest, Service) {
   EXPECT_EQ(
       s.functions()[0].params()[0].annotations()[0].value()["field1"].asInt(),
       4);
+  EXPECT_EQ(s.functions()[0].exceptions().size(), 1);
+  EXPECT_EQ(s.functions()[0].exceptions()[0].id(), FieldId{1});
+  EXPECT_EQ(s.functions()[0].exceptions()[0].name(), "ex");
+  EXPECT_EQ(
+      s.functions()[0].exceptions()[0].type().asException().definition().name(),
+      "TestException");
   EXPECT_EQ(s.functions()[0].qualifier(), type::FunctionQualifier::Unspecified);
   EXPECT_FALSE(s.functions()[0].isPerforms());
 
@@ -558,9 +564,18 @@ TEST_F(ServiceSchemaTest, Service) {
       "      │  │           ├─ 'UNSET' → 0\n"
       "      │  │           ├─ 'VALUE_1' → 1\n"
       "      │  │           ╰─ 'VALUE_2' → 2\n"
-      "      │  ╰─ params\n"
-      "      │     ╰─ FunctionNode::Param (id=1, name='input')\n"
-      "      │        ╰─ type = I32\n"
+      "      │  ├─ params\n"
+      "      │  │  ╰─ FunctionNode::Param (id=1, name='input')\n"
+      "      │  │     ╰─ type = I32\n"
+      "      │  ╰─ exceptions\n"
+      "      │     ╰─ FunctionNode::Exception (id=1, name='ex')\n"
+      "      │        ╰─ type = ExceptionNode 'TestException'\n"
+      "      │           ├─ FieldNode (id=1, presence=UNQUALIFIED, name='blob')\n"
+      "      │           │  ╰─ type = BINARY\n"
+      "      │           ╰─ FieldNode (id=2, presence=UNQUALIFIED, name='s')\n"
+      "      │              ╰─ type = StructNode 'TestRecursiveStruct'\n"
+      "      │                 ╰─ FieldNode (id=1, presence=OPTIONAL, name='myself')\n"
+      "      │                    ╰─ type = StructNode 'TestRecursiveStruct'\n"
       "      ├─ FunctionNode (name='createInteraction')\n"
       "      │  ╰─ FunctionNode::Response\n"
       "      │     ├─ returnType = void\n"
@@ -572,15 +587,9 @@ TEST_F(ServiceSchemaTest, Service) {
       "      │              ├─ params\n"
       "      │              │  ╰─ FunctionNode::Param (id=1, name='input')\n"
       "      │              │     ╰─ type = StructNode 'TestRecursiveStruct'\n"
-      "      │              │        ╰─ FieldNode (id=1, presence=OPTIONAL, name='myself')\n"
-      "      │              │           ╰─ type = StructNode 'TestRecursiveStruct'\n"
       "      │              ╰─ exceptions\n"
       "      │                 ╰─ FunctionNode::Exception (id=1, name='ex')\n"
       "      │                    ╰─ type = ExceptionNode 'TestException'\n"
-      "      │                       ├─ FieldNode (id=1, presence=UNQUALIFIED, name='blob')\n"
-      "      │                       │  ╰─ type = BINARY\n"
-      "      │                       ╰─ FieldNode (id=2, presence=UNQUALIFIED, name='s')\n"
-      "      │                          ╰─ type = StructNode 'TestRecursiveStruct'\n"
       "      ├─ FunctionNode (name='createStream')\n"
       "      │  ╰─ FunctionNode::Response\n"
       "      │     ├─ returnType = I32\n"
@@ -663,7 +672,7 @@ void checkAnnotationsOnTestUnion(const UnionNode& node) {
   EXPECT_EQ(withUri.value().size(), 2);
   EXPECT_EQ(withUri.value()["field1"].asInt(), 3);
   EXPECT_TRUE(withUri.value()["field2"].isObject());
-  const auto& innerField = annotations[0].value()["field2"];
+  const auto& innerField = withUri.value()["field2"];
   EXPECT_EQ(innerField["field1"].asInt(), 4);
 
   auto& complex = findAnnotationOrThrow(annotations, "ComplexAnnotation");

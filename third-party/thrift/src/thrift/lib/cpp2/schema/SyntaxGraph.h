@@ -939,8 +939,10 @@ class FunctionException final
     : folly::MoveOnly,
       detail::WithResolver,
       detail::WithName,
+      detail::WithAnnotations,
       public detail::WithDebugPrinting<FunctionException> {
  public:
+  using detail::WithAnnotations::annotations;
   using detail::WithName::name;
   FieldId id() const { return id_; }
   TypeRef type() const;
@@ -949,9 +951,11 @@ class FunctionException final
       const detail::Resolver& resolver,
       FieldId id,
       std::string_view name,
-      folly::not_null_unique_ptr<TypeRef> type)
+      folly::not_null_unique_ptr<TypeRef> type,
+      std::vector<Annotation>&& annotations)
       : detail::WithResolver(resolver),
         detail::WithName(name),
+        detail::WithAnnotations(std::move(annotations)),
         id_(id),
         type_(std::move(type)) {}
 

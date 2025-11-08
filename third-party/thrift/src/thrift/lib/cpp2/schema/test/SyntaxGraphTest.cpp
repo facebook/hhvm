@@ -489,6 +489,14 @@ TEST_F(ServiceSchemaTest, Service) {
   EXPECT_EQ(
       s.functions()[0].exceptions()[0].type().asException().definition().name(),
       "TestException");
+  EXPECT_EQ(s.functions()[0].exceptions()[0].annotations().size(), 1);
+  EXPECT_EQ(
+      s.functions()[0]
+          .exceptions()[0]
+          .annotations()[0]
+          .value()["field1"]
+          .asInt(),
+      5);
   EXPECT_EQ(s.functions()[0].qualifier(), type::FunctionQualifier::Unspecified);
   EXPECT_FALSE(s.functions()[0].isPerforms());
 

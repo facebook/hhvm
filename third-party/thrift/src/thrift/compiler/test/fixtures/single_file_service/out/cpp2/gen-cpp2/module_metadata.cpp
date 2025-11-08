@@ -80,7 +80,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::A>>::gen_foo([[may
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   [[maybe_unused]] std::size_t exceptionIndex = 0;
-  func.is_oneway() = false;
+  DCHECK_EQ(*func.is_oneway(), false);
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::A>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -125,7 +125,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen_bar([[may
   auto module_B_bar_foo_1_type = std::make_unique<Struct<::cpp2::Foo>>("module.Foo");
   module_B_bar_foo_1_type->writeAndGenType(*module_B_bar_foo_1.type(), metadata);
   [[maybe_unused]] std::size_t exceptionIndex = 0;
-  func.is_oneway() = false;
+  DCHECK_EQ(*func.is_oneway(), false);
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen_stream_stuff([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -134,7 +134,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen_stream_st
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   [[maybe_unused]] std::size_t exceptionIndex = 0;
-  func.is_oneway() = false;
+  DCHECK_EQ(*func.is_oneway(), false);
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen_sink_stuff([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -143,7 +143,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen_sink_stuf
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   [[maybe_unused]] std::size_t exceptionIndex = 0;
-  func.is_oneway() = false;
+  DCHECK_EQ(*func.is_oneway(), false);
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {

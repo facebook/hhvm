@@ -75,7 +75,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::namespace_from_pac
   auto module_TestService_init_int1_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_TestService_init_int1_1_type->writeAndGenType(*module_TestService_init_int1_1.type(), metadata);
   [[maybe_unused]] std::size_t exceptionIndex = 0;
-  func.is_oneway() = false;
+  DCHECK_EQ(*func.is_oneway(), false);
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::test::namespace_from_package_without_module_name::TestService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {

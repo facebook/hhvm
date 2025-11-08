@@ -50,7 +50,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_q
   auto service_MyService_query_i_2_type = std::make_unique<Struct<::cpp2::Included>>("includes.Included");
   service_MyService_query_i_2_type->writeAndGenType(*service_MyService_query_i_2.type(), metadata);
   [[maybe_unused]] std::size_t exceptionIndex = 0;
-  func.is_oneway() = false;
+  DCHECK_EQ(*func.is_oneway(), false);
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_has_arg_docs([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -69,7 +69,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_h
   auto service_MyService_has_arg_docs_i_2_type = std::make_unique<Struct<::cpp2::Included>>("includes.Included");
   service_MyService_has_arg_docs_i_2_type->writeAndGenType(*service_MyService_has_arg_docs_i_2.type(), metadata);
   [[maybe_unused]] std::size_t exceptionIndex = 0;
-  func.is_oneway() = false;
+  DCHECK_EQ(*func.is_oneway(), false);
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {

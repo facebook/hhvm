@@ -375,7 +375,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Raiser>>::gen_doBl
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   [[maybe_unused]] std::size_t exceptionIndex = 0;
-  func.is_oneway() = false;
+  DCHECK_EQ(*func.is_oneway(), false);
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Raiser>>::gen_doRaise([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -402,7 +402,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Raiser>>::gen_doRa
   auto module_Raiser_doRaise_s_3_type = std::make_unique<Struct<::cpp2::Serious>>("module.Serious");
   module_Raiser_doRaise_s_3_type->writeAndGenType(*module_Raiser_doRaise_s_3.type(), metadata);
   ExceptionMetadata<::cpp2::Serious>::gen(metadata);
-  func.is_oneway() = false;
+  DCHECK_EQ(*func.is_oneway(), false);
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Raiser>>::gen_get200([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -411,7 +411,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Raiser>>::gen_get2
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   [[maybe_unused]] std::size_t exceptionIndex = 0;
-  func.is_oneway() = false;
+  DCHECK_EQ(*func.is_oneway(), false);
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Raiser>>::gen_get500([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -438,7 +438,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Raiser>>::gen_get5
   auto module_Raiser_get500_s_3_type = std::make_unique<Struct<::cpp2::Serious>>("module.Serious");
   module_Raiser_get500_s_3_type->writeAndGenType(*module_Raiser_get500_s_3.type(), metadata);
   ExceptionMetadata<::cpp2::Serious>::gen(metadata);
-  func.is_oneway() = false;
+  DCHECK_EQ(*func.is_oneway(), false);
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Raiser>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {

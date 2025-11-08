@@ -70,7 +70,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   [[maybe_unused]] std::size_t exceptionIndex = 0;
-  func.is_oneway() = false;
+  DCHECK_EQ(*func.is_oneway(), false);
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_throws_function([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -91,7 +91,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService
   auto extra_services_ExtraService_throws_function_aex_2_type = std::make_unique<Struct<::some::valid::ns::AnotherException>>("module.AnotherException");
   extra_services_ExtraService_throws_function_aex_2_type->writeAndGenType(*extra_services_ExtraService_throws_function_aex_2.type(), metadata);
   ExceptionMetadata<::some::valid::ns::AnotherException>::gen(metadata);
-  func.is_oneway() = false;
+  DCHECK_EQ(*func.is_oneway(), false);
   func.structured_annotations()->push_back(*cvStruct("cpp.ProcessInEbThreadUnsafe", {  }).cv_struct());
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_throws_function2([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -118,7 +118,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService
   auto extra_services_ExtraService_throws_function2_aex_2_type = std::make_unique<Struct<::some::valid::ns::AnotherException>>("module.AnotherException");
   extra_services_ExtraService_throws_function2_aex_2_type->writeAndGenType(*extra_services_ExtraService_throws_function2_aex_2.type(), metadata);
   ExceptionMetadata<::some::valid::ns::AnotherException>::gen(metadata);
-  func.is_oneway() = false;
+  DCHECK_EQ(*func.is_oneway(), false);
   func.structured_annotations()->push_back(*cvStruct("thrift.Priority", { {"level", cvInteger(1) } }).cv_struct());
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_throws_function3([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -150,7 +150,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService
   auto extra_services_ExtraService_throws_function3_aex_5_type = std::make_unique<Struct<::some::valid::ns::AnotherException>>("module.AnotherException");
   extra_services_ExtraService_throws_function3_aex_5_type->writeAndGenType(*extra_services_ExtraService_throws_function3_aex_5.type(), metadata);
   ExceptionMetadata<::some::valid::ns::AnotherException>::gen(metadata);
-  func.is_oneway() = false;
+  DCHECK_EQ(*func.is_oneway(), false);
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_oneway_void_ret([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -159,7 +159,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   [[maybe_unused]] std::size_t exceptionIndex = 0;
-  func.is_oneway() = true;
+  DCHECK_EQ(*func.is_oneway(), true);
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_oneway_void_ret_i32_i32_i32_i32_i32_param([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -193,7 +193,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService
   auto extra_services_ExtraService_oneway_void_ret_i32_i32_i32_i32_i32_param_param5_5_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   extra_services_ExtraService_oneway_void_ret_i32_i32_i32_i32_i32_param_param5_5_type->writeAndGenType(*extra_services_ExtraService_oneway_void_ret_i32_i32_i32_i32_i32_param_param5_5.type(), metadata);
   [[maybe_unused]] std::size_t exceptionIndex = 0;
-  func.is_oneway() = true;
+  DCHECK_EQ(*func.is_oneway(), true);
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_oneway_void_ret_map_setlist_param([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -212,7 +212,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService
   auto extra_services_ExtraService_oneway_void_ret_map_setlist_param_param2_3_type = std::make_unique<Set>(std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)));
   extra_services_ExtraService_oneway_void_ret_map_setlist_param_param2_3_type->writeAndGenType(*extra_services_ExtraService_oneway_void_ret_map_setlist_param_param2_3.type(), metadata);
   [[maybe_unused]] std::size_t exceptionIndex = 0;
-  func.is_oneway() = true;
+  DCHECK_EQ(*func.is_oneway(), true);
   func.structured_annotations()->push_back(*cvStruct("cpp.ProcessInEbThreadUnsafe", {  }).cv_struct());
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_oneway_void_ret_struct_param([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -227,7 +227,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService
   auto extra_services_ExtraService_oneway_void_ret_struct_param_param1_1_type = std::make_unique<Struct<::some::valid::ns::MyStruct>>("module.MyStruct");
   extra_services_ExtraService_oneway_void_ret_struct_param_param1_1_type->writeAndGenType(*extra_services_ExtraService_oneway_void_ret_struct_param_param1_1.type(), metadata);
   [[maybe_unused]] std::size_t exceptionIndex = 0;
-  func.is_oneway() = true;
+  DCHECK_EQ(*func.is_oneway(), true);
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_oneway_void_ret_listunion_param([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -241,7 +241,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService
   auto extra_services_ExtraService_oneway_void_ret_listunion_param_param1_1_type = std::make_unique<List>(std::make_unique<Union<::some::valid::ns::ComplexUnion>>("module.ComplexUnion"));
   extra_services_ExtraService_oneway_void_ret_listunion_param_param1_1_type->writeAndGenType(*extra_services_ExtraService_oneway_void_ret_listunion_param_param1_1.type(), metadata);
   [[maybe_unused]] std::size_t exceptionIndex = 0;
-  func.is_oneway() = true;
+  DCHECK_EQ(*func.is_oneway(), true);
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {

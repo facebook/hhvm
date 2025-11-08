@@ -110,7 +110,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethod
   auto module_HeaderClientMethodsAnnotationOnService_echo_request_1_type = std::make_unique<Struct<::cpp2::EchoRequest>>("module.EchoRequest");
   module_HeaderClientMethodsAnnotationOnService_echo_request_1_type->writeAndGenType(*module_HeaderClientMethodsAnnotationOnService_echo_request_1.type(), metadata);
   [[maybe_unused]] std::size_t exceptionIndex = 0;
-  func.is_oneway() = false;
+  DCHECK_EQ(*func.is_oneway(), false);
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService>>::gen_echo_2([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -124,7 +124,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethod
   auto module_HeaderClientMethodsAnnotationOnService_echo_2_request_1_type = std::make_unique<Struct<::cpp2::EchoRequest>>("module.EchoRequest");
   module_HeaderClientMethodsAnnotationOnService_echo_2_request_1_type->writeAndGenType(*module_HeaderClientMethodsAnnotationOnService_echo_2_request_1.type(), metadata);
   [[maybe_unused]] std::size_t exceptionIndex = 0;
-  func.is_oneway() = false;
+  DCHECK_EQ(*func.is_oneway(), false);
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -171,7 +171,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethod
   auto module_HeaderClientMethodsAnnotationOnFunction_echo_request_1_type = std::make_unique<Struct<::cpp2::EchoRequest>>("module.EchoRequest");
   module_HeaderClientMethodsAnnotationOnFunction_echo_request_1_type->writeAndGenType(*module_HeaderClientMethodsAnnotationOnFunction_echo_request_1.type(), metadata);
   [[maybe_unused]] std::size_t exceptionIndex = 0;
-  func.is_oneway() = false;
+  DCHECK_EQ(*func.is_oneway(), false);
   func.structured_annotations()->push_back(*cvStruct("cpp.GenerateDeprecatedHeaderClientMethods", {  }).cv_struct());
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnFunction>>::gen_echo_2([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -186,7 +186,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethod
   auto module_HeaderClientMethodsAnnotationOnFunction_echo_2_request_1_type = std::make_unique<Struct<::cpp2::EchoRequest>>("module.EchoRequest");
   module_HeaderClientMethodsAnnotationOnFunction_echo_2_request_1_type->writeAndGenType(*module_HeaderClientMethodsAnnotationOnFunction_echo_2_request_1.type(), metadata);
   [[maybe_unused]] std::size_t exceptionIndex = 0;
-  func.is_oneway() = false;
+  DCHECK_EQ(*func.is_oneway(), false);
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnFunction>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {

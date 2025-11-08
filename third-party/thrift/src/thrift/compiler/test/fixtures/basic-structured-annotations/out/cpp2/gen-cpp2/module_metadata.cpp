@@ -330,7 +330,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_st
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   [[maybe_unused]] std::size_t exceptionIndex = 0;
-  func.is_oneway() = false;
+  DCHECK_EQ(*func.is_oneway(), false);
   func.structured_annotations()->push_back(*cvStruct("module.structured_annotation_with_default", {  }).cv_struct());
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>>::gen_second([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
@@ -348,7 +348,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_st
   auto module_MyService_second_count_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_MyService_second_count_1_type->writeAndGenType(*module_MyService_second_count_1.type(), metadata);
   [[maybe_unused]] std::size_t exceptionIndex = 0;
-  func.is_oneway() = false;
+  DCHECK_EQ(*func.is_oneway(), false);
   func.structured_annotations()->push_back(*cvStruct("module.structured_annotation_inline", { {"count", cvInteger(2) } }).cv_struct());
 }
 

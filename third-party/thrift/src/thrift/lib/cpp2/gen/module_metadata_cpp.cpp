@@ -362,6 +362,8 @@ metadata::ThriftService genServiceMetadata(
       continue;
     }
     ret.functions()->emplace_back().name() = func.name();
+    ret.functions()->back().is_oneway() =
+        func.qualifier() == type::FunctionQualifier::OneWay;
     for (const auto& param : func.params()) {
       auto& i = ret.functions()->back().arguments()->emplace_back();
       i.id() = static_cast<std::int16_t>(param.id());

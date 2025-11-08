@@ -160,7 +160,7 @@ void ServiceMetadata<::{{> service_common/service_class_name}}>::gen_{{function:
 {{/type:structured?}}
 {{/field:type}}
 {{/function:exceptions}}
-  func.is_oneway() = {{function:oneway?}};
+  DCHECK_EQ(*func.is_oneway(), {{function:oneway?}});
 {{#function:structured_annotations}}
 {{#constant:type.self.structured?}}
   func.structured_annotations()->push_back({{> metadata/const_struct}});

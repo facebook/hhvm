@@ -479,6 +479,10 @@ TEST_F(ServiceSchemaTest, Service) {
   EXPECT_EQ(s.functions()[0].params()[0].id(), FieldId{1});
   EXPECT_EQ(s.functions()[0].params()[0].name(), "input");
   EXPECT_EQ(s.functions()[0].params()[0].type(), TypeRef::of(Primitive::I32));
+  EXPECT_EQ(s.functions()[0].params()[0].annotations().size(), 1);
+  EXPECT_EQ(
+      s.functions()[0].params()[0].annotations()[0].value()["field1"].asInt(),
+      4);
   EXPECT_EQ(s.functions()[0].qualifier(), type::FunctionQualifier::Unspecified);
   EXPECT_FALSE(s.functions()[0].isPerforms());
 

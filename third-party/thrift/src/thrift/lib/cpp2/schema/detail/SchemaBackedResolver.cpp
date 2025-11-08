@@ -864,7 +864,8 @@ FunctionNode SchemaIndex::createFunction(
         resolver_,
         *param.id(),
         *param.name(),
-        folly::copy_to_unique_ptr(typeOf(*param.type())));
+        folly::copy_to_unique_ptr(typeOf(*param.type())),
+        createAnnotations(*param.annotationsByKey(), schema));
   }
 
   return FunctionNode(

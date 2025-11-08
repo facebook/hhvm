@@ -109,7 +109,10 @@ interaction TestInteraction {
 
 service TestService {
   @TypedefToTestStructuredAnnotation{field1 = 3}
-  TestStruct foo(1: i32 input);
+  TestStruct foo(
+    @TypedefToTestStructuredAnnotation{field1 = 4}
+    1: i32 input,
+  );
   TestInteraction createInteraction();
   i32, stream<i32> createStream();
   TestInteraction, i32, stream<i32> createInteractionAndStream();

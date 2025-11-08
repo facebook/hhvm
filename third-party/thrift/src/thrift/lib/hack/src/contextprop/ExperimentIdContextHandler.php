@@ -24,6 +24,19 @@ final class ExperimentIdContextHandler implements IContextHandler {
     ImmutableThriftFrameworkMetadataOnResponse $immutable_tfmr,
   ): void {
     $ids_from_response = $immutable_tfmr->getExperimentIds()?->get_merge();
+    if (SV_ZACHZUNDEL_KILLSWITCHES::experimentIdLogging()) {
+      $length = C\count($ids_from_response ?? vec[]);
+      CategorizedOBC::typedGet(ODSCategoryID::ODS_WEB_FOUNDATION)->bumpKey(
+        'experiment_ids',
+        $length,
+        OdsAggregationType::ODS_AGGREGATION_TYPE_AVG,
+      );
+
+      CategorizedOBC::typedGet(ODSCategoryID::ODS_WEB_FOUNDATION)->bumpKey(
+        'experiment_ids',
+        $length,
+      );
+    }
     if ($ids_from_response is nonnull && !C\is_empty($ids_from_response)) {
       foreach ($ids_from_response as $response_id) {
         if (!C\contains($mutable_ctx->getExperimentIds(), $response_id)) {

@@ -174,12 +174,8 @@ TEST_F(PaddedBinaryAdapterTest, ZeroPadding) {
   original.data() = PaddedBinaryData(0, folly::IOBuf::copyBuffer(testData));
 
   std::string serialized = BinarySerializer::serialize<std::string>(original);
-#ifndef NDEBUG
-  ASSERT_DEATH(
-      BinarySerializer::deserialize<SingleAlignedBinary>(serialized),
-      "Magic mismatch");
-#else
-  // Release mode when DCHECK is disabled
+
+  // We should just decode the data as non-padded.
   SingleAlignedBinary deserialized =
       BinarySerializer::deserialize<SingleAlignedBinary>(serialized);
 
@@ -188,7 +184,6 @@ TEST_F(PaddedBinaryAdapterTest, ZeroPadding) {
       deserialized.data()->buf->computeChainDataLength(), testData.size());
   std::string deserializedData = deserialized.data()->buf->to<std::string>();
   EXPECT_EQ(deserializedData, testData);
-#endif
 }
 
 TEST_F(PaddedBinaryAdapterTest, SerializeNonPaddedDeserializePadded) {
@@ -203,13 +198,8 @@ TEST_F(PaddedBinaryAdapterTest, SerializeNonPaddedDeserializePadded) {
   BinaryProtocolReader reader;
   reader.setInput(serialized.get());
   PaddedBinaryData paddedData;
-#ifndef NDEBUG
-  ASSERT_DEATH(
-      PaddedBinaryAdapter::decode<apache::thrift::type::binary_t>(
-          reader, paddedData),
-      "Magic mismatch");
-#else
-  // Release mode when DCHECK is disabled
+
+  // We should just decode the data as non-padded.
   PaddedBinaryAdapter::decode<apache::thrift::type::binary_t>(
       reader, paddedData);
 
@@ -217,7 +207,6 @@ TEST_F(PaddedBinaryAdapterTest, SerializeNonPaddedDeserializePadded) {
   EXPECT_EQ(paddedData.buf->computeChainDataLength(), testData.size());
   std::string deserializedData = paddedData.buf->to<std::string>();
   EXPECT_EQ(deserializedData, testData);
-#endif
 }
 
 TEST_F(PaddedBinaryAdapterTest, SerializePaddedDeserializeNonPadded) {

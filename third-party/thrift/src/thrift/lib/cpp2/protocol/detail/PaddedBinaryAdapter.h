@@ -147,11 +147,8 @@ struct PaddedBinaryAdapter {
 
       // Parse magic to see if the buffer was indeed padded.
       uint64_t magic = cursor.readBE<uint64_t>();
-      DCHECK(magic == PaddedBinaryData::kMagic)
-          << std::hex << "Magic mismatch: exptected 0x"
-          << PaddedBinaryData::kMagic << " got 0x" << magic;
       if (magic != PaddedBinaryData::kMagic) {
-        // Not a padded binary, just return the data
+        // Not a padded binary, just return the data as-is.
         FB_LOG_ONCE(WARNING)
             << "Magic mismatch for PaddedBinaryAdapter, returning data as-is";
         return;

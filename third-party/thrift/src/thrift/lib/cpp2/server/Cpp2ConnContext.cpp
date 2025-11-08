@@ -102,7 +102,7 @@ std::optional<std::string_view> ClientMetadataRef::getAgent() {
   return std::string_view{*md_.agent()};
 }
 
-std::optional<std::string_view> ClientMetadataRef::getHostname() {
+std::optional<std::string_view> ClientMetadataRef::getHostname() const {
   if (!md_.hostname()) {
     return {};
   }

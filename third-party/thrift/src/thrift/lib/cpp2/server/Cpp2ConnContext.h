@@ -64,8 +64,8 @@ class IOWorkerContext;
 class ClientMetadataRef {
  public:
   explicit ClientMetadataRef(const ClientMetadata& md) : md_(md) {}
+  std::optional<std::string_view> getHostname() const;
   std::optional<std::string_view> getAgent();
-  std::optional<std::string_view> getHostname();
   std::optional<std::string_view> getOtherMetadataField(std::string_view key);
   const folly::F14NodeMap<std::string, std::string>& getFields() const;
 

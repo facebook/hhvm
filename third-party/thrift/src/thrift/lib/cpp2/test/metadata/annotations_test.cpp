@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include <thrift/lib/cpp2/gen/module_metadata_cpp.h>
 #include <thrift/lib/cpp2/runtime/SchemaRegistry.h>
+#include <thrift/lib/cpp2/test/metadata/gen-cpp2/TestService.h>
 #include <thrift/lib/cpp2/test/metadata/gen-cpp2/annotations_metadata.h>
 #include <thrift/lib/cpp2/util/DebugTree.h>
 
@@ -246,6 +247,36 @@ TEST(Annotations, Exception) {
           *res.metadata.structured_annotations(),
           *expectedException().structured_annotations(),
           detail::md::getAnnotationTypes<TestException>()));
+}
+
+TEST(Annotations, Service) {
+  auto service = detail::md::genServiceMetadata<TestService>(true);
+  EXPECT_EQ(
+      service.structured_annotations()->begin()->fields()["baz"].cv_string(),
+      "0");
+  EXPECT_EQ(
+      service.functions()[0]
+          .structured_annotations()
+          ->begin()
+          ->fields()["baz"]
+          .cv_string(),
+      "1");
+  EXPECT_EQ(
+      service.functions()[0]
+          .arguments()[0]
+          .structured_annotations()
+          ->begin()
+          ->fields()["baz"]
+          .cv_string(),
+      "2");
+  EXPECT_EQ(
+      service.functions()[0]
+          .exceptions()[0]
+          .structured_annotations()
+          ->begin()
+          ->fields()["baz"]
+          .cv_string(),
+      "3");
 }
 
 } // namespace apache::thrift::test

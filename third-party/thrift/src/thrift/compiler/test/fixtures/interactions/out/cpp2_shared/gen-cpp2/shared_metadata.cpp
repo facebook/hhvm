@@ -75,7 +75,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::thrift::shared_interacti
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::thrift::shared_interactions::InteractLocally>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService shared_InteractLocally = genServiceMetadata<::thrift::shared_interactions::InteractLocally>();
+  ::apache::thrift::metadata::ThriftService shared_InteractLocally = genServiceMetadata<::thrift::shared_interactions::InteractLocally>(false);
   static const ThriftFunctionGenerator functions[] = {
   };
   size_t index = 0;

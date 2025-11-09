@@ -452,7 +452,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Raiser>>::gen(::ap
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Raiser>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_Raiser = genServiceMetadata<::cpp2::Raiser>();
+  ::apache::thrift::metadata::ThriftService module_Raiser = genServiceMetadata<::cpp2::Raiser>(false);
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Raiser>>::gen_doBland,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Raiser>>::gen_doRaise,

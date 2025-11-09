@@ -350,7 +350,7 @@ GenMetadataResult<metadata::ThriftException> genExceptionMetadata(
 }
 
 metadata::ThriftService genServiceMetadata(
-    const syntax_graph::ServiceNode& node) {
+    const syntax_graph::ServiceNode& node, bool genAnnotations) {
   metadata::ThriftService ret;
   ret.name() = getName(node);
   ret.uri() = node.uri();
@@ -369,16 +369,29 @@ metadata::ThriftService genServiceMetadata(
       i.id() = static_cast<std::int16_t>(param.id());
       i.name() = param.name();
       i.is_optional() = false;
-      // TODO: add other information
+      if (genAnnotations) {
+        i.structured_annotations() =
+            genStructuredAnnotations(param.annotations());
+      }
     }
     for (const auto& exception : func.exceptions()) {
       auto& i = ret.functions()->back().exceptions()->emplace_back();
       i.id() = static_cast<std::int16_t>(exception.id());
       i.name() = exception.name();
       i.is_optional() = false;
-      // TODO: add other information
+      if (genAnnotations) {
+        i.structured_annotations() =
+            genStructuredAnnotations(exception.annotations());
+      }
     }
-    // TODO: add other information
+    if (genAnnotations) {
+      ret.functions()->back().structured_annotations() =
+          genStructuredAnnotations(func.annotations());
+    }
+  }
+  if (genAnnotations) {
+    ret.structured_annotations() =
+        genStructuredAnnotations(node.definition().annotations());
   }
   return ret;
 }

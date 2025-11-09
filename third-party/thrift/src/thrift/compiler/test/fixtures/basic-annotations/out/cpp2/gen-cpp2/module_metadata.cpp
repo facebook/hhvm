@@ -303,7 +303,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen(:
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_MyService = genServiceMetadata<::cpp2::MyService>();
+  ::apache::thrift::metadata::ThriftService module_MyService = genServiceMetadata<::cpp2::MyService>(false);
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_ping,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_getRandomData,
@@ -360,7 +360,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioParen
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_MyServicePrioParent = genServiceMetadata<::cpp2::MyServicePrioParent>();
+  ::apache::thrift::metadata::ThriftService module_MyServicePrioParent = genServiceMetadata<::cpp2::MyServicePrioParent>(false);
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>>::gen_ping,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>>::gen_pong,
@@ -402,7 +402,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioChild
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioChild>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_MyServicePrioChild = genServiceMetadata<::cpp2::MyServicePrioChild>();
+  ::apache::thrift::metadata::ThriftService module_MyServicePrioChild = genServiceMetadata<::cpp2::MyServicePrioChild>(false);
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioChild>>::gen_pang,
   };
@@ -444,7 +444,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::GoodService>>::gen
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::GoodService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_BadService = genServiceMetadata<::cpp2::GoodService>();
+  ::apache::thrift::metadata::ThriftService module_BadService = genServiceMetadata<::cpp2::GoodService>(false);
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::GoodService>>::gen_bar,
   };
@@ -505,7 +505,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>>
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_FooBarBazService = genServiceMetadata<::cpp2::FooBarBazService>();
+  ::apache::thrift::metadata::ThriftService module_FooBarBazService = genServiceMetadata<::cpp2::FooBarBazService>(false);
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>>::gen_foo,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>>::gen_bar,

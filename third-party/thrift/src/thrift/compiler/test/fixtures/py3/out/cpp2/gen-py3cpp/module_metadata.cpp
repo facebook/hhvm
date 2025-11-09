@@ -1098,7 +1098,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_SimpleService = genServiceMetadata<::py3::simple::SimpleService>();
+  ::apache::thrift::metadata::ThriftService module_SimpleService = genServiceMetadata<::py3::simple::SimpleService>(false);
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_five,
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_add_five,
@@ -1179,7 +1179,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedServ
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_DerivedService = genServiceMetadata<::py3::simple::DerivedService>();
+  ::apache::thrift::metadata::ThriftService module_DerivedService = genServiceMetadata<::py3::simple::DerivedService>(false);
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedService>>::gen_get_six,
   };
@@ -1221,7 +1221,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedSe
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_RederivedService = genServiceMetadata<::py3::simple::RederivedService>();
+  ::apache::thrift::metadata::ThriftService module_RederivedService = genServiceMetadata<::py3::simple::RederivedService>(false);
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedService>>::gen_get_seven,
   };

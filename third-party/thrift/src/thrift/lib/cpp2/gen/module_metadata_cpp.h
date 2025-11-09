@@ -309,11 +309,12 @@ auto genExceptionMetadata(metadata::ThriftMetadata& md, bool genAnnotations) {
 }
 
 metadata::ThriftService genServiceMetadata(
-    const syntax_graph::ServiceNode& node);
+    const syntax_graph::ServiceNode& node, bool genAnnotations);
 
 template <class Tag>
-metadata::ThriftService genServiceMetadata() {
-  return genServiceMetadata(getDefinitionNodeWithLock<Tag>().asService());
+metadata::ThriftService genServiceMetadata(bool genAnnotations) {
+  return genServiceMetadata(
+      getDefinitionNodeWithLock<Tag>().asService(), genAnnotations);
 }
 
 std::vector<syntax_graph::TypeRef> getAnnotationTypes(

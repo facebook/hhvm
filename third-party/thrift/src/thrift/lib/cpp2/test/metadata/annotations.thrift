@@ -132,3 +132,15 @@ exception TestException {
   1: string field_1;
   2: i32 field_2;
 }
+
+@Bar{baz = "0"}
+service TestService {
+  @Bar{baz = "1"}
+  TestStruct foo(
+    @Bar{baz = "2"}
+    1: i32 input,
+  ) throws (
+    @Bar{baz = "3"}
+    1: TestException ex,
+  );
+}

@@ -567,7 +567,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::EmptySe
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::EmptyService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_EmptyService = genServiceMetadata<::some::valid::ns::EmptyService>();
+  ::apache::thrift::metadata::ThriftService module_EmptyService = genServiceMetadata<::some::valid::ns::EmptyService>(false);
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
@@ -796,7 +796,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ReturnS
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_ReturnService = genServiceMetadata<::some::valid::ns::ReturnService>();
+  ::apache::thrift::metadata::ThriftService module_ReturnService = genServiceMetadata<::some::valid::ns::ReturnService>(false);
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>>::gen_noReturn,
     ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>>::gen_boolReturn,
@@ -1438,7 +1438,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamSe
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_ParamService = genServiceMetadata<::some::valid::ns::ParamService>();
+  ::apache::thrift::metadata::ThriftService module_ParamService = genServiceMetadata<::some::valid::ns::ParamService>(false);
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamService>>::gen_void_ret_i16_param,
     ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamService>>::gen_void_ret_byte_i16_param,

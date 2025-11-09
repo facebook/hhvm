@@ -237,7 +237,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_BiDiService = genServiceMetadata<::cpp2::BiDiService>();
+  ::apache::thrift::metadata::ThriftService module_BiDiService = genServiceMetadata<::cpp2::BiDiService>(false);
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen_simple,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen_response,

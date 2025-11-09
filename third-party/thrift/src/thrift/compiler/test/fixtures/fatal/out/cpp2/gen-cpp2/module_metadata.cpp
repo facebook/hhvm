@@ -784,7 +784,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflectio
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service1>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_service1 = genServiceMetadata<::test_cpp2::cpp_reflection::service1>();
+  ::apache::thrift::metadata::ThriftService module_service1 = genServiceMetadata<::test_cpp2::cpp_reflection::service1>(false);
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service1>>::gen_method1,
     ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service1>>::gen_method2,
@@ -919,7 +919,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflectio
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_service2 = genServiceMetadata<::test_cpp2::cpp_reflection::service2>();
+  ::apache::thrift::metadata::ThriftService module_service2 = genServiceMetadata<::test_cpp2::cpp_reflection::service2>(false);
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>>::gen_methodA,
     ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>>::gen_methodB,
@@ -1054,7 +1054,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflectio
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service3>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_service3 = genServiceMetadata<::test_cpp2::cpp_reflection::service3>();
+  ::apache::thrift::metadata::ThriftService module_service3 = genServiceMetadata<::test_cpp2::cpp_reflection::service3>(false);
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service3>>::gen_methodA,
     ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service3>>::gen_methodB,
@@ -1342,7 +1342,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflectio
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_service_with_special_names = genServiceMetadata<::test_cpp2::cpp_reflection::service_with_special_names>();
+  ::apache::thrift::metadata::ThriftService module_service_with_special_names = genServiceMetadata<::test_cpp2::cpp_reflection::service_with_special_names>(false);
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>>::gen_get,
     ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>>::gen_getter,

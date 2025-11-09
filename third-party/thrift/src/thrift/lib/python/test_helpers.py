@@ -15,6 +15,7 @@
 # pyre-strict
 
 from collections.abc import Iterable, Mapping, Sequence, Set as abcSet
+from dataclasses import asdict as dataclass_asdict, is_dataclass
 from enum import IntEnum
 from math import isclose
 
@@ -143,7 +144,7 @@ def assert_equal_type(
     unittest.assertEqual(type(result), type(expected), field_context + ".__name__")
 
 
-def format_type_context(result: T, field_context: str) -> str:
+def format_type_context(result: T, field_context: str | None) -> str:
     prefix = field_context + "->" if field_context else ""
     return f"{prefix}{type(result).__name__}"
 
@@ -264,6 +265,27 @@ def _assert_sequence_almost_equal(
         )
 
 
+def _assert_dataclass_almost_equal(
+    unittest: Unittest,
+    result: object,
+    expected: object,
+    field_context: str | None,
+    **almost_equal_kwargs: object,
+) -> None:
+    if not isinstance(expected, type(result)):
+        unittest.fail(
+            f"result is a dataclass {type(result)}, but {type(expected)} is not: {field_context}",
+        )
+    type_context = format_type_context(result, field_context)
+    assert_thrift_almost_equal(
+        unittest,
+        dataclass_asdict(result),
+        dataclass_asdict(expected),
+        field_context=f"{type_context}.asdict",
+        **almost_equal_kwargs,
+    )
+
+
 def assert_thrift_almost_equal(
     unittest: object,
     result: T,
@@ -355,6 +377,17 @@ def assert_thrift_almost_equal(
         _assert_sequence_almost_equal(
             unittest, result, expected, field_context, **almost_equal_kwargs
         )
+
+    elif is_dataclass(result):
+        _assert_dataclass_almost_equal(
+            unittest, result, expected, field_context, **almost_equal_kwargs
+        )
+
     else:
         # all non-float scalar types
-        unittest.assertEqual(result, expected, msg=field_context)
+        unittest.assertEqual(
+            result,
+            expected,
+            msg=(field_context or "")
+            + f": {type(result).__module__}.{type(result).__name__}",
+        )

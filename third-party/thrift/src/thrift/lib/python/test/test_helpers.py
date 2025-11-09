@@ -17,6 +17,7 @@
 import math
 import struct
 import unittest
+from dataclasses import dataclass
 from typing import Any, Type
 
 import testing.thrift_mutable_types as mutable_test_types
@@ -478,3 +479,92 @@ class AssertThriftAlmostEqualTest(unittest.TestCase):
             AssertionError, r"numerical\.float_list->List\[1\]"
         ):
             assert_thrift_almost_equal(self, struct1, struct2)
+
+    @dataclass
+    class ExampleDataclass:
+        """Example dataclass with container and thrift struct fields for testing."""
+
+        name: str
+        values: list[float]  # Container field
+        location: immutable_test_types.LatLon | mutable_test_types.LatLon
+        metadata: dict[str, int]  # Another container field
+
+    @parameterized.expand(
+        [
+            ("equal_dataclasses", [1.0, 2.0, 3.0], None),
+            ("nearly_equal_floats", [1.0000001, 2.0000002, 3.0000003], 5),
+        ]
+    )
+    def test_dataclass_equal_pass(
+        self,
+        _name: str,
+        float_values: list[float],
+        places: int | None,
+    ) -> None:
+        """Test that equal or nearly equal dataclasses with thrift structs pass."""
+        dc1 = self.ExampleDataclass(
+            name="test",
+            values=float_values,
+            location=self.test_types.LatLon(lat=51.4769, lon=0.0005),
+            metadata={"key": 1},
+        )
+        dc2 = self.ExampleDataclass(
+            name="test",
+            values=[1.0, 2.0, 3.0],
+            location=self.test_types.LatLon(lat=51.4769, lon=0.0005),
+            metadata={"key": 1},
+        )
+        if places is not None:
+            assert_thrift_almost_equal(self, dc1, dc2, places=places)
+        else:
+            assert_thrift_almost_equal(self, dc1, dc2)
+
+    @parameterized.expand(
+        [
+            (
+                "unequal_container_field",
+                [1.0, 2.5, 3.0],
+                51.4769,
+                1,
+                r"ExampleDataclass\.asdict->dict\[values\]->list\[1\]",
+            ),
+            (
+                "unequal_thrift_struct_field",
+                [1.0, 2.0, 3.0],
+                51.4770,
+                1,
+                r"ExampleDataclass\.asdict->dict\[location\]->LatLon\.lat",
+            ),
+            (
+                "unequal_metadata",
+                [1.0, 2.0, 3.0],
+                51.4769,
+                2,
+                r"ExampleDataclass\.asdict->dict\[metadata\]->dict\[key\]",
+            ),
+        ]
+    )
+    def test_dataclass_unequal_fails(
+        self,
+        _name: str,
+        float_list: list[float],
+        lat2: float,
+        metadata2: int,
+        expected_pattern: str,
+    ) -> None:
+        """Test that dataclasses with unequal fields fail with proper context."""
+
+        dc1 = self.ExampleDataclass(
+            name="test",
+            values=float_list,
+            location=self.test_types.LatLon(lat=51.4769, lon=0.0005),
+            metadata={"key": 1},
+        )
+        dc2 = self.ExampleDataclass(
+            name="test",
+            values=[1.0, 2.0, 3.0],
+            location=self.test_types.LatLon(lat=lat2, lon=0.0005),
+            metadata={"key": metadata2},
+        )
+        with self.assertRaisesRegex(AssertionError, expected_pattern):
+            assert_thrift_almost_equal(self, dc1, dc2, places=5)

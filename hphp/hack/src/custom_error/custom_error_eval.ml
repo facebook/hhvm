@@ -12,7 +12,7 @@ module Ty = Typing_defs
 module Value = struct
   type t =
     | Ty of (Ty.locl_ty[@compare.ignore] [@sexp.opaque])
-    | Name of ((Pos_or_decl.t[@opaque]) * string)
+    | Name of string
     | File of (Relative_path.t[@opaque])
     | Member_name of string
   [@@deriving compare, sexp]
@@ -195,7 +195,7 @@ let rec matches_member_name t ~scrut ~env =
       |> map ~f:(Env.add_member_name ~lbl ~member_name:scrut))
   | Invalid { errs; _ } -> Match.match_err errs
 
-let split_namespace (_pos, name) =
+let split_namespace name =
   let ls =
     List.rev
     @@ List.filter ~f:(fun s -> not @@ String.is_empty s)
@@ -363,23 +363,22 @@ let split_fields flds =
 let matches_locl_ty ?(env = Env.empty) t ~scrut =
   let open Patt_locl_ty in
   let rec aux t ty ~env =
-    let ty_pos = Ty.get_pos ty in
     match (t, Ty.get_node ty) with
     (* -- Type wildcards ---------------------------------------------------- *)
     | (Any, _) -> Match.Matched env
     (* -- Type constructor like types --------------------------------------- *)
     | (Apply { patt_name; patt_params }, Ty.Tclass (name, _, tys)) ->
       Match.(
-        matches_name patt_name ~scrut:name ~env >>= fun env ->
+        matches_name patt_name ~scrut:(snd name) ~env >>= fun env ->
         aux_params patt_params tys ~env)
     | (Apply { patt_name; patt_params }, Ty.Tnewtype (id, tys, _)) ->
       Match.(
-        matches_name patt_name ~scrut:(ty_pos, id) ~env >>= fun env ->
+        matches_name patt_name ~scrut:id ~env >>= fun env ->
         aux_params patt_params tys ~env)
     | (Apply { patt_name; patt_params }, Ty.Tvec_or_dict (ty_key, ty_val)) ->
       Match.(
-        matches_name patt_name ~scrut:(ty_pos, "vec_or_dict") ~env
-        >>= fun env -> aux_params patt_params [ty_key; ty_val] ~env)
+        matches_name patt_name ~scrut:"vec_or_dict" ~env >>= fun env ->
+        aux_params patt_params [ty_key; ty_val] ~env)
     | (Option t, Ty.Toption ty) -> aux t ty ~env
     (* TODO optional and variadic fields T201398626 T201398652 *)
     | ( Tuple ts,
@@ -542,13 +541,12 @@ let matches_typing_error t ~scrut ~env =
             patt_visibility = _;
           },
         Typing_error.Primary.Member_not_found
-          { kind; class_pos; class_name; member_name; _ } ) ->
+          { kind; class_name; member_name; _ } ) ->
       Match.(
         matches_static_pattern patt_is_static ~scrut:`instance ~env
         >>= fun env ->
         matches_member_kind_instance patt_kind ~scrut:kind ~env >>= fun env ->
-        matches_name patt_class_name ~scrut:(class_pos, class_name) ~env
-        >>= fun env ->
+        matches_name patt_class_name ~scrut:class_name ~env >>= fun env ->
         matches_member_name patt_member_name ~scrut:member_name ~env)
     | ( Member_not_found
           {
@@ -559,12 +557,11 @@ let matches_typing_error t ~scrut ~env =
             patt_visibility = _;
           },
         Typing_error.Primary.Smember_not_found
-          { kind; class_pos; class_name; member_name; _ } ) ->
+          { kind; class_name; member_name; _ } ) ->
       Match.(
         matches_static_pattern patt_is_static ~scrut:`static ~env >>= fun env ->
         matches_member_kind_static patt_kind ~scrut:kind ~env >>= fun env ->
-        matches_name patt_class_name ~scrut:(class_pos, class_name) ~env
-        >>= fun env ->
+        matches_name patt_class_name ~scrut:class_name ~env >>= fun env ->
         matches_member_name patt_member_name ~scrut:member_name ~env)
     | (Member_not_found _, _) -> Match.no_match
     (* -- Package errors ---------------------------------------------------- *)
@@ -583,7 +580,19 @@ let matches_typing_error t ~scrut ~env =
       Match.(
         matches_file patt_use_file ~scrut:(Pos.filename pos) ~env >>= fun env ->
         matches_file patt_decl_file ~scrut:(Pos_or_decl.filename decl_pos) ~env)
-    | (Cross_pkg_access_with_requirepackage _, _) -> Match.no_match
+    | (Cross_pkg_access_with_requirepackage _, _) ->
+      Match.no_match
+      (* -- Expression tree errors -------------------------------------------- *)
+    | ( Expression_tree_unsupported_operator
+          { patt_class_name; patt_member_name },
+        Typing_error.Primary.(
+          Expr_tree
+            (Expr_tree.Expression_tree_unsupported_operator
+              { class_name; member_name; _ })) ) ->
+      Match.(
+        matches_name patt_class_name ~scrut:class_name ~env >>= fun env ->
+        matches_member_name patt_member_name ~scrut:member_name ~env)
+    | (Expression_tree_unsupported_operator _, _) -> Match.no_match
   (* -- Secondary errors ---------------------------------------------------- *)
   and aux_secondary t err_snd ~env =
     match (t, err_snd) with
@@ -642,12 +651,10 @@ let matches_naming_error t ~scrut ~env =
   let open Patt_naming_error in
   match (t, scrut) with
   | ( Unbound_name { patt_name_context; patt_name },
-      Naming_error.Unbound_name { pos; name; kind } ) ->
+      Naming_error.Unbound_name { name; kind; _ } ) ->
     Match.(
       matches_name_context patt_name_context ~scrut:kind ~env >>= fun env ->
-      let pos_or_decl = Pos_or_decl.of_raw_pos pos in
-      let scrut = (pos_or_decl, name) in
-      matches_name patt_name ~scrut ~env)
+      matches_name patt_name ~scrut:name ~env)
   | _ -> Match.no_match
 (* -- Top level error matches ----------------------------------------------- *)
 

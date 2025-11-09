@@ -5497,7 +5497,7 @@ end = struct
       ~f:(fun v acc ->
         match v with
         | Core.Either.First str -> str ^ acc
-        | Either.Second (Custom_error_eval.Value.Name (_, class_name)) ->
+        | Either.Second (Custom_error_eval.Value.Name class_name) ->
           (Markdown_lite.md_codify @@ Render.strip_ns class_name) ^ acc
         | Either.Second (Custom_error_eval.Value.Member_name nm) ->
           Markdown_lite.md_codify nm ^ acc

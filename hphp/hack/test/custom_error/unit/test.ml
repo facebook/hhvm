@@ -1526,6 +1526,7 @@ let test_path_glob_with_optional_missing _ =
     ~cmp:[%compare.equal: (string, Eval.Value.t) Either.t list list]
     (Eval.eval_typing_error custom_config ~err)
     [[Either.First "Boom"]]
+
 (* ~~ Naming errors ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
 let test_unbound_name_any_context _ =
@@ -1632,6 +1633,47 @@ let test_unbound_name_function_context_bad _ =
     (* NoMatch *)
     []
 
+(* -- Expression trees ------------------------------------------------------ *)
+
+let test_expr_tree_unsupported_operator _ =
+  let class_name = "//BKSClientVoid" and member_name = "__unwrap" in
+  let expr_tree_err =
+    Typing_error.Primary.(
+      Expr_tree.Expression_tree_unsupported_operator
+        { pos = Pos.none; member_name; class_name })
+  in
+  let primary_error = Typing_error.Primary.Expr_tree expr_tree_err in
+  let err = Typing_error.primary primary_error in
+
+  let patt_namespace = Patt_name.Root in
+  let patt_class_name =
+    Patt_name.Name
+      { patt_namespace; patt_name = Patt_string.Exactly class_name }
+  in
+  let patt_member_name =
+    Patt_member_name.Member_name
+      { patt_string = Patt_string.Exactly member_name }
+  in
+  let patt_typing_error =
+    Patt_typing_error.(
+      Primary
+        (Expression_tree_unsupported_operator
+           { patt_class_name; patt_member_name }))
+  in
+  let patt = Custom_error.Error_v2 (Patt_error.Typing patt_typing_error) in
+  let error_message =
+    Custom_error.Message_v1 Error_message.{ message = [Lit "Boom"] }
+  in
+  let custom_err = Custom_error.{ name = "test"; patt; error_message } in
+  let custom_config =
+    Custom_error_config.{ valid = [custom_err]; invalid = [] }
+  in
+  let open Core in
+  assert_equal
+    ~cmp:[%compare.equal: (string, Eval.Value.t) Either.t list list]
+    (Eval.eval_typing_error custom_config ~err)
+    [[Either.First "Boom"]]
+
 (* ~~ Test suite ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 let tests =
   [
@@ -1673,6 +1715,8 @@ let tests =
     >:: test_path_glob_with_optional_present;
     "test_path_glob_with_optional_missing"
     >:: test_path_glob_with_optional_missing;
+    "test_expr_tree_unsupported_operator"
+    >:: test_expr_tree_unsupported_operator;
   ]
 
 let () = "custom_error_unit_tests" >::: tests |> run_test_tt_main

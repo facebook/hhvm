@@ -920,7 +920,7 @@ let render_custom_error
     ~f:(fun v acc ->
       match v with
       | Core.Either.First str -> str ^ acc
-      | Either.Second (Custom_error_eval.Value.Name (_, nm)) ->
+      | Either.Second (Custom_error_eval.Value.Name nm) ->
         Markdown_lite.md_codify nm ^ acc
       | Either.Second _ -> acc)
     ~init:""

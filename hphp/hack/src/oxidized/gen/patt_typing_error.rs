@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<159d1e150a5d57c9ea222a7d75a93704>>
+// @generated SignedSource<<3f8e4f9add43169785b4afa5d82ed3c6>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -101,6 +101,12 @@ pub enum Primary {
     CrossPkgAccessWithRequirepackage {
         use_file: patt_file::PattFile,
         decl_file: patt_file::PattFile,
+    },
+    #[rust_to_ocaml(prefix = "patt_")]
+    #[rust_to_ocaml(name = "Expression_tree_unsupported_operator")]
+    ExpressionTreeUnsupportedOperator {
+        class_name: patt_name::PattName,
+        member_name: patt_member_name::PattMemberName,
     },
 }
 

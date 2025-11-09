@@ -45,6 +45,11 @@ and primary =
       patt_use_file: Patt_file.t; (* The file in which the error was raised *)
       patt_decl_file: Patt_file.t; (* The accessed module/package is declared *)
     }
+  (* Expression tree *)
+  | Expression_tree_unsupported_operator of {
+      patt_class_name: Patt_name.t; (* Class name pattern *)
+      patt_member_name: Patt_member_name.t; (* Member name pattern *)
+    }
 
 and static_pattern =
   | Static_only (* Match only static members *)

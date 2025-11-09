@@ -272,6 +272,10 @@ impl Validatable for Primary {
                 use_file,
                 decl_file,
             } => use_file.validate(env) && decl_file.validate(env),
+            Self::ExpressionTreeUnsupportedOperator {
+                class_name,
+                member_name,
+            } => class_name.validate(env) && member_name.validate(env),
         }
     }
 }

@@ -27,48 +27,97 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 void EnumMetadata<::test::fixtures::enums::Metasyntactic>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::enums::Metasyntactic>(metadata, false);
+  auto res = genEnumMetadata<::test::fixtures::enums::Metasyntactic>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::enums::Metasyntactic>()
+  ));
 }
 void EnumMetadata<::test::fixtures::enums::MyEnum1>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::enums::MyEnum1>(metadata, false);
+  auto res = genEnumMetadata<::test::fixtures::enums::MyEnum1>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::enums::MyEnum1>()
+  ));
 }
 void EnumMetadata<::test::fixtures::enums::MyEnum2>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::enums::MyEnum2>(metadata, false);
+  auto res = genEnumMetadata<::test::fixtures::enums::MyEnum2>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::enums::MyEnum2>()
+  ));
 }
 void EnumMetadata<::test::fixtures::enums::MyEnum3>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::enums::MyEnum3>(metadata, false);
+  auto res = genEnumMetadata<::test::fixtures::enums::MyEnum3>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::enums::MyEnum3>()
+  ));
 }
 void EnumMetadata<::test::fixtures::enums::MyEnum4>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::enums::MyEnum4>(metadata, false);
+  auto res = genEnumMetadata<::test::fixtures::enums::MyEnum4>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::enums::MyEnum4>()
+  ));
 }
 void EnumMetadata<::test::fixtures::enums::MyBitmaskEnum1>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::enums::MyBitmaskEnum1>(metadata, false);
+  auto res = genEnumMetadata<::test::fixtures::enums::MyBitmaskEnum1>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
   res.metadata.structured_annotations()->push_back(*cvStruct("thrift.BitmaskEnum", {  }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::enums::MyBitmaskEnum1>()
+  ));
 }
 void EnumMetadata<::test::fixtures::enums::MyBitmaskEnum2>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::enums::MyBitmaskEnum2>(metadata, false);
+  auto res = genEnumMetadata<::test::fixtures::enums::MyBitmaskEnum2>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
   res.metadata.structured_annotations()->push_back(*cvStruct("thrift.BitmaskEnum", {  }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::enums::MyBitmaskEnum2>()
+  ));
 }
 
 const ::apache::thrift::metadata::ThriftStruct&

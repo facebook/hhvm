@@ -47,17 +47,31 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 void EnumMetadata<::test::fixtures::basic::MyEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::basic::MyEnum>(metadata, false);
+  auto res = genEnumMetadata<::test::fixtures::basic::MyEnum>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::basic::MyEnum>()
+  ));
 }
 void EnumMetadata<::test::fixtures::basic::HackEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::basic::HackEnum>(metadata, false);
+  auto res = genEnumMetadata<::test::fixtures::basic::HackEnum>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
   res.metadata.structured_annotations()->push_back(*cvStruct("hack.Name", { {"name", cvString("RenamedEnum") } }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::basic::HackEnum>()
+  ));
 }
 
 const ::apache::thrift::metadata::ThriftStruct&

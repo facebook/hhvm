@@ -44,15 +44,22 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 {{#program:enums}}
 void EnumMetadata<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::{{program:qualified_namespace}}::{{enum:cpp_name}}>(metadata, false);
+  auto res = genEnumMetadata<::{{program:qualified_namespace}}::{{enum:cpp_name}}>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
 {{#enum:structured_annotations}}
 {{#constant:type.self.structured?}}
   res.metadata.structured_annotations()->push_back({{> metadata/const_struct}});
 {{/constant:type.self.structured?}}
 {{/enum:structured_annotations}}
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::{{program:qualified_namespace}}::{{enum:cpp_name}}>()
+  ));
 }
 {{/program:enums}}
 

@@ -27,10 +27,17 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 void EnumMetadata<::a::different::ns::AnEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::a::different::ns::AnEnum>(metadata, false);
+  auto res = genEnumMetadata<::a::different::ns::AnEnum>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::a::different::ns::AnEnum>()
+  ));
 }
 
 const ::apache::thrift::metadata::ThriftStruct&

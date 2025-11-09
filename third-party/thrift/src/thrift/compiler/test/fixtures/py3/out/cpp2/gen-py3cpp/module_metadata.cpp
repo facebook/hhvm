@@ -42,23 +42,44 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 void EnumMetadata<::py3::simple::AnEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::py3::simple::AnEnum>(metadata, false);
+  auto res = genEnumMetadata<::py3::simple::AnEnum>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::py3::simple::AnEnum>()
+  ));
 }
 void EnumMetadata<::py3::simple::AnEnumRenamed>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::py3::simple::AnEnumRenamed>(metadata, false);
+  auto res = genEnumMetadata<::py3::simple::AnEnumRenamed>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::py3::simple::AnEnumRenamed>()
+  ));
 }
 void EnumMetadata<::py3::simple::Flags>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::py3::simple::Flags>(metadata, false);
+  auto res = genEnumMetadata<::py3::simple::Flags>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
   res.metadata.structured_annotations()->push_back(*cvStruct("python.Flags", {  }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::py3::simple::Flags>()
+  ));
 }
 
 const ::apache::thrift::metadata::ThriftStruct&

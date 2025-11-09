@@ -47,28 +47,56 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 void EnumMetadata<::test_cpp2::cpp_reflection::enum1>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum1>(metadata, false);
+  auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum1>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test_cpp2::cpp_reflection::enum1>()
+  ));
 }
 void EnumMetadata<::test_cpp2::cpp_reflection::enum2>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum2>(metadata, false);
+  auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum2>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test_cpp2::cpp_reflection::enum2>()
+  ));
 }
 void EnumMetadata<::test_cpp2::cpp_reflection::enum3>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum3>(metadata, false);
+  auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum3>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test_cpp2::cpp_reflection::enum3>()
+  ));
 }
 void EnumMetadata<::test_cpp2::cpp_reflection::enum_with_special_names>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum_with_special_names>(metadata, false);
+  auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum_with_special_names>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test_cpp2::cpp_reflection::enum_with_special_names>()
+  ));
 }
 
 const ::apache::thrift::metadata::ThriftStruct&

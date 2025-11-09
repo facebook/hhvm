@@ -27,17 +27,31 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 void EnumMetadata<::test::fixtures::python_capi::MyEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::python_capi::MyEnum>(metadata, false);
+  auto res = genEnumMetadata<::test::fixtures::python_capi::MyEnum>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::python_capi::MyEnum>()
+  ));
 }
 void EnumMetadata<::test::fixtures::python_capi::NormalDecentEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::python_capi::NormalDecentEnum>(metadata, false);
+  auto res = genEnumMetadata<::test::fixtures::python_capi::NormalDecentEnum>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
   res.metadata.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("NormalDecentEnum") } }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::python_capi::NormalDecentEnum>()
+  ));
 }
 
 const ::apache::thrift::metadata::ThriftStruct&

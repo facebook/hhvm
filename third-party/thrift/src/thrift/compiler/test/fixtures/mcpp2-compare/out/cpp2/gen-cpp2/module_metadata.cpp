@@ -42,32 +42,60 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 void EnumMetadata<::some::valid::ns::MyEnumA>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::some::valid::ns::MyEnumA>(metadata, false);
+  auto res = genEnumMetadata<::some::valid::ns::MyEnumA>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::some::valid::ns::MyEnumA>()
+  ));
 }
 void EnumMetadata<::some::valid::ns::AnnotatedEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::some::valid::ns::AnnotatedEnum>(metadata, false);
+  auto res = genEnumMetadata<::some::valid::ns::AnnotatedEnum>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
   res.metadata.structured_annotations()->push_back(*cvStruct("thrift.DeprecatedUnvalidatedAnnotations", { {"items", cvMap({ cvPair(cvString("cpp.declare_bitwise_ops"), cvString("1")) }) } }).cv_struct());
   res.metadata.structured_annotations()->push_back(*cvStruct("cpp.EnumType", { {"type", cvInteger(4) } }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::some::valid::ns::AnnotatedEnum>()
+  ));
 }
 void EnumMetadata<::some::valid::ns::AnnotatedEnum2>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::some::valid::ns::AnnotatedEnum2>(metadata, false);
+  auto res = genEnumMetadata<::some::valid::ns::AnnotatedEnum2>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
   res.metadata.structured_annotations()->push_back(*cvStruct("thrift.DeprecatedUnvalidatedAnnotations", { {"items", cvMap({ cvPair(cvString("cpp.declare_bitwise_ops"), cvString("1")) }) } }).cv_struct());
   res.metadata.structured_annotations()->push_back(*cvStruct("cpp.EnumType", { {"type", cvInteger(2) } }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::some::valid::ns::AnnotatedEnum2>()
+  ));
 }
 void EnumMetadata<::some::valid::ns::MyEnumB>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::some::valid::ns::MyEnumB>(metadata, false);
+  auto res = genEnumMetadata<::some::valid::ns::MyEnumB>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::some::valid::ns::MyEnumB>()
+  ));
 }
 
 const ::apache::thrift::metadata::ThriftStruct&

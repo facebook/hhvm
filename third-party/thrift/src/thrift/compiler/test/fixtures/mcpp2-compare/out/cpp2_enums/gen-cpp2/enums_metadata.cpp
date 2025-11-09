@@ -27,34 +27,69 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 void EnumMetadata<::facebook::ns::qwerty::AnEnumA>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumA>(metadata, false);
+  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumA>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::facebook::ns::qwerty::AnEnumA>()
+  ));
 }
 void EnumMetadata<::facebook::ns::qwerty::AnEnumB>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumB>(metadata, false);
+  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumB>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::facebook::ns::qwerty::AnEnumB>()
+  ));
 }
 void EnumMetadata<::facebook::ns::qwerty::AnEnumC>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumC>(metadata, false);
+  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumC>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::facebook::ns::qwerty::AnEnumC>()
+  ));
 }
 void EnumMetadata<::facebook::ns::qwerty::AnEnumD>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumD>(metadata, false);
+  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumD>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::facebook::ns::qwerty::AnEnumD>()
+  ));
 }
 void EnumMetadata<::facebook::ns::qwerty::AnEnumE>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumE>(metadata, false);
+  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumE>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::facebook::ns::qwerty::AnEnumE>()
+  ));
 }
 
 const ::apache::thrift::metadata::ThriftStruct&

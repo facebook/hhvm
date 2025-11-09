@@ -32,22 +32,43 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 void EnumMetadata<::apache::thrift::fixtures::types::has_bitwise_ops>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::apache::thrift::fixtures::types::has_bitwise_ops>(metadata, false);
+  auto res = genEnumMetadata<::apache::thrift::fixtures::types::has_bitwise_ops>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::apache::thrift::fixtures::types::has_bitwise_ops>()
+  ));
 }
 void EnumMetadata<::apache::thrift::fixtures::types::is_unscoped>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::apache::thrift::fixtures::types::is_unscoped>(metadata, false);
+  auto res = genEnumMetadata<::apache::thrift::fixtures::types::is_unscoped>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::apache::thrift::fixtures::types::is_unscoped>()
+  ));
 }
 void EnumMetadata<::apache::thrift::fixtures::types::MyForwardRefEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::apache::thrift::fixtures::types::MyForwardRefEnum>(metadata, false);
+  auto res = genEnumMetadata<::apache::thrift::fixtures::types::MyForwardRefEnum>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::apache::thrift::fixtures::types::MyForwardRefEnum>()
+  ));
 }
 
 const ::apache::thrift::metadata::ThriftStruct&

@@ -72,7 +72,9 @@ HTTPTransactionHandler* Dispatcher::getRequestHandler(HTTPMessage* msg) {
   }
 
   if (!FLAGS_static_root.empty()) {
-    return new StaticFileHandler(params_, FLAGS_static_root);
+    auto staticFileHandler =
+        StaticFileHandler::make(params_, FLAGS_static_root);
+    return staticFileHandler.get();
   }
   if (boost::algorithm::starts_with(path, "/delay")) {
     return new DelayHandler(params_,

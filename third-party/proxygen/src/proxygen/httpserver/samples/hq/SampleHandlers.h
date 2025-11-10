@@ -871,9 +871,25 @@ class DeviousBatonHandler : public BaseSampleHandler {
 };
 
 class StaticFileHandler : public BaseSampleHandler {
- public:
+ private:
   StaticFileHandler(const HandlerParams& params, std::string staticRoot)
       : BaseSampleHandler(params), staticRoot_(std::move(staticRoot)) {
+  }
+
+  folly::EventBase* evb() {
+    return CHECK_NOTNULL(folly::EventBaseManager::get()->getEventBase());
+  }
+
+ public:
+  static std::shared_ptr<StaticFileHandler> make(const HandlerParams& params,
+                                                 std::string staticRoot) {
+    // since this class is accessed by two executors (cpu exec via ::readFile &
+    // evb via HttpTxn), this class owns a shared_ptr to extend its lifetime
+    // until work is finished on both executors
+    auto handler = std::shared_ptr<StaticFileHandler>(
+        new StaticFileHandler(params, std::move(staticRoot)));
+    handler->self_ = handler;
+    return handler;
   }
 
   void onHeadersComplete(
@@ -905,9 +921,7 @@ class StaticFileHandler : public BaseSampleHandler {
     txn_->sendHeaders(resp);
     // use a CPU executor since read(2) of a file can block
     folly::getUnsafeMutableGlobalCPUExecutor()->add(
-        std::bind(&StaticFileHandler::readFile,
-                  this,
-                  folly::EventBaseManager::get()->getEventBase()));
+        [this, evb = evb(), self = self_]() { readFile(evb, self); });
   }
 
   void onBody(std::unique_ptr<folly::IOBuf> /*chain*/) noexcept override {
@@ -930,13 +944,33 @@ class StaticFileHandler : public BaseSampleHandler {
     VLOG(10) << "StaticFileHandler::onEgressResumed";
     paused_ = false;
     folly::getUnsafeMutableGlobalCPUExecutor()->add(
-        std::bind(&StaticFileHandler::readFile,
-                  this,
-                  folly::EventBaseManager::get()->getEventBase()));
+        [this, evb = evb(), self = self_]() { readFile(evb, self); });
+  }
+
+  void detachTransaction() noexcept override {
+    txn_ = nullptr;
+    self_.reset();
   }
 
  private:
-  void readFile(folly::EventBase* evb) {
+  void sendAbort() {
+    if (txn_) {
+      txn_->sendAbort();
+    }
+  }
+  void sendBody(std::unique_ptr<folly::IOBuf> body) {
+    if (txn_) {
+      txn_->sendBody(std::move(body));
+    }
+  }
+  void sendEom() {
+    if (txn_) {
+      txn_->sendEOM();
+    }
+  }
+
+  void readFile(folly::EventBase* evb,
+                std::shared_ptr<StaticFileHandler> self) {
     folly::IOBufQueue buf;
     while (file_ && !paused_) {
       // read 4k-ish chunks and foward each one to the client
@@ -944,26 +978,23 @@ class StaticFileHandler : public BaseSampleHandler {
       auto rc = folly::readNoInt(file_->fd(), data.first, data.second);
       if (rc < 0) {
         // error
-        VLOG(4) << "Read error=" << rc;
+        LOG(ERROR) << "Read error=" << rc;
         file_.reset();
-        evb->runInEventBaseThread([this] {
-          LOG(ERROR) << "Error reading file";
-          txn_->sendAbort();
-        });
+        evb->runInEventBaseThread([this] { sendAbort(); });
         break;
       } else if (rc == 0) {
         // done
         file_.reset();
         VLOG(4) << "Read EOF";
-        evb->runInEventBaseThread([this] { txn_->sendEOM(); });
+        evb->runInEventBaseThread([this] { sendEom(); });
         break;
       } else {
         buf.postallocate(rc);
-        evb->runInEventBaseThread([this, body = buf.move()]() mutable {
-          txn_->sendBody(std::move(body));
-        });
+        evb->runInEventBaseThread(
+            [this, body = buf.move()]() mutable { sendBody(std::move(body)); });
       }
     }
+    evb->runInEventBaseThread([_ = std::move(self)] {});
   }
 
   void sendError(const std::string& errorMsg) {
@@ -978,6 +1009,7 @@ class StaticFileHandler : public BaseSampleHandler {
   std::unique_ptr<folly::File> file_;
   std::atomic<bool> paused_{false};
   std::string staticRoot_;
+  std::shared_ptr<StaticFileHandler> self_;
 };
 
 } // namespace quic::samples

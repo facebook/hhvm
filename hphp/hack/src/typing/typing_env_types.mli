@@ -65,6 +65,8 @@ type env = {
   inference_env: Typing_inference_env.t;
   rank: int;
       (** The rank at which fresh type variables and type parameters should be generated *)
+  check_rank: bool;
+      (** Heuristic to determine when we need to check ranks during subtyping  *)
   allow_wildcards: bool;
   big_envs: (Pos.t * env) list ref;
   fun_tast_info: Tast.fun_tast_info option;
@@ -141,3 +143,5 @@ val get_rank : env -> int
 val increment_rank : env -> env
 
 val decrement_rank : env -> env
+
+val should_check_rank : env -> bool

@@ -255,7 +255,6 @@ module Subtype_env = struct
             class_sub_classname typechecker option, but it is unconditionally
             false for type well-formedness checks. *)
     recursion_tracker: Subtype_recursion_tracker.t;
-    check_rank: bool;
   }
 
   let set_on_error t on_error = { t with on_error }
@@ -275,7 +274,6 @@ module Subtype_env = struct
       ?(is_coeffect = false)
       ?(in_transitive_closure = false)
       ?(ignore_likes = false)
-      ?(check_rank = false)
       ?(has_member_arg_posl = None)
       ~class_sub_classname
       ~(log_level : int)
@@ -297,7 +295,6 @@ module Subtype_env = struct
       ignore_likes;
       class_sub_classname;
       recursion_tracker = Subtype_recursion_tracker.empty;
-      check_rank;
     }
 
   let possibly_add_violated_constraint subtype_env ~r_sub ~r_super =
@@ -383,10 +380,6 @@ module Subtype_env = struct
       op
     |> Result.map ~f:(fun recursion_tracker ->
            { subtype_env with recursion_tracker })
-
-  let set_check_rank t check_rank = { t with check_rank }
-
-  let get_check_rank { check_rank; _ } = check_rank
 end
 
 module Logging : sig
@@ -724,6 +717,29 @@ type lhs = {
 let should_cls_sub_cn env =
   TypecheckerOptions.class_sub_classname env.genv.tcopt
 
+(* Find the first generic occurring in [ty] with a rank higher than [rank]  *)
+let check_rank env ty rank =
+  (* To avoid this potentially expensive check we record when the sub- or
+     supertype _may_ contain a higher rank type parameter. *)
+  if Typing_env_types.should_check_rank env then
+    let p ty =
+      match get_node ty with
+      | Tgeneric name -> Env.rank_of_tparam env name > rank
+      | Tvar tv -> Env.rank_of_tvar env tv > rank
+      | _ -> false
+    in
+    let ty_opt = Typing_defs_core.find_locl_ty ty ~p in
+    Option.map ty_opt ~f:(fun ty ->
+        match deref ty with
+        | (r, Tgeneric name) -> (r, Some name)
+        | (r, Tvar _) -> (r, None)
+        | _ ->
+          (* We are guaranteed that if the result if [Some(...)] then the type
+             is a [Tgeneric] so something is seriously wrong here *)
+          failwith "check_rank: unexpected type")
+  else
+    None
+
 module type Constraint_handler = sig
   type rhs
 
@@ -843,29 +859,6 @@ end = struct
         ty_sub
         ty_super
   end
-
-  (* Find the first generic occurring in [ty] with a rank higher than [rank]  *)
-  let check_rank env subtype_env ty rank =
-    (* To avoid this potentially expensive check we record when the sub- or
-       supertype _may_ contain a higher rank type parameter. *)
-    if Subtype_env.get_check_rank subtype_env then
-      let p ty =
-        match get_node ty with
-        | Tgeneric name -> Env.rank_of_tparam env name > rank
-        | Tvar tv -> Env.rank_of_tvar env tv > rank
-        | _ -> false
-      in
-      let ty_opt = Typing_defs_core.find_locl_ty ty ~p in
-      Option.map ty_opt ~f:(fun ty ->
-          match deref ty with
-          | (r, Tgeneric name) -> (r, Some name)
-          | (r, Tvar _) -> (r, None)
-          | _ ->
-            (* We are guaranteed that if the result if [Some(...)] then the type
-               is a [Tgeneric] so something is seriously wrong here *)
-            failwith "check_rank: unexpected type")
-    else
-      None
 
   let is_final_and_invariant env id =
     let class_def = Env.get_class env id in
@@ -1102,7 +1095,7 @@ end = struct
     | (r_sub, Tvar id) -> begin
       (* Ensure that higher-ranked type parameters don't escape their scope *)
       let tvar_rank = Env.rank_of_tvar env id in
-      match check_rank env subtype_env ty_super tvar_rank with
+      match check_rank env ty_super tvar_rank with
       | Some (generic_reason, generic_name) ->
         let error =
           Typing_error.Secondary.Higher_rank_tparam_escape
@@ -3405,7 +3398,7 @@ end = struct
         (r_super, Tvar var_super_id) ) -> begin
       (* Ensure that higher-ranked type parameters don't escape their scope *)
       let tvar_rank = Env.rank_of_tvar env var_super_id in
-      match check_rank env subtype_env ty_sub tvar_rank with
+      match check_rank env ty_sub tvar_rank with
       | Some (generic_reason, generic_name) ->
         let error =
           Typing_error.Secondary.Higher_rank_tparam_escape
@@ -4657,12 +4650,6 @@ end = struct
          If only the subtype is polymorphic we don't change ranks because we
          aren't going though a binder - we are just instantiating. *)
       let increase_rank = not ft_super.ft_instantiated in
-      let subtype_env =
-        let check_rank_outer = Subtype_env.get_check_rank subtype_env in
-        Subtype_env.set_check_rank
-          subtype_env
-          (check_rank_outer || increase_rank)
-      in
       let env =
         if increase_rank then
           Typing_env_types.increment_rank env
@@ -9908,6 +9895,21 @@ end = struct
     | (LoclType lty_sub, LoclType lty_super) -> begin
       match (get_node lty_sub, get_node lty_super) with
       (* var-l-r *)
+      | (Tvar var_sub, Tvar var_super)
+        when Env.rank_of_tvar env var_sub <> Env.rank_of_tvar env var_super ->
+        let tvar_pos = Typing_reason.to_pos (get_reason lty_sub) in
+        let generic_reason = get_reason lty_super in
+        let pos_with_generic = Typing_reason.to_pos generic_reason in
+        let generic_name = None in
+        let error =
+          Typing_error.Secondary.Higher_rank_tparam_escape
+            { tvar_pos; pos_with_generic; generic_reason; generic_name }
+        in
+        let fail =
+          Option.map on_error ~f:(fun on_error ->
+              Typing_error.apply_reasons ~on_error error)
+        in
+        (env, fail, [])
       | (Tvar var_sub, Tvar var_super) ->
         let (env, prop1) =
           add_tyvar_upper_bound_and_close
@@ -9935,25 +9937,61 @@ end = struct
           on_error
       (* var-l *)
       | (Tvar var, _) ->
-        let (env, prop) =
-          add_tyvar_upper_bound_and_close
-            ~is_dynamic_aware
-            (valid env)
-            (get_reason lty_sub, var)
-            lty_super
-            on_error
-        in
-        tell ty_sub ty_super env prop on_error
+        let tvar_rank = Env.rank_of_tvar env var in
+        (match check_rank env lty_super tvar_rank with
+        | Some (generic_reason, generic_name) ->
+          let error =
+            Typing_error.Secondary.Higher_rank_tparam_escape
+              {
+                tvar_pos = Typing_reason.to_pos (get_reason lty_sub);
+                pos_with_generic = Typing_reason.to_pos (get_reason lty_super);
+                generic_reason;
+                generic_name;
+              }
+          in
+          let fail =
+            Option.map on_error ~f:(fun on_error ->
+                Typing_error.apply_reasons ~on_error error)
+          in
+          (env, fail, [])
+        | _ ->
+          let (env, prop) =
+            add_tyvar_upper_bound_and_close
+              ~is_dynamic_aware
+              (valid env)
+              (get_reason lty_sub, var)
+              lty_super
+              on_error
+          in
+          tell ty_sub ty_super env prop on_error)
       | (_, Tvar var) ->
-        let (env, prop) =
-          add_tyvar_lower_bound_and_close
-            ~is_dynamic_aware
-            (valid env)
-            (get_reason lty_super, var)
-            lty_sub
-            on_error
-        in
-        tell ty_sub ty_super env prop on_error
+        let tvar_rank = Env.rank_of_tvar env var in
+        (match check_rank env lty_sub tvar_rank with
+        | Some (generic_reason, generic_name) ->
+          let error =
+            Typing_error.Secondary.Higher_rank_tparam_escape
+              {
+                tvar_pos = Typing_reason.to_pos (get_reason lty_super);
+                pos_with_generic = Typing_reason.to_pos (get_reason lty_sub);
+                generic_reason;
+                generic_name;
+              }
+          in
+          let fail =
+            Option.map on_error ~f:(fun on_error ->
+                Typing_error.apply_reasons ~on_error error)
+          in
+          (env, fail, [])
+        | _ ->
+          let (env, prop) =
+            add_tyvar_lower_bound_and_close
+              ~is_dynamic_aware
+              (valid env)
+              (get_reason lty_super, var)
+              lty_sub
+              on_error
+          in
+          tell ty_sub ty_super env prop on_error)
       | _ -> (env, None, [TL.IsSubtype (is_dynamic_aware, ty_sub, ty_super)])
     end
     (* [constraint_type]s are only valid on the rhs *)

@@ -1,0 +1,18 @@
+ERROR: File "mock_return2.php", line 36, characters 45-60:
+Invalid argument (Typing[4110])
+  File "mock_return2.php", line 27, characters 30-31:
+  Expected a first-class polymorphic function type.
+  File "mock_return2.php", line 27, characters 30-31:
+  A higher rank generic `T1#2` will escape its scope where `T1#2` corresponds to the rank-2 type parameter `T1` in the polymorphic function
+  File "mock_return2.php", line 27, characters 30-31:
+  This type argument to `Pred` only allows supertypes (it is contravariant)
+  File "mock_return2.php", line 36, characters 49-58:
+  Please make this type explicit
+ERROR: File "mock_return2.php", line 36, characters 45-60:
+Invalid argument (Typing[4442])
+  File "mock_return2.php", line 27, characters 34-35:
+  Expected a first-class polymorphic function type.
+  File "mock_return2.php", line 27, characters 34-35:
+  A higher rank generic `T2#2` will escape its scope where `T2#2` corresponds to the rank-2 type parameter `T2` in the polymorphic function
+  File "mock_return2.php", line 36, characters 49-58:
+  Please make this type explicit

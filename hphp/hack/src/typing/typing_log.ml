@@ -622,6 +622,7 @@ let env_as_value env =
     fun_tast_info;
     loaded_packages = _;
     emit_string_coercion_error = _;
+    check_rank = _;
   } =
     env
   in

@@ -26,6 +26,67 @@
 
 namespace apache::thrift::type_system {
 
+namespace detail {
+
+// Helper to get or create a cached TypeRef for a container type.
+// Uses folly::Synchronized for thread-safe access with optimistic concurrency.
+// F14NodeMap ensures stable references even during rehashing.
+const TypeRef* getOrCreateCachedType(
+    ContainerTypeCache& cache, const TypeId& typeId, TypeRef&& typeRef) {
+  // Optimistic read: check if already cached
+  {
+    auto rlock = cache.cache.rlock();
+    auto it = rlock->find(typeId);
+    if (it != rlock->end()) {
+      return &it->second;
+    }
+  }
+
+  // Not found, need to insert. Acquire write lock.
+  auto wlock = cache.cache.wlock();
+
+  // Double-check: another thread may have inserted while we were waiting
+  auto [it, inserted] = wlock->try_emplace(typeId, typeRef);
+  return &it->second;
+}
+
+ListTypeRef::ListTypeRef(TypeRef elementType, ContainerTypeCache& cache)
+    : elementType_([&] {
+        auto id = elementType.id();
+        return getOrCreateCachedType(cache, id, std::move(elementType));
+      }()) {}
+
+TypeId ListTypeRef::id() const {
+  return TypeIds::list(elementType().id());
+}
+
+SetTypeRef::SetTypeRef(TypeRef elementType, ContainerTypeCache& cache)
+    : elementType_([&] {
+        auto id = elementType.id();
+        return getOrCreateCachedType(cache, id, std::move(elementType));
+      }()) {}
+
+TypeId SetTypeRef::id() const {
+  return TypeIds::set(elementType().id());
+}
+
+MapTypeRef::MapTypeRef(
+    TypeRef keyType, TypeRef valueType, ContainerTypeCache& cache)
+    : keyType_([&] {
+        auto id = keyType.id();
+        return getOrCreateCachedType(cache, id, std::move(keyType));
+      }()),
+      valueType_([&] {
+        auto id = valueType.id();
+        return getOrCreateCachedType(cache, id, std::move(valueType));
+      }()) {}
+
+TypeId MapTypeRef::id() const {
+  return TypeIds::map(keyType().id(), valueType().id());
+}
+
+} // namespace detail
+
 StructuredNode::StructuredNode(
     Uri uri,
     std::vector<FieldDefinition> fields,
@@ -92,62 +153,10 @@ FieldDefinition::FieldDefinition(
     AnnotationsMap annotations)
     : identity_(std::move(identity)),
       presence_(presence),
-      type_(std::move(type)),
+      type_(type),
       wireType_(ToTTypeFn{}(type_)),
       customDefaultPartialRecord_(std::move(customDefaultPartialRecord)),
       annotations_(std::move(annotations)) {}
-
-namespace detail {
-
-ListTypeRef::ListTypeRef(TypeRef elementType)
-    : elementType_(folly::copy_to_unique_ptr(std::move(elementType))) {}
-
-ListTypeRef::ListTypeRef(const ListTypeRef& other)
-    : elementType_(folly::copy_to_unique_ptr(other.elementType())) {}
-
-ListTypeRef& ListTypeRef::operator=(const ListTypeRef& other) {
-  elementType_ = folly::copy_to_unique_ptr(other.elementType());
-  return *this;
-}
-
-TypeId ListTypeRef::id() const {
-  return TypeIds::list(elementType().id());
-}
-
-SetTypeRef::SetTypeRef(TypeRef elementType)
-    : elementType_(folly::copy_to_unique_ptr(std::move(elementType))) {}
-
-SetTypeRef::SetTypeRef(const SetTypeRef& other)
-    : elementType_(folly::copy_to_unique_ptr(other.elementType())) {}
-
-SetTypeRef& SetTypeRef::operator=(const SetTypeRef& other) {
-  elementType_ = folly::copy_to_unique_ptr(other.elementType());
-  return *this;
-}
-
-TypeId SetTypeRef::id() const {
-  return TypeIds::set(elementType().id());
-}
-
-MapTypeRef::MapTypeRef(TypeRef keyType, TypeRef valueType)
-    : keyType_(folly::copy_to_unique_ptr(std::move(keyType))),
-      valueType_(folly::copy_to_unique_ptr(std::move(valueType))) {}
-
-MapTypeRef::MapTypeRef(const MapTypeRef& other)
-    : keyType_(folly::copy_to_unique_ptr(other.keyType())),
-      valueType_(folly::copy_to_unique_ptr(other.valueType())) {}
-
-MapTypeRef& MapTypeRef::operator=(const MapTypeRef& other) {
-  keyType_ = folly::copy_to_unique_ptr(other.keyType());
-  valueType_ = folly::copy_to_unique_ptr(other.valueType());
-  return *this;
-}
-
-TypeId MapTypeRef::id() const {
-  return TypeIds::map(keyType().id(), valueType().id());
-}
-
-} // namespace detail
 
 const StructuredNode& TypeRef::asStructured() const {
   switch (kind()) {
@@ -395,6 +404,7 @@ DefinitionRef TypeSystem::getUserDefinedTypeOrThrow(UriView uri) const {
 namespace {
 struct TypeIdResolver {
   const TypeSystem& typeSystem_;
+  detail::ContainerTypeCache& cache_;
 
   TypeRef operator()(const TypeId& typeId) const { return typeId.visit(*this); }
 
@@ -444,24 +454,24 @@ struct TypeIdResolver {
 
   TypeRef operator()(const TypeId::List& listId) const {
     auto elementType = (*this)(listId.elementType());
-    return TypeRef(TypeRef::List(std::move(elementType)));
+    return TypeRef(TypeRef::List(elementType, cache_));
   }
 
   TypeRef operator()(const TypeId::Set& setId) const {
     auto elementType = (*this)(setId.elementType());
-    return TypeRef(TypeRef::Set(std::move(elementType)));
+    return TypeRef(TypeRef::Set(elementType, cache_));
   }
 
   TypeRef operator()(const TypeId::Map& mapId) const {
     auto keyType = (*this)(mapId.keyType());
     auto valueType = (*this)(mapId.valueType());
-    return TypeRef(TypeRef::Map(std::move(keyType), std::move(valueType)));
+    return TypeRef(TypeRef::Map(keyType, valueType, cache_));
   }
 };
 } // namespace
 
 TypeRef TypeSystem::resolveTypeId(const TypeId& typeId) const {
-  return TypeIdResolver{*this}(typeId);
+  return TypeIdResolver{*this, containerTypeCache()}(typeId);
 }
 } // namespace apache::thrift::type_system
 

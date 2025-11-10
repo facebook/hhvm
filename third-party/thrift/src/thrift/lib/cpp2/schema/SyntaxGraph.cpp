@@ -1061,23 +1061,26 @@ class TypeSystemFacade final : public type_system::SourceIndexedTypeSystem {
       // into the map that we will later overwrite with the correct data.
       sgDef->visit(
           [&](const StructNode& s) {
-            auto [entry, _] =
-                cache_.emplace(sgDef, type_system::StructNode{{}, {}, {}, {}});
+            auto [entry, _] = cache_.emplace(
+                sgDef,
+                type_system::StructNode{type_system::Uri(s.uri()), {}, {}, {}});
             reverseCache_.emplace(
                 &std::get<type_system::StructNode>(entry->second), sgDef);
             processStructuredType(s);
           },
           [&](const UnionNode& s) {
-            auto [entry, _] =
-                cache_.emplace(sgDef, type_system::UnionNode{{}, {}, {}, {}});
+            auto [entry, _] = cache_.emplace(
+                sgDef,
+                type_system::UnionNode{type_system::Uri(s.uri()), {}, {}, {}});
             reverseCache_.emplace(
                 &std::get<type_system::UnionNode>(entry->second), sgDef);
             processStructuredType(s);
           },
           [&](const ExceptionNode& e) {
             // SyntaxGraph exceptions are converted into TypeSystem structs
-            auto [entry, _] =
-                cache_.emplace(sgDef, type_system::StructNode{{}, {}, {}, {}});
+            auto [entry, _] = cache_.emplace(
+                sgDef,
+                type_system::StructNode{type_system::Uri(e.uri()), {}, {}, {}});
             reverseCache_.emplace(
                 &std::get<type_system::StructNode>(entry->second), sgDef);
             processStructuredType(e);
@@ -1227,15 +1230,10 @@ class TypeSystemFacade final : public type_system::SourceIndexedTypeSystem {
           folly::throw_exception<std::logic_error>(
               "Typedefs should have been resolved by trueType call");
         },
-        [&](const List& l) {
-          return type_system::TypeSystem::ListOf(convertType(l.elementType()));
-        },
-        [&](const Set& s) {
-          return type_system::TypeSystem::SetOf(convertType(s.elementType()));
-        },
+        [&](const List& l) { return ListOf(convertType(l.elementType())); },
+        [&](const Set& s) { return SetOf(convertType(s.elementType())); },
         [&](const Map& m) {
-          return type_system::TypeSystem::MapOf(
-              convertType(m.keyType()), convertType(m.valueType()));
+          return MapOf(convertType(m.keyType()), convertType(m.valueType()));
         });
   }
 

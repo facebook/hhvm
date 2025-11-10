@@ -142,17 +142,20 @@ struct TagResolver {
 
   template <typename Tag>
   auto operator()(const type::list<Tag>&) const {
-    return TypeRef::List(resolveTag(ts, Tag{}));
+    return TypeRef::List(resolveTag(ts, Tag{}), ts.containerTypeCache());
   }
 
   template <typename Tag>
   auto operator()(const type::set<Tag>&) const {
-    return TypeRef::Set(resolveTag(ts, Tag{}));
+    return TypeRef::Set(resolveTag(ts, Tag{}), ts.containerTypeCache());
   }
 
   template <typename KTag, typename VTag>
   auto operator()(const type::map<KTag, VTag>&) const {
-    return TypeRef::Map(resolveTag(ts, KTag{}), resolveTag(ts, VTag{}));
+    return TypeRef::Map(
+        resolveTag(ts, KTag{}),
+        resolveTag(ts, VTag{}),
+        ts.containerTypeCache());
   }
 
   template <typename T>

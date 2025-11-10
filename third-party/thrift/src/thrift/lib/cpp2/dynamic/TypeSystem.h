@@ -23,6 +23,7 @@
 #include <thrift/lib/thrift/gen-cpp2/type_system_types.h>
 
 #include <folly/CppAttributes.h>
+#include <folly/Synchronized.h>
 #include <folly/Traits.h>
 #include <folly/Utility.h>
 #include <folly/container/F14Set.h>
@@ -326,214 +327,27 @@ class SourceIdentifierHash {
   }
 };
 
-/**
- * An interface for a Thrift "type system", which is a store of schema
- * information.
- *
- * A type system is a collection of types where each type (and all types it
- * refers to) are fully defined within the same type system.
- *
- * This interface is used to abstract away the source of runtime schema
- * information from its usage. For example, a type system may be backed by:
- *   - Schema information bundled within the binary as part of Thrift's code
- *     generation.
- *   - Schema information fetched from a remote source.
- *   - Schema information created programmatically at runtime.
- */
-class TypeSystem {
- public:
-  virtual ~TypeSystem() noexcept = default;
-
-  /**
-   * Resolves the definition of a user-defined type, and implicitly, all
-   * transitively referenced types.
-   *
-   * Returns an empty optional if the requested type does not exist in the type
-   * system.
-   */
-  virtual std::optional<DefinitionRef> getUserDefinedType(UriView) const = 0;
-  /**
-   * Same as getUserDefinedType except throws an exception if the type is not
-   * found.
-   *
-   * Throws:
-   *   - InvalidTypeError if the type is not defined in the type system.
-   */
-  DefinitionRef getUserDefinedTypeOrThrow(UriView) const;
-  /**
-   * Resolves an arbitrary TypeId ito a TypeRef.
-   *
-   * Throws:
-   *   - InvalidTypeError if the TypeId references user-defined types that are
-   *     not defined in the type system.
-   */
-  TypeRef resolveTypeId(const TypeId& typeId) const;
-
-  /**
-   * Generates a set of all user-defined type URIs currently known to the type
-   * system.
-   *
-   * For every URI returned by this function, `getUserDefinedType` must succeed.
-   * For every URI that is NOT returned by this function, `getUserDefinedType`
-   * must fail.
-   *
-   * If the set of URIs is not finitely enumerable, then this function should
-   * return an empty optional.
-   */
-  virtual std::optional<folly::F14FastSet<Uri>> getKnownUris() const = 0;
-
-  /**
-   * Creates a TypeRef for the `bool` type — either true or false.
-   */
-  static TypeRef Bool() noexcept;
-  /**
-   * Creates a TypeRef for the `byte` type — 8-bit signed integer.
-   */
-  static TypeRef Byte() noexcept;
-  /**
-   * Creates a TypeRef for the `i16` type — 16-bit signed integer.
-   */
-  static TypeRef I16() noexcept;
-  /**
-   * Creates a TypeRef for the `i32` type — 32-bit signed integer.
-   */
-  static TypeRef I32() noexcept;
-  /**
-   * Creates a TypeRef for the `i64` type — 64-bit signed integer.
-   */
-  static TypeRef I64() noexcept;
-  /**
-   * Creates a TypeRef for the `float` type — IEEE 754 binary32.
-   */
-  static TypeRef Float() noexcept;
-  /**
-   * Creates a TypeRef for the `double` type — IEEE 754 binary64.
-   */
-  static TypeRef Double() noexcept;
-  /**
-   * Creates a TypeRef for the `string` type — UTF-8 encoded bytes.
-   */
-  static TypeRef String() noexcept;
-  /**
-   * Creates a TypeRef for the `binary` type — a sequence of bytes.
-   */
-  static TypeRef Binary() noexcept;
-  /**
-   * Creates a TypeRef for the `any` type — a type-erased Thrift value.
-   */
-  static TypeRef Any() noexcept;
-
-  /**
-   * Creates a TypeRef for a `list` type.
-   * The provided element type must from the same type system.
-   */
-  TypeRef ListOf(TypeRef elementType) const;
-  /**
-   * Creates a TypeRef for a `set` type.
-   * The provided element type must from the same type system.
-   */
-  TypeRef SetOf(TypeRef elementType) const;
-  /**
-   * Creates a TypeRef for a `list` type.
-   * The provided key and value types must from the same type system.
-   */
-  TypeRef MapOf(TypeRef keyType, TypeRef valueType) const;
-
-  /**
-   * Creates a TypeRef for a user-defined type.
-   *
-   * Throws:
-   *   - InvalidTypeError if the type is not defined in the type system.
-   */
-  TypeRef UserDefined(UriView) const;
-};
-
-/**
- * An interface for a Thrift "type system" that supports looking up types by
- * source names instead of URIs. Note that unlike URIs, source names do not
- * uniquely identify types within a type system.
- *
- * Typically, source information for a type system is derived from the Thrift
- * IDL source file that produced it.
- *
- * The SourceIndexedTypeSystem interface provides only an alternative lookup
- * scheme. It does not include any other information regarding the types
- * contained within the type system.
- */
-class SourceIndexedTypeSystem : public TypeSystem {
- public:
-  ~SourceIndexedTypeSystem() noexcept override = default;
-
-  /**
-   * Resolves the defintion of a user-defined type referred to by a source
-   * identifier, if it exists.
-   *
-   * Note that source information is optional — not all user-defined types may
-   * have a source identifier.
-   */
-  virtual std::optional<DefinitionRef> getUserDefinedTypeBySourceIdentifier(
-      SourceIdentifierView) const = 0;
-
-  /**
-   * Retrieves the source identifier for a user-defined type, if it exists. This
-   * is the inverse of `getUserDefinedTypeBySourceIdentifier`.
-   *
-   * Note that source information is optional — not all user-defined types may
-   * have a source identifier.
-   */
-  virtual std::optional<SourceIdentifierView>
-      getSourceIdentiferForUserDefinedType(DefinitionRef) const = 0;
-
-  using NameToDefinitionsMap = folly::F14FastMap<std::string, DefinitionRef>;
-  /**
-   * Resolves all definitions of user-defined types at a provided location URI.
-   * Typically, this URI points to a source Thrift IDL file.
-   *
-   * The result is a mapping of definition name to a reference to the
-   * definition.
-   *
-   * For every name in the result, `getUserDefinedTypeBySourceIdentifier` must
-   * also succeed.
-   */
-  virtual NameToDefinitionsMap getUserDefinedTypesAtLocation(
-      std::string_view location) const = 0;
-};
-
-/**
- * Exception type that is thrown if there an attempt to form a definition with
- * invalid schema information. Some common scenario that result in this
- * exception being thrown:
- *   - There is an unresolved TypeId.
- *   - Union has non-optional fields.
- *   - Structured type has duplicate field ids or names.
- *   - Enum has duplicate names or values.
- */
-class InvalidTypeError : public std::runtime_error {
- public:
-  using std::runtime_error::runtime_error;
-};
-
-using AnnotationsMap = detail::AnnotationsMap;
-
 namespace detail {
+
+struct ContainerTypeCache;
 
 /**
  * A TypeRef of a list type, including the underlying element type.
  */
 class ListTypeRef final {
  public:
-  explicit ListTypeRef(TypeRef elementType);
+  explicit ListTypeRef(TypeRef elementType, ContainerTypeCache& cache);
 
   const TypeRef& elementType() const { return *elementType_; }
 
   // Helper to construct a ListTypeRef from a type-system node
   // e.g. ListTypeRef::of(TypeRef::Bool())
   template <typename T>
-  static ListTypeRef of(T&&);
+  static ListTypeRef of(T&&, ContainerTypeCache& cache);
 
   ~ListTypeRef() noexcept = default;
-  ListTypeRef(const ListTypeRef&);
-  ListTypeRef& operator=(const ListTypeRef&);
+  ListTypeRef(const ListTypeRef&) = default;
+  ListTypeRef& operator=(const ListTypeRef&) = default;
   ListTypeRef(ListTypeRef&&) noexcept = default;
   ListTypeRef& operator=(ListTypeRef&&) noexcept = default;
 
@@ -541,8 +355,8 @@ class ListTypeRef final {
   TypeId id() const;
 
  private:
-  // Heap usage prevents mutual recursion with `TypeRef`.
-  folly::not_null_unique_ptr<TypeRef> elementType_;
+  // Pointer into the per-TypeSystem container type cache.
+  folly::not_null<const TypeRef*> elementType_;
 };
 
 /**
@@ -550,18 +364,18 @@ class ListTypeRef final {
  */
 class SetTypeRef final {
  public:
-  explicit SetTypeRef(TypeRef elementType);
+  explicit SetTypeRef(TypeRef elementType, ContainerTypeCache& cache);
 
   const TypeRef& elementType() const { return *elementType_; }
 
   // Helper to construct a SetTypeRef from a type-system node
   // e.g. SetTypeRef::of(TypeRef::Bool())
   template <typename T>
-  static SetTypeRef of(T&&);
+  static SetTypeRef of(T&&, ContainerTypeCache& cache);
 
   ~SetTypeRef() noexcept = default;
-  SetTypeRef(const SetTypeRef&);
-  SetTypeRef& operator=(const SetTypeRef&);
+  SetTypeRef(const SetTypeRef&) = default;
+  SetTypeRef& operator=(const SetTypeRef&) = default;
   SetTypeRef(SetTypeRef&&) noexcept = default;
   SetTypeRef& operator=(SetTypeRef&&) noexcept = default;
 
@@ -569,8 +383,8 @@ class SetTypeRef final {
   TypeId id() const;
 
  private:
-  // Heap usage prevents mutual recursion with `TypeRef`.
-  folly::not_null_unique_ptr<TypeRef> elementType_;
+  // Pointer into the per-TypeSystem container type cache.
+  folly::not_null<const TypeRef*> elementType_;
 };
 
 /**
@@ -578,7 +392,7 @@ class SetTypeRef final {
  */
 class MapTypeRef final {
  public:
-  MapTypeRef(TypeRef keyType, TypeRef valueType);
+  MapTypeRef(TypeRef keyType, TypeRef valueType, ContainerTypeCache& cache);
 
   const TypeRef& keyType() const { return *keyType_; }
   const TypeRef& valueType() const { return *valueType_; }
@@ -586,11 +400,11 @@ class MapTypeRef final {
   // Helpers to construct a MapTypeRef from type-system nodes
   // e.g. MapTypeRef::of(TypeRef::I32(), TypeRef::String())
   template <typename K, typename V>
-  static MapTypeRef of(K&&, V&&);
+  static MapTypeRef of(K&&, V&&, ContainerTypeCache& cache);
 
   ~MapTypeRef() noexcept = default;
-  MapTypeRef(const MapTypeRef&);
-  MapTypeRef& operator=(const MapTypeRef&);
+  MapTypeRef(const MapTypeRef&) = default;
+  MapTypeRef& operator=(const MapTypeRef&) = default;
   MapTypeRef(MapTypeRef&&) noexcept = default;
   MapTypeRef& operator=(MapTypeRef&&) noexcept = default;
 
@@ -598,9 +412,9 @@ class MapTypeRef final {
   TypeId id() const;
 
  private:
-  // Heap usage prevents mutual recursion with `TypeRef`.
-  folly::not_null_unique_ptr<TypeRef> keyType_;
-  folly::not_null_unique_ptr<TypeRef> valueType_;
+  // Pointers into the per-TypeSystem container type cache.
+  folly::not_null<const TypeRef*> keyType_;
+  folly::not_null<const TypeRef*> valueType_;
 };
 
 } // namespace detail
@@ -864,10 +678,222 @@ class TypeRef final {
 
   [[noreturn]] void throwAccessInactiveKind() const;
 };
-static_assert(std::is_copy_constructible_v<TypeRef>);
-static_assert(std::is_copy_assignable_v<TypeRef>);
-static_assert(std::is_move_constructible_v<TypeRef>);
-static_assert(std::is_move_assignable_v<TypeRef>);
+static_assert(std::is_trivially_copyable_v<TypeRef>);
+static_assert(std::is_trivially_copy_assignable_v<TypeRef>);
+static_assert(std::is_trivially_move_constructible_v<TypeRef>);
+static_assert(std::is_trivially_move_assignable_v<TypeRef>);
+
+namespace detail {
+// Cache for container type instantiations within a TypeSystem.
+// Uses F14NodeMap to ensure stable references even during rehashing.
+struct ContainerTypeCache {
+  folly::Synchronized<folly::F14NodeMap<TypeId, TypeRef>> cache;
+};
+} // namespace detail
+
+/**
+ * An interface for a Thrift "type system", which is a store of schema
+ * information.
+ *
+ * A type system is a collection of types where each type (and all types it
+ * refers to) are fully defined within the same type system.
+ *
+ * This interface is used to abstract away the source of runtime schema
+ * information from its usage. For example, a type system may be backed by:
+ *   - Schema information bundled within the binary as part of Thrift's code
+ *     generation.
+ *   - Schema information fetched from a remote source.
+ *   - Schema information created programmatically at runtime.
+ */
+class TypeSystem {
+ public:
+  virtual ~TypeSystem() noexcept = default;
+
+  /**
+   * Resolves the definition of a user-defined type, and implicitly, all
+   * transitively referenced types.
+   *
+   * Returns an empty optional if the requested type does not exist in the type
+   * system.
+   */
+  virtual std::optional<DefinitionRef> getUserDefinedType(UriView) const = 0;
+  /**
+   * Same as getUserDefinedType except throws an exception if the type is not
+   * found.
+   *
+   * Throws:
+   *   - InvalidTypeError if the type is not defined in the type system.
+   */
+  DefinitionRef getUserDefinedTypeOrThrow(UriView) const;
+  /**
+   * Resolves an arbitrary TypeId ito a TypeRef.
+   *
+   * Throws:
+   *   - InvalidTypeError if the TypeId references user-defined types that are
+   *     not defined in the type system.
+   */
+  TypeRef resolveTypeId(const TypeId& typeId) const;
+
+  /**
+   * Generates a set of all user-defined type URIs currently known to the type
+   * system.
+   *
+   * For every URI returned by this function, `getUserDefinedType` must succeed.
+   * For every URI that is NOT returned by this function, `getUserDefinedType`
+   * must fail.
+   *
+   * If the set of URIs is not finitely enumerable, then this function should
+   * return an empty optional.
+   */
+  virtual std::optional<folly::F14FastSet<Uri>> getKnownUris() const = 0;
+
+  /**
+   * Creates a TypeRef for the `bool` type — either true or false.
+   */
+  static TypeRef Bool() noexcept;
+  /**
+   * Creates a TypeRef for the `byte` type — 8-bit signed integer.
+   */
+  static TypeRef Byte() noexcept;
+  /**
+   * Creates a TypeRef for the `i16` type — 16-bit signed integer.
+   */
+  static TypeRef I16() noexcept;
+  /**
+   * Creates a TypeRef for the `i32` type — 32-bit signed integer.
+   */
+  static TypeRef I32() noexcept;
+  /**
+   * Creates a TypeRef for the `i64` type — 64-bit signed integer.
+   */
+  static TypeRef I64() noexcept;
+  /**
+   * Creates a TypeRef for the `float` type — IEEE 754 binary32.
+   */
+  static TypeRef Float() noexcept;
+  /**
+   * Creates a TypeRef for the `double` type — IEEE 754 binary64.
+   */
+  static TypeRef Double() noexcept;
+  /**
+   * Creates a TypeRef for the `string` type — UTF-8 encoded bytes.
+   */
+  static TypeRef String() noexcept;
+  /**
+   * Creates a TypeRef for the `binary` type — a sequence of bytes.
+   */
+  static TypeRef Binary() noexcept;
+  /**
+   * Creates a TypeRef for the `any` type — a type-erased Thrift value.
+   */
+  static TypeRef Any() noexcept;
+
+  /**
+   * Creates a TypeRef for a `list` type.
+   * The provided element type must from the same type system.
+   */
+  TypeRef ListOf(TypeRef elementType) const;
+  /**
+   * Creates a TypeRef for a `set` type.
+   * The provided element type must from the same type system.
+   */
+  TypeRef SetOf(TypeRef elementType) const;
+  /**
+   * Creates a TypeRef for a `list` type.
+   * The provided key and value types must from the same type system.
+   */
+  TypeRef MapOf(TypeRef keyType, TypeRef valueType) const;
+
+  /**
+   * Creates a TypeRef for a user-defined type.
+   *
+   * Throws:
+   *   - InvalidTypeError if the type is not defined in the type system.
+   */
+  TypeRef UserDefined(UriView) const;
+
+  /**
+   * Get the container type cache for this TypeSystem instance.
+   * Thread-safe access is ensured using folly::Synchronized.
+   */
+  detail::ContainerTypeCache& containerTypeCache() const {
+    return *containerTypeCache_;
+  }
+
+ private:
+  // Cache for container type instantiations, ensuring each unique container
+  // type is only instantiated once. Uses F14NodeMap for stable references.
+  // Thread-safety is managed by folly::Synchronized.
+  mutable std::unique_ptr<detail::ContainerTypeCache> containerTypeCache_ =
+      std::make_unique<detail::ContainerTypeCache>();
+};
+
+/**
+ * An interface for a Thrift "type system" that supports looking up types by
+ * source names instead of URIs. Note that unlike URIs, source names do not
+ * uniquely identify types within a type system.
+ *
+ * Typically, source information for a type system is derived from the Thrift
+ * IDL source file that produced it.
+ *
+ * The SourceIndexedTypeSystem interface provides only an alternative lookup
+ * scheme. It does not include any other information regarding the types
+ * contained within the type system.
+ */
+class SourceIndexedTypeSystem : public TypeSystem {
+ public:
+  ~SourceIndexedTypeSystem() noexcept override = default;
+
+  /**
+   * Resolves the defintion of a user-defined type referred to by a source
+   * identifier, if it exists.
+   *
+   * Note that source information is optional — not all user-defined types may
+   * have a source identifier.
+   */
+  virtual std::optional<DefinitionRef> getUserDefinedTypeBySourceIdentifier(
+      SourceIdentifierView) const = 0;
+
+  /**
+   * Retrieves the source identifier for a user-defined type, if it exists. This
+   * is the inverse of `getUserDefinedTypeBySourceIdentifier`.
+   *
+   * Note that source information is optional — not all user-defined types may
+   * have a source identifier.
+   */
+  virtual std::optional<SourceIdentifierView>
+      getSourceIdentiferForUserDefinedType(DefinitionRef) const = 0;
+
+  using NameToDefinitionsMap = folly::F14FastMap<std::string, DefinitionRef>;
+  /**
+   * Resolves all definitions of user-defined types at a provided location URI.
+   * Typically, this URI points to a source Thrift IDL file.
+   *
+   * The result is a mapping of definition name to a reference to the
+   * definition.
+   *
+   * For every name in the result, `getUserDefinedTypeBySourceIdentifier` must
+   * also succeed.
+   */
+  virtual NameToDefinitionsMap getUserDefinedTypesAtLocation(
+      std::string_view location) const = 0;
+};
+
+/**
+ * Exception type that is thrown if there an attempt to form a definition with
+ * invalid schema information. Some common scenario that result in this
+ * exception being thrown:
+ *   - There is an unresolved TypeId.
+ *   - Union has non-optional fields.
+ *   - Structured type has duplicate field ids or names.
+ *   - Enum has duplicate names or values.
+ */
+class InvalidTypeError : public std::runtime_error {
+ public:
+  using std::runtime_error::runtime_error;
+};
+
+using AnnotationsMap = detail::AnnotationsMap;
 
 class FieldDefinition final : folly::MoveOnly {
  public:
@@ -1136,7 +1162,7 @@ class OpaqueAliasNode final : folly::MoveOnly, public DefinitionNode {
   explicit OpaqueAliasNode(
       Uri uri, TypeRef targetType, AnnotationsMap annotations)
       : DefinitionNode(std::move(uri)),
-        targetType_(std::move(targetType)),
+        targetType_(targetType),
         annotations_(std::move(annotations)) {}
 
   TypeRef asRef() const noexcept { return TypeRef(*this); }
@@ -1271,19 +1297,21 @@ decltype(auto) TypeRef::visit(F&&... visitors) const {
 namespace detail {
 
 template <typename T>
-/* static */ ListTypeRef ListTypeRef::of(T&& element) {
-  return ListTypeRef(TypeRef(std::forward<T>(element)));
+/* static */ ListTypeRef ListTypeRef::of(
+    T&& element, ContainerTypeCache& cache) {
+  return ListTypeRef(TypeRef(std::forward<T>(element)), cache);
 }
 
 template <typename T>
-/* static */ SetTypeRef SetTypeRef::of(T&& element) {
-  return SetTypeRef(TypeRef(std::forward<T>(element)));
+/* static */ SetTypeRef SetTypeRef::of(T&& element, ContainerTypeCache& cache) {
+  return SetTypeRef(TypeRef(std::forward<T>(element)), cache);
 }
 
 template <typename K, typename V>
-/* static */ MapTypeRef MapTypeRef::of(K&& key, V&& value) {
+/* static */ MapTypeRef MapTypeRef::of(
+    K&& key, V&& value, ContainerTypeCache& cache) {
   return MapTypeRef(
-      TypeRef(std::forward<K>(key)), TypeRef(std::forward<V>(value)));
+      TypeRef(std::forward<K>(key)), TypeRef(std::forward<V>(value)), cache);
 }
 
 } // namespace detail
@@ -1329,15 +1357,15 @@ template <typename K, typename V>
 }
 
 inline TypeRef TypeSystem::ListOf(TypeRef elementType) const {
-  return TypeRef(TypeRef::List::of(std::move(elementType)));
+  return TypeRef(TypeRef::List(elementType, containerTypeCache()));
 }
 
 inline TypeRef TypeSystem::SetOf(TypeRef elementType) const {
-  return TypeRef(TypeRef::Set::of(std::move(elementType)));
+  return TypeRef(TypeRef::Set(elementType, containerTypeCache()));
 }
 
 inline TypeRef TypeSystem::MapOf(TypeRef keyType, TypeRef valueType) const {
-  return TypeRef(TypeRef::Map::of(std::move(keyType), std::move(valueType)));
+  return TypeRef(TypeRef::Map(keyType, valueType, containerTypeCache()));
 }
 
 inline TypeRef TypeSystem::UserDefined(UriView uri) const {

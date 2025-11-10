@@ -163,13 +163,13 @@ std::unique_ptr<SourceIndexedTypeSystem> TypeSystemBuilder::build() && {
     auto uninitDef = std::invoke([&]() -> TSDefinition {
       switch (def.getType()) {
         case SerializableTypeDefinition::Type::structDef:
-          return StructNode{{}, {}, {}, {}};
+          return StructNode{uri, {}, {}, {}};
         case SerializableTypeDefinition::Type::unionDef:
-          return UnionNode{{}, {}, {}, {}};
+          return UnionNode{uri, {}, {}, {}};
         case SerializableTypeDefinition::Type::enumDef:
-          return EnumNode{{}, {}, {}};
+          return EnumNode{uri, {}, {}};
         case SerializableTypeDefinition::Type::opaqueAliasDef:
-          return OpaqueAliasNode{{}, TypeRef{TypeRef::Bool{}}, {}};
+          return OpaqueAliasNode{uri, TypeRef{TypeRef::Bool{}}, {}};
         default:
           break;
       }

@@ -810,7 +810,8 @@ TEST(TypeSystemTest, ListTypeRef) {
   EXPECT_EQ(listField.presence(), def::Optional);
   EXPECT_TRUE(listField.type().isList());
   EXPECT_EQ(listField.type().asList().id(), TypeIds::list(TypeIds::I32));
-  EXPECT_EQ(listField.type().id(), TypeRef::List::of(TypeRef::I32()).id());
+  EXPECT_EQ(
+      listField.type().id(), typeSystem->ListOf(TypeRef(TypeRef::I32())).id());
 
   auto stsBuilder =
       SerializableTypeSystemBuilder::withoutSourceInfo(*typeSystem);
@@ -853,7 +854,8 @@ TEST(TypeSystemTest, SetTypeRef) {
   EXPECT_EQ(setField.presence(), def::Optional);
   EXPECT_TRUE(setField.type().isSet());
   EXPECT_EQ(setField.type().asSet().id(), TypeIds::set(TypeIds::I32));
-  EXPECT_EQ(setField.type().id(), TypeRef::Set::of(TypeRef::I32()).id());
+  EXPECT_EQ(
+      setField.type().id(), typeSystem->SetOf(TypeRef(TypeRef::I32())).id());
 
   auto stsBuilder =
       SerializableTypeSystemBuilder::withoutSourceInfo(*typeSystem);
@@ -900,7 +902,8 @@ TEST(TypeSystemTest, MapTypeRef) {
       TypeIds::map(TypeIds::I32, TypeIds::String));
   EXPECT_EQ(
       mapField.type().id(),
-      TypeRef::Map::of(TypeRef::I32(), TypeRef::String()).id());
+      typeSystem->MapOf(TypeRef(TypeRef::I32()), TypeRef(TypeRef::String()))
+          .id());
 
   auto stsBuilder =
       SerializableTypeSystemBuilder::withoutSourceInfo(*typeSystem);
@@ -1249,6 +1252,8 @@ TEST(TypeSystemTest, TypeRefIsEqualIdentityTo) {
 }
 
 TEST(TypeSystemTest, ToTType) {
+  auto typeSystem = typeSystemWithEmpties();
+
   EXPECT_EQ(ToTTypeFn{}(TypeRef::Bool()), TType::T_BOOL);
   EXPECT_EQ(ToTTypeFn{}(TypeRef::Byte()), TType::T_BYTE);
   EXPECT_EQ(ToTTypeFn{}(TypeRef::I16()), TType::T_I16);
@@ -1259,20 +1264,25 @@ TEST(TypeSystemTest, ToTType) {
   EXPECT_EQ(ToTTypeFn{}(TypeRef::String()), TType::T_STRING);
   EXPECT_EQ(ToTTypeFn{}(TypeRef::Binary()), TType::T_STRING);
 
-  EXPECT_EQ(ToTTypeFn{}(TypeRef::List::of(TypeRef::I32())), TType::T_LIST);
-  EXPECT_EQ(ToTTypeFn{}(TypeRef::List::of(TypeRef::String())), TType::T_LIST);
-
-  EXPECT_EQ(ToTTypeFn{}(TypeRef::Set::of(TypeRef::I32())), TType::T_SET);
-  EXPECT_EQ(ToTTypeFn{}(TypeRef::Set::of(TypeRef::Any())), TType::T_SET);
+  EXPECT_EQ(
+      ToTTypeFn{}(typeSystem->ListOf(TypeRef(TypeRef::I32()))), TType::T_LIST);
+  EXPECT_EQ(
+      ToTTypeFn{}(typeSystem->ListOf(TypeRef(TypeRef::String()))),
+      TType::T_LIST);
 
   EXPECT_EQ(
-      ToTTypeFn{}(TypeRef::Map::of(TypeRef::I32(), TypeRef::I32())),
+      ToTTypeFn{}(typeSystem->SetOf(TypeRef(TypeRef::I32()))), TType::T_SET);
+  EXPECT_EQ(
+      ToTTypeFn{}(typeSystem->SetOf(TypeRef(TypeRef::Any()))), TType::T_SET);
+
+  EXPECT_EQ(
+      ToTTypeFn{}(
+          typeSystem->MapOf(TypeRef(TypeRef::I32()), TypeRef(TypeRef::I32()))),
       TType::T_MAP);
   EXPECT_EQ(
-      ToTTypeFn{}(TypeRef::Map::of(TypeRef::I32(), TypeRef::String())),
+      ToTTypeFn{}(typeSystem->MapOf(
+          TypeRef(TypeRef::I32()), TypeRef(TypeRef::String()))),
       TType::T_MAP);
-
-  auto typeSystem = typeSystemWithEmpties();
 
   EXPECT_EQ(
       ToTTypeFn{}(typeSystem
@@ -1341,10 +1351,10 @@ TEST(TypeSystemTest, TagResolution) {
   testFn(TypeRef::String{}, type::string_t{});
   testFn(TypeRef::Binary{}, type::binary_t{});
 
-  testFn(TypeRef::List::of(TypeRef::I32{}), type::list<type::i32_t>{});
-  testFn(TypeRef::Set::of(TypeRef::I64{}), type::set<type::i64_t>{});
+  testFn(ts->ListOf(TypeRef(TypeRef::I32{})), type::list<type::i32_t>{});
+  testFn(ts->SetOf(TypeRef(TypeRef::I64{})), type::set<type::i64_t>{});
   testFn(
-      TypeRef::Map::of(TypeRef::I32{}, TypeRef::String{}),
+      ts->MapOf(TypeRef(TypeRef::I32{}), TypeRef(TypeRef::String{})),
       type::map<type::i32_t, type::string_t>{});
 }
 TEST(TypeSystemTest, SourceIndexedTypeSystem) {
@@ -1557,10 +1567,10 @@ TEST(TypeSystemTest, AnyTypeInterop) {
       ts->UserDefined(kEmptyEnumUri),
       type::Type::create<type::enum_c>(kEmptyEnumUri));
 
-  test(TypeRef::List::of(TypeRef::I32{}), type::list<type::i32_t>{});
-  test(TypeRef::Set::of(TypeRef::I64{}), type::set<type::i64_t>{});
+  test(ts->ListOf(TypeRef(TypeRef::I32{})), type::list<type::i32_t>{});
+  test(ts->SetOf(TypeRef(TypeRef::I64{})), type::set<type::i64_t>{});
   test(
-      TypeRef::Map::of(TypeRef::I32{}, TypeRef::String{}),
+      ts->MapOf(TypeRef(TypeRef::I32{}), TypeRef(TypeRef::String{})),
       type::map<type::i32_t, type::string_t>{});
 }
 

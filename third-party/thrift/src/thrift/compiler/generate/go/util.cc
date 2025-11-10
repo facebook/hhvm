@@ -234,8 +234,8 @@ void codegen_data::compute_thrift_metadata_types() {
   }
   for (auto const& exception : current_program_->exceptions()) {
     // Visit exception members
-    for (auto const& field : exception->get_members()) {
-      auto type = field->type().get_type();
+    for (auto const& field : exception->fields()) {
+      auto type = field.type().get_type();
       add_to_thrift_metadata_types(type, visited_type_names);
     }
     // Visit exception itself
@@ -259,13 +259,13 @@ void codegen_data::compute_thrift_metadata_types() {
       auto return_type = func.return_type().get_type();
       add_to_thrift_metadata_types(return_type, visited_type_names);
 
-      for (const auto& parameter : func.params().get_members()) {
-        auto type = parameter->type().get_type();
+      for (const auto& parameter : func.params().fields()) {
+        auto type = parameter.type().get_type();
         add_to_thrift_metadata_types(type, visited_type_names);
       }
       if (func.exceptions() != nullptr) {
-        for (const auto& exception : func.exceptions()->get_members()) {
-          auto type = exception->type().get_type();
+        for (const auto& exception : func.exceptions()->fields()) {
+          auto type = exception.type().get_type();
           add_to_thrift_metadata_types(type, visited_type_names);
         }
       }
@@ -273,9 +273,8 @@ void codegen_data::compute_thrift_metadata_types() {
         add_to_thrift_metadata_types(
             func.stream()->elem_type().get_type(), visited_type_names);
         if (func.stream()->exceptions() != nullptr) {
-          for (const auto& exception :
-               func.stream()->exceptions()->get_members()) {
-            auto type = exception->type().get_type();
+          for (const auto& exception : func.stream()->exceptions()->fields()) {
+            auto type = exception.type().get_type();
             add_to_thrift_metadata_types(type, visited_type_names);
           }
         }
@@ -576,8 +575,8 @@ bool is_type_go_comparable(
   }
 
   if (const t_structured* as_struct = real_type->try_as<t_structured>()) {
-    for (auto member : as_struct->get_members()) {
-      auto member_type = member->type().get_type();
+    for (const auto& member : as_struct->fields()) {
+      auto member_type = member.type().get_type();
       auto member_name = member_type->get_full_name();
       // Insert 0 if member_name is not yet in the map.
       auto emplace_pair = visited_type_names.emplace(member_name, 0);
@@ -641,14 +640,21 @@ void make_func_req_resp_structs(
   auto funcGoName = go::get_go_func_name(func);
 
   auto req_struct_name = go::munge_ident("req" + prefix + funcGoName, false);
+  // TODO(T244354071): This is a pre-existing memory leak. See explanation on
+  // go::codegen_data::req_resp_structs
   auto req_struct = new t_struct(func->program(), req_struct_name);
   req_struct->set_generated();
-  for (auto member : func->params().get_members()) {
-    req_struct->append_field(std::unique_ptr<t_field>(member));
+  for (const auto& member : func->params().fields()) {
+    // TODO(T244354071): Second unique_ptr over the same underlying object. See
+    // explanation on go::codegen_data::req_resp_structs
+    req_struct->append_field(
+        std::unique_ptr<t_field>(const_cast<t_field*>(&member)));
   }
   req_resp_structs.push_back(req_struct);
 
   auto resp_struct_name = go::munge_ident("resp" + prefix + funcGoName, false);
+  // TODO(T244354071): This is a pre-existing memory leak. See explanation on
+  // go::codegen_data::req_resp_structs
   auto resp_struct = new t_struct(func->program(), resp_struct_name);
   resp_struct->set_generated();
   if (!func->return_type()->is_void()) {
@@ -658,8 +664,17 @@ void make_func_req_resp_structs(
     resp_struct->append_field(std::move(resp_field));
   }
   if (func->exceptions() != nullptr) {
-    for (const auto& xs : func->exceptions()->get_members()) {
-      auto xc_ptr = std::unique_ptr<t_field>(xs);
+    for (const auto& xs : func->exceptions()->fields()) {
+      // TODO(T244354071): Second unique_ptr over the same underlying object.
+      // See explanation on go::codegen_data::req_resp_structs
+      auto xc_ptr = std::unique_ptr<t_field>(const_cast<t_field*>(&xs));
+
+      // TODO(T244354071): This is a mutation of `xs` (which is const, from a
+      // const t_function), since the mutable unique_ptr xc_ptr is pointing to
+      // the same object. It mutates the original field to force it to be
+      // optional, and the code-generator relies on this behaviour. The
+      // template/code-gen should be refactored to generate optional fields for
+      // exceptions rather than mutating the AST.
       xc_ptr->set_qualifier(t_field_qualifier::optional);
       resp_struct->append_field(std::move(xc_ptr));
     }
@@ -669,6 +684,8 @@ void make_func_req_resp_structs(
   if (func->stream()) {
     auto stream_struct_name =
         go::munge_ident("stream" + prefix + funcGoName, false);
+    // TODO(T244354071): This is a pre-existing memory leak. See explanation on
+    // go::codegen_data::req_resp_structs
     auto stream_struct = new t_struct(func->program(), stream_struct_name);
     stream_struct->set_generated();
     auto elem_field = std::make_unique<t_field>(
@@ -676,8 +693,17 @@ void make_func_req_resp_structs(
     elem_field->set_qualifier(t_field_qualifier::optional);
     stream_struct->append_field(std::move(elem_field));
     if (func->stream()->exceptions() != nullptr) {
-      for (const auto& xs : func->stream()->exceptions()->get_members()) {
-        auto xc_ptr = std::unique_ptr<t_field>(xs);
+      for (const auto& xs : func->stream()->exceptions()->fields()) {
+        // TODO(T244354071): Second unique_ptr over the same underlying object.
+        // See explanation on go::codegen_data::req_resp_structs
+        auto xc_ptr = std::unique_ptr<t_field>(const_cast<t_field*>(&xs));
+
+        // TODO(T244354071): This is a mutation of `xs` (which is const, from a
+        // const t_function), since the mutable unique_ptr xc_ptr is pointing to
+        // the same object. It mutates the original field to force it to be
+        // optional, and the code-generator relies on this behaviour. The
+        // template/code-gen should be refactored to generate optional fields
+        // for exceptions rather than mutating the AST.
         xc_ptr->set_qualifier(t_field_qualifier::optional);
         stream_struct->append_field(std::move(xc_ptr));
       }

@@ -51,7 +51,29 @@ class codegen_data {
   // This is needed to resolve some edge case name collisions.
   std::map<const t_structured*, std::set<std::string>> struct_to_field_names =
       {};
-  // Req/resp structs in the program.
+  /**
+   * Req/resp structs in the program.
+   *
+   * TODO(T244354071): This construct is the source of a memory leak. Refactor
+   * codegen to work without ephemeral structs OR replace this with
+   * node_list_view<t_struct> to manage lifetimes.
+   *
+   * `make_func_req_resp_structs` creates ephemeral structs using `new t_struct`
+   * which are put into this vector. When this vector is destructed, all
+   * references to those objects are dead and the memory has leaked.
+   * As of writing, this is INTENTIONAL. The ephemeral structs are created with
+   * (non-unique) unique_ptrs to field instances which are part of the
+   * non-ephemeral AST. If this vector managed lifetimes correctly and
+   * destructed those structs (and thus their list of unique_ptr fields), those
+   * copied field pointers would be double-freed (once as part of the ephemeral
+   * request/response struct, once as part of the original unique_ptr it was
+   * extracted from).
+   *
+   * Thrift AST nodes are non-copyable and non-movable. The correct way to
+   * handle this is to refactor code generation to only use the original
+   * functions' params/throws AST nodes to generate the desired output, rather
+   * than creating ephemeral AST nodes.
+   */
   std::vector<const t_struct*> req_resp_structs = {};
   // A vector of types for which we need to generate metadata.
   // Order matters here - items later in the list may have a dependency

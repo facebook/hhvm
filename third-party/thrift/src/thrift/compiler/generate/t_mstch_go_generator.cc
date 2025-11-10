@@ -661,13 +661,13 @@ class mstch_go_function : public mstch_function {
   }
 
   std::string get_unique_name(std::string const& name) {
-    auto& members = function_->params().get_members();
+    const auto& members = function_->params().fields();
 
     std::vector<std::string_view> arg_names;
     arg_names.reserve(members.size());
-    for (auto member : members) {
+    for (const auto& member : members) {
       arg_names.push_back(
-          data_.maybe_munge_ident_and_cache(member, /* exported */ false));
+          data_.maybe_munge_ident_and_cache(&member, /* exported */ false));
     }
 
     std::string unique_name = name;

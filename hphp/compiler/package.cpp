@@ -1513,6 +1513,13 @@ void saveFilesInBuild(const std::vector<FileInBuildInfo>& files_in_build,
 /* log to scuba files drifting between symbolrefs and package builds */
 void logPackageDrift(const std::vector<FileInBuildInfo>& files_in_build) {
   StructuredLogEntry ent;
+  // BUILD_ID is pushed in the env by the build pipelines
+  auto build_id = getenv("BUILD_ID");
+  if (!build_id) {
+    ent.setStr("build_id", "");
+  } else {
+    ent.setStr("build_id", build_id);
+  }
   for (auto const& file : files_in_build) {
     if (file.m_reason != FileInBuildReason::fromSymbolRefsAndPackages &&
         file.m_reason != FileInBuildReason::fromIncludeDir) {

@@ -1,12 +1,12 @@
-ERROR: File "call.php", line 29, characters 10-47:
+ERROR: File "call.php", line 29, characters 10-70:
 Typing error (Typing[4110])
-  File "call.php", line 29, characters 27-28:
+  File "call.php", line 30, characters 15-16:
   Expected `int` because this is used in an arithmetic operation
-  File "call.php", line 29, characters 38-40:
+  File "call.php", line 31, characters 11-13:
   But got `float`
-ERROR: File "call.php", line 31, characters 10-38:
+ERROR: File "call.php", line 34, characters 10-57:
 Typing error (Typing[4110])
-  File "call.php", line 30, characters 17-18:
+  File "call.php", line 33, characters 17-18:
   Expected `int` because this is used in an arithmetic operation
-  File "call.php", line 31, characters 29-31:
+  File "call.php", line 36, characters 11-13:
   But got `float`

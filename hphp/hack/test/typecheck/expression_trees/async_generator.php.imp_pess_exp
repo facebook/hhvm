@@ -10,14 +10,14 @@ Invalid return type (Typing[4110])
   Expected `void`
   File "async_generator.php", line 5, characters 18-21:
   But got `Generator<_, _, _>` (result of function containing a `yield`)
-ERROR: File "async_generator.php", line 6, characters 14-38:
-Invalid argument (Typing[4110])
+ERROR: File "async_generator.php", line 6, characters 29-35:
+Invalid `yield` (Typing[4110])
   File "expr_tree.php", line 90, characters 21-26:
   Expected `string`
   File "expr_tree.php", line 104, characters 29-44:
     resulting from expanding the type constant `ExampleDsl::TAst`
   File "async_generator.php", line 6, characters 29-35:
-  But got `AsyncGenerator<?nothing, int, nothing>` (result of `async function` with `yield` in the body)
+  But got `AsyncGenerator<?_, int, nothing>` (result of `async function` with `yield` in the body)
 ERROR: File "async_generator.php", line 6, characters 29-35:
 Invalid `yield` (Typing[4110])
   File "async_generator.php", line 6, characters 14-38:

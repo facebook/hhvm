@@ -1,1 +1,2 @@
 --config constraint_method_call=true
+--extra-builtin ../../expr_tree.php

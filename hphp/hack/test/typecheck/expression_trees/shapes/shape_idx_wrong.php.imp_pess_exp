@@ -2,20 +2,20 @@ ERROR: File "shape_idx_wrong.php", line 9, characters 10-101:
 Invalid return type (Typing[4110])
   File "shape_idx_wrong.php", line 8, characters 15-43:
   Expected `dynamic`
-  File "expr_tree.php", line 100, characters 8-32:
-  But got `ExampleExpression<_>`
+  File "shape_idx_wrong.php", line 9, characters 21-100:
+  But got `ExampleExpression<_>` because method or function was called on dynamic or like-type
 ERROR: File "shape_idx_wrong.php", line 9, characters 10-101:
 Invalid return type (Typing[4110])
   File "shape_idx_wrong.php", line 8, characters 15-43:
   Expected `~ExampleExpression<int>`
   File "shape_idx_wrong.php", line 9, characters 21-100:
-  But got `~ExampleExpression<_>` because method or function was called on dynamic or like-type
+  But got `ExampleExpression<_>` because method or function was called on dynamic or like-type
 ERROR: File "shape_idx_wrong.php", line 9, characters 10-101:
 Invalid return type (Typing[4110])
   File "shape_idx_wrong.php", line 8, characters 33-42:
   Expected `int`
   File "shape_idx_wrong.php", line 9, characters 21-100:
-  But got `?_` because method or function was called on dynamic or like-type
+  But got `null` because method or function was called on dynamic or like-type
 ERROR: File "shape_idx_wrong.php", line 11, characters 37-39:
 You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
   File "shape_idx_wrong.php", line 10, characters 10-29:
@@ -28,38 +28,38 @@ ERROR: File "shape_idx_wrong.php", line 26, characters 10-99:
 Invalid return type (Typing[4110])
   File "shape_idx_wrong.php", line 25, characters 15-43:
   Expected `dynamic`
-  File "expr_tree.php", line 100, characters 8-32:
-  But got `ExampleExpression<_>`
+  File "shape_idx_wrong.php", line 26, characters 21-98:
+  But got `ExampleExpression<_>` because method or function was called on dynamic or like-type
 ERROR: File "shape_idx_wrong.php", line 26, characters 10-99:
 Invalid return type (Typing[4110])
   File "shape_idx_wrong.php", line 25, characters 15-43:
   Expected `~ExampleExpression<int>`
   File "shape_idx_wrong.php", line 26, characters 21-98:
-  But got `~ExampleExpression<_>` because method or function was called on dynamic or like-type
+  But got `ExampleExpression<_>` because method or function was called on dynamic or like-type
 ERROR: File "shape_idx_wrong.php", line 26, characters 10-99:
 Invalid return type (Typing[4110])
   File "shape_idx_wrong.php", line 25, characters 33-42:
   Expected `int`
   File "shape_idx_wrong.php", line 26, characters 21-98:
-  But got `?(string | _)` because method or function was called on dynamic or like-type
+  But got `?string` because method or function was called on dynamic or like-type
 ERROR: File "shape_idx_wrong.php", line 34, characters 10-94:
 Invalid return type (Typing[4110])
   File "shape_idx_wrong.php", line 33, characters 16-44:
   Expected `dynamic`
-  File "expr_tree.php", line 100, characters 8-32:
-  But got `ExampleExpression<_>`
+  File "shape_idx_wrong.php", line 34, characters 21-93:
+  But got `ExampleExpression<_>` because method or function was called on dynamic or like-type
 ERROR: File "shape_idx_wrong.php", line 34, characters 10-94:
 Invalid return type (Typing[4110])
   File "shape_idx_wrong.php", line 33, characters 16-44:
   Expected `~ExampleExpression<int>`
   File "shape_idx_wrong.php", line 34, characters 21-93:
-  But got `~ExampleExpression<_>` because method or function was called on dynamic or like-type
+  But got `ExampleExpression<_>` because method or function was called on dynamic or like-type
 ERROR: File "shape_idx_wrong.php", line 34, characters 10-94:
 Invalid return type (Typing[4110])
   File "shape_idx_wrong.php", line 33, characters 34-43:
   Expected `int`
-  File "expr_tree.php", line 146, characters 40-45:
-  But got `string`
+  File "shape_idx_wrong.php", line 34, characters 21-93:
+  But got `string` because method or function was called on dynamic or like-type
 ERROR: File "shape_idx_wrong.php", line 36, characters 37-39:
 You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
   File "shape_idx_wrong.php", line 35, characters 10-16:
@@ -80,7 +80,7 @@ You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
   The field `x` is not defined in this shape
 ERROR: File "shape_idx_wrong.php", line 55, characters 5-34:
 You are trying to access the method `__unwrap` but this is a string (Typing[4062])
-  File "expr_tree.php", line 146, characters 40-45:
+  File "expr_tree.php", line 153, characters 40-45:
   Definition is here
 ERROR: File "shape_idx_wrong.php", line 62, characters 10-140:
 Invalid return type (Typing[4110])
@@ -90,5 +90,5 @@ Invalid return type (Typing[4110])
   But got `mixed` because the field `y` may be set to any type in this shape
   File "Shapes.hhi", line 45, characters 10-11:
     via this generic `Tv`
-  File "expr_tree.php", line 100, characters 26-31:
+  File "expr_tree.php", line 105, characters 26-31:
     via this generic `TInfer`

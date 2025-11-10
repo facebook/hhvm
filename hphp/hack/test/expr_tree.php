@@ -2,6 +2,7 @@
 
 <<file: __EnableUnstableFeatures('case_types')>>
 <<file: __EnableUnstableFeatures('case_type_where_clauses')>>
+<<file: __EnableUnstableFeatures('like_type_hints')>>
 
 /**
  * An example DSL for testing expression trees (ETs).
@@ -57,12 +58,14 @@ case type ExprTreeOpType<+T as ExampleMixedOpType> =
   | T;
 
 final class ExprTree<TInfer> implements ExampleExpression<TInfer> {
+  <<__NoAutoLikes>>
   public function __construct(
     private ?ExprPos $pos,
     private ?ExprTreeInfo<TInfer> $metadata,
     private (function(ExampleDsl): ExampleDsl::TAst) $ast,
   )[] {}
 
+  <<__NoAutoLikes>>
   public function visit(ExampleDsl $v): ExampleDsl::TAst {
     return ($this->ast)($v);
   }
@@ -75,6 +78,7 @@ final class ExprTree<TInfer> implements ExampleExpression<TInfer> {
     return Shapes::idx($this->metadata, 'lexically_enclosing_tree', null);
   }
 
+  <<__NoAutoLikes>>
   public function getSplices(): dict<string, mixed> {
     return Shapes::idx($this->metadata, 'splices', dict[]);
   }
@@ -86,9 +90,10 @@ class ExampleDsl {
   const type TAst = string;
 
   // The desugared expression tree literal will call this method.
+  <<__NoAutoLikes>>
   public static function makeTree<TInfer>(
     ?ExprPos $pos,
-    ?shape(
+    ~?shape(
       'splices' => dict<string, mixed>,
       'functions' => vec<mixed>,
       'static_methods' => vec<mixed>,
@@ -96,11 +101,12 @@ class ExampleDsl {
       'variables' => vec<string>,
       'lexically_enclosing_tree' => ?ExprPos,
     ) $metadata,
-    (function(ExampleDsl): ExampleDsl::TAst) $ast,
+    ~(function(ExampleDsl): ExampleDsl::TAst) $ast,
   )[]: ExampleExpression<TInfer> {
     return new ExprTree($pos, $metadata, $ast);
   }
 
+  <<__NoAutoLikes>>
   private static function autolift(
     ExampleDsl $visitor,
     ?ExampleAutoLiftable $e,
@@ -118,6 +124,7 @@ class ExampleDsl {
     }
   }
 
+  <<__NoAutoLikes>>
   public static function lift<THack as TInfer as ?ExampleAutoLiftable, TInfer>(
     ExampleUnion<THack, TInfer> $e,
   ): ExampleExpression<TInfer> {
@@ -149,17 +156,21 @@ class ExampleDsl {
   public static function voidType(): ExampleVoid {
     throw new Exception();
   }
+  <<__NoAutoLikes>>
   public static function symbolType<T>(
     (function(ExampleContext): Awaitable<ExampleExpression<T>>) $_,
   ): T {
     throw new Exception();
   }
+  <<__NoAutoLikes>>
   public static function lambdaType<T>(T $_): ExampleFunction<T> {
     throw new Exception();
   }
+  <<__NoAutoLikes>>
   public static function shapeType<T>(T $_): ExampleShape<T> {
     throw new Exception();
   }
+  <<__NoAutoLikes>>
   public static function operationType<T as ExampleMixedOpType>(
     ExprTreeOpType<T> $_,
   )[]: T {
@@ -169,27 +180,33 @@ class ExampleDsl {
   // Desugared nodes. Calls to these are emitted by hackc, following the structure
   // of the expression in the expression tree. Here, they compute a string
   // representation of that expression.
+  <<__NoAutoLikes>>
   public function visitInt(?ExprPos $_, int $i)[]: ExampleDsl::TAst {
     return (string)$i;
   }
 
+  <<__NoAutoLikes>>
   public function visitFloat(?ExprPos $_, float $f)[]: ExampleDsl::TAst {
     return (string)$f;
   }
 
+  <<__NoAutoLikes>>
   public function visitBool(?ExprPos $_, bool $b)[]: ExampleDsl::TAst {
     return $b ? "true" : "false";
   }
 
+  <<__NoAutoLikes>>
   public function visitString(?ExprPos $_, string $s)[]: ExampleDsl::TAst {
     return "\"$s\"";
   }
 
+  <<__NoAutoLikes>>
   public function visitNull(?ExprPos $_)[]: ExampleDsl::TAst {
     return "null";
   }
 
   // Expressions
+  <<__NoAutoLikes>>
   public function visitBinop(
     ?ExprPos $_,
     ExampleDsl::TAst $lhs,
@@ -199,6 +216,7 @@ class ExampleDsl {
     return "$lhs $op $rhs";
   }
 
+  <<__NoAutoLikes>>
   public function visitUnop(
     ?ExprPos $_,
     string $operator,
@@ -207,6 +225,7 @@ class ExampleDsl {
     return "$operator $operand";
   }
 
+  <<__NoAutoLikes>>
   public function visitKeyedCollection(
     ?ExprPos $_,
     string $collection,
@@ -216,10 +235,12 @@ class ExampleDsl {
     return "$collection {".concat_arg_list($v)."}";
   }
 
+  <<__NoAutoLikes>>
   public function visitLocal(?ExprPos $_, string $local)[]: ExampleDsl::TAst {
     return $local;
   }
 
+  <<__NoAutoLikes>>
   public function visitLambda(
     ?ExprPos $_,
     vec<string> $args,
@@ -234,6 +255,7 @@ class ExampleDsl {
       "}";
   }
 
+  <<__NoAutoLikes>>
   public function visitOptionalParameter(
     ?ExprPos $_,
     string $param_name,
@@ -242,6 +264,7 @@ class ExampleDsl {
     return $param_name." = ".$default_value;
   }
 
+  <<__NoAutoLikes>>
   public function visitGlobalFunction<T>(
     ?ExprPos $_,
     (function(ExampleContext): Awaitable<ExampleExpression<T>>) $_,
@@ -249,6 +272,7 @@ class ExampleDsl {
     return "function_ptr";
   }
 
+  <<__NoAutoLikes>>
   public function visitStaticMethod<T>(
     ?ExprPos $_,
     (function(ExampleContext): Awaitable<ExampleExpression<T>>) $_,
@@ -257,6 +281,7 @@ class ExampleDsl {
   }
 
   // Operators
+  <<__NoAutoLikes>>
   public function visitCall(
     ?ExprPos $_,
     ExampleDsl::TAst $callee,
@@ -265,6 +290,7 @@ class ExampleDsl {
     return $callee."(".concat_arg_list($args).")";
   }
 
+  <<__NoAutoLikes>>
   public function visitAssign(
     ?ExprPos $_,
     ExampleDsl::TAst $local,
@@ -273,6 +299,7 @@ class ExampleDsl {
     return $local." = ".$value.";";
   }
 
+  <<__NoAutoLikes>>
   public function visitTernary(
     ?ExprPos $_,
     ExampleDsl::TAst $condition,
@@ -283,6 +310,7 @@ class ExampleDsl {
   }
 
   // Statements.
+  <<__NoAutoLikes>>
   public function visitIf(
     ?ExprPos $_,
     ExampleDsl::TAst $cond,
@@ -298,6 +326,7 @@ class ExampleDsl {
       "}";
   }
 
+  <<__NoAutoLikes>>
   public function visitWhile(
     ?ExprPos $_,
     ExampleDsl::TAst $cond,
@@ -306,6 +335,7 @@ class ExampleDsl {
     return "while (".$cond.") {\n".concat_block($body)."}";
   }
 
+  <<__NoAutoLikes>>
   public function visitReturn(
     ?ExprPos $_,
     ?ExampleDsl::TAst $return_val,
@@ -316,6 +346,7 @@ class ExampleDsl {
     return "return ".$return_val.";";
   }
 
+  <<__NoAutoLikes>>
   public function visitFor(
     ?ExprPos $_,
     vec<ExampleDsl::TAst> $initializers,
@@ -334,14 +365,17 @@ class ExampleDsl {
       "}";
   }
 
+  <<__NoAutoLikes>>
   public function visitBreak(?ExprPos $_)[]: ExampleDsl::TAst {
     return "break;";
   }
 
+  <<__NoAutoLikes>>
   public function visitContinue(?ExprPos $_)[]: ExampleDsl::TAst {
     return "continue;";
   }
 
+  <<__NoAutoLikes>>
   public function visitPropertyAccess(
     ?ExprPos $_,
     ExampleDsl::TAst $expr,
@@ -350,6 +384,7 @@ class ExampleDsl {
     return "$expr->$prop_name";
   }
 
+  <<__NoAutoLikes>>
   public function visitPropertyAccessNullSafe(
     ?ExprPos $_,
     ExampleDsl::TAst $expr,
@@ -358,6 +393,7 @@ class ExampleDsl {
     return "$expr?->$prop_name";
   }
 
+  <<__NoAutoLikes>>
   public function visitInstanceMethod(
     ?ExprPos $_,
     ExampleDsl::TAst $expr,
@@ -366,6 +402,7 @@ class ExampleDsl {
     return "$expr->$method";
   }
 
+  <<__NoAutoLikes>>
   public function visitInstanceMethodNullSafe(
     ?ExprPos $_,
     ExampleDsl::TAst $expr,
@@ -374,6 +411,7 @@ class ExampleDsl {
     return "$expr?->$method";
   }
 
+  <<__NoAutoLikes>>
   public function visitClassConstant<T>(
     ?ExprPos $_,
     classname<T> $classname,
@@ -383,6 +421,7 @@ class ExampleDsl {
     return $classname."::".$name."=".ExampleDsl::lift($value)->visit($this);
   }
 
+  <<__NoAutoLikes>>
   public function visitXhp(
     ?ExprPos $_,
     string $class_name,
@@ -405,15 +444,17 @@ class ExampleDsl {
       ">";
   }
 
+  <<__NoAutoLikes>>
   public function splice<T>(
     ?ExprPos $_,
     string $_key,
-    ExampleExpression<T> $splice_val,
+    ~ExampleExpression<T> $splice_val,
     ?vec<string> $_macro_vars = null,
   ): ExampleDsl::TAst {
     return "\${".($splice_val->visit($this))."}";
   }
 
+  <<__NoAutoLikes>>
   public function visitShape(
     ?ExprPos $_,
     vec<(ExampleDsl::TAst, ExampleDsl::TAst)> $operand,
@@ -425,18 +466,21 @@ class ExampleDsl {
   // Note, these types are not super narrow,
   // but they are inferred by the desugaring process rather than
   // being run against this specific declaration, so that is fine.
+  <<__NoAutoLikes>>
   public static async function shapeAt(
     ExampleContext $_,
   ): Awaitable<ExampleExpression<ExampleMixed>> {
     throw new Error("No runtime implementation yet");
   }
 
+  <<__NoAutoLikes>>
   public static async function shapePut(
     ExampleContext $_,
   ): Awaitable<ExampleExpression<ExampleMixed>> {
     throw new Error("No runtime implementation yet");
   }
 
+  <<__NoAutoLikes>>
   public static async function shapeIdx(
     ExampleContext $_,
   ): Awaitable<ExampleExpression<ExampleMixed>> {
@@ -446,43 +490,43 @@ class ExampleDsl {
 
 // Type declarations used when checking DSL expressions.
 interface ExampleMixedOpType {
-  public function __tripleEquals(ExampleMixed $_): ExampleBool;
-  public function __notTripleEquals(ExampleMixed $_): ExampleBool;
-  public function __questionQuestion(?ExampleMixed $_): ?ExampleMixed;
+  public function __tripleEquals(~ExampleMixed $_): ExampleBool;
+  public function __notTripleEquals(~ExampleMixed $_): ExampleBool;
+  public function __questionQuestion(~?ExampleMixed $_): ?ExampleMixed;
 }
 
 interface ExampleIntOpType extends ExampleMixedOpType {
-  public function __plus(ExampleInt $_): ExampleInt;
-  public function __minus(ExampleInt $_): ExampleInt;
-  public function __star(ExampleInt $_): ExampleInt;
-  public function __slash(ExampleInt $_): ExampleInt;
-  public function __percent(ExampleInt $_): ExampleInt;
+  public function __plus(~ExampleInt $_): ExampleInt;
+  public function __minus(~ExampleInt $_): ExampleInt;
+  public function __star(~ExampleInt $_): ExampleInt;
+  public function __slash(~ExampleInt $_): ExampleInt;
+  public function __percent(~ExampleInt $_): ExampleInt;
   public function __negate(): ExampleInt;
 
-  public function __lessThan(ExampleInt $_): ExampleBool;
-  public function __lessThanEqual(ExampleInt $_): ExampleBool;
-  public function __greaterThan(ExampleInt $_): ExampleBool;
-  public function __greaterThanEqual(ExampleInt $_): ExampleBool;
+  public function __lessThan(~ExampleInt $_): ExampleBool;
+  public function __lessThanEqual(~ExampleInt $_): ExampleBool;
+  public function __greaterThan(~ExampleInt $_): ExampleBool;
+  public function __greaterThanEqual(~ExampleInt $_): ExampleBool;
 
-  public function __amp(ExampleInt $_): ExampleInt;
-  public function __bar(ExampleInt $_): ExampleInt;
-  public function __caret(ExampleInt $_): ExampleInt;
-  public function __lessThanLessThan(ExampleInt $_): ExampleInt;
-  public function __greaterThanGreaterThan(ExampleInt $_): ExampleInt;
+  public function __amp(~ExampleInt $_): ExampleInt;
+  public function __bar(~ExampleInt $_): ExampleInt;
+  public function __caret(~ExampleInt $_): ExampleInt;
+  public function __lessThanLessThan(~ExampleInt $_): ExampleInt;
+  public function __greaterThanGreaterThan(~ExampleInt $_): ExampleInt;
   public function __tilde(): ExampleInt;
   public function __postfixPlusPlus(): void;
   public function __postfixMinusMinus(): void;
 }
 
 interface ExampleBoolOpType extends ExampleMixedOpType {
-  public function __ampamp(ExampleBool $_): ExampleBool;
-  public function __barbar(ExampleBool $_): ExampleBool;
+  public function __ampamp(~ExampleBool $_): ExampleBool;
+  public function __barbar(~ExampleBool $_): ExampleBool;
   public function __bool(): bool;
   public function __exclamationMark(): ExampleBool;
 }
 
 interface ExampleStringOpType extends ExampleMixedOpType {
-  public function __dot(ExampleString $_): ExampleString;
+  public function __dot(~ExampleString $_): ExampleString;
 }
 
 interface ExampleFloatOpType extends ExampleMixedOpType {}
@@ -514,10 +558,12 @@ final class ExampleContext {}
 interface ExampleVoid {}
 
 interface ExampleFunction<T> extends ExampleMixedOpType {
+  <<__NoAutoLikes>>
   public function __unwrap(): T;
 }
 
 interface ExampleShape<T> extends ExampleMixedOpType {
+  <<__NoAutoLikes>>
   public function __unwrap(): T;
 }
 

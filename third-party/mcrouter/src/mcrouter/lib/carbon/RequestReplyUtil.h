@@ -83,7 +83,7 @@ typename std::enable_if_t<detail::HasMessage<Reply>::value> setMessageIfPresent(
 }
 template <typename Reply>
 typename std::enable_if_t<!detail::HasMessage<Reply>::value>
-setMessageIfPresent(Reply&, std::string) {}
+setMessageIfPresent(Reply& /*unused*/, std::string /*unused*/) {}
 
 template <typename Reply>
 typename std::enable_if_t<detail::HasMessage<Reply>::value, folly::StringPiece>
@@ -92,7 +92,7 @@ getMessage(const Reply& reply) {
 }
 template <typename Reply>
 typename std::enable_if_t<!detail::HasMessage<Reply>::value, folly::StringPiece>
-getMessage(const Reply&) {
+getMessage(const Reply& /*unused*/) {
   return folly::StringPiece{};
 }
 
@@ -103,7 +103,7 @@ setIsFailoverIfPresent(Reply& reply, bool isFailover) {
 }
 template <typename Reply>
 typename std::enable_if_t<!detail::HasIsFailover<Reply>::value>
-setIsFailoverIfPresent(Reply&, bool) {}
+setIsFailoverIfPresent(Reply& /*unused*/, bool /*unused*/) {}
 
 template <class Request>
 typename std::enable_if_t<
@@ -116,7 +116,7 @@ template <class Request>
 typename std::enable_if_t<
     !facebook::memcache::HasKeyTrait<Request>::value,
     folly::StringPiece>
-getFullKey(const Request&) {
+getFullKey(const Request& /*unused*/) {
   return "";
 }
 
@@ -131,7 +131,7 @@ template <typename Reply>
 typename std::enable_if_t<
     !detail::HasAppSpecificErrorCode<Reply>::value,
     folly::Optional<int16_t>>
-getAppSpecificErrorCode(const Reply&) {
+getAppSpecificErrorCode(const Reply& /*unused*/) {
   return folly::none;
 }
 
@@ -257,7 +257,7 @@ typename std::enable_if<facebook::memcache::HasFlagsTrait<R>::value, uint64_t>::
 template <class R>
 typename std::
     enable_if<!facebook::memcache::HasFlagsTrait<R>::value, uint64_t>::type
-    getFlags(const R&) {
+    getFlags(const R& /*unused*/) {
   return 0;
 }
 
@@ -272,12 +272,16 @@ template <class TypeList>
 inline size_t getTypeIdByName(folly::StringPiece name, TypeList);
 
 template <>
-inline size_t getTypeIdByName(folly::StringPiece /* name */, List<>) {
+inline size_t getTypeIdByName(
+    folly::StringPiece /* name */,
+    List<> /*unused*/) {
   return 0;
 }
 
 template <class T, class... Ts>
-inline size_t getTypeIdByName(folly::StringPiece name, List<T, Ts...>) {
+inline size_t getTypeIdByName(
+    folly::StringPiece name,
+    List<T, Ts...> /*unused*/) {
   return name == T::name ? T::typeId : getTypeIdByName(name, List<Ts...>());
 }
 
@@ -288,12 +292,14 @@ template <class TypeList>
 inline std::ostream& insertTypeIds(std::ostream&, TypeList);
 
 template <>
-inline std::ostream& insertTypeIds(std::ostream& str, List<>) {
+inline std::ostream& insertTypeIds(std::ostream& str, List<> /*unused*/) {
   return str;
 }
 
 template <class T, class... Ts>
-inline std::ostream& insertTypeIds(std::ostream& str, List<T, Ts...>) {
+inline std::ostream& insertTypeIds(
+    std::ostream& str,
+    List<T, Ts...> /*unused*/) {
   str << ' ' << T::name;
   return insertTypeIds(str, List<Ts...>());
 }
@@ -302,12 +308,16 @@ template <class TypeList>
 inline ssize_t getIndexInListByName(folly::StringPiece name, TypeList);
 
 template <>
-inline ssize_t getIndexInListByName(folly::StringPiece /* name */, List<>) {
+inline ssize_t getIndexInListByName(
+    folly::StringPiece /* name */,
+    List<> /*unused*/) {
   return -1;
 }
 
 template <class T, class... Ts>
-inline ssize_t getIndexInListByName(folly::StringPiece name, List<T, Ts...>) {
+inline ssize_t getIndexInListByName(
+    folly::StringPiece name,
+    List<T, Ts...> /*unused*/) {
   return name == T::name
       ? 0
       : (getIndexInListByName(name, List<Ts...>()) == -1
@@ -403,7 +413,7 @@ namespace detail {
  */
 class CanHandleRequest {
   template <class Request, class OnRequest>
-  static constexpr auto check(int)
+  static constexpr auto check(int /*unused*/)
       -> decltype(std::declval<OnRequest>().onRequest(std::declval<facebook::memcache::McServerRequestContext>(), std::declval<Request>()), std::true_type()) {
     return {};
   }
@@ -430,7 +440,8 @@ class CanHandleRequest {
  */
 class CanHandleRequestWithBuffer {
   template <class Request, class OnRequest>
-  static constexpr auto check(int) -> decltype(std::declval<OnRequest>().onRequest(std::declval<facebook::memcache::McServerRequestContext>(), std::declval<Request>(), std::declval<facebook::memcache::CaretMessageInfo*>(), std::declval<folly::IOBuf*>()), std::true_type()) {
+  static constexpr auto check(
+      int /*unused*/) -> decltype(std::declval<OnRequest>().onRequest(std::declval<facebook::memcache::McServerRequestContext>(), std::declval<Request>(), std::declval<facebook::memcache::CaretMessageInfo*>(), std::declval<folly::IOBuf*>()), std::true_type()) {
     return {};
   }
 

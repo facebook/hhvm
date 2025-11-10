@@ -476,7 +476,7 @@ impl LiftAwait {
                     *e = replace_expr.clone();
                 }
             }
-            // Leaf expressions, can't contain await to be lifted
+            // Leaf expressions, can't contain await to be lifted, or $$ to be replaced
             Expr_::Null
             | Expr_::This
             | Expr_::True
@@ -493,11 +493,16 @@ impl LiftAwait {
             | Expr_::MethodCaller(_)
             | Expr_::Invalid(box None)
             | Expr_::EnumClassLabel(_)
-            | Expr_::ClassConst(_)
             | Expr_::Nameof(_)
             | Expr_::FunctionPointer(_)
-            | Expr_::ClassGet(_)
             | Expr_::Package(_) => {}
+
+            // Expressions that can't contain an await, but might contain a $$ to replace
+            Expr_::ClassGet(box (nast::ClassId(_, _, nast::ClassId_::CIexpr(expr)), _, _))
+            | Expr_::ClassConst(box (nast::ClassId(_, _, nast::ClassId_::CIexpr(expr)), _)) => {
+                self.extract_await(expr, con, seq, tmps)
+            }
+            Expr_::ClassConst(_) | Expr_::ClassGet(_) => {}
 
             // Expressions with exactly one sub-expression that we can lift an await out of
             Expr_::Invalid(box Some(expr))

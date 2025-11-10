@@ -700,6 +700,23 @@ cdef to_map_elements_no_convert(key_type_info, value_type_info):
     return (to_container_elements_no_convert(key_type_info) and
         to_container_elements_no_convert(value_type_info))
 
+cdef supports_in_place_validation(type_info):
+    """
+    Check if internal type needs only validation, not conversion.
+    """
+    return (to_container_elements_no_convert(type_info)
+            or isinstance(type_info, StringTypeInfo))
+
+cdef map_supports_in_place_validation(key_type_info, val_type_info):
+    """
+    Check if both map key and value types support in-place validation.
+
+    Enables optimization to validate without reconstructing another dict,
+    beneficial for maps like map<i64, string> or map<string, string>.
+    """
+    return (supports_in_place_validation(key_type_info)
+            and supports_in_place_validation(val_type_info))
+
 @_cython__final
 cdef class ListTypeInfo(TypeInfoBase):
     def __cinit__(self, val_info):
@@ -2625,12 +2642,26 @@ cdef class Map(Container):
         cdef TypeInfoBase key_type_info = self._fbthrift_key_info
         cdef TypeInfoBase val_type_info = self._fbthrift_val_info
 
-        # Convert all lazy elements to Python values and we need to
-        # convert all elements from scratch to preserve the original insertion order
-        self._fbthrift_elements = {
-            key_type_info.to_python_value(key): val_type_info.to_python_value(value)
-            for key, value in self._fbthrift_internal_elements.items()
-        }
+        # If both key and value types support in-place validation, validate
+        # elements without recreating the dictionary. After validation, use
+        # _fbthrift_internal_elements as _fbthrift_elements.
+        if map_supports_in_place_validation(key_type_info, val_type_info):
+            # Return values from to_python_value() are intentionally discarded.
+            # Internal elements already have the correct Python types (strings are
+            # decoded during deserialization). We call to_python_value() purely for
+            # validation - to raise exceptions for strings with bad unicode.
+            for key, value in self._fbthrift_internal_elements.items():
+                key_type_info.to_python_value(key)
+                val_type_info.to_python_value(value)
+
+            self._fbthrift_elements = self._fbthrift_internal_elements
+        else:
+            # Convert all lazy elements to Python values and we need to convert
+            # all elements from scratch to preserve the original insertion order.
+            self._fbthrift_elements = {
+                key_type_info.to_python_value(key): val_type_info.to_python_value(value)
+                for key, value in self._fbthrift_internal_elements.items()
+            }
 
         # Conversion succeeded, no need to convert again
         self._fbthrift_internal_elements = None

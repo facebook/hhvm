@@ -1119,9 +1119,8 @@ class EdenView final : public QueryableView {
               subscriberEventBase_.terminateLoopSoon();
             }
           } else {
-            auto reason = t.hasException()
-                ? folly::exceptionStr(std::move(t.exception()))
-                : "controlled shutdown";
+            auto reason = t.hasException() ? folly::exceptionStr(t.exception())
+                                           : "controlled shutdown";
             log(ERR,
                 "subscription stream ended: ",
                 w_string_piece(reason.data(), reason.size()),

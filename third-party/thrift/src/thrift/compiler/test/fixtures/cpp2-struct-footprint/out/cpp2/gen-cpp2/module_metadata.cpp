@@ -209,7 +209,7 @@ StructMetadata<::cpp2_struct_footprint::TestUnion>::gen(ThriftMetadata& metadata
 }
 
 void ExceptionMetadata<::cpp2_struct_footprint::ExStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2_struct_footprint::ExStruct>(metadata, false);
+  auto res = genExceptionMetadata<::cpp2_struct_footprint::ExStruct>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
@@ -230,6 +230,13 @@ void ExceptionMetadata<::cpp2_struct_footprint::ExStruct>::gen(ThriftMetadata& m
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_ExStruct.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2_struct_footprint::ExStruct>()
+  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>>::gen_processIOBuf([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];

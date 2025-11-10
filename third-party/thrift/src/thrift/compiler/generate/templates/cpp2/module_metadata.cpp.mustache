@@ -109,7 +109,7 @@ StructMetadata<{{struct:cpp_fullname}}>::gen(ThriftMetadata& metadata) {
 {{#program:structs}}
 {{#struct:exception?}}
 void ExceptionMetadata<{{struct:cpp_fullname}}>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<{{struct:cpp_fullname}}>(metadata, false);
+  auto res = genExceptionMetadata<{{struct:cpp_fullname}}>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
@@ -135,11 +135,18 @@ void ExceptionMetadata<{{struct:cpp_fullname}}>::gen(ThriftMetadata& metadata) {
     {{struct:metadata_name}}.fields()[i++].type() = std::move(type);
   }
 {{/struct:fields?}}
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
 {{#struct:structured_annotations}}
 {{#constant:type.self.structured?}}
   {{struct:metadata_name}}.structured_annotations()->push_back({{> metadata/const_struct}});
 {{/constant:type.self.structured?}}
 {{/struct:structured_annotations}}
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<{{struct:cpp_fullname}}>()
+  ));
 }
 {{/struct:exception?}}
 {{/program:structs}}

@@ -307,7 +307,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyUnion>::gen(Thr
 }
 
 void ExceptionMetadata<::test::fixtures::basic_structured_annotations::MyException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::test::fixtures::basic_structured_annotations::MyException>(metadata, false);
+  auto res = genExceptionMetadata<::test::fixtures::basic_structured_annotations::MyException>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
@@ -328,7 +328,14 @@ void ExceptionMetadata<::test::fixtures::basic_structured_annotations::MyExcepti
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_MyException.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
   module_MyException.structured_annotations()->push_back(*cvStruct("module.structured_annotation_nested", { {"name", cvString("nesty") } }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::basic_structured_annotations::MyException>()
+  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>>::gen_first([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];

@@ -224,7 +224,7 @@ StructMetadata<::cpp2::Banal>::gen(ThriftMetadata& metadata) {
 }
 
 void ExceptionMetadata<::cpp2::Fiery>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::Fiery>(metadata, false);
+  auto res = genExceptionMetadata<::cpp2::Fiery>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
@@ -245,9 +245,16 @@ void ExceptionMetadata<::cpp2::Fiery>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_Fiery.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::Fiery>()
+  ));
 }
 void ExceptionMetadata<::cpp2::Serious>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::Serious>(metadata, false);
+  auto res = genExceptionMetadata<::cpp2::Serious>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
@@ -268,9 +275,16 @@ void ExceptionMetadata<::cpp2::Serious>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_Serious.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::Serious>()
+  ));
 }
 void ExceptionMetadata<::cpp2::ComplexFieldNames>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::ComplexFieldNames>(metadata, false);
+  auto res = genExceptionMetadata<::cpp2::ComplexFieldNames>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
@@ -291,9 +305,16 @@ void ExceptionMetadata<::cpp2::ComplexFieldNames>::gen(ThriftMetadata& metadata)
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_ComplexFieldNames.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::ComplexFieldNames>()
+  ));
 }
 void ExceptionMetadata<::cpp2::CustomFieldNames>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::CustomFieldNames>(metadata, false);
+  auto res = genExceptionMetadata<::cpp2::CustomFieldNames>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
@@ -314,9 +335,16 @@ void ExceptionMetadata<::cpp2::CustomFieldNames>::gen(ThriftMetadata& metadata) 
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_CustomFieldNames.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::CustomFieldNames>()
+  ));
 }
 void ExceptionMetadata<::cpp2::ExceptionWithPrimitiveField>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::ExceptionWithPrimitiveField>(metadata, false);
+  auto res = genExceptionMetadata<::cpp2::ExceptionWithPrimitiveField>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
@@ -337,9 +365,16 @@ void ExceptionMetadata<::cpp2::ExceptionWithPrimitiveField>::gen(ThriftMetadata&
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_ExceptionWithPrimitiveField.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::ExceptionWithPrimitiveField>()
+  ));
 }
 void ExceptionMetadata<::cpp2::ExceptionWithStructuredAnnotation>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::ExceptionWithStructuredAnnotation>(metadata, false);
+  auto res = genExceptionMetadata<::cpp2::ExceptionWithStructuredAnnotation>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
@@ -360,13 +395,27 @@ void ExceptionMetadata<::cpp2::ExceptionWithStructuredAnnotation>::gen(ThriftMet
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_ExceptionWithStructuredAnnotation.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::ExceptionWithStructuredAnnotation>()
+  ));
 }
 void ExceptionMetadata<::cpp2::Banal>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::Banal>(metadata, false);
+  auto res = genExceptionMetadata<::cpp2::Banal>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
   [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_Banal = res.metadata;
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::Banal>()
+  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Raiser>>::gen_doBland([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];

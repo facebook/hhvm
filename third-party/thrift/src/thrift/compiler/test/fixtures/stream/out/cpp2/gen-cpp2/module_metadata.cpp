@@ -64,25 +64,46 @@ StructMetadata<::cpp2::FooEx2>::gen(ThriftMetadata& metadata) {
 }
 
 void ExceptionMetadata<::cpp2::FooStreamEx>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::FooStreamEx>(metadata, false);
+  auto res = genExceptionMetadata<::cpp2::FooStreamEx>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
   [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_FooStreamEx = res.metadata;
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::FooStreamEx>()
+  ));
 }
 void ExceptionMetadata<::cpp2::FooEx>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::FooEx>(metadata, false);
+  auto res = genExceptionMetadata<::cpp2::FooEx>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
   [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_FooEx = res.metadata;
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::FooEx>()
+  ));
 }
 void ExceptionMetadata<::cpp2::FooEx2>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::FooEx2>(metadata, false);
+  auto res = genExceptionMetadata<::cpp2::FooEx2>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
   [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_FooEx2 = res.metadata;
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::FooEx2>()
+  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_returnstream([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];

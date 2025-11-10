@@ -124,7 +124,7 @@ StructMetadata<::cpp2::BiDiMethodException>::gen(ThriftMetadata& metadata) {
 }
 
 void ExceptionMetadata<::cpp2::BiDiSinkException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::BiDiSinkException>(metadata, false);
+  auto res = genExceptionMetadata<::cpp2::BiDiSinkException>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
@@ -145,9 +145,16 @@ void ExceptionMetadata<::cpp2::BiDiSinkException>::gen(ThriftMetadata& metadata)
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_BiDiSinkException.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::BiDiSinkException>()
+  ));
 }
 void ExceptionMetadata<::cpp2::BiDiStreamException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::BiDiStreamException>(metadata, false);
+  auto res = genExceptionMetadata<::cpp2::BiDiStreamException>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
@@ -168,9 +175,16 @@ void ExceptionMetadata<::cpp2::BiDiStreamException>::gen(ThriftMetadata& metadat
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_BiDiStreamException.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::BiDiStreamException>()
+  ));
 }
 void ExceptionMetadata<::cpp2::BiDiMethodException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::BiDiMethodException>(metadata, false);
+  auto res = genExceptionMetadata<::cpp2::BiDiMethodException>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
@@ -191,6 +205,13 @@ void ExceptionMetadata<::cpp2::BiDiMethodException>::gen(ThriftMetadata& metadat
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_BiDiMethodException.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::BiDiMethodException>()
+  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen_simple([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];

@@ -120,7 +120,7 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>::
 }
 
 void ExceptionMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>(metadata, false);
+  auto res = genExceptionMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
@@ -141,6 +141,13 @@ void ExceptionMetadata<::facebook::thrift::compiler::test::fixtures::any::MyExce
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_MyException.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::facebook::thrift::compiler::test::fixtures::any::MyException>()
+  ));
 }
 } // namespace md
 } // namespace detail

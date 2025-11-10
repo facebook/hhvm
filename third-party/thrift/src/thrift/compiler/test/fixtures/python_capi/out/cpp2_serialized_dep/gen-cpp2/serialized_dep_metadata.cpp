@@ -215,7 +215,7 @@ StructMetadata<::test::fixtures::python_capi::MarshalError>::gen(ThriftMetadata&
 }
 
 void ExceptionMetadata<::test::fixtures::python_capi::SerializedError>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::test::fixtures::python_capi::SerializedError>(metadata, false);
+  auto res = genExceptionMetadata<::test::fixtures::python_capi::SerializedError>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
@@ -236,10 +236,17 @@ void ExceptionMetadata<::test::fixtures::python_capi::SerializedError>::gen(Thri
     f.metadata_type_interface->writeAndGenType(type, metadata);
     serialized_dep_SerializedError.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
   serialized_dep_SerializedError.structured_annotations()->push_back(*cvStruct("python.UseCAPI", { {"serialize", cvBool(true) } }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::python_capi::SerializedError>()
+  ));
 }
 void ExceptionMetadata<::test::fixtures::python_capi::MarshalError>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::test::fixtures::python_capi::MarshalError>(metadata, false);
+  auto res = genExceptionMetadata<::test::fixtures::python_capi::MarshalError>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
@@ -260,7 +267,14 @@ void ExceptionMetadata<::test::fixtures::python_capi::MarshalError>::gen(ThriftM
     f.metadata_type_interface->writeAndGenType(type, metadata);
     serialized_dep_MarshalError.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
   serialized_dep_MarshalError.structured_annotations()->push_back(*cvStruct("python.UseCAPI", {  }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::python_capi::MarshalError>()
+  ));
 }
 } // namespace md
 } // namespace detail

@@ -235,7 +235,7 @@ StructMetadata<::facebook::thrift::test::terse_write::TerseException>::gen(Thrif
 }
 
 void ExceptionMetadata<::facebook::thrift::test::terse_write::TerseException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::facebook::thrift::test::terse_write::TerseException>(metadata, false);
+  auto res = genExceptionMetadata<::facebook::thrift::test::terse_write::TerseException>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
@@ -256,7 +256,14 @@ void ExceptionMetadata<::facebook::thrift::test::terse_write::TerseException>::g
     f.metadata_type_interface->writeAndGenType(type, metadata);
     terse_write_TerseException.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
   terse_write_TerseException.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {  }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::facebook::thrift::test::terse_write::TerseException>()
+  ));
 }
 } // namespace md
 } // namespace detail

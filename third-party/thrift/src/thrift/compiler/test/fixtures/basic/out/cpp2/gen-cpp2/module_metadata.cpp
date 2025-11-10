@@ -298,7 +298,7 @@ StructMetadata<::test::fixtures::basic::UnionToBeRenamed>::gen(ThriftMetadata& m
 }
 
 void ExceptionMetadata<::test::fixtures::basic::MyException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::test::fixtures::basic::MyException>(metadata, false);
+  auto res = genExceptionMetadata<::test::fixtures::basic::MyException>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
@@ -319,9 +319,16 @@ void ExceptionMetadata<::test::fixtures::basic::MyException>::gen(ThriftMetadata
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_MyException.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::basic::MyException>()
+  ));
 }
 void ExceptionMetadata<::test::fixtures::basic::MyExceptionWithMessage>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::test::fixtures::basic::MyExceptionWithMessage>(metadata, false);
+  auto res = genExceptionMetadata<::test::fixtures::basic::MyExceptionWithMessage>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
@@ -342,6 +349,13 @@ void ExceptionMetadata<::test::fixtures::basic::MyExceptionWithMessage>::gen(Thr
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_MyExceptionWithMessage.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::basic::MyExceptionWithMessage>()
+  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::FooService>>::gen_simple_rpc([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];

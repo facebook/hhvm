@@ -537,7 +537,7 @@ StructMetadata<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct>::gen(ThriftM
 }
 
 void ExceptionMetadata<::some::valid::ns::AnException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::some::valid::ns::AnException>(metadata, false);
+  auto res = genExceptionMetadata<::some::valid::ns::AnException>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
@@ -558,9 +558,16 @@ void ExceptionMetadata<::some::valid::ns::AnException>::gen(ThriftMetadata& meta
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_AnException.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::some::valid::ns::AnException>()
+  ));
 }
 void ExceptionMetadata<::some::valid::ns::AnotherException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::some::valid::ns::AnotherException>(metadata, false);
+  auto res = genExceptionMetadata<::some::valid::ns::AnotherException>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
@@ -581,7 +588,14 @@ void ExceptionMetadata<::some::valid::ns::AnotherException>::gen(ThriftMetadata&
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_AnotherException.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
   module_AnotherException.structured_annotations()->push_back(*cvStruct("thrift.DeprecatedUnvalidatedAnnotations", { {"items", cvMap({ cvPair(cvString("cpp.virtual"), cvString("1")) }) } }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::some::valid::ns::AnotherException>()
+  ));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::EmptyService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {

@@ -185,13 +185,20 @@ StructMetadata<::cpp2::SecretStruct>::gen(ThriftMetadata& metadata) {
 }
 
 void ExceptionMetadata<::cpp2::detail::YourException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::detail::YourException>(metadata, false);
+  auto res = genExceptionMetadata<::cpp2::detail::YourException>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
   [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_MyException = res.metadata;
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
   module_MyException.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("YourException") } }).cv_struct());
   module_MyException.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::StaticCast") } }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::detail::YourException>()
+  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_ping([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];

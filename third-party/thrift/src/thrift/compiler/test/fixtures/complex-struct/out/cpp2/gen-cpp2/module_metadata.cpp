@@ -482,14 +482,21 @@ StructMetadata<::cpp2::Containers>::gen(ThriftMetadata& metadata) {
 }
 
 void ExceptionMetadata<::cpp2::emptyXcep>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::emptyXcep>(metadata, false);
+  auto res = genExceptionMetadata<::cpp2::emptyXcep>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
   [[maybe_unused]] ::apache::thrift::metadata::ThriftException& module_emptyXcep = res.metadata;
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::emptyXcep>()
+  ));
 }
 void ExceptionMetadata<::cpp2::reqXcep>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::reqXcep>(metadata, false);
+  auto res = genExceptionMetadata<::cpp2::reqXcep>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
@@ -510,9 +517,16 @@ void ExceptionMetadata<::cpp2::reqXcep>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_reqXcep.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::reqXcep>()
+  ));
 }
 void ExceptionMetadata<::cpp2::optXcep>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::optXcep>(metadata, false);
+  auto res = genExceptionMetadata<::cpp2::optXcep>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
@@ -533,9 +547,16 @@ void ExceptionMetadata<::cpp2::optXcep>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_optXcep.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::optXcep>()
+  ));
 }
 void ExceptionMetadata<::cpp2::complexException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::complexException>(metadata, false);
+  auto res = genExceptionMetadata<::cpp2::complexException>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
@@ -556,6 +577,13 @@ void ExceptionMetadata<::cpp2::complexException>::gen(ThriftMetadata& metadata) 
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_complexException.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::complexException>()
+  ));
 }
 } // namespace md
 } // namespace detail

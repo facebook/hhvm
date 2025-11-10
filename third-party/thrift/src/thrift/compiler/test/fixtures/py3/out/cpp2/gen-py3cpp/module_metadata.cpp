@@ -476,7 +476,7 @@ StructMetadata<::py3::simple::AdaptedTypedefFields>::gen(ThriftMetadata& metadat
 }
 
 void ExceptionMetadata<::py3::simple::SimpleException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::py3::simple::SimpleException>(metadata, false);
+  auto res = genExceptionMetadata<::py3::simple::SimpleException>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
@@ -497,9 +497,16 @@ void ExceptionMetadata<::py3::simple::SimpleException>::gen(ThriftMetadata& meta
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_SimpleException.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::py3::simple::SimpleException>()
+  ));
 }
 void ExceptionMetadata<::py3::simple::HiddenException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::py3::simple::HiddenException>(metadata, false);
+  auto res = genExceptionMetadata<::py3::simple::HiddenException>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return;
   }
@@ -520,7 +527,14 @@ void ExceptionMetadata<::py3::simple::HiddenException>::gen(ThriftMetadata& meta
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_HiddenException.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
   module_HiddenException.structured_annotations()->push_back(*cvStruct("python.Py3Hidden", {  }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::py3::simple::HiddenException>()
+  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_five([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];

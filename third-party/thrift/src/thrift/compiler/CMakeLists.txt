@@ -73,7 +73,6 @@ add_library(
   ast/t_node.cc
   ast/t_map.cc
   ast/t_package.cc
-  ast/t_paramlist.cc
   ast/t_program.cc
   ast/t_global_scope.cc
   ast/t_set.cc

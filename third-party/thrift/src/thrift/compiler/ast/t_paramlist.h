@@ -29,16 +29,6 @@ class t_paramlist final : public t_structured {
   // TODO(afuller): The program should always be null, because this is an
   // 'unnamed' t_type (or more accurately, not a type at all).
   explicit t_paramlist(const t_program* program) : t_structured(program, "") {}
-
-  // TODO(T227540797): Remove everything below this comment. It is only provided
-  // for backwards compatibility.
- public:
-  /**
-   * Thrift AST nodes are meant to be non-copyable and non-movable, and should
-   * never be cloned. This method exists to grand-father specific uses in the
-   * target language generators. Do NOT add any new usage of this method.
-   */
-  std::unique_ptr<t_paramlist> clone_DO_NOT_USE() const;
 };
 
 } // namespace apache::thrift::compiler

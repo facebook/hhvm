@@ -34,23 +34,6 @@ class t_throws : public t_structured {
   static bool is_null_or_empty(const t_throws* value) {
     return value == nullptr || !value->has_fields();
   }
-
-  // TODO(T227540797): Remove everything below this comment. It is only provided
-  // for backwards compatibility.
- public:
-  /**
-   * Thrift AST nodes are meant to be non-copyable and non-movable, and should
-   * never be cloned. This method exists to grand-father specific uses in the
-   * target language generators. Do NOT add any new usage of this method.
-   */
-  std::unique_ptr<t_throws> clone_DO_NOT_USE() const {
-    auto clone = std::make_unique<t_throws>();
-    for (const auto& field : fields_) {
-      clone->append(field->clone_DO_NOT_USE());
-    }
-
-    return clone;
-  }
 };
 
 // Returns a view of all the elements in the throws clause if it is non-null

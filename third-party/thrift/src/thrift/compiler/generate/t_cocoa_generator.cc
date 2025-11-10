@@ -225,7 +225,14 @@ class t_cocoa_generator : public t_concat_generator {
   std::string base_type_name(t_primitive_type* tbase);
   std::string declare_field(const t_field* tfield);
   std::string declare_property(const t_field* tfield);
-  std::string function_signature(const t_function* tfunction);
+  std::string function_signature(const t_function* tfunction) {
+    return function_signature(
+        tfunction->name(), tfunction->return_type(), tfunction->params());
+  }
+  std::string function_signature(
+      const std::string& name,
+      const t_type_ref& return_type,
+      const t_paramlist& params);
   std::string argument_list(const t_paramlist& tparamlist);
   std::string type_to_enum(const t_type* ttype);
   std::string format_string_for_type(const t_type* type);
@@ -1808,17 +1815,15 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
   // generate client method implementations
   for (const t_function& function : tservice->functions()) {
     const std::string& funname = function.name();
-
-    t_function send_function(
-        nullptr,
-        t_type_ref::from_req_ptr(&t_primitive_type::t_void()),
-        "send_" + function.name(),
-        function.params().clone_DO_NOT_USE());
-
     std::string argsname = function.name() + "_args";
-
-    // Open function
-    indent(out) << "- " << function_signature(&send_function) << std::endl;
+    // Open send_foo function that takes the declared parameters and returns
+    // void
+    indent(out) << "- "
+                << function_signature(
+                       /*name=*/"send_" + function.name(),
+                       /*return_type=*/t_primitive_type::t_void(),
+                       /*params=*/function.params())
+                << std::endl;
     scope_up(out);
 
     // Serialize the request
@@ -1862,13 +1867,13 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
     out << std::endl;
 
     if (function.qualifier() != t_function_qualifier::oneway) {
-      t_function recv_function(
-          program_, function.return_type(), "recv_" + function.name());
-      if (const t_throws* exceptions = function.exceptions()) {
-        recv_function.set_exceptions(exceptions->clone_DO_NOT_USE());
-      }
-      // Open function
-      indent(out) << "- " << function_signature(&recv_function) << std::endl;
+      // Open recv_foo function that takes no parameters and returns the
+      // declared return type
+      indent(out) << "- "
+                  << function_signature(/*name=*/"recv_" + function.name(),
+                                        /*return_type=*/function.return_type(),
+                                        /*params=*/t_paramlist{program_})
+                  << std::endl;
       scope_up(out);
 
       // TODO(mcslee): Message validation here, was the seqid etc ok?
@@ -2933,10 +2938,12 @@ std::string t_cocoa_generator::declare_property(const t_field* tfield) {
  * @param tfunction Function definition
  * @return String of rendered function definition
  */
-std::string t_cocoa_generator::function_signature(const t_function* tfunction) {
-  const t_type& type = *tfunction->return_type();
-  std::string result = "(" + type_name(&type) + ") " + tfunction->name() +
-      argument_list(tfunction->params());
+std::string t_cocoa_generator::function_signature(
+    const std::string& name,
+    const t_type_ref& return_type,
+    const t_paramlist& params) {
+  std::string result = "(" + type_name(&return_type.deref()) + ") " + name +
+      argument_list(params);
   return result;
 }
 

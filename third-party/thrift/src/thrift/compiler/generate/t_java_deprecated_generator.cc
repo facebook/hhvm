@@ -2504,16 +2504,16 @@ void t_java_deprecated_generator::generate_service_client(
     scope_down(f_service_);
     f_service_ << endl;
 
-    t_function send_function(
-        nullptr,
-        t_type_ref::from_req_ptr(&t_primitive_type::t_void()),
-        string("send_") + func.name(),
-        func.params().clone_DO_NOT_USE());
-
     string argsname = func.name() + "_args";
-
-    // Open function
-    indent(f_service_) << "public " << function_signature(&send_function)
+    // Open send_foo function that takes the declared parameters and returns
+    // void
+    indent(f_service_) << "public "
+                       << function_signature(
+                              /*name=*/func.name(),
+                              /*return_type=*/t_primitive_type::t_void(),
+                              /*params=*/func.params(),
+                              /*exceptions=*/nullptr,
+                              /*prefix=*/"send_")
                        << endl;
     scope_up(f_service_);
 
@@ -2552,16 +2552,15 @@ void t_java_deprecated_generator::generate_service_client(
     if (func.qualifier() != t_function_qualifier::oneway) {
       string resultname = func.name() + "_result";
 
-      t_function recv_function(
-          nullptr,
-          func.return_type(),
-          "recv_" + func.name(),
-          std::make_unique<t_paramlist>(program_));
-      if (const t_throws* exceptions = func.exceptions()) {
-        recv_function.set_exceptions(exceptions->clone_DO_NOT_USE());
-      }
-      // Open the recv function
-      indent(f_service_) << "public " << function_signature(&recv_function)
+      // Open recv_foo function that takes no parameters and returns the
+      // declared return type or throws one of its declared exceptions
+      indent(f_service_) << "public "
+                         << function_signature(
+                                /*name=*/func.name(),
+                                /*return_type=*/func.return_type(),
+                                /*params=*/t_paramlist{program_},
+                                /*exceptions=*/func.exceptions(),
+                                /*prefix=*/"recv_")
                          << endl;
       scope_up(f_service_);
 
@@ -3690,11 +3689,15 @@ string t_java_deprecated_generator::declare_field(
  * @return String of rendered function definition
  */
 string t_java_deprecated_generator::function_signature(
-    const t_function* tfunction, const string& prefix) {
-  const t_type* type = tfunction->return_type().get_type();
-  std::string result = type_name(type) + " " + prefix + tfunction->name() +
-      "(" + argument_list(tfunction->params()) + ") throws ";
-  for (const t_field& x : get_elems(tfunction->exceptions())) {
+    const std::string& name,
+    const t_type_ref& return_type,
+    const t_paramlist& params,
+    const t_throws* exceptions,
+    const string& prefix) {
+  const t_type* type = return_type.get_type();
+  std::string result = type_name(type) + " " + prefix + name + "(" +
+      argument_list(params) + ") throws ";
+  for (const t_field& x : get_elems(exceptions)) {
     result += type_name(x.type().get_type(), false, false) + ", ";
   }
   result += "TException";

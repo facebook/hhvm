@@ -644,33 +644,33 @@ void t_json_generator::generate_struct(const t_structured* tstruct) {
       *tstruct,
       /*add_heading_comma=*/false,
       /*add_trailing_comma=*/true);
-  vector<t_field*> members = tstruct->get_members();
-  vector<t_field*>::iterator mem_iter = members.begin();
+  node_list_view<const t_field> members = tstruct->fields();
+  node_list_view<const t_field>::iterator mem_iter = members.begin();
   indent(f_out_) << "\"fields\" : {" << endl;
   indent_up();
   for (; mem_iter != members.end(); mem_iter++) {
     if (mem_iter != members.begin()) {
       f_out_ << "," << endl;
     }
-    indent(f_out_) << "\"" << (*mem_iter)->name() << "\" : {" << endl;
+    indent(f_out_) << "\"" << (*mem_iter).name() << "\" : {" << endl;
     indent_up();
-    print_spec((*mem_iter)->type().get_type());
+    print_spec((*mem_iter).type().get_type());
     f_out_ << "," << endl
            << indent() << "\"required\" : "
-           << ((*mem_iter)->qualifier() != t_field_qualifier::optional
+           << ((*mem_iter).qualifier() != t_field_qualifier::optional
                    ? "true"
                    : "false");
-    const t_const_value* default_val = (*mem_iter)->default_value();
+    const t_const_value* default_val = (*mem_iter).default_value();
     if (default_val != nullptr) {
       f_out_ << "," << endl << indent() << "\"default_value\" : ";
       print_const_value(default_val);
     }
     print_node_annotations(
-        **mem_iter,
+        *mem_iter,
         /*add_heading_comma=*/true,
         /*add_trailing_comma=*/false);
     f_out_ << "," << endl;
-    print_source_range((*mem_iter)->src_range());
+    print_source_range((*mem_iter).src_range());
     indent_down();
     indent(f_out_) << "}";
   }

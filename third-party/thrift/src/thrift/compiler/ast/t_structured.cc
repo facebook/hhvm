@@ -47,8 +47,6 @@ bool t_structured::try_append_field(std::unique_ptr<t_field>& field) {
   }
   fields_id_order_.emplace(existing.first, field.get());
 
-  fields_raw_.push_back(field.get());
-
   // Take ownership.
   fields_.push_back(std::move(field));
   return true;
@@ -83,7 +81,6 @@ void t_structured::append(std::unique_ptr<t_field> field) {
   if (!field->name().empty()) {
     fields_by_name_[field->name()] = field.get();
   }
-  fields_raw_.push_back(field.get());
   fields_.push_back(std::move(field));
 }
 

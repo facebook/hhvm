@@ -88,11 +88,6 @@ class t_structured : public t_type {
  public:
   // Tries to append the gieven field, throwing an exception on failure.
   void append(std::unique_ptr<t_field> elem);
-
-  const std::vector<t_field*>& get_members() const { return fields_raw_; }
-
- protected:
-  std::vector<t_field*> fields_raw_;
 };
 
 } // namespace apache::thrift::compiler

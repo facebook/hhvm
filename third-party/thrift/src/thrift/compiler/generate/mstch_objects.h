@@ -233,28 +233,6 @@ std::shared_ptr<mstch_base> make_mstch_service_cached(
 // A base class for mstch object types that wrap Thrift AST nodes. It is called
 // mstch_base rather than mstch_node to avoid confusion with mstch::node.
 class mstch_base : public mstch::object {
- protected:
-  // A range of t_field* to avoid copying between std::vector<t_field*>
-  // and std::vector<const t_field*>.
-  class field_range {
-   public:
-    /* implicit */ field_range(const std::vector<t_field*>& fields) noexcept
-        : begin_(const_cast<const t_field* const*>(fields.data())),
-          end_(
-              const_cast<const t_field* const*>(
-                  fields.data() + fields.size())) {}
-    /* implicit */ field_range(
-        const std::vector<const t_field*>& fields) noexcept
-        : begin_(fields.data()), end_(fields.data() + fields.size()) {}
-    constexpr size_t size() const noexcept { return end_ - begin_; }
-    constexpr const t_field* const* begin() const noexcept { return begin_; }
-    constexpr const t_field* const* end() const noexcept { return end_; }
-
-   private:
-    const t_field* const* begin_;
-    const t_field* const* end_;
-  };
-
  public:
   mstch_base(mstch_context& ctx, mstch_element_position pos)
       : context_(ctx), pos_(pos) {
@@ -645,8 +623,7 @@ class mstch_function : public mstch_base {
   const t_function* function_;
 
   mstch::node make_exceptions(const t_throws* exceptions) {
-    return exceptions ? make_mstch_fields(exceptions->get_members())
-                      : mstch::node();
+    return exceptions ? make_mstch_fields(exceptions->fields()) : mstch::node();
   }
 
   const t_interface& interface() const {
@@ -769,16 +746,12 @@ class mstch_struct : public mstch_base {
     return mstch_base::structured_annotations(struct_);
   }
 
-  field_range get_members_in_serialization_order() {
+  mstch::node fields_in_serialization_order() {
     if (struct_->has_structured_annotation(kSerializeInFieldIdOrderUri)) {
-      return struct_->fields_id_order();
+      return make_mstch_fields(struct_->fields_id_order());
     }
 
-    return struct_->get_members();
-  }
-
-  mstch::node fields_in_serialization_order() {
-    return make_mstch_fields(get_members_in_serialization_order());
+    return make_mstch_fields(struct_->fields());
   }
 
   mstch::node has_serialize_in_field_id_order_annotation() {

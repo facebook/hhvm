@@ -1836,8 +1836,8 @@ class cpp_mstch_struct : public mstch_struct {
     return "";
   }
   mstch::node has_lazy_fields() {
-    for (const auto& field : struct_->get_members()) {
-      if (cpp2::is_lazy(field)) {
+    for (const auto& field : struct_->fields()) {
+      if (cpp2::is_lazy(&field)) {
         return true;
       }
     }
@@ -1995,9 +1995,9 @@ class cpp_mstch_struct : public mstch_struct {
     }
 
     std::vector<const t_field*> result;
-    for (const auto* field : struct_->get_members()) {
-      if (has_runtime_annotation(*field)) {
-        result.push_back(field);
+    for (const auto& field : struct_->fields()) {
+      if (has_runtime_annotation(field)) {
+        result.push_back(&field);
       }
     }
 

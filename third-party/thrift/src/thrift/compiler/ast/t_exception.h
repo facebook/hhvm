@@ -62,9 +62,9 @@ class t_exception final : public t_structured {
   void set_safety(t_error_safety safety) { safety_ = safety; }
 
   const t_field* get_message_field() const {
-    for (const auto* field : get_members()) {
-      if (field->has_structured_annotation(kExceptionMessageUri)) {
-        return field;
+    for (const auto& field : fields()) {
+      if (field.has_structured_annotation(kExceptionMessageUri)) {
+        return &field;
       }
     }
     const auto* value = find_unstructured_annotation_or_null("message");

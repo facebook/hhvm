@@ -2598,12 +2598,12 @@ std::unique_ptr<t_const_value> t_hack_generator::struct_to_tmeta(
       std::make_unique<t_const_value>("name"),
       std::make_unique<t_const_value>(tstruct->get_scoped_name()));
 
-  auto fields = tstruct->get_members();
+  auto fields = tstruct->fields();
   if (!fields.empty()) {
     auto tmeta_fields = t_const_value::make_list();
     for (const auto& field : fields) {
-      if (!skip_codegen(field)) {
-        tmeta_fields->add_list(field_to_tmeta(field));
+      if (!skip_codegen(&field)) {
+        tmeta_fields->add_list(field_to_tmeta(&field));
       }
     }
     tmeta->add_map(

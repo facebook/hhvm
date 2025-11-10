@@ -260,7 +260,7 @@ mstch::node mstch_field::type() {
 }
 
 mstch::node mstch_struct::fields() {
-  return make_mstch_fields(struct_->get_members());
+  return make_mstch_fields(struct_->fields());
 }
 
 mstch::node mstch_function::return_type() {
@@ -276,12 +276,12 @@ mstch::node mstch_function::return_type() {
 }
 
 mstch::node mstch_function::arg_list() {
-  return make_mstch_fields(function_->params().get_members());
+  return make_mstch_fields(function_->params().fields());
 }
 
 mstch::node mstch_function::exceptions() {
   const t_throws* throws = function_->exceptions();
-  return throws ? make_mstch_fields(throws->get_members()) : mstch::node();
+  return throws ? make_mstch_fields(throws->fields()) : mstch::node();
 }
 
 mstch::node mstch_function::sink_first_response_type() {

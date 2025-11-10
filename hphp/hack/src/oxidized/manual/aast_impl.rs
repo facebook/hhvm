@@ -300,7 +300,7 @@ impl<En> Expr<(), En> {
         )
     }
 
-    pub fn as_class_get(&self) -> Option<(&ClassId<(), En>, &ClassGetExpr<(), En>, &PropOrMethod)> {
+    pub fn as_class_get(&self) -> Option<(&ClassId<(), En>, &Pstring, &PropOrMethod)> {
         self.2.as_class_get()
     }
 

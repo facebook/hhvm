@@ -197,10 +197,7 @@ let rec is_const_expr (_, _, expr_) =
   | Invalid e -> Option.fold ~none:true ~some:is_const_expr e
   | Array_get (e1, e2) ->
     is_const_expr e1 && Option.fold ~none:true ~some:is_const_expr e2
-  | Class_get (_, cge, _) ->
-    (match cge with
-    | CGstring _ -> true
-    | CGexpr e -> is_const_expr e)
+  | Class_get (_, _, _) -> true
   | Yield afield -> is_const_afield afield
   | Eif (e1, e2, e3) ->
     is_const_expr e1

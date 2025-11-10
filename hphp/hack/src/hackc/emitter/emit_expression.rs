@@ -731,11 +731,9 @@ fn text_of_class_id(cid: &ast::ClassId) -> String {
     }
 }
 
-fn text_of_prop(prop: &ast::ClassGetExpr) -> String {
-    match prop {
-        ast::ClassGetExpr::CGstring((_, s)) => s.into(),
-        ast::ClassGetExpr::CGexpr(e) => text_of_expr(e),
-    }
+fn text_of_prop(prop: &(Pos, String)) -> String {
+    let (_, s) = prop;
+    s.into()
 }
 
 fn emit_import<'a>(
@@ -2273,11 +2271,9 @@ fn emit_call_lhs_and_fcall<'a>(
             // Case Foo::bar(...).
             let (cid, cls_get_expr, _) = &**c;
             let cexpr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, false, cid);
-            let emit_meth_name = |e: &mut Emitter| match &cls_get_expr {
-                ast::ClassGetExpr::CGstring((pos, id)) => {
-                    Ok(emit_pos_then(pos, instr::c_get_l(e.named_local(id))))
-                }
-                ast::ClassGetExpr::CGexpr(expr) => emit_expr(e, env, expr),
+            let emit_meth_name = |e: &mut Emitter| {
+                let (pos, id) = &cls_get_expr;
+                Ok(emit_pos_then(pos, instr::c_get_l(e.named_local(id))))
             };
             Ok(match cexpr {
                 ClassExpr::Id(cid) => {
@@ -3452,7 +3448,7 @@ fn emit_class_get_expr<'a>(
     emitter: &mut Emitter,
     env: &Env<'a>,
     _pos: &Pos,
-    e: &(ast::ClassId, ast::ClassGetExpr, ast::PropOrMethod),
+    e: &(ast::ClassId, (Pos, String), ast::PropOrMethod),
 ) -> Result<InstrSeq> {
     // class gets without a readonly expression must be mutable
     emit_class_get(
@@ -4584,7 +4580,7 @@ fn emit_class_get<'a>(
     env: &Env<'a>,
     query_op: QueryMOp,
     cid: &ast::ClassId,
-    prop: &ast::ClassGetExpr,
+    prop: &(Pos, String),
     readonly_op: ReadonlyOp,
 ) -> Result<InstrSeq> {
     let cexpr = ClassExpr::class_id_to_class_expr(e, &env.scope, false, false, cid);
@@ -6260,21 +6256,14 @@ fn emit_final_member_op(stack_size: StackIndex, op: LValOp, mk: MemberKey) -> In
     }
 }
 
-fn emit_final_static_op(
-    cid: &ast::ClassId,
-    prop: &ast::ClassGetExpr,
-    op: LValOp,
-) -> Result<InstrSeq> {
+fn emit_final_static_op(cid: &ast::ClassId, prop: &(Pos, String), op: LValOp) -> Result<InstrSeq> {
     use LValOp as L;
     Ok(match op {
         L::Set => instr::set_s(ReadonlyOp::Any),
         L::SetOp(op) => instr::set_op_s(op),
         L::IncDec(op) => instr::inc_dec_s(op),
         L::Unset => {
-            let pos = match prop {
-                ast::ClassGetExpr::CGstring((pos, _))
-                | ast::ClassGetExpr::CGexpr(ast::Expr(_, pos, _)) => pos,
-            };
+            let (pos, _) = prop;
             let cid = text_of_class_id(cid);
             let id = text_of_prop(prop);
             emit_fatal::emit_fatal_runtime(
@@ -6508,14 +6497,14 @@ fn emit_class_expr<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
     cexpr: ClassExpr,
-    prop: &ast::ClassGetExpr,
+    prop: &(Pos, String),
 ) -> Result<(InstrSeq, InstrSeq)> {
-    let load_prop = |e: &mut Emitter| match prop {
-        ast::ClassGetExpr::CGstring((pos, id)) => Ok(emit_pos_then(
+    let load_prop = |_: &mut Emitter| {
+        let (pos, id) = prop;
+        Ok(emit_pos_then(
             pos,
             instr::string(string_utils::locals::strip_dollar(id)),
-        )),
-        ast::ClassGetExpr::CGexpr(expr) => emit_expr(e, env, expr),
+        ))
     };
 
     Ok(match &cexpr {
@@ -6539,10 +6528,7 @@ fn emit_class_expr<'a>(
             )
         }
         _ => {
-            let pos = match prop {
-                ast::ClassGetExpr::CGstring((pos, _))
-                | ast::ClassGetExpr::CGexpr(ast::Expr(_, pos, _)) => pos,
-            };
+            let (pos, _) = prop;
             (load_prop(e)?, emit_load_class_ref(e, env, pos, cexpr)?)
         }
     })

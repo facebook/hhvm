@@ -503,10 +503,8 @@ fn print_expr(
                 _ => return Err(Error::fail("TODO Unimplemented unexpected non-CIexpr").into()),
             }
             w.write_all(b"::")?;
-            match &cg.1 {
-                ast::ClassGetExpr::CGstring((_, litstr)) => w.write_all(litstr.as_bytes()),
-                ast::ClassGetExpr::CGexpr(e) => print_expr(ctx, w, env, e),
-            }
+            let (_, litstr) = &cg.1;
+            w.write_all(litstr.as_bytes())
         }
         Expr_::Nameof(box cid) => {
             w.write_all(b"nameof ")?;

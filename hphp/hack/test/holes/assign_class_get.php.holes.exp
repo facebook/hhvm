@@ -44,7 +44,7 @@
            [([11:5-22],
              (Expr
                 ((string), [11:5-21],
-                 (Assign (((int), [11:5-16], (Class_get (((C), [11:5-9], CIself), (CGstring ([11:11-16], "$prop")), Is_prop))), None,
+                 (Assign (((int), [11:5-16], (Class_get (((C), [11:5-9], CIself), ([11:11-16], "$prop"), Is_prop))), None,
                     ((string), [11:19-21], (Hole (((string), [11:19-21], (Lvar ([11:19-21], $x))), (string), (int), Typing))))))))
              ]
            };
@@ -67,7 +67,7 @@
             [([16:5-31],
               (Expr
                  ((nothing), [16:5-30],
-                  (Assign (((?int), [16:5-25], (Class_get (((C), [16:5-9], CIself), (CGstring ([16:11-25], "$nullable_prop")), Is_prop))), None, ((nothing), [16:28-30], (Lvar ([16:28-30], $x))))))))
+                  (Assign (((?int), [16:5-25], (Class_get (((C), [16:5-9], CIself), ([16:11-25], "$nullable_prop"), Is_prop))), None, ((nothing), [16:28-30], (Lvar ([16:28-30], $x))))))))
               ]
             };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -88,7 +88,7 @@
             [([21:5-22],
               (Expr
                  (((int | string)), [21:5-21],
-                  (Assign (((int), [21:5-16], (Class_get (((C), [21:5-9], CIself), (CGstring ([21:11-16], "$prop")), Is_prop))), None,
+                  (Assign (((int), [21:5-16], (Class_get (((C), [21:5-9], CIself), ([21:11-16], "$prop"), Is_prop))), None,
                      (((int | string)), [21:19-21], (Hole ((((int | string)), [21:19-21], (Lvar ([21:19-21], $x))), ((int | string)), (int), Typing))))))))
               ]
             };
@@ -113,7 +113,7 @@
             [([25:5-27],
               (Expr
                  (((int, bool)), [25:5-26],
-                  (Assign (((~(int, string)), [25:5-21], (Class_get (((C), [25:5-9], CIself), (CGstring ([25:11-21], "$pair_prop")), Is_prop))), None,
+                  (Assign (((~(int, string)), [25:5-21], (Class_get (((C), [25:5-9], CIself), ([25:11-21], "$pair_prop"), Is_prop))), None,
                      (((int, bool)), [25:24-26], (Hole ((((int, bool)), [25:24-26], (Lvar ([25:24-26], $x))), ((int, bool)), (~(int, string)), Typing))))))))
               ]
             };
@@ -135,7 +135,7 @@
             [([30:5-28],
               (Expr
                  ((bool), [30:5-27],
-                  (Assign (((bool), [30:5-22], (Array_get (((~Vector<string>), [30:5-20], (Class_get (((C), [30:5-9], CIself), (CGstring ([30:11-20], "$vec_prop")), Is_prop))), None))), None,
+                  (Assign (((bool), [30:5-22], (Array_get (((~Vector<string>), [30:5-20], (Class_get (((C), [30:5-9], CIself), ([30:11-20], "$vec_prop"), Is_prop))), None))), None,
                      ((bool), [30:25-27], (Hole (((bool), [30:25-27], (Lvar ([30:25-27], $x))), (bool), (~(bool | string)), Typing))))))))
               ]
             };
@@ -159,8 +159,7 @@
               (Expr
                  ((bool), [35:5-29],
                   (Assign (
-                     ((bool), [35:5-24],
-                      (Array_get (((~(int, string)), [35:5-21], (Class_get (((C), [35:5-9], CIself), (CGstring ([35:11-21], "$pair_prop")), Is_prop))), (Some ((int), [35:22-23], (Int "0")))))),
+                     ((bool), [35:5-24], (Array_get (((~(int, string)), [35:5-21], (Class_get (((C), [35:5-9], CIself), ([35:11-21], "$pair_prop"), Is_prop))), (Some ((int), [35:22-23], (Int "0")))))),
                      None, ((bool), [35:27-29], (Lvar ([35:27-29], $x))))))))
               ]
             };
@@ -184,8 +183,7 @@
               (Expr
                  ((bool), [40:5-29],
                   (Assign (
-                     ((bool), [40:5-24],
-                      (Array_get (((~(int, string)), [40:5-21], (Class_get (((C), [40:5-9], CIself), (CGstring ([40:11-21], "$pair_prop")), Is_prop))), (Some ((int), [40:22-23], (Int "1")))))),
+                     ((bool), [40:5-24], (Array_get (((~(int, string)), [40:5-21], (Class_get (((C), [40:5-9], CIself), ([40:11-21], "$pair_prop"), Is_prop))), (Some ((int), [40:22-23], (Int "1")))))),
                      None, ((bool), [40:27-29], (Lvar ([40:27-29], $x))))))))
               ]
             };
@@ -249,7 +247,7 @@
             [([16:5-31],
               (Expr
                  ((dynamic), [16:5-30],
-                  (Assign (((?int), [16:5-25], (Class_get (((C), [16:5-9], CIself), (CGstring ([16:11-25], "$nullable_prop")), Is_prop))), None, ((dynamic), [16:28-30], (Lvar ([16:28-30], $x))))))))
+                  (Assign (((?int), [16:5-25], (Class_get (((C), [16:5-9], CIself), ([16:11-25], "$nullable_prop"), Is_prop))), None, ((dynamic), [16:28-30], (Lvar ([16:28-30], $x))))))))
               ]
             };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 

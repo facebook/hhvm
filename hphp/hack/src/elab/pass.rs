@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6eac454cb9cb6efbd8d67a1e59cad6fb>>
+// @generated SignedSource<<3debdf63cef5c3d52166a1c0946d95f4>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -332,22 +332,6 @@ pub trait Pass: PassClone {
         &mut self,
         env: &Env,
         elem: &mut Expr<Ex, En>,
-    ) -> ControlFlow<()> {
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_class_get_expr_top_down(
-        &mut self,
-        env: &Env,
-        elem: &mut ClassGetExpr<Ex, En>,
-    ) -> ControlFlow<()> {
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_class_get_expr_bottom_up(
-        &mut self,
-        env: &Env,
-        elem: &mut ClassGetExpr<Ex, En>,
     ) -> ControlFlow<()> {
         Continue(())
     }
@@ -1864,28 +1848,6 @@ impl Pass for Passes {
     ) -> ControlFlow<()> {
         for pass in &mut self.passes {
             pass.on_fld_binop_rhs_bottom_up(env, elem)?;
-        }
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_class_get_expr_top_down(
-        &mut self,
-        env: &Env,
-        elem: &mut ClassGetExpr<Ex, En>,
-    ) -> ControlFlow<()> {
-        for pass in &mut self.passes {
-            pass.on_ty_class_get_expr_top_down(env, elem)?;
-        }
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_class_get_expr_bottom_up(
-        &mut self,
-        env: &Env,
-        elem: &mut ClassGetExpr<Ex, En>,
-    ) -> ControlFlow<()> {
-        for pass in &mut self.passes {
-            pass.on_ty_class_get_expr_bottom_up(env, elem)?;
         }
         Continue(())
     }

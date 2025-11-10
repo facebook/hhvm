@@ -54,7 +54,7 @@ impl<'a> DeclvarVisitor<'a> {
         }
     }
 
-    fn on_class_get(&mut self, cid: &ClassId, cge: &ClassGetExpr) -> Result<(), String> {
+    fn on_class_get(&mut self, cid: &ClassId, pstr: &(Pos, String)) -> Result<(), String> {
         use aast::ClassId_;
         match &cid.2 {
             ClassId_::CIparent | ClassId_::CIself | ClassId_::CIstatic | ClassId_::CI(_) => {
@@ -62,16 +62,11 @@ impl<'a> DeclvarVisitor<'a> {
             }
             ClassId_::CIexpr(e) => {
                 self.visit_expr(&mut (), e)?;
-                match cge {
-                    ClassGetExpr::CGstring(pstr) => {
-                        // TODO(thomasjiang): For this to match correctly, we need to adjust
-                        // ast_to_nast because it does not make a distinction between ID and Lvar,
-                        // which is needed here
-                        self.add_local(&pstr.1);
-                        Ok(())
-                    }
-                    ClassGetExpr::CGexpr(e2) => self.visit_expr(&mut (), e2),
-                }
+                // TODO(thomasjiang): For this to match correctly, we need to adjust
+                // ast_to_nast because it does not make a distinction between ID and Lvar,
+                // which is needed here
+                self.add_local(&pstr.1);
+                Ok(())
             }
         }
     }

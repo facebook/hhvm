@@ -1245,10 +1245,10 @@ mod tests {
                                             )))
                                         ))
                                     ),
-                                    ClassGetExpr::CGstring((
+                                    (
                                         __hygienic_pos.clone(),
                                         "$__xhpAttributeDeclarationCache".to_owned()
-                                    )),
+                                    ),
                                     PropOrMethod::IsProp
                                 )))
                             )
@@ -1297,10 +1297,10 @@ mod tests {
                                                         )))
                                                     ))
                                                 ),
-                                                ClassGetExpr::CGstring((
+                                                (
                                                     __hygienic_pos.clone(),
                                                     "$__xhpAttributeDeclarationCache".to_owned()
-                                                )),
+                                                ),
                                                 PropOrMethod::IsProp
                                             )))
                                         ),
@@ -1359,10 +1359,10 @@ mod tests {
                                                         )))
                                                     ))
                                                 ),
-                                                ClassGetExpr::CGstring((
+                                                (
                                                     __hygienic_pos.clone(),
                                                     "$__xhpAttributeDeclarationCache".to_owned()
-                                                )),
+                                                ),
                                                 PropOrMethod::IsProp
                                             )))
                                         )

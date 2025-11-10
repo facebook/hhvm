@@ -373,8 +373,7 @@ let visitor =
         | Aast.Obj_get ((ty, _, _), (_, _, Aast.Id mid), _, _) ->
           typed_property env ty mid
         | Aast.Class_const ((ty, _, _), mid) -> typed_const env ty mid
-        | Aast.Class_get ((ty, _, _), Aast.CGstring mid, _) ->
-          typed_property env ty mid
+        | Aast.Class_get ((ty, _, _), mid, _) -> typed_property env ty mid
         | Aast.Xml (cid, attrs, _) ->
           let class_id = process_class_id cid in
           let xhp_attributes = process_xml_attrs (snd cid) attrs in

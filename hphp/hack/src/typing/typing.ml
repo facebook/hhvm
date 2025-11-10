@@ -2062,7 +2062,7 @@ let bad_call env p ty =
 
 let rec make_a_local_of ~include_this env e =
   match e with
-  | (_, p, Class_get ((_, _, cname), CGstring (_, member_name), _)) ->
+  | (_, p, Class_get ((_, _, cname), (_, member_name), _)) ->
     let (env, local) = Env.FakeMembers.make_static env cname member_name p in
     (env, Some (p, local))
   | ( _,
@@ -4227,7 +4227,7 @@ end = struct
              TypecheckerOptions.class_pointer_ban_classname_class_const)
         ~is_attribute_param:ctxt.Context.is_attribute_param
         (cid, mid)
-    | Class_get (((_, _, cid_) as cid), CGstring mid, Is_prop)
+    | Class_get (((_, _, cid_) as cid), mid, Is_prop)
       when Env.FakeMembers.is_valid_static env cid_ (snd mid) ->
       let (env, local) = Env.FakeMembers.make_static env cid_ (snd mid) p in
       let local = ((), p, Lvar (p, local)) in
@@ -4251,9 +4251,9 @@ end = struct
             Reason.flow_const_access ~def ~use)
       in
       let (env, _tal, te, _) = Class_id.class_expr env [] cid in
-      make_result env p (Aast.Class_get (te, Aast.CGstring mid, Is_prop)) ty
+      make_result env p (Aast.Class_get (te, mid, Is_prop)) ty
     (* Statically-known static property access e.g. Foo::$x *)
-    | Class_get (((_, _, cid_) as cid), CGstring mid, prop_or_method) ->
+    | Class_get (((_, _, cid_) as cid), mid, prop_or_method) ->
       let (env, _tal, te, cty) =
         Class_id.(class_expr ~require_class_ptr:Error env [] cid)
       in
@@ -4277,32 +4277,7 @@ end = struct
             let use = Typing_reason.static_prop_access p in
             Typing_reason.flow_prop_access ~def ~use)
       in
-      make_result
-        env
-        p
-        (Aast.Class_get (te, Aast.CGstring mid, prop_or_method))
-        ty
-    (* Dynamic static method invocation or property access. `$y = "bar"; Foo::$y()` is interpreted as `Foo::bar()` *)
-    | Class_get (cid, CGexpr m, prop_or_method) ->
-      let (env, _tal, te, _cty) = Class_id.class_expr env [] cid in
-      (* Match Obj_get dynamic instance property access behavior *)
-      let (env, tm, _) =
-        expr
-          ~expected:None
-          ~ctxt:
-            Context.
-              {
-                default with
-                is_attribute_param = ctxt.is_attribute_param;
-                accept_using_var = false;
-                check_defined = ctxt.check_defined;
-              }
-          env
-          m
-      in
-      let (env, ty) = (env, MakeType.dynamic (Reason.witness p)) in
-      let env = might_throw ~join_pos:p env in
-      make_result env p (Aast.Class_get (te, Aast.CGexpr tm, prop_or_method)) ty
+      make_result env p (Aast.Class_get (te, mid, prop_or_method)) ty
     (* Fake member property access. For example:
      *   if ($x->f !== null) { ...$x->f... }
      *)
@@ -5889,7 +5864,7 @@ end = struct
         let cid =
           match e1 with
           | (_, _, Class_const (cid, (_, x)))
-          | (_, _, Class_get (cid, CGstring (_, x), _))
+          | (_, _, Class_get (cid, (_, x), _))
             when String.equal x SN.Members.mClass ->
             cid
           | _ ->
@@ -12769,7 +12744,7 @@ end = struct
             (env, te1, ty2, rval_ty_mismatch_opt)
           | _ -> (env, te1, ty2, rval_ty_mismatch_opt)
         end
-      | (_, _, Class_get (((_, _, x) as cid), CGstring (pos_member, y), _)) ->
+      | (_, _, Class_get (((_, _, x) as cid), (pos_member, y), _)) ->
         let lenv = env.lenv in
         let no_fakes = LEnv.env_with_empty_fakes env in
         let (env, te1, _) = Expr.lvalue no_fakes e1 in
@@ -12797,8 +12772,7 @@ end = struct
           set_valid_rvalue ~is_defined:true p env local None refined_ty
         in
         (env, te1, ty2, rval_err_opt)
-      | (_, _, Obj_get _)
-      | (_, _, Class_get _) ->
+      | (_, _, Obj_get _) ->
         let lenv = env.lenv in
         let no_fakes = LEnv.env_with_empty_fakes env in
         let (env, te1, real_type) = Expr.lvalue no_fakes e1 in

@@ -114,7 +114,7 @@
               (Expr
                  ((), [20:3-21],
                   (Pipe (([20:3-21], $$), ((), [20:3-7], (Lvar ([20:3-7], $foo))),
-                     ((), [20:11-21], (Class_get (((), [20:11-13], (CIexpr ((), [20:11-13], (Dollardollar ([20:11-13], $$))))), (CGstring ([20:15-21], "$myInt")), Is_prop))), false)))))
+                     ((), [20:11-21], (Class_get (((), [20:11-13], (CIexpr ((), [20:11-13], (Dollardollar ([20:11-13], $$))))), ([20:15-21], "$myInt"), Is_prop))), false)))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([18:10-22], "__SupportDynamicType"); ua_params = [] }]; 
@@ -140,8 +140,7 @@
                     ((), [24:11-35],
                      (Call
                         { func = ((), [24:11-23], (Id ([24:11-23], "\\takes_an_int"))); 
-                          targs = [];
-                          args = [(Anormal ((), [24:24-34], (Class_get (((), [24:24-26], (CIexpr ((), [24:24-26], (Dollardollar ([24:24-26], $$))))), (CGstring ([24:28-34], "$myInt")), Is_prop))))];
+                          targs = []; args = [(Anormal ((), [24:24-34], (Class_get (((), [24:24-26], (CIexpr ((), [24:24-26], (Dollardollar ([24:24-26], $$))))), ([24:28-34], "$myInt"), Is_prop))))];
                           unpacked_arg = None })),
                     false)))))
              ]

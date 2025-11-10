@@ -505,7 +505,7 @@ module Visitor_DEPRECATED = struct
 
       method on_array_get : 'a -> expr -> expr option -> 'a
 
-      method on_class_get : 'a -> class_id -> (unit, unit) class_get_expr -> 'a
+      method on_class_get : 'a -> class_id -> pstring -> 'a
 
       method on_class_const : 'a -> class_id -> pstring -> 'a
 
@@ -946,11 +946,7 @@ module Visitor_DEPRECATED = struct
         in
         acc
 
-      method on_class_get acc cid e =
-        let acc = this#on_class_id acc cid in
-        match e with
-        | CGstring _ -> acc
-        | CGexpr e -> this#on_expr acc e
+      method on_class_get acc cid _ = this#on_class_id acc cid
 
       method on_class_const acc cid _ = this#on_class_id acc cid
 

@@ -2301,7 +2301,7 @@ fn p_scope_resolution_expr<'a>(
                 let ast::Id(p, name) = pos_name(&c.name, env)?;
                 Ok(Expr_::mk_class_get(
                     ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
-                    ast::ClassGetExpr::CGstring((p, name)),
+                    (p, name),
                     ast::PropOrMethod::IsProp,
                 ))
             }
@@ -2330,7 +2330,7 @@ fn p_scope_resolution_expr<'a>(
                     let ast::Lid(p, (_, n)) = *id;
                     Ok(Expr_::mk_class_get(
                         ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
-                        ast::ClassGetExpr::CGstring((p, n)),
+                        (p, n),
                         ast::PropOrMethod::IsProp,
                     ))
                 }

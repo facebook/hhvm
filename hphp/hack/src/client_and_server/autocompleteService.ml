@@ -1995,11 +1995,8 @@ let visitor
         compute_complete_local env ctx toplevel_tast;
       super#on_Lvar env lid
 
-    method! on_Class_get env cid mid prop_or_method =
-      match mid with
-      | Aast.CGstring p ->
-        autocomplete_static_member autocomplete_context env cid p
-      | Aast.CGexpr _ -> super#on_Class_get env cid mid prop_or_method
+    method! on_Class_get env cid p _prop_or_method =
+      autocomplete_static_member autocomplete_context env cid p
 
     method! on_Class_const env cid mid =
       autocomplete_static_member autocomplete_context env cid mid;

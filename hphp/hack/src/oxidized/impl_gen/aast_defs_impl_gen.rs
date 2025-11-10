@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<681a73565bd2ce9dd04745be36f010b6>>
+// @generated SignedSource<<d9a199c4bc20fca61ca66c49ac1b8aaf>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -997,7 +997,7 @@ impl<Ex, En> Expr_<Ex, En> {
     ) -> Self {
         Expr_::ObjGet(Box::new((p0, p1, p2, p3)))
     }
-    pub fn mk_class_get(p0: ClassId<Ex, En>, p1: ClassGetExpr<Ex, En>, p2: PropOrMethod) -> Self {
+    pub fn mk_class_get(p0: ClassId<Ex, En>, p1: Pstring, p2: PropOrMethod) -> Self {
         Expr_::ClassGet(Box::new((p0, p1, p2)))
     }
     pub fn mk_class_const(p0: ClassId<Ex, En>, p1: Pstring) -> Self {
@@ -1513,7 +1513,7 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_class_get(&self) -> Option<(&ClassId<Ex, En>, &ClassGetExpr<Ex, En>, &PropOrMethod)> {
+    pub fn as_class_get(&self) -> Option<(&ClassId<Ex, En>, &Pstring, &PropOrMethod)> {
         match self {
             Expr_::ClassGet(p0) => Some((&p0.0, &p0.1, &p0.2)),
             _ => None,
@@ -1842,11 +1842,7 @@ impl<Ex, En> Expr_<Ex, En> {
     }
     pub fn as_class_get_mut(
         &mut self,
-    ) -> Option<(
-        &mut ClassId<Ex, En>,
-        &mut ClassGetExpr<Ex, En>,
-        &mut PropOrMethod,
-    )> {
+    ) -> Option<(&mut ClassId<Ex, En>, &mut Pstring, &mut PropOrMethod)> {
         match self {
             Expr_::ClassGet(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
             _ => None,
@@ -2192,9 +2188,7 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_class_get_into(
-        self,
-    ) -> Option<(ClassId<Ex, En>, ClassGetExpr<Ex, En>, PropOrMethod)> {
+    pub fn as_class_get_into(self) -> Option<(ClassId<Ex, En>, Pstring, PropOrMethod)> {
         match self {
             Expr_::ClassGet(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
             _ => None,
@@ -2528,62 +2522,6 @@ impl FunctionPointerSource {
         match self {
             FunctionPointerSource::Lowered => true,
             _ => false,
-        }
-    }
-}
-impl<Ex, En> ClassGetExpr<Ex, En> {
-    pub fn mk_cgstring(p0: Pstring) -> Self {
-        ClassGetExpr::CGstring(p0)
-    }
-    pub fn mk_cgexpr(p0: Expr<Ex, En>) -> Self {
-        ClassGetExpr::CGexpr(p0)
-    }
-    pub fn is_cgstring(&self) -> bool {
-        match self {
-            ClassGetExpr::CGstring(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_cgexpr(&self) -> bool {
-        match self {
-            ClassGetExpr::CGexpr(..) => true,
-            _ => false,
-        }
-    }
-    pub fn as_cgstring(&self) -> Option<&Pstring> {
-        match self {
-            ClassGetExpr::CGstring(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_cgexpr(&self) -> Option<&Expr<Ex, En>> {
-        match self {
-            ClassGetExpr::CGexpr(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_cgstring_mut(&mut self) -> Option<&mut Pstring> {
-        match self {
-            ClassGetExpr::CGstring(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_cgexpr_mut(&mut self) -> Option<&mut Expr<Ex, En>> {
-        match self {
-            ClassGetExpr::CGexpr(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_cgstring_into(self) -> Option<Pstring> {
-        match self {
-            ClassGetExpr::CGstring(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_cgexpr_into(self) -> Option<Expr<Ex, En>> {
-        match self {
-            ClassGetExpr::CGexpr(p0) => Some(p0),
-            _ => None,
         }
     }
 }

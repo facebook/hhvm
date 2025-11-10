@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9d215d01fa1d39a278e5d821734f894c>>
+// @generated SignedSource<<b5a22814b2c05a13194e9568caaa17b8>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -353,25 +353,6 @@ impl<P: Params> Node<P> for ClassConstKind<P::Ex, P::En> {
         match self {
             ClassConstKind::CCAbstract(a0) => a0.accept(c, v),
             ClassConstKind::CCConcrete(a0) => a0.accept(c, v),
-        }
-    }
-}
-impl<P: Params> Node<P> for ClassGetExpr<P::Ex, P::En> {
-    fn accept<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_class_get_expr(c, self)
-    }
-    fn recurse<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        match self {
-            ClassGetExpr::CGstring(a0) => a0.accept(c, v),
-            ClassGetExpr::CGexpr(a0) => a0.accept(c, v),
         }
     }
 }
@@ -888,7 +869,7 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
         }
         #[inline]
         fn helper4<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node Box<(ClassId<Ex, En>, ClassGetExpr<Ex, En>, PropOrMethod)>,
+            a: &'node Box<(ClassId<Ex, En>, Pstring, PropOrMethod)>,
             c: &mut P::Context,
             v: &mut dyn Visitor<'node, Params = P>,
         ) -> Result<(), P::Error> {

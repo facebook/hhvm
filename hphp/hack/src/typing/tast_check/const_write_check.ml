@@ -57,7 +57,7 @@ let check_prop env c pid cty_opt =
 
 let rec check_expr env ((_, _, e) : Tast.expr) =
   match e with
-  | Class_get ((cty, _, _), CGstring pid, _) ->
+  | Class_get ((cty, _, _), pid, _) ->
     let (env, cty) = Env.expand_type env cty in
     begin
       match get_node cty with

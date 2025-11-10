@@ -458,12 +458,9 @@ let rec grab_class_elts_from_ty ~static ?(seen = SSet.empty) env ty prop_id =
   | _ -> []
 
 (* Return a list of possible static prop elts given a class_get expression *)
-let get_static_prop_elts env class_id get =
+let get_static_prop_elts env class_id prop_id =
   let (ty, _, _) = class_id in
-  match get with
-  | CGstring prop_id -> grab_class_elts_from_ty ~static:true env ty prop_id
-  (* An expression is dynamic, so there's no way to tell the type generally *)
-  | CGexpr _ -> []
+  grab_class_elts_from_ty ~static:true env ty prop_id
 
 (* Check if an expression is directly from a static variable or not,
    e.g. it returns true for Foo::$bar or (Foo::$bar)->prop. *)
@@ -492,9 +489,7 @@ let rec print_global_expr env expr =
     (* For static properties, we concatenate the class type (instead of class_id_, which
        could be self, parent, static) and the property name. *)
     let class_ty_str = Tast_env.print_ty env c_ty in
-    (match expr with
-    | CGstring (_, expr_str) -> class_ty_str ^ "::" ^ expr_str
-    | CGexpr _ -> class_ty_str ^ "::Unknown")
+    class_ty_str ^ "::" ^ snd expr
   | Class_const ((c_ty, _, _), (_, const_str)) ->
     (* For static method calls, we concatenate the class type and the method name. *)
     Tast_env.print_ty env c_ty ^ "::" ^ const_str

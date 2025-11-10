@@ -215,8 +215,7 @@ module Visitor_DEPRECATED : sig
 
       method on_class_const : 'a -> class_id -> Aast.pstring -> 'a
 
-      method on_class_get :
-        'a -> class_id -> (unit, unit) Aast.class_get_expr -> 'a
+      method on_class_get : 'a -> class_id -> Aast.pstring -> 'a
 
       method on_class_id : 'a -> class_id -> 'a
 

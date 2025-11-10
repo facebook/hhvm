@@ -81,8 +81,6 @@ type type_hint = ty Aast.type_hint
 
 type targ = ty Aast.targ
 
-type class_get_expr = (ty, saved_env) Aast.class_get_expr
-
 type class_typeconst_def = (ty, saved_env) Aast.class_typeconst_def
 
 type user_attribute = (ty, saved_env) Aast.user_attribute

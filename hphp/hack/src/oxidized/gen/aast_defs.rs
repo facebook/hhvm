@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1e57a1df082bbfe7d3be75b831886fcf>>
+// @generated SignedSource<<970f11e8c9f7d4e7983b98608bdf1674>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -831,7 +831,7 @@ pub enum Expr_<Ex, En> {
     ///     Foo::{$bar}();          // Is_method
     #[rust_to_ocaml(name = "Class_get")]
     #[rust_to_ocaml(inline_tuple)]
-    ClassGet(Box<(ClassId<Ex, En>, ClassGetExpr<Ex, En>, PropOrMethod)>),
+    ClassGet(Box<(ClassId<Ex, En>, Pstring, PropOrMethod)>),
     /// Class constant or static method call. As a standalone expression,
     /// this is a class constant. Inside a Call node, this is a static
     /// method call. The rhs of the :: does not begin with $ or is a name
@@ -1208,27 +1208,6 @@ pub struct Binop<Ex, En> {
     pub lhs: Expr<Ex, En>,
     #[rust_to_ocaml(attr = "transform.explicit")]
     pub rhs: Expr<Ex, En>,
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(and)]
-#[repr(C, u8)]
-pub enum ClassGetExpr<Ex, En> {
-    CGstring(Pstring),
-    CGexpr(Expr<Ex, En>),
 }
 
 #[derive(

@@ -150,12 +150,9 @@ let rec grab_class_elts_from_ty ~static ?(seen = SSet.empty) env ty prop_id =
   | _ -> []
 
 (* Return a list of possible static prop elts given a class_get expression *)
-let get_static_prop_elts env class_id get =
+let get_static_prop_elts env class_id prop_id =
   let (ty, _, _) = class_id in
-  match get with
-  | CGstring prop_id -> grab_class_elts_from_ty ~static:true env ty prop_id
-  (* An expression is dynamic, so there's no way to tell the type generally *)
-  | CGexpr _ -> []
+  grab_class_elts_from_ty ~static:true env ty prop_id
 
 (* Return a list of possible prop elts given an obj get expression *)
 let get_prop_elts env obj get =

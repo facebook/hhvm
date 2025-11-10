@@ -346,14 +346,10 @@ and pp_expr_ ppf = function
     Fmt.(pair ~sep:arrow pp_expr pp_expr) ppf (obj_expr, get_expr)
   | Aast.(Obj_get (obj_expr, get_expr, _, _)) ->
     Fmt.(parens @@ pair ~sep:arrow pp_expr pp_expr) ppf (obj_expr, get_expr)
-  | Aast.(Class_get (class_id, class_get_expr, Is_method)) ->
-    Fmt.(pair ~sep:dbl_colon pp_class_id pp_class_get_expr)
-      ppf
-      (class_id, class_get_expr)
-  | Aast.Class_get (class_id, class_get_expr, _) ->
-    Fmt.(parens @@ pair ~sep:dbl_colon pp_class_id pp_class_get_expr)
-      ppf
-      (class_id, class_get_expr)
+  | Aast.(Class_get (class_id, (_, cname), Is_method)) ->
+    Fmt.(pair ~sep:dbl_colon pp_class_id string) ppf (class_id, cname)
+  | Aast.Class_get (class_id, (_, cname), _) ->
+    Fmt.(parens @@ pair ~sep:dbl_colon pp_class_id string) ppf (class_id, cname)
   | Aast.Class_const (class_id, (_, cname)) ->
     Fmt.(pair ~sep:dbl_colon pp_class_id string) ppf (class_id, cname)
   | Aast.(Call { func; targs; args; unpacked_arg }) ->
@@ -512,10 +508,6 @@ and pp_class_id ppf (_, _, class_id_) =
   | Aast.CIself -> Fmt.string ppf "self"
   | Aast.CI (_, name) -> Fmt.string ppf name
   | Aast.CIexpr expr -> pp_expr ppf expr
-
-and pp_class_get_expr ppf = function
-  | Aast.CGexpr expr -> pp_expr ppf expr
-  | Aast.CGstring (_, name) -> Fmt.string ppf name
 
 and pp_function_ptr_id ppf = function
   | Aast.FP_id (_, name) -> Fmt.string ppf name

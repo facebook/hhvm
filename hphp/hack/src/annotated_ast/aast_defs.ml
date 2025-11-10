@@ -481,7 +481,7 @@ and ('ex, 'en) expr_ =
        *)
   | Class_get of
       ('ex, 'en) class_id
-      * ('ex, 'en) class_get_expr
+      * (pstring[@transform.opaque])
       * (prop_or_method[@transform.opaque])
       (** Static property or dynamic method access. The rhs of the :: begins
        * with $ or is some non-name expression appearing within braces {}.
@@ -801,10 +801,6 @@ and ('ex, 'en) binop = {
   lhs: ('ex, 'en) expr; [@transform.explicit]
   rhs: ('ex, 'en) expr; [@transform.explicit]
 }
-
-and ('ex, 'en) class_get_expr =
-  | CGstring of (pstring[@transform.opaque])
-  | CGexpr of ('ex, 'en) expr
 
 and ('ex, 'en) case = ('ex, 'en) expr * ('ex, 'en) block
 

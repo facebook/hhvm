@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2e16cfca3d019b0e91c26d98ca858515>>
+// @generated SignedSource<<22bf7e0803e7c7b8a0f819084ca1a6fd>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -353,25 +353,6 @@ impl<P: Params> NodeMut<P> for ClassConstKind<P::Ex, P::En> {
         match self {
             ClassConstKind::CCAbstract(a0) => a0.accept(c, v),
             ClassConstKind::CCConcrete(a0) => a0.accept(c, v),
-        }
-    }
-}
-impl<P: Params> NodeMut<P> for ClassGetExpr<P::Ex, P::En> {
-    fn accept<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_class_get_expr(c, self)
-    }
-    fn recurse<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        match self {
-            ClassGetExpr::CGstring(a0) => a0.accept(c, v),
-            ClassGetExpr::CGexpr(a0) => a0.accept(c, v),
         }
     }
 }
@@ -888,7 +869,7 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
         }
         #[inline]
         fn helper4<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node mut Box<(ClassId<Ex, En>, ClassGetExpr<Ex, En>, PropOrMethod)>,
+            a: &'node mut Box<(ClassId<Ex, En>, Pstring, PropOrMethod)>,
             c: &mut P::Context,
             v: &mut dyn VisitorMut<'node, Params = P>,
         ) -> Result<(), P::Error> {

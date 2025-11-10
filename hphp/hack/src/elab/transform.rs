@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3af89af5cb694a41535c3f5734aec361>>
+// @generated SignedSource<<12ddaf9ffbca3f731031be64358c2184>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -816,26 +816,6 @@ impl Transform for Binop {
                         let _ = in_pass.on_fld_binop_rhs_bottom_up(env, __binding_2);
                     }
                 }
-            }
-        }
-    }
-}
-impl Transform for ClassGetExpr {
-    fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_class_get_expr_top_down(env, self) {
-            return;
-        }
-        stack_limit::maybe_grow(|| self.traverse(env, pass));
-        let _ = in_pass.on_ty_class_get_expr_bottom_up(env, self);
-    }
-    fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        match self {
-            ClassGetExpr::CGstring(ref mut __binding_0) => {
-                __binding_0.transform(env, &mut pass.clone())
-            }
-            ClassGetExpr::CGexpr(ref mut __binding_0) => {
-                __binding_0.transform(env, &mut pass.clone())
             }
         }
     }

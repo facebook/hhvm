@@ -31,8 +31,6 @@ let well_formed_isset_argument_check env p = function
     | (_, _, Lvar _)
     (* isset($var->thing) but not isset($foo->$bar) *)
     | (_, _, Obj_get (_, (_, _, Id _), _, Is_prop))
-    (* isset($var::thing) but not isset($foo::$bar) *)
-    | (_, _, Class_get (_, CGexpr (_, _, Id _), _))
       when String.equal pseudo_func SN.PseudoFunctions.isset ->
       let Equal = Tast_env.eq_typing_env in
       Typing_error_utils.add_typing_error

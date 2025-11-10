@@ -30,7 +30,6 @@ use oxidized::ast::Block;
 use oxidized::ast::CallExpr;
 use oxidized::ast::CaptureLid;
 use oxidized::ast::Class_;
-use oxidized::ast::ClassGetExpr;
 use oxidized::ast::ClassHint;
 use oxidized::ast::ClassName;
 use oxidized::ast::ClassVar;
@@ -1060,7 +1059,7 @@ impl<'ast, 'a: 'b, 'b> VisitorMut<'ast> for ClosureVisitor<'a, 'b> {
                     res
                 }
                 Expr_::ClassGet(mut x) => {
-                    if let (ClassGetExpr::CGstring(id), PropOrMethod::IsMethod) = (&x.1, x.2) {
+                    if let (id, PropOrMethod::IsMethod) = (&x.1, x.2) {
                         self.state_mut().add_var(scope, &id.1);
                     };
                     x.recurse(scope, self)?;

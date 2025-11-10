@@ -361,10 +361,7 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
         Nameof ((), p1, CIexpr (ty, p2, Id x))
       | Class_get ((_, p1, CIexpr (ty, p2, Id x1)), cge, in_parens) ->
         let x1 = elaborate_type_name env x1 in
-        Class_get
-          ( ((), p1, CIexpr (ty, p2, Id x1)),
-            self#on_class_get_expr env cge,
-            in_parens )
+        Class_get (((), p1, CIexpr (ty, p2, Id x1)), cge, in_parens)
       | Xml (id, al, el) ->
         let id =
           (* if XHP element mangling is disabled, namespaces are supported *)

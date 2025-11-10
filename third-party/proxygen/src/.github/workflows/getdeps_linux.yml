@@ -17,7 +17,7 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v4
     - name: Update system package info
       run: sudo --preserve-env=http_proxy apt-get update
     - name: Install system deps
@@ -31,6 +31,9 @@ jobs:
     - name: Fetch cmake
       if: ${{ steps.paths.outputs.cmake_SOURCE }}
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests cmake
+    - name: Fetch c-ares
+      if: ${{ steps.paths.outputs.c-ares_SOURCE }}
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests c-ares
     - name: Fetch zlib
       if: ${{ steps.paths.outputs.zlib_SOURCE }}
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests zlib
@@ -144,6 +147,22 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.cmake_INSTALL }}
        key: ${{ steps.paths.outputs.cmake_CACHE_KEY }}-install
+    - name: Restore c-ares from cache
+      id: restore_c-ares
+      if: ${{ steps.paths.outputs.c-ares_SOURCE }}
+      uses: actions/cache/restore@v4
+      with:
+       path: ${{ steps.paths.outputs.c-ares_INSTALL }}
+       key: ${{ steps.paths.outputs.c-ares_CACHE_KEY }}-install
+    - name: Build c-ares
+      if: ${{ steps.paths.outputs.c-ares_SOURCE && ! steps.restore_c-ares.outputs.cache-hit }}
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --no-tests c-ares
+    - name: Save c-ares to cache
+      uses: actions/cache/save@v4
+      if: ${{ steps.paths.outputs.c-ares_SOURCE && ! steps.restore_c-ares.outputs.cache-hit }}
+      with:
+       path: ${{ steps.paths.outputs.c-ares_INSTALL }}
+       key: ${{ steps.paths.outputs.c-ares_CACHE_KEY }}-install
     - name: Restore zlib from cache
       id: restore_zlib
       if: ${{ steps.paths.outputs.zlib_SOURCE }}

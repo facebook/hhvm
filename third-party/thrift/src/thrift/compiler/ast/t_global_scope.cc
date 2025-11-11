@@ -38,8 +38,8 @@ t_type_ref t_global_scope::ref_type(
   // NOTE(afuller): This assumes that, since the type was referenced by name, it
   // is safe to create a dummy typedef to use as a proxy for the original type.
   // However, this actually breaks dynamic casts.
-  // TODO(afuller): Merge t_placeholder_typedef into t_type_ref and remove const
-  // cast.
+  // TODO(T244601847): Merge t_placeholder_typedef into t_type_ref and remove
+  // const cast.
   auto ph = std::make_unique<t_placeholder_typedef>(&program, name);
   ph->set_src_range(range);
   return add_placeholder_typedef(std::move(ph));

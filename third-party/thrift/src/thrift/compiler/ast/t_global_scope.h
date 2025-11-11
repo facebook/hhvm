@@ -144,6 +144,8 @@ class t_global_scope {
       const std::string& name,
       const source_range& range);
 
+  // TODO(T244601847): Merge t_placeholder_typedef with t_type_ref and resolve
+  // all types after parsing.
   node_list_view<t_placeholder_typedef> placeholder_typedefs() {
     return placeholder_typedefs_;
   }
@@ -183,6 +185,8 @@ class t_global_scope {
   }
 
  private:
+  // TODO(T244601847): Merge t_placeholder_typedef with t_type_ref and resolve
+  // all types after parsing.
   t_type_ref add_placeholder_typedef(
       std::unique_ptr<t_placeholder_typedef> ptd) {
     assert(ptd != nullptr);

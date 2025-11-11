@@ -105,12 +105,12 @@ class t_typedef : public t_type {
 
 // A placeholder for a type that can't be resolved at parse time.
 //
-// TODO(afuller): Merge this class with t_type_ref and resolve all types after
-// parsing. This class assumes that, since the type was referenced by name, it
-// is safe to create a dummy typedef to use as a proxy for the original type.
-// However, this actually breaks dynamic_cast for t_node and t_type::is_* calls,
-// resulting in a lot of subtle bugs that may or may not show up, depending on
-// the order of IDL declarations.
+// TODO(T244601847): Merge this class with t_type_ref and resolve all types
+// after parsing. This class assumes that, since the type was referenced by
+// name, it is safe to create a dummy typedef to use as a proxy for the original
+// type. However, this actually breaks dynamic_cast for t_node and t_type::is_*
+// calls, resulting in a lot of subtle bugs that may or may not show up,
+// depending on the order of IDL declarations.
 class t_placeholder_typedef final : public t_typedef {
  public:
   t_placeholder_typedef(const t_program* program, std::string name)

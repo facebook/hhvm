@@ -151,7 +151,8 @@ class t_type : public t_named {
  * Type references are different from other references because they can be
  * annotated and unresolved.
  *
- * TODO: Make an unresolved reference directly representable in the AST.
+ * TODO(T244601847): Make an unresolved reference directly representable in the
+ * AST, merging `t_placeholder_typedef` into `t_type_ref`.
  */
 class t_type_ref final {
  public:
@@ -179,8 +180,6 @@ class t_type_ref final {
   bool resolved() const noexcept;
   bool resolve();
 
-  t_placeholder_typedef* unresolved_type() { return unresolved_type_; }
-
   source_range src_range() const { return range_; }
 
   // Helpers for constructing from pointers.
@@ -202,8 +201,6 @@ class t_type_ref final {
 
   static const t_type_ref& none();
 
-  static t_type_ref for_placeholder(t_placeholder_typedef& unresolved_type);
-
  private:
   const t_type* type_ = nullptr;
   source_range range_;
@@ -223,10 +220,33 @@ class t_type_ref final {
 
   const t_type& deref_or_throw() const;
 
-  // TODO(T227540797): Remove everything below this comment. It is only provided
-  // for backwards compatibility.
+  // TODO(T244601847): Remove get_type() once t_placeholder_typedef, at which
+  // point resolved() and deref() are all that's necessary
  public:
   const t_type* get_type() const { return type_; }
+
+  static t_type_ref for_placeholder(t_placeholder_typedef& unresolved_type);
+
+  /**
+   * When we parse an AST, `t_type_ref` represents all type references. E.g. the
+   * type of a field `1: Foo myField` is a type-ref to the AST type `Foo`.
+   *
+   * When a type is not immediately resolvable at parse time (i.e. the parser
+   * has not yet encountered the declaration of type `Foo`), we generate a
+   * "placeholder typedef"  to Foo (i.e. instead of pointing to the definition
+   * `Foo`, the type-ref points to a t_placeholder_typedef representing Foo).
+   *
+   * After parsing completes, we attempt deferred resolution for placeholder
+   * typedefs to resolve types which were declared after their use, and emit
+   * errors for types not found even during deferred resolution.
+   *
+   * TODO(T244601847): unresolved_type() and t_placeholder_typedef will
+   * eventually be removed, and instead unresolved types will be represented by
+   * a t_type_ref with NO underlying type (placeholder or otherwise). Such a
+   * t_type_ref will be identifiable by calling the `resolved()` method
+   * (returning false).
+   */
+  t_placeholder_typedef* unresolved_type() { return unresolved_type_; }
 };
 
 bool is_scalar(const t_type& type);

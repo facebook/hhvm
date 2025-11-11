@@ -51,16 +51,16 @@ class ServerBiDiStreamFactory {
          &decoder,
          &encoder,
          serverExecutor = std::move(serverExecutor)](
-            // TODO(sazonovk): T239783600 Add support for ContextStack
-            std::shared_ptr<ContextStack> /* contextStack */,
+            std::shared_ptr<ContextStack> contextStack,
             // TODO(sazonovk): T239783647 Add support for Interactions
             TilePtr&& /* interaction */,
             FirstResponsePayload&& payload,
             BiDiClientCallback* clientCb,
             folly::EventBase* evb) mutable -> void {
       auto stapled = new ServerCallbackStapler();
-      auto streamBridge = new ServerBiDiStreamBridge(stapled, evb);
-      auto sinkBridge = new ServerBiDiSinkBridge(stapled, evb);
+      auto streamBridge =
+          new ServerBiDiStreamBridge(stapled, evb, contextStack);
+      auto sinkBridge = new ServerBiDiSinkBridge(stapled, evb, contextStack);
       stapled->setSinkServerCallback(sinkBridge);
       stapled->setStreamServerCallback(streamBridge);
       stapled->resetClientCallback(*clientCb);

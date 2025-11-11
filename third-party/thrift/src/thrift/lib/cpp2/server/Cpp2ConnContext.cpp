@@ -95,7 +95,7 @@ folly::Optional<std::string> Cpp2ConnContext::PeerCred::getError() const {
   }
 }
 
-std::optional<std::string_view> ClientMetadataRef::getAgent() {
+std::optional<std::string_view> ClientMetadataRef::getAgent() const {
   if (!md_.agent()) {
     return {};
   }

@@ -70,7 +70,7 @@ StructMetadata<::facebook::thrift::test::MyAnnotation>::gen(ThriftMetadata& meta
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_MyAnnotation = res.metadata;
-  module_MyAnnotation.is_union() = false;
+  DCHECK_EQ(*module_MyAnnotation.is_union(), false);
   static const auto* const
   module_MyAnnotation_fields = new std::array<EncodedThriftField, 2>{ {
     { 1, "signature", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "color", false, std::make_unique<Enum<::facebook::thrift::test::Color>>("module.Color"), std::vector<ThriftConstStruct>{ }},  }};
@@ -102,7 +102,7 @@ StructMetadata<::facebook::thrift::test::Foo>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_Foo = res.metadata;
-  module_Foo.is_union() = false;
+  DCHECK_EQ(*module_Foo.is_union(), false);
   static const auto* const
   module_Foo_fields = new std::array<EncodedThriftField, 15>{ {
     { 1, "intField", false, std::make_unique<Typedef>("module.i32_5137", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("hack.Adapter", { {"name", cvString("\\Adapter1") } }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter1") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedI32_5137_1") } }).cv_struct(), }},    { 2, "optionalIntField", true, std::make_unique<Typedef>("module.i32_5137", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("hack.Adapter", { {"name", cvString("\\Adapter1") } }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter1") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedI32_5137_1") } }).cv_struct(), }},    { 3, "intFieldWithDefault", false, std::make_unique<Typedef>("module.i32_5137", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("hack.Adapter", { {"name", cvString("\\Adapter1") } }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter1") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedI32_5137_1") } }).cv_struct(), }},    { 4, "setField", false, std::make_unique<Typedef>("module.SetWithAdapter", std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("hack.Adapter", { {"name", cvString("\\Adapter2") } }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter2") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter2") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter2") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedSet_2") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 5, "optionalSetField", true, std::make_unique<Typedef>("module.SetWithAdapter", std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("hack.Adapter", { {"name", cvString("\\Adapter2") } }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter2") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter2") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter2") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedSet_2") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 6, "mapField", false, std::make_unique<Typedef>("module.map_string_ListWithElemAdapter_withAdapter_8454", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Typedef>("module.ListWithElemAdapter_withAdapter_2312", std::make_unique<Typedef>("module.ListWithElemAdapter_withAdapter", std::make_unique<Typedef>("module.ListWithElemAdapter_withAdapter", std::make_unique<Typedef>("module.ListWithElemAdapter", std::make_unique<List>(std::make_unique<Typedef>("module.StringWithAdapter", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("hack.Adapter", { {"name", cvString("\\Adapter1") } }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter1") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedString_1") } }).cv_struct(),  })), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("hack.Adapter", { {"name", cvString("\\Adapter2") } }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter2") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter2") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter2") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedList_2") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  })), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("hack.Adapter", { {"name", cvString("\\Adapter3") } }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter3") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter3") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter3") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3") } }).cv_struct(), }},    { 7, "optionalMapField", true, std::make_unique<Typedef>("module.map_string_ListWithElemAdapter_withAdapter_8454", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Typedef>("module.ListWithElemAdapter_withAdapter_2312", std::make_unique<Typedef>("module.ListWithElemAdapter_withAdapter", std::make_unique<Typedef>("module.ListWithElemAdapter_withAdapter", std::make_unique<Typedef>("module.ListWithElemAdapter", std::make_unique<List>(std::make_unique<Typedef>("module.StringWithAdapter", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("hack.Adapter", { {"name", cvString("\\Adapter1") } }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter1") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedString_1") } }).cv_struct(),  })), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("hack.Adapter", { {"name", cvString("\\Adapter2") } }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter2") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter2") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter2") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedList_2") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  })), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("hack.Adapter", { {"name", cvString("\\Adapter3") } }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter3") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter3") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter3") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3") } }).cv_struct(), }},    { 8, "binaryField", false, std::make_unique<Typedef>("module.binary_5673", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("hack.Adapter", { {"name", cvString("\\Adapter1") } }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter3") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter3") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter3") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedBinary_5673_3") } }).cv_struct(), }},    { 9, "longField", false, std::make_unique<Typedef>("module.MyI64", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter1") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedI64_1") } }).cv_struct(), *cvStruct("module.MyAnnotation", { {"signature", cvString("MyI64") }, {"color", cvInteger(2) } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 10, "adaptedLongField", false, std::make_unique<Typedef>("module.MyI64", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter1") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedI64_1") } }).cv_struct(), *cvStruct("module.MyAnnotation", { {"signature", cvString("MyI64") }, {"color", cvInteger(2) } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter2") } }).cv_struct(), *cvStruct("python.Adapter", { {"name", cvString("my.Adapter3") }, {"typeHint", cvString("my.AdaptedType3[]") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter2") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter2") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedMyI64_2") } }).cv_struct(), }},    { 11, "doubleAdaptedField", false, std::make_unique<Typedef>("module.DoubleTypedefI64", std::make_unique<Typedef>("module.MyI64", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter1") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedI64_1") } }).cv_struct(), *cvStruct("module.MyAnnotation", { {"signature", cvString("MyI64") }, {"color", cvInteger(2) } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 12, "adapted_list", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("python.Adapter", { {"name", cvString("my.ListAdapter") }, {"typeHint", cvString("typing.Sequence[int]") } }).cv_struct(), }},    { 13, "adapted_set", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("python.Adapter", { {"name", cvString("my.SetAdapter") }, {"typeHint", cvString("typing.AbstractSet[int]") } }).cv_struct(), }},    { 14, "adapted_map", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("python.Adapter", { {"name", cvString("my.MapAdapter") }, {"typeHint", cvString("typing.Mapping[str, int]") } }).cv_struct(), }},    { 15, "adapted_list_nested", false, std::make_unique<List>(std::make_unique<List>(std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)))), std::vector<ThriftConstStruct>{ *cvStruct("python.Adapter", { {"name", cvString("thrift.python.test.adapters.atoi.ItoaNestedListAdapter") }, {"typeHint", cvString("typing.Sequence[typing.Sequence[typing.Mapping[int, int]]]") } }).cv_struct(), }},  }};
@@ -133,7 +133,7 @@ StructMetadata<::facebook::thrift::test::Baz>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_Baz = res.metadata;
-  module_Baz.is_union() = true;
+  DCHECK_EQ(*module_Baz.is_union(), true);
   static const auto* const
   module_Baz_fields = new std::array<EncodedThriftField, 5>{ {
     { 1, "intField", false, std::make_unique<Typedef>("module.i32_5137", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("hack.Adapter", { {"name", cvString("\\Adapter1") } }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter1") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedI32_5137_1") } }).cv_struct(), }},    { 4, "setField", false, std::make_unique<Typedef>("module.SetWithAdapter", std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("hack.Adapter", { {"name", cvString("\\Adapter2") } }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter2") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter2") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter2") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedSet_2") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 6, "mapField", false, std::make_unique<Typedef>("module.map_string_ListWithElemAdapter_withAdapter_8454", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Typedef>("module.ListWithElemAdapter_withAdapter_2312", std::make_unique<Typedef>("module.ListWithElemAdapter_withAdapter", std::make_unique<Typedef>("module.ListWithElemAdapter_withAdapter", std::make_unique<Typedef>("module.ListWithElemAdapter", std::make_unique<List>(std::make_unique<Typedef>("module.StringWithAdapter", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("hack.Adapter", { {"name", cvString("\\Adapter1") } }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter1") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedString_1") } }).cv_struct(),  })), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("hack.Adapter", { {"name", cvString("\\Adapter2") } }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter2") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter2") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter2") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedList_2") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  })), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("hack.Adapter", { {"name", cvString("\\Adapter3") } }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter3") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter3") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter3") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedMap_string_ListWithElemAdapter_withAdapter_8454_3") } }).cv_struct(), }},    { 8, "binaryField", false, std::make_unique<Typedef>("module.binary_5673", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("hack.Adapter", { {"name", cvString("\\Adapter1") } }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter1") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedBinary_5673_1") } }).cv_struct(), }},    { 9, "longField", false, std::make_unique<Typedef>("module.MyI64", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter1") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedI64_1") } }).cv_struct(), *cvStruct("module.MyAnnotation", { {"signature", cvString("MyI64") }, {"color", cvInteger(2) } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},  }};
@@ -164,7 +164,7 @@ StructMetadata<::facebook::thrift::test::Bar>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_Bar = res.metadata;
-  module_Bar.is_union() = false;
+  DCHECK_EQ(*module_Bar.is_union(), false);
   static const auto* const
   module_Bar_fields = new std::array<EncodedThriftField, 8>{ {
     { 1, "structField", false, std::make_unique<Typedef>("module.Foo_6868", std::make_unique<Typedef>("module.Foo", std::make_unique<Struct<::facebook::thrift::test::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("hack.Adapter", { {"name", cvString("\\Adapter1") } }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") }, {"adaptedType", cvString("::my::Cpp::Type1") } }).cv_struct(), }},    { 2, "optionalStructField", true, std::make_unique<Typedef>("module.Foo_3943", std::make_unique<Typedef>("module.Foo", std::make_unique<Struct<::facebook::thrift::test::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("hack.Adapter", { {"name", cvString("\\Adapter1") } }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), }},    { 3, "structListField", false, std::make_unique<List>(std::make_unique<Typedef>("module.FooWithAdapter_9317", std::make_unique<Typedef>("module.FooWithAdapter", std::make_unique<Typedef>("module.FooWithAdapter", std::make_unique<Struct<::facebook::thrift::test::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("hack.Adapter", { {"name", cvString("\\Adapter1") } }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter1") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedFoo_1") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  })), std::vector<ThriftConstStruct>{ }},    { 4, "optionalStructListField", true, std::make_unique<List>(std::make_unique<Typedef>("module.FooWithAdapter_9317", std::make_unique<Typedef>("module.FooWithAdapter", std::make_unique<Typedef>("module.FooWithAdapter", std::make_unique<Struct<::facebook::thrift::test::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("hack.Adapter", { {"name", cvString("\\Adapter1") } }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter1") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedFoo_1") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  })), std::vector<ThriftConstStruct>{ }},    { 5, "unionField", false, std::make_unique<Typedef>("module.Baz_7352", std::make_unique<Typedef>("module.Baz", std::make_unique<Union<::facebook::thrift::test::Baz>>("module.Baz"), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("hack.Adapter", { {"name", cvString("\\Adapter1") } }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), }},    { 6, "optionalUnionField", true, std::make_unique<Typedef>("module.Baz_7352", std::make_unique<Typedef>("module.Baz", std::make_unique<Union<::facebook::thrift::test::Baz>>("module.Baz"), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("hack.Adapter", { {"name", cvString("\\Adapter1") } }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), }},    { 7, "adaptedStructField", false, std::make_unique<Struct<::facebook::thrift::test::detail::DirectlyAdapted>>("module.DirectlyAdapted"), std::vector<ThriftConstStruct>{ }},    { 8, "structListFieldWithTypedef", false, std::make_unique<Typedef>("module.ListOfFooTypedef", std::make_unique<List>(std::make_unique<Struct<::facebook::thrift::test::Foo>>("module.Foo")), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},  }};
@@ -194,7 +194,7 @@ StructMetadata<::facebook::thrift::test::detail::DirectlyAdapted>::gen(ThriftMet
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_DirectlyAdapted = res.metadata;
-  module_DirectlyAdapted.is_union() = false;
+  DCHECK_EQ(*module_DirectlyAdapted.is_union(), false);
   static const auto* const
   module_DirectlyAdapted_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -226,7 +226,7 @@ StructMetadata<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::ge
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_IndependentDirectlyAdapted = res.metadata;
-  module_IndependentDirectlyAdapted.is_union() = false;
+  DCHECK_EQ(*module_IndependentDirectlyAdapted.is_union(), false);
   static const auto* const
   module_IndependentDirectlyAdapted_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -257,7 +257,7 @@ StructMetadata<::facebook::thrift::test::StructWithFieldAdapter>::gen(ThriftMeta
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_StructWithFieldAdapter = res.metadata;
-  module_StructWithFieldAdapter.is_union() = false;
+  DCHECK_EQ(*module_StructWithFieldAdapter.is_union(), false);
   static const auto* const
   module_StructWithFieldAdapter_fields = new std::array<EncodedThriftField, 4>{ {
     { 1, "field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("python.Adapter", { {"name", cvString("my.Adapter1") }, {"typeHint", cvString("my.AdaptedType1") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter1<>") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter1") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedI32_1") } }).cv_struct(), }},    { 2, "shared_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("cpp.Ref", { {"type", cvInteger(1) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 3, "opt_shared_field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("cpp.Ref", { {"type", cvInteger(1) } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter1<>") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter1") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedI32_1") } }).cv_struct(), }},    { 4, "opt_boxed_field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("thrift.Box", {  }).cv_struct(), }},  }};
@@ -287,7 +287,7 @@ StructMetadata<::facebook::thrift::test::TerseAdaptedFields>::gen(ThriftMetadata
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_TerseAdaptedFields = res.metadata;
-  module_TerseAdaptedFields.is_union() = false;
+  DCHECK_EQ(*module_TerseAdaptedFields.is_union(), false);
   static const auto* const
   module_TerseAdaptedFields_fields = new std::array<EncodedThriftField, 3>{ {
     { 1, "int_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("thrift.TerseWrite", {  }).cv_struct(), }},    { 2, "string_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("thrift.TerseWrite", {  }).cv_struct(), }},    { 3, "set_field", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("thrift.TerseWrite", {  }).cv_struct(), }},  }};
@@ -317,7 +317,7 @@ StructMetadata<::facebook::thrift::test::B>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_B = res.metadata;
-  module_B.is_union() = false;
+  DCHECK_EQ(*module_B.is_union(), false);
   static const auto* const
   module_B_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "a", false, std::make_unique<Typedef>("module.AdaptedA", std::make_unique<Struct<::facebook::thrift::test::A>>("module.A"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},  }};
@@ -347,7 +347,7 @@ StructMetadata<::facebook::thrift::test::A>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_A = res.metadata;
-  module_A.is_union() = false;
+  DCHECK_EQ(*module_A.is_union(), false);
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -357,7 +357,7 @@ StructMetadata<::facebook::thrift::test::Config>::gen(ThriftMetadata& metadata) 
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_Config = res.metadata;
-  module_Config.is_union() = false;
+  DCHECK_EQ(*module_Config.is_union(), false);
   static const auto* const
   module_Config_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "path", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -391,7 +391,7 @@ StructMetadata<::facebook::thrift::test::MyStruct>::gen(ThriftMetadata& metadata
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_MyStruct = res.metadata;
-  module_MyStruct.is_union() = false;
+  DCHECK_EQ(*module_MyStruct.is_union(), false);
   static const auto* const
   module_MyStruct_fields = new std::array<EncodedThriftField, 2>{ {
     { 1, "field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "set_string", false, std::make_unique<Typedef>("module.SetWithAdapter", std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("hack.Adapter", { {"name", cvString("\\Adapter2") } }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter2") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter2") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter2") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedSet_2") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},  }};
@@ -422,7 +422,7 @@ StructMetadata<::facebook::thrift::test::AdaptTestStruct>::gen(ThriftMetadata& m
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_AdaptTestStruct = res.metadata;
-  module_AdaptTestStruct.is_union() = false;
+  DCHECK_EQ(*module_AdaptTestStruct.is_union(), false);
   static const auto* const
   module_AdaptTestStruct_fields = new std::array<EncodedThriftField, 10>{ {
     { 1, "delay", false, std::make_unique<Typedef>("module.DurationMs", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::AdaptTestMsAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 2, "custom", false, std::make_unique<Typedef>("module.CustomProtocolType", std::make_unique<Typedef>("module.IOBuf", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Type", { {"name", cvString("::folly::IOBuf") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::CustomProtocolAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 3, "timeout", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::AdaptTestMsAdapter") } }).cv_struct(), }},    { 4, "data", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::AdapterWithContext") } }).cv_struct(), }},    { 5, "meta", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 6, "indirectionString", false, std::make_unique<Typedef>("module.IndirectionString", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::IndirectionAdapter<::apache::thrift::test::IndirectionString>") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 7, "string_data", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::AdapterWithContext") } }).cv_struct(), }},    { 8, "double_wrapped_bool", false, std::make_unique<Typedef>("module.AdaptedBool", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(), }},    { 9, "double_wrapped_integer", false, std::make_unique<Typedef>("module.AdaptedInteger", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::AdapterWithContext") } }).cv_struct(), }},    { 10, "binary_data", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::AdapterWithContext") } }).cv_struct(), }},  }};
@@ -452,7 +452,7 @@ StructMetadata<::facebook::thrift::test::AdaptTemplatedTestStruct>::gen(ThriftMe
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_AdaptTemplatedTestStruct = res.metadata;
-  module_AdaptTemplatedTestStruct.is_union() = false;
+  DCHECK_EQ(*module_AdaptTemplatedTestStruct.is_union(), false);
   static const auto* const
   module_AdaptTemplatedTestStruct_fields = new std::array<EncodedThriftField, 22>{ {
     { 1, "adaptedBool", false, std::make_unique<Typedef>("module.AdaptedBool", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 2, "adaptedByte", false, std::make_unique<Typedef>("module.AdaptedByte", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 3, "adaptedShort", false, std::make_unique<Typedef>("module.AdaptedShort", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 4, "adaptedInteger", false, std::make_unique<Typedef>("module.AdaptedInteger", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 5, "adaptedLong", false, std::make_unique<Typedef>("module.AdaptedLong", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 6, "adaptedDouble", false, std::make_unique<Typedef>("module.AdaptedDouble", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 7, "adaptedString", false, std::make_unique<Typedef>("module.AdaptedString", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 8, "adaptedList", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(), }},    { 9, "adaptedSet", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(), }},    { 10, "adaptedMap", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(), }},    { 11, "adaptedBoolDefault", false, std::make_unique<Typedef>("module.AdaptedBool", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 12, "adaptedByteDefault", false, std::make_unique<Typedef>("module.AdaptedByte", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 13, "adaptedShortDefault", false, std::make_unique<Typedef>("module.AdaptedShort", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 14, "adaptedIntegerDefault", false, std::make_unique<Typedef>("module.AdaptedInteger", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 15, "adaptedLongDefault", false, std::make_unique<Typedef>("module.AdaptedLong", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 16, "adaptedDoubleDefault", false, std::make_unique<Typedef>("module.AdaptedDouble", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 17, "adaptedStringDefault", false, std::make_unique<Typedef>("module.AdaptedString", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 18, "adaptedEnum", false, std::make_unique<Typedef>("module.AdaptedEnum", std::make_unique<Enum<::facebook::thrift::test::ThriftAdaptedEnum>>("module.ThriftAdaptedEnum"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::StaticCastAdapter<::apache::thrift::test::basic::AdaptedEnum, ::apache::thrift::test::basic::ThriftAdaptedEnum>") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 19, "adaptedListDefault", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::fbthrift_adapters::test::TestAdapter") } }).cv_struct(), }},    { 20, "adaptedSetDefault", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::fbthrift_adapters::test::TestAdapter") } }).cv_struct(), }},    { 21, "adaptedMapDefault", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::fbthrift_adapters::test::TestAdapter") } }).cv_struct(), }},    { 22, "doubleTypedefBool", false, std::make_unique<Typedef>("module.DoubleTypedefBool", std::make_unique<Typedef>("module.AdaptedBool", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},  }};
@@ -482,7 +482,7 @@ StructMetadata<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>::gen(Th
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_AdaptTemplatedNestedTestStruct = res.metadata;
-  module_AdaptTemplatedNestedTestStruct.is_union() = false;
+  DCHECK_EQ(*module_AdaptTemplatedNestedTestStruct.is_union(), false);
   static const auto* const
   module_AdaptTemplatedNestedTestStruct_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "adaptedStruct", false, std::make_unique<Struct<::facebook::thrift::test::AdaptTemplatedTestStruct>>("module.AdaptTemplatedTestStruct"), std::vector<ThriftConstStruct>{ }},  }};
@@ -512,7 +512,7 @@ StructMetadata<::facebook::thrift::test::ThriftAdaptTestUnion>::gen(ThriftMetada
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_AdaptTestUnion = res.metadata;
-  module_AdaptTestUnion.is_union() = true;
+  DCHECK_EQ(*module_AdaptTestUnion.is_union(), true);
   static const auto* const
   module_AdaptTestUnion_fields = new std::array<EncodedThriftField, 2>{ {
     { 1, "delay", false, std::make_unique<Typedef>("module.DurationMs", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::AdaptTestMsAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 2, "custom", false, std::make_unique<Typedef>("module.CustomProtocolType", std::make_unique<Typedef>("module.IOBuf", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Type", { {"name", cvString("::folly::IOBuf") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::CustomProtocolAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},  }};
@@ -543,7 +543,7 @@ StructMetadata<::facebook::thrift::test::ThriftAdaptedStruct>::gen(ThriftMetadat
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_AdaptedStruct = res.metadata;
-  module_AdaptedStruct.is_union() = false;
+  DCHECK_EQ(*module_AdaptedStruct.is_union(), false);
   static const auto* const
   module_AdaptedStruct_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "data", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -574,7 +574,7 @@ StructMetadata<::facebook::thrift::test::detail::DirectlyAdaptedStruct>::gen(Thr
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_DirectlyAdaptedStruct = res.metadata;
-  module_DirectlyAdaptedStruct.is_union() = false;
+  DCHECK_EQ(*module_DirectlyAdaptedStruct.is_union(), false);
   static const auto* const
   module_DirectlyAdaptedStruct_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "data", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -605,7 +605,7 @@ StructMetadata<::facebook::thrift::test::StructFieldAdaptedStruct>::gen(ThriftMe
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_StructFieldAdaptedStruct = res.metadata;
-  module_StructFieldAdaptedStruct.is_union() = false;
+  DCHECK_EQ(*module_StructFieldAdaptedStruct.is_union(), false);
   static const auto* const
   module_StructFieldAdaptedStruct_fields = new std::array<EncodedThriftField, 4>{ {
     { 1, "adaptedStruct", false, std::make_unique<Struct<::facebook::thrift::test::ThriftAdaptedStruct>>("module.AdaptedStruct"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(), }},    { 2, "adaptedTypedef", false, std::make_unique<Typedef>("module.AdaptedTypedef", std::make_unique<Struct<::facebook::thrift::test::ThriftAdaptedStruct>>("module.AdaptedStruct"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 3, "directlyAdapted", false, std::make_unique<Struct<::facebook::thrift::test::detail::DirectlyAdaptedStruct>>("module.DirectlyAdaptedStruct"), std::vector<ThriftConstStruct>{ }},    { 4, "typedefOfAdapted", false, std::make_unique<Typedef>("module.TypedefOfDirect", std::make_unique<Struct<::facebook::thrift::test::detail::DirectlyAdaptedStruct>>("module.DirectlyAdaptedStruct"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},  }};
@@ -635,7 +635,7 @@ StructMetadata<::facebook::thrift::test::CircularAdaptee>::gen(ThriftMetadata& m
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_CircularAdaptee = res.metadata;
-  module_CircularAdaptee.is_union() = false;
+  DCHECK_EQ(*module_CircularAdaptee.is_union(), false);
   static const auto* const
   module_CircularAdaptee_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "field", false, std::make_unique<Struct<::facebook::thrift::test::CircularStruct>>("module.CircularStruct"), std::vector<ThriftConstStruct>{ }},  }};
@@ -665,7 +665,7 @@ StructMetadata<::facebook::thrift::test::CircularStruct>::gen(ThriftMetadata& me
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_CircularStruct = res.metadata;
-  module_CircularStruct.is_union() = false;
+  DCHECK_EQ(*module_CircularStruct.is_union(), false);
   static const auto* const
   module_CircularStruct_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "field", true, std::make_unique<Typedef>("module.AdaptedCircularAdaptee", std::make_unique<Struct<::facebook::thrift::test::CircularAdaptee>>("module.CircularAdaptee"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::MemberAccessAdapter") }, {"adaptedType", cvString("::apache::thrift::test::TaggedWrapper<CircularAdaptee, CircularStruct>") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), }},  }};
@@ -695,7 +695,7 @@ StructMetadata<::facebook::thrift::test::ReorderedStruct>::gen(ThriftMetadata& m
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_ReorderedStruct = res.metadata;
-  module_ReorderedStruct.is_union() = false;
+  DCHECK_EQ(*module_ReorderedStruct.is_union(), false);
   static const auto* const
   module_ReorderedStruct_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "reordered_dependent_adapted", false, std::make_unique<Struct<::facebook::thrift::test::detail::DeclaredAfterStruct>>("module.DeclaredAfterStruct"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},  }};
@@ -725,7 +725,7 @@ StructMetadata<::facebook::thrift::test::detail::DeclaredAfterStruct>::gen(Thrif
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_DeclaredAfterStruct = res.metadata;
-  module_DeclaredAfterStruct.is_union() = false;
+  DCHECK_EQ(*module_DeclaredAfterStruct.is_union(), false);
   module_DeclaredAfterStruct.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>") } }).cv_struct());
   return res.metadata;
 }
@@ -736,7 +736,7 @@ StructMetadata<::facebook::thrift::test::UnderlyingRenamedStruct>::gen(ThriftMet
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_RenamedStruct = res.metadata;
-  module_RenamedStruct.is_union() = false;
+  DCHECK_EQ(*module_RenamedStruct.is_union(), false);
   static const auto* const
   module_RenamedStruct_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "data", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -767,7 +767,7 @@ StructMetadata<::facebook::thrift::test::UnderlyingSameNamespaceStruct>::gen(Thr
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_SameNamespaceStruct = res.metadata;
-  module_SameNamespaceStruct.is_union() = false;
+  DCHECK_EQ(*module_SameNamespaceStruct.is_union(), false);
   static const auto* const
   module_SameNamespaceStruct_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "data", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -798,7 +798,7 @@ StructMetadata<::facebook::thrift::test::detail::HeapAllocated>::gen(ThriftMetad
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_HeapAllocated = res.metadata;
-  module_HeapAllocated.is_union() = false;
+  DCHECK_EQ(*module_HeapAllocated.is_union(), false);
   module_HeapAllocated.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::MoveOnlyAdapter") }, {"moveOnly", cvBool(true) } }).cv_struct());
   return res.metadata;
 }
@@ -809,7 +809,7 @@ StructMetadata<::facebook::thrift::test::MoveOnly>::gen(ThriftMetadata& metadata
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_MoveOnly = res.metadata;
-  module_MoveOnly.is_union() = false;
+  DCHECK_EQ(*module_MoveOnly.is_union(), false);
   static const auto* const
   module_MoveOnly_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "ptr", false, std::make_unique<Struct<::facebook::thrift::test::detail::HeapAllocated>>("module.HeapAllocated"), std::vector<ThriftConstStruct>{ }},  }};
@@ -839,7 +839,7 @@ StructMetadata<::facebook::thrift::test::AlsoMoveOnly>::gen(ThriftMetadata& meta
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_AlsoMoveOnly = res.metadata;
-  module_AlsoMoveOnly.is_union() = false;
+  DCHECK_EQ(*module_AlsoMoveOnly.is_union(), false);
   static const auto* const
   module_AlsoMoveOnly_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "ptr", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::MoveOnlyAdapter") }, {"moveOnly", cvBool(true) } }).cv_struct(), }},  }};
@@ -869,7 +869,7 @@ StructMetadata<::facebook::thrift::test::ApplyAdapter>::gen(ThriftMetadata& meta
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_ApplyAdapter = res.metadata;
-  module_ApplyAdapter.is_union() = false;
+  DCHECK_EQ(*module_ApplyAdapter.is_union(), false);
   module_ApplyAdapter.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::TemplatedTestAdapter") } }).cv_struct());
   module_ApplyAdapter.structured_annotations()->push_back(*cvStruct("scope.Transitive", {  }).cv_struct());
   return res.metadata;
@@ -881,7 +881,7 @@ StructMetadata<::facebook::thrift::test::detail::TransitiveAdapted>::gen(ThriftM
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_TransitiveAdapted = res.metadata;
-  module_TransitiveAdapted.is_union() = false;
+  DCHECK_EQ(*module_TransitiveAdapted.is_union(), false);
   module_TransitiveAdapted.structured_annotations()->push_back(*cvStruct("module.ApplyAdapter", {  }).cv_struct());
   return res.metadata;
 }
@@ -892,7 +892,7 @@ StructMetadata<::facebook::thrift::test::CountingStruct>::gen(ThriftMetadata& me
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_CountingStruct = res.metadata;
-  module_CountingStruct.is_union() = false;
+  DCHECK_EQ(*module_CountingStruct.is_union(), false);
   static const auto* const
   module_CountingStruct_fields = new std::array<EncodedThriftField, 3>{ {
     { 1, "regularInt", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::CountingAdapter<false, int>") } }).cv_struct(), }},    { 2, "countingInt", true, std::make_unique<Typedef>("module.CountingInt", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::CountingAdapter<true, int>") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 3, "regularString", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::CountingAdapter<false, std::string>") } }).cv_struct(), }},  }};
@@ -922,7 +922,7 @@ StructMetadata<::facebook::thrift::test::Person>::gen(ThriftMetadata& metadata) 
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_Person = res.metadata;
-  module_Person.is_union() = false;
+  DCHECK_EQ(*module_Person.is_union(), false);
   static const auto* const
   module_Person_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -954,7 +954,7 @@ StructMetadata<::facebook::thrift::test::Person2>::gen(ThriftMetadata& metadata)
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_Person2 = res.metadata;
-  module_Person2.is_union() = false;
+  DCHECK_EQ(*module_Person2.is_union(), false);
   static const auto* const
   module_Person2_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -984,7 +984,7 @@ StructMetadata<::facebook::thrift::test::Renamed>::gen(ThriftMetadata& metadata)
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_RenamedStructWithStructAdapterAndFieldAdapter = res.metadata;
-  module_RenamedStructWithStructAdapterAndFieldAdapter.is_union() = false;
+  DCHECK_EQ(*module_RenamedStructWithStructAdapterAndFieldAdapter.is_union(), false);
   static const auto* const
   module_RenamedStructWithStructAdapterAndFieldAdapter_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::apache::thrift::test::FieldAdapter") } }).cv_struct(), }},  }};

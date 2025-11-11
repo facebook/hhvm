@@ -34,7 +34,7 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::Tri
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_TrivialStruct = res.metadata;
-  module_TrivialStruct.is_union() = false;
+  DCHECK_EQ(*module_TrivialStruct.is_union(), false);
   static const auto* const
   module_TrivialStruct_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "int_value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -64,7 +64,7 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::Str
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_StructWithNoCustomDefaultValues = res.metadata;
-  module_StructWithNoCustomDefaultValues.is_union() = false;
+  DCHECK_EQ(*module_StructWithNoCustomDefaultValues.is_union(), false);
   static const auto* const
   module_StructWithNoCustomDefaultValues_fields = new std::array<EncodedThriftField, 6>{ {
     { 1, "unqualified_integer", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "optional_integer", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "required_integer", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 4, "unqualified_struct", false, std::make_unique<Struct<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>>("module.TrivialStruct"), std::vector<ThriftConstStruct>{ }},    { 5, "optional_struct", true, std::make_unique<Struct<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>>("module.TrivialStruct"), std::vector<ThriftConstStruct>{ }},    { 6, "required_struct", false, std::make_unique<Struct<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>>("module.TrivialStruct"), std::vector<ThriftConstStruct>{ }},  }};
@@ -94,7 +94,7 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::Str
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_StructWithCustomDefaultValues = res.metadata;
-  module_StructWithCustomDefaultValues.is_union() = false;
+  DCHECK_EQ(*module_StructWithCustomDefaultValues.is_union(), false);
   static const auto* const
   module_StructWithCustomDefaultValues_fields = new std::array<EncodedThriftField, 6>{ {
     { 1, "unqualified_integer", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "optional_integer", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowUnsafeOptionalCustomDefaultValue", {  }).cv_struct(), }},    { 3, "required_integer", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 4, "unqualified_struct", false, std::make_unique<Struct<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>>("module.TrivialStruct"), std::vector<ThriftConstStruct>{ }},    { 5, "optional_struct", true, std::make_unique<Struct<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>>("module.TrivialStruct"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowUnsafeOptionalCustomDefaultValue", {  }).cv_struct(), }},    { 6, "required_struct", false, std::make_unique<Struct<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>>("module.TrivialStruct"), std::vector<ThriftConstStruct>{ }},  }};

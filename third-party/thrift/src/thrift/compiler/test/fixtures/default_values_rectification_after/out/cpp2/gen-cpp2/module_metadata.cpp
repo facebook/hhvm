@@ -34,7 +34,7 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values_rect
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_EmptyStruct = res.metadata;
-  module_EmptyStruct.is_union() = false;
+  DCHECK_EQ(*module_EmptyStruct.is_union(), false);
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -44,7 +44,7 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values_rect
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_TestStruct = res.metadata;
-  module_TestStruct.is_union() = false;
+  DCHECK_EQ(*module_TestStruct.is_union(), false);
   static const auto* const
   module_TestStruct_fields = new std::array<EncodedThriftField, 8>{ {
     { 1, "unqualified_int_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "unqualified_bool_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "unqualified_list_field", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 4, "unqualified_struct_field", false, std::make_unique<Struct<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>>("module.EmptyStruct"), std::vector<ThriftConstStruct>{ }},    { 5, "optional_int_field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 6, "optional_bool_field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ }},    { 7, "optional_list_field", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 8, "optional_struct_field", true, std::make_unique<Struct<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>>("module.EmptyStruct"), std::vector<ThriftConstStruct>{ }},  }};

@@ -99,7 +99,7 @@ StructMetadata<::facebook::ns::qwerty::SomeStruct>::gen(ThriftMetadata& metadata
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& enums_SomeStruct = res.metadata;
-  enums_SomeStruct.is_union() = false;
+  DCHECK_EQ(*enums_SomeStruct.is_union(), false);
   static const auto* const
   enums_SomeStruct_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "fieldA", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};

@@ -321,6 +321,9 @@ static auto genStructuredInMetadataMap(
     return ret;
   }
   ret.metadata.name() = std::move(name);
+  if constexpr (!std::is_same_v<Metadata, metadata::ThriftException>) {
+    ret.metadata.is_union() = node.definition().isUnion();
+  }
   ret.metadata.fields()->reserve(node.fields().size());
   for (auto& field : node.fields()) {
     auto& f = ret.metadata.fields()->emplace_back();

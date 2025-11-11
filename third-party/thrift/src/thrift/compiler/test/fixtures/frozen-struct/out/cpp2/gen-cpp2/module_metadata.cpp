@@ -47,7 +47,7 @@ StructMetadata<::some::ns::ModuleA>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_ModuleA = res.metadata;
-  module_ModuleA.is_union() = false;
+  DCHECK_EQ(*module_ModuleA.is_union(), false);
   static const auto* const
   module_ModuleA_fields = new std::array<EncodedThriftField, 6>{ {
     { 1, "i32Field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "strField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "listField", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{ }},    { 4, "mapField", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 5, "inclAField", false, std::make_unique<Struct<::some::ns::IncludedA>>("include1.IncludedA"), std::vector<ThriftConstStruct>{ }},    { 6, "inclBField", false, std::make_unique<Struct<::some::ns::IncludedB>>("include2.IncludedB"), std::vector<ThriftConstStruct>{ }},  }};
@@ -77,7 +77,7 @@ StructMetadata<::some::ns::ModuleB>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_ModuleB = res.metadata;
-  module_ModuleB.is_union() = false;
+  DCHECK_EQ(*module_ModuleB.is_union(), false);
   static const auto* const
   module_ModuleB_fields = new std::array<EncodedThriftField, 2>{ {
     { 1, "i32Field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "inclEnumB", false, std::make_unique<Enum<::some::ns::EnumB>>("module.EnumB"), std::vector<ThriftConstStruct>{ }},  }};
@@ -107,7 +107,7 @@ StructMetadata<::some::ns::detail::DirectlyAdapted>::gen(ThriftMetadata& metadat
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_DirectlyAdapted = res.metadata;
-  module_DirectlyAdapted.is_union() = false;
+  DCHECK_EQ(*module_DirectlyAdapted.is_union(), false);
   static const auto* const
   module_DirectlyAdapted_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -138,7 +138,7 @@ StructMetadata<::some::ns::CppRef>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_CppRef = res.metadata;
-  module_CppRef.is_union() = false;
+  DCHECK_EQ(*module_CppRef.is_union(), false);
   static const auto* const
   module_CppRef_fields = new std::array<EncodedThriftField, 5>{ {
     { 1, "shared_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(2) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 2, "shared_const_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(1) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 3, "opt_shared_field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(2) } }).cv_struct(), }},    { 4, "opt_shared_const_field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(1) } }).cv_struct(), }},    { 5, "boxed_field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.Box", {  }).cv_struct(), }},  }};

@@ -34,7 +34,7 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::any::detail::MyStru
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_MyStruct = res.metadata;
-  module_MyStruct.is_union() = false;
+  DCHECK_EQ(*module_MyStruct.is_union(), false);
   static const auto* const
   module_MyStruct_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "myString", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -65,7 +65,7 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyUnion>::gen(
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_MyUnion = res.metadata;
-  module_MyUnion.is_union() = true;
+  DCHECK_EQ(*module_MyUnion.is_union(), true);
   static const auto* const
   module_MyUnion_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "myString", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -95,7 +95,7 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>::
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_MyException = res.metadata;
-  module_MyException.is_union() = false;
+  DCHECK_EQ(*module_MyException.is_union(), false);
   static const auto* const
   module_MyException_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "myString", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};

@@ -53,7 +53,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::runtime_annotatio
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_runtime_annotation = res.metadata;
-  module_runtime_annotation.is_union() = false;
+  DCHECK_EQ(*module_runtime_annotation.is_union(), false);
   module_runtime_annotation.structured_annotations()->push_back(*cvStruct("thrift.RuntimeAnnotation", {  }).cv_struct());
   return res.metadata;
 }
@@ -64,7 +64,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_structured_annotation_inline = res.metadata;
-  module_structured_annotation_inline.is_union() = false;
+  DCHECK_EQ(*module_structured_annotation_inline.is_union(), false);
   static const auto* const
   module_structured_annotation_inline_fields = new std::array<EncodedThriftField, 2>{ {
     { 1, "count", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -94,7 +94,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_structured_annotation_with_default = res.metadata;
-  module_structured_annotation_with_default.is_union() = false;
+  DCHECK_EQ(*module_structured_annotation_with_default.is_union(), false);
   static const auto* const
   module_structured_annotation_with_default_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -124,7 +124,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_structured_annotation_recursive = res.metadata;
-  module_structured_annotation_recursive.is_union() = false;
+  DCHECK_EQ(*module_structured_annotation_recursive.is_union(), false);
   static const auto* const
   module_structured_annotation_recursive_fields = new std::array<EncodedThriftField, 3>{ {
     { 1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "recurse", true, std::make_unique<Struct<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>>("module.structured_annotation_recursive"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), }},    { 3, "forward", false, std::make_unique<Struct<::test::fixtures::basic_structured_annotations::structured_annotation_forward>>("module.structured_annotation_forward"), std::vector<ThriftConstStruct>{ }},  }};
@@ -154,7 +154,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_structured_annotation_forward = res.metadata;
-  module_structured_annotation_forward.is_union() = false;
+  DCHECK_EQ(*module_structured_annotation_forward.is_union(), false);
   static const auto* const
   module_structured_annotation_forward_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "count", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -184,7 +184,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_structured_annotation_nested = res.metadata;
-  module_structured_annotation_nested.is_union() = false;
+  DCHECK_EQ(*module_structured_annotation_nested.is_union(), false);
   static const auto* const
   module_structured_annotation_nested_fields = new std::array<EncodedThriftField, 2>{ {
     { 1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "nest", false, std::make_unique<Struct<::test::fixtures::basic_structured_annotations::structured_annotation_with_default>>("module.structured_annotation_with_default"), std::vector<ThriftConstStruct>{ }},  }};
@@ -214,7 +214,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyStruct>::gen(Th
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_MyStruct = res.metadata;
-  module_MyStruct.is_union() = false;
+  DCHECK_EQ(*module_MyStruct.is_union(), false);
   static const auto* const
   module_MyStruct_fields = new std::array<EncodedThriftField, 4>{ {
     { 1, "annotated_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("module.structured_annotation_inline", { {"count", cvInteger(1) }, {"name", cvString("counter") } }).cv_struct(), *cvStruct("module.runtime_annotation", {  }).cv_struct(), }},    { 2, "annotated_type", false, std::make_unique<Typedef>("module.annotated_inline_string", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("module.structured_annotation_inline", { {"count", cvInteger(1) } }).cv_struct(), *cvStruct("module.structured_annotation_with_default", { {"name", cvString("abc") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 3, "annotated_recursive", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("module.structured_annotation_recursive", { {"name", cvString("abc") }, {"recurse", cvStruct("module.structured_annotation_recursive", { {"name", cvString("cba") } }) }, {"forward", cvStruct("module.structured_annotation_forward", { {"count", cvInteger(3) } }) } }).cv_struct(), }},    { 4, "annotated_nested", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("module.structured_annotation_nested", { {"name", cvString("nesty") } }).cv_struct(), }},  }};
@@ -250,7 +250,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyException>::gen
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_MyException = res.metadata;
-  module_MyException.is_union() = false;
+  DCHECK_EQ(*module_MyException.is_union(), false);
   static const auto* const
   module_MyException_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "context", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("module.structured_annotation_with_default", {  }).cv_struct(), }},  }};
@@ -281,7 +281,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyUnion>::gen(Thr
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_MyUnion = res.metadata;
-  module_MyUnion.is_union() = true;
+  DCHECK_EQ(*module_MyUnion.is_union(), true);
   static const auto* const
   module_MyUnion_fields = new std::array<EncodedThriftField, 2>{ {
     { 1, "first", false, std::make_unique<Typedef>("module.annotated_inline_string", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("module.structured_annotation_inline", { {"count", cvInteger(1) } }).cv_struct(), *cvStruct("module.structured_annotation_with_default", { {"name", cvString("abc") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("module.structured_annotation_with_default", {  }).cv_struct(), }},    { 2, "second", false, std::make_unique<Typedef>("module.annotated_inline_i64", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("module.structured_annotation_inline", { {"count", cvInteger(2) } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("module.structured_annotation_with_default", { {"name", cvString("aba") } }).cv_struct(), }},  }};

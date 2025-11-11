@@ -87,7 +87,7 @@ StructMetadata<::test::fixtures::enumstrict::MyStruct>::gen(ThriftMetadata& meta
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_MyStruct = res.metadata;
-  module_MyStruct.is_union() = false;
+  DCHECK_EQ(*module_MyStruct.is_union(), false);
   static const auto* const
   module_MyStruct_fields = new std::array<EncodedThriftField, 2>{ {
     { 1, "myEnum", false, std::make_unique<Enum<::test::fixtures::enumstrict::MyEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{ }},    { 2, "myBigEnum", false, std::make_unique<Enum<::test::fixtures::enumstrict::MyBigEnum>>("module.MyBigEnum"), std::vector<ThriftConstStruct>{ }},  }};

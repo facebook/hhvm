@@ -34,7 +34,7 @@ StructMetadata<::cpp2::Foo>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_Foo = res.metadata;
-  module_Foo.is_union() = false;
+  DCHECK_EQ(*module_Foo.is_union(), false);
   static const auto* const
   module_Foo_fields = new std::array<EncodedThriftField, 3>{ {
     { 3, "field1", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 1, "field2", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "field3", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -65,7 +65,7 @@ StructMetadata<::cpp2::Foo2>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_Foo2 = res.metadata;
-  module_Foo2.is_union() = false;
+  DCHECK_EQ(*module_Foo2.is_union(), false);
   static const auto* const
   module_Foo2_fields = new std::array<EncodedThriftField, 3>{ {
     { 3, "field1", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 1, "field2", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "field3", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};

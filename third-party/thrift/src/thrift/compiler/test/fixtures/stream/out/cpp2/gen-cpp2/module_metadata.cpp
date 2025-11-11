@@ -39,7 +39,7 @@ StructMetadata<::cpp2::FooStreamEx>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_FooStreamEx = res.metadata;
-  module_FooStreamEx.is_union() = false;
+  DCHECK_EQ(*module_FooStreamEx.is_union(), false);
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -49,7 +49,7 @@ StructMetadata<::cpp2::FooEx>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_FooEx = res.metadata;
-  module_FooEx.is_union() = false;
+  DCHECK_EQ(*module_FooEx.is_union(), false);
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -59,7 +59,7 @@ StructMetadata<::cpp2::FooEx2>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_FooEx2 = res.metadata;
-  module_FooEx2.is_union() = false;
+  DCHECK_EQ(*module_FooEx2.is_union(), false);
   return res.metadata;
 }
 

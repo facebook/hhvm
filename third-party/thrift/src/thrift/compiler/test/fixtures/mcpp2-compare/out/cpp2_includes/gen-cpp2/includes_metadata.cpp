@@ -47,7 +47,7 @@ StructMetadata<::a::different::ns::AStruct>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& includes_AStruct = res.metadata;
-  includes_AStruct.is_union() = false;
+  DCHECK_EQ(*includes_AStruct.is_union(), false);
   static const auto* const
   includes_AStruct_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "FieldA", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -77,7 +77,7 @@ StructMetadata<::a::different::ns::AStructB>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& includes_AStructB = res.metadata;
-  includes_AStructB.is_union() = false;
+  DCHECK_EQ(*includes_AStructB.is_union(), false);
   static const auto* const
   includes_AStructB_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "FieldA", false, std::make_unique<Struct<::a::different::ns::AStruct>>("includes.AStruct"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(1) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},  }};

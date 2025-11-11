@@ -34,7 +34,7 @@ StructMetadata<::apache::thrift::test::TerseFoo>::gen(ThriftMetadata& metadata) 
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& deprecated_terse_writes_TerseFoo = res.metadata;
-  deprecated_terse_writes_TerseFoo.is_union() = false;
+  DCHECK_EQ(*deprecated_terse_writes_TerseFoo.is_union(), false);
   static const auto* const
   deprecated_terse_writes_TerseFoo_fields = new std::array<EncodedThriftField, 4>{ {
     { 1, "field1", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{ }},    { 2, "field2", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 3, "field3", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{ }},    { 4, "field4", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},  }};
@@ -64,7 +64,7 @@ StructMetadata<::apache::thrift::test::TerseLazyFoo>::gen(ThriftMetadata& metada
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& deprecated_terse_writes_TerseLazyFoo = res.metadata;
-  deprecated_terse_writes_TerseLazyFoo.is_union() = false;
+  DCHECK_EQ(*deprecated_terse_writes_TerseLazyFoo.is_union(), false);
   static const auto* const
   deprecated_terse_writes_TerseLazyFoo_fields = new std::array<EncodedThriftField, 4>{ {
     { 1, "field1", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{ }},    { 2, "field2", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 3, "field3", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Lazy", {  }).cv_struct(), }},    { 4, "field4", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Lazy", {  }).cv_struct(), }},  }};
@@ -94,7 +94,7 @@ StructMetadata<::apache::thrift::test::TerseOptionalFoo>::gen(ThriftMetadata& me
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& deprecated_terse_writes_TerseOptionalFoo = res.metadata;
-  deprecated_terse_writes_TerseOptionalFoo.is_union() = false;
+  DCHECK_EQ(*deprecated_terse_writes_TerseOptionalFoo.is_union(), false);
   static const auto* const
   deprecated_terse_writes_TerseOptionalFoo_fields = new std::array<EncodedThriftField, 4>{ {
     { 1, "field1", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{ }},    { 2, "field2", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 3, "field3", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{ }},    { 4, "field4", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},  }};
@@ -124,7 +124,7 @@ StructMetadata<::apache::thrift::test::TerseOptionalLazyFoo>::gen(ThriftMetadata
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& deprecated_terse_writes_TerseOptionalLazyFoo = res.metadata;
-  deprecated_terse_writes_TerseOptionalLazyFoo.is_union() = false;
+  DCHECK_EQ(*deprecated_terse_writes_TerseOptionalLazyFoo.is_union(), false);
   static const auto* const
   deprecated_terse_writes_TerseOptionalLazyFoo_fields = new std::array<EncodedThriftField, 4>{ {
     { 1, "field1", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{ }},    { 2, "field2", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 3, "field3", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Lazy", {  }).cv_struct(), }},    { 4, "field4", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Lazy", {  }).cv_struct(), }},  }};

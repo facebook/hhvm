@@ -34,7 +34,7 @@ StructMetadata<::cpp2::Foo>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_Foo = res.metadata;
-  module_Foo.is_union() = false;
+  DCHECK_EQ(*module_Foo.is_union(), false);
   static const auto* const
   module_Foo_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "bar", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};

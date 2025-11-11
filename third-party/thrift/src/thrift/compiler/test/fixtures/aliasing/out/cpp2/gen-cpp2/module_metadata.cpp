@@ -34,7 +34,7 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::aliasing::Foo>::gen
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_Foo = res.metadata;
-  module_Foo.is_union() = false;
+  DCHECK_EQ(*module_Foo.is_union(), false);
   static const auto* const
   module_Foo_fields = new std::array<EncodedThriftField, 2>{ {
     { 1, "other_foo", false, std::make_unique<Struct<::cpp2::Foo>>("module.Foo"), std::vector<ThriftConstStruct>{ }},    { 2, "yet_another_foo", false, std::make_unique<Struct<::cpp2::Foo>>("not_module.Foo"), std::vector<ThriftConstStruct>{ }},  }};

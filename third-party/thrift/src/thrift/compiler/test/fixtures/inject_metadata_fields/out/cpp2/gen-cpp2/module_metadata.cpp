@@ -34,7 +34,7 @@ StructMetadata<::cpp2::Fields>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_Fields = res.metadata;
-  module_Fields.is_union() = false;
+  DCHECK_EQ(*module_Fields.is_union(), false);
   static const auto* const
   module_Fields_fields = new std::array<EncodedThriftField, 1>{ {
     { 100, "injected_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -64,7 +64,7 @@ StructMetadata<::cpp2::FieldsInjectedToEmptyStruct>::gen(ThriftMetadata& metadat
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_FieldsInjectedToEmptyStruct = res.metadata;
-  module_FieldsInjectedToEmptyStruct.is_union() = false;
+  DCHECK_EQ(*module_FieldsInjectedToEmptyStruct.is_union(), false);
   static const auto* const
   module_FieldsInjectedToEmptyStruct_fields = new std::array<EncodedThriftField, 1>{ {
     { -1100, "injected_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -95,7 +95,7 @@ StructMetadata<::cpp2::FieldsInjectedToStruct>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_FieldsInjectedToStruct = res.metadata;
-  module_FieldsInjectedToStruct.is_union() = false;
+  DCHECK_EQ(*module_FieldsInjectedToStruct.is_union(), false);
   static const auto* const
   module_FieldsInjectedToStruct_fields = new std::array<EncodedThriftField, 2>{ {
     { 1, "string_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { -1100, "injected_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -126,7 +126,7 @@ StructMetadata<::cpp2::FieldsInjectedWithIncludedStruct>::gen(ThriftMetadata& me
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_FieldsInjectedWithIncludedStruct = res.metadata;
-  module_FieldsInjectedWithIncludedStruct.is_union() = false;
+  DCHECK_EQ(*module_FieldsInjectedWithIncludedStruct.is_union(), false);
   static const auto* const
   module_FieldsInjectedWithIncludedStruct_fields = new std::array<EncodedThriftField, 4>{ {
     { 1, "string_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { -1100, "injected_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { -1101, "injected_structured_annotation_field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.Box", {  }).cv_struct(), }},    { -1102, "injected_unstructured_annotation_field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.Box", {  }).cv_struct(), }},  }};
@@ -157,7 +157,7 @@ StructMetadata<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct>::gen(ThriftMe
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_FieldsInjectedWithFieldsWithIncludedStruct = res.metadata;
-  module_FieldsInjectedWithFieldsWithIncludedStruct.is_union() = false;
+  DCHECK_EQ(*module_FieldsInjectedWithFieldsWithIncludedStruct.is_union(), false);
   static const auto* const
   module_FieldsInjectedWithFieldsWithIncludedStruct_fields = new std::array<EncodedThriftField, 2>{ {
     { 1, "string_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { -1001, "injected_field", false, std::make_unique<Struct<::cpp2::InjectedField>>("injected_field.InjectedField"), std::vector<ThriftConstStruct>{ }},  }};

@@ -34,7 +34,7 @@ StructMetadata<::cpp2::ReflectionStruct>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& reflection_ReflectionStruct = res.metadata;
-  reflection_ReflectionStruct.is_union() = false;
+  DCHECK_EQ(*reflection_ReflectionStruct.is_union(), false);
   static const auto* const
   reflection_ReflectionStruct_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "fieldA", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};

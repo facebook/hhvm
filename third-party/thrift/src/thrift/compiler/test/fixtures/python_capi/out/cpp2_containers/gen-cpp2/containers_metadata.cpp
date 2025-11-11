@@ -34,7 +34,7 @@ StructMetadata<::test::fixtures::python_capi::TemplateLists>::gen(ThriftMetadata
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& containers_TemplateLists = res.metadata;
-  containers_TemplateLists.is_union() = false;
+  DCHECK_EQ(*containers_TemplateLists.is_union(), false);
   static const auto* const
   containers_TemplateLists_fields = new std::array<EncodedThriftField, 5>{ {
     { 1, "std_string", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("std::vector") } }).cv_struct(), }},    { 2, "deque_string", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("std::deque") } }).cv_struct(), }},    { 3, "small_vector_iobuf", false, std::make_unique<Typedef>("containers.small_vector_iobuf", std::make_unique<List>(std::make_unique<Typedef>("containers.IOBuf", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Type", { {"name", cvString("folly::IOBuf") } }).cv_struct(),  })), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Type", { {"template", cvString("folly::small_vector") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 4, "nested_small_vector", false, std::make_unique<List>(std::make_unique<Typedef>("containers.fbvector_string", std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Type", { {"template", cvString("folly::fbvector") } }).cv_struct(),  })), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::small_vector") } }).cv_struct(), }},    { 5, "small_vector_tensor", false, std::make_unique<List>(std::make_unique<Typedef>("containers.fbvector_fbvector_string", std::make_unique<List>(std::make_unique<Typedef>("containers.fbvector_string", std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Type", { {"template", cvString("folly::fbvector") } }).cv_struct(),  })), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Type", { {"template", cvString("folly::fbvector") } }).cv_struct(),  })), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::fbvector") } }).cv_struct(), }},  }};
@@ -64,7 +64,7 @@ StructMetadata<::test::fixtures::python_capi::TemplateSets>::gen(ThriftMetadata&
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& containers_TemplateSets = res.metadata;
-  containers_TemplateSets.is_union() = false;
+  DCHECK_EQ(*containers_TemplateSets.is_union(), false);
   static const auto* const
   containers_TemplateSets_fields = new std::array<EncodedThriftField, 7>{ {
     { 1, "std_set", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("std::set") } }).cv_struct(), }},    { 2, "std_unordered", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("std::unordered_set") } }).cv_struct(), }},    { 3, "folly_fast", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::F14FastSet") } }).cv_struct(), }},    { 4, "folly_node", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::F14NodeSet") } }).cv_struct(), }},    { 5, "folly_value", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::F14ValueSet") } }).cv_struct(), }},    { 6, "folly_vector", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::F14VectorSet") } }).cv_struct(), }},    { 7, "folly_sorted_vector", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::sorted_vector_set") } }).cv_struct(), }},  }};
@@ -95,7 +95,7 @@ StructMetadata<::test::fixtures::python_capi::TemplateMaps>::gen(ThriftMetadata&
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& containers_TemplateMaps = res.metadata;
-  containers_TemplateMaps.is_union() = false;
+  DCHECK_EQ(*containers_TemplateMaps.is_union(), false);
   static const auto* const
   containers_TemplateMaps_fields = new std::array<EncodedThriftField, 7>{ {
     { 1, "std_map", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("std::map") } }).cv_struct(), }},    { 2, "std_unordered", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("std::unordered_map") } }).cv_struct(), }},    { 3, "folly_fast", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::F14FastMap") } }).cv_struct(), }},    { 4, "folly_node", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::F14NodeMap") } }).cv_struct(), }},    { 5, "folly_value", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::F14ValueMap") } }).cv_struct(), }},    { 6, "folly_vector", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::F14VectorMap") } }).cv_struct(), }},    { 7, "folly_sorted_vector", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("folly::sorted_vector_map") } }).cv_struct(), }},  }};
@@ -126,7 +126,7 @@ StructMetadata<::test::fixtures::python_capi::TWrapped>::gen(ThriftMetadata& met
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& containers_TWrapped = res.metadata;
-  containers_TWrapped.is_union() = false;
+  DCHECK_EQ(*containers_TWrapped.is_union(), false);
   static const auto* const
   containers_TWrapped_fields = new std::array<EncodedThriftField, 2>{ {
     { 1, "fieldA", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "fieldB", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -156,7 +156,7 @@ StructMetadata<::test::fixtures::python_capi::IndirectionA>::gen(ThriftMetadata&
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& containers_IndirectionA = res.metadata;
-  containers_IndirectionA.is_union() = false;
+  DCHECK_EQ(*containers_IndirectionA.is_union(), false);
   static const auto* const
   containers_IndirectionA_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "lst", false, std::make_unique<Typedef>("containers.ListOfWrapped", std::make_unique<List>(std::make_unique<Struct<::test::fixtures::python_capi::TWrapped>>("containers.TWrapped")), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},  }};
@@ -186,7 +186,7 @@ StructMetadata<::test::fixtures::python_capi::IndirectionB>::gen(ThriftMetadata&
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& containers_IndirectionB = res.metadata;
-  containers_IndirectionB.is_union() = false;
+  DCHECK_EQ(*containers_IndirectionB.is_union(), false);
   static const auto* const
   containers_IndirectionB_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "lst", false, std::make_unique<Typedef>("containers.VecOfWrapped", std::make_unique<List>(std::make_unique<Struct<::test::fixtures::python_capi::TWrapped>>("containers.TWrapped")), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Type", { {"template", cvString("std::vector") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},  }};
@@ -216,7 +216,7 @@ StructMetadata<::test::fixtures::python_capi::IndirectionC>::gen(ThriftMetadata&
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& containers_IndirectionC = res.metadata;
-  containers_IndirectionC.is_union() = false;
+  DCHECK_EQ(*containers_IndirectionC.is_union(), false);
   static const auto* const
   containers_IndirectionC_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "lst", false, std::make_unique<Typedef>("containers.ListOfWrappedAlias", std::make_unique<Typedef>("containers.ListOfWrapped", std::make_unique<List>(std::make_unique<Struct<::test::fixtures::python_capi::TWrapped>>("containers.TWrapped")), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},  }};

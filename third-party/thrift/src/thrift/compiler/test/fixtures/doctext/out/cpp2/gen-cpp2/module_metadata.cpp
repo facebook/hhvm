@@ -52,7 +52,7 @@ StructMetadata<::cpp2::A>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_A = res.metadata;
-  module_A.is_union() = false;
+  DCHECK_EQ(*module_A.is_union(), false);
   static const auto* const
   module_A_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "useless_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -82,7 +82,7 @@ StructMetadata<::cpp2::U>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_U = res.metadata;
-  module_U.is_union() = true;
+  DCHECK_EQ(*module_U.is_union(), true);
   static const auto* const
   module_U_fields = new std::array<EncodedThriftField, 2>{ {
     { 1, "i", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "s", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -112,7 +112,7 @@ StructMetadata<::cpp2::Bang>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_Bang = res.metadata;
-  module_Bang.is_union() = false;
+  DCHECK_EQ(*module_Bang.is_union(), false);
   static const auto* const
   module_Bang_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};

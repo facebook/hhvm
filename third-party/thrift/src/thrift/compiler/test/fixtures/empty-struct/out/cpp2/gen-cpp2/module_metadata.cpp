@@ -34,7 +34,7 @@ StructMetadata<::cpp2::Empty>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_Empty = res.metadata;
-  module_Empty.is_union() = false;
+  DCHECK_EQ(*module_Empty.is_union(), false);
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -44,7 +44,7 @@ StructMetadata<::cpp2::Nada>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_Nada = res.metadata;
-  module_Nada.is_union() = true;
+  DCHECK_EQ(*module_Nada.is_union(), true);
   return res.metadata;
 }
 

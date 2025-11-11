@@ -34,7 +34,7 @@ StructMetadata<::apache::thrift::test::A>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_A = res.metadata;
-  module_A.is_union() = false;
+  DCHECK_EQ(*module_A.is_union(), false);
   static const auto* const
   module_A_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "some_map", true, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Struct<::apache::thrift::test::B>>("module.B")), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("std::unordered_map") } }).cv_struct(), }},  }};
@@ -64,7 +64,7 @@ StructMetadata<::apache::thrift::test::B>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_B = res.metadata;
-  module_B.is_union() = false;
+  DCHECK_EQ(*module_B.is_union(), false);
   static const auto* const
   module_B_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};

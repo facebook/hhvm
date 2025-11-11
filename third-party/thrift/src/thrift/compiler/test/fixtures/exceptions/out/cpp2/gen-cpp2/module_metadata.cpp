@@ -39,7 +39,7 @@ StructMetadata<::cpp2::Fiery>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_Fiery = res.metadata;
-  module_Fiery.is_union() = false;
+  DCHECK_EQ(*module_Fiery.is_union(), false);
   static const auto* const
   module_Fiery_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct(), }},  }};
@@ -69,7 +69,7 @@ StructMetadata<::cpp2::Serious>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_Serious = res.metadata;
-  module_Serious.is_union() = false;
+  DCHECK_EQ(*module_Serious.is_union(), false);
   static const auto* const
   module_Serious_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "sonnet", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct(), *cvStruct("python.Name", { {"name", cvString("not_sonnet") } }).cv_struct(), }},  }};
@@ -99,7 +99,7 @@ StructMetadata<::cpp2::ComplexFieldNames>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_ComplexFieldNames = res.metadata;
-  module_ComplexFieldNames.is_union() = false;
+  DCHECK_EQ(*module_ComplexFieldNames.is_union(), false);
   static const auto* const
   module_ComplexFieldNames_fields = new std::array<EncodedThriftField, 2>{ {
     { 1, "error_message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "internal_error_message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct(), }},  }};
@@ -129,7 +129,7 @@ StructMetadata<::cpp2::CustomFieldNames>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_CustomFieldNames = res.metadata;
-  module_CustomFieldNames.is_union() = false;
+  DCHECK_EQ(*module_CustomFieldNames.is_union(), false);
   static const auto* const
   module_CustomFieldNames_fields = new std::array<EncodedThriftField, 2>{ {
     { 1, "error_message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "internal_error_message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct(), }},  }};
@@ -159,7 +159,7 @@ StructMetadata<::cpp2::ExceptionWithPrimitiveField>::gen(ThriftMetadata& metadat
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_ExceptionWithPrimitiveField = res.metadata;
-  module_ExceptionWithPrimitiveField.is_union() = false;
+  DCHECK_EQ(*module_ExceptionWithPrimitiveField.is_union(), false);
   static const auto* const
   module_ExceptionWithPrimitiveField_fields = new std::array<EncodedThriftField, 2>{ {
     { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct(), }},    { 2, "error_code", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -189,7 +189,7 @@ StructMetadata<::cpp2::ExceptionWithStructuredAnnotation>::gen(ThriftMetadata& m
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_ExceptionWithStructuredAnnotation = res.metadata;
-  module_ExceptionWithStructuredAnnotation.is_union() = false;
+  DCHECK_EQ(*module_ExceptionWithStructuredAnnotation.is_union(), false);
   static const auto* const
   module_ExceptionWithStructuredAnnotation_fields = new std::array<EncodedThriftField, 2>{ {
     { 1, "message_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.ExceptionMessage", {  }).cv_struct(), }},    { 2, "error_code", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -219,7 +219,7 @@ StructMetadata<::cpp2::Banal>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_Banal = res.metadata;
-  module_Banal.is_union() = false;
+  DCHECK_EQ(*module_Banal.is_union(), false);
   return res.metadata;
 }
 

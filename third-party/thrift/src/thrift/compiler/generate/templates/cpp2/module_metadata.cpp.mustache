@@ -71,7 +71,7 @@ StructMetadata<{{struct:cpp_fullname}}>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& {{struct:metadata_name}} = res.metadata;
-  {{struct:metadata_name}}.is_union() = {{struct:union?}};
+  DCHECK_EQ(*{{struct:metadata_name}}.is_union(), {{struct:union?}});
 {{#struct:fields?}}
   static const auto* const
   {{struct:metadata_name}}_fields = new std::array<EncodedThriftField, {{struct:num_fields}}>{ {

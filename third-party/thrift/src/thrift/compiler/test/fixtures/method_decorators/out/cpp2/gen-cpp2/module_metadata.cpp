@@ -64,7 +64,7 @@ StructMetadata<::cpp2::Request>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_Request = res.metadata;
-  module_Request.is_union() = false;
+  DCHECK_EQ(*module_Request.is_union(), false);
   static const auto* const
   module_Request_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "id", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -94,7 +94,7 @@ StructMetadata<::cpp2::detail::AdaptedRequest>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_AdaptedRequest = res.metadata;
-  module_AdaptedRequest.is_union() = false;
+  DCHECK_EQ(*module_AdaptedRequest.is_union(), false);
   static const auto* const
   module_AdaptedRequest_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "id", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -125,7 +125,7 @@ StructMetadata<::cpp2::Response>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_Response = res.metadata;
-  module_Response.is_union() = false;
+  DCHECK_EQ(*module_Response.is_union(), false);
   static const auto* const
   module_Response_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "text", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};

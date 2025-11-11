@@ -39,7 +39,7 @@ StructMetadata<::thrift::shared_interactions::DoSomethingResult>::gen(ThriftMeta
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& shared_DoSomethingResult = res.metadata;
-  shared_DoSomethingResult.is_union() = false;
+  DCHECK_EQ(*shared_DoSomethingResult.is_union(), false);
   static const auto* const
   shared_DoSomethingResult_fields = new std::array<EncodedThriftField, 2>{ {
     { 1, "s_res", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "i_res", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};

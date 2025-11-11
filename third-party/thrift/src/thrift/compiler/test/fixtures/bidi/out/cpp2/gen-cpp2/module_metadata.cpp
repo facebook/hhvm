@@ -39,7 +39,7 @@ StructMetadata<::cpp2::BiDiSinkException>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_BiDiSinkException = res.metadata;
-  module_BiDiSinkException.is_union() = false;
+  DCHECK_EQ(*module_BiDiSinkException.is_union(), false);
   static const auto* const
   module_BiDiSinkException_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -69,7 +69,7 @@ StructMetadata<::cpp2::BiDiStreamException>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_BiDiStreamException = res.metadata;
-  module_BiDiStreamException.is_union() = false;
+  DCHECK_EQ(*module_BiDiStreamException.is_union(), false);
   static const auto* const
   module_BiDiStreamException_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -99,7 +99,7 @@ StructMetadata<::cpp2::BiDiMethodException>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_BiDiMethodException = res.metadata;
-  module_BiDiMethodException.is_union() = false;
+  DCHECK_EQ(*module_BiDiMethodException.is_union(), false);
   static const auto* const
   module_BiDiMethodException_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};

@@ -34,7 +34,7 @@ StructMetadata<::cpp2::BasicTypes>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_BasicTypes = res.metadata;
-  module_BasicTypes.is_union() = false;
+  DCHECK_EQ(*module_BasicTypes.is_union(), false);
   static const auto* const
   module_BasicTypes_fields = new std::array<EncodedThriftField, 4>{ {
     { 1, "first", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "second", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "third", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 4, "isTrue", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ }},  }};

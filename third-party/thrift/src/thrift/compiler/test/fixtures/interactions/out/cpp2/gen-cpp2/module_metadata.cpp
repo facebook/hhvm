@@ -59,7 +59,7 @@ StructMetadata<::cpp2::CustomException>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_CustomException = res.metadata;
-  module_CustomException.is_union() = false;
+  DCHECK_EQ(*module_CustomException.is_union(), false);
   static const auto* const
   module_CustomException_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -89,7 +89,7 @@ StructMetadata<::cpp2::ShouldBeBoxed>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_ShouldBeBoxed = res.metadata;
-  module_ShouldBeBoxed.is_union() = false;
+  DCHECK_EQ(*module_ShouldBeBoxed.is_union(), false);
   static const auto* const
   module_ShouldBeBoxed_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "sessionId", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};

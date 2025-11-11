@@ -48,7 +48,7 @@ StructMetadata<::facebook::thrift::test::MyAnnotation>::gen(ThriftMetadata& meta
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_MyAnnotation = res.metadata;
-  module_MyAnnotation.is_union() = false;
+  DCHECK_EQ(*module_MyAnnotation.is_union(), false);
   module_MyAnnotation.structured_annotations()->push_back(*cvStruct("scope.Definition", {  }).cv_struct());
   module_MyAnnotation.structured_annotations()->push_back(*cvStruct("thrift.RuntimeAnnotation", {  }).cv_struct());
   return res.metadata;
@@ -60,7 +60,7 @@ StructMetadata<::facebook::thrift::test::MyStruct>::gen(ThriftMetadata& metadata
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_MyStruct = res.metadata;
-  module_MyStruct.is_union() = false;
+  DCHECK_EQ(*module_MyStruct.is_union(), false);
   static const auto* const
   module_MyStruct_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("module.MyAnnotation", {  }).cv_struct(), }},  }};
@@ -91,7 +91,7 @@ StructMetadata<::facebook::thrift::test::MyUnion>::gen(ThriftMetadata& metadata)
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_MyUnion = res.metadata;
-  module_MyUnion.is_union() = false;
+  DCHECK_EQ(*module_MyUnion.is_union(), false);
   static const auto* const
   module_MyUnion_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("module.MyAnnotation", {  }).cv_struct(), }},  }};
@@ -122,7 +122,7 @@ StructMetadata<::facebook::thrift::test::MyException>::gen(ThriftMetadata& metad
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_MyException = res.metadata;
-  module_MyException.is_union() = false;
+  DCHECK_EQ(*module_MyException.is_union(), false);
   static const auto* const
   module_MyException_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("module.MyAnnotation", {  }).cv_struct(), }},  }};

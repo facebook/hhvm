@@ -127,7 +127,7 @@ StructMetadata<::test::fixtures::enums::SomeStruct>::gen(ThriftMetadata& metadat
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_SomeStruct = res.metadata;
-  module_SomeStruct.is_union() = false;
+  DCHECK_EQ(*module_SomeStruct.is_union(), false);
   static const auto* const
   module_SomeStruct_fields = new std::array<EncodedThriftField, 4>{ {
     { 1, "reasonable", false, std::make_unique<Enum<::test::fixtures::enums::Metasyntactic>>("module.Metasyntactic"), std::vector<ThriftConstStruct>{ }},    { 2, "fine", false, std::make_unique<Enum<::test::fixtures::enums::Metasyntactic>>("module.Metasyntactic"), std::vector<ThriftConstStruct>{ }},    { 3, "questionable", false, std::make_unique<Enum<::test::fixtures::enums::Metasyntactic>>("module.Metasyntactic"), std::vector<ThriftConstStruct>{ }},    { 4, "tags", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},  }};
@@ -157,7 +157,7 @@ StructMetadata<::test::fixtures::enums::MyStruct>::gen(ThriftMetadata& metadata)
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_MyStruct = res.metadata;
-  module_MyStruct.is_union() = false;
+  DCHECK_EQ(*module_MyStruct.is_union(), false);
   static const auto* const
   module_MyStruct_fields = new std::array<EncodedThriftField, 4>{ {
     { 1, "me2_3", false, std::make_unique<Enum<::test::fixtures::enums::MyEnum2>>("module.MyEnum2"), std::vector<ThriftConstStruct>{ }},    { 2, "me3_n3", false, std::make_unique<Enum<::test::fixtures::enums::MyEnum3>>("module.MyEnum3"), std::vector<ThriftConstStruct>{ }},    { 4, "me1_t1", false, std::make_unique<Enum<::test::fixtures::enums::MyEnum1>>("module.MyEnum1"), std::vector<ThriftConstStruct>{ }},    { 6, "me1_t2", false, std::make_unique<Enum<::test::fixtures::enums::MyEnum1>>("module.MyEnum1"), std::vector<ThriftConstStruct>{ }},  }};

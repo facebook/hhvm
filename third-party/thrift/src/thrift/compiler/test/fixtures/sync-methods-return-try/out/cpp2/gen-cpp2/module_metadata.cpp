@@ -44,7 +44,7 @@ StructMetadata<::cpp2::FooStreamEx>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_FooStreamEx = res.metadata;
-  module_FooStreamEx.is_union() = false;
+  DCHECK_EQ(*module_FooStreamEx.is_union(), false);
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -54,7 +54,7 @@ StructMetadata<::cpp2::FooEx>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_FooEx = res.metadata;
-  module_FooEx.is_union() = false;
+  DCHECK_EQ(*module_FooEx.is_union(), false);
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -64,7 +64,7 @@ StructMetadata<::cpp2::FooEx2>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_FooEx2 = res.metadata;
-  module_FooEx2.is_union() = false;
+  DCHECK_EQ(*module_FooEx2.is_union(), false);
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -74,7 +74,7 @@ StructMetadata<::cpp2::InitialResponse>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_InitialResponse = res.metadata;
-  module_InitialResponse.is_union() = false;
+  DCHECK_EQ(*module_InitialResponse.is_union(), false);
   static const auto* const
   module_InitialResponse_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "content", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -104,7 +104,7 @@ StructMetadata<::cpp2::FinalResponse>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_FinalResponse = res.metadata;
-  module_FinalResponse.is_union() = false;
+  DCHECK_EQ(*module_FinalResponse.is_union(), false);
   static const auto* const
   module_FinalResponse_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "content", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -134,7 +134,7 @@ StructMetadata<::cpp2::SinkPayload>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_SinkPayload = res.metadata;
-  module_SinkPayload.is_union() = false;
+  DCHECK_EQ(*module_SinkPayload.is_union(), false);
   static const auto* const
   module_SinkPayload_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "content", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -164,7 +164,7 @@ StructMetadata<::cpp2::CompatibleWithKeywordSink>::gen(ThriftMetadata& metadata)
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_CompatibleWithKeywordSink = res.metadata;
-  module_CompatibleWithKeywordSink.is_union() = false;
+  DCHECK_EQ(*module_CompatibleWithKeywordSink.is_union(), false);
   static const auto* const
   module_CompatibleWithKeywordSink_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "sink", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -194,7 +194,7 @@ StructMetadata<::cpp2::InitialException>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_InitialException = res.metadata;
-  module_InitialException.is_union() = false;
+  DCHECK_EQ(*module_InitialException.is_union(), false);
   static const auto* const
   module_InitialException_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "reason", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -224,7 +224,7 @@ StructMetadata<::cpp2::SinkException1>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_SinkException1 = res.metadata;
-  module_SinkException1.is_union() = false;
+  DCHECK_EQ(*module_SinkException1.is_union(), false);
   static const auto* const
   module_SinkException1_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "reason", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -254,7 +254,7 @@ StructMetadata<::cpp2::SinkException2>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_SinkException2 = res.metadata;
-  module_SinkException2.is_union() = false;
+  DCHECK_EQ(*module_SinkException2.is_union(), false);
   static const auto* const
   module_SinkException2_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "reason", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -284,7 +284,7 @@ StructMetadata<::cpp2::StreamItem>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_StreamItem = res.metadata;
-  module_StreamItem.is_union() = false;
+  DCHECK_EQ(*module_StreamItem.is_union(), false);
   static const auto* const
   module_StreamItem_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "content", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};

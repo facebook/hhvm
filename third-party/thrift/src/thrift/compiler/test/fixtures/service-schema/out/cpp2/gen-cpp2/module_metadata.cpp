@@ -57,7 +57,7 @@ StructMetadata<::facebook::thrift::test::CustomException>::gen(ThriftMetadata& m
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_CustomException = res.metadata;
-  module_CustomException.is_union() = false;
+  DCHECK_EQ(*module_CustomException.is_union(), false);
   static const auto* const
   module_CustomException_fields = new std::array<EncodedThriftField, 2>{ {
     { 1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "result", false, std::make_unique<Enum<::facebook::thrift::test::Result>>("module.Result"), std::vector<ThriftConstStruct>{ }},  }};

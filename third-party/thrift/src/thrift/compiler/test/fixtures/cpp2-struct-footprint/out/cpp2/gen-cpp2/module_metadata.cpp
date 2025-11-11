@@ -44,7 +44,7 @@ StructMetadata<::cpp2_struct_footprint::SimpleStruct>::gen(ThriftMetadata& metad
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_SimpleStruct = res.metadata;
-  module_SimpleStruct.is_union() = false;
+  DCHECK_EQ(*module_SimpleStruct.is_union(), false);
   static const auto* const
   module_SimpleStruct_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -74,7 +74,7 @@ StructMetadata<::cpp2_struct_footprint::ComplexStruct>::gen(ThriftMetadata& meta
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_ComplexStruct = res.metadata;
-  module_ComplexStruct.is_union() = false;
+  DCHECK_EQ(*module_ComplexStruct.is_union(), false);
   static const auto* const
   module_ComplexStruct_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "nested", false, std::make_unique<Struct<::cpp2_struct_footprint::SimpleStruct>>("module.SimpleStruct"), std::vector<ThriftConstStruct>{ }},  }};
@@ -104,7 +104,7 @@ StructMetadata<::cpp2_struct_footprint::Struct1>::gen(ThriftMetadata& metadata) 
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_Struct1 = res.metadata;
-  module_Struct1.is_union() = false;
+  DCHECK_EQ(*module_Struct1.is_union(), false);
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -114,7 +114,7 @@ StructMetadata<::cpp2_struct_footprint::Struct2>::gen(ThriftMetadata& metadata) 
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_Struct2 = res.metadata;
-  module_Struct2.is_union() = false;
+  DCHECK_EQ(*module_Struct2.is_union(), false);
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -124,7 +124,7 @@ StructMetadata<::cpp2_struct_footprint::Struct3>::gen(ThriftMetadata& metadata) 
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_Struct3 = res.metadata;
-  module_Struct3.is_union() = false;
+  DCHECK_EQ(*module_Struct3.is_union(), false);
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -134,7 +134,7 @@ StructMetadata<::cpp2_struct_footprint::Struct4>::gen(ThriftMetadata& metadata) 
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_Struct4 = res.metadata;
-  module_Struct4.is_union() = false;
+  DCHECK_EQ(*module_Struct4.is_union(), false);
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -144,7 +144,7 @@ StructMetadata<::cpp2_struct_footprint::Struct5>::gen(ThriftMetadata& metadata) 
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_Struct5 = res.metadata;
-  module_Struct5.is_union() = false;
+  DCHECK_EQ(*module_Struct5.is_union(), false);
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -154,7 +154,7 @@ StructMetadata<::cpp2_struct_footprint::ExStruct>::gen(ThriftMetadata& metadata)
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_ExStruct = res.metadata;
-  module_ExStruct.is_union() = false;
+  DCHECK_EQ(*module_ExStruct.is_union(), false);
   static const auto* const
   module_ExStruct_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "message", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -184,7 +184,7 @@ StructMetadata<::cpp2_struct_footprint::TestUnion>::gen(ThriftMetadata& metadata
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_TestUnion = res.metadata;
-  module_TestUnion.is_union() = true;
+  DCHECK_EQ(*module_TestUnion.is_union(), true);
   static const auto* const
   module_TestUnion_fields = new std::array<EncodedThriftField, 2>{ {
     { 1, "int_value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "struct_value", false, std::make_unique<Struct<::cpp2_struct_footprint::SimpleStruct>>("module.SimpleStruct"), std::vector<ThriftConstStruct>{ }},  }};

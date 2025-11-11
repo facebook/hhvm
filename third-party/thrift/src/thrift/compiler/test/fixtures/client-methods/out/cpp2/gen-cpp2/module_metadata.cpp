@@ -44,7 +44,7 @@ StructMetadata<::cpp2::EchoRequest>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_EchoRequest = res.metadata;
-  module_EchoRequest.is_union() = false;
+  DCHECK_EQ(*module_EchoRequest.is_union(), false);
   static const auto* const
   module_EchoRequest_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "text", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
@@ -74,7 +74,7 @@ StructMetadata<::cpp2::EchoResponse>::gen(ThriftMetadata& metadata) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_EchoResponse = res.metadata;
-  module_EchoResponse.is_union() = false;
+  DCHECK_EQ(*module_EchoResponse.is_union(), false);
   static const auto* const
   module_EchoResponse_fields = new std::array<EncodedThriftField, 1>{ {
     { 1, "text", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};

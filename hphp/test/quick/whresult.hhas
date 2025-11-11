@@ -1,8 +1,0 @@
-# Tests that WHResult properly fatals when top of stack is not a subclass of
-# WaitHandle
-
-.function ["__EntryPoint"("""y:0:{}""")] N main() {
-  Int 1
-  WHResult
-  RetC
-}

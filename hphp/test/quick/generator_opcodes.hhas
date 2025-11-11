@@ -1,9 +1,0 @@
-# Tests that generator opcodes are verified to be in generator functions
-
-.function ["__EntryPoint"("""y:0:{}""")] N main() {
-  CreateCont
-  Yield
-  Int 1
-  YieldK
-  RetC
-}

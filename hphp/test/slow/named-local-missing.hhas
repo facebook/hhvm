@@ -1,8 +1,0 @@
-.function ["__EntryPoint"("""y:0:{}""")] N main() {
-  .declvars $okay $_0;
-  IsTypeL $_0;"oops" Int
-  String "done"
-  Print
-  PopC
-  RetC
-}

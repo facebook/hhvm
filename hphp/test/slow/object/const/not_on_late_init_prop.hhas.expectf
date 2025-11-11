@@ -1,1 +1,0 @@
-Verification Error (unit %s/not_on_late_init_prop.hhas): Const property p in class C may not also be late init

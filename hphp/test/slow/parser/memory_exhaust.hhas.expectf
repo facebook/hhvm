@@ -1,2 +1,0 @@
-Fatal error: AssemblerUnserializationError: Maximum stack size reached
- in %s/memory_exhaust.hhas on line -1

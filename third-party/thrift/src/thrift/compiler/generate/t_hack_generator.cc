@@ -2669,35 +2669,34 @@ const t_type* t_hack_generator::tmeta_ThriftType_type() {
       std::make_unique<t_enum_value>(
           "THRIFT_VOID_TYPE", ThriftPrimitiveType::THRIFT_VOID_TYPE));
 
-  list_type.append(std::make_unique<t_field>(type, "valueType"));
-  set_type.append(std::make_unique<t_field>(type, "valueType"));
-  map_type.append(std::make_unique<t_field>(type, "keyType"));
-  map_type.append(std::make_unique<t_field>(type, "valueType"));
-  enum_type.append(
-      std::make_unique<t_field>(t_primitive_type::t_string(), "name"));
-  struct_type.append(
-      std::make_unique<t_field>(t_primitive_type::t_string(), "name"));
-  union_type.append(
-      std::make_unique<t_field>(t_primitive_type::t_string(), "name"));
-  typedef_type.append(
-      std::make_unique<t_field>(t_primitive_type::t_string(), "name"));
-  typedef_type.append(std::make_unique<t_field>(type, "underlyingType"));
-  stream_type.append(std::make_unique<t_field>(type, "elemType"));
-  stream_type.append(std::make_unique<t_field>(type, "initialResponseType"));
-  sink_type.append(std::make_unique<t_field>(type, "elemType"));
-  sink_type.append(std::make_unique<t_field>(type, "finalResponseType"));
-  sink_type.append(std::make_unique<t_field>(type, "initialResponseType"));
+  // The field IDs are arbitrary, because we only use these to generate consts
+  // and field IDs are not used in the output. The IDs just need to be unique
+  // within the instance.
+  list_type.create_field(type, "valueType", 1);
+  set_type.create_field(type, "valueType", 1);
+  map_type.create_field(type, "keyType", 1);
+  map_type.create_field(type, "valueType", 2);
+  enum_type.create_field(t_primitive_type::t_string(), "name", 1);
+  struct_type.create_field(t_primitive_type::t_string(), "name", 1);
+  union_type.create_field(t_primitive_type::t_string(), "name", 1);
+  typedef_type.create_field(t_primitive_type::t_string(), "name", 1);
+  typedef_type.create_field(type, "underlyingType", 2);
+  stream_type.create_field(type, "elemType", 1);
+  stream_type.create_field(type, "initialResponseType", 2);
+  sink_type.create_field(type, "elemType", 1);
+  sink_type.create_field(type, "finalResponseType", 2);
+  sink_type.create_field(type, "initialResponseType", 3);
 
-  type.append(std::make_unique<t_field>(primitive_type, "t_primitive"));
-  type.append(std::make_unique<t_field>(list_type, "t_list"));
-  type.append(std::make_unique<t_field>(set_type, "t_set"));
-  type.append(std::make_unique<t_field>(map_type, "t_map"));
-  type.append(std::make_unique<t_field>(enum_type, "t_enum"));
-  type.append(std::make_unique<t_field>(struct_type, "t_struct"));
-  type.append(std::make_unique<t_field>(union_type, "t_union"));
-  type.append(std::make_unique<t_field>(typedef_type, "t_typedef"));
-  type.append(std::make_unique<t_field>(stream_type, "t_stream"));
-  type.append(std::make_unique<t_field>(sink_type, "t_sink"));
+  type.create_field(primitive_type, "t_primitive", 1);
+  type.create_field(list_type, "t_list", 2);
+  type.create_field(set_type, "t_set", 3);
+  type.create_field(map_type, "t_map", 4);
+  type.create_field(enum_type, "t_enum", 5);
+  type.create_field(struct_type, "t_struct", 6);
+  type.create_field(union_type, "t_union", 7);
+  type.create_field(typedef_type, "t_typedef", 8);
+  type.create_field(stream_type, "t_stream", 9);
+  type.create_field(sink_type, "t_sink", 10);
   return &type;
 }
 
@@ -2708,11 +2707,12 @@ const t_type* t_hack_generator::tmeta_ThriftField_type() {
     return &type;
   }
 
-  type.append(std::make_unique<t_field>(t_primitive_type::t_i64(), "id"));
-  type.append(std::make_unique<t_field>(*tmeta_ThriftType_type(), "type"));
-  type.append(std::make_unique<t_field>(t_primitive_type::t_string(), "name"));
-  type.append(
-      std::make_unique<t_field>(t_primitive_type::t_bool(), "is_optional"));
+  // The field IDs are arbitrary, because we only use these to generate consts
+  // and field IDs are not used in the output. The IDs just need to be unique
+  type.create_field(t_primitive_type::t_i64(), "id", 1);
+  type.create_field(*tmeta_ThriftType_type(), "type", 2);
+  type.create_field(t_primitive_type::t_string(), "name", 3);
+  type.create_field(t_primitive_type::t_bool(), "is_optional", 4);
   return &type;
 }
 
@@ -2724,13 +2724,13 @@ const t_type* t_hack_generator::tmeta_ThriftFunction_type() {
     return &type;
   }
 
-  type.append(std::make_unique<t_field>(t_primitive_type::t_string(), "name"));
-  type.append(
-      std::make_unique<t_field>(*tmeta_ThriftType_type(), "return_type"));
-  type.append(std::make_unique<t_field>(tlist, "arguments"));
-  type.append(std::make_unique<t_field>(tlist, "exceptions"));
-  type.append(
-      std::make_unique<t_field>(t_primitive_type::t_bool(), "is_oneway"));
+  // The field IDs are arbitrary, because we only use these to generate consts
+  // and field IDs are not used in the output. The IDs just need to be unique
+  type.create_field(t_primitive_type::t_string(), "name", 1);
+  type.create_field(*tmeta_ThriftType_type(), "return_type", 2);
+  type.create_field(tlist, "arguments", 3);
+  type.create_field(tlist, "exceptions", 4);
+  type.create_field(t_primitive_type::t_bool(), "is_oneway", 5);
   return &type;
 }
 
@@ -2742,10 +2742,11 @@ const t_type* t_hack_generator::tmeta_ThriftService_type() {
     return &type;
   }
 
-  type.append(std::make_unique<t_field>(t_primitive_type::t_string(), "name"));
-  type.append(std::make_unique<t_field>(tlist, "functions"));
-  type.append(
-      std::make_unique<t_field>(t_primitive_type::t_string(), "parent"));
+  // The field IDs are arbitrary, because we only use these to generate consts
+  // and field IDs are not used in the output. The IDs just need to be unique
+  type.create_field(t_primitive_type::t_string(), "name", 1);
+  type.create_field(tlist, "functions", 2);
+  type.create_field(t_primitive_type::t_string(), "parent", 3);
   return &type;
 }
 
@@ -2757,8 +2758,10 @@ const t_type* t_hack_generator::tmeta_ThriftEnum_type() {
     return &type;
   }
 
-  type.append(std::make_unique<t_field>(t_primitive_type::t_string(), "name"));
-  type.append(std::make_unique<t_field>(tmap, "elements"));
+  // The field IDs are arbitrary, because we only use these to generate consts
+  // and field IDs are not used in the output. The IDs just need to be unique
+  type.create_field(t_primitive_type::t_string(), "name", 1);
+  type.create_field(tmap, "elements", 2);
   return &type;
 }
 
@@ -2770,10 +2773,11 @@ const t_type* t_hack_generator::tmeta_ThriftStruct_type() {
     return &type;
   }
 
-  type.append(std::make_unique<t_field>(t_primitive_type::t_string(), "name"));
-  type.append(std::make_unique<t_field>(tlist, "fields"));
-  type.append(
-      std::make_unique<t_field>(t_primitive_type::t_bool(), "is_union"));
+  // The field IDs are arbitrary, because we only use these to generate consts
+  // and field IDs are not used in the output. The IDs just need to be unique
+  type.create_field(t_primitive_type::t_string(), "name", 1);
+  type.create_field(tlist, "fields", 2);
+  type.create_field(t_primitive_type::t_bool(), "is_union", 3);
   return &type;
 }
 
@@ -2785,8 +2789,10 @@ const t_type* t_hack_generator::tmeta_ThriftException_type() {
     return &type;
   }
 
-  type.append(std::make_unique<t_field>(t_primitive_type::t_string(), "name"));
-  type.append(std::make_unique<t_field>(tlist, "fields"));
+  // The field IDs are arbitrary, because we only use these to generate consts
+  // and field IDs are not used in the output. The IDs just need to be unique
+  type.create_field(t_primitive_type::t_string(), "name", 1);
+  type.create_field(tlist, "fields", 2);
   return &type;
 }
 

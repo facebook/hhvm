@@ -1,0 +1,23 @@
+Errors:
+  [4:6-7] `HH\BuiltinEnum` is an implementation internal class that cannot be used directly
+  [7:6-7] `HH\BuiltinEnum` is an implementation internal class that cannot be used directly
+  [4:6-7] Interface `HH\BuiltinEnum` is used more than once in this declaration.
+  [4:6-7] Here is another occurrence
+  [7:6-7] Interface `HH\BuiltinEnum` is used more than once in this declaration.
+  [7:6-7] Here is another occurrence
+{
+  "type_counter": {
+    "intish.php": {
+      "num_like_types": 20,
+      "num_captured_like_types": 0,
+      "num_non_like_types": 29,
+      "num_mixed": 0,
+      "num_supportdyn_of_mixed": 8,
+      "num_dynamic": 0,
+      "num_dynamic_obj": 0,
+      "num_like_obj": 0,
+      "num_non_like_obj": 1,
+      "num_tany": 0
+    }
+  }
+}

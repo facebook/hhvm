@@ -55,10 +55,16 @@ let supportdyn_of_mixed = Typing_make_type.supportdyn_mixed Typing_reason.none
 let is_exactly env ty ty' =
   Tast_env.is_sub_type env ty ty' && Tast_env.is_sub_type env ty' ty
 
-let is_like_type env ty =
+let rec is_like_type env ty =
   let is_sub_type = Tast_env.is_sub_type env in
-  is_sub_type dynamic ty
-  && not (is_sub_type mixed ty || is_sub_type supportdyn_of_mixed ty)
+  begin
+    let (_, ty) = Tast_env.expand_type env ty in
+    match Typing_defs.get_node ty with
+    | Typing_defs.Tintersection tyl -> List.exists tyl ~f:(is_like_type env)
+    | _ ->
+      is_sub_type dynamic ty
+      && not (is_sub_type mixed ty || is_sub_type supportdyn_of_mixed ty)
+  end
 
 let is_tany = Typing_defs.is_any
 

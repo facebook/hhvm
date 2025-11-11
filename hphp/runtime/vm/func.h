@@ -1854,8 +1854,10 @@ private:
   // should not be inherited from.
   jit::AtomicLowTCA m_prologueTable[1];
 };
-static constexpr size_t kFuncSize = debug ? (use_lowptr ? 72 : 96)
-                                          : (use_lowptr ? 64 : 88);
+
+static constexpr size_t kTCAPtrDiff = sizeof(jit::AtomicLowTCA) == 8 ? 16 : 0;
+static constexpr size_t kFuncSize = kTCAPtrDiff + (debug ? (use_lowptr ? 72 : 96)
+                                          : (use_lowptr ? 64 : 88));
 static_assert(CheckSize<Func, kFuncSize>(), "");
 
 ///////////////////////////////////////////////////////////////////////////////

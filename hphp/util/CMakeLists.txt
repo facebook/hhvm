@@ -60,6 +60,10 @@ HHVM_RENDER_CONFIG_SPECIFICATION(
 auto_source_group("hphp_util" "${CMAKE_CURRENT_SOURCE_DIR}"
   ${ASM_SOURCES} ${CXX_SOURCES} ${HEADER_SOURCES})
 
+if (ENABLE_PIE)
+  target_compile_definitions(hphp_util PUBLIC HHVM_PIE FULLPTR_FOR_BUILTINS)
+endif()
+
 target_link_libraries(hphp_util brotli folly zstd)
 if (LIBNUMA_LIBRARIES)
   target_link_libraries(hphp_util ${LIBNUMA_LIBRARIES})

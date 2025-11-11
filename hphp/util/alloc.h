@@ -321,7 +321,7 @@ struct WrapAllocator {
 // Helpers (malloc, free, sized_free) to allocate/deallocate on a specific arena
 // given flags. When not using jemalloc generic malloc/free will be used.
 #if USE_JEMALLOC
-#define DEF_ALLOC_FUNCS(prefix, flag, upper_prefix)             \
+#define DEF_JEMALLOC_ALLOC_FUNCS(prefix, flag, upper_prefix)    \
   inline void* prefix##_malloc(size_t size) {                   \
     assert(size != 0);                                          \
     return mallocx(size, flag);                                 \
@@ -339,9 +339,11 @@ struct WrapAllocator {
     assert(sallocx(ptr, flag) == nallocx(size, flag));          \
     return sdallocx(ptr, size, flag);                           \
   }                                                             \
-                                                                \
   template<typename T> using upper_prefix##Allocator =          \
-    WrapAllocator<prefix##_malloc, prefix##_sized_free, T>;
+  WrapAllocator<prefix##_malloc, prefix##_sized_free, T>;
+
+#define DEF_ALLOC_FUNCS(prefix, flag, upper_prefix)             \
+  DEF_JEMALLOC_ALLOC_FUNCS(prefix, flag, upper_prefix)
 #else
 #define DEF_ALLOC_FUNCS(prefix, flag, upper_prefix)             \
   inline void* prefix##_malloc(size_t size) {                   \
@@ -383,9 +385,31 @@ DEF_ALLOC_FUNCS(apc, HIGH_ARENA_FLAGS, APC)
 // Thread-local allocations that are not accessed outside the thread.
 DEF_ALLOC_FUNCS(local, local_arena_flags, Local)
 
+// If built with jemalloc as a PIE, we can't use custom position-dependent arenas,
+// so use a single sbrk-backed low arena and alias the small arena to it.
+#if USE_JEMALLOC && defined(HHVM_PIE)
+DEF_JEMALLOC_ALLOC_FUNCS(low, low_arena_flags, Low)
+
+inline void* small_malloc(size_t size) {
+  return low_malloc(size);
+}
+inline void small_free(void* ptr) {
+  return low_free(ptr);
+}
+inline void* small_realloc(void* ptr, size_t size) {
+  return low_realloc(ptr, size);
+}
+inline void small_sized_free(void* ptr, size_t size) {
+  return low_free(ptr);
+}
+
+template<typename T> using SmallAllocator = WrapAllocator<small_malloc, small_sized_free, T>;
+#else
 DEF_ALLOC_FUNCS(low, low_arena_flags, Low)
 DEF_ALLOC_FUNCS(small, low_small_arena_flags, Small)
+#endif
 
+#undef DEF_JEMALLOC_ALLOC_FUNCS
 #undef DEF_ALLOC_FUNCS
 
 using SwappableReadonlyArena = ReadOnlyArena<VMColdAllocator<char>, false, 8>;

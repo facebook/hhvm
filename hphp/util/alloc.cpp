@@ -224,6 +224,10 @@ RangeMapper* getMapperChain(RangeState& range, unsigned n1GPages,
 // from the input, because some part of the range may have already been mapped
 // in.
 unsigned allocate2MPagesToRange(AddrRangeClass c, unsigned pages) {
+  if constexpr (!use_position_dependent_jemalloc_arenas) {
+    return 0;
+  }
+
   auto& range = getRange(c);
   auto mapper = range.getLowMapper();
   if (!mapper) return 0;
@@ -370,6 +374,10 @@ static std::vector<std::pair<std::vector<DefaultArena*>,
                              std::atomic_uint*>> s_extra_arenas;
 static unsigned s_extra_arena_per_node;
 bool setup_extra_arenas(unsigned count) {
+  if constexpr (!use_position_dependent_jemalloc_arenas) {
+    return false;
+  }
+
   if (count == 0) return false;
   // This may be called when we have many other threads running.  So hold the
   // lock while making changes.
@@ -468,6 +476,10 @@ void setup_local_arenas(PageSpec spec, unsigned slabs) {
     } else {
       s_slab_managers.push_back(nullptr);
     }
+  }
+
+  if constexpr (!use_position_dependent_jemalloc_arenas) {
+    return;
   }
 
 #ifdef __x86_64__
@@ -583,101 +595,119 @@ struct JEMallocInitializer {
 
     init_numa();
 #ifdef USE_JEMALLOC
-    unsigned low_1g_pages = 0;
-    if (char* buffer = getenv("HHVM_LOW_1G_PAGE")) {
-      if (!sscanf(buffer, "%u", &low_1g_pages)) {
-        fprintf(stderr,
-                "Bad environment variable HHVM_LOW_1G_PAGE: %s\n", buffer);
-        abort();
+    if constexpr (use_position_dependent_jemalloc_arenas) {
+      unsigned low_1g_pages = 0;
+      if (char* buffer = getenv("HHVM_LOW_1G_PAGE")) {
+        if (!sscanf(buffer, "%u", &low_1g_pages)) {
+          fprintf(stderr,
+                  "Bad environment variable HHVM_LOW_1G_PAGE: %s\n", buffer);
+          abort();
+        }
       }
-    }
-    unsigned high_1g_pages = 0;
-    if (char* buffer = getenv("HHVM_HIGH_1G_PAGE")) {
-      if (!sscanf(buffer, "%u", &high_1g_pages)) {
-        fprintf(stderr,
-                "Bad environment variable HHVM_HIGH_1G_PAGE: %s\n", buffer);
-        abort();
+      unsigned high_1g_pages = 0;
+      if (char* buffer = getenv("HHVM_HIGH_1G_PAGE")) {
+        if (!sscanf(buffer, "%u", &high_1g_pages)) {
+          fprintf(stderr,
+                  "Bad environment variable HHVM_HIGH_1G_PAGE: %s\n", buffer);
+          abort();
+        }
       }
-    }
-    unsigned low_2m_pages = 0;
-    if (char* buffer = getenv("HHVM_LOW_2M_PAGE")) {
-      if (!sscanf(buffer, "%u", &low_2m_pages)) {
-        fprintf(stderr,
-                "Bad environment variable HHVM_LOW_2M_PAGE: %s\n", buffer);
-        abort();
+      unsigned low_2m_pages = 0;
+      if (char* buffer = getenv("HHVM_LOW_2M_PAGE")) {
+        if (!sscanf(buffer, "%u", &low_2m_pages)) {
+          fprintf(stderr,
+                  "Bad environment variable HHVM_LOW_2M_PAGE: %s\n", buffer);
+          abort();
+        }
       }
-    }
-    unsigned high_2m_pages = 0;
-    if (char* buffer = getenv("HHVM_HIGH_2M_PAGE")) {
-      if (!sscanf(buffer, "%u", &high_2m_pages)) {
-        fprintf(stderr,
-                "Bad environment variable HHVM_HIGH_2M_PAGE: %s\n", buffer);
-        abort();
+      unsigned high_2m_pages = 0;
+      if (char* buffer = getenv("HHVM_HIGH_2M_PAGE")) {
+        if (!sscanf(buffer, "%u", &high_2m_pages)) {
+          fprintf(stderr,
+                  "Bad environment variable HHVM_HIGH_2M_PAGE: %s\n", buffer);
+          abort();
+        }
       }
-    }
 
-    // Do some reallocation between low and high 1G arenas based on the total
-    // number of pages reserved.
-    HugePageInfo info = get_huge1g_info();
-    unsigned remaining = static_cast<unsigned>(info.nr_hugepages);
-    if (low_1g_pages > 2) low_1g_pages = 2;
-#ifdef __x86_64__
-    auto const origLow1G = low_1g_pages;
-    if (remaining == 0) {
-      low_1g_pages = high_1g_pages = 0;
-    } else if (low_1g_pages > 0 || high_1g_pages > 0) {
-      KernelVersion version;
-      if (version.m_major < 3 ||
-          (version.m_major == 3 && version.m_minor < 9)) {
-        // Older kernels need an explicit hugetlbfs mount point.
-        find_hugetlbfs_path() || auto_mount_hugetlbfs();
+      // Do some reallocation between low and high 1G arenas based on the total
+      // number of pages reserved.
+      HugePageInfo info = get_huge1g_info();
+      unsigned remaining = static_cast<unsigned>(info.nr_hugepages);
+      if (low_1g_pages > 2) low_1g_pages = 2;
+  #ifdef __x86_64__
+      auto const origLow1G = low_1g_pages;
+      if (remaining == 0) {
+        low_1g_pages = high_1g_pages = 0;
+      } else if (low_1g_pages > 0 || high_1g_pages > 0) {
+        KernelVersion version;
+        if (version.m_major < 3 ||
+            (version.m_major == 3 && version.m_minor < 9)) {
+          // Older kernels need an explicit hugetlbfs mount point.
+          find_hugetlbfs_path() || auto_mount_hugetlbfs();
+        }
       }
-    }
 
-    if (low_1g_pages > 0) {
-      if (low_1g_pages + high_1g_pages > remaining) {
-        low_1g_pages = 1;
+      if (low_1g_pages > 0) {
+        if (low_1g_pages + high_1g_pages > remaining) {
+          low_1g_pages = 1;
+        }
+        assert(remaining >= low_1g_pages);
+        remaining -= low_1g_pages;
       }
-      assert(remaining >= low_1g_pages);
-      remaining -= low_1g_pages;
-    }
 
-    if (origLow1G) {
-      fprintf(stderr,
-              "using %u (specified %u) 1G huge pages for low arena\n",
-              low_1g_pages, origLow1G);
-    }
-#else
-    if (low_1g_pages && !remaining) {
-      fprintf(stderr,
-              "specified %u 1G huge pages for low arena but the host doesn't "
-              "have any, will try to use THP\n",
-              low_1g_pages);
-    }
-#endif
+      if (origLow1G) {
+        fprintf(stderr,
+                "using %u (specified %u) 1G huge pages for low arena\n",
+                low_1g_pages, origLow1G);
+      }
+  #else
+      if (low_1g_pages && !remaining) {
+        fprintf(stderr,
+                "specified %u 1G huge pages for low arena but the host doesn't "
+                "have any, will try to use THP\n",
+                low_1g_pages);
+      }
+  #endif
 
-    setup_low_arena({low_1g_pages, low_2m_pages});
-#ifdef __x86_64__
-    auto const origHigh1G = high_1g_pages;
-    if (high_1g_pages > remaining) {
-      high_1g_pages = remaining;
+      setup_low_arena({low_1g_pages, low_2m_pages});
+  #ifdef __x86_64__
+      auto const origHigh1G = high_1g_pages;
+      if (high_1g_pages > remaining) {
+        high_1g_pages = remaining;
+      }
+      if (origHigh1G) {
+        fprintf(stderr,
+                "using %u (specified %u) 1G huge pages for high arena\n",
+                high_1g_pages, origHigh1G);
+      }
+  #else
+      if (high_1g_pages && !remaining) {
+        fprintf(stderr,
+                "specified %u 1G huge pages for high arena but the host doesn't "
+                "have any, will try to use THP\n",
+                high_1g_pages);
+      }
+  #endif
+      setup_high_arena({high_1g_pages, high_2m_pages});
+      // Make sure high/low arenas are available to the current thread.
+      arenas_thread_init();
+    } else {
+      // If built as a position-independent executable,
+      // create a single low arena that uses brk() instead of mmap().
+      // If the mallctl fails, it will always_assert in mallctlHelper.
+      if (mallctlRead<unsigned, true>("arenas.create", &low_arena)) {
+        return;
+      }
+      char buf[32];
+      snprintf(buf, sizeof(buf), "arena.%u.dss", low_arena);
+      if (mallctlWrite<const char*, true>(buf, "primary") != 0) {
+        // Error; bail out.
+        return;
+      }
+      low_arena_flags = MALLOCX_ARENA(low_arena) | MALLOCX_TCACHE_NONE;
+      low_small_arena = low_arena;
+      low_small_arena_flags = low_arena_flags;
     }
-    if (origHigh1G) {
-      fprintf(stderr,
-              "using %u (specified %u) 1G huge pages for high arena\n",
-              high_1g_pages, origHigh1G);
-    }
-#else
-    if (high_1g_pages && !remaining) {
-      fprintf(stderr,
-              "specified %u 1G huge pages for high arena but the host doesn't "
-              "have any, will try to use THP\n",
-              high_1g_pages);
-    }
-#endif
-    setup_high_arena({high_1g_pages, high_2m_pages});
-    // Make sure high/low arenas are available to the current thread.
-    arenas_thread_init();
 
     // Initialize global mibs
     init_mallctl_mibs();

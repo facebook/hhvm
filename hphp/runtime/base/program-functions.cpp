@@ -2055,13 +2055,15 @@ static int execute_program_impl(int argc, char** argv) {
   }
 
 #if USE_JEMALLOC
-  if (Cfg::Server::Mode) {
-    purge_all();
-    setup_auto_arenas({Cfg::Eval::Num1GPagesForA0, Cfg::Eval::Num2MPagesForA0});
-  }
-  if (Cfg::Eval::FileBackedColdArena) {
-    set_cold_file_dir(Cfg::Eval::ColdArenaFileDir.c_str());
-    enable_high_cold_file();
+  if constexpr (use_position_dependent_jemalloc_arenas) {
+    if (Cfg::Server::Mode) {
+      purge_all();
+      setup_auto_arenas({Cfg::Eval::Num1GPagesForA0, Cfg::Eval::Num2MPagesForA0});
+    }
+    if (Cfg::Eval::FileBackedColdArena) {
+      set_cold_file_dir(Cfg::Eval::ColdArenaFileDir.c_str());
+      enable_high_cold_file();
+    }
   }
 #endif
 
@@ -2991,7 +2993,7 @@ static bool hphp_warmup(ExecutionContext *context,
 
 void hphp_session_init(Treadmill::SessionKind session_kind,
                        Transport* transport,
-                       RequestId id, 
+                       RequestId id,
                        RequestId root_req_id) {
   if (id.unallocated()) id = RequestId::allocate();
   assertx(!*s_sessionInitialized);

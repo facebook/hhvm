@@ -40,8 +40,13 @@ using CTCA = const unsigned char*;
 
 using TcaRange = folly::Range<TCA>;
 
+#ifndef HHVM_PIE
 using LowTCA = SmallPtr<uint8_t>;
 using AtomicLowTCA = AtomicSmallPtr<uint8_t>;
+#else
+using LowTCA = FullPtr<uint8_t>;
+using AtomicLowTCA = AtomicFullPtr<uint8_t>;
+#endif
 
 struct ctca_identity_hash {
   size_t operator()(CTCA val) const {

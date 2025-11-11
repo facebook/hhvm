@@ -96,7 +96,7 @@ static bool get_const_int(Env& env, reg_type op, uint64_t &Val) {
   auto const op_it = env.unit.regToConst.find(op);
   if (op_it == env.unit.regToConst.end()) return false;
   auto const op_const = op_it->second;
-  assert(op_const.Kind != Vconst::Double);
+  assert(op_const.kind != Vconst::Double);
   if (op_const.isUndef) return false;
   Val = op_const.val;
   return true;
@@ -114,8 +114,6 @@ bool simplify(Env& env, const shrqi& inst, Vlabel b, size_t i) {
       return false;
 
     auto shift_amt = inst.s0.l();
-    auto bit_num = folly::findLastSet<uint64_t>(Val) - 1;
-
     return simplify_impl(env, b, i, [&] (Vout& v) {
       uint64_t NewVal = Val << shift_amt;
       v << testq{env.unit.makeConst(NewVal), inst.s1, tstl.sf, tstl.fl};

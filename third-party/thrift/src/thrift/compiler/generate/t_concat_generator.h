@@ -353,6 +353,31 @@ class t_concat_generator : public t_generator {
       {'"', "\\\""},
       {'\\', "\\\\"}};
 
+  /**
+   * Thrift AST nodes are meant to be non-copyable and non-movable, and should
+   * not be cloned. This method exists for legacy reasons, as some older
+   * concatentation based generators generate ephemeral structs for RPC
+   * responses and need to copy exception fields from the parsed AST.
+   */
+  void legacy_copy_exception_fields(
+      const t_throws& source, t_structured& destination) const {
+    for (const t_field& field : source.fields()) {
+      t_field& clone =
+          destination.create_field(field.type(), field.name(), field.id());
+      clone.set_src_range(field.src_range());
+      if (field.default_value()) {
+        clone.set_default_value(field.default_value()->clone());
+      }
+      // unstructured annotations
+      clone.reset_annotations(field.unstructured_annotations());
+      // structured annotations
+      for (const auto& annot : field.structured_annotations()) {
+        clone.add_structured_annotation(annot.clone());
+      }
+      clone.set_qualifier(field.qualifier());
+    }
+  }
+
  private:
   /**
    * Current code indentation level

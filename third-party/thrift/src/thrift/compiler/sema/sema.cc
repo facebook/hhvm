@@ -417,6 +417,33 @@ void mutate_terse_write_annotation_structured(
   }
 }
 
+/**
+ * In general, Thrift AST nodes are meant to be non-copyable and non-movable.
+ * However, specifically for the case of injected fields, we need to clone
+ * fields to support injecting fields from one source struct into many
+ * destinations.
+ * @param field Field to clone
+ * @param injected_field_id Field ID to assign to the cloned field
+ */
+std::unique_ptr<t_field> clone_injected_field(
+    const t_field& field, t_field_id injected_field_id) {
+  auto clone =
+      std::make_unique<t_field>(field.type(), field.name(), field.id());
+  clone->set_src_range(field.src_range());
+  if (field.default_value() != nullptr) {
+    clone->set_default_value(field.default_value()->clone());
+  }
+  // unstructured annotations
+  clone->reset_annotations(field.unstructured_annotations());
+  // structured annotations
+  for (const auto& annot : field.structured_annotations()) {
+    clone->add_structured_annotation(annot.clone());
+  }
+  clone->set_qualifier(field.qualifier());
+  clone->set_injected_id(injected_field_id);
+  return clone;
+}
+
 void mutate_inject_metadata_fields(
     sema_context& ctx, mutator_context&, t_structured& node) {
   // TODO(dokwon): Currently field injection doesn't work for structs used as
@@ -461,17 +488,16 @@ void mutate_inject_metadata_fields(
     return;
   }
 
-  const auto* structured = dynamic_cast<const t_structured*>(ttype);
+  const auto* strct = ttype->try_as<t_struct>();
   // We only allow injecting fields from a struct type.
-  if (structured == nullptr || ttype->is<t_union>() ||
-      ttype->is<t_exception>() || ttype->is<t_paramlist>()) {
+  if (strct == nullptr) {
     ctx.error(
         "`{}` is not a struct type. `@internal.InjectMetadataFields` can be "
         "only used with a struct type.",
         type_string);
     return;
   }
-  for (const auto& field : structured->fields()) {
+  for (const auto& field : strct->fields()) {
     t_field_id injected_id;
     try {
       injected_id = cpp2::get_internal_injected_field_id(field.id());
@@ -480,8 +506,8 @@ void mutate_inject_metadata_fields(
       // Iterate all fields to find more errors.
       continue;
     }
-    std::unique_ptr<t_field> cloned_field = field.clone_DO_NOT_USE();
-    cloned_field->set_injected_id(injected_id);
+    std::unique_ptr<t_field> cloned_field =
+        clone_injected_field(field, injected_id);
     ctx.check(
         node.try_append_field(cloned_field),
         "Field id `{}` is already used in `{}`.",

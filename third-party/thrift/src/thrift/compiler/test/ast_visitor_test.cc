@@ -443,14 +443,10 @@ TEST(AstVisitorTest, sink) {
   auto sink1 = std::make_unique<t_sink>(
       t_primitive_type::t_i32(), t_primitive_type::t_i32());
   auto exn = std::make_unique<t_exception>(nullptr, "Exception");
-  auto thrown = std::make_unique<t_field>(*exn, "ex", 1);
   auto throws = std::make_unique<t_throws>();
-  auto thrownptr = thrown.get();
-  auto thrown1 = thrown->clone_DO_NOT_USE();
-  auto thrownptr1 = thrown1.get();
-  throws->append(std::move(thrown));
+  t_field* thrownptr = &throws->create_field(*exn, "ex", 1);
   auto throws1 = std::make_unique<t_throws>();
-  throws1->append(std::move(thrown1));
+  t_field* thrownptr1 = &throws1->create_field(*exn, "ex", 1);
   auto sink1ptr = sink1.get();
   sink1->set_sink_exceptions(std::move(throws));
   auto sink2 = std::make_unique<t_sink>(

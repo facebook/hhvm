@@ -6105,16 +6105,11 @@ void t_hack_generator::generate_php_struct_definition_result_helpers(
     const t_type* ttype,
     const t_throws* ex,
     bool is_void) {
-  if (ttype) {
-    auto success = std::make_unique<t_field>(*ttype, "success", 0);
-    if (!is_void) {
-      result->append(std::move(success));
-    }
+  if (ttype != nullptr && !is_void) {
+    result->create_field(*ttype, "success", 0);
   }
   if (ex != nullptr) {
-    for (const auto& x : ex->fields()) {
-      result->append(x.clone_DO_NOT_USE());
-    }
+    legacy_copy_exception_fields(*ex, *result);
   }
   generate_php_struct_definition(f_service_, result, ThriftStructType::RESULT);
 }

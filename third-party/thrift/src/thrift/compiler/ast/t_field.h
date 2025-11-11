@@ -91,32 +91,6 @@ class t_field final : public t_named {
 
   void set_implicit_id(t_field_id id) { id_ = id; }
 
-  /**
-   * Thrift AST nodes are meant to be non-copyable and non-movable, and should
-   * never be cloned. This method exists to grand-father specific uses in the
-   * target language generators. Do NOT add any new usage of this method.
-   */
-  std::unique_ptr<t_field> clone_DO_NOT_USE() const {
-    auto clone = std::make_unique<t_field>(type_, name(), id_);
-    clone->set_src_range(src_range());
-
-    if (value_) {
-      clone->value_ = value_->clone();
-    }
-
-    // unstructured annotations
-    clone->reset_annotations(unstructured_annotations());
-
-    // structued annotations
-    for (const auto& annot : structured_annotations()) {
-      clone->add_structured_annotation(annot.clone());
-    }
-
-    clone->qual_ = qual_;
-
-    return clone;
-  }
-
  private:
   t_type_ref type_;
   t_field_id id_;

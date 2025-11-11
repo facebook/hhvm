@@ -910,16 +910,12 @@ void t_js_generator::generate_service_helpers(const t_service* tservice) {
 void t_js_generator::generate_js_function_helpers(const t_function* tfunction) {
   t_struct result(
       program_, service_name_ + "_" + tfunction->name() + "_result");
-  auto success =
-      std::make_unique<t_field>(tfunction->return_type(), "success", 0);
   if (!tfunction->return_type()->is_void()) {
-    result.append(std::move(success));
+    result.create_field(tfunction->return_type(), "success", 0);
   }
-
-  for (const t_field& x : get_elems(tfunction->exceptions())) {
-    result.append(x.clone_DO_NOT_USE());
+  if (tfunction->exceptions() != nullptr) {
+    legacy_copy_exception_fields(*tfunction->exceptions(), result);
   }
-
   generate_js_struct_definition(f_service_, &result, false, false);
 }
 

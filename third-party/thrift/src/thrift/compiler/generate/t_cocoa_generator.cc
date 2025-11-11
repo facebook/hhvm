@@ -1689,16 +1689,11 @@ void t_cocoa_generator::generate_function_helpers(const t_function* tfunction) {
   // create a result struct with a success field of the return type,
   // and a field for each type of exception thrown
   t_struct result(program_, function_result_helper_struct_type(tfunction));
-  auto success =
-      std::make_unique<t_field>(tfunction->return_type(), "success", 0);
   if (!tfunction->return_type()->is_void()) {
-    result.append(std::move(success));
+    result.create_field(tfunction->return_type(), "success", 0);
   }
-
   if (tfunction->exceptions() != nullptr) {
-    for (const auto& x : tfunction->exceptions()->fields()) {
-      result.append(x.clone_DO_NOT_USE());
-    }
+    legacy_copy_exception_fields(*tfunction->exceptions(), result);
   }
 
   // generate the result struct

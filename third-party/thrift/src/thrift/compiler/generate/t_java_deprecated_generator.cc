@@ -2963,16 +2963,12 @@ void t_java_deprecated_generator::generate_function_helpers(
   }
 
   t_struct result(program_, tfunction->name() + "_result");
-  auto success =
-      std::make_unique<t_field>(tfunction->return_type(), "success", 0);
   if (!tfunction->return_type()->is_void()) {
-    result.append(std::move(success));
+    result.create_field(tfunction->return_type(), "success", 0);
   }
-
-  for (const t_field& x : get_elems(tfunction->exceptions())) {
-    result.append(x.clone_DO_NOT_USE());
+  if (tfunction->exceptions() != nullptr) {
+    legacy_copy_exception_fields(*tfunction->exceptions(), result);
   }
-
   StructGenParams params;
   params.in_class = true;
   params.is_result = true;

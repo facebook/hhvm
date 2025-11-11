@@ -65,25 +65,6 @@ const t_field* t_structured::get_field_by_id(t_field_id id) const {
   return existing.second ? *existing.first : nullptr;
 }
 
-void t_structured::append(std::unique_ptr<t_field> field) {
-  if (try_append_field(field)) {
-    return;
-  }
-
-  if (field->id() != 0) {
-    throw std::runtime_error(
-        "Field identifier " + std::to_string(field->id()) + " for \"" +
-        field->name() + "\" has already been used");
-  }
-
-  // TODO(afuller): Figure out why some code relies on adding multiple id:0
-  // fields, fix the code, and remove this hack.
-  if (!field->name().empty()) {
-    fields_by_name_[field->name()] = field.get();
-  }
-  fields_.push_back(std::move(field));
-}
-
 t_structured::~t_structured() = default;
 
 } // namespace apache::thrift::compiler

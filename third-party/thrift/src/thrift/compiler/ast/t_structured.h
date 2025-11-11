@@ -80,14 +80,6 @@ class t_structured : public t_type {
   t_structured(const t_program* program, std::string name)
       : t_type(program, std::move(name)) {}
   explicit t_structured(const t_program* program = nullptr) : t_type(program) {}
-
-  ////
-  // TODO(T227540797)
-  // Everyting below here is for backwards compatiblity, and will be removed.
-  ////
- public:
-  // Tries to append the gieven field, throwing an exception on failure.
-  void append(std::unique_ptr<t_field> elem);
 };
 
 } // namespace apache::thrift::compiler

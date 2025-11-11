@@ -78,7 +78,7 @@ TEST(UtilTest, is_eligible_for_constexpr) {
   }
   {
     auto s = t_struct(&program, "struct_name");
-    s.append(std::make_unique<t_field>(i32, "field1", 1));
+    s.create_field(i32, "field1", 1);
     EXPECT_TRUE(is_eligible_for_constexpr(&s));
   }
   for (auto a : {"cpp.virtual", "cpp2.virtual", "cpp.allocator"}) {
@@ -88,22 +88,20 @@ TEST(UtilTest, is_eligible_for_constexpr) {
   }
   {
     auto s = t_struct(&program, "struct_name");
-    s.append(std::make_unique<t_field>(i32, "field1", 1));
-    s.append(std::make_unique<t_field>(set, "field2", 2));
+    s.create_field(i32, "field1", 1);
+    s.create_field(set, "field2", 2);
     EXPECT_FALSE(is_eligible_for_constexpr(&s));
   }
   for (auto a : {"cpp.ref", "cpp2.ref"}) {
     auto s = t_struct(&program, "struct_name");
-    auto field = std::make_unique<t_field>(i32, "field1", 1);
-    field->set_unstructured_annotation(a, "true");
-    s.append(std::move(field));
+    t_field& field = s.create_field(i32, "field1", 1);
+    field.set_unstructured_annotation(a, "true");
     EXPECT_FALSE(is_eligible_for_constexpr(&s)) << a;
   }
   for (auto a : {"cpp.ref_type", "cpp2.ref_type"}) {
     auto s = t_struct(&program, "struct_name");
-    auto field = std::make_unique<t_field>(i32, "field1", 1);
-    field->set_unstructured_annotation(a, "unique");
-    s.append(std::move(field));
+    t_field& field = s.create_field(i32, "field1", 1);
+    field.set_unstructured_annotation(a, "unique");
     EXPECT_FALSE(is_eligible_for_constexpr(&s)) << a;
   }
 
@@ -131,11 +129,11 @@ TEST(UtilTest, for_each_transitive_field) {
   auto a = t_struct(&program, "a");
   auto b = t_struct(&program, "b");
   auto e = t_struct(&program, "e");
-  a.append(std::make_unique<t_field>(b, "b", 1));
-  a.append(std::make_unique<t_field>(i32, "c", 2));
-  b.append(std::make_unique<t_field>(i32, "d", 1));
-  b.append(std::make_unique<t_field>(e, "e", 2));
-  e.append(std::make_unique<t_field>(i32, "f", 1));
+  a.create_field(b, "b", 1);
+  a.create_field(i32, "c", 2);
+  b.create_field(i32, "d", 1);
+  b.create_field(e, "e", 2);
+  e.create_field(i32, "f", 1);
 
   auto fields = std::vector<std::string>();
   cpp2::for_each_transitive_field(&a, [&](const t_field* f) {
@@ -158,7 +156,7 @@ TEST(UtilTest, for_each_transitive_field) {
   structs.push_back(std::make_unique<t_paramlist>(&program));
   for (int i = 1; i < depth; ++i) {
     structs.push_back(std::make_unique<t_paramlist>(&program));
-    structs[i - 1]->append(std::make_unique<t_field>(*structs[i], "field", 1));
+    structs[i - 1]->create_field(*structs[i], "field", 1);
   }
   auto count = 0;
   cpp2::for_each_transitive_field(structs.front().get(), [&](const t_field*) {

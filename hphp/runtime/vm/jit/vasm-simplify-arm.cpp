@@ -393,7 +393,6 @@ bool foldPreUpdateImpl(Env& env,
                        int laneSize,
                        int lanes,
                        EmitFn emitFn) {
-  auto const& inst = env.unit.blocks[b].code[i];
   auto const match = matchPreUpdate(env, b, i, base);
   if (!match) return false;
   if (!validUpdateOffset(match->offset, laneSize, lanes)) return false;
@@ -412,7 +411,6 @@ bool foldPostUpdateImpl(Env& env,
                         int laneSize,
                         int lanes,
                         EmitFn emitFn) {
-  auto const& inst = env.unit.blocks[b].code[i];
   auto const match = matchPostUpdate(env, b, i, base);
   if (!match) return false;
   if (!validUpdateOffset(match->offset, laneSize, lanes)) return false;

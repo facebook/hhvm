@@ -320,7 +320,7 @@ cdef class ImmutableInternalMap(dict):
     pass
 
 cdef class Map(Container):
-    # may be dict, ImmutableInternalMap, or MappingProxyType
+    # may be dict, ImmutableInternalMap
     cdef object _fbthrift_elements
     cdef object _fbthrift_key_info
     cdef object _fbthrift_internal_elements

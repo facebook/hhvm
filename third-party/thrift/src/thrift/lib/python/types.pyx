@@ -908,9 +908,9 @@ cdef class MapTypeInfo(TypeInfoBase):
         inst._fbthrift_val_info = self.val_info
 
         # Elements need no conversion (e.g., int, float, double, binary):
-        # Pass dict as MappingProxyType directly, no conversion needed.
+        # Pass dict directly, no conversion needed.
         if to_map_elements_no_convert(self.key_info, self.val_info):
-            inst._fbthrift_elements = types.MappingProxyType(value)
+            inst._fbthrift_elements = value
             inst._fbthrift_needs_lazy_conversion = False
             inst._fbthrift_internal_elements = None
         # Keys don't need conversion (or are strings): Use lazy conversion to defer value conversion.
@@ -921,7 +921,7 @@ cdef class MapTypeInfo(TypeInfoBase):
                 isinstance(self.key_info, StringTypeInfo)):
             inst._fbthrift_elements = {}
             inst._fbthrift_needs_lazy_conversion = True
-            inst._fbthrift_internal_elements = types.MappingProxyType(value)
+            inst._fbthrift_internal_elements = value
         # Keys need conversion (e.g., enums, structs, containers):
         # Convert eagerly.
         else:

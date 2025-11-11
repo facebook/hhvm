@@ -21,11 +21,11 @@ from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
 import python_module_root.my.namespacing.extend.test.extend.thrift_mutable_types as python_module_root__my__namespacing__extend__test__extend__thrift_mutable_types
 import python_module_root.my.namespacing.extend.test.extend.thrift_metadata as python_module_root__my__namespacing__extend__test__extend__thrift_metadata
-import python_module_root.my.namespacing.test.hsmodule.thrift_services
+import python_module_root.my.namespacing.test.hsmodule.thrift_mutable_services
 import python_module_root.my.namespacing.test.hsmodule.thrift_mutable_types as python_module_root__my__namespacing__test__hsmodule__thrift_mutable_types
 
 class ExtendTestServiceInterface(
-    python_module_root.my.namespacing.test.hsmodule.thrift_services.HsTestServiceInterface,
+    python_module_root.my.namespacing.test.hsmodule.thrift_mutable_services.HsTestServiceInterface,
     metaclass=ABCMeta
 ):
 

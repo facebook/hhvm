@@ -41,7 +41,7 @@ import {{program:module_path}}.{{> types/types_import_path}} as {{program:module
 import {{program:module_path}}.thrift_metadata as {{program:module_mangle}}__thrift_metadata
 {{#program:include_namespaces}}
 {{#has_services?}}
-import {{included_module_path}}.thrift_services
+import {{included_module_path}}.{{> services/service_import_path}}
 {{/has_services?}}
 {{#has_types?}}
 import {{included_module_path}}.{{> types/types_import_path}} as {{included_module_mangle}}__{{> types/types_import_path}}
@@ -57,7 +57,7 @@ import {{module_path}}
 {{#program:services}}
 class {{service:name}}Interface(
   {{#service:extends}}{{#service:external_program?}}
-    {{service:program.module_path}}.thrift_services.{{/service:external_program?}}{{service:name}}Interface,
+    {{service:program.module_path}}.{{> services/service_import_path}}.{{/service:external_program?}}{{service:name}}Interface,
     {{/service:extends}}
     {{^service:extends?}}
     ServiceInterface,

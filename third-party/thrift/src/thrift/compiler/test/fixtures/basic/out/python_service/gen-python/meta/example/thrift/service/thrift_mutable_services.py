@@ -21,7 +21,7 @@ from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
 import meta.example.thrift.service.thrift_mutable_types as _fbthrift__meta__example__thrift__service__thrift_mutable_types
 import meta.example.thrift.service.thrift_metadata as _fbthrift__meta__example__thrift__service__thrift_metadata
-import test.fixtures.basic.module.thrift_services
+import test.fixtures.basic.module.thrift_mutable_services
 import test.fixtures.basic.module.thrift_mutable_types as _fbthrift__test__fixtures__basic__module__thrift_mutable_types
 
 class EchoServiceInterface(
@@ -119,7 +119,7 @@ EchoServiceInterface,
         return serialize_iobuf(return_struct, protocol)
 
 class ExtendedMyServiceInterface(
-    test.fixtures.basic.module.thrift_services.MyServiceInterface,
+    test.fixtures.basic.module.thrift_mutable_services.MyServiceInterface,
     metaclass=ABCMeta
 ):
 

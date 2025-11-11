@@ -21,7 +21,7 @@ from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
 import test.fixtures.interactions.module.thrift_mutable_types as _fbthrift__test__fixtures__interactions__module__thrift_mutable_types
 import test.fixtures.interactions.module.thrift_metadata as _fbthrift__test__fixtures__interactions__module__thrift_metadata
-import test.fixtures.another_interactions.shared.thrift_services
+import test.fixtures.another_interactions.shared.thrift_mutable_services
 import test.fixtures.another_interactions.shared.thrift_mutable_types as _fbthrift__test__fixtures__another_interactions__shared__thrift_mutable_types
 
 class MyServiceInterface(

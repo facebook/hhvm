@@ -24,8 +24,8 @@ final class ExperimentIdContextHandler implements IContextHandler {
     ImmutableThriftFrameworkMetadataOnResponse $immutable_tfmr,
   ): void {
     $ids_from_response = $immutable_tfmr->getExperimentIds()?->get_merge();
+    $length = C\count($ids_from_response ?? vec[]);
     if (SV_ZACHZUNDEL_KILLSWITCHES::experimentIdLogging()) {
-      $length = C\count($ids_from_response ?? vec[]);
       CategorizedOBC::typedGet(ODSCategoryID::ODS_WEB_FOUNDATION)->bumpKey(
         'experiment_ids',
         $length,
@@ -37,12 +37,47 @@ final class ExperimentIdContextHandler implements IContextHandler {
         $length,
       );
     }
+
+    $thrift_class = Shapes::idx($params, 'thrift_class');
+    $limit = JustKnobs::getInt(
+      'lumos/experimentation:www_experiment_downstream_limit',
+      $thrift_class,
+    );
+    $current_num_experiments = C\count($mutable_ctx->getExperimentIds());
+    if ($limit > 0 && $current_num_experiments >= $limit) {
+      CategorizedOBC::typedGet(ODSCategoryID::ODS_FBTRACE)->bumpKey(
+        'incoming_downstream_experiment_ids_dropped',
+        1,
+        OdsAggregationType::ODS_AGGREGATION_TYPE_COUNT,
+      );
+      CategorizedOBC::typedGet(ODSCategoryID::ODS_FBTRACE)->bumpKey(
+        'incoming_downstream_experiment_ids_dropped',
+        $length,
+        OdsAggregationType::ODS_AGGREGATION_TYPE_SUM,
+      );
+      return;
+    }
+
     if ($ids_from_response is nonnull && !C\is_empty($ids_from_response)) {
       foreach ($ids_from_response as $response_id) {
         if (!C\contains($mutable_ctx->getExperimentIds(), $response_id)) {
           $mutable_ctx->addExperimentId($response_id);
         }
       }
+    }
+
+    if (SV_ZACHZUNDEL_KILLSWITCHES::experimentIdLogging()) {
+      $final_length = C\count($mutable_ctx->getExperimentIds());
+      CategorizedOBC::typedGet(ODSCategoryID::ODS_FBTRACE)->bumpKey(
+        'final_incoming_downstream_experiment_ids',
+        $length,
+        OdsAggregationType::ODS_AGGREGATION_TYPE_AVG,
+      );
+
+      CategorizedOBC::typedGet(ODSCategoryID::ODS_FBTRACE)->bumpKey(
+        'final_incoming_downstream_experiment_ids',
+        $length,
+      );
     }
   }
 

@@ -27,6 +27,10 @@ final class ExperimentIdContextHandlerTest extends WWWTest {
   }
 
   public async function testExperimentIdsAddedToCtx(): Awaitable<void> {
+    MockJustKnobs::setInt(
+      'lumos/experimentation:www_experiment_downstream_limit',
+      0,
+    );
     $expected_experiment_ids = vec[123, 456];
     $params = shape();
     $handler = new ExperimentIdContextHandler();
@@ -51,6 +55,39 @@ final class ExperimentIdContextHandlerTest extends WWWTest {
     // handler should change the experiment_ids field ThriftContextPropState
     $experiment_ids_from_ctx = $mutable_ctx->getExperimentIds();
     expect($experiment_ids_from_ctx)->toEqual($expected_experiment_ids);
+  }
+
+  public async function testExperimentIdsAddedToCtxOverLimit(
+  ): Awaitable<void> {
+    MockJustKnobs::setInt(
+      'lumos/experimentation:www_experiment_downstream_limit',
+      1,
+    );
+    $downstream_experiment_ids = vec[123, 456];
+    $params = shape();
+    $handler = new ExperimentIdContextHandler();
+    $mutable_ctx = ThriftContextPropState::get();
+    $mutable_ctx->addExperimentId(1337);
+
+    $tfmr = ThriftFrameworkMetadataOnResponse::fromShape(
+      shape(
+        'experiment_ids' => ExperimentIdsUpdate::fromShape(shape(
+          'merge' => $downstream_experiment_ids,
+        )),
+      ),
+    );
+
+    $immutable_tfmr = new ImmutableThriftFrameworkMetadataOnResponse($tfmr);
+
+    $original_expirment_ids_from_tfm = $immutable_tfmr->getExperimentIds();
+
+    $handler->onIncomingDownstream($mutable_ctx, $params, $immutable_tfmr);
+    // handler should NOT change the TFM
+    $experiment_ids_from_tfm = $immutable_tfmr->getExperimentIds();
+    expect($experiment_ids_from_tfm)->toEqual($original_expirment_ids_from_tfm);
+    // handler should change the experiment_ids field ThriftContextPropState
+    $experiment_ids_from_ctx = $mutable_ctx->getExperimentIds();
+    expect($experiment_ids_from_ctx)->toEqual(vec[1337]);
   }
 
   public async function testEmptyExperimentIdsNotAddedToTfm(): Awaitable<void> {

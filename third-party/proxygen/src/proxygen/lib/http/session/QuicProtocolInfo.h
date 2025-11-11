@@ -18,6 +18,8 @@ namespace proxygen {
  * Session-level protocol info.
  */
 struct QuicProtocolInfo : public wangle::ProtocolInfo {
+  QuicProtocolInfo& operator=(const QuicProtocolInfo&) = default;
+
   ~QuicProtocolInfo() override = default;
 
   quic::Optional<quic::ConnectionId> clientChosenDestConnectionId;

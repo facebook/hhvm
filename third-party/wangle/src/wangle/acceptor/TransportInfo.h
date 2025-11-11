@@ -45,6 +45,8 @@ namespace wangle {
  * Protocol being used (e.g., tcp, quic, etc.).
  */
 struct ProtocolInfo {
+  ProtocolInfo& operator=(const ProtocolInfo&) = default;
+
   virtual ~ProtocolInfo() = default;
 };
 

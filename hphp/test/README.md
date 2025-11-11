@@ -37,7 +37,7 @@ These are the allowed extensions:
 
 * `.php` - The source of the test.
 * `.php.expect` - The exact string expected output.
-* `.php.expectf` - The exact string expected output with formating characters.
+* `.php.expectf` - The exact string expected output with formatting characters.
 * `.php.out` - When you run the test, the output will be stored here.
 * `.php.opts` - Runtime options to pass to hhvm.
 * `.php.cli_args` - Command line arguments to the test file (e.g., `$argv` options).

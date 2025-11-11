@@ -40,6 +40,8 @@ enum MyEnum {
 
 typedef set<i32> SetOfI32
 
+typedef MyEnum MyEnumTypedef
+
 struct Annotation {
   1: bool boolField;
   2: i16 i16Field;
@@ -52,7 +54,7 @@ struct Annotation {
   9: MyEnum enumField;
   10: list<i32> listField;
   11: SetOfI32 setField;
-  12: map<i32, string> mapField;
+  12: map<MyEnumTypedef, string> mapField;
 }
 
 typedef Foo FooTypedef
@@ -69,7 +71,7 @@ typedef Foo FooTypedef
   enumField = MyEnum.second,
   listField = [2, 1, 2],
   setField = [2, 1],
-  mapField = {2: "20", 1: "10"},
+  mapField = {MyEnum.second: "20", MyEnum.first: "10"},
 }
 @FooTypedef{bar = Bar{baz = "123"}}
 enum TestEnum {
@@ -89,7 +91,7 @@ enum TestEnum {
   enumField = MyEnum.second,
   listField = [2, 1, 2],
   setField = [2, 1],
-  mapField = {2: "20", 1: "10"},
+  mapField = {MyEnum.second: "20", MyEnum.first: "10"},
 }
 @Foo{bar = Bar{baz = "123"}}
 struct TestStruct {
@@ -107,7 +109,7 @@ struct TestStruct {
     enumField = MyEnum.second,
     listField = [2, 1, 2],
     setField = [2, 1],
-    mapField = {2: "20", 1: "10"},
+    mapField = {MyEnum.second: "20", MyEnum.first: "10"},
   }
   @Foo{bar = Bar{baz = "123"}}
   2: i32 field_2;
@@ -125,7 +127,7 @@ struct TestStruct {
   enumField = MyEnum.second,
   listField = [2, 1, 2],
   setField = [2, 1],
-  mapField = {2: "20", 1: "10"},
+  mapField = {MyEnum.second: "20", MyEnum.first: "10"},
 }
 @Foo{bar = Bar{baz = "123"}}
 exception TestException {

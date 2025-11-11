@@ -242,8 +242,8 @@ std::vector<ThriftConstValuePair> AnnotationConverter::convertMap(
   std::vector<ThriftConstValuePair> ret;
   for (const auto& [k, v] : dynamic.items()) {
     ThriftConstValuePair pair;
-    pair.key() = convertMapKey(map.keyType(), k.asString());
-    pair.value() = convertValue(map.valueType(), v);
+    pair.key() = convertMapKey(map.keyType().trueType(), k.asString());
+    pair.value() = convertValue(map.valueType().trueType(), v);
     ret.push_back(std::move(pair));
   }
   return ret;
@@ -251,6 +251,11 @@ std::vector<ThriftConstValuePair> AnnotationConverter::convertMap(
 ThriftConstValue AnnotationConverter::convertMapKey(
     const syntax_graph::TypeRef& ref, std::string_view s) {
   ThriftConstValue ret;
+  if (ref.isEnum()) {
+    // Enum is encoded as i32.
+    ret.cv_integer() = folly::to<std::int64_t>(s);
+    return ret;
+  }
   switch (ref.asPrimitive()) {
     case syntax_graph::Primitive::BOOL:
       ret.cv_bool() = folly::to<bool>(s);

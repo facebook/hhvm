@@ -1,0 +1,5 @@
+<?hh
+
+<<__EntryPoint>> function skip(): void {
+  exit("skip test is disabled");
+}

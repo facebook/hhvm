@@ -357,6 +357,13 @@ type _ t =
       -> ((Errors.finalized_error list * int)
          * Tast.program Tast_with_dynamic.t Relative_path.Map.t option)
          t
+  | LOG_ERRORS : {
+      files: string list;
+      log_file: string option;
+      error_filter: Filter_errors.Filter.t;
+      preexisting_warnings: bool;
+    }
+      -> unit t
   | INFER_TYPE :
       file_input * File_content.Position.t
       -> InferAtPosService.result t
@@ -490,6 +497,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | NO_PRECHECKED_FILES -> true
   | STATS -> false
   | STATUS_SINGLE _ -> false
+  | LOG_ERRORS _ -> false
   | INFER_TYPE _ -> false
   | INFER_TYPE_BATCH _ -> false
   | INFER_TYPE_ERROR _ -> false
@@ -516,3 +524,9 @@ let rpc_command_needs_full_check : type a. a t -> bool =
 
 let use_priority_pipe (command : 'result t) : bool =
   not (rpc_command_needs_full_check command)
+
+let handle_after_send : type a. a t -> (a * unit t) option =
+ fun cmd ->
+  match cmd with
+  | LOG_ERRORS _ -> Some ((), cmd)
+  | _ -> None

@@ -53,7 +53,7 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
     ~key:Connection_tracker.Server_done_full_recheck
     ~long_delay_okay:true;
 
-  let (_metadata, cmd) = msg in
+  let (metadata, cmd) = msg in
   ClientProvider.ping client;
   let t_start = Unix.gettimeofday () in
   ClientProvider.track
@@ -62,30 +62,40 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
     ~time:t_start;
   Sys_utils.start_gc_profiling ();
   Full_fidelity_parser_profiling.start_profiling ();
+  let handle_request cmd =
+    let result =
+      try ServerRpc.handle ~is_stale genv env metadata cmd with
+      | exn ->
+        let e = Exception.wrap exn in
+        raise (Nonfatal_rpc_exception (e, env))
+    in
 
-  let (new_env, response) =
-    try ServerRpc.handle ~is_stale genv env cmd with
-    | exn ->
-      let e = Exception.wrap exn in
-      raise (Nonfatal_rpc_exception (e, env))
+    let parsed_files = Full_fidelity_parser_profiling.stop_profiling () in
+    ClientProvider.track
+      client
+      ~key:Connection_tracker.Server_end_handle
+      ~log:true;
+    let (major_gc_time, minor_gc_time) = Sys_utils.get_gc_time () in
+    HackEventLogger.handled_command
+      (ServerCommandTypesUtils.debug_describe_t cmd)
+      ~start_t:t_start
+      ~major_gc_time
+      ~minor_gc_time
+      ~parsed_files;
+    result
   in
 
-  let parsed_files = Full_fidelity_parser_profiling.stop_profiling () in
-  ClientProvider.track
-    client
-    ~key:Connection_tracker.Server_end_handle
-    ~log:true;
-  let (major_gc_time, minor_gc_time) = Sys_utils.get_gc_time () in
-  HackEventLogger.handled_command
-    (ServerCommandTypesUtils.debug_describe_t cmd)
-    ~start_t:t_start
-    ~major_gc_time
-    ~minor_gc_time
-    ~parsed_files;
-
-  ClientProvider.send_response_to_client client response;
-  ClientProvider.shutdown_client client;
-  new_env
+  match ServerCommandTypes.handle_after_send cmd with
+  | None ->
+    let (new_env, response) = handle_request cmd in
+    ClientProvider.send_response_to_client client response;
+    ClientProvider.shutdown_client client;
+    new_env
+  | Some (response, post_send_cmd) ->
+    ClientProvider.send_response_to_client client response;
+    ClientProvider.shutdown_client client;
+    let (new_env, ()) = handle_request post_send_cmd in
+    new_env
 
 let handle
     (genv : ServerEnv.genv)

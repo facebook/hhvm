@@ -388,6 +388,20 @@ let main_internal
         ~max_errors:args.max_errors
     in
     Lwt.return (exit_status, telemetry)
+  | ClientEnv.MODE_LOG_ERRORS { log_file; preexisting_warnings; _ } ->
+    let files = filter_real_paths ~allow_directories:false args.paths in
+    let error_filter =
+      Filter_errors.Filter.make
+        ~default_all:local_config.warnings_default_all
+        ~generated_files:(ServerConfig.warnings_generated_files config)
+        args.warning_switches
+    in
+    let%lwt ((), telemetry) =
+      rpc args
+      @@ ServerCommandTypes.LOG_ERRORS
+           { files; log_file; error_filter; preexisting_warnings }
+    in
+    Lwt.return (Exit_status.No_error, telemetry)
   | ClientEnv.MODE_LIST_FILES ->
     let%lwt (infol, telemetry) =
       rpc args @@ ServerCommandTypes.LIST_FILES_WITH_ERRORS

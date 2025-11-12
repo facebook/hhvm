@@ -42,9 +42,10 @@ let handle :
     ServerEnv.genv ->
     ServerEnv.env ->
     is_stale:bool ->
+    ServerCommandTypes.cmd_metadata ->
     a ServerCommandTypes.t ->
     ServerEnv.env * a =
- fun genv env ~is_stale -> function
+ fun genv env ~is_stale metadata -> function
   | ServerCommandTypes.STATUS { max_errors; error_filter } ->
     log_check_response env;
     let (error_list, dropped_count) =
@@ -118,6 +119,29 @@ let handle :
         None
     in
     (env, (errors, tasts))
+  | ServerCommandTypes.LOG_ERRORS
+      { files; log_file; error_filter; preexisting_warnings } ->
+    let telemetry =
+      ServerLogErrors.go
+        genv.ServerEnv.workers
+        env
+        files
+        error_filter
+        preexisting_warnings
+    in
+    let () =
+      match log_file with
+      | Some path ->
+        let oc = Out_channel.create ~binary:false ~append:true path in
+        telemetry |> Telemetry.to_json |> Hh_json.json_to_output oc;
+        Out_channel.newline oc;
+        Out_channel.close oc
+      | None ->
+        HackEventLogger.LogFileErrors.log
+          telemetry
+          ~from:metadata.ServerCommandTypes.from
+    in
+    (env, ())
   | ServerCommandTypes.INFER_TYPE (file_input, pos) ->
     let path =
       match file_input with

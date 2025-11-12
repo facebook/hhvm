@@ -67,6 +67,7 @@
   serverInvalidateUnits
   serverIsSubtype
   serverLint
+  serverLogErrors
   serverMethodJumps
   serverMethodJumpsBatch
   serverRage

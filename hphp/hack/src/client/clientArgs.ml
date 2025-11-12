@@ -178,6 +178,8 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
 
   let set_from x () = from := x in
   let single_files = ref [] in
+  let only_log_errors = ref false in
+  let log_to_file = ref None in
   let set_mode ?(validate = true) x =
     if validate && Option.is_some !mode then
       raise (Arg.Bad "only a single mode should be specified")
@@ -188,6 +190,7 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
     end
   in
   let add_single x = single_files := x :: !single_files in
+  let set_log_to_file x = log_to_file := Some x in
   let add_multi f =
     let files =
       Sys_utils.read_file f
@@ -212,6 +215,9 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
         set_mode
           (MODE_STATUS_SINGLE
              { filenames = single_files; show_tast; preexisting_warnings }))
+  in
+  let set_mode_only_log_errors config =
+    if !only_log_errors then set_mode (MODE_LOG_ERRORS config)
   in
   let find_my_tests_max_distance = ref 1 in
   (* parse args *)
@@ -684,6 +690,14 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
         Arg.String add_multi,
         "<path> Return errors for files read from the given file (one per line)"
       );
+      ( "--log-errors",
+        Arg.Unit (fun () -> only_log_errors := true),
+        " (mode) type check the given list of files and log their errors (use --log-to-file to specify output file)"
+      );
+      ( "--log-to-file",
+        Arg.String set_log_to_file,
+        "<path> Write logged errors to specified file (use with --log-errors)"
+      );
       ( "--show-tast",
         Arg.Unit (fun () -> show_tast := true),
         " in combination with `--single`, output the TASTs of the file along with TAST hashes."
@@ -816,12 +830,15 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
   );
 
   set_mode_from_single_files !show_tast !preexisting_warnings;
+  set_mode_only_log_errors
+    { log_file = !log_to_file; preexisting_warnings = !preexisting_warnings };
   let mode = Option.value !mode ~default:MODE_STATUS in
   (* fixups *)
   let (root, paths) =
     match (mode, args) with
     | (MODE_LINT, _)
-    | (MODE_FILE_LEVEL_DEPENDENCIES, _) ->
+    | (MODE_FILE_LEVEL_DEPENDENCIES, _)
+    | (MODE_LOG_ERRORS _, _) ->
       (Wwwroot.interpret_command_line_root_parameter [], args)
     | (_, _) -> (Wwwroot.interpret_command_line_root_parameter args, [])
   in

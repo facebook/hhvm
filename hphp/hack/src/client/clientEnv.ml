@@ -19,6 +19,11 @@ type status_single = {
   preexisting_warnings: bool;
 }
 
+type log_errors_params = {
+  log_file: string option;
+  preexisting_warnings: bool;
+}
+
 type client_mode =
   | MODE_CST_SEARCH of string list option
   | MODE_DUMP_SYMBOL_INFO of string
@@ -63,6 +68,7 @@ type client_mode =
   | MODE_STATS
   | MODE_STATUS
   | MODE_STATUS_SINGLE of status_single
+  | MODE_LOG_ERRORS of log_errors_params
   | MODE_TYPE_AT_POS of string
   | MODE_TYPE_AT_POS_BATCH of string list
   | MODE_TYPE_ERROR_AT_POS of string

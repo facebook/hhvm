@@ -71,6 +71,14 @@ When determining which package a file belongs to:
 3. Otherwise, the file belongs to the package whose `include_paths` contains the file's nearest ancestor directory (i.e. the longest prefix match)
 4. If none of the above apply, the file belongs to the **default package**
 
+### Manual Global Exclusions
+
+It is possible globally exclude files from deployements and/or typechecking. This is controlled for the build by `exclude-pattern` build_config.hdf and for the typechecker by `package_exclude_patterns` in .hhconfig.
+- They are excluded from the typechecker (no errors are reported for references to or from these files)
+- They are automatically excluded from all deployments, regardless of package membership
+
+By default, that includes files whose path contains the substring `__tests__`.
+
 ## Default package
 
 Any file not specified in any package (neither via `include_paths` nor `__PackageOverride`) belongs to the implicit "default" package. Symbols within the default package are not accessible from other packages. The default package:

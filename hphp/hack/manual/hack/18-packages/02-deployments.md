@@ -67,6 +67,7 @@ Eval.Runtime.ActiveDeployment = production
 
 When running in [repo authoritative](/docs/hhvm/advanced-usage/repo-authoritative) mode, HHVM only compiles and runs files from packages in the specified deployment. References to undeployed packages cause runtime errors (e.g., "Class not found" or "Call to undefined function"). When running in other modes, the active deployment serves only to modify semantics of `package` checks and the `__RequirePackage` attribute.
 
+**Note:** Files in `__tests__` directories are automatically excluded from all deployments. See [File package membership](/docs/hack/packages/introduction#test-directories) for details.
 
 ### Force Symbol References (Legacy)
 

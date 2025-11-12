@@ -528,9 +528,9 @@ void Vgen::emitVeneers(Venv& env) {
     MacroAssembler av{*cb};
     vixl::Label target_data;
     meta.addressImmediates.insert(vaddr);
-    poolLiteral(*cb, meta, (uint64_t)makeTarget32(veneer.target), 32, true);
+    poolLiteral(*cb, meta, (uint64_t)veneer.target, 64, true);
     av.bind(&target_data);
-    av.Ldr(rAsm_w, &target_data);
+    av.Ldr(rAsm, &target_data);
     av.Br(rAsm);
 
     // Update the veneer source instruction to jump/call the veneer.
@@ -681,17 +681,17 @@ void Vgen::processVveneers(Venv& env) {
 
 void Vgen::patch(Venv& env) {
   // Patch the 32 bit target of the LDR
-  auto patch = [&env](TCA instr, TCA target) {
+  auto patch = [](TCA instr, TCA target) {
     // The LDR loading the address to branch to.
     auto ldr = Instruction::Cast(instr);
     auto const DEBUG_ONLY br = ldr->NextInstruction();
-    assertx(ldr->Mask(LoadLiteralMask) == LDR_w_lit &&
+    assertx(ldr->Mask(LoadLiteralMask) == LDR_x_lit &&
             br->Mask(UnconditionalBranchToRegisterMask) == BR &&
             ldr->Rd() == br->Rn());
     // The address the LDR loads.
     auto targetAddr = ldr->LiteralAddress();
     // Patch the 32 bit target following the LDR and BR
-    patchTarget32(targetAddr, target);
+    patchTarget64(targetAddr, target);
   };
 
   for (auto const& p : env.jmps) {
@@ -1067,10 +1067,10 @@ void Vgen::emit(const jcc& i) {
       recordAddressImmediate();
       a->B(&skip, vixl::InvertCondition(C(i.cc)));
       recordAddressImmediate();
-      poolLiteral(*env.cb, env.meta, (uint64_t)makeTarget32(a->frontier()),
-                  32, false);
+      poolLiteral(*env.cb, env.meta, (uint64_t)a->frontier(),
+                  64, false);
       a->bind(&data);  // This will be remmaped during the handleLiterals phase.
-      a->Ldr(rAsm_w, &data);
+      a->Ldr(rAsm, &data);
       a->Br(rAsm);
       a->bind(&skip);
     }
@@ -1095,9 +1095,9 @@ void Vgen::emit(const jmp& i) {
   // Emit a "far JMP" sequence for easy patching later.  Static relocation
   // might be able to simplify this (see optimizeFarJmp()).
   recordAddressImmediate();
-  poolLiteral(*env.cb, env.meta, (uint64_t)a->frontier(), 32, false);
+  poolLiteral(*env.cb, env.meta, (uint64_t)a->frontier(), 64, false);
   a->bind(&data); // This will be remapped during the handleLiterals phase.
-  a->Ldr(rAsm_w, &data);
+  a->Ldr(rAsm, &data);
   a->Br(rAsm);
 }
 
@@ -1107,9 +1107,9 @@ void Vgen::emit(const jmpi& i) {
   // Cannot use simple a->Mov() since such a sequence cannot be
   // adjusted while live following a relocation.
   recordAddressImmediate();
-  poolLiteral(*env.cb, env.meta, (uint64_t)i.target, 32, false);
+  poolLiteral(*env.cb, env.meta, (uint64_t)i.target, 64, false);
   a->bind(&data); // This will be remapped during the handleLiterals phase.
-  a->Ldr(rAsm_w, &data);
+  a->Ldr(rAsm, &data);
   a->Br(rAsm);
 }
 

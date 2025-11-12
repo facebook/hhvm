@@ -47,12 +47,12 @@ import {{included_module_path}}.{{> services/service_import_path}}
 import {{included_module_path}}.{{> types/types_import_path}} as {{included_module_mangle}}__{{> types/types_import_path}}
 {{/has_types?}}
 {{/program:include_namespaces}}
-{{#program:adapter_modules}}
+{{#each program:adapter_modules as |module_path|}}
 import {{module_path}}
-{{/program:adapter_modules}}
-{{#program:adapter_type_hint_modules}}
+{{/each}}
+{{#each program:adapter_type_hint_modules as |module_path|}}
 import {{module_path}}
-{{/program:adapter_type_hint_modules}}
+{{/each}}
 
 {{#program:services}}
 class {{service:name}}Interface(

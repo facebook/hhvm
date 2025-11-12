@@ -35,9 +35,9 @@
 {{#program:thrift_includes}}
 #include "{{program:include_prefix}}{{program:name}}_types.h"
 {{/program:thrift_includes}}
-{{#program:cpp_includes}}
+{{#each program:cpp_includes as |cpp_include|}}
 #include {{cpp_include}}
-{{/program:cpp_includes}}
+{{/each}}
 
 {{#program:structs?}}
 namespace apache::thrift {

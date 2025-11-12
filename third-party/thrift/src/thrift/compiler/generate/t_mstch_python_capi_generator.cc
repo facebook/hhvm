@@ -336,19 +336,16 @@ class python_capi_mstch_program : public mstch_program {
   mstch::node has_types_node() { return has_types(); }
 
   mstch::node capi_includes() {
-    std::vector<const CapiInclude*> namespaces;
-    namespaces.reserve(capi_includes_.size());
+    mstch::array a;
+    a.reserve(capi_includes_.size());
     for (const auto& it : capi_includes_) {
-      namespaces.push_back(&it.second);
+      a.push_back(it.second.include_prefix);
     }
     std::sort(
-        namespaces.begin(), namespaces.end(), [](const auto* m, const auto* n) {
-          return m->include_prefix < n->include_prefix;
+        a.begin(), a.end(), [](const mstch::node& m, const mstch::node& n) {
+          // We know the nodes are strings because `include_prefix` is a string
+          return std::get<std::string>(m) < std::get<std::string>(n);
         });
-    mstch::array a;
-    for (const auto& it : namespaces) {
-      a.emplace_back(mstch::map{{"header_include", it->include_prefix}});
-    }
     return a;
   }
 

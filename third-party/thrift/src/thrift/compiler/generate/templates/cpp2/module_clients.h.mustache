@@ -26,10 +26,10 @@
 #include "{{program:include_prefix}}{{program:name}}_clients.h"
 {{/program:thrift_includes}}
 
-{{#program:cpp_includes}}
+{{#each program:cpp_includes as |cpp_include|}}
 // cpp_include's
 #include {{cpp_include}}
-{{/program:cpp_includes}}
+{{/each}}
 {{/program}}
 
 {{#any_sinks?}}

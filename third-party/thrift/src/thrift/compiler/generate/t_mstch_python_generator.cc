@@ -554,8 +554,9 @@ class python_mstch_program : public mstch_program {
   mstch::node module_path_array(
       const std::unordered_set<std::string_view>& modules) {
     mstch::array a;
+    a.reserve(modules.size());
     for (const auto& m : modules) {
-      a.emplace_back(mstch::map{{"module_path", m}});
+      a.emplace_back(m);
     }
     return a;
   }

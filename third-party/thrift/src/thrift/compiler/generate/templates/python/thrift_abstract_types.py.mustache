@@ -39,9 +39,9 @@ import {{program:base_library_package}}.abstract_types as _fbthrift_python_abstr
 import {{included_module_path}}.thrift_abstract_types as {{included_module_mangle}}__thrift_abstract_types
 {{/has_types?}}
 {{/program:include_namespaces}}
-{{#program:adapter_type_hint_modules}}
+{{#each program:adapter_type_hint_modules as |module_path|}}
 import {{module_path}}
-{{/program:adapter_type_hint_modules}}
+{{/each}}
 {{> types/import_enums}}
 {{#program:structs}}
 

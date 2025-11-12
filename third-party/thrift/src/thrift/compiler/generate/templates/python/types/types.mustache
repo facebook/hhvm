@@ -54,9 +54,9 @@ import {{included_module_path}}.{{> types/types_import_path}}
 import {{included_module_path}}.{{> types/types_import_path}} as {{included_module_mangle}}__{{> types/types_import_path}}
 {{/has_types?}}
 {{/program:include_namespaces}}
-{{#program:adapter_modules}}
+{{#each program:adapter_modules as |module_path|}}
 import {{module_path}}
-{{/program:adapter_modules}}
+{{/each}}
 {{> types/import_enums}}
 {{#program:structs}}
 

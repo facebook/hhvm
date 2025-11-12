@@ -32,9 +32,9 @@
 {{#service:thrift_includes}}
 #include "{{program:include_prefix}}{{program:name}}_types.h"
 {{/service:thrift_includes}}
-{{#service:cpp_includes}}
+{{#each service:cpp_includes as |cpp_include|}}
 #include {{cpp_include}}
-{{/service:cpp_includes}}
+{{/each}}
 {{^service:interactions?}}
 {{#service:streams?}}
 #include <thrift/lib/cpp2/async/ServerStream.h>

@@ -61,12 +61,12 @@ import {{included_module_path}}.thrift_mutable_clients
 {{/python.generate_mutable_types?}}
 {{/has_services?}}
 {{/program:include_namespaces}}
-{{#program:adapter_modules}}
+{{#each program:adapter_modules as |module_path|}}
 import {{module_path}}
-{{/program:adapter_modules}}
-{{#program:adapter_type_hint_modules}}
+{{/each}}
+{{#each program:adapter_type_hint_modules as |module_path|}}
 import {{module_path}}
-{{/program:adapter_type_hint_modules}}
+{{/each}}
 {{#program:services?}}
 {{#program:services}}
 

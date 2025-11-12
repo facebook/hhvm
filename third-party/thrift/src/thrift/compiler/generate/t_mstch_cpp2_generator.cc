@@ -865,7 +865,7 @@ class cpp_mstch_program : public mstch_program {
       std::vector<std::string> extra_includes;
       boost::split(extra_includes, it->second, [](char c) { return c == ':'; });
       for (auto& include : extra_includes) {
-        includes.emplace_back(mstch::map{{"cpp_include", std::move(include)}});
+        includes.emplace_back(std::move(include));
       }
     }
     return includes;
@@ -2986,12 +2986,10 @@ mstch::array t_mstch_cpp2_generator::cpp_includes(const t_program* program) {
   mstch::array a;
   if (program->language_includes().count("cpp")) {
     for (auto include : program->language_includes().at("cpp")) {
-      mstch::map cpp_include;
       if (include.at(0) != '<') {
         include = fmt::format("\"{}\"", include);
       }
-      cpp_include.emplace("cpp_include", std::move(include));
-      a.emplace_back(std::move(cpp_include));
+      a.emplace_back(std::move(include));
     }
   }
   return a;

@@ -3755,7 +3755,7 @@ Func* resolveFuncImpl(Id id) {
   auto unit = vmfp()->func()->unit();
   auto const nep = unit->lookupNamedFuncPairId(id);
   auto func = Func::resolve(nep.second, nep.first, vmfp()->func());
-  if (func) return func;
+  if (func) return func->unwrap();
   raise_resolve_func_undefined(unit->lookupLitstrId(id));
 }
 

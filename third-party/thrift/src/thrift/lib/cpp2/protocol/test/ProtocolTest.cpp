@@ -33,6 +33,11 @@ class ProtocolTest : public testing::Test {};
 
 static constexpr size_t kTestingProtocolMaxDepth = 4;
 
+TEST(TTypeTest, Format) {
+  EXPECT_EQ(fmt::format("{}", T_BOOL), "BOOL");
+  EXPECT_EQ(fmt::format("{}", T_I64), "I64");
+}
+
 template <typename ProtocolWriter>
 void makeNestedWriteInner(
     ProtocolWriter& writer, const size_t levels, const TType& type) {

@@ -17,6 +17,8 @@
 #pragma once
 
 #include <stdint.h>
+#include <string>
+#include <fmt/core.h>
 
 namespace apache::thrift::protocol {
 
@@ -48,8 +50,16 @@ enum TType : uint8_t {
   T_FLOAT = 19,
 };
 
-inline uint8_t format_as(TType type) {
-  return type;
-}
+/**
+ * Best effort conversion of type into a human readable string
+ */
+std::string debugStringForTType(TType type);
 
 } // namespace apache::thrift::protocol
+
+template <>
+struct fmt::formatter<apache::thrift::protocol::TType>
+    : formatter<std::string> {
+  auto format(apache::thrift::protocol::TType type, format_context& ctx) const
+      -> format_context::iterator;
+};

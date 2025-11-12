@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/request-fanout-limit.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/struct-log.h"
 
 namespace HPHP {
 
@@ -132,6 +133,13 @@ void RequestFanoutLimit::decrement(const RequestId& id) {
     // Log the up-to-date server maxConcurrentFanoutCount to ODS
     if (m_fanoutLogger) {
       m_fanoutLogger->setValue(s_maxConcurrentFanoutCount.load(std::memory_order_acquire));
+    }
+    // Log maxConcurrentCount of current root request to Scuba
+    if (Cfg::Server::EnableRequestFanoutLogging && StructuredLog::enabled()) {
+      StructuredLogEntry entry;
+      entry.setInt("request_max_concurrent_fanout_count", currReqMax);
+      // TODO: Log root request script filename
+      StructuredLog::log("hhvm_request_fanout", entry);
     }
 
     // Erase the entry

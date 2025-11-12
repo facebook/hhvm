@@ -270,6 +270,15 @@ void match_type_with_const_value(
     value->assign(t_const_value(*constant->value()));
   }
 
+  if (value && type->is_float() && value->kind() == t_const_value::CV_DOUBLE) {
+    // Check whether double is in float range.
+    // If it is out of range, it will fail the validation later.
+    if (std::numeric_limits<float>::lowest() <= value->get_double() &&
+        value->get_double() <= std::numeric_limits<float>::max()) {
+      value->set_double(static_cast<float>(value->get_double()));
+    }
+  }
+
   if (const t_list* list = type->try_as<t_list>()) {
     if (value->kind() == t_const_value::CV_LIST) {
       for (auto list_val : value->get_list()) {

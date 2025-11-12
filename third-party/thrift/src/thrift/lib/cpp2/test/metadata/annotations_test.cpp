@@ -185,6 +185,15 @@ TEST(Annotations, Normalization) {
   }
 }
 
+TEST(Annotations, TestFloat) {
+  metadata::ThriftMetadata md1, md2, md3;
+  const auto& t1 = detail::md::StructMetadata<TestFloat1>::gen(md1);
+  const auto& t2 = detail::md::StructMetadata<TestFloat2>::gen(md2);
+  const auto& t3 = detail::md::StructMetadata<TestFloat3>::gen(md3);
+  EXPECT_EQ(t1.structured_annotations(), t2.structured_annotations());
+  EXPECT_NE(t1.structured_annotations(), t3.structured_annotations());
+}
+
 metadata::ThriftStruct expectedStruct() {
   metadata::ThriftStruct ret;
   ret.name() = "annotations.TestStruct";

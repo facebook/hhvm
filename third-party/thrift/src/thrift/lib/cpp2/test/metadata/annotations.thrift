@@ -146,3 +146,13 @@ service TestService {
     1: TestException ex,
   );
 }
+
+@Annotation{floatField = 1.0}
+struct TestFloat1 {}
+
+// Delta < (1 / (2^26)), which can't be stored in float that only has 24 bits precision.
+@Annotation{floatField = 1.00000001}
+struct TestFloat2 {}
+
+@Annotation{floatField = 1.0000001}
+struct TestFloat3 {}

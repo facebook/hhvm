@@ -60,7 +60,7 @@ TEST(JsonTest, to_json_t_const_value) {
       my_int = 1,
       my_string = "hello",
       my_double = 9.9,
-      my_list = [0.1, -0.2],
+      my_list = [0.125, -0.25],
       my_nested = Nested{
         nested_int = 0,
         nested_enum = MyEnum.SECOND,
@@ -81,7 +81,7 @@ TEST(JsonTest, to_json_t_const_value) {
   std::string to_json_result = to_json(annotations.at(0).value());
   EXPECT_EQ(
       "{\"my_bool\": true, \"my_int\": 1, \"my_string\": \"hello\", "
-      "\"my_double\": 9.9, \"my_list\": [0.1, -0.2], "
+      "\"my_double\": 9.9, \"my_list\": [0.125, -0.25], "
       "\"my_nested\": {\"nested_int\": 0, \"nested_enum\": 2}}",
       to_json_result);
 }

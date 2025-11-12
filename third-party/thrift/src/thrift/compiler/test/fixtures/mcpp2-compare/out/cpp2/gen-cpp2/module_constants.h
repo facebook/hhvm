@@ -50,7 +50,7 @@ namespace module_constants {
   }
 
   /** Glean {"constant": "aFloat"} */
-  constexpr float const aFloat_ = static_cast<float>(0.1);
+  constexpr float const aFloat_ = static_cast<float>(0.10000000149011612);
   /** Glean {"constant": "aFloat"} */
   constexpr float aFloat() {
     return aFloat_;

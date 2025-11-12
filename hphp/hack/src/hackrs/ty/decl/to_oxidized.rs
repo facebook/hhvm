@@ -558,6 +558,7 @@ impl ToOxidized for folded::FoldedElement {
                 .deprecated
                 .map(|x| String::from_utf8_lossy(x.as_bytes()).to_string()),
             flags: self.flags,
+            sealed_allowlist: self.sealed_allowlist.to_oxidized(),
             sort_text: self.sort_text,
             overlapping_tparams: self.overlapping_tparams.to_oxidized(),
         }

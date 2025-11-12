@@ -6389,6 +6389,16 @@ end = struct
     in
     create ~code:Error_code.BadMethodOverride ~reasons ()
 
+  let override_sealed child_pos parent_pos =
+    let reasons =
+      lazy
+        [
+          (child_pos, "You cannot override the method because it is sealed.");
+          (parent_pos, "Declaration is here");
+        ]
+    in
+    create ~code:Error_code.OverrideSealed ~reasons ()
+
   let bad_member_override_not_subtype
       ~is_method
       ~class_name
@@ -6856,6 +6866,8 @@ end = struct
            pos_with_generic
            generic_reason
            generic_name)
+    | Override_sealed { pos; parent_pos } ->
+      Eval_result.single (override_sealed pos parent_pos)
 end
 
 and Eval_callback : sig

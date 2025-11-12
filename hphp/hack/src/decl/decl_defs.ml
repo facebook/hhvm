@@ -103,6 +103,7 @@ type element = {
   elt_origin: string;
   elt_visibility: ce_visibility;
   elt_deprecated: string option;
+  elt_sealed_allowlist: SSet.t option;
   elt_sort_text: string option;
   (* Derived from <<__Overlapping(_)>> attribute *)
   elt_overlapping_tparams: SSet.t option;

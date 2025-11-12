@@ -1,0 +1,20 @@
+ERROR: File "method_xcontroller_01.php", line 17, characters 19-21:
+The method `foo` is not compatible with the overridden method (Typing[4341])
+  File "method_xcontroller_01.php", line 17, characters 19-21:
+  You cannot override the method because it is sealed.
+  File "method_xcontroller_01.php", line 7, characters 19-21:
+  Declaration is here
+ERROR: File "method_xcontroller_01.php", line 30, characters 19-21:
+The method `foo` is not compatible with the overridden method (Typing[4341])
+  File "method_xcontroller_01.php", line 30, characters 19-21:
+  You cannot override the method because it is sealed.
+  File "method_xcontroller_01.php", line 7, characters 19-21:
+  Declaration is here
+ERROR: File "method_xcontroller_01.php", line 30, characters 19-21:
+You cannot override this method (Typing[4070])
+  File "method_xcontroller_01.php", line 11, characters 25-27:
+  It was declared as final
+ERROR: File "method_xcontroller_01.php", line 36, characters 19-21:
+You cannot override this method (Typing[4070])
+  File "method_xcontroller_01.php", line 11, characters 25-27:
+  It was declared as final

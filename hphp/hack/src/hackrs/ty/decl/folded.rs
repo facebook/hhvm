@@ -52,6 +52,7 @@ pub struct FoldedElement {
 
     /// If the element is deprecated, this holds the deprecation message.
     pub deprecated: Option<Bytes>,
+    pub sealed_allowlist: Option<IndexSet<TypeName>>,
     pub sort_text: Option<String>,
     pub overlapping_tparams: Option<IndexSet<Symbol>>,
 }

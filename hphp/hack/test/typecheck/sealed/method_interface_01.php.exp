@@ -1,0 +1,2 @@
+ERROR: File "method_interface_01.php", line 6, characters 5-12:
+The `__Sealed` attribute cannot be used on a method declaration in an interface. (Typing[4231])

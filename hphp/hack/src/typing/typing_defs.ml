@@ -91,6 +91,7 @@ type class_elt = {
   ce_deprecated: string option;
   ce_pos: Pos_or_decl.t Lazy.t;  (** pos of the type of the elt *)
   ce_flags: Typing_defs_flags.ClassElt.t;
+  ce_sealed_allowlist: SSet.t option;
   ce_sort_text: string option;
   ce_overlapping_tparams: SSet.t option;
 }

@@ -314,6 +314,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             visibility: vis,
             deprecated: None,
             flags: ClassEltFlags::new(flag_args),
+            sealed_allowlist: None,
             sort_text: None,
             overlapping_tparams: None,
         };
@@ -354,6 +355,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             visibility: vis,
             deprecated: None,
             flags: ClassEltFlags::new(flag_args),
+            sealed_allowlist: None,
             sort_text: None,
             overlapping_tparams: None,
         };
@@ -388,6 +390,8 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             ),
             (_, v) => self.visibility(cls, self.child.module.as_ref().map(Positioned::id), v),
         };
+
+        let sealed_allowlist = self.get_method_sealed_allowlist(sm);
 
         let sort_text = match sm.sort_text.to_owned() {
             Some(text) => Some(text),
@@ -429,6 +433,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             visibility: vis,
             deprecated: sm.deprecated,
             flags: ClassEltFlags::new(flag_args),
+            sealed_allowlist,
             sort_text,
             overlapping_tparams: self.get_overlapping_tparams(sm),
         };
@@ -477,6 +482,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
                 visibility: vis,
                 deprecated: sm.deprecated,
                 flags: ClassEltFlags::new(flag_args),
+                sealed_allowlist: None,
                 sort_text: sm.sort_text.to_owned(),
                 overlapping_tparams: None,
             }
@@ -823,8 +829,16 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         }
     }
 
-    fn get_sealed_whitelist(&self) -> Option<IndexSet<TypeName>> {
+    fn get_class_sealed_whitelist(&self) -> Option<IndexSet<TypeName>> {
         (self.child.user_attributes.iter())
+            .find(|ua| ua.name.id() == *sn::user_attributes::uaSealed)
+            .map(|ua| ua.classname_params().iter().copied().collect())
+    }
+
+    fn get_method_sealed_allowlist(&self, method: &ShallowMethod<R>) -> Option<IndexSet<TypeName>> {
+        method
+            .attributes
+            .iter()
             .find(|ua| ua.name.id() == *sn::user_attributes::uaSealed)
             .map(|ua| ua.classname_params().iter().copied().collect())
     }
@@ -974,7 +988,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             });
         self.rewrite_class_consts_for_enum(enum_inner_ty, &ancestors, &mut consts);
 
-        let sealed_whitelist = self.get_sealed_whitelist();
+        let sealed_whitelist = self.get_class_sealed_whitelist();
 
         let deferred_init_members = self.get_deferred_init_members(&constructor.elt);
 

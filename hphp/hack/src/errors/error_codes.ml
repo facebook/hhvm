@@ -788,6 +788,7 @@ module Typing = struct
     | UnexpectedNamedArgs [@value 4500]
     | DuplicateNamedArgs [@value 4501]
     | LambdaNamedParamMismatch [@value 4502]
+    | OverrideSealed [@value 4503]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

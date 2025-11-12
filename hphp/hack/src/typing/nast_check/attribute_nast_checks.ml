@@ -160,6 +160,52 @@ let check_dynamically_referenced attrs =
           to_user_error
           @@ Attribute_too_many_arguments { pos; name; expected = 1 }))
 
+let check_no_sealed_on_constructors m =
+  let (_, method_name) = m.m_name in
+  if String.equal method_name SN.Members.__construct then begin
+    match find_attribute SN.UserAttributes.uaSealed m.m_user_attributes with
+    | Some { ua_name = (pos, attr_name); _ } ->
+      Errors.add_error
+        Nast_check_error.(
+          to_user_error
+          @@ Wrong_expression_kind_builtin_attribute
+               { expr_kind = "a constructor"; pos; attr_name })
+    | None -> ()
+  end
+
+let check_no_sealed_on_private_methods m =
+  if Aast.equal_visibility m.m_visibility Private then begin
+    match find_attribute SN.UserAttributes.uaSealed m.m_user_attributes with
+    | Some { ua_name = (pos, attr_name); _ } ->
+      Errors.add_error
+        Nast_check_error.(
+          to_user_error
+          @@ Wrong_expression_kind_builtin_attribute
+               { expr_kind = "a private method"; pos; attr_name })
+    | None -> ()
+  end
+
+let check_no_sealed_on_interface_methods env m =
+  let inside_interface =
+    match env.Nast_check_env.classish_kind with
+    | Some ck -> Ast_defs.is_c_interface ck
+    | None -> false
+  in
+  if inside_interface then begin
+    match find_attribute SN.UserAttributes.uaSealed m.m_user_attributes with
+    | Some { ua_name = (pos, attr_name); _ } ->
+      Errors.add_error
+        Nast_check_error.(
+          to_user_error
+          @@ Wrong_expression_kind_builtin_attribute
+               {
+                 expr_kind = "a method declaration in an interface";
+                 pos;
+                 attr_name;
+               })
+    | None -> ()
+  end
+
 let handler =
   object
     inherit Nast_visitor.handler_base
@@ -269,6 +315,9 @@ let handler =
       check_autocomplete_valid_text m.m_user_attributes;
       check_duplicate_memoize m.m_user_attributes;
       check_no_auto_dynamic env m.m_user_attributes;
+      check_no_sealed_on_constructors m;
+      check_no_sealed_on_private_methods m;
+      check_no_sealed_on_interface_methods env m;
       List.iter check_soft_internal_on_param m.m_params;
       (* Ban variadic arguments on memoized methods. *)
       if

@@ -332,6 +332,7 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
             || name == "__NoAutoDynamic"
             || name == "__NoAutoLikes"
             || name == "__Overlapping"
+            || name == "__Sealed"
     }
 
     fn fold_string_concat(&self, expr: &nast::Expr, acc: &mut BString) -> bool {
@@ -3478,7 +3479,8 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         }
 
         // Parse the user attributes
-        // in facts-mode all attributes are saved, otherwise only __NoAutoDynamic/__NoAutoLikes is
+        // in facts-mode all attributes are saved, otherwise only
+        // __NoAutoDynamic/__NoAutoLikes/__Overlapping and Sealed are
         let user_attributes = attributes
             .into_iter()
             .rev()

@@ -1734,6 +1734,10 @@ and Secondary : sig
         generic_reason: Typing_reason.t;
         generic_name: string option;
       }
+    | Override_sealed of {
+        pos: Pos_or_decl.t;
+        parent_pos: Pos_or_decl.t;
+      }
   [@@deriving show]
 end
 

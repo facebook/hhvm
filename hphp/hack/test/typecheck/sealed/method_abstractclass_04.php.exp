@@ -1,0 +1,12 @@
+ERROR: File "method_abstractclass_04.php", line 19, characters 19-21:
+The method `foo` is not compatible with the overridden method (Typing[4341])
+  File "method_abstractclass_04.php", line 19, characters 19-21:
+  You cannot override the method because it is sealed.
+  File "method_abstractclass_04.php", line 7, characters 28-30:
+  Declaration is here
+ERROR: File "method_abstractclass_04.php", line 27, characters 19-21:
+The method `foo` is not compatible with the overridden method (Typing[4341])
+  File "method_abstractclass_04.php", line 27, characters 19-21:
+  You cannot override the method because it is sealed.
+  File "method_abstractclass_04.php", line 7, characters 28-30:
+  Declaration is here

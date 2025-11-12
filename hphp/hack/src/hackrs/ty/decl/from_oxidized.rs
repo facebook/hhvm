@@ -608,6 +608,7 @@ impl From<o::decl_defs::Element> for folded::FoldedElement {
             origin: x.origin.into(),
             visibility: x.visibility.into(),
             deprecated: x.deprecated.map(Into::into),
+            sealed_allowlist: x.sealed_allowlist.map(map_k),
             sort_text: x.sort_text,
             overlapping_tparams: x.overlapping_tparams.map(map_k),
         }

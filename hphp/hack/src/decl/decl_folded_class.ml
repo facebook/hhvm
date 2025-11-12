@@ -281,8 +281,8 @@ let synthesize_typeconst_defaults
     (typeconsts, consts)
   | _ -> (typeconsts, consts)
 
-let get_sealed_whitelist (c : Shallow_decl_defs.shallow_class) : SSet.t option =
-  match Attributes.find SN.UserAttributes.uaSealed c.sc_user_attributes with
+let extract_sealed_classnames attrs : SSet.t option =
+  match attrs with
   | None -> None
   | Some { ua_params; _ } ->
     let cn_params =
@@ -293,6 +293,16 @@ let get_sealed_whitelist (c : Shallow_decl_defs.shallow_class) : SSet.t option =
         ua_params
     in
     Some (SSet.of_list cn_params)
+
+let get_class_sealed_allowlist (c : Shallow_decl_defs.shallow_class) :
+    SSet.t option =
+  extract_sealed_classnames
+    (Attributes.find SN.UserAttributes.uaSealed c.sc_user_attributes)
+
+let get_method_sealed_allowlist (m : Shallow_decl_defs.shallow_method) :
+    SSet.t option =
+  extract_sealed_classnames
+    (Attributes.find SN.UserAttributes.uaSealed m.sm_attributes)
 
 let get_overlapping_tparams (m : Shallow_decl_defs.shallow_method) :
     SSet.t option =
@@ -387,6 +397,7 @@ let build_constructor
       elt_visibility = vis;
       elt_origin = class_name;
       elt_deprecated = method_.sm_deprecated;
+      elt_sealed_allowlist = None;
       elt_sort_text = method_.sm_sort_text;
       elt_overlapping_tparams = get_overlapping_tparams method_;
     }
@@ -521,6 +532,7 @@ let prop_decl_eager
       elt_visibility = vis;
       elt_origin;
       elt_deprecated = None;
+      elt_sealed_allowlist = None;
       elt_sort_text = None;
       elt_overlapping_tparams = None;
     }
@@ -560,6 +572,7 @@ let static_prop_decl_eager
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_deprecated = None;
+      elt_sealed_allowlist = None;
       elt_sort_text = None;
       elt_overlapping_tparams = None;
     }
@@ -707,6 +720,7 @@ let method_decl_eager
     | _ -> visibility (snd c.sc_name) c.sc_module m.sm_visibility
   in
   let support_dynamic_type = sm_support_dynamic_type m in
+  let sealed_allowlist = get_method_sealed_allowlist m in
   let parent_sort_text =
     match SMap.find_opt id acc with
     | Some ({ elt_sort_text = _ as parent_text; _ }, _) -> parent_text
@@ -745,6 +759,7 @@ let method_decl_eager
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_deprecated = m.sm_deprecated;
+      elt_sealed_allowlist = sealed_allowlist;
       elt_sort_text = sort_text;
       elt_overlapping_tparams = get_overlapping_tparams m;
     }
@@ -1000,7 +1015,7 @@ and class_decl
       p
       c.sc_tparams
   in
-  let sealed_whitelist = get_sealed_whitelist c in
+  let sealed_whitelist = get_class_sealed_allowlist c in
   let ua_sort_text =
     match
       Attributes.find

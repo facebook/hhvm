@@ -132,6 +132,7 @@ module ParentClassElt = struct
       ce_deprecated = _;
       ce_pos = _;
       ce_flags = _;
+      ce_sealed_allowlist = _;
       ce_sort_text = _;
       ce_overlapping_tparams = _;
     } =
@@ -144,6 +145,7 @@ module ParentClassElt = struct
       ce_deprecated = _;
       ce_pos = _;
       ce_flags = _;
+      ce_sealed_allowlist = _;
       ce_sort_text = _;
       ce_overlapping_tparams = _;
     } =
@@ -535,6 +537,44 @@ let check_dynamically_callable
     in
     Typing_error_utils.add_typing_error ~env
     @@ Typing_error.apply_reasons ~on_error snd_err2
+
+let bad_sealed_override_error
+    env member_name parent_class_elt class_elt on_error =
+  let (lazy parent_pos) = parent_class_elt.ce_pos in
+  let (lazy pos) = class_elt.ce_pos in
+  let (snd_err1, snd_err2) =
+    Typing_error.Secondary.
+      ( Bad_method_override { pos; member_name },
+        Override_sealed { pos; parent_pos } )
+  in
+  let on_error =
+    Typing_error.Reasons_callback.prepend_on_apply on_error snd_err1
+  in
+  Typing_error_utils.add_typing_error ~env
+  @@ Typing_error.apply_reasons ~on_error snd_err2
+
+let check_sealed_allowlist
+    env member_name _parent_class parent_class_elt class_ class_elt on_error =
+  match parent_class_elt.ce_sealed_allowlist with
+  | None -> ()
+  | Some allowlist ->
+    if not (SSet.mem class_elt.ce_origin allowlist) then
+      (* if the origin of class_elt is not in the allowlist we emit an error unless
+         the class itself is in the allowlist and the elt is imported from a trait *)
+      let is_class_elt_origin_trait =
+        match Env.get_class env class_elt.ce_origin |> Decl_entry.to_option with
+        | Some origin_class when Ast_defs.is_c_trait (Cls.kind origin_class) ->
+          true
+        | _ -> false
+      in
+      let is_class_in_allowlist = SSet.mem (Cls.name class_) allowlist in
+      if not (is_class_elt_origin_trait && is_class_in_allowlist) then
+        bad_sealed_override_error
+          env
+          member_name
+          parent_class_elt
+          class_elt
+          on_error
 
 (** Check that we are not overriding an __LSB property *)
 let check_lsb_overrides
@@ -1052,6 +1092,14 @@ let check_override
       env
       member_name
       parent_class_elt
+      class_elt
+      on_error;
+    check_sealed_allowlist
+      env
+      member_name
+      parent_class
+      parent_class_elt
+      class_
       class_elt
       on_error
   end;
@@ -1772,6 +1820,7 @@ let default_constructor_ce class_ =
     ce_sort_text = None;
     ce_pos = lazy pos;
     ce_overlapping_tparams = None;
+    ce_sealed_allowlist = None;
     ce_flags =
       make_ce_flags
         ~xhp_attr:None

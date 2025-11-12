@@ -1641,11 +1641,11 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
 
         self.assertEqual(0, s.unqualified_float)
         s.unqualified_float = float_constant
-        self.assertEqual(2.718281828459, s.unqualified_float)
+        self.assertEqual(2.5, s.unqualified_float)
 
         self.assertEqual(0, s.unqualified_double)
         s.unqualified_double = double_constant
-        self.assertEqual(2.718281828459, s.unqualified_double)
+        self.assertEqual(2.50000011920928955078125, s.unqualified_double)
 
         self.assertEqual("", s.unqualified_string)
         s.unqualified_string = string_constant

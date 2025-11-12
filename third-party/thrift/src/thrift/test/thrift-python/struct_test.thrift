@@ -26,8 +26,17 @@ const byte byte_constant = -10; // byte is an 8-bit signed integer
 const i16 i16_constant = 200;
 const i32 i32_constant = 0xFA12EE;
 const i64 i64_constant = 0xFFFFFFFFFF;
-const float float_constant = 2.718281828459;
-const double double_constant = 2.718281828459;
+
+// In this example, some precision loss is expected for float_constant because the
+// literal value cannot be represented as a IEEE754 single precision value.
+// Instead, it is rounded to the closest value: 2.5
+const float float_constant = 2.50000011920928955078125;
+
+// Contrary to float_constant, no precision loss is expected for
+// double_constant in this case, as the literal value specified can be represented
+// exactly as a IEEE754 double precision value.
+const double double_constant = 2.50000011920928955078125;
+
 const string string_constant = "June 28, 2017";
 
 const list<i32> list_constant = [2, 3, 5, 7];

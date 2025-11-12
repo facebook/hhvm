@@ -579,34 +579,17 @@ class python_mstch_service : public mstch_service {
         {
             {"service:supported_functions",
              &python_mstch_service::supported_functions},
-            {"service:supported_service_functions",
-             &python_mstch_service::supported_service_functions},
         });
   }
 
-  std::vector<const t_function*> get_supported_functions(
-      const std::function<bool(const t_function*)>& func_filter) {
+  mstch::node supported_functions() {
     std::vector<const t_function*> funcs;
     for (const auto& func : service_->functions()) {
-      if (func_filter(&func)) {
+      if (!func.is_interaction_constructor()) {
         funcs.push_back(&func);
       }
     }
-    return funcs;
-  }
-
-  mstch::node supported_functions() {
-    return make_mstch_functions(
-        get_supported_functions([](const t_function* func) -> bool {
-          return !func->is_interaction_constructor();
-        }));
-  }
-
-  mstch::node supported_service_functions() {
-    return make_mstch_functions(
-        get_supported_functions([](const t_function* func) -> bool {
-          return !func->is_interaction_constructor();
-        }));
+    return make_mstch_functions(funcs);
   }
 };
 
@@ -659,11 +642,7 @@ class python_mstch_struct : public mstch_struct {
   }
 
   mstch::node fields_ordered_by_id() {
-    std::vector<const t_field*> fields = struct_->fields().copy();
-    std::sort(fields.begin(), fields.end(), [](const auto* m, const auto* n) {
-      return m->id() < n->id();
-    });
-    return make_mstch_fields(fields);
+    return make_mstch_fields(struct_->fields_id_order());
   }
 };
 
@@ -1022,6 +1001,16 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     def.property("external_program?", [this](const t_interface& self) {
       return get_program() != self.program();
     });
+    def.property("supported_functions", [&proto](const t_interface& self) {
+      std::vector<const t_function*> functions;
+      functions.reserve(self.functions().size());
+      for (const t_function& func : self.functions()) {
+        if (!func.is_interaction_constructor()) {
+          functions.emplace_back(&func);
+        }
+      }
+      return to_array(functions, proto.of<t_function>());
+    });
 
     return std::move(def).make();
   }
@@ -1053,6 +1042,9 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     });
     def.property("should_generate_patch?", [](const t_structured& self) {
       return should_generate_patch(&self);
+    });
+    def.property("fields_ordered_by_id", [&proto](const t_structured& self) {
+      return to_array(self.fields_id_order(), proto.of<t_field>());
     });
 
     return std::move(def).make();

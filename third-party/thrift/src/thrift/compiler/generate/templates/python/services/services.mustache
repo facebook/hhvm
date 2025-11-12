@@ -71,9 +71,9 @@ class {{service:name}}Interface(
 
     def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
         functionTable = {
-        {{#service:supported_service_functions}}
+        {{#service:supported_functions}}
             b"{{function:name}}": ({{> services/function_kind }}, self._fbthrift__handler_{{function:name}}),
-        {{/service:supported_service_functions}}
+        {{/service:supported_functions}}
         }
         return {**super().getFunctionTable(), **functionTable}
 
@@ -90,7 +90,7 @@ class {{service:name}}Interface(
         return {{program:module_mangle}}__thrift_metadata._fbthrift_metadata_service_response_{{service:name}}()
 
 
-{{#service:supported_service_functions}}
+{{#service:supported_functions}}
 
     {{^function:bidirectional_stream?}}{{^function:stream?}}async {{/function:stream?}}{{#function:stream_has_first_response?}}async {{/function:stream_has_first_response?}}def {{function:name}}(
             self{{#function:args}},
@@ -256,5 +256,5 @@ class {{service:name}}Interface(
         {{/function:bidirectional_stream?}}
         {{/function:oneway?}}
 
-{{/service:supported_service_functions}}
+{{/service:supported_functions}}
 {{/program:services}}

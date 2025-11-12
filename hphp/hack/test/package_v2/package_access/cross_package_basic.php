@@ -7,6 +7,8 @@ new module bar {}
 // package pkg2
 type TFoo = int;
 
+const int FOO = 3;
+
 //// bar.php
 <?hh
 // package pkg1
@@ -17,3 +19,5 @@ newtype NBar1 = TFoo; // ok
 newtype NBar2 as TFoo = int; // ok
 module newtype NBar3 = TFoo; // ok
 module newtype NBar4 as TFoo = int; // ok
+
+const int BAR = FOO; // error

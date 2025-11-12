@@ -77,6 +77,58 @@ def should_auto_update() -> bool:
         return False
 
 
+def filter_test_files(files: List[str], test_base_path: str) -> List[str]:
+    """Filter files based on TEST_FILTER environment variable.
+
+    TEST_FILTER can be:
+    - A relative path to a file (e.g., 'xhp_type_constant/xhp_type_constant_simple.php')
+    - A relative path to a directory (e.g., 'xhp_type_constant')
+    - Multiple paths separated by commas
+
+    Paths are relative to the test base path.
+    """
+    filter_value = os.getenv("TEST_FILTER")
+    if not filter_value:
+        return files
+
+    # Normalize the test base path
+    test_base_path = os.path.normpath(os.path.realpath(test_base_path))
+
+    # Parse filter patterns (comma-separated)
+    patterns = [p.strip() for p in filter_value.split(",") if p.strip()]
+
+    if not patterns:
+        return files
+
+    # Build list of absolute paths to match
+    filter_paths = []
+    for pattern in patterns:
+        # Make absolute path from pattern
+        abs_pattern = os.path.normpath(
+            os.path.realpath(os.path.join(test_base_path, pattern))
+        )
+        filter_paths.append(abs_pattern)
+
+    # Filter files
+    filtered = []
+    for file in files:
+        abs_file = os.path.normpath(os.path.realpath(file))
+        for filter_path in filter_paths:
+            # Match if file is the filter path, or if file is under a directory filter path
+            if abs_file == filter_path or abs_file.startswith(filter_path + os.sep):
+                filtered.append(file)
+                break
+
+    if filtered:
+        print(
+            f"TEST_FILTER: Running {len(filtered)} of {len(files)} tests matching: {filter_value}"
+        )
+    else:
+        print(f"Warning: TEST_FILTER '{filter_value}' matched no tests")
+
+    return filtered
+
+
 """
 Per-test flags passed to test executable. Expected to be in a file with
 same name as test, but with .flags extension.
@@ -1112,6 +1164,9 @@ def main() -> None:
         args.in_extension,
         args.include_directories,
     )
+
+    # Filter files based on TEST_FILTER environment variable
+    files = filter_test_files(files, args.test_path)
 
     if len(files) == 0:
         raise Exception("Could not find any files to test in " + args.test_path)

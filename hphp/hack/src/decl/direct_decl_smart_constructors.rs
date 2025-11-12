@@ -4178,6 +4178,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
                                         pos: pos.clone(),
                                         type_: ty,
                                         value,
+                                        package: self.package.clone(),
                                     };
                                     let this = Rc::make_mut(&mut self.state);
                                     this.const_decl(id, const_decl)

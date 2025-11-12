@@ -149,8 +149,12 @@ let check_internal_access ~in_signature env target pos decl_pos =
   Option.map ~f:Typing_error.modules module_err_opt
 
 let check_package_access
-    ~should_check_package_boundary env use_pos def_pos target_package target_id
-    =
+    ~should_check_package_boundary
+    ~use_pos
+    ~def_pos
+    env
+    target_package
+    target_id =
   match should_check_package_boundary with
   | `No -> None
   | `Yes target_symbol_spec ->
@@ -367,9 +371,9 @@ let check_top_level_access
     if Env.check_packages env then
       check_package_access
         ~should_check_package_boundary
+        ~use_pos
+        ~def_pos
         env
-        use_pos
-        def_pos
         target_package
         target_id
     else

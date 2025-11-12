@@ -37,6 +37,15 @@ val check_obj_access :
   ce_visibility ->
   Typing_error.t option
 
+val check_package_access :
+  should_check_package_boundary:Typing_packages.check_reason ->
+  use_pos:Pos.t ->
+  def_pos:Pos_or_decl.t ->
+  env ->
+  Aast_defs.package_membership option ->
+  string ->
+  Typing_error.t option
+
 val check_top_level_access :
   should_check_package_boundary:Typing_packages.check_reason ->
   in_signature:bool ->

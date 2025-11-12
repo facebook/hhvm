@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<697359de34068d9cba57c55c3b585bb9>>
+// @generated SignedSource<<00b926796647bdca3b802c1d41011dcd>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -112,6 +112,7 @@ pub struct ConstDecl {
     pub pos: pos_or_decl::PosOrDecl,
     pub type_: Ty,
     pub value: Option<String>,
+    pub package: Option<aast_defs::PackageMembership>,
 }
 
 #[derive(

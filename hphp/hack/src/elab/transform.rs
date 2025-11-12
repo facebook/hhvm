@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<12ddaf9ffbca3f731031be64358c2184>>
+// @generated SignedSource<<6fb1b361853a0379cf3c56a477aecf80>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -2108,6 +2108,7 @@ impl Transform for Gconst {
                 namespace: ref mut __binding_5,
                 emit_id: ref mut __binding_7,
                 module: ref mut __binding_8,
+                package: ref mut __binding_9,
                 ..
             } => {
                 {
@@ -2136,7 +2137,10 @@ impl Transform for Gconst {
                 {
                     __binding_7.transform(env, &mut pass.clone())
                 }
-                { __binding_8.transform(env, &mut pass.clone()) }
+                {
+                    __binding_8.transform(env, &mut pass.clone())
+                }
+                { __binding_9.transform(env, &mut pass.clone()) }
             }
         }
     }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<22bf7e0803e7c7b8a0f819084ca1a6fd>>
+// @generated SignedSource<<16174f10cf7c6c4871172cedab434fe6>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -1391,7 +1391,8 @@ impl<P: Params> NodeMut<P> for Gconst<P::Ex, P::En> {
         self.namespace.accept(c, v)?;
         self.span.accept(c, v)?;
         self.emit_id.accept(c, v)?;
-        self.module.accept(c, v)
+        self.module.accept(c, v)?;
+        self.package.accept(c, v)
     }
 }
 impl<P: Params> NodeMut<P> for HfParamInfo {

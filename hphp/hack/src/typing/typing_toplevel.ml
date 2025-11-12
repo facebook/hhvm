@@ -336,6 +336,7 @@ let gconst_def ctx cst =
     check_if_this_def_is_the_winner ctx FileInfo.Const cst.cst_name
   in
   let env = EnvFromDef.gconst_env ~origin:Decl_counters.TopLevel ctx cst in
+  let env = Env.set_current_package_membership env cst.cst_package in
   List.iter ~f:(Typing_error_utils.add_typing_error ~env)
   @@ Typing_type_wellformedness.global_constant env cst;
   let (typed_cst_value, (env, ty_err_opt)) =
@@ -400,6 +401,7 @@ let gconst_def ctx cst =
     Aast.cst_span = cst.cst_span;
     Aast.cst_emit_id = cst.cst_emit_id;
     Aast.cst_module = cst.cst_module;
+    Aast.cst_package = cst.cst_package;
   }
 
 let module_def ctx md =

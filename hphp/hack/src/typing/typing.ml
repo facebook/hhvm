@@ -3587,6 +3587,20 @@ end = struct
         let (env, ty) = Env.fresh_type_error env cst_pos in
         make_result env cst_pos (Aast.Id id) ty
       | Some const ->
+        (if Env.check_packages env then
+          let access_error_opt =
+            TVis.check_package_access
+              ~should_check_package_boundary:(`Yes "global constant")
+              ~use_pos:cst_pos
+              ~def_pos:const.cd_pos
+              env
+              const.cd_package
+              cst_name
+          in
+          Option.iter
+            ~f:(Typing_error_utils.add_typing_error ~env)
+            access_error_opt);
+
         let ((env, ty_err_opt), ty) =
           Phase.localize_no_subst env ~ignore_errors:true const.cd_type
         in

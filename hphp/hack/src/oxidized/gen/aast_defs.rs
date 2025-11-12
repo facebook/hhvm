@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<970f11e8c9f7d4e7983b98608bdf1674>>
+// @generated SignedSource<<6ab058233fbc7434c069c72ca7af4b79>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -2348,6 +2348,7 @@ pub struct Gconst<Ex, En> {
     pub span: Pos,
     pub emit_id: Option<EmitId>,
     pub module: Option<Sid>,
+    pub package: Option<PackageMembership>,
 }
 
 #[derive(

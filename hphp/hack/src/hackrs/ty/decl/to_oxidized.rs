@@ -890,11 +890,17 @@ impl<R: Reason> ToOxidized for shallow::ConstDecl<R> {
     type Output = o::shallow_decl_defs::ConstDecl;
 
     fn to_oxidized(self) -> Self::Output {
-        let Self { pos, ty, value } = self;
+        let Self {
+            pos,
+            ty,
+            value,
+            package,
+        } = self;
         o::shallow_decl_defs::ConstDecl {
             pos: pos.to_oxidized(),
             type_: ty.to_oxidized(),
             value,
+            package,
         }
     }
 }

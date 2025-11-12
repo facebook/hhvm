@@ -81,6 +81,7 @@ type const_decl = {
   cd_pos: Pos_or_decl.t;
   cd_type: decl_ty;
   cd_value: string option;
+  cd_package: Aast_defs.package_membership option;
 }
 [@@deriving show, eq]
 

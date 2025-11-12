@@ -563,6 +563,7 @@ impl<R: Reason> From<o::shallow_decl_defs::ConstDecl> for shallow::ConstDecl<R> 
             pos: x.pos.into(),
             ty: x.type_.into(),
             value: x.value,
+            package: x.package,
         }
     }
 }

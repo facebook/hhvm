@@ -6078,6 +6078,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                             span: p_pos(node, env),
                             emit_id: None,
                             module: None,
+                            package: get_current_package(env, node),
                         };
                         ast::Def::mk_constant(gconst)
                     }

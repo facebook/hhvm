@@ -46,5 +46,5 @@
       { Typing_defs.cd_pos = [9:1-10:53];
         cd_type =
         (Rhint ([9:7-20]), (Tapply (([9:7-20], "\\MyPartialType"), [])));
-        cd_value = None }))
+        cd_value = None; cd_package = None }))
   ]

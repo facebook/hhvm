@@ -89,21 +89,23 @@
   ("\\I",
    (Shallow_decl_defs.Const
       { Typing_defs.cd_pos = [14:1-22];
-        cd_type = (Rhint ([14:7-10]), (Tprim Tint)); cd_value = None }));
+        cd_type = (Rhint ([14:7-10]), (Tprim Tint)); cd_value = None;
+        cd_package = None }));
   ("\\S",
    (Shallow_decl_defs.Const
       { Typing_defs.cd_pos = [14:1-22];
-        cd_type = (Rhint ([14:7-10]), (Tprim Tint)); cd_value = None }));
+        cd_type = (Rhint ([14:7-10]), (Tprim Tint)); cd_value = None;
+        cd_package = None }));
   ("\\J",
    (Shallow_decl_defs.Const
       { Typing_defs.cd_pos = [15:1-18];
         cd_type = (Rwitness_from_decl ([15:9-10]), (Tprim Tint));
-        cd_value = None }));
+        cd_value = None; cd_package = None }));
   ("\\T",
    (Shallow_decl_defs.Const
       { Typing_defs.cd_pos = [15:1-18];
         cd_type = (Rwitness_from_decl ([15:14-17]), (Tprim Tstring));
-        cd_value = None }));
+        cd_value = None; cd_package = None }));
   ("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;

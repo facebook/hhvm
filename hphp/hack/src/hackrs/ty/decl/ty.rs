@@ -679,6 +679,7 @@ pub struct ConstDecl<R: Reason> {
     pub pos: R::Pos,
     pub ty: Ty<R>,
     pub value: Option<String>,
+    pub package: Option<PackageMembership>,
 }
 
 walkable!(ConstDecl<R> => [ty]);

@@ -17,7 +17,6 @@
 #include <thrift/conformance/rpcclient/GTestHarnessRPCClient.h>
 
 #include <chrono>
-#include <filesystem>
 #include <memory>
 #include <stdexcept>
 #include <string_view>
@@ -405,8 +404,13 @@ class RPCClientConformanceTest : public testing::Test {
       if (connectViaServer_) {
         createClient(clientCmd, server_.getAddress().getAddressStr(), port);
       } else {
-        clientProcess_ = launch_client_process_(
-            std::vector<std::string>{std::string(clientCmd), "--port", port});
+        auto cmd = std::string(clientCmd);
+        auto args = cmd.ends_with(".jar")
+            ? std::vector<std::string>{"/usr/bin/env", "java", "-jar", cmd}
+            : std::vector<std::string>{cmd};
+        args.push_back("--port");
+        args.push_back(port);
+        clientProcess_ = launch_client_process_(args);
       }
     } catch (const std::exception& e) {
       verifyConformanceResult(

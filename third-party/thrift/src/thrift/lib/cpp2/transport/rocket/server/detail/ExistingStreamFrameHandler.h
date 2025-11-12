@@ -34,20 +34,6 @@ class RocketServerFrameContext;
 /**
  * Handles frames for EXISTING streams (REQUEST_N, CANCEL, EXT, and future
  * PAYLOAD/CHANNEL frames).
- *
- * CLEAN INTERFACE: Just `handle(frame)` - figures out everything from the
- * frame!
- * - Deserializes frame
- * - Validates stream ID
- * - Looks up existing stream callback
- * - Routes to appropriate RocketStreamClientCallback method
- *
- * EXTENSIBLE DESIGN: Currently handles control frames (REQUEST_N, CANCEL, EXT)
- * but will be extended to handle other existing stream frames like PAYLOAD and
- * channel frames.
- *
- * SCOPE LIMITATION: This class handles ONLY frames for EXISTING streams with
- * RocketStreamClientCallback, not sink or channel callbacks.
  */
 template <
     typename ConnectionT,
@@ -107,9 +93,8 @@ class ExistingStreamFrameHandler {
     const StreamId streamId = payloadFrame.streamId();
     auto it = partialRequestFrames.find(streamId);
 
-    DCHECK(payloadFrame.hasFollows() && it != partialRequestFrames.end())
-        << "payload frame without follows should be in partial frames";
     if (it != partialRequestFrames.end()) {
+      // Handle partial request frames (hasFollows reassembly)
       folly::variant_match(it->second, [&](auto& requestFrame) {
         const bool hasFollows = payloadFrame.hasFollows();
         requestFrame.payload().append(std::move(payloadFrame.payload()));
@@ -121,13 +106,14 @@ class ExistingStreamFrameHandler {
         }
       });
     } else {
-      throw std::logic_error("sink payload not implemented yet");
+      // Handle sink payload frames - these go to existing sink callbacks
+      handleSinkPayloadFrame(streamId, std::move(payloadFrame));
     }
   }
 
   /**
-   * Handle REQUEST_N frames - interface matches handleFrame expectation.
-   * Uses pure delegation to avoid circular dependencies.
+   * Handle REQUEST_N frames - routes to stream or sink based on callback type.
+   * Uses delegation to existing callbacks to avoid circular dependencies.
    */
   template <typename IteratorType>
   void handleRequestNFrame(RequestNFrame&& frame, IteratorType& it) noexcept {
@@ -187,6 +173,10 @@ class ExistingStreamFrameHandler {
    */
   void handleExtFrame(ExtFrame&&) noexcept {
     XLOG(FATAL) << "ext not implemented yet";
+  }
+
+  void handleSinkPayloadFrame(StreamId, PayloadFrame&&) noexcept {
+    XLOG(FATAL) << "sink payload not implemented yet";
   }
 };
 

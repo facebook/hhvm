@@ -99,6 +99,7 @@ RefactoredRocketServerConnection::RefactoredRocketServerConnection(
       streamCallbackManager_(&connectionAdapter_),
       requestStreamHandler_(&connectionAdapter_),
       existingStreamFrameHandler_(&connectionAdapter_),
+      requestChannelHandler_(&connectionAdapter_),
       incomingFrameHandler_(
           connectionAdapter_,
           setupFrameAcceptor_,
@@ -108,6 +109,7 @@ RefactoredRocketServerConnection::RefactoredRocketServerConnection(
           metadataPushHandler_,
           streamCallbackManager_,
           requestStreamHandler_,
+          requestChannelHandler_,
           existingStreamFrameHandler_) {
   CHECK(socket_);
   CHECK(frameHandler_);
@@ -152,7 +154,7 @@ StreamMetricCallback& getNoopStreamMetricCallback() {
 RocketStreamClientCallback* FOLLY_NULLABLE
 RefactoredRocketServerConnection::createStreamClientCallback(
     StreamId streamId,
-    IRocketServerConnection& /* connection */,
+    IRocketServerConnection& connection,
     uint32_t initialRequestN) {
   auto [it, inserted] = streams_.try_emplace(streamId);
   if (!inserted) {
@@ -161,7 +163,7 @@ RefactoredRocketServerConnection::createStreamClientCallback(
 
   auto cb = std::make_unique<RocketStreamClientCallback>(
       streamId,
-      *this,
+      connection,
       initialRequestN,
       THRIFT_FLAG(thrift_enable_stream_counters)
           ? streamMetricCallback_

@@ -30,6 +30,7 @@
 #include <thrift/lib/cpp2/transport/rocket/server/detail/ExistingStreamFrameHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/KeepAliveHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/MetadataPushHandler.h>
+#include <thrift/lib/cpp2/transport/rocket/server/detail/RequestChannelHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/RequestFnfHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/RequestResponseHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/RequestStreamHandler.h>
@@ -93,6 +94,10 @@ class IncomingFrameHandler {
           ConnectionT,
           ConnectionAdapter,
           RocketServerFrameContext>& requestStreamHandler,
+      RequestChannelHandler<
+          ConnectionT,
+          ConnectionAdapter,
+          RocketServerFrameContext>& requestChannelHandler,
       ExistingStreamFrameHandler<
           ConnectionT,
           ConnectionAdapter,
@@ -107,6 +112,7 @@ class IncomingFrameHandler {
         metadataPushHandler_(&metadataPushHandler),
         streamCallbackManager_(&streamCallbackManager),
         requestStreamHandler_(&requestStreamHandler),
+        requestChannelHandler_(&requestChannelHandler),
         existingStreamFrameHandler_(&existingStreamFrameHandler) {}
 
   void handle(std::unique_ptr<folly::IOBuf>&& frame) {
@@ -136,16 +142,18 @@ class IncomingFrameHandler {
         handleFrame<FrameType::REQUEST_FNF>(
             std::move(frame), requestFnfHandler_);
         break;
-      // TODO Add Support for other frame types
-      // case FrameType::REQUEST_CHANNEL:
-      //   handleFrame<FrameType::REQUEST_CHANNEL>(std::move(frame),
-      //   streamHandler_); break;
-      // case FrameType::PAYLOAD:
-      //   handleFrame<FrameType::PAYLOAD>(std::move(frame), streamHandler_);
-      //   break;
+      case FrameType::REQUEST_CHANNEL:
+        handleFrame<FrameType::REQUEST_CHANNEL>(
+            std::move(frame), requestChannelHandler_);
+        break;
+      case FrameType::PAYLOAD:
+        handleFrame<FrameType::PAYLOAD>(
+            std::move(frame), existingStreamFrameHandler_);
+        break;
+      // TODO Add Support for ERROR frame type
       // case FrameType::ERROR:
-      //   handleFrame<FrameType::ERROR>(std::move(frame), streamHandler_);
-      //   break;
+      //   handleFrame<FrameType::ERROR>(std::move(frame),
+      //   existingStreamFrameHandler_); break;
       case FrameType::METADATA_PUSH:
         handleFrame<FrameType::METADATA_PUSH>(
             std::move(frame), metadataPushHandler_);
@@ -183,6 +191,10 @@ class IncomingFrameHandler {
       ConnectionT,
       ConnectionAdapter,
       RocketServerFrameContext>* requestStreamHandler_;
+  RequestChannelHandler<
+      ConnectionT,
+      ConnectionAdapter,
+      RocketServerFrameContext>* requestChannelHandler_;
   ExistingStreamFrameHandler<
       ConnectionT,
       ConnectionAdapter,

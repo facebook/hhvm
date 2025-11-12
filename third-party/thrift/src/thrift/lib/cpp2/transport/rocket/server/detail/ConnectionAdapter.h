@@ -16,11 +16,13 @@
 
 #pragma once
 
+#include <chrono>
 #include <utility>
 #include <vector>
 #include <folly/IntrusiveList.h>
 #include <folly/io/IOBufQueue.h>
 #include <folly/io/async/EventBase.h>
+#include <folly/io/async/HHWheelTimer.h>
 #include <thrift/lib/cpp2/async/MessageChannel.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
@@ -30,6 +32,10 @@
 // Forward declarations to avoid circular dependencies
 namespace folly {
 class exception_wrapper;
+}
+
+namespace apache::thrift::rocket {
+class RocketSinkClientCallback;
 }
 
 namespace apache::thrift::rocket {
@@ -162,6 +168,15 @@ class ConnectionAdapter {
   }
 
   /**
+   * Emplace a partial REQUEST_CHANNEL frame for hasFollows handling.
+   */
+  void emplacePartialRequestChannelFrame(
+      StreamId streamId, RequestChannelFrame&& frame) {
+    connection_->partialRequestFrames_.emplace(
+        streamId, std::forward<RequestChannelFrame>(frame));
+  }
+
+  /**
    * Free a stream callback and perform cleanup.
    * Used by streaming handlers to clean up RocketStreamClientCallback
    * instances.
@@ -180,6 +195,52 @@ class ConnectionAdapter {
     }
   }
 
+  // ====== SINK SUPPORT METHODS ======
+
+  /**
+   * Create a sink client callback for REQUEST_CHANNEL handling.
+   * Returns true if successful, false if streamId is already in use.
+   * Delegates to the underlying connection to avoid circular dependencies.
+   */
+  bool createSinkClientCallback(StreamId streamId) {
+    // Delegate to underlying connection's method which handles concrete types
+    auto result = connection_->createSinkClientCallback(streamId, *connection_);
+    return result != nullptr;
+  }
+
+  /**
+   * Free a sink callback and perform cleanup.
+   * Used by sink handlers to clean up RocketSinkClientCallback instances.
+   * Manages inflightSinkFinalResponses_ counter.
+   */
+  void freeSink(StreamId streamId, bool markRequestComplete) {
+    connection_->freeStream(streamId, markRequestComplete);
+  }
+
+  /**
+   * Schedule a sink timeout callback for chunk timeouts.
+   * Used by sink handlers to manage per-payload timeouts.
+   */
+  void scheduleSinkTimeout(
+      void* timeoutCallback, std::chrono::milliseconds timeout) {
+    // Cast back to concrete type and delegate to underlying connection
+    connection_->scheduleSinkTimeout(
+        static_cast<folly::HHWheelTimer::Callback*>(timeoutCallback), timeout);
+  }
+
+  /**
+   * Increment inflight final response counter.
+   * Critical for sink connection cleanup - tracks pending final responses.
+   */
+  void incInflightFinalResponse() { connection_->incInflightFinalResponse(); }
+
+  /**
+   * Decrement inflight final response counter.
+   * May trigger connection cleanup if counter reaches zero during shutdown.
+   */
+  void decInflightFinalResponse() { connection_->decInflightFinalResponse(); }
+
+ public:
   // ====== READ HANDLE SUPPORT METHODS ======
 
   /**

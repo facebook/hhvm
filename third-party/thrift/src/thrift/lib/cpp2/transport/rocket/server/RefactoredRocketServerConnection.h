@@ -59,6 +59,7 @@
 #include <thrift/lib/cpp2/transport/rocket/server/detail/IncomingFrameBatcher.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/IncomingFrameHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/MetadataPushHandler.h>
+#include <thrift/lib/cpp2/transport/rocket/server/detail/RequestChannelHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/WriteBatcher.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -570,6 +571,12 @@ class RefactoredRocketServerConnection final : public IRocketServerConnection {
       RocketSinkClientCallback,
       RocketServerFrameContext>
       existingStreamFrameHandler_;
+
+  RequestChannelHandler<
+      RefactoredRocketServerConnection,
+      apache::thrift::rocket::ConnectionAdapter,
+      RocketServerFrameContext>
+      requestChannelHandler_;
 
   using IncomingFrameHandler = apache::thrift::rocket::IncomingFrameHandler<
       RefactoredRocketServerConnection,

@@ -19,6 +19,8 @@ function foo(bool $bool, int $int): void {
   !$int;
   $int ? 1 : 2;
   $int ?: 2;
+  (bool)$bool;
+  (bool)$int;
 }
 
 final class Box<T> {

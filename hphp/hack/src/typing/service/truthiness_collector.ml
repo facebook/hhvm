@@ -88,6 +88,11 @@ let get_types
         | _ -> []
 
       method! on_Eif env cond _consq _alt = for_cond env cond "Ternary"
+
+      method! on_Cast env hint e =
+        match hint with
+        | (_pos, Hprim Tbool) -> for_cond env e "Cast"
+        | _ -> []
     end
   in
   let get_map tast : Internal.t_info SMap.t =
@@ -115,7 +120,10 @@ let get_types
          (dynamic : Internal.t_info option) : t_ option ->
       match (normal, dynamic) with
       | (Some normal_info, None) ->
-        if is_sub_like_bool normal_info.tast_env normal_info.ty then
+        if
+          (not (String.equal normal_info.info_position_kind "Cast"))
+          && is_sub_like_bool normal_info.tast_env normal_info.ty
+        then
           None
         else
           Some
@@ -139,7 +147,8 @@ let get_types
       | (None, None) -> None
       | (Some normal_info, Some dynamic_info) ->
         if
-          is_sub_like_bool normal_info.tast_env normal_info.ty
+          (not (String.equal normal_info.info_position_kind "Cast"))
+          && is_sub_like_bool normal_info.tast_env normal_info.ty
           && is_sub_like_bool dynamic_info.tast_env dynamic_info.ty
         then
           None

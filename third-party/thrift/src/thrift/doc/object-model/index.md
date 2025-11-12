@@ -103,6 +103,23 @@ export const Requirement = (props) => {
   return <Operation {...props} />;
 };
 
+<!-- Collapsible section with a title, that is closed by default. -->
+export const Collapse = (props) => {
+  const {children, open = false, title = "Collapse", ...rest} = props;
+  return (
+    <details open={open} {...rest} >
+      <summary>{title}</summary>
+      {children}
+    </details>
+  );
+};
+
+<!-- Collapsible example section (closed by default). -->
+export const Example = (props) => {
+  const {title = "Example", ...rest} = props;
+  return <Collapse {...rest} title={title} />
+};
+
 <!-- Shorthands for subscripted code -->
 
 export const S0 = () => {
@@ -1116,14 +1133,16 @@ Thrift <KW>type systems</KW> are meant to evolve over time — new <KW>user-defi
 
 ### Schema Change
 
-A <KW>schema change</KW> is defined as an action to a <KW>type</KW> <code>T<sub>0</sub></code> to produce a new <KW>type</KW> <code>T<sub>1</sub></code> with the same <KW>type identity</KW> but different <KW>schema</KW>.
-It is denoted as <code>T<sub>0</sub></code> → <code>T<sub>1</sub></code>.
+A <KW>schema change</KW> is a tranformation of a <KW>type</KW> <T0 /> into a new <KW>type</KW> <T1 /> with the same <KW>type identity</KW> but different <KW>schema</KW>.
+
+It is denoted as <T0 /> → <T1 />.
+
 The Object Model provides deterministic semantics around certain classes of <KW>schema changes</KW> that can be used to reason about the (application-specific) safety of <KW>schema changes</KW>.
 
 :::info <KW>schema change</KW> ⇒ new <KW>type system</KW>
-When a <KW>schema change</KW> <code>T<sub>0</sub></code> → <code>T<sub>1</sub></code> is applied on a <KW>type</KW> <code>T<sub>0</sub></code> from a <KW>type system</KW> <code>S<sub>0</sub></code> to produce <code>T<sub>1</sub></code>, the resultant <KW>type</KW> is not part of the same <KW>type system</KW> (since a <KW>type system</KW> must have unique <KW>type identity</KW> for all <KW>types</KW>).
+When a <KW>schema change</KW> <T0 /> → <T1 /> is applied to a <KW>type</KW> <T0 /> from a <KW>type system</KW> <S0 /> to produce <T1 />, the resultant <KW>type</KW> is not part of the same <KW>type system</KW> (since a <KW>type system</KW> must have unique <KW>type identity</KW> for all <KW>types</KW>).
 
-It follows that **a <KW>schema change</KW> always forms a new <KW>type system</KW>**. Consequently, the schema change <code>T<sub>0</sub></code> → <code>T<sub>1</sub></code> can also be denoted as <code>S<sub>0</sub></code> → <code>S<sub>1</sub></code> .
+It follows that **a <KW>schema change</KW> always forms a new <KW>type system</KW>**. Consequently, the schema change <T0 /> → <T1 /> can also be denoted as <S0 /> → <S1 /> .
 :::
 
 The possibility of <KW>values</KW> in distinct <KW>type systems</KW>, whose <KW>types</KW> have the same identity but different <KW>schemas</KW> naturally raises the question of their relationship. In particular, producers (writers) and consumers (readers) must be able to exchange <KW>values</KW>, even if their <KW>type systems</KW> differ.
@@ -1136,7 +1155,7 @@ The relationship between a given <KW>value</KW> in two distinct <KW>type systems
 
 These transformations use <KW>partial records</KW> as intermediate <KW>value</KW> representations that are not associated with any <KW>type system</KW>.
 
-A <Bookmark id="partial-record"><KW>partial record</KW></Bookmark> is a [<KW>record</KW>](#records) where [`FieldSet`-kind <KW>records</KW>](#fieldset) may have missing or extraneous <KW>field values</KW> when compared to the canonical record representation (i.e., `record-of`) of the same <KW>value</KW>.
+A <Bookmark id="partial-record"><KW>partial record</KW></Bookmark> is a [<KW>record</KW>](#records) where [`FieldSet`-kind <KW>records</KW>](#fieldset) may have missing or extraneous <KW>field values</KW> when compared to the canonical record representation (i.e., [`record-of`](#notation-record-ofv)) of the same <KW>value</KW>.
 Notably, like all <KW>records</KW>, **<KW>partial records</KW>** **are not associated with a <KW>type system</KW>**.
 
 First, a <KW>value</KW> (in a <KW>type system</KW>) is **<KW>projected</KW>** to a <KW>partial record</KW>.
@@ -1149,24 +1168,151 @@ Then, the <KW>partial record</KW> can be **<KW>embedded</KW>** in a (potentially
 
 #### Common Field Preservation
 
-A <KW>common field preserving schema change</KW> (<S0 /> → <S1 />) does not affect the interpretation of <KW>field values</KW> of corresponding <KW>structured types</KW> <T0 /> and <T1 /> for <KW>field identities</KW> that remain in common between them.
+The [<KW>schema change</KW>](#schema-change) of a <KW>structured type</KW> <T0 /> → <T1 /> is said to be <KW>common field preserving</KW> if it does not affect the interpretation of the value of any <KW>field</KW> whose [<KW>field identity</KW>](#field-identity) remains in common between them.
 
+Formally:
 <Requirement>
 
 **Given**,
 
 * <S0 /> and <S1 /> — <KW>type systems</KW>
-* <T0 /> and <T1 /> — <KW>structured types</KW> in <S /> and <S1 /> respectively with matching <KW>type identity</KW>.
-* <V0 /> ∈ <code>dataset(T<sub>0</sub>)</code> and
-* <V1 /> = <code><a href="#operation-embed">embed<sub>S1</sub></a>(T<sub>1</sub>, <a href="#operation-project">project<sub>S0</sub></a>(v<sub>0</sub>))</code>
+* <T0 /> and <T1 /> — <KW>structured types</KW> in <S0 /> and <S1 /> respectively, with the same <KW>type identity</KW> <code>T</code>
+* <V0 /> ∈ <code>dataset(T<sub>0</sub>)</code> — a <KW>value</KW> of <KW>type</KW> <T0 />
+* <V1 /> = <code><a href="#operation-embed">embed<sub>S<sub>1</sub></sub></a>(T<sub>1</sub>, <a href="#operation-project">project<sub>S<sub>0</sub></sub></a>(v<sub>0</sub>))</code> — the value of <KW>type</KW> <T1 /> obtained by the *project-embed* round trip of <V0 />
 
-We define a **<KW>schema change</KW> <T0 /> → <T1 /> as <KW>common field preserving</KW>** if,
+**Then**,
 
-* For each <KW>field value</KW> <code>f<sub>0</sub></code> and <code>f<sub>1</sub></code> in the intersection of <code>record-of(v<sub>0</sub>)</code> and <code>record-of(v<sub>1</sub>)</code> by <KW>field identity</KW> respectively
-  * <code>embed<sub>S1</sub>(<i>type</i> of f<sub>1</sub>, f<sub>0</sub>)</code> succeeds
-  * <code><a href="#operation-areequal">areEqual<sub>S1</sub></a>(f<sub>1</sub>, embed<sub>S1</sub>(<i>type</i> of f<sub>1</sub>, f<sub>0</sub>))</code> produces <code>Value(bool, True)</code>
+The **<KW>schema change</KW> <T0 /> → <T1 /> is said to be <KW>common field preserving</KW>** if, for any <V0 />:
+* Let <code>I</code> be the set of <KW>field identities</KW> that exist in both <code>record-of(v<sub>0</sub>)</code> and <code>record-of(v<sub>1</sub>)</code>
+* For each <KW>field identity</KW> <code>id</code> in <code>I</code>:
+  * Let:
+    * <F0 /> and <F1 /> be the <KW>records</KW> of the field with <KW>identity</KW> <code>id</code> in <V0 /> and <V1 />, respectively
+    * <code>F<sub>1</sub></code> be the <KW>type</KW> of the field with <KW>identity</KW> <code>id</code> in <T1 />
+  * The following succeeds: <code>vf<sub>0→1</sub></code> = <code>embed<sub>S<sub>1</sub></sub>(F<sub>1</sub>, f<sub>0</sub>)</code>
+    * (<code>vf<sub>0→1</sub></code> is the <KW>value</KW> of field <code>id</code>, embedded from the original <KW>type system</KW> <S0 /> to the new <KW>type system</KW> <S1 />)
+  * <code><a href="#operation-areequal">areEqual<sub>S<sub>1</sub></sub></a>(Value(F<sub>1</sub>, f<sub>1</sub>), vf<sub>0→1</sub>)</code> produces <code>Value(bool, True)</code>
 
 </Requirement>
+
+<Example title="Example: common field preserving schema change" id="example-common-field-preserving-change">
+
+Let:
+
+<pre>
+T<sub>0</sub> =
+<br />
+    <Indent />
+    struct MyStruct {"{"}
+    <br />
+        <Indent times={2} />
+        1: i32 a;
+        <br />
+    <Indent />
+    {"}"}
+</pre>
+
+Which, after a schema change <S0 /> → <S1 />, results in:
+
+<pre>
+T<sub>1</sub> =
+<br />
+    <Indent />
+    struct MyStruct {"{"}
+    <br />
+        <Indent times={2} />
+        1: i32 a;
+        <br />
+        <Indent times={2} />
+        2: double b;
+        <br />
+    <Indent />
+  {"}"}
+</pre>
+
+i.e., the schema change consisted of adding a new field (of type `double`).
+
+Then, any value <V0 /> will have a record of the following form (for some valid 32-bit integer `x`):
+
+<pre>
+<code>r<sub>0</sub></code> =
+<br />
+    <Indent />
+    FieldSet(
+    <br />
+        <Indent times={2} />
+        (Int16(1), Text("a")) → Int32(x)
+        <br />
+    <Indent />
+    )
+</pre>
+
+Let's compute <V1 /> = <code>embed<sub>S<sub>1</sub></sub>(T<sub>1</sub>, project<sub>S<sub>0</sub></sub>(v<sub>0</sub>))</code>.
+
+Per the [definition of `project`](#operation-project), the partial record produced by <code>project<sub>S<sub>0</sub></sub>(v<sub>0</sub>)</code> is the same as the record above, i.e. <code>r<sub>0</sub></code>. Therefore:
+
+<pre>
+v<sub>1</sub>
+    <br />
+    <Indent />
+    = <a href="#operation-embed">embed<sub>S<sub>1</sub></sub></a>(T<sub>1</sub>, r<sub>0</sub>)
+    <br />
+    <Indent />
+    = Value(T<sub>1</sub>, FieldSet(
+    <br />
+    <Indent times={2} />
+    (Int16(1), Text("a")) → embed<sub>S<sub>1</sub></sub>(i32, Int32(x)),
+    <br />
+    <Indent times={2} />
+    (Int16(2), Text("b")) → <a href="#operation-createstandarddefault">createStandardDefault<sub>S<sub>1</sub></sub></a>(double),
+    <br />
+    <Indent />
+    )
+    <br />
+    <Indent />
+    = Value(T<sub>1</sub>, FieldSet(
+    <br />
+    <Indent times={2} />
+    (Int16(1), Text("a")) → Int32(x),
+    <br />
+    <Indent times={2} />
+    (Int16(2), Text("b")) → Float64(0)
+    <br />
+    <Indent />
+    )
+</pre>
+
+The set `I` of <KW>field identities</KW> in common between values of <T0 /> and <T1 /> is exactly: `(Int16(1), Text("a"))`.
+
+Let:
+
+<pre>
+f<sub>0</sub> = Int32(x)
+<br />
+f<sub>1</sub> = Int32(x)
+<br />
+F<sub>1</sub> = i32
+<br />
+vf<sub>0→1</sub>
+<br />
+    <Indent />
+    = embed<sub>S<sub>1</sub></sub>(i32, Int32(x))
+    <br />
+    <Indent />
+    = Value(i32, Int32(x))
+    <br />
+<br />
+areEqual<sub>S<sub>1</sub></sub>(Value(F<sub>1</sub>, f<sub>1</sub>), vf<sub>0→1</sub>)
+<br />
+    <Indent />
+    = areEqual<sub>S<sub>1</sub></sub>(Value(i32, Int32(x)), Value(i32, Int32(x)))
+    <br />
+    <Indent />
+    = Value(bool, True)
+</pre>
+
+It follows that the schema change <T0 /> → <T1 /> above *is common field preserving*.
+
+</Example>
 
 #### Sealed Types
 
@@ -1253,70 +1399,70 @@ If `T` is...
 * `bool`...
   * If `r` is `Bool`-kind, produces `Value(bool, r)`.
     * FAILS otherwise.
-  * a [<KW>signed integer type</KW>](#fixed-width-signed-integer-types) (`byte`, `i16`, `i32`, `i64`)...
-    * If `r` is a <KW>signed integer kind record</KW> (`Int{N}`) , and <KW>kind</KW> and `T` match (as defined by [this table](#thrift-type--record-kind)), produces `Value(T, r)`.
-    * FAILS otherwise.
-  * `float`...
-    * If `r` is `Float32`-kind, produces `Value(float, r)`.
-    * FAILS otherwise.
-  * `double`...
-    * If `r` is `Float64`-kind, produces `Value(double, r)`.
-    * FAILS otherwise.
-  * `string`...
-    * If `r` is `Text`-kind, produces `Value(string, r)`.
-    * FAILS otherwise.
-  * `binary`...
-    * If `r` is `ByteArray`-kind, produces `Value(binary, r)`.
-    * FAILS otherwise.
-  * `any`...
-    * If `r` is `Any`-kind, produces `Value(any, r)`.
-    * FAILS otherwise.
-  * `list<V>`...
-    * If `r` is `List`-kind, produces `Value(list<V>, result)` where...
-      * For each <KW>record</KW> `e` in `r` (in order),
-        * `result` has the element <code>embed<sub>S</sub>(V, e)</code>.
-      * `result` has no other entries.
-      * FAILS if the aforementioned `embed` fails.
-    * FAILS otherwise.
-  * `set<V>`...
-    * If `r` is `Set`-kind, produces `Value(set<V>, result)` where...
-      * For each <KW>record</KW> `e` in `r`,
-        * `result` has the element <code>embed<sub>S</sub>(V, e)</code>.
-      * `result` has no other entries.
-      * FAILS if the aforementioned `embed` fails.
-    * FAILS otherwise.
-  * `map<K, V>`...
-    * If `r` is `Map`-kind, produces `Value(map<K, V>, result)` where...
-      * `result` is a `Map` where for each element (<code>m<sub>key</sub></code>, <code>m<sub>value</sub></code>) in `r`...
-        * `result` contains the entry (<code>result<sub>key</sub></code>, <code>result<sub>value</sub></code>) where,
-          * <code>result<sub>key</sub></code> = <code>embed<sub>S</sub>(K, m<sub>key</sub>)</code>
-          * <code>result<sub>value</sub></code> = <code>embed<sub>S</sub>(V, m<sub>value</sub>)</code>
-          * FAILS if either aforementioned `embed` fails.
-      * `result` has no other entries.
-    * FAILS otherwise.
-  * an [<KW>enum</KW>](#enum-types)...
-    * Given `v` = <code>embed<sub>S</sub>(i32, r)</code> succeeds, produces `Value(T, record-of(v))`.
+* a [<KW>signed integer type</KW>](#fixed-width-signed-integer-types) (`byte`, `i16`, `i32`, `i64`)...
+  * If `r` is a <KW>signed integer kind record</KW> (`Int{N}`) , and <KW>kind</KW> and `T` match (as defined by [this table](#thrift-type--record-kind)), produces `Value(T, r)`.
+  * FAILS otherwise.
+* `float`...
+  * If `r` is `Float32`-kind, produces `Value(float, r)`.
+  * FAILS otherwise.
+* `double`...
+  * If `r` is `Float64`-kind, produces `Value(double, r)`.
+  * FAILS otherwise.
+* `string`...
+  * If `r` is `Text`-kind, produces `Value(string, r)`.
+  * FAILS otherwise.
+* `binary`...
+  * If `r` is `ByteArray`-kind, produces `Value(binary, r)`.
+  * FAILS otherwise.
+* `any`...
+  * If `r` is `Any`-kind, produces `Value(any, r)`.
+  * FAILS otherwise.
+* `list<V>`...
+  * If `r` is `List`-kind, produces `Value(list<V>, result)` where...
+    * For each <KW>record</KW> `e` in `r` (in order),
+      * `result` has the element <code>embed<sub>S</sub>(V, e)</code>.
+    * `result` has no other entries.
     * FAILS if the aforementioned `embed` fails.
-  * an [<KW>opaque alias</KW>](#opaque-alias-types) with <KW>target type</KW> `V`...
-    * Given `v` = <code>embed<sub>S</sub>(V, r)</code> succeeds, produces `Value(T, record-of(v))`.
+  * FAILS otherwise.
+* `set<V>`...
+  * If `r` is `Set`-kind, produces `Value(set<V>, result)` where...
+    * For each <KW>record</KW> `e` in `r`,
+      * `result` has the element <code>embed<sub>S</sub>(V, e)</code>.
+    * `result` has no other entries.
     * FAILS if the aforementioned `embed` fails.
-  * a [<KW>struct</KW>](#struct)...
-    * If `r` is `FieldSet`-kind, produces `Value(T, result)` where...
-      * `result` is a `FieldSet` where for each <KW>field</KW> `f` in `T`...
-        * If `r` contains <KW>field identity</KW> of `f`, with <KW>record</KW> `u`,
-          * Given `v` = <code>embed<sub>S</sub>(<i>type</i> of f, u)</code>, `result` contains the entry:
-            * (<KW>field identity</KW> of `f`, `v`).
-          * FAILS if the aforementioned `embed` fails.
-        * If `r` does not contain <KW>field identity</KW> of `f`,
-          * If `f` is <KW>optional</KW>, then `f` is absent in `result`.
-          * If `f` is <KW>always-present</KW>, then `result` contains the entry:
-            * (<KW>field identity</KW> of `f`, <code><a href="#operation-createstandarddefault">createStandardDefault<sub>S</sub></a>(<i>type</i> of f)</code>).
-      * FAILS if `T` is [<KW>sealed</KW>](#sealed-types) and there are <KW>field values</KW> in `r` that are not in `T`.
-      * Otherwise, remaining <KW>field values</KW> in `r` are dropped.
-    * FAILS otherwise.
-  * a [<KW>union</KW>](#union)...
-    * Produces a <KW>value</KW> with the same rules as <KW>struct</KW> except:
-      * FAILS if `r` is `FieldSet`-kind and has more than one element.
+  * FAILS otherwise.
+* `map<K, V>`...
+  * If `r` is `Map`-kind, produces `Value(map<K, V>, result)` where...
+    * `result` is a `Map` where for each element (<code>m<sub>key</sub></code>, <code>m<sub>value</sub></code>) in `r`...
+      * `result` contains the entry (<code>result<sub>key</sub></code>, <code>result<sub>value</sub></code>) where,
+        * <code>result<sub>key</sub></code> = <code>embed<sub>S</sub>(K, m<sub>key</sub>)</code>
+        * <code>result<sub>value</sub></code> = <code>embed<sub>S</sub>(V, m<sub>value</sub>)</code>
+        * FAILS if either aforementioned `embed` fails.
+    * `result` has no other entries.
+  * FAILS otherwise.
+* an [<KW>enum</KW>](#enum-types)...
+  * Given `v` = <code>embed<sub>S</sub>(i32, r)</code> succeeds, produces `Value(T, record-of(v))`.
+  * FAILS if the aforementioned `embed` fails.
+* an [<KW>opaque alias</KW>](#opaque-alias-types) with <KW>target type</KW> `V`...
+  * Given `v` = <code>embed<sub>S</sub>(V, r)</code> succeeds, produces `Value(T, record-of(v))`.
+  * FAILS if the aforementioned `embed` fails.
+* a [<KW>struct</KW>](#struct)...
+  * If `r` is `FieldSet`-kind, produces `Value(T, result)` where...
+    * `result` is a `FieldSet` where for each <KW>field</KW> `f` in `T`...
+      * If `r` contains <KW>field identity</KW> of `f`, with <KW>record</KW> `u`,
+        * Given `v` = <code>embed<sub>S</sub>(<i>type</i> of f, u)</code>, `result` contains the entry:
+          * (<KW>field identity</KW> of `f`, `v`).
+        * FAILS if the aforementioned `embed` fails.
+      * If `r` does not contain <KW>field identity</KW> of `f`,
+        * If `f` is <KW>optional</KW>, then `f` is absent in `result`.
+        * If `f` is <KW>always-present</KW>, then `result` contains the entry:
+          * (<KW>field identity</KW> of `f`, <code><a href="#operation-createstandarddefault">createStandardDefault<sub>S</sub></a>(<i>type</i> of f)</code>).
+    * FAILS if `T` is [<KW>sealed</KW>](#sealed-types) and there are <KW>field values</KW> in `r` that are not in `T`.
+    * Otherwise, remaining <KW>field values</KW> in `r` are dropped.
+  * FAILS otherwise.
+* a [<KW>union</KW>](#union)...
+  * Produces a <KW>value</KW> with the same rules as <KW>struct</KW> except:
+    * FAILS if `r` is `FieldSet`-kind and has more than one element.
 
 </Operation>
 
@@ -1340,14 +1486,14 @@ The <KW>cipher</KW> produced by a <KW>protocol</KW> `P` is called a <KW>`P`-ciph
 
 > **<code>serialize<sub>S</sub>(P, v)</code> → <code>cipher<sub>P</sub></code>**
 >
-> Transforms a Thrift <KW>value</KW> to a <KW>`P`-cipher</KW>.
+> Transforms a Thrift <KW>value</KW> into a <KW>`P`-cipher</KW>.
 
 **Environment**:
 * `S` — a <KW>type system</KW>
 
 **Inputs**:
 * `P` — a <KW>protocol</KW>
-* `v` — a <KW>value</KW> of <KW>type</KW> `T,` where `T` is a <KW>type</KW> that exists in `S`
+* `v` — a <KW>value</KW> of <KW>type</KW> `T`, where `T` is a <KW>type</KW> that exists in `S`
 
 **Outputs**:
 * <code>cipher<sub>P</sub></code> — (<KW>byte array</KW>) <KW><code>P</code>-cipher</KW>, which is a <KW>protocol</KW>-specific representation of <code>v</code>.
@@ -1392,7 +1538,7 @@ A conforming <KW>protocol</KW> must produce the same <KW>value</KW> via a <KW>se
 
 **When**,
 
-* <V1 /> = <code>embed<sub>S1</sub>(T<sub>1</sub>, project<sub>S0</sub>(v<sub>0</sub>))</code> succeeds
+* <V1 /> = <code>embed<sub>S<sub>1</sub></sub>(T<sub>1</sub>, project<sub>S<sub>0</sub></sub>(v<sub>0</sub>))</code> succeeds
 * <T0 /> → <T1 /> can be described as a <KW>common field preserving schema change</KW>
   * Note that this is vacuously true for non-<KW>structured types</KW>
 * <code>cipher = serialize(P, S<sub>0</sub>, v<sub>0</sub>)</code> succeeds
@@ -1400,7 +1546,7 @@ A conforming <KW>protocol</KW> must produce the same <KW>value</KW> via a <KW>se
 **Then**,
 
 * <code>r = deserialize(P, S<sub>1</sub>, T<sub>1</sub>, cipher)</code> must succeed, and
-* <code><a href="#operation-areequal">areEqual<sub>S1</sub></a>(r, v<sub>1</sub>)</code> must produce <code>Value(bool, True)</code>
+* <code><a href="#operation-areequal">areEqual<sub>S<sub>1</sub></sub></a>(r, v<sub>1</sub>)</code> must produce <code>Value(bool, True)</code>
 
 </Requirement>
 
@@ -1621,10 +1767,11 @@ Equivalent to **<code><a href="#operation-materialize">materialize<sub>S,P</sub>
 
 ## Changelog
 
-| Date released | Version | Description
-|---------------|---------|----------------
-| May 20, 2025  | 1.0.0   | Initial version
-| June 16, 2025 | 1.1.0   | [`MINOR`](#versioning-minor):<ol><li>Added [<KW>Annotation Map</KW>](#annotation-maps) concept, and updated <KW>user-specified properties</KW> to include annotations.</li></ol>[`PATCH`](#versioning-patch): <ol><li>Changed [<KW>presence qualifiers</KW>](#presence-qualifier): renamed <KW>unqualified</KW> to <KW>always-present</KW>.<br />Rationale: the term "unqualified" conflates a Thrift IDL concept (i.e., the lack of a qualifier in the `.thrift` source) with a semantic one in the object model (of a field always having a value). Indeed, the lack of a qualifier in IDL may actually correspond to different *semantic presence qualifiers*: in a <KW>struct</KW>, it corresponds to <KW>always-present</KW>, whereas in a <KW>union</KW> it corresponds to <KW>optional</KW>.</li><li>Various typos and style fixes.</li></ol>
+| Date released     | Version | Description
+|-------------------|---------|----------------
+| May 20, 2025      | 1.0.0   | Initial version
+| June 16, 2025     | 1.1.0   | [`MINOR`](#versioning-minor):<ol><li>Added [<KW>Annotation Map</KW>](#annotation-maps) concept, and updated <KW>user-specified properties</KW> to include annotations.</li></ol>[`PATCH`](#versioning-patch): <ol><li>Changed [<KW>presence qualifiers</KW>](#presence-qualifier): renamed <KW>unqualified</KW> to <KW>always-present</KW>.<br />Rationale: the term "unqualified" conflates a Thrift IDL concept (i.e., the lack of a qualifier in the `.thrift` source) with a semantic one in the object model (of a field always having a value). Indeed, the lack of a qualifier in IDL may actually correspond to different *semantic presence qualifiers*: in a <KW>struct</KW>, it corresponds to <KW>always-present</KW>, whereas in a <KW>union</KW> it corresponds to <KW>optional</KW>.</li><li>Various typos and style fixes.</li></ol>
+| November 10, 2025 | 1.1.1   | [`PATCH`](#versioning-patch): <ol><li>Reworded [Common Field Preservation](#common-field-preservation) and added [Example](#example-common-field-preserving-change).</li><li>Fixed indentation of `embed` operation details, some typos and nits.</li></ol>
 
 ### Versioning
 
@@ -1642,3 +1789,4 @@ Releases use [Semantic Versioning](https://semver.org/), with a 3-component vers
   * They are typically non-semantic changes to the document, such as examples, clarifications, typographical fixes, etc.
   * All previous assumptions and semantics remain unchanged.
   * Such changes are extremely common.
+

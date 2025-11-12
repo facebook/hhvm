@@ -205,29 +205,41 @@ WebTransportImpl::StreamWriteHandle::writeStreamData(
     std::unique_ptr<folly::IOBuf> data,
     bool fin,
     ByteEventCallback* deliveryCallback) {
+  VLOG(4) << __func__ << " data=" << data.get() << " fin=" << fin
+          << " deliveryCallback=" << deliveryCallback
+          << " stopSendingEc_=" << stopSendingErrorCode_.value_or(0)
+          << " bufferedWrites_.size()=" << bufferedWrites_.size();
+
   if (stopSendingErrorCode_) {
+    VLOG(4) << __func__ << "; STOP_SENDING code=" << *stopSendingErrorCode_;
     return folly::makeUnexpected(WebTransport::ErrorCode::STOP_SENDING);
   }
   if (!data && !fin) {
+    VLOG(4) << __func__ << " No data and no FIN, ret=GENERIC_ERROR";
     return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
   }
 
   impl_.sp_.refreshTimeout();
 
   if (!bufferedWrites_.empty() && bufferedWrites_.back().fin) {
+    VLOG(4) << __func__ << " Last buffered write has FIN, ret=GENERIC_ERROR";
     return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
   }
   if (!bufferedWrites_.empty() &&
       bufferedWrites_.back().deliveryCallback == nullptr) {
+    VLOG(4) << __func__ << " Updating last buffered write";
     if (data) {
       bufferedWrites_.back().buf.append(std::move(data));
     }
     bufferedWrites_.back().deliveryCallback = deliveryCallback;
     bufferedWrites_.back().fin = fin;
   } else {
+    VLOG(4) << __func__ << " Emplacing new buffered write";
     bufferedWrites_.emplace_back(std::move(data), deliveryCallback, fin);
   }
 
+  VLOG(4) << __func__
+          << " Flushing buffered writes, size=" << bufferedWrites_.size();
   return flushBufferedWrites();
 }
 
@@ -280,33 +292,50 @@ void WebTransportImpl::StreamWriteHandle::onStreamWriteReady(
 folly::Expected<WebTransport::FCState, WebTransport::ErrorCode>
 WebTransportImpl::StreamWriteHandle::flushBufferedWrites() {
   auto availableSpace = impl_.sendFlowController_.getAvailable();
+  VLOG(4) << __func__ << " availableSpace=" << availableSpace
+          << " bufferedWrites_.size()=" << bufferedWrites_.size();
 
   while (availableSpace > 0 && !bufferedWrites_.empty()) {
     auto& frontEntry = bufferedWrites_.front();
+    VLOG(4) << __func__ << " Processing frontEntry, buf.len="
+            << frontEntry.buf.chainLength() << " fin=" << frontEntry.fin
+            << " deliveryCallback=" << frontEntry.deliveryCallback;
     auto bufToSend = frontEntry.buf.splitAtMost(availableSpace);
 
-    availableSpace -= bufToSend->computeChainDataLength();
+    auto bufToSendLen = bufToSend ? bufToSend->computeChainDataLength() : 0;
+    VLOG(4) << __func__ << " bufToSendLen=" << bufToSendLen;
+    availableSpace -= bufToSendLen;
     ByteEventCallback* sendDeliveryCallback = nullptr;
     bool sendFin = false;
 
     if (frontEntry.buf.empty()) {
       sendDeliveryCallback = frontEntry.deliveryCallback;
       sendFin = frontEntry.fin;
+      VLOG(4) << __func__ << " frontEntry.buf empty, sendFin=" << sendFin;
       bufferedWrites_.pop_front();
     }
 
+    VLOG(4) << __func__ << " Sending data on stream id=" << id_
+            << " sendFin=" << sendFin
+            << " sendDeliveryCallback=" << sendDeliveryCallback;
     auto res = impl_.sendWebTransportStreamData(
         id_, std::move(bufToSend), sendFin, sendDeliveryCallback);
 
     if (res.hasError()) {
+      VLOG(4) << __func__
+              << " sendWebTransportStreamData error=" << uint32_t(res.error());
       return folly::makeUnexpected(res.error());
     }
 
     if (sendFin || *res == WebTransport::FCState::BLOCKED) {
+      VLOG(4) << __func__ << " sendFin=" << sendFin
+              << " or FCState::BLOCKED, ret=" << uint32_t(*res);
       return *res;
     }
   }
 
+  VLOG(4) << __func__
+          << " Done, bufferedWrites_.empty()=" << bufferedWrites_.empty();
   return bufferedWrites_.empty() ? WebTransport::FCState::UNBLOCKED
                                  : WebTransport::FCState::BLOCKED;
 }

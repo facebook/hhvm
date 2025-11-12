@@ -315,6 +315,11 @@ fn emit_xhp_attribute_array(xal: &[XhpAttribute<'_>]) -> Result<Expr> {
             Hint_::Hlike(h) | Hint_::Hoption(h) => extract_from_hint(h, enum_opt),
             Hint_::Happly(ast_defs::Id(_, id), _) => get_attribute_array_values(id, enum_opt),
             Hint_::HclassPtr(_, _) => get_attribute_array_values("HH\\class", enum_opt),
+            Hint_::Haccess(_, _) => {
+                // TODO: Consider encoding full type access path instead of falling back to mixed
+                // For now, treat type constants as mixed to avoid crashes
+                get_attribute_array_values("HH\\mixed", enum_opt)
+            }
             _ => Err(Error::unrecoverable(
                 "There are no other possible xhp attribute hints",
             )),

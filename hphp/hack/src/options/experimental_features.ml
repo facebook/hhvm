@@ -74,6 +74,7 @@ type feature_name =
   | NamedParameters
   | NamedParametersUse
   | NullsafePipe
+  | XhpTypeConstants
 [@@deriving eq, ord, show]
 
 let feature_name_map =
@@ -123,6 +124,7 @@ let feature_name_map =
       ("named_parameters", NamedParameters);
       ("named_parameters_use", NamedParametersUse);
       ("nullsafe_pipe", NullsafePipe);
+      ("xhp_type_constants", XhpTypeConstants);
     ]
 
 let feature_name_from_string s = SMap.find_opt s feature_name_map

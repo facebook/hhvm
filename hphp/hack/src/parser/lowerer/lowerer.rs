@@ -5045,7 +5045,12 @@ fn p_xhp_class_attr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Either<ast::Xh
         XHPClassAttribute(c) => {
             let ast::Id(p, name) = pos_name(&c.name, env)?;
             if let TypeConstant(_) = &c.type_.children {
-                if env.is_typechecker() {
+                use oxidized::experimental_features::FeatureName;
+                if !env
+                    .active_experimental_features
+                    .contains(&FeatureName::XhpTypeConstants)
+                    && env.is_typechecker()
+                {
                     raise_parsing_error(
                         &c.type_,
                         env,

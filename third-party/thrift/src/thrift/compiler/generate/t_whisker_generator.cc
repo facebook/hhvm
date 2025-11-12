@@ -985,7 +985,8 @@ void t_whisker_generator::initialize_context() {
   context_.register_visitors(visitor);
   initialize_context(visitor);
   for (const t_program& p : program_bundle_.programs()) {
-    visitor(p);
+    whisker_generator_visitor_context ctx;
+    visitor(ctx, p);
   }
 }
 

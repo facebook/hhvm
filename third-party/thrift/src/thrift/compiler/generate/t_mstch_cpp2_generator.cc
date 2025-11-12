@@ -352,37 +352,39 @@ class cpp2_generator_context {
   }
 
   void register_visitors(t_whisker_generator::context_visitor& visitor) {
+    using context = t_whisker_generator::whisker_generator_visitor_context;
     // Compute field isset indexes and serialization order, which requires a
     // back-reference to the parent structured definition
-    visitor.add_structured_definition_visitor([this](const t_structured& node) {
-      cpp2_field_generator_context field_ctx;
-      for (const t_field& field : node.fields()) {
-        if (cpp2::field_has_isset(&field)) {
-          field_ctx.isset_index++;
-        }
-        field_context_map_[&field] = field_ctx;
-      }
+    visitor.add_structured_definition_visitor(
+        [this](const context&, const t_structured& node) {
+          cpp2_field_generator_context field_ctx;
+          for (const t_field& field : node.fields()) {
+            if (cpp2::field_has_isset(&field)) {
+              field_ctx.isset_index++;
+            }
+            field_context_map_[&field] = field_ctx;
+          }
 
-      if (node.has_structured_annotation(kSerializeInFieldIdOrderUri)) {
-        const t_field* prev = nullptr;
-        for (const t_field* curr : node.fields_id_order()) {
-          if (prev != nullptr) {
-            field_context_map_[prev].serialization_next = curr;
-            field_context_map_[curr].serialization_prev = prev;
+          if (node.has_structured_annotation(kSerializeInFieldIdOrderUri)) {
+            const t_field* prev = nullptr;
+            for (const t_field* curr : node.fields_id_order()) {
+              if (prev != nullptr) {
+                field_context_map_[prev].serialization_next = curr;
+                field_context_map_[curr].serialization_prev = prev;
+              }
+              prev = curr;
+            }
+          } else {
+            const t_field* prev = nullptr;
+            for (const t_field& curr : node.fields()) {
+              if (prev != nullptr) {
+                field_context_map_[prev].serialization_next = &curr;
+                field_context_map_[&curr].serialization_prev = prev;
+              }
+              prev = &curr;
+            }
           }
-          prev = curr;
-        }
-      } else {
-        const t_field* prev = nullptr;
-        for (const t_field& curr : node.fields()) {
-          if (prev != nullptr) {
-            field_context_map_[prev].serialization_next = &curr;
-            field_context_map_[&curr].serialization_prev = prev;
-          }
-          prev = &curr;
-        }
-      }
-    });
+        });
   }
 
  private:

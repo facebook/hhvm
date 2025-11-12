@@ -1130,7 +1130,8 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
 
   void initialize_context(context_visitor& visitor) override {
     // Fix fields with mismatched empty const containers
-    visitor.add_field_visitor([](const t_field& node) {
+    visitor.add_field_visitor([](const whisker_generator_visitor_context&,
+                                 const t_field& node) {
       const t_const_value* value = node.default_value();
       if (value != nullptr && value->is_empty()) {
         const t_type& true_type = *node.type()->get_true_type();

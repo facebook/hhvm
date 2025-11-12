@@ -76,17 +76,20 @@ class whisker_generator_context {
   // Thrift AST nodes' relation storage is uni-directional (e.g. a t_struct node
   // contains references to its fields, but t_field does not contain a
   // corresponding reverse reference to the t_struct).
-  void register_visitors(basic_ast_visitor<true>& visitor) {
-    visitor.add_interface_visitor([this](const t_interface& node) {
-      for (const t_function& function : node.functions()) {
-        function_parents_[&function] = &node;
-      }
-    });
-    visitor.add_structured_definition_visitor([this](const t_structured& node) {
-      for (const t_field& field : node.fields()) {
-        field_parents_[&field] = &node;
-      }
-    });
+  void register_visitors(
+      basic_ast_visitor<true, const_visitor_context&>& visitor) {
+    visitor.add_interface_visitor(
+        [this](const const_visitor_context&, const t_interface& node) {
+          for (const t_function& function : node.functions()) {
+            function_parents_[&function] = &node;
+          }
+        });
+    visitor.add_structured_definition_visitor(
+        [this](const const_visitor_context&, const t_structured& node) {
+          for (const t_field& field : node.fields()) {
+            field_parents_[&field] = &node;
+          }
+        });
   }
 
   // Get the parent structured definition (back-reference) of a field.
@@ -118,7 +121,11 @@ class whisker_generator_context {
 class t_whisker_generator : public t_generator {
  public:
   using t_generator::t_generator;
-  using context_visitor = basic_ast_visitor<true>;
+  /** AST visitor context type for the Whisker generator context builder */
+  using whisker_generator_visitor_context = const_visitor_context;
+  /** AST visitor type for the Whisker generator context builder */
+  using context_visitor =
+      basic_ast_visitor<true, whisker_generator_visitor_context&>;
 
  protected:
   /**

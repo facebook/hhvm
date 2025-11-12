@@ -15,14 +15,60 @@
 */
 
 #include "hphp/runtime/base/request-fanout-limit.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {
+
+static std::atomic<int64_t> s_maxConcurrentFanoutCount = 0;
+
+int64_t RequestFanoutLimit::RequestFanoutCount::increment() {
+  /**
+  * This operation is safe from operating on abandoned 
+  * counter erased by other racing xbox threads, because:
+  * - The counter is always initialized to 2 during insertion to account for root-req, AND
+  * - All increment for children request will happen before enqueue() 
+  *   and inside the parent request's lifetime, ensures the count will always > 0 
+  *   as long as any offspring xbox request is running
+  */
+  auto countBeforeIncrement = currentCount.fetch_add(1, std::memory_order_acq_rel);
+  auto newCount = countBeforeIncrement + 1;
+
+  /**
+   * Check the new count is below the configured fanout limit
+   */
+  if (newCount > Cfg::Server::RequestFanoutLimit) {
+    // TODO add enforcement here
+  }
+
+  /**
+   * Update the max concurrent count for the given root req
+   */
+  auto prevMax = maxCount.load(std::memory_order_acquire);
+  while (newCount > prevMax 
+    && !maxCount.compare_exchange_weak(
+      prevMax, 
+      newCount, 
+      std::memory_order_acq_rel, 
+      std::memory_order_acquire)
+    ) {
+      // prevMax updated by compare_exchange_weak
+  }
+
+  return countBeforeIncrement;
+}
+
+int64_t RequestFanoutLimit::RequestFanoutCount::decrement() {
+  return currentCount.fetch_sub(1, std::memory_order_acq_rel);
+}
 
 RequestFanoutLimit::RequestFanoutLimit(int limit, int size)
   : m_limit(limit), m_map(size) {  
   assertx(limit > 0);
   assertx(size > 0);
+  if (Cfg::Server::EnableRequestFanoutLogging) {
+    m_fanoutLogger = ServiceData::createCounter("request_fanout.max_concurrent_count");
+  }
 }
 
 void RequestFanoutLimit::increment(const RequestId& id) {
@@ -38,23 +84,14 @@ void RequestFanoutLimit::increment(const RequestId& id) {
     // always > 0 as long as any offspring children (i.e. xbox) request is running, 
     // which avoids operating on abandoned counter erased by other racing children 
     // (i.e. xbox) threads. 
-    auto insertResult = m_map.insert(id.id(), std::make_shared<std::atomic<int64_t>>(2));
+    auto insertResult = m_map.insert(
+      id.id(), 
+      std::make_shared<RequestFanoutLimit::RequestFanoutCount>(2, 2)
+    );
   } else {
     auto counter = it->second.get();
     assertx(counter);
-
-    /**
-      * This operation is safe from operating on abandoned 
-      * counter erased by other racing xbox threads, because:
-      * - The counter is always initialized to 1 when root request onSessionInit(), AND
-      * - All increment for children request will happen before enqueue() 
-      *   and inside the parent request's lifetime, ensures the count will always > 0 
-      *   as long as any offspring xbox request is running
-      */
-    auto countBeforeIncrement = counter->fetch_add(1, std::memory_order_acq_rel);
-    if (countBeforeIncrement >= m_limit) {
-      Logger::Verbose("Request fanout limit exceeded.");
-    }
+    counter->increment();
   }
 }
 
@@ -73,14 +110,34 @@ void RequestFanoutLimit::decrement(const RequestId& id) {
   auto counter = it->second.get();
   assertx(counter);
 
-  auto countBeforeDecrement = counter->fetch_sub(1, std::memory_order_acq_rel);
+  auto countBeforeDecrement = counter->decrement();
   
-  // Clear the entry if current thread does 1 to 0 decrement
   if (countBeforeDecrement == 1) {
+    // Update the global server max counter if current root-req has spawn 
+    // more children req than any other previous root-req
+    auto prevGlobalMax = s_maxConcurrentFanoutCount.load(std::memory_order_acquire);
+    auto currReqMax = counter->maxCount.load(std::memory_order_acquire);
+    while (
+      currReqMax > prevGlobalMax 
+      && !s_maxConcurrentFanoutCount.compare_exchange_weak(
+        prevGlobalMax, 
+        currReqMax, 
+        std::memory_order_acq_rel, 
+        std::memory_order_acquire
+      )
+    ) {
+      // global server max updated by compare_exchange_weak
+    }
+
+    // Log the up-to-date server maxConcurrentFanoutCount to ODS
+    if (m_fanoutLogger) {
+      m_fanoutLogger->setValue(s_maxConcurrentFanoutCount.load(std::memory_order_acquire));
+    }
+
+    // Erase the entry
     m_map.erase(id.id());
     Logger::Verbose("All children requests of %ld completed", id.id());
   }
-  
 }
 
 int RequestFanoutLimit::getCurrentCount(const RequestId& id) const {
@@ -94,7 +151,21 @@ int RequestFanoutLimit::getCurrentCount(const RequestId& id) const {
     return -1;
   }
 
-  return counter->load(std::memory_order_acquire);
+  return counter->currentCount.load(std::memory_order_acquire);
+}
+
+int RequestFanoutLimit::getMaxCount(const RequestId& id) const {
+  auto it = m_map.find(id.id());
+  if (it == m_map.end()) {
+    return -1;
+  }
+
+  auto counter = it->second.get();
+  if (counter == nullptr) {
+    return -1;
+  }
+
+  return counter->maxCount.load(std::memory_order_acquire);
 }
 
 } // namespace HPHP

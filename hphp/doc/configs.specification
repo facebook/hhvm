@@ -84,6 +84,10 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   to the number of xbox threads it has spawned.This is for rollout purposes, and only
   enables instantiation of the class WITHOUT actual logging or enforcement.
 
+- bool Server.EnableRequestFanoutLogging = true, yichenzhou
+
+  Enable logging the number of xbox threads spawned by each hhvmworker request.
+
 - std::string Server.SecondaryType = "", UNKNOWN
 - int Server.SecondaryPort = 0, UNKNOWN
 

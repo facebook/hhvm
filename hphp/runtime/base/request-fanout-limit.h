@@ -20,6 +20,7 @@
 #include <folly/AtomicHashMap.h>
 #include "hphp/runtime/base/request-id.h"
 #include "hphp/util/hash-map.h"
+#include "hphp/util/service-data.h"
 
 
 namespace HPHP {
@@ -36,9 +37,18 @@ namespace HPHP {
  * - Call decrement() when a thread completes
  * - Call clear() to clear entire map that tracks number of threads per request
  */
-class RequestFanoutLimit {
+struct RequestFanoutLimit {
 public:
-  using RootRequestIDToThreadCnt = folly_concurrent_hash_map_simd<int64_t, std::shared_ptr<std::atomic<int64_t>>>;
+  struct RequestFanoutCount {
+    std::atomic<int64_t> currentCount;
+    std::atomic<int64_t> maxCount;
+    RequestFanoutCount(int64_t current, int64_t max)
+        : currentCount(current), maxCount(max) {}
+    
+    int64_t increment();
+    int64_t decrement();
+  };
+  using RootRequestIDToThreadCnt = folly_concurrent_hash_map_simd<int64_t, std::shared_ptr<RequestFanoutCount>>;
 
   /**
    * Constructor
@@ -76,6 +86,8 @@ public:
    */
   int getCurrentCount(const RequestId& id) const;
 
+  int getMaxCount(const RequestId& id) const;
+
   /**
    * Get the configured limit
    * @return The maximum number of threads allowed per request
@@ -85,7 +97,8 @@ public:
 private:
   const int m_limit;
   RootRequestIDToThreadCnt m_map;
-
+  
+  ServiceData::ExportedCounter* m_fanoutLogger{nullptr};
 };
 
 } // namespace HPHP

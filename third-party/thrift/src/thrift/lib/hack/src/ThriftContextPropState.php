@@ -33,6 +33,7 @@ enum UserIdSource: int {
   LOGIN_STATE = 2;
   PERF_EXPERIMENT = 3;
   PERF_METADATA = 4;
+  ASYNC = 5;
 }
 
 final class ThriftContextPropState {

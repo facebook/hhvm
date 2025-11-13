@@ -29,7 +29,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::ComplexUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::ComplexUnion>(metadata, false);
+  auto res = genStructMetadata<::cpp2::ComplexUnion>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -45,9 +45,16 @@ StructMetadata<::cpp2::ComplexUnion>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::cpp2::ComplexUnion>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -55,11 +62,18 @@ StructMetadata<::cpp2::ComplexUnion>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_ComplexUnion.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::ComplexUnion>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::ListUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::ListUnion>(metadata, false);
+  auto res = genStructMetadata<::cpp2::ListUnion>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -75,9 +89,16 @@ StructMetadata<::cpp2::ListUnion>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::cpp2::ListUnion>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -85,11 +106,18 @@ StructMetadata<::cpp2::ListUnion>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_ListUnion.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::ListUnion>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::DataUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::DataUnion>(metadata, false);
+  auto res = genStructMetadata<::cpp2::DataUnion>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -105,9 +133,16 @@ StructMetadata<::cpp2::DataUnion>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::cpp2::DataUnion>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -115,11 +150,18 @@ StructMetadata<::cpp2::DataUnion>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_DataUnion.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::DataUnion>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Val>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Val>(metadata, false);
+  auto res = genStructMetadata<::cpp2::Val>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -135,9 +177,16 @@ StructMetadata<::cpp2::Val>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::cpp2::Val>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -145,11 +194,18 @@ StructMetadata<::cpp2::Val>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_Val.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::Val>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::ValUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::ValUnion>(metadata, false);
+  auto res = genStructMetadata<::cpp2::ValUnion>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -165,9 +221,16 @@ StructMetadata<::cpp2::ValUnion>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::cpp2::ValUnion>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -175,11 +238,18 @@ StructMetadata<::cpp2::ValUnion>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_ValUnion.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::ValUnion>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::VirtualComplexUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::VirtualComplexUnion>(metadata, false);
+  auto res = genStructMetadata<::cpp2::VirtualComplexUnion>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -195,9 +265,16 @@ StructMetadata<::cpp2::VirtualComplexUnion>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::cpp2::VirtualComplexUnion>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -205,11 +282,18 @@ StructMetadata<::cpp2::VirtualComplexUnion>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_VirtualComplexUnion.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::VirtualComplexUnion>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::NonCopyableStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::NonCopyableStruct>(metadata, false);
+  auto res = genStructMetadata<::cpp2::NonCopyableStruct>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -225,9 +309,16 @@ StructMetadata<::cpp2::NonCopyableStruct>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::cpp2::NonCopyableStruct>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -235,11 +326,18 @@ StructMetadata<::cpp2::NonCopyableStruct>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_NonCopyableStruct.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::NonCopyableStruct>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::NonCopyableUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::NonCopyableUnion>(metadata, false);
+  auto res = genStructMetadata<::cpp2::NonCopyableUnion>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -255,9 +353,16 @@ StructMetadata<::cpp2::NonCopyableUnion>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::cpp2::NonCopyableUnion>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -265,6 +370,13 @@ StructMetadata<::cpp2::NonCopyableUnion>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_NonCopyableUnion.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::NonCopyableUnion>()
+  ));
   return res.metadata;
 }
 

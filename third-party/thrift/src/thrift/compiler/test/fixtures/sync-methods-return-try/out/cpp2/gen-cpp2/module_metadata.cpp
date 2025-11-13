@@ -39,37 +39,58 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::FooStreamEx>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::FooStreamEx>(metadata, false);
+  auto res = genStructMetadata<::cpp2::FooStreamEx>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_FooStreamEx = res.metadata;
   DCHECK_EQ(*module_FooStreamEx.is_union(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::FooStreamEx>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::FooEx>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::FooEx>(metadata, false);
+  auto res = genStructMetadata<::cpp2::FooEx>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_FooEx = res.metadata;
   DCHECK_EQ(*module_FooEx.is_union(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::FooEx>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::FooEx2>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::FooEx2>(metadata, false);
+  auto res = genStructMetadata<::cpp2::FooEx2>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_FooEx2 = res.metadata;
   DCHECK_EQ(*module_FooEx2.is_union(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::FooEx2>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::InitialResponse>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::InitialResponse>(metadata, false);
+  auto res = genStructMetadata<::cpp2::InitialResponse>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -85,9 +106,16 @@ StructMetadata<::cpp2::InitialResponse>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::cpp2::InitialResponse>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -95,11 +123,18 @@ StructMetadata<::cpp2::InitialResponse>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_InitialResponse.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::InitialResponse>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::FinalResponse>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::FinalResponse>(metadata, false);
+  auto res = genStructMetadata<::cpp2::FinalResponse>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -115,9 +150,16 @@ StructMetadata<::cpp2::FinalResponse>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::cpp2::FinalResponse>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -125,11 +167,18 @@ StructMetadata<::cpp2::FinalResponse>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_FinalResponse.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::FinalResponse>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::SinkPayload>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::SinkPayload>(metadata, false);
+  auto res = genStructMetadata<::cpp2::SinkPayload>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -145,9 +194,16 @@ StructMetadata<::cpp2::SinkPayload>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::cpp2::SinkPayload>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -155,11 +211,18 @@ StructMetadata<::cpp2::SinkPayload>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_SinkPayload.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::SinkPayload>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::CompatibleWithKeywordSink>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::CompatibleWithKeywordSink>(metadata, false);
+  auto res = genStructMetadata<::cpp2::CompatibleWithKeywordSink>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -175,9 +238,16 @@ StructMetadata<::cpp2::CompatibleWithKeywordSink>::gen(ThriftMetadata& metadata)
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::cpp2::CompatibleWithKeywordSink>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -185,11 +255,18 @@ StructMetadata<::cpp2::CompatibleWithKeywordSink>::gen(ThriftMetadata& metadata)
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_CompatibleWithKeywordSink.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::CompatibleWithKeywordSink>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::InitialException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::InitialException>(metadata, false);
+  auto res = genStructMetadata<::cpp2::InitialException>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -205,9 +282,16 @@ StructMetadata<::cpp2::InitialException>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::cpp2::InitialException>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -215,11 +299,18 @@ StructMetadata<::cpp2::InitialException>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_InitialException.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::InitialException>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::SinkException1>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::SinkException1>(metadata, false);
+  auto res = genStructMetadata<::cpp2::SinkException1>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -235,9 +326,16 @@ StructMetadata<::cpp2::SinkException1>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::cpp2::SinkException1>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -245,11 +343,18 @@ StructMetadata<::cpp2::SinkException1>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_SinkException1.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::SinkException1>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::SinkException2>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::SinkException2>(metadata, false);
+  auto res = genStructMetadata<::cpp2::SinkException2>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -265,9 +370,16 @@ StructMetadata<::cpp2::SinkException2>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::cpp2::SinkException2>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -275,11 +387,18 @@ StructMetadata<::cpp2::SinkException2>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_SinkException2.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::SinkException2>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::StreamItem>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::StreamItem>(metadata, false);
+  auto res = genStructMetadata<::cpp2::StreamItem>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -295,9 +414,16 @@ StructMetadata<::cpp2::StreamItem>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::cpp2::StreamItem>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -305,6 +431,13 @@ StructMetadata<::cpp2::StreamItem>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_StreamItem.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::StreamItem>()
+  ));
   return res.metadata;
 }
 

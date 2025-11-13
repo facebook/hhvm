@@ -42,7 +42,7 @@ void EnumMetadata<::a::different::ns::AnEnum>::gen(ThriftMetadata& metadata) {
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::a::different::ns::AStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::a::different::ns::AStruct>(metadata, false);
+  auto res = genStructMetadata<::a::different::ns::AStruct>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -58,9 +58,16 @@ StructMetadata<::a::different::ns::AStruct>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::a::different::ns::AStruct>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -68,11 +75,18 @@ StructMetadata<::a::different::ns::AStruct>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     includes_AStruct.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::a::different::ns::AStruct>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::a::different::ns::AStructB>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::a::different::ns::AStructB>(metadata, false);
+  auto res = genStructMetadata<::a::different::ns::AStructB>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -88,9 +102,16 @@ StructMetadata<::a::different::ns::AStructB>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::a::different::ns::AStructB>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -98,6 +119,13 @@ StructMetadata<::a::different::ns::AStructB>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     includes_AStructB.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::a::different::ns::AStructB>()
+  ));
   return res.metadata;
 }
 

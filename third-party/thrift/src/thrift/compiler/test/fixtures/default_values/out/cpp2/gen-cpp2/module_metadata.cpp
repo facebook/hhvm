@@ -29,7 +29,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>(metadata, false);
+  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -45,9 +45,16 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::Tri
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -55,11 +62,18 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::Tri
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_TrivialStruct.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::StructWithNoCustomDefaultValues>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::StructWithNoCustomDefaultValues>(metadata, false);
+  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::StructWithNoCustomDefaultValues>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -75,9 +89,16 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::Str
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::facebook::thrift::compiler::test::fixtures::default_values::StructWithNoCustomDefaultValues>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -85,11 +106,18 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::Str
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_StructWithNoCustomDefaultValues.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::facebook::thrift::compiler::test::fixtures::default_values::StructWithNoCustomDefaultValues>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues>(metadata, false);
+  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -105,9 +133,16 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::Str
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -115,6 +150,13 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::Str
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_StructWithCustomDefaultValues.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues>()
+  ));
   return res.metadata;
 }
 

@@ -29,7 +29,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::TemplateLists>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::TemplateLists>(metadata, false);
+  auto res = genStructMetadata<::test::fixtures::python_capi::TemplateLists>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -45,9 +45,16 @@ StructMetadata<::test::fixtures::python_capi::TemplateLists>::gen(ThriftMetadata
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::test::fixtures::python_capi::TemplateLists>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -55,11 +62,18 @@ StructMetadata<::test::fixtures::python_capi::TemplateLists>::gen(ThriftMetadata
     f.metadata_type_interface->writeAndGenType(type, metadata);
     containers_TemplateLists.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::python_capi::TemplateLists>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::TemplateSets>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::TemplateSets>(metadata, false);
+  auto res = genStructMetadata<::test::fixtures::python_capi::TemplateSets>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -75,9 +89,16 @@ StructMetadata<::test::fixtures::python_capi::TemplateSets>::gen(ThriftMetadata&
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::test::fixtures::python_capi::TemplateSets>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -85,12 +106,19 @@ StructMetadata<::test::fixtures::python_capi::TemplateSets>::gen(ThriftMetadata&
     f.metadata_type_interface->writeAndGenType(type, metadata);
     containers_TemplateSets.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
   containers_TemplateSets.structured_annotations()->push_back(*cvStruct("cpp.EnableCustomTypeOrdering", {  }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::python_capi::TemplateSets>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::TemplateMaps>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::TemplateMaps>(metadata, false);
+  auto res = genStructMetadata<::test::fixtures::python_capi::TemplateMaps>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -106,9 +134,16 @@ StructMetadata<::test::fixtures::python_capi::TemplateMaps>::gen(ThriftMetadata&
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::test::fixtures::python_capi::TemplateMaps>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -116,12 +151,19 @@ StructMetadata<::test::fixtures::python_capi::TemplateMaps>::gen(ThriftMetadata&
     f.metadata_type_interface->writeAndGenType(type, metadata);
     containers_TemplateMaps.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
   containers_TemplateMaps.structured_annotations()->push_back(*cvStruct("cpp.EnableCustomTypeOrdering", {  }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::python_capi::TemplateMaps>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::TWrapped>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::TWrapped>(metadata, false);
+  auto res = genStructMetadata<::test::fixtures::python_capi::TWrapped>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -137,9 +179,16 @@ StructMetadata<::test::fixtures::python_capi::TWrapped>::gen(ThriftMetadata& met
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::test::fixtures::python_capi::TWrapped>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -147,11 +196,18 @@ StructMetadata<::test::fixtures::python_capi::TWrapped>::gen(ThriftMetadata& met
     f.metadata_type_interface->writeAndGenType(type, metadata);
     containers_TWrapped.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::python_capi::TWrapped>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::IndirectionA>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::IndirectionA>(metadata, false);
+  auto res = genStructMetadata<::test::fixtures::python_capi::IndirectionA>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -167,9 +223,16 @@ StructMetadata<::test::fixtures::python_capi::IndirectionA>::gen(ThriftMetadata&
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::test::fixtures::python_capi::IndirectionA>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -177,11 +240,18 @@ StructMetadata<::test::fixtures::python_capi::IndirectionA>::gen(ThriftMetadata&
     f.metadata_type_interface->writeAndGenType(type, metadata);
     containers_IndirectionA.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::python_capi::IndirectionA>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::IndirectionB>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::IndirectionB>(metadata, false);
+  auto res = genStructMetadata<::test::fixtures::python_capi::IndirectionB>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -197,9 +267,16 @@ StructMetadata<::test::fixtures::python_capi::IndirectionB>::gen(ThriftMetadata&
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::test::fixtures::python_capi::IndirectionB>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -207,11 +284,18 @@ StructMetadata<::test::fixtures::python_capi::IndirectionB>::gen(ThriftMetadata&
     f.metadata_type_interface->writeAndGenType(type, metadata);
     containers_IndirectionB.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::python_capi::IndirectionB>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::IndirectionC>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::IndirectionC>(metadata, false);
+  auto res = genStructMetadata<::test::fixtures::python_capi::IndirectionC>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -227,9 +311,16 @@ StructMetadata<::test::fixtures::python_capi::IndirectionC>::gen(ThriftMetadata&
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::test::fixtures::python_capi::IndirectionC>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -237,6 +328,13 @@ StructMetadata<::test::fixtures::python_capi::IndirectionC>::gen(ThriftMetadata&
     f.metadata_type_interface->writeAndGenType(type, metadata);
     containers_IndirectionC.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::python_capi::IndirectionC>()
+  ));
   return res.metadata;
 }
 

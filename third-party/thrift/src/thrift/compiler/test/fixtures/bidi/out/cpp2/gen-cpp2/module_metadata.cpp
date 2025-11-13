@@ -34,7 +34,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::BiDiSinkException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::BiDiSinkException>(metadata, false);
+  auto res = genStructMetadata<::cpp2::BiDiSinkException>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -50,9 +50,16 @@ StructMetadata<::cpp2::BiDiSinkException>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::cpp2::BiDiSinkException>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -60,11 +67,18 @@ StructMetadata<::cpp2::BiDiSinkException>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_BiDiSinkException.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::BiDiSinkException>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::BiDiStreamException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::BiDiStreamException>(metadata, false);
+  auto res = genStructMetadata<::cpp2::BiDiStreamException>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -80,9 +94,16 @@ StructMetadata<::cpp2::BiDiStreamException>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::cpp2::BiDiStreamException>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -90,11 +111,18 @@ StructMetadata<::cpp2::BiDiStreamException>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_BiDiStreamException.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::BiDiStreamException>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::BiDiMethodException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::BiDiMethodException>(metadata, false);
+  auto res = genStructMetadata<::cpp2::BiDiMethodException>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -110,9 +138,16 @@ StructMetadata<::cpp2::BiDiMethodException>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::cpp2::BiDiMethodException>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -120,6 +155,13 @@ StructMetadata<::cpp2::BiDiMethodException>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_BiDiMethodException.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::BiDiMethodException>()
+  ));
   return res.metadata;
 }
 

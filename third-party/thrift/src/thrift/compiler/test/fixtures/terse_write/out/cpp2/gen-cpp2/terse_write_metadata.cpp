@@ -42,17 +42,24 @@ void EnumMetadata<::facebook::thrift::test::terse_write::MyEnum>::gen(ThriftMeta
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::MyStruct>(metadata, false);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::MyStruct>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& terse_write_MyStruct = res.metadata;
   DCHECK_EQ(*terse_write_MyStruct.is_union(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::facebook::thrift::test::terse_write::MyStruct>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::MyUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::MyUnion>(metadata, false);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::MyUnion>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -68,9 +75,16 @@ StructMetadata<::facebook::thrift::test::terse_write::MyUnion>::gen(ThriftMetada
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::facebook::thrift::test::terse_write::MyUnion>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -78,11 +92,18 @@ StructMetadata<::facebook::thrift::test::terse_write::MyUnion>::gen(ThriftMetada
     f.metadata_type_interface->writeAndGenType(type, metadata);
     terse_write_MyUnion.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::facebook::thrift::test::terse_write::MyUnion>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>(metadata, false);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -98,9 +119,16 @@ StructMetadata<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -108,11 +136,18 @@ StructMetadata<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>
     f.metadata_type_interface->writeAndGenType(type, metadata);
     terse_write_MyStructWithCustomDefault.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::StructLevelTerseStruct>(metadata, false);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::StructLevelTerseStruct>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -128,9 +163,16 @@ StructMetadata<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::g
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::facebook::thrift::test::terse_write::StructLevelTerseStruct>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -138,12 +180,19 @@ StructMetadata<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::g
     f.metadata_type_interface->writeAndGenType(type, metadata);
     terse_write_StructLevelTerseStruct.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
   terse_write_StructLevelTerseStruct.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {  }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::facebook::thrift::test::terse_write::StructLevelTerseStruct>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>(metadata, false);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -159,9 +208,16 @@ StructMetadata<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::ge
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -169,11 +225,18 @@ StructMetadata<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::ge
     f.metadata_type_interface->writeAndGenType(type, metadata);
     terse_write_FieldLevelTerseStruct.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::AdaptedFields>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::AdaptedFields>(metadata, false);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::AdaptedFields>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -189,9 +252,16 @@ StructMetadata<::facebook::thrift::test::terse_write::AdaptedFields>::gen(Thrift
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::facebook::thrift::test::terse_write::AdaptedFields>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -199,12 +269,19 @@ StructMetadata<::facebook::thrift::test::terse_write::AdaptedFields>::gen(Thrift
     f.metadata_type_interface->writeAndGenType(type, metadata);
     terse_write_AdaptedFields.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
   terse_write_AdaptedFields.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {  }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::facebook::thrift::test::terse_write::AdaptedFields>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::TerseException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::TerseException>(metadata, false);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::TerseException>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -220,9 +297,16 @@ StructMetadata<::facebook::thrift::test::terse_write::TerseException>::gen(Thrif
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::facebook::thrift::test::terse_write::TerseException>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -230,7 +314,14 @@ StructMetadata<::facebook::thrift::test::terse_write::TerseException>::gen(Thrif
     f.metadata_type_interface->writeAndGenType(type, metadata);
     terse_write_TerseException.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
   terse_write_TerseException.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {  }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::facebook::thrift::test::terse_write::TerseException>()
+  ));
   return res.metadata;
 }
 

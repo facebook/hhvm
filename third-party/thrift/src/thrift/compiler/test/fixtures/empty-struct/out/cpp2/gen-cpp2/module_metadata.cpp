@@ -29,22 +29,36 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Empty>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Empty>(metadata, false);
+  auto res = genStructMetadata<::cpp2::Empty>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_Empty = res.metadata;
   DCHECK_EQ(*module_Empty.is_union(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::Empty>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Nada>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Nada>(metadata, false);
+  auto res = genStructMetadata<::cpp2::Nada>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_Nada = res.metadata;
   DCHECK_EQ(*module_Nada.is_union(), true);
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::cpp2::Nada>()
+  ));
   return res.metadata;
 }
 

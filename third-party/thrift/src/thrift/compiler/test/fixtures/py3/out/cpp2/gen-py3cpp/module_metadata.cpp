@@ -84,7 +84,7 @@ void EnumMetadata<::py3::simple::Flags>::gen(ThriftMetadata& metadata) {
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::SimpleException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::py3::simple::SimpleException>(metadata, false);
+  auto res = genStructMetadata<::py3::simple::SimpleException>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -100,9 +100,16 @@ StructMetadata<::py3::simple::SimpleException>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::py3::simple::SimpleException>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -110,11 +117,18 @@ StructMetadata<::py3::simple::SimpleException>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_SimpleException.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::py3::simple::SimpleException>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::OptionalRefStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::py3::simple::OptionalRefStruct>(metadata, false);
+  auto res = genStructMetadata<::py3::simple::OptionalRefStruct>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -130,9 +144,16 @@ StructMetadata<::py3::simple::OptionalRefStruct>::gen(ThriftMetadata& metadata) 
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::py3::simple::OptionalRefStruct>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -140,11 +161,18 @@ StructMetadata<::py3::simple::OptionalRefStruct>::gen(ThriftMetadata& metadata) 
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_OptionalRefStruct.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::py3::simple::OptionalRefStruct>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::SimpleStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::py3::simple::SimpleStruct>(metadata, false);
+  auto res = genStructMetadata<::py3::simple::SimpleStruct>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -160,9 +188,16 @@ StructMetadata<::py3::simple::SimpleStruct>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::py3::simple::SimpleStruct>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -170,11 +205,18 @@ StructMetadata<::py3::simple::SimpleStruct>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_SimpleStruct.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::py3::simple::SimpleStruct>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::Float32Struct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::py3::simple::Float32Struct>(metadata, false);
+  auto res = genStructMetadata<::py3::simple::Float32Struct>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -190,9 +232,16 @@ StructMetadata<::py3::simple::Float32Struct>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::py3::simple::Float32Struct>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -200,11 +249,18 @@ StructMetadata<::py3::simple::Float32Struct>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_Float32Struct.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::py3::simple::Float32Struct>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::HiddenTypeFieldsStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::py3::simple::HiddenTypeFieldsStruct>(metadata, false);
+  auto res = genStructMetadata<::py3::simple::HiddenTypeFieldsStruct>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -220,9 +276,16 @@ StructMetadata<::py3::simple::HiddenTypeFieldsStruct>::gen(ThriftMetadata& metad
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::py3::simple::HiddenTypeFieldsStruct>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -230,11 +293,18 @@ StructMetadata<::py3::simple::HiddenTypeFieldsStruct>::gen(ThriftMetadata& metad
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_HiddenTypeFieldsStruct.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::py3::simple::HiddenTypeFieldsStruct>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::detail::AdaptedUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::py3::simple::detail::AdaptedUnion>(metadata, false);
+  auto res = genStructMetadata<::py3::simple::detail::AdaptedUnion>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -250,9 +320,16 @@ StructMetadata<::py3::simple::detail::AdaptedUnion>::gen(ThriftMetadata& metadat
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::py3::simple::detail::AdaptedUnion>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -260,12 +337,19 @@ StructMetadata<::py3::simple::detail::AdaptedUnion>::gen(ThriftMetadata& metadat
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_AdaptedUnion.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
   module_AdaptedUnion.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("Adapter") } }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::py3::simple::detail::AdaptedUnion>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::HiddenException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::py3::simple::HiddenException>(metadata, false);
+  auto res = genStructMetadata<::py3::simple::HiddenException>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -281,9 +365,16 @@ StructMetadata<::py3::simple::HiddenException>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::py3::simple::HiddenException>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -291,12 +382,19 @@ StructMetadata<::py3::simple::HiddenException>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_HiddenException.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
   module_HiddenException.structured_annotations()->push_back(*cvStruct("python.Py3Hidden", {  }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::py3::simple::HiddenException>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::ComplexStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::py3::simple::ComplexStruct>(metadata, false);
+  auto res = genStructMetadata<::py3::simple::ComplexStruct>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -312,9 +410,16 @@ StructMetadata<::py3::simple::ComplexStruct>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::py3::simple::ComplexStruct>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -322,11 +427,18 @@ StructMetadata<::py3::simple::ComplexStruct>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_ComplexStruct.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::py3::simple::ComplexStruct>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::BinaryUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::py3::simple::BinaryUnion>(metadata, false);
+  auto res = genStructMetadata<::py3::simple::BinaryUnion>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -342,9 +454,16 @@ StructMetadata<::py3::simple::BinaryUnion>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::py3::simple::BinaryUnion>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -352,11 +471,18 @@ StructMetadata<::py3::simple::BinaryUnion>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_BinaryUnion.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::py3::simple::BinaryUnion>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::BinaryUnionStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::py3::simple::BinaryUnionStruct>(metadata, false);
+  auto res = genStructMetadata<::py3::simple::BinaryUnionStruct>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -372,9 +498,16 @@ StructMetadata<::py3::simple::BinaryUnionStruct>::gen(ThriftMetadata& metadata) 
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::py3::simple::BinaryUnionStruct>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -382,11 +515,18 @@ StructMetadata<::py3::simple::BinaryUnionStruct>::gen(ThriftMetadata& metadata) 
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_BinaryUnionStruct.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::py3::simple::BinaryUnionStruct>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::CustomFields>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::py3::simple::CustomFields>(metadata, false);
+  auto res = genStructMetadata<::py3::simple::CustomFields>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -402,9 +542,16 @@ StructMetadata<::py3::simple::CustomFields>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::py3::simple::CustomFields>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -412,11 +559,18 @@ StructMetadata<::py3::simple::CustomFields>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_CustomFields.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::py3::simple::CustomFields>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::CustomTypedefFields>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::py3::simple::CustomTypedefFields>(metadata, false);
+  auto res = genStructMetadata<::py3::simple::CustomTypedefFields>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -432,9 +586,16 @@ StructMetadata<::py3::simple::CustomTypedefFields>::gen(ThriftMetadata& metadata
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::py3::simple::CustomTypedefFields>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -442,11 +603,18 @@ StructMetadata<::py3::simple::CustomTypedefFields>::gen(ThriftMetadata& metadata
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_CustomTypedefFields.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::py3::simple::CustomTypedefFields>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::AdaptedTypedefFields>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::py3::simple::AdaptedTypedefFields>(metadata, false);
+  auto res = genStructMetadata<::py3::simple::AdaptedTypedefFields>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -462,9 +630,16 @@ StructMetadata<::py3::simple::AdaptedTypedefFields>::gen(ThriftMetadata& metadat
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::py3::simple::AdaptedTypedefFields>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -472,6 +647,13 @@ StructMetadata<::py3::simple::AdaptedTypedefFields>::gen(ThriftMetadata& metadat
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_AdaptedTypedefFields.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::py3::simple::AdaptedTypedefFields>()
+  ));
   return res.metadata;
 }
 

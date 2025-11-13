@@ -42,27 +42,41 @@ void EnumMetadata<::facebook::thrift::test::terse_write::deprecated::MyEnum>::ge
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::deprecated::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::MyStruct>(metadata, false);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::MyStruct>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& deprecated_terse_write_MyStruct = res.metadata;
   DCHECK_EQ(*deprecated_terse_write_MyStruct.is_union(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::facebook::thrift::test::terse_write::deprecated::MyStruct>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::deprecated::MyUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::MyUnion>(metadata, false);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::MyUnion>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& deprecated_terse_write_MyUnion = res.metadata;
   DCHECK_EQ(*deprecated_terse_write_MyUnion.is_union(), true);
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::facebook::thrift::test::terse_write::deprecated::MyUnion>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>(metadata, false);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -78,9 +92,16 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::StructLevelTer
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -88,12 +109,19 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::StructLevelTer
     f.metadata_type_interface->writeAndGenType(type, metadata);
     deprecated_terse_write_StructLevelTerseStruct.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
   deprecated_terse_write_StructLevelTerseStruct.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {  }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>(metadata, false);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -109,9 +137,16 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::FieldLevelTers
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -119,11 +154,18 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::FieldLevelTers
     f.metadata_type_interface->writeAndGenType(type, metadata);
     deprecated_terse_write_FieldLevelTerseStruct.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::deprecated::CppRefStructFields>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::CppRefStructFields>(metadata, false);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::CppRefStructFields>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -139,9 +181,16 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::CppRefStructFi
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::facebook::thrift::test::terse_write::deprecated::CppRefStructFields>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -149,11 +198,18 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::CppRefStructFi
     f.metadata_type_interface->writeAndGenType(type, metadata);
     deprecated_terse_write_CppRefStructFields.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::facebook::thrift::test::terse_write::deprecated::CppRefStructFields>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault>(metadata, false);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -169,9 +225,16 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTers
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -179,11 +242,18 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTers
     f.metadata_type_interface->writeAndGenType(type, metadata);
     deprecated_terse_write_DeprecatedTerseWriteWithCustomDefault.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault>(metadata, false);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -199,9 +269,16 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTers
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -209,6 +286,13 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTers
     f.metadata_type_interface->writeAndGenType(type, metadata);
     deprecated_terse_write_DeprecatedTerseWriteWithRedundantCustomDefault.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault>()
+  ));
   return res.metadata;
 }
 

@@ -48,18 +48,25 @@ void EnumMetadata<::test::fixtures::basic_structured_annotations::MyEnum>::gen(T
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic_structured_annotations::runtime_annotation>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::runtime_annotation>(metadata, false);
+  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::runtime_annotation>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& module_runtime_annotation = res.metadata;
   DCHECK_EQ(*module_runtime_annotation.is_union(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
   module_runtime_annotation.structured_annotations()->push_back(*cvStruct("thrift.RuntimeAnnotation", {  }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::basic_structured_annotations::runtime_annotation>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_inline>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_inline>(metadata, false);
+  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_inline>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -75,9 +82,16 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::test::fixtures::basic_structured_annotations::structured_annotation_inline>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -85,11 +99,18 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_structured_annotation_inline.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::basic_structured_annotations::structured_annotation_inline>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_with_default>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_with_default>(metadata, false);
+  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_with_default>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -105,9 +126,16 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::test::fixtures::basic_structured_annotations::structured_annotation_with_default>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -115,11 +143,18 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_structured_annotation_with_default.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::basic_structured_annotations::structured_annotation_with_default>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>(metadata, false);
+  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -135,9 +170,16 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -145,11 +187,18 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_structured_annotation_recursive.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_forward>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_forward>(metadata, false);
+  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_forward>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -165,9 +214,16 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::test::fixtures::basic_structured_annotations::structured_annotation_forward>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -175,11 +231,18 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_structured_annotation_forward.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::basic_structured_annotations::structured_annotation_forward>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_nested>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_nested>(metadata, false);
+  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_nested>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -195,9 +258,16 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::test::fixtures::basic_structured_annotations::structured_annotation_nested>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -205,11 +275,18 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_structured_annotation_nested.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::basic_structured_annotations::structured_annotation_nested>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic_structured_annotations::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::MyStruct>(metadata, false);
+  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::MyStruct>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -225,9 +302,16 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyStruct>::gen(Th
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::test::fixtures::basic_structured_annotations::MyStruct>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -235,17 +319,24 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyStruct>::gen(Th
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_MyStruct.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
   module_MyStruct.structured_annotations()->push_back(*cvStruct("module.structured_annotation_inline", { {"count", cvInteger(2) } }).cv_struct());
   module_MyStruct.structured_annotations()->push_back(*cvStruct("module.structured_annotation_with_default", {  }).cv_struct());
   module_MyStruct.structured_annotations()->push_back(*cvStruct("module.structured_annotation_nested", { {"name", cvString("nesty2") }, {"nest", cvStruct("module.structured_annotation_with_default", { {"name", cvString("dcdbdcdadcdbdcd") } }) } }).cv_struct());
   module_MyStruct.structured_annotations()->push_back(*cvStruct("included.structured_annotation_included", { {"name", cvString("aba") } }).cv_struct());
   module_MyStruct.structured_annotations()->push_back(*cvStruct("namespaced.structured_annotation_with_namespace", { {"name", cvString("bac") } }).cv_struct());
   module_MyStruct.structured_annotations()->push_back(*cvStruct("module.runtime_annotation", {  }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::basic_structured_annotations::MyStruct>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic_structured_annotations::MyException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::MyException>(metadata, false);
+  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::MyException>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -261,9 +352,16 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyException>::gen
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::test::fixtures::basic_structured_annotations::MyException>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -271,12 +369,19 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyException>::gen
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_MyException.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
   module_MyException.structured_annotations()->push_back(*cvStruct("module.structured_annotation_nested", { {"name", cvString("nesty") } }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::basic_structured_annotations::MyException>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic_structured_annotations::MyUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::MyUnion>(metadata, false);
+  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::MyUnion>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -292,9 +397,16 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyUnion>::gen(Thr
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::test::fixtures::basic_structured_annotations::MyUnion>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -302,7 +414,14 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyUnion>::gen(Thr
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_MyUnion.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
   module_MyUnion.structured_annotations()->push_back(*cvStruct("module.structured_annotation_nested", { {"name", cvString("nesty") }, {"nest", cvStruct("module.structured_annotation_with_default", {  }) } }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::test::fixtures::basic_structured_annotations::MyUnion>()
+  ));
   return res.metadata;
 }
 

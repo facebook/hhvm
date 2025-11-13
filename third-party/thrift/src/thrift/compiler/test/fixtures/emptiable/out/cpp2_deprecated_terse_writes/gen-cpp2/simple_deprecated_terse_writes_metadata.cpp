@@ -42,17 +42,24 @@ void EnumMetadata<::apache::thrift::test::MyEnum>::gen(ThriftMetadata& metadata)
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::MyStruct>(metadata, false);
+  auto res = genStructMetadata<::apache::thrift::test::MyStruct>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& simple_deprecated_terse_writes_MyStruct = res.metadata;
   DCHECK_EQ(*simple_deprecated_terse_writes_MyStruct.is_union(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::apache::thrift::test::MyStruct>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::EmptiableStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::EmptiableStruct>(metadata, false);
+  auto res = genStructMetadata<::apache::thrift::test::EmptiableStruct>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -68,9 +75,16 @@ StructMetadata<::apache::thrift::test::EmptiableStruct>::gen(ThriftMetadata& met
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::apache::thrift::test::EmptiableStruct>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -78,11 +92,18 @@ StructMetadata<::apache::thrift::test::EmptiableStruct>::gen(ThriftMetadata& met
     f.metadata_type_interface->writeAndGenType(type, metadata);
     simple_deprecated_terse_writes_EmptiableStruct.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::apache::thrift::test::EmptiableStruct>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::NotEmptiableStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::NotEmptiableStruct>(metadata, false);
+  auto res = genStructMetadata<::apache::thrift::test::NotEmptiableStruct>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -98,9 +119,16 @@ StructMetadata<::apache::thrift::test::NotEmptiableStruct>::gen(ThriftMetadata& 
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::apache::thrift::test::NotEmptiableStruct>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -108,6 +136,13 @@ StructMetadata<::apache::thrift::test::NotEmptiableStruct>::gen(ThriftMetadata& 
     f.metadata_type_interface->writeAndGenType(type, metadata);
     simple_deprecated_terse_writes_NotEmptiableStruct.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::apache::thrift::test::NotEmptiableStruct>()
+  ));
   return res.metadata;
 }
 

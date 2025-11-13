@@ -42,7 +42,7 @@ void EnumMetadata<::apache::thrift::test::MyEnum>::gen(ThriftMetadata& metadata)
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::StructWithDefaultStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::StructWithDefaultStruct>(metadata, false);
+  auto res = genStructMetadata<::apache::thrift::test::StructWithDefaultStruct>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -58,9 +58,16 @@ StructMetadata<::apache::thrift::test::StructWithDefaultStruct>::gen(ThriftMetad
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::apache::thrift::test::StructWithDefaultStruct>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -68,6 +75,13 @@ StructMetadata<::apache::thrift::test::StructWithDefaultStruct>::gen(ThriftMetad
     f.metadata_type_interface->writeAndGenType(type, metadata);
     module_StructWithDefaultStruct.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::apache::thrift::test::StructWithDefaultStruct>()
+  ));
   return res.metadata;
 }
 

@@ -29,7 +29,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::Foo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::Foo>(metadata, false);
+  auto res = genStructMetadata<::apache::thrift::test::Foo>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -45,9 +45,16 @@ StructMetadata<::apache::thrift::test::Foo>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::apache::thrift::test::Foo>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -55,11 +62,18 @@ StructMetadata<::apache::thrift::test::Foo>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     simple_Foo.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::apache::thrift::test::Foo>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::LazyFoo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::LazyFoo>(metadata, false);
+  auto res = genStructMetadata<::apache::thrift::test::LazyFoo>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -75,9 +89,16 @@ StructMetadata<::apache::thrift::test::LazyFoo>::gen(ThriftMetadata& metadata) {
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::apache::thrift::test::LazyFoo>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -85,11 +106,18 @@ StructMetadata<::apache::thrift::test::LazyFoo>::gen(ThriftMetadata& metadata) {
     f.metadata_type_interface->writeAndGenType(type, metadata);
     simple_LazyFoo.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::apache::thrift::test::LazyFoo>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::OptionalFoo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::OptionalFoo>(metadata, false);
+  auto res = genStructMetadata<::apache::thrift::test::OptionalFoo>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -105,9 +133,16 @@ StructMetadata<::apache::thrift::test::OptionalFoo>::gen(ThriftMetadata& metadat
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::apache::thrift::test::OptionalFoo>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -115,11 +150,18 @@ StructMetadata<::apache::thrift::test::OptionalFoo>::gen(ThriftMetadata& metadat
     f.metadata_type_interface->writeAndGenType(type, metadata);
     simple_OptionalFoo.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::apache::thrift::test::OptionalFoo>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::OptionalLazyFoo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::OptionalLazyFoo>(metadata, false);
+  auto res = genStructMetadata<::apache::thrift::test::OptionalLazyFoo>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -135,9 +177,16 @@ StructMetadata<::apache::thrift::test::OptionalLazyFoo>::gen(ThriftMetadata& met
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::apache::thrift::test::OptionalLazyFoo>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -145,11 +194,18 @@ StructMetadata<::apache::thrift::test::OptionalLazyFoo>::gen(ThriftMetadata& met
     f.metadata_type_interface->writeAndGenType(type, metadata);
     simple_OptionalLazyFoo.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::apache::thrift::test::OptionalLazyFoo>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::OptionalBoxedLazyFoo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::OptionalBoxedLazyFoo>(metadata, false);
+  auto res = genStructMetadata<::apache::thrift::test::OptionalBoxedLazyFoo>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -165,9 +221,16 @@ StructMetadata<::apache::thrift::test::OptionalBoxedLazyFoo>::gen(ThriftMetadata
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::apache::thrift::test::OptionalBoxedLazyFoo>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -175,11 +238,18 @@ StructMetadata<::apache::thrift::test::OptionalBoxedLazyFoo>::gen(ThriftMetadata
     f.metadata_type_interface->writeAndGenType(type, metadata);
     simple_OptionalBoxedLazyFoo.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::apache::thrift::test::OptionalBoxedLazyFoo>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::LazyCppRef>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::LazyCppRef>(metadata, false);
+  auto res = genStructMetadata<::apache::thrift::test::LazyCppRef>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -195,9 +265,16 @@ StructMetadata<::apache::thrift::test::LazyCppRef>::gen(ThriftMetadata& metadata
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::apache::thrift::test::LazyCppRef>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -205,11 +282,18 @@ StructMetadata<::apache::thrift::test::LazyCppRef>::gen(ThriftMetadata& metadata
     f.metadata_type_interface->writeAndGenType(type, metadata);
     simple_LazyCppRef.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::apache::thrift::test::LazyCppRef>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::IndexedFoo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::IndexedFoo>(metadata, false);
+  auto res = genStructMetadata<::apache::thrift::test::IndexedFoo>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -225,9 +309,16 @@ StructMetadata<::apache::thrift::test::IndexedFoo>::gen(ThriftMetadata& metadata
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::apache::thrift::test::IndexedFoo>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -235,11 +326,18 @@ StructMetadata<::apache::thrift::test::IndexedFoo>::gen(ThriftMetadata& metadata
     f.metadata_type_interface->writeAndGenType(type, metadata);
     simple_IndexedFoo.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::apache::thrift::test::IndexedFoo>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::OptionalIndexedFoo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::OptionalIndexedFoo>(metadata, false);
+  auto res = genStructMetadata<::apache::thrift::test::OptionalIndexedFoo>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
@@ -255,9 +353,16 @@ StructMetadata<::apache::thrift::test::OptionalIndexedFoo>::gen(ThriftMetadata& 
     DCHECK_EQ(*field.name(), f.name);
     DCHECK_EQ(*field.is_optional(), f.is_optional);
 
+    auto newAnnotations = std::move(*field.structured_annotations());
     field.structured_annotations().emplace().assign(
         f.structured_annotations.begin(),
         f.structured_annotations.end());
+
+    DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes<::apache::thrift::test::OptionalIndexedFoo>(i, static_cast<std::int16_t>(f.id))
+    ));
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -265,16 +370,30 @@ StructMetadata<::apache::thrift::test::OptionalIndexedFoo>::gen(ThriftMetadata& 
     f.metadata_type_interface->writeAndGenType(type, metadata);
     simple_OptionalIndexedFoo.fields()[i++].type() = std::move(type);
   }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::apache::thrift::test::OptionalIndexedFoo>()
+  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::Empty>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::Empty>(metadata, false);
+  auto res = genStructMetadata<::apache::thrift::test::Empty>(metadata, folly::kIsDebug);
   if (res.preExists) {
     return res.metadata;
   }
   ::apache::thrift::metadata::ThriftStruct& simple_Empty = res.metadata;
   DCHECK_EQ(*simple_Empty.is_union(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::apache::thrift::test::Empty>()
+  ));
   return res.metadata;
 }
 

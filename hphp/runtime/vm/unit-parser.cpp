@@ -224,7 +224,7 @@ ParseFactsResult extract_facts(
   if (!f) { 
     throwErrno(
       folly::sformat(
-        "Failed to extract facts: Could not read source code for %s", 
+        "Failed to extract facts: Could not read source code for {}", 
         filename
       ).c_str());
   }

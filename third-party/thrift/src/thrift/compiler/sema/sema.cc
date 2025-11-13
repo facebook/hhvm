@@ -613,8 +613,18 @@ void lower_deprecated_annotations(
     if (!ctx.sema_parameters().skip_lowering_annotations) {
       deprecated_annotation_map map;
       for (auto& [k, v] : val->get_map()) {
+        // If key and value don't have a source range, we'll end up with the
+        // default (empty) value
+        source_range src_range;
+        if (k->src_range().has_value()) {
+          // If the key has a source range, try use the key-value source range,
+          // otherwise fallback to just the key source range.
+          src_range = v->src_range().has_value()
+              ? source_range{k->src_range()->begin, v->src_range()->end}
+              : k->src_range().value();
+        }
         map[k->get_string()] = {
-            {},
+            src_range,
             v->get_string(),
             deprecated_annotation_value::origin::lowered_unstructured};
       }
@@ -656,7 +666,7 @@ void lower_deprecated_annotations(
           inner_type->set_unstructured_annotation(
               annot,
               map[annot].value,
-              {},
+              map[annot].src_range,
               deprecated_annotation_value::origin::lowered_unstructured);
         }
 

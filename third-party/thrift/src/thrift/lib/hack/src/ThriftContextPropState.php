@@ -34,6 +34,7 @@ enum UserIdSource: int {
   PERF_EXPERIMENT = 3;
   PERF_METADATA = 4;
   ASYNC = 5;
+  LIKELY_ACCOUNT_FOR_LOGGING = 6;
 }
 
 final class ThriftContextPropState {

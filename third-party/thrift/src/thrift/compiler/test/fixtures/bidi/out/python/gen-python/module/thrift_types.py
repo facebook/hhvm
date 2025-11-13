@@ -230,16 +230,19 @@ _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
 
 
 class _fbthrift_BiDiService_simple_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_BiDiService_simple_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_BiDiService_simple_result_stream_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.BIDIRECTIONAL_STREAM
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -256,6 +259,7 @@ class _fbthrift_BiDiService_simple_result_stream_elem(metaclass=_fbthrift_python
 
 
 class _fbthrift_BiDiService_simple_result_sink_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.BIDIRECTIONAL_STREAM
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -283,11 +287,13 @@ class _fbthrift_BiDiService_simple_result_sink_elem(metaclass=_fbthrift_python_t
 
 
 class _fbthrift_BiDiService_response_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_BiDiService_response_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -303,6 +309,7 @@ class _fbthrift_BiDiService_response_result(metaclass=_fbthrift_python_types.Str
 
 
 class _fbthrift_BiDiService_response_result_stream_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.BIDIRECTIONAL_STREAM
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -319,6 +326,7 @@ class _fbthrift_BiDiService_response_result_stream_elem(metaclass=_fbthrift_pyth
 
 
 class _fbthrift_BiDiService_response_result_sink_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.BIDIRECTIONAL_STREAM
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -346,11 +354,13 @@ class _fbthrift_BiDiService_response_result_sink_elem(metaclass=_fbthrift_python
 
 
 class _fbthrift_BiDiService_canThrow_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_BiDiService_canThrow_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -367,6 +377,7 @@ class _fbthrift_BiDiService_canThrow_result(metaclass=_fbthrift_python_types.Str
 
 
 class _fbthrift_BiDiService_canThrow_result_stream_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.BIDIRECTIONAL_STREAM
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -394,6 +405,7 @@ class _fbthrift_BiDiService_canThrow_result_stream_elem(metaclass=_fbthrift_pyth
 
 
 class _fbthrift_BiDiService_canThrow_result_sink_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.BIDIRECTIONAL_STREAM
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(

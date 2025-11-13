@@ -512,21 +512,25 @@ _fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)
 
 
 class _fbthrift_Raiser_doBland_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_Raiser_doBland_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_Raiser_doRaise_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_Raiser_doRaise_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -565,11 +569,13 @@ class _fbthrift_Raiser_doRaise_result(metaclass=_fbthrift_python_mutable_types.M
 
 
 class _fbthrift_Raiser_get200_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_Raiser_get200_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -585,11 +591,13 @@ class _fbthrift_Raiser_get200_result(metaclass=_fbthrift_python_mutable_types.Mu
 
 
 class _fbthrift_Raiser_get500_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_Raiser_get500_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id

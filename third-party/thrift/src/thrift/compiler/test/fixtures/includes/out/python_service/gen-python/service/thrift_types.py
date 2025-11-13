@@ -41,6 +41,7 @@ IncludesTransitiveFoo = _fbthrift__transitive__thrift_types.Foo
 
 
 class _fbthrift_MyService_query_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -68,11 +69,13 @@ class _fbthrift_MyService_query_args(metaclass=_fbthrift_python_types.StructMeta
 
 
 class _fbthrift_MyService_query_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyService_has_arg_docs_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -100,6 +103,7 @@ class _fbthrift_MyService_has_arg_docs_args(metaclass=_fbthrift_python_types.Str
 
 
 class _fbthrift_MyService_has_arg_docs_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 

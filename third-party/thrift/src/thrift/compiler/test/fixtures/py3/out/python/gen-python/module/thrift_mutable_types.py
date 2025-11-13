@@ -1342,11 +1342,13 @@ AdaptedStruct = _fbthrift_SimpleStruct
 
 
 class _fbthrift_SimpleService_get_five_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_SimpleService_get_five_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -1362,6 +1364,7 @@ class _fbthrift_SimpleService_get_five_result(metaclass=_fbthrift_python_mutable
 
 
 class _fbthrift_SimpleService_add_five_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1378,6 +1381,7 @@ class _fbthrift_SimpleService_add_five_args(metaclass=_fbthrift_python_mutable_t
 
 
 class _fbthrift_SimpleService_add_five_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -1393,16 +1397,19 @@ class _fbthrift_SimpleService_add_five_result(metaclass=_fbthrift_python_mutable
 
 
 class _fbthrift_SimpleService_do_nothing_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_SimpleService_do_nothing_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_SimpleService_concat_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1430,6 +1437,7 @@ class _fbthrift_SimpleService_concat_args(metaclass=_fbthrift_python_mutable_typ
 
 
 class _fbthrift_SimpleService_concat_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -1445,6 +1453,7 @@ class _fbthrift_SimpleService_concat_result(metaclass=_fbthrift_python_mutable_t
 
 
 class _fbthrift_SimpleService_get_value_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1461,6 +1470,7 @@ class _fbthrift_SimpleService_get_value_args(metaclass=_fbthrift_python_mutable_
 
 
 class _fbthrift_SimpleService_get_value_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -1476,6 +1486,7 @@ class _fbthrift_SimpleService_get_value_result(metaclass=_fbthrift_python_mutabl
 
 
 class _fbthrift_SimpleService_negate_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1492,6 +1503,7 @@ class _fbthrift_SimpleService_negate_args(metaclass=_fbthrift_python_mutable_typ
 
 
 class _fbthrift_SimpleService_negate_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -1507,6 +1519,7 @@ class _fbthrift_SimpleService_negate_result(metaclass=_fbthrift_python_mutable_t
 
 
 class _fbthrift_SimpleService_tiny_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1523,6 +1536,7 @@ class _fbthrift_SimpleService_tiny_args(metaclass=_fbthrift_python_mutable_types
 
 
 class _fbthrift_SimpleService_tiny_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -1538,6 +1552,7 @@ class _fbthrift_SimpleService_tiny_result(metaclass=_fbthrift_python_mutable_typ
 
 
 class _fbthrift_SimpleService_small_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1554,6 +1569,7 @@ class _fbthrift_SimpleService_small_args(metaclass=_fbthrift_python_mutable_type
 
 
 class _fbthrift_SimpleService_small_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -1569,6 +1585,7 @@ class _fbthrift_SimpleService_small_result(metaclass=_fbthrift_python_mutable_ty
 
 
 class _fbthrift_SimpleService_big_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1585,6 +1602,7 @@ class _fbthrift_SimpleService_big_args(metaclass=_fbthrift_python_mutable_types.
 
 
 class _fbthrift_SimpleService_big_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -1600,6 +1618,7 @@ class _fbthrift_SimpleService_big_result(metaclass=_fbthrift_python_mutable_type
 
 
 class _fbthrift_SimpleService_two_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1616,6 +1635,7 @@ class _fbthrift_SimpleService_two_args(metaclass=_fbthrift_python_mutable_types.
 
 
 class _fbthrift_SimpleService_two_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -1631,11 +1651,13 @@ class _fbthrift_SimpleService_two_result(metaclass=_fbthrift_python_mutable_type
 
 
 class _fbthrift_SimpleService_expected_exception_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_SimpleService_expected_exception_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1652,11 +1674,13 @@ class _fbthrift_SimpleService_expected_exception_result(metaclass=_fbthrift_pyth
 
 
 class _fbthrift_SimpleService_unexpected_exception_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_SimpleService_unexpected_exception_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -1672,6 +1696,7 @@ class _fbthrift_SimpleService_unexpected_exception_result(metaclass=_fbthrift_py
 
 
 class _fbthrift_SimpleService_sum_i16_list_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1688,6 +1713,7 @@ class _fbthrift_SimpleService_sum_i16_list_args(metaclass=_fbthrift_python_mutab
 
 
 class _fbthrift_SimpleService_sum_i16_list_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -1703,6 +1729,7 @@ class _fbthrift_SimpleService_sum_i16_list_result(metaclass=_fbthrift_python_mut
 
 
 class _fbthrift_SimpleService_sum_i32_list_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1719,6 +1746,7 @@ class _fbthrift_SimpleService_sum_i32_list_args(metaclass=_fbthrift_python_mutab
 
 
 class _fbthrift_SimpleService_sum_i32_list_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -1734,6 +1762,7 @@ class _fbthrift_SimpleService_sum_i32_list_result(metaclass=_fbthrift_python_mut
 
 
 class _fbthrift_SimpleService_sum_i64_list_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1750,6 +1779,7 @@ class _fbthrift_SimpleService_sum_i64_list_args(metaclass=_fbthrift_python_mutab
 
 
 class _fbthrift_SimpleService_sum_i64_list_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -1765,6 +1795,7 @@ class _fbthrift_SimpleService_sum_i64_list_result(metaclass=_fbthrift_python_mut
 
 
 class _fbthrift_SimpleService_concat_many_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1781,6 +1812,7 @@ class _fbthrift_SimpleService_concat_many_args(metaclass=_fbthrift_python_mutabl
 
 
 class _fbthrift_SimpleService_concat_many_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -1796,6 +1828,7 @@ class _fbthrift_SimpleService_concat_many_result(metaclass=_fbthrift_python_muta
 
 
 class _fbthrift_SimpleService_count_structs_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1812,6 +1845,7 @@ class _fbthrift_SimpleService_count_structs_args(metaclass=_fbthrift_python_muta
 
 
 class _fbthrift_SimpleService_count_structs_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -1827,6 +1861,7 @@ class _fbthrift_SimpleService_count_structs_result(metaclass=_fbthrift_python_mu
 
 
 class _fbthrift_SimpleService_sum_set_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1843,6 +1878,7 @@ class _fbthrift_SimpleService_sum_set_args(metaclass=_fbthrift_python_mutable_ty
 
 
 class _fbthrift_SimpleService_sum_set_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -1858,6 +1894,7 @@ class _fbthrift_SimpleService_sum_set_result(metaclass=_fbthrift_python_mutable_
 
 
 class _fbthrift_SimpleService_contains_word_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1885,6 +1922,7 @@ class _fbthrift_SimpleService_contains_word_args(metaclass=_fbthrift_python_muta
 
 
 class _fbthrift_SimpleService_contains_word_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -1900,6 +1938,7 @@ class _fbthrift_SimpleService_contains_word_result(metaclass=_fbthrift_python_mu
 
 
 class _fbthrift_SimpleService_get_map_value_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1927,6 +1966,7 @@ class _fbthrift_SimpleService_get_map_value_args(metaclass=_fbthrift_python_muta
 
 
 class _fbthrift_SimpleService_get_map_value_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -1942,6 +1982,7 @@ class _fbthrift_SimpleService_get_map_value_result(metaclass=_fbthrift_python_mu
 
 
 class _fbthrift_SimpleService_map_length_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1958,6 +1999,7 @@ class _fbthrift_SimpleService_map_length_args(metaclass=_fbthrift_python_mutable
 
 
 class _fbthrift_SimpleService_map_length_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -1973,6 +2015,7 @@ class _fbthrift_SimpleService_map_length_result(metaclass=_fbthrift_python_mutab
 
 
 class _fbthrift_SimpleService_sum_map_values_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1989,6 +2032,7 @@ class _fbthrift_SimpleService_sum_map_values_args(metaclass=_fbthrift_python_mut
 
 
 class _fbthrift_SimpleService_sum_map_values_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -2004,6 +2048,7 @@ class _fbthrift_SimpleService_sum_map_values_result(metaclass=_fbthrift_python_m
 
 
 class _fbthrift_SimpleService_complex_sum_i32_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -2020,6 +2065,7 @@ class _fbthrift_SimpleService_complex_sum_i32_args(metaclass=_fbthrift_python_mu
 
 
 class _fbthrift_SimpleService_complex_sum_i32_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -2035,6 +2081,7 @@ class _fbthrift_SimpleService_complex_sum_i32_result(metaclass=_fbthrift_python_
 
 
 class _fbthrift_SimpleService_repeat_name_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -2051,6 +2098,7 @@ class _fbthrift_SimpleService_repeat_name_args(metaclass=_fbthrift_python_mutabl
 
 
 class _fbthrift_SimpleService_repeat_name_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -2066,11 +2114,13 @@ class _fbthrift_SimpleService_repeat_name_result(metaclass=_fbthrift_python_muta
 
 
 class _fbthrift_SimpleService_get_struct_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_SimpleService_get_struct_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -2086,6 +2136,7 @@ class _fbthrift_SimpleService_get_struct_result(metaclass=_fbthrift_python_mutab
 
 
 class _fbthrift_SimpleService_fib_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -2102,6 +2153,7 @@ class _fbthrift_SimpleService_fib_args(metaclass=_fbthrift_python_mutable_types.
 
 
 class _fbthrift_SimpleService_fib_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -2117,6 +2169,7 @@ class _fbthrift_SimpleService_fib_result(metaclass=_fbthrift_python_mutable_type
 
 
 class _fbthrift_SimpleService_unique_words_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -2133,6 +2186,7 @@ class _fbthrift_SimpleService_unique_words_args(metaclass=_fbthrift_python_mutab
 
 
 class _fbthrift_SimpleService_unique_words_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -2148,6 +2202,7 @@ class _fbthrift_SimpleService_unique_words_result(metaclass=_fbthrift_python_mut
 
 
 class _fbthrift_SimpleService_words_count_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -2164,6 +2219,7 @@ class _fbthrift_SimpleService_words_count_args(metaclass=_fbthrift_python_mutabl
 
 
 class _fbthrift_SimpleService_words_count_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -2179,6 +2235,7 @@ class _fbthrift_SimpleService_words_count_result(metaclass=_fbthrift_python_muta
 
 
 class _fbthrift_SimpleService_set_enum_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -2195,6 +2252,7 @@ class _fbthrift_SimpleService_set_enum_args(metaclass=_fbthrift_python_mutable_t
 
 
 class _fbthrift_SimpleService_set_enum_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -2210,6 +2268,7 @@ class _fbthrift_SimpleService_set_enum_result(metaclass=_fbthrift_python_mutable
 
 
 class _fbthrift_SimpleService_list_of_lists_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -2237,6 +2296,7 @@ class _fbthrift_SimpleService_list_of_lists_args(metaclass=_fbthrift_python_muta
 
 
 class _fbthrift_SimpleService_list_of_lists_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -2252,6 +2312,7 @@ class _fbthrift_SimpleService_list_of_lists_result(metaclass=_fbthrift_python_mu
 
 
 class _fbthrift_SimpleService_word_character_frequency_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -2268,6 +2329,7 @@ class _fbthrift_SimpleService_word_character_frequency_args(metaclass=_fbthrift_
 
 
 class _fbthrift_SimpleService_word_character_frequency_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -2283,6 +2345,7 @@ class _fbthrift_SimpleService_word_character_frequency_result(metaclass=_fbthrif
 
 
 class _fbthrift_SimpleService_list_of_sets_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -2299,6 +2362,7 @@ class _fbthrift_SimpleService_list_of_sets_args(metaclass=_fbthrift_python_mutab
 
 
 class _fbthrift_SimpleService_list_of_sets_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -2314,6 +2378,7 @@ class _fbthrift_SimpleService_list_of_sets_result(metaclass=_fbthrift_python_mut
 
 
 class _fbthrift_SimpleService_nested_map_argument_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -2330,6 +2395,7 @@ class _fbthrift_SimpleService_nested_map_argument_args(metaclass=_fbthrift_pytho
 
 
 class _fbthrift_SimpleService_nested_map_argument_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -2345,6 +2411,7 @@ class _fbthrift_SimpleService_nested_map_argument_result(metaclass=_fbthrift_pyt
 
 
 class _fbthrift_SimpleService_make_sentence_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -2361,6 +2428,7 @@ class _fbthrift_SimpleService_make_sentence_args(metaclass=_fbthrift_python_muta
 
 
 class _fbthrift_SimpleService_make_sentence_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -2376,6 +2444,7 @@ class _fbthrift_SimpleService_make_sentence_result(metaclass=_fbthrift_python_mu
 
 
 class _fbthrift_SimpleService_get_union_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -2392,6 +2461,7 @@ class _fbthrift_SimpleService_get_union_args(metaclass=_fbthrift_python_mutable_
 
 
 class _fbthrift_SimpleService_get_union_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -2407,6 +2477,7 @@ class _fbthrift_SimpleService_get_union_result(metaclass=_fbthrift_python_mutabl
 
 
 class _fbthrift_SimpleService_get_keys_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -2423,6 +2494,7 @@ class _fbthrift_SimpleService_get_keys_args(metaclass=_fbthrift_python_mutable_t
 
 
 class _fbthrift_SimpleService_get_keys_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -2438,6 +2510,7 @@ class _fbthrift_SimpleService_get_keys_result(metaclass=_fbthrift_python_mutable
 
 
 class _fbthrift_SimpleService_lookup_double_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -2454,6 +2527,7 @@ class _fbthrift_SimpleService_lookup_double_args(metaclass=_fbthrift_python_muta
 
 
 class _fbthrift_SimpleService_lookup_double_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -2469,6 +2543,7 @@ class _fbthrift_SimpleService_lookup_double_result(metaclass=_fbthrift_python_mu
 
 
 class _fbthrift_SimpleService_retrieve_binary_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -2485,6 +2560,7 @@ class _fbthrift_SimpleService_retrieve_binary_args(metaclass=_fbthrift_python_mu
 
 
 class _fbthrift_SimpleService_retrieve_binary_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -2500,6 +2576,7 @@ class _fbthrift_SimpleService_retrieve_binary_result(metaclass=_fbthrift_python_
 
 
 class _fbthrift_SimpleService_contain_binary_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -2516,6 +2593,7 @@ class _fbthrift_SimpleService_contain_binary_args(metaclass=_fbthrift_python_mut
 
 
 class _fbthrift_SimpleService_contain_binary_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -2531,6 +2609,7 @@ class _fbthrift_SimpleService_contain_binary_result(metaclass=_fbthrift_python_m
 
 
 class _fbthrift_SimpleService_contain_enum_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -2547,6 +2626,7 @@ class _fbthrift_SimpleService_contain_enum_args(metaclass=_fbthrift_python_mutab
 
 
 class _fbthrift_SimpleService_contain_enum_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -2562,6 +2642,7 @@ class _fbthrift_SimpleService_contain_enum_result(metaclass=_fbthrift_python_mut
 
 
 class _fbthrift_SimpleService_get_binary_union_struct_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -2578,6 +2659,7 @@ class _fbthrift_SimpleService_get_binary_union_struct_args(metaclass=_fbthrift_p
 
 
 class _fbthrift_SimpleService_get_binary_union_struct_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -2593,11 +2675,13 @@ class _fbthrift_SimpleService_get_binary_union_struct_result(metaclass=_fbthrift
 
 
 class _fbthrift_SimpleService_get_struct_hidden_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_SimpleService_get_struct_hidden_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -2615,11 +2699,13 @@ class _fbthrift_SimpleService_get_struct_hidden_result(metaclass=_fbthrift_pytho
 
 
 class _fbthrift_DerivedService_get_six_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_DerivedService_get_six_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -2637,11 +2723,13 @@ class _fbthrift_DerivedService_get_six_result(metaclass=_fbthrift_python_mutable
 
 
 class _fbthrift_RederivedService_get_seven_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_RederivedService_get_seven_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id

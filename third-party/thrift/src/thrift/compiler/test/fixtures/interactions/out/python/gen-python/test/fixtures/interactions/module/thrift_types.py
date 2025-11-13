@@ -167,16 +167,19 @@ _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
 
 
 class _fbthrift_MyService_foo_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyService_foo_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyService_interact_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -193,16 +196,19 @@ class _fbthrift_MyService_interact_args(metaclass=_fbthrift_python_types.StructM
 
 
 class _fbthrift_MyService_interact_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyService_interactFast_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyService_interactFast_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -218,11 +224,13 @@ class _fbthrift_MyService_interactFast_result(metaclass=_fbthrift_python_types.S
 
 
 class _fbthrift_MyService_serialize_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyService_serialize_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -238,6 +246,7 @@ class _fbthrift_MyService_serialize_result(metaclass=_fbthrift_python_types.Stru
 
 
 class _fbthrift_MyService_serialize_result_stream_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -256,11 +265,13 @@ class _fbthrift_MyService_serialize_result_stream_elem(metaclass=_fbthrift_pytho
 
 
 class _fbthrift_MyInteraction_frobnicate_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteraction_frobnicate_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -287,21 +298,25 @@ class _fbthrift_MyInteraction_frobnicate_result(metaclass=_fbthrift_python_types
 
 
 class _fbthrift_MyInteraction_ping_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteraction_truthify_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteraction_truthify_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteraction_truthify_result_stream_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -318,11 +333,13 @@ class _fbthrift_MyInteraction_truthify_result_stream_elem(metaclass=_fbthrift_py
 
 
 class _fbthrift_MyInteraction_encode_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteraction_encode_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -338,6 +355,7 @@ class _fbthrift_MyInteraction_encode_result(metaclass=_fbthrift_python_types.Str
 
 
 class _fbthrift_MyInteraction_encode_result_sink_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.SINK
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -363,6 +381,7 @@ class _fbthrift_MyInteraction_encode_result_sink_elem(metaclass=_fbthrift_python
 
 
 class _fbthrift_MyInteraction_encode_result_sink_final(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -380,11 +399,13 @@ class _fbthrift_MyInteraction_encode_result_sink_final(metaclass=_fbthrift_pytho
 
 
 class _fbthrift_MyInteractionFast_frobnicate_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteractionFast_frobnicate_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -400,21 +421,25 @@ class _fbthrift_MyInteractionFast_frobnicate_result(metaclass=_fbthrift_python_t
 
 
 class _fbthrift_MyInteractionFast_ping_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteractionFast_truthify_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteractionFast_truthify_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteractionFast_truthify_result_stream_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -431,11 +456,13 @@ class _fbthrift_MyInteractionFast_truthify_result_stream_elem(metaclass=_fbthrif
 
 
 class _fbthrift_MyInteractionFast_encode_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteractionFast_encode_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -451,6 +478,7 @@ class _fbthrift_MyInteractionFast_encode_result(metaclass=_fbthrift_python_types
 
 
 class _fbthrift_MyInteractionFast_encode_result_sink_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.SINK
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -476,6 +504,7 @@ class _fbthrift_MyInteractionFast_encode_result_sink_elem(metaclass=_fbthrift_py
 
 
 class _fbthrift_MyInteractionFast_encode_result_sink_final(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -493,11 +522,13 @@ class _fbthrift_MyInteractionFast_encode_result_sink_final(metaclass=_fbthrift_p
 
 
 class _fbthrift_SerialInteraction_frobnicate_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_SerialInteraction_frobnicate_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
@@ -505,16 +536,19 @@ class _fbthrift_SerialInteraction_frobnicate_result(metaclass=_fbthrift_python_t
 
 
 class _fbthrift_Factories_foo_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_Factories_foo_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_Factories_interact_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -531,16 +565,19 @@ class _fbthrift_Factories_interact_args(metaclass=_fbthrift_python_types.StructM
 
 
 class _fbthrift_Factories_interact_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_Factories_interactFast_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_Factories_interactFast_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -556,11 +593,13 @@ class _fbthrift_Factories_interactFast_result(metaclass=_fbthrift_python_types.S
 
 
 class _fbthrift_Factories_serialize_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_Factories_serialize_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -576,6 +615,7 @@ class _fbthrift_Factories_serialize_result(metaclass=_fbthrift_python_types.Stru
 
 
 class _fbthrift_Factories_serialize_result_stream_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -594,11 +634,13 @@ class _fbthrift_Factories_serialize_result_stream_elem(metaclass=_fbthrift_pytho
 
 
 class _fbthrift_MyInteraction_frobnicate_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteraction_frobnicate_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -625,21 +667,25 @@ class _fbthrift_MyInteraction_frobnicate_result(metaclass=_fbthrift_python_types
 
 
 class _fbthrift_MyInteraction_ping_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteraction_truthify_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteraction_truthify_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteraction_truthify_result_stream_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -656,11 +702,13 @@ class _fbthrift_MyInteraction_truthify_result_stream_elem(metaclass=_fbthrift_py
 
 
 class _fbthrift_MyInteraction_encode_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteraction_encode_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -676,6 +724,7 @@ class _fbthrift_MyInteraction_encode_result(metaclass=_fbthrift_python_types.Str
 
 
 class _fbthrift_MyInteraction_encode_result_sink_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.SINK
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -701,6 +750,7 @@ class _fbthrift_MyInteraction_encode_result_sink_elem(metaclass=_fbthrift_python
 
 
 class _fbthrift_MyInteraction_encode_result_sink_final(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -718,11 +768,13 @@ class _fbthrift_MyInteraction_encode_result_sink_final(metaclass=_fbthrift_pytho
 
 
 class _fbthrift_MyInteractionFast_frobnicate_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteractionFast_frobnicate_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -738,21 +790,25 @@ class _fbthrift_MyInteractionFast_frobnicate_result(metaclass=_fbthrift_python_t
 
 
 class _fbthrift_MyInteractionFast_ping_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteractionFast_truthify_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteractionFast_truthify_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteractionFast_truthify_result_stream_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -769,11 +825,13 @@ class _fbthrift_MyInteractionFast_truthify_result_stream_elem(metaclass=_fbthrif
 
 
 class _fbthrift_MyInteractionFast_encode_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteractionFast_encode_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -789,6 +847,7 @@ class _fbthrift_MyInteractionFast_encode_result(metaclass=_fbthrift_python_types
 
 
 class _fbthrift_MyInteractionFast_encode_result_sink_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.SINK
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -814,6 +873,7 @@ class _fbthrift_MyInteractionFast_encode_result_sink_elem(metaclass=_fbthrift_py
 
 
 class _fbthrift_MyInteractionFast_encode_result_sink_final(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -831,11 +891,13 @@ class _fbthrift_MyInteractionFast_encode_result_sink_final(metaclass=_fbthrift_p
 
 
 class _fbthrift_SerialInteraction_frobnicate_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_SerialInteraction_frobnicate_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
@@ -843,11 +905,13 @@ class _fbthrift_SerialInteraction_frobnicate_result(metaclass=_fbthrift_python_t
 
 
 class _fbthrift_Perform_foo_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_Perform_foo_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
@@ -855,11 +919,13 @@ class _fbthrift_Perform_foo_result(metaclass=_fbthrift_python_types.StructMeta):
 
 
 class _fbthrift_MyInteraction_frobnicate_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteraction_frobnicate_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -886,21 +952,25 @@ class _fbthrift_MyInteraction_frobnicate_result(metaclass=_fbthrift_python_types
 
 
 class _fbthrift_MyInteraction_ping_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteraction_truthify_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteraction_truthify_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteraction_truthify_result_stream_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -917,11 +987,13 @@ class _fbthrift_MyInteraction_truthify_result_stream_elem(metaclass=_fbthrift_py
 
 
 class _fbthrift_MyInteraction_encode_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteraction_encode_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -937,6 +1009,7 @@ class _fbthrift_MyInteraction_encode_result(metaclass=_fbthrift_python_types.Str
 
 
 class _fbthrift_MyInteraction_encode_result_sink_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.SINK
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -962,6 +1035,7 @@ class _fbthrift_MyInteraction_encode_result_sink_elem(metaclass=_fbthrift_python
 
 
 class _fbthrift_MyInteraction_encode_result_sink_final(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -979,11 +1053,13 @@ class _fbthrift_MyInteraction_encode_result_sink_final(metaclass=_fbthrift_pytho
 
 
 class _fbthrift_MyInteractionFast_frobnicate_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteractionFast_frobnicate_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -999,21 +1075,25 @@ class _fbthrift_MyInteractionFast_frobnicate_result(metaclass=_fbthrift_python_t
 
 
 class _fbthrift_MyInteractionFast_ping_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteractionFast_truthify_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteractionFast_truthify_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteractionFast_truthify_result_stream_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1030,11 +1110,13 @@ class _fbthrift_MyInteractionFast_truthify_result_stream_elem(metaclass=_fbthrif
 
 
 class _fbthrift_MyInteractionFast_encode_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteractionFast_encode_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -1050,6 +1132,7 @@ class _fbthrift_MyInteractionFast_encode_result(metaclass=_fbthrift_python_types
 
 
 class _fbthrift_MyInteractionFast_encode_result_sink_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.SINK
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1075,6 +1158,7 @@ class _fbthrift_MyInteractionFast_encode_result_sink_elem(metaclass=_fbthrift_py
 
 
 class _fbthrift_MyInteractionFast_encode_result_sink_final(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -1092,11 +1176,13 @@ class _fbthrift_MyInteractionFast_encode_result_sink_final(metaclass=_fbthrift_p
 
 
 class _fbthrift_SerialInteraction_frobnicate_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_SerialInteraction_frobnicate_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
@@ -1104,11 +1190,13 @@ class _fbthrift_SerialInteraction_frobnicate_result(metaclass=_fbthrift_python_t
 
 
 class _fbthrift_InteractWithShared_do_some_similar_things_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_InteractWithShared_do_some_similar_things_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -1126,11 +1214,13 @@ class _fbthrift_InteractWithShared_do_some_similar_things_result(metaclass=_fbth
 
 
 class _fbthrift_MyInteraction_frobnicate_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteraction_frobnicate_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -1157,21 +1247,25 @@ class _fbthrift_MyInteraction_frobnicate_result(metaclass=_fbthrift_python_types
 
 
 class _fbthrift_MyInteraction_ping_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteraction_truthify_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteraction_truthify_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteraction_truthify_result_stream_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1188,11 +1282,13 @@ class _fbthrift_MyInteraction_truthify_result_stream_elem(metaclass=_fbthrift_py
 
 
 class _fbthrift_MyInteraction_encode_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyInteraction_encode_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -1208,6 +1304,7 @@ class _fbthrift_MyInteraction_encode_result(metaclass=_fbthrift_python_types.Str
 
 
 class _fbthrift_MyInteraction_encode_result_sink_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.SINK
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1233,6 +1330,7 @@ class _fbthrift_MyInteraction_encode_result_sink_elem(metaclass=_fbthrift_python
 
 
 class _fbthrift_MyInteraction_encode_result_sink_final(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -1250,11 +1348,13 @@ class _fbthrift_MyInteraction_encode_result_sink_final(metaclass=_fbthrift_pytho
 
 
 class _fbthrift_SharedInteraction_init_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_SharedInteraction_init_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -1270,11 +1370,13 @@ class _fbthrift_SharedInteraction_init_result(metaclass=_fbthrift_python_types.S
 
 
 class _fbthrift_SharedInteraction_do_something_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_SharedInteraction_do_something_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -1290,11 +1392,13 @@ class _fbthrift_SharedInteraction_do_something_result(metaclass=_fbthrift_python
 
 
 class _fbthrift_SharedInteraction_tear_down_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_SharedInteraction_tear_down_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
@@ -1302,6 +1406,7 @@ class _fbthrift_SharedInteraction_tear_down_result(metaclass=_fbthrift_python_ty
 
 
 class _fbthrift_BoxService_getABoxSession_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -1318,6 +1423,7 @@ class _fbthrift_BoxService_getABoxSession_args(metaclass=_fbthrift_python_types.
 
 
 class _fbthrift_BoxService_getABoxSession_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -1335,11 +1441,13 @@ class _fbthrift_BoxService_getABoxSession_result(metaclass=_fbthrift_python_type
 
 
 class _fbthrift_BoxedInteraction_getABox_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_BoxedInteraction_getABox_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id

@@ -33,6 +33,7 @@ _fbthrift_all_structs = [
 
 
 class _fbthrift_ExtendTestService_check_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -49,6 +50,7 @@ class _fbthrift_ExtendTestService_check_args(metaclass=_fbthrift_python_mutable_
 
 
 class _fbthrift_ExtendTestService_check_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id

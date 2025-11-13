@@ -644,11 +644,13 @@ annotated_inline_i64 = int
 
 
 class _fbthrift_MyService_first_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyService_first_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -664,6 +666,7 @@ class _fbthrift_MyService_first_result(metaclass=_fbthrift_python_mutable_types.
 
 
 class _fbthrift_MyService_second_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -680,6 +683,7 @@ class _fbthrift_MyService_second_args(metaclass=_fbthrift_python_mutable_types.M
 
 
 class _fbthrift_MyService_second_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id

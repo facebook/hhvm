@@ -486,16 +486,19 @@ _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
 
 
 class _fbthrift_SinkService_method_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_SinkService_method_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_SinkService_method_result_sink_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.SINK
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -521,6 +524,7 @@ class _fbthrift_SinkService_method_result_sink_elem(metaclass=_fbthrift_python_t
 
 
 class _fbthrift_SinkService_method_result_sink_final(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -536,11 +540,13 @@ class _fbthrift_SinkService_method_result_sink_final(metaclass=_fbthrift_python_
 
 
 class _fbthrift_SinkService_methodAndReponse_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_SinkService_methodAndReponse_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -556,6 +562,7 @@ class _fbthrift_SinkService_methodAndReponse_result(metaclass=_fbthrift_python_t
 
 
 class _fbthrift_SinkService_methodAndReponse_result_sink_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.SINK
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -581,6 +588,7 @@ class _fbthrift_SinkService_methodAndReponse_result_sink_elem(metaclass=_fbthrif
 
 
 class _fbthrift_SinkService_methodAndReponse_result_sink_final(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -596,11 +604,13 @@ class _fbthrift_SinkService_methodAndReponse_result_sink_final(metaclass=_fbthri
 
 
 class _fbthrift_SinkService_methodThrow_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_SinkService_methodThrow_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -617,6 +627,7 @@ class _fbthrift_SinkService_methodThrow_result(metaclass=_fbthrift_python_types.
 
 
 class _fbthrift_SinkService_methodThrow_result_sink_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.SINK
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -642,6 +653,7 @@ class _fbthrift_SinkService_methodThrow_result_sink_elem(metaclass=_fbthrift_pyt
 
 
 class _fbthrift_SinkService_methodThrow_result_sink_final(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -657,16 +669,19 @@ class _fbthrift_SinkService_methodThrow_result_sink_final(metaclass=_fbthrift_py
 
 
 class _fbthrift_SinkService_methodSinkThrow_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_SinkService_methodSinkThrow_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_SinkService_methodSinkThrow_result_sink_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.SINK
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -709,6 +724,7 @@ class _fbthrift_SinkService_methodSinkThrow_result_sink_elem(metaclass=_fbthrift
 
 
 class _fbthrift_SinkService_methodSinkThrow_result_sink_final(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -724,16 +740,19 @@ class _fbthrift_SinkService_methodSinkThrow_result_sink_final(metaclass=_fbthrif
 
 
 class _fbthrift_SinkService_methodFinalThrow_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_SinkService_methodFinalThrow_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_SinkService_methodFinalThrow_result_sink_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.SINK
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -759,6 +778,7 @@ class _fbthrift_SinkService_methodFinalThrow_result_sink_elem(metaclass=_fbthrif
 
 
 class _fbthrift_SinkService_methodFinalThrow_result_sink_final(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -785,16 +805,19 @@ class _fbthrift_SinkService_methodFinalThrow_result_sink_final(metaclass=_fbthri
 
 
 class _fbthrift_SinkService_methodBothThrow_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_SinkService_methodBothThrow_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_SinkService_methodBothThrow_result_sink_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.SINK
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -837,6 +860,7 @@ class _fbthrift_SinkService_methodBothThrow_result_sink_elem(metaclass=_fbthrift
 
 
 class _fbthrift_SinkService_methodBothThrow_result_sink_final(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -863,16 +887,19 @@ class _fbthrift_SinkService_methodBothThrow_result_sink_final(metaclass=_fbthrif
 
 
 class _fbthrift_SinkService_methodFast_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_SinkService_methodFast_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_SinkService_methodFast_result_sink_elem(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift__rpc_kind = _fbthrift__RpcKind.SINK
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -898,6 +925,7 @@ class _fbthrift_SinkService_methodFast_result_sink_elem(metaclass=_fbthrift_pyth
 
 
 class _fbthrift_SinkService_methodFast_result_sink_final(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id

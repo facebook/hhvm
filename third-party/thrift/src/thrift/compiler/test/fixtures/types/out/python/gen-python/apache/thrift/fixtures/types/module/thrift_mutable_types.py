@@ -2362,6 +2362,7 @@ string_5252 = str
 
 
 class _fbthrift_SomeService_bounce_map_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -2378,6 +2379,7 @@ class _fbthrift_SomeService_bounce_map_args(metaclass=_fbthrift_python_mutable_t
 
 
 class _fbthrift_SomeService_bounce_map_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -2393,6 +2395,7 @@ class _fbthrift_SomeService_bounce_map_result(metaclass=_fbthrift_python_mutable
 
 
 class _fbthrift_SomeService_binary_keyed_map_args(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -2409,6 +2412,7 @@ class _fbthrift_SomeService_binary_keyed_map_args(metaclass=_fbthrift_python_mut
 
 
 class _fbthrift_SomeService_binary_keyed_map_result(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id

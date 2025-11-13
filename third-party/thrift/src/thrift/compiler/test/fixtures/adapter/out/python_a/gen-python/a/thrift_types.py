@@ -125,11 +125,13 @@ _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
 
 
 class _fbthrift_MyService_adapted_return_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 
 
 class _fbthrift_MyService_adapted_return_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -145,6 +147,7 @@ class _fbthrift_MyService_adapted_return_result(metaclass=_fbthrift_python_types
 
 
 class _fbthrift_MyService_adapted_param_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -161,6 +164,7 @@ class _fbthrift_MyService_adapted_param_args(metaclass=_fbthrift_python_types.St
 
 
 class _fbthrift_MyService_adapted_param_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 

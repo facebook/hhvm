@@ -22,6 +22,7 @@ The argument and result types for functions on thrift services (and interactions
 
 
 class {{> types/function_args_type}}(metaclass={{> types/struct_metaclass}}):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         {{#function:args}}
         _fbthrift_python_types.FieldInfo(
@@ -41,6 +42,7 @@ class {{> types/function_args_type}}(metaclass={{> types/struct_metaclass}}):
 
 
 class _fbthrift_{{service:name}}_{{function:name}}_result(metaclass={{> types/struct_metaclass}}):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         {{#let regular_response_type = (if function:oneway? null function:self.return_type.true_type)}}
         {{#if (and (object.notnull? regular_response_type) (not regular_response_type.void?))}}
@@ -76,6 +78,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result(metaclass={{> types/st
 
 
 class _fbthrift_{{service:name}}_{{function:name}}_result_stream_elem(metaclass={{> types/struct_metaclass}}):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     {{#if function:bidirectional_stream?}}
     _fbthrift__rpc_kind = _fbthrift__RpcKind.BIDIRECTIONAL_STREAM
     {{#else}}
@@ -113,6 +116,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_stream_elem(metaclass=
 
 
 class _fbthrift_{{service:name}}_{{function:name}}_result_sink_elem(metaclass={{> types/struct_metaclass}}):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     {{#if function:bidirectional_stream?}}
     _fbthrift__rpc_kind = _fbthrift__RpcKind.BIDIRECTIONAL_STREAM
     {{#else}}
@@ -175,6 +179,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_sink_elem(metaclass={{
 
 {{^function:bidirectional_stream?}}{{!
 }}class _fbthrift_{{service:name}}_{{function:name}}_result_sink_final(metaclass={{> types/struct_metaclass}}):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         {{#function:sink_final_response_type}}
         _fbthrift_python_types.FieldInfo(

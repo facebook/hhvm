@@ -226,6 +226,7 @@ _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
 
 
 class _fbthrift_EchoService_echo_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -242,6 +243,7 @@ class _fbthrift_EchoService_echo_args(metaclass=_fbthrift_python_types.StructMet
 
 
 class _fbthrift_EchoService_echo_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -270,6 +272,7 @@ class _fbthrift_EchoService_echo_result(metaclass=_fbthrift_python_types.StructM
 
 
 class _fbthrift_ExtendedEchoService_echo_2_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -286,6 +289,7 @@ class _fbthrift_ExtendedEchoService_echo_2_args(metaclass=_fbthrift_python_types
 
 
 class _fbthrift_ExtendedEchoService_echo_2_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             0,  # id
@@ -314,6 +318,7 @@ class _fbthrift_ExtendedEchoService_echo_2_result(metaclass=_fbthrift_python_typ
 
 
 class _fbthrift_ExtendedMyService_putDataById_2_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -341,6 +346,7 @@ class _fbthrift_ExtendedMyService_putDataById_2_args(metaclass=_fbthrift_python_
 
 
 class _fbthrift_ExtendedMyService_putDataById_2_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
     )
 

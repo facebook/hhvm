@@ -83,7 +83,7 @@ namespace test {
 struct SchemaTest;
 }
 
-class SchemaRegistry : public type_system::SourceIndexedTypeSystem {
+class SchemaRegistry : public type_system::TypeSystem {
  public:
   // Access the global registry.
   static SchemaRegistry& get();
@@ -204,8 +204,8 @@ class SchemaRegistry : public type_system::SourceIndexedTypeSystem {
       type_system::DefinitionRef ref) const override {
     return resolver_->getSourceIdentifierByDefinitionRef(ref);
   }
-  type_system::SourceIndexedTypeSystem::NameToDefinitionsMap
-  getUserDefinedTypesAtLocation(std::string_view) const override {
+  type_system::TypeSystem::NameToDefinitionsMap getUserDefinedTypesAtLocation(
+      std::string_view) const override {
     throw std::runtime_error("not implemented");
   }
 

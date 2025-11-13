@@ -28,8 +28,7 @@ namespace apache::thrift::type_system {
 /**
  * SerializableTypeSystemBuilder provides a builder API for constructing
  * SerializableTypeSystem from the type system with selective definitions.
- * It will also include source information if SourceIndexedTypeSystem is
- * provided using `withSourceInfo` static method.
+ * It will also include source information when using `withSourceInfo`.
  *
  * Example:
  *     // Thrift
@@ -55,12 +54,13 @@ namespace apache::thrift::type_system {
 class SerializableTypeSystemBuilder {
  public:
   static SerializableTypeSystemBuilder withSourceInfo(
-      const SourceIndexedTypeSystem& typeSystem) {
-    return SerializableTypeSystemBuilder(typeSystem, &typeSystem);
+      const TypeSystem& typeSystem) {
+    return SerializableTypeSystemBuilder(typeSystem, true /* withSourceInfo */);
   }
   static SerializableTypeSystemBuilder withoutSourceInfo(
       const TypeSystem& typeSystem) {
-    return SerializableTypeSystemBuilder(typeSystem, nullptr);
+    return SerializableTypeSystemBuilder(
+        typeSystem, false /* withSourceInfo */);
   }
 
   /**
@@ -75,10 +75,8 @@ class SerializableTypeSystemBuilder {
 
  private:
   SerializableTypeSystemBuilder(
-      const TypeSystem& typeSystem,
-      const SourceIndexedTypeSystem* sourceIndexedTypeSystem)
-      : typeSystem_(&typeSystem),
-        sourceIndexedTypeSystem_(sourceIndexedTypeSystem) {}
+      const TypeSystem& typeSystem, bool withSourceInfo)
+      : typeSystem_(&typeSystem), withSourceInfo_(withSourceInfo) {}
 
   std::vector<SerializableFieldDefinition> toSerializableField(
       folly::span<const FieldDefinition> fields);
@@ -88,7 +86,7 @@ class SerializableTypeSystemBuilder {
   void addAnnotations(const detail::RawAnnotations& annotations);
 
   folly::not_null<const TypeSystem*> typeSystem_;
-  const SourceIndexedTypeSystem* sourceIndexedTypeSystem_;
+  bool withSourceInfo_;
   SerializableTypeSystem serializableTypeSystem_;
 };
 

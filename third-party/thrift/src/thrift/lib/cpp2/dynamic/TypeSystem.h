@@ -704,6 +704,12 @@ struct ContainerTypeCache {
  *     generation.
  *   - Schema information fetched from a remote source.
  *   - Schema information created programmatically at runtime.
+ *
+ * This interface supports looking up types in two ways:
+ *   - by URIs — this is the primary (unique) identity for a user-defined type.
+ *   - by source names — a secondary, non-unique, and optional identity for a
+ *     user-defined type. Typically, source information for a type system is
+ *     derived from the Thrift IDL source file that produced it.
  */
 class TypeSystem {
  public:
@@ -746,6 +752,40 @@ class TypeSystem {
    * return an empty optional.
    */
   virtual std::optional<folly::F14FastSet<Uri>> getKnownUris() const = 0;
+
+  /**
+   * Resolves the defintion of a user-defined type referred to by a source
+   * identifier, if it exists.
+   *
+   * Note that source information is optional — not all user-defined types may
+   * have a source identifier.
+   */
+  virtual std::optional<DefinitionRef> getUserDefinedTypeBySourceIdentifier(
+      SourceIdentifierView) const = 0;
+
+  /**
+   * Retrieves the source identifier for a user-defined type, if it exists. This
+   * is the inverse of `getUserDefinedTypeBySourceIdentifier`.
+   *
+   * Note that source information is optional — not all user-defined types may
+   * have a source identifier.
+   */
+  virtual std::optional<SourceIdentifierView>
+      getSourceIdentiferForUserDefinedType(DefinitionRef) const = 0;
+
+  using NameToDefinitionsMap = folly::F14FastMap<std::string, DefinitionRef>;
+  /**
+   * Resolves all definitions of user-defined types at a provided location URI.
+   * Typically, this URI points to a source Thrift IDL file.
+   *
+   * The result is a mapping of definition name to a reference to the
+   * definition.
+   *
+   * For every name in the result, `getUserDefinedTypeBySourceIdentifier` must
+   * also succeed.
+   */
+  virtual NameToDefinitionsMap getUserDefinedTypesAtLocation(
+      std::string_view location) const = 0;
 
   /**
    * Creates a TypeRef for the `bool` type — either true or false.
@@ -826,57 +866,6 @@ class TypeSystem {
   // Thread-safety is managed by folly::Synchronized.
   mutable std::unique_ptr<detail::ContainerTypeCache> containerTypeCache_ =
       std::make_unique<detail::ContainerTypeCache>();
-};
-
-/**
- * An interface for a Thrift "type system" that supports looking up types by
- * source names instead of URIs. Note that unlike URIs, source names do not
- * uniquely identify types within a type system.
- *
- * Typically, source information for a type system is derived from the Thrift
- * IDL source file that produced it.
- *
- * The SourceIndexedTypeSystem interface provides only an alternative lookup
- * scheme. It does not include any other information regarding the types
- * contained within the type system.
- */
-class SourceIndexedTypeSystem : public TypeSystem {
- public:
-  ~SourceIndexedTypeSystem() noexcept override = default;
-
-  /**
-   * Resolves the defintion of a user-defined type referred to by a source
-   * identifier, if it exists.
-   *
-   * Note that source information is optional — not all user-defined types may
-   * have a source identifier.
-   */
-  virtual std::optional<DefinitionRef> getUserDefinedTypeBySourceIdentifier(
-      SourceIdentifierView) const = 0;
-
-  /**
-   * Retrieves the source identifier for a user-defined type, if it exists. This
-   * is the inverse of `getUserDefinedTypeBySourceIdentifier`.
-   *
-   * Note that source information is optional — not all user-defined types may
-   * have a source identifier.
-   */
-  virtual std::optional<SourceIdentifierView>
-      getSourceIdentiferForUserDefinedType(DefinitionRef) const = 0;
-
-  using NameToDefinitionsMap = folly::F14FastMap<std::string, DefinitionRef>;
-  /**
-   * Resolves all definitions of user-defined types at a provided location URI.
-   * Typically, this URI points to a source Thrift IDL file.
-   *
-   * The result is a mapping of definition name to a reference to the
-   * definition.
-   *
-   * For every name in the result, `getUserDefinedTypeBySourceIdentifier` must
-   * also succeed.
-   */
-  virtual NameToDefinitionsMap getUserDefinedTypesAtLocation(
-      std::string_view location) const = 0;
 };
 
 /**

@@ -127,9 +127,9 @@ void SerializableTypeSystemBuilder::addDefinition(DefinitionRef ref) {
         return result;
       });
 
-  if (sourceIndexedTypeSystem_) {
+  if (withSourceInfo_) {
     auto sourceInfoView =
-        sourceIndexedTypeSystem_->getSourceIdentiferForUserDefinedType(ref);
+        typeSystem_->getSourceIdentiferForUserDefinedType(ref);
     if (sourceInfoView.has_value()) {
       auto& s = entry.sourceInfo().ensure();
       s.locator() = sourceInfoView->location;

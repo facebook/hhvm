@@ -201,8 +201,9 @@ folly::AsyncTransport::UniquePtr createQuicSocket(
           .setFizzClientContext(getFizzContext(cfg))
           .setCertificateVerifier(getFizzVerifier(cfg))
           .build());
-  quicClient->setPacingTimer(std::make_shared<quic::HighResQuicTimer>(
-      evb, std::chrono::microseconds(200)));
+  quicClient->setPacingTimer(
+      std::make_shared<quic::HighResQuicTimer>(
+          evb, std::chrono::microseconds(200)));
   quicClient->setTransportSettings(ts);
   quicClient->addNewPeerAddress(cfg.serverHost);
   auto quicAsyncTransport = new quic::QuicClientAsyncTransport(quicClient);
@@ -326,8 +327,9 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
     std::shared_ptr<StressTestAsyncClient> connection =
         ClientFactory::createRocketClient(evb, cfg.connConfig);
     for (size_t i = 0; i < cfg.numClientsPerConnection; i++) {
-      clients.emplace_back(std::make_unique<ThriftStressTestClient>(
-          connection, stats, cfg.enableChecksum));
+      clients.emplace_back(
+          std::make_unique<ThriftStressTestClient>(
+              connection, stats, cfg.enableChecksum));
     }
   }
   return clients;

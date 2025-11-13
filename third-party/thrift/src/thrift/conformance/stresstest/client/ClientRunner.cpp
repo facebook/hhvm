@@ -228,13 +228,17 @@ ClientRunner::ClientRunner(const ClientConfig& config)
     : continuous_(config.continuous),
       useLoadGenerator_(config.useLoadGenerator),
       clientThreads_() {
-  rocket::THRIFT_FLAG_SET_MOCK(rocket_enable_frame_relative_alignment, config.enableRocketFrameRelativeAlignment);
+  rocket::THRIFT_FLAG_SET_MOCK(
+      rocket_enable_frame_relative_alignment,
+      config.enableRocketFrameRelativeAlignment);
   auto targetQpsPerClient = config.targetQps / config.numClientThreads;
   for (size_t i = 0; i < config.numClientThreads; i++) {
-    loadGenerator_.emplace_back(std::make_unique<PoissonLoadGenerator>(
-        targetQpsPerClient, config.gen_load_interval));
-    clientThreads_.emplace_back(std::make_unique<ClientThread>(
-        config, i, *loadGenerator_[i], config.useLoadGenerator));
+    loadGenerator_.emplace_back(
+        std::make_unique<PoissonLoadGenerator>(
+            targetQpsPerClient, config.gen_load_interval));
+    clientThreads_.emplace_back(
+        std::make_unique<ClientThread>(
+            config, i, *loadGenerator_[i], config.useLoadGenerator));
   }
 }
 

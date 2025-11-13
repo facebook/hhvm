@@ -247,6 +247,7 @@ add_library(
   ../cpp/protocol/TBase64Utils.cpp
   ../cpp/protocol/TProtocolException.cpp
   ../cpp/protocol/TSimpleJSONProtocol.cpp
+  ../cpp/protocol/TType.cpp
   ../cpp/util/VarintUtils.cpp
   ${reflection-cpp2-SOURCES}
 )

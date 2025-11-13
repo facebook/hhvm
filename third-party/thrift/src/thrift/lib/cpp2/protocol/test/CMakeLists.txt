@@ -57,6 +57,7 @@ foreach (test_name ${PROTOCOL_TESTS})
      GTest::gtest_main
      thriftcpp2
      Folly::folly
+     fmt::fmt
   )
   gtest_discover_tests(${test_name})
 endforeach ()

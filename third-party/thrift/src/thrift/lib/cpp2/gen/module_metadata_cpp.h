@@ -299,6 +299,18 @@ auto genStructMetadata(metadata::ThriftMetadata& md, bool genAnnotations) {
   return genStructMetadata(md, getNodeWithLock<T>(), genAnnotations);
 }
 
+void genStructFieldMetadata(
+    const syntax_graph::StructuredNode& node,
+    metadata::ThriftField& field,
+    const EncodedThriftField& f,
+    size_t index);
+
+template <class T>
+void genStructFieldMetadata(
+    metadata::ThriftField& field, const EncodedThriftField& f, size_t index) {
+  return genStructFieldMetadata(getNodeWithLock<T>(), field, f, index);
+}
+
 GenMetadataResult<metadata::ThriftException> genExceptionMetadata(
     metadata::ThriftMetadata& md,
     const syntax_graph::ExceptionNode& node,

@@ -53,21 +53,7 @@ StructMetadata<::cpp2::SmallStruct>::gen(ThriftMetadata& metadata) {
     { 1, "small_A", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "small_B", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_SmallStruct_fields) {
-    [[maybe_unused]] auto& field = module_SmallStruct.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::cpp2::SmallStruct>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::cpp2::SmallStruct>(module_SmallStruct.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -97,21 +83,7 @@ StructMetadata<::cpp2::containerStruct>::gen(ThriftMetadata& metadata) {
     { 1, "fieldA", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "fieldB", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE)), std::vector<ThriftConstStruct>{ }},    { 3, "fieldC", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 4, "fieldD", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 5, "fieldE", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 6, "fieldF", false, std::make_unique<List>(std::make_unique<List>(std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)))), std::vector<ThriftConstStruct>{ }},    { 7, "fieldG", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)))), std::vector<ThriftConstStruct>{ }},    { 8, "fieldH", false, std::make_unique<List>(std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE))), std::vector<ThriftConstStruct>{ }},    { 9, "fieldI", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ }},    { 10, "fieldJ", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE))), std::vector<ThriftConstStruct>{ }},    { 11, "fieldK", false, std::make_unique<List>(std::make_unique<List>(std::make_unique<List>(std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE))))), std::vector<ThriftConstStruct>{ }},    { 12, "fieldL", false, std::make_unique<Set>(std::make_unique<Set>(std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE)))), std::vector<ThriftConstStruct>{ }},    { 13, "fieldM", false, std::make_unique<Map>(std::make_unique<Set>(std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE))), std::make_unique<Map>(std::make_unique<List>(std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE))), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE))), std::vector<ThriftConstStruct>{ }},    { 17, "fieldQ", false, std::make_unique<Enum<::cpp2::MyEnumA>>("module.MyEnumA"), std::vector<ThriftConstStruct>{ }},    { 18, "fieldR", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 19, "fieldS", false, std::make_unique<Struct<::cpp2::SmallStruct>>("module.SmallStruct"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 20, "fieldT", false, std::make_unique<Struct<::cpp2::SmallStruct>>("module.SmallStruct"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(2) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 21, "fieldU", false, std::make_unique<Struct<::cpp2::SmallStruct>>("module.SmallStruct"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(1) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},    { 23, "fieldX", false, std::make_unique<Struct<::cpp2::SmallStruct>>("module.SmallStruct"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_containerStruct_fields) {
-    [[maybe_unused]] auto& field = module_containerStruct.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::cpp2::containerStruct>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::cpp2::containerStruct>(module_containerStruct.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.

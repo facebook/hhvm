@@ -40,21 +40,7 @@ StructMetadata<::cpp2::ComplexUnion>::gen(ThriftMetadata& metadata) {
     { 1, "intValue", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 5, "stringValue", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "intListValue", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{ }},    { 3, "stringListValue", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ }},    { 9, "typedefValue", false, std::make_unique<Typedef>("module.containerTypedef", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},    { 14, "stringRef", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_ComplexUnion_fields) {
-    [[maybe_unused]] auto& field = module_ComplexUnion.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::cpp2::ComplexUnion>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::cpp2::ComplexUnion>(module_ComplexUnion.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -84,21 +70,7 @@ StructMetadata<::cpp2::ListUnion>::gen(ThriftMetadata& metadata) {
     { 2, "intListValue", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{ }},    { 3, "stringListValue", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_ListUnion_fields) {
-    [[maybe_unused]] auto& field = module_ListUnion.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::cpp2::ListUnion>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::cpp2::ListUnion>(module_ListUnion.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -128,21 +100,7 @@ StructMetadata<::cpp2::DataUnion>::gen(ThriftMetadata& metadata) {
     { 1, "binaryData", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "stringData", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_DataUnion_fields) {
-    [[maybe_unused]] auto& field = module_DataUnion.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::cpp2::DataUnion>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::cpp2::DataUnion>(module_DataUnion.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -172,21 +130,7 @@ StructMetadata<::cpp2::Val>::gen(ThriftMetadata& metadata) {
     { 1, "strVal", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "intVal", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 9, "typedefValue", false, std::make_unique<Typedef>("module.containerTypedef", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_Val_fields) {
-    [[maybe_unused]] auto& field = module_Val.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::cpp2::Val>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::cpp2::Val>(module_Val.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -216,21 +160,7 @@ StructMetadata<::cpp2::ValUnion>::gen(ThriftMetadata& metadata) {
     { 1, "v1", false, std::make_unique<Struct<::cpp2::Val>>("module.Val"), std::vector<ThriftConstStruct>{ }},    { 2, "v2", false, std::make_unique<Struct<::cpp2::Val>>("module.Val"), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_ValUnion_fields) {
-    [[maybe_unused]] auto& field = module_ValUnion.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::cpp2::ValUnion>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::cpp2::ValUnion>(module_ValUnion.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -260,21 +190,7 @@ StructMetadata<::cpp2::VirtualComplexUnion>::gen(ThriftMetadata& metadata) {
     { 1, "thingOne", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "thingTwo", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_VirtualComplexUnion_fields) {
-    [[maybe_unused]] auto& field = module_VirtualComplexUnion.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::cpp2::VirtualComplexUnion>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::cpp2::VirtualComplexUnion>(module_VirtualComplexUnion.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -304,21 +220,7 @@ StructMetadata<::cpp2::NonCopyableStruct>::gen(ThriftMetadata& metadata) {
     { 1, "num", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_NonCopyableStruct_fields) {
-    [[maybe_unused]] auto& field = module_NonCopyableStruct.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::cpp2::NonCopyableStruct>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::cpp2::NonCopyableStruct>(module_NonCopyableStruct.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -348,21 +250,7 @@ StructMetadata<::cpp2::NonCopyableUnion>::gen(ThriftMetadata& metadata) {
     { 1, "s", false, std::make_unique<Struct<::cpp2::NonCopyableStruct>>("module.NonCopyableStruct"), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_NonCopyableUnion_fields) {
-    [[maybe_unused]] auto& field = module_NonCopyableUnion.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::cpp2::NonCopyableUnion>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::cpp2::NonCopyableUnion>(module_NonCopyableUnion.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.

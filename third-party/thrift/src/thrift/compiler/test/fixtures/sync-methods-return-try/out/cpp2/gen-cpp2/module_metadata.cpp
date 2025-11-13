@@ -101,21 +101,7 @@ StructMetadata<::cpp2::InitialResponse>::gen(ThriftMetadata& metadata) {
     { 1, "content", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_InitialResponse_fields) {
-    [[maybe_unused]] auto& field = module_InitialResponse.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::cpp2::InitialResponse>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::cpp2::InitialResponse>(module_InitialResponse.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -145,21 +131,7 @@ StructMetadata<::cpp2::FinalResponse>::gen(ThriftMetadata& metadata) {
     { 1, "content", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_FinalResponse_fields) {
-    [[maybe_unused]] auto& field = module_FinalResponse.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::cpp2::FinalResponse>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::cpp2::FinalResponse>(module_FinalResponse.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -189,21 +161,7 @@ StructMetadata<::cpp2::SinkPayload>::gen(ThriftMetadata& metadata) {
     { 1, "content", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_SinkPayload_fields) {
-    [[maybe_unused]] auto& field = module_SinkPayload.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::cpp2::SinkPayload>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::cpp2::SinkPayload>(module_SinkPayload.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -233,21 +191,7 @@ StructMetadata<::cpp2::CompatibleWithKeywordSink>::gen(ThriftMetadata& metadata)
     { 1, "sink", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_CompatibleWithKeywordSink_fields) {
-    [[maybe_unused]] auto& field = module_CompatibleWithKeywordSink.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::cpp2::CompatibleWithKeywordSink>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::cpp2::CompatibleWithKeywordSink>(module_CompatibleWithKeywordSink.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -277,21 +221,7 @@ StructMetadata<::cpp2::InitialException>::gen(ThriftMetadata& metadata) {
     { 1, "reason", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_InitialException_fields) {
-    [[maybe_unused]] auto& field = module_InitialException.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::cpp2::InitialException>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::cpp2::InitialException>(module_InitialException.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -321,21 +251,7 @@ StructMetadata<::cpp2::SinkException1>::gen(ThriftMetadata& metadata) {
     { 1, "reason", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_SinkException1_fields) {
-    [[maybe_unused]] auto& field = module_SinkException1.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::cpp2::SinkException1>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::cpp2::SinkException1>(module_SinkException1.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -365,21 +281,7 @@ StructMetadata<::cpp2::SinkException2>::gen(ThriftMetadata& metadata) {
     { 1, "reason", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_SinkException2_fields) {
-    [[maybe_unused]] auto& field = module_SinkException2.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::cpp2::SinkException2>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::cpp2::SinkException2>(module_SinkException2.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -409,21 +311,7 @@ StructMetadata<::cpp2::StreamItem>::gen(ThriftMetadata& metadata) {
     { 1, "content", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_StreamItem_fields) {
-    [[maybe_unused]] auto& field = module_StreamItem.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::cpp2::StreamItem>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::cpp2::StreamItem>(module_StreamItem.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.

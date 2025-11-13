@@ -350,6 +350,25 @@ GenMetadataResult<metadata::ThriftStruct> genStructMetadata(
   return genStructuredInMetadataMap(node, *md.structs(), genAnnotations);
 }
 
+void genStructFieldMetadata(
+    const syntax_graph::StructuredNode& node,
+    metadata::ThriftField& field,
+    const EncodedThriftField& f,
+    size_t index) {
+  DCHECK_EQ(*field.id(), f.id);
+  DCHECK_EQ(*field.name(), f.name);
+  DCHECK_EQ(*field.is_optional(), f.is_optional);
+
+  auto newAnnotations = std::move(*field.structured_annotations());
+  field.structured_annotations().emplace().assign(
+      f.structured_annotations.begin(), f.structured_annotations.end());
+
+  DCHECK(structuredAnnotationsEquality(
+      *field.structured_annotations(),
+      newAnnotations,
+      getFieldAnnotationTypes(node, index, static_cast<std::int16_t>(f.id))));
+}
+
 GenMetadataResult<metadata::ThriftException> genExceptionMetadata(
     metadata::ThriftMetadata& md,
     const syntax_graph::ExceptionNode& node,

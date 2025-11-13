@@ -40,21 +40,7 @@ StructMetadata<::test::fixtures::python_capi::SerializedStruct>::gen(ThriftMetad
     { 1, "s", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "i", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "os", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 4, "rs", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *serialized_dep_SerializedStruct_fields) {
-    [[maybe_unused]] auto& field = serialized_dep_SerializedStruct.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::test::fixtures::python_capi::SerializedStruct>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::test::fixtures::python_capi::SerializedStruct>(serialized_dep_SerializedStruct.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -85,21 +71,7 @@ StructMetadata<::test::fixtures::python_capi::SerializedUnion>::gen(ThriftMetada
     { 1, "s", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "i", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *serialized_dep_SerializedUnion_fields) {
-    [[maybe_unused]] auto& field = serialized_dep_SerializedUnion.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::test::fixtures::python_capi::SerializedUnion>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::test::fixtures::python_capi::SerializedUnion>(serialized_dep_SerializedUnion.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -130,21 +102,7 @@ StructMetadata<::test::fixtures::python_capi::SerializedError>::gen(ThriftMetada
     { 1, "msg", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "os", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "rs", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *serialized_dep_SerializedError_fields) {
-    [[maybe_unused]] auto& field = serialized_dep_SerializedError.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::test::fixtures::python_capi::SerializedError>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::test::fixtures::python_capi::SerializedError>(serialized_dep_SerializedError.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -175,21 +133,7 @@ StructMetadata<::test::fixtures::python_capi::MarshalStruct>::gen(ThriftMetadata
     { 1, "s", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "i", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "os", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 4, "rs", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *serialized_dep_MarshalStruct_fields) {
-    [[maybe_unused]] auto& field = serialized_dep_MarshalStruct.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::test::fixtures::python_capi::MarshalStruct>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::test::fixtures::python_capi::MarshalStruct>(serialized_dep_MarshalStruct.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -220,21 +164,7 @@ StructMetadata<::test::fixtures::python_capi::MarshalUnion>::gen(ThriftMetadata&
     { 1, "s", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "i", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *serialized_dep_MarshalUnion_fields) {
-    [[maybe_unused]] auto& field = serialized_dep_MarshalUnion.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::test::fixtures::python_capi::MarshalUnion>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::test::fixtures::python_capi::MarshalUnion>(serialized_dep_MarshalUnion.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -265,21 +195,7 @@ StructMetadata<::test::fixtures::python_capi::MarshalError>::gen(ThriftMetadata&
     { 1, "msg", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "os", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "rs", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *serialized_dep_MarshalError_fields) {
-    [[maybe_unused]] auto& field = serialized_dep_MarshalError.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::test::fixtures::python_capi::MarshalError>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::test::fixtures::python_capi::MarshalError>(serialized_dep_MarshalError.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.

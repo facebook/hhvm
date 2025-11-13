@@ -53,21 +53,7 @@ StructMetadata<::a::different::ns::AStruct>::gen(ThriftMetadata& metadata) {
     { 1, "FieldA", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *includes_AStruct_fields) {
-    [[maybe_unused]] auto& field = includes_AStruct.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::a::different::ns::AStruct>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::a::different::ns::AStruct>(includes_AStruct.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -97,21 +83,7 @@ StructMetadata<::a::different::ns::AStructB>::gen(ThriftMetadata& metadata) {
     { 1, "FieldA", false, std::make_unique<Struct<::a::different::ns::AStruct>>("includes.AStruct"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(1) } }).cv_struct(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *includes_AStructB_fields) {
-    [[maybe_unused]] auto& field = includes_AStructB.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::a::different::ns::AStructB>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::a::different::ns::AStructB>(includes_AStructB.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.

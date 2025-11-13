@@ -63,21 +63,7 @@ StructMetadata<::facebook::thrift::test::CustomException>::gen(ThriftMetadata& m
     { 1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "result", false, std::make_unique<Enum<::facebook::thrift::test::Result>>("module.Result"), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_CustomException_fields) {
-    [[maybe_unused]] auto& field = module_CustomException.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::facebook::thrift::test::CustomException>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::facebook::thrift::test::CustomException>(module_CustomException.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.

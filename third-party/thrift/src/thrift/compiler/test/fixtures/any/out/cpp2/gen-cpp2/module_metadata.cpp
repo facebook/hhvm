@@ -40,21 +40,7 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::any::detail::MyStru
     { 1, "myString", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyStruct_fields) {
-    [[maybe_unused]] auto& field = module_MyStruct.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct>(module_MyStruct.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -85,21 +71,7 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyUnion>::gen(
     { 1, "myString", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyUnion_fields) {
-    [[maybe_unused]] auto& field = module_MyUnion.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::facebook::thrift::compiler::test::fixtures::any::MyUnion>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::facebook::thrift::compiler::test::fixtures::any::MyUnion>(module_MyUnion.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -129,21 +101,7 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>::
     { 1, "myString", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyException_fields) {
-    [[maybe_unused]] auto& field = module_MyException.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::facebook::thrift::compiler::test::fixtures::any::MyException>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>(module_MyException.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.

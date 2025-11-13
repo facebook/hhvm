@@ -87,21 +87,7 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::StructLevelTer
     { 1, "bool_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "byte_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "short_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{ }},    { 4, "int_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 5, "long_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 6, "float_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{ }},    { 7, "double_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ }},    { 8, "string_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 9, "binary_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ }},    { 10, "enum_field", false, std::make_unique<Enum<::facebook::thrift::test::terse_write::deprecated::MyEnum>>("deprecated_terse_write.MyEnum"), std::vector<ThriftConstStruct>{ }},    { 11, "list_field", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{ }},    { 12, "set_field", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{ }},    { 13, "map_field", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{ }},    { 14, "struct_field", false, std::make_unique<Struct<::facebook::thrift::test::terse_write::deprecated::MyStruct>>("deprecated_terse_write.MyStruct"), std::vector<ThriftConstStruct>{ }},    { 15, "union_field", false, std::make_unique<Union<::facebook::thrift::test::terse_write::deprecated::MyUnion>>("deprecated_terse_write.MyUnion"), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *deprecated_terse_write_StructLevelTerseStruct_fields) {
-    [[maybe_unused]] auto& field = deprecated_terse_write_StructLevelTerseStruct.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>(deprecated_terse_write_StructLevelTerseStruct.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -132,21 +118,7 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::FieldLevelTers
     { 1, "terse_bool_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.TerseWrite", {  }).cv_struct(), }},    { 2, "terse_byte_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.TerseWrite", {  }).cv_struct(), }},    { 3, "terse_short_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.TerseWrite", {  }).cv_struct(), }},    { 4, "terse_int_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.TerseWrite", {  }).cv_struct(), }},    { 5, "terse_long_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.TerseWrite", {  }).cv_struct(), }},    { 6, "terse_float_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.TerseWrite", {  }).cv_struct(), }},    { 7, "terse_double_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.TerseWrite", {  }).cv_struct(), }},    { 8, "terse_string_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.TerseWrite", {  }).cv_struct(), }},    { 9, "terse_binary_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.TerseWrite", {  }).cv_struct(), }},    { 10, "terse_enum_field", false, std::make_unique<Enum<::facebook::thrift::test::terse_write::deprecated::MyEnum>>("deprecated_terse_write.MyEnum"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.TerseWrite", {  }).cv_struct(), }},    { 11, "terse_list_field", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("thrift.TerseWrite", {  }).cv_struct(), }},    { 12, "terse_set_field", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("thrift.TerseWrite", {  }).cv_struct(), }},    { 13, "terse_map_field", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("thrift.TerseWrite", {  }).cv_struct(), }},    { 14, "terse_struct_field", false, std::make_unique<Struct<::facebook::thrift::test::terse_write::deprecated::MyStruct>>("deprecated_terse_write.MyStruct"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.TerseWrite", {  }).cv_struct(), }},    { 15, "bool_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 16, "byte_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 17, "short_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 18, "int_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 19, "long_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 20, "float_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 21, "double_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 22, "string_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 23, "binary_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 24, "enum_field", false, std::make_unique<Enum<::facebook::thrift::test::terse_write::deprecated::MyEnum>>("deprecated_terse_write.MyEnum"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 25, "list_field", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 26, "set_field", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 27, "map_field", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 28, "struct_field", false, std::make_unique<Struct<::facebook::thrift::test::terse_write::deprecated::MyStruct>>("deprecated_terse_write.MyStruct"), std::vector<ThriftConstStruct>{ }},    { 29, "union_field", false, std::make_unique<Union<::facebook::thrift::test::terse_write::deprecated::MyUnion>>("deprecated_terse_write.MyUnion"), std::vector<ThriftConstStruct>{ }},    { 30, "iobuf_ptr_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), *cvStruct("cpp.Type", { {"name", cvString("std::unique_ptr<folly::IOBuf>") } }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *deprecated_terse_write_FieldLevelTerseStruct_fields) {
-    [[maybe_unused]] auto& field = deprecated_terse_write_FieldLevelTerseStruct.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>(deprecated_terse_write_FieldLevelTerseStruct.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -176,21 +148,7 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::CppRefStructFi
     { 1, "primitive_ref_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), *cvStruct("cpp.AllowLegacyDeprecatedTerseWritesRef", {  }).cv_struct(), *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), }},    { 2, "struct_ref_field", false, std::make_unique<Struct<::facebook::thrift::test::terse_write::deprecated::MyStruct>>("deprecated_terse_write.MyStruct"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct(), *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), *cvStruct("cpp.AllowLegacyDeprecatedTerseWritesRef", {  }).cv_struct(), *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *deprecated_terse_write_CppRefStructFields_fields) {
-    [[maybe_unused]] auto& field = deprecated_terse_write_CppRefStructFields.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::facebook::thrift::test::terse_write::deprecated::CppRefStructFields>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::facebook::thrift::test::terse_write::deprecated::CppRefStructFields>(deprecated_terse_write_CppRefStructFields.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -220,21 +178,7 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTers
     { 1, "bool_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 2, "byte_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 3, "short_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 4, "int_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 5, "long_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 6, "float_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 7, "double_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 8, "string_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 9, "binary_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 10, "enum_field", false, std::make_unique<Enum<::facebook::thrift::test::terse_write::deprecated::MyEnum>>("deprecated_terse_write.MyEnum"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 11, "list_field", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 12, "set_field", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 13, "map_field", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *deprecated_terse_write_DeprecatedTerseWriteWithCustomDefault_fields) {
-    [[maybe_unused]] auto& field = deprecated_terse_write_DeprecatedTerseWriteWithCustomDefault.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault>(deprecated_terse_write_DeprecatedTerseWriteWithCustomDefault.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -264,21 +208,7 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTers
     { 1, "bool_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 2, "byte_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 3, "short_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 4, "int_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 5, "long_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 6, "float_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 7, "double_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 8, "string_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 9, "binary_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 10, "enum_field", false, std::make_unique<Enum<::facebook::thrift::test::terse_write::deprecated::MyEnum>>("deprecated_terse_write.MyEnum"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 11, "list_field", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 12, "set_field", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},    { 13, "map_field", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *deprecated_terse_write_DeprecatedTerseWriteWithRedundantCustomDefault_fields) {
-    [[maybe_unused]] auto& field = deprecated_terse_write_DeprecatedTerseWriteWithRedundantCustomDefault.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault>(deprecated_terse_write_DeprecatedTerseWriteWithRedundantCustomDefault.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.

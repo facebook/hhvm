@@ -77,21 +77,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     { 1, "count", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_structured_annotation_inline_fields) {
-    [[maybe_unused]] auto& field = module_structured_annotation_inline.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::test::fixtures::basic_structured_annotations::structured_annotation_inline>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_inline>(module_structured_annotation_inline.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -121,21 +107,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     { 1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_structured_annotation_with_default_fields) {
-    [[maybe_unused]] auto& field = module_structured_annotation_with_default.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::test::fixtures::basic_structured_annotations::structured_annotation_with_default>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_with_default>(module_structured_annotation_with_default.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -165,21 +137,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     { 1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "recurse", true, std::make_unique<Struct<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>>("module.structured_annotation_recursive"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct(), }},    { 3, "forward", false, std::make_unique<Struct<::test::fixtures::basic_structured_annotations::structured_annotation_forward>>("module.structured_annotation_forward"), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_structured_annotation_recursive_fields) {
-    [[maybe_unused]] auto& field = module_structured_annotation_recursive.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>(module_structured_annotation_recursive.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -209,21 +167,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     { 1, "count", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_structured_annotation_forward_fields) {
-    [[maybe_unused]] auto& field = module_structured_annotation_forward.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::test::fixtures::basic_structured_annotations::structured_annotation_forward>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_forward>(module_structured_annotation_forward.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -253,21 +197,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
     { 1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "nest", false, std::make_unique<Struct<::test::fixtures::basic_structured_annotations::structured_annotation_with_default>>("module.structured_annotation_with_default"), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_structured_annotation_nested_fields) {
-    [[maybe_unused]] auto& field = module_structured_annotation_nested.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::test::fixtures::basic_structured_annotations::structured_annotation_nested>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_nested>(module_structured_annotation_nested.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -297,21 +227,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyStruct>::gen(Th
     { 1, "annotated_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("module.structured_annotation_inline", { {"count", cvInteger(1) }, {"name", cvString("counter") } }).cv_struct(), *cvStruct("module.runtime_annotation", {  }).cv_struct(), }},    { 2, "annotated_type", false, std::make_unique<Typedef>("module.annotated_inline_string", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("module.structured_annotation_inline", { {"count", cvInteger(1) } }).cv_struct(), *cvStruct("module.structured_annotation_with_default", { {"name", cvString("abc") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 3, "annotated_recursive", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("module.structured_annotation_recursive", { {"name", cvString("abc") }, {"recurse", cvStruct("module.structured_annotation_recursive", { {"name", cvString("cba") } }) }, {"forward", cvStruct("module.structured_annotation_forward", { {"count", cvInteger(3) } }) } }).cv_struct(), }},    { 4, "annotated_nested", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("module.structured_annotation_nested", { {"name", cvString("nesty") } }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyStruct_fields) {
-    [[maybe_unused]] auto& field = module_MyStruct.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::test::fixtures::basic_structured_annotations::MyStruct>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::test::fixtures::basic_structured_annotations::MyStruct>(module_MyStruct.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -347,21 +263,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyException>::gen
     { 1, "context", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("module.structured_annotation_with_default", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyException_fields) {
-    [[maybe_unused]] auto& field = module_MyException.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::test::fixtures::basic_structured_annotations::MyException>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::test::fixtures::basic_structured_annotations::MyException>(module_MyException.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -392,21 +294,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyUnion>::gen(Thr
     { 1, "first", false, std::make_unique<Typedef>("module.annotated_inline_string", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("module.structured_annotation_inline", { {"count", cvInteger(1) } }).cv_struct(), *cvStruct("module.structured_annotation_with_default", { {"name", cvString("abc") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("module.structured_annotation_with_default", {  }).cv_struct(), }},    { 2, "second", false, std::make_unique<Typedef>("module.annotated_inline_i64", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("module.structured_annotation_inline", { {"count", cvInteger(2) } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("module.structured_annotation_with_default", { {"name", cvString("aba") } }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_MyUnion_fields) {
-    [[maybe_unused]] auto& field = module_MyUnion.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::test::fixtures::basic_structured_annotations::MyUnion>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::test::fixtures::basic_structured_annotations::MyUnion>(module_MyUnion.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.

@@ -95,21 +95,7 @@ StructMetadata<::py3::simple::SimpleException>::gen(ThriftMetadata& metadata) {
     { 1, "err_code", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_SimpleException_fields) {
-    [[maybe_unused]] auto& field = module_SimpleException.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::py3::simple::SimpleException>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::py3::simple::SimpleException>(module_SimpleException.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -139,21 +125,7 @@ StructMetadata<::py3::simple::OptionalRefStruct>::gen(ThriftMetadata& metadata) 
     { 1, "optional_blob", true, std::make_unique<Typedef>("module.IOBufPtr", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("std::unique_ptr<folly::IOBuf>") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_OptionalRefStruct_fields) {
-    [[maybe_unused]] auto& field = module_OptionalRefStruct.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::py3::simple::OptionalRefStruct>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::py3::simple::OptionalRefStruct>(module_OptionalRefStruct.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -183,21 +155,7 @@ StructMetadata<::py3::simple::SimpleStruct>::gen(ThriftMetadata& metadata) {
     { 1, "is_on", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "tiny_int", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "small_int", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{ }},    { 4, "nice_sized_int", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 5, "big_int", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 6, "real", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ }},    { 7, "smaller_real", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{ }},    { 9, "something", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("::std::unordered_map") } }).cv_struct(), }},    { 8, "hidden_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("python.Py3Hidden", {  }).cv_struct(), }},    { 10, "opt_default_int", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowUnsafeOptionalCustomDefaultValue", {  }).cv_struct(), }},    { 11, "opt_default_str", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowUnsafeOptionalCustomDefaultValue", {  }).cv_struct(), }},    { 12, "opt_default_enum", true, std::make_unique<Enum<::py3::simple::AnEnum>>("module.AnEnum"), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowUnsafeOptionalCustomDefaultValue", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_SimpleStruct_fields) {
-    [[maybe_unused]] auto& field = module_SimpleStruct.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::py3::simple::SimpleStruct>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::py3::simple::SimpleStruct>(module_SimpleStruct.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -227,21 +185,7 @@ StructMetadata<::py3::simple::Float32Struct>::gen(ThriftMetadata& metadata) {
     { 1, "float32", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "float64", false, std::make_unique<Typedef>("module.LegacyFloat32", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("python.EnableUnsafeUnconstrainedFloat32", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 3, "float_list", false, std::make_unique<List>(std::make_unique<Typedef>("module.LegacyFloat32", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("python.EnableUnsafeUnconstrainedFloat32", {  }).cv_struct(),  })), std::vector<ThriftConstStruct>{ }},    { 4, "float_map", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<List>(std::make_unique<Typedef>("module.LegacyFloat32", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("python.EnableUnsafeUnconstrainedFloat32", {  }).cv_struct(),  }))), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_Float32Struct_fields) {
-    [[maybe_unused]] auto& field = module_Float32Struct.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::py3::simple::Float32Struct>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::py3::simple::Float32Struct>(module_Float32Struct.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -271,21 +215,7 @@ StructMetadata<::py3::simple::HiddenTypeFieldsStruct>::gen(ThriftMetadata& metad
     { 1, "field1", false, std::make_unique<Typedef>("module.AdaptedTypeDef", std::make_unique<Struct<::py3::simple::SimpleStruct>>("module.SimpleStruct"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("Adapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ *cvStruct("python.Py3Hidden", {  }).cv_struct(), }},    { 2, "field2", false, std::make_unique<List>(std::make_unique<Typedef>("module.AdaptedTypeDef", std::make_unique<Struct<::py3::simple::SimpleStruct>>("module.SimpleStruct"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("Adapter") } }).cv_struct(),  })), std::vector<ThriftConstStruct>{ *cvStruct("python.Py3Hidden", {  }).cv_struct(), }},    { 3, "field3", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Typedef>("module.AdaptedTypeDef", std::make_unique<Struct<::py3::simple::SimpleStruct>>("module.SimpleStruct"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("Adapter") } }).cv_struct(),  })), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"template", cvString("::std::unordered_map") } }).cv_struct(), *cvStruct("python.Py3Hidden", {  }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_HiddenTypeFieldsStruct_fields) {
-    [[maybe_unused]] auto& field = module_HiddenTypeFieldsStruct.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::py3::simple::HiddenTypeFieldsStruct>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::py3::simple::HiddenTypeFieldsStruct>(module_HiddenTypeFieldsStruct.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -315,21 +245,7 @@ StructMetadata<::py3::simple::detail::AdaptedUnion>::gen(ThriftMetadata& metadat
     { 1, "best", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_AdaptedUnion_fields) {
-    [[maybe_unused]] auto& field = module_AdaptedUnion.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::py3::simple::detail::AdaptedUnion>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::py3::simple::detail::AdaptedUnion>(module_AdaptedUnion.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -360,21 +276,7 @@ StructMetadata<::py3::simple::HiddenException>::gen(ThriftMetadata& metadata) {
     { 1, "test", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_HiddenException_fields) {
-    [[maybe_unused]] auto& field = module_HiddenException.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::py3::simple::HiddenException>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::py3::simple::HiddenException>(module_HiddenException.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -405,21 +307,7 @@ StructMetadata<::py3::simple::ComplexStruct>::gen(ThriftMetadata& metadata) {
     { 1, "structOne", false, std::make_unique<Struct<::py3::simple::SimpleStruct>>("module.SimpleStruct"), std::vector<ThriftConstStruct>{ }},    { 2, "structTwo", false, std::make_unique<Struct<::py3::simple::SimpleStruct>>("module.SimpleStruct"), std::vector<ThriftConstStruct>{ }},    { 3, "an_integer", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 4, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 5, "an_enum", false, std::make_unique<Enum<::py3::simple::AnEnum>>("module.AnEnum"), std::vector<ThriftConstStruct>{ }},    { 6, "some_bytes", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ }},    { 7, "from", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("python.Name", { {"name", cvString("sender") } }).cv_struct(), }},    { 8, "cdef", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 9, "bytes_with_cpp_type", false, std::make_unique<Typedef>("module.foo_bar", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("foo::Bar") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_ComplexStruct_fields) {
-    [[maybe_unused]] auto& field = module_ComplexStruct.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::py3::simple::ComplexStruct>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::py3::simple::ComplexStruct>(module_ComplexStruct.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -449,21 +337,7 @@ StructMetadata<::py3::simple::BinaryUnion>::gen(ThriftMetadata& metadata) {
     { 1, "iobuf_val", false, std::make_unique<Typedef>("module.IOBuf", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("folly::IOBuf") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_BinaryUnion_fields) {
-    [[maybe_unused]] auto& field = module_BinaryUnion.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::py3::simple::BinaryUnion>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::py3::simple::BinaryUnion>(module_BinaryUnion.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -493,21 +367,7 @@ StructMetadata<::py3::simple::BinaryUnionStruct>::gen(ThriftMetadata& metadata) 
     { 1, "u", false, std::make_unique<Union<::py3::simple::BinaryUnion>>("module.BinaryUnion"), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_BinaryUnionStruct_fields) {
-    [[maybe_unused]] auto& field = module_BinaryUnionStruct.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::py3::simple::BinaryUnionStruct>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::py3::simple::BinaryUnionStruct>(module_BinaryUnionStruct.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -537,21 +397,7 @@ StructMetadata<::py3::simple::CustomFields>::gen(ThriftMetadata& metadata) {
     { 1, "bool_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct(), }},    { 2, "integer_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct(), }},    { 3, "double_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct(), }},    { 4, "string_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct(), }},    { 5, "binary_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct(), }},    { 6, "list_field", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct(), }},    { 7, "set_field", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct(), }},    { 8, "map_field", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct(), }},    { 9, "struct_field", false, std::make_unique<Typedef>("module.SimpleStruct", std::make_unique<Struct<::py3::simple::SimpleStruct>>("module.SimpleStruct"), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct(), }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_CustomFields_fields) {
-    [[maybe_unused]] auto& field = module_CustomFields.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::py3::simple::CustomFields>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::py3::simple::CustomFields>(module_CustomFields.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -581,21 +427,7 @@ StructMetadata<::py3::simple::CustomTypedefFields>::gen(ThriftMetadata& metadata
     { 1, "bool_field", false, std::make_unique<Typedef>("module.CustomBool", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 2, "integer_field", false, std::make_unique<Typedef>("module.CustomInteger", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 3, "double_field", false, std::make_unique<Typedef>("module.CustomDouble", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 4, "string_field", false, std::make_unique<Typedef>("module.CustomString", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 5, "binary_field", false, std::make_unique<Typedef>("module.CustomBinary", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 6, "list_field", false, std::make_unique<Typedef>("module.CustomList", std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 7, "set_field", false, std::make_unique<Typedef>("module.CustomSet", std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 8, "map_field", false, std::make_unique<Typedef>("module.CustomMap", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 9, "struct_field", false, std::make_unique<Typedef>("module.CustomStruct", std::make_unique<Typedef>("module.SimpleStruct", std::make_unique<Struct<::py3::simple::SimpleStruct>>("module.SimpleStruct"), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_CustomTypedefFields_fields) {
-    [[maybe_unused]] auto& field = module_CustomTypedefFields.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::py3::simple::CustomTypedefFields>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::py3::simple::CustomTypedefFields>(module_CustomTypedefFields.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.
@@ -625,21 +457,7 @@ StructMetadata<::py3::simple::AdaptedTypedefFields>::gen(ThriftMetadata& metadat
     { 1, "bool_field", false, std::make_unique<Typedef>("module.AdaptedBool", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::MyAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 2, "integer_field", false, std::make_unique<Typedef>("module.AdaptedInteger", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::MyAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 3, "double_field", false, std::make_unique<Typedef>("module.AdaptedDouble", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::MyAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 4, "string_field", false, std::make_unique<Typedef>("module.AdaptedString", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::MyAdapter") } }).cv_struct(), *cvStruct("python.Py3EnableCppAdapter", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 5, "binary_field", false, std::make_unique<Typedef>("module.AdaptedBinary", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::MyAdapter") } }).cv_struct(), *cvStruct("python.Py3EnableCppAdapter", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 6, "list_field", false, std::make_unique<Typedef>("module.AdaptedList", std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::MyAdapter") } }).cv_struct(), *cvStruct("python.Py3EnableCppAdapter", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 7, "set_field", false, std::make_unique<Typedef>("module.AdaptedSet", std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::MyAdapter") } }).cv_struct(), *cvStruct("python.Py3EnableCppAdapter", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 8, "map_field", false, std::make_unique<Typedef>("module.AdaptedMap", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::MyAdapter") } }).cv_struct(), *cvStruct("python.Py3EnableCppAdapter", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 9, "struct_field", false, std::make_unique<Typedef>("module.AdaptedStruct", std::make_unique<Struct<::py3::simple::SimpleStruct>>("module.SimpleStruct"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::MyAdapter") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_AdaptedTypedefFields_fields) {
-    [[maybe_unused]] auto& field = module_AdaptedTypedefFields.fields()[i];
-    DCHECK_EQ(*field.id(), f.id);
-    DCHECK_EQ(*field.name(), f.name);
-    DCHECK_EQ(*field.is_optional(), f.is_optional);
-
-    auto newAnnotations = std::move(*field.structured_annotations());
-    field.structured_annotations().emplace().assign(
-        f.structured_annotations.begin(),
-        f.structured_annotations.end());
-
-    DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes<::py3::simple::AdaptedTypedefFields>(i, static_cast<std::int16_t>(f.id))
-    ));
+    genStructFieldMetadata<::py3::simple::AdaptedTypedefFields>(module_AdaptedTypedefFields.fields()[i], f, i);
 
     // writeAndGenType will modify metadata, which might invalidate `field` reference
     // We need to store the result in a separate `type` variable.

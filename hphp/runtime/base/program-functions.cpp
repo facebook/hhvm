@@ -1764,7 +1764,7 @@ static int execute_program_impl(int argc, char** argv) {
     cout << "HipHop VM";
     cout << " " << HHVM_VERSION;
     cout << " (" << (debug ? "dbg" : "rel") << ")";
-    cout << " (" << (use_lowptr ? "lowptr" : "non-lowptr") << ")\n";
+    cout << " (" << (use_packedptr ? "packedptr" : use_lowptr ? "lowptr" : "non-lowptr") << ")\n";
     cout << "Compiler: " << compilerId() << "\n";
     cout << "Repo schema: " << repoSchemaId() << "\n";
     return 0;

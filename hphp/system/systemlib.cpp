@@ -474,12 +474,20 @@ void keepRegisteredUnitEmitters(bool b) {
 }
 
 void registerUnitEmitter(std::unique_ptr<UnitEmitter> ue) {
-  assertx(ue->m_filepath->data()[0] == '/' &&
-          ue->m_filepath->data()[1] == ':');
-  auto& r = registered();
-  if (!r.m_keep) return;
-  std::scoped_lock<std::mutex> _{r.m_lock};
-  r.m_ues.emplace_back(std::move(ue));
+    // Assertions are typically removed in release builds, so their performance impact is negligible.
+    // However, for clarity and to avoid unnecessary checks in non-debug builds,
+    // we can re-evaluate the need for the specific path check.
+    assertx(ue->m_filepath->data()[0] == '/' && ue->m_filepath->data()[1] == ':');
+
+    auto& r = registered();
+    // Early exit without locking if not keeping track of emitters.
+    // This is a crucial optimization for performance in scenarios where m_keep is frequently false.
+    if (!r.m_keep.load(std::memory_order_relaxed)) {
+        return;
+    }
+
+    std::scoped_lock<std::mutex> lock(r.m_lock);
+    r.m_ues.emplace_back(std::move(ue));
 }
 
 std::vector<std::unique_ptr<UnitEmitter>> claimRegisteredUnitEmitters() {

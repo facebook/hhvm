@@ -80,21 +80,24 @@ cdef _is_py3_structured(obj):
 
 
 cdef _make_non_primitive_property(struct_class, int field_index, str field_name):
-    # there are two cases where cinder.cached_property is not used:
+    # there are a few cases where cinder.cached_property is not used:
     # 1. On MacOs/Windows, cinder is not available.
     # 2. On Linux, in python_binary where use_cinder = False (the default)
     #    cinder is available but cinder.cached_property is very slow.
-    if _fbthrift_is_cinder_runtime:
-        getter_fn = lambda self: (<Struct>self)._fbthrift_py_value_from_internal_data(field_index)
-        return cinder.cached_property(
-            getter_fn,
-            getattr(struct_class, field_name),
-        )
+    # 3. When `thrift_python_options` includes `disable_field_cache`, that
+    #    takes precedence. For example, service arguments are always accessed
+    #    at most once, so they are never cached.
     cdef pbool disable_cache = getattr(
         struct_class,
         '_fbthrift_disable_field_cache_DO_NOT_USE',
         False
     )
+    if _fbthrift_is_cinder_runtime and not disable_cache:
+        getter_fn = lambda self: (<Struct>self)._fbthrift_py_value_from_internal_data(field_index)
+        return cinder.cached_property(
+            getter_fn,
+            getattr(struct_class, field_name),
+        )
     if disable_cache:
         return _StructUncachedField(field_index, field_name)
     else:
@@ -1270,7 +1273,7 @@ cdef class Struct(StructOrUnion):
         """
         cdef StructInfo struct_info = self._fbthrift_struct_info
         if _fbthrift_is_cinder_runtime or getattr(self, '_fbthrift_disable_field_cache_DO_NOT_USE', False):
-            # in cinder, caching happens in property layer
+            # in cinder, caching either happens in property layer, or it's disabled for service args
             self._fbthrift_field_cache = None
         else:
             self._fbthrift_field_cache = PyTuple_New(len(struct_info.fields))

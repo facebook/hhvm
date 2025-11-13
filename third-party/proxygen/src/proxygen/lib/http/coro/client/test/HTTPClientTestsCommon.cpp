@@ -135,7 +135,7 @@ folly::coro::Task<HTTPSourceHolder> TestHandler::handleRequest(
 
     co_return HTTPFixedSource::makeFixedResponse(500, "failed");
   }
-  if (request->getPathAsStringPiece().find("/bodyError") == 0) {
+  if (request->getPathAsStringPiece().starts_with("/bodyError")) {
     auto path = request->getPathAsStringPiece();
     auto delimiter = std::find(path.begin(), path.end(), '_');
     co_return new ErrorSource(
@@ -145,7 +145,7 @@ folly::coro::Task<HTTPSourceHolder> TestHandler::handleRequest(
             ? 0
             : folly::to<uint32_t>(delimiter + 1, path.end()));
   }
-  if (request->getPathAsStringPiece().find("/earlyreturn") == 0) {
+  if (request->getPathAsStringPiece().starts_with("/earlyreturn")) {
     auto hybridSource = new HTTPHybridSource(std::move(headerEvent.headers),
                                              requestSource.release());
     hybridSource->setHeapAllocated();

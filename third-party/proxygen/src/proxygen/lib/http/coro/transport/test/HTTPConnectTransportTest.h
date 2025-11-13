@@ -94,8 +94,9 @@ class ConnectHandler : public HTTPHandler {
       if (bodyEvent.hasException()) {
         co_yield folly::coro::co_error(std::move(bodyEvent.exception()));
       }
-      eom = bodyEvent->eom || (bodyEvent->event.body.front()->toString().rfind(
-                                   "write_fin", 0) == 0);
+      eom =
+          bodyEvent->eom ||
+          (bodyEvent->event.body.front()->toString().starts_with("write_fin"));
       if (bodyEvent->eventType == HTTPBodyEvent::BODY) {
         respSource->body(bodyEvent->event.body.move(), 0, eom);
       }

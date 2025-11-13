@@ -242,7 +242,7 @@ bool SafePath::startsWithBaseDir(const std::string& filePath,
     tempBaseDir += pathSeparator;
   }
 
-  return filePath.find(tempBaseDir) == 0;
+  return filePath.starts_with(tempBaseDir);
 }
 
 folly::Expected<std::string, folly::exception_wrapper>

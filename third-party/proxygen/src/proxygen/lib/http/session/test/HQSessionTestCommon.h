@@ -167,7 +167,7 @@ class HQSessionTest
 
     if (GetParam().checkUniridStreamCallbacks &&
         GetParam().unidirectionalStreamsCredit >= numCtrlStreams_ &&
-        GetParam().alpn_.find("h3") == 0) {
+        GetParam().alpn_.starts_with("h3")) {
       auto dirModifier =
           (direction_ == proxygen::TransportDirection::DOWNSTREAM) ? 0 : 1;
       EXPECT_CALL(infoCb_, onWrite(testing::_, testing::_))
@@ -196,7 +196,7 @@ class HQSessionTest
     if (GetParam().unidirectionalStreamsCredit < numCtrlStreams_) {
       return false;
     }
-    if (GetParam().alpn_.find("h3") != 0) {
+    if (!GetParam().alpn_.starts_with("h3")) {
       // this function can be called when alpn negotiation failed
       return false;
     }

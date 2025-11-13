@@ -36,13 +36,13 @@ extern CodecProtocol getCodecProtocolFromStr(folly::StringPiece protocolStr) {
   } else if (protocolStr == http_2 || protocolStr == http2::kProtocolString ||
              protocolStr == http2::kProtocolCleartextString) {
     return CodecProtocol::HTTP_2;
-  } else if (protocolStr.find(hq) == 0) {
+  } else if (protocolStr.starts_with(hq)) {
     return CodecProtocol::HQ;
-  } else if (protocolStr.find(h3) == 0) {
+  } else if (protocolStr.starts_with(h3)) {
     return CodecProtocol::HTTP_3;
-  } else if (protocolStr.find(http_binary) == 0) {
+  } else if (protocolStr.starts_with(http_binary)) {
     return CodecProtocol::HTTP_BINARY;
-  } else if (protocolStr.find(tunnel_lite) == 0) {
+  } else if (protocolStr.starts_with(tunnel_lite)) {
     return CodecProtocol::TUNNEL_LITE;
   } else {
     // return default protocol

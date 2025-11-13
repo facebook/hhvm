@@ -394,6 +394,78 @@ def benchmark_serializer_impl(get_serialize_setup: Callable[[str], str]) -> None
     )
 
 
+def benchmark_comparisons():
+    INIT_STRING_BUCKET = """
+string_bucket_1 = StringBucket(
+    one="one",
+    two="two",
+    three="three",
+    four="four",
+    five="five",
+    six="six",
+    seven="seven",
+    eight="eight",
+    nine="nine",
+    ten="ten",
+)
+string_bucket_2 = StringBucket(
+    one="one",
+    two="two",
+    three="three",
+    four="four",
+    five="five",
+    six="six",
+    seven="seven",
+    eight="eight",
+    nine="nine",
+    ten="ten_different",
+)
+"""
+
+    def benchmark_single(flavor, operation, st) -> str:
+        setup = f"{get_import(flavor)}\n{INIT_STRING_BUCKET}"
+        timer = timeit.Timer(
+            stmt=st,
+            setup=setup,
+        )
+        results = timer.repeat(REPEAT, LOOP)
+        min_value_ms = min(results) * 1000 / LOOP
+        return f"{min_value_ms:.6f} ms"
+
+    # format is dict[<operation_name>, (<executable_statement>, tuple[<skip_langs>])]
+    operations = {
+        "iteration": (
+            "for field_name, val in string_bucket_1:\n    pass",
+            ("py-deprecated",),
+        ),
+        "equality": ("_ = string_bucket_1 == string_bucket_2", ()),
+        "less than": ("_ = string_bucket_1 < string_bucket_2", ("py-deprecated",)),
+        "hash": ("_ = hash(string_bucket_1)", ("mutable-python",)),
+    }
+
+    table = [
+        [operation]
+        + [
+            benchmark_single(
+                flavor,
+                operation,
+                st,
+            )
+            if flavor not in skip_langs
+            else "n/a"
+            for flavor in NAMESPACES
+        ]
+        for operation, (st, skip_langs) in operations.items()
+    ]
+    print(
+        tabulate(
+            table,
+            headers=["Comparison Operations"] + list(NAMESPACES.keys()),
+            tablefmt="github",
+        )
+    )
+
+
 @click.group()
 def cli():
     pass
@@ -470,6 +542,11 @@ def serializer_string_benchmark() -> None:
 
 
 @click.command()
+def comparison_benchmark() -> None:
+    benchmark_comparisons()
+
+
+@click.command()
 @click.pass_context
 def run_all(ctx) -> None:
     ctx.invoke(import_benchmark)
@@ -492,6 +569,7 @@ def main() -> None:
     cli.add_command(container_benchmark)
     cli.add_command(serializer_benchmark)
     cli.add_command(serializer_string_benchmark)
+    cli.add_command(comparison_benchmark)
     cli()
 
 

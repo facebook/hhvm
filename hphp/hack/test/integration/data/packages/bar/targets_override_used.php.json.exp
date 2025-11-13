@@ -1,15 +1,4 @@
 [
-  {
-    "def": "\\foo_override_used",
-    "kind": "CLASSISH",
-    "refs": [
-      {
-        "name": "foo_override_used",
-        "filename": "/foo/caller.php",
-        "line": 20,
-        "char_start": 3,
-        "char_end": 19
-      }
-    ]
-  }
+  "/bar/targets_override_used.php",
+  "/foo/caller.php"
 ]

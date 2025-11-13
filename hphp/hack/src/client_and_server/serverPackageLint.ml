@@ -1,5 +1,49 @@
 open Hh_prelude
 
+let go_fast genv env file =
+  let ctx = Provider_utils.ctx_from_server_env env in
+  let path = Relative_path.create_detect_prefix file in
+  let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
+  let ast =
+    Ast_provider.compute_ast ~popt:(Provider_context.get_popt ctx) ~entry
+  in
+  let files =
+    List.fold ast ~init:Relative_path.Set.empty ~f:(fun acc def ->
+        let open Aast_defs in
+        let deps =
+          match def with
+          | Class { c_name = (_, name); _ }
+          | Typedef { t_name = (_, name); _ } ->
+            FindRefsService.get_dependent_files
+              ctx
+              genv.ServerEnv.workers
+              (SSet.singleton name)
+            |> Relative_path.Set.union acc
+          | Fun { fd_name = (_, name); _ } ->
+            FindRefsService.get_dependent_files_function
+              ctx
+              genv.ServerEnv.workers
+              name
+            |> Relative_path.Set.union acc
+          | Constant { cst_name = (_, name); _ } ->
+            FindRefsService.get_dependent_files_gconst
+              ctx
+              genv.ServerEnv.workers
+              name
+            |> Relative_path.Set.union acc
+          | Stmt _
+          | Namespace _
+          | FileAttributes _
+          | Module _
+          | NamespaceUse _
+          | SetNamespaceEnv _
+          | SetModule _ ->
+            acc
+        in
+        deps)
+  in
+  (env, files)
+
 let go genv env file =
   let ctx = Provider_utils.ctx_from_server_env env in
   let path = Relative_path.create_detect_prefix file in

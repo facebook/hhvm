@@ -432,4 +432,5 @@ let handle :
     let ctx = Provider_utils.ctx_from_server_env env in
     let result = ServerFindMyTests.go ~ctx ~genv ~env ~max_distance symbols in
     (env, result)
-  | ServerCommandTypes.PACKAGE_LINT file -> ServerPackageLint.go genv env file
+  | ServerCommandTypes.PACKAGE_LINT file ->
+    ServerPackageLint.go_fast genv env file

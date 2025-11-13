@@ -146,6 +146,8 @@ module Package_lint = struct
   type result = (Find_refs.action * Find_refs.result) list
 
   type result_or_retry = result Done_or_retry.t
+
+  type fast_result = Relative_path.Set.t
 end
 
 module Find_my_tests = struct
@@ -428,7 +430,7 @@ type _ t =
       (string * int * int) list
       -> Find_refs.result_or_retry list t
   | FIND_MY_TESTS : (int * string list) -> Find_my_tests.result t
-  | PACKAGE_LINT : string -> Package_lint.result_or_retry t
+  | PACKAGE_LINT : string -> Package_lint.fast_result t
 
 type cmd_metadata = {
   from: string;

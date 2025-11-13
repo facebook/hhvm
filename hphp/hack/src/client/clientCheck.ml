@@ -1039,31 +1039,16 @@ let main_internal
       Lwt.return (Exit_status.Input_error, telemtry))
   | ClientEnv.MODE_PACKAGE_LINT file ->
     let file = expand_path file in
-    let%lwt results =
-      rpc_with_retry args @@ ServerCommandTypes.PACKAGE_LINT file
-    in
-    let describe =
-      ServerCommandTypes.Find_refs.(
-        function
-        | Class n -> ("CLASSISH", n)
-        | Function n -> ("FUNCTION", n)
-        | GConst n -> ("GLOBAL_CONSTANT", n)
-        | _ -> ("error", ""))
+    let%lwt (results, telemetry) =
+      rpc args @@ ServerCommandTypes.PACKAGE_LINT file
     in
     Hh_json.(
       array_
-        (fun (def, refs) ->
-          let (kind, name) = describe def in
-          JSON_Object
-            [
-              ("def", string_ name);
-              ("kind", string_ kind);
-              ("refs", FindRefsWireFormat.HackAst.to_json refs);
-            ])
-        results)
-    |> Hh_json.json_to_multiline
+        (Fn.compose string_ Relative_path.to_absolute)
+        (Relative_path.Set.elements results))
+    |> Hh_json.json_to_string
     |> print_endline;
-    Lwt.return (Exit_status.No_error, Telemetry.create ())
+    Lwt.return (Exit_status.No_error, telemetry)
 
 let rec flush_event_logger () : unit Lwt.t =
   let%lwt () = Lwt_unix.sleep 1.0 in

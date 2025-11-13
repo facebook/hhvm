@@ -337,12 +337,7 @@ class python_mstch_program : public mstch_program {
             {"program:adapter_type_hint_modules",
              &python_mstch_program::adapter_type_hint_modules},
         });
-    gather_included_program_namespaces();
-    visit_types_for_services_and_interactions();
-    visit_types_for_objects();
-    visit_types_for_constants();
-    visit_types_for_typedefs();
-    visit_types_for_adapters();
+    visit_program();
   }
 
   mstch::node include_namespaces() {
@@ -385,169 +380,106 @@ class python_mstch_program : public mstch_program {
     bool needed_by_patch;
   };
 
-  void gather_included_program_namespaces() {
-    auto needed_includes = needed_includes_by_patch(program_);
-    for (const t_program* included_program :
-         program_->get_includes_for_codegen()) {
-      bool has_types =
-          !(included_program->structured_definitions().empty() &&
-            included_program->enums().empty() &&
-            included_program->typedefs().empty() &&
-            included_program->consts().empty());
-      include_namespaces_[included_program->path()] = Namespace{
-          get_py3_namespace_with_name_and_prefix(
-              included_program, get_option("root_module_prefix")),
-          mangle_program_path(
-              included_program, get_option("root_module_prefix")),
-          !included_program->services().empty(),
-          has_types,
-          is_patch_program(included_program),
-          static_cast<bool>(needed_includes.count(included_program))};
-    }
-  }
-
-  /**
-   * In addition to typedefs that can result in a type's namespace
-   * different from the current program, @internal.InjectMetadataFields
-   * may also pull in a namespace that is not in the current program.
-   * This function includes namespaces for any type whose program
-   * is different from the current program.
-   */
-  void add_type_namespace(const t_type* type) {
-    auto prog = type->program();
-    if (prog && prog != program_) {
-      const auto& path = prog->path();
-      if (include_namespaces_.find(path) != include_namespaces_.end()) {
-        return;
+  void visit_program() {
+    const_ast_visitor visitor;
+    visitor.add_program_visitor([this](const t_program& p) {
+      auto needed_includes = needed_includes_by_patch(&p);
+      for (const t_program* included_program : p.get_includes_for_codegen()) {
+        bool has_types =
+            !(included_program->structured_definitions().empty() &&
+              included_program->enums().empty() &&
+              included_program->typedefs().empty() &&
+              included_program->consts().empty());
+        include_namespaces_[included_program->path()] = Namespace{
+            .ns = get_py3_namespace_with_name_and_prefix(
+                included_program, get_option("root_module_prefix")),
+            .ns_mangle = mangle_program_path(
+                included_program, get_option("root_module_prefix")),
+            .has_services = !included_program->services().empty(),
+            .has_types = has_types,
+            .is_patch = is_patch_program(included_program),
+            .needed_by_patch = needed_includes.contains(included_program),
+        };
       }
-      auto ns = Namespace();
-      ns.ns = get_py3_namespace_with_name_and_prefix(
-          prog, get_option("root_module_prefix"));
-      ns.ns_mangle =
-          mangle_program_path(prog, get_option("root_module_prefix"));
-      ns.has_services = false;
-      ns.has_types = true;
-      ns.is_patch = is_patch_program(prog);
-      ns.needed_by_patch = true;
-      include_namespaces_[path] = std::move(ns);
-    }
+    });
+    visitor.add_field_visitor([&](const t_field& f) {
+      visit_type(*f.type());
+      visit_adapter_annotation(
+          find_structured_adapter_annotation(f),
+          /*add_type_hint_to_adapter_modules=*/false);
+    });
+    visitor.add_function_param_visitor(
+        [&](const t_field& f) { visit_type(*f.type()); });
+    visitor.add_thrown_exception_visitor(
+        [&](const t_field& f) { visit_type(*f.type()); });
+    visitor.add_function_visitor(
+        [&](const t_function& f) { visit_type(*f.return_type()); });
+    visitor.add_stream_visitor(
+        [&](const t_stream& s) { visit_type(*s.elem_type()); });
+    visitor.add_const_visitor([&](const t_const& c) { visit_type(*c.type()); });
+    visitor.add_typedef_visitor([&](const t_typedef& td) {
+      visit_type(*td.type());
+      visit_adapter_annotation(
+          find_structured_adapter_annotation(td),
+          /*add_type_hint_to_adapter_modules=*/true);
+    });
+    visitor.add_structured_definition_visitor([&](const t_structured& s) {
+      visit_adapter_annotation(
+          find_structured_adapter_annotation(s),
+          /*add_type_hint_to_adapter_modules=*/true);
+    });
+    visitor(*program_);
   }
 
-  void visit_type_single_service(const t_service* service) {
-    for (const auto& function : service->functions()) {
-      for (const auto& field : function.params().fields()) {
-        visit_type(field.type().get_type());
-      }
-      for (const t_field& field : get_elems(function.exceptions())) {
-        visit_type(field.type().get_type());
-      }
-      if (const t_stream* stream = function.stream()) {
-        if (const t_throws* exceptions = stream->exceptions()) {
-          for (const auto& field : exceptions->fields()) {
-            visit_type(field.type().get_type());
-          }
-        }
-        if (!function.has_void_initial_response()) {
-          visit_type(function.return_type().get_type());
-        }
-        visit_type(stream->elem_type().get_type());
-      } else {
-        visit_type(function.return_type().get_type());
-      }
-    }
-  }
-
-  void visit_types_for_services_and_interactions() {
-    for (const auto* service : program_->services()) {
-      visit_type_single_service(service);
-    }
-    for (const auto* interaction : program_->interactions()) {
-      visit_type_single_service(interaction);
-    }
-  }
-
-  void visit_types_for_objects() {
-    for (const t_structured* object : program_->structured_definitions()) {
-      for (auto&& field : object->fields()) {
-        visit_type(field.type().get_type());
-      }
-    }
-  }
-
-  void visit_types_for_constants() {
-    for (const auto& constant : program_->consts()) {
-      visit_type(constant->type());
-    }
-  }
-
-  void visit_types_for_typedefs() {
-    for (const auto typedef_def : program_->typedefs()) {
-      visit_type(typedef_def->get_type());
-    }
-  }
-
-  void visit_types_for_adapters() {
-    for (const t_structured* strct : program_->structs_and_unions()) {
-      if (auto annotation = find_structured_adapter_annotation(*strct)) {
-        python::extract_modules_and_insert_into(
-            get_annotation_property(annotation, "name"), adapter_modules_);
-        python::extract_modules_and_insert_into(
-            get_annotation_property(annotation, "typeHint"), adapter_modules_);
-        python::extract_modules_and_insert_into(
-            get_annotation_property(annotation, "typeHint"),
-            adapter_type_hint_modules_);
-      }
-      for (const auto& field : strct->fields()) {
-        if (auto annotation = find_structured_adapter_annotation(field)) {
-          python::extract_modules_and_insert_into(
-              get_annotation_property(annotation, "name"), adapter_modules_);
-          python::extract_modules_and_insert_into(
-              get_annotation_property(annotation, "typeHint"),
-              adapter_type_hint_modules_);
-        }
-      }
-    }
-    for (const auto typedef_def : program_->typedefs()) {
-      if (auto annotation = find_structured_adapter_annotation(*typedef_def)) {
-        python::extract_modules_and_insert_into(
-            get_annotation_property(annotation, "name"), adapter_modules_);
-        python::extract_modules_and_insert_into(
-            get_annotation_property(annotation, "typeHint"), adapter_modules_);
-        python::extract_modules_and_insert_into(
-            get_annotation_property(annotation, "typeHint"),
-            adapter_type_hint_modules_);
-      }
-    }
-  }
-
-  enum TypeDef { NoTypedef, HasTypedef };
-
-  void visit_type(const t_type* orig_type) {
-    return visit_type_with_typedef(orig_type, TypeDef::NoTypedef);
-  }
-
-  void visit_type_with_typedef(const t_type* orig_type, TypeDef is_typedef) {
-    if (!seen_types_.insert(orig_type).second) {
+  void visit_adapter_annotation(
+      const t_const* annotation, bool add_type_hint_to_adapter_modules) {
+    if (annotation == nullptr) {
       return;
     }
-    if (auto annotation = find_structured_adapter_annotation(*orig_type)) {
+    python::extract_modules_and_insert_into(
+        get_annotation_property(annotation, "name"), adapter_modules_);
+    if (add_type_hint_to_adapter_modules) {
       python::extract_modules_and_insert_into(
-          get_annotation_property(annotation, "name"), adapter_modules_);
-      python::extract_modules_and_insert_into(
-          get_annotation_property(annotation, "typeHint"),
-          adapter_type_hint_modules_);
+          get_annotation_property(annotation, "typeHint"), adapter_modules_);
     }
-    auto true_type = orig_type->get_true_type();
-    // See the description of add_type_namespace
-    // for the reason for this call.
-    add_type_namespace(true_type);
-    if (const t_list* list = true_type->try_as<t_list>()) {
-      visit_type_with_typedef(list->elem_type().get_type(), is_typedef);
-    } else if (const t_set* set = true_type->try_as<t_set>()) {
-      visit_type_with_typedef(set->elem_type().get_type(), is_typedef);
-    } else if (const t_map* map = true_type->try_as<t_map>()) {
-      visit_type_with_typedef(&map->key_type().deref(), is_typedef);
-      visit_type_with_typedef(&map->val_type().deref(), is_typedef);
+    python::extract_modules_and_insert_into(
+        get_annotation_property(annotation, "typeHint"),
+        adapter_type_hint_modules_);
+  }
+
+  void visit_type(const t_type& orig_type) {
+    visit_adapter_annotation(
+        find_structured_adapter_annotation(orig_type),
+        /*add_type_hint_to_adapter_modules=*/false);
+    // In addition to typedefs that can result in a type's namespace different
+    // from the current program, @internal.InjectMetadataFields may also pull in
+    // a namespace that is not in the current program that we haven't already
+    // encountered. Add any such cases into included_programs_ if not already
+    // present.
+    const t_type& true_type = *orig_type.get_true_type();
+    const t_program* prog = true_type.program();
+    if (prog != nullptr && prog != program_ &&
+        !include_namespaces_.contains(prog->path())) {
+      include_namespaces_.emplace(
+          prog->path(),
+          Namespace{
+              .ns = get_py3_namespace_with_name_and_prefix(
+                  prog, get_option("root_module_prefix")),
+              .ns_mangle =
+                  mangle_program_path(prog, get_option("root_module_prefix")),
+              .has_services = false,
+              .has_types = true,
+              .is_patch = is_patch_program(prog),
+              .needed_by_patch = true,
+          });
+    }
+    if (const t_list* list = true_type.try_as<t_list>()) {
+      visit_type(*list->elem_type());
+    } else if (const t_set* set = true_type.try_as<t_set>()) {
+      visit_type(*set->elem_type());
+    } else if (const t_map* map = true_type.try_as<t_map>()) {
+      visit_type(*map->key_type());
+      visit_type(*map->val_type());
     }
   }
 
@@ -562,7 +494,6 @@ class python_mstch_program : public mstch_program {
   }
 
   std::unordered_map<std::string, Namespace> include_namespaces_;
-  std::unordered_set<const t_type*> seen_types_;
   std::unordered_set<std::string_view> adapter_modules_;
   std::unordered_set<std::string_view> adapter_type_hint_modules_;
 };

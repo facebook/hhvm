@@ -68,6 +68,7 @@ void smashInterceptJmp(TCA inst);
 bool possiblySmashableMovq(TCA inst);
 bool possiblySmashableJmp(TCA inst);
 bool possiblySmashableJcc(TCA inst);
+bool possiblySmashableCb(TCA inst);
 
 uint64_t smashableMovqImm(TCA inst);
 uint32_t smashableCmpqImm(TCA inst);

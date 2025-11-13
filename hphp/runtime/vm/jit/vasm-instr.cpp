@@ -39,6 +39,10 @@ bool isBlockEnd(const Vinstr& inst) {
     case Vinstr::bindjmp:
     case Vinstr::fallback:
     // control flow
+    case Vinstr::cbzl:
+    case Vinstr::cbnzl:
+    case Vinstr::cbzq:
+    case Vinstr::cbnzq:
     case Vinstr::jcc:
     case Vinstr::jmp:
     case Vinstr::jmpr:
@@ -309,6 +313,8 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::cmpli:
     case Vinstr::cmplm:
     case Vinstr::cmplim:
+    case Vinstr::cbzl:
+    case Vinstr::cbnzl:
     case Vinstr::testl:
     case Vinstr::testli:
     case Vinstr::testlim:
@@ -366,6 +372,8 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::cmpqi:
     case Vinstr::cmpqm:
     case Vinstr::cmpqim:
+    case Vinstr::cbzq:
+    case Vinstr::cbnzq:
     case Vinstr::testq:
     case Vinstr::testqi:
     case Vinstr::testqm:

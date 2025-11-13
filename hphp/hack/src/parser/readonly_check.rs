@@ -201,14 +201,20 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         }
         Eif(e) => {
             // $x ? a : b is readonly if either a or b are readonly
-            let (_, exp1_opt, exp2) = &**e;
+            let (cond, exp1_opt, exp2) = &**e;
             if let Some(exp1) = exp1_opt {
                 match (rty_expr(context, exp1), rty_expr(context, exp2)) {
                     (_, Rty::Readonly) | (Rty::Readonly, _) => Rty::Readonly,
                     (Rty::Mutable, Rty::Mutable) => Rty::Mutable,
                 }
             } else {
-                rty_expr(context, exp2)
+                // Elvis operator: cond ?: exp2
+                // Result is cond if truthy, exp2 if falsy
+                // So readonly if either cond or exp2 is readonly
+                match (rty_expr(context, cond), rty_expr(context, exp2)) {
+                    (_, Rty::Readonly) | (Rty::Readonly, _) => Rty::Readonly,
+                    (Rty::Mutable, Rty::Mutable) => Rty::Mutable,
+                }
             }
         }
         Pair(p) => {

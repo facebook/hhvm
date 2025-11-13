@@ -1,0 +1,4 @@
+ERROR: File "elvis.php", line 4, characters 10-28:
+This expression is readonly, but we expected a mutable value because this function does not return readonly. Please mark it to return readonly if needed. (Parsing[1002])
+ERROR: File "elvis.php", line 8, characters 10-41:
+This expression is readonly, but we expected a mutable value because this function does not return readonly. Please mark it to return readonly if needed. (Parsing[1002])

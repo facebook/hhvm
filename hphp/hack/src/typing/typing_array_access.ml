@@ -784,16 +784,21 @@ let rec array_get
               | From_alias (_, Some pos) -> pos
               | _ -> Reason.to_pos r
             in
-            Typing_error_utils.add_typing_error
-              ~env
-              Typing_error.(
-                primary
-                @@ Primary.Undefined_field
-                     {
-                       pos = p;
-                       name = TUtils.get_printable_shape_field_name field;
-                       decl_pos;
-                     });
+            (* Don't generate an error under dynamic assumptions because we can implicit upcast to dynamic *)
+            if
+              not
+                (Tast.is_under_dynamic_assumptions env.Typing_env_types.checked)
+            then
+              Typing_error_utils.add_typing_error
+                ~env
+                Typing_error.(
+                  primary
+                  @@ Primary.Undefined_field
+                       {
+                         pos = p;
+                         name = TUtils.get_printable_shape_field_name field;
+                         decl_pos;
+                       });
             (* Even though this is an error, we can produce a sound type for the field *)
             (env, (s_unknown_value, dflt_arr_res, Ok ty2))
           | Some { sft_optional; sft_ty } ->

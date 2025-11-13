@@ -6468,7 +6468,7 @@ end = struct
               }
             env)
     in
-    let do_shape r_sub { s_fields = fdm; s_origin; s_unknown_value = _ } =
+    let do_shape r_sub { s_fields = fdm; s_origin; s_unknown_value } =
       let (_, p, _) = can_index.ci_index_expr in
       match
         Typing_shapes.tshape_field_name_with_ty_err env can_index.ci_index_expr
@@ -6499,18 +6499,23 @@ end = struct
               | From_alias (_, Some pos) -> pos
               | _ -> Reason.to_pos r_sub
             in
-            invalid
-              ~fail:
-                (Some
-                   Typing_error.(
-                     primary
-                     @@ Primary.Undefined_field
-                          {
-                            pos = p;
-                            name = TUtils.get_printable_shape_field_name field;
-                            decl_pos;
-                          }))
-              env
+            (* Don't generate an error under dynamic assumptions because we can implicit upcast to dynamic *)
+            if Tast.is_under_dynamic_assumptions env.Typing_env_types.checked
+            then
+              return_val s_unknown_value env
+            else
+              invalid
+                ~fail:
+                  (Some
+                     Typing_error.(
+                       primary
+                       @@ Primary.Undefined_field
+                            {
+                              pos = p;
+                              name = TUtils.get_printable_shape_field_name field;
+                              decl_pos;
+                            }))
+                env
           | Some { sft_optional; sft_ty } ->
             if sft_optional && not can_index.ci_lhs_of_null_coalesce then
               let declared_field =

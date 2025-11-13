@@ -509,6 +509,12 @@ class DynamicPatch {
   std::unique_ptr<folly::IOBuf> applyToSerializedObject(
       const folly::IOBuf& buf) const;
 
+  /// The behavior is identical to applyToSerializedObject(...), though
+  /// sometimes it's faster to deserialize the whole iobuf then apply patches.
+  template <type::StandardProtocol Protocol>
+  std::unique_ptr<folly::IOBuf> applyToSerializedObjectWithoutExtractingMask(
+      const folly::IOBuf& buf) const;
+
   /// Converts SafePatch stored in Thrift Any to DynamicPatch.
   [[nodiscard]] static DynamicPatch fromSafePatch(const type::AnyStruct& any);
   /// Stores DynamicPatch as SafePatch in Thrift Any with the provided type

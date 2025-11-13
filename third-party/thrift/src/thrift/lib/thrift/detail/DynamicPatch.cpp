@@ -1998,9 +1998,25 @@ std::unique_ptr<folly::IOBuf> DynamicPatch::applyToSerializedObject(
   return serializeObject<ProtocolWriter>(val.as_object(), result.excluded);
 }
 
+template <type::StandardProtocol Protocol>
+std::unique_ptr<folly::IOBuf>
+DynamicPatch::applyToSerializedObjectWithoutExtractingMask(
+    const folly::IOBuf& buf) const {
+  protocol::Value val;
+  val.emplace_object(parseObject<ProtocolReaderFor<Protocol>>(buf));
+  apply(val);
+  return serializeObject<ProtocolWriterFor<Protocol>>(val.as_object());
+}
+
 template std::unique_ptr<folly::IOBuf> DynamicPatch::applyToSerializedObject<
     type::StandardProtocol::Binary>(const folly::IOBuf& buf) const;
 template std::unique_ptr<folly::IOBuf> DynamicPatch::applyToSerializedObject<
+    type::StandardProtocol::Compact>(const folly::IOBuf& buf) const;
+template std::unique_ptr<folly::IOBuf>
+DynamicPatch::applyToSerializedObjectWithoutExtractingMask<
+    type::StandardProtocol::Binary>(const folly::IOBuf& buf) const;
+template std::unique_ptr<folly::IOBuf>
+DynamicPatch::applyToSerializedObjectWithoutExtractingMask<
     type::StandardProtocol::Compact>(const folly::IOBuf& buf) const;
 
 Object DynamicPatch::toObject() && {

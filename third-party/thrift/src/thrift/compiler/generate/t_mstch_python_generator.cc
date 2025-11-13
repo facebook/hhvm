@@ -45,64 +45,16 @@ namespace {
 enum class types_file_kind { not_a_types_file, source_file, type_stub };
 enum class type_kind { abstract, immutable, mutable_ };
 
-class python_generator_context {
- public:
-  python_generator_context(bool is_patch_file, type_kind type_kind)
-      : is_patch_file_(is_patch_file), type_kind_(type_kind) {}
-
-  python_generator_context(python_generator_context&&) = default;
-  python_generator_context& operator=(python_generator_context&&) = default;
-
-  void reset(
-      const types_file_kind& types_file_kind,
-      const type_kind& type_kind) noexcept {
-    types_file_kind_ = types_file_kind;
-    type_kind_ = type_kind;
-  }
-
-  void set_enable_abstract_types(const bool& value) noexcept {
-    enable_abstract_types_ = value;
-  }
-  bool enable_abstract_types() const noexcept { return enable_abstract_types_; }
-
-  bool is_patch_file() const noexcept { return is_patch_file_; }
-
-  bool is_types_file() const noexcept {
-    return types_file_kind_ != types_file_kind::not_a_types_file;
-  }
-  bool is_source_file() const noexcept {
-    return types_file_kind_ == types_file_kind::source_file;
-  }
-  bool is_type_stub() const noexcept {
-    return types_file_kind_ == types_file_kind::type_stub;
-  }
-
-  bool generate_abstract_types() const noexcept {
-    return type_kind_ == type_kind::abstract;
-  }
-  bool generate_immutable_types() const noexcept {
-    return type_kind_ == type_kind::immutable;
-  }
-  bool generate_mutable_types() const noexcept {
-    return type_kind_ == type_kind::mutable_;
-  }
-
-  const std::string_view types_import_path() const {
-    switch (type_kind_) {
-      case type_kind::abstract:
-        return "thrift_abstract_types";
-      case type_kind::mutable_:
-        return "thrift_mutable_types";
-      case type_kind::immutable:
-        return "thrift_types";
-    }
-  }
-
- private:
-  bool enable_abstract_types_ = false;
-  bool is_patch_file_ = false;
-  types_file_kind types_file_kind_ = types_file_kind::not_a_types_file;
-  type_kind type_kind_;
+/** Metadata for a program included from the main program being generated */
+struct included_program_info {
+  /**
+   * The py3 namespace for `program`, without root_module_prefix (which is
+   * identical across all modules and will not impact relative sort order)
+   */
+  std::string sort_key;
+  const t_program* program;
+  bool import_services;
+  bool needed_by_patch;
 };
 
 const t_const* find_structured_adapter_annotation(
@@ -323,113 +275,160 @@ bool service_has_any_bidi_types(const t_service* service) {
       });
 }
 
-class python_mstch_program : public mstch_program {
+class python_generator_context {
  public:
-  python_mstch_program(
-      const t_program* p, mstch_context& ctx, mstch_element_position pos)
-      : mstch_program(p, ctx, pos) {
-    register_methods(
-        this,
-        {
-            {"program:include_namespaces",
-             &python_mstch_program::include_namespaces},
-            {"program:adapter_modules", &python_mstch_program::adapter_modules},
-            {"program:adapter_type_hint_modules",
-             &python_mstch_program::adapter_type_hint_modules},
-        });
-    visit_program();
+  python_generator_context(
+      const t_program* root_program, bool is_patch_file, type_kind type_kind)
+      : root_program_(root_program),
+        is_patch_file_(is_patch_file),
+        type_kind_(type_kind) {}
+
+  python_generator_context(python_generator_context&&) = default;
+  python_generator_context& operator=(python_generator_context&&) = default;
+
+  void reset(
+      const types_file_kind& types_file_kind,
+      const type_kind& type_kind) noexcept {
+    types_file_kind_ = types_file_kind;
+    type_kind_ = type_kind;
   }
 
-  mstch::node include_namespaces() {
-    std::vector<const Namespace*> namespaces;
-    namespaces.reserve(include_namespaces_.size());
-    for (const auto& it : include_namespaces_) {
-      namespaces.push_back(&it.second);
+  void set_enable_abstract_types(const bool& value) noexcept {
+    enable_abstract_types_ = value;
+  }
+  bool enable_abstract_types() const noexcept { return enable_abstract_types_; }
+
+  bool is_patch_file() const noexcept { return is_patch_file_; }
+
+  bool is_types_file() const noexcept {
+    return types_file_kind_ != types_file_kind::not_a_types_file;
+  }
+  bool is_source_file() const noexcept {
+    return types_file_kind_ == types_file_kind::source_file;
+  }
+  bool is_type_stub() const noexcept {
+    return types_file_kind_ == types_file_kind::type_stub;
+  }
+
+  bool generate_abstract_types() const noexcept {
+    return type_kind_ == type_kind::abstract;
+  }
+  bool generate_immutable_types() const noexcept {
+    return type_kind_ == type_kind::immutable;
+  }
+  bool generate_mutable_types() const noexcept {
+    return type_kind_ == type_kind::mutable_;
+  }
+
+  std::string_view types_import_path() const {
+    switch (type_kind_) {
+      case type_kind::abstract:
+        return "thrift_abstract_types";
+      case type_kind::mutable_:
+        return "thrift_mutable_types";
+      case type_kind::immutable:
+        return "thrift_types";
     }
-    std::sort(
-        namespaces.begin(), namespaces.end(), [](const auto* m, const auto* n) {
-          return m->ns < n->ns;
-        });
-    mstch::array a;
-    for (const auto& it : namespaces) {
-      a.emplace_back(
-          mstch::map{
-              {"included_module_path", it->ns},
-              {"included_module_mangle", it->ns_mangle},
-              {"has_services?", it->has_services},
-              {"has_types?", it->has_types},
-              {"is_patch?", it->is_patch},
-              {"needed_by_patch?", it->needed_by_patch}});
+  }
+
+  const std::vector<const included_program_info*>& included_programs() {
+    if (included_programs_sorted_.empty() && !included_programs_.empty()) {
+      // included_programs_ is initialized during the visit phase, keyed by the
+      // program path; sorting by namespace is deferred to the first access
+      included_programs_sorted_.reserve(included_programs_.size());
+      for (const auto& it : included_programs_) {
+        included_programs_sorted_.push_back(&it.second);
+      }
+      std::sort(
+          included_programs_sorted_.begin(),
+          included_programs_sorted_.end(),
+          [](const included_program_info* m, const included_program_info* n) {
+            return m->sort_key < n->sort_key;
+          });
     }
-    return a;
+    return included_programs_sorted_;
+  }
+  const std::unordered_set<std::string_view>& adapter_modules() {
+    return adapter_modules_;
+  }
+  const std::unordered_set<std::string_view>& adapter_type_hint_modules() {
+    return adapter_type_hint_modules_;
   }
 
-  mstch::node adapter_modules() { return module_path_array(adapter_modules_); }
-
-  mstch::node adapter_type_hint_modules() {
-    return module_path_array(adapter_type_hint_modules_);
-  }
-
- protected:
-  struct Namespace {
-    std::string ns;
-    std::string ns_mangle;
-    bool has_services;
-    bool has_types;
-    bool is_patch;
-    bool needed_by_patch;
-  };
-
-  void visit_program() {
-    const_ast_visitor visitor;
-    visitor.add_program_visitor([this](const t_program& p) {
+  void register_visitors(t_whisker_generator::context_visitor& visitor) {
+    using context = t_whisker_generator::whisker_generator_visitor_context;
+    visitor.add_program_visitor([&](const context&, const t_program& p) {
+      if (&p != root_program_) {
+        return; // Skip visiting non-root (included) programs
+      }
       auto needed_includes = needed_includes_by_patch(&p);
       for (const t_program* included_program : p.get_includes_for_codegen()) {
-        bool has_types =
-            !(included_program->structured_definitions().empty() &&
-              included_program->enums().empty() &&
-              included_program->typedefs().empty() &&
-              included_program->consts().empty());
-        include_namespaces_[included_program->path()] = Namespace{
-            .ns = get_py3_namespace_with_name_and_prefix(
-                included_program, get_option("root_module_prefix")),
-            .ns_mangle = mangle_program_path(
-                included_program, get_option("root_module_prefix")),
-            .has_services = !included_program->services().empty(),
-            .has_types = has_types,
-            .is_patch = is_patch_program(included_program),
+        included_programs_[included_program->path()] = included_program_info{
+            .sort_key = get_py3_namespace_with_name_and_prefix(
+                included_program, /*prefix=*/""),
+            .program = included_program,
+            .import_services = true,
             .needed_by_patch = needed_includes.contains(included_program),
         };
       }
     });
-    visitor.add_field_visitor([&](const t_field& f) {
-      visit_type(*f.type());
+    visitor.add_field_visitor([&](const context& ctx, const t_field& f) {
+      if (&ctx.program() != root_program_) {
+        return; // Skip visiting non-root (included) programs
+      }
+      visit_type(&ctx.program(), *f.type());
       visit_adapter_annotation(
           find_structured_adapter_annotation(f),
           /*add_type_hint_to_adapter_modules=*/false);
     });
     visitor.add_function_param_visitor(
-        [&](const t_field& f) { visit_type(*f.type()); });
+        [&](const context& ctx, const t_field& f) {
+          visit_type(&ctx.program(), *f.type());
+        });
     visitor.add_thrown_exception_visitor(
-        [&](const t_field& f) { visit_type(*f.type()); });
-    visitor.add_function_visitor(
-        [&](const t_function& f) { visit_type(*f.return_type()); });
-    visitor.add_stream_visitor(
-        [&](const t_stream& s) { visit_type(*s.elem_type()); });
-    visitor.add_const_visitor([&](const t_const& c) { visit_type(*c.type()); });
-    visitor.add_typedef_visitor([&](const t_typedef& td) {
-      visit_type(*td.type());
+        [&](const context& ctx, const t_field& f) {
+          visit_type(&ctx.program(), *f.type());
+        });
+    visitor.add_function_visitor([&](const context& ctx, const t_function& f) {
+      visit_type(&ctx.program(), *f.return_type());
+    });
+    visitor.add_stream_visitor([&](const context& ctx, const t_stream& s) {
+      visit_type(&ctx.program(), *s.elem_type());
+    });
+    visitor.add_const_visitor([&](const context& ctx, const t_const& c) {
+      visit_type(&ctx.program(), *c.type());
+    });
+    visitor.add_typedef_visitor([&](const context& ctx, const t_typedef& td) {
+      if (&ctx.program() != root_program_) {
+        return; // Skip visiting nodes originating in included programs
+      }
+      visit_type(&ctx.program(), *td.type());
       visit_adapter_annotation(
           find_structured_adapter_annotation(td),
           /*add_type_hint_to_adapter_modules=*/true);
     });
-    visitor.add_structured_definition_visitor([&](const t_structured& s) {
-      visit_adapter_annotation(
-          find_structured_adapter_annotation(s),
-          /*add_type_hint_to_adapter_modules=*/true);
-    });
-    visitor(*program_);
+    visitor.add_structured_definition_visitor(
+        [&](const context& ctx, const t_structured& s) {
+          // Skip visiting nodes originating in included programs
+          if (&ctx.program() == root_program_) {
+            visit_adapter_annotation(
+                find_structured_adapter_annotation(s),
+                /*add_type_hint_to_adapter_modules=*/true);
+          }
+        });
   }
+
+ private:
+  const t_program* root_program_;
+  bool enable_abstract_types_ = false;
+  bool is_patch_file_ = false;
+  types_file_kind types_file_kind_ = types_file_kind::not_a_types_file;
+  type_kind type_kind_;
+
+  std::unordered_map<std::string, included_program_info> included_programs_;
+  std::vector<const included_program_info*> included_programs_sorted_;
+  std::unordered_set<std::string_view> adapter_modules_;
+  std::unordered_set<std::string_view> adapter_type_hint_modules_;
 
   void visit_adapter_annotation(
       const t_const* annotation, bool add_type_hint_to_adapter_modules) {
@@ -447,7 +446,11 @@ class python_mstch_program : public mstch_program {
         adapter_type_hint_modules_);
   }
 
-  void visit_type(const t_type& orig_type) {
+  void visit_type(const t_program* active_program, const t_type& orig_type) {
+    if (active_program != root_program_) {
+      // Skip visiting nodes originating in included programs
+      return;
+    }
     visit_adapter_annotation(
         find_structured_adapter_annotation(orig_type),
         /*add_type_hint_to_adapter_modules=*/false);
@@ -458,44 +461,26 @@ class python_mstch_program : public mstch_program {
     // present.
     const t_type& true_type = *orig_type.get_true_type();
     const t_program* prog = true_type.program();
-    if (prog != nullptr && prog != program_ &&
-        !include_namespaces_.contains(prog->path())) {
-      include_namespaces_.emplace(
+    if (prog != nullptr && prog != root_program_ &&
+        !included_programs_.contains(prog->path())) {
+      included_programs_.emplace(
           prog->path(),
-          Namespace{
-              .ns = get_py3_namespace_with_name_and_prefix(
-                  prog, get_option("root_module_prefix")),
-              .ns_mangle =
-                  mangle_program_path(prog, get_option("root_module_prefix")),
-              .has_services = false,
-              .has_types = true,
-              .is_patch = is_patch_program(prog),
+          included_program_info{
+              .sort_key = get_py3_namespace_with_name_and_prefix(prog, ""),
+              .program = prog,
+              .import_services = false,
               .needed_by_patch = true,
           });
     }
     if (const t_list* list = true_type.try_as<t_list>()) {
-      visit_type(*list->elem_type());
+      visit_type(active_program, *list->elem_type());
     } else if (const t_set* set = true_type.try_as<t_set>()) {
-      visit_type(*set->elem_type());
+      visit_type(active_program, *set->elem_type());
     } else if (const t_map* map = true_type.try_as<t_map>()) {
-      visit_type(*map->key_type());
-      visit_type(*map->val_type());
+      visit_type(active_program, *map->key_type());
+      visit_type(active_program, *map->val_type());
     }
   }
-
-  mstch::node module_path_array(
-      const std::unordered_set<std::string_view>& modules) {
-    mstch::array a;
-    a.reserve(modules.size());
-    for (const auto& m : modules) {
-      a.emplace_back(m);
-    }
-    return a;
-  }
-
-  std::unordered_map<std::string, Namespace> include_namespaces_;
-  std::unordered_set<std::string_view> adapter_modules_;
-  std::unordered_set<std::string_view> adapter_type_hint_modules_;
 };
 
 class python_mstch_service : public mstch_service {
@@ -721,6 +706,10 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     return globals;
   }
 
+  void define_additional_prototypes(prototype_database& proto) const override {
+    proto.define(make_prototype_for_included_program());
+  }
+
   prototype<t_const_value>::ptr make_prototype_for_const_value(
       const prototype_database& proto) const override {
     auto base = t_mstch_generator::make_prototype_for_const_value(proto);
@@ -921,6 +910,39 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
                  self.interactions().end(),
                  service_has_any_bidi_types);
     });
+    def.property("include_namespaces", [this, &proto](const t_program& self) {
+      if (&self != program_) {
+        throw whisker::eval_error(
+            "Property include_namespaces is only supported for the root program");
+      }
+      return to_array(
+          python_context_->included_programs(),
+          proto.of<included_program_info>());
+    });
+    def.property("adapter_modules", [this](const t_program& self) {
+      if (&self != program_) {
+        throw whisker::eval_error(
+            "Property adapter_modules is only supported for the root program");
+      }
+      whisker::array::raw a;
+      a.reserve(python_context_->adapter_modules().size());
+      for (const auto& m : python_context_->adapter_modules()) {
+        a.emplace_back(whisker::make::string(m));
+      }
+      return whisker::make::array(std::move(a));
+    });
+    def.property("adapter_type_hint_modules", [this](const t_program& self) {
+      if (&self != program_) {
+        throw whisker::eval_error(
+            "Property adapter_type_hint_modules is only supported for the root program");
+      }
+      whisker::array::raw a;
+      a.reserve(python_context_->adapter_type_hint_modules().size());
+      for (const auto& m : python_context_->adapter_type_hint_modules()) {
+        a.emplace_back(whisker::make::string(m));
+      }
+      return whisker::make::array(std::move(a));
+    });
 
     return std::move(def).make();
   }
@@ -1061,6 +1083,7 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
   }
 
   void initialize_context(context_visitor& visitor) override {
+    python_context_->register_visitors(visitor);
     // Fix fields with mismatched empty const containers
     visitor.add_field_visitor([](const whisker_generator_visitor_context&,
                                  const t_field& node) {
@@ -1104,6 +1127,40 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
         mem_fn(&python_generator_context::enable_abstract_types));
 
     return std::move(ctx).make();
+  }
+
+  prototype<included_program_info>::ptr make_prototype_for_included_program()
+      const {
+    whisker::dsl::prototype_builder<
+        whisker::native_handle<included_program_info>>
+        def;
+
+    def.property(
+        "included_module_path", [this](const included_program_info& self) {
+          return get_py3_namespace_with_name_and_prefix(
+              self.program, get_option("root_module_prefix").value_or(""));
+        });
+    def.property(
+        "included_module_mangle", [this](const included_program_info& self) {
+          return mangle_program_path(
+              self.program, get_option("root_module_prefix"));
+        });
+    def.property("has_services?", [](const included_program_info& self) {
+      return self.import_services && !self.program->services().empty();
+    });
+    def.property("has_types?", [](const included_program_info& self) {
+      return !self.program->structured_definitions().empty() ||
+          !self.program->enums().empty() || !self.program->typedefs().empty() ||
+          !self.program->consts().empty();
+    });
+    def.property("is_patch?", [](const included_program_info& self) {
+      return is_patch_program(self.program);
+    });
+    def.property("needed_by_patch?", [](const included_program_info& self) {
+      return self.needed_by_patch;
+    });
+
+    return std::move(def).make();
   }
 
   const t_program* get_true_type_program(const t_type& type) const {
@@ -1173,16 +1230,17 @@ class t_mstch_python_generator : public t_mstch_python_prototypes_generator {
   void generate_services();
 
   void initialize_context(context_visitor& visitor) override {
-    t_mstch_python_prototypes_generator::initialize_context(visitor);
     python_context_ = std::make_shared<python_generator_context>(
-        /*is_patch_file=*/false, type_kind::abstract);
+        program_,
+        /*is_patch_file=*/false,
+        type_kind::abstract);
+    t_mstch_python_prototypes_generator::initialize_context(visitor);
   }
 
   std::filesystem::path generate_root_path_;
 };
 
 void t_mstch_python_generator::set_mstch_factories() {
-  mstch_context_.add<python_mstch_program>();
   mstch_context_.add<python_mstch_service>();
   mstch_context_.add<python_mstch_struct>();
 }
@@ -1318,16 +1376,15 @@ class t_python_patch_generator : public t_mstch_python_prototypes_generator {
 
  protected:
   void initialize_context(context_visitor& visitor) override {
-    t_mstch_python_prototypes_generator::initialize_context(visitor);
     python_context_ = std::make_shared<python_generator_context>(
-        /*is_patch_file=*/true, type_kind::immutable);
+        program_,
+        /*is_patch_file=*/true,
+        type_kind::immutable);
+    t_mstch_python_prototypes_generator::initialize_context(visitor);
   }
 
  private:
-  void set_mstch_factories() {
-    mstch_context_.add<python_mstch_program>();
-    mstch_context_.add<python_mstch_struct>();
-  }
+  void set_mstch_factories() { mstch_context_.add<python_mstch_struct>(); }
 };
 
 } // namespace

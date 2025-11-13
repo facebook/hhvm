@@ -34,3 +34,13 @@ service ExampleService {
     1: WhisperException ex,
   );
 }
+
+exception StreamException {
+  1: string message;
+}
+
+service ExampleStreamingService {
+  ResponseStruct, stream<string throws (1: StreamException ex)> testStream(
+    1: RequestStruct request,
+  );
+}

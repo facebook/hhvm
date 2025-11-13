@@ -135,8 +135,8 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
     HH\AsyncGenerator<null, TStreamType, void> $stream,
     class<TStreamResponseType> $stream_response_type,
     \TProtocol $output,
-    string $_request_name = '',
-    mixed $_handler_ctx = null,
+    string $request_name = '',
+    mixed $handler_ctx = null,
   ): Awaitable<void> {
     $transport = $output->getTransport();
     invariant(
@@ -146,6 +146,8 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
     $encoded_first_response = $transport->getBuffer();
     $transport->resetBuffer();
     $server_stream = await PHP\gen_start_thrift_stream($encoded_first_response);
+    $this->eventHandler_->postStreamStart($handler_ctx, $request_name);
+
     // Set fatal error handling for thrift streaming requests.
     // This will send proper thrift exception back to the caller
     // instead of default html page for 500.
@@ -164,7 +166,10 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
         $server_stream,
         $stream,
         $payload_encoder,
+        $request_name,
+        $handler_ctx,
       );
+
     } catch (Exception $ex) {
       $payload_encoder =
         ThriftStreamingSerializationHelpers::encodeStreamHelper(
@@ -207,6 +212,8 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
     \TServerStream $server_stream,
     HH\AsyncGenerator<null, TStreamType, void> $payload_generator,
     (function(?TStreamType, ?Exception): (string, ?bool)) $payload_encode,
+    string $request_name,
+    mixed $handler_ctx,
   ): Awaitable<void> {
     $should_continue = false;
     while ($should_continue !== null) {
@@ -217,22 +224,39 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
       }
 
       try {
+        // get next item from async generator
         $item = await $payload_generator->next();
         if ($item === null) {
           // send stream complete and return.
           return $server_stream->sendStreamComplete();
         }
-        list($_, $pld) = $item;
+        // Invoke postPayloadGenerate event handler
+        $this->eventHandler_
+          ->postStreamPayloadGenerate($handler_ctx, $request_name, $item);
 
+        //encode payload
+        list($_, $pld) = $item;
         list($encoded_str, $_) = $payload_encode($pld, null);
+
+        // Invoke postPayloadWrite event handler
+        $this->eventHandler_
+          ->postStreamPayloadWrite($handler_ctx, $request_name, $pld);
+
         $should_continue =
           await $server_stream->genSendStreamPayload($encoded_str);
-
       } catch (Exception $ex) {
         // If async generator throws any error,
         // exception should be encoded and sent to client before throwing
         list($encoded_ex, $is_application_ex) = $payload_encode(null, $ex);
 
+        // Invoke appropriate event handler based on exception type
+        if ($is_application_ex) {
+          $this->eventHandler_
+            ->postStreamPayloadError($handler_ctx, $request_name, $ex);
+        } else {
+          $this->eventHandler_
+            ->postStreamPayloadException($handler_ctx, $request_name, $ex);
+        }
         $server_stream->sendServerException(
           $encoded_ex,
           $ex->getMessage(),

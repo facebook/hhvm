@@ -70,7 +70,7 @@ StressTestHandler::streamTm(std::unique_ptr<StreamRequest> request) {
       makeBasicResponse(*request->processInfo()->initialResponseSize());
   auto stream = folly::coro::co_invoke(
       [this, request = std::move(request)]() mutable
-      -> folly::coro::AsyncGenerator<BasicResponse&&> {
+          -> folly::coro::AsyncGenerator<BasicResponse&&> {
         auto numChunks = request->processInfo()->numChunks();
         for (int64_t i = 0; i < numChunks; i++) {
           co_await co_simulateWork(

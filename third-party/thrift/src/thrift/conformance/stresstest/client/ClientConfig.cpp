@@ -68,9 +68,13 @@ DEFINE_string(
     "",
     "Compression level value to use. (DEFAULT, LESS, MORE)");
 DEFINE_string(
-    thrift_protocol, "COMPACT", "Thrift serialization protocol. Default is COMPACT. (COMPACT, BINARY)");
+    thrift_protocol,
+    "COMPACT",
+    "Thrift serialization protocol. Default is COMPACT. (COMPACT, BINARY)");
 DEFINE_bool(
-  enable_rocket_frame_relative_alignment, false, "Enable frame relative alignment. Default is false. (true, false)");
+    enable_rocket_frame_relative_alignment,
+    false,
+    "Enable frame relative alignment. Default is false. (true, false)");
 
 namespace apache::thrift::stress {
 
@@ -130,7 +134,8 @@ protocol::PROTOCOL_TYPES createThriftProtocolFromFlags() {
   } else if (FLAGS_thrift_protocol == "BINARY") {
     return protocol::T_BINARY_PROTOCOL;
   } else {
-    LOG(FATAL) << fmt::format("Unrecognized option for thrift_protocol '{}'", FLAGS_thrift_protocol);
+    LOG(FATAL) << fmt::format(
+        "Unrecognized option for thrift_protocol '{}'", FLAGS_thrift_protocol);
   }
 }
 
@@ -188,7 +193,8 @@ protocol::PROTOCOL_TYPES createThriftProtocolFromFlags() {
 
   config.enableChecksum = FLAGS_enable_checksum;
 
-  config.enableRocketFrameRelativeAlignment = FLAGS_enable_rocket_frame_relative_alignment;
+  config.enableRocketFrameRelativeAlignment =
+      FLAGS_enable_rocket_frame_relative_alignment;
 
   return config;
 }

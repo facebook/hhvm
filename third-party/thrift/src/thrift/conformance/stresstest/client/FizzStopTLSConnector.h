@@ -33,7 +33,8 @@ class FizzStopTLSConnector
     if (client_ && connectEvb_) {
       auto clientToDestroy = std::move(client_);
       if (connectEvb_->isInEventBaseThread()) {
-        // Already on correct thread, client will be destroyed when this goes out of scope
+        // Already on correct thread, client will be destroyed when this goes
+        // out of scope
       } else {
         // Schedule destruction on the correct thread
         connectEvb_->runInEventBaseThread(

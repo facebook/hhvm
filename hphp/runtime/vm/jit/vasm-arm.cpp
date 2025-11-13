@@ -450,6 +450,7 @@ struct Vgen {
   void emit(const mrs& i) { a->Mrs(X(i.r), vixl::SystemRegister(i.s.l())); }
   void emit(const msr& i) { a->Msr(vixl::SystemRegister(i.s.l()), X(i.r)); }
   void emit(const ubfmli& i) { a->ubfm(W(i.d), W(i.s), i.mr.w(), i.ms.w()); }
+  void emit(const sbfizq& i) { a->Sbfiz(X(i.d), X(i.s), i.shift.l(), i.width.l()); }
   void emit(const storepair& i) { a->Stp(X(i.s0), X(i.s1), M(i.d)); }
   void emit(const storepairl& i) { a->Stp(W(i.s0), W(i.s1), M(i.d)); }
   void emit(const loadpair& i) { a->Ldp(X(i.d0), X(i.d1), M(i.s)); }

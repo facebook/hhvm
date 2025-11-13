@@ -356,6 +356,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::sarqi:
     case Vinstr::shlqi:
     case Vinstr::shrqi:
+    case Vinstr::sbfizq:
     case Vinstr::subq:
     case Vinstr::subqi:
     case Vinstr::subqim:

@@ -276,44 +276,6 @@ class HTTPDownstreamTest : public testing::Test {
 
   void testChunks(bool trailers);
 
-  void expect101(CodecProtocol expectedProtocol,
-                 const std::string& expectedUpgrade,
-                 bool expect100 = false) {
-    NiceMock<MockHTTPCodecCallback> callbacks;
-
-    EXPECT_CALL(callbacks, onMessageBegin(_, _));
-    EXPECT_CALL(callbacks, onNativeProtocolUpgrade(_, _, _, _))
-        .WillOnce(Invoke([this, expectedUpgrade](HTTPCodec::StreamID,
-                                                 CodecProtocol,
-                                                 const std::string&,
-                                                 HTTPMessage& msg) {
-          EXPECT_EQ(msg.getStatusCode(), 101);
-          EXPECT_EQ(msg.getStatusMessage(), "Switching Protocols");
-          EXPECT_EQ(msg.getHeaders().getSingleOrEmpty(HTTP_HEADER_UPGRADE),
-                    expectedUpgrade);
-          // also connection and date
-          EXPECT_EQ(msg.getHeaders().size(), 3);
-          breakParseOutput_ = true;
-          return true;
-        }));
-    // this comes before 101, but due to gmock this is backwards
-    if (expect100) {
-      EXPECT_CALL(callbacks, onMessageBegin(_, _)).RetiresOnSaturation();
-      EXPECT_CALL(callbacks, onHeadersComplete(_, _))
-          .WillOnce(
-              Invoke([](HTTPCodec::StreamID, std::shared_ptr<HTTPMessage> msg) {
-                LOG(INFO) << "100 headers";
-                EXPECT_EQ(msg->getStatusCode(), 100);
-              }))
-          .RetiresOnSaturation();
-    }
-    clientCodec_->setCallback(&callbacks);
-    parseOutput(*clientCodec_);
-    clientCodec_ = HTTPCodecFactory::getCodec(expectedProtocol,
-                                              TransportDirection::UPSTREAM);
-    clientCodec_->createStream();
-    clientCodec_->setCallback(&callbacks_);
-  }
   void expectResponse(uint32_t code, bool expectBody, bool stopParsing = true) {
     expectResponse(
         code, ErrorCode::NO_ERROR, false, false, expectBody, stopParsing);

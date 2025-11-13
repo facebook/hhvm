@@ -260,13 +260,6 @@ class FakeHTTPCodecCallback : public HTTPCodec::Callback {
     data_.append(std::move(authenticator));
   }
 
-  bool onNativeProtocolUpgrade(HTTPCodec::StreamID,
-                               CodecProtocol,
-                               const std::string&,
-                               HTTPMessage&) override {
-    return true;
-  }
-
   uint32_t numOutgoingStreams() const override {
     return 0;
   }

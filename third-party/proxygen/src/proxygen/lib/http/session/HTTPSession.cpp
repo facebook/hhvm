@@ -1392,68 +1392,6 @@ void HTTPSession::onCertificate(uint16_t certId,
   }
 }
 
-bool HTTPSession::onNativeProtocolUpgradeImpl(
-    HTTPCodec::StreamID streamID,
-    std::unique_ptr<HTTPCodec> codec,
-    const std::string& protocolString) {
-  CHECK_EQ(streamID, 1);
-  HTTPTransaction* txn = findTransaction(streamID);
-  CHECK(txn);
-  // only HTTP1xCodec calls onNativeProtocolUpgrade
-  CHECK(!codec_->supportsParallelRequests());
-
-  // Reset to  defaults
-  maxConcurrentIncomingStreams_ = kDefaultMaxConcurrentIncomingStreams;
-  maxConcurrentOutgoingStreamsRemote_ =
-      kDefaultMaxConcurrentOutgoingStreamsRemote;
-
-  // overwrite destination, delay current codec deletion until the end
-  // of the event loop
-  auto oldCodec = codec_.setDestination(std::move(codec));
-  sock_->getEventBase()->runInLoop([oldCodec = std::move(oldCodec)]() {});
-
-  onCodecChanged();
-
-  setupCodec();
-
-  // txn will be streamID=1, have to make a placeholder
-  (void)codec_->createStream();
-
-  // This can happen if flow control was not explicitly set, and it got the
-  // HTTP1xCodec defaults.  Reset to the new codec default
-  if (initialReceiveWindow_ == 0 || receiveStreamWindowSize_ == 0 ||
-      receiveSessionWindowSize_ == 0) {
-    initialReceiveWindow_ = receiveStreamWindowSize_ =
-        receiveSessionWindowSize_ = codec_->getDefaultWindowSize();
-  }
-
-  // trigger settings frame that would have gone out in startNow()
-  HTTPSettings* settings = codec_->getEgressSettings();
-  if (settings) {
-    settings->setSetting(SettingsId::INITIAL_WINDOW_SIZE,
-                         initialReceiveWindow_);
-  }
-  sendSettings();
-  if (connFlowControl_) {
-    connFlowControl_->setReceiveWindowSize(writeBuf_,
-                                           receiveSessionWindowSize_);
-    scheduleWrite();
-  }
-
-  // Convert the transaction that contained the Upgrade header
-  txn->reset(codec_->supportsStreamFlowControl(),
-             initialReceiveWindow_,
-             receiveStreamWindowSize_,
-             getCodecSendWindowSize());
-
-  if (!transportInfo_.secure &&
-      (!transportInfo_.appProtocol || transportInfo_.appProtocol->empty())) {
-    transportInfo_.appProtocol = std::make_shared<string>(protocolString);
-  }
-
-  return true;
-}
-
 void HTTPSession::onSetSendWindow(uint32_t windowSize) {
   VLOG(4) << *this << " got send window size adjustment. new=" << windowSize;
   invokeOnAllTransactions([windowSize](HTTPTransaction* txn) {

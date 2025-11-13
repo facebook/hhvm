@@ -292,18 +292,6 @@ class HTTPCodec {
     }
 
     /**
-     * Called upon receipt of a valid protocol switch.  Return false if
-     * protocol switch could not be completed.
-     */
-    virtual bool onNativeProtocolUpgrade(
-        StreamID /* stream */,
-        CodecProtocol /* protocol */,
-        const std::string& /* protocolString */,
-        HTTPMessage& /* msg */) {
-      return false;
-    }
-
-    /**
      * Called after a header frame is generated.
      * This only applies to framed codecs.
      */

@@ -114,15 +114,6 @@ void PassThroughHTTPCodecFilter::onPushPriority(StreamID stream,
   callback_->onPushPriority(stream, pri);
 }
 
-bool PassThroughHTTPCodecFilter::onNativeProtocolUpgrade(
-    StreamID streamID,
-    CodecProtocol protocol,
-    const std::string& protocolString,
-    HTTPMessage& msg) {
-  return callback_->onNativeProtocolUpgrade(
-      streamID, protocol, protocolString, msg);
-}
-
 void PassThroughHTTPCodecFilter::onGenerateFrameHeader(StreamID streamID,
                                                        uint8_t type,
                                                        uint64_t length,

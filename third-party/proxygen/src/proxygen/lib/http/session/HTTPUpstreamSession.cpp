@@ -170,28 +170,6 @@ bool HTTPUpstreamSession::allTransactionsStarted() const {
   return true;
 }
 
-bool HTTPUpstreamSession::onNativeProtocolUpgrade(
-    HTTPCodec::StreamID streamID,
-    CodecProtocol protocol,
-    const std::string& protocolString,
-    HTTPMessage&) {
-
-  VLOG(4) << *this << " onNativeProtocolUpgrade streamID=" << streamID
-          << " protocol=" << protocolString;
-
-  if (protocol != CodecProtocol::HTTP_2) {
-    return false;
-  }
-
-  // Create the new Codec
-  std::unique_ptr<HTTPCodec> codec =
-      std::make_unique<HTTP2Codec>(TransportDirection::UPSTREAM);
-
-  bool ret =
-      onNativeProtocolUpgradeImpl(streamID, std::move(codec), protocolString);
-  return ret;
-}
-
 void HTTPUpstreamSession::attachThreadLocals(
     folly::EventBase* eventBase,
     std::shared_ptr<const folly::SSLContext> sslContext,

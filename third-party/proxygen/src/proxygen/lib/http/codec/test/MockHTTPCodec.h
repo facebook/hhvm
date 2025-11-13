@@ -231,10 +231,6 @@ class MockHTTPCodecCallback : public HTTPCodec::Callback {
                      std::unique_ptr<folly::IOBuf> certData) override {
     onCertificate(certId, std::shared_ptr<folly::IOBuf>(certData.release()));
   }
-  MOCK_METHOD(
-      bool,
-      onNativeProtocolUpgrade,
-      (HTTPCodec::StreamID, CodecProtocol, const std::string&, HTTPMessage&));
   MOCK_METHOD(void,
               onGenerateFrameHeader,
               (HTTPCodec::StreamID, uint8_t, uint64_t, uint16_t));

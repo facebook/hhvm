@@ -87,11 +87,6 @@ class HTTPDownstreamSession final : public HTTPSession {
 
   bool allTransactionsStarted() const override;
 
-  bool onNativeProtocolUpgrade(HTTPCodec::StreamID streamID,
-                               CodecProtocol protocol,
-                               const std::string& protocolString,
-                               HTTPMessage& msg) override;
-
   // Upstream methods.  Can implement when servers support making request
   bool isDetachable(bool) const override {
     LOG(FATAL) << __func__ << " is an upstream interface";

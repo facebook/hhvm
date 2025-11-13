@@ -1268,14 +1268,6 @@ class HQSession
       VLOG(4) << __func__ << " txn=" << txn_;
     }
 
-    bool onNativeProtocolUpgrade(HTTPCodec::StreamID /* stream */,
-                                 CodecProtocol /* protocol */,
-                                 const std::string& /* protocolString */,
-                                 HTTPMessage& /* msg */) override {
-      VLOG(4) << __func__ << " txn=" << txn_;
-      return false;
-    }
-
     uint32_t numOutgoingStreams() const override {
       VLOG(4) << __func__ << " txn=" << txn_;
       return 0;

@@ -89,46 +89,4 @@ bool HTTPDownstreamSession::allTransactionsStarted() const {
   return true;
 }
 
-bool HTTPDownstreamSession::onNativeProtocolUpgrade(
-    HTTPCodec::StreamID streamID,
-    CodecProtocol protocol,
-    const std::string& protocolString,
-    HTTPMessage& msg) {
-  VLOG(4) << *this << " onNativeProtocolUpgrade streamID=" << streamID
-          << " protocol=" << protocolString;
-  auto txn = findTransaction(streamID);
-  CHECK(txn);
-  if (txn->canSendHeaders()) {
-    // Create the new Codec
-    auto codec = HTTPCodecFactory::getCodec(
-        protocol, TransportDirection::DOWNSTREAM, /*strictValidation=*/true);
-    CHECK(codec);
-    if (!codec->onIngressUpgradeMessage(msg)) {
-      VLOG(4) << *this << " codec rejected upgrade";
-      return false;
-    }
-
-    // Send a 101 Switching Protocols message while we still have HTTP codec
-    // Note: it's possible that the client timed out waiting for a
-    // 100-continue and ended up here first.  In this case the 100 may go
-    // out in the new protocol
-    HTTPMessage switchingProtos;
-    switchingProtos.setHTTPVersion(1, 1);
-    switchingProtos.setStatusCode(101);
-    switchingProtos.setStatusMessage("Switching Protocols");
-    switchingProtos.getHeaders().set(HTTP_HEADER_UPGRADE, protocolString);
-    switchingProtos.getHeaders().set(HTTP_HEADER_CONNECTION, "Upgrade");
-    txn->sendHeaders(switchingProtos);
-    // no sendEOM for 1xx
-
-    // This will actually switch the protocol
-    bool ret = HTTPSession::onNativeProtocolUpgradeImpl(
-        streamID, std::move(codec), protocolString);
-    return ret;
-  } else {
-    VLOG(4) << *this << " plaintext upgrade failed due to early response";
-    return false;
-  }
-}
-
 } // namespace proxygen

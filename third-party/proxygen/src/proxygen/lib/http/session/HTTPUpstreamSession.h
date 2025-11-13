@@ -124,11 +124,6 @@ class HTTPUpstreamSession : public HTTPSession {
 
   bool allTransactionsStarted() const override;
 
-  bool onNativeProtocolUpgrade(HTTPCodec::StreamID streamID,
-                               CodecProtocol protocol,
-                               const std::string& protocolString,
-                               HTTPMessage& msg) override;
-
   void maybeAttachSSLContext(
       std::shared_ptr<const folly::SSLContext> sslContext) const;
   void maybeDetachSSLContext() const;

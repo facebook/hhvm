@@ -320,12 +320,11 @@ cdef class ImmutableInternalMap(dict):
     pass
 
 cdef class Map(Container):
-    # may be dict, ImmutableInternalMap
-    cdef object _fbthrift_elements
+    cdef dict _fbthrift_elements
     cdef object _fbthrift_key_info
-    cdef object _fbthrift_internal_elements
+    cdef dict _fbthrift_internal_elements
     cdef bint _fbthrift_needs_lazy_conversion
-    cdef object _fbthrift_get_elements(self)
+    cdef dict _fbthrift_get_elements(self)
     cdef _fbthrift_lazy_getitem(self, object)
 
 cdef void set_struct_field(tuple struct_tuple, int16_t index, value) except *

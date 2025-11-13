@@ -910,7 +910,7 @@ cdef class MapTypeInfo(TypeInfoBase):
         # Elements need no conversion (e.g., int, float, double, binary):
         # Pass dict directly, no conversion needed.
         if to_map_elements_no_convert(self.key_info, self.val_info):
-            inst._fbthrift_elements = value
+            inst._fbthrift_elements = <dict>value
             inst._fbthrift_needs_lazy_conversion = False
             inst._fbthrift_internal_elements = None
         # Keys don't need conversion (or are strings): Use lazy conversion to defer value conversion.
@@ -921,7 +921,7 @@ cdef class MapTypeInfo(TypeInfoBase):
                 isinstance(self.key_info, StringTypeInfo)):
             inst._fbthrift_elements = {}
             inst._fbthrift_needs_lazy_conversion = True
-            inst._fbthrift_internal_elements = value
+            inst._fbthrift_internal_elements = <dict>value
         # Keys need conversion (e.g., enums, structs, containers):
         # Convert eagerly.
         else:
@@ -2622,7 +2622,7 @@ cdef class Map(Container):
             self._fbthrift_val_info.same_as(other_val_type)
         )
 
-    cdef object _fbthrift_get_elements(Map self):
+    cdef dict _fbthrift_get_elements(Map self):
         """
         Get the internal dict, eagerly converting all lazy elements on first access.
 
@@ -2654,7 +2654,7 @@ cdef class Map(Container):
                 key_type_info.to_python_value(key)
                 val_type_info.to_python_value(value)
 
-            self._fbthrift_elements = self._fbthrift_internal_elements
+            self._fbthrift_elements = <dict>self._fbthrift_internal_elements
         else:
             # Convert all lazy elements to Python values and we need to convert
             # all elements from scratch to preserve the original insertion order.

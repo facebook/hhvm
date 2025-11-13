@@ -66,16 +66,6 @@ function(HHVM_GENERATE_CONFIG_FUNCTIONS_FOUND_DEFINE_STRING destVarName)
     "utimes"
   )
 
-  # This is a list of functions that are known to be present under MSVC
-  # because they are implemented via Folly's portability headers. For an
-  # item in this list to have any effect, it must first fail to be found
-  # when checking the item in the main list.
-  set(HHVM_FUNCTIONS_KNOWN_TO_BE_PRESENT_MSVC)
-  list(APPEND HHVM_FUNCTIONS_KNOWN_TO_BE_PRESENT_MSVC
-    "mkstemp"
-    "mmap"
-  )
-
   set(builtString "")
   list(LENGTH HHVM_FUNCTIONS_TO_CHECK functionCount)
   set(i 0)
@@ -86,12 +76,7 @@ function(HHVM_GENERATE_CONFIG_FUNCTIONS_FOUND_DEFINE_STRING destVarName)
     if (${HAVE_${curFuncUpper}})
       set(builtString "${builtString}\n#define HAVE_${curFuncUpper} 1")
     else()
-      list(FIND HHVM_FUNCTIONS_KNOWN_TO_BE_PRESENT_MSVC "${curFunc}" curFuncIdx)
-      if (curFuncIdx EQUAL -1 OR NOT MSVC)
-        set(builtString "${builtString}\n/* #undef HAVE_${curFuncUpper} */")
-      else()
-        set(builtString "${builtString}\n#define HAVE_${curFuncUpper} 1 /* Implemented via Folly Portability header */")
-      endif()
+      set(builtString "${builtString}\n/* #undef HAVE_${curFuncUpper} */")
     endif()
     math(EXPR i "${i} + 1")
   endwhile()

@@ -15,20 +15,18 @@ list(APPEND HEADER_SOURCES ${files})
 HHVM_REMOVE_MATCHES_FROM_LISTS(ASM_SOURCES CXX_SOURCES HEADER_SOURCES
   MATCHES "/test/" "channeled-json-")
 
-if (NOT MSVC)
-  list(REMOVE_ITEM CXX_SOURCES
+list(REMOVE_ITEM CXX_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/portability/fnmatch.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/portability/glob.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/portability/rand_r.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/portability/strfmon.cpp
   )
-  list(REMOVE_ITEM HEADER_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/portability/fnmatch.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/portability/glob.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/portability/rand_r.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/portability/strfmon.h
-  )
-endif()
+list(REMOVE_ITEM HEADER_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/portability/fnmatch.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/portability/glob.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/portability/rand_r.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/portability/strfmon.h
+)
 
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/low-ptr-def.h
@@ -46,13 +44,6 @@ if (LIBNUMA_INCLUDE_DIRS)
   include_directories(${LIBNUMA_INCLUDE_DIRS})
 endif()
 
-if(MSVC)
-  list(REMOVE_ITEM CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/afdt-util.cpp")
-  list(REMOVE_ITEM HEADER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/afdt-util.h")
-  list(REMOVE_ITEM CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/light-process.cpp")
-  list(REMOVE_ITEM HEADER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/light-process.h")
-endif()
-
 get_target_property(CARGO_EXE cargo LOCATION)
 get_target_property(RUSTC_EXE rustc LOCATION)
 
@@ -68,9 +59,6 @@ HHVM_RENDER_CONFIG_SPECIFICATION(
 
 auto_source_group("hphp_util" "${CMAKE_CURRENT_SOURCE_DIR}"
   ${ASM_SOURCES} ${CXX_SOURCES} ${HEADER_SOURCES})
-if (ENABLE_COTIRE)
-  cotire(hphp_util)
-endif()
 
 target_link_libraries(hphp_util brotli folly zstd)
 if (LIBNUMA_LIBRARIES)

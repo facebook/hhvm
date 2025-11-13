@@ -61,7 +61,3 @@ object_library_ld_link_libraries(hphp_runtime_static hphp_util proxygen mvfst vi
 HHVM_CONFIGURE_TARGET_FOR_EXTENSION_DEPENDENCIES(hphp_runtime_static)
 
 HHVM_PUBLIC_HEADERS(runtime ${HEADER_SOURCES})
-
-if (ENABLE_COTIRE)
-  cotire(hphp_runtime_static)
-endif()

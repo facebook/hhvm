@@ -57,21 +57,12 @@ macro(HHVM_SELECT_SOURCES DIR)
       list(APPEND C_SOURCES ${f})
     endif()
   endforeach()
-  if (MSVC)
-    auto_sources(files "*.asm" "RECURSE" "${DIR}")
-    foreach(f ${files})
-      if (NOT (${f} MATCHES "(ext_hhvm|/(old-)?tests?/)"))
-        list(APPEND ASM_SOURCES ${f})
-      endif()
-    endforeach()
-  else()
-    auto_sources(files "*.S" "RECURSE" "${DIR}")
-    foreach(f ${files})
-      if (NOT (${f} MATCHES "(ext_hhvm|/(old-)?tests?/)"))
-        list(APPEND ASM_SOURCES ${f})
-      endif()
-    endforeach()
-  endif()
+  auto_sources(files "*.S" "RECURSE" "${DIR}")
+  foreach(f ${files})
+    if (NOT (${f} MATCHES "(ext_hhvm|/(old-)?tests?/)"))
+      list(APPEND ASM_SOURCES ${f})
+    endif()
+  endforeach()
   auto_sources(files "*.h" "RECURSE" "${DIR}")
   foreach(f ${files})
     if (NOT (${f} MATCHES "(/(old-)?tests?/)"))
@@ -113,21 +104,14 @@ macro(MYSQL_SOCKET_SEARCH)
 endmacro()
 
 function(append_systemlib TARGET SOURCE SECTNAME)
-  if(MSVC)
-    list(APPEND ${TARGET}_SLIBS_NAMES "${SECTNAME}")
-    set(${TARGET}_SLIBS_NAMES ${${TARGET}_SLIBS_NAMES} PARENT_SCOPE)
-    list(APPEND ${TARGET}_SLIBS_SOURCES "${SOURCE}")
-    set(${TARGET}_SLIBS_SOURCES ${${TARGET}_SLIBS_SOURCES} PARENT_SCOPE)
+  if (APPLE)
+    set(${TARGET}_SLIBS ${${TARGET}_SLIBS} -Wl,-sectcreate,__text,${SECTNAME},${SOURCE} PARENT_SCOPE)
   else()
-    if (APPLE)
-      set(${TARGET}_SLIBS ${${TARGET}_SLIBS} -Wl,-sectcreate,__text,${SECTNAME},${SOURCE} PARENT_SCOPE)
-    else()
-      set(${TARGET}_SLIBS ${${TARGET}_SLIBS} "--add-section" "${SECTNAME}=${SOURCE}" PARENT_SCOPE)
-    endif()
-    # Add the systemlib file to the "LINK_DEPENDS" for the systemlib, this will cause it
-    # to be relinked and the systemlib re-embedded
-    set_property(TARGET ${TARGET} APPEND PROPERTY LINK_DEPENDS ${SOURCE})
+    set(${TARGET}_SLIBS ${${TARGET}_SLIBS} "--add-section" "${SECTNAME}=${SOURCE}" PARENT_SCOPE)
   endif()
+  # Add the systemlib file to the "LINK_DEPENDS" for the systemlib, this will cause it
+  # to be relinked and the systemlib re-embedded
+  set_property(TARGET ${TARGET} APPEND PROPERTY LINK_DEPENDS ${SOURCE})
 endfunction(append_systemlib)
 
 function(embed_sections TARGET DEST)
@@ -150,24 +134,6 @@ function(embed_sections TARGET DEST)
     set(REPO_SCHEMA -Wl,-sectcreate,__text,"repo_schema_id","${CMAKE_BINARY_DIR}/hphp/util/generated-repo-schema-id.txt")
     set(BUILD_ID -Wl,-sectcreate,__text,"build_id","${CMAKE_BINARY_DIR}/hphp/util/generated-build-id.txt")
     target_link_libraries(${TARGET} ${${TARGET}_SLIBS} ${COMPILER_ID} ${COMPILER_TIMESTAMP} ${REPO_SCHEMA} ${BUILD_ID})
-  elseif(MSVC)
-    set(RESOURCE_FILE "#pragma code_page(1252)\n")
-    set(RESOURCE_FILE "${RESOURCE_FILE}LANGUAGE 0, 0\n")
-    set(RESOURCE_FILE "${RESOURCE_FILE}\n")
-    set(RESOURCE_FILE "${RESOURCE_FILE}#include \"${CMAKE_BINARY_DIR}/hphp/runtime/version.h\"\n")
-    file(READ "${CMAKE_BINARY_DIR}/hphp/hhvm/hhvm.rc" VERSION_INFO)
-    set(RESOURCE_FILE "${RESOURCE_FILE}compiler_id RCDATA \"${CMAKE_BINARY_DIR}/hphp/util/generated-compiler-id.txt\"\n")
-    set(RESOURCE_FILE "${RESOURCE_FILE}compiler_ts RCDATA \"${CMAKE_BINARY_DIR}/hphp/util/generated-compiler-timestamp.txt\"\n")
-    set(RESOURCE_FILE "${RESOURCE_FILE}repo_schema_id RCDATA \"${CMAKE_BINARY_DIR}/hphp/util/generated-repo-schema-id.txt\"\n")
-    set(RESOURCE_FILE "${RESOURCE_FILE}build_id RCDATA \"${CMAKE_BINARY_DIR}/hphp/util/generated-build-id.txt\"\n")
-    set(RESOURCE_FILE "${RESOURCE_FILE}${VERSION_INFO}\n")
-    set(i 0)
-    foreach (nm ${${TARGET}_SLIBS_NAMES})
-      list(GET ${TARGET}_SLIBS_SOURCES ${i} source)
-      set(RESOURCE_FILE "${RESOURCE_FILE}${nm} RCDATA \"${source}\"\n")
-      math(EXPR i "${i} + 1")
-    endforeach()
-    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/embed.rc "${RESOURCE_FILE}")
   else()
     add_custom_command(TARGET ${TARGET} POST_BUILD
       COMMAND "objcopy"
@@ -193,13 +159,8 @@ macro(embed_systemlib_byname TARGET SLIB)
   string(MD5 SLIB_HASH_NAME ${SLIB_EXTNAME})
   # Some platforms limit section names to 16 characters :(
   string(SUBSTRING ${SLIB_HASH_NAME} 0 12 SLIB_HASH_NAME_SHORT)
-  if (MSVC)
-    # The dot would be causing the RC lexer to begin a number in the
-    # middle of our resource name, so use an underscore instead.
-    append_systemlib(${TARGET} ${SLIB} "ext_${SLIB_HASH_NAME_SHORT}")
-  else()
-    append_systemlib(${TARGET} ${SLIB} "ext.${SLIB_HASH_NAME_SHORT}")
-  endif()
+
+  append_systemlib(${TARGET} ${SLIB} "ext.${SLIB_HASH_NAME_SHORT}")
 endmacro()
 
 function(embed_all_systemlibs TARGET ROOT DEST)
@@ -395,26 +356,13 @@ function(parse_version PREFIX VERSION)
   set(${PREFIX}SUFFIX ${SUFFIX} PARENT_SCOPE)
 endfunction()
 
-# MSVC doesn't support a --whole-archive flag, but newer versions
-# of CMake do support object libraries, which give the same result.
-# As we can't easily upgrade the normal builds to CMake 3.0, we
-# will just require CMake 3.0+ for MSVC builds only.
 function(add_object_library libraryName)
-  if (MSVC)
-    add_library(${libraryName} OBJECT ${ARGN})
-  else()
-    add_library(${libraryName} STATIC ${ARGN})
-  endif()
+  add_library(${libraryName} STATIC ${ARGN})
 endfunction()
 
 # Get what might be the objects of the object libraries, if needed.
 function(get_object_libraries_objects targetVariable)
   set(OBJECTS)
-  if (MSVC)
-    foreach (fil ${ARGN})
-      list(APPEND OBJECTS $<TARGET_OBJECTS:${fil}>)
-    endforeach()
-  endif()
 
   set(${targetVariable} ${OBJECTS} PARENT_SCOPE)
 endfunction()
@@ -422,10 +370,6 @@ endfunction()
 # Add the additional link targets for a set of object libraries,
 # if needed.
 function(link_object_libraries target)
-  if (MSVC)
-    return()
-  endif()
-
   set(WHOLE_ARCHIVE_LIBS)
   foreach (fil ${ARGN})
     list(APPEND WHOLE_ARCHIVE_LIBS ${fil})
@@ -453,21 +397,14 @@ endfunction()
 # This should be called for object libraries, rather than calling
 # hphp_link directly.
 function(object_library_hphp_link target)
-  # MSVC can't have it. (see below)
-  if (NOT MSVC)
-    hphp_link(${target})
-  endif()
+  hphp_link(${target})
 endfunction()
 
 # If a library needs to be linked in to make GNU ld happy,
 # it should be done by calling this.
 function(object_library_ld_link_libraries target)
   if (${ARGC})
-    # CMake doesn't allow calls to target_link_libraries if the target
-    # is an OBJECT library, so MSVC can't have this.
-    if (NOT MSVC)
-      target_link_libraries(${target} ${ARGN})
-    endif()
+    target_link_libraries(${target} ${ARGN})
   endif()
 endfunction()
 

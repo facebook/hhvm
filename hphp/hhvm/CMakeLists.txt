@@ -4,11 +4,6 @@ set(CXX_SOURCES)
 auto_sources(files "*.cpp" "")
 list(APPEND CXX_SOURCES ${files})
 
-# Windows targets use a generated rc file for embedding libraries
-if(MSVC)
-  list(APPEND CXX_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/embed.rc)
-endif()
-
 option(ENABLE_LD_GOLD "Enable Hot Linker script using ld-gold" On)
 set(SECTION_ORDERING_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../tools/oss_hot_section_ordering CACHE FILEPATH "File used by ld-gold for the relocation of sections")
 
@@ -62,10 +57,6 @@ if (CMAKE_HOST_UNIX)
     COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/symlinks.sh
       ${CMAKE_CURRENT_BINARY_DIR}/hhvm ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT "Creating symlinks for hhvm")
-endif()
-
-if (ENABLE_COTIRE)
-  cotire(hhvm)
 endif()
 
 HHVM_INSTALL(hhvm bin)

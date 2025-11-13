@@ -101,20 +101,8 @@ if (LINUX)
   add_definitions(-D_GNU_SOURCE)
 endif()
 
-if(MSVC)
-  add_definitions(-DGLOG_NO_ABBREVIATED_SEVERITIES)
-  add_definitions(-DWIN32_LEAN_AND_MEAN)
-endif()
-
 if(CMAKE_CONFIGURATION_TYPES)
-  if(NOT MSVC)
-    message(FATAL_ERROR "Adding the appropriate defines for multi-config targets using anything other than MSVC is not yet supported!")
-  endif()
-  foreach(flag_var
-      CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
-      CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-    set(${flag_var} "${${flag_var}} /D NDEBUG")
-  endforeach()
+  message(FATAL_ERROR "Adding the appropriate defines for multi-config targets is not yet supported!")
 elseif(${CMAKE_BUILD_TYPE} MATCHES "Debug" OR
        ${CMAKE_BUILD_TYPE} MATCHES "DebugOpt")
   message("Generating DEBUG build")
@@ -127,7 +115,7 @@ if(ALWAYS_ASSERT)
   add_definitions(-DALWAYS_ASSERT=1)
 endif()
 
-if(APPLE OR FREEBSD OR MSVC)
+if(APPLE OR FREEBSD)
   add_definitions(-DSKIP_USER_CHANGE=1)
 endif()
 

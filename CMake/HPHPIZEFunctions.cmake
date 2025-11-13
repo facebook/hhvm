@@ -31,8 +31,6 @@ endfunction()
 function(embed_systemlibs TARGET DEST)
   if (APPLE)
     target_link_libraries(${TARGET} ${${TARGET}_SLIBS})
-  elseif (MSVC)
-    message(FATAL_ERROR "Shared extensions are not supported on Windows")
   else()
     add_custom_command(TARGET ${TARGET} POST_BUILD
       COMMAND "objcopy"

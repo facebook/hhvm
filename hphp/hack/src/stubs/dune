@@ -59,11 +59,16 @@
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
- ; this stub file is used by both buck2 and dune
-(rule
- (target remote_old_decls_ffi.ml)
- (action
-  (copy# ../facebook/remote_old_decls/stubs/remote_old_decls_ffi.ml remote_old_decls_ffi.ml)))
+(library
+ (name state_loader_stubs)
+ (wrapped false)
+ (modules saved_state_loader state_loader_futures state_loader_lwt)
+ (libraries
+  hg
+  server_env
+  typechecker_options)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name remote_old_decls_ffi)
@@ -73,12 +78,6 @@
   (libraries logging)
   (preprocess
     (pps lwt_ppx ppx_deriving.std)))
-
-; this stub file is used by both buck2 and dune
-(rule
- (target hh_distc_ffi.ml)
- (action
-  (copy# ../facebook/hh_distc/check_ffi/stubs/hh_distc_ffi.ml hh_distc_ffi.ml)))
 
 (library
   (name hh_distc_ffi)
@@ -158,6 +157,21 @@
  (modules folly)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
+
+(library
+ (name redeclarations)
+ (wrapped false)
+ (modules declarationsRewriter))
+
+(library
+ (name linttool)
+ (wrapped false)
+ (modules linttool))
+
+ (library
+ (name sandcastle_stubs)
+ (wrapped false)
+ (modules sandcastle))
 
 (library
  (name startup_initializer_stubs)

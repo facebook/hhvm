@@ -25,6 +25,7 @@
 #include <folly/observer/SimpleObservable.h>
 
 THRIFT_FLAG_DEFINE_bool(test_flag_bool, true);
+THRIFT_FLAG_DEFINE_int64(test_flag_another_int, 21);
 THRIFT_FLAG_DEFINE_int64(test_flag_int, 42);
 THRIFT_FLAG_DEFINE_string(test_flag_string, "foo");
 THRIFT_FLAG_DECLARE_bool(test_flag_bool_external);
@@ -348,11 +349,13 @@ TEST_F(Flags, MockValuePreferred) {
 void assertFlagValue(
     std::vector<apache::thrift::ThriftFlagInfo> allFlags,
     const std::string& name,
-    const std::string& expectedValue) {
+    const std::string& expectedValue,
+    std::optional<bool> expectedIsMocked) {
   bool flagFound = false;
   for (const auto& flag : allFlags) {
     if (flag.name == name) {
       EXPECT_EQ(expectedValue, flag.currentValue);
+      EXPECT_EQ(expectedIsMocked, flag.isMocked);
       flagFound = true;
     }
   }
@@ -369,7 +372,14 @@ TEST_F(Flags, getAllThriftFlags) {
   auto allFlags = apache::thrift::getAllThriftFlags();
 
   // Assert
-  assertFlagValue(allFlags, "test_flag_bool", "false");
-  assertFlagValue(allFlags, "test_flag_int", "88");
-  assertFlagValue(allFlags, "test_flag_string", "test string");
+  assertFlagValue(allFlags, "test_flag_bool", "false", std::nullopt);
+  assertFlagValue(allFlags, "test_flag_int", "88", std::nullopt);
+  assertFlagValue(allFlags, "test_flag_another_int", "21", std::nullopt);
+  assertFlagValue(allFlags, "test_flag_string", "test string", std::nullopt);
+
+  allFlags = apache::thrift::getAllThriftFlags(/* returnIsMocked */ true);
+  assertFlagValue(allFlags, "test_flag_bool", "false", true);
+  assertFlagValue(allFlags, "test_flag_int", "88", true);
+  assertFlagValue(allFlags, "test_flag_another_int", "21", false);
+  assertFlagValue(allFlags, "test_flag_string", "test string", true);
 }

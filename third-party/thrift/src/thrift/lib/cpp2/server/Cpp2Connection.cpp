@@ -33,10 +33,6 @@
 #include <thrift/lib/cpp2/transport/core/SendCallbacks.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketRoutingHandler.h>
 
-THRIFT_FLAG_DEFINE_bool(server_header_reject_framed, true);
-THRIFT_FLAG_DEFINE_bool(server_header_reject_unframed, true);
-THRIFT_FLAG_DEFINE_bool(server_header_reject_all, true);
-
 THRIFT_FLAG_DEFINE_int64(monitoring_over_header_logging_sample_rate, 1'000'000);
 
 namespace apache::thrift {

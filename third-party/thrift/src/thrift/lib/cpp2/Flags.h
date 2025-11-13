@@ -23,9 +23,11 @@
 #include <type_traits>
 
 #include <folly/CPortability.h>
+#include <folly/Conv.h>
 #include <folly/Indestructible.h>
 #include <folly/observer/Observer.h>
 #include <folly/observer/SimpleObservable.h>
+#include <folly/settings/Settings.h>
 #include <folly/synchronization/DelayedInit.h>
 
 #include <thrift/lib/cpp2/PluggableFunction.h>
@@ -49,6 +51,8 @@ class FlagsBackend {
 
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     std::unique_ptr<FlagsBackend>, createFlagsBackend);
+
+THRIFT_PLUGGABLE_FUNC_DECLARE(void, initThriftFlagFollySettings);
 
 FlagsBackend& getFlagsBackend();
 
@@ -135,6 +139,10 @@ class FlagWrapper {
     folly::observer_detail::ObserverManager::waitForAllUpdates();
   }
 
+  bool hasMockValue() const {
+    return mockObservable_.getObserver().getSnapshot()->has_value();
+  }
+
  private:
   template <typename U>
   using ReadOptimizedObserver = std::conditional_t<
@@ -190,7 +198,7 @@ class FlagWrapper {
 };
 } // namespace detail
 
-#define THRIFT_FLAG_DEFINE(_name, _type, _default)                             \
+#define THRIFT_FLAG_DEFINE_IMPL(_name, _type, _default)                        \
   apache::thrift::detail::FlagWrapper<_type>& THRIFT_FLAG_WRAPPER__##_name() { \
     static constexpr std::string_view flagName = #_name;                       \
     static folly::Indestructible<apache::thrift::detail::FlagWrapper<_type>>   \
@@ -200,8 +208,31 @@ class FlagWrapper {
   /* Eagerly register the flag and force a trailing semicolon */               \
   auto& THRIFT_FLAG_REGISTER__##_name = THRIFT_FLAG_WRAPPER__##_name()
 
-#define THRIFT_FLAG_DECLARE(_name, _type) \
-  apache::thrift::detail::FlagWrapper<_type>& THRIFT_FLAG_WRAPPER__##_name()
+#define THRIFT_FLAG_DEFINE(_name, _type, _default)   \
+  THRIFT_FLAG_DEFINE_IMPL(_name, _type, _default);   \
+  FOLLY_SETTING_REGISTER(                            \
+      thriftflag,                                    \
+      _name,                                         \
+      _type,                                         \
+      _default,                                      \
+      folly::settings::Mutability::Mutable,          \
+      folly::settings::CommandLine::RejectOverrides, \
+      "Thrift flag")
+
+#define THRIFT_FLAG_DEFINE_FOLLY_SETTING(_name, _type, _default) \
+  THRIFT_FLAG_DEFINE_IMPL(_name, _type, _default);               \
+  FOLLY_SETTING_DEFINE(                                          \
+      thriftflag,                                                \
+      _name,                                                     \
+      _type,                                                     \
+      _default,                                                  \
+      folly::settings::Mutability::Mutable,                      \
+      folly::settings::CommandLine::RejectOverrides,             \
+      "Thrift flag")
+
+#define THRIFT_FLAG_DECLARE(_name, _type)                                     \
+  apache::thrift::detail::FlagWrapper<_type>& THRIFT_FLAG_WRAPPER__##_name(); \
+  FOLLY_SETTING_DECLARE(thriftflag, _name, _type)
 
 #define THRIFT_FLAG_DEFINE_int64(_name, _default) \
   THRIFT_FLAG_DEFINE(_name, int64_t, _default)
@@ -231,7 +262,12 @@ class FlagWrapper {
 struct ThriftFlagInfo {
   std::string name;
   std::string currentValue;
+  std::optional<bool> isMocked;
 };
 
-std::vector<ThriftFlagInfo> getAllThriftFlags();
+std::vector<ThriftFlagInfo> getAllThriftFlags(bool returnIsMocked = false);
 } // namespace apache::thrift
+
+THRIFT_FLAG_DECLARE_bool(server_header_reject_framed);
+THRIFT_FLAG_DECLARE_bool(server_header_reject_unframed);
+THRIFT_FLAG_DECLARE_bool(server_header_reject_all);

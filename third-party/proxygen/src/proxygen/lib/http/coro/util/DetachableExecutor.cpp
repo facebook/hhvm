@@ -13,7 +13,7 @@
 namespace proxygen::coro::detail {
 
 void DetachableExecutor::add(folly::Func fn) {
-  XLOG(DBG8) << __func__ << "; pEvb_" << pEvb_;
+  XLOG(DBG8) << __func__ << "; pEvb_=" << pEvb_;
   // must be "attached" and running in evb thread
   XCHECK(pEvb_ && pEvb_->isInEventBaseThread());
   auto loopCallback = std::make_unique<LoopCallback>(std::move(fn));
@@ -22,7 +22,7 @@ void DetachableExecutor::add(folly::Func fn) {
 }
 
 void DetachableExecutor::detachEvb() {
-  XLOG(DBG4) << __func__ << "; pEvb_=" << pEvb_;
+  XLOG(DBG8) << __func__ << "; pEvb_=" << pEvb_;
   XCHECK(pEvb_->isInEventBaseThread());
   XCHECK_EQ(state_, State::Detachable);
   pEvb_ = nullptr;
@@ -32,7 +32,7 @@ void DetachableExecutor::detachEvb() {
 }
 
 void DetachableExecutor::attachEvb(folly::EventBase* evb) {
-  XLOG(DBG4) << __func__ << "; evb=" << evb;
+  XLOG(DBG8) << __func__ << "; evb=" << evb;
   XCHECK(evb->isInEventBaseThread());
   pEvb_ = evb;
   for (auto& loopCallback : fnList_) {

@@ -797,7 +797,7 @@ class HTTPCoroSession
       HTTPSourceHolder bodySource) noexcept;
 };
 
-class HTTPUniplexTransportSession : public HTTPCoroSession {
+class HTTPUniplexTransportSession final : public HTTPCoroSession {
  public:
   HTTPUniplexTransportSession(
       std::unique_ptr<folly::coro::TransportIf> coroTransport,
@@ -966,7 +966,7 @@ constexpr uint8_t kDefaultMaxBufferedDatagrams = 5;
 // Maximum number of streams with datagrams buffered
 constexpr uint8_t kMaxStreamsWithBufferedDatagrams = 10;
 
-class HTTPQuicCoroSession
+class HTTPQuicCoroSession final
     : public HTTPCoroSession
     , public quic::QuicSocket::ConnectionCallback
     , public hq::HQUnidirectionalCodec::Callback

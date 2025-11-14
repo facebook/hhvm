@@ -69,15 +69,14 @@ void MyNodeAsyncProcessor::executeRequest_do_mid(
       this->getServiceName(),
       "MyNode.do_mid",
       serverRequest.requestContext());
-  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
-    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
-        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "do_mid",
-        serializedRequest,
+        apache::thrift::detail::ServerRequestHelper::compressedRequest(
+            std::move(serverRequest))
+            .uncompress(),
         ctxStack.get());
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -133,25 +132,19 @@ void MyNodeAsyncProcessor::executeRequest_do_mid(
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](
-        auto callback,
-        auto executeHandler,
-        ArgsState args,
-        const apache::thrift::SerializedRequest&& serializedRequest
-    ) -> folly::coro::Task<void> {
+    [](auto callback, auto executeHandler, ArgsState args)
+        -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
-          std::forward<const apache::thrift::SerializedRequest>(serializedRequest));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+              argRefs));
       executeHandler(std::move(callback), std::move(args));
-    }(
-        std::move(callback),
-        makeExecuteHandler(),
-        std::move(args),
-        std::move(serializedRequest))
-      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
-      .startInlineUnsafe();
+    }(std::move(callback), makeExecuteHandler(), std::move(args))
+               .scheduleOn(
+                   apache::thrift::detail::ServerRequestHelper::executor(
+                       serverRequest))
+               .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }

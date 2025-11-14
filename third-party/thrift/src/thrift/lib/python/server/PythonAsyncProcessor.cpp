@@ -362,9 +362,7 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequestOneway(
                  // see discussion below about why we don't handle exception
                  // here.
                  co_await processServiceInterceptorsOnRequest(
-                     *callback,
-                     emptyInterceptorsArguments(),
-                     serializedRequest);
+                     *callback, emptyInterceptorsArguments());
                }
                co_return co_await handlePythonServerCallbackOneway(
                    protocol,
@@ -396,9 +394,7 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequestStreaming(
                  // see discussion below about why we don't handle exception
                  // here.
                  co_await processServiceInterceptorsOnRequest(
-                     *callback,
-                     emptyInterceptorsArguments(),
-                     serializedRequest);
+                     *callback, emptyInterceptorsArguments());
                }
                co_return co_await handlePythonServerCallbackStreaming(
                    protocol,
@@ -431,9 +427,7 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequestSink(
                  // see discussion below about why we don't handle exception
                  // here.
                  co_await processServiceInterceptorsOnRequest(
-                     *callback,
-                     emptyInterceptorsArguments(),
-                     serializedRequest);
+                     *callback, emptyInterceptorsArguments());
                }
                co_return co_await handlePythonServerCallbackSink(
                    protocol,
@@ -467,9 +461,7 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequestBidi(
                  // see discussion below about why we don't handle exception
                  // here.
                  co_await processServiceInterceptorsOnRequest(
-                     *callback,
-                     emptyInterceptorsArguments(),
-                     serializedRequest);
+                     *callback, emptyInterceptorsArguments());
                }
                co_return co_await handlePythonServerCallbackBidi(
                    protocol,
@@ -503,9 +495,7 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequestResponse(
                  // onResponse interceptor. Explicitly handling it here results
                  // in double invocation.
                  co_await processServiceInterceptorsOnRequest(
-                     *callback,
-                     emptyInterceptorsArguments(),
-                     serializedRequest);
+                     *callback, emptyInterceptorsArguments());
                }
                co_return co_await handlePythonServerCallback(
                    protocol,

@@ -69,15 +69,14 @@ void InteractWithSharedAsyncProcessor::executeRequest_do_some_similar_things(
       this->getServiceName(),
       "InteractWithShared.do_some_similar_things",
       serverRequest.requestContext());
-  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
-    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
-        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "do_some_similar_things",
-        serializedRequest,
+        apache::thrift::detail::ServerRequestHelper::compressedRequest(
+            std::move(serverRequest))
+            .uncompress(),
         ctxStack.get());
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -133,25 +132,19 @@ void InteractWithSharedAsyncProcessor::executeRequest_do_some_similar_things(
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](
-        auto callback,
-        auto executeHandler,
-        ArgsState args,
-        const apache::thrift::SerializedRequest&& serializedRequest
-    ) -> folly::coro::Task<void> {
+    [](auto callback, auto executeHandler, ArgsState args)
+        -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
-          std::forward<const apache::thrift::SerializedRequest>(serializedRequest));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+              argRefs));
       executeHandler(std::move(callback), std::move(args));
-    }(
-        std::move(callback),
-        makeExecuteHandler(),
-        std::move(args),
-        std::move(serializedRequest))
-      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
-      .startInlineUnsafe();
+    }(std::move(callback), makeExecuteHandler(), std::move(args))
+               .scheduleOn(
+                   apache::thrift::detail::ServerRequestHelper::executor(
+                       serverRequest))
+               .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -267,15 +260,14 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_frobnicate(
       "InteractWithShared.MyInteraction.frobnicate",
       serverRequest.requestContext());
   auto& iface = static_cast<apache::thrift::ServiceHandler<InteractWithShared>::MyInteractionIf&>(*tile);
-  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
-    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
-        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "MyInteraction.frobnicate",
-        serializedRequest,
+        apache::thrift::detail::ServerRequestHelper::compressedRequest(
+            std::move(serverRequest))
+            .uncompress(),
         ctxStack.get());
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -334,25 +326,19 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_frobnicate(
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](
-        auto callback,
-        auto executeHandler,
-        ArgsState args,
-        const apache::thrift::SerializedRequest&& serializedRequest
-    ) -> folly::coro::Task<void> {
+    [](auto callback, auto executeHandler, ArgsState args)
+        -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
-          std::forward<const apache::thrift::SerializedRequest>(serializedRequest));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+              argRefs));
       executeHandler(std::move(callback), std::move(args));
-    }(
-        std::move(callback),
-        makeExecuteHandler(),
-        std::move(args),
-        std::move(serializedRequest))
-      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
-      .startInlineUnsafe();
+    }(std::move(callback), makeExecuteHandler(), std::move(args))
+               .scheduleOn(
+                   apache::thrift::detail::ServerRequestHelper::executor(
+                       serverRequest))
+               .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -464,15 +450,14 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_ping(
       "InteractWithShared.MyInteraction.ping",
       serverRequest.requestContext());
   auto& iface = static_cast<apache::thrift::ServiceHandler<InteractWithShared>::MyInteractionIf&>(*tile);
-  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
-    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
-        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "MyInteraction.ping",
-        serializedRequest,
+        apache::thrift::detail::ServerRequestHelper::compressedRequest(
+            std::move(serverRequest))
+            .uncompress(),
         ctxStack.get());
   } catch (...) {
     LOG(ERROR) << "exception in function MyInteraction.ping: " << folly::exceptionStr(std::current_exception());
@@ -521,25 +506,19 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_ping(
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](
-        auto callback,
-        auto executeHandler,
-        ArgsState args,
-        const apache::thrift::SerializedRequest&& serializedRequest
-    ) -> folly::coro::Task<void> {
+    [](auto callback, auto executeHandler, ArgsState args)
+        -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
-          std::forward<const apache::thrift::SerializedRequest>(serializedRequest));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+              argRefs));
       executeHandler(std::move(callback), std::move(args));
-    }(
-        std::move(callback),
-        makeExecuteHandler(),
-        std::move(args),
-        std::move(serializedRequest))
-      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
-      .startInlineUnsafe();
+    }(std::move(callback), makeExecuteHandler(), std::move(args))
+               .scheduleOn(
+                   apache::thrift::detail::ServerRequestHelper::executor(
+                       serverRequest))
+               .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -606,15 +585,14 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_truthify(
       "InteractWithShared.MyInteraction.truthify",
       serverRequest.requestContext());
   auto& iface = static_cast<apache::thrift::ServiceHandler<InteractWithShared>::MyInteractionIf&>(*tile);
-  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
-    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
-        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "MyInteraction.truthify",
-        serializedRequest,
+        apache::thrift::detail::ServerRequestHelper::compressedRequest(
+            std::move(serverRequest))
+            .uncompress(),
         ctxStack.get());
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -673,25 +651,19 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_truthify(
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](
-        auto callback,
-        auto executeHandler,
-        ArgsState args,
-        const apache::thrift::SerializedRequest&& serializedRequest
-    ) -> folly::coro::Task<void> {
+    [](auto callback, auto executeHandler, ArgsState args)
+        -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
-          std::forward<const apache::thrift::SerializedRequest>(serializedRequest));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+              argRefs));
       executeHandler(std::move(callback), std::move(args));
-    }(
-        std::move(callback),
-        makeExecuteHandler(),
-        std::move(args),
-        std::move(serializedRequest))
-      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
-      .startInlineUnsafe();
+    }(std::move(callback), makeExecuteHandler(), std::move(args))
+               .scheduleOn(
+                   apache::thrift::detail::ServerRequestHelper::executor(
+                       serverRequest))
+               .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -787,15 +759,14 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_encode(
       "InteractWithShared.MyInteraction.encode",
       serverRequest.requestContext());
   auto& iface = static_cast<apache::thrift::ServiceHandler<InteractWithShared>::MyInteractionIf&>(*tile);
-  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
-    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
-        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "MyInteraction.encode",
-        serializedRequest,
+        apache::thrift::detail::ServerRequestHelper::compressedRequest(
+            std::move(serverRequest))
+            .uncompress(),
         ctxStack.get());
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -854,25 +825,19 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_encode(
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](
-        auto callback,
-        auto executeHandler,
-        ArgsState args,
-        const apache::thrift::SerializedRequest&& serializedRequest
-    ) -> folly::coro::Task<void> {
+    [](auto callback, auto executeHandler, ArgsState args)
+        -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
-          std::forward<const apache::thrift::SerializedRequest>(serializedRequest));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+              argRefs));
       executeHandler(std::move(callback), std::move(args));
-    }(
-        std::move(callback),
-        makeExecuteHandler(),
-        std::move(args),
-        std::move(serializedRequest))
-      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
-      .startInlineUnsafe();
+    }(std::move(callback), makeExecuteHandler(), std::move(args))
+               .scheduleOn(
+                   apache::thrift::detail::ServerRequestHelper::executor(
+                       serverRequest))
+               .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -992,15 +957,14 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_init(
       "InteractWithShared.SharedInteraction.init",
       serverRequest.requestContext());
   auto& iface = static_cast<apache::thrift::ServiceHandler<InteractWithShared>::SharedInteractionIf&>(*tile);
-  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
-    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
-        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "SharedInteraction.init",
-        serializedRequest,
+        apache::thrift::detail::ServerRequestHelper::compressedRequest(
+            std::move(serverRequest))
+            .uncompress(),
         ctxStack.get());
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -1059,25 +1023,19 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_init(
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](
-        auto callback,
-        auto executeHandler,
-        ArgsState args,
-        const apache::thrift::SerializedRequest&& serializedRequest
-    ) -> folly::coro::Task<void> {
+    [](auto callback, auto executeHandler, ArgsState args)
+        -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
-          std::forward<const apache::thrift::SerializedRequest>(serializedRequest));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+              argRefs));
       executeHandler(std::move(callback), std::move(args));
-    }(
-        std::move(callback),
-        makeExecuteHandler(),
-        std::move(args),
-        std::move(serializedRequest))
-      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
-      .startInlineUnsafe();
+    }(std::move(callback), makeExecuteHandler(), std::move(args))
+               .scheduleOn(
+                   apache::thrift::detail::ServerRequestHelper::executor(
+                       serverRequest))
+               .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -1171,15 +1129,14 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_do_somet
       "InteractWithShared.SharedInteraction.do_something",
       serverRequest.requestContext());
   auto& iface = static_cast<apache::thrift::ServiceHandler<InteractWithShared>::SharedInteractionIf&>(*tile);
-  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
-    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
-        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "SharedInteraction.do_something",
-        serializedRequest,
+        apache::thrift::detail::ServerRequestHelper::compressedRequest(
+            std::move(serverRequest))
+            .uncompress(),
         ctxStack.get());
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -1238,25 +1195,19 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_do_somet
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](
-        auto callback,
-        auto executeHandler,
-        ArgsState args,
-        const apache::thrift::SerializedRequest&& serializedRequest
-    ) -> folly::coro::Task<void> {
+    [](auto callback, auto executeHandler, ArgsState args)
+        -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
-          std::forward<const apache::thrift::SerializedRequest>(serializedRequest));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+              argRefs));
       executeHandler(std::move(callback), std::move(args));
-    }(
-        std::move(callback),
-        makeExecuteHandler(),
-        std::move(args),
-        std::move(serializedRequest))
-      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
-      .startInlineUnsafe();
+    }(std::move(callback), makeExecuteHandler(), std::move(args))
+               .scheduleOn(
+                   apache::thrift::detail::ServerRequestHelper::executor(
+                       serverRequest))
+               .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -1350,15 +1301,14 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_tear_dow
       "InteractWithShared.SharedInteraction.tear_down",
       serverRequest.requestContext());
   auto& iface = static_cast<apache::thrift::ServiceHandler<InteractWithShared>::SharedInteractionIf&>(*tile);
-  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
-    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
-        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "SharedInteraction.tear_down",
-        serializedRequest,
+        apache::thrift::detail::ServerRequestHelper::compressedRequest(
+            std::move(serverRequest))
+            .uncompress(),
         ctxStack.get());
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -1417,25 +1367,19 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_tear_dow
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](
-        auto callback,
-        auto executeHandler,
-        ArgsState args,
-        const apache::thrift::SerializedRequest&& serializedRequest
-    ) -> folly::coro::Task<void> {
+    [](auto callback, auto executeHandler, ArgsState args)
+        -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
-          std::forward<const apache::thrift::SerializedRequest>(serializedRequest));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
+              argRefs));
       executeHandler(std::move(callback), std::move(args));
-    }(
-        std::move(callback),
-        makeExecuteHandler(),
-        std::move(args),
-        std::move(serializedRequest))
-      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
-      .startInlineUnsafe();
+    }(std::move(callback), makeExecuteHandler(), std::move(args))
+               .scheduleOn(
+                   apache::thrift::detail::ServerRequestHelper::executor(
+                       serverRequest))
+               .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }

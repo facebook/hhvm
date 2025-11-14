@@ -19,7 +19,6 @@
 #include <variant>
 
 #include <folly/coro/Task.h>
-#include <folly/io/IOBuf.h>
 #include <folly/memory/not_null.h>
 
 #include <thrift/lib/cpp2/schema/SyntaxGraph.h>
@@ -123,13 +122,6 @@ class ServiceInterceptorBase {
      * initialized from the userDecoratorData() function.
      */
     const server::DecoratorData* decoratorData = nullptr;
-
-    /**
-     * This is the raw bytes buffer of the serialized request. Deserialized
-     * arguments are already available via `RequestInfo.arguments`. However,
-     * this is made available for logging purposes.
-     */
-    const folly::IOBuf* serializedRequestBuffer = nullptr;
   };
   virtual folly::coro::Task<void> internal_onRequest(
       ConnectionInfo, RequestInfo, InterceptorMetricCallback&) = 0;

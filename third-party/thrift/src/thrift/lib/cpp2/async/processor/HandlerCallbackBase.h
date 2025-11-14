@@ -39,8 +39,7 @@ bool shouldProcessServiceInterceptorsOnRequest(HandlerCallbackBase&) noexcept;
 
 folly::coro::Task<void> processServiceInterceptorsOnRequest(
     HandlerCallbackBase&,
-    detail::ServiceInterceptorOnRequestArguments arguments,
-    const SerializedRequest& serializedRequest);
+    detail::ServiceInterceptorOnRequestArguments arguments);
 #endif // FOLLY_HAS_COROUTINES
 
 /**
@@ -397,15 +396,13 @@ class HandlerCallbackBase {
   bool shouldProcessServiceInterceptorsOnResponse() const noexcept;
 
   folly::coro::Task<void> processServiceInterceptorsOnRequest(
-      detail::ServiceInterceptorOnRequestArguments arguments,
-      const SerializedRequest& serializedRequest);
+      detail::ServiceInterceptorOnRequestArguments arguments);
   folly::coro::Task<void> processServiceInterceptorsOnResponse(
       detail::ServiceInterceptorOnResponseResult resultOrActiveException);
 
   friend folly::coro::Task<void> detail::processServiceInterceptorsOnRequest(
       HandlerCallbackBase&,
-      detail::ServiceInterceptorOnRequestArguments arguments,
-      const SerializedRequest& serializedRequest);
+      detail::ServiceInterceptorOnRequestArguments arguments);
 #endif // FOLLY_HAS_COROUTINES
 
   // Required for this call

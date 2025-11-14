@@ -28,6 +28,7 @@
 #include <boost/algorithm/string/split.hpp>
 #include <fmt/core.h>
 #include <openssl/sha.h>
+#include <folly/container/MapUtil.h>
 
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/type_visitor.h>
@@ -75,7 +76,7 @@ bool is_annotation_blacklisted_in_fatal(const std::string& key) {
       "cpp2.template",
       "cpp2.type",
   };
-  return black_list.find(key) != black_list.end();
+  return black_list.contains(key);
 }
 
 bool is_complex_return(const t_type* type) {
@@ -166,7 +167,7 @@ std::string get_fatal_namespace(
 }
 
 std::string render_fatal_string(const std::string& normal_string) {
-  const static std::map<char, std::string> substition{
+  const static std::map<char, std::string> substitutions{
       {'\0', "\\0"},
       {'\n', "\\n"},
       {'\r', "\\r"},
@@ -178,9 +179,8 @@ std::string render_fatal_string(const std::string& normal_string) {
   res << "::fatal::sequence<char";
   for (const char& c : normal_string) {
     res << ", '";
-    auto found = substition.find(c);
-    if (found != substition.end()) {
-      res << found->second;
+    if (auto* found = folly::get_ptr(substitutions, c)) {
+      res << *found;
     } else {
       res << c;
     }
@@ -192,7 +192,7 @@ std::string render_fatal_string(const std::string& normal_string) {
 
 std::string get_out_dir_base(
     const t_mstch_generator::compiler_options_map& options) {
-  return options.find("py3cpp") != options.end() ? "gen-py3cpp" : "gen-cpp2";
+  return options.contains("py3cpp") ? "gen-py3cpp" : "gen-cpp2";
 }
 
 std::string mangle_field_name(const std::string& name) {
@@ -347,8 +347,7 @@ class cpp2_generator_context {
 
   const cpp2_field_generator_context* get_field_context(
       const t_field* field) const {
-    auto it = field_context_map_.find(field);
-    return it == field_context_map_.end() ? nullptr : &it->second;
+    return folly::get_ptr(field_context_map_, field);
   }
 
   void register_visitors(t_whisker_generator::context_visitor& visitor) {
@@ -414,12 +413,11 @@ int checked_stoi(const std::string& s, const std::string& msg) {
 }
 
 int get_split_count(const t_mstch_generator::compiler_options_map& options) {
-  auto iter = options.find("types_cpp_splits");
-  if (iter == options.end()) {
-    return 0;
-  }
-  return checked_stoi(
-      iter->second, "Invalid types_cpp_splits value: `" + iter->second + "`");
+  auto* splits = folly::get_ptr(options, "types_cpp_splits");
+  return splits == nullptr
+      ? 0
+      : checked_stoi(
+            *splits, "Invalid types_cpp_splits value: `" + *splits + "`");
 }
 
 whisker::object make_whisker_annotations(
@@ -860,10 +858,10 @@ class cpp_mstch_program : public mstch_program {
   }
   mstch::node cpp_includes() {
     mstch::array includes = t_mstch_cpp2_generator::cpp_includes(program_);
-    if (auto it = context_.options->find("includes");
-        it != context_.options->end()) {
+    if (auto* includes_opt = folly::get_ptr(context_.options, "includes")) {
       std::vector<std::string> extra_includes;
-      boost::split(extra_includes, it->second, [](char c) { return c == ':'; });
+      boost::split(
+          extra_includes, *includes_opt, [](char c) { return c == ':'; });
       for (auto& include : extra_includes) {
         includes.emplace_back(std::move(include));
       }
@@ -1991,9 +1989,8 @@ class cpp_mstch_struct : public mstch_struct {
     static std::unordered_map<const t_structured*, std::vector<const t_field*>>
         cache;
 
-    auto it = cache.find(struct_);
-    if (it != cache.end()) {
-      return it->second;
+    if (auto* it = folly::get_ptr(cache, struct_)) {
+      return *it;
     }
 
     std::vector<const t_field*> result;
@@ -2871,9 +2868,8 @@ void t_mstch_cpp2_generator::generate_out_of_line_service(
   render_to_file(
       mstch_service, "types_custom_protocol.h", name + "_custom_protocol.h");
 
-  auto iter = client_name_to_split_count_.find(name);
-  if (iter != client_name_to_split_count_.end()) {
-    auto split_count = iter->second;
+  if (auto* iter = folly::get_ptr(client_name_to_split_count_, name)) {
+    auto split_count = *iter;
     auto digit = std::to_string(split_count - 1).size();
     for (int split_id = 0; split_id < split_count; ++split_id) {
       auto s = std::to_string(split_id);
@@ -2998,10 +2994,7 @@ mstch::array t_mstch_cpp2_generator::cpp_includes(const t_program* program) {
 mstch::node t_mstch_cpp2_generator::include_prefix(
     const t_program* program, const compiler_options_map& options) {
   auto prefix = program->include_prefix();
-  std::string include_prefix;
-  if (const auto& it = options.find("include_prefix"); it != options.end()) {
-    include_prefix = it->second;
-  }
+  std::string include_prefix = folly::get_default(options, "include_prefix");
   auto out_dir_base = get_out_dir_base(options);
   if (prefix.empty()) {
     if (include_prefix.empty()) {
@@ -3123,16 +3116,16 @@ class validate_splits {
       return;
     }
     for (const t_service* s : services) {
-      auto iter = client_name_to_split_count_.find(s->name());
-      if (iter != client_name_to_split_count_.end() &&
-          iter->second > static_cast<int32_t>(s->functions().size())) {
+      if (int32_t splits =
+              folly::get_default(client_name_to_split_count_, s->name(), -1);
+          splits > static_cast<int32_t>(s->functions().size())) {
         ctx.report(
             *s,
             "more-splits-than-functions-rule",
             diagnostic_level::error,
             "`client_cpp_splits={}` (For service {}) is misconfigured: it "
             "can not be greater than the number of functions, which is {}.",
-            iter->second,
+            splits,
             s->name(),
             s->functions().size());
       }

@@ -1069,8 +1069,7 @@ class mstch_java_field : public mstch_field {
   }
   std::string default_value_for_type(const t_type* type) {
     if (const t_typedef* typedef_ = type->try_as<t_typedef>()) {
-      auto typedef_type = typedef_->get_type();
-      return default_value_for_type(typedef_type);
+      return default_value_for_type(&typedef_->type().deref());
     } else {
       if (type->is_byte() || type->is_i16() || type->is_i32()) {
         return "0";
@@ -1464,8 +1463,8 @@ class mstch_java_type : public mstch_type {
       if (type_->is<t_typedef>() &&
           type->has_structured_annotation(kJavaAdapterUri)) {
         count++;
-        if (const auto* as_typedef = dynamic_cast<const t_typedef*>(type)) {
-          type = as_typedef->get_type();
+        if (const auto* as_typedef = type->try_as<t_typedef>()) {
+          type = &as_typedef->type().deref();
         } else {
           type = nullptr;
         }

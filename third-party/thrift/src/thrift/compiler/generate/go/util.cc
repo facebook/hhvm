@@ -179,7 +179,7 @@ void codegen_data::add_to_thrift_metadata_types(
   // Skip over a chain of "non-defined" typedefs.
   if (const t_typedef* typedef_ = type->try_as<t_typedef>()) {
     if (typedef_->typedef_kind() != t_typedef::kind::defined) {
-      auto underlying_type = typedef_->get_type();
+      auto underlying_type = &typedef_->type().deref();
       add_to_thrift_metadata_types(underlying_type, visited_type_names);
       return;
     }
@@ -191,7 +191,7 @@ void codegen_data::add_to_thrift_metadata_types(
   // It ensures that the types are recorded in the dependency order.
 
   if (const t_typedef* typedef_ = type->try_as<t_typedef>()) {
-    auto underlying_type = typedef_->get_type();
+    auto underlying_type = &typedef_->type().deref();
     add_to_thrift_metadata_types(underlying_type, visited_type_names);
   } else if (const t_list* list_type = type->try_as<t_list>()) {
     auto elem_type = list_type->elem_type().get_type();
@@ -242,7 +242,7 @@ void codegen_data::compute_thrift_metadata_types() {
     add_to_thrift_metadata_types(exception, visited_type_names);
   }
   for (auto const& typedef_ : current_program_->typedefs()) {
-    auto type = typedef_->get_type();
+    auto type = &typedef_->type().deref();
     // Visit the underlying type
     add_to_thrift_metadata_types(type, visited_type_names);
     // Visit the typedef itself

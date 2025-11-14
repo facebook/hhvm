@@ -1055,7 +1055,7 @@ void t_py_generator::close_generator() {
  */
 void t_py_generator::generate_typedef(const t_typedef* ttypedef) {
   const auto varname = rename_reserved_keywords(ttypedef->name());
-  const auto* type = ttypedef->get_type();
+  const auto* type = &ttypedef->type().deref();
   // Typedefs of user-defined types are useful as aliases.  On the other
   // hand, base types are implicit, so it is not as helpful to support
   // creating aliases to their Python analogs.  That said, if you need it,

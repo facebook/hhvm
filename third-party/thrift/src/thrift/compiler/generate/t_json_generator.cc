@@ -543,7 +543,7 @@ void t_json_generator::generate_typedef(const t_typedef* ttypedef) {
   indent(f_out_) << "\"" << ttypedef->name() << "\" : {" << endl;
   indent_up();
   print_lineno(*ttypedef);
-  print_spec(ttypedef->get_type());
+  print_spec(&ttypedef->type().deref());
   print_node_annotations(
       *ttypedef,
       /*add_heading_comma=*/true,

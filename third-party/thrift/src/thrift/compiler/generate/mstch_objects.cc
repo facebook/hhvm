@@ -141,7 +141,7 @@ mstch::node mstch_type::get_value_type() {
 mstch::node mstch_type::get_typedef_type() {
   if (const t_typedef* typedef_ = type_->try_as<t_typedef>()) {
     return context_.type_factory->make_mstch_object(
-        typedef_->get_type(), context_, pos_);
+        &typedef_->type().deref(), context_, pos_);
   }
   return mstch::node();
 }
@@ -362,7 +362,7 @@ mstch::node mstch_service::make_mstch_extended_service_cached(
 
 mstch::node mstch_typedef::type() {
   return context_.type_factory->make_mstch_object(
-      typedef_->get_type(), context_, pos_);
+      &typedef_->type().deref(), context_, pos_);
 }
 
 mstch::node mstch_const::type() {

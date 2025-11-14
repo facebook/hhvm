@@ -1680,7 +1680,7 @@ void t_hack_generator::generate_typedef(const t_typedef* ttypedef) {
   if (auto adapter = find_hack_adapter(ttypedef)) {
     typehint = *adapter + "::THackType";
   } else {
-    typehint = type_to_typehint(ttypedef->get_type());
+    typehint = type_to_typehint(&ttypedef->type().deref());
   }
   if (wrapper && name.has_value()) {
     f_types_ << (is_mod_int ? "internal " : "") << "type " << typedef_name
@@ -1878,8 +1878,8 @@ bool t_hack_generator::is_hack_const_type(const t_type* type) {
   if (wrapper) {
     return false;
   }
-  if (const auto* ttypedef = dynamic_cast<const t_typedef*>(type)) {
-    return is_hack_const_type(ttypedef->get_type());
+  if (const auto* ttypedef = type->try_as<t_typedef>()) {
+    return is_hack_const_type(&ttypedef->type().deref());
   }
   type = type->get_true_type();
   if (type->is<t_primitive_type>() || type->is<t_enum>()) {
@@ -1887,11 +1887,11 @@ bool t_hack_generator::is_hack_const_type(const t_type* type) {
   } else if (type->is<t_container>()) {
     if (legacy_arrays_ || hack_collections_) {
       return false;
-    } else if (const auto* tlist = dynamic_cast<const t_list*>(type)) {
+    } else if (const auto* tlist = type->try_as<t_list>()) {
       return is_hack_const_type(tlist->elem_type().get_type());
-    } else if (const auto* tset = dynamic_cast<const t_set*>(type)) {
+    } else if (const auto* tset = type->try_as<t_set>()) {
       return is_hack_const_type(tset->elem_type().get_type());
-    } else if (const auto* tmap = dynamic_cast<const t_map*>(type)) {
+    } else if (const auto* tmap = type->try_as<t_map>()) {
       return is_hack_const_type(&tmap->key_type().deref()) &&
           is_hack_const_type(tmap->val_type().get_type());
     }
@@ -1942,11 +1942,11 @@ std::string t_hack_generator::render_const_value_helper(
     bool force_arrays,
     bool exclude_from_fixtures) {
   std::ostringstream out;
-  if (const auto* ttypedef = dynamic_cast<const t_placeholder_typedef*>(type)) {
-    type = ttypedef->get_type();
+  if (const auto* ttypedef = type->try_as<t_placeholder_typedef>()) {
+    type = &ttypedef->type().deref();
   }
-  if (const auto* ttypedef = dynamic_cast<const t_typedef*>(type)) {
-    type = ttypedef->get_type();
+  if (const auto* ttypedef = type->try_as<t_typedef>()) {
+    type = &ttypedef->type().deref();
     auto val = render_const_value_helper(
         type,
         value,
@@ -2400,14 +2400,14 @@ std::unique_ptr<t_const_value> t_hack_generator::type_to_tmeta(
 
     tmeta_ThriftType->add_map(
         std::make_unique<t_const_value>("t_union"), std::move(tunion_tmeta));
-  } else if (const auto* ttypedef = dynamic_cast<const t_typedef*>(type)) {
+  } else if (const auto* ttypedef = type->try_as<t_typedef>()) {
     auto ttypedef_tmeta = t_const_value::make_map();
     ttypedef_tmeta->add_map(
         std::make_unique<t_const_value>("name"),
         std::make_unique<t_const_value>(ttypedef->get_scoped_name()));
     ttypedef_tmeta->add_map(
         std::make_unique<t_const_value>("underlyingType"),
-        type_to_tmeta(ttypedef->get_type()));
+        type_to_tmeta(&ttypedef->type().deref()));
 
     tmeta_ThriftType->add_map(
         std::make_unique<t_const_value>("t_typedef"),
@@ -3592,16 +3592,15 @@ bool t_hack_generator::
         const std::string& val,
         bool is_shape_method,
         bool uses_thrift_only_methods) {
-  if (const auto* ttypedef =
-          dynamic_cast<const t_placeholder_typedef*>(ttype)) {
-    ttype = ttypedef->get_type();
+  if (const auto* ttypedef = ttype->try_as<t_placeholder_typedef>()) {
+    ttype = &ttypedef->type().deref();
   }
   if (std::optional<std::string> adapter = find_hack_adapter(ttype)) {
     out << val;
     return false;
   }
   if (is_shape_method) {
-    if (const auto* tstruct = dynamic_cast<const t_structured*>(ttype)) {
+    if (const auto* tstruct = ttype->try_as<t_structured>()) {
       bool is_async = is_async_shapish_struct(tstruct);
       auto [wrapper, name, ns] = find_hack_wrapper(tstruct);
       std::string struct_name;
@@ -3658,9 +3657,8 @@ bool t_hack_generator::
       val_type = static_cast<const t_list*>(ttype)->elem_type().get_type();
     }
 
-    if (const auto* ttypedef =
-            dynamic_cast<const t_placeholder_typedef*>(val_type)) {
-      val_type = ttypedef->get_type();
+    if (const auto* ttypedef = val_type->try_as<t_placeholder_typedef>()) {
+      val_type = &ttypedef->type().deref();
     }
     auto [wrapper, name, ns] = find_hack_wrapper(val_type);
     std::stringstream inner;
@@ -3750,7 +3748,7 @@ bool t_hack_generator::generate_php_struct_async_toShape_method_helper(
     out << val;
     return false;
   }
-  if (const auto* tstruct = dynamic_cast<const t_structured*>(ttype)) {
+  if (const auto* tstruct = ttype->try_as<t_structured>()) {
     if (is_async_shapish_struct(tstruct)) {
       out << val << "->__genToShape()";
       return true;
@@ -3786,9 +3784,8 @@ bool t_hack_generator::generate_php_struct_async_toShape_method_helper(
       val_type = static_cast<const t_list*>(ttype)->elem_type().get_type();
     }
 
-    if (const auto* ttypedef =
-            dynamic_cast<const t_placeholder_typedef*>(val_type)) {
-      val_type = ttypedef->get_type();
+    if (const auto* ttypedef = val_type->try_as<t_placeholder_typedef>()) {
+      val_type = &ttypedef->type().deref();
     }
     auto [wrapper, name, ns] = find_hack_wrapper(val_type);
     if (val_type->is<t_container>() || val_type->is<t_struct>() ||
@@ -4949,7 +4946,7 @@ std::string t_hack_generator::render_service_metadata_response(
         structs.push_back(tstruct);
       }
     } else if (const auto* ttypedef = dynamic_cast<const t_typedef*>(next)) {
-      queue.push(ttypedef->get_type());
+      queue.push(&ttypedef->type().deref());
     } else if (const auto* fun = dynamic_cast<const t_function*>(next)) {
       if (const t_sink* sink = fun->sink()) {
         queue.push(sink->elem_type().get_type());
@@ -6541,7 +6538,7 @@ std::string t_hack_generator::typedef_to_typehint(
   if (auto adapter = find_hack_adapter(ttypedef)) {
     typehint = *adapter + "::THackType";
   } else {
-    typehint = type_to_typehint(ttypedef->get_type(), variations);
+    typehint = type_to_typehint(&ttypedef->type().deref(), variations);
     if (!wrapper && variations[TypeToTypehintVariations::IS_SHAPE]) {
       return typehint;
     }
@@ -6568,11 +6565,10 @@ std::string t_hack_generator::typedef_to_typehint(
  */
 std::string t_hack_generator::type_to_typehint(
     const t_type* ttype, std::map<TypeToTypehintVariations, bool> variations) {
-  if (const auto* ttypedef =
-          dynamic_cast<const t_placeholder_typedef*>(ttype)) {
-    ttype = ttypedef->get_type();
+  if (const auto* ttypedef = ttype->try_as<t_placeholder_typedef>()) {
+    ttype = &ttypedef->type().deref();
   }
-  if (const auto* ttypedef = dynamic_cast<const t_typedef*>(ttype)) {
+  if (const auto* ttypedef = ttype->try_as<t_typedef>()) {
     return typedef_to_typehint(ttypedef, variations);
   }
 
@@ -6613,17 +6609,17 @@ std::string t_hack_generator::type_to_typehint(
       default:
         return "mixed";
     }
-  } else if (const auto* tenum = dynamic_cast<const t_enum*>(ttype)) {
+  } else if (const auto* tenum = ttype->try_as<t_enum>()) {
     if (is_bitmask_enum(tenum)) {
       return "int";
     } else {
       return hack_name(ttype);
     }
-  } else if (const auto* tlist = dynamic_cast<const t_list*>(ttype)) {
+  } else if (const auto* tlist = ttype->try_as<t_list>()) {
     std::string prefix = get_container_keyword(ttype, variations);
     return prefix + "<" +
         type_to_typehint(tlist->elem_type().get_type(), variations) + ">";
-  } else if (const auto* tmap = dynamic_cast<const t_map*>(ttype)) {
+  } else if (const auto* tmap = ttype->try_as<t_map>()) {
     std::string prefix = get_container_keyword(ttype, variations);
     std::string key_type =
         type_to_typehint(&tmap->key_type().deref(), variations);
@@ -6633,7 +6629,7 @@ std::string t_hack_generator::type_to_typehint(
     }
     return prefix + "<" + key_type + ", " +
         type_to_typehint(tmap->val_type().get_type(), variations) + ">";
-  } else if (const auto* tset = dynamic_cast<const t_set*>(ttype)) {
+  } else if (const auto* tset = ttype->try_as<t_set>()) {
     std::string prefix;
     std::string suffix = ">";
     if (!legacy_arrays_ && !hack_collections_) {

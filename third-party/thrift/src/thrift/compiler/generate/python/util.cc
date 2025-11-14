@@ -48,8 +48,7 @@ static void get_needed_includes_by_patch_impl(
   }
   if (const t_typedef* asTypedef = type.try_as<t_typedef>()) {
     // We don't generate patch struct for typedef. We need to skip the chain.
-    get_needed_includes_by_patch_impl(
-        root, *asTypedef->get_type(), seen, result);
+    get_needed_includes_by_patch_impl(root, *asTypedef->type(), seen, result);
     return;
   }
   if (type.is<t_primitive_type>()) {
@@ -103,20 +102,20 @@ std::unordered_set<const t_program*> needed_includes_by_patch(
 }
 
 bool type_contains_patch(const t_type* type) {
-  if (auto typedf = dynamic_cast<t_typedef const*>(type)) {
-    return type_contains_patch(typedf->get_type());
+  if (const auto* typedf = type->try_as<t_typedef>()) {
+    return type_contains_patch(std::addressof(*typedf->type()));
   }
 
-  if (auto map = dynamic_cast<t_map const*>(type)) {
+  if (const auto* map = type->try_as<t_map>()) {
     return type_contains_patch(&map->key_type().deref()) ||
         type_contains_patch(&map->val_type().deref());
   }
 
-  if (auto set = dynamic_cast<t_set const*>(type)) {
+  if (const auto* set = type->try_as<t_set>()) {
     return type_contains_patch(set->elem_type().get_type());
   }
 
-  if (auto list = dynamic_cast<t_list const*>(type)) {
+  if (const auto* list = type->try_as<t_list>()) {
     return type_contains_patch(list->elem_type().get_type());
   }
 

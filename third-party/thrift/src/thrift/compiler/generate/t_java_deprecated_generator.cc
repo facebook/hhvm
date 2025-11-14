@@ -2219,7 +2219,7 @@ std::string t_java_deprecated_generator::get_java_type_string(
   } else if (type->is<t_enum>()) {
     return "TType.I32";
   } else if (const t_typedef* typedef_ = type->try_as<t_typedef>()) {
-    return get_java_type_string(typedef_->get_type());
+    return get_java_type_string(&typedef_->type().deref());
   } else if (const auto* primitive = type->try_as<t_primitive_type>()) {
     switch (primitive->primitive_type()) {
       case t_primitive_type::type::t_void:

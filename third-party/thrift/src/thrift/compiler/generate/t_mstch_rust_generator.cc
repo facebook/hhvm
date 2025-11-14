@@ -368,7 +368,7 @@ bool type_has_transitive_adapter(
     }
 
     return type_has_transitive_adapter(
-        typedef_type->get_type(), step_through_newtypes);
+        &typedef_type->type().deref(), step_through_newtypes);
 
   } else if (const t_list* list_type = type->try_as<t_list>()) {
     return type_has_transitive_adapter(
@@ -421,12 +421,12 @@ bool typedef_has_constructor_expression(const t_typedef* t) {
       // Outermost typedef refers to a non-Thrift-generated type.
       break;
     }
-    const t_type* definition = t->get_type();
-    if (definition->is<t_enum>()) {
+    const t_type& definition = *t->type();
+    if (definition.is<t_enum>()) {
       // Outermost typedef refers to an enum.
       return true;
     }
-    t = dynamic_cast<const t_typedef*>(definition);
+    t = definition.try_as<t_typedef>();
   } while (t);
   return false;
 }
@@ -1090,7 +1090,7 @@ class rust_mstch_program : public mstch_program {
 
     // Identify dependencies within types
     for (t_typedef* typedf : program_->typedefs()) {
-      if (generate_reference_set(typedf->get_type()) ||
+      if (generate_reference_set(&typedf->type().deref()) ||
           (typedef_has_constructor_expression(typedf))) {
         dependent_types.insert(typedf);
       }
@@ -1846,9 +1846,8 @@ class mstch_rust_value : public mstch_base {
   }
   mstch::node is_newtype() { return has_newtype_annotation(underlying_type_); }
   mstch::node inner() {
-    auto typedef_type = dynamic_cast<const t_typedef*>(underlying_type_);
-    if (typedef_type) {
-      auto inner_type = typedef_type->get_type();
+    if (const auto* typedef_type = underlying_type_->try_as<t_typedef>()) {
+      auto inner_type = &typedef_type->type().deref();
       return std::make_shared<mstch_rust_value>(
           const_value_, inner_type, depth_, context_, pos_, options_);
     }
@@ -2374,10 +2373,10 @@ class rust_mstch_typedef : public mstch_typedef {
   mstch::node rust_ord() {
     return typedef_->has_structured_annotation(kRustOrdUri) ||
         (can_derive_ord(typedef_) &&
-         !type_has_transitive_adapter(typedef_->get_type(), true));
+         !type_has_transitive_adapter(&typedef_->type().deref(), true));
   }
   mstch::node rust_copy() {
-    if (!type_has_transitive_adapter(typedef_->get_type(), true)) {
+    if (!type_has_transitive_adapter(&typedef_->type().deref(), true)) {
       auto inner = typedef_->get_true_type();
       if (inner->is_bool() || inner->is_byte() || inner->is_i16() ||
           inner->is_i32() || inner->is_i64() || inner->is<t_enum>() ||
@@ -2405,7 +2404,7 @@ class rust_mstch_typedef : public mstch_typedef {
   mstch::node has_adapter() {
     return adapter_node(
         adapter_annotation_,
-        typedef_->get_type(),
+        &typedef_->type().deref(),
         false,
         context_,
         pos_,
@@ -2725,7 +2724,7 @@ bool validate_program_annotations(sema_context& ctx, const t_program& program) {
       // typedef list<Foo> Bar
       // ```
       const t_type* typedef_stepped =
-          step_through_typedefs(t->get_type(), true);
+          step_through_typedefs(&t->type().deref(), true);
 
       if (node_has_adapter(*typedef_stepped)) {
         ctx.report(

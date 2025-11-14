@@ -777,10 +777,10 @@ class cpp_mstch_program : public mstch_program {
   std::vector<const t_typedef*> alias_to_struct() {
     std::vector<const t_typedef*> result;
     for (const t_typedef* i : program_->typedefs()) {
-      const t_type* alias = i->get_type();
+      const t_type* alias = &i->type().deref();
       if (alias->is<t_typedef>() &&
           alias->has_unstructured_annotation("cpp.type")) {
-        const t_type* ttype = i->get_type()->get_true_type();
+        const t_type* ttype = i->type()->get_true_type();
         if ((ttype->is<t_structured>()) &&
             !cpp_name_resolver::find_first_adapter(*ttype)) {
           result.push_back(i);
@@ -885,7 +885,7 @@ class cpp_mstch_program : public mstch_program {
         program_->typedefs().begin(),
         program_->typedefs().end(),
         [](const auto* typedf) {
-          return typedf->get_type()->has_unstructured_annotation(
+          return typedf->type()->has_unstructured_annotation(
               {"cpp.declare_hash", "cpp2.declare_hash"});
         });
     return cpp_declare_in_structs || cpp_declare_in_typedefs;

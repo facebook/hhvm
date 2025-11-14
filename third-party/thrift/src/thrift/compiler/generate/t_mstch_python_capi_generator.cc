@@ -414,7 +414,7 @@ class python_capi_mstch_program : public mstch_program {
 
   void visit_types_for_typedefs() {
     for (const auto typedef_def : program_->typedefs()) {
-      visit_type(typedef_def->get_type());
+      visit_type(&typedef_def->type().deref());
     }
   }
 
@@ -552,7 +552,7 @@ class python_capi_mstch_struct : public mstch_struct {
       return false;
     }
     if (const t_typedef* tdef = type->try_as<t_typedef>()) {
-      return capi_eligible_type(tdef->get_type());
+      return capi_eligible_type(&tdef->type().deref());
     }
     return true;
   }

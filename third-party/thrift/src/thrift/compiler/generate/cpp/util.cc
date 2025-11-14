@@ -157,14 +157,14 @@ gen_dependency_graph(
 
     std::function<void(const t_type*, bool)> add_dependency =
         [&](const t_type* type, bool include_structured_types) {
-          if (auto typedf = dynamic_cast<t_typedef const*>(type)) {
+          if (const auto* typedf = type->try_as<t_typedef>()) {
             // Resolve unnamed typedefs
             if (typedf->typedef_kind() != t_typedef::kind::defined) {
-              type = typedf->get_type();
+              type = &typedf->type().deref();
             }
           }
 
-          if (auto map = dynamic_cast<t_map const*>(type)) {
+          if (const auto* map = type->try_as<t_map>()) {
             add_dependency(
                 map->key_type().get_type(),
                 include_structured_types &&
@@ -173,17 +173,17 @@ gen_dependency_graph(
                 map->val_type().get_type(),
                 include_structured_types &&
                     !container_supports_incomplete_params(*map));
-          } else if (auto set = dynamic_cast<t_set const*>(type)) {
+          } else if (const auto* set = type->try_as<t_set>()) {
             return add_dependency(
                 set->elem_type().get_type(),
                 include_structured_types &&
                     !container_supports_incomplete_params(*set));
-          } else if (auto list = dynamic_cast<t_list const*>(type)) {
+          } else if (const auto* list = type->try_as<t_list>()) {
             return add_dependency(
                 list->elem_type().get_type(),
                 include_structured_types &&
                     !container_supports_incomplete_params(*list));
-          } else if (auto typedf = dynamic_cast<t_typedef const*>(type)) {
+          } else if (const auto* typedf = type->try_as<t_typedef>()) {
             // Transitively depend on true type if necessary, since typedefs
             // generally don't depend on their underlying types.
             add_dependency(typedf->get_true_type(), include_structured_types);

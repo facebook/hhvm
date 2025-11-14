@@ -142,7 +142,7 @@ bool type_is_orderable_walk(
   if (const t_typedef* asTypedef = type.try_as<t_typedef>()) {
     const t_type& typedef_true_type = *type.get_true_type();
 
-    const t_type& next = *asTypedef->get_type();
+    const t_type& next = *asTypedef->type();
     if (!type_is_orderable_walk(
             memo,
             next /* type */,
@@ -267,7 +267,7 @@ bool has_custom_set_or_map(
     //
     // @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
     // typedef set<i32> CustomSet3;
-    return has_custom_set_or_map(*asTypedef->get_type(), seen);
+    return has_custom_set_or_map(*asTypedef->type(), seen);
   }
   if (const t_list* asList = type.try_as<t_list>()) {
     // Examples:

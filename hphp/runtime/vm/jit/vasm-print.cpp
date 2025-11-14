@@ -219,6 +219,10 @@ struct FormatVisitor {
     }
   }
 
+  void print(VregShiftExtend se) {
+    str << sep() << show(se);
+  }
+
   const char* sep() { return comma ? ", " : (comma = true, ""); }
   const Vunit& unit;
 
@@ -260,6 +264,58 @@ std::string show(const VregList& l) {
     | map([] (Vreg r) { return show(r); })
     | unsplit<std::string>(", ")
   );
+}
+
+std::string show(VregShiftExtend se) {
+  if (!se.isValid()) return "%?<se>";
+
+  auto const regStr = show(se.reg);
+  auto renderShift = [&]() -> std::string {
+    auto const kind = se.shiftKind();
+    auto const amount = static_cast<unsigned>(se.amount);
+    switch (kind) {
+      case vixl::NO_SHIFT:
+        return amount == 0 ? std::string{} :
+          folly::sformat(" no_shift #{}", amount);
+      case vixl::LSL:
+        if (amount == 0) return std::string{};
+        return folly::sformat(" lsl #{}", amount);
+      case vixl::LSR:
+        return folly::sformat(" lsr #{}", amount);
+      case vixl::ASR:
+        return folly::sformat(" asr #{}", amount);
+      case vixl::ROR:
+        return folly::sformat(" ror #{}", amount);
+    }
+    not_reached();
+  };
+  auto renderExtend = [&]() -> std::string {
+    auto const kind = se.extendKind();
+    auto const amount = static_cast<unsigned>(se.amount);
+    auto const name = [&]() -> const char* {
+      switch (kind) {
+        case vixl::NO_EXTEND: return "no_extend";
+        case vixl::UXTB: return "uxtb";
+        case vixl::UXTH: return "uxth";
+        case vixl::UXTW: return "uxtw";
+        case vixl::UXTX: return "uxtx";
+        case vixl::SXTB: return "sxtb";
+        case vixl::SXTH: return "sxth";
+        case vixl::SXTW: return "sxtw";
+        case vixl::SXTX: return "sxtx";
+      }
+      not_reached();
+    }();
+    if (amount == 0) return folly::sformat(" {}", name);
+    return folly::sformat(" {} #{}", name, amount);
+  };
+
+  if (se.isShift()) {
+    auto const suffix = renderShift();
+    if (suffix.empty()) return regStr;
+    return folly::sformat("{}{}", regStr, suffix);
+  }
+  return folly::sformat("{}{}", regStr, renderExtend());
 }
 
 std::string show(Vptr p) {

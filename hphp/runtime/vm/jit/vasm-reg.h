@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/vasm.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/vixl/a64/constants-a64.h"
 
 #include <vector>
 
@@ -1195,6 +1196,84 @@ inline Width width(VregDbl) { return Width::Quad; }
 inline Width width(VregSF)  { return Width::Flags; }
 
 std::string show(Width w);
+
+///////////////////////////////////////////////////////////////////////////////
+
+struct VregShiftExtend {
+  enum class Variant : uint8_t {
+    Shift,
+    Extend,
+  };
+
+  VregShiftExtend()
+    : reg{}
+    , variant(Variant::Shift)
+    , shift(vixl::LSL)
+    , amount(0)
+  {}
+
+  explicit VregShiftExtend(Vreg r)
+    : reg(r)
+    , variant(Variant::Shift)
+    , shift(vixl::LSL)
+    , amount(0)
+  {}
+
+  static VregShiftExtend makeShift(Vreg reg, vixl::Shift kind, uint8_t amount) {
+    assertx(amount <= 63);
+    VregShiftExtend result{reg};
+    result.variant = Variant::Shift;
+    result.shift = kind;
+    result.amount = amount;
+    return result;
+  }
+
+  static VregShiftExtend makeExtend(Vreg reg, vixl::Extend kind, uint8_t amount) {
+    assertx(amount <= 4);
+    VregShiftExtend result{reg};
+    result.variant = Variant::Extend;
+    result.extend = kind;
+    result.amount = amount;
+    return result;
+  }
+
+  bool isValid() const { return reg.isValid(); }
+  bool isShift() const { return variant == Variant::Shift; }
+  bool isExtend() const { return variant == Variant::Extend; }
+  bool operator==(const VregShiftExtend& other) const {
+    if (reg != other.reg || variant != other.variant || amount != other.amount) {
+      return false;
+    }
+    if (isShift()) return shift == other.shift;
+    return extend == other.extend;
+  }
+
+  vixl::Shift shiftKind() const {
+    assertx(isShift());
+    return shift;
+  }
+
+  vixl::Extend extendKind() const {
+    assertx(isExtend());
+    return extend;
+  }
+
+  Vreg reg;
+  Variant variant;
+  union {
+    vixl::Shift shift;
+    vixl::Extend extend;
+  };
+  uint8_t amount;
+};
+
+inline VregShiftExtend VregShift(Vreg reg, vixl::Shift kind, uint8_t amount) {
+  return VregShiftExtend::makeShift(reg, kind, amount);
+}
+
+inline VregShiftExtend VregExtend(Vreg reg, vixl::Extend kind, uint8_t amount) {
+  return VregShiftExtend::makeExtend(reg, kind, amount);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

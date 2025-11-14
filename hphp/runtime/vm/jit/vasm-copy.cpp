@@ -729,6 +729,11 @@ struct OptVisit {
     });
   }
 
+  void use(VregShiftExtend& se) {
+    if (!se.reg.isValid()) return;
+    use<Vreg>(se.reg);
+  }
+
   template<class T>
   typename std::enable_if<
     std::is_same<Vreg,T>::value ||

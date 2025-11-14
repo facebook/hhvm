@@ -16,15 +16,12 @@
 
 #pragma once
 
-#include <deque>
 #include <memory>
-#include <unordered_map>
 
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/Request.h>
-#include <proxygen/lib/http/HTTPConnector.h>
 #include <proxygen/lib/http/session/HTTPTransaction.h>
 #include <proxygen/lib/http/session/HTTPUpstreamSession.h>
 #include <thrift/lib/cpp/transport/THeader.h>

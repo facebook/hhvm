@@ -43,8 +43,7 @@ class ServerBiDiSinkBridge
       std::shared_ptr<ContextStack> contextStack = nullptr)
       : clientCb_(clientCb),
         evb_(evb),
-        contextStack_(std::move(contextStack)),
-        evbKeepAliveToken_(folly::getKeepAliveToken(*evb_)) {}
+        contextStack_(std::move(contextStack)) {}
 
   //
   // SinkServerCallback
@@ -104,12 +103,13 @@ class ServerBiDiSinkBridge
     // The sending of cancellation and the decref MUST happen on the IOThread
     // (i.e EventBase) or you risk a data race. You'll get a TSAN failure if you
     // get rid of evb_->add here.
-    evb_->add([bridge = this->copy()]() {
-      if (bridge->clientCb_ != nullptr) {
-        bridge->clientCb_->onFinalResponse(
+    evb_->add([this]() {
+      // This cancels the sink if its open
+      if (clientCb_ != nullptr) {
+        clientCb_->onFinalResponse(
             StreamPayload{nullptr, StreamPayloadMetadata{}});
       }
-      bridge->decref();
+      decref();
     });
   }
   //
@@ -281,7 +281,6 @@ class ServerBiDiSinkBridge
   SinkClientCallback* clientCb_{nullptr};
   folly::EventBase* evb_{nullptr};
   std::shared_ptr<ContextStack> contextStack_;
-  folly::Executor::KeepAlive<> evbKeepAliveToken_;
 
   uint64_t bufferSize_{0};
 };

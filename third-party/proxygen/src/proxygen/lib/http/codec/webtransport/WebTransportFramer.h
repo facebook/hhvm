@@ -9,7 +9,6 @@
 #pragma once
 
 #include <proxygen/lib/http/codec/CapsuleCodec.h>
-#include <quic/codec/QuicInteger.h>
 #include <quic/folly_utils/Utils.h>
 
 namespace proxygen {
@@ -135,7 +134,8 @@ parseCloseWebTransportSession(folly::io::Cursor& cursor, size_t length);
 folly::Expected<DrainWebTransportSessionCapsule, CapsuleCodec::ErrorCode>
 parseDrainWebTransportSession(size_t length);
 
-using WriteResult = folly::Expected<size_t, quic::TransportErrorCode>;
+// change from std::optional<size_t> -> size_t (0 can signal error)?
+using WriteResult = std::optional<size_t>;
 
 // Function declarations for serializing each capsule type
 WriteResult writePadding(folly::IOBufQueue& queue,

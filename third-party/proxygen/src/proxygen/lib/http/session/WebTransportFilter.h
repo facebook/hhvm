@@ -150,8 +150,7 @@ class WebTransportFilter
       uint64_t maxData) override {
     WTMaxDataCapsule capsule{maxData};
     folly::IOBufQueue buf{folly::IOBufQueue::cacheChainLength()};
-    auto writeRes = writeWTMaxData(buf, capsule);
-    if (writeRes.hasError()) {
+    if (auto res = writeWTMaxData(buf, capsule); !res.has_value()) {
       return folly::makeUnexpected(WebTransport::ErrorCode::SEND_ERROR);
     }
     if (txn_) {
@@ -164,8 +163,7 @@ class WebTransportFilter
       uint64_t maxStreams, bool isBidi) override {
     WTMaxStreamsCapsule capsule{maxStreams};
     folly::IOBufQueue buf{folly::IOBufQueue::cacheChainLength()};
-    auto writeRes = writeWTMaxStreams(buf, capsule, isBidi);
-    if (writeRes.hasError()) {
+    if (auto res = writeWTMaxStreams(buf, capsule, isBidi); !res.has_value()) {
       return folly::makeUnexpected(WebTransport::ErrorCode::SEND_ERROR);
     }
     if (txn_) {

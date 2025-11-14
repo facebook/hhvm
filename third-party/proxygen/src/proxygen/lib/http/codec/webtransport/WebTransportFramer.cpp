@@ -9,6 +9,7 @@
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBufQueue.h>
 #include <proxygen/lib/http/codec/webtransport/WebTransportFramer.h>
+#include <quic/codec/QuicInteger.h>
 
 namespace {
 const size_t kDefaultBufferGrowth = 32;
@@ -294,10 +295,7 @@ WriteResult writePadding(folly::IOBufQueue& queue,
   std::string padding(capsule.paddingLength, 0);
   queue.append(padding.data(), padding.size());
   size += padding.size();
-  if (error) {
-    return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);
-  }
-  return size;
+  return error ? std::nullopt : std::make_optional(size);
 }
 
 WriteResult writeWTResetStream(folly::IOBufQueue& queue,
@@ -308,17 +306,14 @@ WriteResult writeWTResetStream(folly::IOBufQueue& queue,
       {capsule.streamId, capsule.appProtocolErrorCode, capsule.reliableSize},
       {});
   if (capsuleLen.hasError()) {
-    return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);
+    return std::nullopt;
   }
   writeCapsuleHeader(
       queue, CapsuleType::WT_RESET_STREAM, size, error, capsuleLen.value());
   writeVarint(queue, capsule.streamId, size, error);
   writeVarint(queue, capsule.appProtocolErrorCode, size, error);
   writeVarint(queue, capsule.reliableSize, size, error);
-  if (error) {
-    return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);
-  }
-  return size;
+  return error ? std::nullopt : std::make_optional(size);
 }
 
 WriteResult writeWTStopSending(folly::IOBufQueue& queue,
@@ -328,16 +323,13 @@ WriteResult writeWTStopSending(folly::IOBufQueue& queue,
   auto capsuleLen = getCapsuleSize<2, 0>(
       {capsule.streamId, capsule.appProtocolErrorCode}, {});
   if (capsuleLen.hasError()) {
-    return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);
+    return std::nullopt;
   }
   writeCapsuleHeader(
       queue, CapsuleType::WT_STOP_SENDING, size, error, capsuleLen.value());
   writeVarint(queue, capsule.streamId, size, error);
   writeVarint(queue, capsule.appProtocolErrorCode, size, error);
-  if (error) {
-    return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);
-  }
-  return size;
+  return error ? std::nullopt : std::make_optional(size);
 }
 
 WriteResult writeWTStream(folly::IOBufQueue& queue,
@@ -349,16 +341,13 @@ WriteResult writeWTStream(folly::IOBufQueue& queue,
   auto capsuleLen = getCapsuleSize<1, 1>(
       {capsule.streamId}, {capsule.streamData->computeChainDataLength()});
   if (capsuleLen.hasError()) {
-    return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);
+    return std::nullopt;
   }
   writeCapsuleHeader(queue, capsuleType, size, error, capsuleLen.value());
   writeVarint(queue, capsule.streamId, size, error);
   queue.append(capsule.streamData->clone());
   size += capsule.streamData->computeChainDataLength();
-  if (error) {
-    return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);
-  }
-  return size;
+  return error ? std::nullopt : std::make_optional(size);
 }
 
 WriteResult writeWTMaxData(folly::IOBufQueue& queue,
@@ -367,15 +356,12 @@ WriteResult writeWTMaxData(folly::IOBufQueue& queue,
   bool error = false;
   auto capsuleLen = getCapsuleSize<1, 0>({capsule.maximumData}, {});
   if (capsuleLen.hasError()) {
-    return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);
+    return std::nullopt;
   }
   writeCapsuleHeader(
       queue, CapsuleType::WT_MAX_DATA, size, error, capsuleLen.value());
   writeVarint(queue, capsule.maximumData, size, error);
-  if (error) {
-    return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);
-  }
-  return size;
+  return error ? std::nullopt : std::make_optional(size);
 }
 
 WriteResult writeWTMaxStreamData(folly::IOBufQueue& queue,
@@ -385,16 +371,13 @@ WriteResult writeWTMaxStreamData(folly::IOBufQueue& queue,
   auto capsuleLen =
       getCapsuleSize<2, 0>({capsule.streamId, capsule.maximumStreamData}, {});
   if (capsuleLen.hasError()) {
-    return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);
+    return std::nullopt;
   }
   writeCapsuleHeader(
       queue, CapsuleType::WT_MAX_STREAM_DATA, size, error, capsuleLen.value());
   writeVarint(queue, capsule.streamId, size, error);
   writeVarint(queue, capsule.maximumStreamData, size, error);
-  if (error) {
-    return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);
-  }
-  return size;
+  return error ? std::nullopt : std::make_optional(size);
 }
 
 WriteResult writeWTMaxStreams(folly::IOBufQueue& queue,
@@ -404,16 +387,13 @@ WriteResult writeWTMaxStreams(folly::IOBufQueue& queue,
   bool error = false;
   auto capsuleLen = getCapsuleSize<1, 0>({capsule.maximumStreams}, {});
   if (capsuleLen.hasError()) {
-    return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);
+    return std::nullopt;
   }
   auto type = isBidi ? CapsuleType::WT_MAX_STREAMS_BIDI
                      : CapsuleType::WT_MAX_STREAMS_UNI;
   writeCapsuleHeader(queue, type, size, error, capsuleLen.value());
   writeVarint(queue, capsule.maximumStreams, size, error);
-  if (error) {
-    return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);
-  }
-  return size;
+  return error ? std::nullopt : std::make_optional(size);
 }
 
 WriteResult writeWTDataBlocked(folly::IOBufQueue& queue,
@@ -422,15 +402,12 @@ WriteResult writeWTDataBlocked(folly::IOBufQueue& queue,
   bool error = false;
   auto capsuleLen = getCapsuleSize<1, 0>({capsule.maximumData}, {});
   if (capsuleLen.hasError()) {
-    return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);
+    return std::nullopt;
   }
   writeCapsuleHeader(
       queue, CapsuleType::WT_DATA_BLOCKED, size, error, capsuleLen.value());
   writeVarint(queue, capsule.maximumData, size, error);
-  if (error) {
-    return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);
-  }
-  return size;
+  return error ? std::nullopt : std::make_optional(size);
 }
 
 WriteResult writeWTStreamDataBlocked(
@@ -440,7 +417,7 @@ WriteResult writeWTStreamDataBlocked(
   auto capsuleLen =
       getCapsuleSize<2, 0>({capsule.streamId, capsule.maximumStreamData}, {});
   if (capsuleLen.hasError()) {
-    return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);
+    return std::nullopt;
   }
   writeCapsuleHeader(queue,
                      CapsuleType::WT_STREAM_DATA_BLOCKED,
@@ -449,10 +426,7 @@ WriteResult writeWTStreamDataBlocked(
                      capsuleLen.value());
   writeVarint(queue, capsule.streamId, size, error);
   writeVarint(queue, capsule.maximumStreamData, size, error);
-  if (error) {
-    return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);
-  }
-  return size;
+  return error ? std::nullopt : std::make_optional(size);
 }
 
 WriteResult writeWTStreamsBlocked(folly::IOBufQueue& queue,
@@ -462,16 +436,14 @@ WriteResult writeWTStreamsBlocked(folly::IOBufQueue& queue,
   bool error = false;
   auto capsuleLen = getCapsuleSize<1, 0>({capsule.maximumStreams}, {});
   if (capsuleLen.hasError()) {
-    return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);
+    return std::nullopt;
   }
   auto type = isBidi ? CapsuleType::WT_STREAMS_BLOCKED_BIDI
                      : CapsuleType::WT_STREAMS_BLOCKED_UNI;
   writeCapsuleHeader(queue, type, size, error, capsuleLen.value());
   writeVarint(queue, capsule.maximumStreams, size, error);
-  if (error) {
-    return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);
-  }
-  return size;
+
+  return error ? std::nullopt : std::make_optional(size);
 }
 
 WriteResult writeDatagram(folly::IOBufQueue& queue,
@@ -481,16 +453,13 @@ WriteResult writeDatagram(folly::IOBufQueue& queue,
   auto capsuleLen = getCapsuleSize<0, 1>(
       {}, {capsule.httpDatagramPayload->computeChainDataLength()});
   if (capsuleLen.hasError()) {
-    return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);
+    return std::nullopt;
   }
   writeCapsuleHeader(
       queue, CapsuleType::DATAGRAM, size, error, capsuleLen.value());
   queue.append(capsule.httpDatagramPayload->clone());
   size += capsule.httpDatagramPayload->computeChainDataLength();
-  if (error) {
-    return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);
-  }
-  return size;
+  return error ? std::nullopt : std::make_optional(size);
 }
 
 WriteResult writeCloseWebTransportSession(
@@ -500,7 +469,7 @@ WriteResult writeCloseWebTransportSession(
   auto capsuleLen = getCapsuleSize<1, 1>(
       {capsule.applicationErrorCode}, {capsule.applicationErrorMessage.size()});
   if (capsuleLen.hasError()) {
-    return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);
+    return std::nullopt;
   }
   writeCapsuleHeader(queue,
                      CapsuleType::CLOSE_WEBTRANSPORT_SESSION,
@@ -512,10 +481,7 @@ WriteResult writeCloseWebTransportSession(
       folly::IOBuf::copyBuffer(capsule.applicationErrorMessage.data(),
                                capsule.applicationErrorMessage.size()));
   size += capsule.applicationErrorMessage.size();
-  if (error) {
-    return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);
-  }
-  return size;
+  return error ? std::nullopt : std::make_optional(size);
 }
 
 WriteResult writeDrainWebTransportSession(folly::IOBufQueue& queue) {
@@ -523,10 +489,7 @@ WriteResult writeDrainWebTransportSession(folly::IOBufQueue& queue) {
   bool error = false;
   writeCapsuleHeader(
       queue, CapsuleType::DRAIN_WEBTRANSPORT_SESSION, size, error, 0);
-  if (error) {
-    return folly::makeUnexpected(quic::TransportErrorCode::INTERNAL_ERROR);
-  }
-  return size;
+  return error ? std::nullopt : std::make_optional(size);
 }
 
 } // namespace proxygen

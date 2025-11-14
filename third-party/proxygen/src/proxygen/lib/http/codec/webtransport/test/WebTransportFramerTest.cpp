@@ -30,7 +30,7 @@ TEST(WebTransportFramerTest, Padding) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   PaddingCapsule capsule{10};
   auto writeRes = writePadding(queue, capsule);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   auto cursor = folly::io::Cursor(buf.get());
   auto payloadLen =
@@ -53,7 +53,7 @@ TEST(WebTransportFramerTest, WTResetStream) {
                                .appProtocolErrorCode = 0x12345678,
                                .reliableSize = 0x10};
   auto writeRes = writeWTResetStream(queue, capsule);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   auto cursor = folly::io::Cursor(buf.get());
   auto payloadLen = parseCapsuleHeader(
@@ -72,7 +72,7 @@ TEST(WebTransportFramerTest, WTResetStreamStreamIdError) {
                                .appProtocolErrorCode = 0x12345678,
                                .reliableSize = 0x10};
   auto writeRes = writeWTResetStream(queue, capsule);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   // hack buf so that streamId (1 byte), appProtocolErrorCode (4 bytes), and
   // reliableSize (1 byte) are empty
@@ -92,7 +92,7 @@ TEST(WebTransportFramerTest, WTResetStreamAppProtocolErrorCodeError) {
                                .appProtocolErrorCode = 0x12345678,
                                .reliableSize = 0x10};
   auto writeRes = writeWTResetStream(queue, capsule);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   // hack buf so that appProtocolErrorCode (4 bytes) and reliableSize (1 byte)
   // are empty
@@ -112,7 +112,7 @@ TEST(WebTransportFramerTest, WTResetStreamReliableSizeError) {
                                .appProtocolErrorCode = 0x12345678,
                                .reliableSize = 0x10};
   auto writeRes = writeWTResetStream(queue, capsule);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   // hack buf so that reliableSize (1 byte) is empty
   buf->trimEnd(1);
@@ -131,8 +131,7 @@ TEST(WebTransportFramerTest, WTResetStreamCapsuleSizeError) {
                                .appProtocolErrorCode = 0x12345678,
                                .reliableSize = 0x10};
   auto writeRes = writeWTResetStream(queue, capsule);
-  ASSERT_FALSE(writeRes.hasValue());
-  EXPECT_EQ(writeRes.error(), quic::TransportErrorCode::INTERNAL_ERROR);
+  ASSERT_FALSE(writeRes.has_value());
 }
 
 TEST(WebTransportFramerTest, WTStopSending) {
@@ -140,7 +139,7 @@ TEST(WebTransportFramerTest, WTStopSending) {
   WTStopSendingCapsule capsule{.streamId = 0x01,
                                .appProtocolErrorCode = 0x12345678};
   auto writeRes = writeWTStopSending(queue, capsule);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   auto cursor = folly::io::Cursor(buf.get());
   auto payloadLen = parseCapsuleHeader(
@@ -157,7 +156,7 @@ TEST(WebTransportFramerTest, WTStopSendingStreamIdError) {
   WTStopSendingCapsule capsule{.streamId = 0x01,
                                .appProtocolErrorCode = 0x12345678};
   auto writeRes = writeWTStopSending(queue, capsule);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   // hack buf so that streamId (1 byte) and appProtocolErrorCode (4 bytes) are
   // empty
@@ -176,7 +175,7 @@ TEST(WebTransportFramerTest, WTStopSendingAppProtocolErrorCodeError) {
   WTStopSendingCapsule capsule{.streamId = 0x01,
                                .appProtocolErrorCode = 0x12345678};
   auto writeRes = writeWTStopSending(queue, capsule);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   // hack buf so that appProtocolErrorCode (4 bytes) is empty
   buf->trimEnd(4);
@@ -194,8 +193,7 @@ TEST(WebTransportFramerTest, WTStopSendingCapsuleSizeError) {
   WTStopSendingCapsule capsule{.streamId = std::numeric_limits<uint64_t>::max(),
                                .appProtocolErrorCode = 0x12345678};
   auto writeRes = writeWTStopSending(queue, capsule);
-  ASSERT_FALSE(writeRes.hasValue());
-  EXPECT_EQ(writeRes.error(), quic::TransportErrorCode::INTERNAL_ERROR);
+  ASSERT_FALSE(writeRes.has_value());
 }
 
 TEST(WebTransportFramerTest, WTStream) {
@@ -205,7 +203,7 @@ TEST(WebTransportFramerTest, WTStream) {
                               folly::IOBuf::copyBuffer("Hello, World!"),
                           .fin = true};
   auto writeRes = writeWTStream(queue, capsule);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   auto cursor = folly::io::Cursor(buf.get());
   auto payloadLen = parseCapsuleHeader(
@@ -226,7 +224,7 @@ TEST(WebTransportFramerTest, WTStreamStreamIdError) {
                               folly::IOBuf::copyBuffer("Hello, World!"),
                           .fin = true};
   auto writeRes = writeWTStream(queue, capsule);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   // hack buf so that streamId (1 byte) and streamData (13 bytes) are empty
   queue.trimEnd(14);
   auto buf = queue.move();
@@ -246,7 +244,7 @@ TEST(WebTransportFramerTest, WTStreamDataError) {
                               folly::IOBuf::copyBuffer("Hello, World!"),
                           .fin = true};
   auto writeRes = writeWTStream(queue, capsule);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   // hack buf so that streamData (13 bytes) is empty
   queue.trimEnd(13);
   auto buf = queue.move();
@@ -266,15 +264,14 @@ TEST(WebTransportFramerTest, WTStreamCapsuleSizeError) {
                               folly::IOBuf::copyBuffer("Hello, World!"),
                           .fin = true};
   auto writeRes = writeWTStream(queue, capsule);
-  ASSERT_FALSE(writeRes.hasValue());
-  EXPECT_EQ(writeRes.error(), quic::TransportErrorCode::INTERNAL_ERROR);
+  ASSERT_FALSE(writeRes.has_value());
 }
 
 TEST(WebTransportFramerTest, WTMaxData) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   WTMaxDataCapsule capsule{100};
   auto writeRes = writeWTMaxData(queue, capsule);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   auto cursor = folly::io::Cursor(buf.get());
   auto payloadLen = parseCapsuleHeader(
@@ -289,7 +286,7 @@ TEST(WebTransportFramerTest, WTMaxDataError) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   WTMaxDataCapsule capsule{100};
   auto writeRes = writeWTMaxData(queue, capsule);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   // hack buf so that maximumData (2 bytes) is empty
   buf->trimEnd(2);
@@ -306,15 +303,14 @@ TEST(WebTransportFramerTest, WTMaxDataCapsuleSizeError) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   WTMaxDataCapsule capsule{std::numeric_limits<uint64_t>::max()};
   auto writeRes = writeWTMaxData(queue, capsule);
-  ASSERT_FALSE(writeRes.hasValue());
-  EXPECT_EQ(writeRes.error(), quic::TransportErrorCode::INTERNAL_ERROR);
+  ASSERT_FALSE(writeRes.has_value());
 }
 
 TEST(WebTransportFramerTest, WTMaxStreamData) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   WTMaxStreamDataCapsule capsule{.streamId = 0x1, .maximumStreamData = 100};
   auto writeRes = writeWTMaxStreamData(queue, capsule);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   auto cursor = folly::io::Cursor(buf.get());
   auto payloadLen = parseCapsuleHeader(
@@ -330,7 +326,7 @@ TEST(WebTransportFramerTest, WTMaxStreamDataStreamIdError) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   WTMaxStreamDataCapsule capsule{.streamId = 0x1, .maximumStreamData = 100};
   auto writeRes = writeWTMaxStreamData(queue, capsule);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   // hack buf so that streamId (1 byte) and maximumStreamData (2 bytes) are
   // empty
@@ -348,7 +344,7 @@ TEST(WebTransportFramerTest, WTMaxStreamDataError) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   WTMaxStreamDataCapsule capsule{.streamId = 0x1, .maximumStreamData = 100};
   auto writeRes = writeWTMaxStreamData(queue, capsule);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   // hack buf so that maximumStreamData (2 bytes) is empty
   buf->trimEnd(2);
@@ -367,15 +363,14 @@ TEST(WebTransportFramerTest, WTMaxStreamDataCapsuleSizeError) {
                                      std::numeric_limits<uint64_t>::max(),
                                  .maximumStreamData = 100};
   auto writeRes = writeWTMaxStreamData(queue, capsule);
-  ASSERT_FALSE(writeRes.hasValue());
-  EXPECT_EQ(writeRes.error(), quic::TransportErrorCode::INTERNAL_ERROR);
+  ASSERT_FALSE(writeRes.has_value());
 }
 
 TEST(WebTransportFramerTest, WTMaxStreams) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   WTMaxStreamsCapsule capsule{100};
   auto writeRes = writeWTMaxStreams(queue, capsule, true);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   auto cursor = folly::io::Cursor(buf.get());
   auto payloadLen = parseCapsuleHeader(
@@ -390,7 +385,7 @@ TEST(WebTransportFramerTest, WTMaxStreamsError) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   WTMaxStreamsCapsule capsule{100};
   auto writeRes = writeWTMaxStreams(queue, capsule, true);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   // hack buf so that maximumStreams (2 bytes) is empty
   buf->trimEnd(2);
@@ -407,15 +402,14 @@ TEST(WebTransportFramerTest, WTMaxStreamsCapsuleSizeError) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   WTMaxStreamsCapsule capsule{std::numeric_limits<uint64_t>::max()};
   auto writeRes = writeWTMaxStreams(queue, capsule, true);
-  ASSERT_FALSE(writeRes.hasValue());
-  EXPECT_EQ(writeRes.error(), quic::TransportErrorCode::INTERNAL_ERROR);
+  ASSERT_FALSE(writeRes.has_value());
 }
 
 TEST(WebTransportFramerTest, WTMaxStreamsUni) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   WTMaxStreamsCapsule capsule{100};
   auto writeRes = writeWTMaxStreams(queue, capsule, false);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   auto cursor = folly::io::Cursor(buf.get());
   auto payloadLen = parseCapsuleHeader(
@@ -430,7 +424,7 @@ TEST(WebTransportFramerTest, WTMaxStreamsUniError) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   WTMaxStreamsCapsule capsule{100};
   auto writeRes = writeWTMaxStreams(queue, capsule, false);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   // hack buf so that maximumStreams (2 bytes) is empty
   buf->trimEnd(2);
@@ -447,15 +441,14 @@ TEST(WebTransportFramerTest, WTMaxStreamsUniCapsuleSizeError) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   WTMaxStreamsCapsule capsule{std::numeric_limits<uint64_t>::max()};
   auto writeRes = writeWTMaxStreams(queue, capsule, false);
-  ASSERT_FALSE(writeRes.hasValue());
-  EXPECT_EQ(writeRes.error(), quic::TransportErrorCode::INTERNAL_ERROR);
+  ASSERT_FALSE(writeRes.has_value());
 }
 
 TEST(WebTransportFramerTest, WTDataBlocked) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   WTDataBlockedCapsule capsule{100};
   auto writeRes = writeWTDataBlocked(queue, capsule);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   auto cursor = folly::io::Cursor(buf.get());
   auto payloadLen = parseCapsuleHeader(
@@ -470,7 +463,7 @@ TEST(WebTransportFramerTest, WTDataBlockedError) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   WTDataBlockedCapsule capsule{100};
   auto writeRes = writeWTDataBlocked(queue, capsule);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   // hack buf so that maximumData (2 bytes) is empty
   buf->trimEnd(2);
@@ -487,15 +480,14 @@ TEST(WebTransportFramerTest, WTDataBlockedCapsuleSizeError) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   WTDataBlockedCapsule capsule{std::numeric_limits<uint64_t>::max()};
   auto writeRes = writeWTDataBlocked(queue, capsule);
-  ASSERT_FALSE(writeRes.hasValue());
-  EXPECT_EQ(writeRes.error(), quic::TransportErrorCode::INTERNAL_ERROR);
+  ASSERT_FALSE(writeRes.has_value());
 }
 
 TEST(WebTransportFramerTest, WTStreamDataBlocked) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   WTStreamDataBlockedCapsule capsule{.streamId = 0x1, .maximumStreamData = 100};
   auto writeRes = writeWTStreamDataBlocked(queue, capsule);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   auto cursor = folly::io::Cursor(buf.get());
   auto payloadLen = parseCapsuleHeader(
@@ -511,7 +503,7 @@ TEST(WebTransportFramerTest, WTStreamDataBlockedStreamIdError) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   WTStreamDataBlockedCapsule capsule{.streamId = 0x1, .maximumStreamData = 100};
   auto writeRes = writeWTStreamDataBlocked(queue, capsule);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   // hack buf so that streamId (1 byte) and maximumStreamData (2 bytes) are
   // empty
@@ -529,7 +521,7 @@ TEST(WebTransportFramerTest, WTStreamDataBlockedMaxStreamDataError) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   WTStreamDataBlockedCapsule capsule{.streamId = 0x1, .maximumStreamData = 100};
   auto writeRes = writeWTStreamDataBlocked(queue, capsule);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   // hack buf so that maximumStreamData (2 bytes) is empty
   buf->trimEnd(2);
@@ -548,15 +540,14 @@ TEST(WebTransportFramerTest, WTStreamDataBlockedCapsuleSizeError) {
                                          std::numeric_limits<uint64_t>::max(),
                                      .maximumStreamData = 100};
   auto writeRes = writeWTStreamDataBlocked(queue, capsule);
-  ASSERT_FALSE(writeRes.hasValue());
-  EXPECT_EQ(writeRes.error(), quic::TransportErrorCode::INTERNAL_ERROR);
+  ASSERT_FALSE(writeRes.has_value());
 }
 
 TEST(WebTransportFramerTest, WTStreamsBlocked) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   WTStreamsBlockedCapsule capsule{100};
   auto writeRes = writeWTStreamsBlocked(queue, capsule, true);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   auto cursor = folly::io::Cursor(buf.get());
   auto payloadLen = parseCapsuleHeader(
@@ -571,7 +562,7 @@ TEST(WebTransportFramerTest, WTStreamsBlockedError) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   WTStreamsBlockedCapsule capsule{100};
   auto writeRes = writeWTStreamsBlocked(queue, capsule, true);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   // hack buf so that maximumStreams (2 bytes) is empty
   buf->trimEnd(2);
@@ -588,15 +579,14 @@ TEST(WebTransportFramerTest, WTStreamsBlockedCapsuleSizeError) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   WTStreamsBlockedCapsule capsule{std::numeric_limits<uint64_t>::max()};
   auto writeRes = writeWTStreamsBlocked(queue, capsule, true);
-  ASSERT_FALSE(writeRes.hasValue());
-  EXPECT_EQ(writeRes.error(), quic::TransportErrorCode::INTERNAL_ERROR);
+  ASSERT_FALSE(writeRes.has_value());
 }
 
 TEST(WebTransportFramerTest, WTStreamsBlockedUni) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   WTStreamsBlockedCapsule capsule{100};
   auto writeRes = writeWTStreamsBlocked(queue, capsule, false);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   auto cursor = folly::io::Cursor(buf.get());
   auto payloadLen = parseCapsuleHeader(
@@ -611,7 +601,7 @@ TEST(WebTransportFramerTest, WTStreamsBlockedUniError) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   WTStreamsBlockedCapsule capsule{100};
   auto writeRes = writeWTStreamsBlocked(queue, capsule, false);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   // hack buf so that maximumStreams (2 bytes) is empty
   buf->trimEnd(2);
@@ -628,15 +618,14 @@ TEST(WebTransportFramerTest, WTStreamsBlockedUniCapsuleSizeError) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   WTStreamsBlockedCapsule capsule{std::numeric_limits<uint64_t>::max()};
   auto writeRes = writeWTStreamsBlocked(queue, capsule, false);
-  ASSERT_FALSE(writeRes.hasValue());
-  EXPECT_EQ(writeRes.error(), quic::TransportErrorCode::INTERNAL_ERROR);
+  ASSERT_FALSE(writeRes.has_value());
 }
 
 TEST(WebTransportFramerTest, Datagram) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   DatagramCapsule capsule{folly::IOBuf::copyBuffer("Hello, World!")};
   auto writeRes = writeDatagram(queue, capsule);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   auto cursor = folly::io::Cursor(buf.get());
   auto payloadLen =
@@ -654,7 +643,7 @@ TEST(WebTransportFramerTest, DatagramError) {
   auto writeRes = writeDatagram(queue, capsule);
   // hack buf so that httpDatagramPayload (13 bytes) is empty
   queue.trimEnd(13);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   auto cursor = folly::io::Cursor(buf.get());
   auto payloadLen =
@@ -670,7 +659,7 @@ TEST(WebTransportFramerTest, CloseWebTransportSession) {
   CloseWebTransportSessionCapsule capsule{.applicationErrorCode = 0x12345678,
                                           .applicationErrorMessage = "BAD!"};
   auto writeRes = writeCloseWebTransportSession(queue, capsule);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   auto cursor = folly::io::Cursor(buf.get());
   auto payloadLen = parseCapsuleHeader(
@@ -688,7 +677,7 @@ TEST(WebTransportFramerTest, CloseWebTransportSessionErrorCodeError) {
   CloseWebTransportSessionCapsule capsule{.applicationErrorCode = 0x12345678,
                                           .applicationErrorMessage = "BAD!"};
   auto writeRes = writeCloseWebTransportSession(queue, capsule);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   // hack buf so that applicationErrorCode (4 bytes) and applicationErrorMessage
   // (4 bytes) are empty
   queue.trimEnd(8);
@@ -707,7 +696,7 @@ TEST(WebTransportFramerTest, CloseWebTransportSessionErrorMsgError) {
   CloseWebTransportSessionCapsule capsule{.applicationErrorCode = 0x12345678,
                                           .applicationErrorMessage = "BAD!"};
   auto writeRes = writeCloseWebTransportSession(queue, capsule);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   // hack buf so that applicationErrorMessage (4 bytes) is empty
   queue.trimEnd(4);
   auto buf = queue.move();
@@ -723,7 +712,7 @@ TEST(WebTransportFramerTest, CloseWebTransportSessionErrorMsgError) {
 TEST(WebTransportFramerTest, DrainWebTransportSession) {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   auto writeRes = writeDrainWebTransportSession(queue);
-  ASSERT_TRUE(writeRes.hasValue());
+  ASSERT_TRUE(writeRes.has_value());
   auto buf = queue.move();
   auto cursor = folly::io::Cursor(buf.get());
   auto payloadLen = parseCapsuleHeader(

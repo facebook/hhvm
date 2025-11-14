@@ -2128,10 +2128,9 @@ void HTTPTransaction::sendCloseWebTransportSessionCapsule(
                                           .applicationErrorMessage =
                                               errorMessage};
   folly::IOBufQueue queue;
-  auto writeResult = writeCloseWebTransportSession(queue, capsule);
-  if (writeResult.hasError()) {
-    VLOG(4) << "Failed to write CLOSE_WEBTRANSPORT_SESSION capsule: "
-            << static_cast<int>(writeResult.error());
+  if (auto res = writeCloseWebTransportSession(queue, capsule);
+      !res.has_value()) {
+    VLOG(4) << "Failed to write CLOSE_WEBTRANSPORT_SESSION capsule";
     return;
   }
 

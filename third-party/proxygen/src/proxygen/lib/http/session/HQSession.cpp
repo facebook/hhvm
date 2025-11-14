@@ -3992,12 +3992,9 @@ folly::Expected<folly::Unit, WebTransport::ErrorCode>
 HQSession::HQStreamTransport::sendWTMaxData(uint64_t maxData) {
   WTMaxDataCapsule capsule{maxData};
   folly::IOBufQueue buf{folly::IOBufQueue::cacheChainLength()};
-
-  auto writeRes = writeWTMaxData(buf, capsule);
-  if (writeRes.hasError()) {
+  if (auto res = writeWTMaxData(buf, capsule); !res.has_value()) {
     return folly::makeUnexpected(WebTransport::ErrorCode::SEND_ERROR);
   }
-
   txn_.sendBody(buf.move());
   return folly::unit;
 }

@@ -16,6 +16,7 @@
 
 #include <folly/synchronization/CallOnce.h>
 #include <thrift/conformance/stresstest/client/StressTestClient.h>
+#include <thrift/lib/cpp2/async/RocketClientChannel.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
 
 #include <folly/coro/Sleep.h>
@@ -208,6 +209,40 @@ folly::coro::Task<void> ThriftStressTestClient::co_alignedRequestResponseTm(
   co_await timedExecute([&]() -> folly::coro::Task<void> {
     resp = co_await client_->co_alignedRequestResponseTm(rpcOptions, req);
   });
+}
+
+folly::AsyncTransport* ThriftStressTestClient::getTransport() {
+  auto channel =
+      dynamic_cast<apache::thrift::RocketClientChannel*>(client_->getChannel());
+  return channel->getTransport();
+}
+
+bool ThriftStressTestClient::reattach(
+    std::unordered_map<int, folly::EventBase*>& evbs) {
+  auto channel =
+      dynamic_cast<apache::thrift::RocketClientChannel*>(client_->getChannel());
+  auto transport = channel->getTransport();
+  auto currEvb = transport->getEventBase();
+  folly::EventBase* newEvb = nullptr;
+  currEvb->runInEventBaseThreadAndWait([&]() {
+    auto sockNapiId = transport->getNapiId();
+    auto it = evbs.find(sockNapiId);
+    if (it == evbs.end()) {
+      LOG(FATAL) << "Could not find EVB with NAPI ID: " << sockNapiId;
+    }
+    if (sockNapiId == currEvb->getBackend()->getNapiId()) {
+      return;
+    }
+    newEvb = it->second->getEventBase();
+    channel->detachEventBase();
+  });
+
+  if (newEvb) {
+    newEvb->runInEventBaseThreadAndWait(
+        [&]() { channel->attachEventBase(newEvb); });
+    return true;
+  }
+  return false;
 }
 
 } // namespace apache::thrift::stress

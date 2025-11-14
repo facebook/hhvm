@@ -55,6 +55,8 @@ class StressTestClient {
   virtual folly::coro::Task<void> co_alignedRequestResponseTm(
       RpcOptions&, AlignedResponse&, const AlignedRequest&) = 0;
 
+  virtual folly::AsyncTransport* getTransport() = 0;
+  virtual bool reattach(std::unordered_map<int, folly::EventBase*>& evbs) = 0;
   bool connectionGood() const { return connectionGood_; }
 
  protected:
@@ -96,6 +98,9 @@ class ThriftStressTestClient : public StressTestClient {
 
   folly::coro::Task<void> co_alignedRequestResponseTm(
       RpcOptions&, AlignedResponse&, const AlignedRequest&) override;
+
+  folly::AsyncTransport* getTransport() override;
+  bool reattach(std::unordered_map<int, folly::EventBase*>& evbs) override;
 
  private:
   template <class Fn>

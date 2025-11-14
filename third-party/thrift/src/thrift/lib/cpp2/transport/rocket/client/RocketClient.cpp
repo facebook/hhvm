@@ -993,12 +993,12 @@ void RocketClient::sendRequestResponse(
     void post() override {
       // On the timeout path, post() will be called once more in
       // abortSentRequest() within getResponse(). Avoid recursive misbehavior.
-      if (auto rctx = std::move(rctx_)) {
+      if (auto requestCtx = std::move(rctx_)) {
         SCOPE_EXIT {
           delete this;
         };
         cancelTimeout();
-        callback_(std::move(*rctx).getResponse());
+        callback_(std::move(*requestCtx).getResponse());
       }
     }
 

@@ -465,7 +465,7 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
   static std::string get_cpp2_unprefixed_namespace(const t_program* program);
   static mstch::array cpp_includes(const t_program* program);
   static mstch::node include_prefix(
-      const t_program* program, compiler_options_map& options);
+      const t_program* program, const compiler_options_map& options);
 
  private:
   void set_mstch_factories();
@@ -860,8 +860,8 @@ class cpp_mstch_program : public mstch_program {
   }
   mstch::node cpp_includes() {
     mstch::array includes = t_mstch_cpp2_generator::cpp_includes(program_);
-    auto it = context_.options.find("includes");
-    if (it != context_.options.end()) {
+    if (auto it = context_.options->find("includes");
+        it != context_.options->end()) {
       std::vector<std::string> extra_includes;
       boost::split(extra_includes, it->second, [](char c) { return c == ':'; });
       for (auto& include : extra_includes) {
@@ -871,7 +871,7 @@ class cpp_mstch_program : public mstch_program {
     return includes;
   }
   mstch::node include_prefix() {
-    return t_mstch_cpp2_generator::include_prefix(program_, context_.options);
+    return t_mstch_cpp2_generator::include_prefix(program_, *context_.options);
   }
   mstch::node cpp_declare_hash() {
     bool cpp_declare_in_structs = std::any_of(
@@ -1137,7 +1137,7 @@ class cpp_mstch_program : public mstch_program {
   mstch::node split_enums() {
     if (split_id_) {
       if (!split_enums_) {
-        int split_count = std::max(get_split_count(context_.options), 1);
+        int split_count = std::max(get_split_count(*context_.options), 1);
         const size_t cnt = program_->enums().size();
         split_enums_.emplace();
         for (size_t i = *split_id_; i < cnt; i += split_count) {
@@ -1244,7 +1244,7 @@ class cpp_mstch_service : public mstch_service {
   }
   mstch::node include_prefix() {
     return t_mstch_cpp2_generator::include_prefix(
-        service_->program(), context_.options);
+        service_->program(), *context_.options);
   }
   mstch::node thrift_includes() {
     mstch::array a;
@@ -1345,7 +1345,7 @@ class cpp_mstch_function : public mstch_function {
         interface().has_structured_annotation(kCppProcessInEbThreadUri);
   }
   mstch::node stack_arguments() {
-    return cpp2::is_stack_arguments(context_.options, *function_);
+    return cpp2::is_stack_arguments(*context_.options, *function_);
   }
   mstch::node sync_returns_by_outparam() {
     return is_complex_return(function_->return_type()->get_true_type()) &&
@@ -1717,7 +1717,7 @@ class cpp_mstch_struct : public mstch_struct {
   mstch::node is_struct_orderable() {
     return cpp_context_->is_orderable(
                *struct_,
-               !context_.options.count(
+               !context_.options->contains(
                    "disable_custom_type_ordering_if_structure_has_uri")) &&
         !struct_->has_unstructured_annotation("no_default_comparators");
   }
@@ -2996,9 +2996,12 @@ mstch::array t_mstch_cpp2_generator::cpp_includes(const t_program* program) {
 }
 
 mstch::node t_mstch_cpp2_generator::include_prefix(
-    const t_program* program, compiler_options_map& options) {
+    const t_program* program, const compiler_options_map& options) {
   auto prefix = program->include_prefix();
-  auto include_prefix = options["include_prefix"];
+  std::string include_prefix;
+  if (const auto& it = options.find("include_prefix"); it != options.end()) {
+    include_prefix = it->second;
+  }
   auto out_dir_base = get_out_dir_base(options);
   if (prefix.empty()) {
     if (include_prefix.empty()) {

@@ -50,12 +50,12 @@ std::shared_ptr<mstch_base> make_mstch_service_cached(
 }
 
 bool mstch_base::has_option(const std::string& option) const {
-  return context_.options.find(option) != context_.options.end();
+  return context_.options->contains(option);
 }
 
 std::string mstch_base::get_option(const std::string& option) const {
-  auto itr = context_.options.find(option);
-  if (itr != context_.options.end()) {
+  if (auto itr = context_.options->find(option);
+      itr != context_.options->end()) {
     return itr->second;
   }
   return {};
@@ -429,16 +429,6 @@ mstch::node mstch_program::constants() {
         nullptr));
   }
   return a;
-}
-
-mstch_context& mstch_context::set_or_erase_option(
-    bool condition, const std::string& key, const std::string& value) {
-  if (condition) {
-    options[key] = value;
-  } else {
-    options.erase(key);
-  }
-  return *this;
 }
 
 } // namespace apache::thrift::compiler

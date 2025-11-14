@@ -192,7 +192,7 @@ class mstch_factories {
 // Mstch object construction context.
 struct mstch_context : mstch_factories {
   using compiler_options_map = std::map<std::string, std::string, std::less<>>;
-  compiler_options_map options;
+  const compiler_options_map* options = nullptr;
 
   std::unordered_map<std::string, std::shared_ptr<mstch_base>> enum_cache;
   std::unordered_map<std::string, std::shared_ptr<mstch_base>> struct_cache;
@@ -203,18 +203,6 @@ struct mstch_context : mstch_factories {
 
   const whisker::prototype_database* prototypes = nullptr;
   const whisker_generator_context* whisker_context = nullptr;
-
-  /**
-   * Sets or erases the option with the given `key` depending on the
-   * `condition`.
-   *
-   * If `condition` is true, `options[key]` will be set to the given `value`.
-   * Otherwise, the entry for `key` in `options` (if any) is removed.
-   *
-   * @return `this` (for chaining).
-   */
-  mstch_context& set_or_erase_option(
-      bool condition, const std::string& key, const std::string& value);
 
   node_metadata_cache& cache() { return metadata_cache; }
 };

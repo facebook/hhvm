@@ -262,8 +262,7 @@ class pyi_mstch_program : public mstch_program {
   }
 
   mstch::node get_enable_pos_args() {
-    return this->context_.options.find("enable_pos_args") !=
-        this->context_.options.end();
+    return this->context_.options->contains("enable_pos_args");
   }
 
  private:

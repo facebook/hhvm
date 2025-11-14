@@ -39,7 +39,7 @@ class t_mstch_generator : public t_whisker_generator {
   void process_options(
       const std::map<std::string, std::string>& options) override {
     t_whisker_generator::process_options(options);
-    mstch_context_.options = compiler_options();
+    mstch_context_.options = &compiler_options();
     mstch_context_.prototypes = render_state().prototypes.get();
     mstch_context_.whisker_context = &context();
   }

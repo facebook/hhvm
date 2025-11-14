@@ -370,7 +370,7 @@ class py3_mstch_program : public mstch_program {
 
   void add_function_by_unique_return_type(
       const t_function* function, std::string return_type_name) {
-    auto sa = cpp2::is_stack_arguments(context_.options, *function);
+    auto sa = cpp2::is_stack_arguments(*context_.options, *function);
     uniqueFunctionsByReturnType_.insert(
         {{std::move(return_type_name), sa}, function});
   }
@@ -594,7 +594,7 @@ class py3_mstch_function : public mstch_function {
   }
 
   mstch::node stack_arguments() {
-    return cpp2::is_stack_arguments(context_.options, *function_);
+    return cpp2::is_stack_arguments(*context_.options, *function_);
   }
 
   mstch::node modulePath() {
@@ -604,6 +604,8 @@ class py3_mstch_function : public mstch_function {
   }
 };
 
+enum class FileType { CBindingsFile, TypesFile, NotTypesFile };
+
 class py3_mstch_type : public mstch_type {
  public:
   using cached_properties = apache::thrift::compiler::python::cached_properties;
@@ -612,6 +614,7 @@ class py3_mstch_type : public mstch_type {
     const t_program* program;
     std::unordered_map<const t_type*, cached_properties>* cache;
     cpp_name_resolver* name_resolver;
+    const FileType* file_type;
   };
 
   cached_properties& get_cached_props(const t_type* type, const context& c);
@@ -623,6 +626,7 @@ class py3_mstch_type : public mstch_type {
       context c)
       : mstch_type(type->get_true_type(), ctx, pos),
         prog_(c.program),
+        file_type_(c.file_type),
         cached_props_(get_cached_props(type, c)) {
     register_methods(
         this,
@@ -671,10 +675,18 @@ class py3_mstch_type : public mstch_type {
         });
   }
 
-  mstch::node need_module_path() { return need_import_path("is_types_file"); }
+  mstch::node need_module_path() {
+    // Need import if in a different declaration file, or type originated in a
+    // different Thrift program
+    return *file_type_ == FileType::NotTypesFile ||
+        (type_->program() != nullptr && type_->program() != prog_);
+  }
 
   mstch::node need_cbinding_path() {
-    return need_import_path("is_cbindings_file");
+    // Need import if in a different declaration file, or type originated in a
+    // different Thrift program
+    return *file_type_ != FileType::CBindingsFile ||
+        (type_->program() != nullptr && type_->program() != prog_);
   }
 
   mstch::node modulePath() {
@@ -820,18 +832,6 @@ class py3_mstch_type : public mstch_type {
     return prog_;
   }
 
-  bool need_import_path(const std::string& option) {
-    if (!has_option(option)) {
-      return true;
-    }
-    if (const t_program* prog = type_->program()) {
-      if (prog != prog_) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   std::vector<std::string> get_type_cpp2_namespace() const {
     return cpp2::get_gen_namespace_components(*get_type_program());
   }
@@ -887,6 +887,7 @@ class py3_mstch_type : public mstch_type {
   }
 
   const t_program* prog_;
+  const FileType* file_type_;
   cached_properties& cached_props_;
 };
 
@@ -954,7 +955,7 @@ class py3_mstch_struct : public mstch_struct {
   mstch::node isStructOrderable() {
     return cpp2::OrderableTypeUtils::is_orderable(
                *struct_,
-               !context_.options.count(
+               !context_.options->contains(
                    "disable_custom_type_ordering_if_structure_has_uri")) &&
         !struct_->has_unstructured_annotation("no_default_comparators");
   }
@@ -1454,8 +1455,6 @@ class t_mstch_py3_generator : public t_mstch_generator {
         enum_member_union_field_names_validator::validate_union);
   }
 
-  enum class FileType { CBindingsFile, TypesFile, NotTypesFile };
-
  private:
   void set_mstch_factories();
   void generate_init_files();
@@ -1471,6 +1470,7 @@ class t_mstch_py3_generator : public t_mstch_generator {
   std::unordered_map<const t_type*, py3_mstch_type::cached_properties>
       type_props_cache_;
   cpp_name_resolver cpp_name_resolver_;
+  FileType file_type_ = FileType::NotTypesFile;
 
   whisker::map::raw globals() const override {
     whisker::map::raw globals = t_mstch_generator::globals();
@@ -1545,7 +1545,7 @@ void t_mstch_py3_generator::set_mstch_factories() {
   mstch_context_.add<py3_mstch_interaction>(program_);
   mstch_context_.add<py3_mstch_function>();
   mstch_context_.add<py3_mstch_type>(py3_mstch_type::context{
-      program_, &type_props_cache_, &cpp_name_resolver_});
+      program_, &type_props_cache_, &cpp_name_resolver_, &file_type_});
   mstch_context_.add<py3_mstch_typedef>();
   mstch_context_.add<py3_mstch_struct>();
   mstch_context_.add<py3_mstch_field>();
@@ -1578,15 +1578,7 @@ void t_mstch_py3_generator::generate_file(
     const std::filesystem::path& base = {}) {
   t_program* program = get_program();
   const std::string& program_name = program->name();
-
-  mstch_context_.set_or_erase_option(
-      (file_type == FileType::TypesFile) ||
-          (file_type == FileType::CBindingsFile),
-      "is_types_file",
-      "");
-
-  mstch_context_.set_or_erase_option(
-      file_type == FileType::CBindingsFile, "is_cbindings_file", "");
+  file_type_ = file_type;
 
   std::shared_ptr<mstch_base> mstch_program =
       make_mstch_program_cached(program, mstch_context_);

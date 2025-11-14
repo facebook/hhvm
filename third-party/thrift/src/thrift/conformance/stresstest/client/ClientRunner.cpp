@@ -252,7 +252,8 @@ class ClientThread : public folly::HHWheelTimer::Callback {
 };
 
 ClientRunner::ClientRunner(const ClientConfig& config)
-    : continuous_(config.continuous),
+    : config_(config),
+      continuous_(config.continuous),
       useLoadGenerator_(config.useLoadGenerator),
       latch_(
           config.numClientThreads * config.numConnectionsPerThread *
@@ -283,6 +284,32 @@ void ClientRunner::run(const StressTestBase* test) {
   std::vector<folly::SemiFuture<folly::Unit>> starts;
 
   latch_.wait();
+
+  if (config_.connConfig.ioUringZcrx) {
+    for (auto& thread : clientThreads_) {
+      auto napiId = thread->getEventBase()->getBackend()->getNapiId();
+      napiToThreads_.emplace(napiId, thread.get());
+    }
+
+    std::vector<std::unique_ptr<StressTestClient>> shuffleClients;
+    for (auto& thread : clientThreads_) {
+      auto clients = thread->removeClients(napiToThreads_);
+      shuffleClients.insert(
+          shuffleClients.end(),
+          std::make_move_iterator(clients.begin()),
+          std::make_move_iterator(clients.end()));
+    }
+
+    for (auto& client : shuffleClients) {
+      auto id = client->getTransport()->getNapiId();
+      auto it = napiToThreads_.find(id);
+      if (it == napiToThreads_.end()) {
+        LOG(FATAL) << "Could not find EVB with NAPI ID: " << id;
+      }
+      it->second->addClient(std::move(client));
+    }
+  }
+
   for (auto& clientThread : clientThreads_) {
     starts.push_back(clientThread->run(test));
   }

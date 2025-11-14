@@ -16,6 +16,8 @@
 
 #include <thrift/conformance/stresstest/client/ClientConfig.h>
 
+#include <thrift/conformance/stresstest/util/IoUringUtil.h>
+
 #include <thread>
 #include <glog/logging.h>
 
@@ -165,6 +167,7 @@ protocol::PROTOCOL_TYPES createThriftProtocolFromFlags() {
   connCfg.keyPath = FLAGS_client_key_path;
   connCfg.trustedCertsPath = FLAGS_client_ca_path;
   connCfg.ioUring = FLAGS_io_uring;
+  connCfg.ioUringZcrx = FLAGS_io_zcrx;
   connCfg.useQuic = FLAGS_quic;
   connCfg.stopTLSv1 = FLAGS_stopTLSv1 && (security == ClientSecurity::FIZZ);
   connCfg.stopTLSv2 = FLAGS_stopTLSv2 && (security == ClientSecurity::FIZZ);

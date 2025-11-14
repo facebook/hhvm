@@ -60,12 +60,14 @@ class ClientRunner : public folly::AsyncSocket::ConnectCallback {
   void connectErr(const folly::AsyncSocketException& ex) noexcept override;
 
  private:
+  ClientConfig config_;
   bool started_{false};
   bool stopped_{false};
   bool continuous_{false};
   bool useLoadGenerator_;
 
   folly::Latch latch_;
+  std::unordered_map<int, ClientThread*> napiToThreads_;
   std::vector<std::unique_ptr<PoissonLoadGenerator>> loadGenerator_;
   std::vector<std::unique_ptr<ClientThread>> clientThreads_;
 };

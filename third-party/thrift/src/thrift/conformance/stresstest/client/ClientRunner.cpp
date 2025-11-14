@@ -181,6 +181,33 @@ class ClientThread : public folly::HHWheelTimer::Callback {
     rpcStats_.numSuccess = 0;
   }
 
+  folly::EventBase* getEventBase() { return thread_->getEventBase(); }
+
+  void addClient(std::unique_ptr<StressTestClient> client) {
+    clients_.push_back(std::move(client));
+  }
+
+  std::vector<std::unique_ptr<StressTestClient>> removeClients(
+      std::unordered_map<int, ClientThread*>& threads) {
+    std::unordered_map<int, folly::EventBase*> evbs;
+    for (const auto& [id, th] : threads) {
+      evbs.emplace(id, th->getEventBase());
+    }
+
+    std::vector<std::unique_ptr<StressTestClient>> removedClients;
+    auto end =
+        std::remove_if(clients_.begin(), clients_.end(), [&](auto& client) {
+          if (client->reattach(evbs)) {
+            removedClients.push_back(std::move(client));
+            return true;
+          }
+          return false;
+        });
+    clients_.erase(end, clients_.end());
+
+    return removedClients;
+  }
+
  private:
   folly::coro::Task<void> runConcurrentInternal(
       StressTestClient* client, const StressTestBase* test) {

@@ -19,6 +19,7 @@
 #include <chrono>
 #include <gflags/gflags.h>
 #include <folly/SocketAddress.h>
+#include <folly/io/async/AsyncSocket.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 DECLARE_string(server_host);
@@ -65,6 +66,7 @@ struct ClientConnectionConfig {
   bool stopTLSv1{false};
   bool stopTLSv2{false};
   protocol::PROTOCOL_TYPES thriftProtocol{protocol::T_COMPACT_PROTOCOL};
+  folly::AsyncSocket::ConnectCallback* connectCb;
 };
 
 struct ClientConfig {

@@ -228,14 +228,14 @@ folly::AsyncTransport::UniquePtr createSocket(
 folly::AsyncTransport::UniquePtr createEPollSocket(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
   auto sock = folly::AsyncSocket::newSocket(evb);
-  sock->connect(new ConnectCallback(), cfg.serverHost);
+  sock->connect(cfg.connectCb, cfg.serverHost);
   return sock;
 }
 
 folly::AsyncTransport::UniquePtr createTLSSocket(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
   auto sock = folly::AsyncSSLSocket::newSocket(getSslContext(cfg), evb);
-  sock->connect(new ConnectCallback(), cfg.serverHost);
+  sock->connect(cfg.connectCb, cfg.serverHost);
   return sock;
 }
 
@@ -270,7 +270,7 @@ folly::AsyncTransport::UniquePtr createFizzSocket(
                     std::move(extensions))));
 
   fizzClient->connect(
-      cfg.serverHost, new ConnectCallback(), getFizzVerifier(cfg), {}, {});
+      cfg.serverHost, cfg.connectCb, getFizzVerifier(cfg), {}, {});
   return fizzClient;
 }
 
@@ -278,7 +278,7 @@ folly::AsyncTransport::UniquePtr createFizzSocket(
 folly::AsyncTransport::UniquePtr createIOUring(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
   auto ring = new folly::AsyncIoUringSocket(evb);
-  ring->connect(new ConnectCallback(), cfg.serverHost);
+  ring->connect(cfg.connectCb, cfg.serverHost);
   return folly::AsyncTransport::UniquePtr(ring);
 }
 
@@ -286,7 +286,7 @@ folly::AsyncTransport::UniquePtr createIOUringTLS(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
   auto sock = folly::AsyncSSLSocket::newSocket(getSslContext(cfg), evb);
   auto ring = new folly::AsyncIoUringSocket(std::move(sock));
-  ring->connect(new ConnectCallback(), cfg.serverHost);
+  ring->connect(cfg.connectCb, cfg.serverHost);
   return folly::AsyncTransport::UniquePtr(ring);
 }
 
@@ -295,7 +295,7 @@ folly::AsyncTransport::UniquePtr createIOUringFizz(
   auto fizzClient = fizz::client::AsyncFizzClient::UniquePtr(
       new fizz::client::AsyncFizzClient(evb, getFizzContext(cfg)));
   auto ring = new folly::AsyncIoUringSocket(std::move(fizzClient));
-  ring->connect(new ConnectCallback(), cfg.serverHost);
+  ring->connect(cfg.connectCb, cfg.serverHost);
   return folly::AsyncTransport::UniquePtr(ring);
 }
 #endif

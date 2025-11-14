@@ -227,10 +227,15 @@ class ClientThread : public folly::HHWheelTimer::Callback {
 ClientRunner::ClientRunner(const ClientConfig& config)
     : continuous_(config.continuous),
       useLoadGenerator_(config.useLoadGenerator),
+      latch_(
+          config.numClientThreads * config.numConnectionsPerThread *
+          config.numClientsPerConnection),
       clientThreads_() {
   rocket::THRIFT_FLAG_SET_MOCK(
       rocket_enable_frame_relative_alignment,
       config.enableRocketFrameRelativeAlignment);
+  auto configCopy = config;
+  configCopy.connConfig.connectCb = this;
   auto targetQpsPerClient = config.targetQps / config.numClientThreads;
   for (size_t i = 0; i < config.numClientThreads; i++) {
     loadGenerator_.emplace_back(
@@ -238,7 +243,7 @@ ClientRunner::ClientRunner(const ClientConfig& config)
             targetQpsPerClient, config.gen_load_interval));
     clientThreads_.emplace_back(
         std::make_unique<ClientThread>(
-            config, i, *loadGenerator_[i], config.useLoadGenerator));
+            configCopy, i, *loadGenerator_[i], config.useLoadGenerator));
   }
 }
 
@@ -250,6 +255,7 @@ void ClientRunner::run(const StressTestBase* test) {
   CHECK(!started_) << "ClientRunner was already started";
   std::vector<folly::SemiFuture<folly::Unit>> starts;
 
+  latch_.wait();
   for (auto& clientThread : clientThreads_) {
     starts.push_back(clientThread->run(test));
   }
@@ -279,10 +285,19 @@ ClientThreadMemoryStats ClientRunner::getMemoryStats() const {
   }
   return combinedStats;
 }
+
 void ClientRunner::resetStats() {
   for (auto& clientThread : clientThreads_) {
     clientThread->resetStats();
   }
+}
+
+void ClientRunner::connectSuccess() noexcept {
+  latch_.count_down();
+}
+
+void ClientRunner::connectErr(const folly::AsyncSocketException& ex) noexcept {
+  LOG(FATAL) << "Socket connection failed: " << ex.what();
 }
 
 } // namespace apache::thrift::stress

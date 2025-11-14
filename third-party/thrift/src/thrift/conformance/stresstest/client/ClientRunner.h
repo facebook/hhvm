@@ -20,6 +20,7 @@
 #include <folly/coro/Task.h>
 #include <folly/io/async/HHWheelTimer.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
+#include <folly/synchronization/Latch.h>
 #include <folly/synchronization/RelaxedAtomic.h>
 #include <thrift/conformance/stresstest/client/ClientConfig.h>
 #include <thrift/conformance/stresstest/client/ClientFactory.h>
@@ -42,10 +43,10 @@ struct ClientThreadMemoryStats {
   size_t connectionsIdle{0};
 };
 
-class ClientRunner {
+class ClientRunner : public folly::AsyncSocket::ConnectCallback {
  public:
   explicit ClientRunner(const ClientConfig& config);
-  ~ClientRunner();
+  ~ClientRunner() override;
 
   void run(const StressTestBase* test);
 
@@ -54,11 +55,17 @@ class ClientRunner {
 
   void resetStats();
 
+  // AsyncSocket::ConnectCallback
+  void connectSuccess() noexcept override;
+  void connectErr(const folly::AsyncSocketException& ex) noexcept override;
+
  private:
   bool started_{false};
   bool stopped_{false};
   bool continuous_{false};
   bool useLoadGenerator_;
+
+  folly::Latch latch_;
   std::vector<std::unique_ptr<PoissonLoadGenerator>> loadGenerator_;
   std::vector<std::unique_ptr<ClientThread>> clientThreads_;
 };

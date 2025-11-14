@@ -35,6 +35,7 @@ namespace annotation {
   ::apache::thrift::detail::md::StructMetadata<AllowUnsafeOptionalCustomDefaultValue>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<AllowUnsafeUnionFieldCustomDefaultValue>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<AllowUnsafeRequiredFieldQualifier>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<AllowLegacyMissingUris>::gen(metadata);
   return metadata;
 }
 } // namespace facebook

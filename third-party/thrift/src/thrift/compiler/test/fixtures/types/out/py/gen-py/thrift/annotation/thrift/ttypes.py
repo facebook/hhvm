@@ -48,7 +48,7 @@ class ThriftEnumWrapper(int):
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'RpcPriority', 'Experimental', 'ReserveIds', 'RequiresBackwardCompatibility', 'TerseWrite', 'Box', 'Mixin', 'SerializeInFieldIdOrder', 'BitmaskEnum', 'ExceptionMessage', 'InternBox', 'Serial', 'Uri', 'Priority', 'DeprecatedUnvalidatedAnnotations', 'AllowReservedIdentifier', 'AllowReservedFilename', 'RuntimeAnnotation', 'AllowLegacyTypedefUri', 'AllowUnsafeOptionalCustomDefaultValue', 'AllowUnsafeUnionFieldCustomDefaultValue', 'AllowUnsafeRequiredFieldQualifier']
+__all__ = ['UTF8STRINGS', 'RpcPriority', 'Experimental', 'ReserveIds', 'RequiresBackwardCompatibility', 'TerseWrite', 'Box', 'Mixin', 'SerializeInFieldIdOrder', 'BitmaskEnum', 'ExceptionMessage', 'InternBox', 'Serial', 'Uri', 'Priority', 'DeprecatedUnvalidatedAnnotations', 'AllowReservedIdentifier', 'AllowReservedFilename', 'RuntimeAnnotation', 'AllowLegacyTypedefUri', 'AllowUnsafeOptionalCustomDefaultValue', 'AllowUnsafeUnionFieldCustomDefaultValue', 'AllowUnsafeRequiredFieldQualifier', 'AllowLegacyMissingUris']
 
 class RpcPriority:
   def __getattr__(self, name): raise AttributeError(name)
@@ -2080,6 +2080,122 @@ class AllowUnsafeRequiredFieldQualifier:
   def _to_py_deprecated(self):
     return self
 
+class AllowLegacyMissingUris:
+  r"""
+  Allows Thrift IDL to build despite missing otherwise required Thrift URIs.
+  
+  According to the [Thrift Object Model](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#thrift-uri),
+  all user-defined types MUST have a unique, non-empty URI. In Thrift IDL, this
+  is accomplished by either:
+  1. Specifying a non-empty [`package`](https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#package-declaration), or
+  2. Explicitly adding the `@thrift.Uri` annotation with a non-empty `value`
+     (see `struct Uri` above).
+  
+  Failure to do so results in an invalid Thrift schema, but this has
+  historically not been enforced - until H2'2026.
+  
+  Use of this annotation is strongly DISCOURAGED, but is provided to allow
+  existing schemas to be grandfathered in and continue building successfully
+  until the required URIs are specified.
+  
+  This annotation can be specified either on the declaration of types that are
+  required to have URIs (i.e., struct, union, exception and enum), or on the
+  file-level `package`.
+  
+  Adding this annotation on the `package` is equivalent to annotating every
+  type definiting in that file that is:
+  1. required to have a URI (i.e., struct, union, exception or enum), and
+  2. does not have a non-empty URI.
+  
+  A Thrift IDL schema is ill-formed if either of the following is true:
+  1. It defines a type that:
+      a. is required to have a URI, but the provided (or inferred) URI is empty, and
+      b. is not annotated - directly or through its `package` - with this
+         annotation (i.e., `@thrift.AllowLegacyMissingUris`)
+  2. It uses this annotation unnecessarily, i.e. if:
+     a. it specifies this annotation on a type definition that doesn't need it
+        it (either because it has a non-empty URI, or is not required to have
+        one), or
+     b. it specifies this annotation on the `package` but does not have any
+        type definition that needs it.
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('AllowLegacyMissingUris')
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+    )
+
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.annotation.thrift.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.AllowLegacyMissingUris, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.thrift.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.AllowLegacyMissingUris, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.annotation.thrift.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.AllowLegacyMissingUris, self)
+
+  def _to_py_deprecated(self):
+    return self
+
 all_structs.append(Experimental)
 Experimental.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 )))
@@ -2335,6 +2451,15 @@ AllowUnsafeRequiredFieldQualifier.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 AllowUnsafeRequiredFieldQualifier.thrift_struct_annotations = {
 }
 AllowUnsafeRequiredFieldQualifier.thrift_field_annotations = {
+}
+
+all_structs.append(AllowLegacyMissingUris)
+AllowLegacyMissingUris.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
+
+AllowLegacyMissingUris.thrift_struct_annotations = {
+}
+AllowLegacyMissingUris.thrift_field_annotations = {
 }
 
 fix_spec(all_structs)

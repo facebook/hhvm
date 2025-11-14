@@ -557,6 +557,39 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 347
+      },
+      "AllowLegacyMissingUris" : {
+        "name" : "AllowLegacyMissingUris",
+        "structured_annotations": {
+          "scope.Program" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "Program",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
+          "scope.Structured" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "Structured",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
+          "scope.Enum" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "Enum",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
+        },
+        "docstring" : "Allows Thrift IDL to build despite missing otherwise required Thrift URIs.\n\nAccording to the [Thrift Object Model](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#thrift-uri),\nall user-defined types MUST have a unique, non-empty URI. In Thrift IDL, this\nis accomplished by either:\n1. Specifying a non-empty [`package`](https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#package-declaration), or\n2. Explicitly adding the `@thrift.Uri` annotation with a non-empty `value`\n   (see `struct Uri` above).\n\nFailure to do so results in an invalid Thrift schema, but this has\nhistorically not been enforced - until H2'2026.\n\nUse of this annotation is strongly DISCOURAGED, but is provided to allow\nexisting schemas to be grandfathered in and continue building successfully\nuntil the required URIs are specified.\n\nThis annotation can be specified either on the declaration of types that are\nrequired to have URIs (i.e., struct, union, exception and enum), or on the\nfile-level `package`.\n\nAdding this annotation on the `package` is equivalent to annotating every\ntype definiting in that file that is:\n1. required to have a URI (i.e., struct, union, exception or enum), and\n2. does not have a non-empty URI.\n\nA Thrift IDL schema is ill-formed if either of the following is true:\n1. It defines a type that:\n    a. is required to have a URI, but the provided (or inferred) URI is empty, and\n    b. is not annotated - directly or through its `package` - with this\n       annotation (i.e., `@thrift.AllowLegacyMissingUris`)\n2. It uses this annotation unnecessarily, i.e. if:\n   a. it specifies this annotation on a type definition that doesn't need it\n      it (either because it has a non-empty URI, or is not required to have\n      one), or\n   b. it specifies this annotation on the `package` but does not have any\n      type definition that needs it.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 388
       }
   },
   "source_path" : "thrift/annotation/thrift",

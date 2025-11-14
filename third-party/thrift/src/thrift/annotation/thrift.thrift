@@ -346,3 +346,46 @@ struct AllowUnsafeUnionFieldCustomDefaultValue {}
  */
 @scope.Field
 struct AllowUnsafeRequiredFieldQualifier {}
+
+/**
+ * Allows Thrift IDL to build despite missing otherwise required Thrift URIs.
+ *
+ * According to the [Thrift Object Model](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#thrift-uri),
+ * all user-defined types MUST have a unique, non-empty URI. In Thrift IDL, this
+ * is accomplished by either:
+ * 1. Specifying a non-empty [`package`](https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#package-declaration), or
+ * 2. Explicitly adding the `@thrift.Uri` annotation with a non-empty `value`
+ *    (see `struct Uri` above).
+ *
+ * Failure to do so results in an invalid Thrift schema, but this has
+ * historically not been enforced - until H2'2026.
+ *
+ * Use of this annotation is strongly DISCOURAGED, but is provided to allow
+ * existing schemas to be grandfathered in and continue building successfully
+ * until the required URIs are specified.
+ *
+ * This annotation can be specified either on the declaration of types that are
+ * required to have URIs (i.e., struct, union, exception and enum), or on the
+ * file-level `package`.
+ *
+ * Adding this annotation on the `package` is equivalent to annotating every
+ * type definiting in that file that is:
+ * 1. required to have a URI (i.e., struct, union, exception or enum), and
+ * 2. does not have a non-empty URI.
+ *
+ * A Thrift IDL schema is ill-formed if either of the following is true:
+ * 1. It defines a type that:
+ *     a. is required to have a URI, but the provided (or inferred) URI is empty, and
+ *     b. is not annotated - directly or through its `package` - with this
+ *        annotation (i.e., `@thrift.AllowLegacyMissingUris`)
+ * 2. It uses this annotation unnecessarily, i.e. if:
+ *    a. it specifies this annotation on a type definition that doesn't need it
+ *       it (either because it has a non-empty URI, or is not required to have
+ *       one), or
+ *    b. it specifies this annotation on the `package` but does not have any
+ *       type definition that needs it.
+ */
+@scope.Program
+@scope.Structured
+@scope.Enum
+struct AllowLegacyMissingUris {}

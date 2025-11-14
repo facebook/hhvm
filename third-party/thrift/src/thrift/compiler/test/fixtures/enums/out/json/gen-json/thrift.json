@@ -492,6 +492,24 @@
           "column" : 44
         }
       }
+    },
+    "AllowLegacyMissingUris" : {
+      "lineno" : 388,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 388,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 391,
+          "column" : 33
+        }
+      }
     }
   }
 }

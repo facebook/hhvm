@@ -110,7 +110,7 @@ async function map_async<Tv1, Tv2>(
  * The IO operations for each of calls to `$value_func` will happen in
  * parallel.
  */
-async function map_with_key_async<Tk as arraykey, Tv1, Tv2>(
+async function map_with_key_async<Tk, Tv1, Tv2>(
   KeyedTraversable<Tk, Tv1> $traversable,
   (function(Tk, Tv1)[_]: Awaitable<Tv2>) $value_func,
 )[ctx $value_func]: Awaitable<vec<Tv2>> {

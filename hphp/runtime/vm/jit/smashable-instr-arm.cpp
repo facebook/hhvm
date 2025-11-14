@@ -69,7 +69,6 @@ TCA emitSmashableCall(CodeBlock& cb, CGMeta& meta, TCA target) {
   auto const the_start = cb.frontier();
   meta.smashableLocations.insert(the_start);
 
-  assertx((makeTarget32(target) & 3) == 0);
   addVeneer(meta, the_start, target);
   vixl::Label veneer_addr;
   a.bind(&veneer_addr);
@@ -87,7 +86,6 @@ TCA emitSmashableJmp(CodeBlock& cb, CGMeta& meta, TCA target) {
   auto const the_start = cb.frontier();
   meta.smashableLocations.insert(the_start);
 
-  assertx((makeTarget32(target) & 3) == 0);
   addVeneer(meta, the_start, target);
   vixl::Label veneer_addr;
   a.bind(&veneer_addr);
@@ -106,7 +104,6 @@ TCA emitSmashableJcc(CodeBlock& cb, CGMeta& meta, TCA target,
   auto const the_start = cb.frontier();
   meta.smashableLocations.insert(the_start);
 
-  assertx((makeTarget32(target) & 3) == 0);
   addVeneer(meta, the_start, target);
   vixl::Label veneer_addr;
   a.bind(&veneer_addr);
@@ -148,7 +145,7 @@ bool isVeneer(vixl::Instruction* ldr) {
   auto const rd = ldr->Rd();
 
   return (ldr->IsLoadLiteral() &&
-          ldr->Mask(LoadLiteralMask) == LDR_w_lit &&
+          ldr->Mask(LoadLiteralMask) == LDR_x_lit &&
           br->Mask(UnconditionalBranchToRegisterMask) == BR &&
           br->Rn() == rd);
 }
@@ -206,7 +203,7 @@ void smashCall(TCA inst, TCA target) {
 
   auto const bl = Instruction::Cast(inst);
   auto const ldr = bl->ImmPCOffsetTarget();
-  patchTarget32(ldr->LiteralAddress(), target);
+  patchTarget64(ldr->LiteralAddress(), target);
 
   // If the target can be reached through a direct call, then patch the original
   // call.  Notice that this optimization prevents a debugger guard from being
@@ -247,7 +244,7 @@ void smashJmp(TCA inst, TCA target) {
 
   auto const b = Instruction::Cast(inst);
   auto const ldr = b->ImmPCOffsetTarget();
-  patchTarget32(ldr->LiteralAddress(), target);
+  patchTarget64(ldr->LiteralAddress(), target);
 
   // If the target can be reached through a direct jump, then patch the original
   // jump.  Notice that this optimization prevents a debugger guard from being
@@ -286,7 +283,7 @@ void smashJcc(TCA inst, TCA target) {
 
   auto const b = Instruction::Cast(inst);
   auto const ldr = b->ImmPCOffsetTarget();
-  patchTarget32(ldr->LiteralAddress(), target);
+  patchTarget64(ldr->LiteralAddress(), target);
 
   // If the target can be reached through a direct branch, then patch the
   // original branch.  Notice that this optimization prevents a debugger guard

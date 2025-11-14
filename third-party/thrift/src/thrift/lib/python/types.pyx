@@ -2585,12 +2585,10 @@ cdef class Map(Container):
         return (Map, (self._fbthrift_key_info, self._fbthrift_val_info, dict(self),))
 
     def __getitem__(Map self, object key):
-        try:
-            return self._fbthrift_elements[key]
-        except KeyError:
-            if self._fbthrift_needs_lazy_conversion:
-                return self._fbthrift_lazy_getitem(key)
-            raise
+        if self._fbthrift_needs_lazy_conversion:
+            return self._fbthrift_lazy_getitem(key)
+
+        return self._fbthrift_elements[key]
 
     def __contains__(Map self, key):
         if key is None:
@@ -2675,16 +2673,17 @@ cdef class Map(Container):
         """
         Lazily converts a single map value when accessed by key.
 
-        Called by __getitem__ when key is not yet cached in _fbthrift_elements.
-        Looks up the value in _fbthrift_internal_elements, converts both key
-        and value to Python types, caches in _fbthrift_elements, and returns
-        the converted value.
+        Called by __getitem__ when the Map is in lazy mode.
+        Looks up the value in _fbthrift_internal_elements using the provided key,
+        converts the value to Python type, and returns the converted value.
 
-        Note: Key conversion is performed for consistency since users could use
-        keys with type that extends int, string or float (e.g., IntEnum) and
-        to_internal_data() will handle these cases, though keys requiring
-        conversion would not use lazy mode. String keys may raise UnicodeDecodeError
-        if they are bytes (failed to decode during deserialization).
+        Note: The key is looked up directly in _fbthrift_internal_elements without
+        conversion.
+
+        Design Decision: This method intentionally does not cache converted values;
+        each access performs the conversion again. This trade-off avoids the
+        complexity of maintaining a parallel cache structure while preserving lazy
+        conversion benefits for scenarios where only a subset of values are accessed.
 
         Raises:
             KeyError: If key is not in _fbthrift_internal_elements
@@ -2693,10 +2692,8 @@ cdef class Map(Container):
         cdef TypeInfoBase key_type_info = self._fbthrift_key_info
         cdef TypeInfoBase val_type_info = self._fbthrift_val_info
         value = self._fbthrift_internal_elements[key]
-        key = key_type_info.to_internal_data(key)
-        value = val_type_info.to_python_value(value)
-        self._fbthrift_elements[key] = value
-        return value
+
+        return val_type_info.to_python_value(value)
 
 tag_object_as_mapping(<PyTypeObject*>Map)
 Mapping.register(Map)

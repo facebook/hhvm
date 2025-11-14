@@ -28,11 +28,10 @@ public class CachedRpcClientFactory implements RpcClientFactory {
 
   @Override
   public Mono<RpcClient> createRpcClient(SocketAddress socketAddress) {
-    return delegate
-        .createRpcClient(socketAddress)
-        .cache(
-            value -> java.time.Duration.ofMillis(Long.MAX_VALUE),
-            t -> java.time.Duration.ZERO,
-            () -> java.time.Duration.ZERO);
+    // Return a cached Mono that automatically invalidates when the connection closes.
+    // Each call creates a new cached Mono instance, allowing load balancing to create
+    // separate connections. The cache invalidation prevents stale connection exceptions
+    // from being cached indefinitely, which would cause suppressed exceptions to accumulate.
+    return delegate.createRpcClient(socketAddress).cacheInvalidateWhen(RpcClient::onClose);
   }
 }

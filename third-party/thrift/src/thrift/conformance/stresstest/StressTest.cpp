@@ -17,6 +17,10 @@
 #include <thrift/conformance/stresstest/StressTest.h>
 
 #include <folly/init/Init.h>
+#ifdef __linux__
+#include <ynl/generated/netdev-user.hpp>
+#include <ynl/lib/ynl.hpp>
+#endif
 
 #include <thrift/conformance/stresstest/client/TestRunner.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
@@ -38,6 +42,30 @@ FOLLY_ATTR_WEAK int customStressTestMain(int argc, char* argv[])
 }
 #else
     ;
+#endif
+
+#ifdef __linux__
+int resolve_napi_callback(int ifindex, uint32_t queueId) {
+  ynl_error yerr;
+  ynl_cpp::ynl_socket ys(ynl_cpp::get_ynl_netdev_family(), &yerr);
+  if (!ys) {
+    throw std::runtime_error("no netlink");
+  }
+
+  ynl_cpp::netdev_queue_get_req_dump req;
+  req.ifindex = ifindex;
+  auto resp = ynl_cpp::netdev_queue_get_dump(ys, req);
+  for (auto const& queue : resp->objs) {
+    if (queue.id.value_or(-1) == queueId) {
+      if (!queue.napi_id.has_value()) {
+        throw std::runtime_error(
+            folly::to<std::string>("queue ", queueId, " has no napi id"));
+      }
+      return static_cast<int>(queue.napi_id.value());
+    }
+  }
+  return -1;
+}
 #endif
 
 } // namespace apache::thrift::stress

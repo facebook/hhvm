@@ -64,7 +64,7 @@ class AsyncConnectionPool : public ConnectionPool<AsyncMysqlClient> {
   AsyncConnectionPool(AsyncConnectionPool&&) = delete;
   AsyncConnectionPool& operator=(AsyncConnectionPool&&) = delete;
 
-  FOLLY_NODISCARD folly::SemiFuture<ConnectResult> connectSemiFuture(
+  [[nodiscard]] folly::SemiFuture<ConnectResult> connectSemiFuture(
       const std::string& host,
       int port,
       const std::string& database_name,
@@ -72,7 +72,7 @@ class AsyncConnectionPool : public ConnectionPool<AsyncMysqlClient> {
       const std::string& password,
       const ConnectionOptions& conn_opts = ConnectionOptions());
 
-  FOLLY_NODISCARD folly::SemiFuture<ConnectResult> connectSemiFuture(
+  [[nodiscard]] folly::SemiFuture<ConnectResult> connectSemiFuture(
       const std::string& host,
       int port,
       const std::string& database_name,
@@ -102,7 +102,7 @@ class AsyncConnectionPool : public ConnectionPool<AsyncMysqlClient> {
   void shutdown() override;
 
   // for debugging, return number of pool keys in the pool
-  FOLLY_NODISCARD size_t getNumKey() const noexcept {
+  [[nodiscard]] size_t getNumKey() const noexcept {
     return conn_storage_.getNumKey();
   }
 

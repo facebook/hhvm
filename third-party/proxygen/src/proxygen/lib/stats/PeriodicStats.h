@@ -54,6 +54,10 @@ class PeriodicStats {
     stopRefresh();
     modifyData(nullptr, /*sync=*/true);
   }
+  PeriodicStats(const PeriodicStats&) = delete;
+  PeriodicStats& operator=(const PeriodicStats&) = delete;
+  PeriodicStats(PeriodicStats&&) = delete;
+  PeriodicStats& operator=(PeriodicStats&&) = delete;
 
   /**
    * A caller can set a custom callback, to be executed by the function

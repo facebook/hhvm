@@ -118,6 +118,11 @@ class WtBufferedStreamData {
     return (hasData() && window_.getAvailable()) || (data_.empty() && fin_);
   }
 
+  // returns true if there's only a pending fin
+  bool onlyFinPending() const {
+    return data_.empty() && fin_;
+  }
+
  private:
   folly::IOBufQueue data_{folly::IOBufQueue::cacheChainLength()};
   bool fin_{false};

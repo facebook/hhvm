@@ -602,7 +602,7 @@ TEST(WtStreamManager, AwaitWritableTest) {
 TEST(WtStreamManager, WritableStreams) {
   using WtStreamManager = detail::WtStreamManager;
   WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
-  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 2};
+  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 3};
   WtStreamManagerCb cb;
   WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
   constexpr auto kBufLen = 65'535;
@@ -653,6 +653,12 @@ TEST(WtStreamManager, WritableStreams) {
   dequeue = streamManager.dequeue(*two, kAtMost);
   EXPECT_EQ(dequeue.data->length(), 1);
   EXPECT_FALSE(dequeue.fin);
+
+  // ::nextWritable should return stream with only a pending fin even if
+  // connection-level fc is blocked
+  auto three = CHECK_NOTNULL(streamManager.createEgressHandle());
+  three->writeStreamData(nullptr, /*fin=*/true, /*byteEventCallback=*/nullptr);
+  EXPECT_EQ(streamManager.nextWritable(), three);
 }
 
 TEST(WtStreamManager, DrainWtSession) {

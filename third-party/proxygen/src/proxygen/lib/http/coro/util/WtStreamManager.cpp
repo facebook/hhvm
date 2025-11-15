@@ -510,8 +510,15 @@ StreamData WtStreamManager::dequeue(WtWriteHandle& wh,
 }
 
 WtStreamManager::WtWriteHandle* WtStreamManager::nextWritable() const noexcept {
-  bool hasSend = !writableStreams_.empty() && connSendFc_.getAvailable() > 0;
-  return hasSend ? *writableStreams_.begin() : nullptr;
+  WriteHandle* wh = !writableStreams_.empty()
+                        ? writehandle_ptr_cast(*writableStreams_.begin())
+                        : nullptr;
+  // streams with only a pending fin should be yielded even if connection-level
+  // flow control window is blocked
+  return (wh && (connSendFc_.getAvailable() > 0 ||
+                 wh->bufferedSendData_.onlyFinPending()))
+             ? wh
+             : nullptr;
 }
 
 void WtStreamManager::onStreamWritable(WtWriteHandle& wh) noexcept {
@@ -531,9 +538,25 @@ void WtStreamManager::shutdown(CloseSession data) noexcept {
   enqueueEvent(std::move(data));
 }
 
+/**
+ * Even if wt connection is flow-control blocked, a stream with only a fin
+ * pending should be yielded from ::nextWritable. We insert streams with only a
+ * pending fin first in the set for ::nextWritable to check such cases in O(1)
+ * time.
+ */
 bool WtStreamManager::Compare::operator()(const WtWriteHandle* l,
                                           const WtWriteHandle* r) const {
-  return l->getID() < r->getID();
+  const auto* lWh = static_cast<const WriteHandle*>(l);
+  const auto* rWh = static_cast<const WriteHandle*>(r);
+  // safe to cast to int64_t as getID() is limited by kMaxVarint
+  int64_t lId = lWh->getID();
+  int64_t rId = rWh->getID();
+  // set highest order bit to ensure id is negative for onlyFinPending streams
+  // (i.e. always less than non-onlyFinPending streams) while maintaining stream
+  // id priority
+  lId |= int64_t(lWh->bufferedSendData_.onlyFinPending()) << 63;
+  rId |= int64_t(rWh->bufferedSendData_.onlyFinPending()) << 63;
+  return lId < rId;
 }
 
 bool WtStreamManager::hasEvent() const noexcept {

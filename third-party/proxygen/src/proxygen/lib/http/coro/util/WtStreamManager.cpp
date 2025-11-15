@@ -168,7 +168,6 @@ struct ReadHandle : public WebTransport::StreamReadHandle {
   BufferedData ingress_;
   uint64_t bytesRead_{0};
   ReadPromise promise_{emptyReadPromise()};
-  folly::exception_wrapper ex_; // set on self stop sending or peer reset_stream
   HandleState state_;
   WriteHandle* wh_{nullptr}; // ptr to the symmetric wh
 };
@@ -196,7 +195,6 @@ struct WriteHandle : public WebTransport::StreamWriteHandle {
 
   Accessor smAccessor_;
   WtBufferedStreamData bufferedSendData_{kDefaultFc};
-  folly::exception_wrapper ex_; // set on peer stop_sending or self reset_stream
   uint64_t err{kInvalidVarint};
   WritePromise promise_{emptyWritePromise()};
   HandleState state_;

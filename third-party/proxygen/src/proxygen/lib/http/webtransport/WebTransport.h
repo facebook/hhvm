@@ -99,12 +99,17 @@ class WebTransport {
       return cs_.getToken();
     }
 
+    [[nodiscard]] const Exception* exception() const {
+      return ex_.get_exception<Exception>();
+    }
+
    protected:
     StreamHandleBase(uint64_t id) : id_(id) {
     }
 
     const uint64_t id_;
     folly::CancellationSource cs_;
+    folly::exception_wrapper ex_;
   };
 
   // Handle for read streams
@@ -197,11 +202,6 @@ class WebTransport {
     virtual folly::Expected<folly::Unit, ErrorCode> resetStream(
         uint32_t error) = 0;
 
-    // Error code from the peer's STOP_SENDING message
-    folly::Optional<uint32_t> stopSendingErrorCode() {
-      return stopSendingErrorCode_;
-    }
-
     virtual folly::Expected<folly::Unit, ErrorCode> setPriority(
         uint8_t level, uint32_t order, bool incremental) = 0;
 
@@ -209,9 +209,6 @@ class WebTransport {
     // writes.
     virtual folly::Expected<folly::SemiFuture<uint64_t>, ErrorCode>
     awaitWritable() = 0;
-
-   protected:
-    folly::Optional<uint32_t> stopSendingErrorCode_;
   };
 
   // Handle for bidirectional streams

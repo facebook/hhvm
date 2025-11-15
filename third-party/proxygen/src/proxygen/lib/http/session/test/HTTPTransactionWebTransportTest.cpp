@@ -505,8 +505,7 @@ TEST_F(HTTPTransactionWebTransportTest, BidiStreamEdgeCases) {
       streamHandle.writeHandle->getCancelToken(), [&streamHandle] {
         // Write cancelled:
         // We can retrieve the stop sending code from the handle
-        EXPECT_EQ(*streamHandle.writeHandle->stopSendingErrorCode(),
-                  WT_APP_ERROR_2);
+        EXPECT_EQ(streamHandle.writeHandle->exception()->error, WT_APP_ERROR_2);
         // attempt to write, will error, but don't reset the stream
         auto res = streamHandle.writeHandle->writeStreamData(
             makeBuf(10), true, nullptr);

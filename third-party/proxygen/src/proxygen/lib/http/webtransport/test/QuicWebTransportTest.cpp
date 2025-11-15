@@ -140,7 +140,7 @@ TEST_F(QuicWebTransportTest, OnStopSending) {
   auto res = handle.value()->writeStreamData(nullptr, true, nullptr);
   EXPECT_TRUE(res.hasError());
   EXPECT_EQ(res.error(), WebTransport::ErrorCode::STOP_SENDING);
-  EXPECT_EQ(*handle.value()->stopSendingErrorCode(), WT_ERROR_1);
+  EXPECT_EQ(handle.value()->exception()->error, WT_ERROR_1);
 }
 
 TEST_F(QuicWebTransportTest, ConnectionError) {

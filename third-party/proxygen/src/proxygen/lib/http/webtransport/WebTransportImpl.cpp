@@ -206,16 +206,13 @@ WebTransportImpl::StreamWriteHandle::writeStreamData(
     bool fin,
     ByteEventCallback* deliveryCallback) {
   VLOG(4) << __func__ << " data=" << data.get() << " fin=" << fin
-          << " deliveryCallback=" << deliveryCallback
-          << " stopSendingEc_=" << stopSendingErrorCode_.value_or(0)
+          << " deliveryCallback=" << deliveryCallback << " ex=" << bool(ex_)
           << " bufferedWrites_.size()=" << bufferedWrites_.size();
 
-  if (stopSendingErrorCode_) {
-    VLOG(4) << __func__ << "; STOP_SENDING code=" << *stopSendingErrorCode_;
+  if (ex_) {
     return folly::makeUnexpected(WebTransport::ErrorCode::STOP_SENDING);
   }
   if (!data && !fin) {
-    VLOG(4) << __func__ << " No data and no FIN, ret=GENERIC_ERROR";
     return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
   }
 
@@ -275,8 +272,8 @@ void WebTransportImpl::StreamWriteHandle::onStopSending(uint32_t errorCode) {
   if (writePromise_.valid()) {
     writePromise_.setException(WebTransport::Exception(errorCode));
     writePromise_ = emptyWritePromise();
-  } else if (!stopSendingErrorCode_) {
-    stopSendingErrorCode_ = errorCode;
+  } else if (!ex_) {
+    ex_ = folly::make_exception_wrapper<WebTransport::Exception>(errorCode);
   }
 
   cs_.requestCancellation();

@@ -40,6 +40,15 @@ class FakeStreamHandle
   folly::Optional<uint32_t> getWriteErr() {
     return writeErr_;
   }
+
+  auto* writeException() {
+    return WebTransport::StreamWriteHandle::exception();
+  }
+
+  auto* readException() {
+    return WebTransport::StreamReadHandle::exception();
+  }
+
   folly::SemiFuture<WebTransport::StreamData> readStreamData() override {
     XCHECK(!promise_) << "One read at a time";
     if (writeErr_) {
@@ -58,8 +67,9 @@ class FakeStreamHandle
     }
   }
   GenericApiRet stopSending(uint32_t code) override {
-    if (!stopSendingErrorCode_) {
-      stopSendingErrorCode_ = code;
+    auto& ex = WebTransport::StreamWriteHandle::ex_;
+    if (!ex) {
+      ex = folly::make_exception_wrapper<WebTransport::Exception>(code);
       cs_.requestCancellation();
     }
     if (!writeErr_) {

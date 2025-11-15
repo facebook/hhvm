@@ -111,7 +111,7 @@ class ResponseChannelRequest {
     throw std::logic_error("unimplemented");
   }
 
-  FOLLY_NODISCARD static bool sendStreamReply(
+  [[nodiscard]] static bool sendStreamReply(
       ResponseChannelRequest::UniquePtr request,
       folly::EventBase* eb,
       ResponsePayload&& payload,
@@ -134,7 +134,7 @@ class ResponseChannelRequest {
     throw std::logic_error("unimplemented");
   }
 
-  FOLLY_NODISCARD static bool sendSinkReply(
+  [[nodiscard]] static bool sendSinkReply(
       ResponseChannelRequest::UniquePtr request,
       folly::EventBase* eb,
       ResponsePayload&& payload,
@@ -155,7 +155,7 @@ class ResponseChannelRequest {
     throw std::logic_error("unimplemented");
   }
 
-  FOLLY_NODISCARD static bool sendBiDiReply(
+  [[nodiscard]] static bool sendBiDiReply(
       ResponseChannelRequest::UniquePtr request,
       folly::EventBase* eb,
       ResponsePayload&& payload,
@@ -206,20 +206,20 @@ class ResponseChannelRequest {
   }
   virtual bool tryStartProcessing() = 0;
 
-  FOLLY_NODISCARD virtual bool sendStreamReply(
+  [[nodiscard]] virtual bool sendStreamReply(
       ResponsePayload&&,
       StreamServerCallbackPtr,
       folly::Optional<uint32_t> = folly::none) {
     throw std::logic_error("unimplemented");
   }
-  FOLLY_NODISCARD virtual bool sendSinkReply(
+  [[nodiscard]] virtual bool sendSinkReply(
       ResponsePayload&&,
       SinkServerCallbackPtr,
       folly::Optional<uint32_t> = folly::none) {
     throw std::logic_error("unimplemented");
   }
 
-  FOLLY_NODISCARD virtual bool sendBiDiReply(
+  [[nodiscard]] virtual bool sendBiDiReply(
       ResponsePayload&&,
       BiDiServerCallbackPtr,
       folly::Optional<uint32_t> = folly::none) {

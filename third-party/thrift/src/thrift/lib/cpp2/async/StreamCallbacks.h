@@ -230,10 +230,10 @@ class StreamServerCallback {
  public:
   virtual ~StreamServerCallback() = default;
 
-  FOLLY_NODISCARD virtual bool onStreamRequestN(uint64_t) = 0;
+  [[nodiscard]] virtual bool onStreamRequestN(uint64_t) = 0;
   virtual void onStreamCancel() = 0;
 
-  FOLLY_NODISCARD virtual bool onSinkHeaders(HeadersPayload&&) { return true; }
+  [[nodiscard]] virtual bool onSinkHeaders(HeadersPayload&&) { return true; }
 
   // not terminating
   virtual void resetClientCallback(StreamClientCallback&) = 0;
@@ -248,16 +248,14 @@ class StreamClientCallback {
 
   // StreamClientCallback must remain alive until onFirstResponse or
   // onFirstResponseError callback runs.
-  FOLLY_NODISCARD virtual bool onFirstResponse(
+  [[nodiscard]] virtual bool onFirstResponse(
       FirstResponsePayload&&, folly::EventBase*, StreamServerCallback*) = 0;
   virtual void onFirstResponseError(folly::exception_wrapper) = 0;
 
-  FOLLY_NODISCARD virtual bool onStreamNext(StreamPayload&&) = 0;
+  [[nodiscard]] virtual bool onStreamNext(StreamPayload&&) = 0;
   virtual void onStreamError(folly::exception_wrapper) = 0;
   virtual void onStreamComplete() = 0;
-  FOLLY_NODISCARD virtual bool onStreamHeaders(HeadersPayload&&) {
-    return true;
-  }
+  [[nodiscard]] virtual bool onStreamHeaders(HeadersPayload&&) { return true; }
 
   // not terminating
   virtual void resetServerCallback(StreamServerCallback&) = 0;
@@ -297,9 +295,9 @@ class SinkServerCallback {
  public:
   virtual ~SinkServerCallback() = default;
 
-  FOLLY_NODISCARD virtual bool onSinkNext(StreamPayload&&) = 0;
+  [[nodiscard]] virtual bool onSinkNext(StreamPayload&&) = 0;
   virtual void onSinkError(folly::exception_wrapper) = 0;
-  FOLLY_NODISCARD virtual bool onSinkComplete() = 0;
+  [[nodiscard]] virtual bool onSinkComplete() = 0;
 
   // not terminating
   virtual void resetClientCallback(SinkClientCallback&) = 0;
@@ -308,14 +306,14 @@ class SinkServerCallback {
 class SinkClientCallback {
  public:
   virtual ~SinkClientCallback() = default;
-  FOLLY_NODISCARD virtual bool onFirstResponse(
+  [[nodiscard]] virtual bool onFirstResponse(
       FirstResponsePayload&&, folly::EventBase*, SinkServerCallback*) = 0;
   virtual void onFirstResponseError(folly::exception_wrapper) = 0;
 
   virtual void onFinalResponse(StreamPayload&&) = 0;
   virtual void onFinalResponseError(folly::exception_wrapper) = 0;
 
-  FOLLY_NODISCARD virtual bool onSinkRequestN(uint64_t) = 0;
+  [[nodiscard]] virtual bool onSinkRequestN(uint64_t) = 0;
 
   // not terminating
   virtual void resetServerCallback(SinkServerCallback&) = 0;
@@ -412,12 +410,12 @@ class BiDiServerCallback {
  public:
   virtual ~BiDiServerCallback() = default;
 
-  FOLLY_NODISCARD virtual bool onStreamRequestN(uint64_t) = 0;
-  FOLLY_NODISCARD virtual bool onStreamCancel() = 0;
+  [[nodiscard]] virtual bool onStreamRequestN(uint64_t) = 0;
+  [[nodiscard]] virtual bool onStreamCancel() = 0;
 
-  FOLLY_NODISCARD virtual bool onSinkNext(StreamPayload&&) = 0;
-  FOLLY_NODISCARD virtual bool onSinkError(folly::exception_wrapper) = 0;
-  FOLLY_NODISCARD virtual bool onSinkComplete() = 0;
+  [[nodiscard]] virtual bool onSinkNext(StreamPayload&&) = 0;
+  [[nodiscard]] virtual bool onSinkError(folly::exception_wrapper) = 0;
+  [[nodiscard]] virtual bool onSinkComplete() = 0;
 
   virtual void resetClientCallback(BiDiClientCallback&) = 0;
 };
@@ -426,16 +424,16 @@ class BiDiClientCallback {
  public:
   virtual ~BiDiClientCallback() = default;
 
-  FOLLY_NODISCARD virtual bool onFirstResponse(
+  [[nodiscard]] virtual bool onFirstResponse(
       FirstResponsePayload&&, folly::EventBase*, BiDiServerCallback*) = 0;
   virtual void onFirstResponseError(folly::exception_wrapper) = 0;
 
-  FOLLY_NODISCARD virtual bool onStreamNext(StreamPayload&&) = 0;
-  FOLLY_NODISCARD virtual bool onStreamError(folly::exception_wrapper) = 0;
-  FOLLY_NODISCARD virtual bool onStreamComplete() = 0;
+  [[nodiscard]] virtual bool onStreamNext(StreamPayload&&) = 0;
+  [[nodiscard]] virtual bool onStreamError(folly::exception_wrapper) = 0;
+  [[nodiscard]] virtual bool onStreamComplete() = 0;
 
-  FOLLY_NODISCARD virtual bool onSinkRequestN(uint64_t) = 0;
-  FOLLY_NODISCARD virtual bool onSinkCancel() = 0;
+  [[nodiscard]] virtual bool onSinkRequestN(uint64_t) = 0;
+  [[nodiscard]] virtual bool onSinkCancel() = 0;
 
   virtual void resetServerCallback(BiDiServerCallback&) = 0;
 };

@@ -235,7 +235,7 @@ folly::Try<FirstResponsePayload> decodeResponseError(
 }
 
 template <class Handler>
-FOLLY_NODISCARD folly::exception_wrapper processFirstResponse(
+[[nodiscard]] folly::exception_wrapper processFirstResponse(
     uint16_t protocolId,
     ResponseRpcMetadata& metadata,
     std::unique_ptr<folly::IOBuf>& payload,
@@ -390,7 +390,7 @@ class FirstRequestProcessorStream : public StreamClientCallback,
         evb_(evb),
         guardedClient_(std::move(guardedClient)) {}
 
-  FOLLY_NODISCARD bool onFirstResponse(
+  [[nodiscard]] bool onFirstResponse(
       FirstResponsePayload&& firstResponse,
       folly::EventBase* evb,
       StreamServerCallback* serverCallback) override {
@@ -473,7 +473,7 @@ class FirstRequestProcessorSink : public SinkClientCallback,
         evb_(evb),
         guardedClient_(std::move(guardedClient)) {}
 
-  FOLLY_NODISCARD bool onFirstResponse(
+  [[nodiscard]] bool onFirstResponse(
       FirstResponsePayload&& firstResponse,
       folly::EventBase* evb,
       SinkServerCallback* serverCallback) override {
@@ -536,7 +536,7 @@ class FirstRequestProcessorSink : public SinkClientCallback,
   void onFinalResponseError(folly::exception_wrapper) override {
     std::terminate();
   }
-  FOLLY_NODISCARD bool onSinkRequestN(uint64_t) override { std::terminate(); }
+  [[nodiscard]] bool onSinkRequestN(uint64_t) override { std::terminate(); }
   void resetServerCallback(SinkServerCallback&) override { std::terminate(); }
 
   bool onSinkNext(StreamPayload&&) override { return true; }
@@ -571,7 +571,7 @@ class FirstRequestProcessorBiDi : public BiDiClientCallback,
         evb_(evb),
         guardedClient_(std::move(guardedClient)) {}
 
-  FOLLY_NODISCARD bool onFirstResponse(
+  [[nodiscard]] bool onFirstResponse(
       FirstResponsePayload&& firstResponse,
       folly::EventBase* evb,
       BiDiServerCallback* serverCallback) override {

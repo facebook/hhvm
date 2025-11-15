@@ -293,6 +293,7 @@ struct WtStreamManager {
    */
   std::set<WtWriteHandle*, Compare> writableStreams_;
 
+  uint64_t connBytesRead_{0};
   FlowController connRecvFc_;
   BufferedFlowController connSendFc_;
   Callback& cb_;

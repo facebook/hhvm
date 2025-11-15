@@ -508,6 +508,88 @@ TEST(WtStreamManager, GrantFlowControlCredit) {
   events = streamManager.moveEvents();
   EXPECT_EQ(events.size(), 1);
   EXPECT_TRUE(std::holds_alternative<MaxConnData>(events[0]));
+
+  // validate that receiving a reset_stream releases connection-level flow
+  // control
+  auto* ingress = CHECK_NOTNULL(streamManager.getOrCreateIngressHandle(0x03));
+  streamManager.enqueue(*ingress, {makeBuf(kBufLen), /*fin=*/false});
+  streamManager.onResetStream(
+      WtStreamManager::ResetStream{ingress->getID(), 0x00});
+  events = streamManager.moveEvents();
+  CHECK_EQ(events.size(), 1);
+  maxConnData = std::get<MaxConnData>(events[0]);
+  EXPECT_EQ(maxConnData.maxData,
+            kBufLen * 4); // we've previously already issued 2x kBufLen
+                          // increments, this is the 3rd
+}
+
+TEST(WtStreamManager, GrantConnFlowControlCreditAfterRead) {
+  using WtStreamManager = detail::WtStreamManager;
+  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
+  WtStreamManager::WtMaxStreams peer{.bidi = 2, .uni = 1};
+  WtStreamManagerCb cb;
+  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
+
+  constexpr auto kBufLen = 65'535;
+
+  // enqueue a total of kBufLen bytes across handles one & two
+  auto one = streamManager.createBidiHandle();
+  auto two = streamManager.createBidiHandle();
+  CHECK(one.readHandle && one.writeHandle && two.readHandle && two.writeHandle);
+
+  EXPECT_TRUE(streamManager.enqueue(*one.readHandle,
+                                    {makeBuf(kBufLen - 1), /*fin=*/true}));
+  EXPECT_TRUE(
+      streamManager.enqueue(*two.readHandle, {makeBuf(1), /*fin=*/true}));
+
+  // we should release conn-fc credit only after app reading kBufLen / 2 bytes
+  // => reading the single bytes from two should not release conn-fc
+  auto read = two.readHandle->readStreamData();
+  EXPECT_TRUE(read.isReady());
+  EXPECT_FALSE(cb.evAvail_);
+
+  // reading from one releases flow control (total bytes read > kBufLen / 2)
+  read = one.readHandle->readStreamData();
+  EXPECT_TRUE(read.isReady());
+
+  EXPECT_TRUE(std::exchange(cb.evAvail_, false));
+  auto events = streamManager.moveEvents();
+  EXPECT_EQ(events.size(), 1);
+  EXPECT_TRUE(std::holds_alternative<WtStreamManager::MaxConnData>(events[0]));
+}
+
+TEST(WtStreamManager, ResetStreamReleasesConnFlowControl) {
+  using WtStreamManager = detail::WtStreamManager;
+  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 3};
+  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+  WtStreamManagerCb cb;
+  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
+  constexpr auto kBufLen = 65'535;
+  constexpr auto kHalfBufLen = (kBufLen / 2) + 1;
+
+  auto* one = CHECK_NOTNULL(streamManager.getOrCreateIngressHandle(0x03));
+  auto* two = CHECK_NOTNULL(streamManager.getOrCreateIngressHandle(0x07));
+  auto* three = CHECK_NOTNULL(streamManager.getOrCreateIngressHandle(0x0b));
+
+  // queue kHalfBufLen across all handles; ensure the last reset releases
+  // conn fc
+  streamManager.enqueue(*one, {makeBuf(kHalfBufLen - 2), /*fin=*/false});
+  streamManager.onResetStream({one->getID()});
+  EXPECT_FALSE(cb.evAvail_);
+
+  streamManager.enqueue(*two, {makeBuf(1), /*fin=*/false});
+  streamManager.onResetStream({two->getID()});
+  EXPECT_FALSE(cb.evAvail_);
+
+  streamManager.enqueue(*three, {makeBuf(1), /*fin=*/false});
+  streamManager.onResetStream({three->getID()});
+  EXPECT_TRUE(cb.evAvail_);
+
+  // validate MaxConnData value
+  auto events = streamManager.moveEvents();
+  EXPECT_EQ(events.size(), 1);
+  auto maxConnData = std::get<WtStreamManager::MaxConnData>(events[0]);
+  EXPECT_EQ(maxConnData.maxData, kBufLen + kHalfBufLen);
 }
 
 TEST(WtStreamManager, StopSendingResetStreamTest) {

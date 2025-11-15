@@ -88,7 +88,7 @@ namespace proxygen::coro::detail {
 struct WtStreamManager::Accessor {
   explicit Accessor(WtStreamManager& sm) : sm_(sm) {
   }
-  void maybeGrantFc(ReadHandle* rh, uint64_t bytes) noexcept;
+  void maybeGrantFc(ReadHandle* rh, uint64_t bytesRead) noexcept;
   void stopSending(ReadHandle& rh, uint32_t err) noexcept;
   void resetStream(WriteHandle& wh, uint32_t err) noexcept;
   void onStreamWritable(WriteHandle& wh) noexcept;
@@ -161,7 +161,7 @@ struct ReadHandle : public WebTransport::StreamReadHandle {
   void finish(bool done) noexcept;
 
   Accessor smAccessor_;
-  FlowController recvFc_{kDefaultFc};
+  FlowController streamRecvFc_{kDefaultFc};
   BufferedData ingress_;
   ReadPromise promise_{emptyReadPromise()};
   folly::exception_wrapper ex_; // set on self stop sending or peer reset_stream
@@ -231,22 +231,30 @@ namespace proxygen::coro::detail {
  *
  * Otherwise release both connection- and stream-level flow control
  */
-void Accessor::maybeGrantFc(ReadHandle* rh, uint64_t bytes) noexcept {
+void Accessor::maybeGrantFc(ReadHandle* rh, uint64_t bytesRead) noexcept {
   // TODO(@damlaj): user-defined flow control values and release when 50% is
   // read
-  XLOG(DBG6) << __func__ << "; rh=" << rh << "; bytes=" << bytes;
+  XLOG(DBG6) << __func__ << "; rh=" << rh;
+
   if (rh) { // handle stream-level flow control
-    auto& streamRecv = rh->recvFc_;
+    auto& streamRecv = rh->streamRecvFc_;
     // if peer has less than rwnd / 2 to send, issue fc
-    bool issueFc = streamRecv.getAvailable() < (kDefaultFc / 2);
+    bool issueFc = streamRecv.getAvailable() <= (kDefaultFc / 2);
+    XLOG(DBG6) << __func__ << "avail=" << streamRecv.getAvailable()
+               << "; issue=" << issueFc;
     if (issueFc) {
       streamRecv.grant(streamRecv.getCurrentOffset() + kDefaultFc);
       sm_.enqueueEvent(MaxStreamData{{streamRecv.getMaxOffset()}, rh->getID()});
     }
   }
-  auto& connRecv = sm_.connRecvFc_;
   // if peer has less than rwnd / 2 to send, issue fc
-  bool issueFc = connRecv.getAvailable() < (kDefaultFc / 2);
+  auto& connRecv = sm_.connRecvFc_;
+  sm_.connBytesRead_ += bytesRead;
+  bool issueFc =
+      (connRecv.getMaxOffset() - sm_.connBytesRead_) <= (kDefaultFc / 2);
+  XLOG(DBG6) << __func__ << "; connMaxOffset=" << connRecv.getMaxOffset()
+             << "; connBytesRead_" << sm_.connBytesRead_
+             << "; issue=" << issueFc;
   if (issueFc) {
     connRecv.grant(connRecv.getCurrentOffset() + kDefaultFc);
     sm_.enqueueEvent(MaxConnData{connRecv.getMaxOffset()});
@@ -609,7 +617,7 @@ folly::Expected<folly::Unit, ReadHandle::ErrCode> ReadHandle::stopSending(
 Result ReadHandle::enqueue(StreamData&& data) noexcept {
   XCHECK(!ingress_.fin) << "already rx'd eof";
   auto len = computeChainLength(data.data);
-  if (!recvFc_.reserve(len)) {
+  if (!streamRecvFc_.reserve(len)) {
     return Result::Fail; // error
   }
   if (len > 0) {
@@ -627,6 +635,13 @@ Result ReadHandle::enqueue(StreamData&& data) noexcept {
   return Result::Ok;
 }
 
+/**
+ * Invoked when peer sends rst_stream or when application calls
+ * ReadHandle::stopSending – in either case, we must attempt to release
+ * connection-level flow control credit. It is unnecessary to
+ * release stream-level flow control because the stream's ingress is complete at
+ * this point.
+ */
 void ReadHandle::cancel(folly::exception_wrapper ex) noexcept {
   XLOG(DBG8) << __func__ << "; ex=" << ex.what();
   ex_ = std::move(ex);
@@ -634,6 +649,9 @@ void ReadHandle::cancel(folly::exception_wrapper ex) noexcept {
   if (auto p = resetPromise(); p.valid()) {
     p.setException(ex_);
   }
+  // release conn fc credit to peer
+  auto len = ingress_.chain.computeChainDataLength();
+  smAccessor_.maybeGrantFc(/*rh=*/nullptr, len);
   cs_.requestCancellation();
   finish(/*done=*/true);
 }

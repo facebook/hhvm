@@ -162,7 +162,7 @@ struct WtStreamManager {
   struct ResetStream {
     uint64_t streamId{0};
     uint64_t err{0};
-    /*uint64_t reliable_offset;*/
+    uint64_t reliableSize{0};
   };
   /**
    * Invoke when receiving a rst_stream capsule – returns Ok if stream was

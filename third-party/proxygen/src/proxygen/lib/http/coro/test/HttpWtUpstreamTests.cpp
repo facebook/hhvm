@@ -790,4 +790,35 @@ TEST(WtStreamManager, CloseWtSession) {
       std::holds_alternative<WtStreamManager::CloseSession>(events.back()));
 }
 
+TEST(WtStreamManager, ResetStreamReliableSize) {
+  using WtStreamManager = detail::WtStreamManager;
+  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
+  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+  WtStreamManagerCb cb;
+
+  // enqueue 100 bytes, ensure ::onResetStream does not deallocate stream until
+  // after 100 bytes are read
+  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
+  auto ingress = CHECK_NOTNULL(streamManager.getOrCreateIngressHandle(0x03));
+  streamManager.enqueue(*ingress, {makeBuf(100), /*fin=*/false});
+
+  auto ct = ingress->getCancelToken();
+  streamManager.onResetStream(WtStreamManager::ResetStream{
+      ingress->getID(), 0x00, /*reliableSize=*/100});
+  // stream still alive
+  EXPECT_TRUE(streamManager.hasStreams());
+  EXPECT_FALSE(ct.isCancellationRequested());
+
+  // read the 100 buffered bytes successfully
+  auto read = ingress->readStreamData();
+  EXPECT_TRUE(read.isReady() &&
+              read.value().data->computeChainDataLength() == 100 &&
+              read.value().fin == false);
+
+  // future read fails with exception
+  read = ingress->readStreamData();
+  EXPECT_TRUE(read.isReady() && read.hasException());
+  EXPECT_FALSE(streamManager.hasStreams());
+}
+
 } // namespace proxygen::coro::test

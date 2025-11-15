@@ -90,7 +90,9 @@ struct WtStreamManager::Accessor {
   }
   void maybeGrantFc(ReadHandle* rh, uint64_t bytesRead) noexcept;
   void stopSending(ReadHandle& rh, uint32_t err) noexcept;
-  void resetStream(WriteHandle& wh, uint32_t err) noexcept;
+  void resetStream(WriteHandle& wh,
+                   uint32_t err,
+                   uint64_t reliableSize) noexcept;
   void onStreamWritable(WriteHandle& wh) noexcept;
   // invoked when write handle or read handle are done
   void done(WriteHandle& wh) noexcept;
@@ -156,13 +158,15 @@ struct ReadHandle : public WebTransport::StreamReadHandle {
   folly::SemiFuture<StreamData> readStreamData() override;
   folly::Expected<folly::Unit, ErrCode> stopSending(uint32_t error) override;
   Result enqueue(StreamData&& data) noexcept;
-  void cancel(folly::exception_wrapper ex) noexcept;
+  void cancel(folly::exception_wrapper ex,
+              uint64_t reliableSize = kInvalidVarint) noexcept;
   ReadPromise resetPromise() noexcept;
   void finish(bool done) noexcept;
 
   Accessor smAccessor_;
   FlowController streamRecvFc_{kDefaultFc};
   BufferedData ingress_;
+  uint64_t bytesRead_{0};
   ReadPromise promise_{emptyReadPromise()};
   folly::exception_wrapper ex_; // set on self stop sending or peer reset_stream
   HandleState state_;
@@ -265,8 +269,10 @@ void Accessor::stopSending(ReadHandle& rh, uint32_t err) noexcept {
   sm_.enqueueEvent(StopSending{rh.getID(), err});
 }
 
-void Accessor::resetStream(WriteHandle& wh, uint32_t err) noexcept {
-  sm_.enqueueEvent(ResetStream{wh.getID(), err});
+void Accessor::resetStream(WriteHandle& wh,
+                           uint32_t err,
+                           uint64_t reliableSize) noexcept {
+  sm_.enqueueEvent(ResetStream{wh.getID(), err, reliableSize});
 }
 
 void Accessor::onStreamWritable(WriteHandle& wh) noexcept {
@@ -476,7 +482,7 @@ WtStreamManager::Result WtStreamManager::onResetStream(
   if (auto* rh = readhandle_ptr_cast(getOrCreateIngressHandle(data.streamId))) {
     auto ex = folly::make_exception_wrapper<WtException>(uint32_t(data.err),
                                                          "rx reset_stream");
-    rh->cancel(std::move(ex));
+    rh->cancel(std::move(ex), data.reliableSize);
     return Ok;
   }
   return Fail;
@@ -589,6 +595,7 @@ folly::SemiFuture<StreamData> ReadHandle::readStreamData() {
   XLOG_IF(FATAL, promise_.valid()) << "one pending read at a time";
   if (!ingress_.chain.empty() || ingress_.fin) {
     auto len = ingress_.chain.computeChainDataLength();
+    bytesRead_ += len;
     // only issue conn-level fc if we've rx'd fin
     smAccessor_.maybeGrantFc(ingress_.fin ? nullptr : this, len);
     auto res = StreamData{ingress_.chain.pop(), ingress_.fin};
@@ -597,9 +604,9 @@ folly::SemiFuture<StreamData> ReadHandle::readStreamData() {
     return folly::makeSemiFuture(std::move(res));
   }
   // always deliver buffered data (even if rx fin) prior to delivering err
-  if (ex_) {
+  if (auto ex = ex_) {
     finish(/*done=*/true);
-    return folly::makeSemiFuture<StreamData>(ex_);
+    return folly::makeSemiFuture<StreamData>(std::move(ex));
   }
   auto [p, f] = folly::makePromiseContract<StreamData>();
   promise_ = std::move(p);
@@ -642,9 +649,15 @@ Result ReadHandle::enqueue(StreamData&& data) noexcept {
  * release stream-level flow control because the stream's ingress is complete at
  * this point.
  */
-void ReadHandle::cancel(folly::exception_wrapper ex) noexcept {
+void ReadHandle::cancel(folly::exception_wrapper ex,
+                        uint64_t reliableSize) noexcept {
   XLOG(DBG8) << __func__ << "; ex=" << ex.what();
+  // ensures future reads after reliableSize bytes have been read fail
   ex_ = std::move(ex);
+  reliableSize = (reliableSize == kInvalidVarint) ? bytesRead_ : reliableSize;
+  if (bytesRead_ < reliableSize) {
+    return;
+  }
   // any pending reads should be resolved with ex
   if (auto p = resetPromise(); p.valid()) {
     p.setException(ex_);
@@ -694,7 +707,7 @@ WriteHandle::writeStreamData(std::unique_ptr<folly::IOBuf> data,
 
 folly::Expected<folly::Unit, WriteHandle::ErrCode> WriteHandle::resetStream(
     uint32_t error) {
-  smAccessor_.resetStream(*this, error);
+  smAccessor_.resetStream(*this, error, /*reliableSize=*/0);
   // **beware cancel must be last** (`this` can be deleted immediately after)
   cancel(folly::make_exception_wrapper<WtException>(error, "tx reset_stream"));
   return folly::unit;

@@ -27,6 +27,7 @@
 #include "hphp/util/hugetlb.h"
 #include "hphp/util/numa.h"
 #include "hphp/util/trace.h"
+#include "util/alloc-defs.h"
 
 namespace HPHP::jit {
 
@@ -117,29 +118,32 @@ CodeCache::CodeCache() {
   }
 
 #if USE_JEMALLOC
-  // When we have a low arena, TC must fit below lowArenaMinAddr(). If it
-  // doesn't, we shrink things to make it so.
-  auto const lowArenaStart = lowArenaMinAddr();
-  if (Cfg::Server::Mode) {
-    Logger::Info("lowArenaMinAddr(): 0x%lx", lowArenaStart);
-  }
-  always_assert_flog(
-    usedBase + (32u << 20) <= lowArenaStart,
-    "brk is too big for LOWPTR build (usedBase = {}, lowArenaStart = {})",
-    usedBase, lowArenaStart
-  );
+  if constexpr (use_position_dependent_jemalloc_arenas) {
+    // When using position-dependent custom arenas,
+    // TC must fit below lowArenaMinAddr().
+    // If it doesn't, we shrink things to make it so.
+    auto const lowArenaStart = lowArenaMinAddr();
+    if (Cfg::Server::Mode) {
+      Logger::Info("lowArenaMinAddr(): 0x%lx", lowArenaStart);
+    }
+    always_assert_flog(
+      usedBase + (32u << 20) <= lowArenaStart,
+      "brk is too big for LOWPTR build (usedBase = {}, lowArenaStart = {})",
+      usedBase, lowArenaStart
+    );
 
-  if (usedBase + m_totalSize > lowArenaStart) {
-    cutTCSizeTo(lowArenaStart - usedBase - thread_local_size);
-    new (this) CodeCache;
-    return;
+    if (usedBase + m_totalSize > lowArenaStart) {
+      cutTCSizeTo(lowArenaStart - usedBase - thread_local_size);
+      new (this) CodeCache;
+      return;
+    }
+    always_assert_flog(
+      usedBase + m_totalSize <= lowArenaStart,
+      "computed allocationSize ({}) is too large to fit within "
+      "lowArenaStart ({}), usedBase = {}\n",
+      m_totalSize, lowArenaStart, usedBase
+    );
   }
-  always_assert_flog(
-    usedBase + m_totalSize <= lowArenaStart,
-    "computed allocationSize ({}) is too large to fit within "
-    "lowArenaStart ({}), usedBase = {}\n",
-    m_totalSize, lowArenaStart, usedBase
-  );
 #endif
   // Use MAP_FIXED_NOREPLACE instead of MAP_FIXED so we actually get
   // an error if we overlap with an existing mapping.

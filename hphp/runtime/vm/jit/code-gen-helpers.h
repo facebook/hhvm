@@ -63,6 +63,10 @@ void emitLdPackedPtr(Vout& v, Vptr mem, Vreg reg) {
   ldLowPtrImpl(v, mem, reg, PackedPtr<T>::bits);
 }
 
+inline void emitLdTCAPtr(Vout& v, Vptr mem, Vreg reg) {
+  ldLowPtrImpl(v, mem, reg, LowTCA::bits);
+}
+
 /*
  * Store the LowPtr<T> in `reg' into `mem', with storage size `size'.
  */

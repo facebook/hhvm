@@ -174,7 +174,7 @@ class HandshakeTest : public Test {
           auto tokenOrRetry = cookieCipher_->getTokenOrRetry(
               std::move(readBuf), IOBuf::copyBuffer("test"));
           auto retry =
-              std::move(boost::get<StatelessHelloRetryRequest>(tokenOrRetry));
+              std::move(std::get<StatelessHelloRetryRequest>(tokenOrRetry));
           server->writeChain(nullptr, std::move(retry.data));
         }));
 

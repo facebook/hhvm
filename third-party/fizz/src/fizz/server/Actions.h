@@ -8,14 +8,13 @@
 
 #pragma once
 
-#include <boost/variant.hpp>
-
 #include <fizz/protocol/Actions.h>
 #include <fizz/server/HandshakeLogging.h>
 #include <fizz/util/Variant.h>
 #include <folly/Optional.h>
 #include <folly/futures/Future.h>
 #include <folly/small_vector.h>
+#include <variant>
 
 namespace fizz {
 namespace server {
@@ -73,7 +72,7 @@ struct ReportHandshakeSuccess {};
 FIZZ_DECLARE_VARIANT_TYPE(Action, FIZZ_SERVER_ACTIONS)
 
 using Actions = folly::small_vector<Action, 4>;
-using AsyncActions = boost::variant<Actions, folly::SemiFuture<Actions>>;
+using AsyncActions = std::variant<Actions, folly::SemiFuture<Actions>>;
 
 namespace detail {
 

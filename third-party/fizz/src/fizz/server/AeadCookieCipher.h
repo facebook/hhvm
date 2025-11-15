@@ -8,8 +8,6 @@
 
 #pragma once
 
-#include <boost/variant.hpp>
-
 #include <fizz/server/CookieCipher.h>
 #include <fizz/server/FizzServerContext.h>
 #include <fizz/server/TokenCipher.h>
@@ -51,7 +49,7 @@ class AeadCookieCipher : public CookieCipher {
    * Returns either a stateless hello retry request, or a verified token
    * contained in the client hello.
    */
-  boost::variant<AppToken, StatelessHelloRetryRequest> getTokenOrRetry(
+  std::variant<AppToken, StatelessHelloRetryRequest> getTokenOrRetry(
       Buf clientHello,
       Buf appToken) const;
 

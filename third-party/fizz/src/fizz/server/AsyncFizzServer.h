@@ -123,7 +123,7 @@ class AsyncFizzServerT : public AsyncFizzBase {
       bool closeTransport = true);
   void deliverHandshakeError(folly::exception_wrapper ex);
 
-  class ActionMoveVisitor : public boost::static_visitor<> {
+  class ActionMoveVisitor {
    public:
     explicit ActionMoveVisitor(AsyncFizzServerT<SM>& server)
         : server_(server) {}

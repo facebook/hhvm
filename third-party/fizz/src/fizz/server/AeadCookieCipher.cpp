@@ -84,7 +84,7 @@ inline CookieState decodeCookie(Buf cookie) {
 }
 } // namespace detail
 
-boost::variant<AppToken, StatelessHelloRetryRequest>
+std::variant<AppToken, StatelessHelloRetryRequest>
 AeadCookieCipher::getTokenOrRetry(Buf clientHello, Buf appToken) const {
   folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
   queue.append(std::move(clientHello));

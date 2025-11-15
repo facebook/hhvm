@@ -9,7 +9,6 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
-#include <boost/variant/get.hpp>
 #include <fizz/crypto/exchange/test/Mocks.h>
 #include <fizz/crypto/hpke/test/Mocks.h>
 #include <fizz/crypto/test/TestUtil.h>
@@ -6925,8 +6924,7 @@ TEST_F(ServerProtocolTest, AsyncKeyExchangeTest) {
   fizz::Param param = TestMessages::clientHello();
   // The returned future shouldn't have been fulfilled
   auto asyncActions = detail::processEvent(state_, param);
-  auto& actionsFuture =
-      boost::strict_get<folly::SemiFuture<Actions>>(asyncActions);
+  auto& actionsFuture = std::get<folly::SemiFuture<Actions>>(asyncActions);
   executor_.drain();
 
   // We fulfill the future

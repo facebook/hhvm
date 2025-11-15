@@ -79,7 +79,7 @@ TEST_F(AeadCookieCipherTest, TestGetRetry) {
   useMockRandom();
   auto res = cipher_->getTokenOrRetry(
       getClientHello(nullptr), folly::IOBuf::copyBuffer("test"));
-  auto msg = std::move(boost::get<StatelessHelloRetryRequest>(res));
+  auto msg = std::move(std::get<StatelessHelloRetryRequest>(res));
   EXPECT_EQ(hexlify(msg.data->coalesce()), retry);
 }
 
@@ -88,14 +88,14 @@ TEST_F(AeadCookieCipherTest, TestGetRetryGroup) {
   context_->setSupportedGroups({NamedGroup::secp256r1});
   auto res = cipher_->getTokenOrRetry(
       getClientHello(nullptr), folly::IOBuf::copyBuffer("test"));
-  auto msg = std::move(boost::get<StatelessHelloRetryRequest>(res));
+  auto msg = std::move(std::get<StatelessHelloRetryRequest>(res));
   EXPECT_EQ(hexlify(msg.data->coalesce()), retryGroup);
 }
 
 TEST_F(AeadCookieCipherTest, TestGetToken) {
   auto res = cipher_->getTokenOrRetry(
       getClientHello(toIOBuf(testCookie)), folly::IOBuf::copyBuffer("xx"));
-  auto token = std::move(boost::get<AppToken>(res));
+  auto token = std::move(std::get<AppToken>(res));
   EXPECT_TRUE(
       folly::IOBufEqualTo()(token.token, folly::IOBuf::copyBuffer("test")));
 }

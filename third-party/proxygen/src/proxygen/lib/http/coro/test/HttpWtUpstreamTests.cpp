@@ -821,4 +821,31 @@ TEST(WtStreamManager, ResetStreamReliableSize) {
   EXPECT_FALSE(streamManager.hasStreams());
 }
 
+TEST(WtStreamManager, InvalidCtrlFrames) {
+  using WtStreamManager = detail::WtStreamManager;
+  using Result = WtStreamManager::Result;
+  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
+  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+  WtStreamManagerCb cb;
+  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
+
+  auto bidi = streamManager.createBidiHandle();
+  // stream grant offset (i.e. 0) < stream current offset (i.e. 64KiB)
+  EXPECT_EQ(streamManager.onMaxData(
+                WtStreamManager::MaxStreamData{{0}, bidi.readHandle->getID()}),
+            Result::Fail);
+
+  // conn grant offset (i.e. 0) < conn stream offset (i.e. 64KiB) fails
+  EXPECT_EQ(streamManager.onMaxData(WtStreamManager::MaxConnData{0}),
+            Result::Fail);
+
+  // MaxStreamsBidi{0} < peer.bidi (i.e. 1) fails
+  EXPECT_EQ(streamManager.onMaxStreams(WtStreamManager::MaxStreamsBidi{0}),
+            Result::Fail);
+
+  // MaxStreamsUni{0} < peer.uni (i.e. 1) fails
+  EXPECT_EQ(streamManager.onMaxStreams(WtStreamManager::MaxStreamsUni{0}),
+            Result::Fail);
+}
+
 } // namespace proxygen::coro::test

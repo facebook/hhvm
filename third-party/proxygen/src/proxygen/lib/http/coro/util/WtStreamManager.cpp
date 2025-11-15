@@ -189,7 +189,7 @@ struct WriteHandle : public WebTransport::StreamWriteHandle {
       override;
 
   WebTransport::StreamData dequeue(uint64_t atMost) noexcept;
-  bool onMaxData(uint64_t offset);
+  Result onMaxData(uint64_t offset);
   WritePromise resetPromise() noexcept;
   void cancel(folly::exception_wrapper ex) noexcept;
   void finish(bool done) noexcept;
@@ -446,9 +446,10 @@ WebTransport::BidiStreamHandle WtStreamManager::createBidiHandle() noexcept {
 
 WtStreamManager::Result WtStreamManager::onMaxData(MaxConnData data) noexcept {
   XLOG(DBG9) << __func__ << " maxData=" << data.maxData;
+  if (!connSendFc_.grant(data.maxData)) {
+    return Fail;
+  }
   bool wasEmpty = !hasEvent();
-  std::ignore = // TODO(@damlaj): handle ::grant err
-      connSendFc_.grant(data.maxData);
   if (!wasEmpty && hasEvent()) {
     cb_.eventsAvailable();
   }
@@ -718,13 +719,14 @@ folly::Expected<folly::Unit, WriteHandle::ErrCode> WriteHandle::setPriority(
   XLOG(FATAL) << "not implemented";
 }
 
-bool WriteHandle::onMaxData(uint64_t offset) {
-  // TODO(@damlaj): handle ::grant error
-  bufferedSendData_.grant(offset);
+Result WriteHandle::onMaxData(uint64_t offset) {
+  if (!bufferedSendData_.grant(offset)) {
+    return Result::Fail;
+  }
   if (bufferedSendData_.canSendData()) {
     smAccessor_.onStreamWritable(*this); // stream is now writable
   }
-  return true;
+  return Result::Ok;
 }
 
 folly::Expected<folly::SemiFuture<uint64_t>, WriteHandle::ErrCode>

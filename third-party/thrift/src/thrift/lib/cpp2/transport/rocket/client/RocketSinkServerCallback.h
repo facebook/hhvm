@@ -52,7 +52,7 @@ class RocketSinkServerCallback : public SinkServerCallback {
     clientCallback_ = &clientCallback;
   }
 
-  FOLLY_NODISCARD bool onInitialPayload(
+  [[nodiscard]] bool onInitialPayload(
       FirstResponsePayload&&, folly::EventBase*);
   void onInitialError(folly::exception_wrapper);
 

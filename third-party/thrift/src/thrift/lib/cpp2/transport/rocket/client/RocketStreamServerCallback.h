@@ -48,11 +48,11 @@ class RocketStreamServerCallback : public StreamServerCallback {
     clientCallback_ = &clientCallback;
   }
 
-  FOLLY_NODISCARD bool onInitialPayload(
+  [[nodiscard]] bool onInitialPayload(
       FirstResponsePayload&&, folly::EventBase*);
   void onInitialError(folly::exception_wrapper ew);
 
-  FOLLY_NODISCARD bool onStreamPayload(StreamPayload&&);
+  [[nodiscard]] bool onStreamPayload(StreamPayload&&);
   void onStreamFinalPayload(StreamPayload&&);
   void onStreamComplete();
   void onStreamError(folly::exception_wrapper);

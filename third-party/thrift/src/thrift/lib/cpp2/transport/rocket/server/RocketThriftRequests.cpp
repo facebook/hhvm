@@ -112,7 +112,7 @@ RocketException makeRocketException(
 }
 
 template <typename Serializer>
-FOLLY_NODISCARD std::optional<ResponseRpcError> processFirstResponseHelper(
+[[nodiscard]] std::optional<ResponseRpcError> processFirstResponseHelper(
     ResponseRpcMetadata& metadata,
     std::unique_ptr<folly::IOBuf>& payload,
     int32_t version) noexcept {
@@ -354,7 +354,7 @@ FOLLY_NODISCARD std::optional<ResponseRpcError> processFirstResponseHelper(
   return {};
 }
 
-FOLLY_NODISCARD std::optional<ResponseRpcError> processFirstResponse(
+[[nodiscard]] std::optional<ResponseRpcError> processFirstResponse(
     ResponseRpcMetadata& metadata,
     std::unique_ptr<folly::IOBuf>& payload,
     apache::thrift::protocol::PROTOCOL_TYPES protType,

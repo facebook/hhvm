@@ -383,10 +383,10 @@ class BaseDynView {
   const_iterator cend() const { return ref_.cend(); }
 
   // Checks if the container has no elements.
-  FOLLY_NODISCARD bool empty() const { return ref_.empty(); }
+  [[nodiscard]] bool empty() const { return ref_.empty(); }
 
   // Returns the number of elements in the container.
-  FOLLY_NODISCARD size_t size() const { return ref_.size(); }
+  [[nodiscard]] size_t size() const { return ref_.size(); }
 
   ConstRef asRef() const { return ref_; }
 
@@ -415,17 +415,17 @@ class BaseDynKeyView : public BaseDynView {
   // Returns the number of elements with key that compares equal to the
   // specified argument `key`, which is either 1 or 0 since this container does
   // not allow duplicates.
-  FOLLY_NODISCARD size_t count(ConstRef key) const { return contains(key); }
-  FOLLY_NODISCARD size_t count(const std::string& key) const {
+  [[nodiscard]] size_t count(ConstRef key) const { return contains(key); }
+  [[nodiscard]] size_t count(const std::string& key) const {
     return contains(key);
   }
 
   // Checks if there is an element with key equivalent to `key` in the
   // container.
-  FOLLY_NODISCARD bool contains(ConstRef key) const {
+  [[nodiscard]] bool contains(ConstRef key) const {
     return ref_.get(key).has_value();
   }
-  FOLLY_NODISCARD bool contains(const std::string& key) const {
+  [[nodiscard]] bool contains(const std::string& key) const {
     return ref_.get(key).has_value();
   }
 

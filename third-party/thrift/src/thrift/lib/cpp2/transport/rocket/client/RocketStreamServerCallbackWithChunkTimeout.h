@@ -44,7 +44,7 @@ class RocketStreamServerCallbackWithChunkTimeout
 
   bool onInitialPayload(FirstResponsePayload&&, folly::EventBase*);
 
-  FOLLY_NODISCARD bool onStreamPayload(StreamPayload&&);
+  [[nodiscard]] bool onStreamPayload(StreamPayload&&);
 
   void timeoutExpired() noexcept;
 

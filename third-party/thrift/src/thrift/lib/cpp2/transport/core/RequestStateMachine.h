@@ -74,7 +74,7 @@ class RequestStateMachine {
     return infoStartedProcessing_.load(std::memory_order_relaxed);
   }
 
-  FOLLY_NODISCARD bool includeInRecentRequests() const {
+  [[nodiscard]] bool includeInRecentRequests() const {
     return includeInRecentRequests_;
   }
 

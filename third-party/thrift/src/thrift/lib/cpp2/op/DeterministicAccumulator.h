@@ -157,20 +157,20 @@ class DeterministicAccumulator {
 
 // Creates a deterministic accumulator using the provided hasher.
 template <class Hasher>
-FOLLY_NODISCARD auto makeDeterministicAccumulator() {
+[[nodiscard]] auto makeDeterministicAccumulator() {
   // C++14 can not implicitly generate deduction guide for lambda.
   auto hashGen = [] { return Hasher{}; };
   return DeterministicAccumulator<decltype(hashGen)>(std::move(hashGen));
 }
 
 template <class Accumulator>
-FOLLY_NODISCARD auto makeOrderedHashGuard(Accumulator& accumulator) {
+[[nodiscard]] auto makeOrderedHashGuard(Accumulator& accumulator) {
   accumulator.beginOrdered();
   return folly::makeGuard([&] { accumulator.endOrdered(); });
 }
 
 template <class Accumulator>
-FOLLY_NODISCARD auto makeUnorderedHashGuard(Accumulator& accumulator) {
+[[nodiscard]] auto makeUnorderedHashGuard(Accumulator& accumulator) {
   accumulator.beginUnordered();
   return folly::makeGuard([&] { accumulator.endUnordered(); });
 }

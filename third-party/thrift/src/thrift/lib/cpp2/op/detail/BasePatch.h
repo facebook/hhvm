@@ -169,7 +169,7 @@ class BaseAssignPatch : public BasePatch<Patch, Derived> {
 
   /// Creates a new patch that replaces the existing value.
   template <typename U = value_type>
-  FOLLY_NODISCARD static Derived createAssign(U&& val) {
+  [[nodiscard]] static Derived createAssign(U&& val) {
     Derived patch;
     patch.assign(std::forward<U>(val));
     return patch;
@@ -212,8 +212,8 @@ class BaseAssignPatch : public BasePatch<Patch, Derived> {
   using Base::resetAnd;
   ~BaseAssignPatch() = default; // abstract base class
 
-  FOLLY_NODISCARD bool hasAssign() const { return data_.assign().has_value(); }
-  FOLLY_NODISCARD value_type& assignOr(value_type& value) noexcept {
+  [[nodiscard]] bool hasAssign() const { return data_.assign().has_value(); }
+  [[nodiscard]] value_type& assignOr(value_type& value) noexcept {
     return hasAssign() ? *data_.assign() : value;
   }
 };
@@ -240,7 +240,7 @@ class BaseClearPatch : public BaseAssignPatch<Patch, Derived> {
   BaseClearPatch& operator=(BaseClearPatch&&) noexcept = default;
 
   /// Creates a new patch that clears the value.
-  FOLLY_NODISCARD static Derived createClear() {
+  [[nodiscard]] static Derived createClear() {
     Derived patch;
     patch.clear();
     return patch;

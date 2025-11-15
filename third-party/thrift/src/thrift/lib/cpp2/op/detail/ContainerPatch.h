@@ -341,7 +341,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
 
   /// Returns the patch that for the entry.
   template <typename K = typename T::key_type>
-  FOLLY_NODISCARD VP& patchByKey(K&& key) {
+  [[nodiscard]] VP& patchByKey(K&& key) {
     ensurePatchable();
     if (data_.remove()->count(key)) {
       // We are going to delete key, thus patchByKey is no-op and we just return
@@ -355,7 +355,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
 
   /// Ensures that key exists and patches the entry.
   template <typename K = typename T::key_type>
-  FOLLY_NODISCARD VP& ensureAndPatchByKey(K&& key) {
+  [[nodiscard]] VP& ensureAndPatchByKey(K&& key) {
     tryPutMulti({{key, {}}});
     return patchByKey(key);
   }

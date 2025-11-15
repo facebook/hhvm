@@ -73,7 +73,7 @@ uint32_t endContainer(Accumulator& acc) {
 }
 
 template <typename Accumulator>
-FOLLY_NODISCARD auto makeContainerHashGuard(Accumulator& acc, uint32_t size) {
+[[nodiscard]] auto makeContainerHashGuard(Accumulator& acc, uint32_t size) {
   beginContainer(acc, size);
   return folly::makeGuard([&] { endContainer(acc); });
 }

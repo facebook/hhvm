@@ -141,7 +141,7 @@ class Dyn {
 
   // Returns nullptr on mismatch.
   template <ThriftTypeTag Tag>
-  FOLLY_NODISCARD const native_type<Tag>* tryAs() const noexcept {
+  [[nodiscard]] const native_type<Tag>* tryAs() const noexcept {
     // TODO(afuller): Check thrift types match.
     return type_->tryAs<native_type<Tag>>(ptr_);
   }
@@ -151,21 +151,21 @@ class Dyn {
     return tryAs<infer_tag<T>>();
   }
 
-  FOLLY_NODISCARD bool empty() const { return type_->empty(ptr_); }
-  FOLLY_NODISCARD bool identical(const Dyn& rhs) const {
+  [[nodiscard]] bool empty() const { return type_->empty(ptr_); }
+  [[nodiscard]] bool identical(const Dyn& rhs) const {
     return type() == rhs.type() && type_->identical(ptr_, rhs);
   }
-  FOLLY_NODISCARD bool contains(const Dyn& key) const;
+  [[nodiscard]] bool contains(const Dyn& key) const;
 
-  FOLLY_NODISCARD bool equal(const Dyn& rhs) const {
+  [[nodiscard]] bool equal(const Dyn& rhs) const {
     return type_->equal(ptr_, rhs);
   }
-  FOLLY_NODISCARD folly::ordering compare(const Dyn& rhs) const {
+  [[nodiscard]] folly::ordering compare(const Dyn& rhs) const {
     return type_->compare(ptr_, rhs);
   }
   // TODO(dokwon): Only use op::isEmpty after migrating TypeStruct to terse
   // write.
-  FOLLY_NODISCARD bool has_value() const {
+  [[nodiscard]] bool has_value() const {
     return !type().empty() && type().toThrift() != Type::underlying_type{};
   }
 

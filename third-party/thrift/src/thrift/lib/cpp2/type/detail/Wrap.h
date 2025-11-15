@@ -67,10 +67,10 @@ class Wrap {
   explicit Wrap(const underlying_type& data) : data_(data) {}
   explicit Wrap(underlying_type&& data) noexcept : data_(std::move(data)) {}
 
-  FOLLY_NODISCARD underlying_type& toThrift() & { return data_; }
-  FOLLY_NODISCARD const underlying_type& toThrift() const& { return data_; }
-  FOLLY_NODISCARD underlying_type&& toThrift() && { return std::move(data_); }
-  FOLLY_NODISCARD const underlying_type&& toThrift() const&& {
+  [[nodiscard]] underlying_type& toThrift() & { return data_; }
+  [[nodiscard]] const underlying_type& toThrift() const& { return data_; }
+  [[nodiscard]] underlying_type&& toThrift() && { return std::move(data_); }
+  [[nodiscard]] const underlying_type&& toThrift() const&& {
     return std::move(data_);
   }
 
@@ -121,7 +121,7 @@ class Wrap {
   ~Wrap() = default; // abstract base class
 
   // A fluent version of 'reset()'.
-  FOLLY_NODISCARD T& resetAnd() { return (reset(), data_); }
+  [[nodiscard]] T& resetAnd() { return (reset(), data_); }
 };
 
 template <typename Derived, typename T, typename Tag = struct_t<T>>

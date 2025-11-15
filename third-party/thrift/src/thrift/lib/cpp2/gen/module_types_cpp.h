@@ -204,7 +204,7 @@ template <typename E, typename U = std::underlying_type_t<E>>
 FOLLY_ERASE bool enum_find_name(
     E const value, std::string_view* const out) noexcept {
   if constexpr (eligible_for_dense_enum_optimization_v<E>) {
-    static constexpr auto index = []() FOLLY_CONSTEVAL {
+    static constexpr auto index = []() consteval {
       constexpr auto min = folly::to_underlying(TEnumTraits<E>::min());
       constexpr auto max = folly::to_underlying(TEnumTraits<E>::max());
       constexpr auto size = TEnumTraits<E>::size;

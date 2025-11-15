@@ -44,7 +44,7 @@ struct Get;
 
 // Similar to std::find, but returns ordinal.
 template <class T>
-FOLLY_CONSTEVAL type::Ordinal findOrdinal(
+consteval type::Ordinal findOrdinal(
     const T* first, const T* last, const T& value) {
   for (const T* iter = first; iter != last; ++iter) {
     if (*iter == value) {
@@ -67,7 +67,7 @@ class FindOrdinal<T, folly::tag_t<Args...>> {
 
  public:
   static constexpr auto value = findOrdinal(matches, std::end(matches), true);
-  static FOLLY_CONSTEVAL size_t count() {
+  static consteval size_t count() {
     size_t count = 0;
     for (bool b : matches) {
       count += b;
@@ -187,26 +187,26 @@ inline constexpr type::Ordinal
 #endif
 
 template <class Id, class Idents, class TypeTags>
-FOLLY_CONSTEVAL std::enable_if_t<std::is_same_v<Id, void>, FieldOrdinal>
+consteval std::enable_if_t<std::is_same_v<Id, void>, FieldOrdinal>
 getFieldOrdinal(const int16_t*, size_t) {
   return static_cast<FieldOrdinal>(0);
 }
 
 template <class Id, class Idents, class TypeTags>
-FOLLY_CONSTEVAL std::enable_if_t<type::is_field_id_v<Id>, FieldOrdinal>
+consteval std::enable_if_t<type::is_field_id_v<Id>, FieldOrdinal>
 getFieldOrdinal(const int16_t* ids, size_t numFields) {
   return findOrdinal(
       ids + 1, ids + numFields + 1, folly::to_underlying(Id::value));
 }
 
 template <class Id, class Idents, class TypeTags>
-FOLLY_CONSTEVAL std::enable_if_t<type::is_ident_v<Id>, FieldOrdinal>
-getFieldOrdinal(const int16_t*, size_t) {
+consteval std::enable_if_t<type::is_ident_v<Id>, FieldOrdinal> getFieldOrdinal(
+    const int16_t*, size_t) {
   return FindOrdinalInUniqueTypes<Id, Idents>;
 }
 
 template <class Id, class Idents, class TypeTags>
-FOLLY_CONSTEVAL std::enable_if_t<type::detail::is_type_tag_v<Id>, FieldOrdinal>
+consteval std::enable_if_t<type::detail::is_type_tag_v<Id>, FieldOrdinal>
 getFieldOrdinal(const int16_t*, size_t) {
   static_assert(
       FindOrdinal<Id, TypeTags>::count() <= 1, "Type Tag is not unique");

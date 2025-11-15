@@ -188,15 +188,16 @@ TEST(WtStreamManager, BasicSelfBidi) {
   EXPECT_NE(bidiRes.readHandle, nullptr);
   EXPECT_NE(bidiRes.writeHandle, nullptr);
 
-  // 0x08 is not the next expected bidi stream id for client
+  // creating out of order streams is allowed (e.g. 0x08 vs 0x04)
+  // necessary to support quic/http3 as they both use underlying quic stream id
   bidiRes = streamManager.getOrCreateBidiHandle(0x08);
-  EXPECT_EQ(bidiRes.readHandle, nullptr);
-  EXPECT_EQ(bidiRes.writeHandle, nullptr);
-
-  // 0x04 is the next expected bidi stream id for client
-  bidiRes = streamManager.getOrCreateBidiHandle(0x04);
   EXPECT_NE(bidiRes.readHandle, nullptr);
   EXPECT_NE(bidiRes.writeHandle, nullptr);
+
+  // limit saturated => getOrCreateBidiHandle returns nullptr
+  bidiRes = streamManager.getOrCreateBidiHandle(0x04);
+  EXPECT_EQ(bidiRes.readHandle, nullptr);
+  EXPECT_EQ(bidiRes.writeHandle, nullptr);
 }
 
 TEST(WtStreamManager, BasicSelfUni) {
@@ -211,15 +212,16 @@ TEST(WtStreamManager, BasicSelfUni) {
   EXPECT_EQ(bidiRes.readHandle, nullptr); // egress only
   EXPECT_NE(bidiRes.writeHandle, nullptr);
 
-  // 0x0a is not the next expected uni stream id for client
+  // creating out of order streams is allowed (e.g. 0x0a vs 0x06)
+  // necessary to support quic/http3 as they both use underlying quic stream id
   bidiRes = streamManager.getOrCreateBidiHandle(0x0a);
   EXPECT_EQ(bidiRes.readHandle, nullptr); // egress only
-  EXPECT_EQ(bidiRes.writeHandle, nullptr);
-
-  // 0x06 is the next expected uni stream id for client
-  bidiRes = streamManager.getOrCreateBidiHandle(0x06);
-  EXPECT_EQ(bidiRes.readHandle, nullptr); // egress only
   EXPECT_NE(bidiRes.writeHandle, nullptr);
+
+  // limit saturated => getOrCreateBidiHandle returns nullptr
+  bidiRes = streamManager.getOrCreateBidiHandle(0x06);
+  EXPECT_EQ(bidiRes.readHandle, nullptr);
+  EXPECT_EQ(bidiRes.writeHandle, nullptr);
 }
 
 TEST(WtStreamManager, BasicPeerBidi) {
@@ -234,15 +236,16 @@ TEST(WtStreamManager, BasicPeerBidi) {
   EXPECT_NE(bidiRes.readHandle, nullptr);
   EXPECT_NE(bidiRes.writeHandle, nullptr);
 
-  // 0x09 is not the next expected bidi stream for server
+  // receiving out of order streams is allowed (e.g. 0x09 vs 0x05)
+  // hmm should we reject this for http/2 (technically violates max streams)
   bidiRes = streamManager.getOrCreateBidiHandle(0x09);
-  EXPECT_EQ(bidiRes.readHandle, nullptr);
-  EXPECT_EQ(bidiRes.writeHandle, nullptr);
-
-  // 0x05 is the next expected bidi stream for server
-  bidiRes = streamManager.getOrCreateBidiHandle(0x05);
   EXPECT_NE(bidiRes.readHandle, nullptr);
   EXPECT_NE(bidiRes.writeHandle, nullptr);
+
+  // limit saturated => getOrCreateBidiHandle returns nullptr
+  bidiRes = streamManager.getOrCreateBidiHandle(0x05);
+  EXPECT_EQ(bidiRes.readHandle, nullptr);
+  EXPECT_EQ(bidiRes.writeHandle, nullptr);
 }
 
 TEST(WtStreamManager, BasicPeerUni) {
@@ -257,14 +260,15 @@ TEST(WtStreamManager, BasicPeerUni) {
   EXPECT_NE(bidiRes.readHandle, nullptr);
   EXPECT_EQ(bidiRes.writeHandle, nullptr); // ingress only
 
-  // 0x0b is not the next expected uni stream for server
+  // receiving out of order streams is allowed (e.g. 0x0b vs 0x07)
+  // hmm should we reject this for http/2 (technically violates max streams)
   bidiRes = streamManager.getOrCreateBidiHandle(0x0b);
-  EXPECT_EQ(bidiRes.readHandle, nullptr);
-  EXPECT_EQ(bidiRes.writeHandle, nullptr);
-
-  // 0x07 is the next expected bidi stream for server
-  bidiRes = streamManager.getOrCreateBidiHandle(0x07);
   EXPECT_NE(bidiRes.readHandle, nullptr);
+  EXPECT_EQ(bidiRes.writeHandle, nullptr); // ingress only
+
+  // limit saturated => no handle returned
+  bidiRes = streamManager.getOrCreateBidiHandle(0x07);
+  EXPECT_EQ(bidiRes.readHandle, nullptr);
   EXPECT_EQ(bidiRes.writeHandle, nullptr); // ingress only
 }
 
@@ -753,11 +757,10 @@ TEST(WtStreamManager, DrainWtSession) {
   // drain session
   streamManager.onDrainSession({});
 
-  // all self- and peer-initiated streams will fail
+  // streams can still be created after drain
   auto one = streamManager.createBidiHandle();
   auto* two = streamManager.createEgressHandle();
-  EXPECT_TRUE(one.readHandle == nullptr && one.writeHandle == nullptr);
-  EXPECT_TRUE(two == nullptr);
+  EXPECT_TRUE(one.readHandle && one.writeHandle && two);
 }
 
 TEST(WtStreamManager, CloseWtSession) {

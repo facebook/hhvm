@@ -205,26 +205,6 @@ struct WriteHandle : public WebTransport::StreamWriteHandle {
 
 namespace proxygen::coro::detail {
 
-/*static*/ auto WtStreamManager::selfNextStreams(WtDir dir, WtMaxStreams max)
-    -> NextStreams {
-  // default client-initiated streams for dir == client; adjusted if dir is
-  // server
-  NextStreams streams{.bidi = 0x00, .uni = 0x02, .max = max};
-  if (dir == WtDir::Server) {
-    streams.bidi += 1;
-    streams.uni += 1;
-  }
-  return streams;
-}
-
-/*static*/ auto WtStreamManager::peerNextStreams(WtDir dir, WtMaxStreams max)
-    -> NextStreams {
-  // just invert direction and invoke selfNextStreams
-  dir = static_cast<WtDir>(dir ^ 0x01u);
-  auto streams = selfNextStreams(dir, max);
-  return streams;
-}
-
 /**
  * If rh == nullptr, ::maybeGrantFc only releases connection-level flow control.
  * This is set to nullptr if a fin/reset_stream have been received on a
@@ -291,13 +271,65 @@ void Accessor::done(ReadHandle& rh) noexcept {
   }
 }
 
+/*static*/ auto WtStreamManager::nextStreamIds(WtDir dir) -> NextStreamIds {
+  return dir == Client ? NextStreamIds{.bidi = 0x00, .uni = 0x02}
+                       : NextStreamIds{.bidi = 0x01, .uni = 0x03};
+}
+
+/**
+ * MaxStreams (and StreamsCounter) is indexed by the *type* of the stream, which
+ * is derived from the least two significant bits of the stream id, as per
+ * rfc9000 (i.e. the array must be created in the following order: client bidi
+ * (0x00), server bidi (0x01), client uni (0x02), server uni (0x03))
+ */
+/*static*/ auto WtStreamManager::maxStreams(WtDir dir,
+                                            WtMaxStreams self,
+                                            WtMaxStreams peer)
+    -> std::array<uint64_t, StreamType::Max> {
+  std::array<uint64_t, StreamType::Max> res{
+      peer.bidi, self.bidi, peer.uni, self.uni};
+  if (dir == Server) {
+    res = {self.bidi, peer.bidi, self.uni, peer.uni};
+  }
+  return res;
+}
+
+/*static*/ auto WtStreamManager::streamType(uint64_t streamId) -> StreamType {
+  return static_cast<StreamType>(streamId & 0b11);
+}
+
+auto WtStreamManager::StreamsCounterContainer::getCounter(
+    uint64_t streamId) noexcept -> StreamsCounter& {
+  return streamsCounter_[streamType(streamId)];
+}
+
+auto WtStreamManager::StreamsCounterContainer::getCounter(
+    uint64_t streamId) const noexcept -> const StreamsCounter& {
+  return streamsCounter_[streamType(streamId)];
+}
+
+WtStreamManager::MaxStreamsContainer::MaxStreamsContainer(
+    Type maxStreams) noexcept
+    : maxStreams_(maxStreams) {
+}
+
+uint64_t WtStreamManager::MaxStreamsContainer::getMaxStreams(
+    uint64_t streamId) const noexcept {
+  return maxStreams_[streamType(streamId)];
+}
+
+uint64_t& WtStreamManager::MaxStreamsContainer::getMaxStreams(
+    uint64_t streamId) noexcept {
+  return maxStreams_[streamType(streamId)];
+}
+
 WtStreamManager::WtStreamManager(WtDir dir,
                                  WtMaxStreams self,
                                  WtMaxStreams peer,
                                  Callback& cb) noexcept
     : dir_(dir),
-      selfNextStreams_(selfNextStreams(dir, self)),
-      peerNextStreams_(peerNextStreams(dir, peer)),
+      nextStreamIds_(nextStreamIds(dir)),
+      maxStreams_(maxStreams(dir, self, peer)),
       connRecvFc_(kDefaultFc),
       connSendFc_(kDefaultFc),
       cb_(cb) {
@@ -327,31 +359,6 @@ bool WtStreamManager::isEgress(uint64_t streamId) const {
   return isBidi(streamId) || isSelf(streamId);
 }
 
-uint64_t* WtStreamManager::nextExpectedStream(uint64_t streamId) {
-  if (drain_) {
-    return nullptr;
-  }
-
-  // nextExpectedStream can either be a self or peer stream; in either case, we
-  // need to prevent exceeding concurrent streams limit
-  NextStreams* next{&selfNextStreams_};
-  NextStreams* limit{&peerNextStreams_};
-
-  if (isPeer(streamId)) {
-    next = &peerNextStreams_;
-    limit = &selfNextStreams_;
-  }
-
-  uint64_t* nextId{&next->bidi};
-  uint64_t* limitId{&limit->max.bidi};
-  if (isUni(streamId)) {
-    nextId = &next->uni;
-    limitId = &limit->max.uni;
-  }
-  return (streamId == *nextId && ((streamId >> 2) < *limitId)) ? nextId
-                                                               : nullptr;
-}
-
 /**
  * Enqueues an event into events. If this is the first event to be enqueued, it
  * will invoke the Callback (edge-triggered).
@@ -366,16 +373,19 @@ void WtStreamManager::enqueueEvent(Event&& ev) noexcept {
 
 WtStreamManager::Result WtStreamManager::onMaxStreams(MaxStreamsBidi bidi) {
   XCHECK_LE(bidi.maxStreams, kMaxVarint);
-  bool valid = bidi.maxStreams >= peerNextStreams_.max.bidi;
-  peerNextStreams_.max.bidi =
-      std::max(peerNextStreams_.max.bidi, bidi.maxStreams);
+  // the "StreamType" is derived from a self bidi id, simply use nextStreamIds_
+  auto& maxBidi = maxStreams_.getMaxStreams(nextStreamIds_.bidi);
+  bool valid = bidi.maxStreams >= maxBidi;
+  maxBidi = std::max(maxBidi, bidi.maxStreams);
   return (Result)valid;
 }
 
 WtStreamManager::Result WtStreamManager::onMaxStreams(MaxStreamsUni uni) {
   XCHECK_LE(uni.maxStreams, kMaxVarint);
-  bool valid = uni.maxStreams >= peerNextStreams_.max.uni;
-  peerNextStreams_.max.uni = std::max(peerNextStreams_.max.uni, uni.maxStreams);
+  // the "StreamType" is derived from a self uni id, simply use nextStreamIds_
+  auto& maxUni = maxStreams_.getMaxStreams(nextStreamIds_.uni);
+  bool valid = uni.maxStreams >= maxUni;
+  maxUni = std::max(maxUni, uni.maxStreams);
   return (Result)valid;
 }
 
@@ -395,51 +405,65 @@ struct WtStreamManager::BidiHandle {
   }
 };
 
+bool WtStreamManager::streamLimitExceeded(uint64_t streamId) const noexcept {
+  uint64_t opened = streamsCounter_.getCounter(streamId).opened;
+  uint64_t limit = maxStreams_.getMaxStreams(streamId);
+  bool exceeded = opened >= limit;
+  XLOG_IF(ERR, exceeded) << __func__ << "; opened=" << opened
+                         << "; limit=" << limit << "; id=" << streamId;
+  return exceeded;
+}
+
+WtStreamManager::BidiHandle* WtStreamManager::getOrCreateBidiHandleImpl(
+    uint64_t streamId) noexcept {
+  auto it = streams_.find(streamId);
+  if (it != streams_.end()) {
+    return it->second.get();
+  }
+  if (streamLimitExceeded(streamId)) { // peer or self limit saturated
+    return nullptr;
+  }
+  streamsCounter_.getCounter(streamId).opened++;
+  it = streams_.emplace(streamId, BidiHandle::make(streamId, *this)).first;
+  return it->second.get();
+}
+
 WebTransport::StreamWriteHandle* WtStreamManager::getOrCreateEgressHandle(
     uint64_t streamId) noexcept {
-  if (!isEgress(streamId)) {
-    return nullptr; // egress handle invalid
-  }
-
-  // create if next expected stream
-  if (auto* next = nextExpectedStream(streamId)) {
-    auto it = streams_.emplace(streamId, BidiHandle::make(streamId, *this));
-    *next += kStreamIdInc;
-    return &it.first->second->wh;
-  }
-
-  auto it = streams_.find(streamId);
-  return it != streams_.end() ? &it->second->wh : nullptr;
+  auto* handle =
+      isEgress(streamId) ? getOrCreateBidiHandleImpl(streamId) : nullptr;
+  return handle ? &handle->wh : nullptr;
 }
 
 WebTransport::StreamReadHandle* WtStreamManager::getOrCreateIngressHandle(
     uint64_t streamId) noexcept {
-  if (!isIngress(streamId)) {
-    return nullptr; // ingress handle invalid
-  }
-  // create if next expected stream
-  if (auto* next = nextExpectedStream(streamId)) {
-    auto it = streams_.emplace(streamId, BidiHandle::make(streamId, *this));
-    *next += kStreamIdInc;
-    return &it.first->second->rh;
-  }
-
-  auto it = streams_.find(streamId);
-  return it != streams_.end() ? &it->second->rh : nullptr;
+  auto* handle =
+      isIngress(streamId) ? getOrCreateBidiHandleImpl(streamId) : nullptr;
+  return handle ? &handle->rh : nullptr;
 }
 
 WebTransport::BidiStreamHandle WtStreamManager::getOrCreateBidiHandle(
     uint64_t streamId) noexcept {
-  return {getOrCreateIngressHandle(streamId),
-          getOrCreateEgressHandle(streamId)};
+  WebTransport::BidiStreamHandle res{nullptr, nullptr};
+  if (auto* handle = getOrCreateBidiHandleImpl(streamId)) {
+    res.readHandle = isIngress(streamId) ? &handle->rh : nullptr;
+    res.writeHandle = isEgress(streamId) ? &handle->wh : nullptr;
+  }
+  return res;
 }
 
 WtStreamManager::WtWriteHandle* WtStreamManager::createEgressHandle() noexcept {
-  return getOrCreateEgressHandle(selfNextStreams_.uni);
+  auto* handle = getOrCreateEgressHandle(nextStreamIds_.uni);
+  nextStreamIds_.uni += (handle ? kStreamIdInc : 0);
+  return handle;
 }
 
 WebTransport::BidiStreamHandle WtStreamManager::createBidiHandle() noexcept {
-  return getOrCreateBidiHandle(selfNextStreams_.bidi);
+  auto handle = getOrCreateBidiHandle(nextStreamIds_.bidi);
+  if (handle.readHandle || handle.writeHandle) {
+    nextStreamIds_.bidi += kStreamIdInc;
+  }
+  return handle;
 }
 
 WtStreamManager::Result WtStreamManager::onMaxData(MaxConnData data) noexcept {

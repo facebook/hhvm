@@ -65,6 +65,7 @@
 
 namespace proxygen::coro::detail {
 
+// value maps to lsb of stream id as per rfc9000
 enum WtDir : uint8_t { Client = 0, Server = 1 };
 
 constexpr uint64_t kInvalidVarint = std::numeric_limits<uint64_t>::max();
@@ -116,8 +117,11 @@ struct WtStreamManager {
       uint64_t streamId) noexcept;
 
   /**
-   * initiators of streams should use this api, attempts to create the next
-   * consecutive egress/bidi handle
+   * Initiators of streams should use this api, attempts to create the next
+   * consecutive egress/bidi handle. This is not applicable to quic as quic
+   * stream ids may not be consecutive w.r.t WebTransport streams. Usage over
+   * quic should first successfully create the quic stream and use the above
+   * getOrCreate(Ingress|Egress)Handle apis to create a handle.
    */
   WtWriteHandle* createEgressHandle() noexcept;
   WebTransport::BidiStreamHandle createBidiHandle() noexcept;
@@ -260,23 +264,59 @@ struct WtStreamManager {
   [[nodiscard]] bool isIngress(uint64_t streamId) const;
   [[nodiscard]] bool isUni(uint64_t streamId) const;
   [[nodiscard]] bool isBidi(uint64_t streamId) const;
-  uint64_t* nextExpectedStream(uint64_t streamId);
   void enqueueEvent(Event&& ev) noexcept;
   void onStreamWritable(WtWriteHandle& wh) noexcept;
   void shutdownImpl(uint32_t, std::string) noexcept;
   bool hasEvent() const noexcept;
+  struct BidiHandle;
+  BidiHandle* getOrCreateBidiHandleImpl(uint64_t streamId) noexcept;
+  // as per rfc-9000
+  enum StreamType : uint8_t {
+    ClientBidi = 0x00,
+    ServerBidi = 0x01,
+    ClientUni = 0x02,
+    ServerUni = 0x03,
+    Max = 0x04
+  };
+  // value maps to second lsb as per rfc-9000
+  enum WtStreamDir : uint8_t { Bidi = 0x00, Uni = 0x01 };
+  bool streamLimitExceeded(uint64_t streamId) const noexcept;
 
   WtDir dir_;
-  struct NextStreams {
-    uint64_t bidi{0};
-    uint64_t uni{0};  // expected consecutive stream ids
-    WtMaxStreams max; // max concurrency
-  };
-  NextStreams selfNextStreams_;
-  NextStreams peerNextStreams_;
 
-  struct BidiHandle;
   std::map<uint64_t, std::unique_ptr<BidiHandle>> streams_;
+
+  // used for stream initiators
+  struct NextStreamIds {
+    uint64_t bidi{};
+    uint64_t uni{};
+  } nextStreamIds_;
+
+  // index into arrays using the lower two bits of stream id
+  struct StreamsCounter {
+    uint64_t opened{0};
+    uint64_t closed{0};
+  };
+
+  struct StreamsCounterContainer {
+    using Type = std::array<StreamsCounter, StreamType::Max>;
+    explicit StreamsCounterContainer() noexcept = default;
+    StreamsCounter& getCounter(uint64_t streamId) noexcept;
+    const StreamsCounter& getCounter(uint64_t streamId) const noexcept;
+
+   private:
+    Type streamsCounter_;
+  } streamsCounter_;
+
+  struct MaxStreamsContainer {
+    using Type = std::array<uint64_t, StreamType::Max>;
+    explicit MaxStreamsContainer(Type maxStreams) noexcept;
+    uint64_t& getMaxStreams(uint64_t streamId) noexcept;
+    uint64_t getMaxStreams(uint64_t streamId) const noexcept;
+
+   private:
+    Type maxStreams_;
+  } maxStreams_;
 
   // writable streams ordered by stream id
   // TODO(@damlaj): support priorities
@@ -300,9 +340,12 @@ struct WtStreamManager {
   std::vector<Event> ctrlEvents_;
   bool drain_{false};
 
-  // helper functions to compute next streams
-  static NextStreams selfNextStreams(WtDir, WtMaxStreams);
-  static NextStreams peerNextStreams(WtDir, WtMaxStreams);
+  // helper functions to compute next stream ids & max streams
+  static NextStreamIds nextStreamIds(WtDir);
+  static std::array<uint64_t, StreamType::Max> maxStreams(WtDir,
+                                                          WtMaxStreams self,
+                                                          WtMaxStreams peer);
+  static StreamType streamType(uint64_t streamId);
 };
 
 } // namespace proxygen::coro::detail

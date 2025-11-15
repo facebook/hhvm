@@ -316,6 +316,18 @@ TEST(ObjectTest, ProtocolValueToThriftValueStructureMissingField) {
   EXPECT_EQ(foo.field_1(), 1);
 }
 
+TEST(ObjectTest, ProtocolValueToThriftValueBoolList) {
+  using facebook::thrift::lib::test::BoolList;
+  std::vector<bool> bools = {true, false, true, false};
+  Object obj;
+  obj[FieldId{1}] = detail::asValueStruct<type::list<type::bool_t>>(bools);
+
+  BoolList b;
+  EXPECT_TRUE(
+      detail::ProtocolValueToThriftValue<type::struct_t<BoolList>>{}(obj, b));
+  EXPECT_EQ(b.bools(), bools);
+}
+
 TEST(ObjectTest, ProtocolValueToThriftValueNestedStructure) {
   using facebook::thrift::lib::test::Foo;
   using facebook::thrift::lib::test::MyStruct;

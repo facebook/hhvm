@@ -35,6 +35,10 @@ struct Bar {
   20: Foo field_4;
 }
 
+struct BoolList {
+  1: list<bool> bools;
+}
+
 @cpp.EnableCustomTypeOrdering
 struct MyStruct {
   1: optional Foo foo;

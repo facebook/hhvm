@@ -127,7 +127,7 @@ struct ValueHelper<type::list<V>> {
   template <typename C>
   static void set(Value& result, C&& value) {
     auto& result_list = result.emplace_list();
-    for (auto& elem : value) {
+    for (auto&& elem : value) {
       ValueHelper<V>::set(result_list.emplace_back(), forward_elem<C>(elem));
     }
   }
@@ -878,6 +878,16 @@ struct ProtocolValueToThriftValue<type::bool_t> {
   bool operator()(const Value& value, T& b) const {
     if (auto p = value.if_bool()) {
       b = *p;
+      return true;
+    }
+
+    return false;
+  }
+
+  template <folly::vector_bool_reference T>
+  bool operator()(const Value& value, T bit_ref) const {
+    if (auto p = value.if_bool()) {
+      bit_ref = *p;
       return true;
     }
 

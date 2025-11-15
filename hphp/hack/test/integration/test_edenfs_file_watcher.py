@@ -1027,15 +1027,17 @@ function test_deprecated() : void {
         # Let's go to the commit where only hh.conf and .hhconfig existed
         self.test_driver.gotoRev(self.test_driver.clean_slate_commit)
 
+        # This list must include any directory that may exist by default in a fresh hg repository
+        ignored_dirs = [".hg", ".eden", ".edenfs-notifications-state"]
+
         # Let's double-check that we really just have the files we are expecting:
         hhconfig_count = 0
         hh_conf_count = 0
         for _root, dirs, files in os.walk(self.test_driver.repo_dir):
             # Modifying dirs is the documented way to prevent os.walk from traversing into a subdirectory
-            if ".hg" in dirs:
-                dirs.remove(".hg")
-            if ".eden" in dirs:
-                dirs.remove(".eden")
+            for ignored_dir in ignored_dirs:
+                if ignored_dir in dirs:
+                    dirs.remove(ignored_dir)
 
             for file in files:
                 if file == ".hhconfig":
@@ -1043,7 +1045,7 @@ function test_deprecated() : void {
                 elif file == "hh.conf":
                     hh_conf_count += 1
                 else:
-                    self.fail("unexpected file in repo at clean slate commit")
+                    self.fail(f"unexpected file {file} in repo at clean slate commit")
 
         if hhconfig_count != 1 or hh_conf_count != 1:
             self.fail("unexpected file in repo at clean slate commit")

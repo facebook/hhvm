@@ -30,15 +30,15 @@ using QueryOperation_ptr = std::shared_ptr<QueryOperation>;
 using MultiQueryOperation_ptr = std::shared_ptr<MultiQueryOperation>;
 
 // SemiFuture for ConnectOperation
-FOLLY_NODISCARD folly::SemiFuture<ConnectResult> toSemiFuture(
+[[nodiscard]] folly::SemiFuture<ConnectResult> toSemiFuture(
     const ConnectOperation_ptr& conn_op);
 
 // SemiFuture for QueryOperation
-FOLLY_NODISCARD folly::SemiFuture<DbQueryResult> toSemiFuture(
+[[nodiscard]] folly::SemiFuture<DbQueryResult> toSemiFuture(
     QueryOperation_ptr query_op);
 
 // SemiFuture for MultiQueryOperation
-FOLLY_NODISCARD folly::SemiFuture<DbMultiQueryResult> toSemiFuture(
+[[nodiscard]] folly::SemiFuture<DbMultiQueryResult> toSemiFuture(
     MultiQueryOperation_ptr mquery_op);
 
 } // namespace facebook::common::mysql_client

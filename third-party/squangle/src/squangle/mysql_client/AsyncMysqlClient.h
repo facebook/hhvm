@@ -121,7 +121,7 @@ class AsyncMysqlClient : public MysqlClientBase {
 
   static std::shared_ptr<AsyncMysqlClient> defaultClient();
 
-  FOLLY_NODISCARD folly::SemiFuture<ConnectResult> connectSemiFuture(
+  [[nodiscard]] folly::SemiFuture<ConnectResult> connectSemiFuture(
       const std::string& host,
       int port,
       const std::string& database_name,
@@ -133,7 +133,7 @@ class AsyncMysqlClient : public MysqlClientBase {
   // until the operation has finished.
   // In case the we fail to acquire the connection, MysqlException will be
   // thrown.
-  FOLLY_NODISCARD std::unique_ptr<Connection> connect(
+  [[nodiscard]] std::unique_ptr<Connection> connect(
       const std::string& host,
       int port,
       const std::string& database_name,

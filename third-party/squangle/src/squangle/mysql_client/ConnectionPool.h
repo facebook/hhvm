@@ -268,27 +268,27 @@ class ConnectionPoolBase {
 
   PoolKeyStats getPoolKeyStats(const PoolKey& key) const;
 
-  FOLLY_NODISCARD size_t perKeyLimit() const noexcept {
+  [[nodiscard]] size_t perKeyLimit() const noexcept {
     return pool_options_.rlock()->getPerKeyLimit();
   }
 
-  FOLLY_NODISCARD size_t totalLimit() const noexcept {
+  [[nodiscard]] size_t totalLimit() const noexcept {
     return pool_options_.rlock()->getPoolLimit();
   }
 
-  FOLLY_NODISCARD Duration ageTimeout() const noexcept {
+  [[nodiscard]] Duration ageTimeout() const noexcept {
     return pool_options_.rlock()->getAgeTimeout();
   }
 
-  FOLLY_NODISCARD Duration idleTimeout() const noexcept {
+  [[nodiscard]] Duration idleTimeout() const noexcept {
     return pool_options_.rlock()->getIdleTimeout();
   }
 
-  FOLLY_NODISCARD ExpirationPolicy expirationPolicy() const noexcept {
+  [[nodiscard]] ExpirationPolicy expirationPolicy() const noexcept {
     return pool_options_.rlock()->getExpPolicy();
   }
 
-  FOLLY_NODISCARD bool poolPerMysqlInstance() const noexcept {
+  [[nodiscard]] bool poolPerMysqlInstance() const noexcept {
     return pool_options_.rlock()->poolPerMysqlInstance();
   }
 
@@ -469,7 +469,7 @@ class ConnectionPool
     return ret;
   }
 
-  FOLLY_NODISCARD size_t getNumKey() const noexcept {
+  [[nodiscard]] size_t getNumKey() const noexcept {
     return conn_storage_.getNumKey();
   }
 

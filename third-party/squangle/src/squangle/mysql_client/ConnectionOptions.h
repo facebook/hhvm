@@ -116,7 +116,7 @@ class ConnectionOptions {
     return *this;
   }
 
-  FOLLY_NODISCARD bool getUseChecksum() const noexcept {
+  [[nodiscard]] bool getUseChecksum() const noexcept {
     return use_checksum_;
   }
 

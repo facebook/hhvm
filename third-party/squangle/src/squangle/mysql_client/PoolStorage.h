@@ -215,16 +215,16 @@ class PoolStorageData {
     });
   }
 
-  FOLLY_NODISCARD size_t numQueuedOperations(const PoolKey& pool_key) const {
+  [[nodiscard]] size_t numQueuedOperations(const PoolKey& pool_key) const {
     auto it = waitList_.find(pool_key);
     return it == waitList_.end() ? 0 : it->second.size();
   }
 
-  FOLLY_NODISCARD Duration maxIdleTime() const noexcept {
+  [[nodiscard]] Duration maxIdleTime() const noexcept {
     return max_idle_time_;
   }
 
-  FOLLY_NODISCARD size_t getNumKey() const noexcept {
+  [[nodiscard]] size_t getNumKey() const noexcept {
     return stock_.level1NumKey();
   }
 
@@ -387,7 +387,7 @@ class PoolStorage {
     }
   }
 
-  FOLLY_NODISCARD size_t numQueuedOperations(const PoolKey& pool_key) const {
+  [[nodiscard]] size_t numQueuedOperations(const PoolKey& pool_key) const {
     if constexpr (uses_one_thread_v<Client>) {
       return data_.numQueuedOperations(pool_key);
     } else {
@@ -395,7 +395,7 @@ class PoolStorage {
     }
   }
 
-  FOLLY_NODISCARD Duration maxIdleTime() const noexcept {
+  [[nodiscard]] Duration maxIdleTime() const noexcept {
     if constexpr (uses_one_thread_v<Client>) {
       return data_.maxIdleTime();
     } else {
@@ -403,7 +403,7 @@ class PoolStorage {
     }
   }
 
-  FOLLY_NODISCARD size_t getNumKey() const noexcept {
+  [[nodiscard]] size_t getNumKey() const noexcept {
     if constexpr (uses_one_thread_v<Client>) {
       return data_.getNumKey();
     } else {

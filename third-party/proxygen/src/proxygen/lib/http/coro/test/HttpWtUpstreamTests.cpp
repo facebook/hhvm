@@ -176,13 +176,22 @@ struct WtStreamManagerCb : detail::WtStreamManager::Callback {
   bool evAvail_{false};
 };
 
-TEST(WtStreamManager, BasicSelfBidi) {
-  using WtStreamManager = detail::WtStreamManager;
-  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
-  WtStreamManager::WtMaxStreams peer{.bidi = 2, .uni = 1};
-  WtStreamManagerCb cb;
+using WtStreamManager = detail::WtStreamManager;
+using WtConfig = WtStreamManager::WtConfig;
+using MaxStreamsBidi = WtStreamManager::MaxStreamsBidi;
+using MaxStreamsUni = WtStreamManager::MaxStreamsUni;
+using Result = WtStreamManager::Result;
+using MaxConnData = WtStreamManager::MaxConnData;
+using MaxStreamData = WtStreamManager::MaxStreamData;
+using ResetStream = WtStreamManager::ResetStream;
+using CloseSession = WtStreamManager::CloseSession;
+using StopSending = WtStreamManager::StopSending;
 
-  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
+TEST(WtStreamManager, BasicSelfBidi) {
+  WtConfig config{.peerMaxStreamsBidi = 2};
+  WtStreamManagerCb cb;
+  WtStreamManager streamManager{detail::WtDir::Client, config, cb};
+
   // 0x00 is the next expected bidi stream id for client
   auto bidiRes = streamManager.getOrCreateBidiHandle(0x00);
   EXPECT_NE(bidiRes.readHandle, nullptr);
@@ -201,12 +210,10 @@ TEST(WtStreamManager, BasicSelfBidi) {
 }
 
 TEST(WtStreamManager, BasicSelfUni) {
-  using WtStreamManager = detail::WtStreamManager;
-  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
-  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 2};
+  WtConfig config{.peerMaxStreamsUni = 2};
   WtStreamManagerCb cb;
+  WtStreamManager streamManager{detail::WtDir::Client, config, cb};
 
-  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
   // 0x02 is the next expected uni stream id for client
   auto bidiRes = streamManager.getOrCreateBidiHandle(0x02);
   EXPECT_EQ(bidiRes.readHandle, nullptr); // egress only
@@ -225,12 +232,10 @@ TEST(WtStreamManager, BasicSelfUni) {
 }
 
 TEST(WtStreamManager, BasicPeerBidi) {
-  using WtStreamManager = detail::WtStreamManager;
-  WtStreamManager::WtMaxStreams self{.bidi = 2, .uni = 1};
-  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+  WtConfig config{.selfMaxStreamsBidi = 2};
   WtStreamManagerCb cb;
+  WtStreamManager streamManager{detail::WtDir::Client, config, cb};
 
-  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
   // 0x01 is the next expected bidi stream for server
   auto bidiRes = streamManager.getOrCreateBidiHandle(0x01);
   EXPECT_NE(bidiRes.readHandle, nullptr);
@@ -249,12 +254,10 @@ TEST(WtStreamManager, BasicPeerBidi) {
 }
 
 TEST(WtStreamManager, BasicPeerUni) {
-  using WtStreamManager = detail::WtStreamManager;
-  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 2};
-  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+  WtConfig config{.selfMaxStreamsUni = 2};
   WtStreamManagerCb cb;
+  WtStreamManager streamManager{detail::WtDir::Client, config, cb};
 
-  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
   // 0x03 is the next expected uni stream for server
   auto bidiRes = streamManager.getOrCreateBidiHandle(0x03);
   EXPECT_NE(bidiRes.readHandle, nullptr);
@@ -273,12 +276,10 @@ TEST(WtStreamManager, BasicPeerUni) {
 }
 
 TEST(WtStreamManager, NextBidiUniHandle) {
-  using WtStreamManager = detail::WtStreamManager;
-  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
-  WtStreamManager::WtMaxStreams peer{.bidi = 2, .uni = 2};
+  WtConfig config{.peerMaxStreamsBidi = 2, .peerMaxStreamsUni = 2};
   WtStreamManagerCb cb;
+  WtStreamManager streamManager{detail::WtDir::Client, config, cb};
 
-  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
   // next egress handle tests
   auto uni = CHECK_NOTNULL(streamManager.createEgressHandle());
   EXPECT_EQ(uni->getID(), 0x02);
@@ -300,14 +301,9 @@ TEST(WtStreamManager, NextBidiUniHandle) {
 }
 
 TEST(WtStreamManager, StreamLimits) {
-  using WtStreamManager = detail::WtStreamManager;
-  using MaxStreamsBidi = WtStreamManager::MaxStreamsBidi;
-  using MaxStreamsUni = WtStreamManager::MaxStreamsUni;
-  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
-  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+  WtConfig config{};
   WtStreamManagerCb cb;
-
-  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
+  WtStreamManager streamManager{detail::WtDir::Client, config, cb};
 
   // a single egress handle should succeed
   auto uni = streamManager.createEgressHandle();
@@ -342,12 +338,9 @@ TEST(WtStreamManager, StreamLimits) {
 }
 
 TEST(WtStreamManager, EnqueueIngressData) {
-  using WtStreamManager = detail::WtStreamManager;
-  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
-  WtStreamManager::WtMaxStreams peer{.bidi = 2, .uni = 1};
-
+  WtConfig config{.peerMaxStreamsBidi = 2};
   WtStreamManagerCb cb;
-  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
+  WtStreamManager streamManager{detail::WtDir::Client, config, cb};
 
   // next createBidiHandle should succeed
   auto one = streamManager.createBidiHandle();
@@ -376,11 +369,9 @@ TEST(WtStreamManager, EnqueueIngressData) {
 }
 
 TEST(WtStreamManager, WriteEgressHandle) {
-  using WtStreamManager = detail::WtStreamManager;
-  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
-  WtStreamManager::WtMaxStreams peer{.bidi = 2, .uni = 1};
+  WtConfig config{.peerMaxStreamsBidi = 2};
   WtStreamManagerCb cb;
-  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
+  WtStreamManager streamManager{detail::WtDir::Client, config, cb};
 
   // next two ::createBidiHandle should succeed
   auto one = streamManager.createBidiHandle();
@@ -416,13 +407,12 @@ TEST(WtStreamManager, WriteEgressHandle) {
   // grant one a single byte of stream credit; dequeuing from one should yield
   // nothing since we're still blocked on conn flow control
   EXPECT_TRUE(streamManager.onMaxData(
-      WtStreamManager::MaxStreamData{{kBufLen + 1}, one.writeHandle->getID()}));
+      MaxStreamData{{kBufLen + 1}, one.writeHandle->getID()}));
   EXPECT_EQ(streamManager.nextWritable(), nullptr);
 
   // grant one additional byte of conn credit; dequeue from one should yield
   // byte + eof
-  EXPECT_TRUE(
-      streamManager.onMaxData(WtStreamManager::MaxConnData{kBufLen + 1}));
+  EXPECT_TRUE(streamManager.onMaxData(MaxConnData{kBufLen + 1}));
   EXPECT_EQ(streamManager.nextWritable(), one.writeHandle);
   dequeue = streamManager.dequeue(*one.writeHandle, /*atMost=*/kBufLen);
   EXPECT_EQ(dequeue.data->computeChainDataLength(), 1);
@@ -432,8 +422,7 @@ TEST(WtStreamManager, WriteEgressHandle) {
   EXPECT_EQ(streamManager.nextWritable(), nullptr);
 
   // grant enough conn fc credit to unblock two completely
-  EXPECT_TRUE(
-      streamManager.onMaxData(WtStreamManager::MaxConnData{kBufLen * 2}));
+  EXPECT_TRUE(streamManager.onMaxData(MaxConnData{kBufLen * 2}));
   EXPECT_EQ(streamManager.nextWritable(), two.writeHandle);
   dequeue = streamManager.dequeue(*two.writeHandle, /*atMost=*/kBufLen);
   EXPECT_EQ(dequeue.data->computeChainDataLength(), kBufLen - 1);
@@ -441,11 +430,9 @@ TEST(WtStreamManager, WriteEgressHandle) {
 }
 
 TEST(WtStreamManager, BidiHandleCancellation) {
-  using WtStreamManager = detail::WtStreamManager;
-  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
-  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+  WtConfig config{};
   WtStreamManagerCb cb;
-  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
+  WtStreamManager streamManager{detail::WtDir::Client, config, cb};
 
   // next ::createBidiHandle should succeed
   auto one = streamManager.createBidiHandle();
@@ -471,11 +458,9 @@ TEST(WtStreamManager, BidiHandleCancellation) {
 }
 
 TEST(WtStreamManager, GrantFlowControlCredit) {
-  using WtStreamManager = detail::WtStreamManager;
-  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
-  WtStreamManager::WtMaxStreams peer{.bidi = 2, .uni = 1};
+  WtConfig config{.peerMaxStreamsBidi = 2};
   WtStreamManagerCb cb;
-  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
+  WtStreamManager streamManager{detail::WtDir::Client, config, cb};
 
   constexpr auto kBufLen = 65'535;
 
@@ -493,8 +478,6 @@ TEST(WtStreamManager, GrantFlowControlCredit) {
                                                   // triggered
   auto events = streamManager.moveEvents();
   CHECK_GE(events.size(), 2); // one conn & one stream fc
-  using MaxConnData = WtStreamManager::MaxConnData;
-  using MaxStreamData = WtStreamManager::MaxStreamData;
   auto maxStreamData = std::get<MaxStreamData>(events[0]);
   auto maxConnData = std::get<MaxConnData>(events[1]);
   EXPECT_EQ(maxStreamData.streamId, one.readHandle->getID());
@@ -517,8 +500,7 @@ TEST(WtStreamManager, GrantFlowControlCredit) {
   // control
   auto* ingress = CHECK_NOTNULL(streamManager.getOrCreateIngressHandle(0x03));
   streamManager.enqueue(*ingress, {makeBuf(kBufLen), /*fin=*/false});
-  streamManager.onResetStream(
-      WtStreamManager::ResetStream{ingress->getID(), 0x00});
+  streamManager.onResetStream(ResetStream{ingress->getID(), 0x00});
   events = streamManager.moveEvents();
   CHECK_EQ(events.size(), 1);
   maxConnData = std::get<MaxConnData>(events[0]);
@@ -528,11 +510,9 @@ TEST(WtStreamManager, GrantFlowControlCredit) {
 }
 
 TEST(WtStreamManager, GrantConnFlowControlCreditAfterRead) {
-  using WtStreamManager = detail::WtStreamManager;
-  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
-  WtStreamManager::WtMaxStreams peer{.bidi = 2, .uni = 1};
+  WtConfig config{.peerMaxStreamsBidi = 2};
   WtStreamManagerCb cb;
-  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
+  WtStreamManager streamManager{detail::WtDir::Client, config, cb};
 
   constexpr auto kBufLen = 65'535;
 
@@ -559,15 +539,65 @@ TEST(WtStreamManager, GrantConnFlowControlCreditAfterRead) {
   EXPECT_TRUE(std::exchange(cb.evAvail_, false));
   auto events = streamManager.moveEvents();
   EXPECT_EQ(events.size(), 1);
-  EXPECT_TRUE(std::holds_alternative<WtStreamManager::MaxConnData>(events[0]));
+  EXPECT_TRUE(std::holds_alternative<MaxConnData>(events[0]));
+}
+
+TEST(WtStreamManager, NonDefaultFlowControlValues) {
+  WtConfig config{};
+  config.peerMaxConnData = 100;
+  config.peerMaxStreamDataBidi = config.peerMaxStreamDataUni = 60;
+
+  config.selfMaxConnData = config.selfMaxStreamDataBidi =
+      config.selfMaxStreamDataUni = 100;
+  WtStreamManagerCb cb;
+  WtStreamManager streamManager{detail::WtDir::Client, config, cb};
+  constexpr auto kBufLen = 100;
+
+  // enqueue 100 bytes of data
+  auto one = streamManager.createBidiHandle();
+  CHECK(one.readHandle && one.writeHandle);
+  EXPECT_TRUE(streamManager.enqueue(*one.readHandle,
+                                    {makeBuf(kBufLen), /*fin=*/false}));
+
+  // read synchronously available
+  auto fut = one.readHandle->readStreamData();
+  EXPECT_TRUE(fut.isReady() && fut.hasValue());
+
+  EXPECT_TRUE(std::exchange(cb.evAvail_, false)); // callback should have
+                                                  // triggered
+  auto events = streamManager.moveEvents();
+  CHECK_GE(events.size(), 2); // one conn & one stream fc
+  auto maxStreamData = std::get<MaxStreamData>(events[0]);
+  auto maxConnData = std::get<MaxConnData>(events[1]);
+  EXPECT_EQ(maxStreamData.streamId, one.readHandle->getID());
+  EXPECT_EQ(maxStreamData.maxData, kBufLen * 2);
+  EXPECT_EQ(maxConnData.maxData, kBufLen * 2);
+
+  // dequeuing data from one.writeHandle is limited by stream egress fc, which
+  // is 60
+  one.writeHandle->writeStreamData(
+      makeBuf(kBufLen), /*fin=*/true, /*byteEventCallback=*/nullptr);
+  EXPECT_EQ(streamManager.nextWritable(), one.writeHandle);
+  auto dequeue = streamManager.dequeue(*one.writeHandle,
+                                       std::numeric_limits<uint64_t>::max());
+  EXPECT_EQ(dequeue.data->computeChainDataLength(), 60);
+  EXPECT_FALSE(dequeue.fin);
+
+  // dequeuing data from two's writeHandle is now limited by conn egress fc,
+  // which is 100-60=40
+  auto* two = CHECK_NOTNULL(streamManager.createEgressHandle());
+  two->writeStreamData(
+      makeBuf(kBufLen), /*fin=*/true, /*byteEventCallback=*/nullptr);
+  EXPECT_EQ(streamManager.nextWritable(), two);
+  dequeue = streamManager.dequeue(*two, std::numeric_limits<uint64_t>::max());
+  EXPECT_EQ(dequeue.data->computeChainDataLength(), 40);
+  EXPECT_FALSE(dequeue.fin);
 }
 
 TEST(WtStreamManager, ResetStreamReleasesConnFlowControl) {
-  using WtStreamManager = detail::WtStreamManager;
-  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 3};
-  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+  WtConfig config{.selfMaxStreamsUni = 3};
   WtStreamManagerCb cb;
-  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
+  WtStreamManager streamManager{detail::WtDir::Client, config, cb};
   constexpr auto kBufLen = 65'535;
   constexpr auto kHalfBufLen = (kBufLen / 2) + 1;
 
@@ -592,16 +622,14 @@ TEST(WtStreamManager, ResetStreamReleasesConnFlowControl) {
   // validate MaxConnData value
   auto events = streamManager.moveEvents();
   EXPECT_EQ(events.size(), 1);
-  auto maxConnData = std::get<WtStreamManager::MaxConnData>(events[0]);
+  auto maxConnData = std::get<MaxConnData>(events[0]);
   EXPECT_EQ(maxConnData.maxData, kBufLen + kHalfBufLen);
 }
 
 TEST(WtStreamManager, StopSendingResetStreamTest) {
-  using WtStreamManager = detail::WtStreamManager;
-  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
-  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+  WtConfig config{};
   WtStreamManagerCb cb;
-  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
+  WtStreamManager streamManager{detail::WtDir::Client, config, cb};
   constexpr auto kBufLen = 65'535;
 
   // next ::createBidiHandle should succeed
@@ -616,7 +644,7 @@ TEST(WtStreamManager, StopSendingResetStreamTest) {
   EXPECT_TRUE(std::exchange(cb.evAvail_, false));
   auto events = streamManager.moveEvents();
   EXPECT_EQ(events.size(), 1);
-  auto stopSending = std::get<WtStreamManager::StopSending>(events[0]);
+  auto stopSending = std::get<StopSending>(events[0]);
   EXPECT_EQ(stopSending.streamId, id);
   EXPECT_EQ(stopSending.err, 0);
 
@@ -631,7 +659,7 @@ TEST(WtStreamManager, StopSendingResetStreamTest) {
   EXPECT_TRUE(std::exchange(cb.evAvail_, false));
   events = streamManager.moveEvents();
   EXPECT_EQ(events.size(), 1);
-  auto resetStream = std::get<WtStreamManager::ResetStream>(events[0]);
+  auto resetStream = std::get<ResetStream>(events[0]);
   EXPECT_EQ(resetStream.streamId, id);
   EXPECT_EQ(resetStream.err, 1);
 
@@ -648,11 +676,9 @@ TEST(WtStreamManager, StopSendingResetStreamTest) {
 }
 
 TEST(WtStreamManager, AwaitWritableTest) {
-  using WtStreamManager = detail::WtStreamManager;
-  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
-  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+  WtConfig config{};
   WtStreamManagerCb cb;
-  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
+  WtStreamManager streamManager{detail::WtDir::Client, config, cb};
 
   constexpr auto kBufLen = 65'535;
   // next ::createBidiHandle should succeed
@@ -686,11 +712,9 @@ TEST(WtStreamManager, AwaitWritableTest) {
 }
 
 TEST(WtStreamManager, WritableStreams) {
-  using WtStreamManager = detail::WtStreamManager;
-  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
-  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 3};
+  WtConfig config{.peerMaxStreamsUni = 3};
   WtStreamManagerCb cb;
-  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
+  WtStreamManager streamManager{detail::WtDir::Client, config, cb};
   constexpr auto kBufLen = 65'535;
   constexpr auto kAtMost = std::numeric_limits<uint64_t>::max();
 
@@ -731,8 +755,7 @@ TEST(WtStreamManager, WritableStreams) {
   EXPECT_EQ(streamManager.nextWritable(), nullptr);
 
   // issue one additional byte of conn fc
-  EXPECT_TRUE(
-      streamManager.onMaxData(WtStreamManager::MaxConnData{kBufLen + 1}));
+  EXPECT_TRUE(streamManager.onMaxData(MaxConnData{kBufLen + 1}));
 
   // will return two as conn flow control is now available
   EXPECT_EQ(streamManager.nextWritable(), two);
@@ -748,11 +771,9 @@ TEST(WtStreamManager, WritableStreams) {
 }
 
 TEST(WtStreamManager, DrainWtSession) {
-  using WtStreamManager = detail::WtStreamManager;
-  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
-  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+  WtConfig config{};
   WtStreamManagerCb cb;
-  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
+  WtStreamManager streamManager{detail::WtDir::Client, config, cb};
 
   // drain session
   streamManager.onDrainSession({});
@@ -764,11 +785,9 @@ TEST(WtStreamManager, DrainWtSession) {
 }
 
 TEST(WtStreamManager, CloseWtSession) {
-  using WtStreamManager = detail::WtStreamManager;
-  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
-  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+  WtConfig config{};
   WtStreamManagerCb cb;
-  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
+  WtStreamManager streamManager{detail::WtDir::Client, config, cb};
 
   // ensure cancellation source is cancelled when invoked ::onCloseSession
   auto one = streamManager.createBidiHandle();
@@ -779,7 +798,7 @@ TEST(WtStreamManager, CloseWtSession) {
               one.writeHandle->getCancelToken(),
               two->getCancelToken()};
 
-  streamManager.onCloseSession(WtStreamManager::CloseSession{0, ""});
+  streamManager.onCloseSession(CloseSession{0, ""});
   for (auto& ct : cts) {
     EXPECT_TRUE(ct.isCancellationRequested());
   }
@@ -787,27 +806,24 @@ TEST(WtStreamManager, CloseWtSession) {
   EXPECT_TRUE(oneRead.isReady() && oneRead.hasException());
 
   // a locally initiated close should enqueue an event
-  streamManager.shutdown(WtStreamManager::CloseSession{0, ""});
+  streamManager.shutdown(CloseSession{0, ""});
   auto events = streamManager.moveEvents();
-  EXPECT_TRUE(
-      std::holds_alternative<WtStreamManager::CloseSession>(events.back()));
+  EXPECT_TRUE(std::holds_alternative<CloseSession>(events.back()));
 }
 
 TEST(WtStreamManager, ResetStreamReliableSize) {
-  using WtStreamManager = detail::WtStreamManager;
-  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
-  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+  WtConfig config{};
   WtStreamManagerCb cb;
+  WtStreamManager streamManager{detail::WtDir::Client, config, cb};
 
   // enqueue 100 bytes, ensure ::onResetStream does not deallocate stream until
   // after 100 bytes are read
-  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
   auto ingress = CHECK_NOTNULL(streamManager.getOrCreateIngressHandle(0x03));
   streamManager.enqueue(*ingress, {makeBuf(100), /*fin=*/false});
 
   auto ct = ingress->getCancelToken();
-  streamManager.onResetStream(WtStreamManager::ResetStream{
-      ingress->getID(), 0x00, /*reliableSize=*/100});
+  streamManager.onResetStream(
+      ResetStream{ingress->getID(), 0x00, /*reliableSize=*/100});
   // stream still alive
   EXPECT_TRUE(streamManager.hasStreams());
   EXPECT_FALSE(ct.isCancellationRequested());
@@ -825,30 +841,24 @@ TEST(WtStreamManager, ResetStreamReliableSize) {
 }
 
 TEST(WtStreamManager, InvalidCtrlFrames) {
-  using WtStreamManager = detail::WtStreamManager;
-  using Result = WtStreamManager::Result;
-  WtStreamManager::WtMaxStreams self{.bidi = 1, .uni = 1};
-  WtStreamManager::WtMaxStreams peer{.bidi = 1, .uni = 1};
+  WtConfig config{};
   WtStreamManagerCb cb;
-  WtStreamManager streamManager{detail::WtDir::Client, self, peer, cb};
+  WtStreamManager streamManager{detail::WtDir::Client, config, cb};
 
   auto bidi = streamManager.createBidiHandle();
   // stream grant offset (i.e. 0) < stream current offset (i.e. 64KiB)
-  EXPECT_EQ(streamManager.onMaxData(
-                WtStreamManager::MaxStreamData{{0}, bidi.readHandle->getID()}),
-            Result::Fail);
+  EXPECT_EQ(
+      streamManager.onMaxData(MaxStreamData{{0}, bidi.readHandle->getID()}),
+      Result::Fail);
 
   // conn grant offset (i.e. 0) < conn stream offset (i.e. 64KiB) fails
-  EXPECT_EQ(streamManager.onMaxData(WtStreamManager::MaxConnData{0}),
-            Result::Fail);
+  EXPECT_EQ(streamManager.onMaxData(MaxConnData{0}), Result::Fail);
 
   // MaxStreamsBidi{0} < peer.bidi (i.e. 1) fails
-  EXPECT_EQ(streamManager.onMaxStreams(WtStreamManager::MaxStreamsBidi{0}),
-            Result::Fail);
+  EXPECT_EQ(streamManager.onMaxStreams(MaxStreamsBidi{0}), Result::Fail);
 
   // MaxStreamsUni{0} < peer.uni (i.e. 1) fails
-  EXPECT_EQ(streamManager.onMaxStreams(WtStreamManager::MaxStreamsUni{0}),
-            Result::Fail);
+  EXPECT_EQ(streamManager.onMaxStreams(MaxStreamsUni{0}), Result::Fail);
 }
 
 } // namespace proxygen::coro::test

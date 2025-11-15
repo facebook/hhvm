@@ -86,15 +86,24 @@ struct WtStreamManager {
     virtual void eventsAvailable() noexcept = 0;
   };
 
-  struct WtMaxStreams {
-    uint64_t bidi{0};
-    uint64_t uni{0};
+  struct WtConfig {
+    static constexpr auto kDefaultFc = std::numeric_limits<uint16_t>::max();
+    // values we've advertised to the peer
+    uint64_t selfMaxStreamsBidi{1};
+    uint64_t selfMaxStreamsUni{1};
+    uint64_t selfMaxConnData{kDefaultFc};
+    uint64_t selfMaxStreamDataBidi{kDefaultFc};
+    uint64_t selfMaxStreamDataUni{kDefaultFc};
+
+    // values peer has advertised to us
+    uint64_t peerMaxStreamsBidi{1};
+    uint64_t peerMaxStreamsUni{1};
+    uint64_t peerMaxConnData{kDefaultFc};
+    uint64_t peerMaxStreamDataBidi{kDefaultFc};
+    uint64_t peerMaxStreamDataUni{kDefaultFc};
   };
 
-  WtStreamManager(WtDir dir,
-                  WtMaxStreams self,
-                  WtMaxStreams peer,
-                  Callback& cb) noexcept;
+  WtStreamManager(WtDir dir, const WtConfig& config, Callback& cb) noexcept;
   ~WtStreamManager() noexcept;
 
   using WtException = WebTransport::Exception;
@@ -269,7 +278,11 @@ struct WtStreamManager {
   void shutdownImpl(uint32_t, std::string) noexcept;
   bool hasEvent() const noexcept;
   struct BidiHandle;
+  friend struct BidiHandle;
   BidiHandle* getOrCreateBidiHandleImpl(uint64_t streamId) noexcept;
+  [[nodiscard]] uint64_t initStreamRecvFc(uint64_t streamId) const noexcept;
+  [[nodiscard]] uint64_t initStreamSendFc(uint64_t streamId) const noexcept;
+
   // as per rfc-9000
   enum StreamType : uint8_t {
     ClientBidi = 0x00,
@@ -282,7 +295,7 @@ struct WtStreamManager {
   enum WtStreamDir : uint8_t { Bidi = 0x00, Uni = 0x01 };
   bool streamLimitExceeded(uint64_t streamId) const noexcept;
 
-  WtDir dir_;
+  const WtDir dir_;
 
   std::map<uint64_t, std::unique_ptr<BidiHandle>> streams_;
 
@@ -333,6 +346,7 @@ struct WtStreamManager {
    */
   std::set<WtWriteHandle*, Compare> writableStreams_;
 
+  WtConfig wtConfig_;
   uint64_t connBytesRead_{0};
   FlowController connRecvFc_;
   BufferedFlowController connSendFc_;
@@ -340,12 +354,10 @@ struct WtStreamManager {
   std::vector<Event> ctrlEvents_;
   bool drain_{false};
 
-  // helper functions to compute next stream ids & max streams
-  static NextStreamIds nextStreamIds(WtDir);
-  static std::array<uint64_t, StreamType::Max> maxStreams(WtDir,
-                                                          WtMaxStreams self,
-                                                          WtMaxStreams peer);
-  static StreamType streamType(uint64_t streamId);
+  // helper functions to compute next stream ids and max streams
+  static NextStreamIds nextStreamIds(WtDir) noexcept;
+  static MaxStreamsContainer::Type maxStreams(WtDir, const WtConfig&) noexcept;
+  static StreamType streamType(uint64_t streamId) noexcept;
 };
 
 } // namespace proxygen::coro::detail

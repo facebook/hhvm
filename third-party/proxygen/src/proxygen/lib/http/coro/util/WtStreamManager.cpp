@@ -119,9 +119,6 @@ namespace {
 
 constexpr uint8_t kStreamIdInc = 0x04;
 
-// TODO(@damlaj): change default fc
-constexpr auto kDefaultFc = std::numeric_limits<uint16_t>::max();
-
 struct BufferedData {
   folly::IOBuf chain; // head is always empty
   bool fin{false};
@@ -152,7 +149,7 @@ enum HandleState : uint8_t { Closed = 0, Open = 1 };
 
 struct ReadHandle : public WebTransport::StreamReadHandle {
   // why doesn't using StreamReadHandle::StreamReadHandle work here?
-  ReadHandle(uint64_t id, Accessor acc) noexcept;
+  ReadHandle(uint64_t id, uint64_t initRecvWnd, Accessor acc) noexcept;
   using ErrCode = WebTransport::ErrorCode;
   // StreamReadHandle overrides
   folly::SemiFuture<StreamData> readStreamData() override;
@@ -164,7 +161,7 @@ struct ReadHandle : public WebTransport::StreamReadHandle {
   void finish(bool done) noexcept;
 
   Accessor smAccessor_;
-  FlowController streamRecvFc_{kDefaultFc};
+  FlowController streamRecvFc_;
   BufferedData ingress_;
   uint64_t bytesRead_{0};
   ReadPromise promise_{emptyReadPromise()};
@@ -172,7 +169,7 @@ struct ReadHandle : public WebTransport::StreamReadHandle {
   WriteHandle* wh_{nullptr}; // ptr to the symmetric wh
 };
 struct WriteHandle : public WebTransport::StreamWriteHandle {
-  WriteHandle(uint64_t id, Accessor acc) noexcept;
+  WriteHandle(uint64_t id, uint64_t initSendWnd, Accessor acc) noexcept;
   using FcState = WebTransport::FCState;
   using ErrCode = WebTransport::ErrorCode;
   // StreamWriteHandle overrides
@@ -194,7 +191,7 @@ struct WriteHandle : public WebTransport::StreamWriteHandle {
   void finish(bool done) noexcept;
 
   Accessor smAccessor_;
-  WtBufferedStreamData bufferedSendData_{kDefaultFc};
+  WtBufferedStreamData bufferedSendData_;
   uint64_t err{kInvalidVarint};
   WritePromise promise_{emptyWritePromise()};
   HandleState state_;
@@ -217,28 +214,29 @@ void Accessor::maybeGrantFc(ReadHandle* rh, uint64_t bytesRead) noexcept {
   // TODO(@damlaj): user-defined flow control values and release when 50% is
   // read
   XLOG(DBG6) << __func__ << "; rh=" << rh;
-
   if (rh) { // handle stream-level flow control
+    uint64_t initStreamRecvFc = sm_.initStreamRecvFc(rh->getID());
     auto& streamRecv = rh->streamRecvFc_;
     // if peer has less than rwnd / 2 to send, issue fc
-    bool issueFc = streamRecv.getAvailable() <= (kDefaultFc / 2);
+    bool issueFc = streamRecv.getAvailable() <= (initStreamRecvFc / 2);
     XLOG(DBG6) << __func__ << "avail=" << streamRecv.getAvailable()
                << "; issue=" << issueFc;
     if (issueFc) {
-      streamRecv.grant(streamRecv.getCurrentOffset() + kDefaultFc);
+      streamRecv.grant(streamRecv.getCurrentOffset() + initStreamRecvFc);
       sm_.enqueueEvent(MaxStreamData{{streamRecv.getMaxOffset()}, rh->getID()});
     }
   }
+  uint64_t initConnRecvFc = sm_.wtConfig_.selfMaxConnData;
   // if peer has less than rwnd / 2 to send, issue fc
   auto& connRecv = sm_.connRecvFc_;
   sm_.connBytesRead_ += bytesRead;
   bool issueFc =
-      (connRecv.getMaxOffset() - sm_.connBytesRead_) <= (kDefaultFc / 2);
+      (connRecv.getMaxOffset() - sm_.connBytesRead_) <= (initConnRecvFc / 2);
   XLOG(DBG6) << __func__ << "; connMaxOffset=" << connRecv.getMaxOffset()
              << "; connBytesRead_" << sm_.connBytesRead_
              << "; issue=" << issueFc;
   if (issueFc) {
-    connRecv.grant(connRecv.getCurrentOffset() + kDefaultFc);
+    connRecv.grant(connRecv.getCurrentOffset() + initConnRecvFc);
     sm_.enqueueEvent(MaxConnData{connRecv.getMaxOffset()});
   }
 }
@@ -271,7 +269,8 @@ void Accessor::done(ReadHandle& rh) noexcept {
   }
 }
 
-/*static*/ auto WtStreamManager::nextStreamIds(WtDir dir) -> NextStreamIds {
+/*static*/ auto WtStreamManager::nextStreamIds(WtDir dir) noexcept
+    -> NextStreamIds {
   return dir == Client ? NextStreamIds{.bidi = 0x00, .uni = 0x02}
                        : NextStreamIds{.bidi = 0x01, .uni = 0x03};
 }
@@ -283,18 +282,23 @@ void Accessor::done(ReadHandle& rh) noexcept {
  * (0x00), server bidi (0x01), client uni (0x02), server uni (0x03))
  */
 /*static*/ auto WtStreamManager::maxStreams(WtDir dir,
-                                            WtMaxStreams self,
-                                            WtMaxStreams peer)
-    -> std::array<uint64_t, StreamType::Max> {
-  std::array<uint64_t, StreamType::Max> res{
-      peer.bidi, self.bidi, peer.uni, self.uni};
+                                            const WtConfig& config) noexcept
+    -> MaxStreamsContainer::Type {
+  MaxStreamsContainer::Type res{config.peerMaxStreamsBidi,
+                                config.selfMaxStreamsBidi,
+                                config.peerMaxStreamsUni,
+                                config.selfMaxStreamsUni};
   if (dir == Server) {
-    res = {self.bidi, peer.bidi, self.uni, peer.uni};
+    res = {config.selfMaxStreamsBidi,
+           config.peerMaxStreamsBidi,
+           config.selfMaxStreamsUni,
+           config.peerMaxStreamsUni};
   }
   return res;
 }
 
-/*static*/ auto WtStreamManager::streamType(uint64_t streamId) -> StreamType {
+/*static*/ auto WtStreamManager::streamType(uint64_t streamId) noexcept
+    -> StreamType {
   return static_cast<StreamType>(streamId & 0b11);
 }
 
@@ -324,14 +328,14 @@ uint64_t& WtStreamManager::MaxStreamsContainer::getMaxStreams(
 }
 
 WtStreamManager::WtStreamManager(WtDir dir,
-                                 WtMaxStreams self,
-                                 WtMaxStreams peer,
+                                 const WtConfig& config,
                                  Callback& cb) noexcept
     : dir_(dir),
       nextStreamIds_(nextStreamIds(dir)),
-      maxStreams_(maxStreams(dir, self, peer)),
-      connRecvFc_(kDefaultFc),
-      connSendFc_(kDefaultFc),
+      maxStreams_(maxStreams(dir, config)),
+      wtConfig_(config),
+      connRecvFc_(config.selfMaxConnData),
+      connSendFc_(config.peerMaxConnData),
       cb_(cb) {
   XCHECK(dir <= WtDir::Server) << "invalid dir";
 }
@@ -394,7 +398,8 @@ struct WtStreamManager::BidiHandle {
   ReadHandle rh;
 
   BidiHandle(uint64_t id, WtStreamManager& sm)
-      : wh(id, Accessor{sm}), rh(id, Accessor{sm}) {
+      : wh(id, sm.initStreamSendFc(id), Accessor{sm}),
+        rh(id, sm.initStreamRecvFc(id), Accessor{sm}) {
     // link ReadHandle<->WriteHandle
     wh.rh_ = &rh;
     rh.wh_ = &wh;
@@ -600,15 +605,25 @@ bool WtStreamManager::hasEvent() const noexcept {
   return nextWritable() != nullptr || !ctrlEvents_.empty();
 }
 
+uint64_t WtStreamManager::initStreamRecvFc(uint64_t streamId) const noexcept {
+  return isBidi(streamId) ? wtConfig_.selfMaxStreamDataBidi
+                          : wtConfig_.selfMaxStreamDataUni;
+}
+uint64_t WtStreamManager::initStreamSendFc(uint64_t streamId) const noexcept {
+  return isBidi(streamId) ? wtConfig_.peerMaxStreamDataBidi
+                          : wtConfig_.peerMaxStreamDataUni;
+}
+
 } // namespace proxygen::coro::detail
 
 /**
  * ReadHandle & WriteHandle implementations here
  */
 
-ReadHandle::ReadHandle(uint64_t id, Accessor acc) noexcept
+ReadHandle::ReadHandle(uint64_t id, uint64_t initRecvWnd, Accessor acc) noexcept
     : StreamReadHandle(id),
       smAccessor_(acc),
+      streamRecvFc_(initRecvWnd),
       state_(static_cast<HandleState>(acc.isIngress(id))) {
 }
 
@@ -703,9 +718,12 @@ void ReadHandle::finish(bool done) noexcept {
   }
 }
 
-WriteHandle::WriteHandle(uint64_t id, Accessor acc) noexcept
+WriteHandle::WriteHandle(uint64_t id,
+                         uint64_t initSendWnd,
+                         Accessor acc) noexcept
     : StreamWriteHandle(id),
       smAccessor_(acc),
+      bufferedSendData_(initSendWnd),
       state_(static_cast<HandleState>(acc.isEgress(id))) {
 }
 

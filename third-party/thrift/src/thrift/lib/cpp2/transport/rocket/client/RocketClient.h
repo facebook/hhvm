@@ -96,7 +96,7 @@ class RocketClient : public virtual folly::DelayedDestruction,
         folly::Try<Payload>&& response) noexcept = 0;
   };
 
-  FOLLY_NODISCARD folly::Try<Payload> sendRequestResponseSync(
+  [[nodiscard]] folly::Try<Payload> sendRequestResponseSync(
       Payload&& request,
       std::chrono::milliseconds timeout,
       WriteSuccessCallback* callback);
@@ -112,7 +112,7 @@ class RocketClient : public virtual folly::DelayedDestruction,
     virtual void onWrite(folly::Try<void> writeResult) noexcept = 0;
   };
 
-  FOLLY_NODISCARD folly::Try<void> sendRequestFnfSync(Payload&& request);
+  [[nodiscard]] folly::Try<void> sendRequestFnfSync(Payload&& request);
 
   void sendRequestFnf(
       Payload&& request, std::unique_ptr<RequestFnfCallback> callback);
@@ -137,17 +137,17 @@ class RocketClient : public virtual folly::DelayedDestruction,
       BiDiClientCallback* clientCallback,
       folly::Optional<CompressionConfig> compressionConfig = folly::none);
 
-  FOLLY_NODISCARD bool sendRequestN(StreamId streamId, int32_t n);
+  [[nodiscard]] bool sendRequestN(StreamId streamId, int32_t n);
   void cancelStream(StreamId streamId, bool freeChannel = true);
-  FOLLY_NODISCARD bool sendPayload(
+  [[nodiscard]] bool sendPayload(
       StreamId streamId, StreamPayload&& payload, Flags flags);
   // TODO(T235448311): freeChannel should probably always be true
-  FOLLY_NODISCARD bool sendError(
+  [[nodiscard]] bool sendError(
       StreamId streamId, RocketException&& rex, bool freeChannel = true);
-  FOLLY_NODISCARD bool sendComplete(StreamId streamId, bool freeChannel);
-  FOLLY_NODISCARD bool sendHeadersPush(
+  [[nodiscard]] bool sendComplete(StreamId streamId, bool freeChannel);
+  [[nodiscard]] bool sendHeadersPush(
       StreamId streamId, HeadersPayload&& payload);
-  FOLLY_NODISCARD bool sendSinkError(
+  [[nodiscard]] bool sendSinkError(
       StreamId streamId, StreamPayload&& payload, bool freeChannel);
 
   bool streamExists(StreamId streamId) const;
@@ -483,13 +483,13 @@ class RocketClient : public virtual folly::DelayedDestruction,
   class SendFrameContext;
 
   template <typename Frame, typename OnError>
-  FOLLY_NODISCARD bool sendFrame(Frame&& frame, OnError&& onError);
+  [[nodiscard]] bool sendFrame(Frame&& frame, OnError&& onError);
 
   template <typename InitFunc, typename OnError>
-  FOLLY_NODISCARD bool sendVersionDependentFrame(
+  [[nodiscard]] bool sendVersionDependentFrame(
       InitFunc&& initFunc, StreamId streamId, OnError&& onError);
 
-  FOLLY_NODISCARD folly::Try<void> scheduleWrite(RequestContext& ctx);
+  [[nodiscard]] folly::Try<void> scheduleWrite(RequestContext& ctx);
 
   StreamId makeStreamId();
 
@@ -575,7 +575,7 @@ class RocketClient : public virtual folly::DelayedDestruction,
 
   enum class RequestType { INTERNAL, CLIENT };
 
-  FOLLY_NODISCARD auto makeRequestCountGuard(RequestType type) {
+  [[nodiscard]] auto makeRequestCountGuard(RequestType type) {
     ++requests_;
     if (type == RequestType::CLIENT) {
       ++clientRequests_;

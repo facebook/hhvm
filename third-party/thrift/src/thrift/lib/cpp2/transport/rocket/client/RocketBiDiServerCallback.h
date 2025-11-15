@@ -68,9 +68,9 @@ class RocketBiDiServerCallback : public BiDiServerCallback {
   // Connection close special case
   void onConnectionClosed(folly::exception_wrapper);
 
-  FOLLY_NODISCARD bool onStreamPayload(StreamPayload&&);
-  FOLLY_NODISCARD bool onStreamFinalPayload(StreamPayload&&);
-  FOLLY_NODISCARD bool onStreamComplete();
+  [[nodiscard]] bool onStreamPayload(StreamPayload&&);
+  [[nodiscard]] bool onStreamFinalPayload(StreamPayload&&);
+  [[nodiscard]] bool onStreamComplete();
   void onStreamError(folly::exception_wrapper);
 
   StreamId streamId() const noexcept { return streamId_; }

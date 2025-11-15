@@ -1271,7 +1271,7 @@ class RocketClient::SendFrameContext : public folly::fibers::Baton::Waiter {
     }
   }
 
-  FOLLY_NODISCARD static bool run(std::unique_ptr<SendFrameContext> self) {
+  [[nodiscard]] static bool run(std::unique_ptr<SendFrameContext> self) {
     if (auto ew = err(self->client_.scheduleWrite(self->ctx_))) {
       self->onError_(toTransportException(std::move(ew)));
       return false;

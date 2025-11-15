@@ -104,16 +104,16 @@ class RequestContext {
 
   // For REQUEST_RESPONSE contexts, where an immediate matching response is
   // expected
-  FOLLY_NODISCARD folly::Try<Payload> waitForResponse(
+  [[nodiscard]] folly::Try<Payload> waitForResponse(
       std::chrono::milliseconds timeout);
-  FOLLY_NODISCARD folly::Try<Payload> getResponse() &&;
+  [[nodiscard]] folly::Try<Payload> getResponse() &&;
 
   // For request types for which an immediate matching response is not
   // necessarily expected, e.g., REQUEST_FNF and REQUEST_STREAM
-  FOLLY_NODISCARD folly::Try<void> waitForWriteToComplete();
+  [[nodiscard]] folly::Try<void> waitForWriteToComplete();
 
   void waitForWriteToCompleteSchedule(folly::fibers::Baton::Waiter* waiter);
-  FOLLY_NODISCARD folly::Try<void> waitForWriteToCompleteResult();
+  [[nodiscard]] folly::Try<void> waitForWriteToCompleteResult();
 
   void setTimeoutInfo(
       folly::HHWheelTimer& timer,

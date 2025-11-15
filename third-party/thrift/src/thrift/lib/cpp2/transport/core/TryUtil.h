@@ -23,7 +23,7 @@
 namespace apache::thrift {
 
 template <typename T>
-FOLLY_NODISCARD folly::Try<T> collapseTry(
+[[nodiscard]] folly::Try<T> collapseTry(
     folly::Try<folly::Try<T>>&& arg) noexcept {
   static_assert(
       std::is_nothrow_move_constructible_v<folly::Try<T>>,

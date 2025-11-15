@@ -25,8 +25,6 @@ using apache::thrift::compiler::t_program_bundle;
 using apache::thrift::compiler::codemod::file_manager;
 using apache::thrift::compiler::codemod::get_package;
 using apache::thrift::compiler::codemod::get_replacement_content;
-using apache::thrift::compiler::codemod::package_name_generator;
-using apache::thrift::compiler::codemod::package_name_generator_util;
 
 namespace {
 

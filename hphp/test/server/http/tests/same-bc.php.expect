@@ -1,0 +1,137 @@
+Sandbox: 0 (sandbox0) Version: 0
+--------------------------------------------------------
+1
+kEvicted:
+vec(2) {
+  string(10) "simple.php"
+  string(8) "main.php"
+}
+kEvicted, kCompiled:
+vec(2) {
+  string(10) "simple.php"
+  string(8) "main.php"
+}
+kEvicted, kCompiled, kHitDisk:
+vec(2) {
+  string(10) "simple.php"
+  string(8) "main.php"
+}
+kEvicted, kCompiled, kHitDisk, kWaited:
+vec(2) {
+  string(10) "simple.php"
+  string(8) "main.php"
+}
+--------------------------------------------------------
+
+Sandbox: 0 (sandbox0) Version: 1
+--------------------------------------------------------
+1
+kEvicted:
+vec(0) {
+}
+kEvicted, kCompiled:
+vec(0) {
+}
+kEvicted, kCompiled, kHitDisk:
+vec(0) {
+}
+kEvicted, kCompiled, kHitDisk, kWaited:
+vec(0) {
+}
+--------------------------------------------------------
+
+Sandbox: 0 (sandbox0) Version: 2
+--------------------------------------------------------
+1
+kEvicted:
+vec(0) {
+}
+kEvicted, kCompiled:
+vec(0) {
+}
+kEvicted, kCompiled, kHitDisk:
+vec(0) {
+}
+kEvicted, kCompiled, kHitDisk, kWaited:
+vec(0) {
+}
+--------------------------------------------------------
+
+Sandbox: 0 (sandbox0) Version: 3
+--------------------------------------------------------
+1
+kEvicted:
+vec(0) {
+}
+kEvicted, kCompiled:
+vec(2) {
+  string(10) "simple.php"
+  string(8) "main.php"
+}
+kEvicted, kCompiled, kHitDisk:
+vec(2) {
+  string(10) "simple.php"
+  string(8) "main.php"
+}
+kEvicted, kCompiled, kHitDisk, kWaited:
+vec(2) {
+  string(10) "simple.php"
+  string(8) "main.php"
+}
+--------------------------------------------------------
+
+Sandbox: 0 (sandbox0) Version: 4
+--------------------------------------------------------
+1
+kEvicted:
+vec(0) {
+}
+kEvicted, kCompiled:
+vec(0) {
+}
+kEvicted, kCompiled, kHitDisk:
+vec(0) {
+}
+kEvicted, kCompiled, kHitDisk, kWaited:
+vec(0) {
+}
+--------------------------------------------------------
+
+Sandbox: 0 (sandbox0) Version: 5
+--------------------------------------------------------
+1
+kEvicted:
+vec(0) {
+}
+kEvicted, kCompiled:
+vec(0) {
+}
+kEvicted, kCompiled, kHitDisk:
+vec(0) {
+}
+kEvicted, kCompiled, kHitDisk, kWaited:
+vec(0) {
+}
+--------------------------------------------------------
+
+Sandbox: 0 (sandbox0) Version: 6
+--------------------------------------------------------
+2
+kEvicted:
+vec(1) {
+  string(10) "simple.php"
+}
+kEvicted, kCompiled:
+vec(1) {
+  string(10) "simple.php"
+}
+kEvicted, kCompiled, kHitDisk:
+vec(1) {
+  string(10) "simple.php"
+}
+kEvicted, kCompiled, kHitDisk, kWaited:
+vec(1) {
+  string(10) "simple.php"
+}
+--------------------------------------------------------
+

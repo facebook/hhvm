@@ -805,7 +805,7 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
           assertx(unit->sha1() == loader.sha1());
           assertx(unit->hasPerRequestFilepath());
           // Try to re-use the old Unit if we can:
-          if (sameBC(unit)) return CachedFilePtr{*orig, statInfo};
+          if (sameBC(unit)) return CachedFilePtr{orig->cu, statInfo, options};
           if (forPrefetch || canBeBoundToPath(unit, path)) {
             // We can bind the path so it can be used.
             return makeCachedFilePtr(unit);
@@ -855,7 +855,7 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
         if (sameBC(unit)) {
           lock->release();
           delete unit;
-          return CachedFilePtr{*orig, statInfo};
+          return CachedFilePtr{orig->cu, statInfo, options};
         }
 
         // For things like HHAS files, the filepath in the Unit may not
@@ -898,7 +898,7 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
       // the old one. This saves any JIT work we've already done on the
       // orig Unit.
       delete unit;
-      return CachedFilePtr{*orig, statInfo};
+      return CachedFilePtr{orig->cu, statInfo, options};
     }
     flags = FileLoadFlags::kEvicted;
     assertx(!unit || !unit->hasCacheRef());

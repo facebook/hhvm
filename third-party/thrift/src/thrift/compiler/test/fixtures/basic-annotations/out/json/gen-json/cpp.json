@@ -733,27 +733,6 @@
           "column" : 41
         }
       }
-    },
-    "NonOrderable" : {
-      "lineno" : 441,
-      "is_exception" : false,
-      "is_union" : false,
-      "structured_annotations" : {
-        "scope.Structured" : {  }
-      },
-      "fields" : {
-
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 441,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 442,
-          "column" : 23
-        }
-      }
     }
   }
 }

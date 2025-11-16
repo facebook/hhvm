@@ -26,7 +26,7 @@ import com.facebook.thrift.protocol.*;
 /**
  * If there are custom types in thrift structure (e.g., `std::unordered_map` field),
  * We won't define `operator<` automatically (unless URI exists, but that's about
- * to change). Note that `operator<` is always declared, unless `@cpp.NonOrderable` is used.
+ * to change). Note that `operator<` is always declared.
  * This annotation ensures the `operator<` is always defined. For types that
  * don't have `operator<`, such as `std::unordered_map`, we will convert it to
  * a sorted `std::vector<pair<K*, V*>>` to do the comparison.

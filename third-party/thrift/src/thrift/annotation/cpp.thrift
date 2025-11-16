@@ -413,7 +413,7 @@ struct AllowLegacyDeprecatedTerseWritesRef {}
 /**
  * If there are custom types in thrift structure (e.g., `std::unordered_map` field),
  * We won't define `operator<` automatically (unless URI exists, but that's about
- * to change). Note that `operator<` is always declared, unless `@cpp.NonOrderable` is used.
+ * to change). Note that `operator<` is always declared.
  * This annotation ensures the `operator<` is always defined. For types that
  * don't have `operator<`, such as `std::unordered_map`, we will convert it to
  * a sorted `std::vector<pair<K*, V*>>` to do the comparison.
@@ -428,15 +428,3 @@ struct EnableCustomTypeOrdering {}
  */
 @scope.Service
 struct GenerateServiceMethodDecorator {}
-
-/**
- * Marks a structured type as non-orderable, marking `operator<` as deleted.
- * This is useful when types should never be ordered. By default, `operator<` is
- * always declared, but depending on whether or not the type's shape is considered
- * orderable, it may or may not be defined. See `EnableCustomTypeOrdering` for more
- * details.
- * Note: The unstructured `cpp_noncomparable` annotation has priority over this one &
- * will cause `operator==` && `operator<` to *not* be declared or defined.
- */
-@scope.Structured
-struct NonOrderable {}

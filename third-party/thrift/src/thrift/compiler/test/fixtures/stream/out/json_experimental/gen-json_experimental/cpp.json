@@ -693,7 +693,7 @@
             "value" : {}
           }
         },
-        "docstring" : "If there are custom types in thrift structure (e.g., `std::unordered_map` field),\nWe won't define `operator<` automatically (unless URI exists, but that's about\nto change). Note that `operator<` is always declared, unless `@cpp.NonOrderable` is used.\nThis annotation ensures the `operator<` is always defined. For types that\ndon't have `operator<`, such as `std::unordered_map`, we will convert it to\na sorted `std::vector<pair<K*, V*>>` to do the comparison.\n",
+        "docstring" : "If there are custom types in thrift structure (e.g., `std::unordered_map` field),\nWe won't define `operator<` automatically (unless URI exists, but that's about\nto change). Note that `operator<` is always declared.\nThis annotation ensures the `operator<` is always defined. For types that\ndon't have `operator<`, such as `std::unordered_map`, we will convert it to\na sorted `std::vector<pair<K*, V*>>` to do the comparison.\n",
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 421
@@ -714,23 +714,6 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 429
-      },
-      "NonOrderable" : {
-        "name" : "NonOrderable",
-        "structured_annotations": {
-          "scope.Structured" : {
-            "type" : {
-          "type" : "struct",
-          "name" : "Structured",
-          "path" : "thrift/annotation/scope.thrift"
-        },
-            "value" : {}
-          }
-        },
-        "docstring" : "Marks a structured type as non-orderable, marking `operator<` as deleted.\nThis is useful when types should never be ordered. By default, `operator<` is\nalways declared, but depending on whether or not the type's shape is considered\norderable, it may or may not be defined. See `EnableCustomTypeOrdering` for more\ndetails.\nNote: The unstructured `cpp_noncomparable` annotation has priority over this one &\nwill cause `operator==` && `operator<` to *not* be declared or defined.\n",
-        "is_exception" : false,
-        "is_union" : false,
-        "lineno" : 441
       }
   },
   "source_path" : "thrift/annotation/cpp",

@@ -13,5 +13,5 @@ from thrift.protocol.TProtocol import TProtocolException
 
 
 
-from .ttypes import UTF8STRINGS, RefType, EnumUnderlyingType, Name, Type, Ref, Lazy, DisableLazyChecksum, Adapter, PackIsset, MinimizePadding, ScopedEnumAsUnionType, FieldInterceptor, UseOpEncode, EnumType, Frozen2Exclude, Frozen2RequiresCompleteContainerParams, ProcessInEbThreadUnsafe, UseCursorSerialization, GenerateDeprecatedHeaderClientMethods, AllowLegacyNonOptionalRef, DeprecatedTerseWrite, AllowLegacyDeprecatedTerseWritesRef, EnableCustomTypeOrdering, GenerateServiceMethodDecorator, NonOrderable
+from .ttypes import UTF8STRINGS, RefType, EnumUnderlyingType, Name, Type, Ref, Lazy, DisableLazyChecksum, Adapter, PackIsset, MinimizePadding, ScopedEnumAsUnionType, FieldInterceptor, UseOpEncode, EnumType, Frozen2Exclude, Frozen2RequiresCompleteContainerParams, ProcessInEbThreadUnsafe, UseCursorSerialization, GenerateDeprecatedHeaderClientMethods, AllowLegacyNonOptionalRef, DeprecatedTerseWrite, AllowLegacyDeprecatedTerseWritesRef, EnableCustomTypeOrdering, GenerateServiceMethodDecorator
 

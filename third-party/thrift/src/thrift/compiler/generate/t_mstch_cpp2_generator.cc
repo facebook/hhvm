@@ -1619,6 +1619,7 @@ class cpp_mstch_struct : public mstch_struct {
              &cpp_mstch_struct::cpp_declare_equal_to},
             {"struct:cpp_noncopyable", &cpp_mstch_struct::cpp_noncopyable},
             {"struct:cpp_noncomparable", &cpp_mstch_struct::cpp_noncomparable},
+            {"struct:cpp_nonorderable?", &cpp_mstch_struct::cpp_nonorderable},
             {"struct:is_eligible_for_constexpr?",
              &cpp_mstch_struct::is_eligible_for_constexpr},
             {"struct:virtual", &cpp_mstch_struct::cpp_virtual},
@@ -1796,6 +1797,11 @@ class cpp_mstch_struct : public mstch_struct {
     return struct_->has_unstructured_annotation(
         {"cpp.noncomparable", "cpp2.noncomparable"});
   }
+
+  mstch::node cpp_nonorderable() {
+    return struct_->has_structured_annotation(kCppNonOrderable);
+  }
+
   mstch::node is_eligible_for_constexpr() {
     return is_eligible_for_constexpr_(struct_) ||
         struct_->has_unstructured_annotation({"cpp.methods", "cpp2.methods"});

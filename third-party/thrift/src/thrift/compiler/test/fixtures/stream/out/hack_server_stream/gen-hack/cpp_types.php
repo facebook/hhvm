@@ -2012,7 +2012,7 @@ class AllowLegacyDeprecatedTerseWritesRef implements \IThriftSyncStruct, \IThrif
 /**
  * If there are custom types in thrift structure (e.g., `std::unordered_map` field),
  * We won't define `operator<` automatically (unless URI exists, but that's about
- * to change). Note that `operator<` is always declared.
+ * to change). Note that `operator<` is always declared, unless `@cpp.NonOrderable` is used.
  * This annotation ensures the `operator<` is always defined. For types that
  * don't have `operator<`, such as `std::unordered_map`, we will convert it to
  * a sorted `std::vector<pair<K*, V*>>` to do the comparison.
@@ -2132,6 +2132,76 @@ class GenerateServiceMethodDecorator implements \IThriftSyncStruct, \IThriftStru
     return shape(
       'struct' => dict[
         '\facebook\thrift\annotation\Service' => \facebook\thrift\annotation\Service::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+/**
+ * Marks a structured type as non-orderable, marking `operator<` as deleted.
+ * This is useful when types should never be ordered. By default, `operator<` is
+ * always declared, but depending on whether or not the type's shape is considered
+ * orderable, it may or may not be defined. See `EnableCustomTypeOrdering` for more
+ * details.
+ * Note: The unstructured `cpp_noncomparable` annotation has priority over this one &
+ * will cause `operator==` && `operator<` to *not* be declared or defined.
+ *
+ * Original thrift struct:-
+ * NonOrderable
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/cpp/NonOrderable'))>>
+class NonOrderable implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'NonOrderable';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "cpp.NonOrderable",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::fromShape(
           shape(
           )
         ),

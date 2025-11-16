@@ -42,7 +42,7 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 void EnumMetadata<::some::valid::ns::MyEnumA>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::some::valid::ns::MyEnumA>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::some::valid::ns::MyEnumA>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -55,7 +55,7 @@ void EnumMetadata<::some::valid::ns::MyEnumA>::gen(ThriftMetadata& metadata) {
   ));
 }
 void EnumMetadata<::some::valid::ns::AnnotatedEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::some::valid::ns::AnnotatedEnum>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::some::valid::ns::AnnotatedEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -70,7 +70,7 @@ void EnumMetadata<::some::valid::ns::AnnotatedEnum>::gen(ThriftMetadata& metadat
   ));
 }
 void EnumMetadata<::some::valid::ns::AnnotatedEnum2>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::some::valid::ns::AnnotatedEnum2>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::some::valid::ns::AnnotatedEnum2>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -85,7 +85,7 @@ void EnumMetadata<::some::valid::ns::AnnotatedEnum2>::gen(ThriftMetadata& metada
   ));
 }
 void EnumMetadata<::some::valid::ns::MyEnumB>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::some::valid::ns::MyEnumB>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::some::valid::ns::MyEnumB>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -100,7 +100,7 @@ void EnumMetadata<::some::valid::ns::MyEnumB>::gen(ThriftMetadata& metadata) {
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::Empty>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::Empty>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::some::valid::ns::Empty>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -117,7 +117,7 @@ StructMetadata<::some::valid::ns::Empty>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::ASimpleStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::ASimpleStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::some::valid::ns::ASimpleStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -148,7 +148,7 @@ StructMetadata<::some::valid::ns::ASimpleStruct>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::ASimpleStructNoexcept>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::ASimpleStructNoexcept>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::some::valid::ns::ASimpleStructNoexcept>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -178,7 +178,7 @@ StructMetadata<::some::valid::ns::ASimpleStructNoexcept>::gen(ThriftMetadata& me
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::MyStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::some::valid::ns::MyStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -208,7 +208,7 @@ StructMetadata<::some::valid::ns::MyStruct>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::SimpleUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::SimpleUnion>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::some::valid::ns::SimpleUnion>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -239,7 +239,7 @@ StructMetadata<::some::valid::ns::SimpleUnion>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::ComplexUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::ComplexUnion>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::some::valid::ns::ComplexUnion>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -270,7 +270,7 @@ StructMetadata<::some::valid::ns::ComplexUnion>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::AnException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::AnException>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::some::valid::ns::AnException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -300,7 +300,7 @@ StructMetadata<::some::valid::ns::AnException>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::AnotherException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::AnotherException>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::some::valid::ns::AnotherException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -331,7 +331,7 @@ StructMetadata<::some::valid::ns::AnotherException>::gen(ThriftMetadata& metadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::containerStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::containerStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::some::valid::ns::containerStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -362,7 +362,7 @@ StructMetadata<::some::valid::ns::containerStruct>::gen(ThriftMetadata& metadata
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::MyIncludedStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::MyIncludedStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::some::valid::ns::MyIncludedStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -393,7 +393,7 @@ StructMetadata<::some::valid::ns::MyIncludedStruct>::gen(ThriftMetadata& metadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::AnnotatedStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::AnnotatedStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::some::valid::ns::AnnotatedStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -424,7 +424,7 @@ StructMetadata<::some::valid::ns::AnnotatedStruct>::gen(ThriftMetadata& metadata
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::ComplexContainerStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::ComplexContainerStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::some::valid::ns::ComplexContainerStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -454,7 +454,7 @@ StructMetadata<::some::valid::ns::ComplexContainerStruct>::gen(ThriftMetadata& m
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::FloatStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::FloatStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::some::valid::ns::FloatStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -484,7 +484,7 @@ StructMetadata<::some::valid::ns::FloatStruct>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::FloatUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::FloatUnion>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::some::valid::ns::FloatUnion>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -514,7 +514,7 @@ StructMetadata<::some::valid::ns::FloatUnion>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -544,7 +544,7 @@ StructMetadata<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct>::gen(ThriftM
 }
 
 void ExceptionMetadata<::some::valid::ns::AnException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::some::valid::ns::AnException>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<::some::valid::ns::AnException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -574,7 +574,7 @@ void ExceptionMetadata<::some::valid::ns::AnException>::gen(ThriftMetadata& meta
   ));
 }
 void ExceptionMetadata<::some::valid::ns::AnotherException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::some::valid::ns::AnotherException>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<::some::valid::ns::AnotherException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -616,7 +616,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::EmptySe
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::EmptyService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_EmptyService = genServiceMetadata<::some::valid::ns::EmptyService>(false);
+  ::apache::thrift::metadata::ThriftService module_EmptyService = genServiceMetadata<::some::valid::ns::EmptyService>({.genAnnotations = false});
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
@@ -845,7 +845,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ReturnS
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_ReturnService = genServiceMetadata<::some::valid::ns::ReturnService>(false);
+  ::apache::thrift::metadata::ThriftService module_ReturnService = genServiceMetadata<::some::valid::ns::ReturnService>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>>::gen_noReturn,
     ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>>::gen_boolReturn,
@@ -1487,7 +1487,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamSe
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_ParamService = genServiceMetadata<::some::valid::ns::ParamService>(false);
+  ::apache::thrift::metadata::ThriftService module_ParamService = genServiceMetadata<::some::valid::ns::ParamService>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamService>>::gen_void_ret_i16_param,
     ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamService>>::gen_void_ret_byte_i16_param,

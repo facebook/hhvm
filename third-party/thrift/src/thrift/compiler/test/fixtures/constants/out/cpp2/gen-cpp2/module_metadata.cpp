@@ -27,7 +27,7 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 void EnumMetadata<::cpp2::EmptyEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::cpp2::EmptyEnum>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::cpp2::EmptyEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -40,7 +40,7 @@ void EnumMetadata<::cpp2::EmptyEnum>::gen(ThriftMetadata& metadata) {
   ));
 }
 void EnumMetadata<::cpp2::City>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::cpp2::City>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::cpp2::City>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -53,7 +53,7 @@ void EnumMetadata<::cpp2::City>::gen(ThriftMetadata& metadata) {
   ));
 }
 void EnumMetadata<::cpp2::Company>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::cpp2::Company>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::cpp2::Company>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -68,7 +68,7 @@ void EnumMetadata<::cpp2::Company>::gen(ThriftMetadata& metadata) {
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Internship>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Internship>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::Internship>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -98,7 +98,7 @@ StructMetadata<::cpp2::Internship>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Range>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Range>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::Range>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -128,7 +128,7 @@ StructMetadata<::cpp2::Range>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::struct1>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::struct1>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::struct1>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -158,7 +158,7 @@ StructMetadata<::cpp2::struct1>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::struct2>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::struct2>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::struct2>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -188,7 +188,7 @@ StructMetadata<::cpp2::struct2>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::struct3>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::struct3>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::struct3>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -218,7 +218,7 @@ StructMetadata<::cpp2::struct3>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::struct4>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::struct4>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::struct4>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -248,7 +248,7 @@ StructMetadata<::cpp2::struct4>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::union1>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::union1>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::union1>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -278,7 +278,7 @@ StructMetadata<::cpp2::union1>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::union2>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::union2>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::union2>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }

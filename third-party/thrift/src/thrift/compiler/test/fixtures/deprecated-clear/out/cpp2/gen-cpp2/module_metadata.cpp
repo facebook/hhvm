@@ -27,7 +27,7 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 void EnumMetadata<::apache::thrift::test::MyEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::apache::thrift::test::MyEnum>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::apache::thrift::test::MyEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -42,7 +42,7 @@ void EnumMetadata<::apache::thrift::test::MyEnum>::gen(ThriftMetadata& metadata)
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::StructWithDefaultStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::StructWithDefaultStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::apache::thrift::test::StructWithDefaultStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }

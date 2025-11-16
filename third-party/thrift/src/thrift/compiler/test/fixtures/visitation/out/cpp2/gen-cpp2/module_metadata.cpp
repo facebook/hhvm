@@ -47,7 +47,7 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 void EnumMetadata<::test_cpp2::cpp_reflection::enum1>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum1>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum1>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -60,7 +60,7 @@ void EnumMetadata<::test_cpp2::cpp_reflection::enum1>::gen(ThriftMetadata& metad
   ));
 }
 void EnumMetadata<::test_cpp2::cpp_reflection::enum2>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum2>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum2>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -73,7 +73,7 @@ void EnumMetadata<::test_cpp2::cpp_reflection::enum2>::gen(ThriftMetadata& metad
   ));
 }
 void EnumMetadata<::test_cpp2::cpp_reflection::enum3>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum3>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum3>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -86,7 +86,7 @@ void EnumMetadata<::test_cpp2::cpp_reflection::enum3>::gen(ThriftMetadata& metad
   ));
 }
 void EnumMetadata<::test_cpp2::cpp_reflection::enum_with_special_names>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum_with_special_names>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum_with_special_names>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -101,7 +101,7 @@ void EnumMetadata<::test_cpp2::cpp_reflection::enum_with_special_names>::gen(Thr
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test_cpp2::cpp_reflection::union1>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test_cpp2::cpp_reflection::union1>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test_cpp2::cpp_reflection::union1>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -131,7 +131,7 @@ StructMetadata<::test_cpp2::cpp_reflection::union1>::gen(ThriftMetadata& metadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test_cpp2::cpp_reflection::union2>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test_cpp2::cpp_reflection::union2>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test_cpp2::cpp_reflection::union2>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -161,7 +161,7 @@ StructMetadata<::test_cpp2::cpp_reflection::union2>::gen(ThriftMetadata& metadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test_cpp2::cpp_reflection::union3>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test_cpp2::cpp_reflection::union3>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test_cpp2::cpp_reflection::union3>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -191,7 +191,7 @@ StructMetadata<::test_cpp2::cpp_reflection::union3>::gen(ThriftMetadata& metadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test_cpp2::cpp_reflection::structA>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test_cpp2::cpp_reflection::structA>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test_cpp2::cpp_reflection::structA>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -221,7 +221,7 @@ StructMetadata<::test_cpp2::cpp_reflection::structA>::gen(ThriftMetadata& metada
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test_cpp2::cpp_reflection::unionA>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test_cpp2::cpp_reflection::unionA>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test_cpp2::cpp_reflection::unionA>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -251,7 +251,7 @@ StructMetadata<::test_cpp2::cpp_reflection::unionA>::gen(ThriftMetadata& metadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test_cpp2::cpp_reflection::structB>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test_cpp2::cpp_reflection::structB>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test_cpp2::cpp_reflection::structB>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -281,7 +281,7 @@ StructMetadata<::test_cpp2::cpp_reflection::structB>::gen(ThriftMetadata& metada
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test_cpp2::cpp_reflection::structC>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test_cpp2::cpp_reflection::structC>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test_cpp2::cpp_reflection::structC>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -311,7 +311,7 @@ StructMetadata<::test_cpp2::cpp_reflection::structC>::gen(ThriftMetadata& metada
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test_cpp2::cpp_reflection::struct1>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test_cpp2::cpp_reflection::struct1>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test_cpp2::cpp_reflection::struct1>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -341,7 +341,7 @@ StructMetadata<::test_cpp2::cpp_reflection::struct1>::gen(ThriftMetadata& metada
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test_cpp2::cpp_reflection::struct2>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test_cpp2::cpp_reflection::struct2>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test_cpp2::cpp_reflection::struct2>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -371,7 +371,7 @@ StructMetadata<::test_cpp2::cpp_reflection::struct2>::gen(ThriftMetadata& metada
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test_cpp2::cpp_reflection::struct3>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test_cpp2::cpp_reflection::struct3>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test_cpp2::cpp_reflection::struct3>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -401,7 +401,7 @@ StructMetadata<::test_cpp2::cpp_reflection::struct3>::gen(ThriftMetadata& metada
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test_cpp2::cpp_reflection::struct4>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test_cpp2::cpp_reflection::struct4>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test_cpp2::cpp_reflection::struct4>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -431,7 +431,7 @@ StructMetadata<::test_cpp2::cpp_reflection::struct4>::gen(ThriftMetadata& metada
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test_cpp2::cpp_reflection::struct5>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test_cpp2::cpp_reflection::struct5>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test_cpp2::cpp_reflection::struct5>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -461,7 +461,7 @@ StructMetadata<::test_cpp2::cpp_reflection::struct5>::gen(ThriftMetadata& metada
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test_cpp2::cpp_reflection::struct_binary>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test_cpp2::cpp_reflection::struct_binary>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test_cpp2::cpp_reflection::struct_binary>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -491,7 +491,7 @@ StructMetadata<::test_cpp2::cpp_reflection::struct_binary>::gen(ThriftMetadata& 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test_cpp2::cpp_reflection::dep_A_struct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test_cpp2::cpp_reflection::dep_A_struct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test_cpp2::cpp_reflection::dep_A_struct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -521,7 +521,7 @@ StructMetadata<::test_cpp2::cpp_reflection::dep_A_struct>::gen(ThriftMetadata& m
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test_cpp2::cpp_reflection::dep_B_struct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test_cpp2::cpp_reflection::dep_B_struct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test_cpp2::cpp_reflection::dep_B_struct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -551,7 +551,7 @@ StructMetadata<::test_cpp2::cpp_reflection::dep_B_struct>::gen(ThriftMetadata& m
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test_cpp2::cpp_reflection::annotated>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test_cpp2::cpp_reflection::annotated>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test_cpp2::cpp_reflection::annotated>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -581,7 +581,7 @@ StructMetadata<::test_cpp2::cpp_reflection::annotated>::gen(ThriftMetadata& meta
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test_cpp2::cpp_reflection::union_with_special_names>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test_cpp2::cpp_reflection::union_with_special_names>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test_cpp2::cpp_reflection::union_with_special_names>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -611,7 +611,7 @@ StructMetadata<::test_cpp2::cpp_reflection::union_with_special_names>::gen(Thrif
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test_cpp2::cpp_reflection::struct_with_special_names>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test_cpp2::cpp_reflection::struct_with_special_names>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test_cpp2::cpp_reflection::struct_with_special_names>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -751,7 +751,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflectio
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service1>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_service1 = genServiceMetadata<::test_cpp2::cpp_reflection::service1>(false);
+  ::apache::thrift::metadata::ThriftService module_service1 = genServiceMetadata<::test_cpp2::cpp_reflection::service1>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service1>>::gen_method1,
     ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service1>>::gen_method2,
@@ -886,7 +886,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflectio
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_service2 = genServiceMetadata<::test_cpp2::cpp_reflection::service2>(false);
+  ::apache::thrift::metadata::ThriftService module_service2 = genServiceMetadata<::test_cpp2::cpp_reflection::service2>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>>::gen_methodA,
     ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>>::gen_methodB,
@@ -1021,7 +1021,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflectio
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service3>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_service3 = genServiceMetadata<::test_cpp2::cpp_reflection::service3>(false);
+  ::apache::thrift::metadata::ThriftService module_service3 = genServiceMetadata<::test_cpp2::cpp_reflection::service3>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service3>>::gen_methodA,
     ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service3>>::gen_methodB,
@@ -1309,7 +1309,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflectio
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_service_with_special_names = genServiceMetadata<::test_cpp2::cpp_reflection::service_with_special_names>(false);
+  ::apache::thrift::metadata::ThriftService module_service_with_special_names = genServiceMetadata<::test_cpp2::cpp_reflection::service_with_special_names>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>>::gen_get,
     ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>>::gen_getter,

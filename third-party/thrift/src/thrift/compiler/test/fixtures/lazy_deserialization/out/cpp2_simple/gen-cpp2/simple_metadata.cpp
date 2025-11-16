@@ -29,7 +29,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::Foo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::Foo>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::apache::thrift::test::Foo>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -59,7 +59,7 @@ StructMetadata<::apache::thrift::test::Foo>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::LazyFoo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::LazyFoo>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::apache::thrift::test::LazyFoo>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -89,7 +89,7 @@ StructMetadata<::apache::thrift::test::LazyFoo>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::OptionalFoo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::OptionalFoo>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::apache::thrift::test::OptionalFoo>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -119,7 +119,7 @@ StructMetadata<::apache::thrift::test::OptionalFoo>::gen(ThriftMetadata& metadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::OptionalLazyFoo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::OptionalLazyFoo>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::apache::thrift::test::OptionalLazyFoo>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -149,7 +149,7 @@ StructMetadata<::apache::thrift::test::OptionalLazyFoo>::gen(ThriftMetadata& met
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::OptionalBoxedLazyFoo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::OptionalBoxedLazyFoo>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::apache::thrift::test::OptionalBoxedLazyFoo>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -179,7 +179,7 @@ StructMetadata<::apache::thrift::test::OptionalBoxedLazyFoo>::gen(ThriftMetadata
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::LazyCppRef>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::LazyCppRef>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::apache::thrift::test::LazyCppRef>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -209,7 +209,7 @@ StructMetadata<::apache::thrift::test::LazyCppRef>::gen(ThriftMetadata& metadata
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::IndexedFoo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::IndexedFoo>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::apache::thrift::test::IndexedFoo>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -239,7 +239,7 @@ StructMetadata<::apache::thrift::test::IndexedFoo>::gen(ThriftMetadata& metadata
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::OptionalIndexedFoo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::OptionalIndexedFoo>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::apache::thrift::test::OptionalIndexedFoo>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -269,7 +269,7 @@ StructMetadata<::apache::thrift::test::OptionalIndexedFoo>::gen(ThriftMetadata& 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::Empty>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::Empty>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::apache::thrift::test::Empty>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }

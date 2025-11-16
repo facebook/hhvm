@@ -44,7 +44,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Foo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Foo>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::Foo>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -94,7 +94,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::A>>::gen(::apache:
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::A>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_A = genServiceMetadata<::cpp2::A>(false);
+  ::apache::thrift::metadata::ThriftService module_A = genServiceMetadata<::cpp2::A>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::A>>::gen_foo,
   };
@@ -157,7 +157,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen(::apache:
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_B = genServiceMetadata<::cpp2::B>(false);
+  ::apache::thrift::metadata::ThriftService module_B = genServiceMetadata<::cpp2::B>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen_bar,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen_stream_stuff,
@@ -192,7 +192,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::gen(::apache:
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_C = genServiceMetadata<::cpp2::C>(false);
+  ::apache::thrift::metadata::ThriftService module_C = genServiceMetadata<::cpp2::C>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
   };
   size_t index = 0;

@@ -34,7 +34,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::namespace_from_package::module::Foo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::namespace_from_package::module::Foo>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::namespace_from_package::module::Foo>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -89,7 +89,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::namespace_from_pac
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test::namespace_from_package::module::TestService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_TestService = genServiceMetadata<::test::namespace_from_package::module::TestService>(false);
+  ::apache::thrift::metadata::ThriftService module_TestService = genServiceMetadata<::test::namespace_from_package::module::TestService>({.genAnnotations = false});
   DCHECK_EQ(*module_TestService.uri(), "test.dev/namespace_from_package/module/TestService");
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::test::namespace_from_package::module::TestService>>::gen_init,

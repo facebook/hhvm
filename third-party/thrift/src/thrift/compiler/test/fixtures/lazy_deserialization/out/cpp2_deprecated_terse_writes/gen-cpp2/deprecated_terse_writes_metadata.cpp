@@ -29,7 +29,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::TerseFoo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::TerseFoo>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::apache::thrift::test::TerseFoo>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -59,7 +59,7 @@ StructMetadata<::apache::thrift::test::TerseFoo>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::TerseLazyFoo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::TerseLazyFoo>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::apache::thrift::test::TerseLazyFoo>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -89,7 +89,7 @@ StructMetadata<::apache::thrift::test::TerseLazyFoo>::gen(ThriftMetadata& metada
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::TerseOptionalFoo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::TerseOptionalFoo>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::apache::thrift::test::TerseOptionalFoo>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -119,7 +119,7 @@ StructMetadata<::apache::thrift::test::TerseOptionalFoo>::gen(ThriftMetadata& me
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::TerseOptionalLazyFoo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::TerseOptionalLazyFoo>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::apache::thrift::test::TerseOptionalLazyFoo>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }

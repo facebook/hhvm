@@ -47,7 +47,7 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 void EnumMetadata<::test::fixtures::basic::MyEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::basic::MyEnum>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::test::fixtures::basic::MyEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -60,7 +60,7 @@ void EnumMetadata<::test::fixtures::basic::MyEnum>::gen(ThriftMetadata& metadata
   ));
 }
 void EnumMetadata<::test::fixtures::basic::HackEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::basic::HackEnum>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::test::fixtures::basic::HackEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -76,7 +76,7 @@ void EnumMetadata<::test::fixtures::basic::HackEnum>::gen(ThriftMetadata& metada
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic::MyStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::basic::MyStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -106,7 +106,7 @@ StructMetadata<::test::fixtures::basic::MyStruct>::gen(ThriftMetadata& metadata)
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::Containers>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic::Containers>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::basic::Containers>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -136,7 +136,7 @@ StructMetadata<::test::fixtures::basic::Containers>::gen(ThriftMetadata& metadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::MyDataItem>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic::MyDataItem>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::basic::MyDataItem>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -153,7 +153,7 @@ StructMetadata<::test::fixtures::basic::MyDataItem>::gen(ThriftMetadata& metadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::MyUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic::MyUnion>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::basic::MyUnion>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -183,7 +183,7 @@ StructMetadata<::test::fixtures::basic::MyUnion>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::MyException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic::MyException>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::basic::MyException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -213,7 +213,7 @@ StructMetadata<::test::fixtures::basic::MyException>::gen(ThriftMetadata& metada
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::MyExceptionWithMessage>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic::MyExceptionWithMessage>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::basic::MyExceptionWithMessage>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -243,7 +243,7 @@ StructMetadata<::test::fixtures::basic::MyExceptionWithMessage>::gen(ThriftMetad
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::ReservedKeyword>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic::ReservedKeyword>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::basic::ReservedKeyword>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -274,7 +274,7 @@ StructMetadata<::test::fixtures::basic::ReservedKeyword>::gen(ThriftMetadata& me
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::UnionToBeRenamed>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic::UnionToBeRenamed>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::basic::UnionToBeRenamed>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -305,7 +305,7 @@ StructMetadata<::test::fixtures::basic::UnionToBeRenamed>::gen(ThriftMetadata& m
 }
 
 void ExceptionMetadata<::test::fixtures::basic::MyException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::test::fixtures::basic::MyException>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<::test::fixtures::basic::MyException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -335,7 +335,7 @@ void ExceptionMetadata<::test::fixtures::basic::MyException>::gen(ThriftMetadata
   ));
 }
 void ExceptionMetadata<::test::fixtures::basic::MyExceptionWithMessage>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::test::fixtures::basic::MyExceptionWithMessage>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<::test::fixtures::basic::MyExceptionWithMessage>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -385,7 +385,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::F
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::FooService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_FooService = genServiceMetadata<::test::fixtures::basic::FooService>(false);
+  ::apache::thrift::metadata::ThriftService module_FooService = genServiceMetadata<::test::fixtures::basic::FooService>({.genAnnotations = false});
   DCHECK_EQ(*module_FooService.uri(), "test.dev/fixtures/basic/FooService");
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::FooService>>::gen_simple_rpc,
@@ -436,7 +436,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::F
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::FB303Service>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_FB303Service = genServiceMetadata<::test::fixtures::basic::FB303Service>(false);
+  ::apache::thrift::metadata::ThriftService module_FB303Service = genServiceMetadata<::test::fixtures::basic::FB303Service>({.genAnnotations = false});
   DCHECK_EQ(*module_FB303Service.uri(), "test.dev/fixtures/basic/FB303Service");
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::FB303Service>>::gen_simple_rpc,
@@ -600,7 +600,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::M
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::MyService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_MyService = genServiceMetadata<::test::fixtures::basic::MyService>(false);
+  ::apache::thrift::metadata::ThriftService module_MyService = genServiceMetadata<::test::fixtures::basic::MyService>({.genAnnotations = false});
   DCHECK_EQ(*module_MyService.uri(), "test.dev/fixtures/basic/MyService");
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::MyService>>::gen_ping,
@@ -669,7 +669,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::D
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::DbMixedStackArguments>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_DbMixedStackArguments = genServiceMetadata<::test::fixtures::basic::DbMixedStackArguments>(false);
+  ::apache::thrift::metadata::ThriftService module_DbMixedStackArguments = genServiceMetadata<::test::fixtures::basic::DbMixedStackArguments>({.genAnnotations = false});
   DCHECK_EQ(*module_DbMixedStackArguments.uri(), "test.dev/fixtures/basic/DbMixedStackArguments");
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::DbMixedStackArguments>>::gen_getDataByKey0,

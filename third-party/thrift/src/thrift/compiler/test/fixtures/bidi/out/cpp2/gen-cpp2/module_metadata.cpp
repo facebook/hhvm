@@ -34,7 +34,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::BiDiSinkException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::BiDiSinkException>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::BiDiSinkException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -64,7 +64,7 @@ StructMetadata<::cpp2::BiDiSinkException>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::BiDiStreamException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::BiDiStreamException>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::BiDiStreamException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -94,7 +94,7 @@ StructMetadata<::cpp2::BiDiStreamException>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::BiDiMethodException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::BiDiMethodException>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::BiDiMethodException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -124,7 +124,7 @@ StructMetadata<::cpp2::BiDiMethodException>::gen(ThriftMetadata& metadata) {
 }
 
 void ExceptionMetadata<::cpp2::BiDiSinkException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::BiDiSinkException>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<::cpp2::BiDiSinkException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -154,7 +154,7 @@ void ExceptionMetadata<::cpp2::BiDiSinkException>::gen(ThriftMetadata& metadata)
   ));
 }
 void ExceptionMetadata<::cpp2::BiDiStreamException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::BiDiStreamException>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<::cpp2::BiDiStreamException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -184,7 +184,7 @@ void ExceptionMetadata<::cpp2::BiDiStreamException>::gen(ThriftMetadata& metadat
   ));
 }
 void ExceptionMetadata<::cpp2::BiDiMethodException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::BiDiMethodException>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<::cpp2::BiDiMethodException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -258,7 +258,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_BiDiService = genServiceMetadata<::cpp2::BiDiService>(false);
+  ::apache::thrift::metadata::ThriftService module_BiDiService = genServiceMetadata<::cpp2::BiDiService>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen_simple,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen_response,

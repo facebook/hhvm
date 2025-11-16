@@ -34,7 +34,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::extra::svc::containerStruct2>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::extra::svc::containerStruct2>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::extra::svc::containerStruct2>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -255,7 +255,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService extra_services_ExtraService = genServiceMetadata<::extra::svc::ExtraService>(false);
+  ::apache::thrift::metadata::ThriftService extra_services_ExtraService = genServiceMetadata<::extra::svc::ExtraService>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_simple_function,
     ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_throws_function,

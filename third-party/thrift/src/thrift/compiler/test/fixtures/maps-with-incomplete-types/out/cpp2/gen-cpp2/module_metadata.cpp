@@ -29,7 +29,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::A>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::A>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::apache::thrift::test::A>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -59,7 +59,7 @@ StructMetadata<::apache::thrift::test::A>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::B>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::apache::thrift::test::B>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::apache::thrift::test::B>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }

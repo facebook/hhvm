@@ -34,7 +34,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::thrift::shared_interactions::DoSomethingResult>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::thrift::shared_interactions::DoSomethingResult>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::thrift::shared_interactions::DoSomethingResult>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -75,7 +75,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::thrift::shared_interacti
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::thrift::shared_interactions::InteractLocally>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService shared_InteractLocally = genServiceMetadata<::thrift::shared_interactions::InteractLocally>(false);
+  ::apache::thrift::metadata::ThriftService shared_InteractLocally = genServiceMetadata<::thrift::shared_interactions::InteractLocally>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
   };
   size_t index = 0;

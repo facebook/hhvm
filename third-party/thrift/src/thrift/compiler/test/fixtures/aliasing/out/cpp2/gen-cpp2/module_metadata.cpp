@@ -29,7 +29,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::compiler::test::fixtures::aliasing::Foo>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::aliasing::Foo>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::aliasing::Foo>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }

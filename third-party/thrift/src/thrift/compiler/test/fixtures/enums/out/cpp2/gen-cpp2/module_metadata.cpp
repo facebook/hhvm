@@ -27,7 +27,7 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 void EnumMetadata<::test::fixtures::enums::Metasyntactic>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::enums::Metasyntactic>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::test::fixtures::enums::Metasyntactic>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -40,7 +40,7 @@ void EnumMetadata<::test::fixtures::enums::Metasyntactic>::gen(ThriftMetadata& m
   ));
 }
 void EnumMetadata<::test::fixtures::enums::MyEnum1>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::enums::MyEnum1>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::test::fixtures::enums::MyEnum1>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -53,7 +53,7 @@ void EnumMetadata<::test::fixtures::enums::MyEnum1>::gen(ThriftMetadata& metadat
   ));
 }
 void EnumMetadata<::test::fixtures::enums::MyEnum2>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::enums::MyEnum2>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::test::fixtures::enums::MyEnum2>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -66,7 +66,7 @@ void EnumMetadata<::test::fixtures::enums::MyEnum2>::gen(ThriftMetadata& metadat
   ));
 }
 void EnumMetadata<::test::fixtures::enums::MyEnum3>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::enums::MyEnum3>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::test::fixtures::enums::MyEnum3>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -79,7 +79,7 @@ void EnumMetadata<::test::fixtures::enums::MyEnum3>::gen(ThriftMetadata& metadat
   ));
 }
 void EnumMetadata<::test::fixtures::enums::MyEnum4>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::enums::MyEnum4>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::test::fixtures::enums::MyEnum4>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -92,7 +92,7 @@ void EnumMetadata<::test::fixtures::enums::MyEnum4>::gen(ThriftMetadata& metadat
   ));
 }
 void EnumMetadata<::test::fixtures::enums::MyBitmaskEnum1>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::enums::MyBitmaskEnum1>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::test::fixtures::enums::MyBitmaskEnum1>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -106,7 +106,7 @@ void EnumMetadata<::test::fixtures::enums::MyBitmaskEnum1>::gen(ThriftMetadata& 
   ));
 }
 void EnumMetadata<::test::fixtures::enums::MyBitmaskEnum2>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::enums::MyBitmaskEnum2>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::test::fixtures::enums::MyBitmaskEnum2>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -122,7 +122,7 @@ void EnumMetadata<::test::fixtures::enums::MyBitmaskEnum2>::gen(ThriftMetadata& 
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::enums::SomeStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::enums::SomeStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::enums::SomeStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -152,7 +152,7 @@ StructMetadata<::test::fixtures::enums::SomeStruct>::gen(ThriftMetadata& metadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::enums::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::enums::MyStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::enums::MyStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }

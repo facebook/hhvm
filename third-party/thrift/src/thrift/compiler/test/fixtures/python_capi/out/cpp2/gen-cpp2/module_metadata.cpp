@@ -27,7 +27,7 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 void EnumMetadata<::test::fixtures::python_capi::MyEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::python_capi::MyEnum>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::test::fixtures::python_capi::MyEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -40,7 +40,7 @@ void EnumMetadata<::test::fixtures::python_capi::MyEnum>::gen(ThriftMetadata& me
   ));
 }
 void EnumMetadata<::test::fixtures::python_capi::NormalDecentEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::python_capi::NormalDecentEnum>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::test::fixtures::python_capi::NormalDecentEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -56,7 +56,7 @@ void EnumMetadata<::test::fixtures::python_capi::NormalDecentEnum>::gen(ThriftMe
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::MyStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::python_capi::MyStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -86,7 +86,7 @@ StructMetadata<::test::fixtures::python_capi::MyStruct>::gen(ThriftMetadata& met
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::MyDataItem>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::MyDataItem>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::python_capi::MyDataItem>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -116,7 +116,7 @@ StructMetadata<::test::fixtures::python_capi::MyDataItem>::gen(ThriftMetadata& m
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::TransitiveDoubler>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::TransitiveDoubler>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::python_capi::TransitiveDoubler>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -135,7 +135,7 @@ StructMetadata<::test::fixtures::python_capi::TransitiveDoubler>::gen(ThriftMeta
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::detail::DoubledPair>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::detail::DoubledPair>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::python_capi::detail::DoubledPair>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -166,7 +166,7 @@ StructMetadata<::test::fixtures::python_capi::detail::DoubledPair>::gen(ThriftMe
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::StringPair>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::StringPair>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::python_capi::StringPair>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -196,7 +196,7 @@ StructMetadata<::test::fixtures::python_capi::StringPair>::gen(ThriftMetadata& m
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::VapidStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::VapidStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::python_capi::VapidStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -214,7 +214,7 @@ StructMetadata<::test::fixtures::python_capi::VapidStruct>::gen(ThriftMetadata& 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::PrimitiveStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::PrimitiveStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::python_capi::PrimitiveStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -244,7 +244,7 @@ StructMetadata<::test::fixtures::python_capi::PrimitiveStruct>::gen(ThriftMetada
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::AdaptedFields>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::AdaptedFields>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::python_capi::AdaptedFields>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -274,7 +274,7 @@ StructMetadata<::test::fixtures::python_capi::AdaptedFields>::gen(ThriftMetadata
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::ListStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::ListStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::python_capi::ListStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -304,7 +304,7 @@ StructMetadata<::test::fixtures::python_capi::ListStruct>::gen(ThriftMetadata& m
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::SetStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::SetStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::python_capi::SetStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -335,7 +335,7 @@ StructMetadata<::test::fixtures::python_capi::SetStruct>::gen(ThriftMetadata& me
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::MapStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::MapStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::python_capi::MapStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -366,7 +366,7 @@ StructMetadata<::test::fixtures::python_capi::MapStruct>::gen(ThriftMetadata& me
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::ComposeStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::ComposeStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::python_capi::ComposeStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -396,7 +396,7 @@ StructMetadata<::test::fixtures::python_capi::ComposeStruct>::gen(ThriftMetadata
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::Shallot>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::Shallot>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::python_capi::Shallot>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -427,7 +427,7 @@ StructMetadata<::test::fixtures::python_capi::Shallot>::gen(ThriftMetadata& meta
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::SomeBinary>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::SomeBinary>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::python_capi::SomeBinary>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }

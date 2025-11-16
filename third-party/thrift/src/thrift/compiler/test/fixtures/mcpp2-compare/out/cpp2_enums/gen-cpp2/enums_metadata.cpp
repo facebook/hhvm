@@ -27,7 +27,7 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 void EnumMetadata<::facebook::ns::qwerty::AnEnumA>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumA>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumA>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -40,7 +40,7 @@ void EnumMetadata<::facebook::ns::qwerty::AnEnumA>::gen(ThriftMetadata& metadata
   ));
 }
 void EnumMetadata<::facebook::ns::qwerty::AnEnumB>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumB>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumB>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -53,7 +53,7 @@ void EnumMetadata<::facebook::ns::qwerty::AnEnumB>::gen(ThriftMetadata& metadata
   ));
 }
 void EnumMetadata<::facebook::ns::qwerty::AnEnumC>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumC>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumC>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -66,7 +66,7 @@ void EnumMetadata<::facebook::ns::qwerty::AnEnumC>::gen(ThriftMetadata& metadata
   ));
 }
 void EnumMetadata<::facebook::ns::qwerty::AnEnumD>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumD>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumD>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -79,7 +79,7 @@ void EnumMetadata<::facebook::ns::qwerty::AnEnumD>::gen(ThriftMetadata& metadata
   ));
 }
 void EnumMetadata<::facebook::ns::qwerty::AnEnumE>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumE>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumE>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -94,7 +94,7 @@ void EnumMetadata<::facebook::ns::qwerty::AnEnumE>::gen(ThriftMetadata& metadata
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::ns::qwerty::SomeStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::ns::qwerty::SomeStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::facebook::ns::qwerty::SomeStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }

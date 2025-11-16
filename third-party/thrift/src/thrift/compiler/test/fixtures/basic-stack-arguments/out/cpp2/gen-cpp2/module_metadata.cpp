@@ -42,7 +42,7 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 void EnumMetadata<::cpp2::MyEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::cpp2::MyEnum>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::cpp2::MyEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -57,7 +57,7 @@ void EnumMetadata<::cpp2::MyEnum>::gen(ThriftMetadata& metadata) {
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::MyStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::MyStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -164,7 +164,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen(:
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_MyService = genServiceMetadata<::cpp2::MyService>(false);
+  ::apache::thrift::metadata::ThriftService module_MyService = genServiceMetadata<::cpp2::MyService>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_hasDataById,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_getDataById,
@@ -268,7 +268,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServiceFast>>::g
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServiceFast>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_MyServiceFast = genServiceMetadata<::cpp2::MyServiceFast>(false);
+  ::apache::thrift::metadata::ThriftService module_MyServiceFast = genServiceMetadata<::cpp2::MyServiceFast>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServiceFast>>::gen_hasDataById,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServiceFast>>::gen_getDataById,
@@ -330,7 +330,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DbMixedStackArgume
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DbMixedStackArguments>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_DbMixedStackArguments = genServiceMetadata<::cpp2::DbMixedStackArguments>(false);
+  ::apache::thrift::metadata::ThriftService module_DbMixedStackArguments = genServiceMetadata<::cpp2::DbMixedStackArguments>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DbMixedStackArguments>>::gen_getDataByKey0,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DbMixedStackArguments>>::gen_getDataByKey1,

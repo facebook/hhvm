@@ -29,7 +29,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::SerializedStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::SerializedStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::python_capi::SerializedStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -60,7 +60,7 @@ StructMetadata<::test::fixtures::python_capi::SerializedStruct>::gen(ThriftMetad
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::SerializedUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::SerializedUnion>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::python_capi::SerializedUnion>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -91,7 +91,7 @@ StructMetadata<::test::fixtures::python_capi::SerializedUnion>::gen(ThriftMetada
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::SerializedError>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::SerializedError>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::python_capi::SerializedError>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -122,7 +122,7 @@ StructMetadata<::test::fixtures::python_capi::SerializedError>::gen(ThriftMetada
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::MarshalStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::MarshalStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::python_capi::MarshalStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -153,7 +153,7 @@ StructMetadata<::test::fixtures::python_capi::MarshalStruct>::gen(ThriftMetadata
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::MarshalUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::MarshalUnion>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::python_capi::MarshalUnion>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -184,7 +184,7 @@ StructMetadata<::test::fixtures::python_capi::MarshalUnion>::gen(ThriftMetadata&
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::MarshalError>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::MarshalError>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::python_capi::MarshalError>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -215,7 +215,7 @@ StructMetadata<::test::fixtures::python_capi::MarshalError>::gen(ThriftMetadata&
 }
 
 void ExceptionMetadata<::test::fixtures::python_capi::SerializedError>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::test::fixtures::python_capi::SerializedError>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<::test::fixtures::python_capi::SerializedError>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -246,7 +246,7 @@ void ExceptionMetadata<::test::fixtures::python_capi::SerializedError>::gen(Thri
   ));
 }
 void ExceptionMetadata<::test::fixtures::python_capi::MarshalError>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::test::fixtures::python_capi::MarshalError>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<::test::fixtures::python_capi::MarshalError>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }

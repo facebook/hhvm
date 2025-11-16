@@ -42,7 +42,7 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 void EnumMetadata<::py3::simple::AnEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::py3::simple::AnEnum>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::py3::simple::AnEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -55,7 +55,7 @@ void EnumMetadata<::py3::simple::AnEnum>::gen(ThriftMetadata& metadata) {
   ));
 }
 void EnumMetadata<::py3::simple::AnEnumRenamed>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::py3::simple::AnEnumRenamed>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::py3::simple::AnEnumRenamed>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -68,7 +68,7 @@ void EnumMetadata<::py3::simple::AnEnumRenamed>::gen(ThriftMetadata& metadata) {
   ));
 }
 void EnumMetadata<::py3::simple::Flags>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::py3::simple::Flags>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::py3::simple::Flags>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -84,7 +84,7 @@ void EnumMetadata<::py3::simple::Flags>::gen(ThriftMetadata& metadata) {
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::SimpleException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::py3::simple::SimpleException>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::py3::simple::SimpleException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -114,7 +114,7 @@ StructMetadata<::py3::simple::SimpleException>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::OptionalRefStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::py3::simple::OptionalRefStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::py3::simple::OptionalRefStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -144,7 +144,7 @@ StructMetadata<::py3::simple::OptionalRefStruct>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::SimpleStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::py3::simple::SimpleStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::py3::simple::SimpleStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -174,7 +174,7 @@ StructMetadata<::py3::simple::SimpleStruct>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::Float32Struct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::py3::simple::Float32Struct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::py3::simple::Float32Struct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -204,7 +204,7 @@ StructMetadata<::py3::simple::Float32Struct>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::HiddenTypeFieldsStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::py3::simple::HiddenTypeFieldsStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::py3::simple::HiddenTypeFieldsStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -234,7 +234,7 @@ StructMetadata<::py3::simple::HiddenTypeFieldsStruct>::gen(ThriftMetadata& metad
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::detail::AdaptedUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::py3::simple::detail::AdaptedUnion>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::py3::simple::detail::AdaptedUnion>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -265,7 +265,7 @@ StructMetadata<::py3::simple::detail::AdaptedUnion>::gen(ThriftMetadata& metadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::HiddenException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::py3::simple::HiddenException>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::py3::simple::HiddenException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -296,7 +296,7 @@ StructMetadata<::py3::simple::HiddenException>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::ComplexStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::py3::simple::ComplexStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::py3::simple::ComplexStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -326,7 +326,7 @@ StructMetadata<::py3::simple::ComplexStruct>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::BinaryUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::py3::simple::BinaryUnion>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::py3::simple::BinaryUnion>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -356,7 +356,7 @@ StructMetadata<::py3::simple::BinaryUnion>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::BinaryUnionStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::py3::simple::BinaryUnionStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::py3::simple::BinaryUnionStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -386,7 +386,7 @@ StructMetadata<::py3::simple::BinaryUnionStruct>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::CustomFields>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::py3::simple::CustomFields>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::py3::simple::CustomFields>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -416,7 +416,7 @@ StructMetadata<::py3::simple::CustomFields>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::CustomTypedefFields>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::py3::simple::CustomTypedefFields>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::py3::simple::CustomTypedefFields>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -446,7 +446,7 @@ StructMetadata<::py3::simple::CustomTypedefFields>::gen(ThriftMetadata& metadata
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::AdaptedTypedefFields>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::py3::simple::AdaptedTypedefFields>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::py3::simple::AdaptedTypedefFields>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -476,7 +476,7 @@ StructMetadata<::py3::simple::AdaptedTypedefFields>::gen(ThriftMetadata& metadat
 }
 
 void ExceptionMetadata<::py3::simple::SimpleException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::py3::simple::SimpleException>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<::py3::simple::SimpleException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -506,7 +506,7 @@ void ExceptionMetadata<::py3::simple::SimpleException>::gen(ThriftMetadata& meta
   ));
 }
 void ExceptionMetadata<::py3::simple::HiddenException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::py3::simple::HiddenException>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<::py3::simple::HiddenException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -1133,7 +1133,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_SimpleService = genServiceMetadata<::py3::simple::SimpleService>(false);
+  ::apache::thrift::metadata::ThriftService module_SimpleService = genServiceMetadata<::py3::simple::SimpleService>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_five,
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_add_five,
@@ -1214,7 +1214,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedServ
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_DerivedService = genServiceMetadata<::py3::simple::DerivedService>(false);
+  ::apache::thrift::metadata::ThriftService module_DerivedService = genServiceMetadata<::py3::simple::DerivedService>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedService>>::gen_get_six,
   };
@@ -1256,7 +1256,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedSe
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_RederivedService = genServiceMetadata<::py3::simple::RederivedService>(false);
+  ::apache::thrift::metadata::ThriftService module_RederivedService = genServiceMetadata<::py3::simple::RederivedService>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedService>>::gen_get_seven,
   };

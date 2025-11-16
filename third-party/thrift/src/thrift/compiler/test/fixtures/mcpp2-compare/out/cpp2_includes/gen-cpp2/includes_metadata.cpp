@@ -27,7 +27,7 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 void EnumMetadata<::a::different::ns::AnEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::a::different::ns::AnEnum>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::a::different::ns::AnEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -42,7 +42,7 @@ void EnumMetadata<::a::different::ns::AnEnum>::gen(ThriftMetadata& metadata) {
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::a::different::ns::AStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::a::different::ns::AStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::a::different::ns::AStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -72,7 +72,7 @@ StructMetadata<::a::different::ns::AStruct>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::a::different::ns::AStructB>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::a::different::ns::AStructB>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::a::different::ns::AStructB>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }

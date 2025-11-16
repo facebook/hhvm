@@ -39,7 +39,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2_struct_footprint::SimpleStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2_struct_footprint::SimpleStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2_struct_footprint::SimpleStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -69,7 +69,7 @@ StructMetadata<::cpp2_struct_footprint::SimpleStruct>::gen(ThriftMetadata& metad
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2_struct_footprint::ComplexStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2_struct_footprint::ComplexStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2_struct_footprint::ComplexStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -99,7 +99,7 @@ StructMetadata<::cpp2_struct_footprint::ComplexStruct>::gen(ThriftMetadata& meta
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2_struct_footprint::Struct1>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2_struct_footprint::Struct1>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2_struct_footprint::Struct1>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -116,7 +116,7 @@ StructMetadata<::cpp2_struct_footprint::Struct1>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2_struct_footprint::Struct2>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2_struct_footprint::Struct2>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2_struct_footprint::Struct2>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -133,7 +133,7 @@ StructMetadata<::cpp2_struct_footprint::Struct2>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2_struct_footprint::Struct3>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2_struct_footprint::Struct3>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2_struct_footprint::Struct3>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -150,7 +150,7 @@ StructMetadata<::cpp2_struct_footprint::Struct3>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2_struct_footprint::Struct4>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2_struct_footprint::Struct4>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2_struct_footprint::Struct4>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -167,7 +167,7 @@ StructMetadata<::cpp2_struct_footprint::Struct4>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2_struct_footprint::Struct5>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2_struct_footprint::Struct5>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2_struct_footprint::Struct5>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -184,7 +184,7 @@ StructMetadata<::cpp2_struct_footprint::Struct5>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2_struct_footprint::ExStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2_struct_footprint::ExStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2_struct_footprint::ExStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -214,7 +214,7 @@ StructMetadata<::cpp2_struct_footprint::ExStruct>::gen(ThriftMetadata& metadata)
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2_struct_footprint::TestUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2_struct_footprint::TestUnion>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2_struct_footprint::TestUnion>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -244,7 +244,7 @@ StructMetadata<::cpp2_struct_footprint::TestUnion>::gen(ThriftMetadata& metadata
 }
 
 void ExceptionMetadata<::cpp2_struct_footprint::ExStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2_struct_footprint::ExStruct>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<::cpp2_struct_footprint::ExStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -443,7 +443,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::F
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_FootprintTestService = genServiceMetadata<::cpp2_struct_footprint::FootprintTestService>(false);
+  ::apache::thrift::metadata::ThriftService module_FootprintTestService = genServiceMetadata<::cpp2_struct_footprint::FootprintTestService>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>>::gen_processIOBuf,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>>::gen_getStruct,
@@ -495,7 +495,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::E
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::ExtendedFootprintService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_ExtendedFootprintService = genServiceMetadata<::cpp2_struct_footprint::ExtendedFootprintService>(false);
+  ::apache::thrift::metadata::ThriftService module_ExtendedFootprintService = genServiceMetadata<::cpp2_struct_footprint::ExtendedFootprintService>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::ExtendedFootprintService>>::gen_getComplexMap,
   };

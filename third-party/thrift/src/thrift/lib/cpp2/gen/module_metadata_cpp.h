@@ -278,25 +278,29 @@ const auto& getDefinitionNodeWithLock() {
   return SchemaRegistry::get().getDefinitionNode<T>();
 }
 
+struct Options {
+  bool genAnnotations = false;
+};
+
 // Generate metadata of `node` inside `md`, return the generated metadata.
 GenMetadataResult<metadata::ThriftEnum> genEnumMetadata(
     metadata::ThriftMetadata& md,
     const syntax_graph::EnumNode& node,
-    bool genAnnotations);
+    Options options);
 
 template <class E>
-auto genEnumMetadata(metadata::ThriftMetadata& md, bool genAnnotations) {
-  return genEnumMetadata(md, getNodeWithLock<E>(), genAnnotations);
+auto genEnumMetadata(metadata::ThriftMetadata& md, Options options) {
+  return genEnumMetadata(md, getNodeWithLock<E>(), options);
 }
 
 GenMetadataResult<metadata::ThriftStruct> genStructMetadata(
     metadata::ThriftMetadata& md,
     const syntax_graph::StructuredNode& node,
-    bool genAnnotations);
+    Options options);
 
 template <class T>
-auto genStructMetadata(metadata::ThriftMetadata& md, bool genAnnotations) {
-  return genStructMetadata(md, getNodeWithLock<T>(), genAnnotations);
+auto genStructMetadata(metadata::ThriftMetadata& md, Options options) {
+  return genStructMetadata(md, getNodeWithLock<T>(), options);
 }
 
 void genStructFieldMetadata(
@@ -314,20 +318,20 @@ void genStructFieldMetadata(
 GenMetadataResult<metadata::ThriftException> genExceptionMetadata(
     metadata::ThriftMetadata& md,
     const syntax_graph::ExceptionNode& node,
-    bool genAnnotations);
+    Options options);
 
 template <class T>
-auto genExceptionMetadata(metadata::ThriftMetadata& md, bool genAnnotations) {
-  return genExceptionMetadata(md, getNodeWithLock<T>(), genAnnotations);
+auto genExceptionMetadata(metadata::ThriftMetadata& md, Options options) {
+  return genExceptionMetadata(md, getNodeWithLock<T>(), options);
 }
 
 metadata::ThriftService genServiceMetadata(
-    const syntax_graph::ServiceNode& node, bool genAnnotations);
+    const syntax_graph::ServiceNode& node, Options options);
 
 template <class Tag>
-metadata::ThriftService genServiceMetadata(bool genAnnotations) {
+metadata::ThriftService genServiceMetadata(Options options) {
   return genServiceMetadata(
-      getDefinitionNodeWithLock<Tag>().asService(), genAnnotations);
+      getDefinitionNodeWithLock<Tag>().asService(), options);
 }
 
 std::vector<syntax_graph::TypeRef> getAnnotationTypes(

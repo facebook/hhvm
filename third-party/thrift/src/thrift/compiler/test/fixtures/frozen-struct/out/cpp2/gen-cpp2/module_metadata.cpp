@@ -27,7 +27,7 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 void EnumMetadata<::some::ns::EnumB>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::some::ns::EnumB>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::some::ns::EnumB>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -42,7 +42,7 @@ void EnumMetadata<::some::ns::EnumB>::gen(ThriftMetadata& metadata) {
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::ns::ModuleA>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::ns::ModuleA>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::some::ns::ModuleA>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -72,7 +72,7 @@ StructMetadata<::some::ns::ModuleA>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::ns::ModuleB>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::ns::ModuleB>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::some::ns::ModuleB>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -102,7 +102,7 @@ StructMetadata<::some::ns::ModuleB>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::ns::detail::DirectlyAdapted>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::ns::detail::DirectlyAdapted>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::some::ns::detail::DirectlyAdapted>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -133,7 +133,7 @@ StructMetadata<::some::ns::detail::DirectlyAdapted>::gen(ThriftMetadata& metadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::ns::CppRef>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::some::ns::CppRef>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::some::ns::CppRef>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }

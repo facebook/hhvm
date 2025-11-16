@@ -88,7 +88,8 @@ TEST(Annotations, Enum) {
   EXPECT_EQ(md.enums()["annotations.TestEnum"], expectedEnum());
 
   metadata::ThriftMetadata md2;
-  auto res = detail::md::genEnumMetadata<TestEnum>(md2, true);
+  auto res =
+      detail::md::genEnumMetadata<TestEnum>(md2, {.genAnnotations = true});
   auto types = detail::md::getAnnotationTypes<TestEnum>();
   EXPECT_TRUE(
       detail::md::structuredAnnotationsEquality(
@@ -228,7 +229,8 @@ TEST(Annotations, Struct) {
   EXPECT_EQ(md.structs()["annotations.TestStruct"], expectedStruct());
 
   metadata::ThriftMetadata md2;
-  auto res = detail::md::genStructMetadata<TestStruct>(md2, true);
+  auto res =
+      detail::md::genStructMetadata<TestStruct>(md2, {.genAnnotations = true});
   for (size_t i = 0; i < res.metadata.fields()->size(); ++i) {
     EXPECT_TRUE(
         detail::md::structuredAnnotationsEquality(
@@ -250,7 +252,8 @@ TEST(Annotations, Exception) {
   EXPECT_EQ(md.exceptions()["annotations.TestException"], expectedException());
 
   metadata::ThriftMetadata md2;
-  auto res = detail::md::genExceptionMetadata<TestException>(md2, true);
+  auto res = detail::md::genExceptionMetadata<TestException>(
+      md2, {.genAnnotations = true});
   EXPECT_TRUE(
       detail::md::structuredAnnotationsEquality(
           *res.metadata.structured_annotations(),
@@ -259,7 +262,8 @@ TEST(Annotations, Exception) {
 }
 
 TEST(Annotations, Service) {
-  auto service = detail::md::genServiceMetadata<TestService>(true);
+  auto service =
+      detail::md::genServiceMetadata<TestService>({.genAnnotations = true});
   EXPECT_EQ(
       service.structured_annotations()->begin()->fields()["baz"].cv_string(),
       "0");

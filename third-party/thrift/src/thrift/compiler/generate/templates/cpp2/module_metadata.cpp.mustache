@@ -44,7 +44,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 {{#program:enums}}
 void EnumMetadata<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::{{program:qualified_namespace}}::{{enum:cpp_name}}>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::{{program:qualified_namespace}}::{{enum:cpp_name}}>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -66,7 +66,7 @@ void EnumMetadata<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::gen(Thr
 {{#program:structs}}
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<{{struct:cpp_fullname}}>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<{{struct:cpp_fullname}}>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<{{struct:cpp_fullname}}>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -109,7 +109,7 @@ StructMetadata<{{struct:cpp_fullname}}>::gen(ThriftMetadata& metadata) {
 {{#program:structs}}
 {{#struct:exception?}}
 void ExceptionMetadata<{{struct:cpp_fullname}}>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<{{struct:cpp_fullname}}>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<{{struct:cpp_fullname}}>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -194,7 +194,7 @@ void ServiceMetadata<::{{> service_common/service_class_name}}>::gen(::apache::t
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::{{> service_common/service_class_name}}>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService {{service:metadata_name}} = genServiceMetadata<{{service:qualified_name}}>(false);
+  ::apache::thrift::metadata::ThriftService {{service:metadata_name}} = genServiceMetadata<{{service:qualified_name}}>({.genAnnotations = false});
   {{#if (not (string.empty? service:uri))}}
   DCHECK_EQ(*{{service:metadata_name}}.uri(), "{{service:uri}}");
   {{/if (not (string.empty? service:uri))}}

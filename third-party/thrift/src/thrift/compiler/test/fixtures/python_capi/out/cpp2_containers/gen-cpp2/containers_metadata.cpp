@@ -29,7 +29,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::TemplateLists>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::TemplateLists>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::python_capi::TemplateLists>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -59,7 +59,7 @@ StructMetadata<::test::fixtures::python_capi::TemplateLists>::gen(ThriftMetadata
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::TemplateSets>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::TemplateSets>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::python_capi::TemplateSets>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -90,7 +90,7 @@ StructMetadata<::test::fixtures::python_capi::TemplateSets>::gen(ThriftMetadata&
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::TemplateMaps>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::TemplateMaps>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::python_capi::TemplateMaps>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -121,7 +121,7 @@ StructMetadata<::test::fixtures::python_capi::TemplateMaps>::gen(ThriftMetadata&
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::TWrapped>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::TWrapped>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::python_capi::TWrapped>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -151,7 +151,7 @@ StructMetadata<::test::fixtures::python_capi::TWrapped>::gen(ThriftMetadata& met
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::IndirectionA>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::IndirectionA>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::python_capi::IndirectionA>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -181,7 +181,7 @@ StructMetadata<::test::fixtures::python_capi::IndirectionA>::gen(ThriftMetadata&
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::IndirectionB>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::IndirectionB>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::python_capi::IndirectionB>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -211,7 +211,7 @@ StructMetadata<::test::fixtures::python_capi::IndirectionB>::gen(ThriftMetadata&
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::IndirectionC>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::python_capi::IndirectionC>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::python_capi::IndirectionC>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }

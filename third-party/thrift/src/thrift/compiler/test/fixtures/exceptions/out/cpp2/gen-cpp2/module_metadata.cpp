@@ -34,7 +34,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Fiery>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Fiery>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::Fiery>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -64,7 +64,7 @@ StructMetadata<::cpp2::Fiery>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Serious>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Serious>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::Serious>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -94,7 +94,7 @@ StructMetadata<::cpp2::Serious>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::ComplexFieldNames>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::ComplexFieldNames>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::ComplexFieldNames>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -124,7 +124,7 @@ StructMetadata<::cpp2::ComplexFieldNames>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::CustomFieldNames>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::CustomFieldNames>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::CustomFieldNames>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -154,7 +154,7 @@ StructMetadata<::cpp2::CustomFieldNames>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::ExceptionWithPrimitiveField>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::ExceptionWithPrimitiveField>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::ExceptionWithPrimitiveField>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -184,7 +184,7 @@ StructMetadata<::cpp2::ExceptionWithPrimitiveField>::gen(ThriftMetadata& metadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::ExceptionWithStructuredAnnotation>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::ExceptionWithStructuredAnnotation>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::ExceptionWithStructuredAnnotation>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -214,7 +214,7 @@ StructMetadata<::cpp2::ExceptionWithStructuredAnnotation>::gen(ThriftMetadata& m
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Banal>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Banal>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::Banal>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -231,7 +231,7 @@ StructMetadata<::cpp2::Banal>::gen(ThriftMetadata& metadata) {
 }
 
 void ExceptionMetadata<::cpp2::Fiery>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::Fiery>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<::cpp2::Fiery>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -261,7 +261,7 @@ void ExceptionMetadata<::cpp2::Fiery>::gen(ThriftMetadata& metadata) {
   ));
 }
 void ExceptionMetadata<::cpp2::Serious>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::Serious>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<::cpp2::Serious>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -291,7 +291,7 @@ void ExceptionMetadata<::cpp2::Serious>::gen(ThriftMetadata& metadata) {
   ));
 }
 void ExceptionMetadata<::cpp2::ComplexFieldNames>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::ComplexFieldNames>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<::cpp2::ComplexFieldNames>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -321,7 +321,7 @@ void ExceptionMetadata<::cpp2::ComplexFieldNames>::gen(ThriftMetadata& metadata)
   ));
 }
 void ExceptionMetadata<::cpp2::CustomFieldNames>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::CustomFieldNames>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<::cpp2::CustomFieldNames>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -351,7 +351,7 @@ void ExceptionMetadata<::cpp2::CustomFieldNames>::gen(ThriftMetadata& metadata) 
   ));
 }
 void ExceptionMetadata<::cpp2::ExceptionWithPrimitiveField>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::ExceptionWithPrimitiveField>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<::cpp2::ExceptionWithPrimitiveField>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -381,7 +381,7 @@ void ExceptionMetadata<::cpp2::ExceptionWithPrimitiveField>::gen(ThriftMetadata&
   ));
 }
 void ExceptionMetadata<::cpp2::ExceptionWithStructuredAnnotation>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::ExceptionWithStructuredAnnotation>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<::cpp2::ExceptionWithStructuredAnnotation>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -411,7 +411,7 @@ void ExceptionMetadata<::cpp2::ExceptionWithStructuredAnnotation>::gen(ThriftMet
   ));
 }
 void ExceptionMetadata<::cpp2::Banal>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::Banal>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<::cpp2::Banal>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -508,7 +508,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Raiser>>::gen(::ap
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Raiser>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_Raiser = genServiceMetadata<::cpp2::Raiser>(false);
+  ::apache::thrift::metadata::ThriftService module_Raiser = genServiceMetadata<::cpp2::Raiser>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Raiser>>::gen_doBland,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Raiser>>::gen_doRaise,

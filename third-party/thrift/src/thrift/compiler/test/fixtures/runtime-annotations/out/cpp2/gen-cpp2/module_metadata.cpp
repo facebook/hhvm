@@ -27,7 +27,7 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 void EnumMetadata<::facebook::thrift::test::MyEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::facebook::thrift::test::MyEnum>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::facebook::thrift::test::MyEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -43,7 +43,7 @@ void EnumMetadata<::facebook::thrift::test::MyEnum>::gen(ThriftMetadata& metadat
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::MyAnnotation>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::MyAnnotation>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::facebook::thrift::test::MyAnnotation>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -62,7 +62,7 @@ StructMetadata<::facebook::thrift::test::MyAnnotation>::gen(ThriftMetadata& meta
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::MyStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::facebook::thrift::test::MyStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -93,7 +93,7 @@ StructMetadata<::facebook::thrift::test::MyStruct>::gen(ThriftMetadata& metadata
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::MyUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::MyUnion>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::facebook::thrift::test::MyUnion>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -124,7 +124,7 @@ StructMetadata<::facebook::thrift::test::MyUnion>::gen(ThriftMetadata& metadata)
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::MyException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::MyException>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::facebook::thrift::test::MyException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -155,7 +155,7 @@ StructMetadata<::facebook::thrift::test::MyException>::gen(ThriftMetadata& metad
 }
 
 void ExceptionMetadata<::facebook::thrift::test::MyException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::facebook::thrift::test::MyException>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<::facebook::thrift::test::MyException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }

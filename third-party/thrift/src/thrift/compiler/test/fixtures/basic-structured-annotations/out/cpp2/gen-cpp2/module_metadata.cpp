@@ -32,7 +32,7 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 void EnumMetadata<::test::fixtures::basic_structured_annotations::MyEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::basic_structured_annotations::MyEnum>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::test::fixtures::basic_structured_annotations::MyEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -48,7 +48,7 @@ void EnumMetadata<::test::fixtures::basic_structured_annotations::MyEnum>::gen(T
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic_structured_annotations::runtime_annotation>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::runtime_annotation>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::runtime_annotation>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -66,7 +66,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::runtime_annotatio
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_inline>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_inline>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_inline>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -96,7 +96,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_with_default>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_with_default>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_with_default>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -126,7 +126,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -156,7 +156,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_forward>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_forward>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_forward>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -186,7 +186,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_nested>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_nested>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::structured_annotation_nested>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -216,7 +216,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic_structured_annotations::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::MyStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::MyStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -252,7 +252,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyStruct>::gen(Th
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic_structured_annotations::MyException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::MyException>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::MyException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -283,7 +283,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyException>::gen
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic_structured_annotations::MyUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::MyUnion>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::basic_structured_annotations::MyUnion>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -314,7 +314,7 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyUnion>::gen(Thr
 }
 
 void ExceptionMetadata<::test::fixtures::basic_structured_annotations::MyException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::test::fixtures::basic_structured_annotations::MyException>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<::test::fixtures::basic_structured_annotations::MyException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -384,7 +384,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_st
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_MyService = genServiceMetadata<::test::fixtures::basic_structured_annotations::MyService>(false);
+  ::apache::thrift::metadata::ThriftService module_MyService = genServiceMetadata<::test::fixtures::basic_structured_annotations::MyService>({.genAnnotations = false});
   DCHECK_EQ(*module_MyService.uri(), "test.dev/fixtures/basic_structured_annotations/MyService");
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>>::gen_first,

@@ -291,7 +291,7 @@ metadata::detail::LimitedVector<ThriftConstStruct> genStructuredAnnotations(
 GenMetadataResult<metadata::ThriftEnum> genEnumMetadata(
     metadata::ThriftMetadata& md,
     const syntax_graph::EnumNode& node,
-    bool genAnnotations) {
+    Options options) {
   auto name = getName(node);
   auto res = md.enums()->try_emplace(name);
   GenMetadataResult<metadata::ThriftEnum> ret{!res.second, res.first->second};
@@ -302,7 +302,7 @@ GenMetadataResult<metadata::ThriftEnum> genEnumMetadata(
   for (const auto& value : node.values()) {
     ret.metadata.elements()[value.i32()] = value.name();
   }
-  if (genAnnotations) {
+  if (options.genAnnotations) {
     ret.metadata.structured_annotations() =
         genStructuredAnnotations(node.definition().annotations());
   }
@@ -313,7 +313,7 @@ template <class Metadata>
 static auto genStructuredInMetadataMap(
     const syntax_graph::StructuredNode& node,
     std::map<std::string, Metadata>& metadataMap,
-    bool genAnnotations) {
+    Options options) {
   auto name = getName(node);
   auto res = metadataMap.try_emplace(name);
   GenMetadataResult<Metadata> ret{!res.second, res.first->second};
@@ -331,12 +331,12 @@ static auto genStructuredInMetadataMap(
     f.name() = field.name();
     f.is_optional() =
         (field.presence() == syntax_graph::FieldPresenceQualifier::OPTIONAL_);
-    if (genAnnotations) {
+    if (options.genAnnotations) {
       f.structured_annotations() =
           genStructuredAnnotations(field.annotations());
     }
   }
-  if (genAnnotations) {
+  if (options.genAnnotations) {
     ret.metadata.structured_annotations() =
         genStructuredAnnotations(node.definition().annotations());
   }
@@ -346,8 +346,8 @@ static auto genStructuredInMetadataMap(
 GenMetadataResult<metadata::ThriftStruct> genStructMetadata(
     metadata::ThriftMetadata& md,
     const syntax_graph::StructuredNode& node,
-    bool genAnnotations) {
-  return genStructuredInMetadataMap(node, *md.structs(), genAnnotations);
+    Options options) {
+  return genStructuredInMetadataMap(node, *md.structs(), options);
 }
 
 void genStructFieldMetadata(
@@ -372,12 +372,12 @@ void genStructFieldMetadata(
 GenMetadataResult<metadata::ThriftException> genExceptionMetadata(
     metadata::ThriftMetadata& md,
     const syntax_graph::ExceptionNode& node,
-    bool genAnnotations) {
-  return genStructuredInMetadataMap(node, *md.exceptions(), genAnnotations);
+    Options options) {
+  return genStructuredInMetadataMap(node, *md.exceptions(), options);
 }
 
 metadata::ThriftService genServiceMetadata(
-    const syntax_graph::ServiceNode& node, bool genAnnotations) {
+    const syntax_graph::ServiceNode& node, Options options) {
   metadata::ThriftService ret;
   ret.name() = getName(node);
   ret.uri() = node.uri();
@@ -396,7 +396,7 @@ metadata::ThriftService genServiceMetadata(
       i.id() = static_cast<std::int16_t>(param.id());
       i.name() = param.name();
       i.is_optional() = false;
-      if (genAnnotations) {
+      if (options.genAnnotations) {
         i.structured_annotations() =
             genStructuredAnnotations(param.annotations());
       }
@@ -406,17 +406,17 @@ metadata::ThriftService genServiceMetadata(
       i.id() = static_cast<std::int16_t>(exception.id());
       i.name() = exception.name();
       i.is_optional() = false;
-      if (genAnnotations) {
+      if (options.genAnnotations) {
         i.structured_annotations() =
             genStructuredAnnotations(exception.annotations());
       }
     }
-    if (genAnnotations) {
+    if (options.genAnnotations) {
       ret.functions()->back().structured_annotations() =
           genStructuredAnnotations(func.annotations());
     }
   }
-  if (genAnnotations) {
+  if (options.genAnnotations) {
     ret.structured_annotations() =
         genStructuredAnnotations(node.definition().annotations());
   }

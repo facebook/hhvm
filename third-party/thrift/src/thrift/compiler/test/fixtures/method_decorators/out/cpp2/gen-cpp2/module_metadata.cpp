@@ -59,7 +59,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Request>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Request>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::Request>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -89,7 +89,7 @@ StructMetadata<::cpp2::Request>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::detail::AdaptedRequest>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::detail::AdaptedRequest>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::detail::AdaptedRequest>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -120,7 +120,7 @@ StructMetadata<::cpp2::detail::AdaptedRequest>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Response>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Response>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::Response>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -259,7 +259,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_DecoratedService = genServiceMetadata<::cpp2::DecoratedService>(false);
+  ::apache::thrift::metadata::ThriftService module_DecoratedService = genServiceMetadata<::cpp2::DecoratedService>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>::gen_noop,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>::gen_echo,
@@ -400,7 +400,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_UndecoratedService = genServiceMetadata<::cpp2::UndecoratedService>(false);
+  ::apache::thrift::metadata::ThriftService module_UndecoratedService = genServiceMetadata<::cpp2::UndecoratedService>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService>>::gen_noop,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService>>::gen_echo,
@@ -446,7 +446,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_E
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_DecoratedService_ExtendsUndecoratedService = genServiceMetadata<::cpp2::DecoratedService_ExtendsUndecoratedService>(false);
+  ::apache::thrift::metadata::ThriftService module_DecoratedService_ExtendsUndecoratedService = genServiceMetadata<::cpp2::DecoratedService_ExtendsUndecoratedService>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>>::gen_extension,
   };
@@ -489,7 +489,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_E
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_DecoratedService_ExtendsDecoratedService = genServiceMetadata<::cpp2::DecoratedService_ExtendsDecoratedService>(false);
+  ::apache::thrift::metadata::ThriftService module_DecoratedService_ExtendsDecoratedService = genServiceMetadata<::cpp2::DecoratedService_ExtendsDecoratedService>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>>::gen_extension,
   };
@@ -532,7 +532,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService_ExtendsDecoratedService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_UndecoratedService_ExtendsDecoratedService = genServiceMetadata<::cpp2::UndecoratedService_ExtendsDecoratedService>(false);
+  ::apache::thrift::metadata::ThriftService module_UndecoratedService_ExtendsDecoratedService = genServiceMetadata<::cpp2::UndecoratedService_ExtendsDecoratedService>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService_ExtendsDecoratedService>>::gen_extension,
   };
@@ -579,7 +579,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_E
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService = genServiceMetadata<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>(false);
+  ::apache::thrift::metadata::ThriftService module_DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService = genServiceMetadata<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>>::gen_secondExtension,
   };

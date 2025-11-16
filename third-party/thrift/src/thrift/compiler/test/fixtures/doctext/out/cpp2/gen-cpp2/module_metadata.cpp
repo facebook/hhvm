@@ -32,7 +32,7 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 void EnumMetadata<::cpp2::B>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::cpp2::B>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::cpp2::B>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -47,7 +47,7 @@ void EnumMetadata<::cpp2::B>::gen(ThriftMetadata& metadata) {
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::A>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::A>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::A>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -77,7 +77,7 @@ StructMetadata<::cpp2::A>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::U>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::U>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::U>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -107,7 +107,7 @@ StructMetadata<::cpp2::U>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Bang>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Bang>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::Bang>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -137,7 +137,7 @@ StructMetadata<::cpp2::Bang>::gen(ThriftMetadata& metadata) {
 }
 
 void ExceptionMetadata<::cpp2::Bang>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::Bang>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<::cpp2::Bang>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -226,7 +226,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::gen(::apache:
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_C = genServiceMetadata<::cpp2::C>(false);
+  ::apache::thrift::metadata::ThriftService module_C = genServiceMetadata<::cpp2::C>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::gen_f,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::gen_numbers,

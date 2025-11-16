@@ -39,7 +39,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::EchoRequest>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::EchoRequest>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::EchoRequest>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -69,7 +69,7 @@ StructMetadata<::cpp2::EchoRequest>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::EchoResponse>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::EchoResponse>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::EchoResponse>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -138,7 +138,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethod
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_HeaderClientMethodsAnnotationOnService = genServiceMetadata<::cpp2::HeaderClientMethodsAnnotationOnService>(false);
+  ::apache::thrift::metadata::ThriftService module_HeaderClientMethodsAnnotationOnService = genServiceMetadata<::cpp2::HeaderClientMethodsAnnotationOnService>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService>>::gen_echo,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService>>::gen_echo_2,
@@ -200,7 +200,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethod
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnFunction>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_HeaderClientMethodsAnnotationOnFunction = genServiceMetadata<::cpp2::HeaderClientMethodsAnnotationOnFunction>(false);
+  ::apache::thrift::metadata::ThriftService module_HeaderClientMethodsAnnotationOnFunction = genServiceMetadata<::cpp2::HeaderClientMethodsAnnotationOnFunction>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnFunction>>::gen_echo,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnFunction>>::gen_echo_2,

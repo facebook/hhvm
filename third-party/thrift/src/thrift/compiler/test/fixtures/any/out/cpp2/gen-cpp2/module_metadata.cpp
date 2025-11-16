@@ -29,7 +29,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -60,7 +60,7 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::any::detail::MyStru
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyUnion>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyUnion>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -90,7 +90,7 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyUnion>::gen(
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -120,7 +120,7 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>::
 }
 
 void ExceptionMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }

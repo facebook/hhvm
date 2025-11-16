@@ -29,7 +29,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -46,7 +46,7 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values_rect
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }

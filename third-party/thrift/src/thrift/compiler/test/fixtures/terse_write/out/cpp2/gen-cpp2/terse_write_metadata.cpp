@@ -27,7 +27,7 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 void EnumMetadata<::facebook::thrift::test::terse_write::MyEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::facebook::thrift::test::terse_write::MyEnum>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::facebook::thrift::test::terse_write::MyEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -42,7 +42,7 @@ void EnumMetadata<::facebook::thrift::test::terse_write::MyEnum>::gen(ThriftMeta
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::MyStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::MyStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::MyStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -59,7 +59,7 @@ StructMetadata<::facebook::thrift::test::terse_write::MyStruct>::gen(ThriftMetad
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::MyUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::MyUnion>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::MyUnion>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -89,7 +89,7 @@ StructMetadata<::facebook::thrift::test::terse_write::MyUnion>::gen(ThriftMetada
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -119,7 +119,7 @@ StructMetadata<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::StructLevelTerseStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::StructLevelTerseStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -150,7 +150,7 @@ StructMetadata<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::g
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -180,7 +180,7 @@ StructMetadata<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::ge
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::AdaptedFields>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::AdaptedFields>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::AdaptedFields>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -211,7 +211,7 @@ StructMetadata<::facebook::thrift::test::terse_write::AdaptedFields>::gen(Thrift
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::TerseException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::facebook::thrift::test::terse_write::TerseException>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::facebook::thrift::test::terse_write::TerseException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -242,7 +242,7 @@ StructMetadata<::facebook::thrift::test::terse_write::TerseException>::gen(Thrif
 }
 
 void ExceptionMetadata<::facebook::thrift::test::terse_write::TerseException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::facebook::thrift::test::terse_write::TerseException>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<::facebook::thrift::test::terse_write::TerseException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }

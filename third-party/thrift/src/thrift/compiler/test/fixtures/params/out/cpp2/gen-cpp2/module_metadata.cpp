@@ -115,7 +115,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NestedContainers>>
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NestedContainers>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_NestedContainers = genServiceMetadata<::cpp2::NestedContainers>(false);
+  ::apache::thrift::metadata::ThriftService module_NestedContainers = genServiceMetadata<::cpp2::NestedContainers>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NestedContainers>>::gen_mapList,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NestedContainers>>::gen_mapSet,

@@ -27,7 +27,7 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 void EnumMetadata<::test::fixtures::tablebased::ExampleEnum>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::test::fixtures::tablebased::ExampleEnum>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::test::fixtures::tablebased::ExampleEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -42,7 +42,7 @@ void EnumMetadata<::test::fixtures::tablebased::ExampleEnum>::gen(ThriftMetadata
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::tablebased::TrivialTypesStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::tablebased::TrivialTypesStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::tablebased::TrivialTypesStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -72,7 +72,7 @@ StructMetadata<::test::fixtures::tablebased::TrivialTypesStruct>::gen(ThriftMeta
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::tablebased::ContainerStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::tablebased::ContainerStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::tablebased::ContainerStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -102,7 +102,7 @@ StructMetadata<::test::fixtures::tablebased::ContainerStruct>::gen(ThriftMetadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::tablebased::ExampleUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::test::fixtures::tablebased::ExampleUnion>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::test::fixtures::tablebased::ExampleUnion>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }

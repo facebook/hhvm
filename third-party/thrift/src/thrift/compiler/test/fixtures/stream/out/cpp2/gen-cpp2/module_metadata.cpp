@@ -34,7 +34,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::FooStreamEx>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::FooStreamEx>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::FooStreamEx>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -51,7 +51,7 @@ StructMetadata<::cpp2::FooStreamEx>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::FooEx>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::FooEx>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::FooEx>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -68,7 +68,7 @@ StructMetadata<::cpp2::FooEx>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::FooEx2>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::FooEx2>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::FooEx2>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -85,7 +85,7 @@ StructMetadata<::cpp2::FooEx2>::gen(ThriftMetadata& metadata) {
 }
 
 void ExceptionMetadata<::cpp2::FooStreamEx>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::FooStreamEx>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<::cpp2::FooStreamEx>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -99,7 +99,7 @@ void ExceptionMetadata<::cpp2::FooStreamEx>::gen(ThriftMetadata& metadata) {
   ));
 }
 void ExceptionMetadata<::cpp2::FooEx>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::FooEx>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<::cpp2::FooEx>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -113,7 +113,7 @@ void ExceptionMetadata<::cpp2::FooEx>::gen(ThriftMetadata& metadata) {
   ));
 }
 void ExceptionMetadata<::cpp2::FooEx2>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::FooEx2>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<::cpp2::FooEx2>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -311,7 +311,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingSer
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_PubSubStreamingService = genServiceMetadata<::cpp2::PubSubStreamingService>(false);
+  ::apache::thrift::metadata::ThriftService module_PubSubStreamingService = genServiceMetadata<::cpp2::PubSubStreamingService>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_returnstream,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_streamthrows,

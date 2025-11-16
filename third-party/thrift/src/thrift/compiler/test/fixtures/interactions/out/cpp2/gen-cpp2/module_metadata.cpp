@@ -54,7 +54,7 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::s
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::CustomException>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::CustomException>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::CustomException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -84,7 +84,7 @@ StructMetadata<::cpp2::CustomException>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::ShouldBeBoxed>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::ShouldBeBoxed>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::ShouldBeBoxed>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -114,7 +114,7 @@ StructMetadata<::cpp2::ShouldBeBoxed>::gen(ThriftMetadata& metadata) {
 }
 
 void ExceptionMetadata<::cpp2::CustomException>::gen(ThriftMetadata& metadata) {
-  auto res = genExceptionMetadata<::cpp2::CustomException>(metadata, folly::kIsDebug);
+  auto res = genExceptionMetadata<::cpp2::CustomException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -196,7 +196,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen(:
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_MyService = genServiceMetadata<::cpp2::MyService>(false);
+  ::apache::thrift::metadata::ThriftService module_MyService = genServiceMetadata<::cpp2::MyService>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_foo,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_interact,
@@ -271,7 +271,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Factories>>::gen(:
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Factories>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_Factories = genServiceMetadata<::cpp2::Factories>(false);
+  ::apache::thrift::metadata::ThriftService module_Factories = genServiceMetadata<::cpp2::Factories>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Factories>>::gen_foo,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Factories>>::gen_interact,
@@ -314,7 +314,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Perform>>::gen(::a
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Perform>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_Perform = genServiceMetadata<::cpp2::Perform>(false);
+  ::apache::thrift::metadata::ThriftService module_Perform = genServiceMetadata<::cpp2::Perform>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::Perform>>::gen_foo,
   };
@@ -354,7 +354,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::InteractWithShared
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::InteractWithShared>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_InteractWithShared = genServiceMetadata<::cpp2::InteractWithShared>(false);
+  ::apache::thrift::metadata::ThriftService module_InteractWithShared = genServiceMetadata<::cpp2::InteractWithShared>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::InteractWithShared>>::gen_do_some_similar_things,
   };
@@ -399,7 +399,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BoxService>>::gen(
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BoxService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_BoxService = genServiceMetadata<::cpp2::BoxService>(false);
+  ::apache::thrift::metadata::ThriftService module_BoxService = genServiceMetadata<::cpp2::BoxService>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BoxService>>::gen_getABoxSession,
   };

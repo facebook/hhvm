@@ -64,7 +64,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyRoot>>::gen(::ap
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyRoot>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_MyRoot = genServiceMetadata<::cpp2::MyRoot>(false);
+  ::apache::thrift::metadata::ThriftService module_MyRoot = genServiceMetadata<::cpp2::MyRoot>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyRoot>>::gen_do_root,
   };
@@ -104,7 +104,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyNode>>::gen(::ap
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyNode>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_MyNode = genServiceMetadata<::cpp2::MyNode>(false);
+  ::apache::thrift::metadata::ThriftService module_MyNode = genServiceMetadata<::cpp2::MyNode>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyNode>>::gen_do_mid,
   };
@@ -146,7 +146,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyLeaf>>::gen(::ap
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyLeaf>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_MyLeaf = genServiceMetadata<::cpp2::MyLeaf>(false);
+  ::apache::thrift::metadata::ThriftService module_MyLeaf = genServiceMetadata<::cpp2::MyLeaf>({.genAnnotations = false});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyLeaf>>::gen_do_leaf,
   };

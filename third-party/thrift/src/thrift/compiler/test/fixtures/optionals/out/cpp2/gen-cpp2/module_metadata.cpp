@@ -27,7 +27,7 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
 
 void EnumMetadata<::cpp2::Animal>::gen(ThriftMetadata& metadata) {
-  auto res = genEnumMetadata<::cpp2::Animal>(metadata, folly::kIsDebug);
+  auto res = genEnumMetadata<::cpp2::Animal>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
   }
@@ -42,7 +42,7 @@ void EnumMetadata<::cpp2::Animal>::gen(ThriftMetadata& metadata) {
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Color>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Color>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::Color>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -72,7 +72,7 @@ StructMetadata<::cpp2::Color>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Vehicle>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Vehicle>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::Vehicle>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -102,7 +102,7 @@ StructMetadata<::cpp2::Vehicle>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::Person>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::Person>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::Person>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }

@@ -88,8 +88,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::namespace_from_pac
   response.context() = std::move(context);
 }
 
-const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test::namespace_from_package::module::TestService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_TestService = genServiceMetadata<::test::namespace_from_package::module::TestService>({.genAnnotations = false});
+const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test::namespace_from_package::module::TestService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  ::apache::thrift::metadata::ThriftService module_TestService = genServiceMetadata<::test::namespace_from_package::module::TestService>(metadata, {.genAnnotations = false});
   DCHECK_EQ(*module_TestService.uri(), "test.dev/namespace_from_package/module/TestService");
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::test::namespace_from_package::module::TestService>>::gen_init,

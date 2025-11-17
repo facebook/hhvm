@@ -476,7 +476,9 @@ GenMetadataResult<metadata::ThriftException> genExceptionMetadata(
 }
 
 metadata::ThriftService genServiceMetadata(
-    const syntax_graph::ServiceNode& node, Options options) {
+    const syntax_graph::ServiceNode& node,
+    metadata::ThriftMetadata& md,
+    Options options) {
   metadata::ThriftService ret;
   ret.name() = getName(node);
   ret.uri() = node.uri();
@@ -488,6 +490,41 @@ metadata::ThriftService genServiceMetadata(
       continue;
     }
     ret.functions()->emplace_back().name() = func.name();
+    if (options.genNestedTypes) {
+      if (auto stream = func.response().stream()) {
+        ret.functions()->back().return_type()->t_stream().emplace();
+        ret.functions()->back().return_type()->t_stream()->elemType() =
+            std::make_unique<ThriftType>(genType(md, stream->payloadType()));
+        if (auto retType = func.response().type()) {
+          ret.functions()
+              ->back()
+              .return_type()
+              ->t_stream()
+              ->initialResponseType() =
+              std::make_unique<ThriftType>(genType(md, *retType));
+        }
+      } else if (auto sink = func.response().sink()) {
+        ret.functions()->back().return_type()->t_sink().emplace();
+        ret.functions()->back().return_type()->t_sink()->elemType() =
+            std::make_unique<ThriftType>(genType(md, sink->payloadType()));
+        ret.functions()->back().return_type()->t_sink()->finalResponseType() =
+            std::make_unique<ThriftType>(
+                genType(md, sink->finalResponseType()));
+        if (auto retType = func.response().type()) {
+          ret.functions()
+              ->back()
+              .return_type()
+              ->t_sink()
+              ->initialResponseType() =
+              std::make_unique<ThriftType>(genType(md, *retType));
+        }
+      } else if (auto retType = func.response().type()) {
+        ret.functions()->back().return_type() = genType(md, *retType);
+      } else {
+        ret.functions()->back().return_type()->t_primitive() =
+            metadata::ThriftPrimitiveType::THRIFT_VOID_TYPE;
+      }
+    }
     ret.functions()->back().is_oneway() =
         func.qualifier() == type::FunctionQualifier::OneWay;
     for (const auto& param : func.params()) {
@@ -499,6 +536,9 @@ metadata::ThriftService genServiceMetadata(
         i.structured_annotations() =
             genStructuredAnnotations(param.annotations());
       }
+      if (options.genNestedTypes) {
+        i.type() = genType(md, param.type());
+      }
     }
     for (const auto& exception : func.exceptions()) {
       auto& i = ret.functions()->back().exceptions()->emplace_back();
@@ -508,6 +548,16 @@ metadata::ThriftService genServiceMetadata(
       if (options.genAnnotations) {
         i.structured_annotations() =
             genStructuredAnnotations(exception.annotations());
+      }
+      if (options.genNestedTypes) {
+        i.type() = genType(md, exception.type());
+        if (exception.type().isStructured()) {
+          // Mimicking the existing logic: we add all types in throw clause
+          // into `exceptions` field as long as it's structured.
+          // https://github.com/facebook/fbthrift/blob/v2025.11.03.00/thrift/compiler/generate/templates/cpp2/module_metadata.cpp.mustache#L153-L157
+          genStructuredInMetadataMap(
+              md, *md.exceptions(), exception.type().asStructured(), options);
+        }
       }
     }
     if (options.genAnnotations) {
@@ -613,5 +663,44 @@ bool structuredAnnotationsEquality(
   return normalizeStructuredAnnotations(
              std::move(lhsAnnotations), nameToType) ==
       normalizeStructuredAnnotations(std::move(rhsAnnotations), nameToType);
+}
+
+const ThriftServiceContextRef* genServiceMetadataRecurse(
+    const syntax_graph::ServiceNode& node,
+    ThriftMetadata& metadata,
+    std::vector<ThriftServiceContextRef>& services) {
+  Options options = {.genAnnotations = true, .genNestedTypes = true};
+  auto serviceMetadata = genServiceMetadata(node, metadata, options);
+  // We need to keep the index around because a reference or iterator could be
+  // invalidated.
+  auto selfIndex = services.size();
+  services.emplace_back();
+  if (auto base = node.baseService()) {
+    genServiceMetadataRecurse(*base, metadata, services);
+  }
+  ThriftServiceContextRef& context = services[selfIndex];
+  auto name = *serviceMetadata.name();
+  metadata.services()->emplace(name, std::move(serviceMetadata));
+  context.service_name() = std::move(name);
+  metadata::ThriftModuleContext module;
+  module.name() = node.definition().program().name();
+  context.module() = std::move(module);
+  return &context;
+}
+
+void genServiceMetadataResponse(
+    const syntax_graph::ServiceNode& node,
+    metadata::ThriftServiceMetadataResponse& response) {
+  const ::apache::thrift::metadata::ThriftServiceContextRef* self =
+      genServiceMetadataRecurse(
+          node, *response.metadata(), *response.services());
+  metadata::ThriftServiceContext context;
+  // TODO(praihan): Remove ThriftServiceContext from response. But in the
+  // meantime, we need to fill the field with the result of looking up in
+  // ThriftMetadata.
+  context.module() = *self->module();
+  context.service_info() =
+      response.metadata()->services()->at(*self->service_name());
+  response.context() = std::move(context);
 }
 } // namespace apache::thrift::detail::md

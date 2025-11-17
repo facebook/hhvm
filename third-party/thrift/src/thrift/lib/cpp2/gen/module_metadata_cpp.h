@@ -327,12 +327,15 @@ auto genExceptionMetadata(metadata::ThriftMetadata& md, Options options) {
 }
 
 metadata::ThriftService genServiceMetadata(
-    const syntax_graph::ServiceNode& node, Options options);
+    const syntax_graph::ServiceNode& node,
+    metadata::ThriftMetadata& md,
+    Options options);
 
 template <class Tag>
-metadata::ThriftService genServiceMetadata(Options options) {
+metadata::ThriftService genServiceMetadata(
+    metadata::ThriftMetadata& md, Options options) {
   return genServiceMetadata(
-      getDefinitionNodeWithLock<Tag>().asService(), options);
+      getDefinitionNodeWithLock<Tag>().asService(), md, options);
 }
 
 std::vector<syntax_graph::TypeRef> getAnnotationTypes(
@@ -359,4 +362,32 @@ bool structuredAnnotationsEquality(
     std::vector<ThriftConstStruct> lhsAnnotations,
     std::vector<ThriftConstStruct> rhsAnnotations,
     const std::vector<syntax_graph::TypeRef>& annotationTypes);
+
+const ThriftServiceContextRef* genServiceMetadataRecurse(
+    const syntax_graph::ServiceNode& node,
+    ThriftMetadata& metadata,
+    std::vector<ThriftServiceContextRef>& services);
+
+// An implementation of metadata that should have the same observable behavior
+// as ServiceMetadata::genRecurse(...)
+template <class Service>
+const ThriftServiceContextRef* genServiceMetadataRecurse(
+    ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  return genServiceMetadataRecurse(
+      getDefinitionNodeWithLock<Service>().asService(), metadata, services);
+}
+
+// An implementation of metadata that should have the same observable behavior
+// as ServiceMetadata::gen(...)
+void genServiceMetadataResponse(
+    const syntax_graph::ServiceNode& node,
+    metadata::ThriftServiceMetadataResponse& response);
+
+template <class Service>
+void genServiceMetadataResponse(
+    metadata::ThriftServiceMetadataResponse& response) {
+  return genServiceMetadataResponse(
+      getDefinitionNodeWithLock<Service>().asService(), response);
+}
+
 } // namespace apache::thrift::detail::md

@@ -193,8 +193,8 @@ void ServiceMetadata<::{{> service_common/service_class_name}}>::gen(::apache::t
   response.context() = std::move(context);
 }
 
-const ThriftServiceContextRef* ServiceMetadata<::{{> service_common/service_class_name}}>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService {{service:metadata_name}} = genServiceMetadata<{{service:qualified_name}}>({.genAnnotations = false});
+const ThriftServiceContextRef* ServiceMetadata<::{{> service_common/service_class_name}}>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  ::apache::thrift::metadata::ThriftService {{service:metadata_name}} = genServiceMetadata<{{service:qualified_name}}>(metadata, {.genAnnotations = false});
   {{#if (not (string.empty? service:uri))}}
   DCHECK_EQ(*{{service:metadata_name}}.uri(), "{{service:uri}}");
   {{/if (not (string.empty? service:uri))}}

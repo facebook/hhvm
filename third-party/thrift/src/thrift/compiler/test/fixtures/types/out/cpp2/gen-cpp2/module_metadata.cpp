@@ -1093,8 +1093,8 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures
   response.context() = std::move(context);
 }
 
-const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>>::genRecurse([[maybe_unused]] ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_SomeService = genServiceMetadata<::apache::thrift::fixtures::types::SomeService>({.genAnnotations = false});
+const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  ::apache::thrift::metadata::ThriftService module_SomeService = genServiceMetadata<::apache::thrift::fixtures::types::SomeService>(metadata, {.genAnnotations = false});
   DCHECK_EQ(*module_SomeService.uri(), "apache.org/thrift/fixtures/types/SomeService");
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>>::gen_bounce_map,

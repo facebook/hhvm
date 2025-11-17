@@ -262,8 +262,9 @@ TEST(Annotations, Exception) {
 }
 
 TEST(Annotations, Service) {
+  metadata::ThriftMetadata md;
   auto service =
-      detail::md::genServiceMetadata<TestService>({.genAnnotations = true});
+      detail::md::genServiceMetadata<TestService>(md, {.genAnnotations = true});
   EXPECT_EQ(
       service.structured_annotations()->begin()->fields()["baz"].cv_string(),
       "0");

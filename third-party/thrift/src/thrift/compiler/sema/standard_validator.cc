@@ -44,6 +44,7 @@
 #include <thrift/compiler/generate/cpp/orderable_type_utils.h>
 #include <thrift/compiler/generate/cpp/reference_type.h>
 #include <thrift/compiler/generate/cpp/util.h>
+#include <thrift/compiler/sema/ast_uri_utils.h>
 #include <thrift/compiler/sema/explicit_include_validator.h>
 #include <thrift/compiler/sema/reserved_identifier.h>
 #include <thrift/compiler/sema/resolution_mismatch.h>
@@ -928,6 +929,93 @@ void validate_uri_uniqueness(sema_context& ctx, const t_program& prog) {
     visit(*p);
   }
   visit(prog);
+}
+
+void validate_missing_uris(sema_context& ctx, const t_program& program) {
+  const bool packageHasAnnotation =
+      program.has_structured_annotation(kAllowLegacyMissingUris);
+
+  const diagnostic_level unnecessary_allow_missing_uris_diagnostic_level =
+      validation_to_diagnostic_level(
+          ctx.sema_parameters().unnecessary_allow_missing_uris);
+  bool hasNonAnnotatedDefinitionsWithMissingUris = false;
+  const_ast_visitor ast_visitor;
+  ast_visitor.add_root_definition_visitor([&](const t_named& node) {
+    const bool nodeHasAnnotation =
+        node.has_structured_annotation(kAllowLegacyMissingUris);
+    if (!AstUriUtils::shouldHaveUri(node)) {
+      if (nodeHasAnnotation) {
+        ctx.report(
+            node,
+            unnecessary_allow_missing_uris_diagnostic_level,
+            "Unnecessary use of @thrift.AllowLegacyMissingUris: `{}` does not "
+            "require a URI.",
+            node.name());
+      }
+      return;
+    }
+
+    // node should have a (non-empty) URI.
+
+    if (!node.uri().empty()) {
+      // Node has URI, as required.
+      // Only need to check if the node has a (unnecessary) annotation, then
+      // we're done.
+      if (nodeHasAnnotation) {
+        ctx.report(
+            node,
+            unnecessary_allow_missing_uris_diagnostic_level,
+            "Unnecessary use of @thrift.AllowLegacyMissingUris: `{}` has a "
+            "(non-empty) URI: {}",
+            node.name(),
+            node.uri());
+      }
+      return;
+    }
+
+    // URI is required, but missing...
+
+    if (!nodeHasAnnotation) {
+      hasNonAnnotatedDefinitionsWithMissingUris = true;
+    }
+
+    if (nodeHasAnnotation && packageHasAnnotation) {
+      ctx.report(
+          node,
+          unnecessary_allow_missing_uris_diagnostic_level,
+          "Unnecessary use of @thrift.AllowLegacyMissingUris on `{}`: the "
+          "annotation is already applied at the package (i.e., file) level.",
+          node.name());
+
+      // If the unnecessary use is reported above, mark the package annotation
+      // as needed (or else we would report warnings to remove both!)
+      if (unnecessary_allow_missing_uris_diagnostic_level !=
+          diagnostic_level::debug) {
+        hasNonAnnotatedDefinitionsWithMissingUris = true;
+      }
+    }
+
+    const bool shouldReportMissingUri =
+        !packageHasAnnotation && !nodeHasAnnotation;
+    if (shouldReportMissingUri) {
+      ctx.report(
+          node,
+          validation_to_diagnostic_level(ctx.sema_parameters().missing_uris),
+          "Definition `{}` requires a URI: add a non-empty package to the "
+          "file, or annotate the type with @thrift.Uri. For more details, "
+          "see https://fburl.com/thrift-uri-add-package",
+          node.name());
+    }
+  });
+  ast_visitor(program);
+
+  if (packageHasAnnotation && !hasNonAnnotatedDefinitionsWithMissingUris) {
+    ctx.report(
+        program.package(),
+        unnecessary_allow_missing_uris_diagnostic_level,
+        "Unnecessary use of @thrift.AllowLegacyMissingUris at the package "
+        "level: there are no types who are missing URIs in the file.");
+  }
 }
 
 void validate_explicit_uri_value(sema_context& ctx, const t_named& node) {
@@ -1928,6 +2016,7 @@ ast_validator standard_validator() {
   validator.add_const_visitor(&validate_const_type_and_value);
   validator.add_const_visitor(ValidateAnnotationPositions());
   validator.add_program_visitor(&validate_uri_uniqueness);
+  validator.add_program_visitor(&validate_missing_uris);
 
   validator.add_field_visitor(&validate_cursor_serialization_adapter_on_field);
   validator.add_function_visitor(

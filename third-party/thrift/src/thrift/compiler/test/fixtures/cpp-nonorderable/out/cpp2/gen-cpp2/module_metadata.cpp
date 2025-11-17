@@ -24,12 +24,12 @@ using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
 using ThriftType = ::apache::thrift::metadata::ThriftType;
 using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
-using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
+using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t, std::size_t);
 
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::NonOrderableStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::NonOrderableStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::NonOrderableStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -60,7 +60,7 @@ StructMetadata<::cpp2::NonOrderableStruct>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::NonOrderableUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::NonOrderableUnion>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::NonOrderableUnion>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -91,7 +91,7 @@ StructMetadata<::cpp2::NonOrderableUnion>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::OrderableStruct>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::OrderableStruct>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::OrderableStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }
@@ -121,7 +121,7 @@ StructMetadata<::cpp2::OrderableStruct>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::OrderableUnion>::gen(ThriftMetadata& metadata) {
-  auto res = genStructMetadata<::cpp2::OrderableUnion>(metadata, folly::kIsDebug);
+  auto res = genStructMetadata<::cpp2::OrderableUnion>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
   }

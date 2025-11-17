@@ -27,7 +27,12 @@ class ImportResolverIf {
    */
   virtual std::string import(folly::StringPiece path) = 0;
 
-  virtual ~ImportResolverIf() {}
+  virtual ~ImportResolverIf() = default;
+  ImportResolverIf() = default;
+  ImportResolverIf(const ImportResolverIf&) = delete;
+  ImportResolverIf& operator=(const ImportResolverIf&) = delete;
+  ImportResolverIf(ImportResolverIf&&) = delete;
+  ImportResolverIf& operator=(ImportResolverIf&&) = delete;
 };
 } // namespace memcache
 } // namespace facebook

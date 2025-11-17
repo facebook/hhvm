@@ -41,14 +41,17 @@ class HTTPClientChannel : public ClientChannel,
                           private proxygen::HTTPSessionBase::InfoCallback,
                           virtual public folly::DelayedDestruction {
  private:
-  static const std::chrono::milliseconds kDefaultTransactionTimeout;
+  static inline constexpr std::chrono::milliseconds kDefaultTransactionTimeout =
+      std::chrono::milliseconds(500);
 
  public:
   using Ptr =
       std::unique_ptr<HTTPClientChannel, folly::DelayedDestruction::Destructor>;
 
   static HTTPClientChannel::Ptr newHTTP2Channel(
-      folly::AsyncTransport::UniquePtr transport);
+      folly::AsyncTransport::UniquePtr transport,
+      std::chrono::milliseconds sessionDefaultTimeout =
+          kDefaultTransactionTimeout);
 
   void setHTTPHost(const std::string& host) { httpHost_ = host; }
   void setHTTPUrl(const std::string& url) { httpUrl_ = url; }
@@ -167,7 +170,8 @@ class HTTPClientChannel : public ClientChannel,
 
   HTTPClientChannel(
       folly::AsyncTransport::UniquePtr transport,
-      std::unique_ptr<proxygen::HTTPCodec> codec);
+      std::unique_ptr<proxygen::HTTPCodec> codec,
+      std::chrono::milliseconds sessionDefaultTimeout);
 
   ~HTTPClientChannel() override;
 

@@ -41,26 +41,26 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
     void, setHTTPFrameworkMetadata, THeader*, const RpcOptions&) {}
 } // namespace detail
 
-const std::chrono::milliseconds HTTPClientChannel::kDefaultTransactionTimeout =
-    std::chrono::milliseconds(500);
-
 HTTPClientChannel::Ptr HTTPClientChannel::newHTTP2Channel(
-    folly::AsyncTransport::UniquePtr transport) {
+    folly::AsyncTransport::UniquePtr transport,
+    std::chrono::milliseconds sessionDefaultTimeout) {
   return HTTPClientChannel::Ptr(new HTTPClientChannel(
       std::move(transport),
       std::make_unique<proxygen::HTTP2Codec>(
-          proxygen::TransportDirection::UPSTREAM)));
+          proxygen::TransportDirection::UPSTREAM),
+      sessionDefaultTimeout));
 }
 
 HTTPClientChannel::HTTPClientChannel(
     folly::AsyncTransport::UniquePtr transport,
-    std::unique_ptr<proxygen::HTTPCodec> codec)
+    std::unique_ptr<proxygen::HTTPCodec> codec,
+    std::chrono::milliseconds sessionDefaultTimeout)
     : evb_(transport->getEventBase()) {
   auto localAddress = transport->getLocalAddress();
   auto peerAddress = transport->getPeerAddress();
 
   httpSession_ = new proxygen::HTTPUpstreamSession(
-      WheelTimerInstance(timeout_, evb_),
+      WheelTimerInstance(sessionDefaultTimeout, evb_),
       std::move(transport),
       localAddress,
       peerAddress,

@@ -18,6 +18,8 @@
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp2/async/tests/gen-cpp2/FrameDataAlignmentIntegrationTestService.h>
 #include <thrift/lib/cpp2/protocol/detail/PaddedBinaryAdapter.h>
+#include <thrift/lib/cpp2/test/FlagTestUtils.h>
+#include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 
 using namespace apache::thrift;
@@ -58,7 +60,7 @@ class FrameDataAlignmentIntegrationTestServiceHandler
 };
 
 TEST(FrameDataAlignmentIntegration, BasicAlignment) {
-  THRIFT_FLAG_SET_MOCK(rocket_enable_frame_relative_alignment, true);
+  THRIFT_FLAG_MOCK_GUARD(rocket_enable_frame_relative_alignment, true);
 
   constexpr uint32_t kAlignment = 4;
   auto handler =
@@ -99,12 +101,10 @@ TEST(FrameDataAlignmentIntegration, BasicAlignment) {
   // Verify that the response matches the sent data
   EXPECT_EQ(response.data(), testData);
   EXPECT_EQ(*response.padding(), expectedPadding);
-
-  THRIFT_FLAG_UNMOCK(rocket_enable_frame_relative_alignment);
 }
 
 TEST(FrameDataAlignmentIntegration, LargeAlignment) {
-  THRIFT_FLAG_SET_MOCK(rocket_enable_frame_relative_alignment, true);
+  THRIFT_FLAG_MOCK_GUARD(rocket_enable_frame_relative_alignment, true);
 
   constexpr uint32_t kAlignment = 4096;
   auto handler =
@@ -142,8 +142,6 @@ TEST(FrameDataAlignmentIntegration, LargeAlignment) {
   // Verify that the response matches the sent data
   EXPECT_EQ(response.data(), testData);
   EXPECT_EQ(*response.padding(), expectedPadding);
-
-  THRIFT_FLAG_UNMOCK(rocket_enable_frame_relative_alignment);
 }
 
 TEST(FrameDataAlignmentIntegration, CompactProtocol) {
@@ -164,7 +162,7 @@ TEST(FrameDataAlignmentIntegration, CompactProtocol) {
   // Call echo on the client
   EXPECT_DEBUG_DEATH(
       {
-        THRIFT_FLAG_SET_MOCK(rocket_enable_frame_relative_alignment, true);
+        THRIFT_FLAG_MOCK_GUARD(rocket_enable_frame_relative_alignment, true);
         auto handler =
             std::make_shared<FrameDataAlignmentIntegrationTestServiceHandler>();
         auto client = makeTestClient(
@@ -179,7 +177,7 @@ TEST(FrameDataAlignmentIntegration, CompactProtocol) {
       },
       "Only binary protocol is supported");
 #else
-  THRIFT_FLAG_SET_MOCK(rocket_enable_frame_relative_alignment, true);
+  THRIFT_FLAG_MOCK_GUARD(rocket_enable_frame_relative_alignment, true);
 
   auto handler =
       std::make_shared<FrameDataAlignmentIntegrationTestServiceHandler>();
@@ -196,8 +194,6 @@ TEST(FrameDataAlignmentIntegration, CompactProtocol) {
   // Verify that the response matches the sent data
   EXPECT_EQ(response.data(), testData);
   EXPECT_EQ(*response.padding(), 0);
-
-  THRIFT_FLAG_UNMOCK(rocket_enable_frame_relative_alignment);
 #endif
 }
 
@@ -221,7 +217,7 @@ TEST(FrameDataAlignmentIntegration, WrongParam) {
 #ifndef NDEBUG
   ASSERT_DEATH(
       {
-        THRIFT_FLAG_SET_MOCK(rocket_enable_frame_relative_alignment, true);
+        THRIFT_FLAG_MOCK_GUARD(rocket_enable_frame_relative_alignment, true);
 
         auto handler =
             std::make_shared<FrameDataAlignmentIntegrationTestServiceHandler>();
@@ -238,7 +234,7 @@ TEST(FrameDataAlignmentIntegration, WrongParam) {
       },
       "Cannot find entry in the first param with fieldId=1");
 #else
-  THRIFT_FLAG_SET_MOCK(rocket_enable_frame_relative_alignment, true);
+  THRIFT_FLAG_MOCK_GUARD(rocket_enable_frame_relative_alignment, true);
 
   auto handler =
       std::make_shared<FrameDataAlignmentIntegrationTestServiceHandler>();
@@ -255,8 +251,6 @@ TEST(FrameDataAlignmentIntegration, WrongParam) {
   // Verify that the response matches the sent data
   EXPECT_EQ(response.data(), firstParam + testData);
   EXPECT_EQ(*response.padding(), kAlignment);
-
-  THRIFT_FLAG_UNMOCK(rocket_enable_frame_relative_alignment);
 #endif
 }
 
@@ -280,7 +274,7 @@ TEST(FrameDataAlignmentIntegration, WrongEntry) {
 #ifndef NDEBUG
   ASSERT_DEATH(
       {
-        THRIFT_FLAG_SET_MOCK(rocket_enable_frame_relative_alignment, true);
+        THRIFT_FLAG_MOCK_GUARD(rocket_enable_frame_relative_alignment, true);
 
         auto handler =
             std::make_shared<FrameDataAlignmentIntegrationTestServiceHandler>();
@@ -296,7 +290,7 @@ TEST(FrameDataAlignmentIntegration, WrongEntry) {
       },
       "Not padded");
 #else
-  THRIFT_FLAG_SET_MOCK(rocket_enable_frame_relative_alignment, true);
+  THRIFT_FLAG_MOCK_GUARD(rocket_enable_frame_relative_alignment, true);
 
   // Verify that the response matches the sent data
   auto handler =
@@ -314,8 +308,6 @@ TEST(FrameDataAlignmentIntegration, WrongEntry) {
   // Verify that the response matches the sent data
   EXPECT_EQ(response.data(), firstEntry + testData);
   EXPECT_EQ(*response.padding(), kAlignment);
-
-  THRIFT_FLAG_UNMOCK(rocket_enable_frame_relative_alignment);
 #endif
 }
 
@@ -336,7 +328,7 @@ TEST(FrameDataAlignmentIntegration, RawBinary) {
 #ifndef NDEBUG
   ASSERT_DEATH(
       {
-        THRIFT_FLAG_SET_MOCK(rocket_enable_frame_relative_alignment, true);
+        THRIFT_FLAG_MOCK_GUARD(rocket_enable_frame_relative_alignment, true);
 
         auto handler =
             std::make_shared<FrameDataAlignmentIntegrationTestServiceHandler>();
@@ -352,7 +344,7 @@ TEST(FrameDataAlignmentIntegration, RawBinary) {
       },
       "Magic mismatch");
 #else
-  THRIFT_FLAG_SET_MOCK(rocket_enable_frame_relative_alignment, true);
+  THRIFT_FLAG_MOCK_GUARD(rocket_enable_frame_relative_alignment, true);
 
   auto handler =
       std::make_shared<FrameDataAlignmentIntegrationTestServiceHandler>();
@@ -368,13 +360,11 @@ TEST(FrameDataAlignmentIntegration, RawBinary) {
 
   // Verify that the response matches the sent data
   EXPECT_EQ(response, testData);
-
-  THRIFT_FLAG_UNMOCK(rocket_enable_frame_relative_alignment);
 #endif
 }
 
 TEST(FrameDataAlignmentIntegration, LargePayload) {
-  THRIFT_FLAG_SET_MOCK(rocket_enable_frame_relative_alignment, true);
+  THRIFT_FLAG_MOCK_GUARD(rocket_enable_frame_relative_alignment, true);
 
   constexpr uint32_t kAlignment = 4;
   auto handler =
@@ -415,12 +405,10 @@ TEST(FrameDataAlignmentIntegration, LargePayload) {
   // Verify that the response matches the sent data
   EXPECT_EQ(response.data(), testData);
   EXPECT_EQ(*response.padding(), expectedPadding);
-
-  THRIFT_FLAG_UNMOCK(rocket_enable_frame_relative_alignment);
 }
 
 TEST(FrameDataAlignmentIntegration, LargePayloadWithLargeAlignment) {
-  THRIFT_FLAG_SET_MOCK(rocket_enable_frame_relative_alignment, true);
+  THRIFT_FLAG_MOCK_GUARD(rocket_enable_frame_relative_alignment, true);
 
   constexpr uint32_t kAlignment = 4096;
   auto handler =
@@ -461,8 +449,6 @@ TEST(FrameDataAlignmentIntegration, LargePayloadWithLargeAlignment) {
   // Verify that the response matches the sent data
   EXPECT_EQ(response.data(), testData);
   EXPECT_EQ(*response.padding(), expectedPadding);
-
-  THRIFT_FLAG_UNMOCK(rocket_enable_frame_relative_alignment);
 }
 
 TEST(FrameDataAlignmentIntegration, FragmentedPayload) {
@@ -484,7 +470,7 @@ TEST(FrameDataAlignmentIntegration, FragmentedPayload) {
 #ifndef NDEBUG
   ASSERT_DEATH(
       {
-        THRIFT_FLAG_SET_MOCK(rocket_enable_frame_relative_alignment, true);
+        THRIFT_FLAG_MOCK_GUARD(rocket_enable_frame_relative_alignment, true);
 
         auto handler =
             std::make_shared<FrameDataAlignmentIntegrationTestServiceHandler>();
@@ -500,7 +486,7 @@ TEST(FrameDataAlignmentIntegration, FragmentedPayload) {
       },
       "Fragmented payload");
 #else
-  THRIFT_FLAG_SET_MOCK(rocket_enable_frame_relative_alignment, true);
+  THRIFT_FLAG_MOCK_GUARD(rocket_enable_frame_relative_alignment, true);
 
   auto handler =
       std::make_shared<FrameDataAlignmentIntegrationTestServiceHandler>();
@@ -517,7 +503,5 @@ TEST(FrameDataAlignmentIntegration, FragmentedPayload) {
   // Verify that the response matches the sent data
   EXPECT_EQ(response.data(), testData);
   EXPECT_EQ(*response.padding(), kAlignment);
-
-  THRIFT_FLAG_UNMOCK(rocket_enable_frame_relative_alignment);
 #endif
 }

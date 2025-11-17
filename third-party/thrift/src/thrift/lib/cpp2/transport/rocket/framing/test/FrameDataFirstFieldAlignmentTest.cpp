@@ -20,6 +20,7 @@
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/protocol/detail/PaddedBinaryAdapter.h>
+#include <thrift/lib/cpp2/test/FlagTestUtils.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/test/gen-cpp2/FrameDataFirstFieldAlignment_types.h>
@@ -78,9 +79,10 @@ void verifyDataCommon(
     std::string& testData,
     uintptr_t& frameStartAddress,
     uintptr_t& firstFieldDataStartAddress) {
-  THRIFT_FLAG_SET_MOCK(rocket_enable_frame_relative_alignment, true);
-  auto serializedFrame = std::move(frame).serialize();
-  THRIFT_FLAG_UNMOCK(rocket_enable_frame_relative_alignment);
+  auto serializedFrame = [&]() {
+    THRIFT_FLAG_MOCK_GUARD(rocket_enable_frame_relative_alignment, true);
+    return std::move(frame).serialize();
+  }();
 
   serializedFrame->coalesce();
 
@@ -240,9 +242,10 @@ TEST(FrameDataAlignmentTest, EmptyDataAlignment) {
       verifyDataAligned(std::move(frame), kFrameAlignment, testData),
       "Not padded");
 #else
-  THRIFT_FLAG_SET_MOCK(rocket_enable_frame_relative_alignment, true);
-  auto serializedFrame = std::move(frame).serialize();
-  THRIFT_FLAG_UNMOCK(rocket_enable_frame_relative_alignment);
+  auto serializedFrame = [&]() {
+    THRIFT_FLAG_MOCK_GUARD(rocket_enable_frame_relative_alignment, true);
+    return std::move(frame).serialize();
+  }();
 
   serializedFrame->coalesce();
 
@@ -302,9 +305,10 @@ TEST(FrameDataAlignmentTest, RawBinaryData) {
       verifyDataAligned(std::move(frame), kFrameAlignment, testData),
       "Magic mismatch");
 #else
-  THRIFT_FLAG_SET_MOCK(rocket_enable_frame_relative_alignment, true);
-  auto serializedFrame = std::move(frame).serialize();
-  THRIFT_FLAG_UNMOCK(rocket_enable_frame_relative_alignment);
+  auto serializedFrame = [&]() {
+    THRIFT_FLAG_MOCK_GUARD(rocket_enable_frame_relative_alignment, true);
+    return std::move(frame).serialize();
+  }();
   serializedFrame->coalesce();
 
   // Trim frame length (3 bytes)
@@ -374,15 +378,16 @@ TEST(FrameDataAlignmentTest, ZeroFrameRelativeAlignment) {
 #ifndef NDEBUG
   ASSERT_DEATH(
       {
-        THRIFT_FLAG_SET_MOCK(rocket_enable_frame_relative_alignment, true);
+        THRIFT_FLAG_MOCK_GUARD(rocket_enable_frame_relative_alignment, true);
         auto serializedFrame = std::move(frame).serialize();
-        THRIFT_FLAG_UNMOCK(rocket_enable_frame_relative_alignment);
       },
       "Alignment is not a power of two");
 #else
-  THRIFT_FLAG_SET_MOCK(rocket_enable_frame_relative_alignment, true);
-  auto serializedFrame = std::move(frame).serialize();
-  THRIFT_FLAG_UNMOCK(rocket_enable_frame_relative_alignment);
+  auto serializedFrame = [&]() {
+    THRIFT_FLAG_MOCK_GUARD(rocket_enable_frame_relative_alignment, true);
+    return std::move(frame).serialize();
+  }();
+
   serializedFrame->coalesce();
 
   // Trim frame length (3 bytes)
@@ -432,9 +437,10 @@ TEST(FrameDataAlignmentTest, CompactProtocol) {
       verifyDataAligned(std::move(frame), kFrameAlignment, testData),
       "Only binary protocol is supported");
 #else
-  THRIFT_FLAG_SET_MOCK(rocket_enable_frame_relative_alignment, true);
-  auto serializedFrame = std::move(frame).serialize();
-  THRIFT_FLAG_UNMOCK(rocket_enable_frame_relative_alignment);
+  auto serializedFrame = [&]() {
+    THRIFT_FLAG_MOCK_GUARD(rocket_enable_frame_relative_alignment, true);
+    return std::move(frame).serialize();
+  }();
 
   serializedFrame->coalesce();
 
@@ -476,9 +482,10 @@ TEST(FrameDataAlignmentTest, EmptyProtocol) {
       verifyDataAligned(std::move(frame), kFrameAlignment, testData),
       "No data serialization protocol specified");
 #else
-  THRIFT_FLAG_SET_MOCK(rocket_enable_frame_relative_alignment, true);
-  auto serializedFrame = std::move(frame).serialize();
-  THRIFT_FLAG_UNMOCK(rocket_enable_frame_relative_alignment);
+  auto serializedFrame = [&]() {
+    THRIFT_FLAG_MOCK_GUARD(rocket_enable_frame_relative_alignment, true);
+    return std::move(frame).serialize();
+  }();
 
   serializedFrame->coalesce();
 

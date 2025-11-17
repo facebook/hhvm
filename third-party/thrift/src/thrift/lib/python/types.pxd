@@ -300,6 +300,15 @@ cdef class Union(StructOrUnion):
     ) except? 0
     cdef object _fbthrift_py_type_enum(self)
 
+# a class that lets us customize Isset byte array comparisons and hashing
+# note: cython does not support "inheritance from PyVarObject types like 'bytes'"
+cdef class IssetArray:
+    cdef bytes inner
+
+cdef api object IssetArray_make(PyObject*)
+# returns the inner bytes object
+cdef api object IssetArray_get(object)
+
 cdef class BadEnum:
     cdef object _enum
     cdef readonly int value

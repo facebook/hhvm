@@ -1177,6 +1177,24 @@ cdef class AdaptedTypeInfo(TypeInfoBase):
     def __reduce__(self):
         return (AdaptedTypeInfo, (self._orig_type_info, self._adapter_class, self._transitive_annotation_factory))
 
+cdef class IssetArray:
+    # This class ensures isset bytes ignored when checking equality
+    # via internal data
+    def __eq__(self, other):
+        return True
+    
+    def __hash__(self):
+        return hash(b"\0" * len(self.inner))
+
+# Note this function steals the new reference created from C++ caller
+cdef api object IssetArray_make(PyObject* byteArray):
+    inst = IssetArray.__new__(IssetArray)
+    (<IssetArray>inst).inner = <object>byteArray
+    return inst
+
+cdef api object IssetArray_get(object issetarray) noexcept:
+    return (<IssetArray>issetarray).inner
+
 
 cdef void set_struct_field(tuple struct_tuple, int16_t index, value) except *:
     """
@@ -1289,7 +1307,7 @@ cdef class Struct(StructOrUnion):
         # note this puts the set kwargs into new_inst._fbthrift_data
         cdef Struct new_inst = klass._fbthrift_new(**kwargs)
         not_found = object()
-        isset_flags = self._fbthrift_data[0]
+        isset_flags = (<IssetArray>self._fbthrift_data[0]).inner
 
         for field_name, field_index in struct_info.name_to_index.items():
             value = kwargs.pop(field_name, not_found)
@@ -1321,10 +1339,11 @@ cdef class Struct(StructOrUnion):
     def __eq__(Struct self, other):
         if type(other) != type(self):
             return False
-        for name, value in self:
-            if value != getattr(other, name):
-                return False
-        return True
+        # note that this checks whether two structs with the same schema will have the
+        # same thrift representation. In other words, whether the structs will be
+        # equivalent after a roundtrip serialization-deserialization. It does not
+        # respect custom __eq__ for Adapted types.
+        return self._fbthrift_data == (<Struct>other)._fbthrift_data
 
     def __lt__(self, other):
         return _fbthrift_compare_struct_less(self, other, False)
@@ -1907,7 +1926,7 @@ cdef class _StructCachedField(_FieldDescriptorBase):
 
 @cython.final
 cdef class _StructUncachedField(_FieldDescriptorBase):
-    """ A descriptor that for UncachedField.
+    """ A descriptor for UncachedField that enforces mutability.
         Return _fbthrift_py_value_from_internal_data directly.
     """
     cdef int16_t _field_index
@@ -2519,6 +2538,9 @@ cdef class ImmutableInternalMap(dict):
     def __hash__(self):
         return hash(tuple(self.items()))
 
+    def __eq__(self, other):
+        return super().__eq__(other)
+
 cdef class Map(Container):
     """
     Immutable container used to represent a Thrift map. It has compatible
@@ -2731,7 +2753,7 @@ def fill_specs(*structured_thrift_classes):
 
 def isset(StructOrError struct):
     cdef StructInfo info = struct._fbthrift_struct_info
-    isset_bytes = struct._fbthrift_data[0]
+    isset_bytes = (<IssetArray>struct._fbthrift_data[0]).inner
     return {
         name: bool(isset_bytes[index])
         for name, index in info.name_to_index.items()

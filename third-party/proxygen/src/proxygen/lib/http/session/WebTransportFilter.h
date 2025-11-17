@@ -318,6 +318,8 @@ class WebTransportFilter
     if (handler_) {
       handler_->onSessionEnd(capsule.applicationErrorCode);
     }
+
+    txn_->sendEOM();
   }
   void onDrainWebTransportSessionCapsule(
       DrainWebTransportSessionCapsule /*capsule*/) override {

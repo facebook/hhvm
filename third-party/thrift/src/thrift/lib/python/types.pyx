@@ -1352,8 +1352,9 @@ cdef class Struct(StructOrUnion):
         return _fbthrift_compare_struct_less(self, other, True)
 
     def __hash__(Struct self):
-        value_tuple = tuple(v for _, v in self)
-        return hash(value_tuple if value_tuple else type(self))
+        # hash type(self) in case of empty struct or different structs
+        # with identical field types and values
+        return hash((self._fbthrift_data, type(self)))
 
     def __iter__(self):
         cdef StructInfo info = self._fbthrift_struct_info

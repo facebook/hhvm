@@ -309,10 +309,106 @@ GenMetadataResult<metadata::ThriftEnum> genEnumMetadata(
   return ret;
 }
 
+namespace {
+metadata::ThriftPrimitiveType toThriftPrimitiveType(
+    syntax_graph::Primitive type) {
+  switch (type) {
+    case syntax_graph::Primitive::BOOL:
+      return metadata::ThriftPrimitiveType::THRIFT_BOOL_TYPE;
+    case syntax_graph::Primitive::BYTE:
+      return metadata::ThriftPrimitiveType::THRIFT_BYTE_TYPE;
+    case syntax_graph::Primitive::I16:
+      return metadata::ThriftPrimitiveType::THRIFT_I16_TYPE;
+    case syntax_graph::Primitive::I32:
+      return metadata::ThriftPrimitiveType::THRIFT_I32_TYPE;
+    case syntax_graph::Primitive::I64:
+      return metadata::ThriftPrimitiveType::THRIFT_I64_TYPE;
+    case syntax_graph::Primitive::FLOAT:
+      return metadata::ThriftPrimitiveType::THRIFT_FLOAT_TYPE;
+    case syntax_graph::Primitive::DOUBLE:
+      return metadata::ThriftPrimitiveType::THRIFT_DOUBLE_TYPE;
+    case syntax_graph::Primitive::STRING:
+      return metadata::ThriftPrimitiveType::THRIFT_STRING_TYPE;
+    case syntax_graph::Primitive::BINARY:
+      return metadata::ThriftPrimitiveType::THRIFT_BINARY_TYPE;
+  }
+  throw std::logic_error(
+      fmt::format("unknown primitive type: {}", folly::to_underlying(type)));
+}
+
+// For struct/union/exception/services, we need to generate metadata for nested
+// types.
+ThriftType genType(
+    metadata::ThriftMetadata& md, const syntax_graph::TypeRef& type) {
+  ThriftType ret;
+  Options options = {.genAnnotations = true, .genNestedTypes = true};
+  switch (type.kind()) {
+    case syntax_graph::TypeRef::Kind::PRIMITIVE: {
+      ret.t_primitive() = toThriftPrimitiveType(type.asPrimitive());
+      return ret;
+    }
+    case syntax_graph::TypeRef::Kind::STRUCT: {
+      auto res = genStructMetadata(md, type.asStructured(), options);
+      ret.t_struct().emplace().name() = *res.metadata.name();
+      return ret;
+    }
+    case syntax_graph::TypeRef::Kind::UNION: {
+      auto res = genStructMetadata(md, type.asStructured(), options);
+      ret.t_union().emplace().name() = *res.metadata.name();
+      return ret;
+    }
+    case syntax_graph::TypeRef::Kind::EXCEPTION: {
+      // Note: exception is considered t_struct in metadata's Type system.
+      // There is no t_exception in metadata::ThriftType.
+      auto res = genStructMetadata(md, type.asStructured(), options);
+      ret.t_struct().emplace().name() = *res.metadata.name();
+      return ret;
+    }
+    case syntax_graph::TypeRef::Kind::ENUM: {
+      auto res = genEnumMetadata(md, type.asEnum(), options);
+      ret.t_enum().emplace().name() = *res.metadata.name();
+      return ret;
+    }
+    case syntax_graph::TypeRef::Kind::TYPEDEF: {
+      const auto& node = type.asTypedef();
+      ret.t_typedef().emplace();
+      ret.t_typedef()->name() = getName(node);
+      ret.t_typedef()->underlyingType() =
+          std::make_unique<ThriftType>(genType(md, node.targetType()));
+      ret.t_typedef()->structured_annotations() =
+          genStructuredAnnotations(node.definition().annotations());
+      return ret;
+    }
+    case syntax_graph::TypeRef::Kind::LIST: {
+      ret.t_list().emplace().valueType() = std::make_unique<ThriftType>(
+          genType(md, type.asList().elementType()));
+      return ret;
+    }
+    case syntax_graph::TypeRef::Kind::SET: {
+      ret.t_set().emplace().valueType() =
+          std::make_unique<ThriftType>(genType(md, type.asSet().elementType()));
+      return ret;
+    }
+    case syntax_graph::TypeRef::Kind::MAP: {
+      ret.t_map().emplace();
+      ret.t_map()->keyType() =
+          std::make_unique<ThriftType>(genType(md, type.asMap().keyType()));
+      ret.t_map()->valueType() =
+          std::make_unique<ThriftType>(genType(md, type.asMap().valueType()));
+      return ret;
+    }
+  }
+
+  throw std::logic_error(
+      fmt::format("unknown type kind: {}", folly::to_underlying(type.kind())));
+}
+} // namespace
+
 template <class Metadata>
 static auto genStructuredInMetadataMap(
-    const syntax_graph::StructuredNode& node,
+    metadata::ThriftMetadata& md,
     std::map<std::string, Metadata>& metadataMap,
+    const syntax_graph::StructuredNode& node,
     Options options) {
   auto name = getName(node);
   auto res = metadataMap.try_emplace(name);
@@ -335,6 +431,9 @@ static auto genStructuredInMetadataMap(
       f.structured_annotations() =
           genStructuredAnnotations(field.annotations());
     }
+    if (options.genNestedTypes) {
+      f.type() = genType(md, field.type());
+    }
   }
   if (options.genAnnotations) {
     ret.metadata.structured_annotations() =
@@ -347,7 +446,7 @@ GenMetadataResult<metadata::ThriftStruct> genStructMetadata(
     metadata::ThriftMetadata& md,
     const syntax_graph::StructuredNode& node,
     Options options) {
-  return genStructuredInMetadataMap(node, *md.structs(), options);
+  return genStructuredInMetadataMap(md, *md.structs(), node, options);
 }
 
 void genStructFieldMetadata(
@@ -373,7 +472,7 @@ GenMetadataResult<metadata::ThriftException> genExceptionMetadata(
     metadata::ThriftMetadata& md,
     const syntax_graph::ExceptionNode& node,
     Options options) {
-  return genStructuredInMetadataMap(node, *md.exceptions(), options);
+  return genStructuredInMetadataMap(md, *md.exceptions(), node, options);
 }
 
 metadata::ThriftService genServiceMetadata(

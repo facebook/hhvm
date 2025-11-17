@@ -280,6 +280,7 @@ const auto& getDefinitionNodeWithLock() {
 
 struct Options {
   bool genAnnotations = false;
+  bool genNestedTypes = false;
 };
 
 // Generate metadata of `node` inside `md`, return the generated metadata.

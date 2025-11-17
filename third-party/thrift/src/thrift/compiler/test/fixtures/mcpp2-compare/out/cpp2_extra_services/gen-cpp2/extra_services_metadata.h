@@ -36,15 +36,15 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraServic
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_simple_function(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_throws_function(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_throws_function2(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_throws_function3(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_oneway_void_ret(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_oneway_void_ret_i32_i32_i32_i32_i32_param(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_oneway_void_ret_map_setlist_param(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_oneway_void_ret_struct_param(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_oneway_void_ret_listunion_param(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_simple_function(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_throws_function(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_throws_function2(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_throws_function3(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_oneway_void_ret(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_oneway_void_ret_i32_i32_i32_i32_i32_param(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_oneway_void_ret_map_setlist_param(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_oneway_void_ret_struct_param(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_oneway_void_ret_listunion_param(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
 };
 } // namespace md
 } // namespace detail

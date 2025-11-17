@@ -24,7 +24,7 @@ using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
 using ThriftType = ::apache::thrift::metadata::ThriftType;
 using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
-using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
+using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t, std::size_t);
 
 void EnumMetadata<::test::fixtures::enumstrict::EmptyEnum>::gen(ThriftMetadata& metadata) {
   auto res = genEnumMetadata<::test::fixtures::enumstrict::EmptyEnum>(metadata, {.genAnnotations = folly::kIsDebug});

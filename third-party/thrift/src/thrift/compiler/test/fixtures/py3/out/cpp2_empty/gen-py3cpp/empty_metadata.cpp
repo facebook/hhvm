@@ -29,7 +29,7 @@ using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
 using ThriftType = ::apache::thrift::metadata::ThriftType;
 using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
-using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
+using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t, std::size_t);
 
 
 
@@ -45,10 +45,17 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NullService>>::gen
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NullService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService empty_NullService = genServiceMetadata<::cpp2::NullService>(metadata, {.genAnnotations = false});
+  ::apache::thrift::metadata::ThriftService empty_NullService = genServiceMetadata<::cpp2::NullService>(metadata, {.genAnnotations = folly::kIsDebug});
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
+  [[maybe_unused]] auto empty_NullServiceAnnotations = std::move(*empty_NullService.structured_annotations());
+  empty_NullService.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *empty_NullService.structured_annotations(),
+    empty_NullServiceAnnotations,
+    getAnnotationTypes<::cpp2::NullService>()
+  ));
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("empty.NullService", std::move(empty_NullService));
   context.service_name() = "empty.NullService";

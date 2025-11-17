@@ -36,7 +36,7 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyRoot>> {
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_do_root(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_do_root(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyNode>> {
@@ -48,7 +48,7 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyNode>> {
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_do_mid(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_do_mid(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyLeaf>> {
@@ -60,7 +60,7 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyLeaf>> {
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_do_leaf(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_do_leaf(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
 };
 } // namespace md
 } // namespace detail

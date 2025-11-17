@@ -34,7 +34,7 @@ using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
 using ThriftType = ::apache::thrift::metadata::ThriftType;
 using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
-using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
+using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t, std::size_t);
 
 
 const ::apache::thrift::metadata::ThriftStruct&
@@ -461,7 +461,7 @@ void ExceptionMetadata<::cpp2::SinkException2>::gen(ThriftMetadata& metadata) {
     getAnnotationTypes<::cpp2::SinkException2>()
   ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_method([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_method([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "method");
   auto func_ret_type = std::make_unique<Sink>(std::make_unique<Struct<::cpp2::SinkPayload>>("module.SinkPayload"), std::make_unique<Struct<::cpp2::FinalResponse>>("module.FinalResponse"));
@@ -469,8 +469,15 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen
   [[maybe_unused]] std::size_t argumentIndex = 0;
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::cpp2::SinkService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_methodAndReponse([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_methodAndReponse([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "methodAndReponse");
   auto func_ret_type = std::make_unique<Sink>(std::make_unique<Struct<::cpp2::SinkPayload>>("module.SinkPayload"), std::make_unique<Struct<::cpp2::FinalResponse>>("module.FinalResponse"), std::make_unique<Struct<::cpp2::InitialResponse>>("module.InitialResponse"));
@@ -478,8 +485,15 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen
   [[maybe_unused]] std::size_t argumentIndex = 0;
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::cpp2::SinkService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_methodThrow([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_methodThrow([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "methodThrow");
   auto func_ret_type = std::make_unique<Sink>(std::make_unique<Struct<::cpp2::SinkPayload>>("module.SinkPayload"), std::make_unique<Struct<::cpp2::FinalResponse>>("module.FinalResponse"));
@@ -487,14 +501,28 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen
   [[maybe_unused]] std::size_t argumentIndex = 0;
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SinkService_methodThrow_ex_1 = func.exceptions()[exceptionIndex++];
+  [[maybe_unused]] auto module_SinkService_methodThrow_ex_1Annotations = std::move(*module_SinkService_methodThrow_ex_1.structured_annotations());
+  module_SinkService_methodThrow_ex_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SinkService_methodThrow_ex_1.id(), 1);
   DCHECK_EQ(*module_SinkService_methodThrow_ex_1.name(), "ex");
   auto module_SinkService_methodThrow_ex_1_type = std::make_unique<Struct<::cpp2::InitialException>>("module.InitialException");
   module_SinkService_methodThrow_ex_1_type->writeAndGenType(*module_SinkService_methodThrow_ex_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SinkService_methodThrow_ex_1.structured_annotations(),
+    module_SinkService_methodThrow_ex_1Annotations,
+    getExceptionAnnotationTypes<::cpp2::SinkService>(schemaIndex, exceptionIndex - 1, *func.name(), *module_SinkService_methodThrow_ex_1.name())
+  ));
   ExceptionMetadata<::cpp2::InitialException>::gen(metadata);
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::cpp2::SinkService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_methodSinkThrow([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_methodSinkThrow([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "methodSinkThrow");
   auto func_ret_type = std::make_unique<Sink>(std::make_unique<Struct<::cpp2::SinkPayload>>("module.SinkPayload"), std::make_unique<Struct<::cpp2::FinalResponse>>("module.FinalResponse"));
@@ -502,8 +530,15 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen
   [[maybe_unused]] std::size_t argumentIndex = 0;
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::cpp2::SinkService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_methodFinalThrow([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_methodFinalThrow([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "methodFinalThrow");
   auto func_ret_type = std::make_unique<Sink>(std::make_unique<Struct<::cpp2::SinkPayload>>("module.SinkPayload"), std::make_unique<Struct<::cpp2::FinalResponse>>("module.FinalResponse"));
@@ -511,8 +546,15 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen
   [[maybe_unused]] std::size_t argumentIndex = 0;
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::cpp2::SinkService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_methodBothThrow([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_methodBothThrow([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "methodBothThrow");
   auto func_ret_type = std::make_unique<Sink>(std::make_unique<Struct<::cpp2::SinkPayload>>("module.SinkPayload"), std::make_unique<Struct<::cpp2::FinalResponse>>("module.FinalResponse"));
@@ -520,8 +562,15 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen
   [[maybe_unused]] std::size_t argumentIndex = 0;
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::cpp2::SinkService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_methodFast([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_methodFast([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "methodFast");
   auto func_ret_type = std::make_unique<Sink>(std::make_unique<Struct<::cpp2::SinkPayload>>("module.SinkPayload"), std::make_unique<Struct<::cpp2::FinalResponse>>("module.FinalResponse"));
@@ -529,7 +578,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen
   [[maybe_unused]] std::size_t argumentIndex = 0;
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
   func.structured_annotations()->push_back(*cvStruct("cpp.ProcessInEbThreadUnsafe", {  }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::cpp2::SinkService>(schemaIndex)
+  ));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -543,7 +599,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_SinkService = genServiceMetadata<::cpp2::SinkService>(metadata, {.genAnnotations = false});
+  ::apache::thrift::metadata::ThriftService module_SinkService = genServiceMetadata<::cpp2::SinkService>(metadata, {.genAnnotations = folly::kIsDebug});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_method,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_methodAndReponse,
@@ -553,13 +609,36 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_methodBothThrow,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>>::gen_methodFast,
   };
-  size_t index = 0;
+  static constexpr bool isPerforms [] = {
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+  };
+  size_t index = 0, schemaIndex = 0;
   for (auto& function_gen : functions) {
-    function_gen(metadata, module_SinkService, index++);
+    while (isPerforms[schemaIndex]) {
+      // We skip interaction consturctor in metadata.thrift, but not schema.thrift
+      // To make sure we are generating the correct function, we need to keep
+      // tracking the function index in schema.thrift
+      schemaIndex++;
+      DCHECK_LT(schemaIndex, std::size(isPerforms));
+    }
+    function_gen(metadata, module_SinkService, index++, schemaIndex++);
   }
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
+  [[maybe_unused]] auto module_SinkServiceAnnotations = std::move(*module_SinkService.structured_annotations());
+  module_SinkService.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *module_SinkService.structured_annotations(),
+    module_SinkServiceAnnotations,
+    getAnnotationTypes<::cpp2::SinkService>()
+  ));
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.SinkService", std::move(module_SinkService));
   context.service_name() = "module.SinkService";
@@ -568,158 +647,319 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   context.module() = std::move(module);
   return &context;
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_returnstream([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_returnstream([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "returnstream");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Struct<::cpp2::StreamItem>>("module.StreamItem"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_returnstream_from_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_PubSubStreamingService_returnstream_from_1Annotations = std::move(*module_PubSubStreamingService_returnstream_from_1.structured_annotations());
+  module_PubSubStreamingService_returnstream_from_1.structured_annotations()->clear();
   DCHECK_EQ(*module_PubSubStreamingService_returnstream_from_1.id(), 1);
   DCHECK_EQ(*module_PubSubStreamingService_returnstream_from_1.name(), "from");
   auto module_PubSubStreamingService_returnstream_from_1_type = std::make_unique<Struct<::cpp2::StreamItem>>("module.StreamItem");
   module_PubSubStreamingService_returnstream_from_1_type->writeAndGenType(*module_PubSubStreamingService_returnstream_from_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_PubSubStreamingService_returnstream_from_1.structured_annotations(),
+    module_PubSubStreamingService_returnstream_from_1Annotations,
+    getArgumentAnnotationTypes<::cpp2::PubSubStreamingService>(schemaIndex, argumentIndex - 1, *func.name(), *module_PubSubStreamingService_returnstream_from_1.name())
+  ));
   ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_returnstream_to_2 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_PubSubStreamingService_returnstream_to_2Annotations = std::move(*module_PubSubStreamingService_returnstream_to_2.structured_annotations());
+  module_PubSubStreamingService_returnstream_to_2.structured_annotations()->clear();
   DCHECK_EQ(*module_PubSubStreamingService_returnstream_to_2.id(), 2);
   DCHECK_EQ(*module_PubSubStreamingService_returnstream_to_2.name(), "to");
   auto module_PubSubStreamingService_returnstream_to_2_type = std::make_unique<Struct<::cpp2::StreamItem>>("module.StreamItem");
   module_PubSubStreamingService_returnstream_to_2_type->writeAndGenType(*module_PubSubStreamingService_returnstream_to_2.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_PubSubStreamingService_returnstream_to_2.structured_annotations(),
+    module_PubSubStreamingService_returnstream_to_2Annotations,
+    getArgumentAnnotationTypes<::cpp2::PubSubStreamingService>(schemaIndex, argumentIndex - 1, *func.name(), *module_PubSubStreamingService_returnstream_to_2.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::cpp2::PubSubStreamingService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_streamthrows([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_streamthrows([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "streamthrows");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Struct<::cpp2::StreamItem>>("module.StreamItem"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_streamthrows_foo_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_PubSubStreamingService_streamthrows_foo_1Annotations = std::move(*module_PubSubStreamingService_streamthrows_foo_1.structured_annotations());
+  module_PubSubStreamingService_streamthrows_foo_1.structured_annotations()->clear();
   DCHECK_EQ(*module_PubSubStreamingService_streamthrows_foo_1.id(), 1);
   DCHECK_EQ(*module_PubSubStreamingService_streamthrows_foo_1.name(), "foo");
   auto module_PubSubStreamingService_streamthrows_foo_1_type = std::make_unique<Struct<::cpp2::StreamItem>>("module.StreamItem");
   module_PubSubStreamingService_streamthrows_foo_1_type->writeAndGenType(*module_PubSubStreamingService_streamthrows_foo_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_PubSubStreamingService_streamthrows_foo_1.structured_annotations(),
+    module_PubSubStreamingService_streamthrows_foo_1Annotations,
+    getArgumentAnnotationTypes<::cpp2::PubSubStreamingService>(schemaIndex, argumentIndex - 1, *func.name(), *module_PubSubStreamingService_streamthrows_foo_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::cpp2::PubSubStreamingService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_servicethrows([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_servicethrows([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "servicethrows");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Struct<::cpp2::StreamItem>>("module.StreamItem"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_servicethrows_foo_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_PubSubStreamingService_servicethrows_foo_1Annotations = std::move(*module_PubSubStreamingService_servicethrows_foo_1.structured_annotations());
+  module_PubSubStreamingService_servicethrows_foo_1.structured_annotations()->clear();
   DCHECK_EQ(*module_PubSubStreamingService_servicethrows_foo_1.id(), 1);
   DCHECK_EQ(*module_PubSubStreamingService_servicethrows_foo_1.name(), "foo");
   auto module_PubSubStreamingService_servicethrows_foo_1_type = std::make_unique<Struct<::cpp2::StreamItem>>("module.StreamItem");
   module_PubSubStreamingService_servicethrows_foo_1_type->writeAndGenType(*module_PubSubStreamingService_servicethrows_foo_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_PubSubStreamingService_servicethrows_foo_1.structured_annotations(),
+    module_PubSubStreamingService_servicethrows_foo_1Annotations,
+    getArgumentAnnotationTypes<::cpp2::PubSubStreamingService>(schemaIndex, argumentIndex - 1, *func.name(), *module_PubSubStreamingService_servicethrows_foo_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_servicethrows_e_1 = func.exceptions()[exceptionIndex++];
+  [[maybe_unused]] auto module_PubSubStreamingService_servicethrows_e_1Annotations = std::move(*module_PubSubStreamingService_servicethrows_e_1.structured_annotations());
+  module_PubSubStreamingService_servicethrows_e_1.structured_annotations()->clear();
   DCHECK_EQ(*module_PubSubStreamingService_servicethrows_e_1.id(), 1);
   DCHECK_EQ(*module_PubSubStreamingService_servicethrows_e_1.name(), "e");
   auto module_PubSubStreamingService_servicethrows_e_1_type = std::make_unique<Struct<::cpp2::FooEx>>("module.FooEx");
   module_PubSubStreamingService_servicethrows_e_1_type->writeAndGenType(*module_PubSubStreamingService_servicethrows_e_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_PubSubStreamingService_servicethrows_e_1.structured_annotations(),
+    module_PubSubStreamingService_servicethrows_e_1Annotations,
+    getExceptionAnnotationTypes<::cpp2::PubSubStreamingService>(schemaIndex, exceptionIndex - 1, *func.name(), *module_PubSubStreamingService_servicethrows_e_1.name())
+  ));
   ExceptionMetadata<::cpp2::FooEx>::gen(metadata);
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::cpp2::PubSubStreamingService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_servicethrows2([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_servicethrows2([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "servicethrows2");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Struct<::cpp2::StreamItem>>("module.StreamItem"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_servicethrows2_foo_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_PubSubStreamingService_servicethrows2_foo_1Annotations = std::move(*module_PubSubStreamingService_servicethrows2_foo_1.structured_annotations());
+  module_PubSubStreamingService_servicethrows2_foo_1.structured_annotations()->clear();
   DCHECK_EQ(*module_PubSubStreamingService_servicethrows2_foo_1.id(), 1);
   DCHECK_EQ(*module_PubSubStreamingService_servicethrows2_foo_1.name(), "foo");
   auto module_PubSubStreamingService_servicethrows2_foo_1_type = std::make_unique<Struct<::cpp2::StreamItem>>("module.StreamItem");
   module_PubSubStreamingService_servicethrows2_foo_1_type->writeAndGenType(*module_PubSubStreamingService_servicethrows2_foo_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_PubSubStreamingService_servicethrows2_foo_1.structured_annotations(),
+    module_PubSubStreamingService_servicethrows2_foo_1Annotations,
+    getArgumentAnnotationTypes<::cpp2::PubSubStreamingService>(schemaIndex, argumentIndex - 1, *func.name(), *module_PubSubStreamingService_servicethrows2_foo_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_servicethrows2_e1_1 = func.exceptions()[exceptionIndex++];
+  [[maybe_unused]] auto module_PubSubStreamingService_servicethrows2_e1_1Annotations = std::move(*module_PubSubStreamingService_servicethrows2_e1_1.structured_annotations());
+  module_PubSubStreamingService_servicethrows2_e1_1.structured_annotations()->clear();
   DCHECK_EQ(*module_PubSubStreamingService_servicethrows2_e1_1.id(), 1);
   DCHECK_EQ(*module_PubSubStreamingService_servicethrows2_e1_1.name(), "e1");
   auto module_PubSubStreamingService_servicethrows2_e1_1_type = std::make_unique<Struct<::cpp2::FooEx>>("module.FooEx");
   module_PubSubStreamingService_servicethrows2_e1_1_type->writeAndGenType(*module_PubSubStreamingService_servicethrows2_e1_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_PubSubStreamingService_servicethrows2_e1_1.structured_annotations(),
+    module_PubSubStreamingService_servicethrows2_e1_1Annotations,
+    getExceptionAnnotationTypes<::cpp2::PubSubStreamingService>(schemaIndex, exceptionIndex - 1, *func.name(), *module_PubSubStreamingService_servicethrows2_e1_1.name())
+  ));
   ExceptionMetadata<::cpp2::FooEx>::gen(metadata);
   ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_servicethrows2_e2_2 = func.exceptions()[exceptionIndex++];
+  [[maybe_unused]] auto module_PubSubStreamingService_servicethrows2_e2_2Annotations = std::move(*module_PubSubStreamingService_servicethrows2_e2_2.structured_annotations());
+  module_PubSubStreamingService_servicethrows2_e2_2.structured_annotations()->clear();
   DCHECK_EQ(*module_PubSubStreamingService_servicethrows2_e2_2.id(), 2);
   DCHECK_EQ(*module_PubSubStreamingService_servicethrows2_e2_2.name(), "e2");
   auto module_PubSubStreamingService_servicethrows2_e2_2_type = std::make_unique<Struct<::cpp2::FooEx2>>("module.FooEx2");
   module_PubSubStreamingService_servicethrows2_e2_2_type->writeAndGenType(*module_PubSubStreamingService_servicethrows2_e2_2.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_PubSubStreamingService_servicethrows2_e2_2.structured_annotations(),
+    module_PubSubStreamingService_servicethrows2_e2_2Annotations,
+    getExceptionAnnotationTypes<::cpp2::PubSubStreamingService>(schemaIndex, exceptionIndex - 1, *func.name(), *module_PubSubStreamingService_servicethrows2_e2_2.name())
+  ));
   ExceptionMetadata<::cpp2::FooEx2>::gen(metadata);
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::cpp2::PubSubStreamingService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_boththrows([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_boththrows([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "boththrows");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Struct<::cpp2::StreamItem>>("module.StreamItem"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_boththrows_foo_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_PubSubStreamingService_boththrows_foo_1Annotations = std::move(*module_PubSubStreamingService_boththrows_foo_1.structured_annotations());
+  module_PubSubStreamingService_boththrows_foo_1.structured_annotations()->clear();
   DCHECK_EQ(*module_PubSubStreamingService_boththrows_foo_1.id(), 1);
   DCHECK_EQ(*module_PubSubStreamingService_boththrows_foo_1.name(), "foo");
   auto module_PubSubStreamingService_boththrows_foo_1_type = std::make_unique<Struct<::cpp2::StreamItem>>("module.StreamItem");
   module_PubSubStreamingService_boththrows_foo_1_type->writeAndGenType(*module_PubSubStreamingService_boththrows_foo_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_PubSubStreamingService_boththrows_foo_1.structured_annotations(),
+    module_PubSubStreamingService_boththrows_foo_1Annotations,
+    getArgumentAnnotationTypes<::cpp2::PubSubStreamingService>(schemaIndex, argumentIndex - 1, *func.name(), *module_PubSubStreamingService_boththrows_foo_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_boththrows_e_1 = func.exceptions()[exceptionIndex++];
+  [[maybe_unused]] auto module_PubSubStreamingService_boththrows_e_1Annotations = std::move(*module_PubSubStreamingService_boththrows_e_1.structured_annotations());
+  module_PubSubStreamingService_boththrows_e_1.structured_annotations()->clear();
   DCHECK_EQ(*module_PubSubStreamingService_boththrows_e_1.id(), 1);
   DCHECK_EQ(*module_PubSubStreamingService_boththrows_e_1.name(), "e");
   auto module_PubSubStreamingService_boththrows_e_1_type = std::make_unique<Struct<::cpp2::FooEx>>("module.FooEx");
   module_PubSubStreamingService_boththrows_e_1_type->writeAndGenType(*module_PubSubStreamingService_boththrows_e_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_PubSubStreamingService_boththrows_e_1.structured_annotations(),
+    module_PubSubStreamingService_boththrows_e_1Annotations,
+    getExceptionAnnotationTypes<::cpp2::PubSubStreamingService>(schemaIndex, exceptionIndex - 1, *func.name(), *module_PubSubStreamingService_boththrows_e_1.name())
+  ));
   ExceptionMetadata<::cpp2::FooEx>::gen(metadata);
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::cpp2::PubSubStreamingService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_responseandstreamstreamthrows([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_responseandstreamstreamthrows([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "responseandstreamstreamthrows");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Struct<::cpp2::StreamItem>>("module.StreamItem"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_responseandstreamstreamthrows_foo_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_PubSubStreamingService_responseandstreamstreamthrows_foo_1Annotations = std::move(*module_PubSubStreamingService_responseandstreamstreamthrows_foo_1.structured_annotations());
+  module_PubSubStreamingService_responseandstreamstreamthrows_foo_1.structured_annotations()->clear();
   DCHECK_EQ(*module_PubSubStreamingService_responseandstreamstreamthrows_foo_1.id(), 1);
   DCHECK_EQ(*module_PubSubStreamingService_responseandstreamstreamthrows_foo_1.name(), "foo");
   auto module_PubSubStreamingService_responseandstreamstreamthrows_foo_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   module_PubSubStreamingService_responseandstreamstreamthrows_foo_1_type->writeAndGenType(*module_PubSubStreamingService_responseandstreamstreamthrows_foo_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_PubSubStreamingService_responseandstreamstreamthrows_foo_1.structured_annotations(),
+    module_PubSubStreamingService_responseandstreamstreamthrows_foo_1Annotations,
+    getArgumentAnnotationTypes<::cpp2::PubSubStreamingService>(schemaIndex, argumentIndex - 1, *func.name(), *module_PubSubStreamingService_responseandstreamstreamthrows_foo_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::cpp2::PubSubStreamingService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_responseandstreamservicethrows([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_responseandstreamservicethrows([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "responseandstreamservicethrows");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Struct<::cpp2::StreamItem>>("module.StreamItem"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_responseandstreamservicethrows_foo_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_PubSubStreamingService_responseandstreamservicethrows_foo_1Annotations = std::move(*module_PubSubStreamingService_responseandstreamservicethrows_foo_1.structured_annotations());
+  module_PubSubStreamingService_responseandstreamservicethrows_foo_1.structured_annotations()->clear();
   DCHECK_EQ(*module_PubSubStreamingService_responseandstreamservicethrows_foo_1.id(), 1);
   DCHECK_EQ(*module_PubSubStreamingService_responseandstreamservicethrows_foo_1.name(), "foo");
   auto module_PubSubStreamingService_responseandstreamservicethrows_foo_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   module_PubSubStreamingService_responseandstreamservicethrows_foo_1_type->writeAndGenType(*module_PubSubStreamingService_responseandstreamservicethrows_foo_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_PubSubStreamingService_responseandstreamservicethrows_foo_1.structured_annotations(),
+    module_PubSubStreamingService_responseandstreamservicethrows_foo_1Annotations,
+    getArgumentAnnotationTypes<::cpp2::PubSubStreamingService>(schemaIndex, argumentIndex - 1, *func.name(), *module_PubSubStreamingService_responseandstreamservicethrows_foo_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_responseandstreamservicethrows_e_1 = func.exceptions()[exceptionIndex++];
+  [[maybe_unused]] auto module_PubSubStreamingService_responseandstreamservicethrows_e_1Annotations = std::move(*module_PubSubStreamingService_responseandstreamservicethrows_e_1.structured_annotations());
+  module_PubSubStreamingService_responseandstreamservicethrows_e_1.structured_annotations()->clear();
   DCHECK_EQ(*module_PubSubStreamingService_responseandstreamservicethrows_e_1.id(), 1);
   DCHECK_EQ(*module_PubSubStreamingService_responseandstreamservicethrows_e_1.name(), "e");
   auto module_PubSubStreamingService_responseandstreamservicethrows_e_1_type = std::make_unique<Struct<::cpp2::FooEx>>("module.FooEx");
   module_PubSubStreamingService_responseandstreamservicethrows_e_1_type->writeAndGenType(*module_PubSubStreamingService_responseandstreamservicethrows_e_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_PubSubStreamingService_responseandstreamservicethrows_e_1.structured_annotations(),
+    module_PubSubStreamingService_responseandstreamservicethrows_e_1Annotations,
+    getExceptionAnnotationTypes<::cpp2::PubSubStreamingService>(schemaIndex, exceptionIndex - 1, *func.name(), *module_PubSubStreamingService_responseandstreamservicethrows_e_1.name())
+  ));
   ExceptionMetadata<::cpp2::FooEx>::gen(metadata);
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::cpp2::PubSubStreamingService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_responseandstreamboththrows([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_responseandstreamboththrows([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "responseandstreamboththrows");
   auto func_ret_type = std::make_unique<Stream>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Struct<::cpp2::StreamItem>>("module.StreamItem"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_responseandstreamboththrows_foo_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_PubSubStreamingService_responseandstreamboththrows_foo_1Annotations = std::move(*module_PubSubStreamingService_responseandstreamboththrows_foo_1.structured_annotations());
+  module_PubSubStreamingService_responseandstreamboththrows_foo_1.structured_annotations()->clear();
   DCHECK_EQ(*module_PubSubStreamingService_responseandstreamboththrows_foo_1.id(), 1);
   DCHECK_EQ(*module_PubSubStreamingService_responseandstreamboththrows_foo_1.name(), "foo");
   auto module_PubSubStreamingService_responseandstreamboththrows_foo_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   module_PubSubStreamingService_responseandstreamboththrows_foo_1_type->writeAndGenType(*module_PubSubStreamingService_responseandstreamboththrows_foo_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_PubSubStreamingService_responseandstreamboththrows_foo_1.structured_annotations(),
+    module_PubSubStreamingService_responseandstreamboththrows_foo_1Annotations,
+    getArgumentAnnotationTypes<::cpp2::PubSubStreamingService>(schemaIndex, argumentIndex - 1, *func.name(), *module_PubSubStreamingService_responseandstreamboththrows_foo_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_PubSubStreamingService_responseandstreamboththrows_e_1 = func.exceptions()[exceptionIndex++];
+  [[maybe_unused]] auto module_PubSubStreamingService_responseandstreamboththrows_e_1Annotations = std::move(*module_PubSubStreamingService_responseandstreamboththrows_e_1.structured_annotations());
+  module_PubSubStreamingService_responseandstreamboththrows_e_1.structured_annotations()->clear();
   DCHECK_EQ(*module_PubSubStreamingService_responseandstreamboththrows_e_1.id(), 1);
   DCHECK_EQ(*module_PubSubStreamingService_responseandstreamboththrows_e_1.name(), "e");
   auto module_PubSubStreamingService_responseandstreamboththrows_e_1_type = std::make_unique<Struct<::cpp2::FooEx>>("module.FooEx");
   module_PubSubStreamingService_responseandstreamboththrows_e_1_type->writeAndGenType(*module_PubSubStreamingService_responseandstreamboththrows_e_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_PubSubStreamingService_responseandstreamboththrows_e_1.structured_annotations(),
+    module_PubSubStreamingService_responseandstreamboththrows_e_1Annotations,
+    getExceptionAnnotationTypes<::cpp2::PubSubStreamingService>(schemaIndex, exceptionIndex - 1, *func.name(), *module_PubSubStreamingService_responseandstreamboththrows_e_1.name())
+  ));
   ExceptionMetadata<::cpp2::FooEx>::gen(metadata);
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::cpp2::PubSubStreamingService>(schemaIndex)
+  ));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -733,7 +973,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingSer
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_PubSubStreamingService = genServiceMetadata<::cpp2::PubSubStreamingService>(metadata, {.genAnnotations = false});
+  ::apache::thrift::metadata::ThriftService module_PubSubStreamingService = genServiceMetadata<::cpp2::PubSubStreamingService>(metadata, {.genAnnotations = folly::kIsDebug});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_returnstream,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_streamthrows,
@@ -744,13 +984,37 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_responseandstreamservicethrows,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_responseandstreamboththrows,
   };
-  size_t index = 0;
+  static constexpr bool isPerforms [] = {
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+  };
+  size_t index = 0, schemaIndex = 0;
   for (auto& function_gen : functions) {
-    function_gen(metadata, module_PubSubStreamingService, index++);
+    while (isPerforms[schemaIndex]) {
+      // We skip interaction consturctor in metadata.thrift, but not schema.thrift
+      // To make sure we are generating the correct function, we need to keep
+      // tracking the function index in schema.thrift
+      schemaIndex++;
+      DCHECK_LT(schemaIndex, std::size(isPerforms));
+    }
+    function_gen(metadata, module_PubSubStreamingService, index++, schemaIndex++);
   }
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
+  [[maybe_unused]] auto module_PubSubStreamingServiceAnnotations = std::move(*module_PubSubStreamingService.structured_annotations());
+  module_PubSubStreamingService.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *module_PubSubStreamingService.structured_annotations(),
+    module_PubSubStreamingServiceAnnotations,
+    getAnnotationTypes<::cpp2::PubSubStreamingService>()
+  ));
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.PubSubStreamingService", std::move(module_PubSubStreamingService));
   context.service_name() = "module.PubSubStreamingService";

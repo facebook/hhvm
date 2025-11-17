@@ -80,13 +80,13 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::SinkService>> {
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_method(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_methodAndReponse(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_methodThrow(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_methodSinkThrow(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_methodFinalThrow(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_methodBothThrow(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_methodFast(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_method(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_methodAndReponse(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_methodThrow(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_methodSinkThrow(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_methodFinalThrow(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_methodBothThrow(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_methodFast(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
 };
 } // namespace md
 } // namespace detail

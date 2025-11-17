@@ -29,7 +29,7 @@ using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
 using ThriftType = ::apache::thrift::metadata::ThriftType;
 using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
-using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
+using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t, std::size_t);
 
 void EnumMetadata<::test::fixtures::basic_structured_annotations::MyEnum>::gen(ThriftMetadata& metadata) {
   auto res = genEnumMetadata<::test::fixtures::basic_structured_annotations::MyEnum>(metadata, {.genAnnotations = folly::kIsDebug});
@@ -344,7 +344,7 @@ void ExceptionMetadata<::test::fixtures::basic_structured_annotations::MyExcepti
     getAnnotationTypes<::test::fixtures::basic_structured_annotations::MyException>()
   ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>>::gen_first([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>>::gen_first([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "first");
   auto func_ret_type = std::make_unique<Typedef>("module.annotated_inline_string", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("module.structured_annotation_inline", { {"count", cvInteger(1) } }).cv_struct(), *cvStruct("module.structured_annotation_with_default", { {"name", cvString("abc") } }).cv_struct(),  });
@@ -352,15 +352,24 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_st
   [[maybe_unused]] std::size_t argumentIndex = 0;
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
   func.structured_annotations()->push_back(*cvStruct("module.structured_annotation_with_default", {  }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::test::fixtures::basic_structured_annotations::MyService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>>::gen_second([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>>::gen_second([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "second");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_MyService_second_count_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_MyService_second_count_1Annotations = std::move(*module_MyService_second_count_1.structured_annotations());
+  module_MyService_second_count_1.structured_annotations()->clear();
   DCHECK_EQ(*module_MyService_second_count_1.id(), 1);
   DCHECK_EQ(*module_MyService_second_count_1.name(), "count");
   module_MyService_second_count_1.structured_annotations().emplace().assign({
@@ -368,9 +377,21 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_st
   });
   auto module_MyService_second_count_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_MyService_second_count_1_type->writeAndGenType(*module_MyService_second_count_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_MyService_second_count_1.structured_annotations(),
+    module_MyService_second_count_1Annotations,
+    getArgumentAnnotationTypes<::test::fixtures::basic_structured_annotations::MyService>(schemaIndex, argumentIndex - 1, *func.name(), *module_MyService_second_count_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
   func.structured_annotations()->push_back(*cvStruct("module.structured_annotation_inline", { {"count", cvInteger(2) } }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::test::fixtures::basic_structured_annotations::MyService>(schemaIndex)
+  ));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -384,20 +405,38 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_st
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_MyService = genServiceMetadata<::test::fixtures::basic_structured_annotations::MyService>(metadata, {.genAnnotations = false});
+  ::apache::thrift::metadata::ThriftService module_MyService = genServiceMetadata<::test::fixtures::basic_structured_annotations::MyService>(metadata, {.genAnnotations = folly::kIsDebug});
   DCHECK_EQ(*module_MyService.uri(), "test.dev/fixtures/basic_structured_annotations/MyService");
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>>::gen_first,
     ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>>::gen_second,
   };
-  size_t index = 0;
+  static constexpr bool isPerforms [] = {
+    false,
+    false,
+  };
+  size_t index = 0, schemaIndex = 0;
   for (auto& function_gen : functions) {
-    function_gen(metadata, module_MyService, index++);
+    while (isPerforms[schemaIndex]) {
+      // We skip interaction consturctor in metadata.thrift, but not schema.thrift
+      // To make sure we are generating the correct function, we need to keep
+      // tracking the function index in schema.thrift
+      schemaIndex++;
+      DCHECK_LT(schemaIndex, std::size(isPerforms));
+    }
+    function_gen(metadata, module_MyService, index++, schemaIndex++);
   }
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
+  [[maybe_unused]] auto module_MyServiceAnnotations = std::move(*module_MyService.structured_annotations());
+  module_MyService.structured_annotations()->clear();
   module_MyService.structured_annotations()->push_back(*cvStruct("module.structured_annotation_inline", { {"count", cvInteger(3) } }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *module_MyService.structured_annotations(),
+    module_MyServiceAnnotations,
+    getAnnotationTypes<::test::fixtures::basic_structured_annotations::MyService>()
+  ));
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.MyService", std::move(module_MyService));
   context.service_name() = "module.MyService";

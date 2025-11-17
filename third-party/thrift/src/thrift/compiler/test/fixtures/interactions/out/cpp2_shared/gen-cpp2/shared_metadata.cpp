@@ -29,7 +29,7 @@ using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
 using ThriftType = ::apache::thrift::metadata::ThriftType;
 using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
-using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
+using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t, std::size_t);
 
 
 const ::apache::thrift::metadata::ThriftStruct&
@@ -75,16 +75,33 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::thrift::shared_interacti
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::thrift::shared_interactions::InteractLocally>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService shared_InteractLocally = genServiceMetadata<::thrift::shared_interactions::InteractLocally>(metadata, {.genAnnotations = false});
+  ::apache::thrift::metadata::ThriftService shared_InteractLocally = genServiceMetadata<::thrift::shared_interactions::InteractLocally>(metadata, {.genAnnotations = folly::kIsDebug});
   static const ThriftFunctionGenerator functions[] = {
   };
-  size_t index = 0;
+  static constexpr bool isPerforms [] = {
+    true,
+  };
+  size_t index = 0, schemaIndex = 0;
   for (auto& function_gen : functions) {
-    function_gen(metadata, shared_InteractLocally, index++);
+    while (isPerforms[schemaIndex]) {
+      // We skip interaction consturctor in metadata.thrift, but not schema.thrift
+      // To make sure we are generating the correct function, we need to keep
+      // tracking the function index in schema.thrift
+      schemaIndex++;
+      DCHECK_LT(schemaIndex, std::size(isPerforms));
+    }
+    function_gen(metadata, shared_InteractLocally, index++, schemaIndex++);
   }
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
+  [[maybe_unused]] auto shared_InteractLocallyAnnotations = std::move(*shared_InteractLocally.structured_annotations());
+  shared_InteractLocally.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *shared_InteractLocally.structured_annotations(),
+    shared_InteractLocallyAnnotations,
+    getAnnotationTypes<::thrift::shared_interactions::InteractLocally>()
+  ));
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("shared.InteractLocally", std::move(shared_InteractLocally));
   context.service_name() = "shared.InteractLocally";

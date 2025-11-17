@@ -354,6 +354,54 @@ auto getFieldAnnotationTypes(size_t position, std::int16_t id) {
   return getFieldAnnotationTypes(getNodeWithLock<T>(), position, id);
 }
 
+std::vector<syntax_graph::TypeRef> getFunctionAnnotationTypes(
+    const syntax_graph::ServiceNode& node, std::size_t functionIndex);
+std::vector<syntax_graph::TypeRef> getArgumentAnnotationTypes(
+    const syntax_graph::ServiceNode& node,
+    std::size_t functionIndex,
+    std::size_t argumentIndex,
+    std::string_view functionName,
+    std::string_view argumentName);
+std::vector<syntax_graph::TypeRef> getExceptionAnnotationTypes(
+    const syntax_graph::ServiceNode& node,
+    std::size_t functionIndex,
+    std::size_t exceptionIndex,
+    std::string_view functionName,
+    std::string_view exceptionName);
+
+// functionIndex is the 0-based position of the function in a service
+template <class Service>
+auto getFunctionAnnotationTypes(std::size_t functionIndex) {
+  return getFunctionAnnotationTypes(
+      getDefinitionNodeWithLock<Service>().asService(), functionIndex);
+}
+template <class Service>
+auto getArgumentAnnotationTypes(
+    std::size_t functionIndex,
+    std::size_t argumentIndex,
+    std::string_view functionName,
+    std::string_view argumentName) {
+  return getArgumentAnnotationTypes(
+      getDefinitionNodeWithLock<Service>().asService(),
+      functionIndex,
+      argumentIndex,
+      functionName,
+      argumentName);
+}
+template <class Service>
+auto getExceptionAnnotationTypes(
+    std::size_t functionIndex,
+    std::size_t exceptionIndex,
+    std::string_view functionName,
+    std::string_view exceptionName) {
+  return getExceptionAnnotationTypes(
+      getDefinitionNodeWithLock<Service>().asService(),
+      functionIndex,
+      exceptionIndex,
+      functionName,
+      exceptionName);
+}
+
 // A Helper function to check whether two list of structured annotations have
 // same data. We can not rely on `std::vector::operator==` directly since
 // Annotations' order, as well as the order of `set`/`map` in the annotation

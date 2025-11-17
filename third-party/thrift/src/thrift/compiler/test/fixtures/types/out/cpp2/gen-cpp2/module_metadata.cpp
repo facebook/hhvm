@@ -29,7 +29,7 @@ using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
 using ThriftType = ::apache::thrift::metadata::ThriftType;
 using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
-using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
+using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t, std::size_t);
 
 void EnumMetadata<::apache::thrift::fixtures::types::has_bitwise_ops>::gen(ThriftMetadata& metadata) {
   auto res = genEnumMetadata<::apache::thrift::fixtures::types::has_bitwise_ops>(metadata, {.genAnnotations = folly::kIsDebug});
@@ -1054,33 +1054,61 @@ StructMetadata<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::
   return res.metadata;
 }
 
-void ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>>::gen_bounce_map([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>>::gen_bounce_map([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "bounce_map");
   auto func_ret_type = std::make_unique<Typedef>("included.SomeMap", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Type", { {"template", cvString("std::unordered_map") } }).cv_struct(),  });
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SomeService_bounce_map_m_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SomeService_bounce_map_m_1Annotations = std::move(*module_SomeService_bounce_map_m_1.structured_annotations());
+  module_SomeService_bounce_map_m_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SomeService_bounce_map_m_1.id(), 1);
   DCHECK_EQ(*module_SomeService_bounce_map_m_1.name(), "m");
   auto module_SomeService_bounce_map_m_1_type = std::make_unique<Typedef>("included.SomeMap", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Type", { {"template", cvString("std::unordered_map") } }).cv_struct(),  });
   module_SomeService_bounce_map_m_1_type->writeAndGenType(*module_SomeService_bounce_map_m_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SomeService_bounce_map_m_1.structured_annotations(),
+    module_SomeService_bounce_map_m_1Annotations,
+    getArgumentAnnotationTypes<::apache::thrift::fixtures::types::SomeService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SomeService_bounce_map_m_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::apache::thrift::fixtures::types::SomeService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>>::gen_binary_keyed_map([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>>::gen_binary_keyed_map([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "binary_keyed_map");
   auto func_ret_type = std::make_unique<Map>(std::make_unique<Typedef>("module.TBinary", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  }), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SomeService_binary_keyed_map_r_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SomeService_binary_keyed_map_r_1Annotations = std::move(*module_SomeService_binary_keyed_map_r_1.structured_annotations());
+  module_SomeService_binary_keyed_map_r_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SomeService_binary_keyed_map_r_1.id(), 1);
   DCHECK_EQ(*module_SomeService_binary_keyed_map_r_1.name(), "r");
   auto module_SomeService_binary_keyed_map_r_1_type = std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE));
   module_SomeService_binary_keyed_map_r_1_type->writeAndGenType(*module_SomeService_binary_keyed_map_r_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SomeService_binary_keyed_map_r_1.structured_annotations(),
+    module_SomeService_binary_keyed_map_r_1Annotations,
+    getArgumentAnnotationTypes<::apache::thrift::fixtures::types::SomeService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SomeService_binary_keyed_map_r_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::apache::thrift::fixtures::types::SomeService>(schemaIndex)
+  ));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -1094,19 +1122,37 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_SomeService = genServiceMetadata<::apache::thrift::fixtures::types::SomeService>(metadata, {.genAnnotations = false});
+  ::apache::thrift::metadata::ThriftService module_SomeService = genServiceMetadata<::apache::thrift::fixtures::types::SomeService>(metadata, {.genAnnotations = folly::kIsDebug});
   DCHECK_EQ(*module_SomeService.uri(), "apache.org/thrift/fixtures/types/SomeService");
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>>::gen_bounce_map,
     ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>>::gen_binary_keyed_map,
   };
-  size_t index = 0;
+  static constexpr bool isPerforms [] = {
+    false,
+    false,
+  };
+  size_t index = 0, schemaIndex = 0;
   for (auto& function_gen : functions) {
-    function_gen(metadata, module_SomeService, index++);
+    while (isPerforms[schemaIndex]) {
+      // We skip interaction consturctor in metadata.thrift, but not schema.thrift
+      // To make sure we are generating the correct function, we need to keep
+      // tracking the function index in schema.thrift
+      schemaIndex++;
+      DCHECK_LT(schemaIndex, std::size(isPerforms));
+    }
+    function_gen(metadata, module_SomeService, index++, schemaIndex++);
   }
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
+  [[maybe_unused]] auto module_SomeServiceAnnotations = std::move(*module_SomeService.structured_annotations());
+  module_SomeService.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *module_SomeService.structured_annotations(),
+    module_SomeServiceAnnotations,
+    getAnnotationTypes<::apache::thrift::fixtures::types::SomeService>()
+  ));
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.SomeService", std::move(module_SomeService));
   context.service_name() = "module.SomeService";

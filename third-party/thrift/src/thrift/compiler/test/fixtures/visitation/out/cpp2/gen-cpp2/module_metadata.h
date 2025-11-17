@@ -151,12 +151,12 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflecti
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_method1(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_method2(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_method3(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_method4(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_method5(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_method6(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_method1(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_method2(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_method3(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_method4(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_method5(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_method6(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>> {
@@ -168,12 +168,12 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflecti
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_methodA(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_methodB(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_methodC(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_methodD(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_methodE(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_methodF(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_methodA(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_methodB(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_methodC(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_methodD(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_methodE(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_methodF(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service3>> {
@@ -185,12 +185,12 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflecti
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_methodA(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_methodB(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_methodC(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_methodD(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_methodE(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_methodF(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_methodA(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_methodB(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_methodC(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_methodD(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_methodE(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_methodF(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>> {
@@ -202,34 +202,34 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::test_cpp2::cpp_reflecti
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_get(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_getter(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_lists(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_maps(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_name(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_name_to_value(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_names(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_prefix_tree(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_sets(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_setter(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_str(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_strings(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_type(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_value(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_value_to_name(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_values(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_id(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_ids(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_descriptor(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_descriptors(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_key(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_keys(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_annotation(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_annotations(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_member(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_members(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_field(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_fields(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_get(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_getter(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_lists(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_maps(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_name(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_name_to_value(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_names(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_prefix_tree(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_sets(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_setter(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_str(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_strings(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_type(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_value(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_value_to_name(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_values(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_id(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_ids(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_descriptor(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_descriptors(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_key(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_keys(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_annotation(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_annotations(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_member(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_members(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_field(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_fields(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
 };
 } // namespace md
 } // namespace detail

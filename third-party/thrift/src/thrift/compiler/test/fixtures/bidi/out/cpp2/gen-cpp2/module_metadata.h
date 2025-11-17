@@ -60,9 +60,9 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>> {
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_simple(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_response(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_canThrow(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_simple(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_response(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_canThrow(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
 };
 } // namespace md
 } // namespace detail

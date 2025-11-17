@@ -53,14 +53,14 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>> {
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_ping(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_getRandomData(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_sink(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_putDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_hasDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_getDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_deleteDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_lobDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_ping(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_getRandomData(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_sink(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_putDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_hasDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_getDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_deleteDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_lobDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DbMixedStackArguments>> {
@@ -72,8 +72,8 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DbMixedStackArgum
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_getDataByKey0(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_getDataByKey1(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_getDataByKey0(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_getDataByKey1(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
 };
 } // namespace md
 } // namespace detail

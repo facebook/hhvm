@@ -77,13 +77,13 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>> {
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_ping(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_getRandomData(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_hasDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_getDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_putDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_lobDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_cppDoNothing(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_ping(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_getRandomData(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_hasDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_getDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_putDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_lobDataById(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_cppDoNothing(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>> {
@@ -95,8 +95,8 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioPare
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_ping(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_pong(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_ping(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_pong(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioChild>> {
@@ -108,7 +108,7 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioChil
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_pang(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_pang(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::GoodService>> {
@@ -120,7 +120,7 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::GoodService>> {
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_bar(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_bar(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>> {
@@ -132,9 +132,9 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::FooBarBazService>
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_foo(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_bar(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_baz(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_foo(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_bar(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_baz(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
 };
 } // namespace md
 } // namespace detail

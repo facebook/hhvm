@@ -592,6 +592,37 @@ std::vector<syntax_graph::TypeRef> getFieldAnnotationTypes(
   return getAnnotationTypes(field.annotations());
 }
 
+std::vector<syntax_graph::TypeRef> getFunctionAnnotationTypes(
+    const syntax_graph::ServiceNode& node, std::size_t functionIndex) {
+  return getAnnotationTypes(node.functions()[functionIndex].annotations());
+}
+
+std::vector<syntax_graph::TypeRef> getArgumentAnnotationTypes(
+    const syntax_graph::ServiceNode& node,
+    std::size_t functionIndex,
+    std::size_t argumentIndex,
+    std::string_view functionName,
+    std::string_view argumentName) {
+  const auto& func = node.functions()[functionIndex];
+  const auto& arg = node.functions()[functionIndex].params()[argumentIndex];
+  DCHECK_EQ(functionName, func.name());
+  DCHECK_EQ(argumentName, arg.name());
+  return getAnnotationTypes(arg.annotations());
+}
+
+std::vector<syntax_graph::TypeRef> getExceptionAnnotationTypes(
+    const syntax_graph::ServiceNode& node,
+    std::size_t functionIndex,
+    std::size_t exceptionIndex,
+    std::string_view functionName,
+    std::string_view exceptionName) {
+  const auto& func = node.functions()[functionIndex];
+  const auto& exception = func.exceptions()[exceptionIndex];
+  DCHECK_EQ(functionName, func.name());
+  DCHECK_EQ(exceptionName, exception.name());
+  return getAnnotationTypes(exception.annotations());
+}
+
 namespace {
 // In ThriftConstValue, `set`/`map` are stored as list.
 // This function sort `set`/`map` so that we can do equality comparison.

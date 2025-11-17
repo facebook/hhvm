@@ -34,7 +34,7 @@ using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
 using ThriftType = ::apache::thrift::metadata::ThriftType;
 using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
-using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
+using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t, std::size_t);
 
 void EnumMetadata<::facebook::thrift::test::Color>::gen(ThriftMetadata& metadata) {
   auto res = genEnumMetadata<::facebook::thrift::test::Color>(metadata, {.genAnnotations = folly::kIsDebug});
@@ -1044,29 +1044,57 @@ StructMetadata<::facebook::thrift::test::Renamed>::gen(ThriftMetadata& metadata)
   return res.metadata;
 }
 
-void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::Service>>::gen_func([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::Service>>::gen_func([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "func");
   auto func_ret_type = std::make_unique<Typedef>("module.MyI32_4873", std::make_unique<Typedef>("module.MyI32", std::make_unique<Typedef>("module.MyI32", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("hack.Adapter", { {"name", cvString("\\Adapter1") } }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter1") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedI32_1") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  });
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_Service_func_arg1_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_Service_func_arg1_1Annotations = std::move(*module_Service_func_arg1_1.structured_annotations());
+  module_Service_func_arg1_1.structured_annotations()->clear();
   DCHECK_EQ(*module_Service_func_arg1_1.id(), 1);
   DCHECK_EQ(*module_Service_func_arg1_1.name(), "arg1");
   auto module_Service_func_arg1_1_type = std::make_unique<Typedef>("module.StringWithAdapter_7208", std::make_unique<Typedef>("module.StringWithAdapter", std::make_unique<Typedef>("module.StringWithAdapter", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("hack.Adapter", { {"name", cvString("\\Adapter1") } }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("rust.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct(), *cvStruct("java.Adapter", { {"adapterClassName", cvString("com.facebook.thrift.my.Adapter1") }, {"typeClassName", cvString("com.facebook.thrift.my.AdaptedString_1") } }).cv_struct(),  }), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(),  });
   module_Service_func_arg1_1_type->writeAndGenType(*module_Service_func_arg1_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_Service_func_arg1_1.structured_annotations(),
+    module_Service_func_arg1_1Annotations,
+    getArgumentAnnotationTypes<::facebook::thrift::test::Service>(schemaIndex, argumentIndex - 1, *func.name(), *module_Service_func_arg1_1.name())
+  ));
   ::apache::thrift::metadata::ThriftField &module_Service_func_arg2_2 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_Service_func_arg2_2Annotations = std::move(*module_Service_func_arg2_2.structured_annotations());
+  module_Service_func_arg2_2.structured_annotations()->clear();
   DCHECK_EQ(*module_Service_func_arg2_2.id(), 2);
   DCHECK_EQ(*module_Service_func_arg2_2.name(), "arg2");
   auto module_Service_func_arg2_2_type = std::make_unique<Typedef>("module.StringWithCppAdapter", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter2") } }).cv_struct(),  });
   module_Service_func_arg2_2_type->writeAndGenType(*module_Service_func_arg2_2.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_Service_func_arg2_2.structured_annotations(),
+    module_Service_func_arg2_2Annotations,
+    getArgumentAnnotationTypes<::facebook::thrift::test::Service>(schemaIndex, argumentIndex - 1, *func.name(), *module_Service_func_arg2_2.name())
+  ));
   ::apache::thrift::metadata::ThriftField &module_Service_func_arg3_3 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_Service_func_arg3_3Annotations = std::move(*module_Service_func_arg3_3.structured_annotations());
+  module_Service_func_arg3_3.structured_annotations()->clear();
   DCHECK_EQ(*module_Service_func_arg3_3.id(), 3);
   DCHECK_EQ(*module_Service_func_arg3_3.name(), "arg3");
   auto module_Service_func_arg3_3_type = std::make_unique<Struct<::facebook::thrift::test::Foo>>("module.Foo");
   module_Service_func_arg3_3_type->writeAndGenType(*module_Service_func_arg3_3.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_Service_func_arg3_3.structured_annotations(),
+    module_Service_func_arg3_3Annotations,
+    getArgumentAnnotationTypes<::facebook::thrift::test::Service>(schemaIndex, argumentIndex - 1, *func.name(), *module_Service_func_arg3_3.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::facebook::thrift::test::Service>(schemaIndex)
+  ));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::Service>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -1080,18 +1108,35 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::Service>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_Service = genServiceMetadata<::facebook::thrift::test::Service>(metadata, {.genAnnotations = false});
+  ::apache::thrift::metadata::ThriftService module_Service = genServiceMetadata<::facebook::thrift::test::Service>(metadata, {.genAnnotations = folly::kIsDebug});
   DCHECK_EQ(*module_Service.uri(), "facebook.com/thrift/test/Service");
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::Service>>::gen_func,
   };
-  size_t index = 0;
+  static constexpr bool isPerforms [] = {
+    false,
+  };
+  size_t index = 0, schemaIndex = 0;
   for (auto& function_gen : functions) {
-    function_gen(metadata, module_Service, index++);
+    while (isPerforms[schemaIndex]) {
+      // We skip interaction consturctor in metadata.thrift, but not schema.thrift
+      // To make sure we are generating the correct function, we need to keep
+      // tracking the function index in schema.thrift
+      schemaIndex++;
+      DCHECK_LT(schemaIndex, std::size(isPerforms));
+    }
+    function_gen(metadata, module_Service, index++, schemaIndex++);
   }
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
+  [[maybe_unused]] auto module_ServiceAnnotations = std::move(*module_Service.structured_annotations());
+  module_Service.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *module_Service.structured_annotations(),
+    module_ServiceAnnotations,
+    getAnnotationTypes<::facebook::thrift::test::Service>()
+  ));
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.Service", std::move(module_Service));
   context.service_name() = "module.Service";
@@ -1100,7 +1145,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   context.module() = std::move(module);
   return &context;
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>>::gen_count([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>>::gen_count([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "count");
   auto func_ret_type = std::make_unique<Struct<::facebook::thrift::test::CountingStruct>>("module.CountingStruct");
@@ -1108,20 +1153,41 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
   [[maybe_unused]] std::size_t argumentIndex = 0;
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::facebook::thrift::test::AdapterService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>>::gen_adaptedTypes([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>>::gen_adaptedTypes([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "adaptedTypes");
   auto func_ret_type = std::make_unique<Struct<::facebook::thrift::test::detail::HeapAllocated>>("module.HeapAllocated");
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_AdapterService_adaptedTypes_arg_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_AdapterService_adaptedTypes_arg_1Annotations = std::move(*module_AdapterService_adaptedTypes_arg_1.structured_annotations());
+  module_AdapterService_adaptedTypes_arg_1.structured_annotations()->clear();
   DCHECK_EQ(*module_AdapterService_adaptedTypes_arg_1.id(), 1);
   DCHECK_EQ(*module_AdapterService_adaptedTypes_arg_1.name(), "arg");
   auto module_AdapterService_adaptedTypes_arg_1_type = std::make_unique<Struct<::facebook::thrift::test::detail::HeapAllocated>>("module.HeapAllocated");
   module_AdapterService_adaptedTypes_arg_1_type->writeAndGenType(*module_AdapterService_adaptedTypes_arg_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_AdapterService_adaptedTypes_arg_1.structured_annotations(),
+    module_AdapterService_adaptedTypes_arg_1Annotations,
+    getArgumentAnnotationTypes<::facebook::thrift::test::AdapterService>(schemaIndex, argumentIndex - 1, *func.name(), *module_AdapterService_adaptedTypes_arg_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::facebook::thrift::test::AdapterService>(schemaIndex)
+  ));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -1135,19 +1201,37 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_AdapterService = genServiceMetadata<::facebook::thrift::test::AdapterService>(metadata, {.genAnnotations = false});
+  ::apache::thrift::metadata::ThriftService module_AdapterService = genServiceMetadata<::facebook::thrift::test::AdapterService>(metadata, {.genAnnotations = folly::kIsDebug});
   DCHECK_EQ(*module_AdapterService.uri(), "facebook.com/thrift/test/AdapterService");
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>>::gen_count,
     ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>>::gen_adaptedTypes,
   };
-  size_t index = 0;
+  static constexpr bool isPerforms [] = {
+    false,
+    false,
+  };
+  size_t index = 0, schemaIndex = 0;
   for (auto& function_gen : functions) {
-    function_gen(metadata, module_AdapterService, index++);
+    while (isPerforms[schemaIndex]) {
+      // We skip interaction consturctor in metadata.thrift, but not schema.thrift
+      // To make sure we are generating the correct function, we need to keep
+      // tracking the function index in schema.thrift
+      schemaIndex++;
+      DCHECK_LT(schemaIndex, std::size(isPerforms));
+    }
+    function_gen(metadata, module_AdapterService, index++, schemaIndex++);
   }
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
+  [[maybe_unused]] auto module_AdapterServiceAnnotations = std::move(*module_AdapterService.structured_annotations());
+  module_AdapterService.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *module_AdapterService.structured_annotations(),
+    module_AdapterServiceAnnotations,
+    getAnnotationTypes<::facebook::thrift::test::AdapterService>()
+  ));
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.AdapterService", std::move(module_AdapterService));
   context.service_name() = "module.AdapterService";

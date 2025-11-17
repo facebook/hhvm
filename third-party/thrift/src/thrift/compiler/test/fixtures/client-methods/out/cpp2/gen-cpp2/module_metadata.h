@@ -43,8 +43,8 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMetho
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_echo(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_echo_2(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_echo(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_echo_2(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
 };
 template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnFunction>> {
@@ -56,8 +56,8 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMetho
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_echo(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_echo_2(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_echo(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_echo_2(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
 };
 } // namespace md
 } // namespace detail

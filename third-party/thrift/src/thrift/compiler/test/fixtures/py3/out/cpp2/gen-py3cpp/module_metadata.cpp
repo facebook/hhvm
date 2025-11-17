@@ -39,7 +39,7 @@ using ThriftPrimitiveType = ::apache::thrift::metadata::ThriftPrimitiveType;
 using ThriftType = ::apache::thrift::metadata::ThriftType;
 using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
-using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t);
+using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t, std::size_t);
 
 void EnumMetadata<::py3::simple::AnEnum>::gen(ThriftMetadata& metadata) {
   auto res = genEnumMetadata<::py3::simple::AnEnum>(metadata, {.genAnnotations = folly::kIsDebug});
@@ -536,7 +536,7 @@ void ExceptionMetadata<::py3::simple::HiddenException>::gen(ThriftMetadata& meta
     getAnnotationTypes<::py3::simple::HiddenException>()
   ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_five([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_five([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "get_five");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
@@ -544,22 +544,43 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   [[maybe_unused]] std::size_t argumentIndex = 0;
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_add_five([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_add_five([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "add_five");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_add_five_num_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_add_five_num_1Annotations = std::move(*module_SimpleService_add_five_num_1.structured_annotations());
+  module_SimpleService_add_five_num_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_add_five_num_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_add_five_num_1.name(), "num");
   auto module_SimpleService_add_five_num_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   module_SimpleService_add_five_num_1_type->writeAndGenType(*module_SimpleService_add_five_num_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_add_five_num_1.structured_annotations(),
+    module_SimpleService_add_five_num_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_add_five_num_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_do_nothing([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_do_nothing([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "do_nothing");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
@@ -567,111 +588,223 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   [[maybe_unused]] std::size_t argumentIndex = 0;
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_concat([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_concat([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "concat");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_concat_first_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_concat_first_1Annotations = std::move(*module_SimpleService_concat_first_1.structured_annotations());
+  module_SimpleService_concat_first_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_concat_first_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_concat_first_1.name(), "first");
   auto module_SimpleService_concat_first_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   module_SimpleService_concat_first_1_type->writeAndGenType(*module_SimpleService_concat_first_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_concat_first_1.structured_annotations(),
+    module_SimpleService_concat_first_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_concat_first_1.name())
+  ));
   ::apache::thrift::metadata::ThriftField &module_SimpleService_concat_second_2 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_concat_second_2Annotations = std::move(*module_SimpleService_concat_second_2.structured_annotations());
+  module_SimpleService_concat_second_2.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_concat_second_2.id(), 2);
   DCHECK_EQ(*module_SimpleService_concat_second_2.name(), "second");
   auto module_SimpleService_concat_second_2_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   module_SimpleService_concat_second_2_type->writeAndGenType(*module_SimpleService_concat_second_2.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_concat_second_2.structured_annotations(),
+    module_SimpleService_concat_second_2Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_concat_second_2.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_value([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_value([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "get_value");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_get_value_simple_struct_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_get_value_simple_struct_1Annotations = std::move(*module_SimpleService_get_value_simple_struct_1.structured_annotations());
+  module_SimpleService_get_value_simple_struct_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_get_value_simple_struct_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_get_value_simple_struct_1.name(), "simple_struct");
   auto module_SimpleService_get_value_simple_struct_1_type = std::make_unique<Struct<::py3::simple::SimpleStruct>>("module.SimpleStruct");
   module_SimpleService_get_value_simple_struct_1_type->writeAndGenType(*module_SimpleService_get_value_simple_struct_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_get_value_simple_struct_1.structured_annotations(),
+    module_SimpleService_get_value_simple_struct_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_get_value_simple_struct_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_negate([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_negate([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "negate");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_negate_input_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_negate_input_1Annotations = std::move(*module_SimpleService_negate_input_1.structured_annotations());
+  module_SimpleService_negate_input_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_negate_input_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_negate_input_1.name(), "input");
   auto module_SimpleService_negate_input_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE);
   module_SimpleService_negate_input_1_type->writeAndGenType(*module_SimpleService_negate_input_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_negate_input_1.structured_annotations(),
+    module_SimpleService_negate_input_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_negate_input_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_tiny([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_tiny([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "tiny");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_tiny_input_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_tiny_input_1Annotations = std::move(*module_SimpleService_tiny_input_1.structured_annotations());
+  module_SimpleService_tiny_input_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_tiny_input_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_tiny_input_1.name(), "input");
   auto module_SimpleService_tiny_input_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE);
   module_SimpleService_tiny_input_1_type->writeAndGenType(*module_SimpleService_tiny_input_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_tiny_input_1.structured_annotations(),
+    module_SimpleService_tiny_input_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_tiny_input_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_small([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_small([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "small");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_small_input_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_small_input_1Annotations = std::move(*module_SimpleService_small_input_1.structured_annotations());
+  module_SimpleService_small_input_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_small_input_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_small_input_1.name(), "input");
   auto module_SimpleService_small_input_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE);
   module_SimpleService_small_input_1_type->writeAndGenType(*module_SimpleService_small_input_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_small_input_1.structured_annotations(),
+    module_SimpleService_small_input_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_small_input_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_big([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_big([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "big");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_big_input_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_big_input_1Annotations = std::move(*module_SimpleService_big_input_1.structured_annotations());
+  module_SimpleService_big_input_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_big_input_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_big_input_1.name(), "input");
   auto module_SimpleService_big_input_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_SimpleService_big_input_1_type->writeAndGenType(*module_SimpleService_big_input_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_big_input_1.structured_annotations(),
+    module_SimpleService_big_input_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_big_input_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_two([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_two([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "two");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_two_input_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_two_input_1Annotations = std::move(*module_SimpleService_two_input_1.structured_annotations());
+  module_SimpleService_two_input_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_two_input_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_two_input_1.name(), "input");
   auto module_SimpleService_two_input_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE);
   module_SimpleService_two_input_1_type->writeAndGenType(*module_SimpleService_two_input_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_two_input_1.structured_annotations(),
+    module_SimpleService_two_input_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_two_input_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_expected_exception([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_expected_exception([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "expected_exception");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
@@ -679,14 +812,28 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   [[maybe_unused]] std::size_t argumentIndex = 0;
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_expected_exception_se_1 = func.exceptions()[exceptionIndex++];
+  [[maybe_unused]] auto module_SimpleService_expected_exception_se_1Annotations = std::move(*module_SimpleService_expected_exception_se_1.structured_annotations());
+  module_SimpleService_expected_exception_se_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_expected_exception_se_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_expected_exception_se_1.name(), "se");
   auto module_SimpleService_expected_exception_se_1_type = std::make_unique<Struct<::py3::simple::SimpleException>>("module.SimpleException");
   module_SimpleService_expected_exception_se_1_type->writeAndGenType(*module_SimpleService_expected_exception_se_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_expected_exception_se_1.structured_annotations(),
+    module_SimpleService_expected_exception_se_1Annotations,
+    getExceptionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, exceptionIndex - 1, *func.name(), *module_SimpleService_expected_exception_se_1.name())
+  ));
   ExceptionMetadata<::py3::simple::SimpleException>::gen(metadata);
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_unexpected_exception([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_unexpected_exception([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "unexpected_exception");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
@@ -694,186 +841,375 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   [[maybe_unused]] std::size_t argumentIndex = 0;
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_sum_i16_list([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_sum_i16_list([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "sum_i16_list");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_sum_i16_list_numbers_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_sum_i16_list_numbers_1Annotations = std::move(*module_SimpleService_sum_i16_list_numbers_1.structured_annotations());
+  module_SimpleService_sum_i16_list_numbers_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_sum_i16_list_numbers_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_sum_i16_list_numbers_1.name(), "numbers");
   auto module_SimpleService_sum_i16_list_numbers_1_type = std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE));
   module_SimpleService_sum_i16_list_numbers_1_type->writeAndGenType(*module_SimpleService_sum_i16_list_numbers_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_sum_i16_list_numbers_1.structured_annotations(),
+    module_SimpleService_sum_i16_list_numbers_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_sum_i16_list_numbers_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_sum_i32_list([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_sum_i32_list([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "sum_i32_list");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_sum_i32_list_numbers_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_sum_i32_list_numbers_1Annotations = std::move(*module_SimpleService_sum_i32_list_numbers_1.structured_annotations());
+  module_SimpleService_sum_i32_list_numbers_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_sum_i32_list_numbers_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_sum_i32_list_numbers_1.name(), "numbers");
   auto module_SimpleService_sum_i32_list_numbers_1_type = std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE));
   module_SimpleService_sum_i32_list_numbers_1_type->writeAndGenType(*module_SimpleService_sum_i32_list_numbers_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_sum_i32_list_numbers_1.structured_annotations(),
+    module_SimpleService_sum_i32_list_numbers_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_sum_i32_list_numbers_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_sum_i64_list([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_sum_i64_list([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "sum_i64_list");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_sum_i64_list_numbers_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_sum_i64_list_numbers_1Annotations = std::move(*module_SimpleService_sum_i64_list_numbers_1.structured_annotations());
+  module_SimpleService_sum_i64_list_numbers_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_sum_i64_list_numbers_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_sum_i64_list_numbers_1.name(), "numbers");
   auto module_SimpleService_sum_i64_list_numbers_1_type = std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE));
   module_SimpleService_sum_i64_list_numbers_1_type->writeAndGenType(*module_SimpleService_sum_i64_list_numbers_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_sum_i64_list_numbers_1.structured_annotations(),
+    module_SimpleService_sum_i64_list_numbers_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_sum_i64_list_numbers_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_concat_many([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_concat_many([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "concat_many");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_concat_many_words_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_concat_many_words_1Annotations = std::move(*module_SimpleService_concat_many_words_1.structured_annotations());
+  module_SimpleService_concat_many_words_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_concat_many_words_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_concat_many_words_1.name(), "words");
   auto module_SimpleService_concat_many_words_1_type = std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE));
   module_SimpleService_concat_many_words_1_type->writeAndGenType(*module_SimpleService_concat_many_words_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_concat_many_words_1.structured_annotations(),
+    module_SimpleService_concat_many_words_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_concat_many_words_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_count_structs([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_count_structs([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "count_structs");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_count_structs_items_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_count_structs_items_1Annotations = std::move(*module_SimpleService_count_structs_items_1.structured_annotations());
+  module_SimpleService_count_structs_items_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_count_structs_items_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_count_structs_items_1.name(), "items");
   auto module_SimpleService_count_structs_items_1_type = std::make_unique<List>(std::make_unique<Struct<::py3::simple::SimpleStruct>>("module.SimpleStruct"));
   module_SimpleService_count_structs_items_1_type->writeAndGenType(*module_SimpleService_count_structs_items_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_count_structs_items_1.structured_annotations(),
+    module_SimpleService_count_structs_items_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_count_structs_items_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_sum_set([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_sum_set([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "sum_set");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_sum_set_numbers_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_sum_set_numbers_1Annotations = std::move(*module_SimpleService_sum_set_numbers_1.structured_annotations());
+  module_SimpleService_sum_set_numbers_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_sum_set_numbers_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_sum_set_numbers_1.name(), "numbers");
   auto module_SimpleService_sum_set_numbers_1_type = std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE));
   module_SimpleService_sum_set_numbers_1_type->writeAndGenType(*module_SimpleService_sum_set_numbers_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_sum_set_numbers_1.structured_annotations(),
+    module_SimpleService_sum_set_numbers_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_sum_set_numbers_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_contains_word([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_contains_word([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "contains_word");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_contains_word_words_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_contains_word_words_1Annotations = std::move(*module_SimpleService_contains_word_words_1.structured_annotations());
+  module_SimpleService_contains_word_words_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_contains_word_words_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_contains_word_words_1.name(), "words");
   auto module_SimpleService_contains_word_words_1_type = std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE));
   module_SimpleService_contains_word_words_1_type->writeAndGenType(*module_SimpleService_contains_word_words_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_contains_word_words_1.structured_annotations(),
+    module_SimpleService_contains_word_words_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_contains_word_words_1.name())
+  ));
   ::apache::thrift::metadata::ThriftField &module_SimpleService_contains_word_word_2 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_contains_word_word_2Annotations = std::move(*module_SimpleService_contains_word_word_2.structured_annotations());
+  module_SimpleService_contains_word_word_2.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_contains_word_word_2.id(), 2);
   DCHECK_EQ(*module_SimpleService_contains_word_word_2.name(), "word");
   auto module_SimpleService_contains_word_word_2_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   module_SimpleService_contains_word_word_2_type->writeAndGenType(*module_SimpleService_contains_word_word_2.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_contains_word_word_2.structured_annotations(),
+    module_SimpleService_contains_word_word_2Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_contains_word_word_2.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_map_value([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_map_value([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "get_map_value");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_get_map_value_words_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_get_map_value_words_1Annotations = std::move(*module_SimpleService_get_map_value_words_1.structured_annotations());
+  module_SimpleService_get_map_value_words_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_get_map_value_words_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_get_map_value_words_1.name(), "words");
   auto module_SimpleService_get_map_value_words_1_type = std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE));
   module_SimpleService_get_map_value_words_1_type->writeAndGenType(*module_SimpleService_get_map_value_words_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_get_map_value_words_1.structured_annotations(),
+    module_SimpleService_get_map_value_words_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_get_map_value_words_1.name())
+  ));
   ::apache::thrift::metadata::ThriftField &module_SimpleService_get_map_value_key_2 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_get_map_value_key_2Annotations = std::move(*module_SimpleService_get_map_value_key_2.structured_annotations());
+  module_SimpleService_get_map_value_key_2.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_get_map_value_key_2.id(), 2);
   DCHECK_EQ(*module_SimpleService_get_map_value_key_2.name(), "key");
   auto module_SimpleService_get_map_value_key_2_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   module_SimpleService_get_map_value_key_2_type->writeAndGenType(*module_SimpleService_get_map_value_key_2.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_get_map_value_key_2.structured_annotations(),
+    module_SimpleService_get_map_value_key_2Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_get_map_value_key_2.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_map_length([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_map_length([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "map_length");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_map_length_items_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_map_length_items_1Annotations = std::move(*module_SimpleService_map_length_items_1.structured_annotations());
+  module_SimpleService_map_length_items_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_map_length_items_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_map_length_items_1.name(), "items");
   auto module_SimpleService_map_length_items_1_type = std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Struct<::py3::simple::SimpleStruct>>("module.SimpleStruct"));
   module_SimpleService_map_length_items_1_type->writeAndGenType(*module_SimpleService_map_length_items_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_map_length_items_1.structured_annotations(),
+    module_SimpleService_map_length_items_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_map_length_items_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_sum_map_values([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_sum_map_values([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "sum_map_values");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_sum_map_values_items_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_sum_map_values_items_1Annotations = std::move(*module_SimpleService_sum_map_values_items_1.structured_annotations());
+  module_SimpleService_sum_map_values_items_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_sum_map_values_items_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_sum_map_values_items_1.name(), "items");
   auto module_SimpleService_sum_map_values_items_1_type = std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE));
   module_SimpleService_sum_map_values_items_1_type->writeAndGenType(*module_SimpleService_sum_map_values_items_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_sum_map_values_items_1.structured_annotations(),
+    module_SimpleService_sum_map_values_items_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_sum_map_values_items_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_complex_sum_i32([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_complex_sum_i32([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "complex_sum_i32");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_complex_sum_i32_counter_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_complex_sum_i32_counter_1Annotations = std::move(*module_SimpleService_complex_sum_i32_counter_1.structured_annotations());
+  module_SimpleService_complex_sum_i32_counter_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_complex_sum_i32_counter_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_complex_sum_i32_counter_1.name(), "counter");
   auto module_SimpleService_complex_sum_i32_counter_1_type = std::make_unique<Struct<::py3::simple::ComplexStruct>>("module.ComplexStruct");
   module_SimpleService_complex_sum_i32_counter_1_type->writeAndGenType(*module_SimpleService_complex_sum_i32_counter_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_complex_sum_i32_counter_1.structured_annotations(),
+    module_SimpleService_complex_sum_i32_counter_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_complex_sum_i32_counter_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_repeat_name([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_repeat_name([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "repeat_name");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_repeat_name_counter_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_repeat_name_counter_1Annotations = std::move(*module_SimpleService_repeat_name_counter_1.structured_annotations());
+  module_SimpleService_repeat_name_counter_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_repeat_name_counter_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_repeat_name_counter_1.name(), "counter");
   auto module_SimpleService_repeat_name_counter_1_type = std::make_unique<Struct<::py3::simple::ComplexStruct>>("module.ComplexStruct");
   module_SimpleService_repeat_name_counter_1_type->writeAndGenType(*module_SimpleService_repeat_name_counter_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_repeat_name_counter_1.structured_annotations(),
+    module_SimpleService_repeat_name_counter_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_repeat_name_counter_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_struct([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_struct([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "get_struct");
   auto func_ret_type = std::make_unique<Struct<::py3::simple::SimpleStruct>>("module.SimpleStruct");
@@ -881,237 +1217,475 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   [[maybe_unused]] std::size_t argumentIndex = 0;
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_fib([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_fib([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "fib");
   auto func_ret_type = std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_fib_n_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_fib_n_1Annotations = std::move(*module_SimpleService_fib_n_1.structured_annotations());
+  module_SimpleService_fib_n_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_fib_n_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_fib_n_1.name(), "n");
   auto module_SimpleService_fib_n_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE);
   module_SimpleService_fib_n_1_type->writeAndGenType(*module_SimpleService_fib_n_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_fib_n_1.structured_annotations(),
+    module_SimpleService_fib_n_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_fib_n_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_unique_words([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_unique_words([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "unique_words");
   auto func_ret_type = std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_unique_words_words_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_unique_words_words_1Annotations = std::move(*module_SimpleService_unique_words_words_1.structured_annotations());
+  module_SimpleService_unique_words_words_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_unique_words_words_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_unique_words_words_1.name(), "words");
   auto module_SimpleService_unique_words_words_1_type = std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE));
   module_SimpleService_unique_words_words_1_type->writeAndGenType(*module_SimpleService_unique_words_words_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_unique_words_words_1.structured_annotations(),
+    module_SimpleService_unique_words_words_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_unique_words_words_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_words_count([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_words_count([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "words_count");
   auto func_ret_type = std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_words_count_words_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_words_count_words_1Annotations = std::move(*module_SimpleService_words_count_words_1.structured_annotations());
+  module_SimpleService_words_count_words_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_words_count_words_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_words_count_words_1.name(), "words");
   auto module_SimpleService_words_count_words_1_type = std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE));
   module_SimpleService_words_count_words_1_type->writeAndGenType(*module_SimpleService_words_count_words_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_words_count_words_1.structured_annotations(),
+    module_SimpleService_words_count_words_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_words_count_words_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_set_enum([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_set_enum([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "set_enum");
   auto func_ret_type = std::make_unique<Enum<::py3::simple::AnEnum>>("module.AnEnum");
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_set_enum_in_enum_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_set_enum_in_enum_1Annotations = std::move(*module_SimpleService_set_enum_in_enum_1.structured_annotations());
+  module_SimpleService_set_enum_in_enum_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_set_enum_in_enum_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_set_enum_in_enum_1.name(), "in_enum");
   auto module_SimpleService_set_enum_in_enum_1_type = std::make_unique<Enum<::py3::simple::AnEnum>>("module.AnEnum");
   module_SimpleService_set_enum_in_enum_1_type->writeAndGenType(*module_SimpleService_set_enum_in_enum_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_set_enum_in_enum_1.structured_annotations(),
+    module_SimpleService_set_enum_in_enum_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_set_enum_in_enum_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_list_of_lists([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_list_of_lists([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "list_of_lists");
   auto func_ret_type = std::make_unique<List>(std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_list_of_lists_num_lists_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_list_of_lists_num_lists_1Annotations = std::move(*module_SimpleService_list_of_lists_num_lists_1.structured_annotations());
+  module_SimpleService_list_of_lists_num_lists_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_list_of_lists_num_lists_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_list_of_lists_num_lists_1.name(), "num_lists");
   auto module_SimpleService_list_of_lists_num_lists_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE);
   module_SimpleService_list_of_lists_num_lists_1_type->writeAndGenType(*module_SimpleService_list_of_lists_num_lists_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_list_of_lists_num_lists_1.structured_annotations(),
+    module_SimpleService_list_of_lists_num_lists_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_list_of_lists_num_lists_1.name())
+  ));
   ::apache::thrift::metadata::ThriftField &module_SimpleService_list_of_lists_num_items_2 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_list_of_lists_num_items_2Annotations = std::move(*module_SimpleService_list_of_lists_num_items_2.structured_annotations());
+  module_SimpleService_list_of_lists_num_items_2.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_list_of_lists_num_items_2.id(), 2);
   DCHECK_EQ(*module_SimpleService_list_of_lists_num_items_2.name(), "num_items");
   auto module_SimpleService_list_of_lists_num_items_2_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE);
   module_SimpleService_list_of_lists_num_items_2_type->writeAndGenType(*module_SimpleService_list_of_lists_num_items_2.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_list_of_lists_num_items_2.structured_annotations(),
+    module_SimpleService_list_of_lists_num_items_2Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_list_of_lists_num_items_2.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_word_character_frequency([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_word_character_frequency([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "word_character_frequency");
   auto func_ret_type = std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_word_character_frequency_sentence_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_word_character_frequency_sentence_1Annotations = std::move(*module_SimpleService_word_character_frequency_sentence_1.structured_annotations());
+  module_SimpleService_word_character_frequency_sentence_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_word_character_frequency_sentence_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_word_character_frequency_sentence_1.name(), "sentence");
   auto module_SimpleService_word_character_frequency_sentence_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   module_SimpleService_word_character_frequency_sentence_1_type->writeAndGenType(*module_SimpleService_word_character_frequency_sentence_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_word_character_frequency_sentence_1.structured_annotations(),
+    module_SimpleService_word_character_frequency_sentence_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_word_character_frequency_sentence_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_list_of_sets([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_list_of_sets([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "list_of_sets");
   auto func_ret_type = std::make_unique<List>(std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_list_of_sets_some_words_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_list_of_sets_some_words_1Annotations = std::move(*module_SimpleService_list_of_sets_some_words_1.structured_annotations());
+  module_SimpleService_list_of_sets_some_words_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_list_of_sets_some_words_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_list_of_sets_some_words_1.name(), "some_words");
   auto module_SimpleService_list_of_sets_some_words_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   module_SimpleService_list_of_sets_some_words_1_type->writeAndGenType(*module_SimpleService_list_of_sets_some_words_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_list_of_sets_some_words_1.structured_annotations(),
+    module_SimpleService_list_of_sets_some_words_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_list_of_sets_some_words_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_nested_map_argument([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_nested_map_argument([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "nested_map_argument");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_nested_map_argument_struct_map_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_nested_map_argument_struct_map_1Annotations = std::move(*module_SimpleService_nested_map_argument_struct_map_1.structured_annotations());
+  module_SimpleService_nested_map_argument_struct_map_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_nested_map_argument_struct_map_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_nested_map_argument_struct_map_1.name(), "struct_map");
   auto module_SimpleService_nested_map_argument_struct_map_1_type = std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<List>(std::make_unique<Struct<::py3::simple::SimpleStruct>>("module.SimpleStruct")));
   module_SimpleService_nested_map_argument_struct_map_1_type->writeAndGenType(*module_SimpleService_nested_map_argument_struct_map_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_nested_map_argument_struct_map_1.structured_annotations(),
+    module_SimpleService_nested_map_argument_struct_map_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_nested_map_argument_struct_map_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_make_sentence([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_make_sentence([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "make_sentence");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_make_sentence_word_chars_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_make_sentence_word_chars_1Annotations = std::move(*module_SimpleService_make_sentence_word_chars_1.structured_annotations());
+  module_SimpleService_make_sentence_word_chars_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_make_sentence_word_chars_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_make_sentence_word_chars_1.name(), "word_chars");
   auto module_SimpleService_make_sentence_word_chars_1_type = std::make_unique<List>(std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)));
   module_SimpleService_make_sentence_word_chars_1_type->writeAndGenType(*module_SimpleService_make_sentence_word_chars_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_make_sentence_word_chars_1.structured_annotations(),
+    module_SimpleService_make_sentence_word_chars_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_make_sentence_word_chars_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_union([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_union([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "get_union");
   auto func_ret_type = std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_get_union_sets_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_get_union_sets_1Annotations = std::move(*module_SimpleService_get_union_sets_1.structured_annotations());
+  module_SimpleService_get_union_sets_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_get_union_sets_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_get_union_sets_1.name(), "sets");
   auto module_SimpleService_get_union_sets_1_type = std::make_unique<List>(std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)));
   module_SimpleService_get_union_sets_1_type->writeAndGenType(*module_SimpleService_get_union_sets_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_get_union_sets_1.structured_annotations(),
+    module_SimpleService_get_union_sets_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_get_union_sets_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_keys([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_keys([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "get_keys");
   auto func_ret_type = std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_get_keys_string_map_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_get_keys_string_map_1Annotations = std::move(*module_SimpleService_get_keys_string_map_1.structured_annotations());
+  module_SimpleService_get_keys_string_map_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_get_keys_string_map_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_get_keys_string_map_1.name(), "string_map");
   auto module_SimpleService_get_keys_string_map_1_type = std::make_unique<List>(std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)));
   module_SimpleService_get_keys_string_map_1_type->writeAndGenType(*module_SimpleService_get_keys_string_map_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_get_keys_string_map_1.structured_annotations(),
+    module_SimpleService_get_keys_string_map_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_get_keys_string_map_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_lookup_double([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_lookup_double([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "lookup_double");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_lookup_double_key_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_lookup_double_key_1Annotations = std::move(*module_SimpleService_lookup_double_key_1.structured_annotations());
+  module_SimpleService_lookup_double_key_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_lookup_double_key_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_lookup_double_key_1.name(), "key");
   auto module_SimpleService_lookup_double_key_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   module_SimpleService_lookup_double_key_1_type->writeAndGenType(*module_SimpleService_lookup_double_key_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_lookup_double_key_1.structured_annotations(),
+    module_SimpleService_lookup_double_key_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_lookup_double_key_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_retrieve_binary([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_retrieve_binary([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "retrieve_binary");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_retrieve_binary_something_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_retrieve_binary_something_1Annotations = std::move(*module_SimpleService_retrieve_binary_something_1.structured_annotations());
+  module_SimpleService_retrieve_binary_something_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_retrieve_binary_something_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_retrieve_binary_something_1.name(), "something");
   auto module_SimpleService_retrieve_binary_something_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE);
   module_SimpleService_retrieve_binary_something_1_type->writeAndGenType(*module_SimpleService_retrieve_binary_something_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_retrieve_binary_something_1.structured_annotations(),
+    module_SimpleService_retrieve_binary_something_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_retrieve_binary_something_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_contain_binary([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_contain_binary([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "contain_binary");
   auto func_ret_type = std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_contain_binary_binaries_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_contain_binary_binaries_1Annotations = std::move(*module_SimpleService_contain_binary_binaries_1.structured_annotations());
+  module_SimpleService_contain_binary_binaries_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_contain_binary_binaries_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_contain_binary_binaries_1.name(), "binaries");
   auto module_SimpleService_contain_binary_binaries_1_type = std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE));
   module_SimpleService_contain_binary_binaries_1_type->writeAndGenType(*module_SimpleService_contain_binary_binaries_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_contain_binary_binaries_1.structured_annotations(),
+    module_SimpleService_contain_binary_binaries_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_contain_binary_binaries_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_contain_enum([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_contain_enum([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "contain_enum");
   auto func_ret_type = std::make_unique<List>(std::make_unique<Enum<::py3::simple::AnEnum>>("module.AnEnum"));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_contain_enum_the_enum_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_contain_enum_the_enum_1Annotations = std::move(*module_SimpleService_contain_enum_the_enum_1.structured_annotations());
+  module_SimpleService_contain_enum_the_enum_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_contain_enum_the_enum_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_contain_enum_the_enum_1.name(), "the_enum");
   auto module_SimpleService_contain_enum_the_enum_1_type = std::make_unique<List>(std::make_unique<Enum<::py3::simple::AnEnum>>("module.AnEnum"));
   module_SimpleService_contain_enum_the_enum_1_type->writeAndGenType(*module_SimpleService_contain_enum_the_enum_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_contain_enum_the_enum_1.structured_annotations(),
+    module_SimpleService_contain_enum_the_enum_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_contain_enum_the_enum_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_binary_union_struct([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_binary_union_struct([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "get_binary_union_struct");
   auto func_ret_type = std::make_unique<Struct<::py3::simple::BinaryUnionStruct>>("module.BinaryUnionStruct");
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   [[maybe_unused]] std::size_t argumentIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_SimpleService_get_binary_union_struct_u_1 = func.arguments()[argumentIndex++];
+  [[maybe_unused]] auto module_SimpleService_get_binary_union_struct_u_1Annotations = std::move(*module_SimpleService_get_binary_union_struct_u_1.structured_annotations());
+  module_SimpleService_get_binary_union_struct_u_1.structured_annotations()->clear();
   DCHECK_EQ(*module_SimpleService_get_binary_union_struct_u_1.id(), 1);
   DCHECK_EQ(*module_SimpleService_get_binary_union_struct_u_1.name(), "u");
   auto module_SimpleService_get_binary_union_struct_u_1_type = std::make_unique<Union<::py3::simple::BinaryUnion>>("module.BinaryUnion");
   module_SimpleService_get_binary_union_struct_u_1_type->writeAndGenType(*module_SimpleService_get_binary_union_struct_u_1.type(), metadata);
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService_get_binary_union_struct_u_1.structured_annotations(),
+    module_SimpleService_get_binary_union_struct_u_1Annotations,
+    getArgumentAnnotationTypes<::py3::simple::SimpleService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SimpleService_get_binary_union_struct_u_1.name())
+  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_struct_hidden([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_struct_hidden([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "get_struct_hidden");
   auto func_ret_type = std::make_unique<Struct<::py3::simple::SimpleStruct>>("module.SimpleStruct");
@@ -1119,7 +1693,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
   [[maybe_unused]] std::size_t argumentIndex = 0;
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
   func.structured_annotations()->push_back(*cvStruct("python.Py3Hidden", {  }).cv_struct());
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::SimpleService>(schemaIndex)
+  ));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -1133,7 +1714,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_SimpleService = genServiceMetadata<::py3::simple::SimpleService>(metadata, {.genAnnotations = false});
+  ::apache::thrift::metadata::ThriftService module_SimpleService = genServiceMetadata<::py3::simple::SimpleService>(metadata, {.genAnnotations = folly::kIsDebug});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_five,
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_add_five,
@@ -1178,13 +1759,71 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_binary_union_struct,
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_struct_hidden,
   };
-  size_t index = 0;
+  static constexpr bool isPerforms [] = {
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+  };
+  size_t index = 0, schemaIndex = 0;
   for (auto& function_gen : functions) {
-    function_gen(metadata, module_SimpleService, index++);
+    while (isPerforms[schemaIndex]) {
+      // We skip interaction consturctor in metadata.thrift, but not schema.thrift
+      // To make sure we are generating the correct function, we need to keep
+      // tracking the function index in schema.thrift
+      schemaIndex++;
+      DCHECK_LT(schemaIndex, std::size(isPerforms));
+    }
+    function_gen(metadata, module_SimpleService, index++, schemaIndex++);
   }
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
+  [[maybe_unused]] auto module_SimpleServiceAnnotations = std::move(*module_SimpleService.structured_annotations());
+  module_SimpleService.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *module_SimpleService.structured_annotations(),
+    module_SimpleServiceAnnotations,
+    getAnnotationTypes<::py3::simple::SimpleService>()
+  ));
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.SimpleService", std::move(module_SimpleService));
   context.service_name() = "module.SimpleService";
@@ -1193,7 +1832,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   context.module() = std::move(module);
   return &context;
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedService>>::gen_get_six([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedService>>::gen_get_six([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "get_six");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
@@ -1201,6 +1840,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedServ
   [[maybe_unused]] std::size_t argumentIndex = 0;
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::DerivedService>(schemaIndex)
+  ));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -1214,19 +1860,36 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedServ
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_DerivedService = genServiceMetadata<::py3::simple::DerivedService>(metadata, {.genAnnotations = false});
+  ::apache::thrift::metadata::ThriftService module_DerivedService = genServiceMetadata<::py3::simple::DerivedService>(metadata, {.genAnnotations = folly::kIsDebug});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedService>>::gen_get_six,
   };
-  size_t index = 0;
+  static constexpr bool isPerforms [] = {
+    false,
+  };
+  size_t index = 0, schemaIndex = 0;
   for (auto& function_gen : functions) {
-    function_gen(metadata, module_DerivedService, index++);
+    while (isPerforms[schemaIndex]) {
+      // We skip interaction consturctor in metadata.thrift, but not schema.thrift
+      // To make sure we are generating the correct function, we need to keep
+      // tracking the function index in schema.thrift
+      schemaIndex++;
+      DCHECK_LT(schemaIndex, std::size(isPerforms));
+    }
+    function_gen(metadata, module_DerivedService, index++, schemaIndex++);
   }
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
   DCHECK_EQ(*module_DerivedService.parent(), "module.SimpleService");
   ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::genRecurse(metadata, services);
+  [[maybe_unused]] auto module_DerivedServiceAnnotations = std::move(*module_DerivedService.structured_annotations());
+  module_DerivedService.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *module_DerivedService.structured_annotations(),
+    module_DerivedServiceAnnotations,
+    getAnnotationTypes<::py3::simple::DerivedService>()
+  ));
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.DerivedService", std::move(module_DerivedService));
   context.service_name() = "module.DerivedService";
@@ -1235,7 +1898,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   context.module() = std::move(module);
   return &context;
 }
-void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedService>>::gen_get_seven([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index) {
+void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedService>>::gen_get_seven([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
   DCHECK_EQ(*func.name() , "get_seven");
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
@@ -1243,6 +1906,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedSe
   [[maybe_unused]] std::size_t argumentIndex = 0;
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
+  [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
+  func.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *func.structured_annotations(),
+    newAnnotations,
+    getFunctionAnnotationTypes<::py3::simple::RederivedService>(schemaIndex)
+  ));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -1256,19 +1926,36 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedSe
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-  ::apache::thrift::metadata::ThriftService module_RederivedService = genServiceMetadata<::py3::simple::RederivedService>(metadata, {.genAnnotations = false});
+  ::apache::thrift::metadata::ThriftService module_RederivedService = genServiceMetadata<::py3::simple::RederivedService>(metadata, {.genAnnotations = folly::kIsDebug});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedService>>::gen_get_seven,
   };
-  size_t index = 0;
+  static constexpr bool isPerforms [] = {
+    false,
+  };
+  size_t index = 0, schemaIndex = 0;
   for (auto& function_gen : functions) {
-    function_gen(metadata, module_RederivedService, index++);
+    while (isPerforms[schemaIndex]) {
+      // We skip interaction consturctor in metadata.thrift, but not schema.thrift
+      // To make sure we are generating the correct function, we need to keep
+      // tracking the function index in schema.thrift
+      schemaIndex++;
+      DCHECK_LT(schemaIndex, std::size(isPerforms));
+    }
+    function_gen(metadata, module_RederivedService, index++, schemaIndex++);
   }
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
   DCHECK_EQ(*module_RederivedService.parent(), "module.DerivedService");
   ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedService>>::genRecurse(metadata, services);
+  [[maybe_unused]] auto module_RederivedServiceAnnotations = std::move(*module_RederivedService.structured_annotations());
+  module_RederivedService.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *module_RederivedService.structured_annotations(),
+    module_RederivedServiceAnnotations,
+    getAnnotationTypes<::py3::simple::RederivedService>()
+  ));
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.RederivedService", std::move(module_RederivedService));
   context.service_name() = "module.RederivedService";

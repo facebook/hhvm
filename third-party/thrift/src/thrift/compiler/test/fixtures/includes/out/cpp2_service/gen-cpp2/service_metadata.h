@@ -32,8 +32,8 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>> {
   template <typename T>
   friend class ServiceMetadata;
 
-  static void gen_query(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
-  static void gen_has_arg_docs(ThriftMetadata& metadata, ThriftService& context, std::size_t index);
+  static void gen_query(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
+  static void gen_has_arg_docs(ThriftMetadata& metadata, ThriftService& context, std::size_t index, std::size_t schemaIndex);
 };
 } // namespace md
 } // namespace detail

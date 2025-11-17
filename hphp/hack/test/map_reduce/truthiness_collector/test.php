@@ -4,6 +4,7 @@ function foo(bool $bool, int $int): void {
   if ($bool) {
   }
   if ($int) {
+  } else if ($int) {
   }
   while ($int) {
   }

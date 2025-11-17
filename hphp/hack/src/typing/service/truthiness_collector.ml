@@ -59,40 +59,48 @@ let get_types
       ]
     in
     object
-      inherit [Internal.t_info list] Tast_visitor.reduce
+      inherit [Internal.t_info list] Tast_visitor.reduce as super
 
       method zero = []
 
       method plus = ( @ )
 
-      method! on_If env cond _then_block _else_block = for_cond env cond "If"
+      method! on_If env cond then_block else_block =
+        for_cond env cond "If" @ super#on_If env cond then_block else_block
 
-      method! on_While env cond _block = for_cond env cond "While"
+      method! on_While env cond block =
+        for_cond env cond "While" @ super#on_While env cond block
 
-      method! on_Do env _block cond = for_cond env cond "Do"
+      method! on_Do env block cond =
+        for_cond env cond "Do" @ super#on_Do env block cond
 
-      method! on_For env _init cond _incrs _block =
-        match cond with
+      method! on_For env init cond incrs block =
+        (match cond with
         | Some cond -> for_cond env cond "For"
-        | None -> []
+        | None -> [])
+        @ super#on_For env init cond incrs block
 
-      method! on_Binop env { bop; lhs; rhs } =
-        match bop with
+      method! on_Binop env ({ bop; lhs; rhs } as parts) =
+        (match bop with
         | Ampamp -> for_cond env lhs "&&" @ for_cond env rhs "&&"
         | Barbar -> for_cond env lhs "||" @ for_cond env rhs "||"
-        | _ -> []
+        | _ -> [])
+        @ super#on_Binop env parts
 
       method! on_Unop env uop expr =
-        match uop with
+        (match uop with
         | Ast_defs.Unot -> for_cond env expr "!"
-        | _ -> []
+        | _ -> [])
+        @ super#on_Unop env uop expr
 
-      method! on_Eif env cond _consq _alt = for_cond env cond "Ternary"
+      method! on_Eif env cond consq alt =
+        for_cond env cond "Ternary" @ super#on_Eif env cond consq alt
 
       method! on_Cast env hint e =
-        match hint with
+        (match hint with
         | (_pos, Hprim Tbool) -> for_cond env e "Cast"
-        | _ -> []
+        | _ -> [])
+        @ super#on_Cast env hint e
     end
   in
   let get_map tast : Internal.t_info SMap.t =

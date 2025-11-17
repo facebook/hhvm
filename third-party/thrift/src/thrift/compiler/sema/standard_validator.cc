@@ -276,7 +276,7 @@ class adapter_or_wrapper_checker {
       }
       type = field->type().get_type();
     } else if (const auto* typdef = dynamic_cast<const t_typedef*>(&node)) {
-      type = typdef->get_type();
+      type = typdef->type().get_type();
     } else {
       return;
     }
@@ -285,15 +285,15 @@ class adapter_or_wrapper_checker {
         type->has_structured_annotation(structured_wrapper_annotation);
     std::string typedef_name = type->name();
     while (!has_wrapper) {
-      if (const auto* inner_typedf = dynamic_cast<const t_typedef*>(type)) {
+      if (const auto* inner_typedf = type->try_as<t_typedef>()) {
         has_wrapper = inner_typedf->has_structured_annotation(
             structured_wrapper_annotation);
         typedef_name = inner_typedf->name();
-        type = inner_typedf->get_type();
+        type = inner_typedf->type().get_type();
       } else if (type->is<t_container>()) {
-        if (const auto* map = dynamic_cast<const t_map*>(type)) {
+        if (const auto* map = type->try_as<t_map>()) {
           type = &map->val_type().deref();
-        } else if (const auto* list = dynamic_cast<const t_list*>(type)) {
+        } else if (const auto* list = type->try_as<t_list>()) {
           type = list->elem_type().get_type();
         } else {
           break;

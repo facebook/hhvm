@@ -643,7 +643,7 @@ void lower_deprecated_annotations(
           return;
         }
 
-        auto* inner_type = const_cast<t_type*>(type->get_type());
+        auto* inner_type = const_cast<t_type*>(type->type().get_type());
         if (inner_type->is<t_typedef>()) {
           ctx.error("Cannot use {} on typedefs of typedefs", annot);
         } else if (
@@ -854,12 +854,13 @@ bool sema::check_circular_typedef(
   std::unordered_set<const t_type*> checked;
   for (auto& td :
        bundle.root_program()->global_scope()->placeholder_typedefs()) {
-    if (checked.count(td.get_type())) {
+    if (checked.contains(td.type().get_type())) {
       continue;
     }
     std::unordered_set<const t_type*> visited;
     std::vector<const t_type*> chain;
-    if (nullptr != t_typedef::find_type_if(td.get_type(), [&](const t_type* t) {
+    if (nullptr !=
+        t_typedef::find_type_if(td.type().get_type(), [&](const t_type* t) {
           // Find the first typedef which insertion failed
           checked.insert(t);
           chain.push_back(t);

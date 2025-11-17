@@ -113,7 +113,7 @@ void add_explicit_include_validators(
 
   // Typedefs: underlying type
   validator.add_typedef_visitor([](sema_context& ctx, const t_typedef& td) {
-    visit_type(ctx, td, *td.get_type());
+    visit_type(ctx, td, *td.type().get_type());
   });
 
   // Functions: return types, exceptions, stream/sink types

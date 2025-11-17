@@ -57,7 +57,7 @@ class t_typedef : public t_type {
         return type;
       }
       if (const t_typedef* as_typedef = type->try_as<t_typedef>()) {
-        type = as_typedef->get_type();
+        type = as_typedef->type().get_type();
       } else {
         return nullptr;
       }
@@ -96,11 +96,6 @@ class t_typedef : public t_type {
 
  private:
   bool unnamed_{false};
-
-  // TODO(T227540797): Remove everything below here, as it is just provided for
-  // backwards compatibility.
- public:
-  const t_type* get_type() const { return type_.get_type(); }
 };
 
 // A placeholder for a type that can't be resolved at parse time.

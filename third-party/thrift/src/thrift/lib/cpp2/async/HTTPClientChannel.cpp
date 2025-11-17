@@ -24,6 +24,7 @@
 #include <proxygen/lib/http/HTTPMethod.h>
 #include <proxygen/lib/http/codec/HTTP1xCodec.h>
 #include <proxygen/lib/http/codec/HTTP2Codec.h>
+#include <proxygen/lib/http/session/HTTPTransaction.h>
 #include <thrift/lib/cpp/protocol/TProtocolTypes.h>
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
 #include <wangle/ssl/SSLContextConfig.h>
@@ -177,6 +178,187 @@ void HTTPClientChannel::sendRequestResponse(
   sendRequest_(
       rpcOptions, false, std::move(buf), std::move(header), std::move(cb));
 }
+
+namespace {
+class HTTPTransactionCallback
+    : public MessageChannel::SendCallback,
+      public proxygen::HTTPTransactionHandler,
+      public proxygen::HTTPTransaction::TransportCallback {
+ public:
+  HTTPTransactionCallback(bool oneway, RequestClientCallback::Ptr cb)
+      : oneway_(oneway), cb_(std::move(cb)), txn_(nullptr) {}
+
+  ~HTTPTransactionCallback() override {
+    if (txn_) {
+      txn_->setHandler(nullptr);
+      txn_->setTransportCallback(nullptr);
+    }
+  }
+
+  // MessageChannel::SendCallback methods
+
+  void sendQueued() override {}
+
+  void messageSent() override {
+    if (cb_ && oneway_) {
+      cb_.release()->onResponse({});
+    }
+  }
+
+  void messageSendError(folly::exception_wrapper&& ex) override {
+    requestError(std::move(ex));
+  }
+
+  // end MessageChannel::SendCallback methods
+
+  // proxygen::HTTPTransactionHandler methods
+
+  void setTransaction(proxygen::HTTPTransaction* txn) noexcept override {
+    txn_ = txn;
+    // If Transaction is created through HTTPSession::newTransaction,
+    // handler is already set, thus no need for txn_->setHandler(this);
+    txn_->setTransportCallback(this);
+  }
+
+  void detachTransaction() noexcept override {
+    VLOG(5) << "HTTPTransaction on memory " << this << " is detached.";
+    delete this;
+  }
+
+  void onHeadersComplete(
+      std::unique_ptr<proxygen::HTTPMessage> msg) noexcept override {
+    msg_ = std::move(msg);
+  }
+
+  void onBody(std::unique_ptr<folly::IOBuf> body) noexcept override {
+    if (!body_) {
+      body_ = std::make_unique<folly::IOBufQueue>();
+    }
+    body_->append(std::move(body));
+  }
+
+  void onChunkHeader(size_t /* length */) noexcept override {
+    // HTTP/1.1 function, do not need attention here
+  }
+
+  void onChunkComplete() noexcept override {
+    // HTTP/1.1 function, do not need attention here
+  }
+
+  void onTrailers(
+      std::unique_ptr<proxygen::HTTPHeaders> trailers) noexcept override {
+    trailers_ = std::move(trailers);
+  }
+
+  void onEOM() noexcept override {
+    if (!oneway_ && cb_) {
+      if (!body_) {
+        requestError(
+            folly::make_exception_wrapper<transport::TTransportException>(
+                fmt::format(
+                    "Empty HTTP response, {}",
+                    (msg_ ? folly::to<std::string>(
+                                msg_->getStatusCode(),
+                                ", ",
+                                msg_->getStatusMessage())
+                          : "Empty Header"))));
+        return;
+      }
+
+      auto header = std::make_unique<transport::THeader>();
+      header->setClientType(THRIFT_HTTP_CLIENT_TYPE);
+      apache::thrift::transport::THeader::StringToStringMap readHeaders;
+      msg_->getHeaders().forEach(
+          [&readHeaders](const std::string& key, const std::string& val) {
+            readHeaders[key] = val;
+          });
+      header->setReadHeaders(std::move(readHeaders));
+      auto body = body_->move();
+      body_.reset();
+      cb_.release()->onResponse(
+          ClientReceiveState(-1, std::move(body), std::move(header), nullptr));
+    }
+  }
+
+  void onUpgrade(proxygen::UpgradeProtocol /*protocol*/) noexcept override {
+    // If code comes here, it is seriously wrong
+    // TODO (geniusye) destroy the channel here
+  }
+
+  void onError(const proxygen::HTTPException& error) noexcept override {
+    if (!oneway_) {
+      if (error.getProxygenError() == proxygen::ProxygenError::kErrorTimeout) {
+        TTransportException ex(TTransportException::TIMED_OUT, "Timed Out");
+        ex.setOptions(TTransportException::CHANNEL_IS_VALID);
+        requestError(
+            folly::make_exception_wrapper<TTransportException>(std::move(ex)));
+      } else {
+        requestError(
+            folly::make_exception_wrapper<transport::TTransportException>(
+                error.what()));
+      }
+    }
+  }
+
+  void onEgressPaused() noexcept override {
+    // we could notify servicerouter to throttle on this channel
+    // it is okay not to throttle too,
+    // it won't immediately causing any problem
+  }
+
+  void onEgressResumed() noexcept override {
+    // we could notify servicerouter to stop throttle on this channel
+    // it is okay not to throttle too,
+    // it won't immediately causing any problem
+  }
+
+  void onPushedTransaction(
+      proxygen::HTTPTransaction* /*txn*/) noexcept override {}
+
+  // end proxygen::HTTPTransactionHandler methods
+
+  // proxygen::HTTPTransaction::TransportCallback methods
+
+  // most of the methods in TransportCallback is not interesting to us,
+  // thus, we don't have to handle them, except the one that notifies the
+  // fact the request is sent.
+
+  void firstHeaderByteFlushed() noexcept override {}
+  void firstByteFlushed() noexcept override {}
+
+  void lastByteFlushed() noexcept override {
+    if (cb_ && oneway_) {
+      cb_.release()->onResponse({});
+    }
+  }
+
+  void lastByteAcked(std::chrono::milliseconds /*latency*/) noexcept override {}
+  void headerBytesGenerated(
+      proxygen::HTTPHeaderSize& /*size*/) noexcept override {}
+  void headerBytesReceived(
+      const proxygen::HTTPHeaderSize& /*size*/) noexcept override {}
+  void bodyBytesGenerated(size_t /*nbytes*/) noexcept override {}
+  void bodyBytesReceived(size_t /*size*/) noexcept override {}
+
+  // end proxygen::HTTPTransaction::TransportCallback methods
+
+  void requestError(folly::exception_wrapper ex) {
+    if (cb_) {
+      cb_.release()->onResponseError(std::move(ex));
+    }
+  }
+
+ private:
+  bool oneway_;
+
+  RequestClientCallback::Ptr cb_;
+
+  proxygen::HTTPTransaction* txn_;
+  std::unique_ptr<proxygen::HTTPMessage> msg_;
+  std::unique_ptr<folly::IOBufQueue> body_;
+  std::unique_ptr<proxygen::HTTPHeaders> trailers_;
+};
+} // namespace
 
 void HTTPClientChannel::sendRequest_(
     const RpcOptions& rpcOptions,
@@ -348,129 +530,5 @@ void HTTPClientChannel::setFlowControl(
 }
 
 // HTTPTransactionCallback methods
-
-HTTPClientChannel::HTTPTransactionCallback::HTTPTransactionCallback(
-    bool oneway, RequestClientCallback::Ptr cb)
-    : oneway_(oneway), cb_(std::move(cb)), txn_(nullptr) {}
-
-HTTPClientChannel::HTTPTransactionCallback::~HTTPTransactionCallback() {
-  if (txn_) {
-    txn_->setHandler(nullptr);
-    txn_->setTransportCallback(nullptr);
-  }
-}
-
-// MessageChannel::SendCallback methods
-
-void HTTPClientChannel::HTTPTransactionCallback::messageSent() {
-  if (cb_ && oneway_) {
-    cb_.release()->onResponse({});
-  }
-}
-
-void HTTPClientChannel::HTTPTransactionCallback::messageSendError(
-    folly::exception_wrapper&& ex) {
-  requestError(std::move(ex));
-}
-
-void HTTPClientChannel::HTTPTransactionCallback::requestError(
-    folly::exception_wrapper ex) {
-  if (cb_) {
-    cb_.release()->onResponseError(std::move(ex));
-  }
-}
-
-// end MessageChannel::SendCallback methods
-
-// proxygen::HTTPTransactionHandler methods
-
-void HTTPClientChannel::HTTPTransactionCallback::setTransaction(
-    proxygen::HTTPTransaction* txn) noexcept {
-  txn_ = txn;
-  // If Transaction is created through HTTPSession::newTransaction,
-  // handler is already set, thus no need for txn_->setHandler(this);
-  txn_->setTransportCallback(this);
-}
-
-void HTTPClientChannel::HTTPTransactionCallback::detachTransaction() noexcept {
-  VLOG(5) << "HTTPTransaction on memory " << this << " is detached.";
-  delete this;
-}
-
-void HTTPClientChannel::HTTPTransactionCallback::onHeadersComplete(
-    std::unique_ptr<proxygen::HTTPMessage> msg) noexcept {
-  msg_ = std::move(msg);
-}
-
-void HTTPClientChannel::HTTPTransactionCallback::onBody(
-    std::unique_ptr<folly::IOBuf> body) noexcept {
-  if (!body_) {
-    body_ = std::make_unique<folly::IOBufQueue>();
-  }
-  body_->append(std::move(body));
-}
-
-void HTTPClientChannel::HTTPTransactionCallback::onTrailers(
-    std::unique_ptr<proxygen::HTTPHeaders> trailers) noexcept {
-  trailers_ = std::move(trailers);
-}
-
-void HTTPClientChannel::HTTPTransactionCallback::onEOM() noexcept {
-  if (!oneway_ && cb_) {
-    if (!body_) {
-      requestError(
-          folly::make_exception_wrapper<transport::TTransportException>(
-              fmt::format(
-                  "Empty HTTP response, {}",
-                  (msg_ ? folly::to<std::string>(
-                              msg_->getStatusCode(),
-                              ", ",
-                              msg_->getStatusMessage())
-                        : "Empty Header"))));
-      return;
-    }
-
-    auto header = std::make_unique<transport::THeader>();
-    header->setClientType(THRIFT_HTTP_CLIENT_TYPE);
-    apache::thrift::transport::THeader::StringToStringMap readHeaders;
-    msg_->getHeaders().forEach(
-        [&readHeaders](const std::string& key, const std::string& val) {
-          readHeaders[key] = val;
-        });
-    header->setReadHeaders(std::move(readHeaders));
-    auto body = body_->move();
-    body_.reset();
-    cb_.release()->onResponse(
-        ClientReceiveState(-1, std::move(body), std::move(header), nullptr));
-  }
-}
-
-void HTTPClientChannel::HTTPTransactionCallback::onError(
-    const proxygen::HTTPException& error) noexcept {
-  if (!oneway_) {
-    if (error.getProxygenError() == proxygen::ProxygenError::kErrorTimeout) {
-      TTransportException ex(TTransportException::TIMED_OUT, "Timed Out");
-      ex.setOptions(TTransportException::CHANNEL_IS_VALID);
-      requestError(
-          folly::make_exception_wrapper<TTransportException>(std::move(ex)));
-    } else {
-      requestError(
-          folly::make_exception_wrapper<transport::TTransportException>(
-              error.what()));
-    }
-  }
-}
-
-// end proxygen::HTTPTransactionHandler methods
-
-// proxygen::HTTPTransaction::TransportCallback methods
-
-void HTTPClientChannel::HTTPTransactionCallback::lastByteFlushed() noexcept {
-  if (cb_ && oneway_) {
-    cb_.release()->onResponse({});
-  }
-}
-
-// end proxygen::HTTPTransaction::TransportCallback methods
 
 } // namespace apache::thrift

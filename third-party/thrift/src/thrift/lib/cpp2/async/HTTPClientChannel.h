@@ -22,7 +22,6 @@
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/Request.h>
-#include <proxygen/lib/http/session/HTTPTransaction.h>
 #include <proxygen/lib/http/session/HTTPUpstreamSession.h>
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
@@ -176,110 +175,6 @@ class HTTPClientChannel : public ClientChannel,
   ~HTTPClientChannel() override;
 
  private:
-  class HTTPTransactionCallback
-      : public MessageChannel::SendCallback,
-        public proxygen::HTTPTransactionHandler,
-        public proxygen::HTTPTransaction::TransportCallback {
-   public:
-    HTTPTransactionCallback(bool oneway, RequestClientCallback::Ptr cb);
-
-    ~HTTPTransactionCallback() override;
-
-    // MessageChannel::SendCallback methods
-
-    void sendQueued() override {}
-
-    void messageSent() override;
-
-    void messageSendError(folly::exception_wrapper&& ex) override;
-
-    // end MessageChannel::SendCallback methods
-
-    // proxygen::HTTPTransactionHandler methods
-
-    void setTransaction(proxygen::HTTPTransaction* txn) noexcept override;
-
-    void detachTransaction() noexcept override;
-
-    void onHeadersComplete(
-        std::unique_ptr<proxygen::HTTPMessage> msg) noexcept override;
-
-    void onBody(std::unique_ptr<folly::IOBuf> body) noexcept override;
-
-    void onChunkHeader(size_t /* length */) noexcept override {
-      // HTTP/1.1 function, do not need attention here
-    }
-
-    void onChunkComplete() noexcept override {
-      // HTTP/1.1 function, do not need attention here
-    }
-
-    void onTrailers(
-        std::unique_ptr<proxygen::HTTPHeaders> trailers) noexcept override;
-
-    void onEOM() noexcept override;
-
-    void onUpgrade(proxygen::UpgradeProtocol /*protocol*/) noexcept override {
-      // If code comes here, it is seriously wrong
-      // TODO (geniusye) destroy the channel here
-    }
-
-    void onError(const proxygen::HTTPException& error) noexcept override;
-
-    void onEgressPaused() noexcept override {
-      // we could notify servicerouter to throttle on this channel
-      // it is okay not to throttle too,
-      // it won't immediately causing any problem
-    }
-
-    void onEgressResumed() noexcept override {
-      // we could notify servicerouter to stop throttle on this channel
-      // it is okay not to throttle too,
-      // it won't immediately causing any problem
-    }
-
-    void onPushedTransaction(
-        proxygen::HTTPTransaction* /*txn*/) noexcept override {}
-
-    // end proxygen::HTTPTransactionHandler methods
-
-    // proxygen::HTTPTransaction::TransportCallback methods
-
-    // most of the methods in TransportCallback is not interesting to us,
-    // thus, we don't have to handle them, except the one that notifies the
-    // fact the request is sent.
-
-    void firstHeaderByteFlushed() noexcept override {}
-    void firstByteFlushed() noexcept override {}
-
-    void lastByteFlushed() noexcept override;
-
-    void lastByteAcked(
-        std::chrono::milliseconds /*latency*/) noexcept override {}
-    void headerBytesGenerated(
-        proxygen::HTTPHeaderSize& /*size*/) noexcept override {}
-    void headerBytesReceived(
-        const proxygen::HTTPHeaderSize& /*size*/) noexcept override {}
-    void bodyBytesGenerated(size_t /*nbytes*/) noexcept override {}
-    void bodyBytesReceived(size_t /*size*/) noexcept override {}
-
-    // end proxygen::HTTPTransaction::TransportCallback methods
-
-    void requestError(folly::exception_wrapper ex);
-
-    proxygen::HTTPTransaction* getTransaction() noexcept { return txn_; }
-
-   private:
-    bool oneway_;
-
-    RequestClientCallback::Ptr cb_;
-
-    proxygen::HTTPTransaction* txn_;
-    std::unique_ptr<proxygen::HTTPMessage> msg_;
-    std::unique_ptr<folly::IOBufQueue> body_;
-    std::unique_ptr<proxygen::HTTPHeaders> trailers_;
-  };
-
   void setHeaders(
       proxygen::HTTPHeaders& dstHeaders,
       const transport::THeader::StringToStringMap& srcHeaders);

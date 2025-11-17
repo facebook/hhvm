@@ -45,10 +45,10 @@ ArrayData* addToTypeReifiedGenericsTable(
     ne->setCachedReifiedGenerics(tsList);
     return tsList;
   }
-  // Same key should never result in different values.
+  // Same key should never result in different values modulo key ordering.
   // If this assertion fires, there's a high chance that two different type
   // structure mangle to the same name and they should not.
-  assert_flog(tsList->same(generics),
+  assert_flog(ArrayData::Equal(tsList, generics),
               "reified ts mismatch\nname: {}\ntsList: {}\ngenerics: {}\n",
               name,
               staticArrayStreamer(tsList),

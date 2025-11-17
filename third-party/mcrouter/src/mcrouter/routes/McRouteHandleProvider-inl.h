@@ -600,6 +600,7 @@ McRouteHandleProvider<RouterInfo>::createSRRoute(
       refillJson["service_name"] = *jRefillFromTier;
       refillJson["type"] = "SRRoute";
       refillJson["asynclog"] = false;
+      refillJson["tao_status_from_refill"] = true;
       if (auto jsplits = json.get_ptr("shard_splits")) {
         refillJson["shard_splits"] = *jsplits;
       }

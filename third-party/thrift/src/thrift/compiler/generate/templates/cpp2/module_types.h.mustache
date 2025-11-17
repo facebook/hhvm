@@ -230,7 +230,7 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
 {{^struct:cpp_noncomparable}}
 
   bool operator==(const {{struct:cpp_underlying_name}}&) const;
-  bool operator<(const {{struct:cpp_underlying_name}}&) const;
+  bool operator<(const {{struct:cpp_underlying_name}}&) const{{#struct:cpp_nonorderable?}} = delete{{/struct:cpp_nonorderable?}};
 {{/struct:cpp_noncomparable}}
 {{> module_types_h/union_setters}}
 
@@ -341,7 +341,7 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
 {{^struct:cpp_noncomparable}}
 
   bool operator==(const {{struct:cpp_underlying_name}}&) const;
-  bool operator<(const {{struct:cpp_underlying_name}}&) const;
+  bool operator<(const {{struct:cpp_underlying_name}}&) const{{#struct:cpp_nonorderable?}} = delete{{/struct:cpp_nonorderable?}};
 {{/struct:cpp_noncomparable}}
 {{#struct:fields?}}
 {{> module_types_h/field_ref}}

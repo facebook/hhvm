@@ -48,7 +48,7 @@ class ThriftEnumWrapper(int):
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'RefType', 'EnumUnderlyingType', 'Name', 'Type', 'Ref', 'Lazy', 'DisableLazyChecksum', 'Adapter', 'PackIsset', 'MinimizePadding', 'ScopedEnumAsUnionType', 'FieldInterceptor', 'UseOpEncode', 'EnumType', 'Frozen2Exclude', 'Frozen2RequiresCompleteContainerParams', 'ProcessInEbThreadUnsafe', 'UseCursorSerialization', 'GenerateDeprecatedHeaderClientMethods', 'AllowLegacyNonOptionalRef', 'DeprecatedTerseWrite', 'AllowLegacyDeprecatedTerseWritesRef', 'EnableCustomTypeOrdering', 'GenerateServiceMethodDecorator']
+__all__ = ['UTF8STRINGS', 'RefType', 'EnumUnderlyingType', 'Name', 'Type', 'Ref', 'Lazy', 'DisableLazyChecksum', 'Adapter', 'PackIsset', 'MinimizePadding', 'ScopedEnumAsUnionType', 'FieldInterceptor', 'UseOpEncode', 'EnumType', 'Frozen2Exclude', 'Frozen2RequiresCompleteContainerParams', 'ProcessInEbThreadUnsafe', 'UseCursorSerialization', 'GenerateDeprecatedHeaderClientMethods', 'AllowLegacyNonOptionalRef', 'DeprecatedTerseWrite', 'AllowLegacyDeprecatedTerseWritesRef', 'EnableCustomTypeOrdering', 'GenerateServiceMethodDecorator', 'NonOrderable']
 
 class RefType:
   r"""
@@ -2136,7 +2136,7 @@ class EnableCustomTypeOrdering:
   r"""
   If there are custom types in thrift structure (e.g., `std::unordered_map` field),
   We won't define `operator<` automatically (unless URI exists, but that's about
-  to change). Note that `operator<` is always declared.
+  to change). Note that `operator<` is always declared, unless `@cpp.NonOrderable` is used.
   This annotation ensures the `operator<` is always defined. For types that
   don't have `operator<`, such as `std::unordered_map`, we will convert it to
   a sorted `std::vector<pair<K*, V*>>` to do the comparison.
@@ -2296,6 +2296,93 @@ class GenerateServiceMethodDecorator:
     import thrift.py3.converter
     py3_types = importlib.import_module("facebook.thrift.annotation.cpp.types")
     return thrift.py3.converter.to_py3_struct(py3_types.GenerateServiceMethodDecorator, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class NonOrderable:
+  r"""
+  Marks a structured type as non-orderable, marking `operator<` as deleted.
+  This is useful when types should never be ordered. By default, `operator<` is
+  always declared, but depending on whether or not the type's shape is considered
+  orderable, it may or may not be defined. See `EnableCustomTypeOrdering` for more
+  details.
+  Note: The unstructured `cpp_noncomparable` annotation has priority over this one &
+  will cause `operator==` && `operator<` to *not* be declared or defined.
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('NonOrderable')
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+    )
+
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.annotation.cpp.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.NonOrderable, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.cpp.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.NonOrderable, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.annotation.cpp.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.NonOrderable, self)
 
   def _to_py_deprecated(self):
     return self
@@ -2618,6 +2705,15 @@ GenerateServiceMethodDecorator.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 GenerateServiceMethodDecorator.thrift_struct_annotations = {
 }
 GenerateServiceMethodDecorator.thrift_field_annotations = {
+}
+
+all_structs.append(NonOrderable)
+NonOrderable.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
+
+NonOrderable.thrift_struct_annotations = {
+}
+NonOrderable.thrift_field_annotations = {
 }
 
 fix_spec(all_structs)

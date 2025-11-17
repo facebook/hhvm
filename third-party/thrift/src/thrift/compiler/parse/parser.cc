@@ -193,9 +193,7 @@ class parser {
     try_consume_token(';');
   }
 
-  // package: one of the following:
-  // attributes "package" string_literal [";"]
-  // attributes "package" ";"
+  // package: attributes "package" string_literal [";"]
   void parse_package(source_location loc, std::unique_ptr<attributes> attrs) {
     assert(token_.kind == tok::kw_package);
     auto range = range_tracker(loc, end_);
@@ -216,8 +214,6 @@ class parser {
       default:
         report_expected("string literal");
     }
-
-    // NOTE: `name` can be empty (if explicitly specified via `package;`)
     actions_.on_package(range, std::move(attrs), name);
   }
 

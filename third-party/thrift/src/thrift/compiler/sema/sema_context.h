@@ -159,15 +159,6 @@ struct sema_params {
 
   // Action to take on files without a package.
   validation_level missing_package = validation_level::warn;
-
-  // Action to take on types (struct, union, exception, enum) missing Thrift
-  // URIs (without the annotation that explicitly allows it, i.e.
-  // @thrift.AllowLegacyMissingUris).
-  validation_level missing_uris = validation_level::none;
-
-  // Action to take on unnecessary uses of the @thrift.AllowLegacyMissingUris
-  // annotation.
-  validation_level unnecessary_allow_missing_uris = validation_level::error;
 };
 
 // An AST visitor context for semantic analysis. It combines diagnostics

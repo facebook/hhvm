@@ -1620,191 +1620,6 @@ TEST(CompilerTest, thrift_uri_uniqueness) {
   check_compile(name_contents_map, "main.thrift");
 }
 
-/**
- * Tests the application of @thrift.AllowLegacyMissingUris on the individual
- * type definitions.
- */
-TEST(CompilerTest, missing_uris_annotated_types) {
-  check_compile(
-      R"(
-    include "thrift/annotation/thrift.thrift"
-
-    package;
-    # expected-warning@-1: Thrift file should have a (non-empty) package. Packages will soon be required, at which point missing packages will trigger a Thrift compiler error. For more details, see https://fburl.com/thrift-uri-add-package
-
-    // Valid: struct with URI
-    @thrift.Uri{value = "facebook.com/thrift/test/ValidStruct"}
-    struct ValidStruct { }
-
-    // Valid: struct without URI but with allow annotation
-    @thrift.AllowLegacyMissingUris
-    struct LegacyStruct { }
-
-    // Invalid: struct without URI and without allow annotation
-    struct InvalidStruct { }
-    # expected-error@-1: Definition `InvalidStruct` requires a URI: add a non-empty package to the file, or annotate the type with @thrift.Uri. For more details, see https://fburl.com/thrift-uri-add-package
-
-    // Invalid: struct with URI and with allow annotation (conflicting)
-    @thrift.Uri{value = "facebook.com/thrift/test/ConflictStruct"}
-    @thrift.AllowLegacyMissingUris
-    struct ConflictStruct { }
-    # expected-error@-3: Unnecessary use of @thrift.AllowLegacyMissingUris: `ConflictStruct` has a (non-empty) URI: facebook.com/thrift/test/ConflictStruct
-
-    // Valid: union with URI
-    @thrift.Uri{value = "facebook.com/thrift/test/ValidUnion"}
-    union ValidUnion { }
-
-    // Invalid: union without URI and without allow annotation
-    union InvalidUnion { }
-    # expected-error@-1: Definition `InvalidUnion` requires a URI: add a non-empty package to the file, or annotate the type with @thrift.Uri. For more details, see https://fburl.com/thrift-uri-add-package
-
-    // Valid: exception with URI
-    @thrift.Uri{value = "facebook.com/thrift/test/ValidException"}
-    exception ValidException { }
-
-    // Invalid: exception without URI and without allow annotation
-    exception InvalidException { }
-    # expected-error@-1: Definition `InvalidException` requires a URI: add a non-empty package to the file, or annotate the type with @thrift.Uri. For more details, see https://fburl.com/thrift-uri-add-package
-
-    // Valid: enum with URI
-    @thrift.Uri{value = "facebook.com/thrift/test/ValidEnum"}
-    enum ValidEnum { }
-
-    // Invalid: enum without URI and without allow annotation
-    enum InvalidEnum { }
-    # expected-error@-1: Definition `InvalidEnum` requires a URI: add a non-empty package to the file, or annotate the type with @thrift.Uri. For more details, see https://fburl.com/thrift-uri-add-package
-
-    // Valid: enum without URI but with allow annotation
-    @thrift.AllowLegacyMissingUris
-    enum LegacyEnum { }
-  )",
-      {"--extra-validation", "missing_uris=error"});
-}
-
-/**
- * Tests the application of @thrift.AllowLegacyMissingUris at the package level.
- */
-TEST(CompilerTest, missing_uris_annotated_package) {
-  check_compile(
-      R"(
-    include "thrift/annotation/thrift.thrift"
-
-    @thrift.AllowLegacyMissingUris
-    package;
-    # expected-warning@-2: Thrift file should have a (non-empty) package. Packages will soon be required, at which point missing packages will trigger a Thrift compiler error. For more details, see https://fburl.com/thrift-uri-add-package
-
-    // Valid: struct with explicit URI
-    @thrift.Uri{value = "facebook.com/thrift/test/ValidStruct"}
-    struct ValidStruct { }
-
-    // Valid: struct without URI, but package annotation applies.
-    struct LegacyStruct { }
-
-    // Valid: union with explicit URI
-    @thrift.Uri{value = "facebook.com/thrift/test/ValidUnion"}
-    union ValidUnion { }
-
-    // Valid: union without URI, but package annotation applies
-    union InvalidUnion { }
-
-    // Valid: exception with explicit URI
-    @thrift.Uri{value = "facebook.com/thrift/test/ValidException"}
-    exception ValidException { }
-
-    // Valid: exception without URI, but package annotation applies
-    exception InvalidException { }
-
-    // Valid: enum with explicit URI
-    @thrift.Uri{value = "facebook.com/thrift/test/ValidEnum"}
-    enum ValidEnum { }
-
-    // Valid: enum without URI, but package annotation applies
-    enum InvalidEnum { }
-
-  )",
-      {"--extra-validation", "missing_uris=error"});
-}
-
-/**
- * Tests the unnnecessary use of @thrift.AllowLegacyMissingUris at the package
- * level, because no type definition needs it.
- */
-TEST(CompilerTest, thrift_missing_uris_unnecessary_package_annotation) {
-  check_compile(R"(
-    include "thrift/annotation/thrift.thrift"
-
-    @thrift.AllowLegacyMissingUris
-    package;
-    # expected-error@-2: Unnecessary use of @thrift.AllowLegacyMissingUris at the package level: there are no types who are missing URIs in the file.
-    # expected-warning@-3: Thrift file should have a (non-empty) package. Packages will soon be required, at which point missing packages will trigger a Thrift compiler error. For more details, see https://fburl.com/thrift-uri-add-package
-
-    // Struct has a URI, making the package annotation redundant.
-    @thrift.Uri{value = "facebook.com/thrift/test/ValidStruct"}
-    struct StructWithUri { }
-  )");
-}
-
-/**
- * Same as thrift_missing_uris_unnecessary_package_annotation, but with errors
- * disabled.
- */
-TEST(CompilerTest, thrift_missing_uris_unnecessary_package_annotation_none) {
-  check_compile(
-      R"(
-    include "thrift/annotation/thrift.thrift"
-
-    @thrift.AllowLegacyMissingUris
-    package;
-    # expected-warning@-2: Thrift file should have a (non-empty) package. Packages will soon be required, at which point missing packages will trigger a Thrift compiler error. For more details, see https://fburl.com/thrift-uri-add-package
-
-    // Struct has a URI, making the package annotation redundant.
-    @thrift.Uri{value = "facebook.com/thrift/test/ValidStruct"}
-    struct StructWithUri { }
-  )",
-      {"--extra-validation", "unnecessary_allow_missing_uris=none"});
-}
-
-/**
- * Tests the redundant uses of @thrift.AllowLegacyMissingUris, at both the
- * package and type level.
- */
-TEST(CompilerTest, thrift_missing_uris_redundant_package_and_type_annotation) {
-  check_compile(R"(
-    include "thrift/annotation/thrift.thrift"
-
-    @thrift.AllowLegacyMissingUris
-    package;
-    # expected-warning@-2: Thrift file should have a (non-empty) package. Packages will soon be required, at which point missing packages will trigger a Thrift compiler error. For more details, see https://fburl.com/thrift-uri-add-package
-
-    // Annotation is redundant: package already has the annotation
-    @thrift.AllowLegacyMissingUris
-    struct StructWithoutUri { }
-    # expected-error@-2: Unnecessary use of @thrift.AllowLegacyMissingUris on `StructWithoutUri`: the annotation is already applied at the package (i.e., file) level.
-  )");
-}
-
-/**
- * Same as thrift_missing_uris_redundant_package_and_type_annotation, but with
- * errors disabled. package and type level.
- */
-TEST(
-    CompilerTest,
-    thrift_missing_uris_redundant_package_and_type_annotation_none) {
-  check_compile(
-      R"(
-    include "thrift/annotation/thrift.thrift"
-
-    @thrift.AllowLegacyMissingUris
-    package;
-    # expected-warning@-2: Thrift file should have a (non-empty) package. Packages will soon be required, at which point missing packages will trigger a Thrift compiler error. For more details, see https://fburl.com/thrift-uri-add-package
-
-    // Annotation is redundant: package already has the annotation
-    @thrift.AllowLegacyMissingUris
-    struct StructWithoutUri { }
-  )",
-      {"--extra-validation", "unnecessary_allow_missing_uris=none"});
-}
-
 TEST(CompilerTest, terse_write_annotation) {
   check_compile(R"(
     include "thrift/annotation/thrift.thrift"
@@ -2927,8 +2742,7 @@ TEST(CompilerTest, base_service_defined_after_use) {
 }
 
 TEST(CompilerTest, cpp_orderable) {
-  check_compile(
-      R"(
+  check_compile(R"(
 # expected-warning@-1: Thrift file should have a (non-empty) package. Packages will soon be required, at which point missing packages will trigger a Thrift compiler error. For more details, see https://fburl.com/thrift-uri-add-package
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
@@ -2966,8 +2780,7 @@ struct ExplicitlyEnabledCustomTypeWithUri {
   @cpp.Type{name = "custom"}
   1: set<i32> a;
 }
-)",
-      {"--extra-validation", "missing_uris=none"});
+)");
 }
 
 TEST(CompilerTest, cpp_orderable_unnecessary_annotation_error) {
@@ -3409,20 +3222,19 @@ TEST(CompilerTest, missing_package) {
       "required, at which point missing packages will trigger a Thrift compiler error. "
       "For more details, see https://fburl.com/thrift-uri-add-package";
   check_compile(
-      "struct TestStruct { }",
-      {"--extra-validation", "missing_package=none,missing_uris=none"});
+      "struct TestStruct { }", {"--extra-validation", "missing_package=none"});
   check_compile(
       fmt::format(
           "# expected-warning@1: {}\n"
           "struct TestStruct {{ }}",
           kMissingPackage),
-      {"--extra-validation", "missing_package=warn,missing_uris=none"});
+      {"--extra-validation", "missing_package=warn"});
   check_compile(
       fmt::format(
           "# expected-error@1: {}\n"
           "struct TestStruct {{ }}",
           kMissingPackage),
-      {"--extra-validation", "missing_package=error,missing_uris=none"});
+      {"--extra-validation", "missing_package=error"});
 }
 
 TEST(CompilerTest, bidirectional_streaming) {

@@ -41,6 +41,7 @@ function my_option_map(): OptionInfoMap {
 'no-defaults'     => Pair { '',
                             'Do not use the default wrapper runtime options'},
 'perf:'           => Pair { '', 'Run perf record'},
+'allow-unstable-features'   => Pair { 'u',  'Allow running unstable features' },
   };
 }
 
@@ -182,6 +183,7 @@ function determine_flags(OptionMap $opts): string {
     'no-pgo'          => '-v Eval.JitPGO=false ',
     'hphpd'           => '-m debug ',
     'server'          => '-m server ',
+    'allow-unstable-features' => '-v Hack.Lang.AllowUnstableFeatures=1 ',
   };
 
   if ($opts->containsKey('pgo-threshold')) {

@@ -81,14 +81,15 @@ void DecoratedServiceAsyncProcessor::executeRequest_noop(
       this->getServiceName(),
       "DecoratedService.noop",
       serverRequest.requestContext());
+  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
+    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
+        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "noop",
-        apache::thrift::detail::ServerRequestHelper::compressedRequest(
-            std::move(serverRequest))
-            .uncompress(),
+        serializedRequest,
         ctxStack.get());
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -144,19 +145,25 @@ void DecoratedServiceAsyncProcessor::executeRequest_noop(
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](auto callback, auto executeHandler, ArgsState args)
-        -> folly::coro::Task<void> {
+    [](
+        auto callback,
+        auto executeHandler,
+        ArgsState args,
+        apache::thrift::SerializedRequest serializedRequest
+    ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
-              argRefs));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
+          serializedRequest);
       executeHandler(std::move(callback), std::move(args));
-    }(std::move(callback), makeExecuteHandler(), std::move(args))
-               .scheduleOn(
-                   apache::thrift::detail::ServerRequestHelper::executor(
-                       serverRequest))
-               .startInlineUnsafe();
+    }(
+        std::move(callback),
+        makeExecuteHandler(),
+        std::move(args),
+        std::move(serializedRequest))
+      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+      .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -248,14 +255,15 @@ void DecoratedServiceAsyncProcessor::executeRequest_echo(
       this->getServiceName(),
       "DecoratedService.echo",
       serverRequest.requestContext());
+  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
+    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
+        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "echo",
-        apache::thrift::detail::ServerRequestHelper::compressedRequest(
-            std::move(serverRequest))
-            .uncompress(),
+        serializedRequest,
         ctxStack.get());
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -311,19 +319,25 @@ void DecoratedServiceAsyncProcessor::executeRequest_echo(
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](auto callback, auto executeHandler, ArgsState args)
-        -> folly::coro::Task<void> {
+    [](
+        auto callback,
+        auto executeHandler,
+        ArgsState args,
+        apache::thrift::SerializedRequest serializedRequest
+    ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
-              argRefs));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
+          serializedRequest);
       executeHandler(std::move(callback), std::move(args));
-    }(std::move(callback), makeExecuteHandler(), std::move(args))
-               .scheduleOn(
-                   apache::thrift::detail::ServerRequestHelper::executor(
-                       serverRequest))
-               .startInlineUnsafe();
+    }(
+        std::move(callback),
+        makeExecuteHandler(),
+        std::move(args),
+        std::move(serializedRequest))
+      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+      .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -418,14 +432,15 @@ void DecoratedServiceAsyncProcessor::executeRequest_increment(
       this->getServiceName(),
       "DecoratedService.increment",
       serverRequest.requestContext());
+  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
+    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
+        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "increment",
-        apache::thrift::detail::ServerRequestHelper::compressedRequest(
-            std::move(serverRequest))
-            .uncompress(),
+        serializedRequest,
         ctxStack.get());
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -481,19 +496,25 @@ void DecoratedServiceAsyncProcessor::executeRequest_increment(
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](auto callback, auto executeHandler, ArgsState args)
-        -> folly::coro::Task<void> {
+    [](
+        auto callback,
+        auto executeHandler,
+        ArgsState args,
+        apache::thrift::SerializedRequest serializedRequest
+    ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
-              argRefs));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
+          serializedRequest);
       executeHandler(std::move(callback), std::move(args));
-    }(std::move(callback), makeExecuteHandler(), std::move(args))
-               .scheduleOn(
-                   apache::thrift::detail::ServerRequestHelper::executor(
-                       serverRequest))
-               .startInlineUnsafe();
+    }(
+        std::move(callback),
+        makeExecuteHandler(),
+        std::move(args),
+        std::move(serializedRequest))
+      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+      .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -588,14 +609,15 @@ void DecoratedServiceAsyncProcessor::executeRequest_sum(
       this->getServiceName(),
       "DecoratedService.sum",
       serverRequest.requestContext());
+  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
+    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
+        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "sum",
-        apache::thrift::detail::ServerRequestHelper::compressedRequest(
-            std::move(serverRequest))
-            .uncompress(),
+        serializedRequest,
         ctxStack.get());
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -651,19 +673,25 @@ void DecoratedServiceAsyncProcessor::executeRequest_sum(
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](auto callback, auto executeHandler, ArgsState args)
-        -> folly::coro::Task<void> {
+    [](
+        auto callback,
+        auto executeHandler,
+        ArgsState args,
+        apache::thrift::SerializedRequest serializedRequest
+    ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
-              argRefs));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
+          serializedRequest);
       executeHandler(std::move(callback), std::move(args));
-    }(std::move(callback), makeExecuteHandler(), std::move(args))
-               .scheduleOn(
-                   apache::thrift::detail::ServerRequestHelper::executor(
-                       serverRequest))
-               .startInlineUnsafe();
+    }(
+        std::move(callback),
+        makeExecuteHandler(),
+        std::move(args),
+        std::move(serializedRequest))
+      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+      .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -758,14 +786,15 @@ void DecoratedServiceAsyncProcessor::executeRequest_withStruct(
       this->getServiceName(),
       "DecoratedService.withStruct",
       serverRequest.requestContext());
+  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
+    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
+        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "withStruct",
-        apache::thrift::detail::ServerRequestHelper::compressedRequest(
-            std::move(serverRequest))
-            .uncompress(),
+        serializedRequest,
         ctxStack.get());
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -821,19 +850,25 @@ void DecoratedServiceAsyncProcessor::executeRequest_withStruct(
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](auto callback, auto executeHandler, ArgsState args)
-        -> folly::coro::Task<void> {
+    [](
+        auto callback,
+        auto executeHandler,
+        ArgsState args,
+        apache::thrift::SerializedRequest serializedRequest
+    ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
-              argRefs));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
+          serializedRequest);
       executeHandler(std::move(callback), std::move(args));
-    }(std::move(callback), makeExecuteHandler(), std::move(args))
-               .scheduleOn(
-                   apache::thrift::detail::ServerRequestHelper::executor(
-                       serverRequest))
-               .startInlineUnsafe();
+    }(
+        std::move(callback),
+        makeExecuteHandler(),
+        std::move(args),
+        std::move(serializedRequest))
+      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+      .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -934,14 +969,15 @@ void DecoratedServiceAsyncProcessor::executeRequest_multiParam(
       this->getServiceName(),
       "DecoratedService.multiParam",
       serverRequest.requestContext());
+  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
+    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
+        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "multiParam",
-        apache::thrift::detail::ServerRequestHelper::compressedRequest(
-            std::move(serverRequest))
-            .uncompress(),
+        serializedRequest,
         ctxStack.get());
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -997,19 +1033,25 @@ void DecoratedServiceAsyncProcessor::executeRequest_multiParam(
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](auto callback, auto executeHandler, ArgsState args)
-        -> folly::coro::Task<void> {
+    [](
+        auto callback,
+        auto executeHandler,
+        ArgsState args,
+        apache::thrift::SerializedRequest serializedRequest
+    ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
-              argRefs));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
+          serializedRequest);
       executeHandler(std::move(callback), std::move(args));
-    }(std::move(callback), makeExecuteHandler(), std::move(args))
-               .scheduleOn(
-                   apache::thrift::detail::ServerRequestHelper::executor(
-                       serverRequest))
-               .startInlineUnsafe();
+    }(
+        std::move(callback),
+        makeExecuteHandler(),
+        std::move(args),
+        std::move(serializedRequest))
+      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+      .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -1102,14 +1144,15 @@ void DecoratedServiceAsyncProcessor::executeRequest_echoInteraction(
       this->getServiceName(),
       "DecoratedService.echoInteraction",
       serverRequest.requestContext());
+  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
+    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
+        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "echoInteraction",
-        apache::thrift::detail::ServerRequestHelper::compressedRequest(
-            std::move(serverRequest))
-            .uncompress(),
+        serializedRequest,
         ctxStack.get());
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -1165,19 +1208,25 @@ void DecoratedServiceAsyncProcessor::executeRequest_echoInteraction(
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](auto callback, auto executeHandler, ArgsState args)
-        -> folly::coro::Task<void> {
+    [](
+        auto callback,
+        auto executeHandler,
+        ArgsState args,
+        apache::thrift::SerializedRequest serializedRequest
+    ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
-              argRefs));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
+          serializedRequest);
       executeHandler(std::move(callback), std::move(args));
-    }(std::move(callback), makeExecuteHandler(), std::move(args))
-               .scheduleOn(
-                   apache::thrift::detail::ServerRequestHelper::executor(
-                       serverRequest))
-               .startInlineUnsafe();
+    }(
+        std::move(callback),
+        makeExecuteHandler(),
+        std::move(args),
+        std::move(serializedRequest))
+      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+      .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -1278,14 +1327,15 @@ void DecoratedServiceAsyncProcessor::executeRequest_LegacyPerforms_perform(
       "DecoratedService.LegacyPerforms.perform",
       serverRequest.requestContext());
   auto& iface = static_cast<apache::thrift::ServiceHandler<DecoratedService>::LegacyPerformsIf&>(*tile);
+  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
+    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
+        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "LegacyPerforms.perform",
-        apache::thrift::detail::ServerRequestHelper::compressedRequest(
-            std::move(serverRequest))
-            .uncompress(),
+        serializedRequest,
         ctxStack.get());
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -1344,19 +1394,25 @@ void DecoratedServiceAsyncProcessor::executeRequest_LegacyPerforms_perform(
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](auto callback, auto executeHandler, ArgsState args)
-        -> folly::coro::Task<void> {
+    [](
+        auto callback,
+        auto executeHandler,
+        ArgsState args,
+        apache::thrift::SerializedRequest serializedRequest
+    ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
-              argRefs));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
+          serializedRequest);
       executeHandler(std::move(callback), std::move(args));
-    }(std::move(callback), makeExecuteHandler(), std::move(args))
-               .scheduleOn(
-                   apache::thrift::detail::ServerRequestHelper::executor(
-                       serverRequest))
-               .startInlineUnsafe();
+    }(
+        std::move(callback),
+        makeExecuteHandler(),
+        std::move(args),
+        std::move(serializedRequest))
+      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+      .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -1459,14 +1515,15 @@ void DecoratedServiceAsyncProcessor::executeRequest_EchoInteraction_interactionE
       "DecoratedService.EchoInteraction.interactionEcho",
       serverRequest.requestContext());
   auto& iface = static_cast<apache::thrift::ServiceHandler<DecoratedService>::EchoInteractionIf&>(*tile);
+  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
+    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
+        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "EchoInteraction.interactionEcho",
-        apache::thrift::detail::ServerRequestHelper::compressedRequest(
-            std::move(serverRequest))
-            .uncompress(),
+        serializedRequest,
         ctxStack.get());
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -1525,19 +1582,25 @@ void DecoratedServiceAsyncProcessor::executeRequest_EchoInteraction_interactionE
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](auto callback, auto executeHandler, ArgsState args)
-        -> folly::coro::Task<void> {
+    [](
+        auto callback,
+        auto executeHandler,
+        ArgsState args,
+        apache::thrift::SerializedRequest serializedRequest
+    ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
-              argRefs));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
+          serializedRequest);
       executeHandler(std::move(callback), std::move(args));
-    }(std::move(callback), makeExecuteHandler(), std::move(args))
-               .scheduleOn(
-                   apache::thrift::detail::ServerRequestHelper::executor(
-                       serverRequest))
-               .startInlineUnsafe();
+    }(
+        std::move(callback),
+        makeExecuteHandler(),
+        std::move(args),
+        std::move(serializedRequest))
+      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+      .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -1653,14 +1716,15 @@ void UndecoratedServiceAsyncProcessor::executeRequest_noop(
       this->getServiceName(),
       "UndecoratedService.noop",
       serverRequest.requestContext());
+  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
+    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
+        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "noop",
-        apache::thrift::detail::ServerRequestHelper::compressedRequest(
-            std::move(serverRequest))
-            .uncompress(),
+        serializedRequest,
         ctxStack.get());
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -1716,19 +1780,25 @@ void UndecoratedServiceAsyncProcessor::executeRequest_noop(
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](auto callback, auto executeHandler, ArgsState args)
-        -> folly::coro::Task<void> {
+    [](
+        auto callback,
+        auto executeHandler,
+        ArgsState args,
+        apache::thrift::SerializedRequest serializedRequest
+    ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
-              argRefs));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
+          serializedRequest);
       executeHandler(std::move(callback), std::move(args));
-    }(std::move(callback), makeExecuteHandler(), std::move(args))
-               .scheduleOn(
-                   apache::thrift::detail::ServerRequestHelper::executor(
-                       serverRequest))
-               .startInlineUnsafe();
+    }(
+        std::move(callback),
+        makeExecuteHandler(),
+        std::move(args),
+        std::move(serializedRequest))
+      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+      .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -1820,14 +1890,15 @@ void UndecoratedServiceAsyncProcessor::executeRequest_echo(
       this->getServiceName(),
       "UndecoratedService.echo",
       serverRequest.requestContext());
+  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
+    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
+        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "echo",
-        apache::thrift::detail::ServerRequestHelper::compressedRequest(
-            std::move(serverRequest))
-            .uncompress(),
+        serializedRequest,
         ctxStack.get());
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -1883,19 +1954,25 @@ void UndecoratedServiceAsyncProcessor::executeRequest_echo(
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](auto callback, auto executeHandler, ArgsState args)
-        -> folly::coro::Task<void> {
+    [](
+        auto callback,
+        auto executeHandler,
+        ArgsState args,
+        apache::thrift::SerializedRequest serializedRequest
+    ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
-              argRefs));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
+          serializedRequest);
       executeHandler(std::move(callback), std::move(args));
-    }(std::move(callback), makeExecuteHandler(), std::move(args))
-               .scheduleOn(
-                   apache::thrift::detail::ServerRequestHelper::executor(
-                       serverRequest))
-               .startInlineUnsafe();
+    }(
+        std::move(callback),
+        makeExecuteHandler(),
+        std::move(args),
+        std::move(serializedRequest))
+      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+      .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -1990,14 +2067,15 @@ void UndecoratedServiceAsyncProcessor::executeRequest_increment(
       this->getServiceName(),
       "UndecoratedService.increment",
       serverRequest.requestContext());
+  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
+    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
+        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "increment",
-        apache::thrift::detail::ServerRequestHelper::compressedRequest(
-            std::move(serverRequest))
-            .uncompress(),
+        serializedRequest,
         ctxStack.get());
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -2053,19 +2131,25 @@ void UndecoratedServiceAsyncProcessor::executeRequest_increment(
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](auto callback, auto executeHandler, ArgsState args)
-        -> folly::coro::Task<void> {
+    [](
+        auto callback,
+        auto executeHandler,
+        ArgsState args,
+        apache::thrift::SerializedRequest serializedRequest
+    ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
-              argRefs));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
+          serializedRequest);
       executeHandler(std::move(callback), std::move(args));
-    }(std::move(callback), makeExecuteHandler(), std::move(args))
-               .scheduleOn(
-                   apache::thrift::detail::ServerRequestHelper::executor(
-                       serverRequest))
-               .startInlineUnsafe();
+    }(
+        std::move(callback),
+        makeExecuteHandler(),
+        std::move(args),
+        std::move(serializedRequest))
+      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+      .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -2160,14 +2244,15 @@ void UndecoratedServiceAsyncProcessor::executeRequest_sum(
       this->getServiceName(),
       "UndecoratedService.sum",
       serverRequest.requestContext());
+  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
+    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
+        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "sum",
-        apache::thrift::detail::ServerRequestHelper::compressedRequest(
-            std::move(serverRequest))
-            .uncompress(),
+        serializedRequest,
         ctxStack.get());
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -2223,19 +2308,25 @@ void UndecoratedServiceAsyncProcessor::executeRequest_sum(
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](auto callback, auto executeHandler, ArgsState args)
-        -> folly::coro::Task<void> {
+    [](
+        auto callback,
+        auto executeHandler,
+        ArgsState args,
+        apache::thrift::SerializedRequest serializedRequest
+    ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
-              argRefs));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
+          serializedRequest);
       executeHandler(std::move(callback), std::move(args));
-    }(std::move(callback), makeExecuteHandler(), std::move(args))
-               .scheduleOn(
-                   apache::thrift::detail::ServerRequestHelper::executor(
-                       serverRequest))
-               .startInlineUnsafe();
+    }(
+        std::move(callback),
+        makeExecuteHandler(),
+        std::move(args),
+        std::move(serializedRequest))
+      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+      .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -2330,14 +2421,15 @@ void UndecoratedServiceAsyncProcessor::executeRequest_withStruct(
       this->getServiceName(),
       "UndecoratedService.withStruct",
       serverRequest.requestContext());
+  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
+    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
+        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "withStruct",
-        apache::thrift::detail::ServerRequestHelper::compressedRequest(
-            std::move(serverRequest))
-            .uncompress(),
+        serializedRequest,
         ctxStack.get());
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -2393,19 +2485,25 @@ void UndecoratedServiceAsyncProcessor::executeRequest_withStruct(
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](auto callback, auto executeHandler, ArgsState args)
-        -> folly::coro::Task<void> {
+    [](
+        auto callback,
+        auto executeHandler,
+        ArgsState args,
+        apache::thrift::SerializedRequest serializedRequest
+    ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
-              argRefs));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
+          serializedRequest);
       executeHandler(std::move(callback), std::move(args));
-    }(std::move(callback), makeExecuteHandler(), std::move(args))
-               .scheduleOn(
-                   apache::thrift::detail::ServerRequestHelper::executor(
-                       serverRequest))
-               .startInlineUnsafe();
+    }(
+        std::move(callback),
+        makeExecuteHandler(),
+        std::move(args),
+        std::move(serializedRequest))
+      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+      .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -2506,14 +2604,15 @@ void UndecoratedServiceAsyncProcessor::executeRequest_multiParam(
       this->getServiceName(),
       "UndecoratedService.multiParam",
       serverRequest.requestContext());
+  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
+    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
+        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "multiParam",
-        apache::thrift::detail::ServerRequestHelper::compressedRequest(
-            std::move(serverRequest))
-            .uncompress(),
+        serializedRequest,
         ctxStack.get());
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -2569,19 +2668,25 @@ void UndecoratedServiceAsyncProcessor::executeRequest_multiParam(
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](auto callback, auto executeHandler, ArgsState args)
-        -> folly::coro::Task<void> {
+    [](
+        auto callback,
+        auto executeHandler,
+        ArgsState args,
+        apache::thrift::SerializedRequest serializedRequest
+    ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
-              argRefs));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
+          serializedRequest);
       executeHandler(std::move(callback), std::move(args));
-    }(std::move(callback), makeExecuteHandler(), std::move(args))
-               .scheduleOn(
-                   apache::thrift::detail::ServerRequestHelper::executor(
-                       serverRequest))
-               .startInlineUnsafe();
+    }(
+        std::move(callback),
+        makeExecuteHandler(),
+        std::move(args),
+        std::move(serializedRequest))
+      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+      .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -2676,14 +2781,15 @@ void UndecoratedServiceAsyncProcessor::executeRequest_adaptedRequest(
       this->getServiceName(),
       "UndecoratedService.adaptedRequest",
       serverRequest.requestContext());
+  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
+    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
+        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "adaptedRequest",
-        apache::thrift::detail::ServerRequestHelper::compressedRequest(
-            std::move(serverRequest))
-            .uncompress(),
+        serializedRequest,
         ctxStack.get());
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -2739,19 +2845,25 @@ void UndecoratedServiceAsyncProcessor::executeRequest_adaptedRequest(
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](auto callback, auto executeHandler, ArgsState args)
-        -> folly::coro::Task<void> {
+    [](
+        auto callback,
+        auto executeHandler,
+        ArgsState args,
+        apache::thrift::SerializedRequest serializedRequest
+    ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
-              argRefs));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
+          serializedRequest);
       executeHandler(std::move(callback), std::move(args));
-    }(std::move(callback), makeExecuteHandler(), std::move(args))
-               .scheduleOn(
-                   apache::thrift::detail::ServerRequestHelper::executor(
-                       serverRequest))
-               .startInlineUnsafe();
+    }(
+        std::move(callback),
+        makeExecuteHandler(),
+        std::move(args),
+        std::move(serializedRequest))
+      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+      .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -2856,14 +2968,15 @@ void DecoratedService_ExtendsUndecoratedServiceAsyncProcessor::executeRequest_ex
       this->getServiceName(),
       "DecoratedService_ExtendsUndecoratedService.extension",
       serverRequest.requestContext());
+  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
+    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
+        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "extension",
-        apache::thrift::detail::ServerRequestHelper::compressedRequest(
-            std::move(serverRequest))
-            .uncompress(),
+        serializedRequest,
         ctxStack.get());
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -2919,19 +3032,25 @@ void DecoratedService_ExtendsUndecoratedServiceAsyncProcessor::executeRequest_ex
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](auto callback, auto executeHandler, ArgsState args)
-        -> folly::coro::Task<void> {
+    [](
+        auto callback,
+        auto executeHandler,
+        ArgsState args,
+        apache::thrift::SerializedRequest serializedRequest
+    ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
-              argRefs));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
+          serializedRequest);
       executeHandler(std::move(callback), std::move(args));
-    }(std::move(callback), makeExecuteHandler(), std::move(args))
-               .scheduleOn(
-                   apache::thrift::detail::ServerRequestHelper::executor(
-                       serverRequest))
-               .startInlineUnsafe();
+    }(
+        std::move(callback),
+        makeExecuteHandler(),
+        std::move(args),
+        std::move(serializedRequest))
+      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+      .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -3033,14 +3152,15 @@ void DecoratedService_ExtendsDecoratedServiceAsyncProcessor::executeRequest_exte
       this->getServiceName(),
       "DecoratedService_ExtendsDecoratedService.extension",
       serverRequest.requestContext());
+  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
+    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
+        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "extension",
-        apache::thrift::detail::ServerRequestHelper::compressedRequest(
-            std::move(serverRequest))
-            .uncompress(),
+        serializedRequest,
         ctxStack.get());
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -3096,19 +3216,25 @@ void DecoratedService_ExtendsDecoratedServiceAsyncProcessor::executeRequest_exte
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](auto callback, auto executeHandler, ArgsState args)
-        -> folly::coro::Task<void> {
+    [](
+        auto callback,
+        auto executeHandler,
+        ArgsState args,
+        apache::thrift::SerializedRequest serializedRequest
+    ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
-              argRefs));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
+          serializedRequest);
       executeHandler(std::move(callback), std::move(args));
-    }(std::move(callback), makeExecuteHandler(), std::move(args))
-               .scheduleOn(
-                   apache::thrift::detail::ServerRequestHelper::executor(
-                       serverRequest))
-               .startInlineUnsafe();
+    }(
+        std::move(callback),
+        makeExecuteHandler(),
+        std::move(args),
+        std::move(serializedRequest))
+      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+      .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -3210,14 +3336,15 @@ void UndecoratedService_ExtendsDecoratedServiceAsyncProcessor::executeRequest_ex
       this->getServiceName(),
       "UndecoratedService_ExtendsDecoratedService.extension",
       serverRequest.requestContext());
+  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
+    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
+        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "extension",
-        apache::thrift::detail::ServerRequestHelper::compressedRequest(
-            std::move(serverRequest))
-            .uncompress(),
+        serializedRequest,
         ctxStack.get());
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -3273,19 +3400,25 @@ void UndecoratedService_ExtendsDecoratedServiceAsyncProcessor::executeRequest_ex
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](auto callback, auto executeHandler, ArgsState args)
-        -> folly::coro::Task<void> {
+    [](
+        auto callback,
+        auto executeHandler,
+        ArgsState args,
+        apache::thrift::SerializedRequest serializedRequest
+    ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
-              argRefs));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
+          serializedRequest);
       executeHandler(std::move(callback), std::move(args));
-    }(std::move(callback), makeExecuteHandler(), std::move(args))
-               .scheduleOn(
-                   apache::thrift::detail::ServerRequestHelper::executor(
-                       serverRequest))
-               .startInlineUnsafe();
+    }(
+        std::move(callback),
+        makeExecuteHandler(),
+        std::move(args),
+        std::move(serializedRequest))
+      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+      .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }
@@ -3390,14 +3523,15 @@ void DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedServiceAsyncProc
       this->getServiceName(),
       "DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService.secondExtension",
       serverRequest.requestContext());
+  apache::thrift::SerializedRequest serializedRequest{nullptr};
   try {
     auto pargs = args.pargs();
+    serializedRequest = apache::thrift::detail::ServerRequestHelper::compressedRequest(
+        std::move(serverRequest)).uncompress();
     deserializeRequest<ProtocolIn_>(
         pargs,
         "secondExtension",
-        apache::thrift::detail::ServerRequestHelper::compressedRequest(
-            std::move(serverRequest))
-            .uncompress(),
+        serializedRequest,
         ctxStack.get());
   } catch (...) {
     folly::exception_wrapper ew(std::current_exception());
@@ -3453,19 +3587,25 @@ void DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedServiceAsyncProc
 #if FOLLY_HAS_COROUTINES
   if (apache::thrift::detail::shouldProcessServiceInterceptorsOnRequest(
           *callback)) {
-    [](auto callback, auto executeHandler, ArgsState args)
-        -> folly::coro::Task<void> {
+    [](
+        auto callback,
+        auto executeHandler,
+        ArgsState args,
+        apache::thrift::SerializedRequest serializedRequest
+    ) -> folly::coro::Task<void> {
       auto argRefs = args.asTupleOfRefs();
       co_await apache::thrift::detail::processServiceInterceptorsOnRequest(
           *callback,
-          apache::thrift::detail::ServiceInterceptorOnRequestArguments(
-              argRefs));
+          apache::thrift::detail::ServiceInterceptorOnRequestArguments(argRefs),
+          serializedRequest);
       executeHandler(std::move(callback), std::move(args));
-    }(std::move(callback), makeExecuteHandler(), std::move(args))
-               .scheduleOn(
-                   apache::thrift::detail::ServerRequestHelper::executor(
-                       serverRequest))
-               .startInlineUnsafe();
+    }(
+        std::move(callback),
+        makeExecuteHandler(),
+        std::move(args),
+        std::move(serializedRequest))
+      .scheduleOn(apache::thrift::detail::ServerRequestHelper::executor(serverRequest))
+      .startInlineUnsafe();
   } else {
     makeExecuteHandler()(std::move(callback), std::move(args));
   }

@@ -360,7 +360,8 @@ bool HandlerCallbackBase::shouldProcessServiceInterceptorsOnResponse()
 
 folly::coro::Task<void>
 HandlerCallbackBase::processServiceInterceptorsOnRequest(
-    detail::ServiceInterceptorOnRequestArguments arguments) {
+    detail::ServiceInterceptorOnRequestArguments arguments,
+    const SerializedRequest& serializedRequest) {
   if (!shouldProcessServiceInterceptorsOnRequest()) {
     co_return;
   }
@@ -378,15 +379,17 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
         connectionCtx->getStorageForServiceInterceptorOnConnectionByIndex(i)};
     const server::DecoratorData decoratorData = reqCtx_->getDecoratorData();
     auto requestInfo = ServiceInterceptorBase::RequestInfo{
-        reqCtx_,
-        reqCtx_->getStorageForServiceInterceptorOnRequestByIndex(i),
-        arguments,
-        methodNameInfo_.serviceName,
-        methodNameInfo_.definingServiceName,
-        methodNameInfo_.methodName,
-        methodNameInfo_.qualifiedMethodName,
-        reqCtx_->getInterceptorFrameworkMetadata(),
-        &decoratorData};
+        .context = reqCtx_,
+        .storage = reqCtx_->getStorageForServiceInterceptorOnRequestByIndex(i),
+        .arguments = arguments,
+        .serviceName = methodNameInfo_.serviceName,
+        .definingServiceName = methodNameInfo_.definingServiceName,
+        .methodName = methodNameInfo_.methodName,
+        .qualifiedMethodName = methodNameInfo_.qualifiedMethodName,
+        .frameworkMetadata = reqCtx_->getInterceptorFrameworkMetadata(),
+        .decoratorData = &decoratorData,
+        .serializedRequestBuffer = serializedRequest.buffer.get(),
+    };
     try {
       co_await serviceInterceptors[i]->internal_onRequest(
           connectionInfo, requestInfo, server->getInterceptorMetricCallback());
@@ -473,9 +476,11 @@ bool shouldProcessServiceInterceptorsOnRequest(
 
 folly::coro::Task<void> processServiceInterceptorsOnRequest(
     HandlerCallbackBase& callback,
-    detail::ServiceInterceptorOnRequestArguments arguments) {
+    detail::ServiceInterceptorOnRequestArguments arguments,
+    const SerializedRequest& serializedRequest) {
   try {
-    co_await callback.processServiceInterceptorsOnRequest(std::move(arguments));
+    co_await callback.processServiceInterceptorsOnRequest(
+        std::move(arguments), serializedRequest);
   } catch (...) {
     callback.exception(folly::current_exception());
     throw;

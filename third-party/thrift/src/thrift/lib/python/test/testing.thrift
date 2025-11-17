@@ -703,6 +703,10 @@ union _UnderscoreUnion {
 struct EmptyStruct {}
 exception EmptyError {}
 
+struct StructWithMap {
+  1: map<string, i32> data;
+}
+
 @python.DisableFieldCache
 struct StructDisabledFieldCache {
   1: i32 int_field;

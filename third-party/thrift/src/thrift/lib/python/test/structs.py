@@ -72,6 +72,7 @@ from testing.thrift_types import (
     StringBucket,
     StructDisabledFieldCache,
     StructuredAnnotation,
+    StructWithMap,
     UnusedError,
 )
 from thrift.python.exceptions import GeneratedError
@@ -672,6 +673,26 @@ class StructTests(unittest.TestCase):
         self.assertFalse(isset(s2)["name"])
         self.assertTrue(isset(s2)["city"])
         self.assertEqual(isset(s2), {"name": False, "value": False, "city": True})
+
+    def test_struct_with_map_field_insertion_order(self) -> None:
+        """
+        Test that demonstrates map field insertion order affects struct hash
+        but not equality. Maps with same content but different insertion order
+        should be equal but currently have different hash values.
+
+        This test documents the current behavior where insertion order affects
+        the hash value.
+        """
+        s1 = StructWithMap(data={"a": 1, "b": 2})
+        s2 = StructWithMap(data={"b": 2, "a": 1})
+
+        self.assertEqual(s1, s2)
+
+        # However, hash values are currently different (insertion order dependent)
+        self.assertNotEqual(hash(s1), hash(s2))
+
+        struct_set = {s1, s2}
+        self.assertEqual(len(struct_set), 2)
 
 
 @parameterized_class(

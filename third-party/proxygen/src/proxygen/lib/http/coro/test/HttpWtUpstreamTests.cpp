@@ -493,7 +493,7 @@ TEST(WtStreamManager, GrantFlowControlCredit) {
       streamManager.enqueue(*two.readHandle, {makeBuf(kBufLen), /*fin=*/true}));
   // should have triggered only connection-level flow control since fin=true
   events = streamManager.moveEvents();
-  EXPECT_EQ(events.size(), 1);
+  EXPECT_GE(events.size(), 1);
   EXPECT_TRUE(std::holds_alternative<MaxConnData>(events[0]));
 
   // validate that receiving a reset_stream releases connection-level flow
@@ -502,7 +502,7 @@ TEST(WtStreamManager, GrantFlowControlCredit) {
   streamManager.enqueue(*ingress, {makeBuf(kBufLen), /*fin=*/false});
   streamManager.onResetStream(ResetStream{ingress->getID(), 0x00});
   events = streamManager.moveEvents();
-  CHECK_EQ(events.size(), 1);
+  CHECK_GE(events.size(), 1);
   maxConnData = std::get<MaxConnData>(events[0]);
   EXPECT_EQ(maxConnData.maxData,
             kBufLen * 4); // we've previously already issued 2x kBufLen
@@ -595,7 +595,7 @@ TEST(WtStreamManager, NonDefaultFlowControlValues) {
 }
 
 TEST(WtStreamManager, ResetStreamReleasesConnFlowControl) {
-  WtConfig config{.selfMaxStreamsUni = 3};
+  WtConfig config{.selfMaxStreamsUni = 10};
   WtStreamManagerCb cb;
   WtStreamManager streamManager{detail::WtDir::Client, config, cb};
   constexpr auto kBufLen = 65'535;
@@ -859,6 +859,52 @@ TEST(WtStreamManager, InvalidCtrlFrames) {
 
   // MaxStreamsUni{0} < peer.uni (i.e. 1) fails
   EXPECT_EQ(streamManager.onMaxStreams(MaxStreamsUni{0}), Result::Fail);
+}
+
+TEST(WtStreamManager, IssueMaxStreamsBidiUni) {
+  WtConfig config{.selfMaxStreamsBidi = 2, .selfMaxStreamsUni = 2};
+  WtStreamManagerCb cb;
+  WtStreamManager streamManager{detail::WtDir::Client, config, cb};
+
+  auto peerBidi = streamManager.getOrCreateBidiHandle(0x01);
+  CHECK(peerBidi.readHandle && peerBidi.writeHandle);
+  auto peerUni = CHECK_NOTNULL(streamManager.getOrCreateIngressHandle(0x03));
+
+  // rst_stream & stop_sending on peerBidi will close stream => issue
+  // MaxStreamsBidi
+  peerBidi.readHandle->stopSending(0);
+  peerBidi.writeHandle->resetStream(0);
+
+  // reading fin on peerUni will close stream => issue MaxStreamsUni
+  streamManager.enqueue(*peerUni, {makeBuf(0), true});
+  auto read = peerUni->readStreamData();
+  EXPECT_TRUE(read.isReady());
+
+  EXPECT_TRUE(cb.evAvail_);
+  // validate MaxStreamsBidi&MaxStreamsUni
+  auto events = streamManager.moveEvents();
+  EXPECT_EQ(events.size(), 4);
+  // events[0] & events[1] are StopSending & ResetStream
+  auto maxStreamsBidi = std::get<MaxStreamsBidi>(events[2]);
+  auto maxStreamsUni = std::get<MaxStreamsUni>(events[3]);
+  EXPECT_EQ(maxStreamsBidi.maxStreams, 3);
+  EXPECT_EQ(maxStreamsUni.maxStreams, 3);
+}
+
+TEST(WtStreamManager, ShutdownOpenStreams) {
+  WtConfig config;
+  WtStreamManagerCb cb;
+  WtStreamManager streamManager{detail::WtDir::Client, config, cb};
+
+  // create bidi stream
+  auto bidi = streamManager.createBidiHandle();
+  CHECK(bidi.readHandle && bidi.writeHandle);
+
+  // reset one direction
+  bidi.writeHandle->resetStream(0);
+
+  // ::shutdown with streams still open
+  streamManager.shutdown(CloseSession{});
 }
 
 } // namespace proxygen::coro::test

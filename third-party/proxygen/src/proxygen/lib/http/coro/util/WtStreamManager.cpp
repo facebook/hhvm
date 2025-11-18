@@ -258,14 +258,14 @@ void Accessor::onStreamWritable(WriteHandle& wh) noexcept {
 void Accessor::done(WriteHandle& wh) noexcept {
   XCHECK_EQ(wh.state_, Closed);
   if (wh.rh_->state_ == Closed) { // bidi done
-    sm_.streams_.erase(wh.getID());
+    sm_.erase(wh.getID());
   }
 }
 
 void Accessor::done(ReadHandle& rh) noexcept {
   XCHECK_EQ(rh.state_, Closed);
   if (rh.wh_->state_ == Closed) { // bidi done
-    sm_.streams_.erase(rh.getID());
+    sm_.erase(rh.getID());
   }
 }
 
@@ -609,9 +609,39 @@ uint64_t WtStreamManager::initStreamRecvFc(uint64_t streamId) const noexcept {
   return isBidi(streamId) ? wtConfig_.selfMaxStreamDataBidi
                           : wtConfig_.selfMaxStreamDataUni;
 }
+
 uint64_t WtStreamManager::initStreamSendFc(uint64_t streamId) const noexcept {
   return isBidi(streamId) ? wtConfig_.peerMaxStreamDataBidi
                           : wtConfig_.peerMaxStreamDataUni;
+}
+
+void WtStreamManager::erase(uint64_t streamId) noexcept {
+  bool erased = streams_.erase(streamId) > 0;
+  if (!erased) { // may not be in map if invoked via ::shutdown
+    return;
+  }
+  auto& counter = streamsCounter_.getCounter(streamId);
+  const uint64_t opened = counter.opened;
+  const uint64_t closed = ++counter.closed;
+  XCHECK_GE(opened, closed);
+  // if peer stream, we may need to advertise additional MaxStreams credit.
+  if (isPeer(streamId)) {
+    // compute the number of peer openable streams; if it is <= half of the
+    // initMaxStreams advertised to peer, we advertise additional MaxStreams
+    // credit
+    const uint64_t initStreamLimit = isBidi(streamId)
+                                         ? wtConfig_.selfMaxStreamsBidi
+                                         : wtConfig_.selfMaxStreamsUni;
+    auto& maxStreams = maxStreams_.getMaxStreams(streamId);
+    const uint64_t openable = maxStreams - closed;
+    XLOG(DBG6) << "init=" << initStreamLimit << "; limit=" << maxStreams
+               << "; opened=" << opened << "; closed=" << closed;
+    if (openable <= initStreamLimit / 2) {
+      maxStreams += (initStreamLimit - openable);
+      isBidi(streamId) ? enqueueEvent(MaxStreamsBidi{maxStreams})
+                       : enqueueEvent(MaxStreamsUni{maxStreams});
+    }
+  }
 }
 
 } // namespace proxygen::coro::detail

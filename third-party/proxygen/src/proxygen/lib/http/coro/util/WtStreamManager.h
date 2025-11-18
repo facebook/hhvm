@@ -227,6 +227,8 @@ struct WtStreamManager {
                              StopSending,
                              MaxConnData,
                              MaxStreamData,
+                             MaxStreamsBidi,
+                             MaxStreamsUni,
                              CloseSession>;
   std::vector<Event> moveEvents() noexcept {
     return std::move(ctrlEvents_);
@@ -282,6 +284,7 @@ struct WtStreamManager {
   BidiHandle* getOrCreateBidiHandleImpl(uint64_t streamId) noexcept;
   [[nodiscard]] uint64_t initStreamRecvFc(uint64_t streamId) const noexcept;
   [[nodiscard]] uint64_t initStreamSendFc(uint64_t streamId) const noexcept;
+  void erase(uint64_t streamId) noexcept;
 
   // as per rfc-9000
   enum StreamType : uint8_t {

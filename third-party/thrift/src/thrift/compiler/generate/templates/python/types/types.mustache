@@ -64,10 +64,10 @@ import {{module_path}}
 
 class {{> structs/unadapted_name}}{{!
 }}(metaclass={{!
-        }}{{#struct:union?}}{{> types/union_metaclass}}{{/struct:union?}}{{!
+        }}{{#struct:union?}}{{#partial m_types.union_metaclass}}{{/struct:union?}}{{!
         }}{{^struct:union?}}{{!
-        }}{{#struct:exception?}}{{> types/exception_metaclass}}{{/struct:exception?}}{{!
-        }}{{^struct:exception?}}{{> types/struct_metaclass}}{{/struct:exception?}}{{!
+        }}{{#struct:exception?}}{{#partial m_types.exception_metaclass}}{{/struct:exception?}}{{!
+        }}{{^struct:exception?}}{{#partial m_types.struct_metaclass}}{{/struct:exception?}}{{!
         }}{{/struct:union?}}{{!
         }}):
     {{#if (has_compiler_option? "auto_migrate")}}

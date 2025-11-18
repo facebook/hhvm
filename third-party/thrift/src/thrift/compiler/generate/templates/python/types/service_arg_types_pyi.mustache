@@ -19,7 +19,7 @@ The argument and result types for functions on thrift services (and interactions
 }}{{#service:supported_functions}}
 
 
-class {{> types/function_args_type}}({{> types/struct_base }}):
+class {{> types/function_args_type}}({{#partial m_types.struct_base}}):
     {{#function:args}}
     {{field:py_name}}: _typing.Final[{{#field:type}}{{> types/pep484_type}}{{/field:type}}] = ...
     {{/function:args}}
@@ -36,7 +36,7 @@ class {{> types/function_args_type}}({{> types/struct_base }}):
 {{^function:oneway?}}
 
 
-class _fbthrift_{{service:name}}_{{function:name}}_result({{> types/struct_base }}):
+class _fbthrift_{{service:name}}_{{function:name}}_result({{#partial m_types.struct_base}}):
    {{#let regular_response_type = (if function:oneway? null function:self.return_type.true_type)}}
    {{#regular_response_type}}
     success: _typing.Final[{{> types/pep484_type }}]
@@ -92,7 +92,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_stream_elem({{!
 {{#function:sink?}}
 
 
-class _fbthrift_{{service:name}}_{{function:name}}_result_sink_elem({{> types/struct_base }}):
+class _fbthrift_{{service:name}}_{{function:name}}_result_sink_elem({{#partial m_types.struct_base}}):
     success: _typing.Final[{{#function:sink_elem_type}}{{> types/pep484_type }}{{/function:sink_elem_type}}]
     {{#function:sink_exceptions}}
     {{field:py_name}}: _typing.Final[{{#field:type}}{{> types/pep484_type}}{{/field:type}}]
@@ -109,7 +109,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_sink_elem({{> types/st
 
 
 {{^function:bidirectional_stream?}}{{!
-}}class _fbthrift_{{service:name}}_{{function:name}}_result_sink_final({{> types/struct_base }}):
+}}class _fbthrift_{{service:name}}_{{function:name}}_result_sink_final({{#partial m_types.struct_base}}):
     success: _typing.Final[{{#function:sink_final_response_type}}{{!
         }}{{> types/pep484_type }}{{/function:sink_final_response_type}}]
     {{#function:sink_final_response_exceptions}}

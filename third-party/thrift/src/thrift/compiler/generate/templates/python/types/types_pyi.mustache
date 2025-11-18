@@ -56,10 +56,10 @@ import {{module_path}}
 
 @_typing.final
 class {{> structs/unadapted_name}}({{!
-        }}{{#struct:union?}}{{> types/union_base }}{{/struct:union?}}{{!
+        }}{{#struct:union?}}{{#partial m_types.union_base }}{{/struct:union?}}{{!
         }}{{^struct:union?}}{{!
-        }}{{#struct:exception?}}{{> types/exception_base }}{{/struct:exception?}}{{!
-        }}{{^struct:exception?}}{{> types/struct_base }}{{/struct:exception?}}{{!
+        }}{{#struct:exception?}}{{#partial m_types.exception_base}}{{/struct:exception?}}{{!
+        }}{{^struct:exception?}}{{#partial m_types.struct_base}}{{/struct:exception?}}{{!
         }}{{/struct:union?}}{{!
         }}{{#python.enable_abstract_types?}}{{!
         }}, _fbthrift_python_abstract_types.{{> structs/unadapted_name}}{{!

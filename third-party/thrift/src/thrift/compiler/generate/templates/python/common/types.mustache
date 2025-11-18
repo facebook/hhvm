@@ -22,3 +22,45 @@
 {{#if python.generate_mutable_types?}}thrift_mutable_types{{/if}}
 {{#if python.generate_immutable_types?}}thrift_types{{/if}}
 {{/let partial}}
+
+{{! Base class for Thrift exception }}
+{{#let export partial exception_base}}
+{{#pragma ignore-newlines}}
+{{#if python.generate_mutable_types?}}_fbthrift_python_mutable_exceptions.MutableGeneratedError{{/if}}
+{{#if python.generate_immutable_types?}}_fbthrift_python_exceptions.GeneratedError{{/if}}
+{{/let partial}}
+
+{{! Metaclass for Thrift exception }}
+{{#let export partial exception_metaclass}}
+{{#pragma ignore-newlines}}
+{{#if python.generate_mutable_types?}}_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta{{/if}}
+{{#if python.generate_immutable_types?}}_fbthrift_python_exceptions.GeneratedErrorMeta{{/if}}
+{{/let partial}}
+
+{{! Base class for Thrift struct }}
+{{#let export partial struct_base}}
+{{#pragma ignore-newlines}}
+{{#if python.generate_mutable_types?}}_fbthrift_python_mutable_types.MutableStruct{{/if}}
+{{#if python.generate_immutable_types?}}_fbthrift_python_types.Struct{{/if}}
+{{/let partial}}
+
+{{! Metaclass for Thrift struct }}
+{{#let export partial struct_metaclass}}
+{{#pragma ignore-newlines}}
+{{#if python.generate_mutable_types?}}_fbthrift_python_mutable_types.MutableStructMeta{{/if}}
+{{#if python.generate_immutable_types?}}_fbthrift_python_types.StructMeta{{/if}}
+{{/let partial}}
+
+{{! Base class for Thrift union }}
+{{#let export partial union_base}}
+{{#pragma ignore-newlines}}
+{{#if python.generate_mutable_types?}}_fbthrift_python_mutable_types.MutableUnion{{/if}}
+{{#if python.generate_immutable_types?}}_fbthrift_python_types.Union{{/if}}
+{{/let partial}}
+
+{{! Metaclass for Thrift union }}
+{{#let export partial union_metaclass}}
+{{#pragma ignore-newlines}}
+{{#if python.generate_mutable_types?}}_fbthrift_python_mutable_types.MutableUnionMeta{{/if}}
+{{#if python.generate_immutable_types?}}_fbthrift_python_types.UnionMeta{{/if}}
+{{/let partial}}

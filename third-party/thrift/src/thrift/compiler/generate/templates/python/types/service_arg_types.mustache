@@ -21,7 +21,7 @@ The argument and result types for functions on thrift services (and interactions
 {{#service:supported_functions}}
 
 
-class {{> types/function_args_type}}(metaclass={{> types/struct_metaclass}}):
+class {{> types/function_args_type}}(metaclass={{#partial m_types.struct_metaclass}}):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         {{#function:args}}
@@ -41,7 +41,7 @@ class {{> types/function_args_type}}(metaclass={{> types/struct_metaclass}}):
 {{^function:oneway?}}
 
 
-class _fbthrift_{{service:name}}_{{function:name}}_result(metaclass={{> types/struct_metaclass}}):
+class _fbthrift_{{service:name}}_{{function:name}}_result(metaclass={{#partial m_types.struct_metaclass}}):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         {{#let regular_response_type = (if function:oneway? null function:self.return_type.true_type)}}
@@ -77,7 +77,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result(metaclass={{> types/st
 {{#function:stream?}}
 
 
-class _fbthrift_{{service:name}}_{{function:name}}_result_stream_elem(metaclass={{> types/struct_metaclass}}):
+class _fbthrift_{{service:name}}_{{function:name}}_result_stream_elem(metaclass={{#partial m_types.struct_metaclass}}):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     {{#if function:bidirectional_stream?}}
     _fbthrift__rpc_kind = _fbthrift__RpcKind.BIDIRECTIONAL_STREAM
@@ -115,7 +115,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_stream_elem(metaclass=
 {{#function:sink?}}
 
 
-class _fbthrift_{{service:name}}_{{function:name}}_result_sink_elem(metaclass={{> types/struct_metaclass}}):
+class _fbthrift_{{service:name}}_{{function:name}}_result_sink_elem(metaclass={{#partial m_types.struct_metaclass}}):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     {{#if function:bidirectional_stream?}}
     _fbthrift__rpc_kind = _fbthrift__RpcKind.BIDIRECTIONAL_STREAM
@@ -178,7 +178,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_sink_elem(metaclass={{
 
 
 {{^function:bidirectional_stream?}}{{!
-}}class _fbthrift_{{service:name}}_{{function:name}}_result_sink_final(metaclass={{> types/struct_metaclass}}):
+}}class _fbthrift_{{service:name}}_{{function:name}}_result_sink_final(metaclass={{#partial m_types.struct_metaclass}}):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         {{#function:sink_final_response_type}}

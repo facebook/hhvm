@@ -3218,16 +3218,6 @@ SSATmp* simplifyCheckOffsetImpl(State& env, const IRInstruction* inst) {
     if (!key->type().maybe(TStr)) return gen(env, Jmp, inst->taken());
   }
 
-  if (key->isA(TInt) && keyType.hasConstVal(TInt)) {
-    auto const idx = keyType.intVal();
-    auto const cmp = gen(env, EqInt, key, cns(env, idx));
-    return gen(env, JmpZero, inst->taken(), cmp);
-  }
-  if (key->isA(TStr) && keyType.hasConstVal(TStr)) {
-    auto const str = keyType.strVal();
-    auto const cmp = gen(env, EqStrPtr, key, cns(env, str));
-    return gen(env, JmpZero, inst->taken(), cmp);
-  }
   return mergeBranchDests(env, inst);
 }
 

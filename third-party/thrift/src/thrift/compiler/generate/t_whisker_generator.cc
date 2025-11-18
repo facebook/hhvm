@@ -1011,11 +1011,11 @@ t_whisker_generator::cached_render_state& t_whisker_generator::render_state() {
     options.strict_printable_types = level_for(strict.printable_types);
     options.strict_undefined_variables = level_for(strict.undefined_variables);
 
-    whisker::load_standard_library(options.globals);
-    options.globals.merge(globals());
-
     auto prototypes = std::make_unique<prototype_database>();
     define_prototypes(*prototypes);
+
+    whisker::load_standard_library(options.globals);
+    options.globals.merge(globals(*prototypes));
 
     cached_render_state_ = cached_render_state{
         whisker::diagnostics_engine(

@@ -43,8 +43,8 @@ class t_json_experimental_generator : public t_mstch_generator {
   void generate_program() override;
 
  private:
-  whisker::map::raw globals() const override {
-    whisker::map::raw globals = t_mstch_generator::globals();
+  whisker::map::raw globals(prototype_database& proto) const override {
+    whisker::map::raw globals = t_mstch_generator::globals(proto);
     // To allow rendering a brace not surrounded by whitespace, without
     // interfering with the `{{` `}}` used by the mustache syntax.
     globals["open_object"] = whisker::make::string("{");

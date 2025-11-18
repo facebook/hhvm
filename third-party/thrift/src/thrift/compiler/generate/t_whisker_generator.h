@@ -139,8 +139,9 @@ class t_whisker_generator : public t_generator {
    * The global context used for whisker rendering. This function can be used,
    * for example, to add globally available helper functions.
    */
-  virtual whisker::map::raw globals() const {
+  virtual whisker::map::raw globals(whisker::prototype_database& proto) const {
     whisker::map::raw globals;
+    globals["root_program"] = proto.create<t_program>(*program_);
     globals["has_compiler_option?"] = whisker::dsl::make_function(
         "has_compiler_option?",
         [this](whisker::dsl::function::context ctx) -> whisker::object {

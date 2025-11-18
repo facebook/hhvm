@@ -688,9 +688,9 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
  protected:
   std::shared_ptr<python_generator_context> python_context_;
 
-  whisker::map::raw globals() const override {
+  whisker::map::raw globals(prototype_database& proto) const override {
     assert(python_context_ != nullptr);
-    whisker::map::raw globals = t_mstch_generator::globals();
+    whisker::map::raw globals = t_mstch_generator::globals(proto);
     globals["python"] = whisker::object(
         whisker::native_handle<python_generator_context>(
             python_context_, make_prototype_for_context()));

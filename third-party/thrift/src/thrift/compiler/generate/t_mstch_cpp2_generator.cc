@@ -485,8 +485,8 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     cpp_context_->register_visitors(visitor);
   }
 
-  whisker::map::raw globals() const override {
-    whisker::map::raw globals = t_mstch_generator::globals();
+  whisker::map::raw globals(prototype_database& proto) const override {
+    whisker::map::raw globals = t_mstch_generator::globals(proto);
     // Provide global default for cpp_enable_same_program_const_referencing?
     // Only the template for module_types.h overrides this, setting it to FALSE
     // Controls whether references to consts in the current Thrift file can be

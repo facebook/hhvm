@@ -1472,8 +1472,8 @@ class t_mstch_py3_generator : public t_mstch_generator {
   cpp_name_resolver cpp_name_resolver_;
   FileType file_type_ = FileType::NotTypesFile;
 
-  whisker::map::raw globals() const override {
-    whisker::map::raw globals = t_mstch_generator::globals();
+  whisker::map::raw globals(prototype_database& proto) const override {
+    whisker::map::raw globals = t_mstch_generator::globals(proto);
     globals["py_string_literal"] = whisker::dsl::make_function(
         "py_string_literal",
         [](whisker::dsl::function::context ctx) -> whisker::object {

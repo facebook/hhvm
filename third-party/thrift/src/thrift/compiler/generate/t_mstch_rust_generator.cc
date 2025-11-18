@@ -628,8 +628,8 @@ class t_mstch_rust_generator : public t_mstch_generator {
  private:
   void set_mstch_factories();
   rust_codegen_options options_;
-  whisker::map::raw globals() const override {
-    whisker::map::raw globals = t_mstch_generator::globals();
+  whisker::map::raw globals(prototype_database& proto) const override {
+    whisker::map::raw globals = t_mstch_generator::globals(proto);
     globals["rust_annotation_name"] = whisker::dsl::make_function(
         "rust_annotation_name",
         [](whisker::dsl::function::context ctx) -> whisker::object {

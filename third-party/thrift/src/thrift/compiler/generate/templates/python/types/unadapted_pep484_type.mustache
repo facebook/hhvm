@@ -36,17 +36,17 @@ None
 
   {{#else if type:list?}}
     {{#type:true_type}}
-{{> types/sequence }}[{{#list:elem_type}}{{> types/pep484_type }}{{/list:elem_type}}]
+{{#partial m_types.sequence}}[{{#list:elem_type}}{{> types/pep484_type }}{{/list:elem_type}}]
     {{/type:true_type}}
 
   {{#else if type:set?}}
     {{#type:true_type}}
-{{> types/set }}[{{#set:elem_type}}{{> types/pep484_type }}{{/set:elem_type}}]
+{{#partial m_types.set}}[{{#set:elem_type}}{{> types/pep484_type }}{{/set:elem_type}}]
     {{/type:true_type}}
 
   {{#else if type:map?}}
     {{#type:true_type}}
-{{> types/mapping }}[
+{{#partial m_types.mapping}}[
 {{#map:key_type}}{{> types/pep484_type }}{{/map:key_type}}, {{!}}
 {{#map:val_type}}{{> types/pep484_type }}{{/map:val_type}}
 ]

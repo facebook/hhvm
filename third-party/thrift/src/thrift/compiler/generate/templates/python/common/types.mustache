@@ -64,3 +64,27 @@
 {{#if python.generate_mutable_types?}}_fbthrift_python_mutable_types.MutableUnionMeta{{/if}}
 {{#if python.generate_immutable_types?}}_fbthrift_python_types.UnionMeta{{/if}}
 {{/let partial}}
+
+{{! Type hint for abstract, mutable, and immutable mappings }}
+{{#let export partial mapping}}
+{{#pragma ignore-newlines}}
+{{#if python.generate_abstract_types?}}_typing.Mapping{{/if}}
+{{#if python.generate_mutable_types?}}_fbthrift_python_mutable_containers.MutableMap{{/if}}
+{{#if python.generate_immutable_types?}}_typing.Mapping{{/if}}
+{{/let partial}}
+
+{{! Type hint for abstract, mutable, and immutable sequences }}
+{{#let export partial sequence}}
+{{#pragma ignore-newlines}}
+{{#if python.generate_abstract_types?}}_typing.Sequence{{/if}}
+{{#if python.generate_mutable_types?}}_fbthrift_python_mutable_containers.MutableList{{/if}}
+{{#if python.generate_immutable_types?}}_typing.Sequence{{/if}}
+{{/let partial}}
+
+{{! Type hint for abstract, mutable, and immutable sets }}
+{{#let export partial set}}
+{{#pragma ignore-newlines}}
+{{#if python.generate_abstract_types?}}_typing.AbstractSet{{/if}}
+{{#if python.generate_mutable_types?}}_fbthrift_python_mutable_containers.MutableSet{{/if}}
+{{#if python.generate_immutable_types?}}_typing.AbstractSet{{/if}}
+{{/let partial}}

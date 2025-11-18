@@ -14,16 +14,19 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{!
-This is import module for abstract, mutable, and immutable sequences
 }}
-{{#pragma ignore-newlines}}
-{{#python.generate_abstract_types?}}
-_typing.Sequence
-{{/python.generate_abstract_types?}}
-{{#python.generate_mutable_types?}}
-_fbthrift_python_mutable_containers.MutableList
-{{/python.generate_mutable_types?}}
-{{#python.generate_immutable_types?}}
-_typing.Sequence
-{{/python.generate_immutable_types?}}
+{{#import "common/types" as m_types}}
+
+{{! PEP484 type for collections }}
+{{#let export partial typedef_container |type| captures |m_types|}}
+  {{#pragma ignore-newlines}}
+  {{#if python.generate_immutable_types?}}
+{{#if type.list?}}_typing.List
+{{#else if type.set?}}_typing.Set
+{{#else if type.map?}}_typing.Dict{{/if type.list?}}
+  {{#else}}
+{{#if type.list?}}{{#partial m_types.sequence}}
+{{#else if type.set?}}{{#partial m_types.set}}
+{{#else if type.map?}}{{#partial m_types.mapping}}{{/if type.list?}}
+  {{/if python.generate_immutable_types?}}
+{{/let partial}}

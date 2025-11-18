@@ -17,13 +17,13 @@
 }}{{!
 This is for typedef PEP484 type
 }}{{#type:container?}}{{!
-    }}{{#type:list?}}{{> private/typedef_container_pep484_type}}[{{!
+    }}{{#type:list?}}{{#partial m_pep484.typedef_container type=type:self}}[{{!
         }}{{#type:list_elem_type}}{{> types/pep484_type}}{{/type:list_elem_type}}{{!
     }}]{{/type:list?}}{{!
-    }}{{#type:set?}}{{> private/typedef_container_pep484_type}}[{{!
+    }}{{#type:set?}}{{#partial m_pep484.typedef_container type=type:self}}[{{!
         }}{{#type:set_elem_type}}{{> types/pep484_type}}{{/type:set_elem_type}}{{!
     }}]{{/type:set?}}{{!
-    }}{{#type:map?}}{{> private/typedef_container_pep484_type}}[{{!
+    }}{{#type:map?}}{{#partial m_pep484.typedef_container type=type:self}}[{{!
         }}{{#type:key_type}}{{> types/pep484_type}}{{/type:key_type}}, {{!
         }}{{#type:value_type}}{{> types/pep484_type}}{{/type:value_type}}{{!
     }}]{{/type:map?}}{{!

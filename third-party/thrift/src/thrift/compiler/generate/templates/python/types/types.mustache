@@ -93,7 +93,7 @@ class {{> structs/unadapted_name}}{{!
             None,  # default value
               {{/if (object.notnull? default_val)}}
             {{#partial m_common.adapter_info node=field:self}},  # adapter info
-            {{#field:type}}{{> types/is_primitive }}{{/field:type}}, # field type is primitive
+            {{#partial m_types.is_primitive type=field:self.type}}, # field type is primitive
             {{field:idl_type}}, # IDL type (see BaseTypeEnum)
         ),
         {{/struct:fields_ordered_by_id}}

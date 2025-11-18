@@ -89,6 +89,13 @@
 {{#if python.generate_immutable_types?}}_typing.AbstractSet{{/if}}
 {{/let partial}}
 
+{{! 'True' if the type is a Python primitive, 'False' otherwise }}
+{{#let export partial is_primitive |type|}}
+{{#pragma ignore-newlines}}
+{{#let primitive = (and (or type.primitive? type.iobuf?) (not type.string?))}}
+{{#if primitive}}True{{#else}}False{{/if}}
+{{/let partial}}
+
 {{! Pick the Thrift container wrapper type for mutable types }}
 {{#let export partial add_wrapper_if_container |field|}}
 {{#pragma ignore-newlines}}

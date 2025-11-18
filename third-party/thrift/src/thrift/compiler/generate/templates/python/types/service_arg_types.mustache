@@ -32,7 +32,7 @@ class {{> types/function_args_type}}(metaclass={{#partial m_types.struct_metacla
             {{#field:type}}{{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }}{{/field:type}},  # typeinfo
             None,  # default value
             {{#partial m_common.adapter_info node=field:self}},  # adapter info
-            {{#field:type}}{{> types/is_primitive }}{{/field:type}}, # field type is primitive
+            {{#partial m_types.is_primitive type=field:self.type}}, # field type is primitive
             {{field:idl_type}}, # IDL type (see BaseTypeEnum)
         ),
         {{/function:args}}
@@ -54,7 +54,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result(metaclass={{#partial m
             {{#if (not regular_response_type.primitive?)}}lambda: {{/if}}{{> types/typeinfo }},  # typeinfo
             None,  # default value
             {{#partial m_common.adapter_info node=regular_response_type}},  # adapter info
-            {{> types/is_primitive }}, # field type is primitive
+            {{#partial m_types.is_primitive type=regular_response_type}}, # field type is primitive
         ),
           {{/regular_response_type}}
         {{/if (and (object.notnull? regular_response_type) (not regular_response_type.void?))}}
@@ -67,7 +67,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result(metaclass={{#partial m
             {{#field:type}}{{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }}{{/field:type}},  # typeinfo
             None,  # default value
             {{#partial m_common.adapter_info node=field:self}},  # adapter info
-            {{#field:type}}{{> types/is_primitive }}{{/field:type}}, # field type is primitive
+            {{#partial m_types.is_primitive type=field:self.type}}, # field type is primitive
             {{field:idl_type}}, # IDL type (see BaseTypeEnum)
         ),
         {{/function:exceptions}}
@@ -93,7 +93,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_stream_elem(metaclass=
             {{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }},  # typeinfo
             None,  # default value
             {{#partial m_common.adapter_info node=type:self}},  # adapter info
-            {{> types/is_primitive }}, # field type is primitive
+            {{#partial m_types.is_primitive type=type:self}}, # field type is primitive
         ),
         {{/function:stream_elem_type}}
         {{#function:stream_exceptions}}
@@ -105,7 +105,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_stream_elem(metaclass=
             {{#field:type}}{{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }}{{/field:type}},  # typeinfo
             None,  # default value
             {{#partial m_common.adapter_info node=field:self}},  # adapter info
-            {{#field:type}}{{> types/is_primitive }}{{/field:type}}, # field type is primitive
+            {{#partial m_types.is_primitive type=field:self.type}}, # field type is primitive
             {{field:idl_type}}, # IDL type (see BaseTypeEnum)
         ),
         {{/function:stream_exceptions}}
@@ -131,7 +131,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_sink_elem(metaclass={{
             {{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }},  # typeinfo
             None,  # default value
             {{#partial m_common.adapter_info node=type:self}},  # adapter info
-            {{> types/is_primitive }}, # field type is primitive
+            {{#partial m_types.is_primitive type=type:self}}, # field type is primitive
         ),
         {{/function:sink_elem_type}}
         {{#function:sink_exceptions}}
@@ -143,7 +143,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_sink_elem(metaclass={{
             {{#field:type}}{{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }}{{/field:type}},  # typeinfo
             None,  # default value
             {{#partial m_common.adapter_info node=field:self}},  # adapter info
-            {{#field:type}}{{> types/is_primitive }}{{/field:type}}, # field type is primitive
+            {{#partial m_types.is_primitive type=field:self.type}}, # field type is primitive
             {{field:idl_type}}, # IDL type (see BaseTypeEnum)
         ),
         {{/function:sink_exceptions}}
@@ -189,7 +189,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_sink_elem(metaclass={{
             {{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }},  # typeinfo
             None,  # default value
             {{#partial m_common.adapter_info node=type:self}},  # adapter info
-            {{> types/is_primitive }}, # field type is primitive
+            {{#partial m_types.is_primitive type=type:self}}, # field type is primitive
         ),
         {{/function:sink_final_response_type}}
         {{#function:sink_final_response_exceptions}}
@@ -201,7 +201,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_sink_elem(metaclass={{
             {{#field:type}}{{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }}{{/field:type}},  # typeinfo
             None,  # default value
             {{#partial m_common.adapter_info node=field:self}},  # adapter info
-            {{#field:type}}{{> types/is_primitive }}{{/field:type}}, # field type is primitive
+            {{#partial m_types.is_primitive type=field:self.type}}, # field type is primitive
             {{field:idl_type}}, # IDL type (see BaseTypeEnum)
         ),
         {{/function:sink_final_response_exceptions}}

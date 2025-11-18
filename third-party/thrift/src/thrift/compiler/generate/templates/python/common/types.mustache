@@ -88,3 +88,14 @@
 {{#if python.generate_mutable_types?}}_fbthrift_python_mutable_containers.MutableSet{{/if}}
 {{#if python.generate_immutable_types?}}_typing.AbstractSet{{/if}}
 {{/let partial}}
+
+{{! Pick the Thrift container wrapper type for mutable types }}
+{{#let export partial add_wrapper_if_container |field|}}
+{{#pragma ignore-newlines}}
+{{#let ftype = field.type}}
+{{#if (and (not field.has_adapter?) ftype.container?)}}
+{{#if ftype.list?}} | _fbthrift_python_mutable_types._ThriftListWrapper
+{{#else if ftype.set?}} | _fbthrift_python_mutable_types._ThriftSetWrapper
+{{#else if ftype.map?}} | _fbthrift_python_mutable_types._ThriftMapWrapper{{/if ftype.list?}}
+{{/if (and (not field.has_adapter?) ftype.container?)}}
+{{/let partial}}

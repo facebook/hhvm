@@ -24,6 +24,6 @@
         }},
         {{field:py_name}}: _typing.Optional[{{!
         }}{{> fields/aliased_or_adapted_type_pyi}}{{!
-        }}{{> types/add_wrapper_if_container}}{{!
+        }}{{#partial m_types.add_wrapper_if_container field=field:self}}{{!
         }}]=...{{!
         }}{{/python.generate_mutable_types?}}

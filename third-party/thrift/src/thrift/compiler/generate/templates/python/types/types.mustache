@@ -19,6 +19,7 @@ Generated Python classes for Thrift types
 }}
 {{#import "common/common" as m_common}}
 {{#import "common/functions" as m_functions}}
+{{#import "common/services" as m_services}}
 {{#import "common/types" as m_types}}
 {{#partial m_common.auto_generated_py}}
 
@@ -297,11 +298,11 @@ _fbthrift_python_mutable_types.fill_specs(
 {{#python.generate_immutable_types?}}
 _fbthrift_python_types.fill_specs(
 {{/python.generate_immutable_types?}}
-{{#program:services}}
-    {{> types/service_arg_type_list}}
-{{#service:interactions}}
-    {{> types/service_arg_type_list}}
-{{/service:interactions}}
-{{/program:services}}
+{{#each program:self.services as |service|}}
+    {{#partial m_services.arg_type_list interface=service}}
+  {{#each service.interactions as |interaction|}}
+    {{#partial m_services.arg_type_list interface=interaction}}
+  {{/each}}
+{{/each}}
 )
 {{/program:services?}}

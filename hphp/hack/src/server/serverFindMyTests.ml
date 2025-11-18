@@ -16,9 +16,27 @@ let findrefs_member_of_member = function
 
 let supported_test_framework_classes = SSet.of_list ["WWWTest"]
 
+let show_pos_strip_newline pos =
+  let string =
+    Pos.show_pos
+      (fun fmt s -> Format.pp_print_string fmt s)
+      (Pos.to_relative_string pos)
+  in
+  String.filter string ~f:(fun c -> not (Char.equal c '\n'))
+
+let add_ns name =
+  if Char.equal name.[0] '\\' then
+    name
+  else
+    "\\" ^ name
+
 let strip_ns results =
   List.map results ~f:(fun r ->
       SearchTypes.Find_refs.{ r with name = Utils.strip_ns r.name })
+
+let log_info fmt = Hh_logger.info ~category:"FindMyTests" fmt
+
+let log_debug fmt = Hh_logger.debug ~category:"FindMyTests" fmt
 
 let is_test_file ctx file_path file_nast =
   let is_test_class class_name =
@@ -65,7 +83,7 @@ let is_test_file ctx file_path file_nast =
 
 let search ctx target include_defs ~files genv =
   List.iter files ~f:(fun file ->
-      Hh_logger.debug
+      log_debug
         "ServerFindMyTests.search file %s"
         (Relative_path.to_absolute file));
   (* Get all the references to the provided target in the files *)
@@ -81,12 +99,8 @@ let search ctx target include_defs ~files genv =
   strip_ns res
 
 let search_member
-    ctx
-    (class_name : string)
-    (member : member)
-    ~(include_defs : bool)
-    (genv : genv)
-    (env : env) : SearchTypes.Find_refs.t list =
+    ctx (class_name : string) (member : member) (genv : genv) (env : env) :
+    SearchTypes.Find_refs.t list =
   let dep_member_of member =
     let open Typing_deps.Dep.Member in
     match member with
@@ -122,46 +136,67 @@ let search_member
     FindRefsService.IMember
       (FindRefsService.Class_set class_and_descendants, fr_member)
   in
+  let include_defs = false in
   search ctx target include_defs ~files genv
 
-type symbol_def =
-  | Method of {
-      class_name: string;
-      method_name: string;
-    }
-[@@deriving show]
+let search_class ctx class_name genv =
+  let class_name = add_ns class_name in
+  let target =
+    (* We use IExplicitClass here instead of IClass.
+       The difference is that this excludes references to our target using static::, self:: and parent::, which we don't care about *)
+    FindRefsService.IExplicitClass class_name
+  in
+  let files =
+    FindRefsService.get_dependent_files
+      ctx
+      genv.ServerEnv.workers
+      (SSet.singleton class_name)
+    |> Relative_path.Set.elements
+  in
+  let include_defs = false in
+  search ctx target include_defs ~files genv
+
+(* Standalone module so we can pass it to Hash_set *)
+module Symbol_def = struct
+  type t =
+    | Method of {
+        class_name: string;
+        method_name: string;
+      }
+    | Classish of { name: string }
+  [@@deriving show, ord, sexp, hash]
+end
+
+open Symbol_def
 
 (** A symbol we encounter during our BFS traversal *)
 type symbol_node = {
-  symbol_def: symbol_def;
+  symbol_def: Symbol_def.t;
   distance: int;
 }
+[@@deriving show]
 
 type error_msg = string
-
-let full_name_of_symbol_def = function
-  | Method { class_name; method_name } -> class_name ^ "::" ^ method_name
 
 type result_entry = ServerCommandTypes.Find_my_tests.result_entry
 
 (**
-  This approach is awful performance-wise:
-  FindRefsService gives us *positions* where a certain target symbol is referenced.
-  But we need to find out the name of the enclosing definiton, so we can in turn find
-  where its referenced from.
+  Turns a method symbol occurrence (i.e., method use site) into the surrounding definition,
+  if we are interested in it.
 
-  Ideally, FindRefsService (or an alternative to it) would give us the enclosing SymbolDefinition
-  directly, but that would require piping that information through IdentifySymbolService.
+  Concretely, if method C1:m1 is used at some position p, check if p is inside some method C2:m2.
+  If so, return the latter. Otherwise, return None.
 *)
-let enclosing_def_of_symbol_occurrence
-    (symbol_occurrence_pos : Pos.t) symbol_occurrence_nast : symbol_def option =
+let process_method_occurrence
+    (method_occurrence_pos : Pos.t) method_occurrence_nast : Symbol_def.t option
+    =
   let visitor =
     object
       inherit [_] Aast.reduce as super
 
       method! on_class_ _ctx class_ =
         let class_span = class_.Aast.c_span in
-        if Pos.contains class_span symbol_occurrence_pos then
+        if Pos.contains class_span method_occurrence_pos then
           let ctx = Some class_.Aast.c_name in
           super#on_class_ ctx class_
         else
@@ -169,7 +204,7 @@ let enclosing_def_of_symbol_occurrence
 
       method! on_method_ ctx m =
         let span = m.Aast.m_span in
-        if Pos.contains span symbol_occurrence_pos then
+        if Pos.contains span method_occurrence_pos then
           (* We are seeing a method, so on_class_ must have set the class_name *)
           let class_name = snd (Option.value_exn ctx) in
           let method_name = snd m.Aast.m_name in
@@ -185,33 +220,110 @@ let enclosing_def_of_symbol_occurrence
         | (Some _, _) -> r1
     end
   in
-  visitor#on_program None symbol_occurrence_nast
+  visitor#on_program None method_occurrence_nast
+
+(**
+  Turns a class symbol occurrence (i.e., class name use site) into the surrounding definition,
+  if we are interested in it.
+
+  Concretely, if class C1 is used at some position p, check if p corresponds to `C1::class`
+  or `new C1(...)`.
+*)
+let process_class_occurrence
+    class_name (class_occurrence_pos : Pos.t) class_occurrence_nast :
+    Symbol_def.t option =
+  let is_in_class_or_new_expr block =
+    let is_our_class ci =
+      match ci with
+      | Aast.CI class_id
+      | CIexpr (_, _, Id class_id) ->
+        String.equal (snd class_id) class_name
+      | _ -> false
+    in
+    (object (self)
+       inherit [_] Aast.reduce as super
+
+       method! on_stmt ctx (stmt_span, stmt_) =
+         Pos.contains stmt_span class_occurrence_pos && self#on_stmt_ ctx stmt_
+
+       method! on_expr_ ctx expr_ =
+         (* TODO(frankemrich) This is pretty brittle and just handles the common cases.
+             If we do this using TASTs instead of NASTs we can just inspect the types *)
+         match expr_ with
+         | New ((_, _, ci), _, _, _, _) -> is_our_class ci
+         | Class_const ((_, _, ci), const_name) ->
+           is_our_class ci && String.equal (snd const_name) "class"
+         | _ -> super#on_expr_ ctx expr_
+
+       method zero = false
+
+       method plus = ( || )
+    end)
+      #on_block
+      ()
+      block
+  in
+  let method_visitor =
+    let open Aast in
+    object
+      inherit [_] Aast.reduce as super
+
+      method! on_class_ _ctx class_ =
+        let class_span = class_.Aast.c_span in
+        if Pos.contains class_span class_occurrence_pos then
+          let ctx = Some class_.Aast.c_name in
+          super#on_class_ ctx class_
+        else
+          None
+
+      method! on_method_ ctx m =
+        let span = m.m_span in
+        let body_block = m.m_body.fb_ast in
+        if
+          Pos.contains span class_occurrence_pos
+          && is_in_class_or_new_expr body_block
+        then
+          (* We are seeing a method, so on_class_ must have set the class_name *)
+          let class_name = snd (Option.value_exn ctx) in
+          let method_name = snd m.Aast.m_name in
+          Some (Method { class_name; method_name })
+        else
+          None
+
+      method zero = None
+
+      method plus r1 r2 =
+        match (r1, r2) with
+        | (None, _) -> r2
+        | (Some _, _) -> r1
+    end
+  in
+  method_visitor#on_program None class_occurrence_nast
 
 (**
   Find references to the given symbol.
   If the reference is from a test file, it's returned as part of the second list.
   Otherwise, the definition from where the reference happens is returned as part of the first list. *)
-let get_references
+let get_method_references
     ~(ctx : Provider_context.t)
     ~(genv : ServerEnv.genv)
     ~(env : ServerEnv.env)
-    symbol : (symbol_def list * string list, error_msg) Result.t =
+    ~class_name
+    ~method_name : (Symbol_def.t list * string list, error_msg) Result.t =
   let search_results =
-    match symbol with
-    | Method { class_name; method_name } ->
-      search_member
-        ctx
-        class_name
-        (Method method_name)
-        ~include_defs:false
-        genv
-        env
+    search_member ctx class_name (Method method_name) genv env
   in
   let resolve_found_position
       (acc_symbol_defs, acc_files)
       SearchTypes.Find_refs.{ name = _; pos = referencing_pos } =
     let relative_path = Pos.filename referencing_pos in
     let path = Relative_path.suffix relative_path in
+
+    log_debug
+      "get_method_references: Resolving symbol occurence %s of method %s::%s"
+      (show_pos_strip_newline referencing_pos)
+      class_name
+      method_name;
 
     (* We could implement all of our traversals without NASTs, but just CSTs and their
        Full_fidelity_positioned_syntax.parentage function.
@@ -220,25 +332,77 @@ let get_references
        constructed the TAST in FindRefsService. *)
     let nast = Ast_provider.get_ast ~full:true ctx relative_path in
 
-    if is_test_file ctx path nast then
+    if is_test_file ctx path nast then (
+      log_debug "get_method_references: Reference is from a test file: %s" path;
       Result.Ok
         ( acc_symbol_defs,
           (Pos.to_absolute referencing_pos |> Pos.filename) :: acc_files )
-    else
-      match enclosing_def_of_symbol_occurrence referencing_pos nast with
+    ) else
+      match process_method_occurrence referencing_pos nast with
       | Some referencing_def ->
+        log_debug
+          "get_method_references: found referencing def %s"
+          (Symbol_def.show referencing_def);
         Result.Ok (referencing_def :: acc_symbol_defs, acc_files)
       | None ->
         Result.Error
           (Printf.sprintf
              "Could not find definition enclosing %s"
-             (Pos.to_absolute referencing_pos |> Pos.show_absolute))
+             (show_pos_strip_newline referencing_pos))
   in
   List.fold_result search_results ~init:([], []) ~f:resolve_found_position
 
-let is_root_symbol_in_test_file ctx = function
-  | Method { class_name; method_name = _ } ->
-    (match Naming_provider.get_class_path ctx (Utils.add_ns class_name) with
+let get_class_references
+    ~(ctx : Provider_context.t) ~(genv : ServerEnv.genv) ~name :
+    (Symbol_def.t list * string list, error_msg) Result.t =
+  let search_results = search_class ctx name genv in
+  let resolve_found_position
+      (acc_symbol_defs, acc_files)
+      SearchTypes.Find_refs.{ name = _; pos = referencing_pos } =
+    let relative_path = Pos.filename referencing_pos in
+    let path = Relative_path.suffix relative_path in
+
+    log_debug
+      "get_class_references: Resolving symbol occurence %s"
+      (show_pos_strip_newline referencing_pos);
+
+    (* Same comment here regarding using NASTs to benefit from caching *)
+    let nast = Ast_provider.get_ast ~full:true ctx relative_path in
+
+    if is_test_file ctx path nast then (
+      log_debug "get_class_references: Reference is from a test file: %s" path;
+      Result.Ok
+        ( acc_symbol_defs,
+          (Pos.to_absolute referencing_pos |> Pos.filename) :: acc_files )
+    ) else
+      match process_class_occurrence name referencing_pos nast with
+      | Some referencing_def ->
+        log_debug
+          "get_class_references: found referencing def %s"
+          (Symbol_def.show referencing_def);
+        Result.Ok (referencing_def :: acc_symbol_defs, acc_files)
+      | None ->
+        log_info
+          "get_class_references: Could not find surrounding definition for use site %s of class %s, or it's not suitable"
+          (show_pos_strip_newline referencing_pos)
+          name;
+        Result.Ok (acc_symbol_defs, acc_files)
+  in
+  List.fold_result search_results ~init:([], []) ~f:resolve_found_position
+
+let get_references
+    ~(ctx : Provider_context.t)
+    ~(genv : ServerEnv.genv)
+    ~(env : ServerEnv.env)
+    symbol : (Symbol_def.t list * string list, error_msg) Result.t =
+  match symbol with
+  | Method { class_name; method_name } ->
+    get_method_references ~ctx ~genv ~env ~class_name ~method_name
+  | Classish { name } -> get_class_references ~ctx ~genv ~name
+
+let is_root_symbol_in_test_file ctx symbol_def =
+  let check_class class_name =
+    match Naming_provider.get_class_path ctx (Utils.add_ns class_name) with
     | None ->
       failwith
         (Printf.sprintf
@@ -251,56 +415,85 @@ let is_root_symbol_in_test_file ctx = function
         let absolute_path = Relative_path.to_absolute path in
         Some absolute_path
       else
-        None)
+        None
+  in
+  match symbol_def with
+  | Method { class_name; method_name = _ } -> check_class class_name
+  | Classish { name } -> check_class name
 
 let search
     ~(ctx : Provider_context.t)
     ~(genv : ServerEnv.genv)
     ~(env : ServerEnv.env)
     max_distance
-    (roots : symbol_def list) : result_entry list =
+    (roots : Symbol_def.t list) : result_entry list =
   let queue = Queue.create () in
-  let seen_symbols = Hash_set.create (module String) in
+  let seen_symbols = Hash_set.create (module Symbol_def) in
   (* Maps test file paths to the minimum distance at which we have discovered them *)
   let test_files = Hashtbl.create (module String) in
 
   List.iter roots ~f:(fun root_symbol ->
-      let full_name = full_name_of_symbol_def root_symbol in
-      let seen = Result.is_error (Hash_set.strict_add seen_symbols full_name) in
+      let seen =
+        Result.is_error (Hash_set.strict_add seen_symbols root_symbol)
+      in
       match is_root_symbol_in_test_file ctx root_symbol with
       | Some test_file -> ignore (Hashtbl.add test_files ~key:test_file ~data:0)
       | None ->
-        if not seen then
-          Queue.enqueue queue { distance = 0; symbol_def = root_symbol });
+        if not seen then (
+          log_debug "Adding root %s to queue" (Symbol_def.show root_symbol);
+          Queue.enqueue queue { distance = 0; symbol_def = root_symbol }
+        ));
+
+  (* For each root, we add a node for the enclosing class.
+     TODO(frankemrich): In the future we may want to consider doing this for any method we
+     encounter, not just root methods *)
+  List.iter roots ~f:(fun root_symbol ->
+      match root_symbol with
+      | Method { class_name; _ } ->
+        let class_symbol = Classish { name = class_name } in
+        let seen =
+          Result.is_error (Hash_set.strict_add seen_symbols class_symbol)
+        in
+        (* We consider going from root (distance 0) to the enclosing class as a step *)
+        let distance = 1 in
+        if not seen then (
+          log_debug
+            "Adding enclosing class to queue for root %s"
+            (Symbol_def.show root_symbol);
+          Queue.enqueue queue { distance; symbol_def = class_symbol }
+        )
+      | _ -> ());
 
   let rec bfs () =
     match Queue.dequeue queue with
-    | Some { distance; symbol_def } when distance < max_distance ->
+    | Some ({ distance; symbol_def } as node) when distance < max_distance ->
+      log_info "processing node %s" (show_symbol_node node);
       let new_distance = distance + 1 in
       (match get_references ~ctx ~genv ~env symbol_def with
       | Result.Ok (referencing_defs, referencing_test_files) ->
         List.iter referencing_defs ~f:(fun referencing_def ->
-            let symbol_name = full_name_of_symbol_def referencing_def in
-            match Hash_set.strict_add seen_symbols symbol_name with
+            match Hash_set.strict_add seen_symbols referencing_def with
             | Result.Ok () ->
-              Queue.enqueue
-                queue
+              let new_node =
                 { distance = new_distance; symbol_def = referencing_def }
+              in
+              log_info "adding node %s to queue" (show_symbol_node new_node);
+              Queue.enqueue queue new_node
             | Result.Error _ -> (* Already seen, nothing to do *) ());
         List.iter referencing_test_files ~f:(fun referencing_test_file ->
-            (* This does nothing if a mapping for the same file exists.
-               Since we are doing a BFS traversal, we are guaranteed to maintain
-               the invariant that the existing binding would have existing_distance <= new_distance *)
-            ignore
-              (Hashtbl.add
-                 test_files
-                 ~key:referencing_test_file
-                 ~data:new_distance));
+            match
+              Hashtbl.add
+                test_files
+                ~key:referencing_test_file
+                ~data:new_distance
+            with
+            | `Duplicate -> (* Already seen, nothing to do *) ()
+            | `Ok -> log_info "adding new test %s" referencing_test_file);
         bfs ()
       | Result.Error msg ->
-        Hh_logger.log
+        log_info
           "Getting references for symbol %s failed: %s"
-          (show_symbol_def symbol_def)
+          (Symbol_def.show symbol_def)
           msg)
     | _ -> ()
   in
@@ -340,5 +533,4 @@ let go
         let* def = parse_method_def symbol_name in
         Result.Ok (def :: acc))
   in
-
   Result.Ok (search ~ctx ~genv ~env max_distance roots)

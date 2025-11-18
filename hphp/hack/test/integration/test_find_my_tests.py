@@ -172,3 +172,60 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
                 expected_test_files=expected_tests,
                 max_distance=max_distance,
             )
+
+    def test_construction1(self) -> None:
+        """Tests that we detect object creation (without explicit constructors)
+
+        Uses files from c/ subdirectory
+
+        """
+
+        prefix = os.path.join(self.test_driver.repo_dir, "c", "__tests__")
+
+        self.check_has_tests_with_distances(
+            prefix=prefix,
+            symbols=["C1_Mid::origin"],
+            expected_test_files=[("C1_MidTest.php", 3), ("C1_DirectNewTest.php", 2)],
+            max_distance=10,
+        )
+
+    def test_construction2(self) -> None:
+        """Tests that we detect object creation (with explicit constructors)
+
+        Uses files from c/ subdirectory
+        """
+
+        prefix = os.path.join(self.test_driver.repo_dir, "c", "__tests__")
+
+        self.check_has_tests_with_distances(
+            prefix=prefix,
+            symbols=["C2_Mid::origin"],
+            expected_test_files=[("C2_MidTest.php", 3), ("C2_DirectNewTest.php", 2)],
+            max_distance=10,
+        )
+
+    def test_bypassvisibility(self) -> None:
+        """Tests involving some common usages of BypassVisibility (and a bit of DataProvider).
+
+        Note that FindMyTests currently has no dedicated handling for either of those constructs.
+        However, we should ensure that these tests keep on being detected, even if this is
+        currently achieved through other mechanisms.
+
+        Uses files from d/ subdirectory
+        """
+
+        prefix = os.path.join(self.test_driver.repo_dir, "d", "__tests__")
+
+        self.check_has_tests_with_distances(
+            prefix=prefix,
+            symbols=["D1::origin"],
+            expected_test_files=[
+                ("D1_Test1.php", 2),
+                ("D1_Test2.php", 3),
+                ("D1_Test3.php", 2),
+                ("D1_Test4.php", 2),
+                ("D1_Test5.php", 2),
+                ("D1_Test6.php", 3),
+            ],
+            max_distance=10,
+        )

@@ -123,7 +123,7 @@
    (facebook signed_source -> serverInvalidateUnits.fb.ml)
    (-> serverInvalidateUnits.stubs.ml)))
  (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
+  (pps lwt_ppx ppx_deriving.std ppx_sexp_conv ppx_hash)))
 
 (rule
  (target serverInitMessages.fb.ml)

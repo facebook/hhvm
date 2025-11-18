@@ -255,9 +255,7 @@ ClientRunner::ClientRunner(const ClientConfig& config)
     : config_(config),
       continuous_(config.continuous),
       useLoadGenerator_(config.useLoadGenerator),
-      latch_(
-          config.numClientThreads * config.numConnectionsPerThread *
-          config.numClientsPerConnection),
+      latch_(config.numClientThreads * config.numConnectionsPerThread),
       clientThreads_() {
   rocket::THRIFT_FLAG_SET_MOCK(
       rocket_enable_frame_relative_alignment,

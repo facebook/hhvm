@@ -40,20 +40,26 @@
  *   (e.g. onMaxStreams, onMaxData, ::enqueue(ReadHandle&),
  *   ::dequeue(WriteHandle&), etc.)
  *
- * As of now, there's a single channel to communicate events to the backing
- * transport –via WtStreamManager::Callback. This simply lets the backing
- * transport know that there is an event available for the write loop to action
- * on – there are two main events:
+ * There are two channels to communicate events to the backing transport, via
+ * IngressCallback and EgressCallback.
  *
- * – Control frames that need to be serialized/sent by the transport (e.g.
- *   reset_stream, stop_sending, etc.). The transport should invoke ::moveEvents
- *   and install a visitor to ensure all control-frames are handled
- *   appropriately.
+ *  – IngressCallback lets the backing transport know that a new peer stream is
+ *    available to read/write. This is a simple uint64_t, and the backing
+ *    transport can invoke ::getOrCreateBidiHandle to inspect whether this is a
+ *    bidi or uni stream
  *
- * – A stream that is now writable (e.g. ::nextWritable will return
- *   non-nullptr). The transport should query the nextWritable stream and
- *   dequeue data from the handle.
+ *  – EgressCallback lets the backing transport know that there is an event
+ *    available for the write loop to action on – there are two main
+ *    EgressCallback events:
  *
+ *    – Control frames that need to be serialized/sent by the transport (e.g.
+ *      reset_stream, stop_sending, etc.). The transport should invoke
+ *      ::moveEvents and install a visitor to ensure all control-frames are
+ *      handled appropriately.
+ *
+ *    – A stream that is now writable (e.g. ::nextWritable will return
+ *      non-nullptr). The transport should query the nextWritable stream and
+ *      dequeue data from the handle.
  *
  * A note about stream handles – everything is dervied from WtDir (the role of
  * the endpoint, e.g. client or server) and stream id. Any attempt to
@@ -81,9 +87,19 @@ struct WtStreamManager {
    * It is also invoked once there is a writable stream (i.e. nextWritable()
    * transitions from returning nullptr to returning a valid egress handle)
    */
-  struct Callback {
-    virtual ~Callback() = default;
+  struct EgressCallback {
+    virtual ~EgressCallback() = default;
     virtual void eventsAvailable() noexcept = 0;
+  };
+  /**
+   * IngressCallback::onNewPeerStream is invoked whenever a new peer stream has
+   * been allocated. As of now, the backing transport must wait an EventBase
+   * loop before passing the handle to the application (i.e.
+   * WebTransportHandler).
+   */
+  struct IngressCallback {
+    virtual ~IngressCallback() = default;
+    virtual void onNewPeerStream(uint64_t streamId) noexcept = 0;
   };
 
   struct WtConfig {
@@ -103,7 +119,10 @@ struct WtStreamManager {
     uint64_t peerMaxStreamDataUni{kDefaultFc};
   };
 
-  WtStreamManager(WtDir dir, const WtConfig& config, Callback& cb) noexcept;
+  WtStreamManager(WtDir dir,
+                  const WtConfig& config,
+                  EgressCallback& egressCb,
+                  IngressCallback& ingressCb) noexcept;
   ~WtStreamManager() noexcept;
 
   using WtException = WebTransport::Exception;
@@ -353,7 +372,8 @@ struct WtStreamManager {
   uint64_t connBytesRead_{0};
   FlowController connRecvFc_;
   BufferedFlowController connSendFc_;
-  Callback& cb_;
+  EgressCallback& egressCb_;
+  IngressCallback& ingressCb_;
   std::vector<Event> ctrlEvents_;
   bool drain_{false};
 

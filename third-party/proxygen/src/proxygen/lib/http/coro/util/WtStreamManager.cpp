@@ -329,14 +329,16 @@ uint64_t& WtStreamManager::MaxStreamsContainer::getMaxStreams(
 
 WtStreamManager::WtStreamManager(WtDir dir,
                                  const WtConfig& config,
-                                 Callback& cb) noexcept
+                                 EgressCallback& egressCb,
+                                 IngressCallback& ingressCb) noexcept
     : dir_(dir),
       nextStreamIds_(nextStreamIds(dir)),
       maxStreams_(maxStreams(dir, config)),
       wtConfig_(config),
       connRecvFc_(config.selfMaxConnData),
       connSendFc_(config.peerMaxConnData),
-      cb_(cb) {
+      egressCb_(egressCb),
+      ingressCb_(ingressCb) {
   XCHECK(dir <= WtDir::Server) << "invalid dir";
 }
 
@@ -371,7 +373,7 @@ void WtStreamManager::enqueueEvent(Event&& ev) noexcept {
   bool wasEmpty = !hasEvent();
   ctrlEvents_.push_back(std::move(ev));
   if (wasEmpty && hasEvent()) {
-    cb_.eventsAvailable();
+    egressCb_.eventsAvailable();
   }
 }
 
@@ -403,6 +405,24 @@ struct WtStreamManager::BidiHandle {
     // link ReadHandle<->WriteHandle
     wh.rh_ = &rh;
     rh.wh_ = &wh;
+    if (sm.isPeer(id)) {
+      /**
+       * NOTE: & TODO: This is intentionally invoked now, before the stream is
+       * inserted into the map. This is to prevent the case where an application
+       * bidirectionally resets a stream inline (from
+       * IngressCallback::onNewPeerStream) and causes its subsequent
+       * deallocation while the handle is returned to the backing transport
+       * (e.g. the ::getOrCreateBidiHandle invocation that caused this stream
+       * allocation in the first place).
+       *
+       * The backing transport must accumulate these streams and deliver them to
+       * the application in the next EventBase loop. The more appropriate fix
+       * here is for the containing class to pass in a folly::Executor to
+       * StreamManager, allowing WtStreamManager to defer invoking
+       * ::onNewPeerStream (effectively asynchronous w.r.t stream allocation).
+       */
+      sm.ingressCb_.onNewPeerStream(id);
+    }
   }
 
   static std::unique_ptr<BidiHandle> make(uint64_t id, WtStreamManager& sm) {
@@ -478,7 +498,7 @@ WtStreamManager::Result WtStreamManager::onMaxData(MaxConnData data) noexcept {
   }
   bool wasEmpty = !hasEvent();
   if (!wasEmpty && hasEvent()) {
-    cb_.eventsAvailable();
+    egressCb_.eventsAvailable();
   }
   return Ok;
 }
@@ -567,7 +587,7 @@ void WtStreamManager::onStreamWritable(WtWriteHandle& wh) noexcept {
   bool wasEmpty = !hasEvent();
   writableStreams_.insert(&wh);
   if (wasEmpty && hasEvent()) {
-    cb_.eventsAvailable();
+    egressCb_.eventsAvailable();
   }
 }
 

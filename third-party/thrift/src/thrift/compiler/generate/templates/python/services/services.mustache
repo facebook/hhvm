@@ -19,6 +19,7 @@ Generates a top-level file to be imported in the user's service code. It provide
 wrappers for each of the service handlers that the user is then able to extend.
 }}
 {{#import "common/common" as m_common}}
+{{#import "common/functions" as m_functions}}
 {{#import "common/types" as m_types}}
 {{#partial m_common.auto_generated_py}}
 import builtins
@@ -225,7 +226,7 @@ class {{service:name}}Interface(
     {{/function:bidirectional_stream?}}
     async def _fbthrift__handler_{{function:name}}(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) {{!
             }}-> {{> services/service_handler_return_type }}:
-        args_struct = deserialize({{> types/function_args_type}}, args, protocol)
+        args_struct = deserialize({{#partial m_functions.args_type service=service:self function=function:self}}, args, protocol)
         {{! TODO: call the postWrite hook here }}
         {{#function:exceptions?}}
         try:

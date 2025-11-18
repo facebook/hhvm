@@ -17,7 +17,7 @@
 }}{{!
 A list of the argument and result types for functions on thrift services (and interactions) for the purposes of calling fill_specs on them
 }}{{#service:supported_functions}}
-{{> types/function_args_type}},
+{{#partial m_functions.args_type service=service:self function=function:self}},
 {{^function:oneway?}}
 _fbthrift_{{service:name}}_{{function:name}}_result,
 {{/function:oneway?}}

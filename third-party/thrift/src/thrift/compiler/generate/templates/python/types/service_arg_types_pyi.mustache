@@ -19,7 +19,7 @@ The argument and result types for functions on thrift services (and interactions
 }}{{#service:supported_functions}}
 
 
-class {{> types/function_args_type}}({{#partial m_types.struct_base}}):
+class {{#partial m_functions.args_type service=service:self function=function:self}}({{#partial m_types.struct_base}}):
     {{#function:args}}
     {{field:py_name}}: _typing.Final[{{#field:type}}{{> types/pep484_type}}{{/field:type}}] = ...
     {{/function:args}}

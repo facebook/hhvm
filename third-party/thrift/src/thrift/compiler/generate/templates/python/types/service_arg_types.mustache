@@ -20,7 +20,7 @@ The argument and result types for functions on thrift services (and interactions
 {{#service:supported_functions}}
 
 
-class {{> types/function_args_type}}(metaclass={{#partial m_types.struct_metaclass}}):
+class {{#partial m_functions.args_type service=service:self function=function:self}}(metaclass={{#partial m_types.struct_metaclass}}):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         {{#function:args}}

@@ -85,7 +85,7 @@ class Async({{#service:extends}}{{!
         _fbthrift_resp = await self._send_request(
             {{#if service:interaction?}}"{{parent_service_name}}"{{#else}}"{{service:name}}"{{/if}},
             {{#if service:interaction?}}"{{interaction:name}}.{{function:name}}",{{#else}}"{{function:name}}",{{/if}}
-            {{> types/function_args_type}}({{#function:args}}
+            {{#partial m_functions.args_type service=service:self function=function:self}}({{#function:args}}
                 {{field:py_name}}={{field:py_name}},{{/function:args}}),
             {{> clients/client_return_type}},
             qualifier = _fbthrift_FunctionQualifier.{{function:qualifier}},
@@ -201,7 +201,7 @@ class Sync({{#service:extends}}{{!
         _fbthrift_resp = self._send_request(
             "{{service:name}}",
             "{{function:name}}",
-            {{> types/function_args_type}}({{#function:args}}
+            {{#partial m_functions.args_type service=service:self function=function:self}}({{#function:args}}
                 {{field:py_name}}={{field:py_name}},{{/function:args}}),
             {{> clients/client_return_type}},
             uri_or_name={{#service:uri}}"{{service:uri}}"{{/service:uri}}{{!

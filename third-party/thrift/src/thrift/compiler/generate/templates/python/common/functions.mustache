@@ -14,6 +14,12 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{!
-This is the struct that wraps function args
-}}{{^python.is_types_file?}}{{program:module_mangle}}__{{#partial m_types.import_path}}.{{/python.is_types_file?}}_fbthrift_{{service:name}}_{{function:name}}_args
+}}
+
+{{#import "common/types" as m_types}}
+
+{{! Name of the struct that wraps function args }}
+{{#let export partial args_type |service function| captures |m_types|}}
+{{#pragma ignore-newlines}}
+{{#if (not python.is_types_file?)}}{{root_program.module_mangle}}__{{#partial m_types.import_path}}.{{/if}}_fbthrift_{{service.name}}_{{function.name}}_args
+{{/let partial}}

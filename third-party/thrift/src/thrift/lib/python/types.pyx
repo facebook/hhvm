@@ -1186,14 +1186,13 @@ cdef class IssetArray:
     def __hash__(self):
         return hash(b"\0" * len(self.inner))
 
-# Note this function steals the new reference created from C++ caller
-cdef api object IssetArray_make(PyObject* byteArray):
+cdef api object IssetArray_make(object byteArray):
     inst = IssetArray.__new__(IssetArray)
-    (<IssetArray>inst).inner = <object>byteArray
+    (<IssetArray>inst).inner = byteArray
     return inst
 
-cdef api object IssetArray_get(object issetarray) noexcept:
-    return (<IssetArray>issetarray).inner
+cdef api PyObject* IssetArray_get(object issetarray) noexcept:
+    return <PyObject*>(<IssetArray>issetarray).inner
 
 
 cdef void set_struct_field(tuple struct_tuple, int16_t index, value) except *:

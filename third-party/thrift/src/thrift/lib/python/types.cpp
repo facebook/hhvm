@@ -1270,8 +1270,8 @@ template <typename Container>
 PyObject* FOLLY_NULLABLE createStructContainer(int16_t numFields) {
   ensure_module_imported();
   // Allocate and 0-initialize numFields bytes.
-  PyObject* issetBytes = PyBytes_FromStringAndSize(nullptr, numFields);
-  char* flags = PyBytes_AsString(issetBytes);
+  UniquePyObjectPtr issetBytes{PyBytes_FromStringAndSize(nullptr, numFields)};
+  char* flags = PyBytes_AsString(issetBytes.get());
   if (flags == nullptr) {
     return nullptr;
   }
@@ -1281,8 +1281,7 @@ PyObject* FOLLY_NULLABLE createStructContainer(int16_t numFields) {
     flags[i] = '\0';
   }
 
-  // IssetArray_make "steals" issetBytes, taking ownership
-  UniquePyObjectPtr issetArr{IssetArray_make(issetBytes)};
+  UniquePyObjectPtr issetArr{IssetArray_make(issetBytes.get())};
   if (issetArr == nullptr) {
     return nullptr;
   }

@@ -305,9 +305,9 @@ cdef class Union(StructOrUnion):
 cdef class IssetArray:
     cdef bytes inner
 
-cdef api object IssetArray_make(PyObject*)
-# returns the inner bytes object
-cdef api object IssetArray_get(object)
+cdef api object IssetArray_make(object)
+# returns a borrowed reference (no Py_INCREF) to inner bytes object
+cdef api PyObject* IssetArray_get(object)
 
 cdef class BadEnum:
     cdef object _enum

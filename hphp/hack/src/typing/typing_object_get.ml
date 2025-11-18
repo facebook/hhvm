@@ -112,7 +112,10 @@ let fold_mismatch_opts opt_errs =
 
 let get_member ~is_method env class_info member_name =
   if is_method then
-    Env.get_method env class_info member_name
+    if String.equal member_name SN.Members.__construct then
+      fst (Env.get_construct env class_info)
+    else
+      Env.get_method env class_info member_name
   else
     Env.get_prop env class_info member_name
 
@@ -901,17 +904,6 @@ and obj_get_concrete_class_without_member_info
       (mk (Reason.none, Tfun ft), []),
       dflt_lval_mismatch,
       dflt_rval_mismatch )
-  else if String.equal id_str SN.Members.__construct then
-    (* __construct is not an instance method and shouldn't be invoked directly
-       Note that we already raise a NAST check error in `illegal_name_check` but
-       we raise a related typing error here to properly keep track of failure.
-       We prefer a specific error here since the generic 4053 `MemberNotFound`
-       error, below, would be quite confusing telling us there is no instance
-       method `__construct` *)
-    let ty_err =
-      Typing_error.(primary @@ Primary.Construct_not_instance_method id_pos)
-    in
-    default (Some ty_err)
   else
     let ty_err =
       member_not_found

@@ -390,7 +390,7 @@ let build_constructor
           ~superfluous_override:false
           ~dynamicallycallable:false
           ~readonly_prop_or_needs_concrete:false
-          ~support_dynamic_type:false
+          ~support_dynamic_type:(sm_support_dynamic_type method_)
           ~needs_init:false
           ~no_auto_likes:(sm_no_auto_likes method_)
           ~safe_global_variable:false;

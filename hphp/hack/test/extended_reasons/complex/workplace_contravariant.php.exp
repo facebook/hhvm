@@ -2,6 +2,8 @@ error: Typing[4110] Invalid argument
 
 File workplace_contravariant.php, line 13, character 33 - line 13, character 39:
 
+  9 | }
+ 10 | 
  11 | final class TestServiceWA extends TestServiceBase<int, string> {
  12 |   public function __construct(int $a, string $b, ISender<int, null> $sender) {
  13 |     parent::__construct($a, $b, »$sender«);
@@ -12,6 +14,8 @@ Expected null
 
 File workplace_contravariant.php, line 12, character 63 - line 12, character 66:
 
+  9 | }
+ 10 | 
  11 | final class TestServiceWA extends TestServiceBase<int, string> {
  12 |   public function __construct(int $a, string $b, ISender<int, »null«> $sender) {
  13 |     parent::__construct($a, $b, $sender);
@@ -20,189 +24,32 @@ File workplace_contravariant.php, line 12, character 63 - line 12, character 66:
 
 But got string
 
-File workplace_contravariant.php, line 12, character 39 - line 12, character 44:
+File workplace_contravariant.php, line 11, character 56 - line 11, character 61:
 
- 11 | final class TestServiceWA extends TestServiceBase<int, string> {
- 12 |   public function __construct(int $a, »string« $b, ISender<int, null> $sender) {
- 13 |     parent::__construct($a, $b, $sender);
- 14 |   }
- 15 | }
-
-Here's why:
-
-I checked the subtype constraint in [Main] because it was implied by the other constraints on the generic parameter TB of TestServiceBase.
-
-  [Main] Step 1 of 2                                                            
-
-I started by checking this subtype relationship.
-
-The subtype comes from this function or method declaration
-
-File workplace_contravariant.php, line 4, character 19 - line 4, character 29:
-
- 3 | abstract class TestServiceBase<TA, TB> {
- 4 |   public function »__construct«(
- 5 |     protected TA $a,
- 6 |     protected TB $b,
- 7 |     ISender<TA, ?TB> $sender,
- 8 |   ) {}
- 9 | }
-
-The supertype comes from this expression
-
-File workplace_contravariant.php, line 13, character 5 - line 13, character 40:
-
- 11 | final class TestServiceWA extends TestServiceBase<int, string> {
+  9 | }
+ 10 | 
+ 11 | final class TestServiceWA extends TestServiceBase<int, »string«> {
  12 |   public function __construct(int $a, string $b, ISender<int, null> $sender) {
- 13 |     »parent::__construct($a, $b, $sender)«;
- 14 |   }
- 15 | }
-
-
-  [Main] Step 2 of 2                          (here is where the error occurred) 
-
-These are function types so next I checked the 2nd function parameters.
-Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
-
-The subtype comes from this hint
-
-File workplace_contravariant.php, line 12, character 39 - line 12, character 44:
-
- 11 | final class TestServiceWA extends TestServiceBase<int, string> {
- 12 |   public function __construct(int $a, »string« $b, ISender<int, null> $sender) {
  13 |     parent::__construct($a, $b, $sender);
  14 |   }
  15 | }
 
-and flows into this expression
+  via this generic TB
 
-File workplace_contravariant.php, line 12, character 46 - line 12, character 47:
-
- 11 | final class TestServiceWA extends TestServiceBase<int, string> {
- 12 |   public function __construct(int $a, string »$b«, ISender<int, null> $sender) {
- 13 |     parent::__construct($a, $b, $sender);
- 14 |   }
- 15 | }
-
-as the parameter hint
-
-which itself flows into this expression
-
-File workplace_contravariant.php, line 13, character 29 - line 13, character 30:
-
- 11 | final class TestServiceWA extends TestServiceBase<int, string> {
- 12 |   public function __construct(int $a, string $b, ISender<int, null> $sender) {
- 13 |     parent::__construct($a, »$b«, $sender);
- 14 |   }
- 15 | }
-
-as the type of the local variable
-
-The supertype comes from this hint
-
-File workplace_contravariant.php, line 12, character 63 - line 12, character 66:
-
- 11 | final class TestServiceWA extends TestServiceBase<int, string> {
- 12 |   public function __construct(int $a, string $b, ISender<int, »null«> $sender) {
- 13 |     parent::__construct($a, $b, $sender);
- 14 |   }
- 15 | }
-
-I found the subtype for [Main] when I checked the subtype constraint in [Lower].
-
-  [Lower] Step 1 of 2                                                           
-
-I started by checking this subtype relationship.
-
-The subtype comes from this function or method declaration
-
-File workplace_contravariant.php, line 4, character 19 - line 4, character 29:
-
- 3 | abstract class TestServiceBase<TA, TB> {
- 4 |   public function »__construct«(
- 5 |     protected TA $a,
- 6 |     protected TB $b,
- 7 |     ISender<TA, ?TB> $sender,
- 8 |   ) {}
- 9 | }
-
-The supertype comes from this expression
-
-File workplace_contravariant.php, line 13, character 5 - line 13, character 40:
-
- 11 | final class TestServiceWA extends TestServiceBase<int, string> {
- 12 |   public function __construct(int $a, string $b, ISender<int, null> $sender) {
- 13 |     »parent::__construct($a, $b, $sender)«;
- 14 |   }
- 15 | }
-
-
-  [Lower] Step 2 of 2                                                           
-
-These are function types so next I checked the 2nd function parameters.
-Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
-
-The subtype comes from this hint
-
-File workplace_contravariant.php, line 12, character 39 - line 12, character 44:
-
- 11 | final class TestServiceWA extends TestServiceBase<int, string> {
- 12 |   public function __construct(int $a, »string« $b, ISender<int, null> $sender) {
- 13 |     parent::__construct($a, $b, $sender);
- 14 |   }
- 15 | }
-
-and flows into this expression
-
-File workplace_contravariant.php, line 12, character 46 - line 12, character 47:
-
- 11 | final class TestServiceWA extends TestServiceBase<int, string> {
- 12 |   public function __construct(int $a, string »$b«, ISender<int, null> $sender) {
- 13 |     parent::__construct($a, $b, $sender);
- 14 |   }
- 15 | }
-
-as the parameter hint
-
-which itself flows into this expression
-
-File workplace_contravariant.php, line 13, character 29 - line 13, character 30:
-
- 11 | final class TestServiceWA extends TestServiceBase<int, string> {
- 12 |   public function __construct(int $a, string $b, ISender<int, null> $sender) {
- 13 |     parent::__construct($a, »$b«, $sender);
- 14 |   }
- 15 | }
-
-as the type of the local variable
-
-The supertype comes from this generic parameter TB of TestServiceBase
-
-File workplace_contravariant.php, line 13, character 5 - line 13, character 40:
-
- 11 | final class TestServiceWA extends TestServiceBase<int, string> {
- 12 |   public function __construct(int $a, string $b, ISender<int, null> $sender) {
- 13 |     »parent::__construct($a, $b, $sender)«;
- 14 |   }
- 15 | }
-
-and flows into this hint
-
-File workplace_contravariant.php, line 6, character 15 - line 6, character 16:
+File workplace_contravariant.php, line 7, character 18 - line 7, character 19:
 
  3 | abstract class TestServiceBase<TA, TB> {
  4 |   public function __construct(
  5 |     protected TA $a,
- 6 |     protected »TB« $b,
- 7 |     ISender<TA, ?TB> $sender,
+ 6 |     protected TB $b,
+ 7 |     ISender<TA, ?»TB«> $sender,
  8 |   ) {}
  9 | }
 
-as the instantiation of the generic TB
+Here's why:
 
-I found the supertype for [Main] when I checked the subtype constraint in [Upper].
 
-  [Upper] Step 1 of 4                                                           
+  Step 1 of 4                                                                   
 
 I started by checking this subtype relationship.
 
@@ -222,6 +69,8 @@ The supertype comes from this expression
 
 File workplace_contravariant.php, line 13, character 5 - line 13, character 40:
 
+  9 | }
+ 10 | 
  11 | final class TestServiceWA extends TestServiceBase<int, string> {
  12 |   public function __construct(int $a, string $b, ISender<int, null> $sender) {
  13 |     »parent::__construct($a, $b, $sender)«;
@@ -229,7 +78,7 @@ File workplace_contravariant.php, line 13, character 5 - line 13, character 40:
  15 | }
 
 
-  [Upper] Step 2 of 4                                                           
+  Step 2 of 4                                                                   
 
 These are function types so next I checked the 3rd function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -238,6 +87,8 @@ The subtype comes from this hint
 
 File workplace_contravariant.php, line 12, character 50 - line 12, character 67:
 
+  9 | }
+ 10 | 
  11 | final class TestServiceWA extends TestServiceBase<int, string> {
  12 |   public function __construct(int $a, string $b, »ISender<int, null>« $sender) {
  13 |     parent::__construct($a, $b, $sender);
@@ -256,6 +107,8 @@ and flows into this expression
 
 File workplace_contravariant.php, line 12, character 69 - line 12, character 75:
 
+  9 | }
+ 10 | 
  11 | final class TestServiceWA extends TestServiceBase<int, string> {
  12 |   public function __construct(int $a, string $b, ISender<int, null> »$sender«) {
  13 |     parent::__construct($a, $b, $sender);
@@ -268,6 +121,8 @@ which itself flows into this expression
 
 File workplace_contravariant.php, line 13, character 33 - line 13, character 39:
 
+  9 | }
+ 10 | 
  11 | final class TestServiceWA extends TestServiceBase<int, string> {
  12 |   public function __construct(int $a, string $b, ISender<int, null> $sender) {
  13 |     parent::__construct($a, $b, »$sender«);
@@ -291,7 +146,7 @@ File workplace_contravariant.php, line 7, character 5 - line 7, character 20:
 (its definition was given above)
 
 
-  [Upper] Step 3 of 4                                                           
+  Step 3 of 4                                                                   
 
 ISender is a class or interface so next I checked the 2nd type arguments.
 The type parameter is contravariant so the direction of the subtype relationship is reversed.
@@ -312,6 +167,8 @@ The supertype comes from this hint
 
 File workplace_contravariant.php, line 12, character 63 - line 12, character 66:
 
+  9 | }
+ 10 | 
  11 | final class TestServiceWA extends TestServiceBase<int, string> {
  12 |   public function __construct(int $a, string $b, ISender<int, »null«> $sender) {
  13 |     parent::__construct($a, $b, $sender);
@@ -319,17 +176,19 @@ File workplace_contravariant.php, line 12, character 63 - line 12, character 66:
  15 | }
 
 
-  [Upper] Step 4 of 4                                                           
+  Step 4 of 4                                 (here is where the error occurred) 
 
 The subtype is a nullable type so next I checked the subtype constraint is satisfied for both the null & non-null parts.
 
-The subtype comes from this generic parameter TB of TestServiceBase
+The subtype comes from this hint
 
-File workplace_contravariant.php, line 13, character 5 - line 13, character 40:
+File workplace_contravariant.php, line 11, character 56 - line 11, character 61:
 
- 11 | final class TestServiceWA extends TestServiceBase<int, string> {
+  9 | }
+ 10 | 
+ 11 | final class TestServiceWA extends TestServiceBase<int, »string«> {
  12 |   public function __construct(int $a, string $b, ISender<int, null> $sender) {
- 13 |     »parent::__construct($a, $b, $sender)«;
+ 13 |     parent::__construct($a, $b, $sender);
  14 |   }
  15 | }
 
@@ -351,6 +210,8 @@ The supertype is the same as before.
 
 File workplace_contravariant.php, line 12, character 63 - line 12, character 66:
 
+  9 | }
+ 10 | 
  11 | final class TestServiceWA extends TestServiceBase<int, string> {
  12 |   public function __construct(int $a, string $b, ISender<int, »null«> $sender) {
  13 |     parent::__construct($a, $b, $sender);

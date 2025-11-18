@@ -2490,6 +2490,35 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
         )
     }
 
+    fn possibly_make_supportdyn_method(
+        &mut self,
+        class_attributes: &Attributes,
+        method: ShallowMethod,
+    ) -> ShallowMethod {
+        if ((self.implicit_sdt() && !class_attributes.no_support_dynamic_type)
+            || class_attributes.support_dynamic_type
+            || class_attributes.dynamically_referenced)
+            && !method.flags.contains(MethodFlags::SUPPORT_DYNAMIC_TYPE)
+        {
+            let type_ = match *method.type_.1 {
+                Ty_::Tfun(ft) => {
+                    let flags = ft.flags | FunTypeFlags::SUPPORT_DYNAMIC_TYPE;
+                    let ft = FunType { flags, ..ft };
+                    Ty(method.type_.0, Box::new(Ty_::Tfun(ft)))
+                }
+                _ => method.type_,
+            };
+            let flags = method.flags | MethodFlags::SUPPORT_DYNAMIC_TYPE;
+            ShallowMethod {
+                type_,
+                flags,
+                ..method
+            }
+        } else {
+            method
+        }
+    }
+
     // For a polymorphic context with form `ctx $f` (represented here as
     // `Tapply "$f"`), add a type parameter named `Tctx$f`, and rewrite the
     // parameter `(function (ts)[_]: t) $f` as `(function (ts)[Tctx$f]: t) $f`
@@ -4569,6 +4598,10 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
                     }
                 }
                 Node::Constructor(box ConstructorNode { method, properties }) => {
+                    // Annoyingly, the <<__SupportDynamicType>> annotation on a
+                    // class implicitly changes the decls of every constructor inside
+                    // it, so we have to reallocate them here.
+                    let method = self.possibly_make_supportdyn_method(&class_attributes, method);
                     constructor = Some(method);
                     for property in properties {
                         props.push(property)
@@ -4578,29 +4611,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
                     // Annoyingly, the <<__SupportDynamicType>> annotation on a
                     // class implicitly changes the decls of every method inside
                     // it, so we have to reallocate them here.
-                    let method = if ((self.implicit_sdt()
-                        && !class_attributes.no_support_dynamic_type)
-                        || class_attributes.support_dynamic_type
-                        || class_attributes.dynamically_referenced)
-                        && !method.flags.contains(MethodFlags::SUPPORT_DYNAMIC_TYPE)
-                    {
-                        let type_ = match *method.type_.1 {
-                            Ty_::Tfun(ft) => {
-                                let flags = ft.flags | FunTypeFlags::SUPPORT_DYNAMIC_TYPE;
-                                let ft = FunType { flags, ..ft };
-                                Ty(method.type_.0, Box::new(Ty_::Tfun(ft)))
-                            }
-                            _ => method.type_,
-                        };
-                        let flags = method.flags | MethodFlags::SUPPORT_DYNAMIC_TYPE;
-                        ShallowMethod {
-                            type_,
-                            flags,
-                            ..method
-                        }
-                    } else {
-                        method
-                    };
+                    let method = self.possibly_make_supportdyn_method(&class_attributes, method);
                     if is_static {
                         static_methods.push(method);
                     } else {
@@ -4950,7 +4961,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         flags.set(MethodFlags::PHP_STD_LIB, attributes.php_std_lib);
         flags.set(
             MethodFlags::SUPPORT_DYNAMIC_TYPE,
-            !is_constructor && attributes.support_dynamic_type,
+            attributes.support_dynamic_type,
         );
         flags.set(MethodFlags::NO_AUTO_LIKES, attributes.no_auto_likes);
         flags.set(MethodFlags::NEEDS_CONCRETE, attributes.needs_concrete);

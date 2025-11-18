@@ -472,7 +472,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
                 is_lateinit: false,
                 is_dynamicallycallable: false,
                 is_readonly_prop_or_needs_concrete: false,
-                supports_dynamic_type: false,
+                supports_dynamic_type: meth_flags.supports_dynamic_type(),
                 needs_init: false,
                 safe_global_variable: false,
                 no_auto_likes: false,

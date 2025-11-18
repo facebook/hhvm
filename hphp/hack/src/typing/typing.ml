@@ -2600,7 +2600,6 @@ module rec Expr : sig
       as in `<<MyAttr()>> class C` (note that attributes are classes) *)
   val new_object :
     expected:ExpectedTy.t option ->
-    check_parent:bool ->
     check_not_abstract:bool ->
     is_using_clause:bool ->
     is_attribute:bool ->
@@ -4602,7 +4601,6 @@ end = struct
         new_object
           ~expected
           ~is_using_clause:ctxt.Context.is_using_clause
-          ~check_parent:false
           ~check_not_abstract:true
           ~is_attribute:false
           pos
@@ -5240,7 +5238,6 @@ end = struct
 
   and new_object
       ~(expected : ExpectedTy.t option)
-      ~check_parent
       ~check_not_abstract
       ~is_using_clause
       ~is_attribute
@@ -5320,8 +5317,7 @@ end = struct
           end
       in
       if
-        (not check_parent)
-        && (not is_using_clause)
+        (not is_using_clause)
         && Typing_disposable.is_disposable_class env class_info
       then
         Typing_error_utils.add_typing_error
@@ -5357,8 +5353,6 @@ end = struct
         let (env, cid_ty) = Env.expand_type env cid_ty in
         if is_generic cid_ty then
           (env, cid_ty)
-        else if check_parent then
-          (env, c_ty)
         else
           ExprDepTy.make env ~cid:cid_ c_ty
       in
@@ -5494,8 +5488,6 @@ end = struct
       in
       if is_generic stripped_cid_ty then
         (env, cid_ty)
-      else if check_parent then
-        (env, ty)
       else
         ExprDepTy.make env ~cid:cid_ ty
     in
@@ -5593,85 +5585,23 @@ end = struct
 
     (env, (te, ty))
 
-  and check_parent_construct pos recv_pos env el unpacked_element env_parent =
-    let check_not_abstract = false in
-    let ((env, ty_err_opt), env_parent) =
-      Phase.localize_no_subst env ~ignore_errors:true env_parent
-    in
-    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-    let ( env,
-          _tcid,
-          _tal,
-          tel,
-          typed_unpack_element,
-          parent,
-          fty,
-          should_forget_fakes ) =
-      new_object
-        ~expected:None
-        ~check_parent:true
-        ~check_not_abstract
-        ~is_using_clause:false
-        ~is_attribute:false
-        pos
-        env
-        ((), recv_pos, CIparent)
-        []
-        el
-        unpacked_element
-    in
-    (* Not sure why we need to equate these types *)
-    let (env, e1) =
-      Type.sub_type
-        pos
-        Reason.URnone
-        env
-        env_parent
-        parent
-        Typing_error.Callback.unify_error
-    in
-    let (env, e2) =
-      Type.sub_type
-        pos
-        Reason.URnone
-        env
-        parent
-        env_parent
-        Typing_error.Callback.unify_error
-    in
-    Option.(
-      iter ~f:(Typing_error_utils.add_typing_error ~env)
-      @@ merge e1 e2 ~f:Typing_error.both);
-    ( env,
-      tel,
-      typed_unpack_element,
-      MakeType.void (Reason.witness pos),
-      parent,
-      fty,
-      should_forget_fakes )
-
-  and call_parent_construct pos recv_pos env el unpacked_element =
+  (* Check that the parent exists in a parent::__construct call *)
+  and check_parent_construct_receiver pos env =
     match Env.get_parent_ty env with
-    | Some parent ->
-      check_parent_construct pos recv_pos env el unpacked_element parent
+    (* Direct parent, so ok *)
+    | Some _parent -> ()
     | None ->
-      (* continue here *)
-      let (env, ty) = Env.fresh_type_error env pos in
-      let should_invalidate_fake_members = true in
-      let default =
-        (env, [], None, ty, ty, ty, should_invalidate_fake_members)
-      in
       (match Env.get_self_id env with
       | Some self ->
         let open TraitMostConcreteParent in
         (match Env.get_class env self with
+        (* Self is a trait, so look at trait's parents *)
         | Decl_entry.Found trait when Ast_defs.is_c_trait (Cls.kind trait) ->
           (match trait_most_concrete_parent trait env with
           | None ->
             Typing_error_utils.add_typing_error
               ~env
-              Typing_error.(primary @@ Primary.Parent_in_trait pos);
-            default
+              Typing_error.(primary @@ Primary.Parent_in_trait pos)
           | Some NotFound ->
             let trait_reqs =
               Some
@@ -5683,9 +5613,8 @@ end = struct
             Typing_error_utils.add_typing_error
               ~env
               Typing_error.(
-                primary @@ Primary.Parent_undefined { pos; trait_reqs });
-            default
-          | Some (Found (c, parent_ty)) ->
+                primary @@ Primary.Parent_undefined { pos; trait_reqs })
+          | Some (Found (c, _parent_ty)) ->
             (match Typing_env.get_construct env c with
             | (_, Inconsistent) ->
               Typing_error_utils.add_typing_error
@@ -5694,29 +5623,13 @@ end = struct
                   primary
                   @@ Primary.Trait_parent_construct_inconsistent
                        { pos; decl_pos = Cls.pos c })
-            | _ -> ());
-            check_parent_construct
-              pos
-              recv_pos
-              env
-              el
-              unpacked_element
-              parent_ty)
-        | Decl_entry.Found _self_tc ->
-          Typing_error_utils.add_typing_error
-            ~env
-            Typing_error.(
-              primary @@ Primary.Parent_undefined { pos; trait_reqs = None });
-          default
-        | Decl_entry.NotYetAvailable
-        | Decl_entry.DoesNotExist ->
-          assert false)
+            | _ -> ()))
+        | _ -> ())
       | None ->
+        (* We're not even inside a class *)
         Typing_error_utils.add_typing_error
           ~env
-          Typing_error.(primary @@ Primary.Parent_outside_class pos);
-        let (env, ty) = Env.fresh_type_error env pos in
-        (env, [], None, ty, ty, ty, should_invalidate_fake_members))
+          Typing_error.(primary @@ Primary.Parent_outside_class pos))
 
   (* Depending on the kind of expression we are dealing with
    * The typing of call is different.
@@ -6257,37 +6170,16 @@ end = struct
             | _ -> (env, res))
       | _ -> dispatch_class_const env class_id method_id
     end
-    (* Special function `parent::__construct` *)
-    | Class_const ((_, pos, CIparent), ((_, construct) as id))
-      when String.equal construct SN.Members.__construct ->
-      let ( env,
-            tel,
-            typed_unpack_element,
-            ty,
-            pty,
-            ctor_fty,
-            should_forget_fakes ) =
-        call_parent_construct p pos env el unpacked_element
-      in
-      let (env, te) =
-        Typing_helpers.make_simplify_typed_expr
-          env
-          fpos
-          ctor_fty
-          (Aast.Class_const ((pty, pos, Aast.CIparent), id))
-      in
-      let result =
-        make_call
-          env
-          te
-          [] (* tal: no type arguments to constructor *)
-          tel
-          typed_unpack_element
-          ty
-      in
-      (result, should_forget_fakes)
     (* Calling parent / class method *)
-    | Class_const (class_id, m) -> dispatch_class_const env class_id m
+    | Class_const (class_id, m) ->
+      let () =
+        match (class_id, m) with
+        | ((_, pos, CIparent), (_, construct))
+          when String.equal construct SN.Members.__construct ->
+          check_parent_construct_receiver pos env
+        | _ -> ()
+      in
+      dispatch_class_const env class_id m
     (* Readonly Expressions do not affect the type, but need to be threaded through when they're part of a call *)
     | ReadonlyExpr r ->
       let env = Env.set_readonly env true in
@@ -11272,7 +11164,6 @@ end = struct
       let (env, _, _, _, _, _, _, _) =
         Expr.new_object
           ~expected:None
-          ~check_parent:false
           ~check_not_abstract:false
           ~is_using_clause:false
           ~is_attribute:true

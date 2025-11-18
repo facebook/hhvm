@@ -18,8 +18,9 @@
 Generated Python classes for Thrift types
 }}
 {{#import "common/adapter_info" as m_adapter_info }}
+{{#import "common/common" as m_common}}
 {{#import "common/types" as m_types}}
-{{> common/auto_generated_py}}
+{{#partial m_common.auto_generated_py}}
 
 {{#if (not (or python.generate_immutable_types? python.generate_mutable_types?))}}
 import builtins

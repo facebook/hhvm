@@ -18,8 +18,9 @@
 Generates a top-level file to be imported in the user's service code. It provides
 wrappers for each of the service handlers that the user is then able to extend.
 }}
+{{#import "common/common" as m_common}}
 {{#import "common/types" as m_types}}
-{{> common/auto_generated_py}}
+{{#partial m_common.auto_generated_py}}
 import builtins
 
 

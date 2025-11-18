@@ -17,11 +17,12 @@
 }}{{!
 Generated Python classes for abstract thrift-python types.
 }}
+{{#import "common/common" as m_common}}
 {{#import "common/pep484" as m_pep484}}
 {{#import "common/types" as m_types}}
 
 
-{{> common/auto_generated_py}}
+{{#partial m_common.auto_generated_py}}
 
 import abc as _abc
 import typing as _typing

@@ -17,8 +17,9 @@
 }}{{!
 Generated Python classes for Thrift clients
 }}
+{{#import "common/common" as m_common}}
 {{#import "common/types" as m_types}}
-{{> common/auto_generated_py}}
+{{#partial m_common.auto_generated_py}}
 import builtins
 
 

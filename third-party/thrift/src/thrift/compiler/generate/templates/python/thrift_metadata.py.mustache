@@ -17,7 +17,8 @@
 }}{{!
 Metadata for Thrift types
 }}
-{{> common/auto_generated_py}}
+{{#import "common/common" as m_common}}
+{{#partial m_common.auto_generated_py}}
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 

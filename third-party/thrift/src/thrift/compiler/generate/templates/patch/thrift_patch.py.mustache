@@ -15,6 +15,7 @@
   limitations under the License.
 
 }}
+{{#import "../python/common/types" as m_types}}
 # @{{!}}generated
 from __future__ import annotations
 
@@ -58,7 +59,7 @@ import {{program:safe_patch_module_path}}.thrift_types as _fbthrift_safe_patch_t
 {{#program:include_namespaces}}
 {{#if has_types?}}{{#if (not is_patch?)}}{{#if needed_by_patch?}}
 
-import {{included_module_path}}.{{> ../python/types/types_import_path}} as {{included_module_mangle}}__{{> ../python/types/types_import_path}}
+import {{included_module_path}}.{{#partial m_types.import_path}} as {{included_module_mangle}}__{{#partial m_types.import_path}}
 import {{included_module_path}}.thrift_patch
 {{/if needed_by_patch?}}{{/if (not is_patch?)}}{{/if has_types?}}
 {{/program:include_namespaces}}

@@ -18,5 +18,5 @@
 This is the struct that wraps function return
 }}{{#function:oneway?}}None{{/function:oneway?}}{{!!
 }}{{^function:oneway?}}{{!
-  }}{{program:module_mangle}}__{{> types/types_import_path}}._fbthrift_{{service:name}}_{{function:name}}_result{{!
+  }}{{program:module_mangle}}__{{#partial m_types.import_path}}._fbthrift_{{service:name}}_{{function:name}}_result{{!
 }}{{/function:oneway?}}

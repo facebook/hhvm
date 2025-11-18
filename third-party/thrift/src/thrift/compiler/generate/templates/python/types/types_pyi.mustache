@@ -17,6 +17,7 @@
 }}{{!
 Generated Python typestubs for Thrift types
 }}
+{{#import "common/types" as m_types}}
 {{> common/auto_generated_py}}
 
 import typing as _typing
@@ -43,7 +44,7 @@ import {{program:base_library_package}}.mutable_containers as _fbthrift_python_m
 {{#program:include_namespaces}}
 {{#has_types?}}
 
-import {{included_module_path}}.{{> types/types_import_path}} as {{included_module_mangle}}__{{> types/types_import_path}}
+import {{included_module_path}}.{{#partial m_types.import_path}} as {{included_module_mangle}}__{{#partial m_types.import_path}}
 {{/has_types?}}
 {{/program:include_namespaces}}
 {{#each program:adapter_type_hint_modules as |module_path|}}

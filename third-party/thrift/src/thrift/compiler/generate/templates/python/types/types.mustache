@@ -18,6 +18,7 @@
 Generated Python classes for Thrift types
 }}
 {{#import "common/adapter_info" as m_adapter_info }}
+{{#import "common/types" as m_types}}
 {{> common/auto_generated_py}}
 
 {{#if (not (or python.generate_immutable_types? python.generate_mutable_types?))}}
@@ -50,8 +51,8 @@ import {{program:base_library_package}}.mutable_typeinfos as _fbthrift_python_mu
 {{#program:include_namespaces}}
 {{#has_types?}}
 
-import {{included_module_path}}.{{> types/types_import_path}}
-import {{included_module_path}}.{{> types/types_import_path}} as {{included_module_mangle}}__{{> types/types_import_path}}
+import {{included_module_path}}.{{#partial m_types.import_path}}
+import {{included_module_path}}.{{#partial m_types.import_path}} as {{included_module_mangle}}__{{#partial m_types.import_path}}
 {{/has_types?}}
 {{/program:include_namespaces}}
 {{#each program:adapter_modules as |module_path|}}

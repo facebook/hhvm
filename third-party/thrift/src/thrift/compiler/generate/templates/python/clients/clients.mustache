@@ -17,6 +17,7 @@
 }}{{!
 Generated Python classes for Thrift clients
 }}
+{{#import "common/types" as m_types}}
 {{> common/auto_generated_py}}
 import builtins
 
@@ -46,11 +47,11 @@ import {{program:base_library_package}}.mutable_types as _fbthrift_python_mutabl
 }}{{/python.generate_mutable_types?}}
 import {{program:base_library_package}}.exceptions as _fbthrift_python_exceptions
 import {{program:base_library_package}}.types as _fbthrift_python_types
-import {{program:module_path}}.{{> types/types_import_path}} as {{program:module_mangle}}__{{> types/types_import_path}}
+import {{program:module_path}}.{{#partial m_types.import_path}} as {{program:module_mangle}}__{{#partial m_types.import_path}}
 import {{program:module_path}}.thrift_metadata as {{program:module_mangle}}__thrift_metadata
 {{#program:include_namespaces}}
 {{#has_types?}}
-import {{included_module_path}}.{{> types/types_import_path}} as {{included_module_mangle}}__{{> types/types_import_path}}
+import {{included_module_path}}.{{#partial m_types.import_path}} as {{included_module_mangle}}__{{#partial m_types.import_path}}
 {{/has_types?}}
 {{#has_services?}}
 {{#python.generate_immutable_types?}}

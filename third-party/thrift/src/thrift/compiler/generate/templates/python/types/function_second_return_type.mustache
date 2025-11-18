@@ -18,12 +18,12 @@
 This is the struct that wraps function secondary return type (ie. stream, sink)
 }}{{^function:bidirectional_stream?}}{{!
 }}{{#function:stream?}}{{!
-  }}{{program:module_mangle}}__{{> types/types_import_path}}._fbthrift_{{service:name}}_{{function:name}}_result_stream_elem{{!
+  }}{{program:module_mangle}}__{{#partial m_types.import_path}}._fbthrift_{{service:name}}_{{function:name}}_result_stream_elem{{!
 }}{{/function:stream?}}{{!
 }}{{#function:sink?}}{{!
-  }}{{program:module_mangle}}__{{> types/types_import_path}}._fbthrift_{{service:name}}_{{function:name}}_result_sink_elem{{!
+  }}{{program:module_mangle}}__{{#partial m_types.import_path}}._fbthrift_{{service:name}}_{{function:name}}_result_sink_elem{{!
 }}{{/function:sink?}}{{!
 }}{{/function:bidirectional_stream?}}{{#function:bidirectional_stream?}}{{!
-  }}{{program:module_mangle}}__{{> types/types_import_path}}._fbthrift_{{service:name}}_{{function:name}}_result_sink_elem, {{!
-  }}{{program:module_mangle}}__{{> types/types_import_path}}._fbthrift_{{service:name}}_{{function:name}}_result_stream_elem{{!
+  }}{{program:module_mangle}}__{{#partial m_types.import_path}}._fbthrift_{{service:name}}_{{function:name}}_result_sink_elem, {{!
+  }}{{program:module_mangle}}__{{#partial m_types.import_path}}._fbthrift_{{service:name}}_{{function:name}}_result_stream_elem{{!
 }}{{/function:bidirectional_stream?}}

@@ -23,3 +23,26 @@
 {{#pragma ignore-newlines}}
 {{#if (not python.is_types_file?)}}{{root_program.module_mangle}}__{{#partial m_types.import_path}}.{{/if}}_fbthrift_{{service.name}}_{{function.name}}_args
 {{/let partial}}
+
+{{! Name of the the struct that wraps function return }}
+{{#let export partial return_type |service function| captures |m_types|}}
+{{#pragma ignore-newlines}}
+  {{#if function.oneway?}}
+None
+  {{#else}}
+{{root_program.module_mangle}}__{{#partial m_types.import_path}}._fbthrift_{{service.name}}_{{function.name}}_result
+  {{/if function.oneway?}}
+{{/let partial}}
+
+{{! Name of the struct that wraps function secondary return type (ie. stream, sink) }}
+{{#let export partial second_return_type |service function| captures |m_types|}}
+  {{#pragma ignore-newlines}}
+  {{#if function.bidirectional_stream?}}
+{{root_program.module_mangle}}__{{#partial m_types.import_path}}._fbthrift_{{service.name}}_{{function.name}}_result_sink_elem, {{!}}
+{{root_program.module_mangle}}__{{#partial m_types.import_path}}._fbthrift_{{service.name}}_{{function.name}}_result_stream_elem
+  {{#else if function.sink?}}
+{{root_program.module_mangle}}__{{#partial m_types.import_path}}._fbthrift_{{service.name}}_{{function.name}}_result_sink_elem
+  {{#else if function.stream?}}
+{{root_program.module_mangle}}__{{#partial m_types.import_path}}._fbthrift_{{service.name}}_{{function.name}}_result_stream_elem
+  {{/if function.bidirectional_stream?}}
+{{/let partial}}

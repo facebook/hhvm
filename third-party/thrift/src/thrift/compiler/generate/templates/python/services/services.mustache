@@ -105,14 +105,14 @@ class {{service:name}}Interface(
     async def _fbthrift__stream_wrapper_{{function:name}}(self, stream_generator: _typing.AsyncIterator[{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
         {{#if (array.empty? function:stream.exceptions)}}
         async for item in stream_generator:
-            yield serialize_iobuf({{> types/function_second_return_type}}(success=item), protocol)
+            yield serialize_iobuf({{#partial m_functions.second_return_type service=service:self function=function:self}}(success=item), protocol)
         {{#else}}
         try:
             async for item in stream_generator:
-                yield serialize_iobuf({{> types/function_second_return_type}}(success=item), protocol)
+                yield serialize_iobuf({{#partial m_functions.second_return_type service=service:self function=function:self}}(success=item), protocol)
         {{#function:stream_exceptions}}{{#field:type}}
         except {{type:module_mangle}}.{{#type:structured}}{{> structs/unadapted_name}}{{/type:structured}} as e:
-            return_struct = {{> types/function_second_return_type}}({{> fields/exception_field_name }}=e)
+            return_struct = {{#partial m_functions.second_return_type service=service:self function=function:self}}({{> fields/exception_field_name }}=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('{{type:py3_namespace}}{{#type:structured}}{{> structs/unadapted_name}}{{/type:structured}}', str(e), buf)
             raise exp
@@ -233,7 +233,7 @@ class {{service:name}}Interface(
             {{> services/get_handler_result }}
         {{#function:exceptions}}{{#field:type}}
         except {{type:module_mangle}}.{{#type:structured}}{{> structs/unadapted_name}}{{/type:structured}} as e:
-            return_struct = {{> types/function_return_type}}({{> fields/exception_field_name }}=e)
+            return_struct = {{#partial m_functions.return_type service=service:self function=function:self}}({{> fields/exception_field_name }}=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('{{type:py3_namespace}}{{#type:structured}}{{> structs/unadapted_name}}{{/type:structured}}', str(e), buf)
             raise exp

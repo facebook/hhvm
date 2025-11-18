@@ -9,12 +9,6 @@ class A {
   }
 }
 
-// OK - package softbar is soft-deployed in the same deployment as package foo
-<<__RequirePackage("softbar")>>
-function a(): void {
-  var_dump("in a");
-}
-
 <<__RequirePackage("bat")>>
 // ERROR - package bat is not deployed in the same deployment as package foo
 function b(): void {
@@ -25,6 +19,5 @@ function b(): void {
 <<__Entrypoint>>
 function main(): void {
   A::bar();
-  a();
   b();
 }

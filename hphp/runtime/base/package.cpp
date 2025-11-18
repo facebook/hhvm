@@ -206,9 +206,9 @@ bool PackageInfo::implPackageExists(const StringData* package) const {
   if (!activeDeployment) return packages().contains(package->toCppString());
   switch (activeDeployment->getDeployKind(package->toCppString())) {
     case DeployKind::Hard:
-    case DeployKind::Soft:
     case DeployKind::HardOrSoft:
       return true;
+    case DeployKind::Soft:
     case DeployKind::NotDeployed:
       return false;
   }

@@ -1,7 +1,7 @@
 [packages]
 
 [packages.foo]
-include_paths = [ "//basic.php", "//noactivedeploytement.php" ]
+include_paths = [ "//basic.php", "//basic-soft.php", "//noactivedeploytement.php" ]
 
 [packages.bar]
 

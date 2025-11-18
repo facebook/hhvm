@@ -1,3 +1,4 @@
+f [fromIncludedDir] basic-soft.php
 f [fromIncludedDir] basic.php
 f [fromIncludedDir] noactivedeployement.php
 string(10) "in A1::bar"

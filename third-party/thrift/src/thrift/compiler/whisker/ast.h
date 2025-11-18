@@ -69,13 +69,6 @@ using bodies = std::vector<body>;
 using header = std::variant<comment, pragma_statement, import_statement>;
 using headers = std::vector<header>;
 
-// Defines operator!= in terms of operator==
-// Remove in C++20 which introduces comparison operator synthesis
-#define WHISKER_DEFINE_OPERATOR_INEQUALITY(type)             \
-  friend bool operator!=(const type& lhs, const type& rhs) { \
-    return !(lhs == rhs);                                    \
-  }
-
 /**
  * The root node of a Whisker AST representing a source file.
  */
@@ -154,8 +147,6 @@ struct identifier {
   friend bool operator==(const identifier& lhs, const identifier& rhs) {
     return lhs.name == rhs.name;
   }
-  // Remove in C++20 which introduces comparison operator synthesis
-  WHISKER_DEFINE_OPERATOR_INEQUALITY(identifier)
 
   // For std::map and std::set
   struct compare_by_name {
@@ -195,8 +186,6 @@ struct variable_component {
       const variable_component& lhs, const variable_component& rhs) {
     return lhs.qualifier == rhs.qualifier && lhs.property == rhs.property;
   }
-  // Remove in C++20 which introduces comparison operator synthesis
-  WHISKER_DEFINE_OPERATOR_INEQUALITY(variable_component)
 
   /**
    * Returns a source-identical string representation of this variable
@@ -221,9 +210,7 @@ struct variable_lookup {
   source_range loc;
   // this_ref is a special case: {{.}} referring to the current object.
   struct this_ref {
-    // Remove in C++20 which introduces comparison operator synthesis
     friend bool operator==(const this_ref&, const this_ref&) { return true; }
-    WHISKER_DEFINE_OPERATOR_INEQUALITY(this_ref)
   };
   std::variant<this_ref, std::vector<variable_component>> chain;
 
@@ -235,8 +222,6 @@ struct variable_lookup {
       const variable_lookup& lhs, const variable_lookup& rhs) {
     return lhs.chain == rhs.chain;
   }
-  // Remove in C++20 which introduces comparison operator synthesis
-  WHISKER_DEFINE_OPERATOR_INEQUALITY(variable_lookup)
 
   std::string chain_string() const;
 };
@@ -266,44 +251,36 @@ struct expression {
      * The `(not arg1)` function.
      */
     struct builtin_not : builtin {
-      // Remove in C++20 which introduces comparison operator synthesis
       friend bool operator==(const builtin_not&, const builtin_not&) {
         return true;
       }
-      WHISKER_DEFINE_OPERATOR_INEQUALITY(builtin_not)
     };
 
     /**
      * The `(and arg1 ... argN)` function.
      */
     struct builtin_and : builtin, builtin_binary_associative {
-      // Remove in C++20 which introduces comparison operator synthesis
       friend bool operator==(const builtin_and&, const builtin_and&) {
         return true;
       }
-      WHISKER_DEFINE_OPERATOR_INEQUALITY(builtin_and)
     };
 
     /**
      * The `(or arg1 ... argN)` function.
      */
     struct builtin_or : builtin, builtin_binary_associative {
-      // Remove in C++20 which introduces comparison operator synthesis
       friend bool operator==(const builtin_or&, const builtin_or&) {
         return true;
       }
-      WHISKER_DEFINE_OPERATOR_INEQUALITY(builtin_or)
     };
 
     /**
      * The `(if cond true_val false_val)` ternary function.
      */
     struct builtin_ternary : builtin {
-      // Remove in C++20 which introduces comparison operator synthesis
       friend bool operator==(const builtin_ternary&, const builtin_ternary&) {
         return true;
       }
-      WHISKER_DEFINE_OPERATOR_INEQUALITY(builtin_ternary)
     };
 
     /**
@@ -319,8 +296,6 @@ struct expression {
       friend bool operator==(const user_defined& lhs, const user_defined& rhs) {
         return lhs.name == rhs.name;
       }
-      // Remove in C++20 which introduces comparison operator synthesis
-      WHISKER_DEFINE_OPERATOR_INEQUALITY(user_defined)
     };
 
     std::variant<
@@ -350,8 +325,6 @@ struct expression {
         };
         return as_tuple(lhs) == as_tuple(rhs);
       }
-      // Remove in C++20 which introduces comparison operator synthesis
-      WHISKER_DEFINE_OPERATOR_INEQUALITY(named_argument)
     };
     /**
      * Named arguments that are identified by their name, with no restrictions
@@ -374,8 +347,6 @@ struct expression {
       };
       return as_tuple(lhs) == as_tuple(rhs);
     }
-    // Remove in C++20 which introduces comparison operator synthesis
-    WHISKER_DEFINE_OPERATOR_INEQUALITY(function_call)
   };
 
   struct string_literal {
@@ -385,8 +356,6 @@ struct expression {
         const string_literal& lhs, const string_literal& rhs) {
       return lhs.text == rhs.text;
     }
-    // Remove in C++20 which introduces comparison operator synthesis
-    WHISKER_DEFINE_OPERATOR_INEQUALITY(string_literal)
   };
 
   struct i64_literal {
@@ -395,32 +364,24 @@ struct expression {
     friend bool operator==(const i64_literal& lhs, const i64_literal& rhs) {
       return lhs.value == rhs.value;
     }
-    // Remove in C++20 which introduces comparison operator synthesis
-    WHISKER_DEFINE_OPERATOR_INEQUALITY(i64_literal)
   };
 
   struct null_literal {
     friend bool operator==(const null_literal&, const null_literal&) {
       return true;
     }
-    // Remove in C++20 which introduces comparison operator synthesis
-    WHISKER_DEFINE_OPERATOR_INEQUALITY(null_literal)
   };
 
   struct true_literal {
     friend bool operator==(const true_literal&, const true_literal&) {
       return true;
     }
-    // Remove in C++20 which introduces comparison operator synthesis
-    WHISKER_DEFINE_OPERATOR_INEQUALITY(true_literal)
   };
 
   struct false_literal {
     friend bool operator==(const false_literal&, const false_literal&) {
       return true;
     }
-    // Remove in C++20 which introduces comparison operator synthesis
-    WHISKER_DEFINE_OPERATOR_INEQUALITY(false_literal)
   };
 
   std::variant<
@@ -440,8 +401,6 @@ struct expression {
   friend bool operator==(const expression& lhs, const expression& rhs) {
     return lhs.which == rhs.which;
   }
-  // Remove in C++20 which introduces comparison operator synthesis
-  WHISKER_DEFINE_OPERATOR_INEQUALITY(expression)
 
   /**
    * Returns a human-readable text representation of the expression.

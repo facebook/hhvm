@@ -687,23 +687,6 @@ class expected {
     return !lhs.has_value() && lhs.error() == rhs.error();
   }
 
-  // Before C++20, operator!= is not synthesized from operator==.
-  template <
-      typename U,
-      typename G,
-      std::enable_if_t<!std::is_void_v<U>, int> = 0>
-  friend bool operator!=(const expected<T, E>& lhs, const expected<U, G>& rhs) {
-    return !(lhs == rhs);
-  }
-  template <typename T2>
-  friend bool operator!=(const expected<T, E>& lhs, const T2& rhs) {
-    return !(lhs == rhs);
-  }
-  template <typename E2>
-  friend bool operator!=(const expected<T, E>& lhs, const unexpected<E2>& rhs) {
-    return !(lhs == rhs);
-  }
-
  private:
   template <typename U, typename G>
   friend class expected;

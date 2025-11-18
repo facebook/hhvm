@@ -170,14 +170,7 @@ struct token_kind {
   friend bool operator==(token_kind lhs, token_kind rhs) {
     return lhs.value == rhs.value;
   }
-
-  // The following overloads are only for compatibility with pre-C++20.
   friend bool operator==(token_kind lhs, tok rhs) { return lhs.value == rhs; }
-  friend bool operator!=(tok lhs, token_kind rhs) { return lhs != rhs.value; }
-  friend bool operator!=(token_kind lhs, tok rhs) { return lhs.value != rhs; }
-  friend bool operator!=(token_kind lhs, token_kind rhs) {
-    return lhs.value != rhs.value;
-  }
 };
 
 std::string_view to_string(token_kind kind);

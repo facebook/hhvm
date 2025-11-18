@@ -105,7 +105,7 @@ class {{> structs/unadapted_name}}({{!
 
 {{struct:py_name}} = {{adapter.type_hint}}{{#if adapter.is_generic?}}[{{> structs/unadapted_name}}]{{/if}}
 {{/if struct:has_adapter?}}
-{{> private/alias_prefix}}{{struct:py_name}} = {{struct:py_name}}{{!
+{{#partial m_common.private_alias_prefix}}{{struct:py_name}} = {{struct:py_name}}{{!
 }}{{/program:structs}}
 {{#program:typedefs?}}
 

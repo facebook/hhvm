@@ -30,3 +30,92 @@ from __future__ import annotations
 import __static__
 {{/if (has_compiler_option? "import_static")}}
 {{/let partial}}
+
+{{!
+A tuple of:
+  1. adapter class,
+  2. a lambda that returns transitive annotation (if the adapter is applied via transitive annotation, else None.)
+if the node has an adapter, else None.
+}}
+{{#let export partial adapter_info |node|}}
+  {{#pragma ignore-newlines}}
+  {{#if node.has_adapter?}}
+    {{#let adapter = node.adapter}}
+(
+{{adapter.name}}, lambda: {{!preserve trailing space}}
+    {{#if (object.notnull? adapter.transitive_annotation)}}
+{{!   }}{{#adapter.transitive_annotation}}{{> types/constant_value }}{{/adapter.transitive_annotation}}
+    {{#else}}
+{{!   }}None
+    {{/if (object.notnull? adapter.transitive_annotation)}}
+)
+  {{#else}}
+None
+  {{/if node.has_adapter?}}
+{{/let partial}}
+
+{{!
+    Why this huge comment for an 10 character string?
+    It is to give someone pause before they decide it is unnecessary
+    without the knowledge of the reasons for this partial.
+
+    What is the purpose of the alias prefix?
+    This resolves the type check error below.
+        Annotation `TestFieldNameSameAsTypeName.SomeTypeName` is not defined as a type.
+
+    When a thrift field name (TestFieldNameSameAsTypeName.SomeTypeName in this example)
+    is exactly the same as a thrift type name (SomeTypeName in this example)
+    and the type name is used as the type for a field within the same type
+    that contains that field, then type check fails because the type name,
+    which is now bound to a function, is not considered a valid type annotation.
+
+    Why use a partial for the prefix, which has way more characters, than the
+    prefix directly?
+
+    The goal of partial was NOT to reduce the length of the identifier at the
+    sites that reference it. It is
+    1. to reveal intent
+    2. make it easier to find the places that use this prefix.
+    3. It is easier to explain the reason for the choice of the prefix in one
+    place, as you can see from the comment in this file.
+    4. In cases where the prefix is a common string and harder to search for
+    just the instances with this specific intent, like `_fbthrift`,
+    this makes it easier to change the name in all the sites with
+    just the change to the partial.
+    (
+        More detail: The prefix went through a few iterations of changes.
+        When I changed the name each time, especially, when it was a name like
+        `_fbthrift_`, which appears in places other than just as this alias_prefix
+        just a search and replace was not easily possible.
+        I had to rely on the tests to ensure I addressed
+        all the locations where I needed to make this change,
+        which increase the number of cycles before the change completed.
+    )
+
+    Why _fbthrift_ and not __fbthrift_, which would deter unintentional use of that symbol?
+    As you might already know, Python mangles the double underscore version
+    and it becomes more difficult to infer the correct name of the type hint,
+    if that is even possible, and brittle as well, is case Python changes how
+    it mangles that name.
+
+    The single underscore version, _fbthrift_, does not prevent use by
+    client-sites unless the module deletes this symbol within the context of
+    the module. The delete caused the call to typing.get_type_hints by the test for
+    property type hints in the abstract types test to fail because that call
+    did not have access to the deleted symbol.
+
+    I briefly considered _fbthrift_WILL_NOT_FIX_BREAKAGES_IF_YOU_USE_THIS_.
+    That makes the generated code hard to read.
+
+    I decided to stay simple to unblock this fix. I added the DO_BEFORE below
+    to revisit this issue.
+
+    DO_BEFORE(satishvk, 20241231): Determine if it is acceptable to accept
+    the risk that user code will use the _fbthrift_actual_symbol or
+    it is important enough to find a different approach to solve the problem
+    of fieldname matches the typename.
+}}
+{{#let export partial private_alias_prefix}}
+{{#pragma ignore-newlines}}
+_fbthrift_
+{{/let partial}}

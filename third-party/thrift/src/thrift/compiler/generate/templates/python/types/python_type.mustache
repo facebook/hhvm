@@ -28,7 +28,7 @@ in a different thrift file, or defined in the same thrift file.
 }}{{#type:binary?}}{{#type:iobuf?}}_fbthrift_iobuf.IOBuf{{/type:iobuf?}}{{^type:iobuf?}}bytes{{/type:iobuf?}}{{/type:binary?}}{{!
 }}{{#type:structured}}{{!
   }}{{#type:need_module_path?}}{{type:module_mangle}}.{{/type:need_module_path?}}{{!
-  }}{{^type:need_module_path?}}{{> private/alias_prefix}}{{/type:need_module_path?}}{{struct:py_name}}{{!
+  }}{{^type:need_module_path?}}{{#partial m_common.private_alias_prefix}}{{/type:need_module_path?}}{{struct:py_name}}{{!
 }}{{/type:structured}}{{!
 }}{{#type:list?}}{{!
 }}{{#python.generate_immutable_types?}}{{!
@@ -62,6 +62,6 @@ in a different thrift file, or defined in the same thrift file.
 }}{{/type:map?}}{{!
 }}{{#type:enum}}{{!
   }}{{#type:need_module_path?}}{{type:module_mangle}}.{{/type:need_module_path?}}{{!
-  }}{{^type:need_module_path?}}{{> private/alias_prefix}}{{/type:need_module_path?}}{{enum:name}}{{!
+  }}{{^type:need_module_path?}}{{#partial m_common.private_alias_prefix}}{{/type:need_module_path?}}{{enum:name}}{{!
 }}{{/type:enum}}{{!
 }}{{#type:void?}}None{{/type:void?}}

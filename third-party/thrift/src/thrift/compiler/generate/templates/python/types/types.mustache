@@ -17,7 +17,6 @@
 }}{{!
 Generated Python classes for Thrift types
 }}
-{{#import "common/adapter_info" as m_adapter_info }}
 {{#import "common/common" as m_common}}
 {{#import "common/types" as m_types}}
 {{#partial m_common.auto_generated_py}}
@@ -93,7 +92,7 @@ class {{> structs/unadapted_name}}{{!
               {{#else}}
             None,  # default value
               {{/if (object.notnull? default_val)}}
-            {{#partial m_adapter_info.adapter_info node=field:self}},  # adapter info
+            {{#partial m_common.adapter_info node=field:self}},  # adapter info
             {{#field:type}}{{> types/is_primitive }}{{/field:type}}, # field type is primitive
             {{field:idl_type}}, # IDL type (see BaseTypeEnum)
         ),
@@ -233,7 +232,7 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.{{> structs/unadapted_name}}
 
 {{struct:py_name}} = {{adapter.type_hint}}{{#if adapter.is_generic?}}[{{> structs/unadapted_name}}]{{/if}}
 {{/if struct:has_adapter?}}
-{{> private/alias_prefix}}{{struct:py_name}} = {{struct:py_name}}{{!
+{{#partial m_common.private_alias_prefix}}{{struct:py_name}} = {{struct:py_name}}{{!
 }}{{/program:structs}}
 
 {{#python.generate_immutable_types?}}

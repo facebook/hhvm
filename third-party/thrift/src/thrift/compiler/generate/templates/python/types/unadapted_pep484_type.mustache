@@ -30,7 +30,7 @@ None
   {{#else if type:structured?}}
     {{#type:true_type}}
 {{#if type:need_module_path?}}{{type:module_mangle}}.{{/if}}
-{{#if (not (or type:need_module_path? struct:has_adapter?))}}{{> private/alias_prefix}}{{/if}}
+{{#if (not (or type:need_module_path? struct:has_adapter?))}}{{#partial m_common.private_alias_prefix}}{{/if}}
 {{> structs/unadapted_name}}
     {{/type:true_type}}
 
@@ -56,7 +56,7 @@ None
     {{#if type:need_module_path?}}
 {{type:module_mangle}}.
     {{#else}}
-{{> private/alias_prefix}}
+{{#partial m_common.private_alias_prefix}}
     {{/if type:need_module_path?}}
 {{type:true_type.py_name}}
 

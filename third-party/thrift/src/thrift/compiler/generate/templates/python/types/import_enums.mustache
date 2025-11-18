@@ -31,7 +31,7 @@ from {{program:module_path}}.thrift_enums import (
 {{#python.is_source_file?}}
     {{enum:name}},
 {{/python.is_source_file?}}
-    {{enum:name}} as {{> private/alias_prefix}}{{enum:name}},
+    {{enum:name}} as {{#partial m_common.private_alias_prefix}}{{enum:name}},
 {{#last?}}
 )
 {{/last?}}
@@ -49,6 +49,6 @@ from {{program:module_path}}.thrift_enums import (
 }}
 {{#python.is_type_stub?}}
 {{#program:enums}}
-{{enum:name}} = {{> private/alias_prefix}}{{enum:name}}
+{{enum:name}} = {{#partial m_common.private_alias_prefix}}{{enum:name}}
 {{/program:enums}}
 {{/python.is_type_stub?}}

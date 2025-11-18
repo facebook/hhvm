@@ -55,6 +55,15 @@ None
 {{/let partial}}
 
 {{!
+A single UNSTRUCTURED annotation, written out for python consumption in a dict.
+Annotations may start/end with quotes hence we take extra care
+An annotation without an explicitly provided value is implicitly assigned the default value "1".
+}}
+{{#let export partial unstructured_annotation |key value|}}
+{{(py_string_literal key)}}: {{#if (string.empty? value)}}"1"{{#else}}{{(py_string_literal value)}}{{/if}},
+{{/let partial}}
+
+{{!
     Why this huge comment for an 10 character string?
     It is to give someone pause before they decide it is unnecessary
     without the knowledge of the reasons for this partial.

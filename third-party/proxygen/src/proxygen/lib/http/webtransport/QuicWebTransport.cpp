@@ -65,7 +65,7 @@ void QuicWebTransport::onConnectionEndImpl(
     if (error->code.type() == quic::QuicErrorCode::Type::ApplicationErrorCode) {
       wtError = static_cast<uint32_t>(*error->code.asApplicationErrorCode());
     } else {
-      XLOG(ERR) << "QUIC Connection Error: " << *error;
+      XLOG(DBG2) << "QUIC Connection Error: " << *error;
       wtError = std::numeric_limits<uint32_t>::max();
     }
   }

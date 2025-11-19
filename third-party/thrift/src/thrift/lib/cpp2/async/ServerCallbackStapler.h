@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <thrift/lib/cpp/ContextStack.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 
 namespace apache::thrift::detail {
@@ -44,9 +45,24 @@ class ServerCallbackStapler : public BiDiServerCallback,
  public:
   ServerCallbackStapler() : sink_(nullptr), stream_(nullptr) {}
 
+  ~ServerCallbackStapler() override {
+    if (contextStack_) {
+      if (hasError_) {
+        contextStack_->onBiDiFinally(details::BIDI_FINISH_REASON::ERROR);
+      } else if (hasCancellation_) {
+        contextStack_->onBiDiFinally(details::BIDI_FINISH_REASON::CANCEL);
+      } else {
+        contextStack_->onBiDiFinally(details::BIDI_FINISH_REASON::COMPLETE);
+      }
+    }
+  }
+
   void setSinkServerCallback(SinkServerCallback* sink) { sink_ = sink; }
   void setStreamServerCallback(StreamServerCallback* stream) {
     stream_ = stream;
+  }
+  void setContextStack(std::shared_ptr<ContextStack> contextStack) {
+    contextStack_ = std::move(contextStack);
   }
 
   //
@@ -61,6 +77,7 @@ class ServerCallbackStapler : public BiDiServerCallback,
 
   bool onStreamCancel() override {
     DeletionGuard guard(this);
+    hasCancellation_ = true;
     std::exchange(stream_, nullptr)->onStreamCancel();
     return sink_ || stream_;
   }
@@ -73,6 +90,7 @@ class ServerCallbackStapler : public BiDiServerCallback,
 
   bool onSinkError(folly::exception_wrapper ew) override {
     DeletionGuard guard(this);
+    hasError_ = true;
     std::exchange(sink_, nullptr)->onSinkError(std::move(ew));
     return sink_ || stream_;
   }
@@ -117,6 +135,7 @@ class ServerCallbackStapler : public BiDiServerCallback,
 
   void onFinalResponseError(folly::exception_wrapper) override {
     DeletionGuard guard(this);
+    hasError_ = true;
     sink_ = nullptr;
   }
 
@@ -153,6 +172,7 @@ class ServerCallbackStapler : public BiDiServerCallback,
 
   void onStreamError(folly::exception_wrapper ew) override {
     DeletionGuard guard(this);
+    hasError_ = true;
     stream_ = nullptr;
     std::ignore = clientCb_->onStreamError(std::move(ew));
   }
@@ -177,6 +197,10 @@ class ServerCallbackStapler : public BiDiServerCallback,
 
   SinkServerCallback* sink_{nullptr};
   StreamServerCallback* stream_{nullptr};
+  std::shared_ptr<ContextStack> contextStack_;
+
+  bool hasError_{false};
+  bool hasCancellation_{false};
 };
 
 } // namespace apache::thrift::detail

@@ -81,9 +81,6 @@ class ServerBiDiStreamBridge
       ServerBiDiStreamBridge::Ptr bridge,
       folly::coro::AsyncGenerator<In> input,
       StreamElementEncoder<Out>* encode) {
-    // Notify output stream subscription
-    notifyStreamSubscribe(bridge->contextStack_.get());
-
     SCOPE_EXIT {
       bridge->serverClose();
     };
@@ -103,20 +100,14 @@ class ServerBiDiStreamBridge
 
         auto message = std::move(messages.front());
         if (message == CANCEL) {
-          // Notify cancellation
-          notifyStreamFinally(
-              bridge->contextStack_.get(),
-              details::STREAM_ENDING_TYPES::CANCEL);
           co_return;
         }
-        // Notify credits received from client
-        notifyStreamCredit(bridge->contextStack_.get(), message);
+        notifyBiDiStreamCredit(bridge->contextStack_.get(), message);
         credits += message;
       }
 
       if (credits == 0) {
-        // Notify pause due to no credits
-        notifyStreamPause(
+        notifyBiDiStreamPause(
             bridge->contextStack_.get(),
             details::STREAM_PAUSE_REASON::NO_CREDITS);
         continue;
@@ -124,9 +115,7 @@ class ServerBiDiStreamBridge
 
       auto next = co_await folly::coro::co_awaitTry(input.next());
       if (next.hasException()) {
-        // Transformation threw an exception
-        // Notify error
-        handleStreamErrorWrapped(bridge->contextStack_.get(), next.exception());
+        handleBiDiStreamError(bridge->contextStack_.get(), next.exception());
         auto encoded = (*encode)(std::move(next.exception()));
         bridge->serverPush(std::move(encoded));
         co_return;
@@ -139,14 +128,11 @@ class ServerBiDiStreamBridge
 
       bridge->serverPush((*encode)(**next));
 
-      // Notify item sent
-      notifyStreamNext(bridge->contextStack_.get());
-      notifyStreamNextSent(bridge->contextStack_.get());
+      notifyBiDiStreamNext(bridge->contextStack_.get());
 
       credits--;
       if (credits == 0) {
-        // Notify pause
-        notifyStreamPause(
+        notifyBiDiStreamPause(
             bridge->contextStack_.get(),
             details::STREAM_PAUSE_REASON::NO_CREDITS);
       }
@@ -183,57 +169,31 @@ class ServerBiDiStreamBridge
     }
   }
 
-  //
-  // Helper methods to encapsulate ContextStack usage
-  //
-  static void notifyStreamSubscribe(ContextStack* ctx) {
+  static void notifyBiDiStreamNext(ContextStack* ctx) {
     if (ctx) {
-      StreamEventHandler::StreamContext streamCtx;
-      ctx->onStreamSubscribe(streamCtx);
+      ctx->onBiDiStreamNext();
     }
   }
 
-  static void notifyStreamNext(ContextStack* ctx) {
-    if (ctx) {
-      ctx->onStreamNext();
-    }
-  }
-
-  static void notifyStreamNextSent(ContextStack* ctx) {
-    if (ctx) {
-      ctx->onStreamNextSent();
-    }
-  }
-
-  static void notifyStreamCredit(ContextStack* ctx, int64_t credits) {
+  static void notifyBiDiStreamCredit(ContextStack* ctx, int64_t credits) {
     if (ctx && credits > 0) {
-      ctx->onStreamCredit(static_cast<uint32_t>(credits));
+      ctx->onBiDiStreamCredit(static_cast<uint32_t>(credits));
     }
   }
 
-  static void notifyStreamPause(
+  static void notifyBiDiStreamPause(
       ContextStack* ctx, details::STREAM_PAUSE_REASON reason) {
     if (ctx) {
-      ctx->onStreamPause(reason);
+      ctx->onBiDiStreamPause(reason);
     }
   }
 
-  static void handleStreamErrorWrapped(
+  static void handleBiDiStreamError(
       ContextStack* ctx, const folly::exception_wrapper& ew) {
     if (ctx) {
-      ctx->handleStreamErrorWrapped(ew);
+      ctx->handleBiDiStreamError(ew);
     }
   }
-
-  static void notifyStreamFinally(
-      ContextStack* ctx, details::STREAM_ENDING_TYPES endType) {
-    if (ctx) {
-      ctx->onStreamFinally(endType);
-    }
-  }
-  //
-  // end of Helper methods to encapsulate ContextStack usage
-  //
 
  private:
   StreamClientCallback* clientCb_{nullptr};

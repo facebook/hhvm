@@ -57,10 +57,15 @@ class ServerBiDiStreamFactory {
             FirstResponsePayload&& payload,
             BiDiClientCallback* clientCb,
             folly::EventBase* evb) mutable -> void {
+      if (contextStack) {
+        contextStack->onBiDiSubscribe();
+      }
+
       auto stapled = new ServerCallbackStapler();
       auto streamBridge =
           new ServerBiDiStreamBridge(stapled, evb, contextStack);
       auto sinkBridge = new ServerBiDiSinkBridge(stapled, evb, contextStack);
+      stapled->setContextStack(contextStack);
       stapled->setSinkServerCallback(sinkBridge);
       stapled->setStreamServerCallback(streamBridge);
       stapled->resetClientCallback(*clientCb);

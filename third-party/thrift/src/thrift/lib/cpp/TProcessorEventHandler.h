@@ -21,6 +21,7 @@
 
 #include <folly/Demangle.h>
 #include <folly/ExceptionWrapper.h>
+#include <thrift/lib/cpp/BiDiEventHandler.h>
 #include <thrift/lib/cpp/SerializedMessage.h>
 #include <thrift/lib/cpp/StreamEventHandler.h>
 #include <thrift/lib/cpp/server/TConnectionContext.h>
@@ -189,14 +190,24 @@ class TProcessorEventHandler {
     return streamEventHandler_.get();
   }
 
+  BiDiEventHandler* getBiDiEventHandler() { return bidiEventHandler_.get(); }
+
  protected:
-  TProcessorEventHandler() : streamEventHandler_(nullptr) {}
+  TProcessorEventHandler()
+      : streamEventHandler_(nullptr), bidiEventHandler_(nullptr) {}
   explicit TProcessorEventHandler(
       std::unique_ptr<StreamEventHandler> streamEventHandler)
-      : streamEventHandler_(std::move(streamEventHandler)) {}
+      : streamEventHandler_(std::move(streamEventHandler)),
+        bidiEventHandler_(nullptr) {}
+  explicit TProcessorEventHandler(
+      std::unique_ptr<StreamEventHandler> streamEventHandler,
+      std::unique_ptr<BiDiEventHandler> bidiEventHandler)
+      : streamEventHandler_(std::move(streamEventHandler)),
+        bidiEventHandler_(std::move(bidiEventHandler)) {}
 
  private:
   std::unique_ptr<StreamEventHandler> streamEventHandler_;
+  std::unique_ptr<BiDiEventHandler> bidiEventHandler_;
 };
 
 /**
@@ -208,7 +219,6 @@ class TProcessorEventHandler {
  * in user exceptions which results in that work being discarded.
  */
 class TProcessorEventHandlerNoUserExnCallbacks : public TProcessorEventHandler {
- public:
  public:
   void userException(
       void* /*ctx*/,

@@ -18,6 +18,7 @@
 #include <quic/server/QuicHandshakeSocketHolder.h>
 #include <quic/server/QuicServer.h>
 #include <signal.h>
+#include <wangle/acceptor/FizzAcceptorHandshakeHelper.h>
 #include <wangle/acceptor/ServerSocketConfig.h>
 
 namespace proxygen::coro {
@@ -73,6 +74,7 @@ class HTTPServer : public quic::QuicHandshakeSocketHolder::Callback {
     std::vector<int> shutdownOnSignals{SIGINT};
     NewConnectionFilter newConnectionFilter;
     ServerFilterFactoryList filterFactories;
+    std::shared_ptr<wangle::FizzLoggingCallback> fizzLoggingCallback;
   };
 
   static wangle::SSLContextConfig getDefaultTLSConfig() {

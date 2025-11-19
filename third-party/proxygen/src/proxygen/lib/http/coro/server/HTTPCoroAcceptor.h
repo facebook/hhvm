@@ -23,6 +23,10 @@ namespace quic {
 class QuicSocket;
 }
 
+namespace wangle {
+class FizzLoggingCallback;
+} // namespace wangle
+
 namespace proxygen::coro {
 
 class HTTPHandler;
@@ -90,7 +94,8 @@ class HTTPCoroAcceptor : public wangle::Acceptor {
       std::shared_ptr<const AcceptorConfiguration> accConfig,
       std::shared_ptr<HTTPHandler> handler,
       NewConnectionFilter* newConnectionFilter = nullptr,
-      std::shared_ptr<HTTPCodecFactory> codecFactory = nullptr);
+      std::shared_ptr<HTTPCodecFactory> codecFactory = nullptr,
+      std::shared_ptr<wangle::FizzLoggingCallback> loggingCallback = nullptr);
   ~HTTPCoroAcceptor() override {
   }
 
@@ -161,6 +166,7 @@ class HTTPCoroAcceptor : public wangle::Acceptor {
   NewConnectionFilter* newConnectionFilter_{nullptr};
   std::function<void()> onConnectionsDrainedFn_;
   folly::Synchronized<folly::Executor::KeepAlive<folly::EventBase>> keepAlive_;
+  std::shared_ptr<wangle::FizzLoggingCallback> loggingCallback_;
 };
 
 } // namespace proxygen::coro

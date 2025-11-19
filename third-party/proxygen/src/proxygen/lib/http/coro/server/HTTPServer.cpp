@@ -174,7 +174,9 @@ HTTPCoroAcceptor* HTTPServer::createAcceptor(
   return &(*it->second.emplace(it->second.end(),
                                std::move(acceptorConfig),
                                handler_,
-                               &config_.newConnectionFilter));
+                               &config_.newConnectionFilter,
+                               /* codecFactory = */ nullptr,
+                               config_.fizzLoggingCallback));
 }
 
 HTTPCoroAcceptor* FOLLY_NULLABLE

@@ -28,6 +28,7 @@
 #include <quic/logging/test/Mocks.h>
 #include <quic/state/test/MockQuicStats.h>
 #include <quic/state/test/Mocks.h>
+#include <wangle/acceptor/FizzAcceptorHandshakeHelper.h>
 
 using namespace proxygen::coro;
 
@@ -42,6 +43,35 @@ struct StatsFactory : public ServerFilterFactory {
   void onServerStop() noexcept override {
   }
   proxygen::FakeHTTPServerStats stats_;
+};
+
+class MockFizzLoggingCallback : public wangle::FizzLoggingCallback {
+ public:
+  MOCK_METHOD(void,
+              logFizzHandshakeSuccess,
+              (const fizz::server::AsyncFizzServer&,
+               const wangle::TransportInfo&),
+              (noexcept, override));
+  MOCK_METHOD(void,
+              logFallbackHandshakeSuccess,
+              (const folly::AsyncSSLSocket&, const wangle::TransportInfo&),
+              (noexcept, override));
+  MOCK_METHOD(void,
+              logFizzHandshakeFallback,
+              (const fizz::server::AsyncFizzServer&,
+               const wangle::TransportInfo&),
+              (noexcept, override));
+  MOCK_METHOD(void,
+              logFizzHandshakeError,
+              (const fizz::server::AsyncFizzServer&,
+               const folly::exception_wrapper&),
+              (noexcept, override));
+  MOCK_METHOD(void,
+              logFallbackHandshakeError,
+              (const folly::AsyncSSLSocket&,
+               const folly::AsyncSocketException&,
+               const fizz::server::HandshakeLogging*),
+              (noexcept, override));
 };
 
 } // namespace
@@ -335,6 +365,29 @@ TEST_P(HTTPServerTests, TestFilterFailException) {
   stopServer();
 }
 
+TEST_P(HTTPServerTests, TestFizzLoggingCallbackInvoked) {
+  auto mockFizzLoggingCallback = std::make_shared<MockFizzLoggingCallback>();
+  if (GetParam() == TransportType::TLS) {
+    EXPECT_CALL(*mockFizzLoggingCallback, logFizzHandshakeSuccess(_, _))
+        .Times(1);
+  }
+
+  serverConfig_.fizzLoggingCallback = std::move(mockFizzLoggingCallback);
+  startServer(nullptr, /*expectRequest=*/true);
+  initClient();
+
+  auto url = fmt::format("https://{}/test", server_->address()->describe());
+  auto useQuic = GetParam() == TransportType::QUIC;
+  EventBase evb;
+  auto response = folly::coro::blockingWait(
+      HTTPClient::get(&evb, url, std::chrono::milliseconds(500), useQuic),
+      &evb);
+  EXPECT_NE(response.headers.get(), nullptr);
+  EXPECT_EQ(response.headers->getStatusCode(), 200);
+
+  stopServer();
+}
+
 INSTANTIATE_TEST_SUITE_P(HTTPServerStartStop,
                          HTTPServerTests,
                          testing::Values(TransportType::QUIC,
@@ -554,4 +607,5 @@ TEST_F(MultiAcceptorHttpServerTest, TestShutdown) {
     EXPECT_TRUE(result.hasException());
   }
 }
+
 } // namespace proxygen::coro::test

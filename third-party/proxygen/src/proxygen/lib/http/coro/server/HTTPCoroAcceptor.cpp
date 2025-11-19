@@ -20,11 +20,16 @@ HTTPCoroAcceptor::HTTPCoroAcceptor(
     std::shared_ptr<const AcceptorConfiguration> accConfig,
     std::shared_ptr<HTTPHandler> handler,
     NewConnectionFilter* newConnFilter,
-    std::shared_ptr<HTTPCodecFactory> codecFactory)
+    std::shared_ptr<HTTPCodecFactory> codecFactory,
+    std::shared_ptr<wangle::FizzLoggingCallback> loggingCallback)
     : Acceptor(accConfig),
       factory_(std::move(accConfig), std::move(codecFactory)),
       handler_(std::move(handler)),
-      newConnectionFilter_(newConnFilter) {
+      newConnectionFilter_(newConnFilter),
+      loggingCallback_(std::move(loggingCallback)) {
+  if (loggingCallback_ != nullptr) {
+    getFizzPeeker()->options().setLoggingCallback(loggingCallback_.get());
+  }
 }
 
 HTTPCoroDownstreamSessionFactory::HTTPCoroDownstreamSessionFactory(

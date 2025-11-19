@@ -98,11 +98,12 @@ TEST_F(PathUtilsTest, computeFileNameWithExistingDirectory) {
 
   auto state_dir = getTempPath() + "/watchman_state";
   setWatchmanStateDir(state_dir);
+  folly::fs::create_directories(state_dir);
+
+  // Verify the state directory already exists
+  EXPECT_TRUE(folly::fs::exists(state_dir));
 
   auto expected = fmt::format("{}/{}", state_dir, suffix);
-
-  // Verify the state directory doesn't exist initially
-  EXPECT_FALSE(folly::fs::exists(state_dir));
 
   // This should compute a path and create directories as needed
   EXPECT_NO_THROW({
@@ -123,6 +124,45 @@ TEST_F(PathUtilsTest, computeFileNameWithExistingDirectory) {
   checkDirectoryPermissions(state_dir);
 #endif
 }
+
+#ifndef _WIN32
+TEST_F(PathUtilsTest, computeFileNameWithSymlinkToExistingDirectory) {
+  std::string result;
+  std::string suffix = getRandomSuffix();
+
+  auto actual_state_dir = getTempPath() + "/watchman_state_actual";
+  folly::fs::create_directories(actual_state_dir);
+
+  // Verify the state directory already exists
+  EXPECT_TRUE(folly::fs::exists(actual_state_dir));
+
+  auto state_dir = getTempPath() + "/watchman_state";
+  folly::fs::create_symlink(actual_state_dir, state_dir);
+  setWatchmanStateDir(state_dir);
+
+  // Verify the state directory exists and is a symlink
+  EXPECT_TRUE(folly::fs::exists(state_dir));
+  EXPECT_TRUE(folly::fs::is_symlink(state_dir));
+
+  auto expected = fmt::format("{}/{}", state_dir, suffix);
+
+  // This should compute a path and create directories as needed
+  EXPECT_NO_THROW({
+    compute_file_name(result, "testuser", suffix.c_str(), "testfile", true);
+  });
+
+  // The result should not be empty
+  EXPECT_FALSE(result.empty());
+  EXPECT_EQ(result, expected);
+
+  // Verify the directory was created
+  EXPECT_TRUE(folly::fs::exists(state_dir));
+
+  // The result should be an absolute path and have correct permissions
+  EXPECT_TRUE(result[0] == '/');
+  checkDirectoryPermissions(state_dir);
+}
+#endif
 
 TEST_F(PathUtilsTest, computeFileNameWithNonExistingDirectory) {
   std::string result;

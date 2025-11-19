@@ -153,22 +153,33 @@ bail:
 
 void create_state_dir(const char* state_dir, std::error_code& ec) {
   ec.clear();
-  auto created = folly::fs::create_directories(state_dir, ec);
-
-  // If create_directories() failed, it will set ec, so just return
-  // so the caller can handle the error.
+  // folly::fs::create_directories errors in the case where the state_dir is a
+  // symlink, so explictly check for the existence first and gate the creation
+  // on this check.
+  auto exists = folly::fs::exists(state_dir, ec);
   if (ec) {
     return;
   }
 
-  if (created) {
+  if (!exists) {
+    auto created = folly::fs::create_directories(state_dir, ec);
+
+    // If create_directories() failed, it will set ec, so just return
+    // so the caller can handle the error.
+    if (ec) {
+      return;
+    }
+
+    if (created) {
 #ifndef _WIN32
-    // Ignore the result here as it doesn't matter, we will check the actual
-    // permissions in verify_dir_ownership
-    chmod(state_dir, 0700);
+      // Ignore the result here as it doesn't matter, we will check the actual
+      // permissions in verify_dir_ownership
+      chmod(state_dir, 0700);
 #endif
+    }
   }
 
+  // Verify the permissions on both pre-existing and newly created directories
   verify_dir_ownership(state_dir);
 }
 

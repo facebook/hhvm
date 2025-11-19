@@ -88,6 +88,10 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Enable logging the number of xbox threads spawned by each hhvmworker request.
 
+- int Server.RequestFanoutLoggingSampleRate = 0, yichenzhou
+
+  Sample rate for logging the number of children threads spawn each root request.
+
 - std::string Server.SecondaryType = "", UNKNOWN
 - int Server.SecondaryPort = 0, UNKNOWN
 

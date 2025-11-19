@@ -130,16 +130,19 @@ void RequestFanoutLimit::decrement(const RequestId& id) {
       // global server max updated by compare_exchange_weak
     }
 
-    // Log the up-to-date server maxConcurrentFanoutCount to ODS
-    if (m_fanoutLogger) {
-      m_fanoutLogger->setValue(s_maxConcurrentFanoutCount.load(std::memory_order_acquire));
-    }
-    // Log maxConcurrentCount of current root request to Scuba
-    if (Cfg::Server::EnableRequestFanoutLogging && StructuredLog::enabled()) {
-      StructuredLogEntry entry;
-      entry.setInt("request_max_concurrent_fanout_count", currReqMax);
-      // TODO: Log root request script filename
-      StructuredLog::log("hhvm_request_fanout", entry);
+    if (Cfg::Server::RequestFanoutLoggingSampleRate != 0 
+      && id.id() % Cfg::Server::RequestFanoutLoggingSampleRate == 0) {
+      // Log the up-to-date server maxConcurrentFanoutCount to ODS
+      if (m_fanoutLogger) {
+        m_fanoutLogger->setValue(s_maxConcurrentFanoutCount.load(std::memory_order_acquire));
+      }
+      // Log maxConcurrentCount of current root request to Scuba
+      if (Cfg::Server::EnableRequestFanoutLogging && StructuredLog::enabled()) {
+        StructuredLogEntry entry;
+        entry.setInt("request_max_concurrent_fanout_count", currReqMax);
+        // TODO: Log root request script filename
+        StructuredLog::log("hhvm_request_fanout", entry);
+      }
     }
 
     // Erase the entry

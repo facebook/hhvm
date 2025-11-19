@@ -51,15 +51,6 @@ Variant HHVM_FUNCTION(apache_note, const String& note_name,
   return false;
 }
 
-Array HHVM_FUNCTION(apache_request_headers) {
-  Transport *transport = g_context->getTransport();
-  if (transport) {
-    auto const& headers = transport->getHeaders();
-    return get_headers(headers);
-  }
-  return empty_dict_array();
-}
-
 static Array get_raw_headers(const proxygen::HTTPHeaders &headers) {
   VecInit ret(headers.size());
   headers.forEach([&] (const std::string &header, const std::string &val) {
@@ -144,10 +135,8 @@ ApacheExtension::~ApacheExtension() {}
 void ApacheExtension::moduleRegisterNative() {
   HHVM_FE(apache_note);
   HHVM_FE(apache_notes);
-  HHVM_FE(apache_request_headers);
   HHVM_FE(apache_response_headers);
   HHVM_FE(apache_setenv);
-  HHVM_FALIAS(getallheaders, apache_request_headers);
   HHVM_FE(apache_get_config);
   HHVM_FALIAS(HH\\get_headers_secure, get_headers_secure);
   HHVM_FALIAS(HH\\get_proxygen_headers, get_proxygen_headers);

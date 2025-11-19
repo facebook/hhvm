@@ -194,11 +194,6 @@ class Connection {
       std::vector<Query>&& queries,
       const AttributeMap& attributes = AttributeMap());
 
-  [[nodiscard]] static MultiQueryStreamHandler streamMultiQuery(
-      std::unique_ptr<Connection> connection,
-      MultiQuery&& multi_query,
-      const AttributeMap& attributes = AttributeMap());
-
   // Called in the libevent thread to create the MYSQL* client.
   void initMysqlOnly();
   void initialize(bool initMysql = true);

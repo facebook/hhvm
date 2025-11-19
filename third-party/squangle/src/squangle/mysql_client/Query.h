@@ -439,12 +439,6 @@ class MultiQuery {
   explicit MultiQuery(std::vector<Query>&& queries)
       : queries_(std::move(queries)) {}
 
-  // Construct an unsafe multi query.
-  // Caller must guarantee the lifetime of the string
-  static MultiQuery unsafe(folly::StringPiece multi_query) {
-    return MultiQuery{multi_query};
-  }
-
   std::shared_ptr<folly::fbstring> renderQuery(
       const InternalConnection* conn) const;
 
@@ -458,10 +452,6 @@ class MultiQuery {
   }
 
  private:
-  explicit MultiQuery(folly::StringPiece multi_query) {
-    rendered_multi_query_ = std::make_shared<folly::fbstring>(multi_query);
-  }
-
   mutable std::shared_ptr<folly::fbstring> rendered_multi_query_;
   std::vector<Query> queries_;
 };

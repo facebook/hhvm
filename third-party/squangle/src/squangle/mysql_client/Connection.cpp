@@ -570,28 +570,6 @@ MultiQueryStreamHandler Connection::streamMultiQuery(
   return MultiQueryStreamHandler(std::move(op));
 }
 
-MultiQueryStreamHandler Connection::streamMultiQuery(
-    std::unique_ptr<Connection> conn,
-    MultiQuery&& multi_query,
-    const AttributeMap& attributes) {
-  auto proxy =
-      std::make_unique<OperationBase::OwnedConnection>(std::move(conn));
-  auto* connP = proxy->get();
-  auto op = connP->createOperation(std::move(proxy), std::move(multi_query));
-  if (attributes.size() > 0) {
-    op->setAttributes(attributes);
-  }
-  Duration timeout = op->connection()->conn_options_.getQueryTimeout();
-  if (timeout.count() > 0) {
-    op->setTimeout(timeout);
-  }
-
-  // MultiQueryStreamHandler needs to be alive while the operation is running.
-  // To accomplish that, ~MultiQueryStreamHandler waits until
-  // `postOperationEnded` is called.
-  return MultiQueryStreamHandler(std::move(op));
-}
-
 void Connection::mergePersistentQueryAttributes(QueryAttributes& attrs) const {
   for (const auto& [key, value] : getPersistentQueryAttributes()) {
     attrs[key] = value;

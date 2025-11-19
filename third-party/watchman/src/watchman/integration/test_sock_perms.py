@@ -287,12 +287,56 @@ class TestSockPerms(unittest.TestCase):
         self.assertACL(instance.user_dir, group, f"group:{group.gr_name}:r-x")
         self.assertACL(instance.sock_file, group, f"group:{group.gr_name}:rw-")
 
-    def assertFileMode(self, f, mode) -> None:
-        st = os.lstat(f)
+    def test_sock_symlink(self) -> None:
+        instance = self._new_instance({"sock_access": {"group": True}})
+        os.makedirs(instance.user_dir)
+        user_dir2 = instance.user_dir + "2"
+        os.rename(instance.user_dir, user_dir2)
+        os.chmod(user_dir2, 0o700)
+        os.symlink(user_dir2, instance.user_dir)
+
+        instance.start()
+
+        # Assert that starting watchman sets the permissions on the symlink
+        self.assertFileMode(instance.user_dir, 0o750 | stat.S_ISGID)
+        self.assertFileMode(instance.user_dir, 0o777, follow_symlink=False)
+
+        os.chmod(user_dir2, 0o700)
+
+        # Check that get-sockname sets file permissions to 0750
+        stdout = instance.commandViaCLI(["get-sockname"])[0].decode("utf-8")
+        self.assertIn('"sockname":', stdout)
+        self.assertFileMode(instance.user_dir, 0o750 | stat.S_ISGID)
+        self.assertFileMode(instance.user_dir, 0o777, follow_symlink=False)
+
+        def run_get_sockname():
+            cmd = f"seq 100 | xargs -Iz -P 100 {instance.watchmanBinary()} {' '.join(instance.get_state_args())} get-sockname --no-spawn"
+            env = os.environ.copy()
+            return subprocess.Popen(
+                cmd,
+                env=env,
+                stdin=None,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                shell=True,
+            )
+
+        results = run_get_sockname().communicate()
+        self.assertNotIn("chmod 0700", results[1].decode("utf-8"))
+        instance.stop()
+
+    def assertFileMode(self, f, mode, follow_symlink=True) -> None:
+        if follow_symlink:
+            st = os.stat(f)
+        else:
+            st = os.lstat(f)
         self.assertEqual(stat.S_IMODE(st.st_mode), mode)
 
-    def assertFileGID(self, f, gid) -> None:
-        st = os.lstat(f)
+    def assertFileGID(self, f, gid, follow_symlink=True) -> None:
+        if follow_symlink:
+            st = os.stat(f)
+        else:
+            st = os.lstat(f)
         self.assertEqual(st.st_gid, gid)
 
     def assertACL(self, f, group, expected_regex) -> None:

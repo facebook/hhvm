@@ -90,10 +90,10 @@ bool setSecondaryGroupACL(
     return false;
   }
 
-  // Get the path's current permissions
+  // Get the path's current permissions, following symlinks
   struct stat st{};
-  if (lstat(path, &st) != 0) {
-    logf(ERR, "Failed to lstat {}: {}\n", path, folly::errnoStr(errno));
+  if (stat(path, &st) != 0) {
+    logf(ERR, "Failed to stat {}: {}\n", path, folly::errnoStr(errno));
     return false;
   }
 

@@ -122,6 +122,7 @@ add_library(
   parse/parse_ast.h
   parse/token.cc
   parse/token.h
+  sema/ast_uri_utils.cc
   sema/check_initializer.cc
   sema/check_map_keys.cc
   sema/explicit_include_validator.cc

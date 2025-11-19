@@ -593,6 +593,142 @@ void ContextStack::handleSinkError(const folly::exception_wrapper& ew) {
   }
 }
 
+// BiDi-specific implementations
+void ContextStack::onBiDiSubscribe() {
+  FOLLY_SDT(
+      thrift,
+      thrift_context_stack_on_bidi_subscribe,
+      serviceName_,
+      methodNamePrefixed_);
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      if (auto* bidiEventHandler = (*handlers_)[i]->getBiDiEventHandler()) {
+        bidiEventHandler->onBiDiSubscribe(contextAt(i));
+      }
+    }
+  }
+}
+
+void ContextStack::onBiDiSinkNext() {
+  FOLLY_SDT(
+      thrift,
+      thrift_context_stack_on_bidi_sink_next,
+      serviceName_,
+      methodNamePrefixed_);
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      if (auto* bidiEventHandler = (*handlers_)[i]->getBiDiEventHandler()) {
+        bidiEventHandler->onBiDiSinkNext(contextAt(i));
+      }
+    }
+  }
+}
+
+void ContextStack::onBiDiSinkCredit(uint32_t credits) {
+  FOLLY_SDT(
+      thrift,
+      thrift_context_stack_on_bidi_sink_credit,
+      serviceName_,
+      methodNamePrefixed_);
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      if (auto* bidiEventHandler = (*handlers_)[i]->getBiDiEventHandler()) {
+        bidiEventHandler->onBiDiSinkCredit(contextAt(i), credits);
+      }
+    }
+  }
+}
+
+void ContextStack::onBiDiStreamNext() {
+  FOLLY_SDT(
+      thrift,
+      thrift_context_stack_on_bidi_stream_next,
+      serviceName_,
+      methodNamePrefixed_);
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      if (auto* bidiEventHandler = (*handlers_)[i]->getBiDiEventHandler()) {
+        bidiEventHandler->onBiDiStreamNext(contextAt(i));
+      }
+    }
+  }
+}
+
+void ContextStack::onBiDiStreamCredit(uint32_t credits) {
+  FOLLY_SDT(
+      thrift,
+      thrift_context_stack_on_bidi_stream_credit,
+      serviceName_,
+      methodNamePrefixed_);
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      if (auto* bidiEventHandler = (*handlers_)[i]->getBiDiEventHandler()) {
+        bidiEventHandler->onBiDiStreamCredit(contextAt(i), credits);
+      }
+    }
+  }
+}
+
+void ContextStack::onBiDiStreamPause(details::STREAM_PAUSE_REASON reason) {
+  FOLLY_SDT(
+      thrift,
+      thrift_context_stack_on_bidi_stream_pause,
+      serviceName_,
+      methodNamePrefixed_);
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      if (auto* bidiEventHandler = (*handlers_)[i]->getBiDiEventHandler()) {
+        bidiEventHandler->onBiDiStreamPause(contextAt(i), reason);
+      }
+    }
+  }
+}
+
+void ContextStack::handleBiDiSinkError(const folly::exception_wrapper& ew) {
+  FOLLY_SDT(
+      thrift,
+      thrift_context_stack_on_bidi_sink_error,
+      serviceName_,
+      methodNamePrefixed_);
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      if (auto* bidiEventHandler = (*handlers_)[i]->getBiDiEventHandler()) {
+        bidiEventHandler->handleBiDiSinkError(contextAt(i), ew);
+      }
+    }
+  }
+}
+
+void ContextStack::handleBiDiStreamError(const folly::exception_wrapper& ew) {
+  FOLLY_SDT(
+      thrift,
+      thrift_context_stack_on_bidi_stream_error,
+      serviceName_,
+      methodNamePrefixed_);
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      if (auto* bidiEventHandler = (*handlers_)[i]->getBiDiEventHandler()) {
+        bidiEventHandler->handleBiDiStreamError(contextAt(i), ew);
+      }
+    }
+  }
+}
+
+void ContextStack::onBiDiFinally(details::BIDI_FINISH_REASON endReason) {
+  FOLLY_SDT(
+      thrift,
+      thrift_context_stack_on_bidi_finally,
+      serviceName_,
+      methodNamePrefixed_);
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      if (auto* bidiEventHandler = (*handlers_)[i]->getBiDiEventHandler()) {
+        bidiEventHandler->onBiDiFinally(contextAt(i), endReason);
+      }
+    }
+  }
+}
+
 void ContextStack::resetClientRequestContextHeader() {
   if (embeddedClientContext_ == nullptr) {
     return;

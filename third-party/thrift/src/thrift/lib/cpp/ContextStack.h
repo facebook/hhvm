@@ -18,15 +18,15 @@
 
 #include <folly/ExceptionWrapper.h>
 #include <folly/Try.h>
+#include <thrift/lib/cpp/BiDiEventHandler.h>
 #include <thrift/lib/cpp/SerializedMessage.h>
+#include <thrift/lib/cpp/StreamEventHandler.h>
 #include <thrift/lib/cpp/TProcessorEventHandler.h>
 #include <thrift/lib/cpp/protocol/TProtocolTypes.h>
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/async/ClientInterceptorBase.h>
 #include <thrift/lib/cpp2/async/ClientInterceptorStorage.h>
 #include <thrift/lib/cpp2/util/AllocationColocator.h>
-
-#include <thrift/lib/cpp/StreamEventHandler.h>
 
 namespace apache::thrift {
 
@@ -125,6 +125,16 @@ class ContextStack {
   void onSinkCredit(uint32_t credits);
   void onSinkFinally(details::SINK_ENDING_TYPES endReason);
   void handleSinkError(const folly::exception_wrapper& ew);
+
+  void onBiDiSubscribe();
+  void onBiDiSinkNext();
+  void onBiDiSinkCredit(uint32_t credits);
+  void onBiDiStreamNext();
+  void onBiDiStreamCredit(uint32_t credits);
+  void onBiDiStreamPause(details::STREAM_PAUSE_REASON reason);
+  void handleBiDiSinkError(const folly::exception_wrapper& ew);
+  void handleBiDiStreamError(const folly::exception_wrapper& ew);
+  void onBiDiFinally(details::BIDI_FINISH_REASON endReason);
 
   void resetClientRequestContextHeader();
 

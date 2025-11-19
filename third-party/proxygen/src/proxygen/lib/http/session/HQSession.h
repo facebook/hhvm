@@ -351,6 +351,10 @@ class HQSession
     return supportsWebTransport_.all();
   }
 
+  WebTransportFilter* getWebTransportFilter() const {
+    return wtFilter_.get();
+  }
+
   void setMaxConcurrentIncomingStreams(uint32_t /*num*/) override {
     // need transport API
   }

@@ -158,7 +158,8 @@ class HTTPHandlerBase {
 
 class MockHTTPHandler
     : public HTTPHandlerBase
-    , public HTTPTransaction::Handler {
+    , public HTTPTransaction::Handler
+    , public WebTransportHandler {
  public:
   MockHTTPHandler() {
     setupInvariantViolation();
@@ -223,6 +224,20 @@ class MockHTTPHandler
               onWebTransportSessionClose,
               (folly::Optional<uint32_t>),
               (noexcept));
+
+  void onNewUniStream(
+      WebTransport::StreamReadHandle* readHandle) noexcept override {
+    onWebTransportUniStream(0, readHandle);
+  }
+
+  void onNewBidiStream(
+      WebTransport::BidiStreamHandle bidiHandle) noexcept override {
+    onWebTransportBidiStream(0, bidiHandle);
+  }
+
+  void onSessionEnd(folly::Optional<uint32_t> error) noexcept override {
+    onWebTransportSessionClose(error);
+  }
 
   void onChunkHeader(size_t length) noexcept override {
     _onChunkHeader(length);

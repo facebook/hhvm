@@ -2216,6 +2216,14 @@ class HQUpstreamSessionTestWebTransport : public HQUpstreamSessionTest {
     writeWTMaxStreams(capsuleQueue, bidiCapsule, true);
     sendPartialBody(sessionId_, capsuleQueue.move(), false);
     flushAndLoopN(2);
+
+    // Connect the handler to the WebTransport filter so callbacks work
+    // The filter is installed when the 200 response is processed, so we can
+    // now set the handler on it
+    auto* wtFilter = hqSession_->getWebTransportFilter();
+    if (wtFilter) {
+      wtFilter->setHandler(dynamic_cast<WebTransportHandler*>(handler_.get()));
+    }
   }
 
   std::unique_ptr<testing::StrictMock<proxygen::MockHTTPHandler>>
@@ -2287,6 +2295,96 @@ TEST_P(HQUpstreamSessionTestWebTransport, FilterInstallation) {
   EXPECT_NE(filter, nullptr);
 
   closeWTSession();
+}
+
+TEST_P(HQUpstreamSessionTestWebTransport, CloseSessionCapsule) {
+  InSequence enforceOrder;
+
+  folly::IOBufQueue capsuleQueue;
+  CloseWebTransportSessionCapsule closeCapsule{.applicationErrorCode = 42,
+                                               .applicationErrorMessage =
+                                                   "server initiated close"};
+  auto writeResult = writeCloseWebTransportSession(capsuleQueue, closeCapsule);
+  EXPECT_TRUE(writeResult.has_value());
+  auto capsuleData = capsuleQueue.move();
+  EXPECT_GT(capsuleData->computeChainDataLength(), 0);
+
+  EXPECT_CALL(*handler_,
+              onWebTransportSessionClose(folly::Optional<uint32_t>(42)))
+      .Times(1);
+  handler_->expectEOM();
+  handler_->expectDetachTransaction();
+
+  sendPartialBody(sessionId_, std::move(capsuleData), true);
+  flushAndLoop();
+
+  // Unlike HTTP/2 which has httpSession_->destroy(), HTTP/3 uses
+  // dropConnection() to immediately destroy the session and trigger
+  // detachSession() callback.
+  HQSession::DestructorGuard dg(hqSession_);
+  hqSession_->dropConnection();
+}
+
+TEST_P(HQUpstreamSessionTestWebTransport, CloseSessionCapsuleWithStreams) {
+  InSequence enforceOrder;
+
+  // Send data using a bidi stream, then try to close the WebTransport session.
+  auto bidiStream = wt_->createBidiStream().value();
+  auto bidiStreamId = bidiStream.readHandle->getID();
+  VLOG(4) << "Created bidi stream with ID: " << bidiStreamId;
+
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+  wtImpl->onMaxData(10000);
+  socketDriver_->setStreamFlowControlWindow(bidiStreamId, 10000);
+  socketDriver_->setConnectionFlowControlWindow(10000);
+
+  auto writeRes =
+      bidiStream.writeHandle->writeStreamData(makeBuf(100), false, nullptr);
+  EXPECT_TRUE(writeRes.hasValue());
+  eventBase_.loopOnce();
+  VLOG(4) << "Successfully wrote 100 bytes to bidi stream";
+
+  bool dataReceived = false;
+  bidiStream.readHandle->awaitNextRead(
+      &eventBase_, [&](auto, auto, auto streamData) {
+        VLOG(4) << "Received " << streamData->data->computeChainDataLength()
+                << " bytes on bidi stream";
+        EXPECT_EQ(streamData->data->computeChainDataLength(), 50);
+        dataReceived = true;
+      });
+
+  socketDriver_->addReadEvent(
+      bidiStreamId, makeBuf(50), std::chrono::milliseconds(0));
+
+  eventBase_.loopOnce();
+  eventBase_.loopOnce();
+  EXPECT_TRUE(dataReceived);
+
+  // Send close capsule to terminate the WebTransport session and all streams
+  // associated with it.
+  folly::IOBufQueue capsuleQueue;
+  CloseWebTransportSessionCapsule closeCapsule{.applicationErrorCode = 42,
+                                               .applicationErrorMessage =
+                                                   "server initiated close"};
+  auto writeResult = writeCloseWebTransportSession(capsuleQueue, closeCapsule);
+  EXPECT_TRUE(writeResult.has_value());
+
+  auto capsuleData = capsuleQueue.move();
+  EXPECT_GT(capsuleData->computeChainDataLength(), 0);
+
+  EXPECT_CALL(*handler_,
+              onWebTransportSessionClose(folly::Optional<uint32_t>(42)))
+      .Times(1);
+  handler_->expectEOM();
+  handler_->expectDetachTransaction();
+
+  sendPartialBody(sessionId_, std::move(capsuleData), true);
+  flushAndLoop();
+  EXPECT_TRUE(socketDriver_->streams_[bidiStreamId].error.has_value());
+
+  HQSession::DestructorGuard dg(hqSession_);
+  hqSession_->dropConnection();
 }
 
 TEST_P(HQUpstreamSessionTestWebTransport, BidirectionalStream) {

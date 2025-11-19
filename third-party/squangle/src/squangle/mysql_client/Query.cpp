@@ -598,7 +598,9 @@ folly::fbstring Query::renderMultiQuery(
     reserve_size += query.query_text_.getQuery().size() +
         8 * query.params_.size() + query_prefix.size();
   }
-  reserve_size += queries.size() - 1; // for the ';'
+  if (queries.size() > 0) {
+    reserve_size += queries.size() - 1;
+  }
 
   folly::fbstring ret;
   ret.reserve(reserve_size);

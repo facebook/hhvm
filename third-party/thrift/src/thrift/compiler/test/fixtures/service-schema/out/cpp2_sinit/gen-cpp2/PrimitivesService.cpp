@@ -22,7 +22,7 @@ apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::Cre
 #if defined(THRIFT_SCHEMA_AVAILABLE)
 std::optional<apache::thrift::schema::DefinitionsSchema> apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>::getServiceSchema() {
   std::optional<apache::thrift::schema::DefinitionsSchema> ret = schema::DefinitionsSchema{};
-  ret->schema = ::apache::thrift::schema::detail::mergeSchemas(::facebook::thrift::test::module_constants::_fbthrift_schema_bc0984a218954d47_includes());
+  ret->schema = ::apache::thrift::schema::detail::loadBundledSchema(::facebook::thrift::test::module_constants::_fbthrift_schema_bc0984a218954d47_includes());
   ret->definitions = { {"\x8a\x6f\xcf\x1a\xc4\x7f\xef\xe9\xfc\xd0\xb5\xce\x3b\x5e\x14\xb4", 16} };
   return ret;
 }

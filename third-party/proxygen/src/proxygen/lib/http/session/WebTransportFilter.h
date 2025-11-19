@@ -173,44 +173,46 @@ class WebTransportFilter
   }
 
   folly::Expected<folly::Unit, WebTransport::ErrorCode> resetWebTransportEgress(
-      HTTPCodec::StreamID /*id*/, uint32_t /*errorCode*/) override {
-    return folly::unit;
+      HTTPCodec::StreamID id, uint32_t errorCode) override {
+    return h3Tp_ ? h3Tp_->resetWebTransportEgress(id, errorCode) : folly::unit;
   }
 
   folly::Expected<folly::Unit, WebTransport::ErrorCode>
-  setWebTransportStreamPriority(HTTPCodec::StreamID /*id*/,
-                                HTTPPriority /*pri*/) override {
-    return folly::unit;
+  setWebTransportStreamPriority(HTTPCodec::StreamID id,
+                                HTTPPriority pri) override {
+    return h3Tp_ ? h3Tp_->setWebTransportStreamPriority(id, pri) : folly::unit;
   }
 
   folly::Expected<std::pair<std::unique_ptr<folly::IOBuf>, bool>,
                   WebTransport::ErrorCode>
-  readWebTransportData(HTTPCodec::StreamID /*id*/, size_t /*max*/) override {
-    return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
+  readWebTransportData(HTTPCodec::StreamID id, size_t max) override {
+    return h3Tp_
+               ? h3Tp_->readWebTransportData(id, max)
+               : folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
   }
 
   folly::Expected<folly::Unit, WebTransport::ErrorCode>
-  initiateReadOnBidiStream(
-      HTTPCodec::StreamID /*id*/,
-      quic::StreamReadCallback* /*readCallback*/) override {
-    return folly::unit;
+  initiateReadOnBidiStream(HTTPCodec::StreamID id,
+                           quic::StreamReadCallback* readCallback) override {
+    return h3Tp_ ? h3Tp_->initiateReadOnBidiStream(id, readCallback)
+                 : folly::unit;
   }
 
   folly::Expected<folly::Unit, WebTransport::ErrorCode>
-  pauseWebTransportIngress(HTTPCodec::StreamID /*id*/) override {
-    return folly::unit;
+  pauseWebTransportIngress(HTTPCodec::StreamID id) override {
+    return h3Tp_ ? h3Tp_->pauseWebTransportIngress(id) : folly::unit;
   }
 
   folly::Expected<folly::Unit, WebTransport::ErrorCode>
-  resumeWebTransportIngress(HTTPCodec::StreamID /*id*/) override {
-    return folly::unit;
+  resumeWebTransportIngress(HTTPCodec::StreamID id) override {
+    return h3Tp_ ? h3Tp_->resumeWebTransportIngress(id) : folly::unit;
   }
 
   folly::Expected<folly::Unit, WebTransport::ErrorCode>
-  stopReadingWebTransportIngress(
-      HTTPCodec::StreamID /*id*/,
-      folly::Optional<uint32_t> /*errorCode*/) override {
-    return folly::unit;
+  stopReadingWebTransportIngress(HTTPCodec::StreamID id,
+                                 folly::Optional<uint32_t> errorCode) override {
+    return h3Tp_ ? h3Tp_->stopReadingWebTransportIngress(id, errorCode)
+                 : folly::unit;
   }
 
   folly::SemiFuture<folly::Unit> awaitUniStreamCredit() override {
@@ -230,13 +232,18 @@ class WebTransportFilter
   }
 
   folly::Expected<folly::Unit, WebTransport::ErrorCode>
-  notifyPendingWriteOnStream(HTTPCodec::StreamID /*id*/,
-                             quic::StreamWriteCallback* /*wcb*/) override {
-    return folly::unit;
+  notifyPendingWriteOnStream(HTTPCodec::StreamID id,
+                             quic::StreamWriteCallback* wcb) override {
+    return h3Tp_ ? h3Tp_->notifyPendingWriteOnStream(id, wcb) : folly::unit;
   }
 
   bool usesEncodedApplicationErrorCodes() override {
-    return false;
+    return h3Tp_ ? h3Tp_->usesEncodedApplicationErrorCodes()
+                 : true; // For H2, we use encoded application error codes
+  }
+
+  uint64_t getWTInitialSendWindow() const override {
+    return h3Tp_ ? h3Tp_->getWTInitialSendWindow() : quic::kMaxVarInt;
   }
 
   const folly::SocketAddress& getLocalAddress() const override {

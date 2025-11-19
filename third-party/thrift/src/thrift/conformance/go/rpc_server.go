@@ -110,14 +110,14 @@ func (h *rpcConformanceServiceHandler) StreamBasic(ctx context.Context, request 
 		SetStreamBasic(requestValue)
 
 	elemProducerFunc := func(ctx context.Context, elemChan chan<- *rpc.Response) error {
-        for _, resp := range h.instruction.StreamBasic.StreamPayloads {
-            select {
-                case <-ctx.Done():
-                    return ctx.Err()
-                case elemChan <- resp:
-            }
-        }
-        return nil
+		for _, resp := range h.instruction.StreamBasic.StreamPayloads {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case elemChan <- resp:
+			}
+		}
+		return nil
 	}
 	return elemProducerFunc, nil
 }
@@ -128,14 +128,14 @@ func (h *rpcConformanceServiceHandler) StreamInitialResponse(ctx context.Context
 		SetStreamInitialResponse(requestValue)
 
 	elemProducerFunc := func(ctx context.Context, elemChan chan<- *rpc.Response) error {
-        for _, resp := range h.instruction.StreamInitialResponse.StreamPayloads {
-            select {
-                case <-ctx.Done():
-                    return ctx.Err()
-                case elemChan <- resp:
-            }
-        }
-        return nil
+		for _, resp := range h.instruction.StreamInitialResponse.StreamPayloads {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case elemChan <- resp:
+			}
+		}
+		return nil
 	}
 	return h.instruction.StreamInitialResponse.InitialResponse, elemProducerFunc, nil
 }
@@ -146,7 +146,7 @@ func (h *rpcConformanceServiceHandler) StreamDeclaredException(ctx context.Conte
 		SetStreamDeclaredException(requestValue)
 
 	elemProducerFunc := func(ctx context.Context, elemChan chan<- *rpc.Response) error {
-        return h.instruction.StreamDeclaredException.UserException
+		return h.instruction.StreamDeclaredException.UserException
 	}
 	return elemProducerFunc, nil
 }
@@ -157,7 +157,7 @@ func (h *rpcConformanceServiceHandler) StreamUndeclaredException(ctx context.Con
 		SetStreamUndeclaredException(requestValue)
 
 	elemProducerFunc := func(ctx context.Context, elemChan chan<- *rpc.Response) error {
-        return errors.New(h.instruction.StreamUndeclaredException.ExceptionMessage)
+		return errors.New(h.instruction.StreamUndeclaredException.ExceptionMessage)
 	}
 	return elemProducerFunc, nil
 }
@@ -168,7 +168,7 @@ func (h *rpcConformanceServiceHandler) StreamInitialDeclaredException(ctx contex
 		SetStreamInitialDeclaredException(requestValue)
 
 	elemProducerFunc := func(ctx context.Context, elemChan chan<- *rpc.Response) error {
-        return nil
+		return nil
 	}
 	return elemProducerFunc, h.instruction.StreamInitialDeclaredException.UserException
 }
@@ -179,7 +179,7 @@ func (h *rpcConformanceServiceHandler) StreamInitialUndeclaredException(ctx cont
 		SetStreamInitialUndeclaredException(requestValue)
 
 	elemProducerFunc := func(ctx context.Context, elemChan chan<- *rpc.Response) error {
-        return nil
+		return nil
 	}
 	return elemProducerFunc, errors.New(h.instruction.StreamInitialUndeclaredException.ExceptionMessage)
 }
@@ -213,7 +213,7 @@ func (h *rpcConformanceServiceHandler) BasicInteractionFactoryFunction(ctx conte
 
 	interaction := &basicInteractionImpl{
 		initialSum: initialSum,
-		handler: h,
+		handler:    h,
 	}
 	return rpc.NewBasicInteractionProcessor(interaction), nil
 }

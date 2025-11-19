@@ -1741,12 +1741,14 @@ class HTTPTransaction
     return transport_.supportsWebTransport() && wtConnectStream_;
   }
 
-  WebTransport* getWebTransport() {
+  WebTransportImpl* getWebTransport() {
     if (!isWebTransportConnectStream()) {
       return nullptr;
     }
     if (!webTransportImpl_) {
-      webTransportImpl_ = std::make_unique<WebTransportImpl>(transport_, *this);
+      CHECK(wtTransportProvider_);
+      webTransportImpl_ =
+          std::make_unique<WebTransportImpl>(*wtTransportProvider_, *this);
     }
     return webTransportImpl_.get();
   }

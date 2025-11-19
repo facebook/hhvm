@@ -263,14 +263,20 @@ class WebTransportFilter
     if ((nextNewWTUniStream_ >> 2) >= maxWTUniStreams_) {
       return false;
     }
-    return !h3Tp_ || h3Tp_->canCreateUniStream();
+    if (h3Tp_ && !h3Tp_->canCreateUniStream()) {
+      return false;
+    }
+    return true;
   }
 
   bool canCreateBidiStream() override {
     if ((nextNewWTBidiStream_ >> 2) >= maxWTBidiStreams_) {
       return false;
     }
-    return !h3Tp_ || h3Tp_->canCreateBidiStream();
+    if (h3Tp_ && !h3Tp_->canCreateBidiStream()) {
+      return false;
+    }
+    return true;
   }
 
   folly::Expected<folly::Unit, WebTransport::ErrorCode>

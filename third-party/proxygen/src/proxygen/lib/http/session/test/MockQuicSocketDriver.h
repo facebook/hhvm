@@ -942,7 +942,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
 
   void setMaxUniStreams(uint64_t maxUniStreams) {
     auto maxUniStreamID =
-        maxUniStreams * 4 + ((transportType_ == TransportEnum::SERVER) ? 3 : 1);
+        maxUniStreams * 4 + ((transportType_ == TransportEnum::SERVER) ? 3 : 2);
     if (maxUniStreamID > maxUniStreamID_) {
       maxUniStreamID_ = maxUniStreamID;
       if (sock_->connCb_) {

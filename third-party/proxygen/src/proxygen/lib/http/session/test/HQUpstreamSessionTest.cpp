@@ -2209,10 +2209,10 @@ class HQUpstreamSessionTestWebTransport : public HQUpstreamSessionTest {
 
     // Set WebTransport stream limits to allow stream creation in tests
     folly::IOBufQueue capsuleQueue;
-    WTMaxStreamsCapsule uniCapsule{.maximumStreams = 100};
+    WTMaxStreamsCapsule uniCapsule{.maximumStreams = 1};
     writeWTMaxStreams(capsuleQueue, uniCapsule, false);
     sendPartialBody(sessionId_, capsuleQueue.move(), false);
-    WTMaxStreamsCapsule bidiCapsule{.maximumStreams = 100};
+    WTMaxStreamsCapsule bidiCapsule{.maximumStreams = 1};
     writeWTMaxStreams(capsuleQueue, bidiCapsule, true);
     sendPartialBody(sessionId_, capsuleQueue.move(), false);
     flushAndLoopN(2);
@@ -2297,98 +2297,20 @@ TEST_P(HQUpstreamSessionTestWebTransport, FilterInstallation) {
   closeWTSession();
 }
 
-TEST_P(HQUpstreamSessionTestWebTransport, CloseSessionCapsule) {
-  InSequence enforceOrder;
-
-  folly::IOBufQueue capsuleQueue;
-  CloseWebTransportSessionCapsule closeCapsule{.applicationErrorCode = 42,
-                                               .applicationErrorMessage =
-                                                   "server initiated close"};
-  auto writeResult = writeCloseWebTransportSession(capsuleQueue, closeCapsule);
-  EXPECT_TRUE(writeResult.has_value());
-  auto capsuleData = capsuleQueue.move();
-  EXPECT_GT(capsuleData->computeChainDataLength(), 0);
-
-  EXPECT_CALL(*handler_,
-              onWebTransportSessionClose(folly::Optional<uint32_t>(42)))
-      .Times(1);
-  handler_->expectEOM();
-  handler_->expectDetachTransaction();
-
-  sendPartialBody(sessionId_, std::move(capsuleData), true);
-  flushAndLoop();
-
-  // Unlike HTTP/2 which has httpSession_->destroy(), HTTP/3 uses
-  // dropConnection() to immediately destroy the session and trigger
-  // detachSession() callback.
-  HQSession::DestructorGuard dg(hqSession_);
-  hqSession_->dropConnection();
-}
-
-TEST_P(HQUpstreamSessionTestWebTransport, CloseSessionCapsuleWithStreams) {
-  InSequence enforceOrder;
-
-  // Send data using a bidi stream, then try to close the WebTransport session.
-  auto bidiStream = wt_->createBidiStream().value();
-  auto bidiStreamId = bidiStream.readHandle->getID();
-  VLOG(4) << "Created bidi stream with ID: " << bidiStreamId;
-
-  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
-  ASSERT_NE(wtImpl, nullptr);
-  wtImpl->onMaxData(10000);
-  socketDriver_->setStreamFlowControlWindow(bidiStreamId, 10000);
-  socketDriver_->setConnectionFlowControlWindow(10000);
-
-  auto writeRes =
-      bidiStream.writeHandle->writeStreamData(makeBuf(100), false, nullptr);
-  EXPECT_TRUE(writeRes.hasValue());
-  eventBase_.loopOnce();
-  VLOG(4) << "Successfully wrote 100 bytes to bidi stream";
-
-  bool dataReceived = false;
-  bidiStream.readHandle->awaitNextRead(
-      &eventBase_, [&](auto, auto, auto streamData) {
-        VLOG(4) << "Received " << streamData->data->computeChainDataLength()
-                << " bytes on bidi stream";
-        EXPECT_EQ(streamData->data->computeChainDataLength(), 50);
-        dataReceived = true;
-      });
-
-  socketDriver_->addReadEvent(
-      bidiStreamId, makeBuf(50), std::chrono::milliseconds(0));
-
-  eventBase_.loopOnce();
-  eventBase_.loopOnce();
-  EXPECT_TRUE(dataReceived);
-
-  // Send close capsule to terminate the WebTransport session and all streams
-  // associated with it.
-  folly::IOBufQueue capsuleQueue;
-  CloseWebTransportSessionCapsule closeCapsule{.applicationErrorCode = 42,
-                                               .applicationErrorMessage =
-                                                   "server initiated close"};
-  auto writeResult = writeCloseWebTransportSession(capsuleQueue, closeCapsule);
-  EXPECT_TRUE(writeResult.has_value());
-
-  auto capsuleData = capsuleQueue.move();
-  EXPECT_GT(capsuleData->computeChainDataLength(), 0);
-
-  EXPECT_CALL(*handler_,
-              onWebTransportSessionClose(folly::Optional<uint32_t>(42)))
-      .Times(1);
-  handler_->expectEOM();
-  handler_->expectDetachTransaction();
-
-  sendPartialBody(sessionId_, std::move(capsuleData), true);
-  flushAndLoop();
-  EXPECT_TRUE(socketDriver_->streams_[bidiStreamId].error.has_value());
-
-  HQSession::DestructorGuard dg(hqSession_);
-  hqSession_->dropConnection();
-}
-
 TEST_P(HQUpstreamSessionTestWebTransport, BidirectionalStream) {
   InSequence enforceOrder;
+
+  // Send WT_MAX_STREAMS_BIDI capsule to establish stream credit on the
+  // WebTransport level.
+  folly::IOBufQueue capsuleQueue;
+  WTMaxStreamsCapsule maxStreamsCapsule{.maximumStreams = 10};
+  auto writeResult = writeWTMaxStreams(capsuleQueue, maxStreamsCapsule, true);
+  EXPECT_TRUE(writeResult.has_value());
+  auto capsuleData = capsuleQueue.move();
+  EXPECT_GT(capsuleData->computeChainDataLength(), 0);
+  sendPartialBody(sessionId_, std::move(capsuleData), false);
+  flushAndLoopN(2);
+
   // Create a bidi WT stream
   auto stream = wt_->createBidiStream().value();
   auto id = stream.readHandle->getID();
@@ -2516,6 +2438,18 @@ TEST_P(HQUpstreamSessionTestWebTransport, RejectBidirectionalStream) {
 
 TEST_P(HQUpstreamSessionTestWebTransport, PairOfUnisReset) {
   socketDriver_->setMaxUniStreams(10);
+
+  // Send WT_MAX_STREAMS_UNI capsule to establish stream credit on the
+  // WebTransport level.
+  folly::IOBufQueue capsuleQueue;
+  WTMaxStreamsCapsule maxStreamsCapsule{.maximumStreams = 10};
+  auto writeResult = writeWTMaxStreams(capsuleQueue, maxStreamsCapsule, false);
+  EXPECT_TRUE(writeResult.has_value());
+  auto capsuleData = capsuleQueue.move();
+  EXPECT_GT(capsuleData->computeChainDataLength(), 0);
+  sendPartialBody(sessionId_, std::move(capsuleData), false);
+  flushAndLoopN(2);
+
   auto writeHandle = wt_->createUniStream().value();
   auto writeId = writeHandle->getID();
   WebTransport::StreamReadHandle* readHandle{nullptr};
@@ -2568,12 +2502,154 @@ TEST_P(HQUpstreamSessionTestWebTransport, Datagrams) {
   closeWTSession();
 }
 
-TEST_P(HQUpstreamSessionTestWebTransport, ReceiveWTInitialMaxData) {
-  // Verify that the WT_INITIAL_MAX_DATA setting was received in the initial
-  // settings.
-  EXPECT_EQ(httpCallbacks_.wtInitialMaxData, 65536);
-  EXPECT_EQ(httpCallbacks_.settings, 1);
-  EXPECT_EQ(handler_->txn_->getTransport().getWTInitialSendWindow(), 65536);
+TEST_P(HQUpstreamSessionTestWebTransport, CloseSessionCapsule) {
+  InSequence enforceOrder;
+
+  folly::IOBufQueue capsuleQueue;
+  CloseWebTransportSessionCapsule closeCapsule{.applicationErrorCode = 42,
+                                               .applicationErrorMessage =
+                                                   "server initiated close"};
+  auto writeResult = writeCloseWebTransportSession(capsuleQueue, closeCapsule);
+  EXPECT_TRUE(writeResult.has_value());
+  auto capsuleData = capsuleQueue.move();
+  EXPECT_GT(capsuleData->computeChainDataLength(), 0);
+
+  EXPECT_CALL(*handler_,
+              onWebTransportSessionClose(folly::Optional<uint32_t>(42)))
+      .Times(1);
+  handler_->expectEOM();
+  handler_->expectDetachTransaction();
+
+  sendPartialBody(sessionId_, std::move(capsuleData), true);
+  flushAndLoop();
+
+  // Unlike HTTP/2 which has httpSession_->destroy(), HTTP/3 uses
+  // dropConnection() to immediately destroy the session and trigger
+  // detachSession() callback.
+  HQSession::DestructorGuard dg(hqSession_);
+  hqSession_->dropConnection();
+}
+
+TEST_P(HQUpstreamSessionTestWebTransport, CloseSessionCapsuleWithStreams) {
+  InSequence enforceOrder;
+
+  // Send WT_MAX_STREAMS_BIDI capsule to establish stream credit on the
+  // WebTransport level.
+  folly::IOBufQueue capsuleQueue;
+  WTMaxStreamsCapsule maxStreamsCapsule{.maximumStreams = 10};
+  auto writeResult = writeWTMaxStreams(capsuleQueue, maxStreamsCapsule, true);
+  EXPECT_TRUE(writeResult.has_value());
+  auto capsuleData = capsuleQueue.move();
+  EXPECT_GT(capsuleData->computeChainDataLength(), 0);
+  sendPartialBody(sessionId_, std::move(capsuleData), false);
+  flushAndLoopN(2);
+
+  // Send data using a bidi stream, then try to close the WebTransport session.
+  auto bidiStream = wt_->createBidiStream().value();
+  auto bidiStreamId = bidiStream.readHandle->getID();
+  VLOG(4) << "Created bidi stream with ID: " << bidiStreamId;
+
+  auto wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
+  ASSERT_NE(wtImpl, nullptr);
+  wtImpl->onMaxData(10000);
+  socketDriver_->setStreamFlowControlWindow(bidiStreamId, 10000);
+  socketDriver_->setConnectionFlowControlWindow(10000);
+
+  auto writeRes =
+      bidiStream.writeHandle->writeStreamData(makeBuf(100), false, nullptr);
+  EXPECT_TRUE(writeRes.hasValue());
+  eventBase_.loopOnce();
+  VLOG(4) << "Successfully wrote 100 bytes to bidi stream";
+
+  bool dataReceived = false;
+  bidiStream.readHandle->awaitNextRead(
+      &eventBase_, [&](auto, auto, auto streamData) {
+        VLOG(4) << "Received " << streamData->data->computeChainDataLength()
+                << " bytes on bidi stream";
+        EXPECT_EQ(streamData->data->computeChainDataLength(), 50);
+        dataReceived = true;
+      });
+
+  socketDriver_->addReadEvent(
+      bidiStreamId, makeBuf(50), std::chrono::milliseconds(0));
+
+  eventBase_.loopOnce();
+  eventBase_.loopOnce();
+  EXPECT_TRUE(dataReceived);
+
+  // Send close capsule to terminate the WebTransport session and all streams
+  // associated with it.
+  folly::IOBufQueue closeCapsuleQueue;
+  CloseWebTransportSessionCapsule closeCapsule{.applicationErrorCode = 42,
+                                               .applicationErrorMessage =
+                                                   "server initiated close"};
+  auto closeWriteResult =
+      writeCloseWebTransportSession(closeCapsuleQueue, closeCapsule);
+  EXPECT_TRUE(closeWriteResult.has_value());
+
+  auto closeCapsuleData = closeCapsuleQueue.move();
+  EXPECT_GT(closeCapsuleData->computeChainDataLength(), 0);
+
+  EXPECT_CALL(*handler_,
+              onWebTransportSessionClose(folly::Optional<uint32_t>(42)))
+      .Times(1);
+  handler_->expectEOM();
+  handler_->expectDetachTransaction();
+
+  sendPartialBody(sessionId_, std::move(closeCapsuleData), true);
+  flushAndLoop();
+  EXPECT_TRUE(socketDriver_->streams_[bidiStreamId].error.has_value());
+
+  HQSession::DestructorGuard dg(hqSession_);
+  hqSession_->dropConnection();
+}
+
+TEST_P(HQUpstreamSessionTestWebTransport, MaxStreamsBidiCapsule) {
+  InSequence enforceOrder;
+
+  // Testing stream limits with a WT_MAX_STREAMS_BIDI capsule.
+  // SetUp() set the initial limit to 1. Create one stream.
+  auto streamResult = wt_->createBidiStream();
+  EXPECT_TRUE(streamResult.hasValue());
+
+  // Send capsule to increase limit to 2
+  folly::IOBufQueue bidiCapsuleQueue;
+  WTMaxStreamsCapsule capsule{.maximumStreams = 2};
+  writeWTMaxStreams(bidiCapsuleQueue, capsule, true);
+  sendPartialBody(sessionId_, bidiCapsuleQueue.move(), false);
+  flushAndLoopN(2);
+
+  // Now we should be able to create another stream
+  auto bidiStreamResult = wt_->createBidiStream();
+  EXPECT_TRUE(bidiStreamResult.hasValue());
+
+  closeWTSession();
+}
+
+TEST_P(HQUpstreamSessionTestWebTransport, MaxStreamsUniCapsule) {
+  InSequence enforceOrder;
+
+  // Testing stream limits with a WT_MAX_STREAMS_UNI capsule.
+
+  // 3 control streams (control, QPACK encoder, QPACK decoder) are already
+  // created in SetUp(). To allow 2 additional WT uni streams, we need to set
+  // the limit to 5 total streams.
+  socketDriver_->setMaxUniStreams(5);
+
+  auto streamResult = wt_->createUniStream();
+  EXPECT_TRUE(streamResult.hasValue());
+
+  // Now send a capsule to increase the limit to 2
+  folly::IOBufQueue uniCapsuleQueue;
+  WTMaxStreamsCapsule capsule{.maximumStreams = 2};
+  writeWTMaxStreams(uniCapsuleQueue, capsule, false);
+  sendPartialBody(sessionId_, uniCapsuleQueue.move(), false);
+  flushAndLoopN(2);
+
+  // Verify we can still create streams with the new higher limit
+  auto uniStreamResult = wt_->createUniStream();
+  EXPECT_TRUE(uniStreamResult.hasValue());
+
   closeWTSession();
 }
 

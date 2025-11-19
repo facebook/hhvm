@@ -342,9 +342,8 @@ struct ListContainer final {
  */
 template <typename Container>
 const char* getDataHolderIssetFlags(const PyObject* structDataHolder) {
-  PyObject* issetArray = Container::GET_ITEM(structDataHolder, 0);
-  PyObject* issetBytes = IssetArray_get(issetArray);
-  const char* issetFlags = PyBytes_AsString(issetBytes);
+  PyObject* isset = Container::GET_ITEM(structDataHolder, 0);
+  const char* issetFlags = PyBytes_AsString(isset);
   if (issetFlags == nullptr) {
     THRIFT_PY3_CHECK_ERROR();
   }
@@ -692,9 +691,8 @@ void* setMutableUnion(void* objectPtr, const detail::TypeInfo& /* typeInfo */) {
  * please see `DynamicStructInfo::addMutableFieldInfo()`
  */
 bool getMutableIsset(const void* objectPtr, ptrdiff_t offset) {
-  PyObject* issetPyBytes =
-      IssetArray_get(*static_cast<PyObject* const*>(objectPtr));
-  const char* issetFlags = PyBytes_AsString(issetPyBytes);
+  const char* issetFlags =
+      PyBytes_AsString(*static_cast<PyObject* const*>(objectPtr));
   if (issetFlags == nullptr) {
     THRIFT_PY3_CHECK_ERROR();
   }
@@ -712,8 +710,7 @@ void setIsset(void* objectPtr, ptrdiff_t offset, bool value) {
  * please see `DynamicStructInfo::addMutableFieldInfo()`
  */
 void setMutableIsset(void* objectPtr, ptrdiff_t offset, bool value) {
-  PyObject* issetPyBytes = IssetArray_get(*static_cast<PyObject**>(objectPtr));
-  char* flags = PyBytes_AsString(issetPyBytes);
+  char* flags = PyBytes_AsString(*static_cast<PyObject**>(objectPtr));
   if (flags == nullptr) {
     THRIFT_PY3_CHECK_ERROR();
   }
@@ -1267,23 +1264,18 @@ PyObject* createMutableUnionDataHolder() {
 }
 
 template <typename Container>
-PyObject* FOLLY_NULLABLE createStructContainer(int16_t numFields) {
-  ensure_module_imported();
+PyObject* createStructContainer(int16_t numFields) {
   // Allocate and 0-initialize numFields bytes.
-  UniquePyObjectPtr issetBytes{PyBytes_FromStringAndSize(nullptr, numFields)};
-  char* flags = PyBytes_AsString(issetBytes.get());
+  UniquePyObjectPtr issetArr{PyBytes_FromStringAndSize(nullptr, numFields)};
+  if (issetArr == nullptr) {
+    return nullptr;
+  }
+  char* flags = PyBytes_AsString(issetArr.get());
   if (flags == nullptr) {
     return nullptr;
   }
-  // This *must* be done in C. Merely constructing the `bytes` from Python
-  // does not initialize the char* array, which is what the serializer uses
   for (Py_ssize_t i = 0; i < numFields; ++i) {
     flags[i] = '\0';
-  }
-
-  UniquePyObjectPtr issetArr{IssetArray_make(issetBytes.get())};
-  if (issetArr == nullptr) {
-    return nullptr;
   }
 
   // Create container, with isset byte array as first element (followed by
@@ -1340,8 +1332,7 @@ PyObject* createStructListWithNones(const detail::StructInfo& structInfo) {
 
 template <typename Container>
 void setStructIsset(PyObject* structTuple, int16_t index, bool value) {
-  PyObject* issetPyArray = Container::GET_ITEM(structTuple, 0);
-  PyObject* issetPyBytes = IssetArray_get(issetPyArray);
+  PyObject* issetPyBytes = Container::GET_ITEM(structTuple, 0);
   char* flags = PyBytes_AsString(issetPyBytes);
   if (flags == nullptr) {
     THRIFT_PY3_CHECK_ERROR();

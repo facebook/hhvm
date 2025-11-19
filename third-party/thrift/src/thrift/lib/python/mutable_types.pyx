@@ -40,7 +40,6 @@ from thrift.python.mutable_typeinfos cimport (
 from thrift.python.types cimport (
     AdaptedTypeInfo,
     FieldInfo,
-    IssetArray,
     StringTypeInfo,
     TypeInfoBase,
     getCTypeInfo,
@@ -128,7 +127,7 @@ def _isset(MutableStructOrError struct):
     mutable types, it remains internal and should not be accessed by user code.
     """
     cdef MutableStructInfo info = struct._fbthrift_mutable_struct_info
-    isset_bytes = (<IssetArray>struct._fbthrift_data[0]).inner
+    isset_bytes = struct._fbthrift_data[0]
     return {
         name: bool(isset_bytes[index])
         for name, index in info.name_to_index.items()

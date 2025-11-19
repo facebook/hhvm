@@ -29,13 +29,13 @@
 #include <folly/lang/Assume.h>
 
 #include <cmath>
+#include <concepts>
 #include <cstdint>
 #include <iosfwd>
 #include <memory>
 #include <stdexcept>
 #include <string>
 #include <string_view>
-#include <type_traits>
 #include <utility>
 
 // WARNING: This code is highly experimental.
@@ -64,38 +64,17 @@ struct PrimitiveDatum {
   T datum;
   /* implicit */ operator T() const { return datum; }
 
-  template <typename U = T, std::enable_if_t<std::is_same_v<U, T>>* = nullptr>
   /* implicit */ PrimitiveDatum(T datum) noexcept : datum(datum) {}
 
-  template <
-      typename U = T,
-      std::enable_if_t<std::is_convertible_v<U, T>>* = nullptr>
+  template <typename U = T>
+    requires std::convertible_to<U, T>
   friend bool operator==(const PrimitiveDatum& lhs, const U& rhs) {
     return lhs.datum == rhs;
   }
-  template <
-      typename U,
-      std::enable_if_t<
-          !std::is_same_v<U, PrimitiveDatum> && std::is_convertible_v<U, T>>* =
-          nullptr>
+  template <typename U>
+    requires(!std::same_as<U, PrimitiveDatum> && std::convertible_to<U, T>)
   friend bool operator==(const U& lhs, const PrimitiveDatum& rhs) {
     return rhs == lhs;
-  }
-
-  // In C++20, operator!= can be synthesized from operator==.
-  template <
-      typename U = T,
-      std::enable_if_t<std::is_convertible_v<U, T>>* = nullptr>
-  friend bool operator!=(const PrimitiveDatum& lhs, const U& rhs) {
-    return !(lhs == rhs);
-  }
-  template <
-      typename U,
-      std::enable_if_t<
-          !std::is_same_v<U, PrimitiveDatum> && std::is_convertible_v<U, T>>* =
-          nullptr>
-  friend bool operator!=(const U& lhs, const PrimitiveDatum& rhs) {
-    return !(lhs == rhs);
   }
 };
 
@@ -147,7 +126,7 @@ bool areByteArraysEqual(const type::ByteBuffer&, const type::ByteBuffer&);
  */
 void ensureUTF8OrThrow(std::string_view);
 
-template <typename T, std::enable_if_t<std::is_floating_point_v<T>>* = nullptr>
+template <std::floating_point T>
 void ensureValidFloatOrThrow(T datum) {
   if (std::isnan(datum)) {
     throw std::invalid_argument("NaN is not a valid Thrift datum");
@@ -554,25 +533,10 @@ class SerializableRecord final {
     return lhs.isMap() && lhs.asMap() == rhs;
   }
 
-  template <
-      typename V,
-      std::enable_if_t<detail::isSerializableRecordKind<V>>* = nullptr>
+  template <typename V>
+    requires detail::isSerializableRecordKind<V>
   friend bool operator==(const V& lhs, const SerializableRecord& rhs) {
     return rhs == lhs;
-  }
-
-  // In C++20, operator!= can be synthesized from operator==.
-  template <
-      typename V,
-      std::enable_if_t<detail::isSerializableRecordKind<V>>* = nullptr>
-  friend bool operator!=(const SerializableRecord& lhs, const V& rhs) {
-    return !(lhs == rhs);
-  }
-  template <
-      typename V,
-      std::enable_if_t<detail::isSerializableRecordKind<V>>* = nullptr>
-  friend bool operator!=(const V& lhs, const SerializableRecord& rhs) {
-    return !(lhs == rhs);
   }
 
  private:

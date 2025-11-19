@@ -877,7 +877,7 @@ type_system::SerializableRecord toTypeSystemAnnotation(
                 static_cast<int32_t>(data.asInt()))};
           case Primitive::I64:
             return {type_system::SerializableRecord::Int64(
-                static_cast<int8_t>(data.asInt()))};
+                static_cast<int64_t>(data.asInt()))};
           case Primitive::DOUBLE:
             return {type_system::SerializableRecord::Float32(
                 static_cast<float>(data.asDouble()))};

@@ -618,10 +618,8 @@ final class ThriftContextPropState {
   }
 
   public static function getOriginIdResolver()[]: (function()[leak_safe]: int) {
-    return ()[leak_safe] ==> (
-      readonly ThriftContextPropState::getReadonlyIfInitialized()
-    )?->getOriginId() ??
-      MCPProductID::UNKNOWN;
+    return ()[leak_safe] ==>
+      MCPContext::getGlobalOriginIdDirectly__UNSAFE() ?? MCPProductID::UNKNOWN;
   }
 
   public function getExperimentIds()[]: vec<int> {

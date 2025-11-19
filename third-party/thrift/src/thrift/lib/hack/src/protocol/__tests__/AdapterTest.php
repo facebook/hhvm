@@ -155,6 +155,39 @@ final class AdapterTest extends WWWTest {
       'intField' => '2',
     ))))->toEqual(vec[3, 4]);
   }
+
+  public function testAdapterExceptionDuringSerialization(): void {
+    $struct = AdapterTest\StructWithThrowingAdapter::fromShape(shape(
+      'field' => 'throw',
+    ));
+
+    expect(() ==> {
+      TCompactSerializer::serialize($struct);
+    })->toThrow(Exception::class, 'Adapter toThrift failed');
+
+    expect(() ==> {
+      TBinarySerializer::serialize($struct);
+    })->toThrow(Exception::class, 'Adapter toThrift failed');
+  }
+
+  public function testAdapterExceptionDuringDeserialization(): void {
+    $compact_serialized = PHP\pack('H*', '15fe0300');
+    $binary_serialized = PHP\pack('H*', '080001000000ff00');
+
+    expect(() ==> {
+      TCompactSerializer::deserialize(
+        $compact_serialized,
+        AdapterTest\StructWithThrowingAdapter::withDefaultValues(),
+      );
+    })->toThrow(Exception::class, 'Adapter fromThrift failed');
+
+    expect(() ==> {
+      TBinarySerializer::deserialize(
+        $binary_serialized,
+        AdapterTest\StructWithThrowingAdapter::withDefaultValues(),
+      );
+    })->toThrow(Exception::class, 'Adapter fromThrift failed');
+  }
 }
 
 final class AdapterTestIntToString implements IThriftAdapter {
@@ -218,6 +251,18 @@ final class AdapterTestStructToShape implements IThriftAdapter {
   )[]: AdapterTest\Bar {
     return
       AdapterTest\Bar::fromShape(shape('field' => (int)$hack_value['str']));
+  }
+}
+
+final class AdapterTestThrowingAdapter implements IThriftAdapter {
+  const type TThriftType = int;
+  const type THackType = string;
+  public static function fromThrift(int $thrift_value)[]: string {
+    throw new Exception('Adapter fromThrift failed');
+  }
+
+  public static function toThrift(string $hack_value)[]: int {
+    throw new Exception('Adapter toThrift failed');
   }
 }
 

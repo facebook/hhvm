@@ -37,6 +37,10 @@ typedef Bar BarWithAdapter
 @hack.Adapter{name = '\AdapterTestIntToString'}
 typedef i32 i32WithAdapter
 
+@thrift.AllowLegacyTypedefUri
+@hack.Adapter{name = '\AdapterTestThrowingAdapter'}
+typedef i32 i32WithThrowingAdapter
+
 struct Foo {
   1: i32WithAdapter intField;
   @hack.Adapter{name = '\AdapterTestIntToString'}
@@ -47,6 +51,10 @@ struct Foo {
   6: optional BarWithAdapter oStructField;
   7: ReversedList reversedListField;
   8: map<string, BarWithAdapter> mapField;
+}
+
+struct StructWithThrowingAdapter {
+  1: i32WithThrowingAdapter field;
 }
 
 struct FooWithoutAdapters {

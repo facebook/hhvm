@@ -142,6 +142,7 @@ using ClassPtr = AtomicSharedPackedPtr<Class>;
 // Since native instance dtors can be release functions, they have to have
 // compatible signatures.
 using ObjReleaseFunc = BuiltinDtorFunction;
+using OptObjReleaseFunc = SmallPtr<void(ObjectData*)>;
 
 using ObjectProps = std::conditional<tv_layout::stores_unaligned_typed_values, tv_layout::UnalignedTVLayout, tv_layout::Tv7Up>::type;
 
@@ -824,6 +825,15 @@ public:
   // or a custom native instance dtor.
 
   ObjReleaseFunc releaseFunc() const;
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Optimized Object release.
+  //
+  // Similar to the above, except only the object needs passing to the release
+  // function. The class is obtained directly from the object itself. If an
+  // optimized version does not exist, return std::nullopt.
+
+  Optional<OptObjReleaseFunc> optReleaseFunc() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Property metadata.                                                 [const]

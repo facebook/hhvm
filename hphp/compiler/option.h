@@ -118,6 +118,7 @@ struct Option {
   static bool ExternWorkerCleanup;
   static bool ExternWorkerUseRichClient;
   static bool ExternWorkerUseP2P;
+  static bool ExternWorkerUseSubprocessScheduler;
   static int ExternWorkerCasConnectionCount;
   static int ExternWorkerEngineConnectionCount;
   static int ExternWorkerExecutionConcurrencyLimit;
@@ -126,6 +127,7 @@ struct Option {
   static int ExternWorkerThrottleRetries;
   static int ExternWorkerThrottleBaseWaitMSecs;
   static std::string ExternWorkerWorkingDir;
+  static size_t ExternWorkerMaxSubprocessMemory;
 
 private:
   static const int kDefaultParserGroupSize;

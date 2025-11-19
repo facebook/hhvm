@@ -153,6 +153,7 @@ struct Options {
   bool ExternWorkerUseP2P = false;
   bool ExternWorkerVerboseLogging = false;
   bool ExternWorkerAsyncCleanup = true;
+  bool ExternWorkerUseSubprocessScheduler = true;
   int ExternWorkerTimeoutSecs = 0;
   int ExternWorkerThrottleRetries = -1;
   int ExternWorkerThrottleBaseWaitMSecs = -1;
@@ -160,6 +161,7 @@ struct Options {
   size_t ExternWorkerEngineConnectionCount = 4;
   size_t ExternWorkerActionCacheConnectionCount = 16;
   std::string ExternWorkerFeaturesFile;
+  uint64_t ExternWorkerMaxSubprocessMemory = 0;
 
   static MethodMap init_trace_functions();
 

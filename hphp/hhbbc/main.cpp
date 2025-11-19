@@ -152,6 +152,8 @@ void parse_options(int argc, char** argv) {
     ("extern-worker-use-p2p",                  po::value(&options.ExternWorkerUseP2P))
     ("extern-worker-verbose-logging",          po::value(&options.ExternWorkerVerboseLogging))
     ("extern-worker-async-cleanup",            po::value(&options.ExternWorkerAsyncCleanup))
+    ("extern-worker-max-subprocess-memory",    po::value(&options.ExternWorkerMaxSubprocessMemory))
+    ("extern-worker-use-subprocess-scheduler", po::value(&options.ExternWorkerUseSubprocessScheduler))
     ;
 
   po::options_description all;
@@ -417,7 +419,8 @@ extern_worker::Options make_extern_worker_options() {
     .setCasConnectionCount(options.ExternWorkerCASConnectionCount)
     .setEngineConnectionCount(options.ExternWorkerEngineConnectionCount)
     .setAcConnectionCount(options.ExternWorkerActionCacheConnectionCount)
-    .setFeaturesFile(options.ExternWorkerFeaturesFile);
+    .setFeaturesFile(options.ExternWorkerFeaturesFile)
+    .setUseSubprocessScheduler(options.ExternWorkerUseSubprocessScheduler);
   if (options.ExternWorkerTimeoutSecs > 0) {
     opts.setTimeout(std::chrono::seconds{options.ExternWorkerTimeoutSecs});
   }
@@ -434,6 +437,9 @@ extern_worker::Options make_extern_worker_options() {
     opts.setThrottleBaseWait(
       std::chrono::milliseconds{options.ExternWorkerThrottleBaseWaitMSecs}
     );
+  }
+  if (options.ExternWorkerMaxSubprocessMemory > 0) {
+    opts.setMaxSubprocessMemory(options.ExternWorkerMaxSubprocessMemory);
   }
   return opts;
 }
@@ -473,6 +479,8 @@ void compile_repo() {
   sample.setInt("throttle_retries", options.ExternWorkerThrottleRetries);
   sample.setInt("throttle_base_wait_ms",
                 options.ExternWorkerThrottleBaseWaitMSecs);
+  sample.setInt("use_subprocess_scheduler",
+                options.ExternWorkerUseSubprocessScheduler);
   sample.setStr("working_dir", options.ExternWorkerWorkingDir);
   sample.setStr("use_hphpc", "false");
   sample.setStr("use_hhbbc", "true");

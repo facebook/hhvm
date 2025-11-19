@@ -452,12 +452,26 @@ struct Options {
     return *this;
   }
 
+  Options& setMaxSubprocessMemory(uint64_t n) {
+    m_maxSubprocessMemory = n;
+    return *this;
+  }
+
+  Options& setUseSubprocessScheduler(bool use) {
+    m_useSubprocessScheduler = use;
+    return *this;
+  }
+
   UseSubprocess m_useSubprocess{UseSubprocess::Always};
   std::filesystem::path m_workingDir{std::filesystem::temp_directory_path()};
   std::chrono::seconds m_timeout{std::chrono::minutes{15}};
   std::chrono::seconds m_minTTL{std::chrono::hours{3}};
   std::chrono::milliseconds m_throttleBaseWait{25};
   size_t m_throttleRetries{7};
+  // A soft limit for the total amount of memory (in bytes) concurrently running
+  // subprocesses are allowed to use.
+  uint64_t m_maxSubprocessMemory{0};
+  bool m_useSubprocessScheduler{true};
   bool m_verboseLogging{false};
   bool m_cacheExecs{true};
   bool m_useEdenFS{true};

@@ -759,11 +759,13 @@ Options makeExternWorkerOptions(const CompilerOptions& po) {
     .setUseEdenFS(Cfg::Eval::UseEdenFS)
     .setUseRichClient(Option::ExternWorkerUseRichClient)
     .setUseP2P(Option::ExternWorkerUseP2P)
+    .setUseSubprocessScheduler(Option::ExternWorkerUseSubprocessScheduler)
     .setCasConnectionCount(Option::ExternWorkerCasConnectionCount)
     .setEngineConnectionCount(Option::ExternWorkerEngineConnectionCount)
     .setExecutionConcurrencyLimit(Option::ExternWorkerExecutionConcurrencyLimit)
     .setAcConnectionCount(Option::ExternWorkerAcConnectionCount)
-    .setVerboseLogging(Option::ExternWorkerVerboseLogging);
+    .setVerboseLogging(Option::ExternWorkerVerboseLogging)
+    .setMaxSubprocessMemory(Option::ExternWorkerMaxSubprocessMemory);
   if (!Option::ExternWorkerPlatform.empty()) {
     options.setPlatform(Option::ExternWorkerPlatform);
   }

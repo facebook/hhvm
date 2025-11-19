@@ -22,6 +22,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/match.h"
 #include "hphp/util/struct-log.h"
+#include "hphp/util/subprocess-scheduler.h"
 #include "hphp/util/trace.h"
 
 #include <folly/FileUtil.h>
@@ -960,17 +961,22 @@ private:
   coro::Task<std::string> doSubprocess(const RequestId&,
                                        const std::string&,
                                        std::string,
-                                       const fs::path&);
+                                       const fs::path&,
+                                       Optional<uint64_t>);
 
   Options m_options;
   std::unique_ptr<FDManager> m_fdManager;
   TraceFileManager m_traceManager;
+  Optional<SubprocessScheduler> m_subprocessScheduler;
+  Optional<std::thread> m_measureRSSThread{};
+  std::atomic_bool m_stopMeasuringRSSThread{false};
 };
 
 SubprocessImpl::SubprocessImpl(const Options& options, Client& parent)
   : Impl{"subprocess", parent}
   , m_options{options}
   , m_fdManager{std::make_unique<FDManager>(newRoot(m_options))}
+  , m_subprocessScheduler{std::nullopt}
 {
   FTRACE(2, "Using subprocess extern-worker impl with root at {}\n",
          m_fdManager->root().native());
@@ -978,6 +984,21 @@ SubprocessImpl::SubprocessImpl(const Options& options, Client& parent)
     "Using subprocess extern-worker at {}",
     m_fdManager->root().native()
   );
+  if (m_options.m_useSubprocessScheduler) {
+    m_subprocessScheduler.emplace(options.m_maxSubprocessMemory);
+    m_measureRSSThread = std::thread([&] {
+      auto lastMeasurement = std::chrono::steady_clock::now();
+      while (!m_stopMeasuringRSSThread) {
+        // We wake more often than we measure to promptly end the thread when destructing.
+        auto now = std::chrono::steady_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - lastMeasurement);
+        if (elapsed.count() >= 5) {
+          m_subprocessScheduler->sampleRSSData();
+          lastMeasurement = now;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+      }});
+  }
 }
 
 SubprocessImpl::~SubprocessImpl() {
@@ -985,6 +1006,10 @@ SubprocessImpl::~SubprocessImpl() {
   // Destroy FD manager first, to ensure no open FDs to any files
   // while cleaning up.
   m_fdManager.reset();
+  if (m_measureRSSThread.has_value()) {
+    m_stopMeasuringRSSThread.store(true, std::memory_order_release);
+    m_measureRSSThread->join();
+  }
 
   if (m_options.m_cleanup) {
     Logger::FInfo(
@@ -1157,13 +1182,21 @@ SubprocessImpl::exec(const RequestId& requestId,
   auto fd = m_fdManager->acquireForAppend();
   SCOPE_EXIT { if (fd) m_fdManager->release(*fd); };
 
+
+  Optional<uint64_t> usageEstimate{};
+  if (m_subprocessScheduler.has_value()) {
+    // Wait until we have enough memory to run the subprocess.
+    usageEstimate = m_subprocessScheduler->acquire(command);
+    assertx(usageEstimate.value() > 0);
+  }
   // Do the actual fork+exec.
   auto const outputBlob = co_await
     doSubprocess(
       requestId,
       command,
       std::string{(const char*)encoder.data(), encoder.size()},
-      fd->path()
+      fd->path(),
+      usageEstimate
     );
   // The worker (maybe) wrote to the file, so we need to re-sync our
   // tracked offset.
@@ -1209,7 +1242,8 @@ coro::Task<std::string>
 SubprocessImpl::doSubprocess(const RequestId& requestId,
                              const std::string& command,
                              std::string inputBlob,
-                             const fs::path& outputPath) {
+                             const fs::path& outputPath,
+                             Optional<uint64_t> usageEstimate) {
   auto workerPath = m_options.m_workerPath.empty()
     ? current_executable_path()
     : m_options.m_workerPath;
@@ -1264,6 +1298,11 @@ SubprocessImpl::doSubprocess(const RequestId& requestId,
     nullptr,
     &env
   };
+  Optional<uint64_t> pid;
+  if (m_subprocessScheduler.has_value()) {
+    pid = subprocess.pid();
+    m_subprocessScheduler->registerSubprocess(*pid, command);
+  }
 
   std::string output;
   std::string stderr;
@@ -1316,6 +1355,10 @@ SubprocessImpl::doSubprocess(const RequestId& requestId,
 
   auto const returnCode = subprocess.wait();
   auto const elapsed = std::chrono::steady_clock::now() - before;
+  if (m_subprocessScheduler.has_value()) {
+    assertx(pid.has_value());
+    m_subprocessScheduler->release(*pid, command, *usageEstimate);
+  }
 
   stats().execCpuUsec +=
     std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();

@@ -50,15 +50,26 @@ impl JumpTargets {
         self.regions.as_slice()
     }
 
-    pub fn get_closest_enclosing_finally_label(&self) -> Option<(Label, Vec<IterId>)> {
-        let mut iters = vec![];
+    /// Checks if the current return is inside a foreach loop or a finally
+    /// block that needs to be run before returning. In case of foreach loops,
+    /// the return statement is placed outside all nested loops to avoid
+    /// double-freeing iterators if there is a return type verification
+    /// failure.
+    pub fn get_enclosing_scope_for_return(&self) -> Option<(Label, Option<IterId>)> {
         for r in self.regions.iter().rev() {
             match r {
                 Region::Using(l) | Region::TryFinally(l) => {
-                    return Some((*l, iters));
+                    return Some((*l, None));
                 }
-                Region::Loop(LoopLabels { iterator, .. }) => {
-                    add_iterator(*iterator, &mut iters);
+                Region::Loop(LoopLabels {
+                    label_break,
+                    iterator,
+                    ..
+                }) => {
+                    // Exclude while/ do-while loops
+                    if iterator.is_some() {
+                        return Some((*label_break, *iterator));
+                    }
                 }
                 _ => {}
             }

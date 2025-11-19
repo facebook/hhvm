@@ -35,6 +35,21 @@ impl<'i> JumpInstructions<'i> {
         self.0.is_empty()
     }
 
+    pub(super) fn collect_ret(
+        instr_seq: &'i InstrSeq,
+        jt_gen: &mut jt::Gen,
+    ) -> JumpInstructions<'i> {
+        JumpInstructions(instr_seq.iter().fold(LabelMap::new(), |mut acc, instr| {
+            match *instr {
+                Instruct::Opcode(Opcode::RetC | Opcode::RetM(_)) => {
+                    acc.insert(jt_gen.get_id_for_return(), instr);
+                }
+                _ => {}
+            };
+            acc
+        }))
+    }
+
     /// Collects list of Ret* and non rewritten Break/Continue instructions inside try body.
     pub(super) fn collect(instr_seq: &'i InstrSeq, jt_gen: &mut jt::Gen) -> JumpInstructions<'i> {
         fn get_label_id(jt_gen: &mut jt::Gen, is_break: bool) -> jt::StateId {
@@ -64,6 +79,12 @@ impl<'i> JumpInstructions<'i> {
             acc
         }))
     }
+}
+
+/// Delete Ret* instructions from the foreach body
+pub(super) fn cleanup_iterate_body(mut is: InstrSeq) -> InstrSeq {
+    is.retain(|instr| !matches!(instr, Instruct::Opcode(Opcode::RetC | Opcode::RetM(_))));
+    is
 }
 
 /// Delete Ret*, Break, and Continue instructions from the try body
@@ -101,22 +122,18 @@ pub(super) fn emit_return<'a>(
 ) -> Result<InstrSeq> {
     // check if there are try/finally region
     let jt_gen = &env.jump_targets_gen;
-    match jt_gen.jump_targets().get_closest_enclosing_finally_label() {
+    match jt_gen.jump_targets().get_enclosing_scope_for_return() {
         None => {
-            // no finally blocks, but there might be some iterators that should be
-            // released before exit - do it
             let ctx = e.statement_state();
             let num_out = ctx.num_out;
             let verify_out = ctx.verify_out.clone();
             let verify_return = ctx.verify_return.clone();
-            let release_iterators_instr = InstrSeq::gather(
-                jt_gen
-                    .jump_targets()
-                    .iterators()
-                    .map(instr::iter_free)
-                    .collect(),
-            );
-            let mut instrs = Vec::with_capacity(5);
+
+            // no finally blocks. At this point there should be no
+            // iterators to be freed.
+            assert!(jt_gen.jump_targets().iterators().next().is_none());
+
+            let mut instrs = Vec::with_capacity(4);
             if in_finally_epilogue {
                 let load_retval_instr = instr::c_get_l(e.local_gen_mut().get_retval().clone());
                 instrs.push(load_retval_instr);
@@ -164,7 +181,6 @@ pub(super) fn emit_return<'a>(
             instrs.extend(vec![
                 verify_return_instr,
                 verify_out,
-                release_iterators_instr,
                 if num_out != 0 {
                     instr::ret_m(num_out as u32 + 1)
                 } else {
@@ -173,9 +189,9 @@ pub(super) fn emit_return<'a>(
             ]);
             Ok(InstrSeq::gather(instrs))
         }
-        // ret is in finally block and there might be iterators to release -
-        // jump to finally block via Jmp
-        Some((target_label, iterators_to_release)) => {
+        // ret is in a finally block or foreach body. Release the foreach
+        // iterator and jump to the finally block or loopbreak label.
+        Some((target_label, iterator)) => {
             let preamble = if in_finally_epilogue {
                 instr::empty()
             } else {
@@ -189,7 +205,7 @@ pub(super) fn emit_return<'a>(
             };
             Ok(InstrSeq::gather(vec![
                 preamble,
-                emit_jump_to_label(target_label, iterators_to_release),
+                emit_jump_to_label(target_label, iterator.map_or(vec![], |x| vec![x])),
                 // emit ret instr as an indicator for try/finally rewriter to generate
                 // finally epilogue, try/finally rewriter will remove it.
                 instr::ret_c(),

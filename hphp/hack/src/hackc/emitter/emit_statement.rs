@@ -948,6 +948,9 @@ fn emit_foreach<'a>(
     block: &[ast::Stmt],
 ) -> Result<InstrSeq> {
     use ast::AsExpr as A;
+    if iter_body_has_return(block) {
+        e.local_gen_mut().reserve_retval_and_label_id_locals();
+    }
     e.local_scope(|e| match iterator {
         A::AsV(_) | A::AsKv(_, _) => emit_foreach_(e, env, pos, collection, iterator, block),
         A::AwaitAsV(pos, _) | A::AwaitAsKv(pos, _, _) => {
@@ -1210,6 +1213,41 @@ fn emit_foreach_non_local<'a>(
     ]))
 }
 
+fn iter_body_has_return(body: &[ast::Stmt]) -> bool {
+    struct V {
+        has_return: bool,
+    }
+    use oxidized::aast_visitor::AstParams;
+    use oxidized::aast_visitor::Node;
+    use oxidized::aast_visitor::Visitor;
+    use oxidized::ast::Expr_;
+    use oxidized::ast::Stmt_;
+    impl<'a> Visitor<'a> for V {
+        type Params = AstParams<(), ()>;
+        fn object(&mut self) -> &mut dyn Visitor<'a, Params = Self::Params> {
+            self
+        }
+
+        fn visit_stmt_(&mut self, c: &mut (), p: &Stmt_) -> Result<(), ()> {
+            match p {
+                Stmt_::Return(..) => {
+                    self.has_return = true;
+                    // Not a real error - just early out.
+                    return Err(());
+                }
+                _ => {}
+            }
+            p.recurse(c, self.object())
+        }
+        fn visit_expr_(&mut self, _c: &mut (), _p: &Expr_) -> Result<(), ()> {
+            Ok(())
+        }
+    }
+    let mut v = V { has_return: false };
+    let _ = body.recurse(&mut (), &mut v);
+    v.has_return
+}
+
 fn emit_foreach_local<'a>(
     e: &mut Emitter,
     env: &mut Env<'a>,
@@ -1242,7 +1280,7 @@ fn emit_foreach_local<'a>(
             emit_block,
         )?;
         let iter_init = instr::iter_init(iter_args.clone(), local, loop_break_label);
-        let iterate = InstrSeq::gather(vec![
+        let mut iterate = InstrSeq::gather(vec![
             instr::label(loop_head_label),
             instr::iter_get_value(iter_args.clone(), local),
             instr::pop_l(val_id),
@@ -1260,7 +1298,20 @@ fn emit_foreach_local<'a>(
             emit_pos(pos),
             instr::iter_next(iter_args, local, loop_head_label),
         ]);
-        let iter_done = instr::label(loop_break_label);
+        // Rewrite Ret instructions outside try catch
+        let jump_instrs = tfr::JumpInstructions::collect_ret(&iterate, &mut env.jump_targets_gen);
+        let iter_done = if jump_instrs.is_empty() {
+            instr::label(loop_break_label)
+        } else {
+            let end_epilogue = e.label_gen_mut().next_regular();
+            let epilogue = tfr::emit_finally_epilogue(e, env, pos, jump_instrs, end_epilogue)?;
+            iterate = tfr::cleanup_iterate_body(iterate);
+            InstrSeq::gather(vec![
+                instr::label(loop_break_label),
+                epilogue,
+                instr::label(end_epilogue),
+            ])
+        };
         Ok((iter_init, iterate, iter_done))
     })
 }

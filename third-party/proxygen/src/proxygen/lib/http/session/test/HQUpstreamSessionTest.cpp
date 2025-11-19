@@ -2653,6 +2653,103 @@ TEST_P(HQUpstreamSessionTestWebTransport, MaxStreamsUniCapsule) {
   closeWTSession();
 }
 
+TEST_P(HQUpstreamSessionTestWebTransport, SessionFlowControl) {
+  InSequence enforceOrder;
+
+  // Send WT_MAX_STREAMS_BIDI capsule to establish stream credit on the
+  // WebTransport level.
+  folly::IOBufQueue bidiCapsuleQueue;
+  WTMaxStreamsCapsule bidiCapsule{.maximumStreams = 10};
+  auto bidiWriteResult = writeWTMaxStreams(bidiCapsuleQueue, bidiCapsule, true);
+  EXPECT_TRUE(bidiWriteResult.has_value());
+  auto bidiCapsuleData = bidiCapsuleQueue.move();
+  EXPECT_GT(bidiCapsuleData->computeChainDataLength(), 0);
+  sendPartialBody(sessionId_, std::move(bidiCapsuleData), false);
+  flushAndLoopN(2);
+
+  // Send WT_MAX_DATA capsule with increased window
+  folly::IOBufQueue maxDataCapsuleQueue;
+  WTMaxDataCapsule maxDataCapsule{.maximumData = 100000};
+  auto maxDataWriteResult = writeWTMaxData(maxDataCapsuleQueue, maxDataCapsule);
+  EXPECT_TRUE(maxDataWriteResult.has_value());
+  auto maxDataCapsuleData = maxDataCapsuleQueue.move();
+  EXPECT_GT(maxDataCapsuleData->computeChainDataLength(), 0);
+
+  sendPartialBody(sessionId_, std::move(maxDataCapsuleData), false);
+  flushAndLoopN(2);
+
+  // Create a bidi stream and verify write succeeds with updated window
+  auto stream = wt_->createBidiStream().value();
+  auto id = stream.readHandle->getID();
+
+  // Set up stream flow control windows
+  socketDriver_->setStreamFlowControlWindow(id, 10000);
+  socketDriver_->setConnectionFlowControlWindow(10000);
+
+  // Send data that fits within the window
+  auto writeRes =
+      stream.writeHandle->writeStreamData(makeBuf(100), false, nullptr);
+  EXPECT_TRUE(writeRes.hasValue());
+  EXPECT_EQ(writeRes.value(), WebTransport::FCState::UNBLOCKED);
+
+  closeWTSession();
+}
+
+TEST_P(HQUpstreamSessionTestWebTransport, SessionFlowControlExceedLimit) {
+  InSequence enforceOrder;
+
+  // Send WT_MAX_STREAMS_BIDI capsule to establish stream credit on the
+  // WebTransport level.
+  folly::IOBufQueue bidiCapsuleQueue;
+  WTMaxStreamsCapsule bidiCapsule{.maximumStreams = 10};
+  auto bidiWriteResult = writeWTMaxStreams(bidiCapsuleQueue, bidiCapsule, true);
+  EXPECT_TRUE(bidiWriteResult.has_value());
+  auto bidiCapsuleData = bidiCapsuleQueue.move();
+  EXPECT_GT(bidiCapsuleData->computeChainDataLength(), 0);
+  sendPartialBody(sessionId_, std::move(bidiCapsuleData), false);
+  flushAndLoopN(2);
+
+  // Create a bidi stream
+  auto stream = wt_->createBidiStream().value();
+  auto id = stream.readHandle->getID();
+
+  // Set up stream flow control windows (larger than WT session window)
+  socketDriver_->setStreamFlowControlWindow(id, 100000);
+  socketDriver_->setConnectionFlowControlWindow(100000);
+
+  // The initial WT session window is 65536 (from WT_INITIAL_MAX_DATA setting).
+  // Send data that consumes most of the window (65500 bytes)
+  auto writeRes1 =
+      stream.writeHandle->writeStreamData(makeBuf(65500), false, nullptr);
+  EXPECT_TRUE(writeRes1.hasValue());
+  EXPECT_EQ(writeRes1.value(), WebTransport::FCState::UNBLOCKED);
+
+  // Try to send more data that would exceed flow control (65500 + 100 > 65536)
+  auto writeRes2 =
+      stream.writeHandle->writeStreamData(makeBuf(100), false, nullptr);
+  EXPECT_TRUE(writeRes2.hasValue());
+  EXPECT_EQ(writeRes2.value(), WebTransport::FCState::BLOCKED);
+
+  // Send WT_MAX_DATA capsule to increase the window to 100000
+  folly::IOBufQueue maxDataCapsuleQueue;
+  WTMaxDataCapsule maxDataCapsule{.maximumData = 100000};
+  auto maxDataWriteResult = writeWTMaxData(maxDataCapsuleQueue, maxDataCapsule);
+  EXPECT_TRUE(maxDataWriteResult.has_value());
+  auto maxDataCapsuleData = maxDataCapsuleQueue.move();
+  EXPECT_GT(maxDataCapsuleData->computeChainDataLength(), 0);
+
+  sendPartialBody(sessionId_, std::move(maxDataCapsuleData), false);
+  flushAndLoopN(2);
+
+  // Now the previously blocked write and an additional write should succeed
+  auto writeRes3 =
+      stream.writeHandle->writeStreamData(makeBuf(200), false, nullptr);
+  EXPECT_TRUE(writeRes3.hasValue());
+  EXPECT_EQ(writeRes3.value(), WebTransport::FCState::UNBLOCKED);
+
+  closeWTSession();
+}
+
 /**
  * Instantiate the Parametrized test cases
  */

@@ -1,5 +1,5 @@
 File "unsurfaced_exception.bad.php", line 9, characters 33-34:
-Silencing catches is dangerous because it makes SEVs impossible to debug.
+Blindly suppressing exceptions is risky and makes the system more difficult to debug.
 
 Use `ope($ex, $consequence)` to log how your program recovers. Create the $consequence input with the `causes_the(...)->to(...)` syntax.
 

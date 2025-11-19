@@ -47,10 +47,11 @@ struct GetTestTypeName<type::set<Tag>> {
 template <typename KeyTag, typename ValueTag>
 struct GetTestTypeName<type::map<KeyTag, ValueTag>> {
   const std::string& operator()() const {
-    FOLLY_EXPORT static const auto* kName = new std::string(fmt::format(
-        "map<{},{}>",
-        GetTestTypeName<KeyTag>()(),
-        GetTestTypeName<ValueTag>()()));
+    FOLLY_EXPORT static const auto* kName = new std::string(
+        fmt::format(
+            "map<{},{}>",
+            GetTestTypeName<KeyTag>()(),
+            GetTestTypeName<ValueTag>()()));
     return *kName;
   }
 };

@@ -98,8 +98,7 @@ void addRoundTripToSuite(
         createRoundTripTest<ElementTag>(registry, protocol));
     if constexpr (!std::is_same_v<ElementTag, type::bool_t>) {
       suite.tests()->emplace_back(
-          createRoundTripTest<type::list<ElementTag>>(
-              registry, protocol));
+          createRoundTripTest<type::list<ElementTag>>(registry, protocol));
     }
     mp11::mp_for_each<detail::KeyTypeTags>([&](auto key_tag) {
       using KeyTag = decltype(key_tag);

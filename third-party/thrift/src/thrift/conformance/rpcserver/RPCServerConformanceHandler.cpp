@@ -155,9 +155,10 @@ RPCServerConformanceHandler::sinkChunkTimeout(std::unique_ptr<Request> req) {
             ->sinkChunkTimeout()
             ->finalResponse();
       }}
-      .setChunkTimeout(std::chrono::milliseconds{*testCase_->serverInstruction()
-                                                      ->sinkChunkTimeout()
-                                                      ->chunkTimeoutMs()});
+      .setChunkTimeout(
+          std::chrono::milliseconds{*testCase_->serverInstruction()
+                                         ->sinkChunkTimeout()
+                                         ->chunkTimeoutMs()});
 }
 
 apache::thrift::ResponseAndSinkConsumer<Response, Request, Response>

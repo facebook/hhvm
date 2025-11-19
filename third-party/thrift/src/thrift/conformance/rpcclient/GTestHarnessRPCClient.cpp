@@ -180,8 +180,10 @@ class ConformanceVerificationServer
   apache::thrift::ServerStream<Response> streamInitialTimeout(
       std::unique_ptr<Request> req) override {
     serverResult_.streamInitialTimeout().emplace().request() = *req;
-    std::this_thread::sleep_for(std::chrono::milliseconds(
-        *testCase_.serverInstruction()->streamInitialTimeout()->timeoutMs()));
+    std::this_thread::sleep_for(
+        std::chrono::milliseconds(*testCase_.serverInstruction()
+                                       ->streamInitialTimeout()
+                                       ->timeoutMs()));
     return ServerStream<Response>::createEmpty();
   }
 
@@ -242,9 +244,10 @@ class ConformanceVerificationServer
             result.userException() = e;
             throw;
           } catch (...) {
-            throw std::logic_error(fmt::format(
-                "Publisher threw undeclared exception: {}",
-                folly::exception_wrapper(std::current_exception()).what()));
+            throw std::logic_error(
+                fmt::format(
+                    "Publisher threw undeclared exception: {}",
+                    folly::exception_wrapper(std::current_exception()).what()));
           }
         },
         static_cast<uint64_t>(*testCase_.serverInstruction()

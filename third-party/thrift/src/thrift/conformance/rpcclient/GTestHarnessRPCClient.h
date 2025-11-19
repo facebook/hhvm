@@ -26,7 +26,8 @@
 // Registers the given conformance test suites with gtest
 #define THRIFT_RPC_CLIENT_CONFORMANCE_TEST(suites, clientCmds, nonconforming) \
   static ::apache::thrift::conformance::detail::                              \
-      RPCClientConformanceTestRegistration __suite_reg_##__LINE__(            \
+      RPCClientConformanceTestRegistration                                    \
+      __suite_reg_##__LINE__(                                                 \
           suites, clientCmds, nonconforming, __FILE__, __LINE__)
 
 namespace apache::thrift::conformance {

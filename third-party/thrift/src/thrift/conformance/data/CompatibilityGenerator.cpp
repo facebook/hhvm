@@ -522,18 +522,22 @@ Test createCompatibilityTest(const Protocol& protocol) {
   addToTest(changeFieldTypeTestCase<type::i32_t, type::i64_t, false>(protocol));
   addToTest(
       changeFieldTypeTestCase<type::string_t, type::binary_t, true>(protocol));
-  addToTest(changeFieldTypeTestCase<type::binary_t, type::string_t, true>(
-      protocol, [](auto&& value) { return value.name != "bad_utf8"; }));
-  addToTest(changeFieldTypeTestCase<type::binary_t, type::string_t, false>(
-      protocol, [](auto&& value) { return value.name == "bad_utf8"; }));
-  addToTest(changeFieldTypeTestCase<
-            type::set<type::i64_t>,
-            type::list<type::i64_t>,
-            false>(protocol));
-  addToTest(changeFieldTypeTestCase<
-            type::list<type::i64_t>,
-            type::set<type::i64_t>,
-            false>(protocol));
+  addToTest(
+      changeFieldTypeTestCase<type::binary_t, type::string_t, true>(
+          protocol, [](auto&& value) { return value.name != "bad_utf8"; }));
+  addToTest(
+      changeFieldTypeTestCase<type::binary_t, type::string_t, false>(
+          protocol, [](auto&& value) { return value.name == "bad_utf8"; }));
+  addToTest(
+      changeFieldTypeTestCase<
+          type::set<type::i64_t>,
+          type::list<type::i64_t>,
+          false>(protocol));
+  addToTest(
+      changeFieldTypeTestCase<
+          type::list<type::i64_t>,
+          type::set<type::i64_t>,
+          false>(protocol));
 
   // TODO: Test change between enum and integer.
 
@@ -546,22 +550,27 @@ Test createCompatibilityTest(const Protocol& protocol) {
   addToTest(
       changeQualifierTestCase<mod_set<FieldModifier::Optional>, mod_set<>>(
           protocol));
-  addToTest(changeQualifierTestCase<
-            mod_set<FieldModifier::Optional>,
-            mod_set<FieldModifier::Required>>(protocol));
+  addToTest(
+      changeQualifierTestCase<
+          mod_set<FieldModifier::Optional>,
+          mod_set<FieldModifier::Required>>(protocol));
   addToTest(
       changeQualifierTestCase<mod_set<FieldModifier::Required>, mod_set<>>(
           protocol));
-  addToTest(changeQualifierTestCase<
-            mod_set<FieldModifier::Required>,
-            mod_set<FieldModifier::Optional>>(protocol));
-  addToTest(changeQualifierTestCase<mod_set<>, mod_set<FieldModifier::Terse>>(
-      protocol));
-  addToTest(changeQualifierTestCase<mod_set<FieldModifier::Terse>, mod_set<>>(
-      protocol));
-  addToTest(changeQualifierTestCase<
-            mod_set<FieldModifier::Optional>,
-            mod_set<FieldModifier::Terse>>(protocol));
+  addToTest(
+      changeQualifierTestCase<
+          mod_set<FieldModifier::Required>,
+          mod_set<FieldModifier::Optional>>(protocol));
+  addToTest(
+      changeQualifierTestCase<mod_set<>, mod_set<FieldModifier::Terse>>(
+          protocol));
+  addToTest(
+      changeQualifierTestCase<mod_set<FieldModifier::Terse>, mod_set<>>(
+          protocol));
+  addToTest(
+      changeQualifierTestCase<
+          mod_set<FieldModifier::Optional>,
+          mod_set<FieldModifier::Terse>>(protocol));
 
   addToTest(changeEnumValueTestCases(protocol));
 

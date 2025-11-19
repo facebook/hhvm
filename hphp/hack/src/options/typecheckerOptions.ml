@@ -213,6 +213,8 @@ let explicit_consistent_constructors t =
 let require_types_class_consts t =
   t.GlobalOptions.tco_require_types_class_consts
 
+let check_bool_for_condition t = t.GlobalOptions.tco_check_bool_for_condition
+
 let type_printer_fuel t = t.GlobalOptions.tco_type_printer_fuel
 
 let log_saved_state_age_and_distance t =

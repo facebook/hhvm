@@ -109,6 +109,7 @@ impl Default for GlobalOptions {
             tco_implicit_inherit_sdt: false,
             tco_explicit_consistent_constructors: 0,
             tco_require_types_class_consts: 0,
+            tco_check_bool_for_condition: 0,
             tco_type_printer_fuel: 100,
             tco_specify_manifold_api_key: false,
             tco_profile_top_level_definitions: false,

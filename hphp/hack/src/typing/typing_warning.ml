@@ -215,6 +215,10 @@ module Needs_concrete_override = struct
   }
 end
 
+module Expect_bool_for_condition = struct
+  type t = { ty: string }
+end
+
 type (_, _) kind =
   | Sketchy_equality : (Sketchy_equality.t, warn) kind
   | Is_as_always : (Is_as_always.t, migrated) kind
@@ -236,5 +240,6 @@ type (_, _) kind =
   | Uninstantiable_class_via_static
       : (Uninstantiable_class_via_static.t, warn) kind
   | Needs_concrete_override : (Needs_concrete_override.t, warn) kind
+  | Expect_bool_for_condition : (Expect_bool_for_condition.t, warn) kind
 
 type ('x, 'a) t = Pos.t * ('x, 'a) kind * 'x

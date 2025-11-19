@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<843aeffa3afc18b22ddebaadd4b4463e>>
+// @generated SignedSource<<859f4484a85d6b9dd1e18b6a570a1383>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -309,6 +309,9 @@ pub struct GlobalOptions {
     /// Raises an error when a class constant is missing a type. 0 does not raise, 1 raises
     /// for abstract class constants, 2 raises for all.
     pub tco_require_types_class_consts: isize,
+    /// Controls reporting when a non-bool type is used in a condition. 0 does not report,
+    /// 1 reports as a warning, 2 reports as an error.
+    pub tco_check_bool_for_condition: isize,
     /// Sets the amount of fuel that the type printer can use to display an
     /// individual type. More of a type is printed as the value increases.
     pub tco_type_printer_fuel: isize,

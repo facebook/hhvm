@@ -1817,6 +1817,8 @@ and Callback : sig
 
   val math_invalid_argument : t
 
+  val expect_bool_for_condition : t
+
   val using_error : Pos.t -> has_await:bool -> t
 end
 

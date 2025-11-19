@@ -330,6 +330,7 @@ type witness_locl =
   | Incdec_dynamic of Pos.t
   | Comp of Pos.t
   | Concat_ret of Pos.t
+  | Condition of Pos.t
   | Logic_ret of Pos.t
   | Bitwise of Pos.t
   | Bitwise_ret of Pos.t
@@ -394,6 +395,7 @@ let witness_locl_to_raw_pos = function
   | Incdec_dynamic pos
   | Comp pos
   | Concat_ret pos
+  | Condition pos
   | Logic_ret pos
   | Bitwise pos
   | Bitwise_ret pos
@@ -464,6 +466,7 @@ let map_pos_witness_locl pos pos_or_decl w =
   | Incdec_dynamic p -> Incdec_dynamic (pos p)
   | Comp p -> Comp (pos p)
   | Concat_ret p -> Concat_ret (pos p)
+  | Condition p -> Condition (pos p)
   | Logic_ret p -> Logic_ret (pos p)
   | Bitwise p -> Bitwise (pos p)
   | Bitwise_ret p -> Bitwise_ret (pos p)
@@ -528,6 +531,7 @@ let constructor_string_of_witness_locl = function
   | Incdec_dynamic _ -> "Rincdec_dynamic"
   | Comp _ -> "Rcomp"
   | Concat_ret _ -> "Rconcat_ret"
+  | Condition _ -> "Rcondition"
   | Logic_ret _ -> "Rlogic_ret"
   | Bitwise _ -> "Rbitwise"
   | Bitwise_ret _ -> "Rbitwise_ret"
@@ -605,6 +609,7 @@ let pp_witness_locl fmt witness =
     | Arith_dynamic p
     | Comp p
     | Concat_ret p
+    | Condition p
     | Logic_ret p
     | Bitwise p
     | Bitwise_ret p
@@ -699,6 +704,8 @@ let witness_locl_to_json witness =
   | Comp pos -> Hh_json.(JSON_Object [("Comp", JSON_Array [pos_to_json pos])])
   | Concat_ret pos ->
     Hh_json.(JSON_Object [("Concat_ret", JSON_Array [pos_to_json pos])])
+  | Condition pos ->
+    Hh_json.(JSON_Object [("Condition", JSON_Array [pos_to_json pos])])
   | Logic_ret pos ->
     Hh_json.(JSON_Object [("Logic_ret", JSON_Array [pos_to_json pos])])
   | Bitwise pos ->
@@ -884,6 +891,8 @@ let witness_locl_to_string prefix witness =
   | Concat_ret pos ->
     ( Pos_or_decl.of_raw_pos pos,
       prefix ^ " because this is the result of a concatenation" )
+  | Condition pos ->
+    (Pos_or_decl.of_raw_pos pos, prefix ^ " because this is used as a condition")
   | Logic_ret pos ->
     ( Pos_or_decl.of_raw_pos pos,
       prefix ^ " because this is the result of a logical operation" )
@@ -2664,6 +2673,8 @@ module Constructors = struct
 
   let concat_ret p = from_witness_locl @@ Concat_ret p
 
+  let condition p = from_witness_locl @@ Condition p
+
   let logic_ret p = from_witness_locl @@ Logic_ret p
 
   let bitwise p = from_witness_locl @@ Bitwise p
@@ -3247,6 +3258,7 @@ type ureason =
   | URstr_interp
   | URdynamic_prop
   | URlabel
+  | URcondition
 [@@deriving show]
 
 let index_array = URindex "array"
@@ -3311,6 +3323,7 @@ let string_of_ureason = function
   | URdynamic_prop -> "Dynamic access of property"
   | URlabel ->
     "This label is not a valid reference to a member of the given enum class"
+  | URcondition -> "Only bool values can be used as a condition"
 
 (* ~~ Extended reasons rendering ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 

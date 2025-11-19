@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5bb2ab63c12f5e71af391114b610d1bf>>
+// @generated SignedSource<<36b0f17ec3f46b3a387886940028cc8b>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -443,6 +443,7 @@ pub enum WitnessLocl {
     Comp(pos::Pos),
     #[rust_to_ocaml(name = "Concat_ret")]
     ConcatRet(pos::Pos),
+    Condition(pos::Pos),
     #[rust_to_ocaml(name = "Logic_ret")]
     LogicRet(pos::Pos),
     Bitwise(pos::Pos),
@@ -844,4 +845,5 @@ pub enum Ureason {
     #[rust_to_ocaml(name = "URdynamic_prop")]
     URdynamicProp,
     URlabel,
+    URcondition,
 }

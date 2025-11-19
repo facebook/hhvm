@@ -1,0 +1,75 @@
+WARN: File "non_bool_condition.php", line 19, characters 9-10:
+`$s` is a sketchy condition: testing the truthiness of a string may not behave as expected.
+The values `""` and `"0"` are both considered falsy. To check for non-emptiness, use `!Str\is_empty($s)`. (Warn[12006])
+ERROR: File "non_bool_condition.php", line 4, characters 7-8:
+Only bool values can be used as a condition (Typing[4504])
+  File "non_bool_condition.php", line 4, characters 7-8:
+  Expected `bool`
+  File "non_bool_condition.php", line 3, characters 29-31:
+  But got `int`
+ERROR: File "non_bool_condition.php", line 7, characters 10-11:
+Only bool values can be used as a condition (Typing[4504])
+  File "non_bool_condition.php", line 7, characters 10-11:
+  Expected `bool`
+  File "non_bool_condition.php", line 3, characters 29-31:
+  But got `int`
+ERROR: File "non_bool_condition.php", line 12, characters 12-13:
+Only bool values can be used as a condition (Typing[4504])
+  File "non_bool_condition.php", line 12, characters 12-13:
+  Expected `bool`
+  File "non_bool_condition.php", line 3, characters 29-31:
+  But got `int`
+ERROR: File "non_bool_condition.php", line 13, characters 16-17:
+Only bool values can be used as a condition (Typing[4504])
+  File "non_bool_condition.php", line 13, characters 16-17:
+  Expected `bool`
+  File "non_bool_condition.php", line 3, characters 29-31:
+  But got `int`
+ERROR: File "non_bool_condition.php", line 15, characters 3-4:
+Only bool values can be used as a condition (Typing[4504])
+  File "non_bool_condition.php", line 15, characters 3-4:
+  Expected `bool`
+  File "non_bool_condition.php", line 3, characters 29-31:
+  But got `int`
+ERROR: File "non_bool_condition.php", line 16, characters 12-13:
+Only bool values can be used as a condition (Typing[4504])
+  File "non_bool_condition.php", line 16, characters 12-13:
+  Expected `bool`
+  File "non_bool_condition.php", line 3, characters 29-31:
+  But got `int`
+ERROR: File "non_bool_condition.php", line 17, characters 3-4:
+Only bool values can be used as a condition (Typing[4504])
+  File "non_bool_condition.php", line 17, characters 3-4:
+  Expected `bool`
+  File "non_bool_condition.php", line 3, characters 29-31:
+  But got `int`
+ERROR: File "non_bool_condition.php", line 18, characters 12-13:
+Only bool values can be used as a condition (Typing[4504])
+  File "non_bool_condition.php", line 18, characters 12-13:
+  Expected `bool`
+  File "non_bool_condition.php", line 3, characters 29-31:
+  But got `int`
+ERROR: File "non_bool_condition.php", line 19, characters 3-4:
+Only bool values can be used as a condition (Typing[4504])
+  File "non_bool_condition.php", line 19, characters 3-4:
+  Expected `bool`
+  File "non_bool_condition.php", line 3, characters 29-31:
+  But got `int`
+ERROR: File "non_bool_condition.php", line 19, characters 9-10:
+Only bool values can be used as a condition (Typing[4504])
+  File "non_bool_condition.php", line 19, characters 9-10:
+  Expected `bool`
+  File "non_bool_condition.php", line 3, characters 37-42:
+  But got `string`
+ERROR: File "non_bool_condition.php", line 20, characters 4-5:
+Only bool values can be used as a condition (Typing[4504])
+  File "non_bool_condition.php", line 20, characters 4-5:
+  Expected `bool`
+  File "non_bool_condition.php", line 3, characters 29-31:
+  But got `int`
+ERROR: File "non_bool_condition.php", line 21, characters 3-4:
+Only bool values can be used as a condition (Typing[4504])
+  File "non_bool_condition.php", line 21, characters 3-4:
+  Expected `bool`
+  File "non_bool_condition.php", line 3, characters 29-31:
+  But got `int`

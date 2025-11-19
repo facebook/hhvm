@@ -69,7 +69,8 @@ impl WitnessLocl {
             | Self::Pattern(pos)
             | Self::JoinPoint(pos)
             | Self::StaticPropertyAccess(pos)
-            | Self::ClassConstantAccess(pos) => pos,
+            | Self::ClassConstantAccess(pos)
+            | Self::Condition(pos) => pos,
         }
     }
 }

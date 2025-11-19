@@ -207,6 +207,9 @@ type t = {
   tco_require_types_class_consts: int;
       (** Raises an error when a class constant is missing a type. 0 does not raise, 1 raises
         for abstract class constants, 2 raises for all. *)
+  tco_check_bool_for_condition: int;
+      (** Controls reporting when a non-bool type is used in a condition. 0 does not report,
+        1 reports as a warning, 2 reports as an error. *)
   tco_type_printer_fuel: int;
       (** Sets the amount of fuel that the type printer can use to display an
         individual type. More of a type is printed as the value increases. *)
@@ -377,6 +380,7 @@ val set :
   ?tco_implicit_inherit_sdt:bool ->
   ?tco_explicit_consistent_constructors:int ->
   ?tco_require_types_class_consts:int ->
+  ?tco_check_bool_for_condition:int ->
   ?tco_type_printer_fuel:int ->
   ?tco_specify_manifold_api_key:bool ->
   ?tco_profile_top_level_definitions:bool ->

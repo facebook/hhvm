@@ -789,6 +789,7 @@ module Typing = struct
     | DuplicateNamedArgs [@value 4501]
     | LambdaNamedParamMismatch [@value 4502]
     | OverrideSealed [@value 4503]
+    | ExpectBoolForCondition [@value 4504]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 
@@ -820,6 +821,8 @@ module Warning = struct
     | AbstractAccessViaStatic [@value 12025]
     | UninstantiableClassViaStatic [@value 12026]
     | NeedsConcreteOverride [@value 12027]
+    | ExpectBoolForCondition [@value 12028]
+  (* Add new Warning codes here! Comment out when deprecating. *)
   [@@deriving enum, ord, show { with_path = false }]
 end
 

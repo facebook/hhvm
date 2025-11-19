@@ -158,6 +158,7 @@ type t = {
   tco_implicit_inherit_sdt: bool;
   tco_explicit_consistent_constructors: int;
   tco_require_types_class_consts: int;
+  tco_check_bool_for_condition: int;
   tco_type_printer_fuel: int;
   tco_specify_manifold_api_key: bool;
   tco_profile_top_level_definitions: bool;
@@ -279,6 +280,7 @@ let default =
     tco_implicit_inherit_sdt = false;
     tco_explicit_consistent_constructors = 0;
     tco_require_types_class_consts = 0;
+    tco_check_bool_for_condition = 0;
     tco_type_printer_fuel = 100;
     tco_specify_manifold_api_key = false;
     tco_profile_top_level_definitions = false;
@@ -399,6 +401,7 @@ let set
     ?tco_implicit_inherit_sdt
     ?tco_explicit_consistent_constructors
     ?tco_require_types_class_consts
+    ?tco_check_bool_for_condition
     ?tco_type_printer_fuel
     ?tco_specify_manifold_api_key
     ?tco_profile_top_level_definitions
@@ -638,6 +641,8 @@ let set
       setting
         tco_require_types_class_consts
         options.tco_require_types_class_consts;
+    tco_check_bool_for_condition =
+      setting tco_check_bool_for_condition options.tco_check_bool_for_condition;
     tco_type_printer_fuel =
       setting tco_type_printer_fuel options.tco_type_printer_fuel;
     tco_specify_manifold_api_key =

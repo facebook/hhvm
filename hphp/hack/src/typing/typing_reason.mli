@@ -156,6 +156,7 @@ type ureason =
   | URstr_interp
   | URdynamic_prop
   | URlabel
+  | URcondition
 [@@deriving show]
 
 val index_array : ureason
@@ -218,6 +219,8 @@ val incdec_dynamic : Pos.t -> t
 val comp : Pos.t -> t
 
 val concat_ret : Pos.t -> t
+
+val condition : Pos.t -> t
 
 val logic_ret : Pos.t -> t
 

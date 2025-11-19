@@ -2289,6 +2289,8 @@ and Callback : sig
 
   val math_invalid_argument : t
 
+  val expect_bool_for_condition : t
+
   val using_error : Pos.t -> has_await:bool -> t
 end = struct
   type t =
@@ -2369,6 +2371,9 @@ end = struct
     with_code ~code:Error_code.IncDecInvalidArgument
 
   let math_invalid_argument = with_code ~code:Error_code.MathInvalidArgument
+
+  let expect_bool_for_condition =
+    with_code ~code:Error_code.ExpectBoolForCondition
 
   let using_error pos ~has_await =
     let new_claim = Primary.Using_error { pos; has_await } in

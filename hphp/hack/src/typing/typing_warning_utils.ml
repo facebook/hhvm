@@ -746,6 +746,23 @@ module Needs_concrete_override = struct
   let quickfixes _ = []
 end
 
+module Expect_bool_for_condition = struct
+  type t = Typing_warning.Expect_bool_for_condition.t
+
+  let code = Codes.ExpectBoolForCondition
+
+  let codes = [code]
+
+  let code _ = code
+
+  let claim { Typing_warning.Expect_bool_for_condition.ty } =
+    "Only bool values can be used as a condition. This is " ^ ty
+
+  let reasons _ = []
+
+  let quickfixes _ = []
+end
+
 let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
     (module Warning with type t = x) =
   match kind with
@@ -770,6 +787,8 @@ let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
   | Typing_warning.Uninstantiable_class_via_static ->
     (module Uninstantiable_class_via_static)
   | Typing_warning.Needs_concrete_override -> (module Needs_concrete_override)
+  | Typing_warning.Expect_bool_for_condition ->
+    (module Expect_bool_for_condition)
 
 let module_of_migrated
     (type x) (kind : (x, Typing_warning.migrated) Typing_warning.kind) :

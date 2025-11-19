@@ -2502,6 +2502,40 @@ module Valkind = struct
       false
 end
 
+let check_bool_for_condition env pos ty_have =
+  let tcopt = Env.get_tcopt env in
+  let check_level = TCO.check_bool_for_condition tcopt in
+  (* 0 = don't check, 1 = warning, 2 = error *)
+  if check_level = 0 then
+    env
+  else
+    let reason = Reason.witness pos in
+    let like_bool = Typing_make_type.locl_like reason (MakeType.bool reason) in
+    let (env, ty_err_opt) =
+      Typing_utils.sub_type
+        env
+        ty_have
+        like_bool
+        (Some
+           (Typing_error.Reasons_callback.with_claim
+              Typing_error.Callback.expect_bool_for_condition
+              ~claim:(lazy (pos, Reason.string_of_ureason Reason.URcondition))))
+    in
+    (match ty_err_opt with
+    | Some _ty_err when check_level = 1 ->
+      (* Convert error to warning *)
+      let ty_str = Typing_print.error env ty_have in
+      Typing_warning_utils.add
+        env
+        ( pos,
+          Typing_warning.Expect_bool_for_condition,
+          { Typing_warning.Expect_bool_for_condition.ty = ty_str } )
+    | Some ty_err ->
+      (* check_level = 2, report as error *)
+      Typing_error_utils.add_typing_error ~env ty_err
+    | None -> ());
+    env
+
 (** This represents a partially-processed result of type partitioning.
    ty_trues and ty_falses take envs because they do intersections where you
    want the updated environment. *)
@@ -2902,6 +2936,8 @@ end = struct
   (* TODO TAST: type refinement should be made explicit in the typed AST *)
   and eif env ~(expected : ExpectedTy.t option) ~in_await p c e1 e2 =
     let (env, tc, tyc) = expr ~expected:None ~ctxt:Context.default env c in
+    let (cond_ty, cond_pos, _) = tc in
+    let env = check_bool_for_condition env cond_pos cond_ty in
     let parent_lenv = env.lenv in
     let (env, _) = condition env true tc in
     let (env, te1, ty1) =
@@ -4214,6 +4250,15 @@ end = struct
               }
           env
           e
+      in
+      (* might be appropriate to move this into Typing_arithmetic later,
+         but easier here while check_bool_for_condition is in typing.ml *)
+      let env =
+        match uop with
+        | Unot ->
+          let (cond_ty, cond_pos, _) = te in
+          check_bool_for_condition env cond_pos cond_ty
+        | _ -> env
       in
       let env = might_throw ~join_pos:p env in
       let (env, tuop, ty) = Typing_arithmetic.unop p env uop te ty in
@@ -9214,6 +9259,8 @@ end = struct
       let (env, te, _) =
         Expr.expr ~expected:None ~ctxt:Expr.Context.default env e
       in
+      let (cond_ty, cond_pos, _) = te in
+      let env = check_bool_for_condition env cond_pos cond_ty in
       let (env, condition_true, condition_false) = Expr.condition_dual env te in
       let (env, tb1, tb2) =
         branch
@@ -9363,6 +9410,8 @@ end = struct
             let (env, te, _) =
               Expr.expr ~expected:None ~ctxt:Expr.Context.default env e
             in
+            let (cond_ty, cond_pos, _) = te in
+            let env = check_bool_for_condition env cond_pos cond_ty in
             let (env, _) = Expr.condition env false te in
             let env =
               LEnv.update_next_from_conts ~join_pos:pos env [C.Break; C.Next]
@@ -9400,6 +9449,8 @@ end = struct
             let (env, te, _) =
               Expr.expr ~expected:None ~ctxt:Expr.Context.default env e
             in
+            let (cond_ty, cond_pos, _) = te in
+            let env = check_bool_for_condition env cond_pos cond_ty in
             let (env, _) = Expr.condition env false te in
             let env =
               LEnv.update_next_from_conts env ~join_pos:pos [C.Break; C.Next]
@@ -9475,6 +9526,8 @@ end = struct
             let (env, te2, _) =
               Expr.expr ~expected:None ~ctxt:Expr.Context.default env e2
             in
+            let (cond_ty, cond_pos, _) = te2 in
+            let env = check_bool_for_condition env cond_pos cond_ty in
             let (env, _) = Expr.condition env false te2 in
             let env =
               LEnv.update_next_from_conts ~join_pos:pos env [C.Break; C.Next]
@@ -11997,6 +12050,8 @@ end = struct
           env
           e1
       in
+      let (cond_ty, cond_pos, _) = te1 in
+      let env = check_bool_for_condition env cond_pos cond_ty in
       let lenv = env.lenv in
       let (env, _) = Expr.condition env c te1 in
       let (env, te2, _) =
@@ -12007,6 +12062,8 @@ end = struct
           env
           e2
       in
+      let (cond_ty, cond_pos, _) = te2 in
+      let env = check_bool_for_condition env cond_pos cond_ty in
       let env = { env with lenv } in
       make_result
         env

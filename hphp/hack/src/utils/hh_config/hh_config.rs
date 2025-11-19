@@ -449,6 +449,10 @@ impl HhConfig {
                 "require_types_tco_require_types_class_consts",
                 default.tco_require_types_class_consts,
             )?,
+            tco_check_bool_for_condition: hhconfig.get_int_or(
+                "check_bool_for_condition",
+                default.tco_check_bool_for_condition,
+            )?,
             tco_type_printer_fuel: hhconfig
                 .get_int_or("type_printer_fuel", default.tco_type_printer_fuel)?,
             tco_specify_manifold_api_key: default.tco_specify_manifold_api_key,

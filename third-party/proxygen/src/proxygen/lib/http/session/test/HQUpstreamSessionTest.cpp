@@ -2198,7 +2198,7 @@ class HQUpstreamSessionTestWebTransport : public HQUpstreamSessionTest {
   void SetUp() override {
     HQUpstreamSessionTest::SetUp();
     // Set up WT session
-    handler_ = openTransaction();
+    handler_ = openWTTransaction();
     sessionId_ = handler_->txn_->getID();
     handler_->txn_->sendHeaders(getWTConnectRequest());
     handler_->expectHeaders();
@@ -2206,6 +2206,35 @@ class HQUpstreamSessionTestWebTransport : public HQUpstreamSessionTest {
     flushAndLoopN(3);
     wt_ = handler_->txn_->getWebTransport();
     EXPECT_NE(wt_, nullptr);
+
+    // Set WebTransport stream limits to allow stream creation in tests
+    folly::IOBufQueue capsuleQueue;
+    WTMaxStreamsCapsule uniCapsule{.maximumStreams = 100};
+    writeWTMaxStreams(capsuleQueue, uniCapsule, false);
+    sendPartialBody(sessionId_, capsuleQueue.move(), false);
+    WTMaxStreamsCapsule bidiCapsule{.maximumStreams = 100};
+    writeWTMaxStreams(capsuleQueue, bidiCapsule, true);
+    sendPartialBody(sessionId_, capsuleQueue.move(), false);
+    flushAndLoopN(2);
+  }
+
+  std::unique_ptr<testing::StrictMock<proxygen::MockHTTPHandler>>
+  openWTTransaction() {
+    auto handler =
+        std::make_unique<testing::StrictMock<proxygen::MockHTTPHandler>>();
+
+    // WebTransport CONNECT requests cause _setTransaction to be called twice:
+    // 1. When the original handler is set during normal transaction setup
+    // 2. When WebTransportFilter::install() replaces the handler after 200
+    // response
+    EXPECT_CALL(*handler, _setTransaction(testing::_))
+        .Times(2)
+        .WillOnce(testing::SaveArg<0>(&handler->txn_))
+        .WillOnce(testing::DoDefault());
+
+    HTTPTransaction* txn = hqSession_->newTransaction(handler.get());
+    EXPECT_EQ(txn, handler->txn_);
+    return handler;
   }
 
   void closeWTSession() {
@@ -2250,6 +2279,15 @@ class MockDeliveryCallback : public WebTransport::ByteEventCallback {
               (quic::StreamId, uint64_t),
               (noexcept));
 };
+
+TEST_P(HQUpstreamSessionTestWebTransport, FilterInstallation) {
+  auto* txnHandler = handler_->txn_->getHandler();
+  EXPECT_NE(txnHandler, nullptr);
+  auto* filter = dynamic_cast<WebTransportFilter*>(txnHandler);
+  EXPECT_NE(filter, nullptr);
+
+  closeWTSession();
+}
 
 TEST_P(HQUpstreamSessionTestWebTransport, BidirectionalStream) {
   InSequence enforceOrder;

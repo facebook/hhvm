@@ -31,6 +31,7 @@
 #include <proxygen/lib/http/session/HTTPTransaction.h>
 #include <proxygen/lib/http/session/QuicProtocolInfo.h>
 #include <proxygen/lib/http/session/ServerPushLifecycle.h>
+#include <proxygen/lib/http/session/WebTransportFilter.h>
 #include <proxygen/lib/utils/ConditionalGate.h>
 #include <quic/QuicConstants.h>
 #include <quic/api/QuicSocket.h>
@@ -1969,6 +1970,8 @@ class HQSession
   bool receivedSettings_{false};
   enum class SettingEnabled : uint8_t { SELF = 0, PEER = 1 };
   std::bitset<2> supportsWebTransport_;
+
+  std::unique_ptr<WebTransportFilter> wtFilter_{};
 
   /**
    * The maximum number of concurrent transactions that this session's peer

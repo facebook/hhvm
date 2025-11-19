@@ -35,6 +35,9 @@ class WebTransportFilter
   explicit WebTransportFilter(HTTPTransaction* txn, CodecVersion version)
       : txn_(txn) {
     codec_ = std::make_unique<WebTransportCapsuleCodec>(this, version);
+    if (version == CodecVersion::H3) {
+      h3Tp_ = txn_->getWTTransportProvider();
+    }
     txn_->setWTTransportProvider(
         static_cast<WebTransportImpl::TransportProvider*>(this));
     txn_->setTransportCallback(
@@ -89,6 +92,28 @@ class WebTransportFilter
     }
   }
 
+  void onDatagram(std::unique_ptr<folly::IOBuf> datagram) noexcept override {
+    if (nextTransactionHandler_) {
+      nextTransactionHandler_->onDatagram(std::move(datagram));
+    }
+  }
+
+  void onWebTransportBidiStream(
+      HTTPCodec::StreamID id,
+      WebTransport::BidiStreamHandle stream) noexcept override {
+    if (nextTransactionHandler_) {
+      nextTransactionHandler_->onWebTransportBidiStream(id, std::move(stream));
+    }
+  }
+
+  void onWebTransportUniStream(
+      HTTPCodec::StreamID id,
+      WebTransport::StreamReadHandle* stream) noexcept override {
+    if (nextTransactionHandler_) {
+      nextTransactionHandler_->onWebTransportUniStream(id, stream);
+    }
+  }
+
   std::unique_ptr<HTTPMessageFilter> clone() noexcept override {
     return nullptr;
   }
@@ -117,13 +142,19 @@ class WebTransportFilter
   }
 
   folly::Expected<folly::Unit, WebTransport::ErrorCode> sendDatagram(
-      std::unique_ptr<folly::IOBuf> /*datagram*/) override {
+      std::unique_ptr<folly::IOBuf> datagram) override {
+    if (h3Tp_) {
+      return h3Tp_->sendDatagram(std::move(datagram));
+    }
     return folly::unit;
   }
 
   folly::Expected<HTTPCodec::StreamID, WebTransport::ErrorCode>
   newWebTransportBidiStream() override {
     // TODO: Flow control
+    if (h3Tp_) {
+      return h3Tp_->newWebTransportBidiStream();
+    }
     auto res = nextNewWTBidiStream_;
     nextNewWTBidiStream_ += 4;
     return res;
@@ -132,17 +163,22 @@ class WebTransportFilter
   folly::Expected<HTTPCodec::StreamID, WebTransport::ErrorCode>
   newWebTransportUniStream() override {
     // TODO: Flow control
+    if (h3Tp_) {
+      return h3Tp_->newWebTransportUniStream();
+    }
     auto res = nextNewWTUniStream_;
     nextNewWTUniStream_ += 4;
     return res;
   }
 
   folly::Expected<WebTransport::FCState, WebTransport::ErrorCode>
-  sendWebTransportStreamData(
-      HTTPCodec::StreamID /*id*/,
-      std::unique_ptr<folly::IOBuf> /*data*/,
-      bool /*eof*/,
-      WebTransport::ByteEventCallback* /*wcb*/) override {
+  sendWebTransportStreamData(HTTPCodec::StreamID id,
+                             std::unique_ptr<folly::IOBuf> data,
+                             bool eof,
+                             WebTransport::ByteEventCallback* wcb) override {
+    if (h3Tp_) {
+      return h3Tp_->sendWebTransportStreamData(id, std::move(data), eof, wcb);
+    }
     return WebTransport::FCState::UNBLOCKED;
   }
 
@@ -220,15 +256,21 @@ class WebTransportFilter
   }
 
   folly::SemiFuture<folly::Unit> awaitBidiStreamCredit() override {
-    return folly::makeFuture(folly::unit);
+    return folly::makeSemiFuture(folly::unit);
   }
 
   bool canCreateUniStream() override {
-    return (nextNewWTUniStream_ >> 2) < maxWTUniStreams_;
+    if ((nextNewWTUniStream_ >> 2) >= maxWTUniStreams_) {
+      return false;
+    }
+    return !h3Tp_ || h3Tp_->canCreateUniStream();
   }
 
   bool canCreateBidiStream() override {
-    return (nextNewWTBidiStream_ >> 2) < maxWTBidiStreams_;
+    if ((nextNewWTBidiStream_ >> 2) >= maxWTBidiStreams_) {
+      return false;
+    }
+    return !h3Tp_ || h3Tp_->canCreateBidiStream();
   }
 
   folly::Expected<folly::Unit, WebTransport::ErrorCode>

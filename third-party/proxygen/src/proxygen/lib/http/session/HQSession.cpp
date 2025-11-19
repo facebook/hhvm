@@ -2634,6 +2634,15 @@ void HQSession::HQStreamTransportBase::onHeadersComplete(
       session_.supportsWebTransport_.set(
           folly::to_underlying(SettingEnabled::PEER));
     }
+  } else {
+    if (msg->isResponse() && msg->getStatusCode() == 200 &&
+        txn_.isWebTransportConnectStream()) {
+      if (!session_.wtFilter_) {
+        VLOG(4) << "Received a 200 resp for a WT connect req";
+        session_.wtFilter_ = WebTransportFilter::make(&txn_, CodecVersion::H3);
+        session_.wtFilter_->setWebTransportImpl(txn_.getWebTransport());
+      }
+    }
   }
 
   if (!txn_.getHandler()) {
@@ -3932,29 +3941,11 @@ HQSession::HQStreamTransport::newWebTransportUniStream() {
 }
 
 bool HQSession::HQStreamTransport::canCreateUniStream() {
-  if (session_.sock_->getNumOpenableUnidirectionalStreams() == 0) {
-    return false;
-  }
-
-  auto* wtTransportProvider = txn_.getWTTransportProvider();
-  auto* wtFilter = wtTransportProvider
-                       ? dynamic_cast<WebTransportFilter*>(wtTransportProvider)
-                       : nullptr;
-
-  return !wtFilter || wtFilter->canCreateUniStream();
+  return session_.sock_->getNumOpenableUnidirectionalStreams() > 0;
 }
 
 bool HQSession::HQStreamTransport::canCreateBidiStream() {
-  if (session_.sock_->getNumOpenableBidirectionalStreams() == 0) {
-    return false;
-  }
-
-  auto* wtTransportProvider = txn_.getWTTransportProvider();
-  auto* wtFilter = wtTransportProvider
-                       ? dynamic_cast<WebTransportFilter*>(wtTransportProvider)
-                       : nullptr;
-
-  return !wtFilter || wtFilter->canCreateBidiStream();
+  return session_.sock_->getNumOpenableBidirectionalStreams() > 0;
 }
 
 folly::Expected<WebTransport::FCState, WebTransport::ErrorCode>

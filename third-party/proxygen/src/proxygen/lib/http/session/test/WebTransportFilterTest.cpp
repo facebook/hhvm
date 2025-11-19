@@ -198,8 +198,10 @@ TEST_F(WebTransportFilterTest, MultipleCapsulesInOneBody) {
 }
 
 TEST_F(WebTransportFilterTest, StreamCreationLimits) {
+  // Use H2 codec version so the filter manages stream IDs directly without
+  // delegating to an underlying transport provider
   auto filter =
-      std::make_unique<WebTransportFilter>(txn_.get(), CodecVersion::H3);
+      std::make_unique<WebTransportFilter>(txn_.get(), CodecVersion::H2);
 
   // Initially should NOT be able to create streams since maxStreams is 0
   EXPECT_FALSE(filter->canCreateUniStream());

@@ -507,6 +507,7 @@ auto update_discard(Op& op) -> decltype(op.arg1, true) {
 template<typename Op>
 Optional<std::pair<Type,Promotion>> key_type_or_fixup(ISS& env, Op op) {
   if (env.collect.mInstrState.extraPop) {
+    assertx(can_rewind(env));
     auto const mkey = update_mkey(op);
     if (update_discard(op) || mkey) {
       env.collect.mInstrState.extraPop = false;
@@ -2035,9 +2036,11 @@ void in(ISS& env, const bc::BaseSC& op) {
     // stack.
     if (op.subop3 == MOpMode::Warn || op.subop3 == MOpMode::None) {
       if (auto const v = tv(lookup.ty)) {
-        reduce(env, gen_constant(*v), bc::BaseC { 0, op.subop3 });
-        env.collect.mInstrState.extraPop = true;
-        return;
+        if (can_rewind(env)) {
+          reduce(env, gen_constant(*v), bc::BaseC { 0, op.subop3 });
+          env.collect.mInstrState.extraPop = true;
+          return;
+        }
       }
     }
 
@@ -2068,9 +2071,11 @@ void in(ISS& env, const bc::BaseL& op) {
     // stack.
     if (op.subop2 == MOpMode::Warn || op.subop2 == MOpMode::None) {
       if (auto const v = tv(ty)) {
-        reduce(env, gen_constant(*v), bc::BaseC { 0, op.subop2 });
-        env.collect.mInstrState.extraPop = true;
-        return;
+        if (can_rewind(env)) {
+          reduce(env, gen_constant(*v), bc::BaseC { 0, op.subop2 });
+          env.collect.mInstrState.extraPop = true;
+          return;
+        }
       }
 
       // Try to find an equivalent local to use instead
@@ -2168,6 +2173,7 @@ void in(ISS& env, const bc::Dim& op) {
   if ((op.subop1 == MOpMode::None || op.subop1 == MOpMode::Warn) &&
       env.collect.mInstrState.effectFree &&
       will_reduce(env) &&
+      can_rewind(env) &&
       is_scalar(env.collect.mInstrState.base.type)) {
     // Find the base instruction which started the sequence.
     for (int i = 0; ; i++) {
@@ -2258,7 +2264,8 @@ void in(ISS& env, const bc::QueryM& op) {
       op.subop2 == QueryMOp::CGet &&
       nDiscard == 1 &&
       op.mkey.mcode == MemberCode::MET &&
-      op.mkey.litstr == s_classname.get()) {
+      op.mkey.litstr == s_classname.get() &&
+      can_rewind(env)) {
     if (auto const last = last_op(env, 0)) {
       if (last->op == Op::BaseC) {
         if (auto const prev = last_op(env, 1)) {
@@ -2297,7 +2304,9 @@ void in(ISS& env, const bc::QueryM& op) {
 
   // If the QueryM produced a constant without any possible
   // side-ffects, we can replace the entire thing with the constant.
-  if (env.collect.mInstrState.effectFree && is_scalar(topC(env))) {
+  if (env.collect.mInstrState.effectFree &&
+      can_rewind(env) &&
+      is_scalar(topC(env))) {
     for (int i = 0; ; i++) {
       auto const last = last_op(env, i);
       if (!last) break;

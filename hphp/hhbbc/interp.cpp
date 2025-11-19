@@ -268,6 +268,7 @@ void ensure_mutable(ISS& env, uint32_t id) {
  */
 int kill_by_slot(ISS& env, int slot) {
   assertx(!env.undo);
+  assertx(can_rewind(env));
   auto const id = id_from_slot(env, slot);
   assertx(id != StackElem::NoId);
   auto const sz = env.state.stack.size();
@@ -404,6 +405,7 @@ const Bytecode* last_op(ISS& env, int idx /* = 0 */) {
  */
 void rewind(ISS& env, const Bytecode& bc) {
   assertx(!env.undo);
+  assertx(can_rewind(env));
   ITRACE(2, "(rewind: {}\n", show(*env.ctx.func, bc));
   env.state.stack.rewind(numPop(bc), numPush(bc));
   env.flags.usedParams.reset();
@@ -421,6 +423,7 @@ void rewind(ISS& env, const Bytecode& bc) {
 void rewind(ISS& env, int n) {
   assertx(n);
   assertx(!env.undo);
+  assertx(can_rewind(env));
   while (env.replacedBcs.size()) {
     rewind(env, env.replacedBcs.back());
     env.replacedBcs.pop_back();
@@ -583,7 +586,7 @@ void in(ISS& env, const bc::Nop&)  { reduce(env); }
 
 void in(ISS& env, const bc::PopC&) {
   if (auto const last = last_op(env)) {
-    if (poppable(last->op)) {
+    if (poppable(last->op) && can_rewind(env)) {
       rewind(env, 1);
       return reduce(env);
     }
@@ -600,7 +603,7 @@ void in(ISS& env, const bc::PopC&) {
       replace_last_op(env, bc::PopL { last->SetL.loc1 });
       return reduce(env);
     }
-    if (last->op == Op::CGetL2) {
+    if (last->op == Op::CGetL2 && can_rewind(env)) {
       auto loc = last->CGetL2.nloc1;
       rewind(env, 1);
       return reduce(env, bc::PopC {}, bc::CGetL { loc });
@@ -613,7 +616,7 @@ void in(ISS& env, const bc::PopC&) {
 
 void in(ISS& env, const bc::PopU&) {
   if (auto const last = last_op(env)) {
-    if (last->op == Op::NullUninit) {
+    if (last->op == Op::NullUninit && can_rewind(env)) {
       rewind(env, 1);
       return reduce(env);
     }
@@ -1117,7 +1120,7 @@ void concatHelper(ISS& env, uint32_t n) {
       }
     }
 
-    if (!side_effects) {
+    if (!side_effects && can_rewind(env)) {
       for (auto i = 0; i < n; i++) {
         auto const prev = op_from_slot(env, i);
         if (!prev) continue;
@@ -1302,7 +1305,7 @@ std::pair<Type,bool> resolveSame(ISS& env) {
 template<bool Negate>
 void sameImpl(ISS& env) {
   if (auto const last = last_op(env)) {
-    if (last->op == Op::Null) {
+    if (last->op == Op::Null && can_rewind(env)) {
       rewind(env, 1);
       reduce(env, bc::IsTypeC { IsTypeOp::Null });
       if (Negate) reduce(env, bc::Not {});
@@ -1311,7 +1314,7 @@ void sameImpl(ISS& env) {
     if (auto const prev = last_op(env, 1)) {
       if (prev->op == Op::Null &&
           (last->op == Op::CGetL || last->op == Op::CGetL2 ||
-           last->op == Op::CGetQuietL)) {
+           last->op == Op::CGetQuietL) && can_rewind(env)) {
         auto const loc = [&]() {
           if (last->op == Op::CGetL) {
             return last->CGetL.nloc1;
@@ -1931,8 +1934,8 @@ void jmpImpl(ISS& env, const JmpOp& op) {
     return reduce(env, bc::PopC{});
   }
 
-  auto fix = [&] {
-    if (env.flags.jmpDest == NoBlockId) return;
+  auto const fix = [&] {
+    if (env.flags.jmpDest == NoBlockId || !can_rewind(env)) return;
     auto const jmpDest = env.flags.jmpDest;
     env.flags.jmpDest = NoBlockId;
     rewind(env, op);
@@ -1941,7 +1944,7 @@ void jmpImpl(ISS& env, const JmpOp& op) {
   };
 
   if (auto const last = last_op(env)) {
-    if (last->op == Op::Not) {
+    if (last->op == Op::Not && can_rewind(env)) {
       rewind(env, 1);
       return reduce(env, invertJmp(op));
     }
@@ -2126,7 +2129,7 @@ void in(ISS& env, const bc::CGetL& op) {
   }
   if (auto const last = last_op(env)) {
     if (last->op == Op::PopL &&
-        op.nloc1.id == last->PopL.loc1) {
+        op.nloc1.id == last->PopL.loc1 && can_rewind(env)) {
       reprocess(env);
       rewind(env, 1);
       setLocRaw(env, op.nloc1.id, TCell);
@@ -2148,7 +2151,8 @@ void in(ISS& env, const bc::CGetQuietL& op) {
   }
   if (auto const last = last_op(env)) {
     if (last->op == Op::PopL &&
-        op.loc1 == last->PopL.loc1) {
+        op.loc1 == last->PopL.loc1 &&
+        can_rewind(env)) {
       reprocess(env);
       rewind(env, 1);
       setLocRaw(env, op.loc1, TCell);
@@ -2181,7 +2185,7 @@ void in(ISS& env, const bc::PushL& op) {
 
   if (auto const last = last_op(env)) {
     if (last->op == Op::PopL &&
-        last->PopL.loc1 == op.loc1) {
+        last->PopL.loc1 == op.loc1 && can_rewind(env)) {
       // rewind is ok, because we're just going to unset the local
       // (and note the unset can't be a no-op because the PopL set it
       // to an InitCell). But its possible that before the PopL, the
@@ -2218,12 +2222,14 @@ void in(ISS& env, const bc::PushL& op) {
 
 void in(ISS& env, const bc::CGetL2& op) {
   if (auto const last = last_op(env)) {
-    if ((poppable(last->op) && !numPop(*last)) ||
-        ((last->op == Op::CGetL || last->op == Op::CGetQuietL) &&
-         !peekLocCouldBeUninit(env, op.nloc1.id))) {
-      auto const other = *last;
-      rewind(env, 1);
-      return reduce(env, bc::CGetL { op.nloc1 }, other);
+    if (can_rewind(env)) {
+      if ((poppable(last->op) && !numPop(*last)) ||
+          ((last->op == Op::CGetL || last->op == Op::CGetQuietL) &&
+           !peekLocCouldBeUninit(env, op.nloc1.id))) {
+        auto const other = *last;
+        rewind(env, 1);
+        return reduce(env, bc::CGetL { op.nloc1 }, other);
+      }
     }
   }
 
@@ -3307,7 +3313,7 @@ Optional<std::pair<Type, LocalId>> moveToLocImpl(ISS& env,
   if (auto const prev = last_op(env, 1)) {
     if (prev->op == Op::CGetL2 &&
         prev->CGetL2.nloc1.id == op.loc1 &&
-        last_op(env)->op == Op::Concat) {
+        last_op(env)->op == Op::Concat && can_rewind(env)) {
       rewind(env, 2);
       reduce(env, bc::SetOpL { op.loc1, SetOpOp::ConcatEqual });
       return std::nullopt;
@@ -3536,7 +3542,8 @@ void in(ISS& env, const bc::UnsetL& op) {
     // No point in popping into the local if we're just going to
     // immediately unset it.
     if (last->op == Op::PopL &&
-        last->PopL.loc1 == op.loc1) {
+        last->PopL.loc1 == op.loc1 &&
+        can_rewind(env)) {
       reprocess(env);
       rewind(env, 1);
       setLocRaw(env, op.loc1, TCell);
@@ -6104,6 +6111,13 @@ void interpStep(ISS& env, const Bytecode& bc) {
     // actually exist at runtime.
     if (any(env.collect.opts & CollectionOpts::Inlining)) {
       ITRACE(2, "   inlining, skipping actual constprop\n");
+      return false;
+    }
+
+    // If we're speculating, it's not safe to rewind since it messes
+    // up stack tracking.
+    if (any(env.collect.opts & CollectionOpts::Speculating)) {
+      ITRACE(2, "   speculating, skipping actual constprop\n");
       return false;
     }
 

@@ -175,29 +175,33 @@ void reduce(ISS& env, Bytecodes&&... hhbc) {
 
 bool will_reduce(ISS& env) { return env.analyzeDepth == 0; }
 
+bool can_rewind(ISS& env) {
+  return !any(env.collect.opts & CollectionOpts::Speculating);
+}
+
 void nothrow(ISS& env) {
-  FTRACE(2, "    nothrow\n");
+  ITRACE(2, "    nothrow\n");
   env.flags.wasPEI = false;
 }
 
 void unreachable(ISS& env) {
-  FTRACE(2, "    unreachable\n");
+  ITRACE(2, "    unreachable\n");
   env.state.unreachable = true;
 }
 
 void constprop(ISS& env) {
-  FTRACE(2, "    constprop\n");
+  ITRACE(2, "    constprop\n");
   env.flags.canConstProp = true;
 }
 
 void effect_free(ISS& env) {
-  FTRACE(2, "    effect_free\n");
+  ITRACE(2, "    effect_free\n");
   nothrow(env);
   env.flags.effectFree = true;
 }
 
 void reanalyze_on_update(ISS& env) {
-  FTRACE(2, "    reanalyze_on_update\n");
+  ITRACE(2, "    reanalyze_on_update\n");
   env.collect.reanalyzeOnUpdate = true;
 }
 
@@ -250,7 +254,7 @@ void hasInvariantIterBase(ISS& env) {
 Type popT(ISS& env) {
   assertx(!env.state.stack.empty());
   auto const ret = env.state.stack.back().type;
-  FTRACE(2, "    pop:  {}\n", show(ret));
+  ITRACE(2, "    pop:  {}\n", show(ret));
   assertx(ret.subtypeOf(BCell));
   env.state.stack.pop_elem();
   env.state.topStkIterKeyEquiv = NoIterId;
@@ -295,7 +299,7 @@ const Type& topC(ISS& env, uint32_t i = 0) {
 const Type& topCV(ISS& env, uint32_t i = 0) { return topT(env, i); }
 
 void push(ISS& env, Type t) {
-  FTRACE(2, "    push: {}\n", show(t));
+  ITRACE(2, "    push: {}\n", show(t));
   env.state.stack.push_elem(std::move(t), NoLocalId,
                             env.unchangedBcs + env.replacedBcs.size());
   env.state.topStkIterKeyEquiv = NoIterId;
@@ -307,7 +311,7 @@ void push(ISS& env, Type t, LocalId l) {
   if (l <= MaxLocalId && is_volatile_local(env.ctx.func, l)) {
     return push(env, t);
   }
-  FTRACE(2, "    push: {} (={})\n", show(t), local_string(*env.ctx.func, l));
+  ITRACE(2, "    push: {} (={})\n", show(t), local_string(*env.ctx.func, l));
   env.state.stack.push_elem(std::move(t), l,
                             env.unchangedBcs + env.replacedBcs.size());
   env.state.topStkIterKeyEquiv = NoIterId;
@@ -318,7 +322,7 @@ void push(ISS& env, Type t, LocalId l) {
 // $this
 
 void setThisAvailable(ISS& env) {
-  FTRACE(2, "    setThisAvailable\n");
+  ITRACE(2, "    setThisAvailable\n");
   if (!env.ctx.cls || is_unused_trait(*env.ctx.cls) ||
       (env.ctx.func->attrs & AttrStatic)) {
     return unreachable(env);
@@ -689,7 +693,7 @@ void setStkLocal(ISS& env, LocalId loc, uint32_t idx = 0) {
 void killThisLoc(ISS& env, LocalId l) {
   if (l != NoLocalId ?
       env.state.thisLoc == l : env.state.thisLoc != NoLocalId) {
-    FTRACE(2, "Killing thisLoc: {}\n", env.state.thisLoc);
+    ITRACE(2, "Killing thisLoc: {}\n", env.state.thisLoc);
     env.state.thisLoc = NoLocalId;
   }
 }
@@ -897,7 +901,7 @@ LocalId findLocal(ISS& env, SString name) {
 }
 
 void killLocals(ISS& env) {
-  FTRACE(2, "    killLocals\n");
+  ITRACE(2, "    killLocals\n");
   readUnknownLocals(env);
   for (size_t l = 0; l < env.state.locals.size(); ++l) {
     if (env.undo) env.undo->onLocalWrite(l, std::move(env.state.locals[l]));
@@ -966,7 +970,7 @@ bool isDefinitelyThisPropAttr(ISS& env, SString name, Attr attr) {
 }
 
 void killThisProps(ISS& env) {
-  FTRACE(2, "    killThisProps\n");
+  ITRACE(2, "    killThisProps\n");
   env.collect.props.mergeInAllPrivateProps(env.index, TCell);
 }
 
@@ -1029,7 +1033,7 @@ void unsetUnknownThisProp(ISS& env) {
 // insensitive types for these.
 
 void killPrivateStatics(ISS& env) {
-  FTRACE(2, "    killPrivateStatics\n");
+  ITRACE(2, "    killPrivateStatics\n");
   env.collect.props.mergeInAllPrivateStatics(env.index, TInitCell, true, false);
 }
 
@@ -1041,7 +1045,7 @@ inline void propInitialValue(ISS& env,
                              TypedValue val,
                              bool satisfies,
                              bool deepInit) {
-  FTRACE(2, "    propInitialValue \"{}\" -> {}{}{}\n",
+  ITRACE(2, "    propInitialValue \"{}\" -> {}{}{}\n",
          prop.name, show(from_cell(val)),
          satisfies ? " (initial satisfies TC)" : "",
          deepInit ? " (deep init)" : "");
@@ -1055,7 +1059,7 @@ inline PropMergeResult mergeStaticProp(ISS& env,
                                        bool checkUB = false,
                                        bool ignoreConst = false,
                                        bool mustBeReadOnly = false) {
-  FTRACE(2, "    mergeStaticProp {}::{} -> {}\n",
+  ITRACE(2, "    mergeStaticProp {}::{} -> {}\n",
          show(self), show(name), show(val));
   return env.index.merge_static_type(
     env.ctx,

@@ -261,7 +261,8 @@ class Query {
 
   static folly::fbstring renderMultiQuery(
       const InternalConnection* conn,
-      const std::vector<Query>& queries);
+      const std::vector<Query>& queries,
+      std::string_view prefix = "");
 
   // render either with the parameters to the constructor or specified
   // ones.
@@ -440,7 +441,8 @@ class MultiQuery {
       : queries_(std::move(queries)) {}
 
   std::shared_ptr<folly::fbstring> renderQuery(
-      const InternalConnection* conn) const;
+      const InternalConnection* conn,
+      std::string_view prefix = "") const;
 
   const Query& getQuery(size_t index) const {
     CHECK_THROW(index < queries_.size(), std::invalid_argument);

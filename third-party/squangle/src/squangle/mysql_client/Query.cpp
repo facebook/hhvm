@@ -591,12 +591,15 @@ void Query::appendValueClauses(
 
 folly::fbstring Query::renderMultiQuery(
     const InternalConnection* conn,
-    const std::vector<Query>& queries) {
+    const std::vector<Query>& queries,
+    std::string_view query_prefix) {
   auto reserve_size = 0;
   for (const Query& query : queries) {
-    reserve_size +=
-        query.query_text_.getQuery().size() + 8 * query.params_.size();
+    reserve_size += query.query_text_.getQuery().size() +
+        8 * query.params_.size() + query_prefix.size();
   }
+  reserve_size += queries.size() - 1; // for the ';'
+
   folly::fbstring ret;
   ret.reserve(reserve_size);
 
@@ -604,6 +607,9 @@ folly::fbstring Query::renderMultiQuery(
   for (const Query& query : queries) {
     if (!ret.empty()) {
       ret.append(";");
+    }
+    if (!query_prefix.empty()) {
+      ret.append(query_prefix);
     }
     ret.append(query.render(conn));
   }
@@ -801,10 +807,11 @@ folly::fbstring Query::renderInternal(
 }
 
 std::shared_ptr<folly::fbstring> MultiQuery::renderQuery(
-    const InternalConnection* conn) const {
+    const InternalConnection* conn,
+    std::string_view prefix) const {
   if (!rendered_multi_query_) {
     rendered_multi_query_ = std::make_shared<folly::fbstring>(
-        Query::renderMultiQuery(conn, queries_));
+        Query::renderMultiQuery(conn, queries_, prefix));
   }
 
   return rendered_multi_query_;

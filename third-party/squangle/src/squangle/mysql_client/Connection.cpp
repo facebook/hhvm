@@ -164,6 +164,15 @@ std::shared_ptr<QueryType> Connection::beginAnyQuery(
           : folly::makeSemiFuture(std::move(result));
     });
   }
+
+  if ((opType == db::OperationType::Query ||
+       opType == db::OperationType::MultiQuery ||
+       opType == db::OperationType::MultiQueryStream) &&
+      conn.callbacks_.render_prefix_callback_) {
+    ret->setRenderPrefixCallback(
+        [&]() { return conn.callbacks_.render_prefix_callback_(); });
+  }
+
   return ret;
 }
 

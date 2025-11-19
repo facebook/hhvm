@@ -388,6 +388,8 @@ class Connection {
     callbacks_.post_query_callback_ = OperationBase::appendCallback(
         std::move(callbacks_.post_query_callback_),
         std::move(callbacks.post_query_callback_));
+    callbacks_.render_prefix_callback_ =
+        std::move(callbacks.render_prefix_callback_);
   }
 
   [[nodiscard]] const folly::EventBase* getEventBase() const {

@@ -86,6 +86,11 @@ using AsyncPreQueryCallback =
 using AsyncPostQueryCallback =
     std::function<folly::SemiFuture<AsyncPostQueryResult>(
         AsyncPostQueryResult&&)>;
+// A similar callback that is used during query rendering.  The result will be
+// prefixed to every query being rendered.  This can be used to add comments to
+// queries for observability.  Note that the data generated should never derive
+// from the user as this would allow SQL injection attacks.
+using RenderPrefixCallback = std::function<std::string()>;
 
 enum class SquangleErrno : uint16_t {
   SQ_ERRNO_CONN_TIMEOUT = 7000,
@@ -195,6 +200,8 @@ class OperationBase {
    */
   void setPreQueryCallback(AsyncPreQueryCallback&& callback);
   void setPostQueryCallback(AsyncPostQueryCallback&& callback);
+
+  void setRenderPrefixCallback(RenderPrefixCallback&& callback);
 
   void setAttributes(const AttributeMap& attributes);
   void setAttributes(AttributeMap&& attributes);
@@ -404,6 +411,8 @@ class OperationBase {
 
     AsyncPreQueryCallback pre_query_callback_;
     AsyncPostQueryCallback post_query_callback_;
+
+    RenderPrefixCallback render_prefix_callback_;
   };
 
   Callbacks callbacks_;
@@ -428,6 +437,10 @@ class OperationBase {
   static AsyncPostQueryCallback appendCallback(
       AsyncPostQueryCallback&& callback1,
       AsyncPostQueryCallback&& callback2);
+
+  static RenderPrefixCallback appendCallback(
+      RenderPrefixCallback&& callback1,
+      RenderPrefixCallback&& callback2);
 
   Connection& conn() {
     auto* conn = connection();
@@ -577,6 +590,10 @@ class Operation : public std::enable_shared_from_this<Operation> {
   }
   void setPostQueryCallback(AsyncPostQueryCallback&& callback) {
     impl()->setPostQueryCallback(std::move(callback));
+  }
+
+  void setRenderPrefixCallback(RenderPrefixCallback&& callback) {
+    impl()->setRenderPrefixCallback(std::move(callback));
   }
 
   // Save any mysql errors that occurred (since we may hand off the

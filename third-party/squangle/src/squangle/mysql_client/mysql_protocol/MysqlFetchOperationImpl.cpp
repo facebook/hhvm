@@ -40,7 +40,11 @@ void MysqlFetchOperationImpl::specializedRun() {
 
 void MysqlFetchOperationImpl::specializedRunImpl() {
   try {
-    rendered_query_ = queries().renderQuery(&getInternalConnection());
+    folly::fbstring prefix;
+    if (callbacks_.render_prefix_callback_) {
+      prefix = callbacks_.render_prefix_callback_();
+    }
+    rendered_query_ = queries().renderQuery(&getInternalConnection(), prefix);
 
     auto* mysql_conn = getMysqlConnection();
     if (auto ret = mysql_conn->setQueryAttributes(getAttributes())) {

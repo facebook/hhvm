@@ -112,6 +112,11 @@ void OperationBase::setPostQueryCallback(AsyncPostQueryCallback&& callback) {
       std::move(callbacks_.post_query_callback_), std::move(callback));
 }
 
+void OperationBase::setRenderPrefixCallback(RenderPrefixCallback&& callback) {
+  callbacks_.render_prefix_callback_ = appendCallback(
+      std::move(callbacks_.render_prefix_callback_), std::move(callback));
+}
+
 void OperationBase::setTimeout(Duration timeout) {
   CHECK_THROW(
       state() == OperationState::Unstarted, db::OperationStateException);
@@ -277,6 +282,21 @@ AsyncPostQueryCallback OperationBase::appendCallback(
       return callback2(std::move(result));
     });
   };
+}
+
+RenderPrefixCallback OperationBase::appendCallback(
+    RenderPrefixCallback&& cb1,
+    RenderPrefixCallback&& cb2) {
+  if (!cb1) {
+    return std::move(cb2);
+  }
+
+  if (!cb2) {
+    return std::move(cb1);
+  }
+
+  return
+      [cb1 = std::move(cb1), cb2 = std::move(cb2)]() { return cb1() + cb2(); };
 }
 
 const InternalConnection& OperationBase::getInternalConnection() const {

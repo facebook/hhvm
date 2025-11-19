@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-#include <folly/synchronization/CallOnce.h>
 #include <thrift/conformance/stresstest/client/StressTestClient.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
 
+#include <glog/logging.h>
 #include <folly/coro/Sleep.h>
+#include <folly/synchronization/CallOnce.h>
+#include <thrift/facebook/stresstest/grpc/client/GrpcAsyncClient.h>
 
 namespace apache::thrift::stress {
 
@@ -40,6 +42,8 @@ void ClientRpcStats::combine(const ClientRpcStats& other) {
   numSuccess += other.numSuccess;
   numFailure += other.numFailure;
 }
+
+// ===== ThriftStressTestClient Implementation =====
 
 folly::coro::Task<void> ThriftStressTestClient::co_ping() {
   co_await timedExecute([&]() { return client_->co_ping(); });
@@ -129,7 +133,6 @@ folly::coro::Task<void> ThriftStressTestClient::co_requestResponseTm(
 
 folly::coro::Task<void> ThriftStressTestClient::co_streamTm(
     const StreamRequest& req) {
-  // time the entire stream from start to finish
   co_await timedExecute([&]() -> folly::coro::Task<void> {
     auto result = co_await client_->co_streamTm(req);
     auto gen = std::move(result).stream.toAsyncGenerator();
@@ -141,7 +144,6 @@ folly::coro::Task<void> ThriftStressTestClient::co_streamTm(
 
 folly::coro::Task<void> ThriftStressTestClient::co_sinkTm(
     const StreamRequest& req) {
-  // time the entire sink from start to finish
   co_await timedExecute([&]() -> folly::coro::Task<void> {
     auto result = co_await client_->co_sinkTm(req);
     std::ignore =
@@ -155,7 +157,6 @@ folly::coro::Task<void> ThriftStressTestClient::co_sinkTm(
             co_yield std::move(chunk);
           }
         }());
-    // (void)finalResponse; // we don't care about this
   });
 }
 
@@ -177,16 +178,12 @@ folly::coro::Task<void> ThriftStressTestClient::timedExecute(Fn&& fn) {
   try {
     co_await fn();
   } catch (folly::OperationCancelled&) {
-    // cancelled requests do not count as failures
     throw;
   } catch (transport::TTransportException& e) {
-    // assume fatal issue with connection, stop using this client
-    // TODO: Improve handling of connection issues
     LOG(ERROR) << e.what();
     connectionGood_ = false;
     co_return;
   } catch (...) {
-    // LOG(1) << "Request failed: " << e.what();
     stats_.numFailure++;
     co_return;
   }
@@ -243,6 +240,83 @@ bool ThriftStressTestClient::reattach(
     return true;
   }
   return false;
+}
+
+// ===== GrpcStressTestClient Implementation =====
+
+folly::coro::Task<void> GrpcStressTestClient::co_ping() {
+  co_await timedExecute([&]() { return client_->co_ping(); });
+}
+
+folly::coro::Task<std::string> GrpcStressTestClient::co_echo(
+    const std::string& message) {
+  std::string ret;
+  co_await timedExecute([&]() -> folly::coro::Task<void> {
+    ret = co_await client_->co_echo(message);
+  });
+  co_return ret;
+}
+
+template <class Fn>
+folly::coro::Task<void> GrpcStressTestClient::timedExecute(Fn&& fn) {
+  if (!connectionGood_) {
+    co_return;
+  }
+
+  auto start = std::chrono::steady_clock::now();
+
+  try {
+    co_await fn();
+  } catch (const std::exception& e) {
+    LOG(ERROR) << "gRPC call failed: " << e.what();
+    stats_.numFailure++;
+    connectionGood_ = false;
+    co_return;
+  }
+
+  auto elapsed = std::chrono::steady_clock::now() - start;
+  stats_.latencyHistogram.addValue(
+      std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count());
+  stats_.numSuccess++;
+  co_return;
+}
+
+folly::coro::Task<std::string> GrpcStressTestClient::co_echoEb(
+    const std::string&) {
+  throw std::runtime_error("echoEb not supported for gRPC - use echo instead");
+}
+
+folly::coro::Task<void> GrpcStressTestClient::co_requestResponseEb(
+    const BasicRequest&) {
+  throw std::runtime_error("requestResponseEb not supported for gRPC");
+}
+
+folly::coro::Task<void> GrpcStressTestClient::co_requestResponseTm(
+    const BasicRequest&) {
+  throw std::runtime_error("requestResponseTm not supported for gRPC");
+}
+
+folly::coro::Task<void> GrpcStressTestClient::co_streamTm(
+    const StreamRequest&) {
+  throw std::runtime_error("streamTm not supported for gRPC");
+}
+
+folly::coro::Task<void> GrpcStressTestClient::co_sinkTm(const StreamRequest&) {
+  throw std::runtime_error("sinkTm not supported for gRPC");
+}
+
+folly::coro::Task<double> GrpcStressTestClient::co_calculateSquares(int32_t) {
+  throw std::runtime_error("calculateSquares not supported for gRPC");
+}
+
+folly::coro::Task<void> GrpcStressTestClient::co_alignedRequestResponseEb(
+    RpcOptions&, AlignedResponse&, const AlignedRequest&) {
+  throw std::runtime_error("alignedRequestResponseEb not supported for gRPC");
+}
+
+folly::coro::Task<void> GrpcStressTestClient::co_alignedRequestResponseTm(
+    RpcOptions&, AlignedResponse&, const AlignedRequest&) {
+  throw std::runtime_error("alignedRequestResponseTm not supported for gRPC");
 }
 
 } // namespace apache::thrift::stress

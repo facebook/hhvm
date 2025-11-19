@@ -14,20 +14,27 @@
  * limitations under the License.
  */
 
-#pragma once
+syntax = "proto3";
 
-#include <thrift/conformance/stresstest/server/StressTestHandler.h>
-#include <thrift/facebook/stresstest/grpc/server/GrpcAsyncServer.h>
-#include <thrift/lib/cpp2/server/ThriftServer.h>
+package apache.thrift.stress.grpc;
 
-namespace apache::thrift::stress {
+message PingRequest {
+  // Empty for now, but allows future extension
+}
 
-std::shared_ptr<StressTestHandler> createStressTestHandler();
+message PingResponse {
+  // Empty for now, but allows future extension
+}
 
-std::shared_ptr<ThriftServer> createStressTestServer(
-    std::shared_ptr<apache::thrift::ServiceHandler<StressTest>> handler =
-        nullptr);
+message EchoRequest {
+  string message = 1;
+}
 
-std::unique_ptr<GrpcAsyncServer> createGrpcStressTestServer();
+message EchoResponse {
+  string message = 1;
+}
 
-} // namespace apache::thrift::stress
+service StressTest {
+  rpc Ping(PingRequest) returns (PingResponse);
+  rpc Echo(EchoRequest) returns (EchoResponse);
+}

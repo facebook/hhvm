@@ -22,6 +22,7 @@
 
 namespace apache::thrift::stress {
 
+class GrpcAsyncClient;
 class ClientThread;
 
 struct ClientRpcStats {
@@ -109,6 +110,44 @@ class ThriftStressTestClient : public StressTestClient {
   std::shared_ptr<StressTestAsyncClient> client_;
 
   const bool enableChecksum_;
+  AlignedResponse resp;
+};
+
+/**
+ * gRPC implementation of StressTestClient for stress testing gRPC servers
+ */
+class GrpcStressTestClient : public StressTestClient {
+ public:
+  explicit GrpcStressTestClient(
+      std::shared_ptr<GrpcAsyncClient> client, ClientRpcStats& stats)
+      : StressTestClient(stats), client_(std::move(client)) {}
+
+  folly::coro::Task<void> co_ping() override;
+  folly::coro::Task<std::string> co_echo(const std::string& message) override;
+
+  // These methods are not supported for gRPC and will throw
+  folly::coro::Task<std::string> co_echoEb(const std::string&) override;
+  folly::coro::Task<void> co_requestResponseEb(const BasicRequest&) override;
+  folly::coro::Task<void> co_requestResponseTm(const BasicRequest&) override;
+  folly::coro::Task<void> co_streamTm(const StreamRequest&) override;
+  folly::coro::Task<void> co_sinkTm(const StreamRequest&) override;
+  folly::coro::Task<double> co_calculateSquares(int32_t) override;
+  folly::coro::Task<void> co_alignedRequestResponseEb(
+      RpcOptions&, AlignedResponse&, const AlignedRequest&) override;
+  folly::coro::Task<void> co_alignedRequestResponseTm(
+      RpcOptions&, AlignedResponse&, const AlignedRequest&) override;
+
+  folly::AsyncTransport* getTransport() override { return nullptr; }
+  bool reattach(
+      std::unordered_map<int, folly::EventBase*>& /* unused */) override {
+    return false;
+  }
+
+ private:
+  template <class Fn>
+  folly::coro::Task<void> timedExecute(Fn&& fn);
+
+  std::shared_ptr<GrpcAsyncClient> client_;
 };
 
 } // namespace apache::thrift::stress

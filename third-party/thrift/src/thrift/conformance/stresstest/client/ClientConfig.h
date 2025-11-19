@@ -45,6 +45,9 @@ DECLARE_string(compression_config);
 DECLARE_string(compression_level);
 DECLARE_string(thrift_protocol);
 DECLARE_bool(enable_rocket_frame_relative_alignment);
+DECLARE_bool(use_grpc_client);
+DECLARE_string(grpc_async_client_poll_mode);
+DECLARE_string(grpc_client_mode);
 
 namespace apache::thrift::stress {
 

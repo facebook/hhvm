@@ -25,12 +25,19 @@
 #include <thrift/conformance/stresstest/if/gen-cpp2/StressTest.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
 
+namespace folly {
+class IOThreadPoolExecutor;
+}
+
 namespace apache::thrift::stress {
 
 class ClientFactory {
  public:
   static std::unique_ptr<StressTestAsyncClient> createRocketClient(
       folly::EventBase* evb, const ClientConnectionConfig& cfg);
+
+  static std::shared_ptr<GrpcAsyncClient> createGrpcClient(
+      const ClientConnectionConfig& cfg);
 
   static void useCustomSslContext(
       std::function<std::shared_ptr<folly::SSLContext>()> fn);

@@ -191,3 +191,9 @@ final class ModuleBoundaryViolationException extends LogicException {}
  * Exception thrown when a deployment boundary violation occurs.
  */
 final class DeploymentBoundaryViolationException extends LogicException {}
+
+/**
+ * Exception thrown when request tries to spin up children requests
+ * beyond the limit.
+ */
+final class RequestFanoutLimitExceededException extends RuntimeException {}

@@ -128,6 +128,7 @@ struct Option {
   static int ExternWorkerThrottleBaseWaitMSecs;
   static std::string ExternWorkerWorkingDir;
   static size_t ExternWorkerMaxSubprocessMemory;
+  static std::string ExternWorkerZstdDictionaryPath;
 
 private:
   static const int kDefaultParserGroupSize;

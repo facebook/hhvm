@@ -154,6 +154,7 @@ void parse_options(int argc, char** argv) {
     ("extern-worker-async-cleanup",            po::value(&options.ExternWorkerAsyncCleanup))
     ("extern-worker-max-subprocess-memory",    po::value(&options.ExternWorkerMaxSubprocessMemory))
     ("extern-worker-use-subprocess-scheduler", po::value(&options.ExternWorkerUseSubprocessScheduler))
+    ("extern-worker-zstd-dictionary",          po::value(&options.ExternWorkerZstdDictionaryPath))
     ;
 
   po::options_description all;
@@ -440,6 +441,9 @@ extern_worker::Options make_extern_worker_options() {
   }
   if (options.ExternWorkerMaxSubprocessMemory > 0) {
     opts.setMaxSubprocessMemory(options.ExternWorkerMaxSubprocessMemory);
+  }
+  if (!options.ExternWorkerZstdDictionaryPath.empty()) {
+    opts.setZSTDDictionaryPath(options.ExternWorkerZstdDictionaryPath);
   }
   return opts;
 }

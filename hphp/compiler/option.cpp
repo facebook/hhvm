@@ -84,6 +84,7 @@ int Option::ExternWorkerThrottleRetries = -1;
 int Option::ExternWorkerThrottleBaseWaitMSecs = -1;
 bool Option::ExternWorkerUseSubprocessScheduler = true;
 size_t Option::ExternWorkerMaxSubprocessMemory = 0;
+std::string Option::ExternWorkerZstdDictionaryPath;
 
 ///////////////////////////////////////////////////////////////////////////////
 // load from HDF file
@@ -216,6 +217,9 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(ExternWorkerUseSubprocessScheduler, ini, config,
                "ExternWorker.UseSubprocessScheduler",
                ExternWorkerUseSubprocessScheduler);
+  Config::Bind(ExternWorkerZstdDictionaryPath, ini, config,
+               "ExternWorker.ZstdDictionaryPath",
+               ExternWorkerZstdDictionaryPath);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

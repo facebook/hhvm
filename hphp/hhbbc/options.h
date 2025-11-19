@@ -162,6 +162,7 @@ struct Options {
   size_t ExternWorkerActionCacheConnectionCount = 16;
   std::string ExternWorkerFeaturesFile;
   uint64_t ExternWorkerMaxSubprocessMemory = 0;
+  std::string ExternWorkerZstdDictionaryPath;
 
   static MethodMap init_trace_functions();
 

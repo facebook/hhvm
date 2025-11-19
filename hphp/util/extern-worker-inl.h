@@ -249,6 +249,12 @@ inline RefId::RefId(std::string id, size_t size, size_t extra)
   : m_id{std::move(id)}, m_size{size}, m_extra{extra}
 {}
 
+inline RefId::RefId(std::string id, size_t size, uint32_t offset, uint32_t length)
+  : m_id{std::move(id)}
+  , m_size{size}
+  , m_offsetAndLength{RefId::OffsetAndLength{offset, length}}
+{}
+
 inline bool RefId::operator==(const RefId& o) const {
   return
     std::tie(m_id, m_extra, m_size) ==

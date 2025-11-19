@@ -765,7 +765,8 @@ Options makeExternWorkerOptions(const CompilerOptions& po) {
     .setExecutionConcurrencyLimit(Option::ExternWorkerExecutionConcurrencyLimit)
     .setAcConnectionCount(Option::ExternWorkerAcConnectionCount)
     .setVerboseLogging(Option::ExternWorkerVerboseLogging)
-    .setMaxSubprocessMemory(Option::ExternWorkerMaxSubprocessMemory);
+    .setMaxSubprocessMemory(Option::ExternWorkerMaxSubprocessMemory)
+    .setZSTDDictionaryPath(Option::ExternWorkerZstdDictionaryPath);
   if (!Option::ExternWorkerPlatform.empty()) {
     options.setPlatform(Option::ExternWorkerPlatform);
   }

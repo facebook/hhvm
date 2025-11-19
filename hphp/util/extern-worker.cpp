@@ -24,6 +24,7 @@
 #include "hphp/util/struct-log.h"
 #include "hphp/util/subprocess-scheduler.h"
 #include "hphp/util/trace.h"
+#include "hphp/util/zstd.h"
 
 #include <folly/FileUtil.h>
 #include <folly/Subprocess.h>
@@ -83,7 +84,41 @@ constexpr int g_local_pipe_fd = 3;
 // For the subprocess impl, if the size of the data is <= this
 // constant, we'll store it "inline" in the ref itself, rather than
 // writing it to disk. This values probably needs more tuning.
-constexpr size_t g_inline_size = 64;
+constexpr size_t g_inline_size = 256;
+
+// The compression level is between 0 (no compression) and 22 (lots of
+// computation, smaller resulting artifacts). We can probably tune
+// this further.
+size_t g_zstd_compression_level = 10;
+
+// A well-known name for where ZSTD dictionaries are expected to live for SerializedSource/Sinks.
+const char* const g_zstddict_filename = "zstd.dict";
+
+fs::path zstdDictLocation(const fs::path& root) {
+  return root / g_zstddict_filename;
+}
+
+std::pair<ZSTD_CDict*, ZSTD_DDict*> createZstdDictionaries(const fs::path& dictPath)
+{
+  std::string dictContent;
+  if (!folly::readFile(dictPath.c_str(), dictContent)) {
+    // Fail silently if the expected path isn't a ZSTD dict.
+    return {nullptr, nullptr};
+  }
+  auto cdict =
+    ZSTD_createCDict(dictContent.data(), dictContent.size(), g_zstd_compression_level);
+  assertx(cdict != nullptr);
+  auto ddict = ZSTD_createDDict(dictContent.data(), dictContent.size());
+  assertx(ddict != nullptr);
+  FTRACE(3, "ZSTD compression dictionary initialized from `{}`\n", dictPath.native());
+  return {cdict, ddict};
+}
+
+RefId inlineRefId(const std::string blobToInline) {
+  DEBUG_ONLY auto const sz = blobToInline.size();
+  assertx(sz <= g_inline_size);
+  return RefId{std::move(blobToInline), blobToInline.size(), 0};
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -227,6 +262,249 @@ private:
   size_t m_offset;
 };
 
+// Encapsulates a blob file for reading. Concurrent reads are OK.
+//
+// All blobs are assumed to be stored as individual ZSTD-compressed blobs, and
+// the read API (readAndDecompress) requires a buffer & decompression context
+// to be passed by the caller - this is to allow re-using the same memory
+// when we're reading blobs from lots of different files.
+struct BlobReader {
+  BlobReader(const fs::path& path) {
+    auto fd = folly::openNoInt(path.c_str(), O_CLOEXEC | O_RDONLY);
+    if (fd < 0) {
+      throw Error{
+        folly::sformat(
+          "Unable to open {} [{}]",
+          path.native(), folly::errnoStr(errno)
+        )
+      };
+    }
+    FTRACE(3, "Readable blob opened for {} as fd {}\n", path.native(), fd);
+    m_fd = fd;
+  }
+
+  ~BlobReader() { if (m_fd >= 0) ::close(m_fd); }
+  BlobReader(const BlobReader&) = delete;
+  BlobReader(BlobReader&& o) noexcept : m_fd{o.m_fd}
+  { o.m_fd = -1; }
+  BlobReader& operator=(const BlobReader&) = delete;
+  BlobReader& operator=(BlobReader&& o) noexcept {
+    std::swap(m_fd, o.m_fd);
+    return *this;
+  }
+
+  // To save memory, the caller provides a reused string to hold the
+  // compressed data we read from the file and we re-use a decompression
+  // context.
+  std::string readAndDecompress(
+    const RefId::OffsetAndLength& offsetAndLength,
+    std::string& compressedBuffer,
+    ZSTD_DCtx* dctx,
+    ZSTD_DDict* ddict) const {
+    assertx(m_fd >= 0);
+    assertx(offsetAndLength.length > 0);
+
+    folly::resizeWithoutInitialization(compressedBuffer, offsetAndLength.length);
+    auto const read = folly::preadFull(m_fd, compressedBuffer.data(),
+                                       offsetAndLength.length, offsetAndLength.offset);
+    if (static_cast<uint32_t>(read) != offsetAndLength.length) {
+      throw Error{
+        folly::sformat(
+          "Blob failed reading {} bytes from {} at {}, actual read {} [{}]",
+          offsetAndLength.length, m_fd, offsetAndLength.offset, read, folly::errnoStr(errno)
+        )
+      };
+    }
+    size_t decompressedSize =
+      ZSTD_getFrameContentSize(compressedBuffer.data(), compressedBuffer.size());
+    if (decompressedSize == ZSTD_CONTENTSIZE_UNKNOWN
+        || decompressedSize == ZSTD_CONTENTSIZE_ERROR) {
+      decompressedSize = ZSTD_decompressBound(compressedBuffer.data(), compressedBuffer.size());
+    }
+    if (ZSTD_isError(decompressedSize)) {
+      throw Error{
+        folly::sformat("ZSTD error {} while reading fd {}", 0 - decompressedSize, m_fd)
+      };
+    }
+    std::string decompressed;
+    folly::resizeWithoutInitialization(decompressed, decompressedSize);
+    if (ddict != nullptr) {
+      decompressedSize =
+        ZSTD_decompress_usingDDict(dctx,
+                                   decompressed.data(), decompressedSize,
+                                   compressedBuffer.data(), compressedBuffer.size(),
+                                   ddict);
+    } else {
+      decompressedSize =
+        ZSTD_decompressDCtx(dctx,
+                            decompressed.data(), decompressedSize,
+                            compressedBuffer.data(), compressedBuffer.size());
+    }
+    if (ZSTD_isError(decompressedSize)) {
+      throw Error{
+        folly::sformat("ZSTD error while decompressing: {}",
+                       0 - decompressedSize)
+      };
+    }
+    folly::resizeWithoutInitialization(decompressed, decompressedSize);
+    return decompressed;
+  }
+
+private:
+  int m_fd;
+};
+
+// Represents a blob file for writing by a single thread. Blob RefId's are
+// obtained by actually writing the blob to disk. All writes are compressed
+// with zstd (using a compression dict if it is available) as individual
+// frames.
+//
+// If create is set to true, we create the file and throw if the file exists.
+// Otherwise, we open the file in append mode and seek to the end.
+struct BlobWriter {
+  BlobWriter(const fs::path& path, bool create, ZSTD_CDict* compressionDict)
+  : m_path{path}, m_offset{0}, m_compressionDict{compressionDict} {
+    auto flags = O_CLOEXEC;
+    if (create) {
+      flags |= O_CREAT | O_WRONLY | O_EXCL;
+    } else {
+      flags |= O_WRONLY | O_APPEND;
+    }
+    auto fd = folly::openNoInt(m_path.c_str(), flags);
+    if (fd < 0) {
+      throw Error{
+        folly::sformat(
+          "Unable to open {} [{}]",
+          m_path.native(), folly::errnoStr(errno)
+        )
+      };
+    }
+    m_fd = fd;
+    m_cctx = ZSTD_createCCtx();
+    SCOPE_FAIL { ::close(m_fd); };
+    if (m_cctx == nullptr) {
+      throw Error{
+        folly::sformat(
+          "Unable to create ZSTD context for {}",
+          m_path.native()
+        )
+      };
+    }
+    SCOPE_FAIL { ZSTD_freeCCtx(m_cctx); };
+    if (!create) syncOffset();
+  }
+
+ ~BlobWriter() {
+    if (m_fd >= 0) ::close(m_fd);
+    if (m_cctx != nullptr) ZSTD_freeCCtx(m_cctx);
+  }
+
+  BlobWriter(const BlobWriter&) = delete;
+  BlobWriter(BlobWriter&& o) noexcept
+  : m_path{std::move(o.m_path)}, m_fd{o.m_fd}, m_offset{o.m_offset}
+  , m_compressedBuffer{std::move(o.m_compressedBuffer)}
+  , m_cctx{o.m_cctx}, m_compressionDict{o.m_compressionDict}
+  {
+    o.m_fd = -1;
+    o.m_cctx = nullptr;
+    o.m_compressionDict = nullptr;
+  }
+  BlobWriter& operator=(const BlobWriter&) = delete;
+  BlobWriter& operator=(BlobWriter&& o) noexcept {
+    std::swap(m_fd, o.m_fd);
+    std::swap(m_cctx, o.m_cctx);
+    std::swap(m_path, o.m_path);
+    std::swap(m_compressedBuffer, o.m_compressedBuffer);
+    std::swap(m_offset, o.m_offset);
+    std::swap(m_compressionDict, o.m_compressionDict);
+    return *this;
+  }
+
+
+  const fs::path& path() const { return m_path; }
+
+  void syncOffset() {
+    assertx(m_fd >= 0);
+    auto const size = ::lseek(m_fd, 0, SEEK_END);
+    if (size < 0) {
+      throw Error{
+        folly::sformat(
+          "Unable to seek to end of {}",
+          m_path.native()
+        )
+      };
+    }
+    m_offset = size;
+  }
+
+  // For long-lived blobs, it's useful to occasionally free the buffer
+  // that contains the compressed strings we're writing to the filesystem.
+  void freeBuffer() {
+    m_compressedBuffer.clear();
+    m_compressedBuffer.shrink_to_fit();
+  }
+
+  RefId compressAndAppend(const std::string& data) {
+    assertx(m_cctx != nullptr);
+
+    // `m_compressedBuffer` will be updated with the compressed data here.
+    compressBlobToBuffer(data);
+
+    FTRACE(5, "Compress blob request for size {}\n", data.size());
+    auto const written =
+      folly::writeFull(m_fd, m_compressedBuffer.data(), m_compressedBuffer.size());
+    if (written != m_compressedBuffer.size()) {
+      throw Error{
+        folly::sformat(
+          "Failed writing to {} (expected {}, actual {})",
+          m_path.native(), m_compressedBuffer.size(), written
+        )
+      };
+    }
+    auto const offset = m_offset;
+    m_offset += written;
+    assertx(offset < std::numeric_limits<uint32_t>::max());
+    assertx(written < std::numeric_limits<uint32_t>::max());
+    return RefId{
+      m_path.filename().native(),
+      data.size(),
+      static_cast<uint32_t>(offset),
+      static_cast<uint32_t>(written)
+    };
+  }
+
+private:
+  void compressBlobToBuffer(const std::string& blob) {
+    assertx(blob.size() > g_inline_size);
+    const size_t compressedSizeMax = ZSTD_compressBound(blob.size());
+    folly::resizeWithoutInitialization(m_compressedBuffer, compressedSizeMax);
+
+    size_t compressedSize;
+    if (m_compressionDict != nullptr ) {
+      compressedSize =
+        ZSTD_compress_usingCDict(m_cctx, m_compressedBuffer.data(), compressedSizeMax,
+                                blob.data(), blob.size(), m_compressionDict);
+    } else {
+      compressedSize =
+        ZSTD_compressCCtx(m_cctx, m_compressedBuffer.data(), compressedSizeMax,
+                          blob.data(), blob.size(), g_zstd_compression_level);
+    }
+    if (ZSTD_isError(compressedSize)) {
+      throw Error{
+        folly::sformat("ZSTD error while compressing: {}",
+                      0 - compressedSize)
+      };
+    }
+    folly::resizeWithoutInitialization(m_compressedBuffer, compressedSize);
+  }
+
+  fs::path m_path;
+  int m_fd;
+  size_t m_offset;
+  std::string m_compressedBuffer;
+  ZSTD_CCtx* m_cctx;
+  ZSTD_CDict* m_compressionDict;
+};
 //////////////////////////////////////////////////////////////////////
 
 // Read from the FD (which is assumed to be a pipe) and append the
@@ -312,14 +590,28 @@ void writeToPipe(int fd, const char* data, size_t size) {
  */
 
 struct SerializedSource : public detail::ISource {
-  SerializedSource(fs::path root, std::string s)
+  SerializedSource(fs::path root, std::string s, ZSTD_CDict* cdict,
+                   ZSTD_DDict* ddict)
     : m_source{std::move(s)}
     , m_decoder{m_source.data(), m_source.size()}
     , m_currentInput{0}
     , m_numInputs{0}
+    , m_cdict{cdict}
+    , m_ddict{ddict}
     , m_root{std::move(root)}
-  {}
-  ~SerializedSource() = default;
+  {
+    // Look for the well-known zstd dictionary location which should be
+    // placed under the input root by the scheduler.
+    auto zstd_dict_path = m_root / g_zstddict_filename;
+    m_dctx = ZSTD_createDCtx();
+    if (m_dctx == nullptr) {
+      throw Error{"Unable to create ZSTD decompression context"};
+    }
+  }
+
+  ~SerializedSource() {
+    ZSTD_freeDCtx(m_dctx);
+  }
 
   std::string blob() override {
     return refToBlob(decodeRefId(m_decoder));
@@ -351,23 +643,25 @@ struct SerializedSource : public detail::ISource {
   void finish() override { m_decoder.assertDone(); }
 
   static RefId decodeRefId(BlobDecoder& d) {
-    // Optimize RefId representation for space. If m_size is <= the
-    // inline size, we know that m_extra is zero, and that m_id has
-    // the same length as m_size, so we do not need to encode it
-    // twice.
+    // Optimize RefId representation for space. If size is <= the
+    // inline size, we know that m_offsetAndLength is zero, and
+    // that m_id has the same length as m_size, so we do not need to
+    // encode it twice.
     decltype(RefId::m_size) size;
     d(size);
     if (size <= g_inline_size) {
       assertx(d.remaining() >= size);
       std::string id{(const char*)d.data(), size};
       d.advance(size);
-      return RefId{std::move(id), size, 0};
+      return inlineRefId(std::move(id));
     } else {
       decltype(RefId::m_id) id;
-      decltype(RefId::m_extra) offset;
+      decltype(RefId::OffsetAndLength::offset) offset;
+      decltype(RefId::OffsetAndLength::length) length;
       d(id);
       d(offset);
-      return RefId{std::move(id), size, offset};
+      d(length);
+      return RefId{std::move(id), static_cast<uint64_t>(size), offset, length};
     }
   }
 
@@ -394,7 +688,6 @@ struct SerializedSource : public detail::ISource {
 private:
   std::string refToBlob(const RefId& r) {
     if (r.m_size <= g_inline_size) {
-      assertx(r.m_id.size() == r.m_size);
       assertx(!r.m_extra);
       return r.m_id;
     }
@@ -404,30 +697,43 @@ private:
       return FD{path, true, false, false}.read(r.m_extra, r.m_size);
     }
 
-    auto it = m_fdCache.find(path.native());
-    if (it == m_fdCache.end()) {
-      auto [elem, emplaced] = m_fdCache.emplace(
+    auto it = m_blobReaderCache.find(path.native());
+    if (it == m_blobReaderCache.end()) {
+      auto [elem, emplaced] = m_blobReaderCache.emplace(
         path.native(),
-        FD{m_root / path, true, false, false}
+        BlobReader{m_root / path}
       );
       assertx(emplaced);
       it = elem;
     }
-    return it->second.read(r.m_extra, r.m_size);
+    return it->second.readAndDecompress(r.m_offsetAndLength, m_buffer, m_dctx, m_ddict);
   }
 
   std::string m_source;
   BlobDecoder m_decoder;
   size_t m_currentInput;
   size_t m_numInputs;
+  std::string m_buffer;
+  ZSTD_DCtx* m_dctx;
+
+  ZSTD_CDict* m_cdict;
+  ZSTD_DDict* m_ddict;
 
   fs::path m_root;
-  hphp_fast_map<std::string, FD> m_fdCache;
+  hphp_fast_map<std::string, BlobReader> m_blobReaderCache;
 };
 
 struct SerializedSink : public detail::ISink {
-  explicit SerializedSink(fs::path outputFile)
-    : m_fd{outputFile, false, true, false} {}
+  explicit SerializedSink(fs::path outputFile, ZSTD_CDict* cdict, ZSTD_DDict* ddict)
+    : m_writer{outputFile, /* create */ false, cdict}
+    , m_cdict(cdict)
+    , m_ddict(ddict) {}
+
+
+  ~SerializedSink() {
+    ZSTD_freeCDict(m_cdict);
+    ZSTD_freeDDict(m_ddict);
+  }
 
   void blob(const std::string& b) override {
     encodeRefId(makeRefId(b), m_encoder);
@@ -463,7 +769,8 @@ struct SerializedSink : public detail::ISink {
       e.writeRaw(r.m_id.data(), r.m_id.size());
     } else {
       e(r.m_id);
-      e(r.m_extra);
+      e(r.m_offsetAndLength.offset);
+      e(r.m_offsetAndLength.length);
     }
   }
 
@@ -483,13 +790,17 @@ struct SerializedSink : public detail::ISink {
 
 private:
   RefId makeRefId(const std::string& b) {
-    if (b.size() <= g_inline_size) return RefId{b, b.size(), 0};
-    auto const offset = m_fd.append(b);
-    return RefId{m_fd.path().filename(), b.size(), offset};
+    if (b.size() <= g_inline_size) {
+      return inlineRefId(b);
+    }
+    return m_writer.compressAndAppend(b);
   }
 
-  FD m_fd;
+  BlobWriter m_writer;
   BlobEncoder m_encoder;
+
+  ZSTD_CDict* m_cdict;
+  ZSTD_DDict* m_ddict;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -767,14 +1078,25 @@ parseOptions(int argc, char** argv) {
            name, root.native(), outputFile.native());
 
     // Input comes from STDIN
+    auto zstdDictPath = root/ g_zstddict_filename;
+    auto zstdDicts = createZstdDictionaries(zstdDictPath);
     auto source =
       time("read-pipe", [] { return readFromPipe(STDIN_FILENO); });
     return std::make_tuple(
       std::make_unique<SerializedSource>(
         std::move(root),
-        std::move(source)
+        std::move(source),
+        zstdDicts.first,
+        zstdDicts.second
       ),
-      std::make_unique<SerializedSink>(std::move(outputFile)),
+      // Even though we pass the zstd dicts to both the source and the
+      // sink, we make the SerializedSink the owner of the data as it
+      // is referenced after the source.
+      std::make_unique<SerializedSink>(
+        std::move(outputFile),
+        zstdDicts.first,
+        zstdDicts.second
+      ),
       std::move(name)
     );
   } else if (argc != 6) {
@@ -834,7 +1156,9 @@ int main(int argc, char** argv) {
     SCOPE_EXIT { g_in_job = false; };
 
     // First do any global initialization.
-    time("init", [&, &source = source] { worker->init(*source); });
+    time("init", [&, &source = source] {
+      worker->init(*source);
+    });
     time("run-all", [&, &source = source, &sink = sink] {
       // Then execute run() until we're out of inputs.
       size_t run = 0;
@@ -880,14 +1204,20 @@ namespace {
  *
  * The RefIds are just the path to the file, either a blob file, or
  * some other file. If the data was stored in a blob file, the m_extra
- * of the RefId will contain its offset in the blob file. For stored
- * files, m_extra will always be zero.
+ * of the RefId will be interpreted as a pair of (uint32_t, uint32_t)
+ * consisting of the offset and length in the blob file.
+ * For stored files, m_extra will always be zero.
  *
  * As an optimization, if the data is less or equal to g_inline_size,
  * then its stored "inline" in the RefId. That is, m_id is the blob
  * itself. Inline/non-inline blobs can be distinguished by the m_size
  * field. This also applies to stored files (if sufficiently small,
  * we'll read it and store it inline).
+ *
+ * Stored blobs are compressed: For blobs stored in files, `m_size`
+ * refers to the uncompressed size of the data, whereas
+ * `m_offsetAndLength`'s * length field contains the compressed size
+ * and the offset in the blobfile to start reading from.
  *
  * Workers are forked, given their inputs, calculate outputs, then
  * write their outputs and exit. Input is given to the worker via
@@ -927,21 +1257,24 @@ private:
 
     // Acquire a FD to the given file to read from. If the path does
     // not correspond to a blob file, nullptr is returned.
-    const FD* acquireForRead(const fs::path&);
+    const BlobReader* acquireForRead(const fs::path&);
     // Acquire a FD to a blob file to append to. You don't have a say
     // in which file you get. The FD must be returned via release()
     // when done. You have exclusive access to this FD.
-    FD* acquireForAppend();
-    // Release a FD acquired from acquireForAppend.
-    void release(FD&);
-  private:
-    std::unique_ptr<FD> newFD();
+    // Takes an optional ZSTD compression dict.
+    BlobWriter* acquireForAppend(ZSTD_CDict*);
+    // Writes the ZSTD compression dict to a location known to workers.
+    // Returns the written path.
+    fs::path provideZSTDCompressionDict(const fs::path&) const;
+    void release(BlobWriter& writer);
 
+  private:
     fs::path m_root;
-    folly_concurrent_hash_map_simd<std::string, std::unique_ptr<FD>> m_fds;
+    folly_concurrent_hash_map_simd<std::string, std::unique_ptr<BlobReader>> m_blobReaders;
+    folly_concurrent_hash_map_simd<std::string, std::unique_ptr<BlobWriter>> m_blobWriters;
 
     std::mutex m_lock;
-    std::stack<FD*> m_forAppend;
+    std::stack<BlobWriter*> m_forAppend;
     size_t m_nextBlob;
   };
 
@@ -970,6 +1303,8 @@ private:
   Optional<SubprocessScheduler> m_subprocessScheduler;
   Optional<std::thread> m_measureRSSThread{};
   std::atomic_bool m_stopMeasuringRSSThread{false};
+  ZSTD_CDict* m_compressionDict{nullptr};
+  ZSTD_DDict* m_decompressionDict{nullptr};
 };
 
 SubprocessImpl::SubprocessImpl(const Options& options, Client& parent)
@@ -984,6 +1319,13 @@ SubprocessImpl::SubprocessImpl(const Options& options, Client& parent)
     "Using subprocess extern-worker at {}",
     m_fdManager->root().native()
   );
+  if (!options.m_zstdDictionaryPath.empty()) {
+    auto zstdDictPath =
+      m_fdManager->provideZSTDCompressionDict(fs::path(options.m_zstdDictionaryPath));
+    auto dicts = createZstdDictionaries(zstdDictPath);
+    m_compressionDict = dicts.first;
+    m_decompressionDict = dicts.second;
+  }
   if (m_options.m_useSubprocessScheduler) {
     m_subprocessScheduler.emplace(options.m_maxSubprocessMemory);
     m_measureRSSThread = std::thread([&] {
@@ -1010,6 +1352,9 @@ SubprocessImpl::~SubprocessImpl() {
     m_stopMeasuringRSSThread.store(true, std::memory_order_release);
     m_measureRSSThread->join();
   }
+
+  ZSTD_freeCDict(m_compressionDict);
+  ZSTD_freeDDict(m_decompressionDict);
 
   if (m_options.m_cleanup) {
     Logger::FInfo(
@@ -1061,9 +1406,17 @@ coro::Task<BlobVec> SubprocessImpl::load(const RequestId& requestId,
           assertx(!id.m_extra);
           return id.m_id;
         }
-        if (auto const fd = m_fdManager->acquireForRead(id.m_id)) {
+        auto reader = m_fdManager->acquireForRead(id.m_id);
+        if (reader != nullptr) {
           // The data is in a blob file, so use a cached FD
-          return fd->read(id.m_extra, id.m_size);
+          std::string compressedBuffer;
+          ZSTD_DCtx* dctx = ZSTD_createDCtx();
+          SCOPE_EXIT { ZSTD_freeDCtx(dctx); };
+          if (dctx == nullptr) {
+            throw Error{"Failed to create ZSTD decompression context"};
+          }
+          return reader->readAndDecompress(
+            id.m_offsetAndLength, compressedBuffer, dctx, m_decompressionDict);
         }
         // It's some other (non-blob) file. Create an ephemeral FD to
         // read it.
@@ -1079,17 +1432,17 @@ coro::Task<IdVec> SubprocessImpl::store(const RequestId& requestId,
                                         bool) {
   // SubprocessImpl never "uploads" files, but it must write to disk
   // (which we classify as an upload).
+  BlobWriter* writer = nullptr;
+  SCOPE_EXIT { if (writer) m_fdManager->release(*writer); };
 
-  FD* fd = nullptr;
-  SCOPE_EXIT { if (fd) m_fdManager->release(*fd); };
 
   // Update stats. Skip blobs which we'll store inline.
   for (auto const& b : blobs) {
     if (b.size() <= g_inline_size) continue;
     ++stats().blobsUploaded;
     stats().blobBytesUploaded += b.size();
-    if (!fd) fd = m_fdManager->acquireForAppend();
-    assertx(fd);
+    if (!writer) writer = m_fdManager->acquireForAppend(m_compressionDict);
+    assertx(writer);
   }
 
   auto out =
@@ -1104,7 +1457,7 @@ coro::Task<IdVec> SubprocessImpl::store(const RequestId& requestId,
             // Size of file could theoretically change between
             // stat-ing and reading it.
             if (contents.size() <= g_inline_size) {
-              return RefId{contents, contents.size(), 0};
+              return inlineRefId(std::move(contents));
             }
             fileSize = contents.size();
           }
@@ -1119,12 +1472,11 @@ coro::Task<IdVec> SubprocessImpl::store(const RequestId& requestId,
          if (b.size() <= g_inline_size) {
            FTRACE(4, "{} storing blob inline\n",
                   requestId.tracePrefix());
-           return RefId{b, b.size(), 0};
+           return inlineRefId(b);
          }
          FTRACE(4, "{} writing size {} blob to {}\n",
-                requestId.tracePrefix(), b.size(), fd->path().native());
-         auto const offset = fd->append(b);
-         RefId r{fd->path().filename().native(), b.size(), offset};
+                requestId.tracePrefix(), b.size(), writer->path().native());
+         RefId r = writer->compressAndAppend(b);
          FTRACE(4, "{} written as {}\n", requestId.tracePrefix(), r.toString());
          return r;
        })
@@ -1179,9 +1531,8 @@ SubprocessImpl::exec(const RequestId& requestId,
   // Acquire a FD. We're not actually going to write to it, but the
   // worker will. This ensures the worker has exclusive access to the
   // file while it's running.
-  auto fd = m_fdManager->acquireForAppend();
-  SCOPE_EXIT { if (fd) m_fdManager->release(*fd); };
-
+  auto writer = m_fdManager->acquireForAppend(m_compressionDict);
+  SCOPE_EXIT { if (writer) m_fdManager->release(*writer); };
 
   Optional<uint64_t> usageEstimate{};
   if (m_subprocessScheduler.has_value()) {
@@ -1195,12 +1546,14 @@ SubprocessImpl::exec(const RequestId& requestId,
       requestId,
       command,
       std::string{(const char*)encoder.data(), encoder.size()},
-      fd->path(),
+      writer->path(),
       usageEstimate
     );
+
   // The worker (maybe) wrote to the file, so we need to re-sync our
   // tracked offset.
-  fd->syncOffset();
+  writer->syncOffset();
+  writer->freeBuffer();
 
   // Decode the output
   BlobDecoder decoder{outputBlob.data(), outputBlob.size()};
@@ -1428,52 +1781,61 @@ SubprocessImpl::FDManager::FDManager(fs::path root)
   , m_nextBlob{0}
 {}
 
-const FD* SubprocessImpl::FDManager::acquireForRead(const fs::path& path) {
+const BlobReader* SubprocessImpl::FDManager::acquireForRead(const fs::path& path) {
   // Blob files are always relative
   if (path.is_absolute()) return nullptr;
-  // Only already created blob files should be in m_fds. So, if it's
-  // not present, it can't be a blob file.
-  auto const it = m_fds.find(path.native());
-  if (it == m_fds.end()) return nullptr;
-  return it->second.get();
+
+  assertx(m_blobWriters.find(path.native()) != m_blobWriters.end());
+  auto const it = m_blobReaders.find(path.native());
+  if (it != m_blobReaders.end()) return it->second.get();
+
+  auto const filename = m_root / path.filename().native();
+  auto [elem, emplaced] =
+    m_blobReaders.emplace(path.filename().native(), std::make_unique<BlobReader>(filename));
+  assertx(emplaced);
+  return elem->second.get();
 }
 
-FD* SubprocessImpl::FDManager::acquireForAppend() {
-  // Use the blob file at the top of m_forAppend.
-  std::scoped_lock<std::mutex> _{m_lock};
-  if (m_forAppend.empty()) {
-    // If empty, there's no free blob file. We need to create a new
-    // one.
-    auto fd = newFD();
-    auto const path = fd->path();
-    auto const [elem, emplaced] =
-      m_fds.emplace(path.filename().native(), std::move(fd));
-    assertx(emplaced);
-    m_forAppend.push(elem->second.get());
-  }
-  auto fd = m_forAppend.top();
-  m_forAppend.pop();
-  return fd;
-}
-
-void SubprocessImpl::FDManager::release(FD& fd) {
+void SubprocessImpl::FDManager::release(BlobWriter& fd) {
   if (debug) {
     // Should be returning something cached
-    auto const it = m_fds.find(fd.path().filename().native());
-    always_assert(it != m_fds.end());
+    auto const it = m_blobWriters.find(fd.path().filename().native());
+    always_assert(it != m_blobWriters.end());
     always_assert(it->second.get() == &fd);
   }
   std::scoped_lock<std::mutex> _{m_lock};
   m_forAppend.push(&fd);
 }
 
-std::unique_ptr<FD> SubprocessImpl::FDManager::newFD() {
+BlobWriter* SubprocessImpl::FDManager::acquireForAppend(ZSTD_CDict* cdict) {
+  // Use the blob file at the top of m_forAppend.
+  std::scoped_lock<std::mutex> _{m_lock};
+  if (m_forAppend.empty()) {
+    // If empty, there's no free blob file. We need to create a new
+    // one.
+    auto const id = m_nextBlob++;
+    auto const filename = m_root / folly::to<std::string>(id);
+    auto const [elem, emplaced] = m_blobWriters.emplace(
+      filename.filename().native(),
+      std::make_unique<BlobWriter>(filename, /* create */ true, cdict)
+    );
+    assertx(emplaced);
+    m_forAppend.push(elem->second.get());
+  }
   // We deliberately keep the blob filename as small as possible
   // because they get serialized a lot and it keeps the input/output
   // sizes small.
-  auto const id = m_nextBlob++;
-  auto const filename = m_root / folly::to<std::string>(id);
-  return std::make_unique<FD>(filename, true, true, true);
+  auto writer = m_forAppend.top();
+  m_forAppend.pop();
+  return writer;
+}
+
+fs::path SubprocessImpl::FDManager::provideZSTDCompressionDict(
+  const fs::path& path) const {
+  auto content = detail::readFile(path);
+  auto outPath = zstdDictLocation(m_root);
+  detail::writeFile(outPath, content.data(), content.length());
+  return outPath;
 }
 
 //////////////////////////////////////////////////////////////////////

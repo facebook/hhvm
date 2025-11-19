@@ -218,6 +218,7 @@ struct RefId {
   static constexpr size_t kDigestSentinel = ~size_t(0);
   RefId(const std::array<uint8_t, kDigestLen>&, size_t);
   RefId(std::string, size_t, size_t extra = 0);
+  RefId(std::string, size_t, uint32_t offset, uint32_t length);
 
   std::string toString() const;
   bool operator==(const RefId&) const;
@@ -230,9 +231,22 @@ struct RefId {
     size_t operator()(const RefId& r) const { return r.hash(); }
   };
 
+  // The default client interprets the extra bits as an
+  // offset-and-length pair. Provide ergonomic access to it.
+  struct OffsetAndLength {
+    uint32_t offset;
+    uint32_t length;
+  };
+
   std::string m_id;
   size_t m_size; // Size of data
-  size_t m_extra; // For internal usage
+  union {
+    size_t m_extra; // For internal usage
+    OffsetAndLength m_offsetAndLength;
+  };
+  // We compare the unions by checking the m_extra field, so it's
+  // important that OffsetAndLength fits or we'll have subtle bugs.
+  static_assert(sizeof(OffsetAndLength) <= sizeof(size_t));
 };
 
 // Represents a piece of data "inside" the extern-worker
@@ -462,6 +476,11 @@ struct Options {
     return *this;
   }
 
+  Options& setZSTDDictionaryPath(std::filesystem::path p) {
+    m_zstdDictionaryPath = std::move(p);
+    return *this;
+  }
+
   UseSubprocess m_useSubprocess{UseSubprocess::Always};
   std::filesystem::path m_workingDir{std::filesystem::temp_directory_path()};
   std::chrono::seconds m_timeout{std::chrono::minutes{15}};
@@ -486,6 +505,7 @@ struct Options {
   std::string m_platform{"linux-remote-execution"};
   std::string m_featuresFile{""};
   std::string m_workerPath{""};
+  std::string m_zstdDictionaryPath{""};
 };
 
 //////////////////////////////////////////////////////////////////////

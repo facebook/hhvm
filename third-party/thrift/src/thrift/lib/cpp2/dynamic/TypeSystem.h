@@ -30,7 +30,6 @@
 #include <folly/container/MapUtil.h>
 #include <folly/container/span.h>
 #include <folly/lang/Assume.h>
-#include <folly/lang/Exception.h>
 #include <folly/lang/SafeAssert.h>
 #include <folly/memory/not_null.h>
 
@@ -1017,7 +1016,7 @@ class StructuredNode : public DefinitionNode {
    */
   const FieldDefinition& at(FastFieldHandle handle) const {
     if (!handle.valid() || handle.ordinal > fields_.size()) {
-      folly::throw_exception<std::out_of_range>(
+      throw std::out_of_range(
           fmt::format("invalid field handle: {}", handle.ordinal));
     }
     return fields_.at(handle.ordinal - 1);

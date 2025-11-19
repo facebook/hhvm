@@ -135,8 +135,7 @@ SerializableRecord& SerializableRecord::operator=(
       for (auto& datum : list) {
         auto [_, inserted] = result.insert(fromThrift(std::move(datum)));
         if (!inserted) {
-          folly::throw_exception<std::invalid_argument>(
-              "Duplicate element in setDatum");
+          throw std::invalid_argument("Duplicate element in setDatum");
         }
       }
       return result;
@@ -150,7 +149,7 @@ SerializableRecord& SerializableRecord::operator=(
         auto [_, inserted] =
             result.emplace(fromThrift(std::move(k)), fromThrift(std::move(v)));
         if (!inserted) {
-          folly::throw_exception<std::invalid_argument>(
+          throw std::invalid_argument(
               fmt::format("Duplicate element in mapDatum"));
         }
       }
@@ -160,8 +159,7 @@ SerializableRecord& SerializableRecord::operator=(
     default:
       break;
   }
-  folly::throw_exception<std::invalid_argument>(
-      "SerializedRecord cannot be empty");
+  throw std::invalid_argument("SerializedRecord cannot be empty");
 }
 
 /* static */ SerializableRecordUnion SerializableRecord::toThrift(
@@ -275,14 +273,14 @@ SerializableRecord& SerializableRecord::operator=(
     }
     return Type::__EMPTY__;
   }));
-  folly::throw_exception<std::runtime_error>(fmt::format(
-      "tried to access SerializableRecord with inactive kind, actual kind was: {}",
-      actualKind));
+  throw std::runtime_error(
+      fmt::format(
+          "tried to access SerializableRecord with inactive kind, actual kind was: {}",
+          actualKind));
 }
 
 /* static */ [[noreturn]] void SerializableRecord::throwAccessEmpty() {
-  folly::throw_exception<std::runtime_error>(
-      "tried to access empty SerializableRecord");
+  throw std::runtime_error("tried to access empty SerializableRecord");
 }
 
 bool operator==(const SerializableRecord& lhs, const SerializableRecord& rhs) {
@@ -368,7 +366,7 @@ bool areByteArraysEqual(
 
 void ensureUTF8OrThrow(std::string_view string) {
   const auto onError = [&]() -> void {
-    folly::throw_exception<std::invalid_argument>(
+    throw std::invalid_argument(
         fmt::format("UTF-8 validation failed for '{}'", string));
   };
   const auto charAt = [&](std::size_t i) -> unsigned char {

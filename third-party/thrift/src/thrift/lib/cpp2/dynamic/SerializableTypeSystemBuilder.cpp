@@ -71,8 +71,9 @@ void SerializableTypeSystemBuilder::addDefinition(UriView uri) {
 
   auto type = typeSystem_->getUserDefinedType(uri);
   if (!type.has_value()) {
-    folly::throw_exception<InvalidTypeError>(fmt::format(
-        "Type with URI '{}' is not defined in this TypeSystem.", uri));
+    throw InvalidTypeError(
+        fmt::format(
+            "Type with URI '{}' is not defined in this TypeSystem.", uri));
   }
   addDefinition(*type);
 }

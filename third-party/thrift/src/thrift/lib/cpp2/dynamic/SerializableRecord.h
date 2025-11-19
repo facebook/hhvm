@@ -27,7 +27,6 @@
 #include <folly/container/F14Set.h>
 #include <folly/container/Reserve.h>
 #include <folly/lang/Assume.h>
-#include <folly/lang/Exception.h>
 
 #include <cmath>
 #include <cstdint>
@@ -151,12 +150,10 @@ void ensureUTF8OrThrow(std::string_view);
 template <typename T, std::enable_if_t<std::is_floating_point_v<T>>* = nullptr>
 void ensureValidFloatOrThrow(T datum) {
   if (std::isnan(datum)) {
-    folly::throw_exception<std::invalid_argument>(
-        "NaN is not a valid Thrift datum");
+    throw std::invalid_argument("NaN is not a valid Thrift datum");
   }
   if (datum == T(0) && std::signbit(datum)) {
-    folly::throw_exception<std::invalid_argument>(
-        "-0.0 is not a valid Thrift datum");
+    throw std::invalid_argument("-0.0 is not a valid Thrift datum");
   }
 }
 

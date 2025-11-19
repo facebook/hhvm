@@ -103,19 +103,21 @@ StructuredNode::StructuredNode(
             .emplace(field.identity().id(), FastFieldHandle{ordinal})
             .second;
     if (!emplaced) {
-      folly::throw_exception<InvalidTypeError>(fmt::format(
-          "duplicate field id '{}' in struct '{}'",
-          folly::to_underlying(field.identity().id()),
-          uri_));
+      throw InvalidTypeError(
+          fmt::format(
+              "duplicate field id '{}' in struct '{}'",
+              folly::to_underlying(field.identity().id()),
+              uri_));
     }
     emplaced = fieldHandleByName_
                    .emplace(field.identity().name(), FastFieldHandle{ordinal})
                    .second;
     if (!emplaced) {
-      folly::throw_exception<InvalidTypeError>(fmt::format(
-          "duplicate field name '{}' in struct '{}'",
-          field.identity().name(),
-          uri_));
+      throw InvalidTypeError(
+          fmt::format(
+              "duplicate field name '{}' in struct '{}'",
+              field.identity().name(),
+              uri_));
     }
     ++ordinal;
   }
@@ -139,8 +141,9 @@ UnionNode::UnionNode(
           std::move(uri), std::move(fields), isSealed, std::move(annotations)) {
   for (const FieldDefinition& field : this->fields()) {
     if (field.presence() != PresenceQualifier::OPTIONAL_) {
-      folly::throw_exception<InvalidTypeError>(fmt::format(
-          "field {} must be optional in a Union", field.identity()));
+      throw InvalidTypeError(
+          fmt::format(
+              "field {} must be optional in a Union", field.identity()));
     }
   }
 }
@@ -321,9 +324,10 @@ std::string_view kindToString(TypeRef::Kind k) noexcept {
 } // namespace
 
 [[noreturn]] void TypeRef::throwAccessInactiveKind() const {
-  folly::throw_exception<std::runtime_error>(fmt::format(
-      "tried to access TypeRef with inactive kind, actual kind was: {}",
-      kindToString(kind())));
+  throw std::runtime_error(
+      fmt::format(
+          "tried to access TypeRef with inactive kind, actual kind was: {}",
+          kindToString(kind())));
 }
 
 /* static */ TypeRef TypeRef::fromDefinition(DefinitionRef def) {
@@ -344,7 +348,7 @@ std::string_view kindToString(TypeRef::Kind k) noexcept {
 
 const Uri& DefinitionNode::uri() const {
   if (uri_.empty()) {
-    folly::throw_exception<InvalidTypeError>("Type does not have URI set.");
+    throw InvalidTypeError("Type does not have URI set.");
   }
   return uri_;
 }
@@ -388,17 +392,19 @@ std::string_view kindToString(DefinitionRef::Kind k) noexcept {
 } // namespace
 
 [[noreturn]] void DefinitionRef::throwAccessInactiveKind() const {
-  folly::throw_exception<std::runtime_error>(fmt::format(
-      "tried to access DefinitionRef with inactive kind, actual kind was: {}",
-      kindToString(kind())));
+  throw std::runtime_error(
+      fmt::format(
+          "tried to access DefinitionRef with inactive kind, actual kind was: {}",
+          kindToString(kind())));
 }
 
 DefinitionRef TypeSystem::getUserDefinedTypeOrThrow(UriView uri) const {
   if (std::optional<DefinitionRef> def = this->getUserDefinedType(uri)) {
     return *def;
   }
-  folly::throw_exception<InvalidTypeError>(fmt::format(
-      "Type with URI '{}' is not defined in this TypeSystem.", uri));
+  throw InvalidTypeError(
+      fmt::format(
+          "Type with URI '{}' is not defined in this TypeSystem.", uri));
 }
 
 namespace {

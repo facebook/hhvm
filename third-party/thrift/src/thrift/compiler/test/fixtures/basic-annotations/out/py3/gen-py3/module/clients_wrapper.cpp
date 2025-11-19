@@ -269,7 +269,7 @@ folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>>
 BadServiceClientWrapper::createBadInteraction() {
   return folly::via(
       channel_->getEventBase(),
-      [=]() -> std::unique_ptr<::thrift::py3::ClientWrapper> {
+      [=, this]() -> std::unique_ptr<::thrift::py3::ClientWrapper> {
         auto interaction_client = static_cast<std::unique_ptr<apache::thrift::GeneratedAsyncClient>>(std::make_unique<GoodServiceAsyncClient::BadInteraction>(((GoodServiceAsyncClient*)async_client_.get())->createBadInteraction()));
         return static_cast<std::unique_ptr<::thrift::py3::ClientWrapper>>(std::make_unique<BadInteractionInteractionWrapper>(std::move(interaction_client), channel_));
       }

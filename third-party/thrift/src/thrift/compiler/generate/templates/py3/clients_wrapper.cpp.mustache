@@ -48,7 +48,7 @@ folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>>
 {{service:parent_service_name}}ClientWrapper::create{{service:name}}() {
   return folly::via(
       channel_->getEventBase(),
-      [=]() -> std::unique_ptr<::thrift::py3::ClientWrapper> {
+      [=, this]() -> std::unique_ptr<::thrift::py3::ClientWrapper> {
         auto interaction_client = static_cast<std::unique_ptr<apache::thrift::GeneratedAsyncClient>>(std::make_unique<{{interaction:parent_service_cpp_name}}AsyncClient::{{service:name}}>((({{interaction:parent_service_cpp_name}}AsyncClient*)async_client_.get())->create{{service:name}}()));
         return static_cast<std::unique_ptr<::thrift::py3::ClientWrapper>>(std::make_unique<{{service:name}}InteractionWrapper>(std::move(interaction_client), channel_));
       }

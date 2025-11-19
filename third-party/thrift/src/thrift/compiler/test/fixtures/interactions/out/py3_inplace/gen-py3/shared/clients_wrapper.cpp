@@ -16,7 +16,7 @@ folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>>
 InteractLocallyClientWrapper::createSharedInteraction() {
   return folly::via(
       channel_->getEventBase(),
-      [=]() -> std::unique_ptr<::thrift::py3::ClientWrapper> {
+      [=, this]() -> std::unique_ptr<::thrift::py3::ClientWrapper> {
         auto interaction_client = static_cast<std::unique_ptr<apache::thrift::GeneratedAsyncClient>>(std::make_unique<InteractLocallyAsyncClient::SharedInteraction>(((InteractLocallyAsyncClient*)async_client_.get())->createSharedInteraction()));
         return static_cast<std::unique_ptr<::thrift::py3::ClientWrapper>>(std::make_unique<SharedInteractionInteractionWrapper>(std::move(interaction_client), channel_));
       }

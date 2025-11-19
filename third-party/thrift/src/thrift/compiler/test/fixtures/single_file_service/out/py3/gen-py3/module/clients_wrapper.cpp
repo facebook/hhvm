@@ -37,7 +37,7 @@ folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>>
 AClientWrapper::createI() {
   return folly::via(
       channel_->getEventBase(),
-      [=]() -> std::unique_ptr<::thrift::py3::ClientWrapper> {
+      [=, this]() -> std::unique_ptr<::thrift::py3::ClientWrapper> {
         auto interaction_client = static_cast<std::unique_ptr<apache::thrift::GeneratedAsyncClient>>(std::make_unique<AAsyncClient::I>(((AAsyncClient*)async_client_.get())->createI()));
         return static_cast<std::unique_ptr<::thrift::py3::ClientWrapper>>(std::make_unique<IInteractionWrapper>(std::move(interaction_client), channel_));
       }
@@ -117,7 +117,7 @@ folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>>
 CClientWrapper::createI() {
   return folly::via(
       channel_->getEventBase(),
-      [=]() -> std::unique_ptr<::thrift::py3::ClientWrapper> {
+      [=, this]() -> std::unique_ptr<::thrift::py3::ClientWrapper> {
         auto interaction_client = static_cast<std::unique_ptr<apache::thrift::GeneratedAsyncClient>>(std::make_unique<CAsyncClient::I>(((CAsyncClient*)async_client_.get())->createI()));
         return static_cast<std::unique_ptr<::thrift::py3::ClientWrapper>>(std::make_unique<IInteractionWrapper>(std::move(interaction_client), channel_));
       }

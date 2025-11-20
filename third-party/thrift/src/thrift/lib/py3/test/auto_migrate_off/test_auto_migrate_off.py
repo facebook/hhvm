@@ -22,6 +22,7 @@ import testing.thrift_types
 import testing.types
 
 from thrift.lib.py3.test.auto_migrate.auto_migrate_util import is_auto_migrated
+from thrift.py3.test.auto_migrate_off.module.thrift_types import TestStruct
 
 
 class AutoMigrateOffTests(unittest.TestCase):
@@ -32,3 +33,9 @@ class AutoMigrateOffTests(unittest.TestCase):
         self.assertFalse(is_auto_migrated())
         # pyre-ignore[16]: Undefined attribute testing a non-public API
         self.assertFalse(testing.thrift_types.Nested1._fbthrift_auto_migrate_enabled())
+
+    # this tests the case where auto-migrate is set in PACKAGE. The above
+    # tests a thrift library where auto-migrate is not set at PACKAGE
+    def test_auto_migrate_cls_attribute_generation(self) -> None:
+        # pyre-ignore[16]: Undefined attribute testing a non-public API
+        self.assertFalse(TestStruct._fbthrift_auto_migrate_enabled())

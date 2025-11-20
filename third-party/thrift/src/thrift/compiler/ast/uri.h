@@ -62,6 +62,8 @@ inline constexpr auto kAllowUnsafeUnionFieldCustomDefaultValueUri =
     "facebook.com/thrift/annotation/AllowUnsafeUnionFieldCustomDefaultValue";
 inline constexpr auto kAllowUnsafeRequiredFieldQualifierUri =
     "facebook.com/thrift/annotation/AllowUnsafeRequiredFieldQualifier";
+inline constexpr auto kAllowLegacyMissingUris =
+    "facebook.com/thrift/annotation/AllowLegacyMissingUris";
 
 // Scope:
 inline constexpr auto kScopeProgramUri =

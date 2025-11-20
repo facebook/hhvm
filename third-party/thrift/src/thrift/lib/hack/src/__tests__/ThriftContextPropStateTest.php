@@ -86,27 +86,7 @@ final class ThriftContextPropStateTest extends WWWTest {
     $serialized_empty = $fresh_tcps->getSerialized();
     expect($serialized_after_clear)->toEqual($serialized_empty);
   }
-  public function testGetOriginIdResolver___DPRS_ACH_TEST(): void {
-    // Ensure a clean state
-    ThriftContextPropState::get()->clear();
 
-    // Initialize the instance and set an origin ID
-    $origin_id = 12345;
-    // Ensure the test ID is different from the fallback value
-    expect($origin_id)->toNotEqual(MCPProductID::UNKNOWN);
-    MCPContext::setGlobal__UNSAFE($origin_id);
-
-    // Get the resolver function
-    $resolver = ThriftContextPropState::getOriginIdResolver();
-
-    // Execute the resolver
-    $resolved_origin_id = $resolver();
-
-    // In the correct implementation, the resolver should return the set origin ID.
-    // In the mutated version, getReadonlyIfInitialized() returns null,
-    // so the resolver will fall back to MCPProductID::UNKNOWN, causing this to fail.
-    expect($resolved_origin_id)->toEqual($origin_id);
-  }
   public function testAddExperimentIdDirtiesCache___DPRS_ACH_TEST(): void {
     $tcps = ThriftContextPropState::get();
     $tcps->clear();
@@ -127,6 +107,7 @@ final class ThriftContextPropStateTest extends WWWTest {
     // (stale) value is returned, and this assertion will fail.
     expect($serialized_before)->toNotEqual($serialized_after);
   }
+
   public function testAccess(): void {
     $tcps = ThriftContextPropState::get();
     expect($tcps->getRequestId())->toEqual("");

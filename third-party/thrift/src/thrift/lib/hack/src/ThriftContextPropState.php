@@ -635,11 +635,6 @@ final class ThriftContextPropState {
     $this->dirty();
   }
 
-  public static function getOriginIdResolver()[]: (function()[leak_safe]: int) {
-    return ()[leak_safe] ==>
-      MCPContext::getGlobalOriginIdDirectly__UNSAFE() ?? MCPProductID::UNKNOWN;
-  }
-
   public function getExperimentIds()[]: vec<int> {
     $ret = $this->storage->experiment_ids;
     if ($ret !== null) {

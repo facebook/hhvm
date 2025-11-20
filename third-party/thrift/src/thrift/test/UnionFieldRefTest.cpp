@@ -333,4 +333,9 @@ TEST(UnionFieldTest, CppRef) {
   EXPECT_EQ(s.shared_const(), "shared_const");
   EXPECT_THROW(*s.box(), bad_union_field_access);
 }
+
+TEST(UnionFieldTest, CppMethods) {
+  CppMethods t;
+  EXPECT_FALSE(t.field().has_value());
+}
 } // namespace apache::thrift::test

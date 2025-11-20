@@ -2575,6 +2575,8 @@ class cpp_mstch_field : public mstch_field {
     assert(strct != nullptr);
 
     if (strct->is<t_union>()) {
+      // For unions, we should set this to false since we don't want to mangle
+      // the field name inside MyUnion::Type.
       return false;
     }
 

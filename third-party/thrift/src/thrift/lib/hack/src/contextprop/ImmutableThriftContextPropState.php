@@ -35,10 +35,6 @@ final class ImmutableThriftContextPropState {
     return $this->state->getRequestId();
   }
 
-  public readonly function getOriginId()[leak_safe]: ?int {
-    return $this->state->getOriginId();
-  }
-
   public readonly function getRegionalizationEntity()[leak_safe]: ?int {
     return $this->state->getRegionalizationEntity();
   }

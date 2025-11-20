@@ -94,7 +94,7 @@ final class ThriftContextPropStateTest extends WWWTest {
     $origin_id = 12345;
     // Ensure the test ID is different from the fallback value
     expect($origin_id)->toNotEqual(MCPProductID::UNKNOWN);
-    ThriftContextPropState::get()->setOriginId($origin_id);
+    MCPContext::setGlobal__UNSAFE($origin_id);
 
     // Get the resolver function
     $resolver = ThriftContextPropState::getOriginIdResolver();
@@ -136,12 +136,12 @@ final class ThriftContextPropStateTest extends WWWTest {
 
   public function testOriginIdNullable(): void {
     $tcps = ThriftContextPropState::get();
-    expect($tcps->getOriginId())->toBeNull();
+    expect(MCPContext::getGlobalOriginIdDirectly__UNSAFE())->toBeNull();
     // 0 is different from null
-    $tcps->setOriginId(0);
-    expect($tcps->getOriginId())->toEqual(0);
-    $tcps->setOriginId(null);
-    expect($tcps->getOriginId())->toBeNull();
+    MCPContext::setGlobal__UNSAFE(0);
+    expect(MCPContext::getGlobalOriginIdDirectly__UNSAFE())->toEqual(0);
+    MCPContext::setGlobal__UNSAFE(null);
+    expect(MCPContext::getGlobalOriginIdDirectly__UNSAFE())->toBeNull();
   }
 
   public function testRegionalizationEntityNullable(): void {
@@ -584,7 +584,7 @@ final class ThriftContextPropStateTest extends WWWTest {
     ThriftContextPropState::initFromString($e);
     $tcps = ThriftContextPropState::get();
     $serialized_before = $tcps->getSerialized();
-    $tcps->setOriginId(12345);
+    MCPContext::setGlobal__UNSAFE(12345);
     $serialized_after = $tcps->getSerialized();
     expect($serialized_before)->toNotEqual($serialized_after);
   }

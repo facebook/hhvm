@@ -36,7 +36,8 @@ final class ThriftContextPropHandlers {
         (
           $context_prop_state->getRootProductId() ==
             MCPProductID::L4_ADS_MANAGER ||
-          $context_prop_state->getOriginId() == MCPProductID::L4_ADS_MANAGER
+          MCPContext::getGlobalOriginIdDirectly__UNSAFE() ==
+            MCPProductID::L4_ADS_MANAGER
         ) &&
         (
           Environment::getServiceId() == 'web_ads_manager/hhvm' ||
@@ -65,7 +66,8 @@ final class ThriftContextPropHandlers {
         (
           $context_prop_state->getRootProductId() ==
             MCPProductID::L4_MARKETING_API ||
-          $context_prop_state->getOriginId() == MCPProductID::L4_MARKETING_API
+          MCPContext::getGlobalOriginIdDirectly__UNSAFE() ==
+            MCPProductID::L4_MARKETING_API
         ) &&
         Environment::isAsyncEnvironment() &&
         JustKnobs::evalString(

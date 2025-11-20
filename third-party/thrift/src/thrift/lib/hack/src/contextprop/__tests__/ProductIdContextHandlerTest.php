@@ -81,7 +81,7 @@ final class ProductIdContextHandlerTest extends WWWTest {
     );
 
     // product id in ThriftContextPropState is 123
-    ThriftContextPropState::get()->setOriginId(123);
+    MCPContext::setGlobal__UNSAFE(123);
 
     $transport =
       TServiceRouterTransport::create('sample_service_name', dict[], dict[]);
@@ -131,7 +131,7 @@ final class ProductIdContextHandlerTest extends WWWTest {
     );
 
     // product id in ThriftContextPropState is 123
-    ThriftContextPropState::get()->setOriginId(123);
+    MCPContext::setGlobal__UNSAFE(123);
 
     $transport =
       TServiceRouterTransport::create('sample_service_name', dict[], dict[]);
@@ -181,7 +181,7 @@ final class ProductIdContextHandlerTest extends WWWTest {
     );
 
     // product id in ThriftContextPropState is null
-    ThriftContextPropState::get()->setOriginId(null);
+    MCPContext::setGlobal__UNSAFE(null);
 
     $transport =
       TServiceRouterTransport::create('sample_service_name', dict[], dict[]);

@@ -390,16 +390,34 @@ final class ThriftContextPropState {
     $this->dirty();
   }
 
-  public readonly function getOriginId()[leak_safe]: ?int {
+  private readonly function getOriginId()[leak_safe]: ?int {
     if ($this->storage->origin_id is null) {
       return null;
     }
     return $this->storage->origin_id as int;
   }
 
-  public function setOriginId(?int $id)[write_props]: void {
+  private function setOriginId(?int $id)[write_props]: void {
     // We do not dirty cache in this case, because the cache key is origin ID.
     $this->storage->origin_id = $id;
+  }
+
+  /**
+   * !!!DO NOT CALL THIS!!! Instead call MCPContext::get
+   */
+  public readonly function getOriginId__FOR_MCP_CONTEXT_ONLY(
+  )[leak_safe]: ?int {
+    return $this->getOriginId();
+  }
+
+  /**
+   * !!!DO NOT CALL THIS!!! Instead call MCPContext::setGlobal__UNSAFE
+   */
+  public function setOriginId__FOR_MCP_CONTEXT_ONLY(
+    ?int $id,
+  )[write_props]: void {
+    // We do not dirty cache in this case, because the cache key is origin ID.
+    $this->setOriginId($id);
   }
 
   public readonly function getRegionalizationEntity()[leak_safe]: ?int {

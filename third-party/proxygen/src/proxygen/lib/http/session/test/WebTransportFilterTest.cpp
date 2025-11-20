@@ -72,11 +72,11 @@ class MockWebTransportFilter : public WebTransportFilter {
               (override, noexcept));
   MOCK_METHOD(void, onDatagramCapsule, (DatagramCapsule), (override, noexcept));
   MOCK_METHOD(void,
-              onCloseWebTransportSessionCapsule,
+              onCloseWTSessionCapsule,
               (CloseWebTransportSessionCapsule),
               (override, noexcept));
   MOCK_METHOD(void,
-              onDrainWebTransportSessionCapsule,
+              onDrainWTSessionCapsule,
               (DrainWebTransportSessionCapsule),
               (override, noexcept));
   MOCK_METHOD(void,
@@ -168,9 +168,9 @@ class WebTransportFilterTest : public Test {
 TEST_F(WebTransportFilterTest, OnCloseWebTransportSessionCapsule) {
   // expect the capsule callback to be called and call through to original
   // implementation to test for onSessionEnd()
-  EXPECT_CALL(*filter_, onCloseWebTransportSessionCapsule(_))
+  EXPECT_CALL(*filter_, onCloseWTSessionCapsule(_))
       .WillOnce(Invoke([&](const CloseWebTransportSessionCapsule& capsule) {
-        filter_->WebTransportFilter::onCloseWebTransportSessionCapsule(capsule);
+        filter_->WebTransportFilter::onCloseWTSessionCapsule(capsule);
       }));
   EXPECT_CALL(*handler_, onSessionEnd(Optional<uint32_t>(WT_ERROR_CODE)));
 
@@ -198,12 +198,11 @@ TEST_F(WebTransportFilterTest, MultipleCapsulesInOneBody) {
   auto secondCapsule = createCloseSessionCapsule(WT_ERROR_CODE + 1);
   queue.append(std::move(secondCapsule));
 
-  EXPECT_CALL(*filter_, onCloseWebTransportSessionCapsule(_))
+  EXPECT_CALL(*filter_, onCloseWTSessionCapsule(_))
       .Times(2)
       .WillRepeatedly(
           Invoke([&](const CloseWebTransportSessionCapsule& capsule) {
-            filter_->WebTransportFilter::onCloseWebTransportSessionCapsule(
-                capsule);
+            filter_->WebTransportFilter::onCloseWTSessionCapsule(capsule);
           }));
 
   EXPECT_CALL(*handler_, onSessionEnd(Optional<uint32_t>(WT_ERROR_CODE)));

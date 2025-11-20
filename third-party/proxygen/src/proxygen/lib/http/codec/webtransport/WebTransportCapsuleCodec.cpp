@@ -105,12 +105,9 @@ WebTransportCapsuleCodec::parseCapsule(folly::io::Cursor& cursor) {
     }
     case folly::to_underlying(CapsuleType::WT_STREAMS_BLOCKED_BIDI): {
       auto res = parseWTStreamsBlocked(cursor, curCapsuleLength_);
-      if (res) {
-        if (callback_) {
-          callback_->onWTStreamsBlockedBidiCapsule(std::move(res.value()));
-        }
-      } else {
-        return folly::makeUnexpected(res.error());
+      ret_if_err(res);
+      if (callback_) {
+        callback_->onWTStreamsBlockedBidiCapsule(std::move(res.value()));
       }
       break;
     }
@@ -134,7 +131,7 @@ WebTransportCapsuleCodec::parseCapsule(folly::io::Cursor& cursor) {
       auto res = parseCloseWebTransportSession(cursor, curCapsuleLength_);
       ret_if_err(res);
       if (callback_) {
-        callback_->onCloseWebTransportSessionCapsule(std::move(res.value()));
+        callback_->onCloseWTSessionCapsule(std::move(res.value()));
       }
       break;
     }
@@ -142,7 +139,7 @@ WebTransportCapsuleCodec::parseCapsule(folly::io::Cursor& cursor) {
       auto res = parseDrainWebTransportSession(curCapsuleLength_);
       ret_if_err(res);
       if (callback_) {
-        callback_->onDrainWebTransportSessionCapsule(std::move(res.value()));
+        callback_->onDrainWTSessionCapsule(std::move(res.value()));
       }
       break;
     }

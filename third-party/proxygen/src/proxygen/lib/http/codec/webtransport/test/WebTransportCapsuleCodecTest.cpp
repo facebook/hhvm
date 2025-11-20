@@ -26,54 +26,63 @@ class WebTransportCapsuleCodecTest : public Test {
   class TestWebTransportCapsuleCodecCallback
       : public WebTransportCapsuleCodec::Callback {
    public:
-    MOCK_METHOD(void, onPaddingCapsule, (PaddingCapsule), (override));
+    MOCK_METHOD(void, onPaddingCapsule, (PaddingCapsule), (override, noexcept));
     MOCK_METHOD(void,
                 onWTResetStreamCapsule,
                 (WTResetStreamCapsule),
-                (override));
+                (override, noexcept));
     MOCK_METHOD(void,
                 onWTStopSendingCapsule,
                 (WTStopSendingCapsule),
-                (override));
-    MOCK_METHOD(void, onWTStreamCapsule, (WTStreamCapsule), (override));
-    MOCK_METHOD(void, onWTMaxDataCapsule, (WTMaxDataCapsule), (override));
+                (override, noexcept));
+    MOCK_METHOD(void,
+                onWTStreamCapsule,
+                (WTStreamCapsule),
+                (override, noexcept));
+    MOCK_METHOD(void,
+                onWTMaxDataCapsule,
+                (WTMaxDataCapsule),
+                (override, noexcept));
     MOCK_METHOD(void,
                 onWTMaxStreamDataCapsule,
                 (WTMaxStreamDataCapsule),
-                (override));
+                (override, noexcept));
     MOCK_METHOD(void,
                 onWTMaxStreamsBidiCapsule,
                 (WTMaxStreamsCapsule),
-                (override));
+                (override, noexcept));
     MOCK_METHOD(void,
                 onWTMaxStreamsUniCapsule,
                 (WTMaxStreamsCapsule),
-                (override));
+                (override, noexcept));
     MOCK_METHOD(void,
                 onWTDataBlockedCapsule,
                 (WTDataBlockedCapsule),
-                (override));
+                (override, noexcept));
     MOCK_METHOD(void,
                 onWTStreamDataBlockedCapsule,
                 (WTStreamDataBlockedCapsule),
-                (override));
+                (override, noexcept));
     MOCK_METHOD(void,
                 onWTStreamsBlockedBidiCapsule,
                 (WTStreamsBlockedCapsule),
-                (override));
+                (override, noexcept));
     MOCK_METHOD(void,
                 onWTStreamsBlockedUniCapsule,
                 (WTStreamsBlockedCapsule),
-                (override));
-    MOCK_METHOD(void, onDatagramCapsule, (DatagramCapsule), (override));
+                (override, noexcept));
     MOCK_METHOD(void,
-                onCloseWebTransportSessionCapsule,
+                onDatagramCapsule,
+                (DatagramCapsule),
+                (override, noexcept));
+    MOCK_METHOD(void,
+                onCloseWTSessionCapsule,
                 (CloseWebTransportSessionCapsule),
-                (override));
+                (override, noexcept));
     MOCK_METHOD(void,
-                onDrainWebTransportSessionCapsule,
+                onDrainWTSessionCapsule,
                 (DrainWebTransportSessionCapsule),
-                (override));
+                (override, noexcept));
     MOCK_METHOD(void,
                 onConnectionError,
                 (CapsuleCodec::ErrorCode),
@@ -492,7 +501,7 @@ TEST_F(WebTransportCapsuleCodecTest, H2OnCloseWebTransportSessionCapsule) {
   writeCloseWebTransportSession(queue_, capsule);
 
   auto buf = queue_.move();
-  EXPECT_CALL(callback_, onCloseWebTransportSessionCapsule(_))
+  EXPECT_CALL(callback_, onCloseWTSessionCapsule(_))
       .WillOnce(Invoke([&](const CloseWebTransportSessionCapsule& capsule) {
         EXPECT_EQ(capsule.applicationErrorCode, 500);
         EXPECT_EQ(capsule.applicationErrorMessage, "BAD!");
@@ -507,7 +516,7 @@ TEST_F(WebTransportCapsuleCodecTest, H3OnCloseWebTransportSessionCapsule) {
   writeCloseWebTransportSession(queue_, capsule);
 
   auto buf = queue_.move();
-  EXPECT_CALL(callback_, onCloseWebTransportSessionCapsule(_))
+  EXPECT_CALL(callback_, onCloseWTSessionCapsule(_))
       .WillOnce(Invoke([&](const CloseWebTransportSessionCapsule& capsule) {
         EXPECT_EQ(capsule.applicationErrorCode, 500);
         EXPECT_EQ(capsule.applicationErrorMessage, "BAD!");
@@ -535,7 +544,7 @@ TEST_F(WebTransportCapsuleCodecTest, H3OnCloseWebTransportSessionCapsuleError) {
 TEST_F(WebTransportCapsuleCodecTest, H2OnDrainWebTransportSessionCapsule) {
   writeDrainWebTransportSession(queue_);
   auto buf = queue_.move();
-  EXPECT_CALL(callback_, onDrainWebTransportSessionCapsule(_));
+  EXPECT_CALL(callback_, onDrainWTSessionCapsule(_));
   EXPECT_CALL(callback_, onConnectionError(_)).Times(0);
   h2_codec_->onIngress(std::move(buf), true);
 }
@@ -543,7 +552,7 @@ TEST_F(WebTransportCapsuleCodecTest, H2OnDrainWebTransportSessionCapsule) {
 TEST_F(WebTransportCapsuleCodecTest, H3OnDrainWebTransportSessionCapsule) {
   writeDrainWebTransportSession(queue_);
   auto buf = queue_.move();
-  EXPECT_CALL(callback_, onDrainWebTransportSessionCapsule(_));
+  EXPECT_CALL(callback_, onDrainWTSessionCapsule(_));
   EXPECT_CALL(callback_, onConnectionError(_)).Times(0);
   h3_codec_->onIngress(std::move(buf), true);
 }

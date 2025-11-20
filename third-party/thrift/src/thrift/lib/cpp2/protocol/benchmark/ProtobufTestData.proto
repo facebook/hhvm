@@ -1,0 +1,119 @@
+/*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package benchmark;
+
+message ProtobufTestDataSmall {
+  required int32 int_field_1 = 1;
+  required int64 long_field_1 = 2;
+  required string short_string_1 = 3;
+  repeated int32 int_list_1 = 4;
+  map<string, int32> string_map_1 = 5;
+  required bool bool_field_1 = 6;
+  required double double_field_1 = 7;
+}
+
+message ProtobufTestDataMedium {
+  required int32 int_field_1 = 1;
+  required int64 long_field_1 = 2;
+  required string short_string_1 = 3;
+  repeated int32 int_list_1 = 4;
+  map<string, int32> string_map_1 = 5;
+  required bool bool_field_1 = 6;
+  required double double_field_1 = 7;
+  required int32 int_field_2 = 8;
+  required int64 long_field_2 = 9;
+  required string short_string_2 = 10;
+  repeated int32 int_list_2 = 11;
+  map<string, int32> string_map_2 = 12;
+  required bool bool_field_2 = 13;
+  required double double_field_2 = 14;
+  required int32 int_field_3 = 15;
+  required int64 long_field_3 = 16;
+  required string short_string_3 = 17;
+  repeated int32 int_list_3 = 18;
+  map<string, int32> string_map_3 = 19;
+  required bool bool_field_3 = 20;
+  required double double_field_3 = 21;
+}
+
+message ProtobufTestDataLarge {
+  required int32 int_field_1 = 1;
+  required int64 long_field_1 = 2;
+  required string short_string_1 = 3;
+  repeated int32 int_list_1 = 4;
+  map<string, int32> string_map_1 = 5;
+  required bool bool_field_1 = 6;
+  required double double_field_1 = 7;
+  required int32 int_field_2 = 8;
+  required int64 long_field_2 = 9;
+  required string short_string_2 = 10;
+  repeated int32 int_list_2 = 11;
+  map<string, int32> string_map_2 = 12;
+  required bool bool_field_2 = 13;
+  required double double_field_2 = 14;
+  required int32 int_field_3 = 15;
+  required int64 long_field_3 = 16;
+  required string short_string_3 = 17;
+  repeated int32 int_list_3 = 18;
+  map<string, int32> string_map_3 = 19;
+  required bool bool_field_3 = 20;
+  required double double_field_3 = 21;
+  required int32 int_field_4 = 22;
+  required int64 long_field_4 = 23;
+  required string short_string_4 = 24;
+  repeated int32 int_list_4 = 25;
+  map<string, int32> string_map_4 = 26;
+  required bool bool_field_4 = 27;
+  required double double_field_4 = 28;
+  required int32 int_field_5 = 29;
+  required int64 long_field_5 = 30;
+  required string short_string_5 = 31;
+  repeated int32 int_list_5 = 32;
+  map<string, int32> string_map_5 = 33;
+  required bool bool_field_5 = 34;
+  required double double_field_5 = 35;
+  required int32 int_field_6 = 36;
+  required int64 long_field_6 = 37;
+  required string short_string_6 = 38;
+  repeated int32 int_list_6 = 39;
+  map<string, int32> string_map_6 = 40;
+  required bool bool_field_6 = 41;
+  required double double_field_6 = 42;
+  required int32 int_field_7 = 43;
+  required int64 long_field_7 = 44;
+  required string short_string_7 = 45;
+  repeated int32 int_list_7 = 46;
+  map<string, int32> string_map_7 = 47;
+  required bool bool_field_7 = 48;
+  required double double_field_7 = 49;
+  required int32 int_field_8 = 50;
+  required int64 long_field_8 = 51;
+  required string short_string_8 = 52;
+  repeated int32 int_list_8 = 53;
+  map<string, int32> string_map_8 = 54;
+  required bool bool_field_8 = 55;
+  required double double_field_8 = 56;
+  required int32 int_field_9 = 57;
+  required int64 long_field_9 = 58;
+  required string short_string_9 = 59;
+  repeated int32 int_list_9 = 60;
+  map<string, int32> string_map_9 = 61;
+  required bool bool_field_9 = 62;
+  required double double_field_9 = 63;
+}

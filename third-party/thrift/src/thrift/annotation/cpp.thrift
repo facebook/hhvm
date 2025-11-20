@@ -440,3 +440,21 @@ struct GenerateServiceMethodDecorator {}
  */
 @scope.Structured
 struct NonOrderable {}
+
+/**
+ * Declares a specialization of `std::hash` for the struct or type.
+ * This is equivalent to the unstructured `cpp.declare_hash` annotation.
+ * The generated code will include a forward declaration of the hash specialization in the std namespace.
+ */
+@scope.Structured
+@scope.Typedef
+struct DeclareHashSpecialization {}
+
+/**
+ * Declares a specialization of `std::equal_to` for the struct or type.
+ * This is equivalent to the unstructured `cpp.declare_equal_to` annotation.
+ * The generated code will include a forward declaration of the equal_to specialization in the std namespace.
+ */
+@scope.Structured
+@scope.Typedef
+struct DeclareEqualToSpecialization {}

@@ -731,6 +731,56 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 441
+      },
+      "DeclareHashSpecialization" : {
+        "name" : "DeclareHashSpecialization",
+        "structured_annotations": {
+          "scope.Structured" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "Structured",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
+          "scope.Typedef" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "Typedef",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
+        },
+        "docstring" : "Declares a specialization of `std::hash` for the struct or type.\nThis is equivalent to the unstructured `cpp.declare_hash` annotation.\nThe generated code will include a forward declaration of the hash specialization in the std namespace.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 449
+      },
+      "DeclareEqualToSpecialization" : {
+        "name" : "DeclareEqualToSpecialization",
+        "structured_annotations": {
+          "scope.Structured" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "Structured",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
+          "scope.Typedef" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "Typedef",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
+        },
+        "docstring" : "Declares a specialization of `std::equal_to` for the struct or type.\nThis is equivalent to the unstructured `cpp.declare_equal_to` annotation.\nThe generated code will include a forward declaration of the equal_to specialization in the std namespace.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 458
       }
   },
   "source_path" : "thrift/annotation/cpp",

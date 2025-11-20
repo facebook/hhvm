@@ -754,6 +754,50 @@
           "column" : 23
         }
       }
+    },
+    "DeclareHashSpecialization" : {
+      "lineno" : 449,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Structured" : {  },
+        "scope.Typedef" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 449,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 451,
+          "column" : 36
+        }
+      }
+    },
+    "DeclareEqualToSpecialization" : {
+      "lineno" : 458,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Structured" : {  },
+        "scope.Typedef" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 458,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 460,
+          "column" : 39
+        }
+      }
     }
   }
 }

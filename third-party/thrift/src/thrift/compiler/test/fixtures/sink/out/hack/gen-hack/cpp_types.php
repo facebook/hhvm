@@ -2217,3 +2217,143 @@ class NonOrderable implements \IThriftSyncStruct, \IThriftStructMetadata {
 
 }
 
+/**
+ * Declares a specialization of `std::hash` for the struct or type.
+ * This is equivalent to the unstructured `cpp.declare_hash` annotation.
+ * The generated code will include a forward declaration of the hash specialization in the std namespace.
+ *
+ * Original thrift struct:-
+ * DeclareHashSpecialization
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/cpp/DeclareHashSpecialization'))>>
+class DeclareHashSpecialization implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'DeclareHashSpecialization';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "cpp.DeclareHashSpecialization",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\Typedef' => \facebook\thrift\annotation\Typedef::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+/**
+ * Declares a specialization of `std::equal_to` for the struct or type.
+ * This is equivalent to the unstructured `cpp.declare_equal_to` annotation.
+ * The generated code will include a forward declaration of the equal_to specialization in the std namespace.
+ *
+ * Original thrift struct:-
+ * DeclareEqualToSpecialization
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/cpp/DeclareEqualToSpecialization'))>>
+class DeclareEqualToSpecialization implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'DeclareEqualToSpecialization';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "cpp.DeclareEqualToSpecialization",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\Typedef' => \facebook\thrift\annotation\Typedef::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+

@@ -879,14 +879,17 @@ class cpp_mstch_program : public mstch_program {
         program_->structs_and_unions().end(),
         [](const t_structured* strct) {
           return strct->has_unstructured_annotation(
-              {"cpp.declare_hash", "cpp2.declare_hash"});
+                     {"cpp.declare_hash", "cpp2.declare_hash"}) ||
+              strct->has_structured_annotation(kCppDeclareHashSpecialization);
         });
     bool cpp_declare_in_typedefs = std::any_of(
         program_->typedefs().begin(),
         program_->typedefs().end(),
         [](const auto* typedf) {
           return typedf->type()->has_unstructured_annotation(
-              {"cpp.declare_hash", "cpp2.declare_hash"});
+                     {"cpp.declare_hash", "cpp2.declare_hash"}) ||
+              typedf->type()->has_structured_annotation(
+                  kCppDeclareHashSpecialization);
         });
     return cpp_declare_in_structs || cpp_declare_in_typedefs;
   }
@@ -1547,11 +1550,15 @@ class cpp_mstch_type : public mstch_type {
   }
   mstch::node cpp_declare_hash() {
     return resolved_type_->has_unstructured_annotation(
-        {"cpp.declare_hash", "cpp2.declare_hash"});
+               {"cpp.declare_hash", "cpp2.declare_hash"}) ||
+        resolved_type_->has_structured_annotation(
+            kCppDeclareHashSpecialization);
   }
   mstch::node cpp_declare_equal_to() {
     return resolved_type_->has_unstructured_annotation(
-        {"cpp.declare_equal_to", "cpp2.declare_equal_to"});
+               {"cpp.declare_equal_to", "cpp2.declare_equal_to"}) ||
+        resolved_type_->has_structured_annotation(
+            kCppDeclareEqualToSpecialization);
   }
   mstch::node cpp_use_allocator() {
     return !!t_typedef::get_first_unstructured_annotation_or_null(
@@ -1759,11 +1766,13 @@ class cpp_mstch_struct : public mstch_struct {
   }
   mstch::node cpp_declare_hash() {
     return struct_->has_unstructured_annotation(
-        {"cpp.declare_hash", "cpp2.declare_hash"});
+               {"cpp.declare_hash", "cpp2.declare_hash"}) ||
+        struct_->has_structured_annotation(kCppDeclareHashSpecialization);
   }
   mstch::node cpp_declare_equal_to() {
     return struct_->has_unstructured_annotation(
-        {"cpp.declare_equal_to", "cpp2.declare_equal_to"});
+               {"cpp.declare_equal_to", "cpp2.declare_equal_to"}) ||
+        struct_->has_structured_annotation(kCppDeclareEqualToSpecialization);
   }
   mstch::node cpp_noncopyable() {
     if (struct_->has_unstructured_annotation(

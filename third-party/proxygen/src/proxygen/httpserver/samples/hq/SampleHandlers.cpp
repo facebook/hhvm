@@ -396,16 +396,20 @@ void DeviousBatonHandler::readHandler(
     folly::Try<WebTransport::StreamData> streamData) {
   if (streamData.hasException()) {
     VLOG(4) << "read error=" << streamData.exception().what();
-  } else {
-    VLOG(4) << "read data id=" << id;
-    devious_->onStreamData(
-        id, streams_[id], std::move(streamData->data), streamData->fin);
-    if (!streamData->fin) {
-      readHandle->awaitNextRead(
-          evb_, [this](auto readHandle, auto id, auto streamData) {
-            readHandler(readHandle, id, std::move(streamData));
-          });
-    }
+    return;
+  }
+
+  VLOG(4) << "read data id=" << id;
+
+  auto cancelToken = readHandle->getCancelToken();
+  devious_->onStreamData(
+      id, streams_[id], std::move(streamData->data), streamData->fin);
+  bool done = streamData->fin || cancelToken.isCancellationRequested();
+  if (!done) {
+    readHandle->awaitNextRead(
+        evb_, [this](auto readHandle, auto id, auto streamData) {
+          readHandler(readHandle, id, std::move(streamData));
+        });
   }
 }
 
@@ -432,6 +436,7 @@ void DeviousBatonHandler::onWebTransportSessionClose(
     folly::Optional<uint32_t> error) noexcept {
   VLOG(4) << "Session Close error="
           << (error ? folly::to<std::string>(*error) : std::string("none"));
+  devious_.reset();
 }
 
 void DeviousBatonHandler::onDatagram(

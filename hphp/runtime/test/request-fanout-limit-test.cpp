@@ -1,5 +1,7 @@
 #include <folly/portability/GTest.h>
 
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/request-fanout-limit.h"
 #include "hphp/runtime/base/request-id.h"
 
@@ -69,8 +71,12 @@ TEST_F(RequestFanoutLimitTest, HighConcurrency) {
   for (std::thread& t : threads) {
     t = std::thread(
       [limit, root_req_id] {
+        hphp_thread_init();
+        rds::local::init();
         limit->increment(root_req_id);
         limit->decrement(root_req_id);
+        rds::local::fini();
+        hphp_thread_exit();        
       }
     );
   }

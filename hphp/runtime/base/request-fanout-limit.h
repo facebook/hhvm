@@ -39,16 +39,18 @@ namespace HPHP {
  */
 struct RequestFanoutLimit {
 public:
-  struct RequestFanoutCount {
+  struct RequestFanoutData {
     std::atomic<int64_t> currentCount;
     std::atomic<int64_t> maxCount;
-    RequestFanoutCount(int64_t current, int64_t max)
-        : currentCount(current), maxCount(max) {}
+    std::string rootReqScriptFilename{""};
+
+    RequestFanoutData(int64_t current, int64_t max)
+      : currentCount(current), maxCount(max){}
     
     int64_t increment();
     int64_t decrement();
   };
-  using RootRequestIDToThreadCnt = folly_concurrent_hash_map_simd<int64_t, std::shared_ptr<RequestFanoutCount>>;
+  using RootRequestIDToThreadCnt = folly_concurrent_hash_map_simd<int64_t, std::shared_ptr<RequestFanoutData>>;
 
   /**
    * Constructor
@@ -65,7 +67,7 @@ public:
   /**
    * Increment the thread count for a given request ID
    * If the given root request ID is not present in the map,
-   * a new entry will be created with value 1
+   * a new entry will be created
    * @param id The request ID to increment count for
    */
   void increment(const RequestId& id);
@@ -73,9 +75,11 @@ public:
   /**
    * Decrement the thread count for a given request ID
    * If count reaches 0, the entry will be removed from the map
-   * @param id The request ID to decrement count for
+   * @param id The root request ID to decrement count for
    */
   void decrement(const RequestId& id);
+
+  void setScriptFilename(const RequestId id, std::string scriptFilename);
 
   /**
    * Get the current thread count for a given request ID

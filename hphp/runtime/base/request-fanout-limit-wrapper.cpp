@@ -35,5 +35,10 @@ namespace HPHP {
     }
   }
 
+  void requestFanoutLimitSetScriptFilename(RequestId rootReqId, std::string scriptFilename) {
+    if (s_xboxRequestFanoutLimit) {
+      s_xboxRequestFanoutLimit->setScriptFilename(rootReqId, scriptFilename);
+    }
+  }
 
 } // namespace HPHP

@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/server/server-note.h"
 #include "hphp/runtime/base/request-fanout-limit.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/util/logger.h"
@@ -23,7 +24,7 @@ namespace HPHP {
 
 static std::atomic<int64_t> s_maxConcurrentFanoutCount = 0;
 
-int64_t RequestFanoutLimit::RequestFanoutCount::increment() {
+int64_t RequestFanoutLimit::RequestFanoutData::increment() {
   /**
   * This operation is safe from operating on abandoned 
   * counter erased by other racing xbox threads, because:
@@ -59,7 +60,7 @@ int64_t RequestFanoutLimit::RequestFanoutCount::increment() {
   return countBeforeIncrement;
 }
 
-int64_t RequestFanoutLimit::RequestFanoutCount::decrement() {
+int64_t RequestFanoutLimit::RequestFanoutData::decrement() {
   return currentCount.fetch_sub(1, std::memory_order_acq_rel);
 }
 
@@ -87,7 +88,7 @@ void RequestFanoutLimit::increment(const RequestId& id) {
     // (i.e. xbox) threads. 
     auto insertResult = m_map.insert(
       id.id(), 
-      std::make_shared<RequestFanoutLimit::RequestFanoutCount>(2, 2)
+      std::make_shared<RequestFanoutLimit::RequestFanoutData>(2, 2)
     );
   } else {
     auto counter = it->second.get();
@@ -140,7 +141,9 @@ void RequestFanoutLimit::decrement(const RequestId& id) {
       if (Cfg::Server::EnableRequestFanoutLogging && StructuredLog::enabled()) {
         StructuredLogEntry entry;
         entry.setInt("request_max_concurrent_fanout_count", currReqMax);
-        // TODO: Log root request script filename
+        if (!counter->rootReqScriptFilename.empty()) {
+          entry.setStr("script_filename", counter->rootReqScriptFilename);
+        }
         StructuredLog::log("hhvm_request_fanout", entry);
       }
     }
@@ -148,6 +151,26 @@ void RequestFanoutLimit::decrement(const RequestId& id) {
     // Erase the entry
     m_map.erase(id.id());
     Logger::Verbose("All children requests of %ld completed", id.id());
+  }
+}
+
+void RequestFanoutLimit::setScriptFilename(const RequestId id, std::string scriptFilename) {
+  if (id.unallocated()) {
+    return; 
+  }
+
+  auto it = m_map.find(id.id());
+  if (it == m_map.end()) {
+    // This check is safe and necessary to handle the cases of cli-server also
+    // calling RI.onSessionExit() during SCOPE_EXIT. 
+    return;
+  }
+
+  auto counter = it->second.get();
+  assertx(counter);
+
+  if (!scriptFilename.empty()) {
+    counter->rootReqScriptFilename = scriptFilename;
   }
 }
 

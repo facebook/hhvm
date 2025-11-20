@@ -62,6 +62,7 @@
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/server/cli-server.h"
+#include "hphp/runtime/server/server-note.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/server/thread-hint.h"
 #include "hphp/runtime/server/source-root-info.h"
@@ -1465,8 +1466,15 @@ void ExecutionContext::requestInit() {
 
 void ExecutionContext::requestExit() {
   RequestInfo *ti = RequestInfo::s_requestInfo.getNoCheck();
-  if (ti->getRootRequestId() != ti->m_id || m_xboxTasksStarted > 0) {
-    requestFanoutLimitDecrement(ti->getRootRequestId());
+  RequestId rootReqId = ti->getRootRequestId();
+  if (rootReqId != ti->m_id || m_xboxTasksStarted > 0) {
+    // Set the script filename of request group when root request 
+    // is about to finish. It is important that setScriptFilename
+    // is called before decrement. 
+    if (rootReqId == ti->m_id) {
+      requestFanoutLimitSetScriptFilename(rootReqId, ServerNote::Get("DYNO_SCRIPT_FILENAME").c_str());
+    }
+    requestFanoutLimitDecrement(rootReqId);
   }
 
   apcExtension::purgeDeferred(std::move(m_apcDeferredExpire));

@@ -12,4 +12,6 @@ void requestFanoutLimitInit(int fanoutLimit, int rootReqThreadCount);
 void requestFanoutLimitIncrement(RequestId rootReqId);
 void requestFanoutLimitDecrement(RequestId rootReqId);
 
+void requestFanoutLimitSetScriptFilename(RequestId rootReqId, std::string scriptFilename);
+
 } // namespace HPHP

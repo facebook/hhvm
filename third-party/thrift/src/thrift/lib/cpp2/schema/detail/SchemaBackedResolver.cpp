@@ -19,6 +19,8 @@
 #include <thrift/lib/cpp2/schema/SyntaxGraph.h>
 #include <thrift/lib/cpp2/schema/detail/Merge.h>
 
+#include <folly/String.h>
+
 #ifdef THRIFT_SCHEMA_AVAILABLE
 
 namespace apache::thrift::syntax_graph::detail {
@@ -258,8 +260,9 @@ class SchemaIndex {
     }
     for (const auto& keyRef : unresolved) {
       if (!definitionsByKey_.contains(keyRef)) {
-        folly::throw_exception<InvalidSyntaxGraphError>(
-            fmt::format("Definition {} cannot be resolved.", keyRef.get()));
+        folly::throw_exception<InvalidSyntaxGraphError>(fmt::format(
+            "Definition \"{}\" cannot be resolved.",
+            folly::cEscape<std::string>(keyRef.get())));
       }
     }
     fromFullyResolvedResolver_ = true;

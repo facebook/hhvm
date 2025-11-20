@@ -16,15 +16,13 @@
 
 #pragma once
 
-#include <folly/CPortability.h>
-
 namespace apache::thrift::conformance {
 class AnyRegistry;
 namespace detail {
 
 // NOTE: Non-const access is not thread-safe. All non-const access should happen
 // at static initalization time.
-FOLLY_EXPORT AnyRegistry& getGeneratedAnyRegistry();
+AnyRegistry& getGeneratedAnyRegistry();
 
 } // namespace detail
 } // namespace apache::thrift::conformance

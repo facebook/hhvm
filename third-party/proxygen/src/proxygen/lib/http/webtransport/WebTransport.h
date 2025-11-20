@@ -289,6 +289,7 @@ class WebTransportHandler {
   virtual void onNewBidiStream(WebTransport::BidiStreamHandle bidiHandle) = 0;
   virtual void onDatagram(std::unique_ptr<folly::IOBuf> datagram) = 0;
   virtual void onSessionEnd(folly::Optional<uint32_t> error) = 0;
+  virtual void onSessionDrain() = 0;
 };
 
 } // namespace proxygen

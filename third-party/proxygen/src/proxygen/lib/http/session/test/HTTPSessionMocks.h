@@ -239,6 +239,8 @@ class MockHTTPHandler
     onWebTransportSessionClose(error);
   }
 
+  MOCK_METHOD(void, onSessionDrain, (), (noexcept, override));
+
   void onChunkHeader(size_t length) noexcept override {
     _onChunkHeader(length);
   }

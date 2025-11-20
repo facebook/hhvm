@@ -379,6 +379,9 @@ class WebTransportFilter
   void onDrainWebTransportSessionCapsule(
       DrainWebTransportSessionCapsule /*capsule*/) override {
     XLOG(DBG1) << __func__;
+    if (handler_) {
+      handler_->onSessionDrain();
+    }
   }
 
  private:

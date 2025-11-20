@@ -2530,6 +2530,27 @@ TEST_P(HQUpstreamSessionTestWebTransport, CloseSessionCapsule) {
   hqSession_->dropConnection();
 }
 
+TEST_P(HQUpstreamSessionTestWebTransport, DrainSessionCapsule) {
+  InSequence enforceOrder;
+
+  folly::IOBufQueue capsuleQueue;
+  auto writeResult = writeDrainWebTransportSession(capsuleQueue);
+  EXPECT_TRUE(writeResult.has_value());
+  auto capsuleData = capsuleQueue.move();
+  EXPECT_GT(capsuleData->computeChainDataLength(), 0);
+
+  EXPECT_CALL(*handler_, onSessionDrain()).Times(1);
+  handler_->expectEOM();
+  handler_->expectError();
+  handler_->expectDetachTransaction();
+
+  sendPartialBody(sessionId_, std::move(capsuleData), true);
+  flushAndLoop();
+
+  HQSession::DestructorGuard dg(hqSession_);
+  hqSession_->dropConnection();
+}
+
 TEST_P(HQUpstreamSessionTestWebTransport, CloseSessionCapsuleWithStreams) {
   InSequence enforceOrder;
 

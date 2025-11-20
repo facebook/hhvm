@@ -141,6 +141,7 @@ class MockWebTransportHandler : public WebTransportHandler {
               onSessionEnd,
               (folly::Optional<uint32_t> error),
               (override));
+  MOCK_METHOD(void, onSessionDrain, (), (override));
 };
 
 } // namespace proxygen::test

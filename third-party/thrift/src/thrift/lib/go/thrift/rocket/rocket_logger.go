@@ -44,6 +44,10 @@ func (log rsocketLogger) Errorf(format string, args ...any) {
 
 // SetRsocketLogger sets the logger for rsocket-go.
 func SetRsocketLogger(log func(format string, args ...any)) {
-	logger.SetLevel(logger.LevelError)
 	logger.SetLogger(rsocketLogger(log))
+}
+
+func init() {
+	// Set the default logger to error level.
+	logger.SetLevel(logger.LevelError)
 }

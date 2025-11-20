@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/rsocket/rsocket-go/logger"
 	"github.com/stretchr/testify/require"
 )
 
@@ -39,4 +40,11 @@ func TestRocketLogger(t *testing.T) {
 	logger.Errorf("%s", "error\n")
 
 	require.Equal(t, "debug\ninfo\nwarn\nerror\n", buffer.String())
+}
+
+func TestRsocketLogLevel(t *testing.T) {
+	// Ensure that the default log level is Error.
+	// This prevents noisy/verbose logs.
+	level := logger.GetLevel()
+	require.Equal(t, logger.LevelError, level)
 }

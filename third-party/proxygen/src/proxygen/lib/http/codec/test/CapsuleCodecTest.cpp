@@ -33,7 +33,7 @@ class TestCapsuleCodec : public CapsuleCodec {
       : CapsuleCodec(callback) {
   }
 
-  bool canParseCapsule(uint64_t capsuleType) override {
+  bool canParseCapsule(uint64_t capsuleType) noexcept override {
     return capsuleType == 0x01;
   }
 

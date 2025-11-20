@@ -55,7 +55,7 @@ class WebTransportCapsuleCodec : public CapsuleCodec {
   }
 
  private:
-  bool canParseCapsule(uint64_t capsuleType) override {
+  bool canParseCapsule(uint64_t capsuleType) noexcept override {
     switch (capsuleType) {
       // Common H2 and H3 capsule types
       case folly::to_underlying(CapsuleType::WT_MAX_DATA):

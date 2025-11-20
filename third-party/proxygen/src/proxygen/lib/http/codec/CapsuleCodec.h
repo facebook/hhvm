@@ -45,7 +45,7 @@ class CapsuleCodec {
   }
 
  protected:
-  virtual bool canParseCapsule(uint64_t /*capsuleType*/) {
+  virtual bool canParseCapsule(uint64_t /*capsuleType*/) noexcept {
     return false;
   }
 

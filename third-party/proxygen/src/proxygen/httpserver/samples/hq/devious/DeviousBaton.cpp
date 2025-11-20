@@ -245,11 +245,11 @@ void DeviousBaton::onBatonFinished(WhoFinished who, bool reset) {
   if (who == WhoFinished::NO_ONE) {
     return;
   }
+  activeBatons_--;
   if (activeBatons_ == 0) {
     closeSession(uint32_t(BatonSessionError::BRUH));
     return;
   }
-  activeBatons_--;
   if (reset) {
     resetBatons_++;
   } else {

@@ -299,7 +299,7 @@ class WebTransportImpl : public WebTransport {
     FCState dataAvailable(std::unique_ptr<folly::IOBuf> data, bool eof);
     void deliverReadError(const folly::exception_wrapper& ex);
     [[nodiscard]] bool open() const {
-      return !eof_ && !error_;
+      return !eof_ && !ex_;
     }
 
     // quic::StreamReadCallback overrides
@@ -311,7 +311,6 @@ class WebTransportImpl : public WebTransport {
     folly::Promise<WebTransport::StreamData> readPromise_;
     folly::IOBufQueue buf_{folly::IOBufQueue::cacheChainLength()};
     bool eof_{false};
-    folly::exception_wrapper error_;
   };
 
  private:

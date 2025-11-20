@@ -371,8 +371,8 @@ folly::SemiFuture<StreamData>
 WebTransportImpl::StreamReadHandle::readStreamData() {
   VLOG(4) << __func__;
   CHECK(!readPromise_.valid()) << "One read at a time";
-  if (error_) {
-    auto ex = std::move(error_);
+  if (ex_) {
+    auto ex = ex_;
     impl_.closeIngressStream(getID());
     return folly::makeSemiFuture<StreamData>(std::move(ex));
   } else if (buf_.empty() && !eof_) {
@@ -493,13 +493,12 @@ void WebTransportImpl::StreamReadHandle::readError(
 
 void WebTransportImpl::StreamReadHandle::deliverReadError(
     const folly::exception_wrapper& ex) {
+  ex_ = ex;
   cs_.requestCancellation();
   if (readPromise_.valid()) {
     readPromise_.setException(ex);
     readPromise_ = emptyReadPromise();
     impl_.closeIngressStream(getID());
-  } else {
-    error_ = ex;
   }
 }
 

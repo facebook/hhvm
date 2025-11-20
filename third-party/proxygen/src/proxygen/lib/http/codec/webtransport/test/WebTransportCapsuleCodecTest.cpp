@@ -74,7 +74,10 @@ class WebTransportCapsuleCodecTest : public Test {
                 onDrainWebTransportSessionCapsule,
                 (DrainWebTransportSessionCapsule),
                 (override));
-    MOCK_METHOD(void, onConnectionError, (CapsuleCodec::ErrorCode), (override));
+    MOCK_METHOD(void,
+                onConnectionError,
+                (CapsuleCodec::ErrorCode),
+                (override, noexcept));
   };
 
   // Simulate PARSE_UNDERFLOW by modifying buf to signify 8-byte varint. For all

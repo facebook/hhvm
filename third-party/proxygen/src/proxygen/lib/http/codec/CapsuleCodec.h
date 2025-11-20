@@ -23,12 +23,12 @@ class CapsuleCodec {
 
   class Callback {
    public:
-    virtual ~Callback() = default;
+    virtual ~Callback() noexcept = default;
 
     virtual void onCapsule(uint64_t /*capsuleType*/,
-                           uint64_t /*capsuleLength*/) {
+                           uint64_t /*capsuleLength*/) noexcept {
     }
-    virtual void onConnectionError(ErrorCode error) = 0;
+    virtual void onConnectionError(ErrorCode error) noexcept = 0;
   };
 
   explicit CapsuleCodec(Callback* callback = nullptr)

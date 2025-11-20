@@ -28,46 +28,61 @@ class MockWebTransportFilter : public WebTransportFilter {
       : WebTransportFilter(txn, version) {
   }
 
-  MOCK_METHOD(void, onPaddingCapsule, (PaddingCapsule), (override));
-  MOCK_METHOD(void, onWTResetStreamCapsule, (WTResetStreamCapsule), (override));
-  MOCK_METHOD(void, onWTStopSendingCapsule, (WTStopSendingCapsule), (override));
-  MOCK_METHOD(void, onWTStreamCapsule, (WTStreamCapsule), (override));
-  MOCK_METHOD(void, onWTMaxDataCapsule, (WTMaxDataCapsule), (override));
+  MOCK_METHOD(void, onPaddingCapsule, (PaddingCapsule), (override, noexcept));
+  MOCK_METHOD(void,
+              onWTResetStreamCapsule,
+              (WTResetStreamCapsule),
+              (override, noexcept));
+  MOCK_METHOD(void,
+              onWTStopSendingCapsule,
+              (WTStopSendingCapsule),
+              (override, noexcept));
+  MOCK_METHOD(void, onWTStreamCapsule, (WTStreamCapsule), (override, noexcept));
+  MOCK_METHOD(void,
+              onWTMaxDataCapsule,
+              (WTMaxDataCapsule),
+              (override, noexcept));
   MOCK_METHOD(void,
               onWTMaxStreamDataCapsule,
               (WTMaxStreamDataCapsule),
-              (override));
+              (override, noexcept));
   MOCK_METHOD(void,
               onWTMaxStreamsBidiCapsule,
               (WTMaxStreamsCapsule),
-              (override));
+              (override, noexcept));
   MOCK_METHOD(void,
               onWTMaxStreamsUniCapsule,
               (WTMaxStreamsCapsule),
-              (override));
-  MOCK_METHOD(void, onWTDataBlockedCapsule, (WTDataBlockedCapsule), (override));
+              (override, noexcept));
+  MOCK_METHOD(void,
+              onWTDataBlockedCapsule,
+              (WTDataBlockedCapsule),
+              (override, noexcept));
   MOCK_METHOD(void,
               onWTStreamDataBlockedCapsule,
               (WTStreamDataBlockedCapsule),
-              (override));
+              (override, noexcept));
   MOCK_METHOD(void,
               onWTStreamsBlockedBidiCapsule,
               (WTStreamsBlockedCapsule),
-              (override));
+              (override, noexcept));
   MOCK_METHOD(void,
               onWTStreamsBlockedUniCapsule,
               (WTStreamsBlockedCapsule),
-              (override));
-  MOCK_METHOD(void, onDatagramCapsule, (DatagramCapsule), (override));
+              (override, noexcept));
+  MOCK_METHOD(void, onDatagramCapsule, (DatagramCapsule), (override, noexcept));
   MOCK_METHOD(void,
               onCloseWebTransportSessionCapsule,
               (CloseWebTransportSessionCapsule),
-              (override));
+              (override, noexcept));
   MOCK_METHOD(void,
               onDrainWebTransportSessionCapsule,
               (DrainWebTransportSessionCapsule),
-              (override));
-  MOCK_METHOD(void, onConnectionError, (CapsuleCodec::ErrorCode), (override));
+              (override, noexcept));
+  MOCK_METHOD(void,
+              onConnectionError,
+              (CapsuleCodec::ErrorCode),
+              (override, noexcept));
 
   MOCK_METHOD((folly::Expected<HTTPCodec::StreamID, WebTransport::ErrorCode>),
               newWebTransportBidiStream,

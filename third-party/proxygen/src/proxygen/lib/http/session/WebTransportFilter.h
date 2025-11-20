@@ -302,7 +302,7 @@ class WebTransportFilter
     return txn_->getPeerAddress();
   }
 
-  void onConnectionError(CapsuleCodec::ErrorCode error) override {
+  void onConnectionError(CapsuleCodec::ErrorCode error) noexcept override {
     XLOG(DBG1) << __func__ << " error=" << static_cast<int>(error);
   }
   void onPaddingCapsule(PaddingCapsule /*capsule*/) override {

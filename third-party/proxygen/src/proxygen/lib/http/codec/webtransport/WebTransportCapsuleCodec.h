@@ -19,7 +19,7 @@ class WebTransportCapsuleCodec : public CapsuleCodec {
  public:
   class Callback : public CapsuleCodec::Callback {
    public:
-    ~Callback() override = default;
+    ~Callback() noexcept override = default;
 
     virtual void onPaddingCapsule(PaddingCapsule capsule) = 0;
     virtual void onWTResetStreamCapsule(WTResetStreamCapsule capsule) = 0;

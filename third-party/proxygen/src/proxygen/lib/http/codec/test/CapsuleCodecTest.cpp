@@ -19,8 +19,9 @@ using namespace testing;
 
 class TestCapsuleCodecCallback : public CapsuleCodec::Callback {
  public:
-  MOCK_METHOD(void, onCapsule, (uint64_t, uint64_t)); // parses type + length
-  MOCK_METHOD(void, onConnectionError, (CapsuleCodec::ErrorCode));
+  MOCK_METHOD(void, onCapsule, (uint64_t, uint64_t), (noexcept)); // parses type
+                                                                  // + length
+  MOCK_METHOD(void, onConnectionError, (CapsuleCodec::ErrorCode), (noexcept));
   MOCK_METHOD(void,
               onStringCapsule,
               (uint64_t, uint64_t, std::string)); // parses payload

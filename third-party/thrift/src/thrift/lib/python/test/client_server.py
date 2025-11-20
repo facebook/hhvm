@@ -234,6 +234,7 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
             async with get_client(TestingService, host=ip, port=port) as client:
                 self.assertEqual(True, await client.renamed_func(True))
 
+    @unittest.skip("Test is flaky and uses time.sleep() which blocks event loop")
     async def test_queue_timeout(self) -> None:
         """
         This tests whether queue timeout functions properly.

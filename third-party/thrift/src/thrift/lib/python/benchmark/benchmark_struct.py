@@ -331,6 +331,54 @@ from thrift.python.mutable_serializer import deserialize, serialize
 }
 
 
+SERIALIZER_IMPORT_JSON = {
+    "py-deprecated": """
+from thrift.util.Serializer import deserialize as d, serialize as s
+from thrift.protocol.TJSONProtocol import TJSONProtocolFactory
+
+def serialize(inst):
+    return s(
+        TJSONProtocolFactory(),
+        inst,
+    )
+
+def deserialize(klass, bytes):
+    return d(
+        TJSONProtocolFactory(),
+        bytes,
+        klass()
+    )
+""",
+    "py3": """
+from thrift.py3.serializer import deserialize as d, serialize as s, Protocol
+
+def serialize(inst):
+    return s(inst, protocol=Protocol.JSON)
+
+def deserialize(klass, bytes):
+    return d(klass, bytes, protocol=Protocol.JSON)
+""",
+    "python": """
+from thrift.python.serializer import deserialize as d, serialize as s, Protocol
+
+def serialize(inst):
+    return s(inst, protocol=Protocol.JSON)
+
+def deserialize(klass, bytes):
+    return d(klass, bytes, protocol=Protocol.JSON)
+""",
+    "mutable-python": """
+from thrift.python.mutable_serializer import deserialize as d, serialize as s, Protocol
+
+def serialize(inst):
+    return s(inst, protocol=Protocol.JSON)
+
+def deserialize(klass, bytes):
+    return d(klass, bytes, protocol=Protocol.JSON)
+""",
+}
+
+
 def get_serialize_setup(flavor: str) -> str:
     val_list = list(range(100))
     val_set = set(range(100))
@@ -354,7 +402,33 @@ def get_deserialize_setup(flavor: str) -> str:
     return f"{get_serialize_setup(flavor)}\nserialized = serialize(inst)"
 
 
-def benchmark_serializer_impl(get_serialize_setup: Callable[[str], str]) -> None:
+def get_serialize_setup_json(flavor: str) -> str:
+    val_list = list(range(100))
+    val_set = set(range(100))
+    init_statement = INIT_STATEMENT_MyStruct.format(
+        val_list=val_list, val_set=val_set, val_map={}
+    )
+    return f"{get_import(flavor)}\n{init_statement}\n{SERIALIZER_IMPORT_JSON[flavor]}"
+
+
+def get_serialize_str_setup_json(flavor: str) -> str:
+    str_list = [f"str_{i}" for i in range(100)]
+    str_map = {f"k_{i}": f"v_{i}" for i in range(100)}
+    init_statement = INIT_STATEMENT_MyStruct_str.format(
+        str_list=str_list,
+        str_map=str_map,
+    )
+    return f"{get_import(flavor)}\n{init_statement}\n{SERIALIZER_IMPORT_JSON[flavor]}"
+
+
+def get_deserialize_setup_json(flavor: str) -> str:
+    return f"{get_serialize_setup_json(flavor)}\nserialized = serialize(inst)"
+
+
+def benchmark_serializer_impl(
+    get_serialize_setup: Callable[[str], str],
+    get_deserialize_setup: Callable[[str], str],
+) -> None:
     def benchmark_serialize(flavor: str) -> str:
         timer = timeit.Timer(
             setup=get_serialize_setup(flavor),
@@ -533,12 +607,22 @@ def container_benchmark() -> None:
 
 @click.command()
 def serializer_benchmark() -> None:
-    benchmark_serializer_impl(get_serialize_setup)
+    benchmark_serializer_impl(get_serialize_setup, get_deserialize_setup)
 
 
 @click.command()
 def serializer_string_benchmark() -> None:
-    benchmark_serializer_impl(get_serialize_str_setup)
+    benchmark_serializer_impl(get_serialize_str_setup, get_deserialize_setup)
+
+
+@click.command()
+def serializer_json_benchmark() -> None:
+    benchmark_serializer_impl(get_serialize_setup_json, get_deserialize_setup_json)
+
+
+@click.command()
+def serializer_string_json_benchmark() -> None:
+    benchmark_serializer_impl(get_serialize_str_setup_json, get_deserialize_setup_json)
 
 
 @click.command()
@@ -569,6 +653,8 @@ def main() -> None:
     cli.add_command(container_benchmark)
     cli.add_command(serializer_benchmark)
     cli.add_command(serializer_string_benchmark)
+    cli.add_command(serializer_json_benchmark)
+    cli.add_command(serializer_string_json_benchmark)
     cli.add_command(comparison_benchmark)
     cli()
 

@@ -65,6 +65,16 @@ PythonAsyncProcessorFactory::semifuture_onStartServing() {
 
 folly::SemiFuture<folly::Unit>
 PythonAsyncProcessorFactory::semifuture_onStopRequested() {
+#ifdef Py_GIL_DISABLED
+  // In free-threaded Python, AsyncioExecutor::drop() can be called before the
+  // PythonAsyncProcessorFactory dtor, resulting in UB. This is very likely not
+  // real/complete fix but rather workaround to pass test_threaded_destruction
+  // test in test/server.py and marks the issue. Since it is not clear if this
+  // should apply to GIL builds, only enable this for free-threaded builds with
+  // the Py_GIL_DISABLED macro.
+  executor = folly::Executor::KeepAlive<>{};
+#endif
+
   return callLifecycle(LifecycleFunc::ON_STOP_REQUESTED);
 }
 

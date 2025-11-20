@@ -7,7 +7,7 @@ error: Typing[4472] Cannot access a generic defined in package pkg2 from package
 cross_package_generics.php--bar.php:8:28
     6 | function bar<T>(): void {}
     7 | 
-[1] 8 | class Bar1 implements IBar<TFoo> {} // error when package_v2_allow_all_generics_violations is turned off
+[1] 8 | class Bar1 implements IBar<TFoo> {} // error when package_allow_all_generics_violations is turned off
     9 | class Bar2 implements IFoo<TBar> {} // error
    10 | class Bar3<T as TFoo> {} // ok
 
@@ -34,7 +34,7 @@ error: Typing[4472] Cannot access a symbol defined in package pkg2 from package 
 
 cross_package_generics.php--bar.php:9:23
     7 | 
-    8 | class Bar1 implements IBar<TFoo> {} // error when package_v2_allow_all_generics_violations is turned off
+    8 | class Bar1 implements IBar<TFoo> {} // error when package_allow_all_generics_violations is turned off
 [1] 9 | class Bar2 implements IFoo<TBar> {} // error
    10 | class Bar3<T as TFoo> {} // ok
    11 | class Bar4<T as Foo> {} // ok
@@ -62,7 +62,7 @@ error: Typing[4472] Cannot access a generic defined in package pkg2 from package
 
 cross_package_generics.php--bar.php:15:18
     13 | function test(mixed $x): void {
-    14 |     // both error when package_v2_allow_all_generics_violations is turned off
+    14 |     // both error when package_allow_all_generics_violations is turned off
 [1] 15 |     $_ = new Bar<TFoo>();
     16 |     bar<TFoo>();
     17 | }
@@ -89,7 +89,7 @@ error: Typing[4472] Cannot access a generic defined in package pkg2 from package
 -> And package pkg1 does not include package pkg2 [4]
 
 cross_package_generics.php--bar.php:16:9
-    14 |     // both error when package_v2_allow_all_generics_violations is turned off
+    14 |     // both error when package_allow_all_generics_violations is turned off
     15 |     $_ = new Bar<TFoo>();
 [1] 16 |     bar<TFoo>();
     17 | }

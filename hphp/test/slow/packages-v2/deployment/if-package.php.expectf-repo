@@ -1,4 +1,0 @@
-Cannot see softprod
-
-Warning: File %s/packages-v2/deployment/softprod/quz.inc.php is soft-deployed, but its unit was merged in %s/packages-v2/deployment/if-package.php on line 10
-I am in softprod

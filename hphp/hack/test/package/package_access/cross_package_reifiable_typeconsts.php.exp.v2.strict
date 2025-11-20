@@ -7,8 +7,8 @@ error: Typing[4472] Cannot access a type constant defined in package pkg2 from p
 cross_package_reifiable_typeconsts.php--foo.php:10:19
      8 | 
      9 | class MyProd extends MyProdBase {
-[1] 10 |   const type T1 = MyInternClass; // error when package_v2_allow_all_tconst_violations is turned off
-    11 |   const type T2 = MyInternClass; // error when package_v2_allow_reifiable_tconst_violations is off
+[1] 10 |   const type T1 = MyInternClass; // error when package_allow_all_tconst_violations is turned off
+    11 |   const type T2 = MyInternClass; // error when package_allow_reifiable_tconst_violations is off
     12 | }
 
 cross_package_reifiable_typeconsts.php--bar.php:4:7
@@ -32,8 +32,8 @@ error: Typing[4472] Cannot access a type constant defined in package pkg2 from p
 
 cross_package_reifiable_typeconsts.php--foo.php:11:19
      9 | class MyProd extends MyProdBase {
-    10 |   const type T1 = MyInternClass; // error when package_v2_allow_all_tconst_violations is turned off
-[1] 11 |   const type T2 = MyInternClass; // error when package_v2_allow_reifiable_tconst_violations is off
+    10 |   const type T1 = MyInternClass; // error when package_allow_all_tconst_violations is turned off
+[1] 11 |   const type T2 = MyInternClass; // error when package_allow_reifiable_tconst_violations is off
     12 | }
 
 cross_package_reifiable_typeconsts.php--bar.php:4:7

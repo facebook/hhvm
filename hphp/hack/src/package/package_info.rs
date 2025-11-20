@@ -332,7 +332,7 @@ mod test {
     }
 
     #[test]
-    fn test_include_paths_is_reverse_sorted_in_package_v2() {
+    fn test_include_paths_is_reverse_sorted_in_package() {
         let test_path = SRCDIR.as_path().join("tests/package-8.toml");
         let info = PackageInfo::from_text(false, test_path.to_str().unwrap()).unwrap();
         let baz = &info.packages()["baz"];

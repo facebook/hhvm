@@ -295,32 +295,6 @@ module Primary : sig
           access_pos: Pos.t;
           trait_pos: Pos_or_decl.t;
         }
-      | Module_cross_pkg_access of {
-          pos: Pos.t;
-          decl_pos: Pos_or_decl.t;
-          module_pos: Pos_or_decl.t;
-          package_pos: Pos.t;
-          current_module_opt: string option;
-          current_package_opt: string option;
-          target_module_opt: string option;
-          target_package_opt: string option;
-        }
-      | Module_cross_pkg_call of {
-          pos: Pos.t;
-          decl_pos: Pos_or_decl.t;
-          current_package_opt: string option;
-          target_package_opt: string option;
-        }
-      | Module_soft_included_access of {
-          pos: Pos.t;
-          decl_pos: Pos_or_decl.t;
-          module_pos: Pos_or_decl.t;
-          package_pos: Pos.t;
-          current_module_opt: string option;
-          current_package_opt: string option;
-          target_module_opt: string option;
-          target_package_opt: string option;
-        }
     [@@deriving show]
   end
 

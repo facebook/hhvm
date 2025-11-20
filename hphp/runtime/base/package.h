@@ -34,7 +34,6 @@ struct StringData;
 enum class DeployKind {
   Hard,
   Soft,
-  HardOrSoft, // TODO(T225881098) this should be deleted along with PackageV1
   NotDeployed,
 };
 

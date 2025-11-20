@@ -565,7 +565,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      "Write the list of files included in the build to the specified file")
     ("log-package-build-drift",
      value<bool>(&po.logPackageBuildDrift)->default_value(false),
-     "Log to scuba the files pulled by packagev2 and not symbolrefs, and viceversa")
+     "Log to scuba the files pulled by packages and not symbolrefs, and viceversa")
     ;
 
   positional_options_description p;

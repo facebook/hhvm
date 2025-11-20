@@ -8,8 +8,6 @@
 
 (** [can_access_internal ~env ~current ~target target_pos] returns whether a symbol defined in
   * module [current] is allowed to access an internal symbol defined in [target] under [env].
-  * If package_v2 is set in [env], also check that the current file is allowed to access the
-  * target file (calculated by [target_pos] according to package v1 dependency rules.
   *)
 val can_access_internal :
   env:Typing_env_types.env ->

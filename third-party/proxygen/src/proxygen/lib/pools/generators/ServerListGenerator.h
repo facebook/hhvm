@@ -174,7 +174,7 @@ class ServerListGenerator : public ServerListGeneratorIf {
     /*
      * Represents the current on-going request
      */
-    Generator* gen_;
+    Generator* gen_{nullptr};
     bool takeOwnershipOfGenerator_{false};
   };
 

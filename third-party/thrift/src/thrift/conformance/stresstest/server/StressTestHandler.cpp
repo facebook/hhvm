@@ -230,34 +230,32 @@ void StressTestHandler::alignedRequestResponseImpl(
   auto alignment = *request->alignment();
   folly::IOBuf* curr = data.get();
   AlignedResponse resp;
+  resp.aligned() = false;
   int i = 0;
   do {
-    // Page 0 must have 4 byte aligned address
+    // Page 0 must have aligned address according to `alignment`
     if (curr == data.get() && ((uintptr_t)curr->data() & (alignment - 1)) > 0) {
       LOG(ERROR) << fmt::format(
           "IOBuf 0 address is not 4 byte aligned: {:#x}",
           (uintptr_t)curr->data());
-      resp.aligned() = false;
       callback->result(resp);
       return;
     }
     // Pages 1..N must have 4K (page) aligned addresses
     if (curr != data.get() && (((uintptr_t)curr->data() & 0xfff) > 0)) {
       LOG(ERROR) << fmt::format("IOBuf {} address is not 4K aligned", i);
-      resp.aligned() = false;
       callback->result(resp);
       return;
     }
     // Pages 0..N-1 must end on a page boundary
     if (curr != data->prev() && curr->tailroom() != 0) {
       LOG(ERROR) << fmt::format("IOBuf {} not end on a page boundary", i);
-      resp.aligned() = false;
       callback->result(resp);
       return;
     }
+    // Page N must have a length that is 4 byte aligned
     if (curr == data->prev() && (curr->length() & 0x3) > 0) {
       LOG(ERROR) << "IOBuf N length is not 4 byte aligned";
-      resp.aligned() = false;
       callback->result(resp);
       return;
     }
@@ -265,6 +263,7 @@ void StressTestHandler::alignedRequestResponseImpl(
     i++;
   } while (curr != data.get());
 
+  resp.aligned() = true;
   callback->result(resp);
 }
 

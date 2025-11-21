@@ -70,6 +70,7 @@ prototype<t_named>::ptr t_whisker_generator::make_prototype_for_named(
   def.property("scoped_name", mem_fn(&t_named::get_scoped_name));
   def.property("doc", mem_fn(&t_named::doc));
   def.property("docs?", mem_fn(&t_named::has_doc));
+  def.property("generated?", mem_fn(&t_named::generated));
   def.property("program", mem_fn(&t_named::program, proto.of<t_program>()));
   def.property(
       "structured_annotations",

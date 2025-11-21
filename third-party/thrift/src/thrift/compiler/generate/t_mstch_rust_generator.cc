@@ -1553,7 +1553,6 @@ class rust_mstch_struct : public mstch_struct {
             {"struct:has_adapter?", &rust_mstch_struct::has_adapter},
             {"struct:rust_structured_annotations",
              &rust_mstch_struct::rust_structured_annotations},
-            {"struct:generated?", &rust_mstch_struct::rust_generated_struct},
             {"struct:all_optional?", &rust_mstch_struct::rust_all_optional},
         });
   }
@@ -1660,7 +1659,6 @@ class rust_mstch_struct : public mstch_struct {
   mstch::node rust_structured_annotations() {
     return structured_annotations_node(*struct_, 1, context_, pos_, options_);
   }
-  mstch::node rust_generated_struct() { return (*struct_).generated(); }
   mstch::node rust_all_optional() {
     for (const auto& field : struct_->fields()) {
       if (field.qualifier() != t_field_qualifier::optional) {

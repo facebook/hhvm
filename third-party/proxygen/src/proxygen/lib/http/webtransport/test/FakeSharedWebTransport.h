@@ -70,7 +70,7 @@ class FakeStreamHandle
     auto& ex = WebTransport::StreamWriteHandle::ex_;
     if (!ex) {
       ex = folly::make_exception_wrapper<WebTransport::Exception>(code);
-      cs_.requestCancellation();
+      WebTransport::StreamWriteHandle::cs_.requestCancellation();
     }
     if (!writeErr_) {
       writeErr_.emplace(code);
@@ -173,7 +173,6 @@ class FakeStreamHandle
   }
 
   uint64_t id{0};
-  folly::CancellationSource cs_;
   folly::Optional<folly::Promise<WebTransport::StreamData>> promise_;
   folly::IOBufQueue buf_{folly::IOBufQueue::cacheChainLength()};
   uint32_t dataWritten_{0};

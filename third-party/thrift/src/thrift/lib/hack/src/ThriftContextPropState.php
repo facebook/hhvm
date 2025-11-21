@@ -210,7 +210,7 @@ final class ThriftContextPropState {
       // Only allow ViewerContext to override the user id since it has
       // most accurate user id
       if ($user_id_source !== UserIdSource::VIEWER_CONTEXT) {
-        return false;
+        return true;
       }
       $ods->bumpKey('contextprop.fb_user_id_override.'.$src);
     }
@@ -262,7 +262,7 @@ final class ThriftContextPropState {
       // Only allow ViewerContext to override the user id since it has
       // most accurate user id
       if ($user_id_source !== UserIdSource::VIEWER_CONTEXT) {
-        return false;
+        return true;
       }
       $ods->bumpKey('contextprop.ig_user_id_override.'.$src);
     }
@@ -270,6 +270,32 @@ final class ThriftContextPropState {
     self::get()->setIGUserId($ig_user_id);
     $ods->bumpKey('contextprop.ig_user_id_set.'.$src);
     return true;
+  }
+
+  // FB and IG user IDs overlap in range, so some IDs may appear valid for both
+  // (both fbid_in_uid_range and IgidUtils::isUserIgid return true).
+  // Since FB IDs are more common on WWW, we first try interpreting the ID as
+  // an FB ID, and fall back to IG only if FB validation fails. This may still
+  // misclassify some IG IDs as FB.
+  //
+  // Use this API only when the ID type is unknown. If the ID is known to be FB or
+  // IG, call `updateFBUserId` or `updateIGUserId` instead.
+  public static function updateUserId(
+    ?int $user_id,
+    string $src,
+    UserIdSource $user_id_source,
+  ): bool {
+    if ($user_id is null || $user_id <= 0) {
+      return false;
+    }
+    if (
+      ThriftContextPropState::updateFBUserId($user_id, $src, $user_id_source)
+    ) {
+      return true;
+    }
+
+    return
+      ThriftContextPropState::updateIGUserId($user_id, $src, $user_id_source);
   }
 
   private static function updateFBUserIdFromVC(
@@ -302,6 +328,9 @@ final class ThriftContextPropState {
   }
 
   private static function getIgUserId(int $ig_user_id): ?int {
+    if ($ig_user_id === 17841400000000000) {
+      return null; // This ID will return true in genIsInstagramUserFBID check
+    }
     if (IgidUtils::isUserFbid($ig_user_id)) {
       return $ig_user_id;
     }

@@ -49,7 +49,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::bas
       return extractorError<::test::fixtures::basic::MyStruct>(
           "Marshal error: MyStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::basic::MyStruct, ::test__fixtures__basic__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -240,7 +240,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::bas
       return extractorError<::test::fixtures::basic::Containers>(
           "Marshal error: Containers");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::basic::Containers, ::test__fixtures__basic__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -407,7 +407,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::bas
       return extractorError<::test::fixtures::basic::MyUnion>(
           "Marshal error: MyUnion");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftUnionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::basic::MyUnion, ::test__fixtures__basic__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -530,7 +530,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::bas
       return extractorError<::test::fixtures::basic::MyException>(
           "Marshal error: MyException");
   }
-  StrongRef fbThriftData(getExceptionThriftData(obj));
+  StrongRef fbThriftData(getThriftExceptionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::basic::MyException, ::test__fixtures__basic__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -651,7 +651,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::bas
       return extractorError<::test::fixtures::basic::MyExceptionWithMessage>(
           "Marshal error: MyExceptionWithMessage");
   }
-  StrongRef fbThriftData(getExceptionThriftData(obj));
+  StrongRef fbThriftData(getThriftExceptionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::basic::MyExceptionWithMessage, ::test__fixtures__basic__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -772,7 +772,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::bas
       return extractorError<::test::fixtures::basic::ReservedKeyword>(
           "Marshal error: ReservedKeyword");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::basic::ReservedKeyword, ::test__fixtures__basic__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -851,7 +851,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::bas
       return extractorError<::test::fixtures::basic::UnionToBeRenamed>(
           "Marshal error: UnionToBeRenamed");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftUnionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::basic::UnionToBeRenamed, ::test__fixtures__basic__module::NamespaceTag>>{}(*fbThriftData);
 }

@@ -41,7 +41,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::CustomExcepti
       return extractorError<::cpp2::CustomException>(
           "Marshal error: CustomException");
   }
-  StrongRef fbThriftData(getExceptionThriftData(obj));
+  StrongRef fbThriftData(getThriftExceptionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::CustomException, ::test__fixtures__interactions__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -120,7 +120,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::ShouldBeBoxed
       return extractorError<::cpp2::ShouldBeBoxed>(
           "Marshal error: ShouldBeBoxed");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::ShouldBeBoxed, ::test__fixtures__interactions__module::NamespaceTag>>{}(*fbThriftData);
 }

@@ -40,7 +40,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::AnnotationWit
       return extractorError<::cpp2::AnnotationWithContainers>(
           "Marshal error: AnnotationWithContainers");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::AnnotationWithContainers, ::with_containers::NamespaceTag>>{}(*fbThriftData);
 }
@@ -133,7 +133,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyStruct, ::w
       return extractorError<::cpp2::MyStruct>(
           "Marshal error: MyStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::MyStruct, ::with_containers::NamespaceTag>>{}(*fbThriftData);
 }

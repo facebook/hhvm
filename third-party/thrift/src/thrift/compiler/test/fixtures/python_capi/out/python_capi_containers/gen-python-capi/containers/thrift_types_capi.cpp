@@ -55,7 +55,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::pyt
       return extractorError<::test::fixtures::python_capi::TemplateLists>(
           "Marshal error: TemplateLists");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::python_capi::TemplateLists, ::test__fixtures__python_capi__containers::NamespaceTag>>{}(*fbThriftData);
 }
@@ -197,7 +197,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::pyt
       return extractorError<::test::fixtures::python_capi::TemplateSets>(
           "Marshal error: TemplateSets");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::python_capi::TemplateSets, ::test__fixtures__python_capi__containers::NamespaceTag>>{}(*fbThriftData);
 }
@@ -360,7 +360,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::pyt
       return extractorError<::test::fixtures::python_capi::TemplateMaps>(
           "Marshal error: TemplateMaps");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::python_capi::TemplateMaps, ::test__fixtures__python_capi__containers::NamespaceTag>>{}(*fbThriftData);
 }
@@ -523,7 +523,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::pyt
       return extractorError<::test::fixtures::python_capi::TWrapped>(
           "Marshal error: TWrapped");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::python_capi::TWrapped, ::test__fixtures__python_capi__containers::NamespaceTag>>{}(*fbThriftData);
 }
@@ -616,7 +616,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::pyt
       return extractorError<::test::fixtures::python_capi::IndirectionA>(
           "Marshal error: IndirectionA");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::python_capi::IndirectionA, ::test__fixtures__python_capi__containers::NamespaceTag>>{}(*fbThriftData);
 }
@@ -695,7 +695,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::pyt
       return extractorError<::test::fixtures::python_capi::IndirectionB>(
           "Marshal error: IndirectionB");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::python_capi::IndirectionB, ::test__fixtures__python_capi__containers::NamespaceTag>>{}(*fbThriftData);
 }
@@ -774,7 +774,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::pyt
       return extractorError<::test::fixtures::python_capi::IndirectionC>(
           "Marshal error: IndirectionC");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::python_capi::IndirectionC, ::test__fixtures__python_capi__containers::NamespaceTag>>{}(*fbThriftData);
 }

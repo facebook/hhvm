@@ -1223,8 +1223,11 @@ def _unpickle_struct(klass, bytes data):
     inst._deserialize(iobuf, Protocol.COMPACT)
     return inst
 
-cdef api object _get_fbthrift_data(object struct_or_union):
-    return (<StructOrUnion> struct_or_union)._fbthrift_data
+cdef api object _get_struct_fbthrift_data(object struct):
+    return (<Struct> struct)._fbthrift_data
+
+cdef api object _get_union_fbthrift_data(object union):
+    return (<Union> union)._fbthrift_data
 
 cdef api object _get_exception_fbthrift_data(object generated_error):
     return (<GeneratedError> generated_error)._fbthrift_data

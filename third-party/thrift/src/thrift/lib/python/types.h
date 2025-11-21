@@ -1008,17 +1008,23 @@ PyObject* ImmutableInternalDict_New();
 
 namespace capi {
 /**
- * Retrieves internal _fbthrift_data from `StructOrUnion`. On import failure,
+ * Retrieves internal _fbthrift_data from `Struct`. On import failure,
  * returns nullptr. Caller is responsible for clearing Err indicator on failure.
  * Do not use externally; use capi interface instead.
  */
-PyObject* FOLLY_NULLABLE getThriftData(PyObject* structOrUnion);
+PyObject* FOLLY_NULLABLE getThriftStructFieldData(PyObject*);
+/**
+ * Retrieves internal _fbthrift_data from `Union`. On import failure,
+ * returns nullptr. Caller is responsible for clearing Err indicator on failure.
+ * Do not use externally; use capi interface instead.
+ */
+PyObject* FOLLY_NULLABLE getThriftUnionFieldData(PyObject*);
 /**
  * Retrieves internal _fbthrift_data from `GeneratedError`. On import failure,
  * returns nullptr. Caller is responsible for clearing Err indicator on failure.
  * Do not use externally; use capi interface instead.
  */
-PyObject* FOLLY_NULLABLE getExceptionThriftData(PyObject* generatedError);
+PyObject* FOLLY_NULLABLE getThriftExceptionFieldData(PyObject* generatedError);
 
 /**
  * Sets index + 1 field of struct_tuple to `value` and records that is set

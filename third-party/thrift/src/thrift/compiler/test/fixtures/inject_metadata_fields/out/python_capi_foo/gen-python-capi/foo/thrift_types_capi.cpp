@@ -41,7 +41,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Fields, ::foo
       return extractorError<::cpp2::Fields>(
           "Marshal error: Fields");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::Fields, ::foo::NamespaceTag>>{}(*fbThriftData);
 }
@@ -162,7 +162,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::FieldsWithInc
       return extractorError<::cpp2::FieldsWithIncludedStruct>(
           "Marshal error: FieldsWithIncludedStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::FieldsWithIncludedStruct, ::foo::NamespaceTag>>{}(*fbThriftData);
 }

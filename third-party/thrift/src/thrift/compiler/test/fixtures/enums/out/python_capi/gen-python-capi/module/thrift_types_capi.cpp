@@ -40,7 +40,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enu
       return extractorError<::test::fixtures::enums::SomeStruct>(
           "Marshal error: SomeStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::enums::SomeStruct, ::test__fixtures__enums__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -161,7 +161,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enu
       return extractorError<::test::fixtures::enums::MyStruct>(
           "Marshal error: MyStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::enums::MyStruct, ::test__fixtures__enums__module::NamespaceTag>>{}(*fbThriftData);
 }

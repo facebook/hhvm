@@ -106,7 +106,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::t
       return extractorError<::facebook::thrift::test::terse_write::MyUnion>(
           "Marshal error: MyUnion");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftUnionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::facebook::thrift::test::terse_write::MyUnion, ::facebook__thrift__test__terse_write::NamespaceTag>>{}(*fbThriftData);
 }
@@ -319,7 +319,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::t
       return extractorError<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>(
           "Marshal error: MyStructWithCustomDefault");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::facebook::thrift::test::terse_write::MyStructWithCustomDefault, ::facebook__thrift__test__terse_write::NamespaceTag>>{}(*fbThriftData);
 }
@@ -398,7 +398,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::t
       return extractorError<::facebook::thrift::test::terse_write::StructLevelTerseStruct>(
           "Marshal error: StructLevelTerseStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::facebook::thrift::test::terse_write::StructLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>{}(*fbThriftData);
 }
@@ -673,7 +673,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::t
       return extractorError<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>(
           "Marshal error: FieldLevelTerseStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::facebook::thrift::test::terse_write::FieldLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>{}(*fbThriftData);
 }
@@ -1226,7 +1226,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::facebook::thrift::test::terse_write::TerseException>
@@ -1239,7 +1239,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::t
       return extractorError<::facebook::thrift::test::terse_write::TerseException>(
           "Marshal error: TerseException");
   }
-  StrongRef fbThriftData(getExceptionThriftData(obj));
+  StrongRef fbThriftData(getThriftExceptionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::facebook::thrift::test::terse_write::TerseException, ::facebook__thrift__test__terse_write::NamespaceTag>>{}(*fbThriftData);
 }

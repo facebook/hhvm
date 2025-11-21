@@ -161,7 +161,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::apache::thrift::fix
       return extractorError<::apache::thrift::fixtures::types::decorated_struct>(
           "Marshal error: decorated_struct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::apache::thrift::fixtures::types::decorated_struct, ::apache__thrift__fixtures__types__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -308,7 +308,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::apache::thrift::fixtures::types::CppTypeStruct>
@@ -389,7 +389,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::apache::thrift::fixtures::types::VirtualStruct>
@@ -402,7 +402,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::apache::thrift::fix
       return extractorError<::apache::thrift::fixtures::types::VirtualStruct>(
           "Marshal error: VirtualStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::apache::thrift::fixtures::types::VirtualStruct, ::apache__thrift__fixtures__types__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -481,7 +481,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::apache::thrift::fix
       return extractorError<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>(
           "Marshal error: MyStructWithForwardRefEnum");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::apache::thrift::fixtures::types::MyStructWithForwardRefEnum, ::apache__thrift__fixtures__types__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -574,7 +574,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::apache::thrift::fix
       return extractorError<::apache::thrift::fixtures::types::TrivialNumeric>(
           "Marshal error: TrivialNumeric");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::apache::thrift::fixtures::types::TrivialNumeric, ::apache__thrift__fixtures__types__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -667,7 +667,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::apache::thrift::fix
       return extractorError<::apache::thrift::fixtures::types::TrivialNestedWithDefault>(
           "Marshal error: TrivialNestedWithDefault");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::apache::thrift::fixtures::types::TrivialNestedWithDefault, ::apache__thrift__fixtures__types__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -760,7 +760,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::apache::thrift::fix
       return extractorError<::apache::thrift::fixtures::types::ComplexString>(
           "Marshal error: ComplexString");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::apache::thrift::fixtures::types::ComplexString, ::apache__thrift__fixtures__types__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -853,7 +853,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::apache::thrift::fix
       return extractorError<::apache::thrift::fixtures::types::ComplexNestedWithDefault>(
           "Marshal error: ComplexNestedWithDefault");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::apache::thrift::fixtures::types::ComplexNestedWithDefault, ::apache__thrift__fixtures__types__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -946,7 +946,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::apache::thrift::fix
       return extractorError<::apache::thrift::fixtures::types::MinPadding>(
           "Marshal error: MinPadding");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::apache::thrift::fixtures::types::MinPadding, ::apache__thrift__fixtures__types__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -1149,7 +1149,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::apache::thrift::fixtures::types::MyStruct>
@@ -1162,7 +1162,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::apache::thrift::fix
       return extractorError<::apache::thrift::fixtures::types::MyStruct>(
           "Marshal error: MyStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::apache::thrift::fixtures::types::MyStruct, ::apache__thrift__fixtures__types__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -1343,7 +1343,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::apache::thrift::fix
       return extractorError<::apache::thrift::fixtures::types::Renamed>(
           "Marshal error: Renaming");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::apache::thrift::fixtures::types::Renamed, ::apache__thrift__fixtures__types__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -1422,7 +1422,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::apache::thrift::fix
       return extractorError<::apache::thrift::fixtures::types::AnnotatedTypes>(
           "Marshal error: AnnotatedTypes");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::apache::thrift::fixtures::types::AnnotatedTypes, ::apache__thrift__fixtures__types__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -1515,7 +1515,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::apache::thrift::fix
       return extractorError<::apache::thrift::fixtures::types::ForwardUsageRoot>(
           "Marshal error: ForwardUsageRoot");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::apache::thrift::fixtures::types::ForwardUsageRoot, ::apache__thrift__fixtures__types__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -1622,7 +1622,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::apache::thrift::fix
       return extractorError<::apache::thrift::fixtures::types::ForwardUsageStruct>(
           "Marshal error: ForwardUsageStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::apache::thrift::fixtures::types::ForwardUsageStruct, ::apache__thrift__fixtures__types__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -1708,7 +1708,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::apache::thrift::fix
       return extractorError<::apache::thrift::fixtures::types::ForwardUsageByRef>(
           "Marshal error: ForwardUsageByRef");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::apache::thrift::fixtures::types::ForwardUsageByRef, ::apache__thrift__fixtures__types__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -1794,7 +1794,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::apache::thrift::fix
       return extractorError<::apache::thrift::fixtures::types::IncompleteMap>(
           "Marshal error: IncompleteMap");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::apache::thrift::fixtures::types::IncompleteMap, ::apache__thrift__fixtures__types__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -1940,7 +1940,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::apache::thrift::fix
       return extractorError<::apache::thrift::fixtures::types::CompleteMap>(
           "Marshal error: CompleteMap");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::apache::thrift::fixtures::types::CompleteMap, ::apache__thrift__fixtures__types__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -2154,7 +2154,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::apache::thrift::fixtures::types::IncompleteListDep>
@@ -2227,7 +2227,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::apache::thrift::fix
       return extractorError<::apache::thrift::fixtures::types::CompleteList>(
           "Marshal error: CompleteList");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::apache::thrift::fixtures::types::CompleteList, ::apache__thrift__fixtures__types__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -2441,7 +2441,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::apache::thrift::fixtures::types::detail::AdaptedListDep>
@@ -2454,7 +2454,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::apache::thrift::fix
       return extractorError<::apache::thrift::fixtures::types::detail::AdaptedListDep>(
           "Marshal error: AdaptedListDep");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::apache::thrift::fixtures::types::detail::AdaptedListDep, ::apache__thrift__fixtures__types__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -2601,7 +2601,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>
@@ -2614,7 +2614,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::apache::thrift::fix
       return extractorError<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>(
           "Marshal error: DependentAdaptedListDep");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::apache::thrift::fixtures::types::detail::DependentAdaptedListDep, ::apache__thrift__fixtures__types__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -2700,7 +2700,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::apache::thrift::fix
       return extractorError<::apache::thrift::fixtures::types::AllocatorAware>(
           "Marshal error: AllocatorAware");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::apache::thrift::fixtures::types::AllocatorAware, ::apache__thrift__fixtures__types__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -2863,7 +2863,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::apache::thrift::fix
       return extractorError<::apache::thrift::fixtures::types::AllocatorAware2>(
           "Marshal error: AllocatorAware2");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::apache::thrift::fixtures::types::AllocatorAware2, ::apache__thrift__fixtures__types__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -3031,7 +3031,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>
@@ -3044,7 +3044,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::apache::thrift::fix
       return extractorError<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>(
           "Marshal error: StructWithDoubleUnderscores");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::apache::thrift::fixtures::types::StructWithDoubleUnderscores, ::apache__thrift__fixtures__types__module::NamespaceTag>>{}(*fbThriftData);
 }

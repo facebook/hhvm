@@ -50,7 +50,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Fields, ::mod
       return extractorError<::cpp2::Fields>(
           "Marshal error: Fields");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::Fields, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -129,7 +129,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::FieldsInjecte
       return extractorError<::cpp2::FieldsInjectedToEmptyStruct>(
           "Marshal error: FieldsInjectedToEmptyStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::FieldsInjectedToEmptyStruct, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -208,7 +208,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::FieldsInjecte
       return extractorError<::cpp2::FieldsInjectedToStruct>(
           "Marshal error: FieldsInjectedToStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::FieldsInjectedToStruct, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -301,7 +301,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::FieldsInjecte
       return extractorError<::cpp2::FieldsInjectedWithIncludedStruct>(
           "Marshal error: FieldsInjectedWithIncludedStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::FieldsInjectedWithIncludedStruct, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -436,7 +436,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::FieldsInjecte
       return extractorError<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct>(
           "Marshal error: FieldsInjectedWithFieldsWithIncludedStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::FieldsInjectedWithFieldsWithIncludedStruct, ::module::NamespaceTag>>{}(*fbThriftData);
 }

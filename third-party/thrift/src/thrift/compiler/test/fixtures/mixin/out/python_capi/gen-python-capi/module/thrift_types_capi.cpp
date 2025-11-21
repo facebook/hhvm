@@ -46,7 +46,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Mixin1, ::mod
       return extractorError<::cpp2::Mixin1>(
           "Marshal error: Mixin1");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::Mixin1, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -125,7 +125,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Mixin2, ::mod
       return extractorError<::cpp2::Mixin2>(
           "Marshal error: Mixin2");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::Mixin2, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -225,7 +225,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Mixin3Base, :
       return extractorError<::cpp2::Mixin3Base>(
           "Marshal error: Mixin3Base");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::Mixin3Base, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -304,7 +304,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Foo, ::module
       return extractorError<::cpp2::Foo>(
           "Marshal error: Foo");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::Foo, ::module::NamespaceTag>>{}(*fbThriftData);
 }

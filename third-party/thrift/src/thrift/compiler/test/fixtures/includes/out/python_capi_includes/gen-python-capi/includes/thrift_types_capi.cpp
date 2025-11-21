@@ -38,7 +38,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Included, ::i
       return extractorError<::cpp2::Included>(
           "Marshal error: Included");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::Included, ::includes::NamespaceTag>>{}(*fbThriftData);
 }

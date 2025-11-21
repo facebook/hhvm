@@ -37,7 +37,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::namespace_fro
       return extractorError<::test::namespace_from_package::module::Foo>(
           "Marshal error: Foo");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::namespace_from_package::module::Foo, ::test__namespace_from_package__module::NamespaceTag>>{}(*fbThriftData);
 }

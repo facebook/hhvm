@@ -1969,13 +1969,19 @@ int16_t pyFloatIsFloat32(PyObject* obj) {
 } // namespace apache::thrift::python
 
 namespace apache::thrift::python::capi {
-PyObject* FOLLY_NULLABLE getThriftData(PyObject* structOrUnion) {
+PyObject* FOLLY_NULLABLE getThriftStructFieldData(PyObject* struct_) {
   if (!ensure_module_imported()) {
     return nullptr;
   }
-  return _get_fbthrift_data(structOrUnion);
+  return _get_struct_fbthrift_data(struct_);
 }
-PyObject* FOLLY_NULLABLE getExceptionThriftData(PyObject* generatedError) {
+PyObject* FOLLY_NULLABLE getThriftUnionFieldData(PyObject* union_) {
+  if (!ensure_module_imported()) {
+    return nullptr;
+  }
+  return _get_union_fbthrift_data(union_);
+}
+PyObject* FOLLY_NULLABLE getThriftExceptionFieldData(PyObject* generatedError) {
   if (!ensure_module_imported()) {
     return nullptr;
   }

@@ -52,7 +52,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::py3::simple::Simple
       return extractorError<::py3::simple::SimpleException>(
           "Marshal error: SimpleException");
   }
-  StrongRef fbThriftData(getExceptionThriftData(obj));
+  StrongRef fbThriftData(getThriftExceptionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::py3::simple::SimpleException, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -131,7 +131,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::py3::simple::Option
       return extractorError<::py3::simple::OptionalRefStruct>(
           "Marshal error: OptionalRefStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::py3::simple::OptionalRefStruct, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -217,7 +217,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::py3::simple::Simple
       return extractorError<::py3::simple::SimpleStruct>(
           "Marshal error: SimpleStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::py3::simple::SimpleStruct, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -471,7 +471,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::py3::simple::Float3
       return extractorError<::py3::simple::Float32Struct>(
           "Marshal error: Float32Struct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::py3::simple::Float32Struct, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -660,7 +660,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::py3::simple::detail::AdaptedUnion>
@@ -673,7 +673,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::py3::simple::detail
       return extractorError<::py3::simple::detail::AdaptedUnion>(
           "Marshal error: AdaptedUnion");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftUnionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::py3::simple::detail::AdaptedUnion, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -769,7 +769,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::py3::simple::Hidden
       return extractorError<::py3::simple::HiddenException>(
           "Marshal error: HiddenException");
   }
-  StrongRef fbThriftData(getExceptionThriftData(obj));
+  StrongRef fbThriftData(getThriftExceptionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::py3::simple::HiddenException, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -916,7 +916,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::py3::simple::BinaryUnion>
@@ -929,7 +929,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::py3::simple::Binary
       return extractorError<::py3::simple::BinaryUnion>(
           "Marshal error: BinaryUnion");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftUnionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::py3::simple::BinaryUnion, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -1025,7 +1025,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::py3::simple::Binary
       return extractorError<::py3::simple::BinaryUnionStruct>(
           "Marshal error: BinaryUnionStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::py3::simple::BinaryUnionStruct, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -1172,7 +1172,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::py3::simple::CustomTypedefFields>
@@ -1253,7 +1253,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::py3::simple::AdaptedTypedefFields>
@@ -1334,7 +1334,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::py3::simple::AnEnum>

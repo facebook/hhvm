@@ -68,7 +68,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::pyt
       return extractorError<::test::fixtures::python_capi::MyStruct>(
           "Marshal error: MyStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::python_capi::MyStruct, ::test__fixtures__python_capi__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -245,7 +245,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::pyt
       return extractorError<::test::fixtures::python_capi::MyDataItem>(
           "Marshal error: MyDataItem");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::python_capi::MyDataItem, ::test__fixtures__python_capi__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -384,7 +384,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::pyt
       return extractorError<::test::fixtures::python_capi::detail::DoubledPair>(
           "Marshal error: DoubledPair");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::python_capi::detail::DoubledPair, ::test__fixtures__python_capi__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -477,7 +477,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::pyt
       return extractorError<::test::fixtures::python_capi::StringPair>(
           "Marshal error: StringPair");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::python_capi::StringPair, ::test__fixtures__python_capi__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -630,7 +630,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::pyt
       return extractorError<::test::fixtures::python_capi::PrimitiveStruct>(
           "Marshal error: PrimitiveStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::python_capi::PrimitiveStruct, ::test__fixtures__python_capi__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -947,7 +947,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::pyt
       return extractorError<::test::fixtures::python_capi::AdaptedFields>(
           "Marshal error: AdaptedFields");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::python_capi::AdaptedFields, ::test__fixtures__python_capi__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -1068,7 +1068,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::pyt
       return extractorError<::test::fixtures::python_capi::ListStruct>(
           "Marshal error: ListStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::python_capi::ListStruct, ::test__fixtures__python_capi__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -1273,7 +1273,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::pyt
       return extractorError<::test::fixtures::python_capi::SetStruct>(
           "Marshal error: SetStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::python_capi::SetStruct, ::test__fixtures__python_capi__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -1450,7 +1450,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::pyt
       return extractorError<::test::fixtures::python_capi::MapStruct>(
           "Marshal error: MapStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::python_capi::MapStruct, ::test__fixtures__python_capi__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -1669,7 +1669,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::pyt
       return extractorError<::test::fixtures::python_capi::ComposeStruct>(
           "Marshal error: ComposeStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::python_capi::ComposeStruct, ::test__fixtures__python_capi__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -1874,7 +1874,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::pyt
       return extractorError<::test::fixtures::python_capi::Shallot>(
           "Marshal error: Onion");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftUnionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::python_capi::Shallot, ::test__fixtures__python_capi__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -2024,7 +2024,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::pyt
       return extractorError<::test::fixtures::python_capi::SomeBinary>(
           "Marshal error: SomeBinary");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftUnionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::python_capi::SomeBinary, ::test__fixtures__python_capi__module::NamespaceTag>>{}(*fbThriftData);
 }

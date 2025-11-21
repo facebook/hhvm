@@ -38,7 +38,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::t
       return extractorError<::facebook::thrift::test::CustomException>(
           "Marshal error: CustomException");
   }
-  StrongRef fbThriftData(getExceptionThriftData(obj));
+  StrongRef fbThriftData(getThriftExceptionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::facebook::thrift::test::CustomException, ::facebook__thrift__test__module::NamespaceTag>>{}(*fbThriftData);
 }

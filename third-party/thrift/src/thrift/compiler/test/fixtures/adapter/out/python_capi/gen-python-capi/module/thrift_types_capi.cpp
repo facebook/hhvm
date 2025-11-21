@@ -70,7 +70,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::t
       return extractorError<::facebook::thrift::test::MyAnnotation>(
           "Marshal error: MyAnnotation");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::facebook::thrift::test::MyAnnotation, ::facebook__thrift__test__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -231,7 +231,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::facebook::thrift::test::Baz>
@@ -312,7 +312,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftUnionFieldData(*obj);
 }
 
 ExtractorResult<::facebook::thrift::test::Bar>
@@ -393,7 +393,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::facebook::thrift::test::detail::DirectlyAdapted>
@@ -406,7 +406,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::t
       return extractorError<::facebook::thrift::test::detail::DirectlyAdapted>(
           "Marshal error: DirectlyAdapted");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::facebook::thrift::test::detail::DirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -485,7 +485,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::t
       return extractorError<::facebook::thrift::test::detail::IndependentDirectlyAdapted>(
           "Marshal error: IndependentDirectlyAdapted");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::facebook::thrift::test::detail::IndependentDirectlyAdapted, ::facebook__thrift__test__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -632,7 +632,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::facebook::thrift::test::TerseAdaptedFields>
@@ -713,7 +713,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::facebook::thrift::test::B>
@@ -794,7 +794,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::facebook::thrift::test::A>
@@ -867,7 +867,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::t
       return extractorError<::facebook::thrift::test::Config>(
           "Marshal error: Config");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::facebook::thrift::test::Config, ::facebook__thrift__test__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -1014,7 +1014,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::facebook::thrift::test::AdaptTestStruct>
@@ -1095,7 +1095,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::facebook::thrift::test::AdaptTemplatedTestStruct>
@@ -1176,7 +1176,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>
@@ -1189,7 +1189,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::t
       return extractorError<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>(
           "Marshal error: AdaptTemplatedNestedTestStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::facebook::thrift::test::AdaptTemplatedNestedTestStruct, ::facebook__thrift__test__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -1336,7 +1336,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftUnionFieldData(*obj);
 }
 
 ExtractorResult<::facebook::thrift::test::ThriftAdaptedStruct>
@@ -1349,7 +1349,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::t
       return extractorError<::facebook::thrift::test::ThriftAdaptedStruct>(
           "Marshal error: AdaptedStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::facebook::thrift::test::ThriftAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -1428,7 +1428,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::t
       return extractorError<::facebook::thrift::test::detail::DirectlyAdaptedStruct>(
           "Marshal error: DirectlyAdaptedStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::facebook::thrift::test::detail::DirectlyAdaptedStruct, ::facebook__thrift__test__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -1575,7 +1575,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::facebook::thrift::test::CircularAdaptee>
@@ -1588,7 +1588,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::t
       return extractorError<::facebook::thrift::test::CircularAdaptee>(
           "Marshal error: CircularAdaptee");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::facebook::thrift::test::CircularAdaptee, ::facebook__thrift__test__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -1735,7 +1735,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::facebook::thrift::test::ReorderedStruct>
@@ -1816,7 +1816,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::facebook::thrift::test::detail::DeclaredAfterStruct>
@@ -1889,7 +1889,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::t
       return extractorError<::facebook::thrift::test::UnderlyingRenamedStruct>(
           "Marshal error: RenamedStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::facebook::thrift::test::UnderlyingRenamedStruct, ::facebook__thrift__test__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -1968,7 +1968,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::t
       return extractorError<::facebook::thrift::test::UnderlyingSameNamespaceStruct>(
           "Marshal error: SameNamespaceStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::facebook::thrift::test::UnderlyingSameNamespaceStruct, ::facebook__thrift__test__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -2175,7 +2175,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::facebook::thrift::test::AlsoMoveOnly>
@@ -2256,7 +2256,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::facebook::thrift::test::ApplyAdapter>
@@ -2457,7 +2457,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::facebook::thrift::test::Person>
@@ -2470,7 +2470,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::t
       return extractorError<::facebook::thrift::test::Person>(
           "Marshal error: Person");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::facebook::thrift::test::Person, ::facebook__thrift__test__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -2549,7 +2549,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::t
       return extractorError<::facebook::thrift::test::Person2>(
           "Marshal error: Person2");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::facebook::thrift::test::Person2, ::facebook__thrift__test__module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -2698,7 +2698,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::facebook::thrift::test::Color>

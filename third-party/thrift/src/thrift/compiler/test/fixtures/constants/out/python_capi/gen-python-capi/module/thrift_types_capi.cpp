@@ -52,7 +52,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Internship, :
       return extractorError<::cpp2::Internship>(
           "Marshal error: Internship");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::Internship, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -208,7 +208,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Range, ::modu
       return extractorError<::cpp2::Range>(
           "Marshal error: Range");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::Range, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -301,7 +301,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::struct1, ::mo
       return extractorError<::cpp2::struct1>(
           "Marshal error: struct1");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::struct1, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -394,7 +394,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::struct2, ::mo
       return extractorError<::cpp2::struct2>(
           "Marshal error: struct2");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::struct2, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -515,7 +515,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::struct3, ::mo
       return extractorError<::cpp2::struct3>(
           "Marshal error: struct3");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::struct3, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -622,7 +622,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::struct4, ::mo
       return extractorError<::cpp2::struct4>(
           "Marshal error: struct4");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::struct4, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -743,7 +743,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::union1, ::mod
       return extractorError<::cpp2::union1>(
           "Marshal error: union1");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftUnionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::union1, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -848,7 +848,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::union2, ::mod
       return extractorError<::cpp2::union2>(
           "Marshal error: union2");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftUnionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::union2, ::module::NamespaceTag>>{}(*fbThriftData);
 }

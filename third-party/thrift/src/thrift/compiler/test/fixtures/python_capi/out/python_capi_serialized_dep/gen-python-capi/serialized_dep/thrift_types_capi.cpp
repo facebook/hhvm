@@ -108,7 +108,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftStructFieldData(*obj);
 }
 
 ExtractorResult<::test::fixtures::python_capi::SerializedUnion>
@@ -189,7 +189,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return getThriftUnionFieldData(*obj);
 }
 
 ExtractorResult<::test::fixtures::python_capi::SerializedError>
@@ -270,7 +270,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   if (!obj) {
     return nullptr;
   }
-  return getExceptionThriftData(*obj);
+  return getThriftExceptionFieldData(*obj);
 }
 
 ExtractorResult<::test::fixtures::python_capi::MarshalStruct>
@@ -283,7 +283,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::pyt
       return extractorError<::test::fixtures::python_capi::MarshalStruct>(
           "Marshal error: MarshalStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::python_capi::MarshalStruct, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>>{}(*fbThriftData);
 }
@@ -411,7 +411,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::pyt
       return extractorError<::test::fixtures::python_capi::MarshalUnion>(
           "Marshal error: MarshalUnion");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftUnionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::python_capi::MarshalUnion, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>>{}(*fbThriftData);
 }
@@ -516,7 +516,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::pyt
       return extractorError<::test::fixtures::python_capi::MarshalError>(
           "Marshal error: MarshalError");
   }
-  StrongRef fbThriftData(getExceptionThriftData(obj));
+  StrongRef fbThriftData(getThriftExceptionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::test::fixtures::python_capi::MarshalError, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>>{}(*fbThriftData);
 }

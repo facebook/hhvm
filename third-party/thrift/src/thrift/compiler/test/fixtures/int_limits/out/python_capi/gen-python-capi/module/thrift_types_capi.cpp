@@ -37,7 +37,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Limits, ::mod
       return extractorError<::cpp2::Limits>(
           "Marshal error: Limits");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::Limits, ::module::NamespaceTag>>{}(*fbThriftData);
 }

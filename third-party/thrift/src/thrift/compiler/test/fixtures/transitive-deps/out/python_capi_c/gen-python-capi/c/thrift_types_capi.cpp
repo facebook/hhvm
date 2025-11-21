@@ -37,7 +37,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::C, ::c::Names
       return extractorError<::cpp2::C>(
           "Marshal error: C");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::C, ::c::NamespaceTag>>{}(*fbThriftData);
 }

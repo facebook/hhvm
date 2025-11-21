@@ -52,7 +52,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Fiery, ::modu
       return extractorError<::cpp2::Fiery>(
           "Marshal error: Fiery");
   }
-  StrongRef fbThriftData(getExceptionThriftData(obj));
+  StrongRef fbThriftData(getThriftExceptionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::Fiery, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -131,7 +131,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Serious, ::mo
       return extractorError<::cpp2::Serious>(
           "Marshal error: Serious");
   }
-  StrongRef fbThriftData(getExceptionThriftData(obj));
+  StrongRef fbThriftData(getThriftExceptionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::Serious, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -217,7 +217,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::ComplexFieldN
       return extractorError<::cpp2::ComplexFieldNames>(
           "Marshal error: ComplexFieldNames");
   }
-  StrongRef fbThriftData(getExceptionThriftData(obj));
+  StrongRef fbThriftData(getThriftExceptionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::ComplexFieldNames, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -310,7 +310,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::CustomFieldNa
       return extractorError<::cpp2::CustomFieldNames>(
           "Marshal error: CustomFieldNames");
   }
-  StrongRef fbThriftData(getExceptionThriftData(obj));
+  StrongRef fbThriftData(getThriftExceptionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::CustomFieldNames, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -403,7 +403,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::ExceptionWith
       return extractorError<::cpp2::ExceptionWithPrimitiveField>(
           "Marshal error: ExceptionWithPrimitiveField");
   }
-  StrongRef fbThriftData(getExceptionThriftData(obj));
+  StrongRef fbThriftData(getThriftExceptionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::ExceptionWithPrimitiveField, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -496,7 +496,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::ExceptionWith
       return extractorError<::cpp2::ExceptionWithStructuredAnnotation>(
           "Marshal error: ExceptionWithStructuredAnnotation");
   }
-  StrongRef fbThriftData(getExceptionThriftData(obj));
+  StrongRef fbThriftData(getThriftExceptionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::ExceptionWithStructuredAnnotation, ::module::NamespaceTag>>{}(*fbThriftData);
 }

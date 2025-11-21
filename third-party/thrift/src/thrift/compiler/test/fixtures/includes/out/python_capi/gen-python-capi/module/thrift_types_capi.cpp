@@ -38,7 +38,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyStruct, ::m
       return extractorError<::cpp2::MyStruct>(
           "Marshal error: MyStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::MyStruct, ::module::NamespaceTag>>{}(*fbThriftData);
 }

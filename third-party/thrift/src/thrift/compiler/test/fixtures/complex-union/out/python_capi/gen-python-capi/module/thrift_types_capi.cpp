@@ -40,7 +40,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::ComplexUnion,
       return extractorError<::cpp2::ComplexUnion>(
           "Marshal error: ComplexUnion");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftUnionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::ComplexUnion, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -181,7 +181,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::ListUnion, ::
       return extractorError<::cpp2::ListUnion>(
           "Marshal error: ListUnion");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftUnionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::ListUnion, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -286,7 +286,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::DataUnion, ::
       return extractorError<::cpp2::DataUnion>(
           "Marshal error: DataUnion");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftUnionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::DataUnion, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -391,7 +391,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Val, ::module
       return extractorError<::cpp2::Val>(
           "Marshal error: Val");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::Val, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -498,7 +498,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::ValUnion, ::m
       return extractorError<::cpp2::ValUnion>(
           "Marshal error: ValUnion");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftUnionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::ValUnion, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -603,7 +603,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::VirtualComple
       return extractorError<::cpp2::VirtualComplexUnion>(
           "Marshal error: VirtualComplexUnion");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftUnionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::VirtualComplexUnion, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -708,7 +708,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::NonCopyableSt
       return extractorError<::cpp2::NonCopyableStruct>(
           "Marshal error: NonCopyableStruct");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftStructFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::NonCopyableStruct, ::module::NamespaceTag>>{}(*fbThriftData);
 }
@@ -787,7 +787,7 @@ Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::NonCopyableUn
       return extractorError<::cpp2::NonCopyableUnion>(
           "Marshal error: NonCopyableUnion");
   }
-  StrongRef fbThriftData(getThriftData(obj));
+  StrongRef fbThriftData(getThriftUnionFieldData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
       ::cpp2::NonCopyableUnion, ::module::NamespaceTag>>{}(*fbThriftData);
 }

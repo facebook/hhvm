@@ -1055,9 +1055,10 @@ void Debugger::requestShutdown() {
   auto const threadInfo = &RI();
   DebuggerRequestInfo* requestInfo = nullptr;
   request_id_t threadId = -1;
+  bool shouldSendThreadExited = false;
 
   SCOPE_EXIT {
-    if (clientConnected() && threadId >= 0) {
+    if (clientConnected() && threadId >= 0 && shouldSendThreadExited) {
       sendThreadEventMessage(threadId, ThreadEventType::ThreadExited);
       m_session->getBreakpointManager()->onRequestShutdown(threadId);
     }
@@ -1087,6 +1088,16 @@ void Debugger::requestShutdown() {
 
     m_requestIdMap.erase(idItr);
     m_requestInfoMap.erase(infoItr);
+
+    // When we send a threadStart event, we check to see if we're executing
+    // either user functions or runtime functions. If yes, we send the start.
+    // This was to ensure that we don't send new start events after the
+    // debugger should have paused execution. For parity, only send exit
+    // events under the same criteria.
+    if (threadInfo->m_executing == RequestInfo::Executing::UserFunctions ||
+        threadInfo->m_executing == RequestInfo::Executing::RuntimeFunctions) {
+      shouldSendThreadExited = true;
+    }
 
     if (!g_context.isNull()) {
       g_context->removeDebuggerStdoutHook();

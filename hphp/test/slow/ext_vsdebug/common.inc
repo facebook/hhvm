@@ -527,11 +527,9 @@ function vsDebugCleanup($testProcess, $expectedExitCode = 0) {
   $msg = json_decode(getNextVsDebugMessage(), true);
   checkObjEqualRecursively($msg, dict[
     "type" => "event",
-    "event" => "thread",
-    "body" => dict[
-      "threadId" => 1,
-      "reason" => "exited"
-    ]]);
+    "event" => "terminated",
+    "body" => dict[]
+  ]);
 
   fclose($client);
 

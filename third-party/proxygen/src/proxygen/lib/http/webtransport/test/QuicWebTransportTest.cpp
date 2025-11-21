@@ -187,6 +187,64 @@ TEST_F(QuicWebTransportTest, WriteWithDeliveryCallback) {
   eventBase_.loop();
 }
 
+TEST_F(QuicWebTransportTest, CloseTransportCancelsReadTokens) {
+  WebTransport::StreamReadHandle* readHandle1 = nullptr;
+  WebTransport::StreamReadHandle* readHandle2 = nullptr;
+  folly::CancellationToken token1;
+  folly::CancellationToken token2;
+
+  // Create two read handles from incoming uni streams
+  EXPECT_CALL(*handler_, onNewUniStream(_))
+      .WillOnce([&](WebTransport::StreamReadHandle* handle) {
+        readHandle1 = handle;
+        token1 = handle->getCancelToken();
+      })
+      .WillOnce([&](WebTransport::StreamReadHandle* handle) {
+        readHandle2 = handle;
+        token2 = handle->getCancelToken();
+      });
+
+  // Trigger two incoming uni streams
+  socketDriver_.addReadEvent(2, nullptr, false);
+  socketDriver_.addReadEvent(6, nullptr, false);
+  eventBase_.loopOnce();
+
+  ASSERT_NE(readHandle1, nullptr);
+  ASSERT_NE(readHandle2, nullptr);
+  EXPECT_FALSE(token1.isCancellationRequested());
+  EXPECT_FALSE(token2.isCancellationRequested());
+
+  // Invoke read on the first handle (will be pending since no data)
+  auto future1 = readHandle1->readStreamData();
+  bool readErrorReceived = false;
+
+  std::move(future1)
+      .via(&eventBase_)
+      .thenTry([&](folly::Try<WebTransport::StreamData> result) {
+        EXPECT_TRUE(result.hasException());
+        // Verify the exception is a WebTransport::Exception
+        auto* ex = result.tryGetExceptionObject<WebTransport::Exception>();
+        ASSERT_NE(ex, nullptr);
+        // Verify the error code matches the connection error
+        // This is broken behavior but it's what mvfst currently does
+        EXPECT_EQ(ex->error, WT_ERROR_1);
+        readErrorReceived = true;
+      });
+
+  // Close the transport by delivering a connection error
+  EXPECT_CALL(*handler_, onSessionEnd(_));
+  socketDriver_.deliverConnectionError(quic::QuicError(
+      quic::ApplicationErrorCode(WT_ERROR_1), "connection close"));
+  eventBase_.loop();
+
+  // Verify both tokens are cancelled
+  EXPECT_TRUE(token1.isCancellationRequested());
+  EXPECT_TRUE(token2.isCancellationRequested());
+
+  // Verify the pending read received an error
+  EXPECT_TRUE(readErrorReceived);
+}
+
 // TODO:
 //
 // new streams with no handler

@@ -287,7 +287,9 @@ class WebTransportImpl : public WebTransport {
    public:
     StreamReadHandle(WebTransportImpl& impl, HTTPCodec::StreamID id);
 
-    ~StreamReadHandle() override = default;
+    ~StreamReadHandle() override {
+      cs_.requestCancellation();
+    }
 
     folly::SemiFuture<WebTransport::StreamData> readStreamData() override;
 

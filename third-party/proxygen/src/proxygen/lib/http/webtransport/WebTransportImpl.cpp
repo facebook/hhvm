@@ -444,6 +444,7 @@ WebTransport::FCState WebTransportImpl::StreamReadHandle::dataAvailable(
     return WebTransport::FCState::SESSION_CLOSED;
   }
 
+  eof_ = eof;
   if (readPromise_.valid()) {
     impl_.maybeGrantFlowControl(len);
     readPromise_.setValue(StreamData({.data = std::move(data), .fin = eof}));
@@ -455,7 +456,6 @@ WebTransport::FCState WebTransportImpl::StreamReadHandle::dataAvailable(
     }
   } else {
     buf_.append(std::move(data)); // ok if nullptr
-    eof_ = eof;
   }
   VLOG(4) << "dataAvailable buflen=" << buf_.chainLength();
   return (eof || buf_.chainLength() < kMaxWTIngressBuf)
@@ -494,7 +494,6 @@ void WebTransportImpl::StreamReadHandle::readError(
 void WebTransportImpl::StreamReadHandle::deliverReadError(
     const folly::exception_wrapper& ex) {
   ex_ = ex;
-  cs_.requestCancellation();
   if (readPromise_.valid()) {
     readPromise_.setException(ex);
     readPromise_ = emptyReadPromise();

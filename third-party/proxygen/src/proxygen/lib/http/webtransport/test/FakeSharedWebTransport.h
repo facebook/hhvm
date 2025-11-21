@@ -336,14 +336,17 @@ class FakeSharedWebTransport : public WebTransport {
   // exception
   folly::Expected<folly::Unit, ErrorCode> closeSession(
       folly::Optional<uint32_t> error = folly::none) override {
+    // TODO: This mirrors mvfst and WebTransportImpl behavior but seems wrong.
+    // A local code for stopSending/reset would be better that the input code.
+    auto closeCode = error.value_or(std::numeric_limits<uint32_t>::max());
     for (auto& h : writeHandles) {
       if (h.second->open()) {
-        h.second->resetStream(std::numeric_limits<uint32_t>::max());
+        h.second->resetStream(closeCode);
       }
     }
     writeHandles.clear();
     for (auto& h : readHandles) {
-      h.second->stopSending(std::numeric_limits<uint32_t>::max());
+      h.second->stopSending(closeCode);
     }
     readHandles.clear();
     if (peerHandler_) {

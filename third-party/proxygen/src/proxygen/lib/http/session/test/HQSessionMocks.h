@@ -14,7 +14,6 @@
 #include <proxygen/lib/http/session/HQStreamDispatcher.h>
 #include <proxygen/lib/http/session/test/HTTPSessionMocks.h>
 #include <proxygen/lib/http/session/test/HTTPTransactionMocks.h>
-#include <quic/dsr/test/Mocks.h>
 
 namespace proxygen {
 
@@ -382,13 +381,6 @@ class MockHQSession : public HQSession {
 
 class FakeHQHTTPCodecCallback : public FakeHTTPCodecCallback {
  public:
-};
-
-class MockQuicDSRRequestSender
-    : public MockDSRRequestSender
-    , public quic::test::MockDSRPacketizationRequestSender {
- public:
-  MockQuicDSRRequestSender() = default;
 };
 
 } // namespace proxygen

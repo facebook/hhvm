@@ -89,11 +89,6 @@ class HTTPTunnelSink
   void sendHeaders(const HTTPMessage&) override {
   }
 
-  bool sendHeadersWithDelegate(const HTTPMessage&,
-                               std::unique_ptr<DSRRequestSender>) override {
-    return true;
-  }
-
   void sendHeadersWithEOM(const HTTPMessage&) override {
     sendEOM();
   }

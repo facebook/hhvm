@@ -74,14 +74,6 @@ class MockHTTPMessageFilter : public HTTPMessageFilter {
                << this->getFilterName();
   };
 
-  void setAllowDSR(bool allow) {
-    allowDSR_ = allow;
-  }
-
-  bool allowDSR() const noexcept override {
-    return allowDSR_;
-  }
-
   void nextOnEOMPublic() {
     nextOnEOM();
   }
@@ -117,7 +109,6 @@ class MockHTTPMessageFilter : public HTTPMessageFilter {
   bool trackTrailersPassedThrough_{false};
   std::shared_ptr<const HTTPHeaders> requestHeadersCopy_;
   std::shared_ptr<const HTTPHeaders> requestTrailersCopy_;
-  bool allowDSR_{true};
 };
 
 } // namespace proxygen

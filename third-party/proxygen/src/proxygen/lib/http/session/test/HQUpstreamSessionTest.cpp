@@ -819,17 +819,6 @@ TEST_P(HQUpstreamSessionTest, OnConnectionErrorWithOpenStreamsPause) {
             ConnectionCloseReason::SHUTDOWN);
 }
 
-TEST_P(HQUpstreamSessionTest, RejectDelegateSending) {
-  auto handler = openTransaction();
-  auto dsrRequestSender = std::make_unique<MockDSRRequestSender>();
-  EXPECT_FALSE(handler->txn_->sendHeadersWithDelegate(
-      getGetRequest(), std::move(dsrRequestSender)));
-  handler->expectDetachTransaction();
-  handler->terminate();
-  eventBase_.loop();
-  hqSession_->closeWhenIdle();
-}
-
 TEST_P(HQUpstreamSessionTest, GoawayStreamsUnacknowledged) {
   std::vector<std::unique_ptr<StrictMock<MockHTTPHandler>>> handlers;
   auto numStreams = 4;

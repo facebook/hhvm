@@ -61,17 +61,6 @@ class HTTPHandlerBase {
     txn_->sendHeaders(reply);
   }
 
-  bool sendHeadersWithDelegate(uint32_t code,
-                               uint32_t content_length,
-                               std::unique_ptr<DSRRequestSender> dsrSender) {
-    HTTPMessage response;
-    response.setStatusCode(code);
-    response.setHTTPVersion(1, 1);
-    response.getHeaders().add(HTTP_HEADER_CONTENT_LENGTH,
-                              folly::to<std::string>(content_length));
-    return txn_->sendHeadersWithDelegate(response, std::move(dsrSender));
-  }
-
   void sendReply() {
     sendReplyCode(200);
   }
@@ -618,12 +607,6 @@ class MockHTTPSessionInfoCallback : public HTTPSession::InfoCallback {
   MOCK_METHOD(void, onEgressBufferCleared, (const HTTPSessionBase&));
   MOCK_METHOD(void, onSettings, (const HTTPSessionBase&, const SettingsList&));
   MOCK_METHOD(void, onSettingsAck, (const HTTPSessionBase&));
-};
-
-class MockDSRRequestSender : public DSRRequestSender {
- public:
-  MockDSRRequestSender() = default;
-  MOCK_METHOD1(onHeaderBytesGenerated, void(size_t));
 };
 
 } // namespace proxygen

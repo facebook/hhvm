@@ -57,8 +57,6 @@ class HTTPSink {
   virtual void detachAndAbortIfIncomplete(std::unique_ptr<HTTPSink> self) = 0;
   // Sending data
   virtual void sendHeaders(const HTTPMessage& headers) = 0;
-  virtual bool sendHeadersWithDelegate(
-      const HTTPMessage& headers, std::unique_ptr<DSRRequestSender> sender) = 0;
   virtual void sendHeadersWithEOM(const HTTPMessage& headers) = 0;
   virtual void sendHeadersWithOptionalEOM(const HTTPMessage& headers,
                                           bool eom) = 0;

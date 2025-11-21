@@ -114,7 +114,6 @@ HTTPTransaction::HTTPTransaction(
       wtConnectStream_(false),
       egressHeadersDelivered_(false),
       has1xxResponse_(false),
-      isDelegated_(false),
       deferredNoError_(false),
       upgraded_(false),
       idleTimeout_(defaultIdleTimeout),
@@ -620,7 +619,6 @@ void HTTPTransaction::markEgressComplete() {
     transport_.notifyEgressBodyBuffered(-deferredEgressBodyBytes);
   }
   deferredEgressBody_.move();
-  deferredBufferMeta_.length = 0;
   if (isEnqueued()) {
     dequeue();
   }
@@ -1133,111 +1131,6 @@ void HTTPTransaction::sendHeadersWithOptionalEOM(const HTTPMessage& headers,
   flushWindowUpdate();
 }
 
-bool HTTPTransaction::delegatedTransactionChecks(
-    const HTTPMessage& headers) noexcept {
-  if (!delegatedTransactionChecks()) {
-    return false;
-  }
-  // DSR txn is for downstream response only
-  INVARIANT_RETURN(!headers.isRequest(), false);
-
-  const auto& contentLen =
-      headers.getHeaders().getSingleOrEmpty(HTTP_HEADER_CONTENT_LENGTH);
-  if (contentLen.empty()) {
-    LOG(ERROR) << "Delegate response must include CL header. txn=" << *this;
-    return false;
-  }
-  expectedResponseLength_ = folly::to<uint64_t>(contentLen);
-  return true;
-}
-
-bool HTTPTransaction::delegatedTransactionChecks() noexcept {
-  // TODO: We should examine if it's possible to actually support 1xx resp.
-  // For now, just bail from such case.
-  if (has1xxResponse_ || headRequest_ || isPushed()) {
-    LOG(ERROR) << "This transaction cannot be delegated";
-    return false;
-  }
-  if (direction_ == TransportDirection::UPSTREAM) {
-    LOG(ERROR) << "Upstream transaction cannot be delegated";
-    return false;
-  }
-  auto codecProtocol = transport_.getCodec().getProtocol();
-  if (codecProtocol != CodecProtocol::HTTP_3 &&
-      codecProtocol != CodecProtocol::HQ) {
-    LOG(ERROR) << "Only H3 and HQ can be delegated";
-    return false;
-  }
-  // Mixed body types is not supported
-  INVARIANT_RETURN(deferredEgressBody_.empty(), false);
-  INVARIANT_RETURN(!useFlowControl_, false);
-  INVARIANT_RETURN(!isEgressComplete(), false);
-  INVARIANT_RETURN(
-      egressState_ != HTTPTransactionEgressSM::State::ChunkHeaderSent, false);
-  return true;
-}
-
-bool HTTPTransaction::sendHeadersWithDelegate(
-    const HTTPMessage& headers, std::unique_ptr<DSRRequestSender> sender) {
-  auto okToDelegate = delegatedTransactionChecks(headers);
-  if (!okToDelegate) {
-    LOG(ERROR) << "This transaction can not use delegated body sending. txn="
-               << *this;
-    return false;
-  }
-  isDelegated_ = true;
-  if (!validateEgressStateTransition(
-          HTTPTransactionEgressSM::Event::sendHeaders)) {
-    return false;
-  }
-
-  lastResponseStatus_ = headers.getStatusCode();
-  HTTPHeaderSize size;
-  size_t dataFrameHeaderSize = 0;
-  if (!transport_.sendHeadersWithDelegate(this,
-                                          headers,
-                                          &size,
-                                          &dataFrameHeaderSize,
-                                          *expectedResponseLength_,
-                                          std::move(sender))) {
-    return false;
-  }
-  if (transportCallback_) {
-    transportCallback_->headerBytesGenerated(size);
-    transportCallback_->bodyBytesGenerated(dataFrameHeaderSize);
-  }
-  if (txnObserverContainer_.hasObserversForEvent<
-          HTTPTransactionObserverInterface::Events::TxnBytes>()) {
-    const auto ts = proxygen::SteadyClock::now();
-    const auto he =
-        HTTPTransactionObserverInterface::TxnBytesEvent::Builder()
-            .setTimestamp(ts)
-            .setType(HTTPTransactionObserverInterface::TxnBytesEvent::Type::
-                         HEADER_BYTES_GENERATED)
-            .setNumBytes(size.compressed ? size.compressed : size.uncompressed)
-            .setHeaders(headers)
-            .build();
-    txnObserverContainer_.invokeInterfaceMethod<
-        HTTPTransactionObserverInterface::Events::TxnBytes>(
-        [&he](auto observer, auto observed) {
-          observer->onBytesEvent(observed, he);
-        });
-    const auto be = HTTPTransactionObserverInterface::TxnBytesEvent::Builder()
-                        .setTimestamp(ts)
-                        .setType(HTTPTransactionObserverInterface::
-                                     TxnBytesEvent::Type::BODY_BYTES_GENERATED)
-                        .setNumBytes(dataFrameHeaderSize)
-                        .build();
-    txnObserverContainer_.invokeInterfaceMethod<
-        HTTPTransactionObserverInterface::Events::TxnBytes>(
-        [&be](auto observer, auto observed) {
-          observer->onBytesEvent(observed, be);
-        });
-  }
-  updateEgressCompressionInfo(transport_.getCodec().getCompressionInfo());
-  return true;
-}
-
 void HTTPTransaction::sendHeadersWithEOM(const HTTPMessage& header) {
   sendHeadersWithOptionalEOM(header, true);
 }
@@ -1253,7 +1146,6 @@ void HTTPTransaction::sendBody(std::unique_ptr<folly::IOBuf> body) {
        !transport_.getCodec().supportsParallelRequests()); // see
                                                            // sendChunkHeader
 
-  INVARIANT(deferredBufferMeta_.length == 0);
   if (!validateEgressStateTransition(
           HTTPTransactionEgressSM::Event::sendBody)) {
     return;
@@ -1275,23 +1167,6 @@ void HTTPTransaction::sendBody(std::unique_ptr<folly::IOBuf> body) {
     transport_.notifyEgressBodyBuffered(bodyLen);
   }
   notifyTransportPendingEgress();
-}
-
-bool HTTPTransaction::addBufferMeta() noexcept {
-  DestructorGuard guard(this);
-  if (!validateEgressStateTransition(
-          HTTPTransactionEgressSM::Event::sendBody)) {
-    return false;
-  }
-  INVARIANT_RETURN(!deferredBufferMeta_.length, false);
-  INVARIANT_RETURN(!actualResponseLength_ || !*actualResponseLength_, false);
-  auto bufferMetaLen = *expectedResponseLength_;
-  deferredBufferMeta_.length = bufferMetaLen;
-  actualResponseLength_ = bufferMetaLen;
-  transport_.notifyEgressBodyBuffered(bufferMetaLen);
-
-  notifyTransportPendingEgress();
-  return true;
 }
 
 bool HTTPTransaction::onWriteReady(const uint32_t maxEgress, double ratio) {
@@ -1328,13 +1203,8 @@ size_t HTTPTransaction::sendDeferredBody(uint32_t maxEgress) {
 
   if (chunkHeaders_.empty()) {
     if (deferredEgressBody_.chainLength() > 0) {
-      INVARIANT_RETURN(deferredBufferMeta_.length == 0, 0);
       std::unique_ptr<IOBuf> body = deferredEgressBody_.split(canSend);
       nbytes = sendBodyNow(std::move(body), canSend, hasPendingEOM());
-    }
-    if (deferredBufferMeta_.length > 0) {
-      INVARIANT_RETURN(delegatedTransactionChecks(), 0);
-      nbytes += sendDeferredBufferMeta(canSend);
     }
   } else {
     size_t curLen = 0;
@@ -1384,44 +1254,6 @@ size_t HTTPTransaction::sendDeferredBody(uint32_t maxEgress) {
         [&e](auto observer, auto observed) {
           observer->onBytesEvent(observed, e);
         });
-  }
-  return nbytes;
-}
-
-size_t HTTPTransaction::sendDeferredBufferMeta(uint32_t maxEgress) {
-  auto bufferMeta = deferredBufferMeta_.split(maxEgress);
-  INVARIANT_RETURN(bufferMeta.length > 0, 0);
-  auto okToDelegate = delegatedTransactionChecks();
-  if (!okToDelegate) {
-    VLOG(2) << "Cannot send deferred buffer meta due to "
-               "delegatedTransactionChecks. txn="
-            << *this;
-    return 0;
-  }
-  auto sendEom = hasPendingEOM();
-  VLOG(4) << "DSR transaction sending " << bufferMeta.length
-          << " bytes of body. eom=" << ((sendEom) ? "yes" : "no") << " "
-          << *this;
-
-  size_t nbytes = 0;
-  transport_.notifyEgressBodyBuffered(-static_cast<int64_t>(bufferMeta.length));
-  if (sendEom) {
-    if (!validateEgressStateTransition(
-            HTTPTransactionEgressSM::Event::eomFlushed)) {
-      return 0;
-    }
-  }
-  updateReadTimeout();
-  nbytes = transport_.sendBody(this, bufferMeta, sendEom);
-  bodyBytesEgressed_ += bufferMeta.length;
-  for (auto it = egressBodyOffsetsToTrack_.begin();
-       it != egressBodyOffsetsToTrack_.end() && it->first < bodyBytesEgressed_;
-       it = egressBodyOffsetsToTrack_.begin()) {
-    transport_.trackEgressBodyOffset(it->first, it->second);
-    egressBodyOffsetsToTrack_.erase(it);
-  }
-  if (egressLimitBytesPerMs_ > 0) {
-    numLimitedBytesEgressed_ += nbytes;
   }
   return nbytes;
 }
@@ -1629,9 +1461,9 @@ void HTTPTransaction::sendEOM() {
               << "ingressState=" << ingressState_ << ", "
               << "egressPaused=" << egressPaused_ << ", "
               << "ingressPaused=" << ingressPaused_ << ", "
-              << "aborted=" << aborted_ << ", " << "enqueued=" << isEnqueued()
-              << ", " << "chainLength=" << deferredEgressBody_.chainLength()
-              << ", " << "bufferMetaLen=" << deferredBufferMeta_.length << "]"
+              << "aborted=" << aborted_ << ", "
+              << "enqueued=" << isEnqueued() << ", "
+              << "chainLength=" << deferredEgressBody_.chainLength() << "]"
               << " on " << *this;
     }
   } else {
@@ -1939,11 +1771,6 @@ void HTTPTransaction::checkCreateDeferredIngress() {
 
 bool HTTPTransaction::onPushedTransaction(HTTPTransaction* pushTxn) {
   DestructorGuard g(this);
-  if (isDelegated_) {
-    LOG(ERROR) << "Adding Pushed transaction on a delegated HTTPTransaction "
-               << "is not supported. txn=" << *this;
-    return false;
-  }
   INVARIANT_RETURN(*pushTxn->assocStreamId_ == id_, false);
   if (!handler_) {
     VLOG(4) << "Cannot add a pushed txn to an unhandled txn";
@@ -1961,11 +1788,6 @@ bool HTTPTransaction::onPushedTransaction(HTTPTransaction* pushTxn) {
 
 bool HTTPTransaction::onExTransaction(HTTPTransaction* exTxn) {
   DestructorGuard g(this);
-  if (isDelegated_) {
-    LOG(ERROR) << "Adding ExTransaction on a delegated HTTPTransaction is "
-               << "not supported. txn=" << *this;
-    return false;
-  }
   INVARIANT_RETURN(*(exTxn->getControlStream()) == id_, false);
   if (!handler_) {
     LOG(ERROR) << "Cannot add a exTxn to an unhandled txn";

@@ -1303,22 +1303,10 @@ class HQSession
                      HTTPHeaderSize* size,
                      bool includeEOM) noexcept override;
 
-    bool sendHeadersWithDelegate(
-        HTTPTransaction* txn,
-        const HTTPMessage& headers,
-        HTTPHeaderSize* size,
-        size_t* dataFrameHeaderSize,
-        uint64_t contentLength,
-        std::unique_ptr<DSRRequestSender> dsrSender) noexcept override;
-
     size_t sendBody(HTTPTransaction* txn,
                     std::unique_ptr<folly::IOBuf> body,
                     bool includeEOM,
                     bool trackLastByteFlushed) noexcept override;
-
-    size_t sendBody(HTTPTransaction* txn,
-                    const HTTPTransaction::BufferMeta& body,
-                    bool eom) noexcept override;
 
     size_t sendChunkHeader(HTTPTransaction* txn,
                            size_t length) noexcept override;
@@ -1683,8 +1671,7 @@ class HQSession
      * queue.
      */
     uint64_t streamWriteByteOffset() const {
-      return streamEgressCommittedByteOffset() + writeBuf_.chainLength() +
-             bufMeta_.length;
+      return streamEgressCommittedByteOffset() + writeBuf_.chainLength();
     }
 
     void abortIngress();
@@ -1716,10 +1703,6 @@ class HQSession
 
     // Stream + session protocol info
     std::shared_ptr<QuicStreamProtocolInfo> quicStreamProtocolInfo_;
-
-    // BufferMeta represents a buffer that isn't owned by this stream but a
-    // remote entity.
-    HTTPTransaction::BufferMeta bufMeta_;
 
     void armStreamByteEventCb(uint64_t streamOffset,
                               quic::ByteEvent::Type type);

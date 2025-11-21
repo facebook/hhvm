@@ -86,12 +86,6 @@ class HTTPStreamSourceUpstreamSink
   void sendHeaders(const HTTPMessage& headers) override {
     sendHeadersWithOptionalEOM(headers, false);
   }
-  bool sendHeadersWithDelegate(
-      const HTTPMessage& headers,
-      std::unique_ptr<DSRRequestSender> sender) override {
-    LOG(FATAL) << "No DSR yet in proxygen::coro";
-    return false;
-  }
   void sendHeadersWithEOM(const HTTPMessage& headers) override {
     sendHeadersWithOptionalEOM(headers, true);
   }

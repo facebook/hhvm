@@ -17,6 +17,5 @@ proxygen_add_test(TARGET TransportTests
       proxygen
       testmain
       mvfst::mvfst_codec_types
-      mvfst::mvfst_dsr_types
       mvfst::mvfst_state_machine
 )

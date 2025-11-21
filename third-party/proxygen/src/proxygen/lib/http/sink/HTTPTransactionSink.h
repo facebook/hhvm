@@ -78,12 +78,6 @@ class HTTPTransactionSink : public HTTPSink {
   void sendHeaders(const HTTPMessage& headers) override {
     httpTransaction_->sendHeaders(headers);
   }
-  bool sendHeadersWithDelegate(
-      const HTTPMessage& headers,
-      std::unique_ptr<DSRRequestSender> sender) override {
-    return httpTransaction_->sendHeadersWithDelegate(headers,
-                                                     std::move(sender));
-  }
   void sendHeadersWithEOM(const HTTPMessage& headers) override {
     httpTransaction_->sendHeadersWithEOM(headers);
   }

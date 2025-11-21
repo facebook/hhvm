@@ -40,17 +40,6 @@ class MockHTTPTransactionTransport : public HTTPTransaction::Transport {
               (HTTPTransaction*, std::shared_ptr<folly::IOBuf>, bool, bool),
               (noexcept));
 
-  MOCK_METHOD((size_t),
-              sendBodyMeta,
-              (HTTPTransaction*, size_t bufferMetaLength, bool),
-              (noexcept));
-
-  size_t sendBody(HTTPTransaction* txn,
-                  const HTTPTransaction::BufferMeta& bufferMeta,
-                  bool eom) noexcept override {
-    return sendBodyMeta(txn, bufferMeta.length, eom);
-  }
-
   size_t sendBody(HTTPTransaction* txn,
                   std::unique_ptr<folly::IOBuf> iob,
                   bool eom,
@@ -447,7 +436,6 @@ class MockHTTPTransaction : public HTTPTransaction {
               removeWaitingForReplaySafety,
               (folly::AsyncTransport::ReplaySafetyCallback*));
   MOCK_METHOD(void, updateAndSendPriority, (HTTPPriority));
-  MOCK_METHOD((bool), addBufferMeta, (), (noexcept));
   void enablePush() {
     EXPECT_CALL(mockTransport_.mockCodec_, supportsPushTransactions())
         .WillRepeatedly(testing::Return(true));

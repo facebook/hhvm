@@ -45,14 +45,6 @@ class HTTPMessageFilter
 
   virtual std::unique_ptr<HTTPMessageFilter> clone() noexcept = 0;
 
-  // This function is used to validate whether a request could be DSRed.
-  // The function is called pre-delegation. For body mutating filters,
-  // allowDSR should return false. Other examples, beside body mutating,
-  // is a filter which rate limit the response delivery
-  // Note that allowDSR is a pure virtual to make the filter author
-  // aware of it
-  virtual bool allowDSR() const noexcept = 0;
-
   // These HTTPTransaction::Handler callbacks may be overwritten
   // The default behavior is to pass the call through.
   void onHeadersComplete(std::unique_ptr<HTTPMessage> msg) noexcept override {

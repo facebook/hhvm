@@ -59,6 +59,5 @@ proxygen_add_test(TARGET HQSessionTests
     proxygen
     testmain
     mvfst::mvfst_codec_types
-    mvfst::mvfst_dsr_types
     mvfst::mvfst_state_machine
 )

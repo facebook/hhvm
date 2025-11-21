@@ -684,11 +684,11 @@ size_t HQSession::HQStreamTransportBase::changePriority(
 }
 
 size_t HQSession::HQStreamTransportBase::writeBufferSize() const {
-  return writeBuf_.chainLength() + bufMeta_.length;
+  return writeBuf_.chainLength();
 }
 
 bool HQSession::HQStreamTransportBase::hasWriteBuffer() const {
-  return writeBuf_.chainLength() != 0 || bufMeta_.length != 0;
+  return writeBuf_.chainLength() != 0;
 }
 
 bool HQSession::HQStreamTransportBase::hasPendingBody() const {
@@ -1413,8 +1413,6 @@ void HQSession::clearStreamCallbacks(quic::StreamId id) {
   if (sock_) {
     sock_->setReadCallback(id, nullptr, std::nullopt);
     sock_->setPeekCallback(id, nullptr);
-    sock_->setDSRPacketizationRequestSender(id, nullptr);
-
   } else {
     VLOG(4) << "Attempt to clear callbacks on closed socket";
   }
@@ -2061,14 +2059,6 @@ uint64_t HQSession::requestStreamWriteImpl(HQStreamTransportBase* hqStream,
     return sock_->writeChain(
         streamId, std::move(data), sendEof, deliveryCallback);
   };
-  auto bufMetaWritter =
-      [&](quic::StreamId streamId,
-          quic::BufferMeta bufMeta,
-          bool sendEof,
-          quic::QuicSocket::DeliveryCallback* deliveryCallback) {
-        return sock_->writeBufMeta(
-            streamId, bufMeta, sendEof, deliveryCallback);
-      };
 
   size_t sent = 0;
   auto bufSendLen = std::min(canSend, hqStream->writeBuf_.chainLength());
@@ -2085,19 +2075,6 @@ uint64_t HQSession::requestStreamWriteImpl(HQStreamTransportBase* hqStream,
                        std::move(tryWriteBuf),
                        bufSendLen,
                        sendEof);
-  }
-  auto bufMetaWriteLen =
-      std::min(canSend - bufSendLen, hqStream->bufMeta_.length);
-  auto splitBufMeta = hqStream->bufMeta_.split(bufMetaWriteLen);
-  // Refresh sendEof after previous write and the bufMEta split.
-  sendEof = (hqStream->pendingEOM_ && !hqStream->hasPendingBody());
-  if (sendEof || splitBufMeta.length > 0) {
-    quic::BufferMeta quicBufMeta(splitBufMeta.length);
-    sent += handleWrite(std::move(bufMetaWritter),
-                        hqStream,
-                        quicBufMeta,
-                        quicBufMeta.length,
-                        sendEof);
   }
 
   VLOG(4) << __func__ << " after write sess=" << *this
@@ -2882,62 +2859,6 @@ HQSession::HQStreamTransportBase::generateHeadersCommon(
   return std::make_pair(oldOffset, newOffset);
 }
 
-bool HQSession::HQStreamTransportBase::sendHeadersWithDelegate(
-    HTTPTransaction* txn,
-    const HTTPMessage& headers,
-    HTTPHeaderSize* size,
-    size_t* dataFrameHeaderSize,
-    uint64_t contentLength,
-    std::unique_ptr<DSRRequestSender> dsrSender) noexcept {
-  VLOG(4) << __func__ << " txn=" << *txn;
-  CHECK(hasEgressStreamId()) << __func__ << " invoked on stream without egress";
-  CHECK_EQ(txn, &txn_);
-  CHECK(!headers.isRequest())
-      << "Delegate sending can only happen with response";
-  CHECK(!txn->getAssocTxnId()) << "Delegate sending isn't supported with push";
-  if (!contentLength) {
-    return false;
-  }
-
-  updatePriority(headers);
-  auto g = folly::makeGuard(setActiveCodec(__func__));
-  auto streamId = getStreamId();
-  auto sock = session_.sock_;
-  if (!sock) {
-    LOG(ERROR) << __func__
-               << ": HQSession received delegate request without a QuicSocket";
-    return false;
-  }
-  auto dsrRequestSenderRawPtr = CHECK_NOTNULL(dsrSender.get());
-  auto quicDSRSenderRawPtr = dynamic_cast<quic::DSRPacketizationRequestSender*>(
-      dsrRequestSenderRawPtr);
-  if (!quicDSRSenderRawPtr) {
-    LOG(ERROR) << __func__ << ": The passed in DSRSender is of wrong type";
-    return false;
-  }
-  dsrSender.release();
-  auto setSenderRet = sock->setDSRPacketizationRequestSender(
-      streamId,
-      std::unique_ptr<quic::DSRPacketizationRequestSender>(
-          quicDSRSenderRawPtr));
-  if (setSenderRet.hasError()) {
-    LOG(ERROR) << __func__ << ": failed to set DSR sender, error="
-               << toString(setSenderRet.error());
-    return false;
-  }
-  generateHeadersCommon(streamId, headers, false /* includeEOM */, size);
-  // Write a DATA frame header with CL value
-  auto writeFrameHeaderResult =
-      hq::writeFrameHeader(writeBuf_, FrameType::DATA, contentLength);
-  if (writeFrameHeaderResult.hasError()) {
-    return false;
-  }
-  *dataFrameHeaderSize = *writeFrameHeaderResult;
-  notifyPendingEgress();
-  dsrRequestSenderRawPtr->onHeaderBytesGenerated(streamWriteByteOffset());
-  return true;
-}
-
 void HQSession::HQStreamTransportBase::sendHeaders(HTTPTransaction* txn,
                                                    const HTTPMessage& headers,
                                                    HTTPHeaderSize* size,
@@ -3104,7 +3025,6 @@ void HQSession::HQStreamTransportBase::abortEgress(bool checkForDetach) {
   VLOG(4) << "Aborting egress for " << txn_;
   byteEventTracker_.drainByteEvents();
   writeBuf_.move();
-  bufMeta_.length = 0;
   pendingEOM_ = false;
   if (queueHandle_.isStreamTransportEnqueued()) {
     VLOG(4) << "clearPendingEgress for " << txn_;
@@ -3236,51 +3156,6 @@ void HQSession::HQStreamTransportBase::notifyPendingEgress() noexcept {
   session_.scheduleWrite();
 }
 
-size_t HQSession::HQStreamTransportBase::sendBody(
-    HTTPTransaction* txn,
-    const HTTPTransaction::BufferMeta& body,
-    bool eom) noexcept {
-  VLOG(4) << __func__ << " len=" << body.length << " eof=" << eom
-          << " txn=" << *txn;
-  CHECK(hasEgressStreamId()) << __func__ << " invoked on stream without egress";
-  CHECK_EQ(txn, &txn_);
-
-  auto g = folly::makeGuard(setActiveCodec(__func__));
-  CHECK(codecStreamId_);
-
-  codecFilterChain->generateBodyDSR(
-      *codecStreamId_, body.length, HTTPCodec::NoPadding, eom);
-
-  uint64_t offset = streamWriteByteOffset();
-  bufMeta_.length += body.length;
-  bodyBytesEgressed_ += body.length;
-
-  if (auto httpSessionActivityTracker =
-          session_.getHTTPSessionActivityTracker()) {
-    httpSessionActivityTracker->addTrackedEgressByteEvent(
-        offset, body.length, &byteEventTracker_, txn);
-  }
-
-  if (body.length && !txn->testAndSetFirstByteSent()) {
-    byteEventTracker_.addFirstBodyByteEvent(offset, txn);
-  }
-
-  auto sock = session_.sock_;
-  auto streamId = getStreamId();
-  auto timeDiff = std::chrono::duration_cast<std::chrono::milliseconds>(
-      std::chrono::steady_clock::now() - createdTime);
-  if (sock && sock->getState() && sock->getState()->qLogger) {
-    sock->getState()->qLogger->addStreamStateUpdate(
-        streamId, quic::kBody, timeDiff);
-  }
-
-  if (eom) {
-    coalesceEOM(body.length);
-  }
-  notifyPendingEgress();
-  return body.length;
-}
-
 void HQSession::HQStreamTransportBase::coalesceEOM(size_t encodedBodyBytes) {
   session_.handleLastByteEvents(&byteEventTracker_,
                                 &txn_,
@@ -3310,7 +3185,6 @@ size_t HQSession::HQStreamTransportBase::sendBody(
           << " txn=" << txn_;
   CHECK(hasEgressStreamId()) << __func__ << " invoked on stream without egress";
   DCHECK(txn == &txn_);
-  CHECK_EQ(0, bufMeta_.length);
   uint64_t offset = streamWriteByteOffset();
 
   auto g = folly::makeGuard(setActiveCodec(__func__));

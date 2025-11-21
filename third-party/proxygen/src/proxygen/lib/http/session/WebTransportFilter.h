@@ -118,10 +118,6 @@ class WebTransportFilter
     return nullptr;
   }
 
-  [[nodiscard]] bool allowDSR() const noexcept override {
-    return false;
-  }
-
   void trackedByteEventTX(const ByteEvent& /*event*/) noexcept override {
   }
   void firstHeaderByteFlushed() noexcept override {

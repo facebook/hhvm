@@ -83,8 +83,6 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
     bool isPendingWriteCbStreamNotif{false};
     // data written by application
     folly::IOBufQueue unsentBuf{folly::IOBufQueue::cacheChainLength()};
-    // BufMeta written by application
-    WriteBufferMeta unsentBufMeta;
     bool pendingWriteEOF{false};
     // data waiting to be flushed
     folly::IOBufQueue pendingWriteBuf{folly::IOBufQueue::cacheChainLength()};
@@ -586,92 +584,6 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
               return {};
             }));
 
-    EXPECT_CALL(*sock_,
-                writeBufMeta(testing::_, testing::_, testing::_, testing::_))
-        .WillRepeatedly(testing::Invoke(
-            [this](StreamId id,
-                   const BufferMeta& data,
-                   bool eof,
-                   ByteEventCallback* cb) -> quic::MockQuicSocket::WriteResult {
-              ERROR_IF(id == kConnectionStreamId,
-                       "writeChain(kConnectionStreamId) not handled",
-                       return quic::make_unexpected(
-                           quic::LocalErrorCode::INTERNAL_ERROR));
-              checkNotReadOnlyStream(id);
-              auto& stream = streams_[id];
-              auto& connState = streams_[kConnectionStreamId];
-              ERROR_IF(connState.writeState == CLOSED,
-                       "writeChain on CLOSED connection",
-                       return quic::make_unexpected(
-                           quic::LocalErrorCode::INTERNAL_ERROR));
-              // check stream.writeState == ERROR -> deliver error
-              if (stream.writeState == ERROR) {
-                // if writes return a LocalErrorCode, reads are also in error
-                stream.readState = ERROR;
-                return quic::make_unexpected(
-                    quic::LocalErrorCode::INTERNAL_ERROR);
-              }
-              auto totalStreamLength =
-                  stream.nextWriteOffset + stream.unsentBuf.chainLength();
-              if (totalStreamLength == 0) {
-                return quic::make_unexpected(
-                    quic::LocalErrorCode::INTERNAL_ERROR);
-              }
-              if (stream.unsentBufMeta.offset == 0) {
-                // beginning offset = totalStreamLength
-                stream.unsentBufMeta.offset = totalStreamLength;
-              }
-              stream.unsentBufMeta.length += data.length;
-              if (eof) {
-                stream.unsentBufMeta.eof = true;
-              }
-              // clip to FCW
-              uint64_t length =
-                  std::min(static_cast<uint64_t>(stream.unsentBufMeta.length),
-                           stream.flowControlWindow);
-              length = std::min(length, connState.flowControlWindow);
-              auto toSend = stream.unsentBufMeta.split(length);
-              if (localAppCb_) {
-                if (sock_->isUnidirectionalStream(id)) {
-                  // localAppCb_->unidirectionalReadCallback(id,
-                  // toSend->clone());
-                } else {
-                  // localAppCb_->readCallback(id, toSend->clone());
-                }
-              }
-              stream.pendingBufMetaLength += toSend.length;
-              setStreamFlowControlWindow(id, stream.flowControlWindow - length);
-              setConnectionFlowControlWindow(connState.flowControlWindow -
-                                             length);
-              if (stream.unsentBufMeta.length == 0 && eof) {
-                stream.writeEOF = true;
-              } else if (eof) {
-                stream.pendingWriteEOF = eof;
-              }
-              if (cb) {
-                // The API doesn't allow for registering a last-byte tx cb here
-                auto finOffset = stream.nextWriteOffset +
-                                 stream.pendingBufMetaLength +
-                                 stream.unsentBufMeta.length;
-                auto type = quic::ByteEvent::Type::ACK;
-                VLOG(4) << "onByteEventRegistered id=" << id
-                        << " offset=" << finOffset
-                        << " type=" << uint64_t(type);
-                cb->onByteEventRegistered(
-                    {.id = id, .offset = finOffset, .type = type});
-                stream.deliveryCallbacks.emplace_back(finOffset, cb);
-              }
-              eventBase_->runInLoop([this, deleted = deleted_] {
-                if (!*deleted) {
-                  flushWrites();
-                }
-              });
-              CHECK(stream.unsentBufMeta.length == 0 ||
-                    stream.flowControlWindow == 0 ||
-                    connState.flowControlWindow == 0);
-              return {};
-            }));
-
     EXPECT_CALL(*sock_, closeGracefully())
         .WillRepeatedly(testing::Invoke([this]() {
           closeConnection();
@@ -704,7 +616,6 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
               stream.pendingWriteBuf.move();
               stream.pendingWriteCb.stream = nullptr;
               stream.pendingBufMetaLength = 0;
-              stream.unsentBufMeta.length = 0;
               cancelDeliveryCallbacks(id, stream);
               return {};
             }));
@@ -807,8 +718,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
                       LocalErrorCode::STREAM_NOT_EXISTS));
               return it->second.pendingWriteBuf.chainLength() +
                      it->second.unsentBuf.chainLength() +
-                     it->second.pendingBufMetaLength +
-                     it->second.unsentBufMeta.length;
+                     it->second.pendingBufMetaLength;
             }));
     EXPECT_CALL(*sock_,
                 registerDeliveryCallback(testing::_, testing::_, testing::_))
@@ -1641,8 +1551,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
         if (stream.first == kConnectionStreamId) {
           continue;
         }
-        if ((!stream.second.unsentBuf.empty() ||
-             stream.second.unsentBufMeta.length > 0) &&
+        if (!stream.second.unsentBuf.empty() &&
             stream.second.flowControlWindow > 0) {
           resumeWrites(stream.first, /*connFCEvent=*/true);
         }
@@ -1720,12 +1629,6 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
       // re-invoke write chain with the pending data
       sock_->writeChain(
           streamId, stream.unsentBuf.move(), stream.pendingWriteEOF, nullptr);
-    }
-    if (stream.unsentBufMeta.length > 0) {
-      sock_->writeBufMeta(streamId,
-                          quic::BufferMeta(stream.unsentBufMeta.length),
-                          stream.unsentBufMeta.eof,
-                          nullptr);
     }
   }
 

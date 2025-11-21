@@ -414,7 +414,6 @@ struct IsSupportedCppType<type::cpp_type<T, Tag>> {
           std::is_same_v<T, folly::fbstring> ||
           std::is_same_v<T, std::string> ||
           std::is_same_v<T, ManagedStringViewWithConversions>;
-      ;
     } else if constexpr (type::is_a_v<Tag, type::container_c>) {
       return HasValueType<T>::value;
     }

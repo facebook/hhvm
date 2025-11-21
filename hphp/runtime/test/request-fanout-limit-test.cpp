@@ -4,6 +4,7 @@
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/request-fanout-limit.h"
 #include "hphp/runtime/base/request-id.h"
+#include "hphp/system/systemlib.h"
 
 using namespace testing;
 
@@ -84,6 +85,22 @@ TEST_F(RequestFanoutLimitTest, HighConcurrency) {
     t.join();
   }
   EXPECT_EQ(limit->getCurrentCount(root_req_id), 1);
+}
+
+TEST_F(RequestFanoutLimitTest, IncrementWithExceededLimit) {
+  auto id = RequestId::allocate();
+  EXPECT_GT(id.id(), 0);
+  
+  // Initial state
+  EXPECT_EQ(limit_->getCurrentCount(id), -1);
+  
+  // increment should succeed up to the limit
+  limit_->increment(id);
+  limit_->increment(id);
+  EXPECT_EQ(limit_->getCurrentCount(id), 3);
+
+  // Increment should fail when limit is exceeded
+  EXPECT_ANY_THROW(limit_->increment(id));
 }
 
 } // namespace HPHP

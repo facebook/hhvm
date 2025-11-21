@@ -91,6 +91,7 @@ namespace HPHP::SystemLib {
   x(DynMethCallerHelper,, \\__SystemLib\\)      \
   x(Traversable, HH_, HH\\)                     \
   x(Iterator, HH_, HH\\)                        \
+  x(RequestFanoutLimitExceededException,,)      \
 /* */
 
 extern bool s_anyNonPersistentBuiltins;
@@ -134,6 +135,7 @@ Object AllocLazyKVZipIterableObject(const Variant& mp);
 
 Object AllocLazyIterableViewObject(const Variant& iterable);
 Object AllocLazyKeyedIterableViewObject(const Variant& iterable);
+Object AllocRequestFanoutLimitExceededExceptionObject(const Variant& message);
 
 [[noreturn]] void throwExceptionObject(const Variant& message);
 [[noreturn]] void throwErrorObject(const Variant& message);
@@ -171,6 +173,7 @@ void throwSoapFaultObject(const Variant& code,
 [[noreturn]] void throwCoeffectViolationExceptionObject(const Variant& message);
 [[noreturn]] void throwModuleBoundaryViolationExceptionObject(const Variant& message);
 [[noreturn]] void throwDeploymentBoundaryViolationExceptionObject(const Variant& message);
+[[noreturn]] void throwRequestFanoutLimitExceededExceptionObject(const Variant& message);
 
 /**
  * Register a persistent unit to be re-merged (in non-repo mode)

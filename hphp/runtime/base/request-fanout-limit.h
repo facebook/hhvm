@@ -101,7 +101,7 @@ public:
 private:
   const int m_limit;
   RootRequestIDToThreadCnt m_map;
-  
+
   ServiceData::ExportedCounter* m_fanoutLogger{nullptr};
 };
 

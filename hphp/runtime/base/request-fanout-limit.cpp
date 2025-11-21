@@ -14,8 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/server/server-note.h"
 #include "hphp/runtime/base/request-fanout-limit.h"
+
+#include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/server/server-note.h"
+#include "hphp/system/systemlib.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/struct-log.h"
@@ -39,8 +42,13 @@ int64_t RequestFanoutLimit::RequestFanoutData::increment() {
   /**
    * Check the new count is below the configured fanout limit
    */
-  if (newCount > Cfg::Server::RequestFanoutLimit) {
-    // TODO add enforcement here
+  if (Cfg::Server::EnforceRequestFanout && newCount > Cfg::Server::RequestFanoutLimit) {
+    auto msg = folly::format("Request fanout limit exceeded.").str();
+    // In enforcement mode, we will throw an exception if the limit is exceeded
+    // and the request will not be queued for execution, so we need to rollback
+    // the incremented counter.
+    currentCount.fetch_sub(1, std::memory_order_acq_rel);
+    SystemLib::throwRequestFanoutLimitExceededExceptionObject(msg);
   }
 
   /**

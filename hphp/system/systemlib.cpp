@@ -246,6 +246,10 @@ Object AllocDeploymentBoundaryViolationExceptionObject(const Variant& message) {
   return createAndConstructThrowable(getDeploymentBoundaryViolationExceptionClass(), message);
 }
 
+Object AllocRequestFanoutLimitExceededExceptionObject(const Variant& message) {
+  return createAndConstructThrowable(getRequestFanoutLimitExceededExceptionClass(), message);
+}
+
 [[noreturn]] void throwExceptionObject(const Variant& message) {
   throw_object(AllocExceptionObject(message));
 }
@@ -351,6 +355,10 @@ Object AllocDeploymentBoundaryViolationExceptionObject(const Variant& message) {
 
 [[noreturn]] void throwDeploymentBoundaryViolationExceptionObject(const Variant& message) {
   throw_object(AllocDeploymentBoundaryViolationExceptionObject(message));
+}
+
+[[noreturn]] void throwRequestFanoutLimitExceededExceptionObject(const Variant& message) {
+  throw_object(AllocRequestFanoutLimitExceededExceptionObject(message));
 }
 
 #define ALLOC_OBJECT_STUB(name)                                         \

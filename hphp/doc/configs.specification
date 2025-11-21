@@ -92,6 +92,11 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Sample rate for logging the number of children threads spawn each root request.
 
+- bool Server.EnforceRequestFanout = false, yichenzhou
+
+  Enable enforcing the max number of xbox threads spawned by each hhvmworker request.
+  An Hack exception will be thrown if the limit is exceeded.
+
 - std::string Server.SecondaryType = "", UNKNOWN
 - int Server.SecondaryPort = 0, UNKNOWN
 

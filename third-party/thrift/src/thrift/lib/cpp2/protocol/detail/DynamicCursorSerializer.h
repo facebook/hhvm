@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#pragma once
 #include <thrift/lib/cpp2/protocol/CursorBasedSerializer.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>

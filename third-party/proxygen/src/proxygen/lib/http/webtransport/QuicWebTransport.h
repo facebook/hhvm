@@ -31,7 +31,11 @@ class QuicWebTransport
     quicSocket_->setDatagramCallback(this);
   }
 
-  ~QuicWebTransport() override = default;
+  ~QuicWebTransport() override {
+    // close session is a no-op if closeSession or onConnectionEnd/Error has
+    // been called
+    closeSessionImpl(folly::none);
+  }
 
   void setHandler(WebTransportHandler* handler) {
     handler_ = handler;
@@ -155,11 +159,25 @@ class QuicWebTransport
   }
 
   folly::Expected<folly::Unit, WebTransport::ErrorCode> closeSession(
-      folly::Optional<uint32_t> /*error*/) override;
+      folly::Optional<uint32_t> error) override {
+    return closeSessionImpl(std::move(error));
+  }
 
   void onDatagramsAvailable() noexcept override;
 
+  folly::Expected<folly::Unit, WebTransport::ErrorCode> closeSessionImpl(
+      folly::Optional<uint32_t> error);
   void onConnectionEndImpl(folly::Optional<quic::QuicError> error);
+
+  void clearQuicSocket() {
+    if (quicSocket_) {
+      // This should be a no-op if the transport correctly reset all callbacks
+      terminateSessionStreams(WebTransport::kInternalError, "socket teardown");
+      quicSocket_->setConnectionCallback(nullptr);
+      quicSocket_->setDatagramCallback(nullptr);
+      quicSocket_.reset();
+    }
+  }
 
   std::shared_ptr<quic::QuicSocket> quicSocket_;
   WebTransportHandler* handler_{nullptr};

@@ -372,7 +372,7 @@ class WebTransportImpl : public WebTransport {
     terminateSessionStreams(WebTransport::kSessionGone, "session terminated");
   }
 
- private:
+ protected:
   void terminateSessionStreams(uint32_t errorCode, const std::string& reason);
 
  public:

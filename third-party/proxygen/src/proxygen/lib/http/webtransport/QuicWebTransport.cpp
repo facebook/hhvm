@@ -69,8 +69,11 @@ void QuicWebTransport::onConnectionEndImpl(
       wtError = std::numeric_limits<uint32_t>::max();
     }
   }
-  quicSocket_.reset();
-  handler_->onSessionEnd(wtError);
+  clearQuicSocket();
+  if (handler_) {
+    handler_->onSessionEnd(wtError);
+    handler_ = nullptr;
+  }
 }
 
 folly::Expected<HTTPCodec::StreamID, WebTransport::ErrorCode>
@@ -212,14 +215,15 @@ QuicWebTransport::sendWTMaxStreams(uint64_t /*maxStreams*/, bool /*isBidi*/) {
 }
 
 folly::Expected<folly::Unit, WebTransport::ErrorCode>
-QuicWebTransport::closeSession(folly::Optional<uint32_t> error) {
+QuicWebTransport::closeSessionImpl(folly::Optional<uint32_t> error) {
+  handler_ = nullptr; // no need to deliver callbacks/onSessionEnd
   if (quicSocket_) {
     if (error) {
       quicSocket_->close(quic::QuicError(quic::ApplicationErrorCode(*error)));
     } else {
       quicSocket_->close(quic::QuicError(quic::ApplicationErrorCode(0)));
     }
-    quicSocket_.reset();
+    clearQuicSocket();
   } // else we came from connectionEnd/Error and quicSocket_ is reset
   return folly::unit;
 }
@@ -284,8 +288,10 @@ void QuicWebTransport::onDatagramsAvailable() noexcept {
     return;
   }
   VLOG(4) << "Received " << result.value().size() << " datagrams";
-  for (auto& datagram : result.value()) {
-    handler_->onDatagram(std::move(datagram));
+  if (handler_) {
+    for (auto& datagram : result.value()) {
+      handler_->onDatagram(std::move(datagram));
+    }
   }
 }
 

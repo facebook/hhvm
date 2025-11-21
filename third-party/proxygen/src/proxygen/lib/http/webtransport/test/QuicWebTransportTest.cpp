@@ -43,7 +43,9 @@ class QuicWebTransportTest : public Test {
   }
 
   void TearDown() override {
-    webTransport()->closeSession();
+    if (transport_) {
+      webTransport()->closeSession();
+    }
   }
 
   WebTransport* webTransport() {
@@ -243,6 +245,96 @@ TEST_F(QuicWebTransportTest, CloseTransportCancelsReadTokens) {
 
   // Verify the pending read received an error
   EXPECT_TRUE(readErrorReceived);
+}
+
+TEST_F(QuicWebTransportTest, DestructorTerminatesOpenStreams) {
+  WebTransport::StreamReadHandle* uniReadHandle = nullptr;
+  WebTransport::StreamReadHandle* bidiReadHandle = nullptr;
+  WebTransport::StreamWriteHandle* bidiWriteHandle = nullptr;
+  WebTransport::StreamWriteHandle* uniWriteHandle = nullptr;
+
+  // Create an incoming uni stream
+  EXPECT_CALL(*handler_, onNewUniStream(_))
+      .WillOnce([&](WebTransport::StreamReadHandle* handle) {
+        uniReadHandle = handle;
+      });
+  socketDriver_.addReadEvent(2, nullptr, false);
+  eventBase_.loopOnce();
+  ASSERT_NE(uniReadHandle, nullptr);
+
+  // Create an incoming bidi stream
+  EXPECT_CALL(*handler_, onNewBidiStream(_))
+      .WillOnce([&](WebTransport::BidiStreamHandle handle) {
+        bidiReadHandle = handle.readHandle;
+        bidiWriteHandle = handle.writeHandle;
+      });
+  socketDriver_.addReadEvent(0, nullptr, false);
+  eventBase_.loopOnce();
+  ASSERT_NE(bidiReadHandle, nullptr);
+  ASSERT_NE(bidiWriteHandle, nullptr);
+
+  // Create an outgoing uni stream
+  auto uniStreamRes = webTransport()->createUniStream();
+  ASSERT_TRUE(uniStreamRes.hasValue());
+  uniWriteHandle = uniStreamRes.value();
+
+  // Start pending read operations
+  bool uniReadErrorReceived = false;
+  bool bidiReadErrorReceived = false;
+
+  // When transport is deleted with no code passed to close, it passes 0 to the
+  // transport. Currently the transport echoes this error back to all open
+  // streams, hence ex->error is 0.
+  auto uniReadFuture = uniReadHandle->readStreamData();
+  std::move(uniReadFuture)
+      .via(&eventBase_)
+      .thenTry([&](folly::Try<WebTransport::StreamData> result) {
+        EXPECT_TRUE(result.hasException());
+        auto* ex = result.tryGetExceptionObject<WebTransport::Exception>();
+        ASSERT_NE(ex, nullptr);
+        EXPECT_EQ(ex->error, 0);
+        uniReadErrorReceived = true;
+      });
+
+  auto bidiReadFuture = bidiReadHandle->readStreamData();
+  std::move(bidiReadFuture)
+      .via(&eventBase_)
+      .thenTry([&](folly::Try<WebTransport::StreamData> result) {
+        EXPECT_TRUE(result.hasException());
+        auto* ex = result.tryGetExceptionObject<WebTransport::Exception>();
+        ASSERT_NE(ex, nullptr);
+        EXPECT_EQ(ex->error, 0);
+        bidiReadErrorReceived = true;
+      });
+
+  // Store cancellation tokens before destroying transport
+  auto uniReadToken = uniReadHandle->getCancelToken();
+  auto bidiReadToken = bidiReadHandle->getCancelToken();
+  auto bidiWriteToken = bidiWriteHandle->getCancelToken();
+  auto uniWriteToken = uniWriteHandle->getCancelToken();
+
+  // Verify cancellation tokens are not yet cancelled
+  EXPECT_FALSE(uniReadToken.isCancellationRequested());
+  EXPECT_FALSE(bidiReadToken.isCancellationRequested());
+  EXPECT_FALSE(bidiWriteToken.isCancellationRequested());
+  EXPECT_FALSE(uniWriteToken.isCancellationRequested());
+
+  // Destroy the transport - this triggers terminateSessionStreams in the
+  // destructor which calls stopReadingWebTransportIngress with an error code.
+  // The mock socket will transition stream states to ERROR, allowing clean
+  // shutdown.
+  transport_.reset();
+  eventBase_.loop();
+
+  // Verify all cancellation tokens are now cancelled
+  EXPECT_TRUE(uniReadToken.isCancellationRequested());
+  EXPECT_TRUE(bidiReadToken.isCancellationRequested());
+  EXPECT_TRUE(bidiWriteToken.isCancellationRequested());
+  EXPECT_TRUE(uniWriteToken.isCancellationRequested());
+
+  // Verify pending reads received errors
+  EXPECT_TRUE(uniReadErrorReceived);
+  EXPECT_TRUE(bidiReadErrorReceived);
 }
 
 // TODO:

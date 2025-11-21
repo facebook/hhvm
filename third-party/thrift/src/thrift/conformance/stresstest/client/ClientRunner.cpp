@@ -18,6 +18,7 @@
 
 #include <folly/coro/BlockingWait.h>
 #include <thrift/conformance/stresstest/util/Util.h>
+#include <thrift/lib/cpp2/transport/rocket/client/RocketClient.h>
 
 #include <folly/experimental/io/IoUringBackend.h>
 
@@ -260,6 +261,8 @@ ClientRunner::ClientRunner(const ClientConfig& config)
   rocket::THRIFT_FLAG_SET_MOCK(
       rocket_enable_frame_relative_alignment,
       config.enableRocketFrameRelativeAlignment);
+  THRIFT_FLAG_SET_MOCK(
+      rocket_client_set_eor_flag, config.enableRocketFrameRelativeAlignment);
   auto configCopy = config;
   configCopy.connConfig.connectCb = this;
   auto targetQpsPerClient = config.targetQps / config.numClientThreads;

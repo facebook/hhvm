@@ -259,3 +259,72 @@ TEST_F(WebTransportFilterTest, StreamCreationLimits) {
   // create more
   EXPECT_FALSE(filter->canCreateBidiStream());
 }
+
+TEST_F(WebTransportFilterTest,
+       OnCloseWebTransportSessionCapsuleWhenEgressComplete) {
+  // Test that sendEOM() is NOT called when transaction egress is already
+  // complete
+  auto egressQueueForPushed = std::make_unique<NiceMock<HTTP2PriorityQueue>>();
+
+  // Create an upstream transaction with assocStreamId set, which starts it in
+  // SendingDone state
+  auto txnWithEgressComplete = std::make_unique<NiceMock<MockHTTPTransaction>>(
+      TransportDirection::UPSTREAM, // Must be upstream for SendingDone
+      2,                            // stream id
+      0,                            // seq no
+      *egressQueueForPushed,
+      nullptr,                // timer
+      folly::none,            // idle timeout
+      nullptr,                // stats
+      false,                  // use flow control
+      1024,                   // receive window
+      1024,                   // send window
+      http2::DefaultPriority, // priority
+      1                       // assocStreamId - this triggers SendingDone
+  );
+
+  // Verify the transaction is in SendingDone state
+  EXPECT_TRUE(txnWithEgressComplete->isEgressComplete());
+
+  // Create a filter with this transaction
+  auto filterWithCompleteTxn = std::make_unique<MockWebTransportFilter>(
+      txnWithEgressComplete.get(), CodecVersion::H3);
+  filterWithCompleteTxn->setHandler(handler_.get());
+
+  // Verify that sendEOM() is NOT called when egress is already complete
+  EXPECT_CALL(*txnWithEgressComplete, sendEOM()).Times(0);
+
+  // Expect the capsule callback to be called and call through to the real
+  // implementation to test the fix
+  EXPECT_CALL(*filterWithCompleteTxn, onCloseWTSessionCapsule(_))
+      .WillOnce(Invoke([&](const CloseWebTransportSessionCapsule& capsule) {
+        filterWithCompleteTxn->WebTransportFilter::onCloseWTSessionCapsule(
+            capsule);
+      }));
+
+  EXPECT_CALL(*handler_, onSessionEnd(Optional<uint32_t>(WT_ERROR_CODE)));
+
+  auto capsuleData = createCloseSessionCapsule();
+  filterWithCompleteTxn->onBody(std::move(capsuleData));
+}
+
+TEST_F(WebTransportFilterTest,
+       OnCloseWebTransportSessionCapsuleWhenEgressNotComplete) {
+  // Verify the normal case where egress is not complete, sendEOM() should be
+  // called. The transaction is in Start state by default (not SendingDone).
+
+  // Verify that sendEOM() IS called when egress is not complete
+  EXPECT_CALL(*txn_, sendEOM()).Times(1);
+
+  // Expect the capsule callback to be called and call through to the real
+  // implementation to test the normal case
+  EXPECT_CALL(*filter_, onCloseWTSessionCapsule(_))
+      .WillOnce(Invoke([&](const CloseWebTransportSessionCapsule& capsule) {
+        filter_->WebTransportFilter::onCloseWTSessionCapsule(capsule);
+      }));
+
+  EXPECT_CALL(*handler_, onSessionEnd(Optional<uint32_t>(WT_ERROR_CODE)));
+
+  auto capsuleData = createCloseSessionCapsule();
+  filter_->onBody(std::move(capsuleData));
+}

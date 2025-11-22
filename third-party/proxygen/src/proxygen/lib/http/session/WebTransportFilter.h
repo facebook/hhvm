@@ -380,7 +380,9 @@ class WebTransportFilter
       handler_->onSessionEnd(capsule.applicationErrorCode);
     }
 
-    txn_->sendEOM();
+    if (txn_ && !txn_->isEgressComplete()) {
+      txn_->sendEOM();
+    }
   }
   void onDrainWTSessionCapsule(
       DrainWebTransportSessionCapsule /*capsule*/) noexcept override {

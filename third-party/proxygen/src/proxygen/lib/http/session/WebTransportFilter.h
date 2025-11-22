@@ -37,6 +37,11 @@ class WebTransportFilter
     codec_ = std::make_unique<WebTransportCapsuleCodec>(this, version);
     if (version == CodecVersion::H3) {
       h3Tp_ = txn_->getWTTransportProvider();
+    } else {
+      // For H2, start with 0 streams allowed until we receive max stream
+      // capsules
+      maxWTBidiStreams_ = 0;
+      maxWTUniStreams_ = 0;
     }
     txn_->setWTTransportProvider(
         static_cast<WebTransportImpl::TransportProvider*>(this));
@@ -390,8 +395,8 @@ class WebTransportFilter
   std::unique_ptr<CapsuleCodec> codec_;
   uint64_t nextNewWTBidiStream_{0};
   uint64_t nextNewWTUniStream_{2};
-  uint64_t maxWTBidiStreams_{0};
-  uint64_t maxWTUniStreams_{0};
+  uint64_t maxWTBidiStreams_{quic::kMaxVarInt};
+  uint64_t maxWTUniStreams_{quic::kMaxVarInt};
   folly::F14FastMap<HTTPCodec::StreamID, WebTransportImpl::StreamReadHandle*>
       readCallbacks_;
   struct WriteCallback {

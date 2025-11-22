@@ -217,7 +217,7 @@ TEST_F(WebTransportFilterTest, StreamCreationLimits) {
   auto filter =
       std::make_unique<WebTransportFilter>(txn_.get(), CodecVersion::H2);
 
-  // Initially should NOT be able to create streams since maxStreams is 0
+  // Initially should NOT be able to create streams since maxStreams is 0 for H2
   EXPECT_FALSE(filter->canCreateUniStream());
   EXPECT_FALSE(filter->canCreateBidiStream());
 

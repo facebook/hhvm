@@ -22,7 +22,6 @@
 #include <folly/experimental/io/IoUringBackend.h>
 #include <folly/init/Init.h>
 #include <folly/io/async/EventBase.h>
-#include <thrift/facebook/stresstest/grpc/server/GrpcAsyncServer.h>
 
 #include <gflags/gflags.h>
 #include <wangle/ssl/SSLContextConfig.h>
@@ -337,19 +336,6 @@ std::shared_ptr<ThriftServer> createStressTestServer(
     LOG(INFO) << "Setting defaultSyncMaxQpsToExecutionRate: true";
     THRIFT_FLAG_SET_MOCK(default_sync_max_qps_to_execution_rate, true);
   }
-
-  return server;
-}
-
-std::unique_ptr<GrpcAsyncServer> createGrpcStressTestServer() {
-  uint32_t numCompletionQueues = sanitizeNumThreads(FLAGS_io_threads);
-
-  auto server = std::make_unique<GrpcAsyncServer>();
-  server->setNumCompletionQueues(numCompletionQueues);
-  server->setNumWorkersPerCompletionQueue(1);
-  server->setPort(FLAGS_port);
-
-  server->start();
 
   return server;
 }

@@ -17,7 +17,6 @@
 #pragma once
 
 #include <thrift/conformance/stresstest/server/StressTestHandler.h>
-#include <thrift/facebook/stresstest/grpc/server/GrpcAsyncServer.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 
 namespace apache::thrift::stress {
@@ -27,7 +26,5 @@ std::shared_ptr<StressTestHandler> createStressTestHandler();
 std::shared_ptr<ThriftServer> createStressTestServer(
     std::shared_ptr<apache::thrift::ServiceHandler<StressTest>> handler =
         nullptr);
-
-std::unique_ptr<GrpcAsyncServer> createGrpcStressTestServer();
 
 } // namespace apache::thrift::stress

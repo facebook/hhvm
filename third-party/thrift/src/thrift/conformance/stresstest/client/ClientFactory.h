@@ -36,9 +36,6 @@ class ClientFactory {
   static std::unique_ptr<StressTestAsyncClient> createRocketClient(
       folly::EventBase* evb, const ClientConnectionConfig& cfg);
 
-  static std::shared_ptr<GrpcAsyncClient> createGrpcClient(
-      const ClientConnectionConfig& cfg);
-
   static void useCustomSslContext(
       std::function<std::shared_ptr<folly::SSLContext>()> fn);
   static void useCustomFizzClientContext(

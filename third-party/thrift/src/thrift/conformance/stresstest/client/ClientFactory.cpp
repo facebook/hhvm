@@ -16,10 +16,8 @@
 
 #include <thrift/conformance/stresstest/client/ClientFactory.h>
 #include <thrift/conformance/stresstest/client/FizzStopTLSConnector.h>
-#include <thrift/facebook/stresstest/grpc/client/GrpcAsyncClient.h>
 #include "common/services/cpp/security/FizzThriftFactory.h"
 
-#include <grpcpp/grpcpp.h>
 #include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/client/AsyncFizzClient.h>
 #include <fizz/client/MultiClientExtensions.h>
@@ -319,36 +317,6 @@ ClientFactory::createRocketClient(
   return std::make_unique<StressTestAsyncClient>(std::move(chan));
 }
 
-/* static */ std::shared_ptr<GrpcAsyncClient> ClientFactory::createGrpcClient(
-    const ClientConnectionConfig& cfg) {
-  std::string server_address = cfg.serverHost.describe();
-  ::grpc::ChannelArguments args;
-  args.SetInt(GRPC_ARG_MAX_CONCURRENT_STREAMS, 100);
-  args.SetInt(GRPC_ARG_HTTP2_MAX_PINGS_WITHOUT_DATA, 0);
-  args.SetInt(GRPC_ARG_KEEPALIVE_TIME_MS, 1000);
-  args.SetInt(GRPC_ARG_USE_LOCAL_SUBCHANNEL_POOL, 1);
-
-  auto channel = ::grpc::CreateCustomChannel(
-      server_address, ::grpc::InsecureChannelCredentials(), args);
-
-  // Wait for the channel to connect with a timeout
-  auto deadline = std::chrono::system_clock::now() + std::chrono::seconds(30);
-  if (!channel->WaitForConnected(deadline)) {
-    LOG(INFO) << "gRPC channel failed to connect";
-    folly::AsyncSocketException ex(
-        folly::AsyncSocketException::NOT_OPEN,
-        fmt::format(
-            "gRPC channel failed to connect to {}. Is the server running?",
-            server_address));
-    cfg.connectCb->connectErr(ex);
-  } else {
-    cfg.connectCb->connectSuccess();
-  }
-
-  return std::make_shared<GrpcAsyncClient>(
-      channel, FLAGS_grpc_async_client_poll_mode == "sync");
-}
-
 THRIFT_PLUGGABLE_FUNC_REGISTER(
     std::vector<std::unique_ptr<StressTestClient>>,
     createClients,
@@ -357,22 +325,7 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
     ClientRpcStats& stats) {
   std::vector<std::unique_ptr<StressTestClient>> clients;
 
-  // Check if gRPC client is requested
-  if (FLAGS_use_grpc_client) {
-    for (size_t connectionIdx = 0; connectionIdx < cfg.numConnectionsPerThread;
-         connectionIdx++) {
-      std::shared_ptr<GrpcAsyncClient> connection =
-          ClientFactory::createGrpcClient(cfg.connConfig);
-      // Create multiple GrpcStressTestClient instances that share the client
-      for (size_t i = 0; i < cfg.numClientsPerConnection; i++) {
-        clients.emplace_back(
-            std::make_unique<GrpcStressTestClient>(connection, stats));
-      }
-    }
-    return clients;
-  }
-
-  // Default: Create Thrift clients
+  // Create Thrift clients
   for (size_t connectionIdx = 0; connectionIdx < cfg.numConnectionsPerThread;
        connectionIdx++) {
     std::shared_ptr<StressTestAsyncClient> connection =

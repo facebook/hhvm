@@ -77,15 +77,6 @@ DEFINE_bool(
     enable_rocket_frame_relative_alignment,
     false,
     "Enable frame relative alignment. Default is false. (true, false)");
-DEFINE_bool(use_grpc_client, false, "Use gRPC client instead of Thrift client");
-DEFINE_string(
-    grpc_async_client_poll_mode,
-    "sync",
-    "Polling mode for gRPC client: 'sync' or 'async' (default: sync)");
-DEFINE_string(
-    grpc_client_mode,
-    "sync",
-    "gRPC client mode: 'sync' or 'async' (default: sync)");
 
 namespace apache::thrift::stress {
 

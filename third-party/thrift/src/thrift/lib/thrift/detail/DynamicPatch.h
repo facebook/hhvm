@@ -21,6 +21,7 @@
 #include <thrift/lib/cpp2/protocol/FieldMask.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
 #include <thrift/lib/cpp2/protocol/Patch.h>
+#include <thrift/lib/cpp2/protocol/detail/DynamicCursorSerializer.h>
 
 namespace apache::thrift::op::detail {
 template <typename>
@@ -55,6 +56,8 @@ using Badge = folly::badge<PatchBadgeFactory>;
 template <typename T, typename U>
 using if_same_type_after_remove_cvref = std::enable_if_t<
     std::is_same_v<folly::remove_cvref_t<T>, folly::remove_cvref_t<U>>>;
+
+using apache::thrift::detail::DynamicCursorSerializationWrapper;
 
 template <class PatchType>
 PatchType createPatchFromObject(Badge badge, Object obj) {
@@ -96,6 +99,21 @@ void checkHomogeneousContainer(const ValueList& l);
 void checkHomogeneousContainer(const ValueSet& s);
 void checkHomogeneousContainer(const ValueMap& m);
 
+/// Copy the next field in `in` to `out`
+template <class Reader, bool _>
+void forwardOneField(
+    thrift::detail::StructuredDynamicCursorReader<Reader, _>& in,
+    thrift::detail::StructuredDynamicCursorWriter<
+        typename Reader::ProtocolWriter>& out) {
+  auto id = in.fieldId();
+  auto type = in.fieldType();
+  if (type == protocol::TType::T_BOOL) {
+    // readRaw won't work with bool in compact protocol
+    out.write(id, type::bool_t{}, in.read(type::bool_t{}));
+  } else {
+    out.writeRaw(id, type, in.readRawCursor());
+  }
+}
 } // namespace detail
 
 class DynamicPatch;
@@ -601,6 +619,18 @@ class DynamicPatch {
 
   /// @endcond
 
+  template <class Reader, bool _>
+  void applyOneFieldInStream(
+      detail::Badge,
+      thrift::detail::StructuredDynamicCursorReader<Reader, _>& in,
+      thrift::detail::StructuredDynamicCursorWriter<
+          typename Reader::ProtocolWriter>& out) const {
+    auto id = in.fieldId();
+    auto value = in.readValue();
+    apply(value);
+    out.writeValue(id, value);
+  }
+
  private:
   DynamicListPatch& getStoredPatchByTag(type::list_c);
   DynamicSetPatch& getStoredPatchByTag(type::set_c);
@@ -914,6 +944,86 @@ class DynamicStructurePatch {
   FOLLY_FOR_EACH_THIS_OVERLOAD_IN_CLASS_BODY_DELEGATE(
       customVisit, customVisitImpl);
   void apply(detail::Badge, Object& obj) const;
+
+  /// @brief Applies the patch to the given blob and returns the result as a
+  /// blob. Throws if the patch is not applicable.
+  template <type::StandardProtocol Protocol>
+  std::unique_ptr<folly::IOBuf> applyToSerializedObject(
+      std::unique_ptr<folly::IOBuf> buf) const;
+
+  template <class Reader, bool _>
+  void applyAllFieldsInStream(
+      detail::Badge badge,
+      thrift::detail::StructuredDynamicCursorReader<Reader, _>& in,
+      thrift::detail::StructuredDynamicCursorWriter<
+          typename Reader::ProtocolWriter>& out) const {
+    static_assert(
+        (folly::always_false<Reader> || IsUnion) == false,
+        "apply to union stream is not implemented");
+    if (assign_) {
+      for (auto&& [k, v] : *assign_) {
+        out.writeValue(k, v);
+      }
+      return;
+    }
+
+    // TODO: optimize it by using folly::sorted_vector_set
+    folly::F14FastSet<FieldId> processed;
+
+    if (!clear_) {
+      while (in.fieldType() != protocol::TType::T_STOP) {
+        auto id = static_cast<FieldId>(in.fieldId());
+        processed.insert(id);
+        if (remove_.contains(id)) {
+          in.skip();
+          continue;
+        }
+
+        auto prior = folly::get_ptr(patchPrior_, id);
+        auto after = folly::get_ptr(patchAfter_, id);
+
+        if (!prior && !after) {
+          // The field is not modified. Forward the raw bytes to output.
+          detail::forwardOneField(in, out);
+          continue;
+        }
+
+        if (!prior) {
+          after->applyOneFieldInStream(badge, in, out);
+          continue;
+        }
+
+        if (!after) {
+          prior->applyOneFieldInStream(badge, in, out);
+          continue;
+        }
+
+        // Fallback to protocol::Value
+        auto value = in.readValue();
+        prior->apply(value);
+        after->apply(value);
+        out.writeValue(folly::to_underlying(id), value);
+      }
+    }
+
+    for (const auto& [id, v] : ensure_) {
+      if (processed.contains(id)) {
+        continue;
+      }
+
+      if (remove_.contains(id)) {
+        throw std::runtime_error(
+            "Patch that deleted ensured id: " +
+            std::to_string(folly::to_underlying(id)));
+      }
+
+      auto value = v;
+      if (auto p = folly::get_ptr(patchAfter_, id)) {
+        p->apply(value);
+      }
+      out.writeValue(folly::to_underlying(id), value);
+    }
+  }
 
  private:
   void undoChanges(FieldId);

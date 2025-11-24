@@ -227,6 +227,14 @@ void init(int n) {
   patch8 = getPatch8(n);
 }
 
+void applyStream(
+    DynamicPatch& patch, const std::unique_ptr<folly::IOBuf>& buf) {
+  auto& structPatch = patch.getStoredPatchByTag<type::struct_c>();
+  folly::doNotOptimizeAway(
+      structPatch.applyToSerializedObject<type::StandardProtocol::Compact>(
+          std::make_unique<folly::IOBuf>(*buf)));
+}
+
 BENCHMARK(few_small_fields) {
   patch1.applyToSerializedObjectWithoutExtractingMask<
       type::StandardProtocol::Compact>(*serialized1);
@@ -235,6 +243,12 @@ BENCHMARK(few_small_fields) {
 BENCHMARK_RELATIVE(few_small_fields_partial_deser) {
   patch1.applyToSerializedObject<type::StandardProtocol::Compact>(*serialized1);
 }
+
+BENCHMARK_RELATIVE(few_small_fields_stream) {
+  applyStream(patch1, serialized1);
+}
+
+BENCHMARK_DRAW_LINE();
 
 BENCHMARK(large_fields) {
   patch2.applyToSerializedObjectWithoutExtractingMask<
@@ -245,6 +259,12 @@ BENCHMARK_RELATIVE(large_fields_partial_deser) {
   patch2.applyToSerializedObject<type::StandardProtocol::Compact>(*serialized2);
 }
 
+BENCHMARK_RELATIVE(large_fields_stream) {
+  applyStream(patch2, serialized2);
+}
+
+BENCHMARK_DRAW_LINE();
+
 BENCHMARK(all_small_fields) {
   patch3.applyToSerializedObjectWithoutExtractingMask<
       type::StandardProtocol::Compact>(*serialized3);
@@ -253,6 +273,12 @@ BENCHMARK(all_small_fields) {
 BENCHMARK_RELATIVE(all_small_fields_partial_deser) {
   patch3.applyToSerializedObject<type::StandardProtocol::Compact>(*serialized3);
 }
+
+BENCHMARK_RELATIVE(all_small_fields_stream) {
+  applyStream(patch3, serialized3);
+}
+
+BENCHMARK_DRAW_LINE();
 
 BENCHMARK(clear_large_fields) {
   patch4.applyToSerializedObjectWithoutExtractingMask<
@@ -263,6 +289,12 @@ BENCHMARK_RELATIVE(clear_large_fields_partial_deser) {
   patch4.applyToSerializedObject<type::StandardProtocol::Compact>(*serialized4);
 }
 
+BENCHMARK_RELATIVE(clear_large_fields_stream) {
+  applyStream(patch4, serialized4);
+}
+
+BENCHMARK_DRAW_LINE();
+
 BENCHMARK(few_map_elems_with_put) {
   patch5.applyToSerializedObjectWithoutExtractingMask<
       type::StandardProtocol::Compact>(*serialized5);
@@ -271,6 +303,12 @@ BENCHMARK(few_map_elems_with_put) {
 BENCHMARK_RELATIVE(few_map_elems_with_put_partial_deser) {
   patch5.applyToSerializedObject<type::StandardProtocol::Compact>(*serialized5);
 }
+
+BENCHMARK_RELATIVE(few_map_elems_with_put_stream) {
+  applyStream(patch5, serialized5);
+}
+
+BENCHMARK_DRAW_LINE();
 
 BENCHMARK(all_map_elems_with_put) {
   patch6.applyToSerializedObjectWithoutExtractingMask<
@@ -281,6 +319,12 @@ BENCHMARK_RELATIVE(all_map_elems_with_put_partial_deser) {
   patch6.applyToSerializedObject<type::StandardProtocol::Compact>(*serialized6);
 }
 
+BENCHMARK_RELATIVE(all_map_elems_with_put_stream) {
+  applyStream(patch6, serialized6);
+}
+
+BENCHMARK_DRAW_LINE();
+
 BENCHMARK(few_map_elems_with_patch_after) {
   patch7.applyToSerializedObjectWithoutExtractingMask<
       type::StandardProtocol::Compact>(*serialized7);
@@ -290,6 +334,12 @@ BENCHMARK_RELATIVE(few_map_elems_with_patch_after_partial_deser) {
   patch7.applyToSerializedObject<type::StandardProtocol::Compact>(*serialized7);
 }
 
+BENCHMARK_RELATIVE(few_map_elems_with_patch_after_stream) {
+  applyStream(patch7, serialized7);
+}
+
+BENCHMARK_DRAW_LINE();
+
 BENCHMARK(all_map_elems_with_patch_after) {
   patch8.applyToSerializedObjectWithoutExtractingMask<
       type::StandardProtocol::Compact>(*serialized8);
@@ -297,6 +347,10 @@ BENCHMARK(all_map_elems_with_patch_after) {
 
 BENCHMARK_RELATIVE(all_map_elems_with_patch_after_partial_deser) {
   patch8.applyToSerializedObject<type::StandardProtocol::Compact>(*serialized8);
+}
+
+BENCHMARK_RELATIVE(all_map_elems_with_patch_after_stream) {
+  applyStream(patch8, serialized8);
 }
 
 } // namespace apache::thrift::protocol

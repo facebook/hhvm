@@ -33,6 +33,9 @@
 
 namespace apache::thrift::protocol {
 using detail::badge;
+using thrift::detail::DynamicCursorSerializationWrapper;
+using thrift::detail::StructuredDynamicCursorReader;
+using thrift::detail::StructuredDynamicCursorWriter;
 
 namespace {
 
@@ -809,6 +812,27 @@ void DynamicStructurePatch<IsUnion>::apply(detail::Badge, Object& obj) const {
 
 template class DynamicStructurePatch<true>;
 template class DynamicStructurePatch<false>;
+
+template <bool IsUnion>
+template <type::StandardProtocol Protocol>
+std::unique_ptr<folly::IOBuf>
+DynamicStructurePatch<IsUnion>::applyToSerializedObject(
+    std::unique_ptr<folly::IOBuf> buf) const {
+  using Reader = ProtocolReaderFor<Protocol>;
+  using Writer = ProtocolWriterFor<Protocol>;
+  DynamicCursorSerializationWrapper<Reader, Writer> inWrapper(std::move(buf));
+  DynamicCursorSerializationWrapper<Reader, Writer> outWrapper;
+  auto reader = inWrapper.beginRead();
+  auto writer = outWrapper.beginWrite();
+  applyAllFieldsInStream(badge, reader, writer);
+  inWrapper.endRead(std::move(reader));
+  outWrapper.endWrite(std::move(writer));
+  return std::move(outWrapper).serializedData();
+}
+
+template std::unique_ptr<folly::IOBuf>
+    DynamicStructurePatch<false>::applyToSerializedObject<
+        type::StandardProtocol::Compact>(std::unique_ptr<folly::IOBuf>) const;
 
 DynamicPatch DiffVisitorBase::diff(const Object& src, const Object& dst) {
   return diffStructured(src, dst);

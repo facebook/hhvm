@@ -129,6 +129,37 @@ namespace detail {
 constexpr std::string_view kPatchUriSuffix = "Patch";
 constexpr std::string_view kSafePatchUriSuffix = "SafePatch";
 
+Value emptyValueFromTType(TType type) {
+  switch (type) {
+    case TType::T_BOOL:
+      return emptyValue(Value::Type::boolValue);
+    case TType::T_BYTE:
+      return emptyValue(Value::Type::byteValue);
+    case TType::T_I16:
+      return emptyValue(Value::Type::i16Value);
+    case TType::T_I32:
+      return emptyValue(Value::Type::i32Value);
+    case TType::T_I64:
+      return emptyValue(Value::Type::i64Value);
+    case TType::T_FLOAT:
+      return emptyValue(Value::Type::floatValue);
+    case TType::T_DOUBLE:
+      return emptyValue(Value::Type::doubleValue);
+    case TType::T_STRING:
+      return emptyValue(Value::Type::binaryValue);
+    case TType::T_LIST:
+      return emptyValue(Value::Type::listValue);
+    case TType::T_SET:
+      return emptyValue(Value::Type::setValue);
+    case TType::T_MAP:
+      return emptyValue(Value::Type::mapValue);
+    case TType::T_STRUCT:
+      return emptyValue(Value::Type::objectValue);
+    default:
+      folly::throw_exception<std::runtime_error>("Not Implemented.");
+  }
+}
+
 void convertStringToBinary(ValueList& list) {
   for (Value& i : list) {
     convertStringToBinary(i);

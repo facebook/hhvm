@@ -98,6 +98,7 @@ void checkCompatibleType(
 void checkHomogeneousContainer(const ValueList& l);
 void checkHomogeneousContainer(const ValueSet& s);
 void checkHomogeneousContainer(const ValueMap& m);
+Value emptyValueFromTType(TType);
 
 /// Copy the next field in `in` to `out`
 template <class Reader, bool _>
@@ -1180,6 +1181,61 @@ void DynamicStructurePatch<IsUnion>::customVisitImpl(Self&& self, Visitor&& v) {
   }
 }
 
+namespace detail {
+// Check whether patch will completely overwrite the existing value.
+struct PatchContainsAssignOrClear {
+ public:
+  template <class... T>
+  void assign(T&&...) {
+    result_ = true;
+  }
+  void clear() { result_ = true; }
+  template <class... T>
+  void patchIfSet(T&&...) {}
+  template <class... T>
+  void ensure(T&&...) {}
+  template <class... T>
+  void add(T&&...) {}
+  template <class... T>
+  void addMulti(T&&...) {}
+  template <class... T>
+  void remove(T&&...) {}
+  template <class... T>
+  void removeMulti(T&&...) {}
+  template <class... T>
+  void putMulti(T&&...) {}
+  template <class... T>
+  void tryPutMulti(T&&...) {}
+  template <class... T>
+  void prepend(T&&...) {}
+  template <class... T>
+  void append(T&&...) {}
+  template <class... T>
+  void patchByKey(T&&...) {}
+  template <class... T>
+  void patchIfTypeIs(T&&...) {}
+  template <class... T>
+  void ensureAny(T&&...) {}
+  template <class... T>
+  void push_back(T&&...) {}
+  template <class... T>
+  void invert(T&&...) {}
+
+  operator bool() const { return result_; }
+
+ private:
+  bool result_ = false;
+};
+
+template <class T>
+bool patchContainsAssignOrClear(T& patch) {
+  PatchContainsAssignOrClear v;
+  patch.customVisit(v);
+  return v;
+}
+
+} // namespace detail
+
 template <class Reader, bool _>
 void DynamicPatch::applyOneFieldInStream(
     detail::Badge badge,
@@ -1192,8 +1248,14 @@ void DynamicPatch::applyOneFieldInStream(
     patch.apply(value);
     out.write(id, tag, std::move(value));
   };
-  auto fallback = [&](auto&) {
-    auto value = in.readValue();
+  auto fallback = [&](auto& patch) {
+    protocol::Value value;
+    if (detail::patchContainsAssignOrClear(patch)) {
+      value = detail::emptyValueFromTType(in.fieldType());
+      in.skip();
+    } else {
+      value = in.readValue();
+    }
     apply(value);
     out.writeValue(id, value);
   };

@@ -101,7 +101,7 @@ void codegen_data::set_current_program(const t_program* program) {
   current_program_ = program;
 
   // Prevent collisions with *this* program's package name
-  auto pkg_name = go::get_go_package_base_name(program, package_override);
+  auto pkg_name = go::get_go_package_base_name(program);
   go_package_name_collisions_[pkg_name] = 0;
 }
 
@@ -310,7 +310,7 @@ std::string codegen_data::get_go_package_alias(const t_program* program) {
     return "";
   }
 
-  auto package = go::get_go_package_name(program, package_override);
+  auto package = go::get_go_package_name(program);
   auto iter = go_package_map_.find(package);
   if (iter != go_package_map_.end()) {
     return iter->second;
@@ -328,12 +328,7 @@ std::string codegen_data::go_package_alias_prefix(const t_program* program) {
   }
 }
 
-std::string get_go_package_name(
-    const t_program* program, std::string name_override) {
-  if (!name_override.empty()) {
-    return name_override;
-  }
-
+std::string get_go_package_name(const t_program* program) {
   std::string real_package = program->get_namespace("go");
   if (!real_package.empty()) {
     return real_package;
@@ -342,18 +337,16 @@ std::string get_go_package_name(
   return boost::algorithm::to_lower_copy(program->name());
 }
 
-std::string get_go_package_dir(
-    const t_program* program, std::string name_override) {
-  auto go_package = get_go_package_name(program, std::move(name_override));
+std::string get_go_package_dir(const t_program* program) {
+  auto go_package = get_go_package_name(program);
   if (go_package.find('/') != std::string::npos) {
     return go_package;
   }
   return boost::replace_all_copy(go_package, ".", "/");
 }
 
-std::string get_go_package_base_name(
-    const t_program* program, std::string name_override) {
-  auto go_package = get_go_package_name(program, std::move(name_override));
+std::string get_go_package_base_name(const t_program* program) {
+  auto go_package = get_go_package_name(program);
   std::vector<std::string> parts;
   // The go package name can be separated by slashes or dots.
   // Slashes can only be used if it was quoted, for example `namespace go

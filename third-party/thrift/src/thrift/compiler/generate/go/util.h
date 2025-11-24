@@ -31,8 +31,6 @@ class codegen_data {
   // the import path for the supporting metadata library
   std::string thrift_metadata_import =
       "github.com/facebook/fbthrift/thrift/lib/thrift/metadata";
-  // package name override (otherwise inferred from thrift file by default)
-  std::string package_override;
 
   // whether to generate code compatible with the old Go generator
   // (to make the migration easier)
@@ -146,14 +144,11 @@ class codegen_data {
 extern const std::string DEFAULT_RETVAL_FIELD_NAME;
 
 // e.g. very.good.package
-std::string get_go_package_name(
-    const t_program* program, std::string name_override = "");
+std::string get_go_package_name(const t_program* program);
 // e.g. very/good/package
-std::string get_go_package_dir(
-    const t_program* program, std::string name_override = "");
+std::string get_go_package_dir(const t_program* program);
 // e.g. package
-std::string get_go_package_base_name(
-    const t_program* program, std::string name_override = "");
+std::string get_go_package_base_name(const t_program* program);
 
 std::string munge_ident(
     const std::string& ident, bool exported = true, bool compat = true);

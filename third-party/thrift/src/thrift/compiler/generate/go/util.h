@@ -25,10 +25,6 @@ namespace apache::thrift::compiler::go {
 
 class codegen_data {
  public:
-  // the import path for the supporting metadata library
-  std::string thrift_metadata_import =
-      "github.com/facebook/fbthrift/thrift/lib/thrift/metadata";
-
   // whether to generate code compatible with the old Go generator
   // (to make the migration easier)
   bool compat = true;
@@ -139,6 +135,7 @@ class codegen_data {
 // Name of the field of the response helper struct where
 // the return value is stored (if function call is not void).
 extern const std::string DEFAULT_RETVAL_FIELD_NAME;
+extern const std::string THRIFT_METADATA_IMPORT;
 
 // e.g. very.good.package
 std::string get_go_package_name(const t_program* program);

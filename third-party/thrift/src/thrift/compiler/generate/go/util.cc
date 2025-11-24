@@ -26,6 +26,9 @@ namespace apache::thrift::compiler::go {
 // Name of the field of the response helper struct where
 // the return value is stored (if function call is not void).
 const std::string DEFAULT_RETVAL_FIELD_NAME = "success";
+// The import path for the supporting metadata library
+const std::string THRIFT_METADATA_IMPORT =
+    "github.com/facebook/fbthrift/thrift/lib/thrift/metadata";
 
 // Keywords
 // https://go.dev/ref/spec#Keywords

@@ -35,7 +35,7 @@ import (
     {{/program:thrift_imports}}
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
     {{#program:import_metadata_package?}}
-    metadata "{{program:thrift_metadata_import}}"
+    metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
     {{/program:import_metadata_package?}}
 )
 

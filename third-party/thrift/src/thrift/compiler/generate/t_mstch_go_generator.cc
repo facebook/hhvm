@@ -67,9 +67,6 @@ class t_mstch_go_generator : public t_mstch_generator {
     data_.compute_req_resp_structs();
     data_.compute_thrift_metadata_types();
 
-    if (auto thrift_metadata_import = get_option("thrift_metadata_import")) {
-      data_.thrift_metadata_import = *thrift_metadata_import;
-    }
     if (auto gen_metadata = get_option("gen_metadata")) {
       data_.gen_metadata = (gen_metadata.value() == "true");
     }
@@ -120,8 +117,6 @@ class mstch_go_program : public mstch_program {
             {"program:compat_setters?",
              &mstch_go_program::go_gen_compat_setters},
             {"program:thrift_imports", &mstch_go_program::thrift_imports},
-            {"program:thrift_metadata_import",
-             &mstch_go_program::thrift_metadata_import},
             {"program:go_package_alias", &mstch_go_program::go_package_alias},
             {"program:gen_metadata?", &mstch_go_program::should_gen_metadata},
             {"program:gen_default_get?",
@@ -155,7 +150,6 @@ class mstch_go_program : public mstch_program {
     return a;
   }
   mstch::node go_import_path() { return get_go_import_path_(); }
-  mstch::node thrift_metadata_import() { return data_.thrift_metadata_import; }
   mstch::node go_package_alias() {
     return data_.get_go_package_alias(program_);
   }
@@ -188,7 +182,7 @@ class mstch_go_program : public mstch_program {
 
   std::string get_go_import_path_() { return go::get_go_package_dir(program_); }
   bool is_metadata_package_() {
-    return get_go_import_path_() == data_.thrift_metadata_import;
+    return get_go_import_path_() == go::THRIFT_METADATA_IMPORT;
   }
 };
 

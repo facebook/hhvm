@@ -60,7 +60,7 @@ pub struct HhConfig {
     pub naming_table_compression_threads: usize,
     pub eden_fetch_parallelism: usize,
     pub use_distc_crawl_dircache: bool,
-    pub distc_no_unnecessary_saved_state_work: bool,
+    pub distc_avoid_unnecessary_saved_state_work: bool,
     pub distc_write_trace_during_save_state_creation_only: bool,
     pub distc_per_attempt_decls_directory_upload: bool,
 }
@@ -661,8 +661,8 @@ impl HhConfig {
                 "use_distc_crawl_dircache" => {
                     c.use_distc_crawl_dircache = parse_json(&value)?;
                 }
-                "distc_no_unnecessary_saved_state_work" => {
-                    c.distc_no_unnecessary_saved_state_work = parse_json(&value)?;
+                "distc_avoid_unnecessary_saved_state_work" => {
+                    c.distc_avoid_unnecessary_saved_state_work = parse_json(&value)?;
                 }
                 "distc_write_trace_during_save_state_creation_only" => {
                     c.distc_write_trace_during_save_state_creation_only = parse_json(&value)?;
@@ -680,7 +680,7 @@ impl HhConfig {
         let experiments = json!({
             "eden_fetch_parallelism": self.eden_fetch_parallelism,
             "use_distc_crawl_dircache": self.use_distc_crawl_dircache,
-            "distc_no_unnecessary_saved_state_work": self.distc_no_unnecessary_saved_state_work,
+            "distc_avoid_unnecessary_saved_state_work": self.distc_avoid_unnecessary_saved_state_work,
             "distc_write_trace_during_save_state_creation_only": self.distc_write_trace_during_save_state_creation_only,
             "distc_per_attempt_decls_directory_upload": self.distc_per_attempt_decls_directory_upload
         });

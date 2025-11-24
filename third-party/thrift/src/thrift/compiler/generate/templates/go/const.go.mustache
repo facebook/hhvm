@@ -15,6 +15,7 @@
   limitations under the License.
 
 }}
+{{#import "common/constants" as constants}}
 {{> common/auto_generated_go}}
 
 package {{program:go_pkg_name}}
@@ -23,7 +24,7 @@ import (
     {{#program:thrift_imports}}
     {{program:go_package_alias}} "{{program:go_import_path}}"
     {{/program:thrift_imports}}
-    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+    thrift "{{constants.thrift_lib_import}}"
 )
 
 // (needed to ensure safety because of naive import list construction)

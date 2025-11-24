@@ -14,6 +14,7 @@
   limitations under the License.
 
 }}
+{{#import "common/constants" as constants}}
 {{> common/auto_generated_go}}
 
 {{#program:docs?}}
@@ -32,10 +33,10 @@ import (
     {{#program:thrift_imports}}
     {{program:go_package_alias}} "{{program:go_import_path}}"
     {{/program:thrift_imports}}
-    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+    thrift "{{constants.thrift_lib_import}}"
     {{#program:gen_metadata?}}
     {{#program:import_metadata_package?}}
-    metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
+    metadata "{{constants.thrift_metadata_import}}"
     {{/program:import_metadata_package?}}
     {{/program:gen_metadata?}}
 )

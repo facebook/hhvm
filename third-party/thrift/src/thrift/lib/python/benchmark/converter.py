@@ -22,15 +22,13 @@ import timeit
 
 import click
 import convertible.thrift_types as python_types  # noqa: F401
-import convertible.ttypes as py_legacy_types  # noqa: F401
 import convertible.types as py3_types  # noqa: F401
 from tabulate import tabulate
 from thrift.py3.converter import to_py3_struct  # noqa: F401
 from thrift.python.converter import to_python_struct  # noqa: F401
-from thrift.util.converter import to_py_struct as to_py_legacy_struct  # noqa: F401
 
 
-LANGS = ["python", "py3", "py_legacy"]
+LANGS = ["python", "py3"]
 
 base_line_cost = None
 cost_in_ms = {}
@@ -61,10 +59,8 @@ def benchmark(ctx, name: str, *, stmt: str, setup: str):
                     globals={
                         "python_types": python_types,
                         "py3_types": py3_types,
-                        "py_legacy_types": py_legacy_types,
                         "to_py3_struct": to_py3_struct,
                         "to_python_struct": to_python_struct,
-                        "to_py_legacy_struct": to_py_legacy_struct,
                     },
                 )
                 costs = []

@@ -26,10 +26,23 @@ package "apache.org/thrift/test"
 }
 typedef binary PaddedBinaryData
 
+@cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
+typedef binary IOBufPtr
+
 struct SingleAlignedBinary {
   1: PaddedBinaryData data;
 }
 
 struct MultipleAlignedBinary {
   1: list<PaddedBinaryData> data;
+}
+
+struct OldRequest {
+  1: IOBufPtr data;
+  2: string checksum;
+}
+
+struct NewRequest {
+  1: PaddedBinaryData data;
+  2: string checksum;
 }

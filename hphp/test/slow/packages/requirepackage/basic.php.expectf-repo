@@ -1,5 +1,8 @@
+f [fromPackages] abstract.php
 f [fromPackages] basic-soft.php
 f [fromPackages] basic.php
+f [fromPackages] interface.php
+f [fromPackages] noactivedeployement.php
 string(9) "in A::bar"
 
 Fatal error: Uncaught exception 'HH\InvariantException' with message 'Package bat should be loaded' in %s/requirepackage/basic.php:12

@@ -7,6 +7,7 @@ use naming_special_names_rust::autoimported_functions;
 use naming_special_names_rust::pseudo_functions;
 use naming_special_names_rust::user_attributes;
 use nast::CallExpr;
+use nast::Class_;
 use nast::Expr;
 use nast::Expr_;
 use nast::Fun_;
@@ -20,13 +21,20 @@ use oxidized::ast::Pos;
 use crate::prelude::*;
 
 #[derive(Copy, Clone, Default)]
-pub struct ElabCrossPackagePass;
+pub struct ElabCrossPackagePass {
+    in_interface: bool,
+}
 
 impl Pass for ElabCrossPackagePass {
-    fn on_ty_method__bottom_up(&mut self, _env: &Env, elem: &mut Method_) -> ControlFlow<()> {
+    fn on_ty_class__top_down(&mut self, _env: &Env, class: &mut Class_) -> ControlFlow<()> {
+        self.in_interface = class.kind.is_cinterface();
+        Continue(())
+    }
+
+    fn on_ty_method__top_down(&mut self, _env: &Env, elem: &mut Method_) -> ControlFlow<()> {
         for ua in &elem.user_attributes {
             if user_attributes::REQUIRE_PACKAGE == ua.name.name()
-                || user_attributes::REQUIRE_PACKAGE == ua.name.name()
+                && !(elem.abstract_ || self.in_interface)
             {
                 ua.params
                     .iter()
@@ -37,11 +45,9 @@ impl Pass for ElabCrossPackagePass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_fun__bottom_up(&mut self, _env: &Env, elem: &mut Fun_) -> ControlFlow<()> {
+    fn on_ty_fun__top_down(&mut self, _env: &Env, elem: &mut Fun_) -> ControlFlow<()> {
         for ua in &elem.user_attributes {
-            if user_attributes::REQUIRE_PACKAGE == ua.name.name()
-                || user_attributes::REQUIRE_PACKAGE == ua.name.name()
-            {
+            if user_attributes::REQUIRE_PACKAGE == ua.name.name() {
                 ua.params
                     .iter()
                     .for_each(|pkg| elem.body.fb_ast.insert(0, assert_package_is_loaded(pkg)));

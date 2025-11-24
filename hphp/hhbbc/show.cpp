@@ -599,7 +599,7 @@ std::string show(const Type& t) {
   // remaining (non-support) bits. If there's no specialization, just
   // delegate to gather().
   auto const gatherForSpec = [&] (trep bits) {
-    // Gather the supoprt and the non-support bits, then combine them
+    // Gather the support and the non-support bits, then combine them
     // into a string (with the spec in the middle).
     auto const impl = [&] (trep mask, const std::string& spec) {
       auto const [specPart, specMatches] = gather(bits & mask);
@@ -685,7 +685,7 @@ std::string show(const Type& t) {
       return impl(BCls, showDCls(t.m_data.dcls, false));
     case DataTag::ArrLikePacked:
       return impl(
-        BArrLikeN,
+        BArrLike,
         folly::sformat(
           "({})",
           [&] {
@@ -698,12 +698,12 @@ std::string show(const Type& t) {
       );
     case DataTag::ArrLikePackedN:
       return impl(
-        BArrLikeN,
+        BArrLike,
         folly::sformat("([{}])", show(t.m_data.packedn->type))
       );
     case DataTag::ArrLikeMap:
       return impl(
-        BArrLikeN,
+        BArrLike,
         folly::sformat(
           "({}{})",
           [&] {
@@ -725,7 +725,7 @@ std::string show(const Type& t) {
       );
     case DataTag::ArrLikeMapN:
       return impl(
-        BArrLikeN,
+        BArrLike,
         folly::sformat(
           "([{}])",
           showElem(t.m_data.mapn->key, t.m_data.mapn->val)
@@ -733,7 +733,7 @@ std::string show(const Type& t) {
       );
     case DataTag::ArrLikeVal:
       return impl(
-        BArrLikeN,
+        BArrLike,
         folly::sformat(
           "~{}",
           [&] {
@@ -882,12 +882,13 @@ std::string show(const ConstraintType& t) {
     case TriBool::No: cts = "no"; break;
     case TriBool::Maybe: cts = "maybe"; break;
   }
-  return folly::sformat("ConstraintType{{lower:{}, upper:{}, coerceClassToString:{}, maybeMixed:{}}}",
-                        show(t.lower),
-                        show(t.upper),
-                        cts,
-                        t.maybeMixed ? "true" : "false"
-                       );
+  return folly::sformat(
+    "ConstraintType{{lower:{}, upper:{}, coerceClassToString:{}, maybeMixed:{}}}",
+    show(t.lower),
+    show(t.upper),
+    cts,
+    t.maybeMixed ? "true" : "false"
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -164,11 +164,11 @@ std::pair<trep, trep> allowedKeyBits(trep b) {
   auto upper = BBottom;
   auto lower = BArrKey;
 
-  if (couldBe(b, BVec)) {
+  if (couldBe(b, BVecN)) {
     // Vecs only ever have int keys
     upper |= BInt;
     lower &= BInt;
-    b &= ~BVec;
+    b &= ~BVecN;
   }
   if (couldBe(b, BArrLikeN)) {
     if (subtypeOf(b, BSArrLikeN)) {
@@ -5588,6 +5588,8 @@ Type loosen_string_staticness(Type t) {
 }
 
 Type loosen_array_staticness(Type t) {
+  if (!t.couldBe(BArrLike)) return t;
+
   auto bits = t.bits();
   auto const check = [&] (trep a) {
     if (couldBe(bits, a)) bits |= a;
@@ -5599,7 +5601,35 @@ Type loosen_array_staticness(Type t) {
   check(BKeysetE);
   check(BKeysetN);
 
-  if (t.m_dataTag == DataTag::ArrLikeVal) {
+  // If the array has no specialization, but it was static, then
+  // (implicitly) the contents must also be static. If we simply make
+  // the array bits non-static, we lose this information. In this
+  // case, add a specialization to the new non-static array to
+  // preserve the knowledge about the inner elements. This is a rare
+  // case of loosening *adding* a specialization.
+  if (t.m_dataTag == DataTag::None &&
+      couldBe(bits, BArrLikeN) &&
+      subtypeOf(bits, BArrLikeN | kNonSupportBits)) {
+    auto const oldKeyBits = allowedKeyBits(t.bits()).first;
+    auto const oldValBits = allowedValBits(t.bits(), false).first;
+    auto const newKeyBits = allowedKeyBits(bits).first;
+    auto const newValBits = allowedValBits(bits, false).first;
+    assertx(subtypeOf(oldKeyBits, newKeyBits));
+    assertx(subtypeOf(oldValBits, newValBits));
+    if (oldKeyBits != newKeyBits || oldValBits != newValBits) {
+      if (subtypeAmong(bits, BVecN, BArrLikeN)) {
+        assertx(oldKeyBits == newKeyBits);
+        return packedn_impl(bits, t.m_legacyMark, Type{oldValBits});
+      } else {
+        return mapn_impl(
+          bits,
+          t.m_legacyMark,
+          Type{oldKeyBits},
+          Type{oldValBits}
+        );
+      }
+    }
+  } else if (t.m_dataTag == DataTag::ArrLikeVal) {
     return toDArrLike(t.m_data.aval, bits, t.m_legacyMark);
   }
   t.m_bits = bits;
@@ -6640,28 +6670,9 @@ IterTypes iter_types(const Type& iterable) {
   };
 
   if (!is_specialized_array_like(iterable)) {
-    auto kv = [&]() -> std::pair<Type, Type> {
-      if (iterable.subtypeOf(BInitNull | BSVec)) {
-        return { TInt, TInitUnc };
-      }
-      if (iterable.subtypeOf(BInitNull | BSKeyset)) {
-        return { TUncArrKey, TUncArrKey };
-      }
-      if (iterable.subtypeOf(BInitNull | BSArrLike)) {
-        return { TUncArrKey, TInitUnc };
-      }
-      if (iterable.subtypeOf(BInitNull | BVec)) {
-        return { TInt, TInitCell };
-      }
-      if (iterable.subtypeOf(BInitNull | BKeyset)) {
-        return { TArrKey, TArrKey };
-      }
-      return { TArrKey, TInitCell };
-    }();
-
     return {
-      std::move(kv.first),
-      std::move(kv.second),
+      Type{ allowedKeyBits(iterable.bits()).first },
+      Type{ allowedValBits(iterable.bits(), false).first },
       count(std::nullopt),
       mayThrow,
       false

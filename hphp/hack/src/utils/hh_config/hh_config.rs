@@ -62,7 +62,6 @@ pub struct HhConfig {
     pub use_distc_crawl_dircache: bool,
     pub distc_avoid_unnecessary_saved_state_work: bool,
     pub distc_write_trace_during_save_state_creation_only: bool,
-    pub distc_per_attempt_decls_directory_upload: bool,
 }
 
 impl HhConfig {
@@ -667,9 +666,6 @@ impl HhConfig {
                 "distc_write_trace_during_save_state_creation_only" => {
                     c.distc_write_trace_during_save_state_creation_only = parse_json(&value)?;
                 }
-                "distc_per_attempt_decls_directory_upload" => {
-                    c.distc_per_attempt_decls_directory_upload = parse_json(&value)?;
-                }
                 _ => {}
             }
         }
@@ -682,7 +678,6 @@ impl HhConfig {
             "use_distc_crawl_dircache": self.use_distc_crawl_dircache,
             "distc_avoid_unnecessary_saved_state_work": self.distc_avoid_unnecessary_saved_state_work,
             "distc_write_trace_during_save_state_creation_only": self.distc_write_trace_during_save_state_creation_only,
-            "distc_per_attempt_decls_directory_upload": self.distc_per_attempt_decls_directory_upload
         });
         experiments.to_string()
     }

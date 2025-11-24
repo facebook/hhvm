@@ -9,15 +9,61 @@ import (
     "fmt"
     "reflect"
 
+    includedEnum "included_enum"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
     metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
+var _ = includedEnum.GoUnusedProtection__
 var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.VOID
 var _ = metadata.GoUnusedProtection__
+
+type IncludedEnumAlias = includedEnum.IncludedEnum
+
+const (
+    IncludedEnumAlias_FIRST IncludedEnumAlias = includedEnum.IncludedEnum_FIRST
+    IncludedEnumAlias_SECOND IncludedEnumAlias = includedEnum.IncludedEnum_SECOND
+    IncludedEnumAlias_THIRD IncludedEnumAlias = includedEnum.IncludedEnum_THIRD
+)
+
+// Enum value maps for IncludedEnum
+var (
+    IncludedEnumAliasToName  = includedEnum.IncludedEnumToName
+    IncludedEnumAliasToValue = includedEnum.IncludedEnumToValue
+)
+
+// Deprecated: Use IncludedEnumAliasToValue instead (e.g. `x, ok := IncludedEnumAliasToValue["name"]`).
+func IncludedEnumAliasFromString(s string) (IncludedEnumAlias, error) {
+    return includedEnum.IncludedEnumFromString(s)
+}
+
+func NewIncludedEnumAlias() IncludedEnumAlias {
+    return 0
+}
+
+func WriteIncludedEnumAlias(item IncludedEnumAlias, p thrift.Encoder) error {
+    if err := p.WriteI32(int32(item)); err != nil {
+        return err
+    }
+    return nil
+}
+
+func ReadIncludedEnumAlias(p thrift.Decoder) (IncludedEnumAlias, error) {
+    var decodeResult IncludedEnumAlias
+    decodeErr := func() error {
+        enumResult, err := p.ReadI32()
+        if err != nil {
+            return err
+        }
+        result := includedEnum.IncludedEnum(enumResult)
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
+}
 
 type Metasyntactic int32
 

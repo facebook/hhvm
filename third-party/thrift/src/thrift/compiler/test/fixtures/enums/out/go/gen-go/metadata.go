@@ -8,11 +8,13 @@ package module
 import (
     "maps"
 
+    includedEnum "included_enum"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
     metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
+var _ = includedEnum.GoUnusedProtection__
 var _ = thrift.VOID
 var _ = maps.Copy[map[int]int, map[int]int]
 var _ = metadata.GoUnusedProtection__
@@ -92,6 +94,14 @@ var (
             TStruct:
                 &metadata.ThriftStructType{
                     Name: "module.MyStruct",
+                },
+        }
+    premadeThriftType_module_IncludedEnumAlias =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module.IncludedEnumAlias",
+                    UnderlyingType: includedEnum.GetMetadataThriftType("included_enum.IncludedEnum"),
                 },
         }
 )
@@ -174,6 +184,7 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
     fbthriftThriftTypesMap["module.SomeStruct"] = premadeThriftType_module_SomeStruct
     fbthriftThriftTypesMap["module.MyStruct"] = premadeThriftType_module_MyStruct
+    fbthriftThriftTypesMap["module.IncludedEnumAlias"] = premadeThriftType_module_IncludedEnumAlias
     return fbthriftThriftTypesMap
 }()
 
@@ -321,6 +332,7 @@ var packageThriftMetadata = func() *metadata.ThriftMetadata {
 
     // Obtain Thrift metadatas from recursively included programs...
     var recursiveThriftMetadatas []*metadata.ThriftMetadata
+    recursiveThriftMetadatas = append(recursiveThriftMetadatas, includedEnum.GetThriftMetadata())
 
     // ...now merge metadatas from recursively included programs.
     for _, thriftMetadata := range recursiveThriftMetadatas {

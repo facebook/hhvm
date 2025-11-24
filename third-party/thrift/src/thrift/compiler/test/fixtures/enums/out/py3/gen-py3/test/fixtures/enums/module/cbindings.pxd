@@ -33,6 +33,7 @@ from thrift.py3.types cimport (
 )
 from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
 
+cimport test.fixtures.enums.included_enum.cbindings as _test_fixtures_enums_included_enum_cbindings
 
 
 cdef extern from "thrift/compiler/test/fixtures/enums/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":

@@ -27,6 +27,7 @@ from thrift.python.types cimport BadEnum as _fbthrift_BadEnum
 from thrift.py3.types import _from_python_or_raise
 from thrift.py3.types cimport _ensure_py3_container_or_raise
 
+import test.fixtures.enums.included_enum.types as _test_fixtures_enums_included_enum_types
 
 import test.fixtures.enums.module.types as _test_fixtures_enums_module_types
 from test.fixtures.enums.module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (

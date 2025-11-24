@@ -13,11 +13,13 @@ import (
     "reflect"
     "sync"
 
+    includedEnum "included_enum"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
     metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
+var _ = includedEnum.GoUnusedProtection__
 var _ = context.Background
 var _ = errors.New
 var _ = fmt.Printf

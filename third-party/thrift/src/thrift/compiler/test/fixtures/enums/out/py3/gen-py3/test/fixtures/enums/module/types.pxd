@@ -42,6 +42,8 @@ from thrift.python.common cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+cimport test.fixtures.enums.included_enum.types as _test_fixtures_enums_included_enum_types
+cimport test.fixtures.enums.included_enum.cbindings as _test_fixtures_enums_included_enum_cbindings
 
 cimport test.fixtures.enums.module.types as _fbthrift_types
 cimport test.fixtures.enums.module.types_fields as _fbthrift_types_fields

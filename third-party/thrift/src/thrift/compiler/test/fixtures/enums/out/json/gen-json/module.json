@@ -4,11 +4,14 @@
   "includes": {
     "thrift" : {
       "path" : "thrift/annotation/thrift.thrift"
+    },
+    "included_enum" : {
+      "path" : "included_enum.thrift"
     }
   },
   "enumerations" : {
     "Metasyntactic" : {
-      "lineno" : 25,
+      "lineno" : 26,
       "constants" : {
         "FOO" : 1,
         "BAR" : 2,
@@ -17,17 +20,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 25,
+          "line" : 26,
           "column" : 1
         },
         "end" : {
-          "line" : 30,
+          "line" : 31,
           "column" : 2
         }
       }
     },
     "MyEnum1" : {
-      "lineno" : 39,
+      "lineno" : 40,
       "constants" : {
         "ME1_0" : 0,
         "ME1_1" : 1,
@@ -38,17 +41,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 39,
+          "line" : 40,
           "column" : 1
         },
         "end" : {
-          "line" : 46,
+          "line" : 47,
           "column" : 2
         }
       }
     },
     "MyEnum2" : {
-      "lineno" : 48,
+      "lineno" : 49,
       "constants" : {
         "ME2_0" : 0,
         "ME2_1" : 1,
@@ -56,17 +59,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 48,
+          "line" : 49,
           "column" : 1
         },
         "end" : {
-          "line" : 52,
+          "line" : 53,
           "column" : 2
         }
       }
     },
     "MyEnum3" : {
-      "lineno" : 54,
+      "lineno" : 55,
       "constants" : {
         "ME3_0" : 0,
         "ME3_1" : 1,
@@ -77,17 +80,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 54,
+          "line" : 55,
           "column" : 1
         },
         "end" : {
-          "line" : 61,
+          "line" : 62,
           "column" : 2
         }
       }
     },
     "MyEnum4" : {
-      "lineno" : 63,
+      "lineno" : 64,
       "constants" : {
         "ME4_A" : 2147483645,
         "ME4_B" : 2147483646,
@@ -96,17 +99,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 63,
+          "line" : 64,
           "column" : 1
         },
         "end" : {
-          "line" : 68,
+          "line" : 69,
           "column" : 2
         }
       }
     },
     "MyBitmaskEnum1" : {
-      "lineno" : 77,
+      "lineno" : 78,
       "constants" : {
         "ONE" : 1,
         "TWO" : 2,
@@ -114,17 +117,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 77,
+          "line" : 78,
           "column" : 1
         },
         "end" : {
-          "line" : 82,
+          "line" : 83,
           "column" : 2
         }
       }
     },
     "MyBitmaskEnum2" : {
-      "lineno" : 84,
+      "lineno" : 85,
       "constants" : {
         "ONE" : 1,
         "TWO" : 2,
@@ -132,19 +135,36 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 84,
+          "line" : 85,
           "column" : 1
         },
         "end" : {
-          "line" : 89,
+          "line" : 90,
           "column" : 2
+        }
+      }
+    }
+  },
+  "typedefs" : {
+    "IncludedEnumAlias" : {
+      "lineno" : 92,
+      "type_enum" : "ENUM",
+      "spec_args" : "included_enum.IncludedEnum",
+      "source_range" : {
+        "begin" : {
+          "line" : 92,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 92,
+          "column" : 53
         }
       }
     }
   },
   "structs" : {
     "SomeStruct" : {
-      "lineno" : 32,
+      "lineno" : 33,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -155,11 +175,11 @@
           "default_value" : 1,
           "source_range" : {
             "begin" : {
-              "line" : 33,
+              "line" : 34,
               "column" : 3
             },
             "end" : {
-              "line" : 33,
+              "line" : 34,
               "column" : 37
             }
           }
@@ -171,11 +191,11 @@
           "default_value" : 2,
           "source_range" : {
             "begin" : {
-              "line" : 34,
+              "line" : 35,
               "column" : 3
             },
             "end" : {
-              "line" : 34,
+              "line" : 35,
               "column" : 29
             }
           }
@@ -187,11 +207,11 @@
           "default_value" : -1,
           "source_range" : {
             "begin" : {
-              "line" : 35,
+              "line" : 36,
               "column" : 3
             },
             "end" : {
-              "line" : 35,
+              "line" : 36,
               "column" : 38
             }
           }
@@ -203,11 +223,11 @@
           "default_value" : [  ],
           "source_range" : {
             "begin" : {
-              "line" : 36,
+              "line" : 37,
               "column" : 3
             },
             "end" : {
-              "line" : 36,
+              "line" : 37,
               "column" : 25
             }
           }
@@ -215,17 +235,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 32,
+          "line" : 33,
           "column" : 1
         },
         "end" : {
-          "line" : 37,
+          "line" : 38,
           "column" : 2
         }
       }
     },
     "MyStruct" : {
-      "lineno" : 70,
+      "lineno" : 71,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -236,11 +256,11 @@
           "default_value" : 3,
           "source_range" : {
             "begin" : {
-              "line" : 71,
+              "line" : 72,
               "column" : 3
             },
             "end" : {
-              "line" : 71,
+              "line" : 72,
               "column" : 24
             }
           }
@@ -252,11 +272,11 @@
           "default_value" : -3,
           "source_range" : {
             "begin" : {
-              "line" : 72,
+              "line" : 73,
               "column" : 3
             },
             "end" : {
-              "line" : 72,
+              "line" : 73,
               "column" : 26
             }
           }
@@ -268,11 +288,11 @@
           "default_value" : 1,
           "source_range" : {
             "begin" : {
-              "line" : 73,
+              "line" : 74,
               "column" : 3
             },
             "end" : {
-              "line" : 73,
+              "line" : 74,
               "column" : 25
             }
           }
@@ -284,11 +304,11 @@
           "default_value" : 1,
           "source_range" : {
             "begin" : {
-              "line" : 74,
+              "line" : 75,
               "column" : 3
             },
             "end" : {
-              "line" : 74,
+              "line" : 75,
               "column" : 37
             }
           }
@@ -296,11 +316,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 70,
+          "line" : 71,
           "column" : 1
         },
         "end" : {
-          "line" : 75,
+          "line" : 76,
           "column" : 2
         }
       }

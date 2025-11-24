@@ -1,0 +1,37 @@
+{
+  "__fbthrift": "@generated",
+  "thrift_module" : "included_enum",
+  "package": {
+    "domain_prefix": "test",
+    "domain_suffix": "dev",
+    "path": "fixtures/enums",
+    "filename": "included_enum"
+  },
+
+  "enumerations" :
+  {
+      "IncludedEnum" : {
+        "name" : "IncludedEnum",
+        "constants" : {
+          "FIRST" : {
+            "name" : "FIRST",
+            "lineno" : 20,
+            "value" : 1
+          },
+          "SECOND" : {
+            "name" : "SECOND",
+            "lineno" : 21,
+            "value" : 2
+          },
+          "THIRD" : {
+            "name" : "THIRD",
+            "lineno" : 22,
+            "value" : 3
+          }
+        },
+        "lineno" : 19
+      }
+  },
+  "source_path" : "included_enum",
+  "py_namespace" : ""
+}

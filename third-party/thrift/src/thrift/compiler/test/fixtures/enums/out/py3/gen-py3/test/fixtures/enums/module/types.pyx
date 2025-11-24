@@ -50,6 +50,8 @@ from collections.abc import Sequence, Set, Mapping, Iterable
 import weakref as __weakref
 import builtins as _builtins
 import importlib
+cimport test.fixtures.enums.included_enum.types as _test_fixtures_enums_included_enum_types
+import test.fixtures.enums.included_enum.types as _test_fixtures_enums_included_enum_types
 
 import test.fixtures.enums.module.thrift_types as _fbthrift_python_types
 from test.fixtures.enums.module.thrift_enums import (
@@ -385,3 +387,4 @@ cdef object Set__i32__from_cpp(const cset[cint32_t]& c_set) except *:
     return Set__i32(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 
 
+IncludedEnumAlias = _test_fixtures_enums_included_enum_types.IncludedEnum

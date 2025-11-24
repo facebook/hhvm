@@ -6,5 +6,6 @@
 #
 import typing as __T
 
+import included_enum.ttypes
 from module.ttypes import *
 

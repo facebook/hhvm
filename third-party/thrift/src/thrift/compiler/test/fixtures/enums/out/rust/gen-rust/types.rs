@@ -7,6 +7,10 @@
 #[allow(unused_imports)]
 pub(crate) use crate as types;
 
+pub type IncludedEnumAlias = included_enum__types::IncludedEnum;
+#[doc(hidden)]
+pub use included_enum__types::__constructors::IncludedEnum as IncludedEnumAlias;
+
 #[derive(Clone, PartialEq)]
 pub struct SomeStruct {
     pub reasonable: crate::types::Metasyntactic,
@@ -1359,6 +1363,10 @@ pub(crate) mod r#impl {
 #[deprecated]
 #[allow(hidden_glob_reexports)]
 pub mod __constructors {
+    mod IncludedEnumAlias {
+        pub use crate::IncludedEnumAlias;
+    }
+    pub use self::IncludedEnumAlias::*;
     mod Metasyntactic {
         pub use crate::Metasyntactic;
     }

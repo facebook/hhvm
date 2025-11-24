@@ -15,6 +15,9 @@ import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
+import test.fixtures.enums.included_enum.thrift_types
+import test.fixtures.enums.included_enum.thrift_types as _fbthrift__test__fixtures__enums__included_enum__thrift_types
+
 from test.fixtures.enums.module.thrift_enums import (
     Metasyntactic,
     Metasyntactic as _fbthrift_Metasyntactic,
@@ -244,3 +247,5 @@ _fbthrift_all_structs = [
     MyStruct,
 ]
 _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
+
+IncludedEnumAlias = _fbthrift__test__fixtures__enums__included_enum__thrift_types.IncludedEnum

@@ -16,6 +16,8 @@ import sys
 if sys.version_info[0] >= 3:
   long = int
 
+import included_enum.ttypes
 
-from .ttypes import UTF8STRINGS, Metasyntactic, MyEnum1, MyEnum2, MyEnum3, MyEnum4, MyBitmaskEnum1, MyBitmaskEnum2, SomeStruct, MyStruct
+
+from .ttypes import UTF8STRINGS, Metasyntactic, MyEnum1, MyEnum2, MyEnum3, MyEnum4, MyBitmaskEnum1, MyBitmaskEnum2, SomeStruct, MyStruct, IncludedEnumAlias
 

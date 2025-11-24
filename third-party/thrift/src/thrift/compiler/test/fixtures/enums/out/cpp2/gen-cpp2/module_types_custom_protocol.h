@@ -16,6 +16,7 @@
 
 #include "thrift/compiler/test/fixtures/enums/gen-cpp2/module_types.tcc"
 
+#include "thrift/compiler/test/fixtures/enums/gen-cpp2/included_enum_types_custom_protocol.h"
 
 
 namespace apache {

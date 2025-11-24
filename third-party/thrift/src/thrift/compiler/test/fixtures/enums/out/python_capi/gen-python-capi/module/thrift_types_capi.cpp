@@ -14,6 +14,7 @@
 #include <thrift/compiler/test/fixtures/enums/gen-python-capi/module/thrift_types_api.h>
 #include <thrift/compiler/test/fixtures/enums/gen-python-capi/module/thrift_types_capi.h>
 
+#include "thrift/compiler/test/fixtures/enums/gen-python-capi/included_enum/thrift_types_capi.h"
 
 namespace apache::thrift::python::capi {
 namespace {

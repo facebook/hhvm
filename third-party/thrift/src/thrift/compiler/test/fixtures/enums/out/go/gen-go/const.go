@@ -6,10 +6,12 @@
 package module
 
 import (
+    includedEnum "included_enum"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 // (needed to ensure safety because of naive import list construction)
+var _ = includedEnum.GoUnusedProtection__
 var _ = thrift.VOID
 
 var GoUnusedProtection__ int

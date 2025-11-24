@@ -11,4 +11,5 @@ py: py:json src/module.thrift
 pyi: mstch_pyi src/module.thrift
 python: mstch_python src/module.thrift
 python_capi: mstch_python_capi src/module.thrift
+python_typedef_only: mstch_python src/enum_typedef_only.thrift
 rust: mstch_rust src/module.thrift

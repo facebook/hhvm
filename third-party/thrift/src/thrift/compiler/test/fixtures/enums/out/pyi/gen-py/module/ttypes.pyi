@@ -14,6 +14,7 @@ from thrift.protocol.TProtocol import TProtocolBase
 
 __property__ = property  # sometimes `property` is used as a field name
 
+import included_enum.ttypes
 
 UTF8STRINGS: bool
 
@@ -179,3 +180,4 @@ class MyStruct:
     def _to_py_deprecated(self) -> MyStruct: ...
 
 
+IncludedEnumAlias = included_enum.ttypes.IncludedEnum

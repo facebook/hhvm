@@ -9,18 +9,19 @@
 
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
+#include "thrift/compiler/test/fixtures/enums/gen-cpp2/included_enum_constants.h"
 
 namespace test::fixtures::enums {
 namespace module_constants {
 
 
-::std::string_view _fbthrift_schema_aee2267ce76e558f() {
+::std::string_view _fbthrift_schema_a91c4c5d2179f7bb() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_aee2267ce76e558f_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_a91c4c5d2179f7bb_includes() {
   return {};
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_aee2267ce76e558f_uris() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_a91c4c5d2179f7bb_uris() {
   return {};
 }
 

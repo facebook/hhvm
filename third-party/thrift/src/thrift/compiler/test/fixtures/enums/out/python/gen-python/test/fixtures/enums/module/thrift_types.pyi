@@ -16,6 +16,8 @@ import test.fixtures.enums.module.thrift_abstract_types as _fbthrift_python_abst
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
+import test.fixtures.enums.included_enum.thrift_types as _fbthrift__test__fixtures__enums__included_enum__thrift_types
+
 from test.fixtures.enums.module.thrift_enums import (
     Metasyntactic as _fbthrift_Metasyntactic,
     MyEnum1 as _fbthrift_MyEnum1,
@@ -89,3 +91,5 @@ class MyStruct(_fbthrift_python_types.Struct, _fbthrift_python_abstract_types.My
     def _to_py3(self) -> "test.fixtures.enums.module.types.MyStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...  # type: ignore
 _fbthrift_MyStruct = MyStruct
+
+IncludedEnumAlias = _fbthrift__test__fixtures__enums__included_enum__thrift_types.IncludedEnum

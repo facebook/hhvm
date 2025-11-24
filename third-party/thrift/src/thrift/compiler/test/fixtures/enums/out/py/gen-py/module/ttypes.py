@@ -16,6 +16,8 @@ import sys
 if sys.version_info[0] >= 3:
   long = int
 
+import included_enum.ttypes
+
 
 import pprint
 import warnings
@@ -52,7 +54,7 @@ class ThriftEnumWrapper(int):
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'Metasyntactic', 'MyEnum1', 'MyEnum2', 'MyEnum3', 'MyEnum4', 'MyBitmaskEnum1', 'MyBitmaskEnum2', 'SomeStruct', 'MyStruct']
+__all__ = ['UTF8STRINGS', 'Metasyntactic', 'MyEnum1', 'MyEnum2', 'MyEnum3', 'MyEnum4', 'MyBitmaskEnum1', 'MyBitmaskEnum2', 'SomeStruct', 'MyStruct', 'IncludedEnumAlias']
 
 class Metasyntactic:
   def __getattr__(self, name): raise AttributeError(name)
@@ -614,6 +616,7 @@ class MyStruct:
   def _to_py_deprecated(self):
     return self
 
+IncludedEnumAlias = included_enum.ttypes.IncludedEnum
 all_structs.append(SomeStruct)
 SomeStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.I32, 'reasonable', Metasyntactic,   1, 2, ), # 1

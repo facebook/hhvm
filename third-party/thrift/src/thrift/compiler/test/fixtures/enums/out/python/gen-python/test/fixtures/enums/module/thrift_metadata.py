@@ -13,6 +13,9 @@ import test.fixtures.enums.module.thrift_enums as _fbthrift_current_module_enums
 import test.fixtures.enums.module.thrift_enums
 
 
+import test.fixtures.enums.included_enum.thrift_enums
+import test.fixtures.enums.included_enum.thrift_metadata as _fbthrift__test__fixtures__enums__included_enum__thrift_metadata
+
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
 # instead of re-generating thrift structs
 def _fbthrift_gen_metadata_struct_SomeStruct(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:

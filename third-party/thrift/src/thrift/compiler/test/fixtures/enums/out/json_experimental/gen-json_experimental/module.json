@@ -2,7 +2,8 @@
   "__fbthrift": "@generated",
   "thrift_module" : "module",
   "includes": {
-    "thrift": "thrift/annotation/thrift.thrift"
+    "thrift": "thrift/annotation/thrift.thrift",
+    "included_enum": "included_enum.thrift"
   },
   "namespaces": {
     "android": "test.fixtures.enums",
@@ -16,6 +17,18 @@
     "filename": "module"
   },
 
+  "typedefs": {
+      "IncludedEnumAlias": {
+        "name": "IncludedEnumAlias",
+        "type": {
+  "type" : "enum",
+  "name" : "IncludedEnum",
+  "path" : "thrift/compiler/test/fixtures/enums/src/included_enum.thrift"
+},
+        "is_exception": false,
+        "lineno": 92
+      }
+  },
   "enumerations" :
   {
       "Metasyntactic" : {
@@ -23,187 +36,187 @@
         "constants" : {
           "FOO" : {
             "name" : "FOO",
-            "lineno" : 26,
+            "lineno" : 27,
             "value" : 1
           },
           "BAR" : {
             "name" : "BAR",
-            "lineno" : 27,
+            "lineno" : 28,
             "value" : 2
           },
           "BAZ" : {
             "name" : "BAZ",
-            "lineno" : 28,
+            "lineno" : 29,
             "value" : 3
           },
           "BAX" : {
             "name" : "BAX",
-            "lineno" : 29,
+            "lineno" : 30,
             "value" : 4
           }
         },
-        "lineno" : 25
+        "lineno" : 26
       },
       "MyEnum1" : {
         "name" : "MyEnum1",
         "constants" : {
           "ME1_0" : {
             "name" : "ME1_0",
-            "lineno" : 40,
+            "lineno" : 41,
             "value" : 0
           },
           "ME1_1" : {
             "name" : "ME1_1",
-            "lineno" : 41,
+            "lineno" : 42,
             "value" : 1
           },
           "ME1_2" : {
             "name" : "ME1_2",
-            "lineno" : 42,
+            "lineno" : 43,
             "value" : 2
           },
           "ME1_3" : {
             "name" : "ME1_3",
-            "lineno" : 43,
+            "lineno" : 44,
             "value" : 3
           },
           "ME1_5" : {
             "name" : "ME1_5",
-            "lineno" : 44,
+            "lineno" : 45,
             "value" : 5
           },
           "ME1_6" : {
             "name" : "ME1_6",
-            "lineno" : 45,
+            "lineno" : 46,
             "value" : 6
           }
         },
-        "lineno" : 39
+        "lineno" : 40
       },
       "MyEnum2" : {
         "name" : "MyEnum2",
         "constants" : {
           "ME2_0" : {
             "name" : "ME2_0",
-            "lineno" : 49,
+            "lineno" : 50,
             "value" : 0
           },
           "ME2_1" : {
             "name" : "ME2_1",
-            "lineno" : 50,
+            "lineno" : 51,
             "value" : 1
           },
           "ME2_2" : {
             "name" : "ME2_2",
-            "lineno" : 51,
+            "lineno" : 52,
             "value" : 2
           }
         },
-        "lineno" : 48
+        "lineno" : 49
       },
       "MyEnum3" : {
         "name" : "MyEnum3",
         "constants" : {
           "ME3_0" : {
             "name" : "ME3_0",
-            "lineno" : 55,
+            "lineno" : 56,
             "value" : 0
           },
           "ME3_1" : {
             "name" : "ME3_1",
-            "lineno" : 56,
+            "lineno" : 57,
             "value" : 1
           },
           "ME3_N2" : {
             "name" : "ME3_N2",
-            "lineno" : 57,
+            "lineno" : 58,
             "value" : -2
           },
           "ME3_N1" : {
             "name" : "ME3_N1",
-            "lineno" : 58,
+            "lineno" : 59,
             "value" : -1
           },
           "ME3_9" : {
             "name" : "ME3_9",
-            "lineno" : 59,
+            "lineno" : 60,
             "value" : 9
           },
           "ME3_10" : {
             "name" : "ME3_10",
-            "lineno" : 60,
+            "lineno" : 61,
             "value" : 10
           }
         },
-        "lineno" : 54
+        "lineno" : 55
       },
       "MyEnum4" : {
         "name" : "MyEnum4",
         "constants" : {
           "ME4_A" : {
             "name" : "ME4_A",
-            "lineno" : 64,
+            "lineno" : 65,
             "value" : 2147483645
           },
           "ME4_B" : {
             "name" : "ME4_B",
-            "lineno" : 65,
+            "lineno" : 66,
             "value" : 2147483646
           },
           "ME4_C" : {
             "name" : "ME4_C",
-            "lineno" : 66,
+            "lineno" : 67,
             "value" : 2147483647
           },
           "ME4_D" : {
             "name" : "ME4_D",
-            "lineno" : 67,
+            "lineno" : 68,
             "value" : -2147483648
           }
         },
-        "lineno" : 63
+        "lineno" : 64
       },
       "MyBitmaskEnum1" : {
         "name" : "MyBitmaskEnum1",
         "constants" : {
           "ONE" : {
             "name" : "ONE",
-            "lineno" : 79,
+            "lineno" : 80,
             "value" : 1
           },
           "TWO" : {
             "name" : "TWO",
-            "lineno" : 80,
+            "lineno" : 81,
             "value" : 2
           },
           "FOUR" : {
             "name" : "FOUR",
-            "lineno" : 81,
+            "lineno" : 82,
             "value" : 4
           }
         },
-        "lineno" : 77
+        "lineno" : 78
       },
       "MyBitmaskEnum2" : {
         "name" : "MyBitmaskEnum2",
         "constants" : {
           "ONE" : {
             "name" : "ONE",
-            "lineno" : 86,
+            "lineno" : 87,
             "value" : 1
           },
           "TWO" : {
             "name" : "TWO",
-            "lineno" : 87,
+            "lineno" : 88,
             "value" : 2
           },
           "FOUR" : {
             "name" : "FOUR",
-            "lineno" : 88,
+            "lineno" : 89,
             "value" : 4
           }
         },
-        "lineno" : 84
+        "lineno" : 85
       }
   },
   "structs" :
@@ -215,7 +228,7 @@
             "name" : "reasonable",
             "default_value" : 1,
             "key" : 1,
-            "lineno" : 33,
+            "lineno" : 34,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "enum",
@@ -226,7 +239,7 @@
             "name" : "fine",
             "default_value" : 2,
             "key" : 2,
-            "lineno" : 34,
+            "lineno" : 35,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "enum",
@@ -237,7 +250,7 @@
             "name" : "questionable",
             "default_value" : -1,
             "key" : 3,
-            "lineno" : 35,
+            "lineno" : 36,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "enum",
@@ -248,7 +261,7 @@
             "name" : "tags",
             "default_value" : [],
             "key" : 4,
-            "lineno" : 36,
+            "lineno" : 37,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "set",
@@ -258,7 +271,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 32
+        "lineno" : 33
       },
       "MyStruct" : {
         "name" : "MyStruct",
@@ -267,7 +280,7 @@
             "name" : "me2_3",
             "default_value" : 3,
             "key" : 1,
-            "lineno" : 71,
+            "lineno" : 72,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "enum",
@@ -278,7 +291,7 @@
             "name" : "me3_n3",
             "default_value" : -3,
             "key" : 2,
-            "lineno" : 72,
+            "lineno" : 73,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "enum",
@@ -289,7 +302,7 @@
             "name" : "me1_t1",
             "default_value" : 1,
             "key" : 4,
-            "lineno" : 73,
+            "lineno" : 74,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "enum",
@@ -300,7 +313,7 @@
             "name" : "me1_t2",
             "default_value" : 1,
             "key" : 6,
-            "lineno" : 74,
+            "lineno" : 75,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "enum",
@@ -310,7 +323,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 70
+        "lineno" : 71
       }
   },
   "source_path" : "thrift/compiler/test/fixtures/enums/src/module",

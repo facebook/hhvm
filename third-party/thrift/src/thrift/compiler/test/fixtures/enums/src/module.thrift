@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/thrift.thrift"
+include "included_enum.thrift"
 
 package "test.dev/fixtures/enums"
 
@@ -87,3 +88,5 @@ enum MyBitmaskEnum2 {
   TWO = 2,
   FOUR = 4,
 }
+
+typedef included_enum.IncludedEnum IncludedEnumAlias

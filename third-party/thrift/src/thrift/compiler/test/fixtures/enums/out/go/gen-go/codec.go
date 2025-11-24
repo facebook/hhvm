@@ -6,10 +6,12 @@
 package module
 
 import (
+    includedEnum "included_enum"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 // (needed to ensure safety because of naive import list construction)
+var _ = includedEnum.GoUnusedProtection__
 var _ = thrift.VOID
 
 // Premade codec specs
@@ -94,6 +96,14 @@ var (
                 ScopedName: "module.MyStruct",
                 IsUnion:    false,
                 NewFunc:    func() thrift.Struct { return NewMyStruct() },
+            },
+    }
+    premadeCodecTypeSpec_module_IncludedEnumAlias = &thrift.TypeSpec{
+        FullName: "module.IncludedEnumAlias",
+        CodecTypedefSpec:
+            &thrift.CodecTypedefSpec{
+                ScopedName:         "module.IncludedEnumAlias",
+                UnderlyingTypeSpec: includedEnum.GetCodecTypeSpec("included_enum.IncludedEnum"),
             },
     }
 )
@@ -228,6 +238,7 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_SomeStruct.FullName] = premadeCodecTypeSpec_module_SomeStruct
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyStruct.FullName] = premadeCodecTypeSpec_module_MyStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_IncludedEnumAlias.FullName] = premadeCodecTypeSpec_module_IncludedEnumAlias
     return fbthriftTypeSpecsMap
 }()
 

@@ -18,6 +18,9 @@ import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 
 
+import test.fixtures.enums.included_enum.thrift_mutable_types
+import test.fixtures.enums.included_enum.thrift_mutable_types as _fbthrift__test__fixtures__enums__included_enum__thrift_mutable_types
+
 from test.fixtures.enums.module.thrift_enums import (
     Metasyntactic,
     Metasyntactic as _fbthrift_Metasyntactic,
@@ -231,3 +234,5 @@ _fbthrift_all_structs = [
     MyStruct,
 ]
 _fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)
+
+IncludedEnumAlias = _fbthrift__test__fixtures__enums__included_enum__thrift_mutable_types.IncludedEnum

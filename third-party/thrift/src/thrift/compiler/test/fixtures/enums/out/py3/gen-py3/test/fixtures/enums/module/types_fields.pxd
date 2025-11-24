@@ -39,6 +39,8 @@ from thrift.py3.types cimport (
 from thrift.python.protocol cimport Protocol as __Protocol
 from folly.optional cimport cOptional as __cOptional
 
+cimport test.fixtures.enums.included_enum.types as _test_fixtures_enums_included_enum_types
+cimport test.fixtures.enums.included_enum.cbindings as _test_fixtures_enums_included_enum_cbindings
 
 cimport test.fixtures.enums.module.types as _test_fixtures_enums_module_types
 cimport test.fixtures.enums.module.cbindings as _test_fixtures_enums_module_cbindings

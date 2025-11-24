@@ -19,6 +19,7 @@ import builtins
 
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
+import test.fixtures.enums.included_enum.thrift_abstract_types as _fbthrift__test__fixtures__enums__included_enum__thrift_abstract_types
 
 from test.fixtures.enums.module.thrift_enums import (
     Metasyntactic,
@@ -93,3 +94,5 @@ class MyStruct(_abc.ABC):
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...  # type: ignore
 _fbthrift_MyStruct = MyStruct
+
+IncludedEnumAlias = _fbthrift__test__fixtures__enums__included_enum__thrift_abstract_types.IncludedEnum

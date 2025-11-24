@@ -25,9 +25,6 @@ namespace apache::thrift::compiler::go {
 
 class codegen_data {
  public:
-  // the import path for the supporting library
-  std::string thrift_lib_import =
-      "github.com/facebook/fbthrift/thrift/lib/go/thrift/types";
   // the import path for the supporting metadata library
   std::string thrift_metadata_import =
       "github.com/facebook/fbthrift/thrift/lib/thrift/metadata";

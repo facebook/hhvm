@@ -23,7 +23,7 @@ import (
     {{#program:thrift_imports}}
     {{program:go_package_alias}} "{{program:go_import_path}}"
     {{/program:thrift_imports}}
-    thrift "{{program:thrift_lib_import}}"
+    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 // (needed to ensure safety because of naive import list construction)

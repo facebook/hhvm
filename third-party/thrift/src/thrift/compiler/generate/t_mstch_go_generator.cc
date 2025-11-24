@@ -67,9 +67,6 @@ class t_mstch_go_generator : public t_mstch_generator {
     data_.compute_req_resp_structs();
     data_.compute_thrift_metadata_types();
 
-    if (auto thrift_lib_import = get_option("thrift_import")) {
-      data_.thrift_lib_import = *thrift_lib_import;
-    }
     if (auto thrift_metadata_import = get_option("thrift_metadata_import")) {
       data_.thrift_metadata_import = *thrift_metadata_import;
     }
@@ -123,7 +120,6 @@ class mstch_go_program : public mstch_program {
             {"program:compat_setters?",
              &mstch_go_program::go_gen_compat_setters},
             {"program:thrift_imports", &mstch_go_program::thrift_imports},
-            {"program:thrift_lib_import", &mstch_go_program::thrift_lib_import},
             {"program:thrift_metadata_import",
              &mstch_go_program::thrift_metadata_import},
             {"program:go_package_alias", &mstch_go_program::go_package_alias},
@@ -159,7 +155,6 @@ class mstch_go_program : public mstch_program {
     return a;
   }
   mstch::node go_import_path() { return get_go_import_path_(); }
-  mstch::node thrift_lib_import() { return data_.thrift_lib_import; }
   mstch::node thrift_metadata_import() { return data_.thrift_metadata_import; }
   mstch::node go_package_alias() {
     return data_.get_go_package_alias(program_);

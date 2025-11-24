@@ -1,4 +1,4 @@
 example
-  INSERT example(${1:\$x}, ${2:y=\$y}, ${3:\$z})
+  INSERT example(${1:\$x}, y=${2:\$y}, ${3:\$z})
   function(int $x, named int $y, int $z): void
 SORT TEXT: none

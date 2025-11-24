@@ -249,7 +249,7 @@ let snippet_for_params (params : 'a Typing_defs.fun_param list) : string =
             String.substr_replace_first param_name ~pattern:"$" ~with_:prefix
           | None -> prefix ^ string_of_int (i + 1)
         in
-        Printf.sprintf "${%d:%s%s}" (i + 1) named_arg_snippet placeholder)
+        Printf.sprintf "%s${%d:%s}" named_arg_snippet (i + 1) placeholder)
   in
   String.concat ~sep:", " param_templates
 

@@ -1,8 +1,8 @@
 bar
-  INSERT bar(${1:\$in})
-  (function(~dict<string, string> $in): string)
+  INSERT bar
+  function
 SORT TEXT: none
 foo
-  INSERT foo()
-  (function(): string)
+  INSERT foo
+  function
 SORT TEXT: none

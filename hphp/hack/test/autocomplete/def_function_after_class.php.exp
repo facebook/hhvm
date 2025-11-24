@@ -1,402 +1,402 @@
 fb_disable_code_coverage
-  INSERT fb_disable_code_coverage()
-  (function(): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fb_disable_code_coverage
+  function
 SORT TEXT: none
 fb_double_metaphone
-  INSERT fb_double_metaphone(${1:\$word})
-  (function(~string $word): string)
+  INSERT fb_double_metaphone
+  function
 SORT TEXT: none
 fb_double_metaphone_with_vowel
-  INSERT fb_double_metaphone_with_vowel(${1:\$word}, ${2:\$include_vowels})
-  (function(string $word, bool $include_vowels): string)
+  INSERT fb_double_metaphone_with_vowel
+  function
 SORT TEXT: none
 fb_enable_code_coverage
-  INSERT fb_enable_code_coverage()
-  (function(): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fb_enable_code_coverage
+  function
 SORT TEXT: none
 fb_fbid_in_oid_range
-  INSERT fb_fbid_in_oid_range(${1:\$fbid})
-  (function(mixed $fbid)[HH\Contexts\leak_safe]: bool)
+  INSERT fb_fbid_in_oid_range
+  function
 SORT TEXT: none
 fb_fbid_in_rid_range
-  INSERT fb_fbid_in_rid_range(${1:\$fbid})
-  (function(mixed $fbid)[HH\Contexts\leak_safe]: bool)
+  INSERT fb_fbid_in_rid_range
+  function
 SORT TEXT: none
 fb_fbid_in_uid_range
-  INSERT fb_fbid_in_uid_range(${1:\$fbid})
-  (function(mixed $fbid)[HH\Contexts\leak_safe]: bool)
+  INSERT fb_fbid_in_uid_range
+  function
 SORT TEXT: none
 fb_fbid_is_valid
-  INSERT fb_fbid_is_valid(${1:\$fbid})
-  (function(mixed $fbid)[]: bool)
+  INSERT fb_fbid_is_valid
+  function
 SORT TEXT: none
 fb_folly_varint_decode
-  INSERT fb_folly_varint_decode(${1:\$encoded}, ${2:\$size})
-  (function(string $encoded, inout ~HH\FIXME\MISSING_PARAM_TYPE $size): int)
+  INSERT fb_folly_varint_decode
+  function
 SORT TEXT: none
 fb_folly_varint_decode_group
-  INSERT fb_folly_varint_decode_group(${1:\$encoded}, ${2:\$count}, ${3:\$size})
-  (function(string $encoded, int $count, inout ~HH\FIXME\MISSING_PARAM_TYPE $size): ~Vector<int>)
+  INSERT fb_folly_varint_decode_group
+  function
 SORT TEXT: none
 fb_folly_varint_encode
-  INSERT fb_folly_varint_encode(${1:\$value})
-  (function(~int $value): string)
+  INSERT fb_folly_varint_encode
+  function
 SORT TEXT: none
 fb_folly_varint_encode_group
-  INSERT fb_folly_varint_encode_group(${1:\$values})
-  (function(~ConstVector<int> $values): string)
+  INSERT fb_folly_varint_encode_group
+  function
 SORT TEXT: none
 fb_gen_user_func
-  INSERT fb_gen_user_func(${1:\$initialDoc}, ${2:\$function})
-  (function(string $initialDoc, mixed $function, mixed $func_args...): ~Awaitable<dynamic>)
+  INSERT fb_gen_user_func
+  function
 SORT TEXT: none
 fb_get_cert_token
-  INSERT fb_get_cert_token(${1:\$proxies}, ${2:\$grants}, ${3:\$min_expiration_time})
-  (function(vec<mixed> $proxies, vec<mixed> $grants, int $min_expiration_time, optional string $pem_private_key, optional string $pem_certificate): string)
+  INSERT fb_get_cert_token
+  function
 SORT TEXT: none
 fb_get_client_identities
-  INSERT fb_get_client_identities()
-  (function(): ~vec<shape('id_data' => string, 'id_type' => string)>)
+  INSERT fb_get_client_identities
+  function
 SORT TEXT: none
 fb_get_code_coverage
-  INSERT fb_get_code_coverage(${1:\$flush})
-  (function(bool $flush): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fb_get_code_coverage
+  function
 SORT TEXT: none
 fb_get_enum_names
-  INSERT fb_get_enum_names(${1:\$class}, ${2:\$recurse})
-  (function(string $class, bool $recurse)[]: ~dict<arraykey, mixed>)
+  INSERT fb_get_enum_names
+  function
 SORT TEXT: none
 fb_get_enum_values
-  INSERT fb_get_enum_values(${1:\$class}, ${2:\$recurse})
-  (function(string $class, bool $recurse)[]: ~dict<arraykey, mixed>)
+  INSERT fb_get_enum_values
+  function
 SORT TEXT: none
 fb_get_hash_and_shard
-  INSERT fb_get_hash_and_shard(${1:\$tohash}, ${2:\$type})
-  (function(string $tohash, int $type, optional int $custom_ring): ~dict<string, mixed>)
+  INSERT fb_get_hash_and_shard
+  function
 SORT TEXT: none
 fb_get_hashout_config
-  INSERT fb_get_hashout_config(${1:\$type})
-  (function(int $type): ~dict<arraykey, mixed>)
+  INSERT fb_get_hashout_config
+  function
 SORT TEXT: none
 fb_get_last_flush_size
-  INSERT fb_get_last_flush_size()
-  (function(): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fb_get_last_flush_size
+  function
 SORT TEXT: none
 fb_get_sandbox_cat
-  INSERT fb_get_sandbox_cat()
-  (function(): ?string)
+  INSERT fb_get_sandbox_cat
+  function
 SORT TEXT: none
 fb_get_sandbox_owners
-  INSERT fb_get_sandbox_owners()
-  (function(): ~vec<shape('id_data' => string, 'id_type' => string)>)
+  INSERT fb_get_sandbox_owners
+  function
 SORT TEXT: none
 fb_id_to_db
-  INSERT fb_id_to_db(${1:\$fbid})
-  (function(mixed $fbid)[HH\Contexts\leak_safe]: mixed)
+  INSERT fb_id_to_db
+  function
 SORT TEXT: none
 fb_init_scribe_extension
-  INSERT fb_init_scribe_extension()
-  (function(): void)
+  INSERT fb_init_scribe_extension
+  function
 SORT TEXT: none
 fb_intercept2
-  INSERT fb_intercept2(${1:\$name}, ${2:\$handler})
-  (function(string $name, HH\FIXME\MISSING_PARAM_TYPE $handler): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fb_intercept2
+  function
 SORT TEXT: none
 fb_output_compression
-  INSERT fb_output_compression(${1:\$new_value})
-  (function(bool $new_value): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fb_output_compression
+  function
 SORT TEXT: none
 fb_proxy_cert_token
-  INSERT fb_proxy_cert_token(${1:\$target_tier}, ${2:\$proxy_tier}, ${3:\$overrides})
-  (function(string $target_tier, string $proxy_tier, dict<arraykey, mixed> $overrides): string)
+  INSERT fb_proxy_cert_token
+  function
 SORT TEXT: none
 fb_rename_function
-  INSERT fb_rename_function(${1:\$orig_func_name}, ${2:\$new_func_name})
-  (function(string $orig_func_name, string $new_func_name): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fb_rename_function
+  function
 SORT TEXT: none
 fb_scribe_fetch_graphapi_category_meta
-  INSERT fb_scribe_fetch_graphapi_category_meta(${1:\$category}, ${2:\$appId})
-  (function(string $category, string $appId): string)
+  INSERT fb_scribe_fetch_graphapi_category_meta
+  function
 SORT TEXT: none
 fb_scribe_gen_write_message
-  INSERT fb_scribe_gen_write_message(${1:\$category}, ${2:\$message}, ${3:\$metadata}, ${4:\$timeoutMs})
-  (function(string $category, string $message, string $metadata, int $timeoutMs): ~Awaitable<int>)
+  INSERT fb_scribe_gen_write_message
+  function
 SORT TEXT: none
 fb_scribe_gen_write_structured_message
-  INSERT fb_scribe_gen_write_structured_message(${1:\$message_blob}, ${2:\$timeout_ms})
-  (function(string $message_blob, int $timeout_ms): ~dict<int, NativeExtScribeWriteResult>)
+  INSERT fb_scribe_gen_write_structured_message
+  function
 SORT TEXT: none
 fb_scribe_is_initialized
-  INSERT fb_scribe_is_initialized()
-  (function(): bool)
+  INSERT fb_scribe_is_initialized
+  function
 SORT TEXT: none
 fb_scribe_offer
-  INSERT fb_scribe_offer(${1:\$category}, ${2:\$message}, ${3:\$bucket}, ${4:\$secureThrift})
-  (function(string $category, string $message, int $bucket, bool $secureThrift): int)
+  INSERT fb_scribe_offer
+  function
 SORT TEXT: none
 fb_scribe_offer_message
-  INSERT fb_scribe_offer_message(${1:\$category}, ${2:\$message}, ${3:\$metadata}, ${4:\$secureThrift})
-  (function(string $category, string $message, string $metadata, bool $secureThrift): int)
+  INSERT fb_scribe_offer_message
+  function
 SORT TEXT: none
 fb_serialize
-  INSERT fb_serialize(${1:\$thing})
-  (function(HH\FIXME\MISSING_PARAM_TYPE $thing, optional int $options)[]: ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fb_serialize
+  function
 SORT TEXT: none
 fb_set_exit_callback
-  INSERT fb_set_exit_callback(${1:\$function})
-  (function(HH\FIXME\MISSING_PARAM_TYPE $function): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fb_set_exit_callback
+  function
 SORT TEXT: none
 fb_setprofile
-  INSERT fb_setprofile(${1:\$callback})
-  (function(HH\FIXME\MISSING_PARAM_TYPE $callback, optional int $flags, optional vec<string> $functions): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fb_setprofile
+  function
 SORT TEXT: none
 fb_unserialize
-  INSERT fb_unserialize(${1:\$thing}, ${2:\$success})
-  (function(HH\FIXME\MISSING_PARAM_TYPE $thing, inout ~?bool $success, optional int $options): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fb_unserialize
+  function
 SORT TEXT: none
 fb_utf8_strlen
-  INSERT fb_utf8_strlen(${1:\$input})
-  (function(string $input)[]: ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fb_utf8_strlen
+  function
 SORT TEXT: none
 fb_utf8_substr
-  INSERT fb_utf8_substr(${1:\$str}, ${2:\$start})
-  (function(string $str, int $start, optional int $length)[]: ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fb_utf8_substr
+  function
 SORT TEXT: none
 fb_utf8ize
-  INSERT fb_utf8ize(${1:\$input})
-  (function(inout ~string $input): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fb_utf8ize
+  function
 SORT TEXT: none
 fb_verify_cert_token
-  INSERT fb_verify_cert_token(${1:\$token}, ${2:\$proxy}, ${3:\$destination}, ${4:\$action})
-  (function(string $token, mixed $proxy, mixed $destination, string $action, optional string $pem_certificate): ~vec<mixed>)
+  INSERT fb_verify_cert_token
+  function
 SORT TEXT: none
 fclose
-  INSERT fclose(${1:\$handle})
-  (function(resource $handle): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fclose
+  function
 SORT TEXT: none
 feof
-  INSERT feof(${1:\$handle})
-  (function(resource $handle): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT feof
+  function
 SORT TEXT: none
 fflush
-  INSERT fflush(${1:\$handle})
-  (function(resource $handle): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fflush
+  function
 SORT TEXT: none
 fgetc
-  INSERT fgetc(${1:\$handle})
-  (function(resource $handle): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fgetc
+  function
 SORT TEXT: none
 fgetcsv
-  INSERT fgetcsv(${1:\$handle})
-  (function(resource $handle, optional int $length, optional string $delimiter, optional string $enclosure, optional string $escape_char): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fgetcsv
+  function
 SORT TEXT: none
 fgets
-  INSERT fgets(${1:\$handle})
-  (function(resource $handle, optional int $length): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fgets
+  function
 SORT TEXT: none
 fgetss
-  INSERT fgetss(${1:\$handle})
-  (function(resource $handle, optional int $length, optional string $allowable_tags): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fgetss
+  function
 SORT TEXT: none
 file
-  INSERT file(${1:\$filename})
-  (function(string $filename, optional int $flags, optional HH\FIXME\MISSING_PARAM_TYPE $context): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT file
+  function
 SORT TEXT: none
 file_exists
-  INSERT file_exists(${1:\$filename})
-  (function(string $filename): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT file_exists
+  function
 SORT TEXT: none
 file_get_contents
-  INSERT file_get_contents(${1:\$filename})
-  (function(string $filename, optional bool $use_include_path, optional HH\FIXME\MISSING_PARAM_TYPE $context, optional int $offset, optional int $maxlen): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT file_get_contents
+  function
 SORT TEXT: none
 file_put_contents
-  INSERT file_put_contents(${1:\$filename}, ${2:\$data})
-  (function(string $filename, HH\FIXME\MISSING_PARAM_TYPE $data, optional int $flags, optional HH\FIXME\MISSING_PARAM_TYPE $context): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT file_put_contents
+  function
 SORT TEXT: none
 fileatime
-  INSERT fileatime(${1:\$filename})
-  (function(string $filename): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fileatime
+  function
 SORT TEXT: none
 filectime
-  INSERT filectime(${1:\$filename})
-  (function(string $filename): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT filectime
+  function
 SORT TEXT: none
 filegroup
-  INSERT filegroup(${1:\$filename})
-  (function(string $filename): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT filegroup
+  function
 SORT TEXT: none
 fileinode
-  INSERT fileinode(${1:\$filename})
-  (function(string $filename): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fileinode
+  function
 SORT TEXT: none
 filemtime
-  INSERT filemtime(${1:\$filename})
-  (function(string $filename): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT filemtime
+  function
 SORT TEXT: none
 fileowner
-  INSERT fileowner(${1:\$filename})
-  (function(string $filename): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fileowner
+  function
 SORT TEXT: none
 fileperms
-  INSERT fileperms(${1:\$filename})
-  (function(string $filename): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fileperms
+  function
 SORT TEXT: none
 filesize
-  INSERT filesize(${1:\$filename})
-  (function(string $filename): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT filesize
+  function
 SORT TEXT: none
 filetype
-  INSERT filetype(${1:\$filename})
-  (function(string $filename): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT filetype
+  function
 SORT TEXT: none
 filter_has_var
-  INSERT filter_has_var(${1:\$type}, ${2:\$variable_name})
-  (function(int $type, string $variable_name): bool)
+  INSERT filter_has_var
+  function
 SORT TEXT: none
 filter_id
-  INSERT filter_id(${1:\$name})
-  (function(string $name)[]: ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT filter_id
+  function
 SORT TEXT: none
 filter_input
-  INSERT filter_input(${1:\$type}, ${2:\$variable_name})
-  (function(int $type, string $variable_name, optional int $filter, optional mixed $options): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT filter_input
+  function
 SORT TEXT: none
 filter_input_array
-  INSERT filter_input_array(${1:\$type})
-  (function(int $type, optional mixed $definition, optional bool $add_empty): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT filter_input_array
+  function
 SORT TEXT: none
 filter_list
-  INSERT filter_list()
-  (function()[]: ~vec<string>)
+  INSERT filter_list
+  function
 SORT TEXT: none
 filter_var
-  INSERT filter_var(${1:\$value})
-  (function(mixed $value, optional int $filter, optional mixed $options)[]: ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT filter_var
+  function
 SORT TEXT: none
 filter_var_array
-  INSERT filter_var_array(${1:\$data})
-  (function(Container<mixed> $data, optional mixed $definition, optional bool $add_empty)[]: ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT filter_var_array
+  function
 SORT TEXT: none
 finfo
   INSERT finfo
   class
 SORT TEXT: none
 finfo_buffer
-  INSERT finfo_buffer(${1:\$finfo}, ${2:\$string})
-  (function(resource $finfo, HH\FIXME\MISSING_PARAM_TYPE $string, optional int $options, optional HH\FIXME\MISSING_PARAM_TYPE $context): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT finfo_buffer
+  function
 SORT TEXT: none
 finfo_close
-  INSERT finfo_close(${1:\$finfo})
-  (function(resource $finfo): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT finfo_close
+  function
 SORT TEXT: none
 finfo_file
-  INSERT finfo_file(${1:\$finfo}, ${2:\$file_name})
-  (function(resource $finfo, HH\FIXME\MISSING_PARAM_TYPE $file_name, optional int $options, optional HH\FIXME\MISSING_PARAM_TYPE $context): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT finfo_file
+  function
 SORT TEXT: none
 finfo_open
-  INSERT finfo_open()
-  (function(optional int $options, optional HH\FIXME\MISSING_PARAM_TYPE $magic_file): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT finfo_open
+  function
 SORT TEXT: none
 finfo_set_flags
-  INSERT finfo_set_flags(${1:\$finfo}, ${2:\$options})
-  (function(resource $finfo, int $options): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT finfo_set_flags
+  function
 SORT TEXT: none
 flatbuffer_encode
-  INSERT flatbuffer_encode(${1:\$json_string}, ${2:\$idl_string})
-  (function(string $json_string, string $idl_string): ?string)
+  INSERT flatbuffer_encode
+  function
 SORT TEXT: none
 floatval
-  INSERT floatval(${1:\$v})
-  (function(~HH\FIXME\MISSING_PARAM_TYPE $v)[]: float)
+  INSERT floatval
+  function
 SORT TEXT: none
 flock
-  INSERT flock(${1:\$handle}, ${2:\$operation}, ${3:\$wouldblock})
-  (function(resource $handle, int $operation, inout ~HH\FIXME\MISSING_PARAM_TYPE $wouldblock): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT flock
+  function
 SORT TEXT: none
 floor
-  INSERT floor(${1:\$value})
-  (function(~HH\FIXME\MISSING_PARAM_TYPE $value)[]: float)
+  INSERT floor
+  function
 SORT TEXT: none
 flush
-  INSERT flush()
-  (function(): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT flush
+  function
 SORT TEXT: none
 fmod
-  INSERT fmod(${1:\$x}, ${2:\$y})
-  (function(float $x, float $y)[]: float)
+  INSERT fmod
+  function
 SORT TEXT: none
 fnmatch
-  INSERT fnmatch(${1:\$pattern}, ${2:\$filename})
-  (function(string $pattern, string $filename, optional int $flags): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fnmatch
+  function
 SORT TEXT: none
 fopen
-  INSERT fopen(${1:\$filename}, ${2:\$mode})
-  (function(string $filename, string $mode, optional bool $use_include_path, optional HH\FIXME\MISSING_PARAM_TYPE $context): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fopen
+  function
 SORT TEXT: none
 fpassthru
-  INSERT fpassthru(${1:\$handle})
-  (function(resource $handle): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fpassthru
+  function
 SORT TEXT: none
 fprintf
-  INSERT fprintf(${1:\$handle}, ${2:\$format})
-  (function(resource $handle, string $format, HH\FIXME\MISSING_PARAM_TYPE $args...): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fprintf
+  function
 SORT TEXT: none
 fputcsv
-  INSERT fputcsv(${1:\$handle}, ${2:\$fields})
-  (function(resource $handle, HH\FIXME\MISSING_PARAM_TYPE $fields, optional string $delimiter, optional string $enclosure, optional string $escape_char): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fputcsv
+  function
 SORT TEXT: none
 fputs
-  INSERT fputs(${1:\$handle}, ${2:\$data})
-  (function(resource $handle, string $data, optional int $length): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fputs
+  function
 SORT TEXT: none
 fread
-  INSERT fread(${1:\$handle}, ${2:\$length})
-  (function(resource $handle, int $length): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fread
+  function
 SORT TEXT: none
 fscanf
-  INSERT fscanf(${1:\$handle}, ${2:\$format})
-  (function(resource $handle, string $format): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fscanf
+  function
 SORT TEXT: none
 fseek
-  INSERT fseek(${1:\$handle}, ${2:\$offset})
-  (function(resource $handle, int $offset, optional int $whence): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fseek
+  function
 SORT TEXT: none
 fsockopen
-  INSERT fsockopen(${1:\$hostname}, ${2:\$port}, ${3:\$errnum}, ${4:\$errstr})
-  (function(string $hostname, int $port, inout ~HH\FIXME\MISSING_PARAM_TYPE $errnum, inout ~HH\FIXME\MISSING_PARAM_TYPE $errstr, optional float $timeout): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fsockopen
+  function
 SORT TEXT: none
 fstat
-  INSERT fstat(${1:\$handle})
-  (function(resource $handle): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fstat
+  function
 SORT TEXT: none
 ftell
-  INSERT ftell(${1:\$handle})
-  (function(resource $handle): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT ftell
+  function
 SORT TEXT: none
 ftok
-  INSERT ftok(${1:\$pathname}, ${2:\$proj})
-  (function(string $pathname, string $proj): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT ftok
+  function
 SORT TEXT: none
 ftruncate
-  INSERT ftruncate(${1:\$handle}, ${2:\$size})
-  (function(resource $handle, int $size): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT ftruncate
+  function
 SORT TEXT: none
 function_exists
-  INSERT function_exists(${1:\$function_name})
-  (function(string $function_name, optional bool $autoload)[]: bool)
+  INSERT function_exists
+  function
 SORT TEXT: none
 furchash_hphp_ext
-  INSERT furchash_hphp_ext(${1:\$key}, ${2:\$len}, ${3:\$nPart})
-  (function(string $key, int $len, int $nPart)[]: ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT furchash_hphp_ext
+  function
 SORT TEXT: none
 furchash_hphp_ext_supported
-  INSERT furchash_hphp_ext_supported()
-  (function()[]: ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT furchash_hphp_ext_supported
+  function
 SORT TEXT: none
 fwrite
-  INSERT fwrite(${1:\$handle}, ${2:\$data})
-  (function(resource $handle, string $data, optional int $length): ~HH\FIXME\MISSING_RETURN_TYPE)
+  INSERT fwrite
+  function
 SORT TEXT: none
 function
   INSERT function

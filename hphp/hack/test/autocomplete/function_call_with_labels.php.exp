@@ -1,4 +1,4 @@
 label_taker
-  INSERT label_taker(${1:#label1}, ${2:\$i}, ${3:#label2})
-  (function(HH\EnumClass\Label<MyEnum, bool> $label1, int $i, HH\EnumClass\Label<MyEnum, bool> $label2): void)
+  INSERT label_taker
+  function
 SORT TEXT: none

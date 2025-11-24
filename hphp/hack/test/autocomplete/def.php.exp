@@ -339,64 +339,64 @@ SODIUM_LIBRARY_VERSION
   constant
 SORT TEXT: none
 sodium_crypto_core_ristretto255_add
-  INSERT sodium_crypto_core_ristretto255_add(${1:\$p}, ${2:\$q})
-  (function(string $p, string $q): string)
+  INSERT sodium_crypto_core_ristretto255_add
+  function
 SORT TEXT: none
 sodium_crypto_core_ristretto255_from_hash
-  INSERT sodium_crypto_core_ristretto255_from_hash(${1:\$r})
-  (function(~string $r): string)
+  INSERT sodium_crypto_core_ristretto255_from_hash
+  function
 SORT TEXT: none
 sodium_crypto_core_ristretto255_is_valid_point
-  INSERT sodium_crypto_core_ristretto255_is_valid_point(${1:\$s})
-  (function(~string $s): bool)
+  INSERT sodium_crypto_core_ristretto255_is_valid_point
+  function
 SORT TEXT: none
 sodium_crypto_core_ristretto255_random
-  INSERT sodium_crypto_core_ristretto255_random()
-  (function(): string)
+  INSERT sodium_crypto_core_ristretto255_random
+  function
 SORT TEXT: none
 sodium_crypto_core_ristretto255_scalar_add
-  INSERT sodium_crypto_core_ristretto255_scalar_add(${1:\$x}, ${2:\$y})
-  (function(string $x, string $y): string)
+  INSERT sodium_crypto_core_ristretto255_scalar_add
+  function
 SORT TEXT: none
 sodium_crypto_core_ristretto255_scalar_complement
-  INSERT sodium_crypto_core_ristretto255_scalar_complement(${1:\$s})
-  (function(~string $s): string)
+  INSERT sodium_crypto_core_ristretto255_scalar_complement
+  function
 SORT TEXT: none
 sodium_crypto_core_ristretto255_scalar_invert
-  INSERT sodium_crypto_core_ristretto255_scalar_invert(${1:\$s})
-  (function(~string $s): string)
+  INSERT sodium_crypto_core_ristretto255_scalar_invert
+  function
 SORT TEXT: none
 sodium_crypto_core_ristretto255_scalar_mul
-  INSERT sodium_crypto_core_ristretto255_scalar_mul(${1:\$x}, ${2:\$y})
-  (function(string $x, string $y): string)
+  INSERT sodium_crypto_core_ristretto255_scalar_mul
+  function
 SORT TEXT: none
 sodium_crypto_core_ristretto255_scalar_negate
-  INSERT sodium_crypto_core_ristretto255_scalar_negate(${1:\$s})
-  (function(~string $s): string)
+  INSERT sodium_crypto_core_ristretto255_scalar_negate
+  function
 SORT TEXT: none
 sodium_crypto_core_ristretto255_scalar_random
-  INSERT sodium_crypto_core_ristretto255_scalar_random()
-  (function(): string)
+  INSERT sodium_crypto_core_ristretto255_scalar_random
+  function
 SORT TEXT: none
 sodium_crypto_core_ristretto255_scalar_reduce
-  INSERT sodium_crypto_core_ristretto255_scalar_reduce(${1:\$s})
-  (function(~string $s): string)
+  INSERT sodium_crypto_core_ristretto255_scalar_reduce
+  function
 SORT TEXT: none
 sodium_crypto_core_ristretto255_scalar_sub
-  INSERT sodium_crypto_core_ristretto255_scalar_sub(${1:\$x}, ${2:\$y})
-  (function(string $x, string $y): string)
+  INSERT sodium_crypto_core_ristretto255_scalar_sub
+  function
 SORT TEXT: none
 sodium_crypto_core_ristretto255_sub
-  INSERT sodium_crypto_core_ristretto255_sub(${1:\$p}, ${2:\$q})
-  (function(string $p, string $q): string)
+  INSERT sodium_crypto_core_ristretto255_sub
+  function
 SORT TEXT: none
 sodium_crypto_scalarmult_ristretto255
-  INSERT sodium_crypto_scalarmult_ristretto255(${1:\$n}, ${2:\$p})
-  (function(string $n, string $p): string)
+  INSERT sodium_crypto_scalarmult_ristretto255
+  function
 SORT TEXT: none
 sodium_crypto_secretstream_xchacha20poly1305_rekey
-  INSERT sodium_crypto_secretstream_xchacha20poly1305_rekey(${1:\$state})
-  (function(inout mixed $state): void)
+  INSERT sodium_crypto_secretstream_xchacha20poly1305_rekey
+  function
 SORT TEXT: none
 enum
   INSERT enum

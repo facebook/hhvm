@@ -918,8 +918,14 @@ let decl_and_run_mode
   let sienv =
     {
       sienv with
+      (* WARNING: These values are different
+         * from what we actually use in prod (searchUtils.ml)
+         * and I don't know why.
+         * Recommendation:
+         * - When iterating on a feature, test manually in IDE as well
+         * - if you can, delete these overrides
+      *)
       SearchUtils.sie_quiet_mode = false;
-      SearchUtils.sie_resolve_signatures = true;
       SearchUtils.sie_resolve_positions = true;
       SearchUtils.sie_resolve_local_decl = true;
     }

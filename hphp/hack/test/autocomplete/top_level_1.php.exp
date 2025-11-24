@@ -3,12 +3,12 @@ FunctionCredential
   class
 SORT TEXT: none
 function222
-  INSERT function222()
-  (function(): void)
+  INSERT function222
+  function
 SORT TEXT: none
 function_exists
-  INSERT function_exists(${1:\$function_name})
-  (function(string $function_name, optional bool $autoload)[]: bool)
+  INSERT function_exists
+  function
 SORT TEXT: none
 function
   INSERT function

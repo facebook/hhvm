@@ -621,15 +621,10 @@ class DynamicPatch {
 
   template <class Reader, bool _>
   void applyOneFieldInStream(
-      detail::Badge,
+      detail::Badge badge,
       thrift::detail::StructuredDynamicCursorReader<Reader, _>& in,
       thrift::detail::StructuredDynamicCursorWriter<
-          typename Reader::ProtocolWriter>& out) const {
-    auto id = in.fieldId();
-    auto value = in.readValue();
-    apply(value);
-    out.writeValue(id, value);
-  }
+          typename Reader::ProtocolWriter>& out) const;
 
  private:
   DynamicListPatch& getStoredPatchByTag(type::list_c);
@@ -1183,6 +1178,44 @@ void DynamicStructurePatch<IsUnion>::customVisitImpl(Self&& self, Visitor&& v) {
       std::forward<Visitor>(v).remove(id);
     }
   }
+}
+
+template <class Reader, bool _>
+void DynamicPatch::applyOneFieldInStream(
+    detail::Badge badge,
+    thrift::detail::StructuredDynamicCursorReader<Reader, _>& in,
+    thrift::detail::StructuredDynamicCursorWriter<
+        typename Reader::ProtocolWriter>& out) const {
+  const auto id = in.fieldId();
+  auto byTag = [&](auto& patch, auto tag) {
+    auto value = in.read(tag);
+    patch.apply(value);
+    out.write(id, tag, std::move(value));
+  };
+  auto fallback = [&](auto&) {
+    auto value = in.readValue();
+    apply(value);
+    out.writeValue(id, value);
+  };
+  auto applier = folly::overload(
+      [&](const op::BoolPatch& patch) { byTag(patch, type::bool_t{}); },
+      [&](const op::BytePatch& patch) { byTag(patch, type::byte_t{}); },
+      [&](const op::I16Patch& patch) { byTag(patch, type::i16_t{}); },
+      [&](const op::I32Patch& patch) { byTag(patch, type::i32_t{}); },
+      [&](const op::I64Patch& patch) { byTag(patch, type::i64_t{}); },
+      [&](const op::FloatPatch& patch) { byTag(patch, type::float_t{}); },
+      [&](const op::DoublePatch& patch) { byTag(patch, type::double_t{}); },
+      [&](const op::StringPatch& patch) { byTag(patch, type::string_t{}); },
+      [&](const op::BinaryPatch& patch) { byTag(patch, type::binary_t{}); },
+      [&](const DynamicStructPatch& patch) {
+        auto reader = in.beginReadStructured();
+        auto writer = out.beginWriteStructured(id);
+        patch.applyAllFieldsInStream(badge, reader, writer);
+        in.endRead(std::move(reader));
+        out.endWrite(std::move(writer));
+      },
+      fallback);
+  visitPatch(applier);
 }
 
 class DiffVisitorBase {

@@ -22,6 +22,35 @@
 namespace apache::thrift::compiler {
 namespace {
 
+bool is_supported_type(const t_type& type);
+
+bool is_supported_primitive(const t_type& type) {
+  const t_primitive_type* primitive = type.try_as<t_primitive_type>();
+  return primitive != nullptr &&
+      primitive->primitive_type() != t_primitive_type::type::t_void &&
+      primitive->primitive_type() != t_primitive_type::type::t_binary;
+}
+
+bool is_supported_collection(const t_type& type) {
+  if (type.is<t_enum>()) {
+    return true;
+  }
+  if (const t_list* list = type.try_as<t_list>()) {
+    return is_supported_type(*list->elem_type());
+  }
+  if (const t_map* map = type.try_as<t_map>()) {
+    return is_supported_type(*map->key_type()) &&
+        is_supported_type(*map->val_type());
+  }
+  return false;
+}
+
+bool is_supported_type(const t_type& type) {
+  const t_type& true_type = *type.get_true_type();
+  return is_supported_primitive(true_type) ||
+      is_supported_collection(true_type);
+}
+
 class t_starlark_generator : public t_mstch_generator {
  public:
   using t_mstch_generator::t_mstch_generator;
@@ -31,65 +60,26 @@ class t_starlark_generator : public t_mstch_generator {
   void generate_program() override;
 
  private:
-  void set_mstch_factories();
-};
+  prototype<t_type>::ptr make_prototype_for_type(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_type(proto);
+    auto def = whisker::dsl::prototype_builder<h_type>::extends(base);
 
-class mstch_starlark_type : public mstch_type {
- public:
-  mstch_starlark_type(
-      const t_type* t, mstch_context& ctx, mstch_element_position pos)
-      : mstch_type(t, ctx, pos) {
-    register_methods(
-        this,
-        {
-            {"type:starlark_supported?",
-             &mstch_starlark_type::is_starlark_supported},
-        });
-  }
+    def.property("starlark_supported?", &is_supported_type);
 
-  mstch::node is_starlark_supported() { return is_supported_type(type_); }
-
- private:
-  bool is_supported_type(const t_type* type) {
-    return is_primitive(type->get_true_type()) ||
-        is_supported_collection(type->get_true_type());
-  }
-
-  bool is_primitive(const t_type* type) {
-    return type->is_byte() || type->is_i16() || type->is_i32() ||
-        type->is_i64() || type->is_string() || type->is_bool() ||
-        type->is_float() || type->is_double();
-  }
-
-  bool is_supported_collection(const t_type* type) {
-    if (type->is<t_enum>()) {
-      return true;
-    }
-    if (const t_list* list = type->try_as<t_list>()) {
-      return is_supported_type(list->elem_type().get_type());
-    }
-    if (const t_map* map = type->try_as<t_map>()) {
-      return is_supported_type(&map->key_type().deref()) &&
-          is_supported_type(&map->val_type().deref());
-    }
-    return false;
+    return std::move(def).make();
   }
 };
 
 void t_starlark_generator::generate_program() {
   out_dir_base_ = "gen-star";
 
-  set_mstch_factories();
   const auto* program = get_program();
   auto mstch_program = mstch_context_.program_factory->make_mstch_object(
       program, mstch_context_);
 
   render_to_file(
       std::move(mstch_program), "definitions.star", program->name() + ".star");
-}
-
-void t_starlark_generator::set_mstch_factories() {
-  mstch_context_.add<mstch_starlark_type>();
 }
 
 THRIFT_REGISTER_GENERATOR(starlark, "Starlark", "Starlark generator");

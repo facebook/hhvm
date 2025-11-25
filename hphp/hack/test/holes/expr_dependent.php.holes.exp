@@ -67,7 +67,7 @@ Errors:
                        (Call
                           { func =
                             (((function(): ~T::TX)), [11:10-20],
-                             (Obj_get (((T), [11:10-15], (Lvar ([11:10-15], $left))), (((function(): ~T::TX)), [11:17-20], (Id ([11:17-20], "gen"))), OG_nullthrows, Is_method)));
+                             (Obj_get (((T), [11:10-15], (Lvar ([11:10-15], $left))), (((function(): ~T::TX)), [11:17-20], (Id ([11:17-20], "gen"))), Regular, Is_method)));
                             targs = []; args = []; unpacked_arg = None })))))
              ]
            };
@@ -138,8 +138,7 @@ Errors:
                                           (Call
                                              { func =
                                                ((~(function(T::TX $x): void)), [17:23-33],
-                                                (Obj_get (((~T), [17:23-28], (Lvar ([17:23-28], $left))), (
-                                                   (~(function(T::TX $x): void)), [17:30-33], (Id ([17:30-33], "log"))), OG_nullthrows, Is_method)));
+                                                (Obj_get (((~T), [17:23-28], (Lvar ([17:23-28], $left))), ((~(function(T::TX $x): void)), [17:30-33], (Id ([17:30-33], "log"))), Regular, Is_method)));
                                                targs = []; args = [(Anormal ((TR), [17:34-36], (Lvar ([17:34-36], $x))))]; 
                                                unpacked_arg = None })))))
                                 ]
@@ -276,8 +275,7 @@ Errors:
              (Return
                 (Some ((dynamic), [11:10-22],
                        (Call
-                          { func =
-                            ((dynamic), [11:10-20], (Obj_get (((dynamic), [11:10-15], (Lvar ([11:10-15], $left))), ((dynamic), [11:17-20], (Id ([11:17-20], "gen"))), OG_nullthrows, Is_method)));
+                          { func = ((dynamic), [11:10-20], (Obj_get (((dynamic), [11:10-15], (Lvar ([11:10-15], $left))), ((dynamic), [11:17-20], (Id ([11:17-20], "gen"))), Regular, Is_method)));
                             targs = []; args = []; unpacked_arg = None })))))
              ]
            };

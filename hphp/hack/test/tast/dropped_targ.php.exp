@@ -79,7 +79,7 @@
                  (Call
                     { func =
                       ((~(function<T>(): void)), [10:3-11],
-                       (Obj_get (((((nonnull & dynamic) | I)), [10:3-6], (Lvar ([10:3-6], $i1))), ((~(function<T>(): void)), [10:8-11], (Id ([10:8-11], "bar"))), OG_nullthrows, Is_method)));
+                       (Obj_get (((((nonnull & dynamic) | I)), [10:3-6], (Lvar ([10:3-6], $i1))), ((~(function<T>(): void)), [10:8-11], (Id ([10:8-11], "bar"))), Regular, Is_method)));
                       targs = [((int), ([10:12-15], (Hprim Tint)))]; 
                       args = []; unpacked_arg = None }))));
              ([11:3-19],
@@ -87,8 +87,7 @@
                  ((~void), [11:3-18],
                   (Call
                      { func =
-                       ((~(function<T>(): void)), [11:3-11],
-                        (Obj_get (((~I), [11:3-6], (Lvar ([11:3-6], $i2))), ((~(function<T>(): void)), [11:8-11], (Id ([11:8-11], "bar"))), OG_nullthrows, Is_method)));
+                       ((~(function<T>(): void)), [11:3-11], (Obj_get (((~I), [11:3-6], (Lvar ([11:3-6], $i2))), ((~(function<T>(): void)), [11:8-11], (Id ([11:8-11], "bar"))), Regular, Is_method)));
                        targs = [((int), ([11:12-15], (Hprim Tint)))]; 
                        args = []; unpacked_arg = None }))));
              ([12:3-19],
@@ -96,8 +95,7 @@
                  ((void), [12:3-18],
                   (Call
                      { func =
-                       (((function<T>(): void)), [12:3-11],
-                        (Obj_get (((I), [12:3-6], (Lvar ([12:3-6], $i3))), (((function<T>(): void)), [12:8-11], (Id ([12:8-11], "bar"))), OG_nullthrows, Is_method)));
+                       (((function<T>(): void)), [12:3-11], (Obj_get (((I), [12:3-6], (Lvar ([12:3-6], $i3))), (((function<T>(): void)), [12:8-11], (Id ([12:8-11], "bar"))), Regular, Is_method)));
                        targs = [((int), ([12:12-15], (Hprim Tint)))]; 
                        args = []; unpacked_arg = None }))))
              ]
@@ -150,21 +148,20 @@
              (Expr
                 ((dynamic), [10:3-18],
                  (Call
-                    { func = ((dynamic), [10:3-11], (Obj_get (((dynamic), [10:3-6], (Lvar ([10:3-6], $i1))), ((dynamic), [10:8-11], (Id ([10:8-11], "bar"))), OG_nullthrows, Is_method))); 
+                    { func = ((dynamic), [10:3-11], (Obj_get (((dynamic), [10:3-6], (Lvar ([10:3-6], $i1))), ((dynamic), [10:8-11], (Id ([10:8-11], "bar"))), Regular, Is_method))); 
                       targs = []; args = []; unpacked_arg = None }))));
              ([11:3-19],
               (Expr
                  ((dynamic), [11:3-18],
                   (Call
-                     { func = ((dynamic), [11:3-11], (Obj_get (((dynamic), [11:3-6], (Lvar ([11:3-6], $i2))), ((dynamic), [11:8-11], (Id ([11:8-11], "bar"))), OG_nullthrows, Is_method))); 
+                     { func = ((dynamic), [11:3-11], (Obj_get (((dynamic), [11:3-6], (Lvar ([11:3-6], $i2))), ((dynamic), [11:8-11], (Id ([11:8-11], "bar"))), Regular, Is_method))); 
                        targs = []; args = []; unpacked_arg = None }))));
              ([12:3-19],
               (Expr
                  ((void), [12:3-18],
                   (Call
                      { func =
-                       (((function<T>(): void)), [12:3-11],
-                        (Obj_get (((I), [12:3-6], (Lvar ([12:3-6], $i3))), (((function<T>(): void)), [12:8-11], (Id ([12:8-11], "bar"))), OG_nullthrows, Is_method)));
+                       (((function<T>(): void)), [12:3-11], (Obj_get (((I), [12:3-6], (Lvar ([12:3-6], $i3))), (((function<T>(): void)), [12:8-11], (Id ([12:8-11], "bar"))), Regular, Is_method)));
                        targs = [((int), ([12:12-15], (Hprim Tint)))]; 
                        args = []; unpacked_arg = None }))))
              ]

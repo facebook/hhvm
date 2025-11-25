@@ -334,11 +334,11 @@ and pp_expr_ ppf = function
     Fmt.(pair ~sep:nop pp_expr @@ brackets @@ option pp_expr)
       ppf
       (arr_expr, idx_expr_opt)
-  | Aast.(Obj_get (obj_expr, get_expr, OG_nullsafe, Is_method)) ->
+  | Aast.(Obj_get (obj_expr, get_expr, Nullsafe, Is_method)) ->
     Fmt.(pair ~sep:arrow (suffix (const string "?") pp_expr) pp_expr)
       ppf
       (obj_expr, get_expr)
-  | Aast.(Obj_get (obj_expr, get_expr, OG_nullsafe, _)) ->
+  | Aast.(Obj_get (obj_expr, get_expr, Nullsafe, _)) ->
     Fmt.(parens @@ pair ~sep:arrow (suffix (const string "?") pp_expr) pp_expr)
       ppf
       (obj_expr, get_expr)
@@ -398,7 +398,12 @@ and pp_expr_ ppf = function
     Fmt.(pair ~sep:sp pp_expr @@ pair ~sep:sp pp_assign pp_expr)
       ppf
       (lhs, (bop, rhs))
-  | Aast.Pipe (_lid, e1, e2, is_nullsafe) ->
+  | Aast.Pipe (_lid, e1, e2, null_flavor) ->
+    let is_nullsafe =
+      match null_flavor with
+      | Aast.Nullsafe -> true
+      | _ -> false
+    in
     Fmt.(
       pair
         ~sep:

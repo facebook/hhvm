@@ -29,7 +29,7 @@ Errors:
                 (Call
                    { func =
                      (((function()[]: Set<?string>)), [4:3-13],
-                      (Obj_get (((Vector<?string>), [4:3-6], (Lvar ([4:3-6], $xs))), (((function()[]: Set<?string>)), [4:8-13], (Id ([4:8-13], "toSet"))), OG_nullthrows, Is_method)));
+                      (Obj_get (((Vector<?string>), [4:3-6], (Lvar ([4:3-6], $xs))), (((function()[]: Set<?string>)), [4:8-13], (Id ([4:8-13], "toSet"))), Regular, Is_method)));
                      targs = []; args = []; unpacked_arg = None }))))
             ]
           };

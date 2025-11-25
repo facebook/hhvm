@@ -83,7 +83,7 @@
                   (Call
                      { func =
                        (((function(Vector<int> $g): void)), [18:3-10],
-                        (Obj_get (((exact TestVector), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(Vector<int> $g): void)), [18:9-10], (Id ([18:9-10], "g"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestVector), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(Vector<int> $g): void)), [18:9-10], (Id ([18:9-10], "g"))), Regular, Is_method)));
                        targs = []; args = [(Anormal ((Vector<float>), [18:11-13], (Hole (((Vector<float>), [18:11-13], (Lvar ([18:11-13], $g))), (Vector<float>), (Vector<int>), Typing))))];
                        unpacked_arg = None }))))
              ]
@@ -137,7 +137,7 @@
                   (Call
                      { func =
                        (((function(Vector<int> $g): void)), [30:3-10],
-                        (Obj_get (((exact TestVector), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Vector<int> $g): void)), [30:9-10], (Id ([30:9-10], "g"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestVector), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Vector<int> $g): void)), [30:9-10], (Id ([30:9-10], "g"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal
@@ -249,7 +249,7 @@
                   (Call
                      { func =
                        (((function(Vector<int> $g): void)), [30:3-10],
-                        (Obj_get (((exact TestVector), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Vector<int> $g): void)), [30:9-10], (Id ([30:9-10], "g"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestVector), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Vector<int> $g): void)), [30:9-10], (Id ([30:9-10], "g"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal

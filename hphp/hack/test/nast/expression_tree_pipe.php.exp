@@ -63,8 +63,8 @@
                                                                     Pipe ((
                                                                     [4:22-30], $$), (
                                                                     (), [4:22-24], (Lvar ([4:22-24], $0dollardollar))), (
-                                                                    (), [4:28-30], (Dollardollar ([4:28-30], $$))), false))), (
-                                                                    (), [4:34-36], (Dollardollar ([4:34-36], $$))), false))))
+                                                                    (), [4:28-30], (Dollardollar ([4:28-30], $$))), Regular))), (
+                                                                    (), [4:34-36], (Dollardollar ([4:34-36], $$))), Regular))))
                                                               ];
                                                             unpacked_arg = None }))
                                                       }))
@@ -173,7 +173,7 @@
                                                                     Call
                                                                     { func =
                                                                     ((), [4:19-38],
-                                                                    (Obj_get (((), [4:19-38], (Lvar ([4:19-38], $0v))), ((), [4:19-38], (Id ([4:19-38], "splice"))), OG_nullthrows, Is_method)));
+                                                                    (Obj_get (((), [4:19-38], (Lvar ([4:19-38], $0v))), ((), [4:19-38], (Id ([4:19-38], "splice"))), Regular, Is_method))); 
                                                                     targs = [];
                                                                     args =
                                                                     [(Anormal
@@ -202,7 +202,7 @@
                                targs = []; args = [(Anormal ((), [4:22-24], (Dollardollar ([4:22-24], $$))))]; 
                                unpacked_arg = None }));
                          et_free_vars = None })),
-                   false)))))
+                   Regular)))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-14], "__SupportDynamicType"); ua_params = [] }]; 

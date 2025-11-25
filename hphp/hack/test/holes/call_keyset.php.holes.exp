@@ -83,7 +83,7 @@
                   (Call
                      { func =
                        (((function(keyset<int> $f): void)), [18:3-10],
-                        (Obj_get (((exact TestKeyset), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(keyset<int> $f): void)), [18:9-10], (Id ([18:9-10], "f"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestKeyset), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(keyset<int> $f): void)), [18:9-10], (Id ([18:9-10], "f"))), Regular, Is_method)));
                        targs = []; args = [(Anormal ((keyset<string>), [18:11-13], (Hole (((keyset<string>), [18:11-13], (Lvar ([18:11-13], $f))), (keyset<string>), (keyset<int>), Typing))))];
                        unpacked_arg = None }))))
              ]
@@ -137,7 +137,7 @@
                   (Call
                      { func =
                        (((function(keyset<int> $f): void)), [30:3-10],
-                        (Obj_get (((exact TestKeyset), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(keyset<int> $f): void)), [30:9-10], (Id ([30:9-10], "f"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestKeyset), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(keyset<int> $f): void)), [30:9-10], (Id ([30:9-10], "f"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal
@@ -249,7 +249,7 @@
                   (Call
                      { func =
                        (((function(keyset<int> $f): void)), [30:3-10],
-                        (Obj_get (((exact TestKeyset), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(keyset<int> $f): void)), [30:9-10], (Id ([30:9-10], "f"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestKeyset), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(keyset<int> $f): void)), [30:9-10], (Id ([30:9-10], "f"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal

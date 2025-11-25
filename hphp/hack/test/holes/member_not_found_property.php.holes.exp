@@ -38,7 +38,7 @@ Errors:
            [([7:3-22],
              (Expr
                 ((nothing), [7:3-21],
-                 (Obj_get (((C), [7:3-5], (Hole (((C), [7:3-5], (Lvar ([7:3-5], $c))), (C), (nothing), Typing))), ((nothing), [7:7-21], (Id ([7:7-21], "does_not_exist"))), OG_nullthrows, Is_prop)))))
+                 (Obj_get (((C), [7:3-5], (Hole (((C), [7:3-5], (Lvar ([7:3-5], $c))), (C), (nothing), Typing))), ((nothing), [7:7-21], (Id ([7:7-21], "does_not_exist"))), Regular, Is_prop)))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([5:11-42], "__SupportDynamicType"); ua_params = [] }]; 
@@ -66,8 +66,7 @@ Errors:
            [([12:3-22],
              (Expr
                 ((nothing), [12:3-21],
-                 (Obj_get (((C), [12:3-5], (Hole (((C), [12:3-5], (Lvar ([12:3-5], $c))), (C), (nothing), Typing))), (
-                    (nothing), [12:7-21], (Id ([12:7-21], "does_not_exist"))), OG_nullthrows, Is_prop)))))
+                 (Obj_get (((C), [12:3-5], (Hole (((C), [12:3-5], (Lvar ([12:3-5], $c))), (C), (nothing), Typing))), ((nothing), [12:7-21], (Id ([12:7-21], "does_not_exist"))), Regular, Is_prop)))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([11:11-45], "__SupportDynamicType"); ua_params = [] }]; 

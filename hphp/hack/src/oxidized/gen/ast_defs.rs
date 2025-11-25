@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fb064de56051ea649609e334f605bb22>>
+// @generated SignedSource<<0ad636831afe354a3047a7e874d62264>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -351,14 +351,12 @@ arena_deserializer::impl_deserialize_in_arena!(SplatKind);
 #[rust_to_ocaml(and)]
 #[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(u8)]
-pub enum OgNullFlavor {
-    #[rust_to_ocaml(name = "OG_nullthrows")]
-    OGNullthrows,
-    #[rust_to_ocaml(name = "OG_nullsafe")]
-    OGNullsafe,
+pub enum OperatorNullFlavor {
+    Regular,
+    Nullsafe,
 }
-impl TrivialDrop for OgNullFlavor {}
-arena_deserializer::impl_deserialize_in_arena!(OgNullFlavor);
+impl TrivialDrop for OperatorNullFlavor {}
+arena_deserializer::impl_deserialize_in_arena!(OperatorNullFlavor);
 
 #[derive(
     Clone,

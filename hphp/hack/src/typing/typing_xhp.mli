@@ -60,4 +60,4 @@ val rewrite_xml_into_new :
  * `$xml?->:attr`
  *)
 val rewrite_attribute_access_into_call :
-  Pos.t -> Nast.expr -> og_null_flavor -> Nast.expr
+  Pos.t -> Nast.expr -> operator_null_flavor -> Nast.expr

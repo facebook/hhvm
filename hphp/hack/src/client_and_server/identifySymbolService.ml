@@ -837,7 +837,7 @@ let visitor =
       | Aast.Id _ ->
         (* Don't visit this Id, since we would record it as a gconst access. *)
         let obja = self#on_expr env obj in
-        let ognfa = self#on_og_null_flavor env ognf in
+        let ognfa = self#on_operator_null_flavor env ognf in
         self#plus obja ognfa
       | _ -> super#on_Obj_get env obj member ognf prop_or_method
 

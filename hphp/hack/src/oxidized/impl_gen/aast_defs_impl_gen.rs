@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d9a199c4bc20fca61ca66c49ac1b8aaf>>
+// @generated SignedSource<<cef86f4f883eb29d2a329e65f11bbc40>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -992,7 +992,7 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_obj_get(
         p0: Expr<Ex, En>,
         p1: Expr<Ex, En>,
-        p2: OgNullFlavor,
+        p2: OperatorNullFlavor,
         p3: PropOrMethod,
     ) -> Self {
         Expr_::ObjGet(Box::new((p0, p1, p2, p3)))
@@ -1055,7 +1055,7 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_assign(p0: Expr<Ex, En>, p1: Option<ast_defs::Bop>, p2: Expr<Ex, En>) -> Self {
         Expr_::Assign(Box::new((p0, p1, p2)))
     }
-    pub fn mk_pipe(p0: Lid, p1: Expr<Ex, En>, p2: Expr<Ex, En>, p3: bool) -> Self {
+    pub fn mk_pipe(p0: Lid, p1: Expr<Ex, En>, p2: Expr<Ex, En>, p3: OperatorNullFlavor) -> Self {
         Expr_::Pipe(Box::new((p0, p1, p2, p3)))
     }
     pub fn mk_eif(p0: Expr<Ex, En>, p1: Option<Expr<Ex, En>>, p2: Expr<Ex, En>) -> Self {
@@ -1507,7 +1507,12 @@ impl<Ex, En> Expr_<Ex, En> {
     }
     pub fn as_obj_get(
         &self,
-    ) -> Option<(&Expr<Ex, En>, &Expr<Ex, En>, &OgNullFlavor, &PropOrMethod)> {
+    ) -> Option<(
+        &Expr<Ex, En>,
+        &Expr<Ex, En>,
+        &OperatorNullFlavor,
+        &PropOrMethod,
+    )> {
         match self {
             Expr_::ObjGet(p0) => Some((&p0.0, &p0.1, &p0.2, &p0.3)),
             _ => None,
@@ -1627,7 +1632,7 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_pipe(&self) -> Option<(&Lid, &Expr<Ex, En>, &Expr<Ex, En>, &bool)> {
+    pub fn as_pipe(&self) -> Option<(&Lid, &Expr<Ex, En>, &Expr<Ex, En>, &OperatorNullFlavor)> {
         match self {
             Expr_::Pipe(p0) => Some((&p0.0, &p0.1, &p0.2, &p0.3)),
             _ => None,
@@ -1832,7 +1837,7 @@ impl<Ex, En> Expr_<Ex, En> {
     ) -> Option<(
         &mut Expr<Ex, En>,
         &mut Expr<Ex, En>,
-        &mut OgNullFlavor,
+        &mut OperatorNullFlavor,
         &mut PropOrMethod,
     )> {
         match self {
@@ -1964,7 +1969,12 @@ impl<Ex, En> Expr_<Ex, En> {
     }
     pub fn as_pipe_mut(
         &mut self,
-    ) -> Option<(&mut Lid, &mut Expr<Ex, En>, &mut Expr<Ex, En>, &mut bool)> {
+    ) -> Option<(
+        &mut Lid,
+        &mut Expr<Ex, En>,
+        &mut Expr<Ex, En>,
+        &mut OperatorNullFlavor,
+    )> {
         match self {
             Expr_::Pipe(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2, &mut p0.3)),
             _ => None,
@@ -2182,7 +2192,7 @@ impl<Ex, En> Expr_<Ex, En> {
     }
     pub fn as_obj_get_into(
         self,
-    ) -> Option<(Expr<Ex, En>, Expr<Ex, En>, OgNullFlavor, PropOrMethod)> {
+    ) -> Option<(Expr<Ex, En>, Expr<Ex, En>, OperatorNullFlavor, PropOrMethod)> {
         match self {
             Expr_::ObjGet(p0) => Some(((*p0).0, (*p0).1, (*p0).2, (*p0).3)),
             _ => None,
@@ -2298,7 +2308,7 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_pipe_into(self) -> Option<(Lid, Expr<Ex, En>, Expr<Ex, En>, bool)> {
+    pub fn as_pipe_into(self) -> Option<(Lid, Expr<Ex, En>, Expr<Ex, En>, OperatorNullFlavor)> {
         match self {
             Expr_::Pipe(p0) => Some(((*p0).0, (*p0).1, (*p0).2, (*p0).3)),
             _ => None,

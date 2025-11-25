@@ -110,7 +110,7 @@
                      { func =
                        (((function(KeyedTraversable<int, int> $o): void)), [21:3-10],
                         (Obj_get (((exact TestKeyedTraversable), [21:3-7], (Lvar ([21:3-7], $foo))), (
-                           ((function(KeyedTraversable<int, int> $o): void)), [21:9-10], (Id ([21:9-10], "o"))), OG_nullthrows, Is_method)));
+                           ((function(KeyedTraversable<int, int> $o): void)), [21:9-10], (Id ([21:9-10], "o"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal
@@ -125,7 +125,7 @@
                      { func =
                        (((function(KeyedTraversable<int, int> $o): void)), [23:3-10],
                         (Obj_get (((exact TestKeyedTraversable), [23:3-7], (Lvar ([23:3-7], $foo))), (
-                           ((function(KeyedTraversable<int, int> $o): void)), [23:9-10], (Id ([23:9-10], "o"))), OG_nullthrows, Is_method)));
+                           ((function(KeyedTraversable<int, int> $o): void)), [23:9-10], (Id ([23:9-10], "o"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal
@@ -207,7 +207,7 @@
                      { func =
                        (((function(KeyedTraversable<int, int> $o): void)), [38:3-10],
                         (Obj_get (((exact TestKeyedTraversable), [38:3-7], (Lvar ([38:3-7], $foo))), (
-                           ((function(KeyedTraversable<int, int> $o): void)), [38:9-10], (Id ([38:9-10], "o"))), OG_nullthrows, Is_method)));
+                           ((function(KeyedTraversable<int, int> $o): void)), [38:9-10], (Id ([38:9-10], "o"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal
@@ -226,7 +226,7 @@
                      { func =
                        (((function(KeyedTraversable<int, int> $o): void)), [40:3-10],
                         (Obj_get (((exact TestKeyedTraversable), [40:3-7], (Lvar ([40:3-7], $foo))), (
-                           ((function(KeyedTraversable<int, int> $o): void)), [40:9-10], (Id ([40:9-10], "o"))), OG_nullthrows, Is_method)));
+                           ((function(KeyedTraversable<int, int> $o): void)), [40:9-10], (Id ([40:9-10], "o"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal
@@ -362,7 +362,7 @@
                      { func =
                        (((function(KeyedTraversable<int, int> $o): void)), [38:3-10],
                         (Obj_get (((exact TestKeyedTraversable), [38:3-7], (Lvar ([38:3-7], $foo))), (
-                           ((function(KeyedTraversable<int, int> $o): void)), [38:9-10], (Id ([38:9-10], "o"))), OG_nullthrows, Is_method)));
+                           ((function(KeyedTraversable<int, int> $o): void)), [38:9-10], (Id ([38:9-10], "o"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal
@@ -381,7 +381,7 @@
                      { func =
                        (((function(KeyedTraversable<int, int> $o): void)), [40:3-10],
                         (Obj_get (((exact TestKeyedTraversable), [40:3-7], (Lvar ([40:3-7], $foo))), (
-                           ((function(KeyedTraversable<int, int> $o): void)), [40:9-10], (Id ([40:9-10], "o"))), OG_nullthrows, Is_method)));
+                           ((function(KeyedTraversable<int, int> $o): void)), [40:9-10], (Id ([40:9-10], "o"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal

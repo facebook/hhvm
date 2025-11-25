@@ -647,7 +647,7 @@ mod tests {
                                     let tmp: Expr = meth_lvar;
                                     tmp
                                 },
-                                OgNullFlavor::OGNullthrows,
+                                OperatorNullFlavor::Regular,
                                 PropOrMethod::IsMethod,
                             ))),
                         ),
@@ -855,7 +855,7 @@ mod tests {
                                     let tmp: String = fname.to_string();
                                     Expr((), pf.clone(), Expr_::Id(Box::new(Id(pf.clone(), tmp))))
                                 },
-                                OgNullFlavor::OGNullthrows,
+                                OperatorNullFlavor::Regular,
                                 PropOrMethod::IsMethod,
                             ))),
                         ),

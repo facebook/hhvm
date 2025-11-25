@@ -32,8 +32,7 @@ Errors:
                  (Call
                     { func =
                       ((nothing), [6:5-12],
-                       (Obj_get (((mixed), [6:5-7], (Hole (((T), [6:5-7], (Lvar ([6:5-7], $x))), (mixed), (nothing), Typing))), (
-                          (nothing), [6:9-12], (Id ([6:9-12], "bar"))), OG_nullthrows, Is_method)));
+                       (Obj_get (((mixed), [6:5-7], (Hole (((T), [6:5-7], (Lvar ([6:5-7], $x))), (mixed), (nothing), Typing))), ((nothing), [6:9-12], (Id ([6:9-12], "bar"))), Regular, Is_method)));
                       targs = []; args = []; unpacked_arg = None }))))
              ]
            };

@@ -84,7 +84,7 @@
                   (Call
                      { func =
                        (((function(ImmSet<int> $j): void)), [18:3-10],
-                        (Obj_get (((exact TestImmSet), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(ImmSet<int> $j): void)), [18:9-10], (Id ([18:9-10], "j"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestImmSet), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(ImmSet<int> $j): void)), [18:9-10], (Id ([18:9-10], "j"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal ((<expr#2> as ImmSet<string>), [18:11-13], (Hole (((ImmSet<string>), [18:11-13], (Lvar ([18:11-13], $j))), (<expr#2> as ImmSet<string>), (ImmSet<int>), Typing))))];
@@ -140,7 +140,7 @@
                   (Call
                      { func =
                        (((function(ImmSet<int> $j): void)), [30:3-10],
-                        (Obj_get (((exact TestImmSet), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(ImmSet<int> $j): void)), [30:9-10], (Id ([30:9-10], "j"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestImmSet), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(ImmSet<int> $j): void)), [30:9-10], (Id ([30:9-10], "j"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal
@@ -252,7 +252,7 @@
                   (Call
                      { func =
                        (((function(ImmSet<int> $j): void)), [30:3-10],
-                        (Obj_get (((exact TestImmSet), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(ImmSet<int> $j): void)), [30:9-10], (Id ([30:9-10], "j"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestImmSet), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(ImmSet<int> $j): void)), [30:9-10], (Id ([30:9-10], "j"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal

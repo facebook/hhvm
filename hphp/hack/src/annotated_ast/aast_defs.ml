@@ -61,9 +61,9 @@ type pstring = Ast_defs.pstring
 type positioned_byte_string = Ast_defs.positioned_byte_string
 [@@deriving eq, ord, show]
 
-type og_null_flavor = Ast_defs.og_null_flavor =
-  | OG_nullthrows
-  | OG_nullsafe
+type operator_null_flavor = Ast_defs.operator_null_flavor =
+  | Regular
+  | Nullsafe
 [@@deriving eq, hash, ord, show { with_path = false }] [@@transform.opaque]
 
 type prop_or_method = Ast_defs.prop_or_method =
@@ -460,19 +460,19 @@ and ('ex, 'en) expr_ =
   | Obj_get of
       ('ex, 'en) expr
       * ('ex, 'en) expr
-      * (og_null_flavor[@transform.opaque])
+      * (operator_null_flavor[@transform.opaque])
       * (prop_or_method[@transform.opaque])
       (** Instance property or method access.
        *
-       *     $foo->bar      // OG_nullthrows, Is_prop: access named property
-       *     ($foo->bar)()  // OG_nullthrows, Is_prop: call lambda stored in named property
-       *     $foo?->bar     // OG_nullsafe,   Is_prop
-       *     ($foo?->bar)() // OG_nullsafe,   Is_prop
+       *     $foo->bar      // Regular, Is_prop: access named property
+       *     ($foo->bar)()  // Regular, Is_prop: call lambda stored in named property
+       *     $foo?->bar     // Nullsafe,   Is_prop
+       *     ($foo?->bar)() // Nullsafe,   Is_prop
        *
-       *     $foo->bar()    // OG_nullthrows, Is_method: call named method
-       *     $foo->$bar()   // OG_nullthrows, Is_method: dynamic call, method name stored in local $bar
-       *     $foo?->bar()   // OG_nullsafe,   Is_method
-       *     $foo?->$bar()  // OG_nullsafe,   Is_method
+       *     $foo->bar()    // Regular, Is_method: call named method
+       *     $foo->$bar()   // Regular, Is_method: dynamic call, method name stored in local $bar
+       *     $foo?->bar()   // Nullsafe,   Is_method
+       *     $foo?->$bar()  // Nullsafe,   Is_method
        *
        * prop_or_method is:
        *   - Is_prop for property access
@@ -620,7 +620,11 @@ and ('ex, 'en) expr_ =
       ('ex, 'en) expr
       * (Ast_defs.bop[@transform.opaque]) option
       * ('ex, 'en) expr
-  | Pipe of lid * ('ex, 'en) expr * ('ex, 'en) expr * bool
+  | Pipe of
+      lid
+      * ('ex, 'en) expr
+      * ('ex, 'en) expr
+      * (operator_null_flavor[@transform.opaque])
       (** Pipe expression. The lid is the ID of the $$ that is implicitly
        * declared by this pipe.
        *

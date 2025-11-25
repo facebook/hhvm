@@ -22,7 +22,7 @@ let handler =
 
     method! at_expr env =
       function
-      | (_, p, Obj_get ((ty, _, _), _, OG_nullsafe, _))
+      | (_, p, Obj_get ((ty, _, _), _, Nullsafe, _))
         when Utils.type_non_nullable env ty ->
         Lints_errors.nullsafe_not_needed p
       | _ -> ()

@@ -10,7 +10,7 @@ aast_defs::FunKind
 aast_defs::ImportFlavor
 aast_defs::KvcKind
 aast_defs::NsKind
-aast_defs::OgNullFlavor
+aast_defs::OperatorNullFlavor
 aast_defs::OptionalKind
 aast_defs::ParamMutability
 aast_defs::ParamNamed
@@ -36,7 +36,7 @@ aast::FunKind
 aast::ImportFlavor
 aast::KvcKind
 aast::NsKind
-aast::OgNullFlavor
+aast::OperatorNullFlavor
 aast::OptionalKind
 aast::ParamMutability
 aast::ParamNamed
@@ -57,7 +57,7 @@ ast_defs::Bop
 ast_defs::ClassishKind
 ast_defs::ConstraintKind
 ast_defs::FunKind
-ast_defs::OgNullFlavor
+ast_defs::OperatorNullFlavor
 ast_defs::OptionalKind
 ast_defs::ParamNamed
 ast_defs::PropOrMethod

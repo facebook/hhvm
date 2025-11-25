@@ -556,8 +556,8 @@ fn print_expr(
         Expr_::ObjGet(og) => {
             print_expr(ctx, w, env, &og.0)?;
             w.write_all(match og.2 {
-                ast::OgNullFlavor::OGNullthrows => b"->",
-                ast::OgNullFlavor::OGNullsafe => b"?->",
+                ast::OperatorNullFlavor::Regular => b"->",
+                ast::OperatorNullFlavor::Nullsafe => b"?->",
             })?;
             print_expr(ctx, w, env, &og.1)
         }
@@ -590,7 +590,10 @@ fn print_expr(
         }
         Expr_::Pipe(p) => {
             print_expr(ctx, w, env, &p.1)?;
-            w.write_all(if p.3 { b" |?> " } else { b" |> " })?;
+            w.write_all(match p.3 {
+                ast::OperatorNullFlavor::Regular => b"|>",
+                ast::OperatorNullFlavor::Nullsafe => b"|?>",
+            })?;
             print_expr(ctx, w, env, &p.2)
         }
         Expr_::Is(i) => {

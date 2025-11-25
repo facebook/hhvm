@@ -22,7 +22,7 @@ let handler =
 
     method! at_expr env =
       function
-      | (_, p, Obj_get ((ty, _, _), _, OG_nullsafe, _)) ->
+      | (_, p, Obj_get ((ty, _, _), _, Nullsafe, _)) ->
         let (_, ty) = Tast_env.expand_type env ty in
         begin
           match get_node ty with

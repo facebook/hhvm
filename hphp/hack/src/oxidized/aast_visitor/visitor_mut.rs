@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<87b72ec513dbfdf91f918bff8538eae6>>
+// @generated SignedSource<<79598a1ee97641e43bbd7132d609eb94>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -497,10 +497,10 @@ pub trait VisitorMut<'node> {
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }
-    fn visit_og_null_flavor(
+    fn visit_operator_null_flavor(
         &mut self,
         c: &mut <Self::Params as Params>::Context,
-        p: &'node mut OgNullFlavor,
+        p: &'node mut OperatorNullFlavor,
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }

@@ -497,7 +497,7 @@ fn v_meth_call(meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Expr {
             Expr_::mk_obj_get(
                 receiver,
                 meth,
-                OgNullFlavor::OGNullthrows,
+                OperatorNullFlavor::Regular,
                 ast::PropOrMethod::IsMethod,
             ),
         ),
@@ -532,9 +532,9 @@ fn meth_call(receiver: Expr, meth_name: &str, args: Vec<Expr>, nullsafe: bool, p
                 receiver,
                 meth,
                 if nullsafe {
-                    OgNullFlavor::OGNullsafe
+                    OperatorNullFlavor::Nullsafe
                 } else {
-                    OgNullFlavor::OGNullthrows
+                    OperatorNullFlavor::Regular
                 },
                 ast::PropOrMethod::IsMethod,
             ),
@@ -1549,16 +1549,16 @@ impl RewriteState {
                 };
                 let desugar_expr = v_meth_call(
                     match (is_prop_call, null_flavor) {
-                        (PropOrMethod::IsProp, OgNullFlavor::OGNullthrows) => {
+                        (PropOrMethod::IsProp, OperatorNullFlavor::Regular) => {
                             et::VISIT_PROPERTY_ACCESS
                         }
-                        (PropOrMethod::IsMethod, OgNullFlavor::OGNullthrows) => {
+                        (PropOrMethod::IsMethod, OperatorNullFlavor::Regular) => {
                             et::VISIT_INSTANCE_METHOD
                         }
-                        (PropOrMethod::IsProp, OgNullFlavor::OGNullsafe) => {
+                        (PropOrMethod::IsProp, OperatorNullFlavor::Nullsafe) => {
                             et::VISIT_PROPERTY_ACCESS_NULL_SAFE
                         }
-                        (PropOrMethod::IsMethod, OgNullFlavor::OGNullsafe) => {
+                        (PropOrMethod::IsMethod, OperatorNullFlavor::Nullsafe) => {
                             et::VISIT_INSTANCE_METHOD_NULL_SAFE
                         }
                     },

@@ -1342,11 +1342,11 @@ fn p_import_flavor<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ImportFlav
     }
 }
 
-fn p_null_flavor<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::OgNullFlavor> {
-    use ast::OgNullFlavor::*;
+fn p_null_flavor<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::OperatorNullFlavor> {
+    use ast::OperatorNullFlavor::*;
     match token_kind(node) {
-        Some(TK::QuestionMinusGreaterThan) => Ok(OGNullsafe),
-        Some(TK::MinusGreaterThan) => Ok(OGNullthrows),
+        Some(TK::QuestionMinusGreaterThan) => Ok(Nullsafe),
+        Some(TK::MinusGreaterThan) => Ok(Regular),
         _ => missing_syntax("null flavor", node, env),
     }
 }
@@ -3030,12 +3030,22 @@ fn p_bop<'a>(
         Some(TK::BarGreaterThan) => {
             let lid =
                 ast::Lid::from_counter(pos, env.next_local_id(), special_idents::DOLLAR_DOLLAR);
-            Ok(Expr_::mk_pipe(lid, lhs, rhs, false))
+            Ok(Expr_::mk_pipe(
+                lid,
+                lhs,
+                rhs,
+                ast::OperatorNullFlavor::Regular,
+            ))
         }
         Some(TK::BarQuestionGreaterThan) => {
             let lid =
                 ast::Lid::from_counter(pos, env.next_local_id(), special_idents::DOLLAR_DOLLAR);
-            Ok(Expr_::mk_pipe(lid, lhs, rhs, true))
+            Ok(Expr_::mk_pipe(
+                lid,
+                lhs,
+                rhs,
+                ast::OperatorNullFlavor::Nullsafe,
+            ))
         }
         Some(TK::QuestionColon) => Ok(Expr_::mk_eif(lhs, None, rhs)),
         _ => missing_syntax("binary operator", node, env),
@@ -5424,7 +5434,7 @@ fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) {
                             e(Expr_::mk_obj_get(
                                 e(Expr_::mk_lvar(lid(special_idents::THIS))),
                                 e(Expr_::mk_id(ast::Id(p.clone(), cvname.to_string()))),
-                                ast::OgNullFlavor::OGNullthrows,
+                                ast::OperatorNullFlavor::Regular,
                                 ast::PropOrMethod::IsProp,
                             )),
                             None,

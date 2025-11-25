@@ -81,9 +81,9 @@ and optional_kind = Optional [@@transform.opaque]
 
 and splat_kind = Splat [@@transform.opaque]
 
-and og_null_flavor =
-  | OG_nullthrows
-  | OG_nullsafe
+and operator_null_flavor =
+  | Regular
+  | Nullsafe
 [@@transform.opaque]
 
 and prop_or_method =

@@ -22,7 +22,7 @@
                 (Call
                    { func =
                      ((nothing), [5:3-9],
-                      (Obj_get (((int), [5:3-6], (Hole (((int), [5:3-6], (Lvar ([5:3-6], $xs))), (int), (nothing), Typing))), ((nothing), [5:8-9], (Id ([5:8-9], "c"))), OG_nullthrows, Is_method)));
+                      (Obj_get (((int), [5:3-6], (Hole (((int), [5:3-6], (Lvar ([5:3-6], $xs))), (int), (nothing), Typing))), ((nothing), [5:8-9], (Id ([5:8-9], "c"))), Regular, Is_method)));
                      targs = []; args = []; unpacked_arg = None }))))
             ]
           };

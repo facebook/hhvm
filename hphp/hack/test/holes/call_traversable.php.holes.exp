@@ -87,7 +87,7 @@
                   (Call
                      { func =
                        (((function(Traversable<int> $i): void)), [18:3-10],
-                        (Obj_get (((exact TestTraversable), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(Traversable<int> $i): void)), [18:9-10], (Id ([18:9-10], "i"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestTraversable), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(Traversable<int> $i): void)), [18:9-10], (Id ([18:9-10], "i"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal
@@ -146,7 +146,7 @@
                   (Call
                      { func =
                        (((function(Traversable<int> $i): void)), [30:3-10],
-                        (Obj_get (((exact TestTraversable), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Traversable<int> $i): void)), [30:9-10], (Id ([30:9-10], "i"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestTraversable), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Traversable<int> $i): void)), [30:9-10], (Id ([30:9-10], "i"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal
@@ -258,7 +258,7 @@
                   (Call
                      { func =
                        (((function(Traversable<int> $i): void)), [30:3-10],
-                        (Obj_get (((exact TestTraversable), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Traversable<int> $i): void)), [30:9-10], (Id ([30:9-10], "i"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestTraversable), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Traversable<int> $i): void)), [30:9-10], (Id ([30:9-10], "i"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal

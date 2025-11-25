@@ -550,7 +550,7 @@ module Visitor_DEPRECATED = struct
 
       method on_assign : 'a -> expr -> Ast_defs.bop option -> expr -> 'a
 
-      method on_pipe : 'a -> id -> expr -> expr -> bool -> 'a
+      method on_pipe : 'a -> id -> expr -> expr -> operator_null_flavor -> 'a
 
       method on_eif : 'a -> expr -> expr option -> expr -> 'a
 
@@ -845,8 +845,8 @@ module Visitor_DEPRECATED = struct
         | Unop (uop, e) -> this#on_unop acc uop e
         | Binop { bop; lhs; rhs } -> this#on_binop acc bop lhs rhs
         | Assign (lhs, bop, rhs) -> this#on_assign acc lhs bop rhs
-        | Pipe (id, e1, e2, is_nullsafe) ->
-          this#on_pipe acc id e1 e2 is_nullsafe
+        | Pipe (id, e1, e2, null_flavor) ->
+          this#on_pipe acc id e1 e2 null_flavor
         | Eif (e1, e2, e3) -> this#on_eif acc e1 e2 e3
         | Is (e, h) -> this#on_is acc e h
         | As { expr; hint; is_nullable; enforce_deep = _ } ->
@@ -1026,7 +1026,7 @@ module Visitor_DEPRECATED = struct
         let acc = this#on_expr acc e2 in
         acc
 
-      method on_pipe acc _id e1 e2 _is_nullsafe =
+      method on_pipe acc _id e1 e2 _null_flavor =
         let acc = this#on_expr acc e1 in
         let acc = this#on_expr acc e2 in
         acc

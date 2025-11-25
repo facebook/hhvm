@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a36da80b6f9ffd29bea8a63c766590fc>>
+// @generated SignedSource<<5100a043c2414678621d1e4c31f559fa>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -324,22 +324,22 @@ impl SplatKind {
         true
     }
 }
-impl OgNullFlavor {
-    pub fn mk_ognullthrows() -> Self {
-        OgNullFlavor::OGNullthrows
+impl OperatorNullFlavor {
+    pub fn mk_regular() -> Self {
+        OperatorNullFlavor::Regular
     }
-    pub fn mk_ognullsafe() -> Self {
-        OgNullFlavor::OGNullsafe
+    pub fn mk_nullsafe() -> Self {
+        OperatorNullFlavor::Nullsafe
     }
-    pub fn is_ognullthrows(&self) -> bool {
+    pub fn is_regular(&self) -> bool {
         match self {
-            OgNullFlavor::OGNullthrows => true,
+            OperatorNullFlavor::Regular => true,
             _ => false,
         }
     }
-    pub fn is_ognullsafe(&self) -> bool {
+    pub fn is_nullsafe(&self) -> bool {
         match self {
-            OgNullFlavor::OGNullsafe => true,
+            OperatorNullFlavor::Nullsafe => true,
             _ => false,
         }
     }

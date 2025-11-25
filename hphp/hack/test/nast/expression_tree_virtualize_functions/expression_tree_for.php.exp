@@ -122,7 +122,7 @@
                                                                     args = []; 
                                                                     unpacked_arg = None })))]; 
                                                                     unpacked_arg = None })), (
-                                                                    (), [5:18-22], (Id ([5:18-22], "__bool"))), OG_nullthrows, Is_method))); 
+                                                                    (), [5:18-22], (Id ([5:18-22], "__bool"))), Regular, Is_method))); 
                                                                     targs = []; 
                                                                     args = []; 
                                                                     unpacked_arg = None }))),
@@ -140,7 +140,7 @@
                                                                     targs = []; 
                                                                     args = [(Anormal ((), [5:29-31], (Lvar ([5:29-31], $i))))]; 
                                                                     unpacked_arg = None })), (
-                                                                    (), [5:29-35], (Id ([5:29-35], "__plus"))), OG_nullthrows, Is_method))); 
+                                                                    (), [5:29-35], (Id ([5:29-35], "__plus"))), Regular, Is_method))); 
                                                                     targs = [];
                                                                     args =
                                                                     [(Anormal
@@ -167,7 +167,7 @@
                                                                     targs = []; 
                                                                     args = [(Anormal ((), [6:7-10], (Lvar ([6:7-10], $0fp0))))]; 
                                                                     unpacked_arg = None })), (
-                                                                    (), [6:7-12], (Id ([6:7-12], "__unwrap"))), OG_nullthrows, Is_method))); 
+                                                                    (), [6:7-12], (Id ([6:7-12], "__unwrap"))), Regular, Is_method))); 
                                                                     targs = []; 
                                                                     args = []; 
                                                                     unpacked_arg = None })); 
@@ -233,9 +233,7 @@
                                                                     Call
                                                                     { func =
                                                                     ((), [4:14-8:4],
-                                                                    (Obj_get ((
-                                                                    (), [4:14-8:4], (Lvar ([4:14-8:4], $0v))), (
-                                                                    (), [4:14-8:4], (Id ([4:14-8:4], "visitLambda"))), OG_nullthrows, Is_method))); 
+                                                                    (Obj_get (((), [4:14-8:4], (Lvar ([4:14-8:4], $0v))), ((), [4:14-8:4], (Id ([4:14-8:4], "visitLambda"))), Regular, Is_method)));
                                                                     targs = [];
                                                                     args =
                                                                     [(Anormal
@@ -255,7 +253,7 @@
                                                                     (Call
                                                                     { func =
                                                                     ((), [5:5-7:6],
-                                                                    (Obj_get (((), [5:5-7:6], (Lvar ([5:5-7:6], $0v))), ((), [5:5-7:6], (Id ([5:5-7:6], "visitFor"))), OG_nullthrows, Is_method)));
+                                                                    (Obj_get (((), [5:5-7:6], (Lvar ([5:5-7:6], $0v))), ((), [5:5-7:6], (Id ([5:5-7:6], "visitFor"))), Regular, Is_method)));
                                                                     targs = [];
                                                                     args =
                                                                     [(Anormal
@@ -274,7 +272,7 @@
                                                                     (Call
                                                                     { func =
                                                                     ((), [5:10-16],
-                                                                    (Obj_get (((), [5:10-16], (Lvar ([5:10-16], $0v))), ((), [5:10-16], (Id ([5:10-16], "visitAssign"))), OG_nullthrows, Is_method)));
+                                                                    (Obj_get (((), [5:10-16], (Lvar ([5:10-16], $0v))), ((), [5:10-16], (Id ([5:10-16], "visitAssign"))), Regular, Is_method)));
                                                                     targs = [];
                                                                     args =
                                                                     [(Anormal
@@ -290,7 +288,7 @@
                                                                     (Call
                                                                     { func =
                                                                     ((), [5:10-12],
-                                                                    (Obj_get (((), [5:10-12], (Lvar ([5:10-12], $0v))), ((), [5:10-12], (Id ([5:10-12], "visitLocal"))), OG_nullthrows, Is_method)));
+                                                                    (Obj_get (((), [5:10-12], (Lvar ([5:10-12], $0v))), ((), [5:10-12], (Id ([5:10-12], "visitLocal"))), Regular, Is_method)));
                                                                     targs = [];
                                                                     args =
                                                                     [(Anormal
@@ -308,7 +306,7 @@
                                                                     (Call
                                                                     { func =
                                                                     ((), [5:15-16],
-                                                                    (Obj_get (((), [5:15-16], (Lvar ([5:15-16], $0v))), ((), [5:15-16], (Id ([5:15-16], "visitInt"))), OG_nullthrows, Is_method)));
+                                                                    (Obj_get (((), [5:15-16], (Lvar ([5:15-16], $0v))), ((), [5:15-16], (Id ([5:15-16], "visitInt"))), Regular, Is_method)));
                                                                     targs = [];
                                                                     args =
                                                                     [(Anormal
@@ -327,7 +325,7 @@
                                                                     (Call
                                                                     { func =
                                                                     ((), [5:18-22],
-                                                                    (Obj_get (((), [5:18-22], (Lvar ([5:18-22], $0v))), ((), [5:18-22], (Id ([5:18-22], "visitBool"))), OG_nullthrows, Is_method)));
+                                                                    (Obj_get (((), [5:18-22], (Lvar ([5:18-22], $0v))), ((), [5:18-22], (Id ([5:18-22], "visitBool"))), Regular, Is_method)));
                                                                     targs = [];
                                                                     args =
                                                                     [(Anormal
@@ -348,7 +346,7 @@
                                                                     (Call
                                                                     { func =
                                                                     ((), [5:24-35],
-                                                                    (Obj_get (((), [5:24-35], (Lvar ([5:24-35], $0v))), ((), [5:24-35], (Id ([5:24-35], "visitAssign"))), OG_nullthrows, Is_method)));
+                                                                    (Obj_get (((), [5:24-35], (Lvar ([5:24-35], $0v))), ((), [5:24-35], (Id ([5:24-35], "visitAssign"))), Regular, Is_method)));
                                                                     targs = [];
                                                                     args =
                                                                     [(Anormal
@@ -364,7 +362,7 @@
                                                                     (Call
                                                                     { func =
                                                                     ((), [5:24-26],
-                                                                    (Obj_get (((), [5:24-26], (Lvar ([5:24-26], $0v))), ((), [5:24-26], (Id ([5:24-26], "visitLocal"))), OG_nullthrows, Is_method)));
+                                                                    (Obj_get (((), [5:24-26], (Lvar ([5:24-26], $0v))), ((), [5:24-26], (Id ([5:24-26], "visitLocal"))), Regular, Is_method)));
                                                                     targs = [];
                                                                     args =
                                                                     [(Anormal
@@ -382,7 +380,7 @@
                                                                     (Call
                                                                     { func =
                                                                     ((), [5:29-35],
-                                                                    (Obj_get (((), [5:29-35], (Lvar ([5:29-35], $0v))), ((), [5:29-35], (Id ([5:29-35], "visitBinop"))), OG_nullthrows, Is_method)));
+                                                                    (Obj_get (((), [5:29-35], (Lvar ([5:29-35], $0v))), ((), [5:29-35], (Id ([5:29-35], "visitBinop"))), Regular, Is_method)));
                                                                     targs = [];
                                                                     args =
                                                                     [(Anormal
@@ -398,7 +396,7 @@
                                                                     (Call
                                                                     { func =
                                                                     ((), [5:29-31],
-                                                                    (Obj_get (((), [5:29-31], (Lvar ([5:29-31], $0v))), ((), [5:29-31], (Id ([5:29-31], "visitLocal"))), OG_nullthrows, Is_method)));
+                                                                    (Obj_get (((), [5:29-31], (Lvar ([5:29-31], $0v))), ((), [5:29-31], (Id ([5:29-31], "visitLocal"))), Regular, Is_method)));
                                                                     targs = [];
                                                                     args =
                                                                     [(Anormal
@@ -417,7 +415,7 @@
                                                                     (Call
                                                                     { func =
                                                                     ((), [5:34-35],
-                                                                    (Obj_get (((), [5:34-35], (Lvar ([5:34-35], $0v))), ((), [5:34-35], (Id ([5:34-35], "visitInt"))), OG_nullthrows, Is_method)));
+                                                                    (Obj_get (((), [5:34-35], (Lvar ([5:34-35], $0v))), ((), [5:34-35], (Id ([5:34-35], "visitInt"))), Regular, Is_method)));
                                                                     targs = [];
                                                                     args =
                                                                     [(Anormal
@@ -439,8 +437,7 @@
                                                                     [((), [6:7-12],
                                                                     (Call
                                                                     { func =
-                                                                    ((), [6:7-12],
-                                                                    (Obj_get (((), [6:7-12], (Lvar ([6:7-12], $0v))), ((), [6:7-12], (Id ([6:7-12], "visitCall"))), OG_nullthrows, Is_method)));
+                                                                    ((), [6:7-12], (Obj_get (((), [6:7-12], (Lvar ([6:7-12], $0v))), ((), [6:7-12], (Id ([6:7-12], "visitCall"))), Regular, Is_method)));
                                                                     targs = [];
                                                                     args =
                                                                     [(Anormal
@@ -456,9 +453,7 @@
                                                                     (Call
                                                                     { func =
                                                                     ((), [6:7-12],
-                                                                    (Obj_get ((
-                                                                    (), [6:7-12], (Lvar ([6:7-12], $0v))), (
-                                                                    (), [6:7-12], (Id ([6:7-12], "visitGlobalFunction"))), OG_nullthrows, Is_method))); 
+                                                                    (Obj_get (((), [6:7-12], (Lvar ([6:7-12], $0v))), ((), [6:7-12], (Id ([6:7-12], "visitGlobalFunction"))), Regular, Is_method)));
                                                                     targs = [];
                                                                     args =
                                                                     [(Anormal

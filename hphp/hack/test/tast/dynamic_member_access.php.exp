@@ -31,13 +31,13 @@
          f_body =
          { fb_ast =
            [([6:3-16], (Expr ((string), [6:3-15], (Assign (((string), [6:3-7], (Lvar ([6:3-7], $foo))), None, ((string), [6:10-15], (String "foo")))))));
-             ([7:3-11], (Expr ((dynamic), [7:3-10], (Obj_get (((dynamic), [7:3-5], (Lvar ([7:3-5], $c))), ((dynamic), [7:7-10], (Id ([7:7-10], "foo"))), OG_nullthrows, Is_prop)))));
-             ([8:3-12], (Expr ((dynamic), [8:3-11], (Obj_get (((dynamic), [8:3-5], (Lvar ([8:3-5], $c))), ((dynamic), [8:7-11], (Lvar ([8:7-11], $foo))), OG_nullthrows, Is_prop)))));
+             ([7:3-11], (Expr ((dynamic), [7:3-10], (Obj_get (((dynamic), [7:3-5], (Lvar ([7:3-5], $c))), ((dynamic), [7:7-10], (Id ([7:7-10], "foo"))), Regular, Is_prop)))));
+             ([8:3-12], (Expr ((dynamic), [8:3-11], (Obj_get (((dynamic), [8:3-5], (Lvar ([8:3-5], $c))), ((dynamic), [8:7-11], (Lvar ([8:7-11], $foo))), Regular, Is_prop)))));
              ([9:3-31],
               (Expr
                  ((dynamic), [9:3-30],
                   (Obj_get (((dynamic), [9:3-5], (Lvar ([9:3-5], $c))),
-                     ((dynamic), [9:8-29], (Call { func = (((function(): string)), [9:8-27], (Id ([9:8-27], "\\returnsTheStringFoo"))); targs = []; args = []; unpacked_arg = None })), OG_nullthrows,
+                     ((dynamic), [9:8-29], (Call { func = (((function(): string)), [9:8-27], (Id ([9:8-27], "\\returnsTheStringFoo"))); targs = []; args = []; unpacked_arg = None })), Regular,
                      Is_prop)))))
              ]
            };

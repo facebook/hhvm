@@ -98,7 +98,7 @@
                   (Call
                      { func =
                        (((function(dict<int, int> $n): void)), [21:3-10],
-                        (Obj_get (((exact TestDict), [21:3-7], (Lvar ([21:3-7], $foo))), (((function(dict<int, int> $n): void)), [21:9-10], (Id ([21:9-10], "n"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestDict), [21:3-7], (Lvar ([21:3-7], $foo))), (((function(dict<int, int> $n): void)), [21:9-10], (Id ([21:9-10], "n"))), Regular, Is_method)));
                        targs = [];
                        args = [(Anormal ((dict<string, int>), [21:11-14], (Hole (((dict<string, int>), [21:11-14], (Lvar ([21:11-14], $n1))), (dict<string, int>), (dict<int, int>), Typing))))];
                        unpacked_arg = None }))));
@@ -108,7 +108,7 @@
                   (Call
                      { func =
                        (((function(dict<int, int> $n): void)), [23:3-10],
-                        (Obj_get (((exact TestDict), [23:3-7], (Lvar ([23:3-7], $foo))), (((function(dict<int, int> $n): void)), [23:9-10], (Id ([23:9-10], "n"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestDict), [23:3-7], (Lvar ([23:3-7], $foo))), (((function(dict<int, int> $n): void)), [23:9-10], (Id ([23:9-10], "n"))), Regular, Is_method)));
                        targs = [];
                        args = [(Anormal ((dict<int, string>), [23:11-14], (Hole (((dict<int, string>), [23:11-14], (Lvar ([23:11-14], $n2))), (dict<int, string>), (dict<int, int>), Typing))))];
                        unpacked_arg = None }))))
@@ -185,7 +185,7 @@
                   (Call
                      { func =
                        (((function(dict<int, int> $n): void)), [38:3-10],
-                        (Obj_get (((exact TestDict), [38:3-7], (Lvar ([38:3-7], $foo))), (((function(dict<int, int> $n): void)), [38:9-10], (Id ([38:9-10], "n"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestDict), [38:3-7], (Lvar ([38:3-7], $foo))), (((function(dict<int, int> $n): void)), [38:9-10], (Id ([38:9-10], "n"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal
@@ -203,7 +203,7 @@
                   (Call
                      { func =
                        (((function(dict<int, int> $n): void)), [40:3-10],
-                        (Obj_get (((exact TestDict), [40:3-7], (Lvar ([40:3-7], $foo))), (((function(dict<int, int> $n): void)), [40:9-10], (Id ([40:9-10], "n"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestDict), [40:3-7], (Lvar ([40:3-7], $foo))), (((function(dict<int, int> $n): void)), [40:9-10], (Id ([40:9-10], "n"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal
@@ -335,7 +335,7 @@
                   (Call
                      { func =
                        (((function(dict<int, int> $n): void)), [38:3-10],
-                        (Obj_get (((exact TestDict), [38:3-7], (Lvar ([38:3-7], $foo))), (((function(dict<int, int> $n): void)), [38:9-10], (Id ([38:9-10], "n"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestDict), [38:3-7], (Lvar ([38:3-7], $foo))), (((function(dict<int, int> $n): void)), [38:9-10], (Id ([38:9-10], "n"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal
@@ -353,7 +353,7 @@
                   (Call
                      { func =
                        (((function(dict<int, int> $n): void)), [40:3-10],
-                        (Obj_get (((exact TestDict), [40:3-7], (Lvar ([40:3-7], $foo))), (((function(dict<int, int> $n): void)), [40:9-10], (Id ([40:9-10], "n"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestDict), [40:3-7], (Lvar ([40:3-7], $foo))), (((function(dict<int, int> $n): void)), [40:9-10], (Id ([40:9-10], "n"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal

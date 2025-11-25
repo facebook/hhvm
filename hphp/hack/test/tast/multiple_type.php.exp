@@ -82,7 +82,7 @@
                         (Call
                            { func =
                              (((function(): (int | string))), [18:10-17],
-                              (Obj_get ((((C1 | C2)), [18:10-12], (Lvar ([18:10-12], $x))), (((function(): (int | string))), [18:14-17], (Id ([18:14-17], "foo"))), OG_nullthrows, Is_method)));
+                              (Obj_get ((((C1 | C2)), [18:10-12], (Lvar ([18:10-12], $x))), (((function(): (int | string))), [18:14-17], (Id ([18:14-17], "foo"))), Regular, Is_method)));
                              targs = []; args = []; unpacked_arg = None })))))
              ]
            };

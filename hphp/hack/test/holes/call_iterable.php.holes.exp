@@ -85,7 +85,7 @@
                   (Call
                      { func =
                        (((function(Iterable<int> $m): void)), [18:3-10],
-                        (Obj_get (((exact TestIterable), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(Iterable<int> $m): void)), [18:9-10], (Id ([18:9-10], "m"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestIterable), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(Iterable<int> $m): void)), [18:9-10], (Id ([18:9-10], "m"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal ((<expr#2> as Iterable<float>), [18:11-13], (Hole (((Iterable<float>), [18:11-13], (Lvar ([18:11-13], $m))), (<expr#2> as Iterable<float>), (Iterable<int>), Typing))))
@@ -142,7 +142,7 @@
                   (Call
                      { func =
                        (((function(Iterable<int> $m): void)), [30:3-10],
-                        (Obj_get (((exact TestIterable), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Iterable<int> $m): void)), [30:9-10], (Id ([30:9-10], "m"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestIterable), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Iterable<int> $m): void)), [30:9-10], (Id ([30:9-10], "m"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal
@@ -254,7 +254,7 @@
                   (Call
                      { func =
                        (((function(Iterable<int> $m): void)), [30:3-10],
-                        (Obj_get (((exact TestIterable), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Iterable<int> $m): void)), [30:9-10], (Id ([30:9-10], "m"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestIterable), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Iterable<int> $m): void)), [30:9-10], (Id ([30:9-10], "m"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal

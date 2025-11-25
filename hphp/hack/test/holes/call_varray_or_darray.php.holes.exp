@@ -89,7 +89,7 @@
                      { func =
                        (((function(vec_or_dict<arraykey, int> $d): void)), [18:3-10],
                         (Obj_get (((exact TestVarrayOrDarray), [18:3-7], (Lvar ([18:3-7], $foo))), (
-                           ((function(vec_or_dict<arraykey, int> $d): void)), [18:9-10], (Id ([18:9-10], "d"))), OG_nullthrows, Is_method)));
+                           ((function(vec_or_dict<arraykey, int> $d): void)), [18:9-10], (Id ([18:9-10], "d"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal
@@ -146,7 +146,7 @@
                      { func =
                        (((function(vec_or_dict<arraykey, int> $d): void)), [30:3-10],
                         (Obj_get (((exact TestVarrayOrDarray), [30:3-7], (Lvar ([30:3-7], $foo))), (
-                           ((function(vec_or_dict<arraykey, int> $d): void)), [30:9-10], (Id ([30:9-10], "d"))), OG_nullthrows, Is_method)));
+                           ((function(vec_or_dict<arraykey, int> $d): void)), [30:9-10], (Id ([30:9-10], "d"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal
@@ -253,7 +253,7 @@
                      { func =
                        (((function(vec_or_dict<arraykey, int> $d): void)), [30:3-10],
                         (Obj_get (((exact TestVarrayOrDarray), [30:3-7], (Lvar ([30:3-7], $foo))), (
-                           ((function(vec_or_dict<arraykey, int> $d): void)), [30:9-10], (Id ([30:9-10], "d"))), OG_nullthrows, Is_method)));
+                           ((function(vec_or_dict<arraykey, int> $d): void)), [30:9-10], (Id ([30:9-10], "d"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal

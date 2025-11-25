@@ -32,7 +32,7 @@
            [([5:59-64],
              (Expr
                 ((dict<string, mixed>), [5:59-64],
-                 (Assign (((~dict<string, mixed>), [5:59-64], (Obj_get (((this), [5:59-64], This), ((~dict<string, mixed>), [5:59-64], (Id ([5:59-64], "spec"))), OG_nullthrows, Is_prop))), None,
+                 (Assign (((~dict<string, mixed>), [5:59-64], (Obj_get (((this), [5:59-64], This), ((~dict<string, mixed>), [5:59-64], (Id ([5:59-64], "spec"))), Regular, Is_prop))), None,
                     ((dict<string, mixed>), [5:59-64], (Lvar ([5:59-64], $spec))))))));
              ([Pos.none], Noop)]
            };
@@ -213,8 +213,7 @@
             [([5:59-64],
               (Expr
                  ((dynamic), [5:59-64],
-                  (Assign (
-                     ((~dict<string, mixed>), [5:59-64], (Obj_get ((((this & dynamic)), [5:59-64], This), ((~dict<string, mixed>), [5:59-64], (Id ([5:59-64], "spec"))), OG_nullthrows, Is_prop))),
+                  (Assign (((~dict<string, mixed>), [5:59-64], (Obj_get ((((this & dynamic)), [5:59-64], This), ((~dict<string, mixed>), [5:59-64], (Id ([5:59-64], "spec"))), Regular, Is_prop))),
                      None, ((dynamic), [5:59-64], (Lvar ([5:59-64], $spec))))))));
               ([Pos.none], Noop)]
             };

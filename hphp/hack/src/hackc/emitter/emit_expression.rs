@@ -2035,10 +2035,10 @@ fn has_non_tparam_generics_targs(env: &Env<'_>, targs: &[ast::Targ]) -> bool {
     })
 }
 
-fn from_ast_null_flavor(nullflavor: ast::OgNullFlavor) -> ObjMethodOp {
+fn from_ast_null_flavor(nullflavor: ast::OperatorNullFlavor) -> ObjMethodOp {
     match nullflavor {
-        ast::OgNullFlavor::OGNullsafe => ObjMethodOp::NullSafe,
-        ast::OgNullFlavor::OGNullthrows => ObjMethodOp::NullThrows,
+        ast::OperatorNullFlavor::Nullsafe => ObjMethodOp::NullSafe,
+        ast::OperatorNullFlavor::Regular => ObjMethodOp::NullThrows,
     }
 }
 
@@ -2106,20 +2106,23 @@ fn emit_call_lhs_and_fcall<'a>(
         Expr_::ObjGet(o) if o.as_ref().3 == ast::PropOrMethod::IsMethod => {
             // Case $x->foo(...).
             // TODO: utilize caller_readonly_opt here for method calls
-            let emit_id =
-                |e: &mut Emitter, obj, id, null_flavor: &ast::OgNullFlavor, mut fcall_args| {
-                    let name = MethodName::intern(string_utils::strip_global_ns(id));
-                    let obj = emit_object_expr(e, env, obj)?;
-                    let generics = emit_generics(e, env, &mut fcall_args)?;
-                    let null_flavor = from_ast_null_flavor(*null_flavor);
-                    Ok((
-                        InstrSeq::gather(vec![obj, instr::null_uninit()]),
-                        InstrSeq::gather(vec![
-                            generics,
-                            instr::f_call_obj_method_d_(fcall_args, name, null_flavor),
-                        ]),
-                    ))
-                };
+            let emit_id = |e: &mut Emitter,
+                           obj,
+                           id,
+                           null_flavor: &ast::OperatorNullFlavor,
+                           mut fcall_args| {
+                let name = MethodName::intern(string_utils::strip_global_ns(id));
+                let obj = emit_object_expr(e, env, obj)?;
+                let generics = emit_generics(e, env, &mut fcall_args)?;
+                let null_flavor = from_ast_null_flavor(*null_flavor);
+                Ok((
+                    InstrSeq::gather(vec![obj, instr::null_uninit()]),
+                    InstrSeq::gather(vec![
+                        generics,
+                        instr::f_call_obj_method_d_(fcall_args, name, null_flavor),
+                    ]),
+                ))
+            };
             match o.as_ref() {
                 (obj, Expr(_, _, Expr_::String(id)), null_flavor, _) => {
                     emit_id(
@@ -3468,7 +3471,7 @@ fn emit_obj_get_expr<'a>(
     e: &(
         ast::Expr,
         ast::Expr,
-        aast_defs::OgNullFlavor,
+        aast_defs::OperatorNullFlavor,
         aast_defs::PropOrMethod,
     ),
 ) -> Result<InstrSeq> {
@@ -3980,7 +3983,7 @@ fn emit_obj_get<'a>(
     query_op: QueryMOp,
     expr: &ast::Expr,
     prop: &ast::Expr,
-    nullflavor: &ast_defs::OgNullFlavor,
+    nullflavor: &ast_defs::OperatorNullFlavor,
     null_coalesce_assignment: bool,
     readonly_get: bool, // obj_get enclosed in readonly expression
 ) -> Result<(InstrSeq, Option<StackIndex>)> {
@@ -3992,7 +3995,7 @@ fn emit_obj_get<'a>(
 
     if let Some(ast::Lid(pos, id)) = expr.2.as_lvar() {
         if local_id::get_name(id) == special_idents::THIS
-            && nullflavor.eq(&ast_defs::OgNullFlavor::OGNullsafe)
+            && nullflavor.eq(&ast_defs::OperatorNullFlavor::Nullsafe)
         {
             return Err(Error::fatal_parse(pos, "?-> is not allowed with $this"));
         }
@@ -4075,7 +4078,7 @@ fn emit_obj_get<'a>(
 fn emit_prop_expr<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
-    nullflavor: &ast_defs::OgNullFlavor,
+    nullflavor: &ast_defs::OperatorNullFlavor,
     stack_index: StackIndex,
     prop: &ast::Expr,
     null_coalesce_assignment: bool,
@@ -4090,8 +4093,8 @@ fn emit_prop_expr<'a>(
                 // Special case for known property name
                 let pid = hhbc::PropName::from_ast_name(string_utils::strip_global_ns(name));
                 match nullflavor {
-                    ast_defs::OgNullFlavor::OGNullthrows => MemberKey::PT(pid, readonly_op),
-                    ast_defs::OgNullFlavor::OGNullsafe => MemberKey::QT(pid, readonly_op),
+                    ast_defs::OperatorNullFlavor::Regular => MemberKey::PT(pid, readonly_op),
+                    ast_defs::OperatorNullFlavor::Nullsafe => MemberKey::QT(pid, readonly_op),
                 }
             }
         }
@@ -4101,8 +4104,8 @@ fn emit_prop_expr<'a>(
                 let pid: hhbc::PropName =
                     hhbc::PropName::from_ast_name(string_utils::strip_global_ns(name));
                 match nullflavor {
-                    ast_defs::OgNullFlavor::OGNullthrows => MemberKey::PT(pid, readonly_op),
-                    ast_defs::OgNullFlavor::OGNullsafe => MemberKey::QT(pid, readonly_op),
+                    ast_defs::OperatorNullFlavor::Regular => MemberKey::PT(pid, readonly_op),
+                    ast_defs::OperatorNullFlavor::Nullsafe => MemberKey::QT(pid, readonly_op),
                 }
             }
             Err(_) => {
@@ -4122,7 +4125,7 @@ fn emit_prop_expr<'a>(
     // For nullsafe access, insist that property is known
     Ok(match mk {
         MemberKey::PL(_, _) | MemberKey::PC(_, _)
-            if nullflavor.eq(&ast_defs::OgNullFlavor::OGNullsafe) =>
+            if nullflavor.eq(&ast_defs::OperatorNullFlavor::Nullsafe) =>
         {
             return Err(Error::fatal_parse(
                 &prop.1,
@@ -4145,7 +4148,7 @@ fn emit_xhp_obj_get<'a>(
     pos: &Pos,
     expr: &ast::Expr,
     s: &str,
-    nullflavor: &ast_defs::OgNullFlavor,
+    nullflavor: &ast_defs::OperatorNullFlavor,
 ) -> Result<InstrSeq> {
     use ast::Expr;
     use ast::Expr_;
@@ -5068,7 +5071,12 @@ fn emit_assign<'a>(
 fn emit_pipe<'a>(
     e: &mut Emitter,
     env: &Env<'a>,
-    (_, e1, e2, is_nullsafe): &(aast_defs::Lid, ast::Expr, ast::Expr, bool),
+    (_, e1, e2, nullflavor): &(
+        aast_defs::Lid,
+        ast::Expr,
+        ast::Expr,
+        ast::OperatorNullFlavor,
+    ),
 ) -> Result<InstrSeq> {
     let lhs_instrs = emit_expr(e, env, e1)?;
     scope::with_unnamed_local(e, |e, local| {
@@ -5077,25 +5085,26 @@ fn emit_pipe<'a>(
         let mut pipe_env = env.clone();
         pipe_env.with_pipe_var(local);
         let rhs_instrs = emit_expr(e, &pipe_env, e2)?;
-        if *is_nullsafe {
-            let end_label = e.label_gen_mut().next_regular();
-            Ok((
-                InstrSeq::gather(vec![
-                    lhs_instrs,
-                    instr::dup(),
-                    instr::is_type_c(IsTypeOp::Null),
-                    instr::jmp_nz(end_label),
-                    instr::pop_l(local),
-                ]),
-                rhs_instrs,
-                instr::label(end_label),
-            ))
-        } else {
-            Ok((
+        match nullflavor {
+            ast::OperatorNullFlavor::Nullsafe => {
+                let end_label = e.label_gen_mut().next_regular();
+                Ok((
+                    InstrSeq::gather(vec![
+                        lhs_instrs,
+                        instr::dup(),
+                        instr::is_type_c(IsTypeOp::Null),
+                        instr::jmp_nz(end_label),
+                        instr::pop_l(local),
+                    ]),
+                    rhs_instrs,
+                    instr::label(end_label),
+                ))
+            }
+            ast::OperatorNullFlavor::Regular => Ok((
                 InstrSeq::gather(vec![lhs_instrs, instr::pop_l(local)]),
                 rhs_instrs,
                 instr::empty(),
-            ))
+            )),
         }
     })
 }
@@ -6374,7 +6383,7 @@ pub fn emit_lval_op_nonlist_steps<'a>(
             },
             Expr_::ObjGet(x) if x.as_ref().3 == ast::PropOrMethod::IsProp => {
                 let (e1, e2, nullflavor, _) = &**x;
-                if nullflavor.eq(&ast_defs::OgNullFlavor::OGNullsafe) {
+                if nullflavor.eq(&ast_defs::OperatorNullFlavor::Nullsafe) {
                     return Err(Error::fatal_parse(
                         pos,
                         "?-> is not allowed in write context",

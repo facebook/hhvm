@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6fb1b361853a0379cf3c56a477aecf80>>
+// @generated SignedSource<<023d69295896281ecf04262a091592d7>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -2849,7 +2849,7 @@ const _: () = {
     impl Transform for SplatKind {}
 };
 const _: () = {
-    impl Transform for OgNullFlavor {}
+    impl Transform for OperatorNullFlavor {}
 };
 const _: () = {
     impl Transform for PropOrMethod {}

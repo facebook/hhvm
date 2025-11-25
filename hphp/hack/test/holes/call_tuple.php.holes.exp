@@ -102,7 +102,7 @@
                   (Call
                      { func =
                        (((function((int, int) $a): void)), [21:3-10],
-                        (Obj_get (((exact TestTuple), [21:3-7], (Lvar ([21:3-7], $foo))), (((function((int, int) $a): void)), [21:9-10], (Id ([21:9-10], "a"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestTuple), [21:3-7], (Lvar ([21:3-7], $foo))), (((function((int, int) $a): void)), [21:9-10], (Id ([21:9-10], "a"))), Regular, Is_method)));
                        targs = []; args = [(Anormal (((int, bool)), [21:11-14], (Hole ((((int, bool)), [21:11-14], (Lvar ([21:11-14], $a1))), ((int, bool)), ((int, int)), Typing))))];
                        unpacked_arg = None }))));
              ([23:3-16],
@@ -111,7 +111,7 @@
                   (Call
                      { func =
                        (((function((int, int) $a): void)), [23:3-10],
-                        (Obj_get (((exact TestTuple), [23:3-7], (Lvar ([23:3-7], $foo))), (((function((int, int) $a): void)), [23:9-10], (Id ([23:9-10], "a"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestTuple), [23:3-7], (Lvar ([23:3-7], $foo))), (((function((int, int) $a): void)), [23:9-10], (Id ([23:9-10], "a"))), Regular, Is_method)));
                        targs = []; args = [(Anormal (((bool, int)), [23:11-14], (Hole ((((bool, int)), [23:11-14], (Lvar ([23:11-14], $a2))), ((bool, int)), ((int, int)), Typing))))];
                        unpacked_arg = None }))))
              ]
@@ -190,7 +190,7 @@
                   (Call
                      { func =
                        (((function((int, int) $a): void)), [38:3-10],
-                        (Obj_get (((exact TestTuple), [38:3-7], (Lvar ([38:3-7], $foo))), (((function((int, int) $a): void)), [38:9-10], (Id ([38:9-10], "a"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestTuple), [38:3-7], (Lvar ([38:3-7], $foo))), (((function((int, int) $a): void)), [38:9-10], (Id ([38:9-10], "a"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal
@@ -209,7 +209,7 @@
                   (Call
                      { func =
                        (((function((int, int) $a): void)), [40:3-10],
-                        (Obj_get (((exact TestTuple), [40:3-7], (Lvar ([40:3-7], $foo))), (((function((int, int) $a): void)), [40:9-10], (Id ([40:9-10], "a"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestTuple), [40:3-7], (Lvar ([40:3-7], $foo))), (((function((int, int) $a): void)), [40:9-10], (Id ([40:9-10], "a"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal
@@ -351,7 +351,7 @@
                   (Call
                      { func =
                        (((function((int, int) $a): void)), [38:3-10],
-                        (Obj_get (((exact TestTuple), [38:3-7], (Lvar ([38:3-7], $foo))), (((function((int, int) $a): void)), [38:9-10], (Id ([38:9-10], "a"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestTuple), [38:3-7], (Lvar ([38:3-7], $foo))), (((function((int, int) $a): void)), [38:9-10], (Id ([38:9-10], "a"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal
@@ -370,7 +370,7 @@
                   (Call
                      { func =
                        (((function((int, int) $a): void)), [40:3-10],
-                        (Obj_get (((exact TestTuple), [40:3-7], (Lvar ([40:3-7], $foo))), (((function((int, int) $a): void)), [40:9-10], (Id ([40:9-10], "a"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestTuple), [40:3-7], (Lvar ([40:3-7], $foo))), (((function((int, int) $a): void)), [40:9-10], (Id ([40:9-10], "a"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal

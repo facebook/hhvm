@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4fc09dd438b86cd1101ccd94c708e215>>
+// @generated SignedSource<<a9c2a512d9051643528c1a265ef6bb4d>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -858,7 +858,7 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
         }
         #[inline]
         fn helper3<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node Box<(Expr<Ex, En>, Expr<Ex, En>, OgNullFlavor, PropOrMethod)>,
+            a: &'node Box<(Expr<Ex, En>, Expr<Ex, En>, OperatorNullFlavor, PropOrMethod)>,
             c: &mut P::Context,
             v: &mut dyn Visitor<'node, Params = P>,
         ) -> Result<(), P::Error> {
@@ -935,7 +935,7 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
         }
         #[inline]
         fn helper11<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node Box<(Lid, Expr<Ex, En>, Expr<Ex, En>, bool)>,
+            a: &'node Box<(Lid, Expr<Ex, En>, Expr<Ex, En>, OperatorNullFlavor)>,
             c: &mut P::Context,
             v: &mut dyn Visitor<'node, Params = P>,
         ) -> Result<(), P::Error> {
@@ -1720,13 +1720,13 @@ impl<P: Params> Node<P> for NsKind {
         }
     }
 }
-impl<P: Params> Node<P> for OgNullFlavor {
+impl<P: Params> Node<P> for OperatorNullFlavor {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
         v: &mut dyn Visitor<'node, Params = P>,
     ) -> Result<(), P::Error> {
-        v.visit_og_null_flavor(c, self)
+        v.visit_operator_null_flavor(c, self)
     }
     fn recurse<'node>(
         &'node self,
@@ -1734,8 +1734,8 @@ impl<P: Params> Node<P> for OgNullFlavor {
         v: &mut dyn Visitor<'node, Params = P>,
     ) -> Result<(), P::Error> {
         match self {
-            OgNullFlavor::OGNullthrows => Ok(()),
-            OgNullFlavor::OGNullsafe => Ok(()),
+            OperatorNullFlavor::Regular => Ok(()),
+            OperatorNullFlavor::Nullsafe => Ok(()),
         }
     }
 }

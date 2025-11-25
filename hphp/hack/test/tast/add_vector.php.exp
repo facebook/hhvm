@@ -24,7 +24,7 @@
            [([16:5-26],
              (Expr
                 ((Vector<T>), [16:5-25],
-                 (Assign (((~Vector<T>), [16:5-13], (Obj_get (((this), [16:5-10], This), ((~Vector<T>), [16:12-13], (Id ([16:12-13], "x"))), OG_nullthrows, Is_prop))), None,
+                 (Assign (((~Vector<T>), [16:5-13], (Obj_get (((this), [16:5-10], This), ((~Vector<T>), [16:12-13], (Id ([16:12-13], "x"))), Regular, Is_prop))), None,
                     ((Vector<T>), [16:16-25], (ValCollection (([16:16-22], Vector), None, []))))))))
              ]
            };
@@ -47,7 +47,7 @@
               (Expr
                  ((T), [20:5-20],
                   (Assign (
-                     ((T), [20:5-15], (Array_get (((~Vector<T>), [20:5-13], (Obj_get (((this), [20:5-10], This), ((~Vector<T>), [20:12-13], (Id ([20:12-13], "x"))), OG_nullthrows, Is_prop))), None))),
+                     ((T), [20:5-15], (Array_get (((~Vector<T>), [20:5-13], (Obj_get (((this), [20:5-10], This), ((~Vector<T>), [20:12-13], (Id ([20:12-13], "x"))), Regular, Is_prop))), None))),
                      None, ((T), [20:18-20], (Lvar ([20:18-20], $x))))))))
               ]
             };
@@ -69,7 +69,7 @@
             [([24:5-24],
               (Return
                  (Some ((~T), [24:12-23],
-                        (Array_get (((~Vector<T>), [24:12-20], (Obj_get (((this), [24:12-17], This), ((~Vector<T>), [24:19-20], (Id ([24:19-20], "x"))), OG_nullthrows, Is_prop))),
+                        (Array_get (((~Vector<T>), [24:12-20], (Obj_get (((this), [24:12-17], This), ((~Vector<T>), [24:19-20], (Id ([24:19-20], "x"))), Regular, Is_prop))),
                            (Some ((int), [24:21-22], (Int "0")))))))))
               ]
             };
@@ -162,7 +162,7 @@
                   (Call
                      { func =
                        (((function(X $x): void)), [34:3-10],
-                        (Obj_get (((exact MyPhonyVector<X>), [34:3-5], (Lvar ([34:3-5], $x))), (((function(X $x): void)), [34:7-10], (Id ([34:7-10], "add"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact MyPhonyVector<X>), [34:3-5], (Lvar ([34:3-5], $x))), (((function(X $x): void)), [34:7-10], (Id ([34:7-10], "add"))), Regular, Is_method)));
                        targs = []; args = [(Anormal ((exact B), [34:11-18], (New (((exact B), [34:15-16], (CI ([34:15-16], "\\B"))), [], [], None, ((function(): void))))))]; 
                        unpacked_arg = None }))));
              ([35:3-20],
@@ -171,7 +171,7 @@
                   (Call
                      { func =
                        (((function(X $x): void)), [35:3-10],
-                        (Obj_get (((exact MyPhonyVector<X>), [35:3-5], (Lvar ([35:3-5], $x))), (((function(X $x): void)), [35:7-10], (Id ([35:7-10], "add"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact MyPhonyVector<X>), [35:3-5], (Lvar ([35:3-5], $x))), (((function(X $x): void)), [35:7-10], (Id ([35:7-10], "add"))), Regular, Is_method)));
                        targs = []; args = [(Anormal ((exact A), [35:11-18], (New (((exact A), [35:15-16], (CI ([35:15-16], "\\A"))), [], [], None, ((function(): void))))))]; 
                        unpacked_arg = None }))));
              ([36:3-12],
@@ -221,7 +221,7 @@
                  ((dynamic), [20:5-20],
                   (Assign (
                      ((dynamic), [20:5-15],
-                      (Array_get (((~Vector<T>), [20:5-13], (Obj_get ((((this & dynamic)), [20:5-10], This), ((~Vector<T>), [20:12-13], (Id ([20:12-13], "x"))), OG_nullthrows, Is_prop))), None))),
+                      (Array_get (((~Vector<T>), [20:5-13], (Obj_get ((((this & dynamic)), [20:5-10], This), ((~Vector<T>), [20:12-13], (Id ([20:12-13], "x"))), Regular, Is_prop))), None))),
                      None, ((dynamic), [20:18-20], (Lvar ([20:18-20], $x))))))))
               ]
             };
@@ -271,7 +271,7 @@
                   (Call
                      { func =
                        (((function(#3 $x): void)), [34:3-10],
-                        (Obj_get (((exact MyPhonyVector<#3>), [34:3-5], (Lvar ([34:3-5], $x))), (((function(#3 $x): void)), [34:7-10], (Id ([34:7-10], "add"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact MyPhonyVector<#3>), [34:3-5], (Lvar ([34:3-5], $x))), (((function(#3 $x): void)), [34:7-10], (Id ([34:7-10], "add"))), Regular, Is_method)));
                        targs = []; args = [(Anormal ((exact B), [34:11-18], (New (((exact B), [34:15-16], (CI ([34:15-16], "\\B"))), [], [], None, ((function(): void))))))]; 
                        unpacked_arg = None }))));
              ([35:3-20],
@@ -280,7 +280,7 @@
                   (Call
                      { func =
                        (((function(#3 $x): void)), [35:3-10],
-                        (Obj_get (((exact MyPhonyVector<#3>), [35:3-5], (Lvar ([35:3-5], $x))), (((function(#3 $x): void)), [35:7-10], (Id ([35:7-10], "add"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact MyPhonyVector<#3>), [35:3-5], (Lvar ([35:3-5], $x))), (((function(#3 $x): void)), [35:7-10], (Id ([35:7-10], "add"))), Regular, Is_method)));
                        targs = []; args = [(Anormal ((exact A), [35:11-18], (New (((exact A), [35:15-16], (CI ([35:15-16], "\\A"))), [], [], None, ((function(): void))))))]; 
                        unpacked_arg = None }))));
              ([36:3-12],

@@ -56,22 +56,22 @@
            [([7:38-49],
              (Expr
                 ((dict<string, dynamic>), [7:38-49],
-                 (Assign (((~dict<string, dynamic>), [7:38-49], (Obj_get (((this), [7:38-49], This), ((~dict<string, dynamic>), [7:38-49], (Id ([7:38-49], "attributes"))), OG_nullthrows, Is_prop))),
-                    None, ((dict<string, dynamic>), [7:38-49], (Lvar ([7:38-49], $attributes))))))));
+                 (Assign (((~dict<string, dynamic>), [7:38-49], (Obj_get (((this), [7:38-49], This), ((~dict<string, dynamic>), [7:38-49], (Id ([7:38-49], "attributes"))), Regular, Is_prop))), None,
+                    ((dict<string, dynamic>), [7:38-49], (Lvar ([7:38-49], $attributes))))))));
              ([8:30-39],
               (Expr
                  ((vec<dynamic>), [8:30-39],
-                  (Assign (((~vec<dynamic>), [8:30-39], (Obj_get (((this), [8:30-39], This), ((~vec<dynamic>), [8:30-39], (Id ([8:30-39], "children"))), OG_nullthrows, Is_prop))), None,
+                  (Assign (((~vec<dynamic>), [8:30-39], (Obj_get (((this), [8:30-39], This), ((~vec<dynamic>), [8:30-39], (Id ([8:30-39], "children"))), Regular, Is_prop))), None,
                      ((vec<dynamic>), [8:30-39], (Lvar ([8:30-39], $children))))))));
              ([9:21-26],
               (Expr
                  ((string), [9:21-26],
-                  (Assign (((string), [9:21-26], (Obj_get (((this), [9:21-26], This), ((string), [9:21-26], (Id ([9:21-26], "file"))), OG_nullthrows, Is_prop))), None,
+                  (Assign (((string), [9:21-26], (Obj_get (((this), [9:21-26], This), ((string), [9:21-26], (Id ([9:21-26], "file"))), Regular, Is_prop))), None,
                      ((string), [9:21-26], (Lvar ([9:21-26], $file))))))));
              ([10:18-23],
               (Expr
                  ((int), [10:18-23],
-                  (Assign (((int), [10:18-23], (Obj_get (((this), [10:18-23], This), ((int), [10:18-23], (Id ([10:18-23], "line"))), OG_nullthrows, Is_prop))), None,
+                  (Assign (((int), [10:18-23], (Obj_get (((this), [10:18-23], This), ((int), [10:18-23], (Id ([10:18-23], "line"))), Regular, Is_prop))), None,
                      ((int), [10:18-23], (Lvar ([10:18-23], $line))))))));
              ([Pos.none], Noop)]
            };
@@ -182,23 +182,22 @@
               (Expr
                  ((dynamic), [7:38-49],
                   (Assign (
-                     ((~dict<string, dynamic>), [7:38-49],
-                      (Obj_get ((((this & dynamic)), [7:38-49], This), ((~dict<string, dynamic>), [7:38-49], (Id ([7:38-49], "attributes"))), OG_nullthrows, Is_prop))),
+                     ((~dict<string, dynamic>), [7:38-49], (Obj_get ((((this & dynamic)), [7:38-49], This), ((~dict<string, dynamic>), [7:38-49], (Id ([7:38-49], "attributes"))), Regular, Is_prop))),
                      None, ((dynamic), [7:38-49], (Lvar ([7:38-49], $attributes))))))));
               ([8:30-39],
                (Expr
                   ((dynamic), [8:30-39],
-                   (Assign (((~vec<dynamic>), [8:30-39], (Obj_get ((((this & dynamic)), [8:30-39], This), ((~vec<dynamic>), [8:30-39], (Id ([8:30-39], "children"))), OG_nullthrows, Is_prop))), None,
+                   (Assign (((~vec<dynamic>), [8:30-39], (Obj_get ((((this & dynamic)), [8:30-39], This), ((~vec<dynamic>), [8:30-39], (Id ([8:30-39], "children"))), Regular, Is_prop))), None,
                       ((dynamic), [8:30-39], (Lvar ([8:30-39], $children))))))));
               ([9:21-26],
                (Expr
                   ((string), [9:21-26],
-                   (Assign (((string), [9:21-26], (Obj_get ((((this & dynamic)), [9:21-26], This), ((string), [9:21-26], (Id ([9:21-26], "file"))), OG_nullthrows, Is_prop))), None,
+                   (Assign (((string), [9:21-26], (Obj_get ((((this & dynamic)), [9:21-26], This), ((string), [9:21-26], (Id ([9:21-26], "file"))), Regular, Is_prop))), None,
                       ((string), [9:21-26], (Lvar ([9:21-26], $file))))))));
               ([10:18-23],
                (Expr
                   ((int), [10:18-23],
-                   (Assign (((int), [10:18-23], (Obj_get ((((this & dynamic)), [10:18-23], This), ((int), [10:18-23], (Id ([10:18-23], "line"))), OG_nullthrows, Is_prop))), None,
+                   (Assign (((int), [10:18-23], (Obj_get ((((this & dynamic)), [10:18-23], This), ((int), [10:18-23], (Id ([10:18-23], "line"))), Regular, Is_prop))), None,
                       ((int), [10:18-23], (Lvar ([10:18-23], $line))))))));
               ([Pos.none], Noop)]
             };

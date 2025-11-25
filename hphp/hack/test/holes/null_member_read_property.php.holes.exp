@@ -19,7 +19,7 @@
           [([5:3-10],
             (Expr
                ((nothing), [5:3-9],
-                (Obj_get (((null), [5:3-6], (Hole (((null), [5:3-6], (Lvar ([5:3-6], $xs))), (null), (nothing), Typing))), ((nothing), [5:8-9], (Id ([5:8-9], "c"))), OG_nullthrows, Is_prop)))))
+                (Obj_get (((null), [5:3-6], (Hole (((null), [5:3-6], (Lvar ([5:3-6], $xs))), (null), (nothing), Typing))), ((nothing), [5:8-9], (Id ([5:8-9], "c"))), Regular, Is_prop)))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-40], "__SupportDynamicType"); ua_params = [] }]; 
@@ -47,8 +47,7 @@
            [([10:3-10],
              (Expr
                 ((nothing), [10:3-9],
-                 (Obj_get (((?string), [10:3-6], (Hole (((?string), [10:3-6], (Lvar ([10:3-6], $xs))), (?string), (nothing), Typing))), (
-                    (nothing), [10:8-9], (Id ([10:8-9], "c"))), OG_nullthrows, Is_prop)))))
+                 (Obj_get (((?string), [10:3-6], (Hole (((?string), [10:3-6], (Lvar ([10:3-6], $xs))), (?string), (nothing), Typing))), ((nothing), [10:8-9], (Id ([10:8-9], "c"))), Regular, Is_prop)))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([8:10-44], "__SupportDynamicType"); ua_params = [] }]; 
@@ -76,7 +75,7 @@
            [([15:3-10],
              (Expr
                 ((nothing), [15:3-9],
-                 (Obj_get (((mixed), [15:3-6], (Hole (((mixed), [15:3-6], (Lvar ([15:3-6], $xs))), (mixed), (nothing), Typing))), ((nothing), [15:8-9], (Id ([15:8-9], "c"))), OG_nullthrows, Is_prop)))))
+                 (Obj_get (((mixed), [15:3-6], (Hole (((mixed), [15:3-6], (Lvar ([15:3-6], $xs))), (mixed), (nothing), Typing))), ((nothing), [15:8-9], (Id ([15:8-9], "c"))), Regular, Is_prop)))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([13:10-41], "__SupportDynamicType"); ua_params = [] }]; 

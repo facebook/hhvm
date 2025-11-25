@@ -3,13 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6ab058233fbc7434c069c72ca7af4b79>>
+// @generated SignedSource<<d14270b685b436789bf18c909ec7cfbc>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
 
 use arena_trait::TrivialDrop;
-pub use ast_defs::OgNullFlavor;
+pub use ast_defs::OperatorNullFlavor;
 pub use ast_defs::Pos;
 pub use ast_defs::PositionedByteString;
 pub use ast_defs::PropOrMethod;
@@ -803,22 +803,22 @@ pub enum Expr_<Ex, En> {
     ArrayGet(Box<(Expr<Ex, En>, Option<Expr<Ex, En>>)>),
     /// Instance property or method access.
     ///
-    ///     $foo->bar      // OG_nullthrows, Is_prop: access named property
-    ///     ($foo->bar)()  // OG_nullthrows, Is_prop: call lambda stored in named property
-    ///     $foo?->bar     // OG_nullsafe,   Is_prop
-    ///     ($foo?->bar)() // OG_nullsafe,   Is_prop
+    ///     $foo->bar      // Regular, Is_prop: access named property
+    ///     ($foo->bar)()  // Regular, Is_prop: call lambda stored in named property
+    ///     $foo?->bar     // Nullsafe,   Is_prop
+    ///     ($foo?->bar)() // Nullsafe,   Is_prop
     ///
-    ///     $foo->bar()    // OG_nullthrows, Is_method: call named method
-    ///     $foo->$bar()   // OG_nullthrows, Is_method: dynamic call, method name stored in local $bar
-    ///     $foo?->bar()   // OG_nullsafe,   Is_method
-    ///     $foo?->$bar()  // OG_nullsafe,   Is_method
+    ///     $foo->bar()    // Regular, Is_method: call named method
+    ///     $foo->$bar()   // Regular, Is_method: dynamic call, method name stored in local $bar
+    ///     $foo?->bar()   // Nullsafe,   Is_method
+    ///     $foo?->$bar()  // Nullsafe,   Is_method
     ///
     /// prop_or_method is:
     ///   - Is_prop for property access
     ///   - Is_method for method call, only possible when the node is the receiver in a Call node.
     #[rust_to_ocaml(name = "Obj_get")]
     #[rust_to_ocaml(inline_tuple)]
-    ObjGet(Box<(Expr<Ex, En>, Expr<Ex, En>, OgNullFlavor, PropOrMethod)>),
+    ObjGet(Box<(Expr<Ex, En>, Expr<Ex, En>, OperatorNullFlavor, PropOrMethod)>),
     /// Static property or dynamic method access. The rhs of the :: begins
     /// with $ or is some non-name expression appearing within braces {}.
     ///
@@ -976,7 +976,7 @@ pub enum Expr_<Ex, En> {
     ///
     ///     foo() |> bar(); // equivalent: foo(); bar();
     #[rust_to_ocaml(inline_tuple)]
-    Pipe(Box<(Lid, Expr<Ex, En>, Expr<Ex, En>, bool)>),
+    Pipe(Box<(Lid, Expr<Ex, En>, Expr<Ex, En>, OperatorNullFlavor)>),
     /// Ternary operator, or elvis operator.
     ///
     ///     $foo ? $bar : $baz // ternary

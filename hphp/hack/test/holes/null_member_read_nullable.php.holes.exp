@@ -26,8 +26,7 @@
            [([4:42-44],
              (Expr
                 ((int), [4:42-44],
-                 (Assign (((int), [4:42-44], (Obj_get (((this), [4:42-44], This), ((int), [4:42-44], (Id ([4:42-44], "x"))), OG_nullthrows, Is_prop))), None,
-                    ((int), [4:42-44], (Lvar ([4:42-44], $x))))))));
+                 (Assign (((int), [4:42-44], (Obj_get (((this), [4:42-44], This), ((int), [4:42-44], (Id ([4:42-44], "x"))), Regular, Is_prop))), None, ((int), [4:42-44], (Lvar ([4:42-44], $x))))))));
              ([Pos.none], Noop)]
            };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -82,7 +81,7 @@
               (Expr
                  ((nothing), [11:3-8],
                   (Obj_get (((?exact MyVeryOwnC), [11:3-5], (Hole (((?exact MyVeryOwnC), [11:3-5], (Lvar ([11:3-5], $c))), (?exact MyVeryOwnC), (nothing), Typing))),
-                     ((nothing), [11:7-8], (Id ([11:7-8], "x"))), OG_nullthrows, Is_prop)))));
+                     ((nothing), [11:7-8], (Id ([11:7-8], "x"))), Regular, Is_prop)))));
              ([13:3-13],
               (Expr
                  ((void), [13:3-12],
@@ -90,7 +89,7 @@
                      { func =
                        (((function(): void)), [13:3-10],
                         (Obj_get (((?exact MyVeryOwnC), [13:3-5], (Hole (((?exact MyVeryOwnC), [13:3-5], (Lvar ([13:3-5], $c))), (?exact MyVeryOwnC), (exact MyVeryOwnC), Typing))),
-                           (((function(): void)), [13:7-10], (Id ([13:7-10], "bar"))), OG_nullthrows, Is_method)));
+                           (((function(): void)), [13:7-10], (Id ([13:7-10], "bar"))), Regular, Is_method)));
                        targs = []; args = []; unpacked_arg = None }))))
              ]
            };

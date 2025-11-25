@@ -83,7 +83,7 @@
                   (Call
                      { func =
                        (((function(vec<int> $c): void)), [18:3-10],
-                        (Obj_get (((exact TestVarray), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(vec<int> $c): void)), [18:9-10], (Id ([18:9-10], "c"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestVarray), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(vec<int> $c): void)), [18:9-10], (Id ([18:9-10], "c"))), Regular, Is_method)));
                        targs = []; args = [(Anormal ((vec<float>), [18:11-13], (Hole (((vec<float>), [18:11-13], (Lvar ([18:11-13], $c))), (vec<float>), (vec<int>), Typing))))]; 
                        unpacked_arg = None }))))
              ]
@@ -136,7 +136,7 @@
                   (Call
                      { func =
                        (((function(vec<int> $c): void)), [30:3-10],
-                        (Obj_get (((exact TestVarray), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(vec<int> $c): void)), [30:9-10], (Id ([30:9-10], "c"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestVarray), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(vec<int> $c): void)), [30:9-10], (Id ([30:9-10], "c"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal
@@ -247,7 +247,7 @@
                   (Call
                      { func =
                        (((function(vec<int> $c): void)), [30:3-10],
-                        (Obj_get (((exact TestVarray), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(vec<int> $c): void)), [30:9-10], (Id ([30:9-10], "c"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestVarray), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(vec<int> $c): void)), [30:9-10], (Id ([30:9-10], "c"))), Regular, Is_method)));
                        targs = [];
                        args =
                        [(Anormal

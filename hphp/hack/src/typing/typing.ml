@@ -4148,7 +4148,7 @@ end = struct
         bop
         e1
         (Either.First e2)
-    | Pipe (e0, e1, e2, is_nullsafe) ->
+    | Pipe (e0, e1, e2, null_flavor) ->
       (* If it weren't for local variable assignment or refinement the pipe
        * expression e1 |> e2 could be typed using this rule (E is environment with
        * types for locals):
@@ -4166,6 +4166,11 @@ end = struct
        * The possibility of e2 changing the types of locals in E means that E
        * can evolve, and so we need to restore $$ to its original state.
        *)
+      let is_nullsafe =
+        match null_flavor with
+        | Aast.Nullsafe -> true
+        | _ -> false
+      in
       let r = Reason.nullsafe_pipe_op p in
       let ty_null = MakeType.null r and ty_nonnull = MakeType.nonnull r in
       let (env, te1, ty1) =
@@ -4233,7 +4238,7 @@ end = struct
               local.pos)
       in
       let (env, te, ty) =
-        make_result env p (Aast.Pipe (e0, te1, te2, is_nullsafe)) ty2
+        make_result env p (Aast.Pipe (e0, te1, te2, null_flavor)) ty2
       in
       (env, te, ty)
     | Unop (uop, e) ->
@@ -4412,7 +4417,7 @@ end = struct
       in
       let ((env, ty_err_opt), result_ty, ty_mismatch_opt) =
         match nullflavor with
-        | OG_nullthrows ->
+        | Regular ->
           let (env, ty_err_opt) =
             Type.sub_type_i
               p1
@@ -4426,7 +4431,7 @@ end = struct
             mk_ty_mismatch_opt ty1 (MakeType.nothing Reason.none) ty_err_opt
           in
           ((env, ty_err_opt), mem_ty, ty_mismatch)
-        | OG_nullsafe ->
+        | Nullsafe ->
           (* A nullsafe access is equivalent to an `if` where the receiver is
              refined to `nonnull` (`null`) in the true (false) branches *)
           let r = Reason.nullsafe_op p in
@@ -6025,7 +6030,7 @@ end = struct
           match el with
           | [arg] ->
             (match Aast_utils.arg_to_expr arg with
-            | (_, p, Obj_get (_, _, OG_nullsafe, _)) ->
+            | (_, p, Obj_get (_, _, Nullsafe, _)) ->
               (Typing_error_utils.add_typing_error ~env
               @@ Typing_error.(
                    primary @@ Primary.Nullsafe_property_write_context p));
@@ -6266,8 +6271,8 @@ end = struct
       in
       let nullsafe =
         match nullflavor with
-        | OG_nullthrows -> None
-        | OG_nullsafe -> Some p
+        | Regular -> None
+        | Nullsafe -> Some p
       in
       let use_constraint_inference =
         List.is_empty explicit_targs
@@ -6374,7 +6379,7 @@ end = struct
             (Aast.Obj_get
                ( hole_on_ty_mismatch ~ty_mismatch_opt te1,
                  inner_te,
-                 OG_nullthrows,
+                 Regular,
                  Is_method ))
         in
         let result = make_call env te [] args_tast None ty in
@@ -12182,7 +12187,7 @@ end
 
 and Xhp_attribute : sig
   val xhp_check_get_attribute :
-    pos -> env -> Nast.expr -> byte_string -> og_null_flavor -> env
+    pos -> env -> Nast.expr -> byte_string -> operator_null_flavor -> env
 
   (**
   * Typecheck the attribute expressions - this just checks that the expressions are
@@ -12643,8 +12648,8 @@ end = struct
         let lenv = env.lenv in
         let nullsafe =
           match nullflavor with
-          | OG_nullthrows -> None
-          | OG_nullsafe -> Some pobj
+          | Regular -> None
+          | Nullsafe -> Some pobj
         in
         let (env, tobj, obj_ty) =
           Expr.expr

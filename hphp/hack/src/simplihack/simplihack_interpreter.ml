@@ -433,7 +433,7 @@ end = struct
       | (Aast.Anormal arg :: args, Aast.{ param_name; _ } :: params) ->
         go args params
         @@ Context.store ~ctx (Local_id.make_unscoped param_name) (eval arg)
-      (* TODO(named_params): Better handling needed here. *)
+      (* TODO(named_params): Better handling needed here or delete simplihack *)
       | (Aast.Anamed (_, _) :: _, _) -> ctx
       | _ -> ctx
     in

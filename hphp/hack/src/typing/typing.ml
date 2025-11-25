@@ -6787,7 +6787,6 @@ end = struct
 
                     (env, (fun e -> Aast_defs.Ainout (iopos, e)), te, ty)
                   | Aast_defs.Anamed (name, elt) ->
-                    (* TODO(named_params): We need to review this to make sure it's right. *)
                     let (env, te, ty) =
                       expr
                         ~expected:(Some expected_arg_ty)

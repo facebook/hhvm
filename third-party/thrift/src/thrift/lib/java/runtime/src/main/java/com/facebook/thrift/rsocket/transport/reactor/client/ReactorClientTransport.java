@@ -63,25 +63,26 @@ public class ReactorClientTransport implements ClientTransport {
 
     if (debugNettyPipeline) {
       ConnectionClosureMetricsHandler handler = new ConnectionClosureMetricsHandler();
-      tcpClient
-          .observe(handler)
-          .doOnChannelInit(
-              (connectionObserver, channel, remoteAddress) -> {
-                if (sslContext != null) {
-                  channel
-                      .pipeline()
-                      .addAfter(
-                          NettyPipeline.SslHandler, "connectionClosureMetricsHandler", handler);
-                } else {
-                  channel.pipeline().addFirst("connectionClosureMetricsHandler", handler);
-                }
-              });
+      tcpClient =
+          tcpClient
+              .observe(handler)
+              .doOnChannelInit(
+                  (connectionObserver, channel, remoteAddress) -> {
+                    if (sslContext != null) {
+                      channel
+                          .pipeline()
+                          .addAfter(
+                              NettyPipeline.SslHandler, "connectionClosureMetricsHandler", handler);
+                    } else {
+                      channel.pipeline().addFirst("connectionClosureMetricsHandler", handler);
+                    }
+                  });
     }
 
     if (sslContext != null) {
-      tcpClient.secure(SslProvider.builder().sslContext(sslContext).build());
+      tcpClient = tcpClient.secure(SslProvider.builder().sslContext(sslContext).build());
     } else {
-      tcpClient.noSSL();
+      tcpClient = tcpClient.noSSL();
     }
 
     return tcpClient

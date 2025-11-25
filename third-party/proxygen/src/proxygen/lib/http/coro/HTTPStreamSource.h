@@ -170,12 +170,20 @@ class HTTPStreamSource : public HTTPSource {
     return error_ || isEOMSeen();
   }
 
+  bool sourceComplete() const {
+    return sourceComplete_;
+  }
+
   void setCallback(Callback* callback) {
     callback_ = callback;
   }
 
   void describe(std::ostream& os) const {
     os << ", streamID=" << id_;
+  }
+
+  const auto& window() const {
+    return recvWindow_.getWindow();
   }
 
   uint32_t bodyBytesBuffered() const {

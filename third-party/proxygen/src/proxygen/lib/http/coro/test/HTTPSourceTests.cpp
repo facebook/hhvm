@@ -62,6 +62,8 @@ class HTTPStreamSourceTest : public testing::Test {
             evb_.terminateLoopSoon();
           }
         }));
+    XCHECK(!stream_.sourceComplete());
+    XCHECK_EQ(stream_.window().getSize(), 65'535);
   }
 
  protected:

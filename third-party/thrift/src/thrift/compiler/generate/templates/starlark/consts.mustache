@@ -15,15 +15,42 @@
   limitations under the License.
 
 }}
-{{#program:constants}}{{!
-  }}{{#constant:type}}{{!
-    }}{{#type:starlark_supported?}}
-{{constant:name}} = {{!
-      }}{{#constant:value}}{{!
-        }}{{> consts/value}}{{!
-      }}{{/constant:value}}
-      {{!newline after constant}}
 
-    {{/type:starlark_supported?}}{{!
-  }}{{/constant:type}}{{!
-}}{{/program:constants}}
+{{#let partial primitive_value |value|}}
+  {{#pragma ignore-newlines}}
+  {{#let val_type = value.type}}
+  {{#if val_type.string?}}
+"{{value.string_value}}"
+  {{#else if (or val_type.byte? val_type.any_int?)}}
+{{value.integer_value}}
+  {{#else if val_type.bool?}}
+{{#if value.nonzero?}}True{{#else}}False{{/if}}
+  {{#else if val_type.floating_point?}}
+{{#if value.double?}}{{value.double_value}}{{#else}}{{value.integer_value}}.0{{/if}}
+  {{/if val_type.string?}}
+{{/let partial}}
+
+{{!
+  We can't use ignore-newlines in the const_value partial because lists/maps
+  need to emit newlines. So we must comment all the line breaks we don't want to emit.
+}}
+{{#let export partial const_value |value| captures |primitive_value|}}
+  {{#let val_type = value.type}}
+{{#if val_type.primitive?}}{{#partial primitive_value value=value}}{{!
+}}{{#else if (and val_type.enum? value.enum_value?)}}{{val_type.name}}.{{value.enum_value.name}}{{!
+}}{{#else if val_type.list?}}{{!
+  List
+}}[
+    {{#each value.list_elements as |elem|}}
+  {{#partial const_value value=elem }},
+    {{/each}}
+]{{!
+}}{{#else if val_type.map?}}{{!
+  Map
+}}{
+    {{#each value.map_elements as |elem|}}
+  {{#partial const_value value=elem.key}}: {{#partial const_value value=elem.value}},
+    {{/each}}
+}{{!
+}}{{/if val_type.primitive?}}{{!
+}}{{/let partial}}

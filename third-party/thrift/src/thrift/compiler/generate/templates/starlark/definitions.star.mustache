@@ -15,5 +15,29 @@
   limitations under the License.
 
 }}
-{{> enums}}
-{{> consts}}
+{{#import "consts" as m_const}}
+  {{! Enums }}
+  {{#each (array.enumerate root_program.enums with_first=true) as |i enum first?|}}
+    {{#if first?}}
+__StarlarkEnum__ = record(name=str, value=int)
+    {{/if first?}}
+__{{enum.name}}_enum__ = record(
+    {{#each enum.values as |val|}}
+    {{val.name}} = __StarlarkEnum__,
+    {{/each}}
+)
+
+{{enum.name}} = __{{enum.name}}_enum__(
+    {{#each enum.values as |val|}}
+    {{val.name}} = __StarlarkEnum__(name="{{val.name}}", value={{val.value}}),
+    {{/each}}
+)
+
+{{/each}}
+  {{! Consts }}
+  {{#each root_program.consts as |const|}}
+    {{#if const.type.starlark_supported?}}
+{{const.name}} = {{#partial m_const.const_value value=const.value}}
+
+    {{/if const.type.starlark_supported?}}
+  {{/each}}

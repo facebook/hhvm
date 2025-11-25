@@ -223,6 +223,8 @@ module Redundant_nullsafe_operation = struct
   type kind =
     | Redundant_nullsafe_member_select
     | Nullsafe_member_select_on_null
+    | Redundant_nullsafe_pipe
+    | Nullsafe_pipe_on_null
 
   type t = {
     kind: kind;

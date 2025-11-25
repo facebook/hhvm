@@ -2,5 +2,5 @@ ERROR: File "nullsafe_pipe_operator_nested_wrong_type.php", line 16, characters 
 Invalid argument (Typing[4110])
   File "nullsafe_pipe_operator_nested_wrong_type.php", line 11, characters 17-19:
   Expected `int`
-  File "nullsafe_pipe_operator_nested_wrong_type.php", line 11, characters 26-31:
+  File "nullsafe_pipe_operator_nested_wrong_type.php", line 11, characters 27-32:
   But got `string`

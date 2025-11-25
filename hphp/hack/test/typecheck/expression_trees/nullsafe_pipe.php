@@ -16,8 +16,8 @@ function helper_baz(ExampleContext $_):
   throw new Exception();
 }
 
-function test(): ?ExampleExpression<ExampleFloat> {
-  $et = 1
+function test(?int $x): ?ExampleExpression<ExampleFloat> {
+  $et = $x
     |?> foo($$)
     |?> ExampleDsl`${ $$ }`
     |?> bar($$)

@@ -772,9 +772,16 @@ module Redundant_nullsafe_operation = struct
     match kind with
     | Redundant_nullsafe_member_select -> Codes.RedundantNullsafeMemberSelect
     | Nullsafe_member_select_on_null -> Codes.NullsafeMemberSelectOnNull
+    | Redundant_nullsafe_pipe -> Codes.RedundantNullsafePipe
+    | Nullsafe_pipe_on_null -> Codes.NullsafePipeOnNull
 
   let codes =
-    [Codes.RedundantNullsafeMemberSelect; Codes.NullsafeMemberSelectOnNull]
+    [
+      Codes.RedundantNullsafeMemberSelect;
+      Codes.NullsafeMemberSelectOnNull;
+      Codes.RedundantNullsafePipe;
+      Codes.NullsafePipeOnNull;
+    ]
 
   let claim { kind; ty } =
     match kind with
@@ -788,6 +795,16 @@ module Redundant_nullsafe_operation = struct
       Printf.sprintf
         "You are using the %s operator but this value is always null. It's likely you did not intend this value to be always null."
         (Markdown_lite.md_codify "?->")
+    | Redundant_nullsafe_pipe ->
+      Printf.sprintf
+        "You are using the %s operator but this expression is of type %s which cannot be null. You can use the %s operator instead."
+        (Markdown_lite.md_codify "|?>")
+        ty
+        (Markdown_lite.md_codify "|>")
+    | Nullsafe_pipe_on_null ->
+      Printf.sprintf
+        "You are using the %s operator but this expression is always null. It's likely you did not intend this value to be always null."
+        (Markdown_lite.md_codify "|?>")
 
   let reasons _ = []
 

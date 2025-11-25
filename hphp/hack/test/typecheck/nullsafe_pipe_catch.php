@@ -1,7 +1,7 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-function getit():int { return 32; }
+function getit():?int { return 32; }
 <<__EntryPoint>>
 function leaky():void {
   try {

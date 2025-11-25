@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b7b9d6bbd7a4d1599d7682213bdb791d>>
+// @generated SignedSource<<3f899c82f15b01a6cf584bae0dd43582>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -662,6 +662,8 @@ pub enum Warning {
     ExpectBoolForCondition = 12028,
     RedundantNullsafeMemberSelect = 12029,
     NullsafeMemberSelectOnNull = 12030,
+    RedundantNullsafePipe = 12031,
+    NullsafePipeOnNull = 12032,
 }
 impl TrivialDrop for Warning {}
 arena_deserializer::impl_deserialize_in_arena!(Warning);

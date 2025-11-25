@@ -1,6 +1,6 @@
 <?hh
 
-function foo(): int {
+function foo(): ?int {
   return 1;
 }
 

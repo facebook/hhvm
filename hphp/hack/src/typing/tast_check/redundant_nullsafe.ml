@@ -52,5 +52,26 @@ let handler ~as_lint =
                 } )
           | _ -> ()
         end
+      | (_, pos, Pipe (_, (ty, _, _), _, Nullsafe))
+        when Utils.type_non_nullable env ty ->
+        let open Typing_warning.Redundant_nullsafe_operation in
+        Env.add_warning
+          env
+          ( pos,
+            Redundant_nullsafe_operation,
+            { kind = Redundant_nullsafe_pipe; ty = Env.print_ty env ty } )
+      | (_, pos, Pipe (_, (ty, _, _), _, Nullsafe)) ->
+        let (_, ty) = Tast_env.expand_type env ty in
+        begin
+          match get_node ty with
+          | Tprim Tnull ->
+            let open Typing_warning.Redundant_nullsafe_operation in
+            Env.add_warning
+              env
+              ( pos,
+                Redundant_nullsafe_operation,
+                { kind = Nullsafe_pipe_on_null; ty = Env.print_ty env ty } )
+          | _ -> ()
+        end
       | _ -> ()
   end

@@ -1,7 +1,7 @@
 <?hh
 <<file: __EnableUnstableFeatures('pipe_await')>>
 
-async function f(): Awaitable<int> {
+async function f(): Awaitable<?int> {
   return 1;
 }
 

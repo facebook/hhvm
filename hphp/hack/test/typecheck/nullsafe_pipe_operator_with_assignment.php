@@ -12,8 +12,8 @@ function echo_it(?string $a): ?string {
   return $a;
 }
 
-function piped(): void {
-  $z = 5 |?> 3 + $$ |?> say_it($$);
+function piped(?int $x): void {
+  $z = $x |?> 3 + $$ |?> say_it($$);
 
   echo_it($z); // $z is a ?string
 }

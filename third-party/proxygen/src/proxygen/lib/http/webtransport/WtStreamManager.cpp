@@ -602,6 +602,14 @@ void WtStreamManager::shutdown(CloseSession data) noexcept {
   enqueueEvent(std::move(data));
 }
 
+bool WtStreamManager::canCreateUni() const noexcept {
+  return !streamLimitExceeded(nextStreamIds_.uni);
+}
+
+bool WtStreamManager::canCreateBidi() const noexcept {
+  return !streamLimitExceeded(nextStreamIds_.bidi);
+}
+
 /**
  * Even if wt connection is flow-control blocked, a stream with only a fin
  * pending should be yielded from ::nextWritable. We insert streams with only a

@@ -54,17 +54,20 @@ TEST(WtStreamManager, BasicSelfBidi) {
       detail::WtDir::Client, config, egressCb, ingressCb};
 
   // 0x00 is the next expected bidi stream id for client
+  EXPECT_TRUE(streamManager.canCreateBidi());
   auto bidiRes = streamManager.getOrCreateBidiHandle(0x00);
   EXPECT_NE(bidiRes.readHandle, nullptr);
   EXPECT_NE(bidiRes.writeHandle, nullptr);
 
   // creating out of order streams is allowed (e.g. 0x08 vs 0x04)
   // necessary to support quic/http3 as they both use underlying quic stream id
+  EXPECT_TRUE(streamManager.canCreateBidi());
   bidiRes = streamManager.getOrCreateBidiHandle(0x08);
   EXPECT_NE(bidiRes.readHandle, nullptr);
   EXPECT_NE(bidiRes.writeHandle, nullptr);
 
   // limit saturated => getOrCreateBidiHandle returns nullptr
+  EXPECT_FALSE(streamManager.canCreateBidi());
   bidiRes = streamManager.getOrCreateBidiHandle(0x04);
   EXPECT_EQ(bidiRes.readHandle, nullptr);
   EXPECT_EQ(bidiRes.writeHandle, nullptr);
@@ -78,17 +81,20 @@ TEST(WtStreamManager, BasicSelfUni) {
       detail::WtDir::Client, config, egressCb, ingressCb};
 
   // 0x02 is the next expected uni stream id for client
+  EXPECT_TRUE(streamManager.canCreateUni());
   auto bidiRes = streamManager.getOrCreateBidiHandle(0x02);
   EXPECT_EQ(bidiRes.readHandle, nullptr); // egress only
   EXPECT_NE(bidiRes.writeHandle, nullptr);
 
   // creating out of order streams is allowed (e.g. 0x0a vs 0x06)
   // necessary to support quic/http3 as they both use underlying quic stream id
+  EXPECT_TRUE(streamManager.canCreateUni());
   bidiRes = streamManager.getOrCreateBidiHandle(0x0a);
   EXPECT_EQ(bidiRes.readHandle, nullptr); // egress only
   EXPECT_NE(bidiRes.writeHandle, nullptr);
 
   // limit saturated => getOrCreateBidiHandle returns nullptr
+  EXPECT_FALSE(streamManager.canCreateUni());
   bidiRes = streamManager.getOrCreateBidiHandle(0x06);
   EXPECT_EQ(bidiRes.readHandle, nullptr);
   EXPECT_EQ(bidiRes.writeHandle, nullptr);

@@ -288,6 +288,10 @@ struct WtStreamManager {
    */
   void shutdown(CloseSession) noexcept;
 
+  // returns true iff we can create self-initiated uni/bidi streams
+  bool canCreateUni() const noexcept;
+  bool canCreateBidi() const noexcept;
+
  private:
   [[nodiscard]] bool isSelf(uint64_t streamId) const;
   [[nodiscard]] bool isPeer(uint64_t streamId) const;

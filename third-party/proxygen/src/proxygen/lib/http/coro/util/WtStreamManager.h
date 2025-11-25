@@ -248,6 +248,7 @@ struct WtStreamManager {
                              MaxStreamData,
                              MaxStreamsBidi,
                              MaxStreamsUni,
+                             DrainSession,
                              CloseSession>;
   std::vector<Event> moveEvents() noexcept {
     return std::move(ctrlEvents_);
@@ -268,7 +269,7 @@ struct WtStreamManager {
   }
 
   bool isClosed() const noexcept {
-    return drain_ && !hasStreams();
+    return shutdown_ && !hasStreams();
   }
 
   /**
@@ -375,7 +376,8 @@ struct WtStreamManager {
   EgressCallback& egressCb_;
   IngressCallback& ingressCb_;
   std::vector<Event> ctrlEvents_;
-  bool drain_{false};
+  bool drain_ : 1 {false};
+  bool shutdown_ : 1 {false};
 
   // helper functions to compute next stream ids and max streams
   static NextStreamIds nextStreamIds(WtDir) noexcept;

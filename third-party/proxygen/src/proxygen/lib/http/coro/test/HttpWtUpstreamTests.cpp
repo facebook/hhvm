@@ -194,6 +194,7 @@ using Result = WtStreamManager::Result;
 using MaxConnData = WtStreamManager::MaxConnData;
 using MaxStreamData = WtStreamManager::MaxStreamData;
 using ResetStream = WtStreamManager::ResetStream;
+using DrainSession = WtStreamManager::DrainSession;
 using CloseSession = WtStreamManager::CloseSession;
 using StopSending = WtStreamManager::StopSending;
 
@@ -822,19 +823,31 @@ TEST(WtStreamManager, WritableStreams) {
 }
 
 TEST(WtStreamManager, DrainWtSession) {
-  WtConfig config{};
+  WtConfig config{.peerMaxStreamsBidi = 2, .peerMaxStreamsUni = 2};
   WtSmEgressCb egressCb;
   WtSmIngressCb ingressCb;
   WtStreamManager streamManager{
       detail::WtDir::Client, config, egressCb, ingressCb};
 
-  // drain session
+  // drain session, expect enqueued event
   streamManager.onDrainSession({});
+  streamManager.drain();
+  EXPECT_TRUE(egressCb.evAvail_);
+  auto events = streamManager.moveEvents();
+  CHECK(!events.empty() && std::holds_alternative<DrainSession>(events[0]));
 
   // streams can still be created after drain
-  auto one = streamManager.createBidiHandle();
-  auto* two = streamManager.createEgressHandle();
-  EXPECT_TRUE(one.readHandle && one.writeHandle && two);
+  auto bidi = streamManager.createBidiHandle();
+  auto* egress = streamManager.createEgressHandle();
+  EXPECT_TRUE(bidi.readHandle && bidi.writeHandle && egress);
+
+  // shutdown session
+  streamManager.shutdown(CloseSession{});
+
+  // no streams can be opened after shutdown
+  bidi = streamManager.createBidiHandle();
+  egress = streamManager.createEgressHandle();
+  EXPECT_FALSE(bidi.readHandle || bidi.writeHandle || egress);
 }
 
 TEST(WtStreamManager, CloseWtSession) {

@@ -445,7 +445,8 @@ WtStreamManager::BidiHandle* WtStreamManager::getOrCreateBidiHandleImpl(
   if (it != streams_.end()) {
     return it->second.get();
   }
-  if (streamLimitExceeded(streamId)) { // peer or self limit saturated
+  // prevent new streams if shutdown or either peer/self limit saturated
+  if (streamLimitExceeded(streamId) || shutdown_) {
     return nullptr;
   }
   streamsCounter_.getCounter(streamId).opened++;
@@ -537,11 +538,11 @@ WtStreamManager::Result WtStreamManager::onResetStream(
 }
 
 void WtStreamManager::onDrainSession(DrainSession) noexcept {
-  drain();
+  drain_ = true;
 }
 
 void WtStreamManager::onCloseSession(CloseSession close) noexcept {
-  drain();
+  shutdown_ = true;
   auto ex = folly::make_exception_wrapper<WtException>(close.err, close.msg);
   auto streams = std::move(streams_);
   for (auto& [_, handle] : streams) {
@@ -593,6 +594,7 @@ void WtStreamManager::onStreamWritable(WtWriteHandle& wh) noexcept {
 
 void WtStreamManager::drain() noexcept {
   drain_ = true;
+  enqueueEvent(DrainSession{});
 }
 
 void WtStreamManager::shutdown(CloseSession data) noexcept {

@@ -2477,6 +2477,7 @@ let decl_and_run_mode
     | Some pkgs_config_relpath ->
       PackageConfig.load_and_parse
         ~strict:false
+        ~disable_transitivity_check:false
         ~pkgs_config_abs_path:
           Relative_path.(to_absolute @@ from_root ~suffix:pkgs_config_relpath)
   in

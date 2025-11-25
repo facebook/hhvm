@@ -87,6 +87,7 @@ impl HhConfig {
         let package_config_pathbuf =
             Self::get_repo_packages_config_path(hhconfig, PACKAGE_FILE_PATH_RELATIVE_TO_ROOT);
         PackageInfo::from_text_non_strict(
+            true, // disable the include package transitivity checks
             root.as_ref()
                 .join(package_config_pathbuf)
                 .to_str()
@@ -600,6 +601,10 @@ impl HhConfig {
             fanout_strip_class_location: hhconfig.get_bool_or(
                 "fanout_strip_class_location",
                 default.fanout_strip_class_location,
+            )?,
+            tco_package_config_disable_transitivity_check: hhconfig.get_bool_or(
+                "package_config_disable_transitivity_check",
+                default.tco_package_config_disable_transitivity_check,
             )?,
         };
         let mut c = Self {

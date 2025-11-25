@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<859f4484a85d6b9dd1e18b6a570a1383>>
+// @generated SignedSource<<0b07c408409c4bd7dd4e6f15df510991>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -414,5 +414,8 @@ pub struct GlobalOptions {
     pub tco_poly_function_pointers: bool,
     /// enable static package enforcement
     pub tco_check_packages: bool,
+    /// POC: @fzn, if true fanout strips class location when comparing shallow classes for minor changes
     pub fanout_strip_class_location: bool,
+    /// POC: @fzn, if true, transitivity checks for package/deployment inclusion are disabled - for intern/prod rollout only
+    pub tco_package_config_disable_transitivity_check: bool,
 }

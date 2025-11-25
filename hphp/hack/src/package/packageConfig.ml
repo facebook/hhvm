@@ -10,11 +10,11 @@ open Hh_prelude
 type errors = (Pos.t * string * (Pos.t * string) list) list
 
 external extract_packages_from_text_strict :
-  string -> (Package.t list, errors) result
+  bool -> string -> (Package.t list, errors) result
   = "extract_packages_from_text_strict_ffi"
 
 external extract_packages_from_text_non_strict :
-  string -> (Package.t list, errors) result
+  bool -> string -> (Package.t list, errors) result
   = "extract_packages_from_text_non_strict_ffi"
 
 let repo_config_path =
@@ -23,12 +23,12 @@ let repo_config_path =
 let log_debug (msg : ('a, unit, string, string, string, unit) format6) : 'a =
   Hh_logger.debug ~category:"packages" ?exn:None msg
 
-let parse (strict : bool) (path : string) =
+let parse (strict : bool) (disable_transitivity_check : bool) (path : string) =
   let extract_packages_from_text =
     if strict then
-      extract_packages_from_text_strict
+      extract_packages_from_text_strict disable_transitivity_check
     else
-      extract_packages_from_text_non_strict
+      extract_packages_from_text_non_strict disable_transitivity_check
   in
   match extract_packages_from_text path with
   | Error [] -> failwith "Bad package specifiction"
@@ -49,12 +49,14 @@ let parse (strict : bool) (path : string) =
     failwith (String.concat strings)
   | Ok packages -> PackageInfo.from_packages packages
 
-let load_and_parse ~(strict : bool) ~(pkgs_config_abs_path : string) :
-    PackageInfo.t =
+let load_and_parse
+    ~(strict : bool)
+    ~(disable_transitivity_check : bool)
+    ~(pkgs_config_abs_path : string) : PackageInfo.t =
   if not @@ Sys.file_exists pkgs_config_abs_path then (
     log_debug "Package config at %s does not exist" pkgs_config_abs_path;
     PackageInfo.empty
   ) else
-    let result = parse strict pkgs_config_abs_path in
+    let result = parse strict disable_transitivity_check pkgs_config_abs_path in
     log_debug "Parsed %s" pkgs_config_abs_path;
     result

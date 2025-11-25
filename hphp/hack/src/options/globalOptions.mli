@@ -305,7 +305,9 @@ type t = {
   tco_poly_function_pointers: bool;
   tco_check_packages: bool;  (** enable static package enforcement *)
   fanout_strip_class_location: bool;
-      (* POC: @fzn, if true fanout strips class location when comparing shallow classes for minor changes *)
+      (** POC: @fzn, if true fanout strips class location when comparing shallow classes for minor changes *)
+  tco_package_config_disable_transitivity_check: bool;
+      (** POC: @fzn, if true, transitivity checks for package/deployment inclusion are disabled - for intern/prod rollout only *)
 }
 [@@deriving eq, show]
 
@@ -427,6 +429,7 @@ val set :
   ?tco_poly_function_pointers:bool ->
   ?tco_check_packages:bool ->
   ?fanout_strip_class_location:bool ->
+  ?tco_package_config_disable_transitivity_check:bool ->
   t ->
   t
 

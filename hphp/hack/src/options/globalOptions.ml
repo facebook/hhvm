@@ -205,6 +205,7 @@ type t = {
   tco_poly_function_pointers: bool;
   tco_check_packages: bool;
   fanout_strip_class_location: bool;
+  tco_package_config_disable_transitivity_check: bool;
 }
 [@@deriving eq, show]
 
@@ -328,6 +329,7 @@ let default =
     tco_poly_function_pointers = false;
     tco_check_packages = true;
     fanout_strip_class_location = false;
+    tco_package_config_disable_transitivity_check = false;
   }
 
 let set
@@ -448,6 +450,7 @@ let set
     ?tco_poly_function_pointers
     ?tco_check_packages
     ?fanout_strip_class_location
+    ?tco_package_config_disable_transitivity_check
     options =
   let setting setting option =
     match setting with
@@ -776,6 +779,10 @@ let set
     tco_check_packages = setting tco_check_packages options.tco_check_packages;
     fanout_strip_class_location =
       setting fanout_strip_class_location options.fanout_strip_class_location;
+    tco_package_config_disable_transitivity_check =
+      setting
+        tco_package_config_disable_transitivity_check
+        options.tco_package_config_disable_transitivity_check;
   }
 
 let so_naming_sqlite_path t = t.so_naming_sqlite_path

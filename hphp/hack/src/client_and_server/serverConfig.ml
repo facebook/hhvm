@@ -516,6 +516,8 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
       (bool_opt "class_pointer_ban_class_array_key" config)
     ?tco_poly_function_pointers:(bool_opt "poly_function_pointers" config)
     ?tco_check_packages:(bool_opt "check_packages" config)
+    ?tco_package_config_disable_transitivity_check:
+      (bool_opt "package_config_disable_transitivity_check" config)
     options
 
 (** Load local config from the following sources:
@@ -578,14 +580,7 @@ let load ~silent ~from ~(cli_config_overrides : (string * string) list) :
       ~hhconfig_contents:(Config_file.cat_hhconfig_file hhconfig_abs_path)
       ~pkgconfig_contents:(Config_file.cat_packages_file pkgs_config_abs_path)
   in
-  Hh_logger.log "Parsing and loading packages config at %s" pkgs_config_abs_path;
-  let package_info =
-    PackageConfig.load_and_parse
-      ~strict:local_config.ServerLocalConfig.package_config_strict_validation
-      ~pkgs_config_abs_path
-  in
-  PackageInfo.log_package_info package_info;
-  let global_opts =
+  let global_opts_without_package_info =
     let tco_custom_error_config = CustomErrorConfig.load_and_parse () in
     let local_config_opts =
       GlobalOptions.set
@@ -595,7 +590,6 @@ let load ~silent ~from ~(cli_config_overrides : (string * string) list) :
               default.po with
               ParserOptions.allow_unstable_features =
                 local_config.ServerLocalConfig.allow_unstable_features;
-              package_info;
             }
         ?so_naming_sqlite_path:local_config.naming_sqlite_path
         ?tco_log_large_fanouts_threshold:
@@ -636,6 +630,23 @@ let load ~silent ~from ~(cli_config_overrides : (string * string) list) :
     in
     load_config config local_config_opts
   in
+  Hh_logger.log "Parsing and loading packages config at %s" pkgs_config_abs_path;
+  let package_info =
+    PackageConfig.load_and_parse
+      ~strict:local_config.ServerLocalConfig.package_config_strict_validation
+      ~disable_transitivity_check:
+        global_opts_without_package_info
+          .tco_package_config_disable_transitivity_check
+      ~pkgs_config_abs_path
+  in
+  PackageInfo.log_package_info package_info;
+  let global_opts =
+    GlobalOptions.set
+      ~po:
+        GlobalOptions.{ global_opts_without_package_info.po with package_info }
+      global_opts_without_package_info
+  in
+
   Errors.allowed_fixme_codes_strict :=
     GlobalOptions.allowed_fixme_codes_strict global_opts;
   Errors.code_agnostic_fixme := GlobalOptions.code_agnostic_fixme global_opts;

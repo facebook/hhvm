@@ -10,9 +10,10 @@ use oxidized::package_info_impl::package_info_to_vec;
 
 ocaml_ffi! {
     fn extract_packages_from_text_strict_ffi(
+        disable_transitivity_check: bool,
         filename: String,
     ) -> Result<Vec<Package>, Errors> {
-        let info = match package::PackageInfo::from_text_strict(&filename) {
+        let info = match package::PackageInfo::from_text_strict(disable_transitivity_check, &filename) {
             Ok(info) => info,
             // TODO(T148525961): Send a proper error when packages.toml fails to parse
             Err(_) => return Ok(vec![]),
@@ -21,9 +22,10 @@ ocaml_ffi! {
     }
 
     fn extract_packages_from_text_non_strict_ffi(
+        disable_transitivity_check: bool,
         filename: String,
     ) -> Result<Vec<Package>, Errors> {
-        let info = match package::PackageInfo::from_text_non_strict(&filename) {
+        let info = match package::PackageInfo::from_text_non_strict(disable_transitivity_check, &filename) {
             Ok(info) => info,
             // TODO(T148525961): Send a proper error when packages.toml fails to parse
             Err(_) => return Ok(vec![]),

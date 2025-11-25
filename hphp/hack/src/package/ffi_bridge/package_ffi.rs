@@ -41,7 +41,8 @@ mod ffi {
 
 pub fn package_info(packages_toml: &CxxString) -> ffi::PackageInfo {
     // HHVM should not perform validation of include_paths, so invoking from_text_non_strict
-    let s = package::PackageInfo::from_text_non_strict(&packages_toml.to_string());
+    // and disabling transitivity checks
+    let s = package::PackageInfo::from_text_non_strict(true, &packages_toml.to_string());
     match s {
         Ok(info) => {
             let convert = |v: Option<&package::NameSet>| {

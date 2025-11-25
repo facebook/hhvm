@@ -159,6 +159,7 @@ impl Default for GlobalOptions {
             tco_poly_function_pointers: false,
             tco_check_packages: true,
             fanout_strip_class_location: false,
+            tco_package_config_disable_transitivity_check: false,
         }
     }
 }

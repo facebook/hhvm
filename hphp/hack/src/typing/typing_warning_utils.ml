@@ -763,6 +763,37 @@ module Expect_bool_for_condition = struct
   let quickfixes _ = []
 end
 
+module Redundant_nullsafe_operation = struct
+  type t = Typing_warning.Redundant_nullsafe_operation.t
+
+  open Typing_warning.Redundant_nullsafe_operation
+
+  let code { kind; _ } =
+    match kind with
+    | Redundant_nullsafe_member_select -> Codes.RedundantNullsafeMemberSelect
+    | Nullsafe_member_select_on_null -> Codes.NullsafeMemberSelectOnNull
+
+  let codes =
+    [Codes.RedundantNullsafeMemberSelect; Codes.NullsafeMemberSelectOnNull]
+
+  let claim { kind; ty } =
+    match kind with
+    | Redundant_nullsafe_member_select ->
+      Printf.sprintf
+        "You are using the %s operator but this object is of type %s which cannot be null. You can use the %s operator instead."
+        (Markdown_lite.md_codify "?->")
+        ty
+        (Markdown_lite.md_codify "->")
+    | Nullsafe_member_select_on_null ->
+      Printf.sprintf
+        "You are using the %s operator but this value is always null. It's likely you did not intend this value to be always null."
+        (Markdown_lite.md_codify "?->")
+
+  let reasons _ = []
+
+  let quickfixes _ = []
+end
+
 let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
     (module Warning with type t = x) =
   match kind with
@@ -789,6 +820,8 @@ let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
   | Typing_warning.Needs_concrete_override -> (module Needs_concrete_override)
   | Typing_warning.Expect_bool_for_condition ->
     (module Expect_bool_for_condition)
+  | Typing_warning.Redundant_nullsafe_operation ->
+    (module Redundant_nullsafe_operation)
 
 let module_of_migrated
     (type x) (kind : (x, Typing_warning.migrated) Typing_warning.kind) :

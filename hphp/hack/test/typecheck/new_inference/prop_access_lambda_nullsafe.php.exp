@@ -1,3 +1,5 @@
+WARN: File "prop_access_lambda_nullsafe.php", line 9, characters 31-36:
+You are using the `?->` operator but this value is always null. It's likely you did not intend this value to be always null. (Warn[12030])
 ERROR: File "prop_access_lambda_nullsafe.php", line 10, characters 6-7:
 Invalid argument (Typing[4110])
   File "prop_access_lambda_nullsafe.php", line 9, characters 23-28:

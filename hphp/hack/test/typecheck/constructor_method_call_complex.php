@@ -6,5 +6,5 @@ class A {
 }
 
 function main(?A $a): void {
-  $a ?? new A() ?->foo();
+  $a ?? new A() ->foo();
 }

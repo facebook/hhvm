@@ -9,7 +9,7 @@ function mixed_property(mixed $foo): void {
 }
 
 function mixed_method_null_check(mixed $foo): void {
-  $foo?->bar();
+  $foo->bar();
 }
 
 function nonnull_method(nonnull $foo): void {

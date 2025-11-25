@@ -822,7 +822,9 @@ module Warning = struct
     | UninstantiableClassViaStatic [@value 12026]
     | NeedsConcreteOverride [@value 12027]
     | ExpectBoolForCondition [@value 12028]
-  (* Add new Warning codes here! Comment out when deprecating. *)
+    | RedundantNullsafeMemberSelect [@value 12029]
+    | NullsafeMemberSelectOnNull [@value 12030]
+      (* Add new Warning codes here! Comment out when deprecating. *)
   [@@deriving enum, ord, show { with_path = false }]
 end
 

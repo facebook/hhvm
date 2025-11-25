@@ -1,1 +1,14 @@
-No errors
+WARN: File "shape_idx.php", line 14, characters 12-40:
+You are using the `?->` operator but this object is of type ExampleShape<shape('y' => string)> which cannot be null. You can use the `->` operator instead. (Warn[12029])
+WARN: File "shape_idx.php", line 21, characters 12-48:
+You are using the `?->` operator but this object is of type ExampleShape<shape('y' => string)> which cannot be null. You can use the `->` operator instead. (Warn[12029])
+WARN: File "shape_idx.php", line 27, characters 12-50:
+You are using the `?->` operator but this value is always null. It's likely you did not intend this value to be always null. (Warn[12030])
+WARN: File "shape_idx.php", line 35, characters 7-50:
+You are using the `?->` operator but this object is of type ExampleShape<shape(?'y' => string)> which cannot be null. You can use the `->` operator instead. (Warn[12029])
+WARN: File "shape_idx.php", line 59, characters 7-50:
+You are using the `?->` operator but this object is of type ExampleShape<shape('y' => string)> which cannot be null. You can use the `->` operator instead. (Warn[12029])
+WARN: File "shape_idx.php", line 68, characters 7-39:
+You are using the `?->` operator but this object is of type ExampleShape<shape('y' => ?string)> which cannot be null. You can use the `->` operator instead. (Warn[12029])
+WARN: File "shape_idx.php", line 78, characters 7-47:
+You are using the `?->` operator but this object is of type ExampleShape<shape('y' => ?string)> which cannot be null. You can use the `->` operator instead. (Warn[12029])

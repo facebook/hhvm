@@ -41,6 +41,7 @@ let warning_checks =
     (module Truthiness_test);
     (module Equality_check);
     (module Duplicate_properties);
+    (module Redundant_nullsafe);
   ]
 
 let visitor ctx =

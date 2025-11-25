@@ -15,6 +15,6 @@ function test(): void {
   }
 
   if ($x !== null) {
-    $x?->f();
+    $x->f();
   }
 }

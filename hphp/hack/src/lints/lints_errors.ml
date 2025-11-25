@@ -155,22 +155,6 @@ let inferred_variance pos name description syntax =
   ^ ". Consider prefixing it with "
   ^ syntax
 
-let nullsafe_not_needed pos =
-  Lints.add Codes.nullsafe_not_needed Lint_advice pos
-  @@ "You are using the "
-  ^ Markdown_lite.md_codify "?->"
-  ^ " operator but this object cannot be null."
-  ^ " You can use the "
-  ^ Markdown_lite.md_codify "->"
-  ^ " operator instead."
-
-let nullsafe_on_null pos =
-  Lints.add Codes.nullsafe_on_null Lint_warning pos
-  @@ "You are using the "
-  ^ Markdown_lite.md_codify "?->"
-  ^ " operator but this value is always null."
-  ^ " It's likely you did not intend this value to be always null."
-
 let parse_error code pos msg = Lints.add code Lint_error pos msg
 
 let rec prettify_class_list names =

@@ -1,3 +1,7 @@
+WARN: File "nullsafe-unresolved.php", line 5, characters 8-13:
+You are using the `?->` operator but this value is always null. It's likely you did not intend this value to be always null. (Warn[12030])
+WARN: File "nullsafe-unresolved.php", line 7, characters 8-13:
+You are using the `?->` operator but this value is always null. It's likely you did not intend this value to be always null. (Warn[12030])
 ERROR: File "nullsafe-unresolved.php", line 6, characters 18-19:
 Invalid argument (Typing[4110])
   File "nullsafe-unresolved.php", line 15, characters 25-40:

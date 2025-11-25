@@ -77,7 +77,7 @@ module Codes = struct
 
   (* let deprecated_missing_via_label_attribute = 5632 *)
 
-  let nullsafe_not_needed = 5633
+  (* let deprecated_nullsafe_not_needed = 5633 *)
 
   let duplicate_property_enum_init = 5634
 
@@ -119,5 +119,5 @@ module Codes = struct
 
   let class_pointer_to_string = 5653
 
-  let nullsafe_on_null = 5654
+  (* let deprecated_nullsafe_on_null = 5654 *)
 end

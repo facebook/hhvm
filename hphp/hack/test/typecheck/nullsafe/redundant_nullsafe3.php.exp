@@ -1,0 +1,2 @@
+WARN: File "redundant_nullsafe3.php", line 8, characters 3-10:
+You are using the `?->` operator but this object is of type A which cannot be null. You can use the `->` operator instead. (Warn[12029])

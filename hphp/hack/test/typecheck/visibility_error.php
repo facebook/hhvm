@@ -5,5 +5,5 @@ class A {
 }
 
 function main(A $a): void {
-  $a?->b;
+  $a->b;
 }

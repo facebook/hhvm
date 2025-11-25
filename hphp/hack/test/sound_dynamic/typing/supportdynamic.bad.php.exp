@@ -1,3 +1,7 @@
+WARN: File "supportdynamic.bad.php", line 8, characters 3-9:
+You are using the `?->` operator but this object is of type nonnull which cannot be null. You can use the `->` operator instead. (Warn[12029])
+WARN: File "supportdynamic.bad.php", line 10, characters 3-9:
+You are using the `?->` operator but this object is of type supportdyn<nonnull> which cannot be null. You can use the `->` operator instead. (Warn[12029])
 ERROR: File "supportdynamic.bad.php", line 4, characters 3-8:
 Typing error (Typing[4110])
   File "supportdynamic.bad.php", line 4, characters 3-8:

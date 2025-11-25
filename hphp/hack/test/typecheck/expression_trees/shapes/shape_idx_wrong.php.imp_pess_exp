@@ -1,3 +1,23 @@
+WARN: File "shape_idx_wrong.php", line 11, characters 12-40:
+You are using the `?->` operator but this object is of type ExampleShape<shape('y' => string)> which cannot be null. You can use the `->` operator instead. (Warn[12029])
+WARN: File "shape_idx_wrong.php", line 19, characters 12-43:
+You are using the `?->` operator but this object is of type ExampleShape<shape('y' => string)> which cannot be null. You can use the `->` operator instead. (Warn[12029])
+WARN: File "shape_idx_wrong.php", line 28, characters 12-40:
+You are using the `?->` operator but this object is of type ExampleShape<shape('y' => string)> which cannot be null. You can use the `->` operator instead. (Warn[12029])
+WARN: File "shape_idx_wrong.php", line 36, characters 12-48:
+You are using the `?->` operator but this object is of type ExampleShape<shape()> which cannot be null. You can use the `->` operator instead. (Warn[12029])
+WARN: File "shape_idx_wrong.php", line 43, characters 5-45:
+You are using the `?->` operator but this object is of type ExampleShape<shape('y' => string)> which cannot be null. You can use the `->` operator instead. (Warn[12029])
+WARN: File "shape_idx_wrong.php", line 46, characters 5-40:
+You are using the `?->` operator but this object is of type ExampleShape<shape('y' => string)> which cannot be null. You can use the `->` operator instead. (Warn[12029])
+WARN: File "shape_idx_wrong.php", line 49, characters 5-32:
+You are using the `?->` operator but this object is of type ExampleShape<shape('y' => string)> which cannot be null. You can use the `->` operator instead. (Warn[12029])
+WARN: File "shape_idx_wrong.php", line 52, characters 5-37:
+You are using the `?->` operator but this object is of type ExampleShape<shape('y' => string)> which cannot be null. You can use the `->` operator instead. (Warn[12029])
+WARN: File "shape_idx_wrong.php", line 55, characters 5-34:
+You are using the `?->` operator but this object is of type string which cannot be null. You can use the `->` operator instead. (Warn[12029])
+WARN: File "shape_idx_wrong.php", line 63, characters 48-88:
+You are using the `?->` operator but this object is of type ExampleShape<shape(...)> which cannot be null. You can use the `->` operator instead. (Warn[12029])
 ERROR: File "shape_idx_wrong.php", line 9, characters 10-101:
 Invalid return type (Typing[4110])
   File "shape_idx_wrong.php", line 8, characters 15-43:

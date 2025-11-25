@@ -1,2 +1,0 @@
-File "nullsafe6.php", line 8, characters 3-10:
-You are using the `?->` operator but this object cannot be null. You can use the `->` operator instead. (Lint[5633])

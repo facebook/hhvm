@@ -26,7 +26,7 @@
   {{#else if val_type.bool?}}
 {{#if value.nonzero?}}True{{#else}}False{{/if}}
   {{#else if val_type.floating_point?}}
-{{#if value.double?}}{{value.double_value}}{{#else}}{{value.integer_value}}.0{{/if}}
+{{#if value.double?}}{{(float_to_string value.double_value)}}{{#else}}{{value.integer_value}}.0{{/if}}
   {{/if val_type.string?}}
 {{/let partial}}
 

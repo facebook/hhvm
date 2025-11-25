@@ -15,9 +15,7 @@
  */
 
 #include <utility>
-
-#include <thrift/compiler/generate/mstch_objects.h>
-#include <thrift/compiler/generate/t_mstch_generator.h>
+#include <thrift/compiler/generate/t_whisker_generator.h>
 
 namespace apache::thrift::compiler {
 namespace {
@@ -51,15 +49,32 @@ bool is_supported_type(const t_type& type) {
       is_supported_collection(true_type);
 }
 
-class t_starlark_generator : public t_mstch_generator {
+class t_starlark_generator : public t_whisker_generator {
  public:
-  using t_mstch_generator::t_mstch_generator;
+  using t_whisker_generator::t_whisker_generator;
 
   std::string template_prefix() const override { return "starlark"; }
 
   void generate_program() override;
 
  private:
+  whisker::map::raw globals(whisker::prototype_database& proto) const override {
+    whisker::map::raw globals = t_whisker_generator::globals(proto);
+    // By default, Whisker considers f64s to be unprintable in strict mode, as
+    // floats can have non-deterministic string results (e.g. fmt vs
+    // std::ostream). For this reason, each generator should explicitly define
+    // how its floats should be rendered.
+    globals["float_to_string"] = whisker::dsl::make_function(
+        "float_to_string",
+        [](whisker::dsl::function::context ctx) -> whisker::object {
+          ctx.declare_named_arguments({});
+          ctx.declare_arity(1);
+          return whisker::make::string(
+              fmt::format("{}", ctx.argument<whisker::f64>(0)));
+        });
+    return globals;
+  }
+
   prototype<t_type>::ptr make_prototype_for_type(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_type(proto);
@@ -74,12 +89,11 @@ class t_starlark_generator : public t_mstch_generator {
 void t_starlark_generator::generate_program() {
   out_dir_base_ = "gen-star";
 
-  const auto* program = get_program();
-  auto mstch_program = mstch_context_.program_factory->make_mstch_object(
-      program, mstch_context_);
-
   render_to_file(
-      std::move(mstch_program), "definitions.star", program->name() + ".star");
+      /*output_file=*/get_program()->name() + ".star",
+      /*template_file=*/"definitions.star",
+      // `root_program` is a Whisker generator global
+      /*context=*/whisker::make::map());
 }
 
 THRIFT_REGISTER_GENERATOR(starlark, "Starlark", "Starlark generator");

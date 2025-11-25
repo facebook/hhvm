@@ -1407,12 +1407,12 @@ cdef class Struct(StructOrUnion):
 
     cdef _fbthrift_fully_populate_cache(self):
         for _, field in self:
-            if isinstance(field, (Sequence, Set)):
+            if isinstance(field, (List, Set)):
                 for elem in field:
                     if not isinstance(elem, Struct):
                         break
                     (<Struct>elem)._fbthrift_fully_populate_cache()
-            elif isinstance(field, Mapping):
+            elif isinstance(field, Map):
                 # keys are already materialized upon hashing
                 for elem in field.values():
                     if not isinstance(elem, Struct):

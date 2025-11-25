@@ -25,7 +25,8 @@ namespace HPHP::thrift {
 enum TError {
   ERR_UNKNOWN = 0,
   ERR_INVALID_DATA = 1,
-  ERR_BAD_VERSION = 4
+  ERR_BAD_VERSION = 4,
+  ERR_UNEXPECTED_EXCEPTION = 5
 };
 
 enum class TTransportError {
@@ -102,7 +103,7 @@ inline void check_container_size(const uint32_t size) {
         std::numeric_limits<int32_t>::max());
   }
 }
-	
+
 class StrictUnionChecker {
 public:
   explicit StrictUnionChecker(bool enabled) : enabled_{enabled}, unionFieldFound_{false} {}
@@ -111,7 +112,7 @@ public:
     if (!enabled_) {
       return;
     }
-    
+
     if (unionFieldFound_) {
       thrift_error("Union field already set", ERR_INVALID_DATA);
     }

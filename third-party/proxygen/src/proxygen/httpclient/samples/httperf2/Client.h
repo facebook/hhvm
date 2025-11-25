@@ -49,6 +49,10 @@ class Client
          const std::string& plaintextProto,
          const std::string& serverName);
   ~Client() override;
+  Client(const Client&) = delete;
+  Client& operator=(const Client&) = delete;
+  Client(Client&&) = delete;
+  Client& operator=(Client&&) = delete;
 
   void start();
   void exit();

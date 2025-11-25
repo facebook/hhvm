@@ -63,7 +63,7 @@
  *   simplicity.
  */
 
-#include <proxygen/lib/http/coro/util/WtStreamManager.h>
+#include <proxygen/lib/http/webtransport/WtStreamManager.h>
 
 #include <folly/logging/xlog.h>
 

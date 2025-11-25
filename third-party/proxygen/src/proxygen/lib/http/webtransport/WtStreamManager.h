@@ -18,8 +18,8 @@
  * get rid of WebTransport.h dependency, extract StreamReadHandle &
  * StreamWriteHandle into a different TU?
  */
-#include <proxygen/lib/http/coro/util/WtEgressContainer.h>
 #include <proxygen/lib/http/webtransport/WebTransport.h>
+#include <proxygen/lib/http/webtransport/WtEgressContainer.h>
 
 /**
  * This comment block documents the api of WtStreamManager (i.e. its behaviour).

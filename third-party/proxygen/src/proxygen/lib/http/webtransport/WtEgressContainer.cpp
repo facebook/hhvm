@@ -7,7 +7,7 @@
  */
 
 #include <folly/logging/xlog.h>
-#include <proxygen/lib/http/coro/util/WtEgressContainer.h>
+#include <proxygen/lib/http/webtransport/WtEgressContainer.h>
 
 namespace proxygen::coro {
 

@@ -222,6 +222,13 @@ class DynamicUnknownPatch : public DynamicPatchBase {
     validateAndGetCategory();
   }
 
+  template <class Reader, bool _>
+  void applyAllFieldsInStream(
+      detail::Badge badge,
+      thrift::detail::StructuredDynamicCursorReader<Reader, _>& in,
+      thrift::detail::StructuredDynamicCursorWriter<
+          typename Reader::ProtocolWriter>& out) const;
+
   /// Checks if it is convertible to the patch type.
   template <class Patch>
   void checkConvertible() const {
@@ -1276,8 +1283,80 @@ void DynamicPatch::applyOneFieldInStream(
         in.endRead(std::move(reader));
         out.endWrite(std::move(writer));
       },
+      [&](const DynamicUnknownPatch& patch) {
+        if (in.fieldType() != protocol::TType::T_STRUCT) {
+          fallback(patch);
+          return;
+        }
+        auto reader = in.beginReadStructured();
+        auto writer = out.beginWriteStructured(id);
+        patch.applyAllFieldsInStream(badge, reader, writer);
+        in.endRead(std::move(reader));
+        out.endWrite(std::move(writer));
+      },
       fallback);
   visitPatch(applier);
+}
+
+template <class Reader, bool _>
+void DynamicUnknownPatch::applyAllFieldsInStream(
+    detail::Badge badge,
+    thrift::detail::StructuredDynamicCursorReader<Reader, _>& in,
+    thrift::detail::StructuredDynamicCursorWriter<
+        typename Reader::ProtocolWriter>& out) const {
+  if (auto assign = get_ptr(op::PatchOp::Assign)) {
+    for (const auto& [id, value] : assign->as_object()) {
+      out.writeValue(id, value);
+    }
+    return;
+  }
+
+  if (auto clear = get_ptr(op::PatchOp::Clear); clear && clear->as_bool()) {
+    return;
+  }
+
+  if (get_ptr(op::PatchOp::Remove)) {
+    // If Remove operation exists in Unknown Patch, it would be either a set or
+    // a map patch, which can not be applied on structured.
+    throw std::runtime_error("Trying to apply set/map patch to struct/union");
+  }
+
+  auto patchPrior = get_ptr(op::PatchOp::PatchPrior);
+  auto patchAfter = get_ptr(op::PatchOp::PatchAfter);
+
+  while (in.fieldType() != protocol::TType::T_STOP) {
+    auto id = in.fieldId();
+    auto prior = patchPrior
+        ? folly::get_ptr(*patchPrior->as_object().members(), id)
+        : nullptr;
+    auto after = patchAfter
+        ? folly::get_ptr(*patchAfter->as_object().members(), id)
+        : nullptr;
+
+    if (!prior && !after) {
+      // The field is not modified. Forward the raw bytes to output.
+      detail::forwardOneField(in, out);
+      continue;
+    }
+
+    if (!prior) {
+      auto patch = DynamicPatch::fromObject(after->as_object());
+      patch.applyOneFieldInStream(badge, in, out);
+      continue;
+    }
+
+    if (!after) {
+      auto patch = DynamicPatch::fromObject(prior->as_object());
+      patch.applyOneFieldInStream(badge, in, out);
+      continue;
+    }
+
+    // Fallback to protocol::Value
+    auto value = in.readValue();
+    DynamicPatch::fromObject(prior->as_object()).apply(value);
+    DynamicPatch::fromObject(after->as_object()).apply(value);
+    out.writeValue(id, value);
+  }
 }
 
 class DiffVisitorBase {

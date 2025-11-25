@@ -118,15 +118,14 @@ class t_mstch_go_generator : public t_mstch_generator {
     def.property("thirft_source_path", [](const t_program& self) {
       return self.path();
     });
-    def.property(
-        "compat?", [this](const t_program& _) { return data_.compat; });
-    def.property("compat_setters?", [this](const t_program& _) {
+    def.property("compat?", [this](const t_program&) { return data_.compat; });
+    def.property("compat_setters?", [this](const t_program&) {
       return data_.compat_setters;
     });
-    def.property("gen_metadata?", [this](const t_program& _) {
+    def.property("gen_metadata?", [this](const t_program&) {
       return data_.gen_metadata;
     });
-    def.property("gen_default_get?", [this](const t_program& _) {
+    def.property("gen_default_get?", [this](const t_program&) {
       return data_.gen_default_get;
     });
 
@@ -163,7 +162,7 @@ class t_mstch_go_generator : public t_mstch_generator {
     def.property("go_server_supported?", [](const t_function& self) {
       return go::is_func_go_server_supported(&self);
     });
-    def.property("retval_field_name", [](const t_function& _) {
+    def.property("retval_field_name", [](const t_function&) {
       // Field name for the return value.
       return go::munge_ident(go::DEFAULT_RETVAL_FIELD_NAME, /*exported*/ true);
     });

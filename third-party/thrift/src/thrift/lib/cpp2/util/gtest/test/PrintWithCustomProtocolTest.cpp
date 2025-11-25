@@ -36,7 +36,7 @@ TEST(
     ThriftDefaultPrint,
     Given_CustomProtocolHeaderIsIncluded_When_PrintTo_Then_DebugPrint) {
   auto r = apache::thrift::test::SameType();
-  std::string debugPrint = apache::thrift::debugString(r);
+  std::string debugPrint = apache::thrift::debugStringViaEncode(r);
   EXPECT_EQ(testing::PrintToString(r), debugPrint);
 }
 

@@ -16,10 +16,10 @@
 
 #include <optional>
 
+#include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 #include <thrift/lib/cpp2/util/gtest/Printer.h>
 #include <thrift/lib/cpp2/util/gtest/test/gen-cpp2/Matcher_types.h>
 
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 // portability/GTest must be imported before any other gtest header
@@ -33,13 +33,10 @@ using apache::thrift::PrintTo;
 
 TEST(
     ThriftDefaultPrint,
-    Given_CustomProtocolHeaderNotIncluded_When_PrintTo_Then_PrintsTypeAndSuggestionForContent) {
+    Given_CustomProtocolHeaderNotIncluded_When_PrintTo_Then_DebugPrint) {
   auto r = apache::thrift::test::SameType();
-  EXPECT_THAT(
-      testing::PrintToString(r),
-      testing::AllOf(
-          testing::HasSubstr("apache::thrift::test::SameType"),
-          testing::HasSubstr("_types_custom_protocol.h")));
+  std::string debugPrint = apache::thrift::debugStringViaEncode(r);
+  EXPECT_EQ(testing::PrintToString(r), debugPrint);
 }
 
 #endif

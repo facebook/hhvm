@@ -22,7 +22,22 @@
 #include <thrift/lib/cpp2/type/BaseType.h>
 #include <thrift/lib/cpp2/type/UniversalName.h>
 
-namespace apache::thrift::type {
+namespace apache::thrift {
+
+namespace type {
+namespace {
+enum class MyEnum {};
+} // namespace
+} // namespace type
+
+template <>
+struct TEnumTraits<type::MyEnum> {
+  constexpr static auto __fbthrift_thrift_uri() {
+    return "domain.com/my/package/MyEnum";
+  }
+};
+
+namespace type {
 namespace {
 
 struct TypeTestCase {
@@ -134,6 +149,9 @@ TEST(TypeTest, Create) {
   EXPECT_EQ(
       Type::get<exception_t<MyStruct>>(),
       Type::create<exception_c>("domain.com/my/package/MyStruct"));
+  EXPECT_EQ(
+      Type::get<enum_t<MyEnum>>(),
+      Type::create<enum_c>("domain.com/my/package/MyEnum"));
 }
 
 TEST(TypeTest, Adapted) {
@@ -328,4 +346,5 @@ TEST(TypeTest, DebugString) {
   EXPECT_THROW(Type().debugString(), std::runtime_error);
 }
 } // namespace
-} // namespace apache::thrift::type
+} // namespace type
+} // namespace apache::thrift

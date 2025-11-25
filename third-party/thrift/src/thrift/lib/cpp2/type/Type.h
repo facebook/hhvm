@@ -181,9 +181,7 @@ class Type : public detail::Wrap<TypeStruct> {
   }
   template <typename Tag>
   static TypeStruct makeType(enum_c) {
-    // TODO(afuller): Support enums in thrift::uri.
-    // return makeNamed<Tag>(thrift::uri<standard_type<Tag>>());
-    return makeNamed<Tag>("");
+    return makeNamed<Tag>(thrift::uri<standard_type<Tag>>());
   }
   template <typename Tag>
   struct Helper;

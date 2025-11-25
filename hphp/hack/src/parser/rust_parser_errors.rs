@@ -5583,11 +5583,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 self.check_can_use_feature(node, &FeatureName::ExpressionTreeCoalesceOperator);
                 self.assignment_errors(node);
             }
-            BinaryExpression(x)
-                if token_kind(&x.operator) == Some(TokenKind::BarQuestionGreaterThan) =>
-            {
-                self.check_can_use_feature(node, &FeatureName::NullsafePipe);
-            }
             PostfixUnaryExpression(_)
             | BinaryExpression(_)
             | ForeachStatement(_)

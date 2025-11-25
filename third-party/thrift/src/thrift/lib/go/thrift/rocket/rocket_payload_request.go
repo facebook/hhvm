@@ -43,6 +43,11 @@ func EncodeRequestPayload(
 		SetCompression(&compression).
 		SetOtherMetadata(maps.Clone(headers))
 
+	frameworkMetadata := getFrameworkMetadata(ctx)
+	if frameworkMetadata != nil {
+		metadata.SetFrameworkMetadata(frameworkMetadata)
+	}
+
 	if interactionID, ok := types.GetInteractionIDFromContext(ctx); ok {
 		if interactionName, ok := types.GetInteractionCreateFromContext(ctx); ok {
 			// New interaction (not yet created)

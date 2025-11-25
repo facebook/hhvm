@@ -17,6 +17,7 @@
 package thrift
 
 import (
+	"context"
 	"io"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/format"
@@ -159,4 +160,8 @@ func DecodeCompactJSON(data []byte, msg types.ReadableStruct) error {
 
 func DecodeSimpleJSON(data []byte, msg types.ReadableStruct) error {
 	return format.DecodeSimpleJSON(data, msg)
+}
+
+func WithFrameworkMetadata(ctx context.Context, metadata []byte) context.Context {
+	return rocket.WithFrameworkMetadata(ctx, metadata)
 }

@@ -25,7 +25,7 @@ let handler ~as_lint =
     method! at_expr env =
       function
       | (_, pos, Obj_get ((ty, _, _), _, Nullsafe, _))
-        when Utils.type_non_nullable env ty ->
+        when Utils.type_non_nullable env ty && not (Env.is_in_expr_tree env) ->
         let open Typing_warning.Redundant_nullsafe_operation in
         Env.add_warning
           env
@@ -35,7 +35,8 @@ let handler ~as_lint =
               kind = Redundant_nullsafe_member_select;
               ty = Env.print_ty env ty;
             } )
-      | (_, pos, Obj_get ((ty, _, _), _, Nullsafe, _)) ->
+      | (_, pos, Obj_get ((ty, _, _), _, Nullsafe, _))
+        when not (Env.is_in_expr_tree env) ->
         let (_, ty) = Tast_env.expand_type env ty in
         begin
           match get_node ty with

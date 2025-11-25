@@ -1,17 +1,9 @@
-ERROR: File "named_params_lambda_synthesis_2_errors.php", line 6, characters 14-51:
-Too few positional arguments (required 2 but got 0) (Typing[4104])
-  File "named_params_lambda_synthesis_2_errors.php", line 6, characters 13-74:
-  Definition is here
 ERROR: File "named_params_lambda_synthesis_2_errors.php", line 6, characters 56-62:
 Invalid argument (Typing[4110])
   File "named_params_lambda_synthesis_2_errors.php", line 6, characters 21-23:
   Expected `int`
   File "named_params_lambda_synthesis_2_errors.php", line 6, characters 56-62:
   But got `string`
-ERROR: File "named_params_lambda_synthesis_2_errors.php", line 11, characters 14-51:
-Too few positional arguments (required 2 but got 0) (Typing[4104])
-  File "named_params_lambda_synthesis_2_errors.php", line 11, characters 13-69:
-  Definition is here
 ERROR: File "named_params_lambda_synthesis_2_errors.php", line 11, characters 14-69:
 Missing required named argument: x (Typing[4499])
   File "named_params_lambda_synthesis_2_errors.php", line 11, characters 14-51:
@@ -20,21 +12,9 @@ ERROR: File "named_params_lambda_synthesis_2_errors.php", line 11, characters 14
 Unexpected named argument: z (Typing[4500])
   File "named_params_lambda_synthesis_2_errors.php", line 11, characters 14-51:
   Definition is here
-ERROR: File "named_params_lambda_synthesis_2_errors.php", line 16, characters 14-51:
-Too few positional arguments (required 1 but got 0) (Typing[4104])
-  File "named_params_lambda_synthesis_2_errors.php", line 16, characters 13-58:
-  Definition is here
 ERROR: File "named_params_lambda_synthesis_2_errors.php", line 16, characters 14-58:
 Missing required named argument: y (Typing[4499])
   File "named_params_lambda_synthesis_2_errors.php", line 16, characters 14-51:
-  Definition is here
-ERROR: File "named_params_lambda_synthesis_2_errors.php", line 21, characters 14-51:
-Too few positional arguments (required 3 but got 0) (Typing[4104])
-  File "named_params_lambda_synthesis_2_errors.php", line 21, characters 13-76:
-  Definition is here
-ERROR: File "named_params_lambda_synthesis_2_errors.php", line 21, characters 14-76:
-Too few positional arguments (required 1 but got 0) (Typing[4104])
-  File "named_params_lambda_synthesis_2_errors.php", line 21, characters 14-51:
   Definition is here
 ERROR: File "named_params_lambda_synthesis_2_errors.php", line 21, characters 14-76:
 Unexpected named argument: z (Typing[4500])

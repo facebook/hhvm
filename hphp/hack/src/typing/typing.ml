@@ -2719,23 +2719,25 @@ end = struct
           p
           (Reason.type_variable p)
       in
-      let (env, fp_type) =
+      let (exp_opt, fp_name, is_named) =
         match arg with
-        | Aast_defs.Ainout (_, _) ->
-          Env.fresh_type_reason
-            ~variance:Ast_defs.Invariant
-            env
-            p
-            (Reason.type_variable p)
-        | Aast_defs.Anamed _ ->
-          (* TODO(named_params): We likely need to do more work here. *)
-          Env.fresh_type_reason
-            ~variance:Ast_defs.Invariant
-            env
-            p
-            (Reason.type_variable p)
+        | Aast_defs.Ainout (_, _) -> (None, None, false)
+        | Aast_defs.Anamed (name, exp) ->
+          let ((), p, exp_) = exp in
+          (Some (p, exp_), Some (snd name), true)
         | Aast_defs.Anormal exp ->
           let ((), p, exp_) = exp in
+          (Some (p, exp_), None, false)
+      in
+      let (env, fp_type) =
+        match exp_opt with
+        | None ->
+          Env.fresh_type_reason
+            ~variance:Ast_defs.Invariant
+            env
+            p
+            (Reason.type_variable p)
+        | Some (p, exp_) ->
           (match exp_ with
           | Null -> (env, MakeType.null (Reason.witness p))
           | True
@@ -2762,12 +2764,17 @@ end = struct
               fresh env p
           | _ -> fresh env p)
       in
+      let fp_flags =
+        Typing_defs_flags.FunParam.set_named
+          is_named
+          Typing_defs_flags.FunParam.default
+      in
       let param =
         {
           fp_pos = Pos_or_decl.of_raw_pos p;
-          fp_name = None;
+          fp_name;
           fp_type;
-          fp_flags = Typing_defs_flags.FunParam.default;
+          fp_flags;
           fp_def_value = None;
         }
       in

@@ -10,3 +10,4 @@ function test_lambda_stored_in_variable(): void {
   $f = ((named int $x, named string $y) ==> $x);
   $f(x=42, y="hello");
 }
+//

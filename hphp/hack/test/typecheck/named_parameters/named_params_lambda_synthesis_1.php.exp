@@ -1,8 +1,1 @@
-ERROR: File "named_params_lambda_synthesis_1.php", line 5, characters 4-41:
-Too few positional arguments (required 2 but got 0) (Typing[4104])
-  File "named_params_lambda_synthesis_1.php", line 5, characters 3-59:
-  Definition is here
-ERROR: File "named_params_lambda_synthesis_1.php", line 6, characters 4-45:
-Too few positional arguments (required 2 but got 0) (Typing[4104])
-  File "named_params_lambda_synthesis_1.php", line 6, characters 3-62:
-  Definition is here
+No errors

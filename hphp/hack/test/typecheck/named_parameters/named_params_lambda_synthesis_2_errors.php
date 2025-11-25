@@ -20,3 +20,4 @@ function test_extra_parameter(): void {
   // Extra parameter 'z' that doesn't exist
   $result = ((named int $x, named string $y) ==> $x)(x=42, y="hello", z=100);
 }
+//

@@ -79,13 +79,13 @@ class codegen_data {
   void compute_req_resp_structs();
   void compute_thrift_metadata_types();
 
-  bool is_current_program(const t_program* program);
+  bool is_current_program(const t_program* program) const;
 
   std::string_view maybe_munge_ident_and_cache(
       const t_named* named, bool exported = true, bool compact = true);
 
-  std::string get_go_package_alias(const t_program* program);
-  std::string go_package_alias_prefix(const t_program* program);
+  std::string get_go_package_alias(const t_program* program) const;
+  std::string go_package_alias_prefix(const t_program* program) const;
 
  private:
   std::string make_go_package_name_unique(const std::string& name);
@@ -160,10 +160,17 @@ bool is_type_go_comparable(
     const t_type* type, std::map<std::string, int> visited_type_names = {});
 bool is_type_metadata_primitive(const t_type* type);
 
+std::string go_name(const t_named& named);
 std::string get_go_field_name(const t_field* field);
 std::string get_go_func_name(const t_function* func);
+std::string get_go_type_sanitized_full_name(const t_type& type);
+std::string get_go_type_metadata_name(const t_type& type);
+std::string get_go_type_codec_type_spec_name(const t_type& type);
 
 std::set<std::string> get_struct_go_field_names(const t_structured* tstruct);
+
+std::string get_go_func_unique_arg_name(
+    const t_function* func, std::string const& desired_arg_name);
 
 void make_func_req_resp_structs(
     const t_function* func,
@@ -175,5 +182,7 @@ const std::string* get_go_tag_annotation(const t_named* node);
 
 int get_field_size(const t_field* field, bool is_inside_union);
 void optimize_fields_layout(std::vector<const t_field*>& fields, bool is_union);
+
+std::string doc_comment(const t_named* named);
 
 } // namespace apache::thrift::compiler::go

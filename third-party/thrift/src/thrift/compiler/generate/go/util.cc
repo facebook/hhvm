@@ -286,7 +286,7 @@ void codegen_data::compute_thrift_metadata_types() {
   }
 }
 
-bool codegen_data::is_current_program(const t_program* program) {
+bool codegen_data::is_current_program(const t_program* program) const {
   return (program == current_program_);
 }
 
@@ -308,7 +308,7 @@ std::string_view codegen_data::maybe_munge_ident_and_cache(
              munge_ident(named->name(), exported, compact);
 }
 
-std::string codegen_data::get_go_package_alias(const t_program* program) {
+std::string codegen_data::get_go_package_alias(const t_program* program) const {
   if (is_current_program(program)) {
     return "";
   }
@@ -322,7 +322,8 @@ std::string codegen_data::get_go_package_alias(const t_program* program) {
       fmt::format("unable to determine Go package alias '{}'", package));
 }
 
-std::string codegen_data::go_package_alias_prefix(const t_program* program) {
+std::string codegen_data::go_package_alias_prefix(
+    const t_program* program) const {
   auto alias = get_go_package_alias(program);
   if (alias == "") {
     return "";
@@ -594,6 +595,13 @@ bool is_type_metadata_primitive(const t_type* type) {
       type->is_void();
 }
 
+std::string go_name(const t_named& named) {
+  if (const std::string* name_override = go::get_go_name_annotation(&named)) {
+    return *name_override;
+  }
+  return go::munge_ident(named.name());
+}
+
 std::string get_go_func_name(const t_function* func) {
   auto name_override = get_go_name_annotation(func);
   if (name_override != nullptr) {
@@ -615,6 +623,26 @@ std::string get_go_field_name(const t_field* field) {
   return name;
 }
 
+std::string get_go_type_sanitized_full_name(const t_type& type) {
+  std::string full_name = type.get_full_name();
+  boost::replace_all(full_name, " ", "");
+  boost::replace_all(full_name, ".", "_");
+  boost::replace_all(full_name, ",", "_");
+  boost::replace_all(full_name, "<", "_");
+  boost::replace_all(full_name, ">", "");
+  return full_name;
+}
+
+std::string get_go_type_metadata_name(const t_type& type) {
+  return fmt::format(
+      "premadeThriftType_{}", get_go_type_sanitized_full_name(type));
+}
+
+std::string get_go_type_codec_type_spec_name(const t_type& type) {
+  return fmt::format(
+      "premadeCodecTypeSpec_{}", get_go_type_sanitized_full_name(type));
+}
+
 std::set<std::string> get_struct_go_field_names(const t_structured* tstruct) {
   // Returns a set of Go field names from the given struct.
   std::set<std::string> field_names;
@@ -622,6 +650,23 @@ std::set<std::string> get_struct_go_field_names(const t_structured* tstruct) {
     field_names.insert(go::get_go_field_name(&field));
   }
   return field_names;
+}
+
+std::string get_go_func_unique_arg_name(
+    const t_function* func, std::string const& desired_arg_name) {
+  const auto& members = func->params().fields();
+
+  std::set<std::string> arg_names;
+  for (auto& member : members) {
+    arg_names.insert(go::munge_ident(member.name(), /*exported*/ false));
+  }
+
+  std::string unique_name = desired_arg_name;
+  auto current_num = 0;
+  while (arg_names.count(unique_name) > 0) {
+    unique_name = desired_arg_name + std::to_string(++current_num);
+  }
+  return unique_name;
 }
 
 void make_func_req_resp_structs(
@@ -780,6 +825,17 @@ void optimize_fields_layout(
         // Sort by field size, descending
         return get_field_size(lhs, is_union) > get_field_size(rhs, is_union);
       });
+}
+
+std::string doc_comment(const t_named* named) {
+  std::istringstream in(named->doc());
+
+  std::string line;
+  std::ostringstream out;
+  while (std::getline(in, line)) {
+    out << "// " << line << std::endl;
+  }
+  return out.str();
 }
 
 } // namespace apache::thrift::compiler::go

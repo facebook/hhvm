@@ -111,3 +111,11 @@ func TestWithServerObserver(t *testing.T) {
 	customConfig := newServerConfig(WithServerObserver(customObserver))
 	require.Equal(t, customObserver, customConfig.serverObserver)
 }
+
+func TestWithLoadFn(t *testing.T) {
+	defaultConfig := newServerConfig()
+	require.Nil(t, defaultConfig.loadFn)
+
+	customConfig := newServerConfig(WithLoadFn(func() uint { return 123 }))
+	require.NotNil(t, customConfig.loadFn)
+}

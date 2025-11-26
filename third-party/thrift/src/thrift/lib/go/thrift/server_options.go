@@ -49,6 +49,7 @@ type serverConfig struct {
 	processorStats map[string]*stats.TimingSeries
 	serverObserver ServerObserver
 	maxRequests    int64
+	loadFn         func() uint
 }
 
 func defaultServerConfig() *serverConfig {
@@ -128,6 +129,14 @@ func WithServerObserver(serverObserver ServerObserver) ServerOption {
 func WithMaxRequests(maxRequests int64) ServerOption {
 	return func(server *serverConfig) {
 		server.maxRequests = maxRequests
+	}
+}
+
+// WithLoadFn sets a custom load function for the server.
+// Needs to be very fast, because it is called on every request.
+func WithLoadFn(loadFn func() uint) ServerOption {
+	return func(server *serverConfig) {
+		server.loadFn = loadFn
 	}
 }
 

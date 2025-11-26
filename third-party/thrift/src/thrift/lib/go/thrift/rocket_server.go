@@ -55,11 +55,12 @@ type rocketServer struct {
 	observer                ServerObserver
 	maxRequests             int64
 	totalActiveRequestCount atomic.Int64
+	loadFn                  func() uint
 }
 
 func newServer(proc Processor, listener net.Listener, config *serverConfig, transportID TransportID) Server {
 	rocket.SetRsocketLogger(config.log)
-	return &rocketServer{
+	result := &rocketServer{
 		proc:          proc,
 		listener:      listener,
 		transportID:   transportID,
@@ -74,6 +75,12 @@ func newServer(proc Processor, listener net.Listener, config *serverConfig, tran
 		observer:    config.serverObserver,
 		maxRequests: config.maxRequests,
 	}
+	if config.loadFn != nil {
+		result.loadFn = config.loadFn
+	} else {
+		result.loadFn = result.defaultLoadFn
+	}
+	return result
 }
 
 func (s *rocketServer) ServeContext(ctx context.Context) error {
@@ -158,7 +165,7 @@ func (s *rocketServer) isOverloaded() bool {
 // should ensure your load numbers are comparable and account for this
 // (i.e. divide by NumCPU)
 // NOTE: loadFn is called on every single response.  it should be fast.
-func (s *rocketServer) loadFn() uint {
+func (s *rocketServer) defaultLoadFn() uint {
 	working := s.totalActiveRequestCount.Load()
 	denominator := float64(runtime.NumCPU())
 	return uint(1000. * float64(working) / denominator)

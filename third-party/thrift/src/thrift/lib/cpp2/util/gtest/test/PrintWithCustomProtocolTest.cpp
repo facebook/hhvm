@@ -14,23 +14,12 @@
  * limitations under the License.
  */
 
-#include <optional>
-
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 #include <thrift/lib/cpp2/util/gtest/Printer.h>
 #include <thrift/lib/cpp2/util/gtest/test/gen-cpp2/Matcher_types.h>
 #include <thrift/lib/cpp2/util/gtest/test/gen-cpp2/Matcher_types_custom_protocol.h>
 
 #include <gtest/gtest.h>
-
-// portability/GTest must be imported before any other gtest header
-
-// Bring the function into the thrift type namespace
-namespace apache::thrift::test {
-using apache::thrift::PrintTo;
-}
-
-#if __cpp_concepts
 
 TEST(
     ThriftDefaultPrint,
@@ -39,5 +28,3 @@ TEST(
   std::string debugPrint = apache::thrift::debugStringViaEncode(r);
   EXPECT_EQ(testing::PrintToString(r), debugPrint);
 }
-
-#endif

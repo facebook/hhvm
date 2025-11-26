@@ -225,6 +225,17 @@ std::string debugStringViaEncode(
   return debugStringViaEncode<type::infer_tag<T>>(obj, options);
 }
 
+template <typename T>
+  requires(is_thrift_class_v<T>)
+void PrintTo(const T& obj, std::ostream* os) {
+  *os << debugStringViaEncode(obj);
+}
+
 } // namespace apache::thrift
+
+// Make PrintTo visible for all Thrift classes by default.
+namespace testing::internal {
+using apache::thrift::PrintTo;
+}
 
 #endif /* CPP2_PROTOCOL_DEBUGPROTOCOL_H_ */

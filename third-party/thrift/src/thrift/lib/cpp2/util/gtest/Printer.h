@@ -43,12 +43,4 @@ void PrintTo(optional_field_ref<T> obj, std::ostream* os) {
   *os << "optional_field_ref holding " << testing::PrintToString(*obj);
 }
 
-template <typename T>
-  requires(
-      is_thrift_class_v<std::remove_cvref_t<T>> ||
-      is_thrift_exception_v<std::remove_cvref_t<T>>)
-void PrintTo(const T& obj, std::ostream* os) {
-  *os << debugStringViaEncode(obj);
-}
-
 } // namespace apache::thrift

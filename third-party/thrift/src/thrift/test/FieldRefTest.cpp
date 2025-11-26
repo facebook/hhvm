@@ -306,6 +306,10 @@ class ThriftStruct {
   friend bool operator==(const ThriftStruct& lhs, const ThriftStruct& rhs) {
     return lhs.name_ == rhs.name_;
   }
+
+  friend void PrintTo(const ThriftStruct& obj, std::ostream* os) {
+    *os << "ThriftStruct{name=\"" << obj.name_ << "\"}";
+  }
 };
 
 namespace {

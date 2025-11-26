@@ -960,9 +960,6 @@ class DynamicStructurePatch {
       thrift::detail::StructuredDynamicCursorReader<Reader, _>& in,
       thrift::detail::StructuredDynamicCursorWriter<
           typename Reader::ProtocolWriter>& out) const {
-    static_assert(
-        (folly::always_false<Reader> || IsUnion) == false,
-        "apply to union stream is not implemented");
     if (assign_) {
       for (auto&& [k, v] : *assign_) {
         out.writeValue(k, v);
@@ -978,6 +975,13 @@ class DynamicStructurePatch {
         auto id = static_cast<FieldId>(in.fieldId());
         processed.insert(id);
         if (remove_.contains(id)) {
+          in.skip();
+          continue;
+        }
+
+        if (IsUnion && !ensure_.empty() && ensure_.begin()->first != id) {
+          // For Union, if we are ensuring other fields, we should skip the
+          // current field.
           in.skip();
           continue;
         }
@@ -1277,6 +1281,13 @@ void DynamicPatch::applyOneFieldInStream(
       [&](const op::StringPatch& patch) { byTag(patch, type::string_t{}); },
       [&](const op::BinaryPatch& patch) { byTag(patch, type::binary_t{}); },
       [&](const DynamicStructPatch& patch) {
+        auto reader = in.beginReadStructured();
+        auto writer = out.beginWriteStructured(id);
+        patch.applyAllFieldsInStream(badge, reader, writer);
+        in.endRead(std::move(reader));
+        out.endWrite(std::move(writer));
+      },
+      [&](const DynamicUnionPatch& patch) {
         auto reader = in.beginReadStructured();
         auto writer = out.beginWriteStructured(id);
         patch.applyAllFieldsInStream(badge, reader, writer);

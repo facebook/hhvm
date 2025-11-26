@@ -18,6 +18,7 @@
 {{#import "enums" as m_enums}}
 {{#import "partials" as m_partials}}
 {{#import "services" as m_services}}
+{{#import "structs" as m_structs}}
 {
   "__fbthrift": "@{{!}}generated",
   "thrift_module" : "{{program:name}}",
@@ -89,7 +90,9 @@
   {{#program:structs?}}
   "structs" :
   {
-    {{> structs}}
+    {{#each (array.enumerate root_program.structured_definitions with_last=true) as |i struct last?|}}
+    {{#partial m_structs.render_struct struct=struct trailing_comma?=(not last?)}}
+    {{/each}}
   },
   {{/program:structs?}}
   {{#program:services?}}

@@ -15,51 +15,55 @@
   limitations under the License.
 
 }}
-{{#program:structs}}
-  "{{struct:name}}" : {
-    "name" : "{{struct:name}}",
-    {{#if (not (array.empty? struct:structured_annotations))}}
+{{#import "partials" as m_partials}}
+
+{{#let partial field_required |field|}}
+{{#pragma ignore-newlines}}
+{{#if field.required?}}required
+{{#else if field.optional?}}optional
+{{#else if field.unqualified?}}opt-in-req-out
+{{/if field.required?}}
+{{/let partial}}
+
+{{#let export partial render_struct |struct trailing_comma?| captures |m_partials field_required|}}
+  "{{struct.name}}" : {
+    "name" : "{{struct.name}}",
+    {{#if (not (array.empty? struct.structured_annotations))}}
     "structured_annotations": {
-      {{#partial m_partials.structured_annotations annotations=struct:self.structured_annotations}}
+      {{#partial m_partials.structured_annotations annotations=struct.structured_annotations}}
     },
-    {{/if (not (array.empty? struct:structured_annotations))}}
-    {{#struct:docs?}}
-    "docstring" : {{struct:docstring}},
-    {{/struct:docs?}}
-    {{#struct:fields?}}
+    {{/if (not (array.empty? struct.structured_annotations))}}
+    {{#if struct.docs?}}
+    "docstring" : {{struct.docstring}},
+    {{/if struct.docs?}}
+    {{#if struct.fields?}}
     "fields" : {
-      {{#struct:fields}}
-      "{{field:name}}" : {
-        "name" : "{{field:name}}",
-        {{#if (object.notnull? field:self.default_value)}}
-        "default_value" : {{#partial m_partials.const_value value=field:self.default_value}},
-        {{/if (object.notnull? field:self.default_value)}}
-        {{#field:docs?}}
-        "docstring" : {{field:docstring}},
-        {{/field:docs?}}
-        "key" : {{field:id}},
-        "lineno" : {{field:lineno}},
-        {{#field:required?}}
-        "required" : "required",
-        {{/field:required?}}
-        {{#field:optional?}}
-        "required" : "optional",
-        {{/field:optional?}}
-        {{#field:unqualified?}}
-        "required" : "opt-in-req-out",
-        {{/field:unqualified?}}
-        "type" : {{#partial m_partials.type t=field:self.type}}
-        {{#if (not (array.empty? field:structured_annotations))}},
+      {{#each (array.enumerate struct.fields with_last=true) as |i field last_field?|}}
+      "{{field.name}}" : {
+        "name" : "{{field.name}}",
+        {{#if (object.notnull? field.default_value)}}
+        "default_value" : {{#partial m_partials.const_value value=field.default_value}},
+        {{/if (object.notnull? field.default_value)}}
+        {{#if field.docs?}}
+        "docstring" : {{field.docstring}},
+        {{/if field.docs?}}
+        "key" : {{field.id}},
+        "lineno" : {{field.lineno}},
+        {{#if (not field.terse?)}}
+        "required" : "{{#partial field_required field=field}}",
+        {{/if (not field.terse?)}}
+        "type" : {{#partial m_partials.type t=field.type}}
+        {{#if (not (array.empty? field.structured_annotations))}},
         "structured_annotations": {
-          {{#partial m_partials.structured_annotations annotations=field:self.structured_annotations}}
+          {{#partial m_partials.structured_annotations annotations=field.structured_annotations}}
         }
-        {{/if (not (array.empty? field:structured_annotations))}}
-      }{{^last?}},{{/last?}}
-      {{/struct:fields}}
+        {{/if (not (array.empty? field.structured_annotations))}}
+      }{{#if (not last_field?)}},{{/if}}
+      {{/each}}
     },
-    {{/struct:fields?}}
-    "is_exception" : {{struct:exception?}},
-    "is_union" : {{struct:union?}},
-    "lineno" : {{struct:lineno}}
-  }{{^last?}},{{/last?}}
-{{/program:structs}}
+    {{/if struct.fields?}}
+    "is_exception" : {{#if struct.exception?}}true{{#else}}false{{/if}},
+    "is_union" : {{#if struct.union?}}true{{#else}}false{{/if}},
+    "lineno" : {{struct.lineno}}
+  }{{#if trailing_comma?}},{{/if}}
+{{/let partial}}

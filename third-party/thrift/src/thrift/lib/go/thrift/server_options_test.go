@@ -116,6 +116,6 @@ func TestWithLoadFn(t *testing.T) {
 	defaultConfig := newServerConfig()
 	require.Nil(t, defaultConfig.loadFn)
 
-	customConfig := newServerConfig(WithLoadFn(func() uint { return 123 }))
+	customConfig := newServerConfig(WithLoadFn(func() uint32 { return 123 }))
 	require.NotNil(t, customConfig.loadFn)
 }

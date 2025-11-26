@@ -22,6 +22,7 @@ import (
 	"math"
 	"net"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -117,7 +118,7 @@ type rocketServer struct {
 	observer                ServerObserver
 	maxRequests             int64
 	totalActiveRequestCount atomic.Int64
-	loadFn                  func() uint
+	loadFn                  func() uint32
 }
 
 func (s *rocketServer) ServeContext(ctx context.Context) error {
@@ -202,10 +203,10 @@ func (s *rocketServer) isOverloaded() bool {
 // should ensure your load numbers are comparable and account for this
 // (i.e. divide by NumCPU)
 // NOTE: loadFn is called on every single response.  it should be fast.
-func (s *rocketServer) defaultLoadFn() uint {
+func (s *rocketServer) defaultLoadFn() uint32 {
 	working := s.totalActiveRequestCount.Load()
 	denominator := float64(runtime.NumCPU())
-	return uint(1000. * float64(working) / denominator)
+	return uint32(1000. * float64(working) / denominator)
 }
 
 type rocketServerSocket struct {
@@ -332,7 +333,8 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 			s.interactionsMutex.Unlock()
 		}
 
-		protocol.setRequestHeader(LoadHeaderKey, fmt.Sprintf("%d", s.loadFn()))
+		loadMetric := s.loadFn()
+		protocol.setRequestHeader(LoadHeaderKey, strconv.FormatUint(uint64(loadMetric), 10))
 
 		responseCompressionAlgo := rocket.CompressionAlgorithmFromCompressionConfig(metadata.GetCompressionConfig())
 		var payload payload.Payload

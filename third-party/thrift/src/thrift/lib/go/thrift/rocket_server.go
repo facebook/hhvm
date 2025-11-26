@@ -57,22 +57,22 @@ type rocketServer struct {
 	totalActiveRequestCount atomic.Int64
 }
 
-func newServer(proc Processor, listener net.Listener, opts *serverOptions, transportID TransportID) Server {
-	rocket.SetRsocketLogger(opts.log)
+func newServer(proc Processor, listener net.Listener, config *serverConfig, transportID TransportID) Server {
+	rocket.SetRsocketLogger(config.log)
 	return &rocketServer{
 		proc:          proc,
 		listener:      listener,
 		transportID:   transportID,
 		zstdSupported: true,
-		log:           opts.log,
-		connContext:   opts.connContext,
+		log:           config.log,
+		connContext:   config.connContext,
 
-		numWorkers: opts.numWorkers,
+		numWorkers: config.numWorkers,
 
-		pstats:      opts.processorStats,
-		stats:       opts.serverStats,
-		observer:    opts.serverObserver,
-		maxRequests: opts.maxRequests,
+		pstats:      config.processorStats,
+		stats:       config.serverStats,
+		observer:    config.serverObserver,
+		maxRequests: config.maxRequests,
 	}
 }
 

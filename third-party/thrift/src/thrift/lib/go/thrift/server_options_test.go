@@ -47,67 +47,67 @@ func TestListenerALPNOptions(t *testing.T) {
 }
 
 func TestWithNumWorkers(t *testing.T) {
-	defaultOptions := newServerOptions()
-	require.Equal(t, GoroutinePerRequest, defaultOptions.numWorkers)
+	defaultConfig := newServerConfig()
+	require.Equal(t, GoroutinePerRequest, defaultConfig.numWorkers)
 
-	customOptions := newServerOptions(WithNumWorkers(12345))
-	require.Equal(t, 12345, customOptions.numWorkers)
+	customConfig := newServerConfig(WithNumWorkers(12345))
+	require.Equal(t, 12345, customConfig.numWorkers)
 }
 
 func TestWithConnContext(t *testing.T) {
 	dummyConn, _ := net.Pipe()
 
-	defaultOptions := newServerOptions()
-	require.NotNil(t, defaultOptions.connContext)
-	defaultOptions.connContext(context.TODO(), dummyConn)
+	defaultConfig := newServerConfig()
+	require.NotNil(t, defaultConfig.connContext)
+	defaultConfig.connContext(context.TODO(), dummyConn)
 
 	invoked := false
 	customConnContextFn := func(ctx context.Context, conn net.Conn) context.Context { invoked = true; return ctx }
-	customOptions := newServerOptions(WithConnContext(customConnContextFn))
-	require.NotNil(t, customOptions.connContext)
-	customOptions.connContext(context.TODO(), dummyConn)
+	customConfig := newServerConfig(WithConnContext(customConnContextFn))
+	require.NotNil(t, customConfig.connContext)
+	customConfig.connContext(context.TODO(), dummyConn)
 	require.True(t, invoked)
 }
 
 func TestWithLog(t *testing.T) {
-	defaultOptions := newServerOptions()
-	require.NotNil(t, defaultOptions.log)
-	defaultOptions.log("test")
+	defaultConfig := newServerConfig()
+	require.NotNil(t, defaultConfig.log)
+	defaultConfig.log("test")
 
 	invoked := false
 	customLogFn := func(format string, args ...any) { invoked = true }
-	customOptions := newServerOptions(WithLog(customLogFn))
-	require.NotNil(t, customOptions.log)
-	customOptions.log("test")
+	customConfig := newServerConfig(WithLog(customLogFn))
+	require.NotNil(t, customConfig.log)
+	customConfig.log("test")
 	require.True(t, invoked)
 }
 
 func TestWithServerStats(t *testing.T) {
-	defaultOptions := newServerOptions()
-	require.NotNil(t, defaultOptions.serverStats)
+	defaultConfig := newServerConfig()
+	require.NotNil(t, defaultConfig.serverStats)
 
 	customServerStats := stats.NewServerStats(stats.NewTimingConfig(60), 60)
-	customOptions := newServerOptions(WithServerStats(customServerStats))
-	require.Equal(t, customServerStats, customOptions.serverStats)
+	customConfig := newServerConfig(WithServerStats(customServerStats))
+	require.Equal(t, customServerStats, customConfig.serverStats)
 }
 
 func TestWithProcessorStats(t *testing.T) {
-	defaultOptions := newServerOptions()
-	require.NotNil(t, defaultOptions.processorStats)
-	require.Len(t, defaultOptions.processorStats, 0)
+	defaultConfig := newServerConfig()
+	require.NotNil(t, defaultConfig.processorStats)
+	require.Len(t, defaultConfig.processorStats, 0)
 
 	customProcessorStats := map[string]*stats.TimingSeries{"test": {}}
-	customOptions := newServerOptions(WithProcessorStats(customProcessorStats))
-	require.Equal(t, customProcessorStats, customOptions.processorStats)
+	customConfig := newServerConfig(WithProcessorStats(customProcessorStats))
+	require.Equal(t, customProcessorStats, customConfig.processorStats)
 }
 
 func TestWithServerObserver(t *testing.T) {
-	defaultOptions := newServerOptions()
-	require.NotNil(t, defaultOptions.serverObserver)
-	require.IsType(t, &noopServerObserver{}, defaultOptions.serverObserver)
+	defaultConfig := newServerConfig()
+	require.NotNil(t, defaultConfig.serverObserver)
+	require.IsType(t, &noopServerObserver{}, defaultConfig.serverObserver)
 
 	type customServerObserver = noopServerObserver
 	customObserver := &customServerObserver{}
-	customOptions := newServerOptions(WithServerObserver(customObserver))
-	require.Equal(t, customObserver, customOptions.serverObserver)
+	customConfig := newServerConfig(WithServerObserver(customObserver))
+	require.Equal(t, customObserver, customConfig.serverObserver)
 }

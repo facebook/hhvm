@@ -35,16 +35,16 @@ type Server interface {
 // * out of order responses (for clients that support it!)
 // * and statstics that you can export to your favorite monitoring system
 func NewServer(processor Processor, listener net.Listener, transportType TransportID, options ...ServerOption) Server {
-	serverOptions := newServerOptions(options...)
+	serverConfig := newServerConfig(options...)
 	switch transportType {
 	case TransportIDHeader:
 		// NOTE: temporary workaround while Header support is being removed.
 		// This code is never hit actually.
-		return newServer(processor, listener, serverOptions, TransportIDUpgradeToRocket)
+		return newServer(processor, listener, serverConfig, TransportIDUpgradeToRocket)
 	case TransportIDRocket:
-		return newServer(processor, listener, serverOptions, TransportIDRocket)
+		return newServer(processor, listener, serverConfig, TransportIDRocket)
 	case TransportIDUpgradeToRocket:
-		return newServer(processor, listener, serverOptions, TransportIDUpgradeToRocket)
+		return newServer(processor, listener, serverConfig, TransportIDUpgradeToRocket)
 	default:
 		panic(fmt.Sprintf("Server does not support: %v", transportType))
 	}

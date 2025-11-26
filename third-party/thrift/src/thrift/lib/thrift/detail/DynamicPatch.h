@@ -529,6 +529,7 @@ class DynamicPatch {
   void apply(Value&) const;
   /// Applies the patch to the given Thrift Any. Throws if the patch is not
   /// applicable.
+  void applyObjectInAny(type::AnyStruct&) const;
   void applyToDataFieldInsideAny(type::AnyStruct&) const;
   /// @brief Applies the patch to the given blob and returns the result as a
   /// blob. Throws if the patch is not applicable.

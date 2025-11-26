@@ -1539,11 +1539,17 @@ TEST(DynamicPatch, applyToDataFieldInsideAny) {
   type::AnyStruct safePatchAny = type::AnyData::toAny(safePatch).toThrift();
 
   // apply patch
+  auto any1 = objAny, any2 = objAny;
   DynamicPatch dynPatch = DynamicPatch::fromSafePatch(safePatchAny);
-  dynPatch.applyToDataFieldInsideAny(objAny);
+  dynPatch.applyToDataFieldInsideAny(any1);
 
   EXPECT_EQ(
-      type::AnyData{objAny}.get<type::union_t<MyUnion>>().s().value(),
+      type::AnyData{any1}.get<type::union_t<MyUnion>>().s().value(),
+      "hello world");
+
+  dynPatch.applyObjectInAny(any2);
+  EXPECT_EQ(
+      type::AnyData{any2}.get<type::union_t<MyUnion>>().s().value(),
       "hello world");
 }
 

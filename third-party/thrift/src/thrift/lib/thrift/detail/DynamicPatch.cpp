@@ -2060,6 +2060,19 @@ void DynamicPatch::applyToDataFieldInsideAny(type::AnyStruct& any) const {
             .toThrift();
 }
 
+void DynamicPatch::applyObjectInAny(type::AnyStruct& any) const {
+  if (any.protocol() == type::StandardProtocol::Binary) {
+    any.data() = *applyToSerializedObjectWithoutExtractingMask<
+        type::StandardProtocol::Binary>(*any.data());
+  } else if (any.protocol() == type::StandardProtocol::Compact) {
+    any.data() = *applyToSerializedObjectWithoutExtractingMask<
+        type::StandardProtocol::Compact>(*any.data());
+  } else {
+    throw std::runtime_error(
+        "Unsupported protocol: " + std::string(any.protocol()->name()));
+  }
+}
+
 template <type::StandardProtocol Protocol>
 std::unique_ptr<folly::IOBuf> DynamicPatch::applyToSerializedObject(
     const folly::IOBuf& buf) const {

@@ -235,56 +235,71 @@ and matches_namespace patt_namespace ~scrut ~env =
 
 (* -- Files ----------------------------------------------------------------- *)
 
+let rec matches_file_path_help t ~segs ~env =
+  let open Patt_file in
+  match t with
+  | Dot -> Either.First (env, segs)
+  | Slash { prefix; segment } ->
+    let prefix_res = matches_file_path_help prefix ~segs ~env in
+    (match prefix_res with
+    | Either.Second _ ->
+      (* If the prefix doesn't match then the path doesn't match *)
+      prefix_res
+    | Either.First (_env, []) ->
+      (* The prefix matched but we have a required segment which doesn't so
+         the path doesn't match *)
+      Either.Second None
+    | Either.First (env, next :: rest) ->
+      (* The prefix matched and we have a non-empty residual path; check if
+         the current segment matches *)
+      (match matches_string segment ~scrut:next ~env with
+      | Match.Matched env ->
+        (* The current segment also matches so the path matches *)
+        Either.First (env, rest)
+      | Match.No_match ->
+        (* The current segment doesn't match so the path doesn't match *)
+        Either.Second None
+      | Match.Match_err err -> Either.Second (Some err)))
+  | Slash_opt { prefix; segment } ->
+    let prefix_res = matches_file_path_help prefix ~segs ~env in
+    (match prefix_res with
+    | Either.Second _ ->
+      (* If the prefix doesn't match then the path doesn't match *)
+      prefix_res
+    | Either.First (_env, []) ->
+      (* The prefix matched and we have an optional segment so the path matches *)
+      prefix_res
+    | Either.First (env, next :: rest) ->
+      (* The prefix matched and we have a non-empty residual path; check if
+         the current segment matches *)
+      (match matches_string segment ~scrut:next ~env with
+      | Match.Matched env ->
+        (* The current segment also matches so the path matches *)
+        Either.First (env, rest)
+      | Match.No_match ->
+        (* The current segment doesn't match but it's optional so the path matches *)
+        Either.First (env, next :: rest)
+      | Match.Match_err err -> Either.Second (Some err)))
+
 (** A [Patt_file.t] matches the prefix of the path [scrut], represented as a list
     of strings, when we have an elementwise match starting from [Dot] allowing
     for a non-empty path suffix *)
 let matches_file_path_prefix t ~scrut ~env =
-  let open Patt_file in
-  let rec aux t ~scrut ~env ~k =
-    match t with
-    | Dot -> k (env, scrut)
-    | Slash_opt { prefix; segment } ->
-      aux prefix ~scrut ~env ~k:(function
-          | (env, []) -> Match.Matched env
-          | (env, next :: rest) ->
-            (match matches_string segment ~scrut:next ~env with
-            | Match.Matched env -> k (env, rest)
-            | Match.No_match ->
-              (* For optional segments try to match entire path to the prefix if
-                 we have no match for the current segment *)
-              aux prefix ~scrut ~env ~k
-            | Match.Match_err err -> Match.Match_err err))
-    | Slash { prefix; segment } ->
-      aux prefix ~scrut ~env ~k:(function
-          | (env, []) -> Match.Matched env
-          | (env, next :: rest) ->
-            (match matches_string segment ~scrut:next ~env with
-            | Match.Matched env -> k (env, rest)
-            | res -> res))
-  in
-  aux t ~scrut ~env ~k:(fun (env, _) -> Match.matched env)
+  match matches_file_path_help t ~segs:scrut ~env with
+  | Either.First (env, _) -> Match.matched env
+  | Either.Second None -> Match.no_match
+  | Either.Second (Some err) -> Match.match_err err
 
-(** A [Patt_file.t] matches the prefix of the path [scrut], represented as a list
-    of strings in reverse order, when we have an elementwise match starting
-    from the end of the path *)
-let rec matches_file_path t ~scrut ~env =
-  let open Patt_file in
-  match (t, scrut) with
-  | (Dot, []) -> Match.matched env
-  | (Dot, _) -> Match.no_match
-  | (Slash_opt { prefix; segment }, next :: rest) ->
-    (match matches_string segment ~scrut:next ~env with
-    | Match.Matched env -> matches_file_path prefix ~scrut:rest ~env
-    | Match.No_match ->
-      (* For optional segments try to match entire path to the prefix if
-         we have no match for the current segment *)
-      matches_file_path prefix ~scrut ~env
-    | Match.Match_err err -> Match.match_err err)
-  | (Slash { prefix; segment }, next :: rest) ->
-    Match.(
-      matches_string segment ~scrut:next ~env >>= fun env ->
-      matches_file_path prefix ~scrut:rest ~env)
-  | ((Slash _ | Slash_opt _), []) -> Match.no_match
+(** A [Patt_file.t] exactgly matches the path [scrut], represented as a list
+    of strings, when we have an elementwise match starting from [Dot] such that
+    the suffix is empty *)
+let matches_file_path_exact t ~scrut ~env =
+  match matches_file_path_help t ~segs:scrut ~env with
+  | Either.First (env, []) -> Match.matched env
+  | Either.First _
+  | Either.Second None ->
+    Match.no_match
+  | Either.Second (Some err) -> Match.match_err err
 
 let rec matches_file t ~(scrut : Relative_path.t) ~env =
   let open Patt_file in
@@ -319,13 +334,11 @@ let rec matches_file t ~(scrut : Relative_path.t) ~env =
           patt_file_path
           ~default:(Match.matched env)
           ~f:(fun patt_file_path ->
+            let scrut = List.rev scrut_path in
             if allow_glob then
-              matches_file_path_prefix
-                patt_file_path
-                ~scrut:(List.rev scrut_path)
-                ~env
+              matches_file_path_prefix patt_file_path ~scrut ~env
             else
-              matches_file_path patt_file_path ~scrut:scrut_path ~env))
+              matches_file_path_exact patt_file_path ~scrut ~env))
     | _ -> Match.no_match)
 
 (* -- Types ----------------------------------------------------------------- *)

@@ -57,31 +57,12 @@ type rocketServer struct {
 	totalActiveRequestCount atomic.Int64
 }
 
-func newRocketServer(proc Processor, listener net.Listener, opts *serverOptions) Server {
+func newServer(proc Processor, listener net.Listener, opts *serverOptions, transportID TransportID) Server {
 	rocket.SetRsocketLogger(opts.log)
 	return &rocketServer{
 		proc:          proc,
 		listener:      listener,
-		transportID:   TransportIDRocket,
-		zstdSupported: true,
-		log:           opts.log,
-		connContext:   opts.connContext,
-
-		numWorkers: opts.numWorkers,
-
-		pstats:      opts.processorStats,
-		stats:       opts.serverStats,
-		observer:    opts.serverObserver,
-		maxRequests: opts.maxRequests,
-	}
-}
-
-func newUpgradeToRocketServer(proc Processor, listener net.Listener, opts *serverOptions) Server {
-	rocket.SetRsocketLogger(opts.log)
-	return &rocketServer{
-		proc:          proc,
-		listener:      listener,
-		transportID:   TransportIDUpgradeToRocket,
+		transportID:   transportID,
 		zstdSupported: true,
 		log:           opts.log,
 		connContext:   opts.connContext,

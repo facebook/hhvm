@@ -40,11 +40,11 @@ func NewServer(processor Processor, listener net.Listener, transportType Transpo
 	case TransportIDHeader:
 		// NOTE: temporary workaround while Header support is being removed.
 		// This code is never hit actually.
-		return newUpgradeToRocketServer(processor, listener, serverOptions)
+		return newServer(processor, listener, serverOptions, TransportIDUpgradeToRocket)
 	case TransportIDRocket:
-		return newRocketServer(processor, listener, serverOptions)
+		return newServer(processor, listener, serverOptions, TransportIDRocket)
 	case TransportIDUpgradeToRocket:
-		return newUpgradeToRocketServer(processor, listener, serverOptions)
+		return newServer(processor, listener, serverOptions, TransportIDUpgradeToRocket)
 	default:
 		panic(fmt.Sprintf("Server does not support: %v", transportType))
 	}

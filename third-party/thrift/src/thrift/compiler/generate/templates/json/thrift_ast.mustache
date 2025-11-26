@@ -15,6 +15,7 @@
   limitations under the License.
 
 }}
+{{#import "enums" as m_enums}}
 {{#import "partials" as m_partials}}
 {
   "__fbthrift": "@{{!}}generated",
@@ -79,7 +80,9 @@
   }}{{#program:enums?}}
   "enumerations" :
   {
-    {{> enums}}
+    {{#each (array.enumerate root_program.enums with_last=true) as |i enum last?|}}
+    {{#partial m_enums.render_enum enum=enum trailing_comma?=(not last?)}}
+    {{/each}}
   },
   {{/program:enums?}}
   {{#program:structs?}}

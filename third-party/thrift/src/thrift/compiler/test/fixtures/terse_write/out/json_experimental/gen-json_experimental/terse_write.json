@@ -191,10 +191,10 @@
         "structured_annotations": {
           "thrift.TerseWrite" : {
             "type" : {
-          "type" : "struct",
-          "name" : "TerseWrite",
-          "path" : "thrift/annotation/thrift.thrift"
-        },
+            "type" : "struct",
+            "name" : "TerseWrite",
+            "path" : "thrift/annotation/thrift.thrift"
+          },
             "value" : {}
           }
         },
@@ -325,10 +325,10 @@
             "structured_annotations": {
               "thrift.TerseWrite" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "TerseWrite",
-              "path" : "thrift/annotation/thrift.thrift"
-            },
+                "type" : "struct",
+                "name" : "TerseWrite",
+                "path" : "thrift/annotation/thrift.thrift"
+              },
                 "value" : {}
               }
             }
@@ -342,10 +342,10 @@
             "structured_annotations": {
               "thrift.TerseWrite" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "TerseWrite",
-              "path" : "thrift/annotation/thrift.thrift"
-            },
+                "type" : "struct",
+                "name" : "TerseWrite",
+                "path" : "thrift/annotation/thrift.thrift"
+              },
                 "value" : {}
               }
             }
@@ -359,10 +359,10 @@
             "structured_annotations": {
               "thrift.TerseWrite" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "TerseWrite",
-              "path" : "thrift/annotation/thrift.thrift"
-            },
+                "type" : "struct",
+                "name" : "TerseWrite",
+                "path" : "thrift/annotation/thrift.thrift"
+              },
                 "value" : {}
               }
             }
@@ -376,10 +376,10 @@
             "structured_annotations": {
               "thrift.TerseWrite" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "TerseWrite",
-              "path" : "thrift/annotation/thrift.thrift"
-            },
+                "type" : "struct",
+                "name" : "TerseWrite",
+                "path" : "thrift/annotation/thrift.thrift"
+              },
                 "value" : {}
               }
             }
@@ -393,10 +393,10 @@
             "structured_annotations": {
               "thrift.TerseWrite" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "TerseWrite",
-              "path" : "thrift/annotation/thrift.thrift"
-            },
+                "type" : "struct",
+                "name" : "TerseWrite",
+                "path" : "thrift/annotation/thrift.thrift"
+              },
                 "value" : {}
               }
             }
@@ -410,10 +410,10 @@
             "structured_annotations": {
               "thrift.TerseWrite" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "TerseWrite",
-              "path" : "thrift/annotation/thrift.thrift"
-            },
+                "type" : "struct",
+                "name" : "TerseWrite",
+                "path" : "thrift/annotation/thrift.thrift"
+              },
                 "value" : {}
               }
             }
@@ -427,10 +427,10 @@
             "structured_annotations": {
               "thrift.TerseWrite" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "TerseWrite",
-              "path" : "thrift/annotation/thrift.thrift"
-            },
+                "type" : "struct",
+                "name" : "TerseWrite",
+                "path" : "thrift/annotation/thrift.thrift"
+              },
                 "value" : {}
               }
             }
@@ -444,10 +444,10 @@
             "structured_annotations": {
               "thrift.TerseWrite" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "TerseWrite",
-              "path" : "thrift/annotation/thrift.thrift"
-            },
+                "type" : "struct",
+                "name" : "TerseWrite",
+                "path" : "thrift/annotation/thrift.thrift"
+              },
                 "value" : {}
               }
             }
@@ -461,10 +461,10 @@
             "structured_annotations": {
               "thrift.TerseWrite" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "TerseWrite",
-              "path" : "thrift/annotation/thrift.thrift"
-            },
+                "type" : "struct",
+                "name" : "TerseWrite",
+                "path" : "thrift/annotation/thrift.thrift"
+              },
                 "value" : {}
               }
             }
@@ -481,10 +481,10 @@
             "structured_annotations": {
               "thrift.TerseWrite" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "TerseWrite",
-              "path" : "thrift/annotation/thrift.thrift"
-            },
+                "type" : "struct",
+                "name" : "TerseWrite",
+                "path" : "thrift/annotation/thrift.thrift"
+              },
                 "value" : {}
               }
             }
@@ -501,10 +501,10 @@
             "structured_annotations": {
               "thrift.TerseWrite" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "TerseWrite",
-              "path" : "thrift/annotation/thrift.thrift"
-            },
+                "type" : "struct",
+                "name" : "TerseWrite",
+                "path" : "thrift/annotation/thrift.thrift"
+              },
                 "value" : {}
               }
             }
@@ -521,10 +521,10 @@
             "structured_annotations": {
               "thrift.TerseWrite" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "TerseWrite",
-              "path" : "thrift/annotation/thrift.thrift"
-            },
+                "type" : "struct",
+                "name" : "TerseWrite",
+                "path" : "thrift/annotation/thrift.thrift"
+              },
                 "value" : {}
               }
             }
@@ -542,10 +542,10 @@
             "structured_annotations": {
               "thrift.TerseWrite" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "TerseWrite",
-              "path" : "thrift/annotation/thrift.thrift"
-            },
+                "type" : "struct",
+                "name" : "TerseWrite",
+                "path" : "thrift/annotation/thrift.thrift"
+              },
                 "value" : {}
               }
             }
@@ -562,10 +562,10 @@
             "structured_annotations": {
               "thrift.TerseWrite" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "TerseWrite",
-              "path" : "thrift/annotation/thrift.thrift"
-            },
+                "type" : "struct",
+                "name" : "TerseWrite",
+                "path" : "thrift/annotation/thrift.thrift"
+              },
                 "value" : {}
               }
             }
@@ -582,10 +582,10 @@
             "structured_annotations": {
               "thrift.TerseWrite" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "TerseWrite",
-              "path" : "thrift/annotation/thrift.thrift"
-            },
+                "type" : "struct",
+                "name" : "TerseWrite",
+                "path" : "thrift/annotation/thrift.thrift"
+              },
                 "value" : {}
               }
             }
@@ -724,10 +724,10 @@
         "structured_annotations": {
           "thrift.TerseWrite" : {
             "type" : {
-          "type" : "struct",
-          "name" : "TerseWrite",
-          "path" : "thrift/annotation/thrift.thrift"
-        },
+            "type" : "struct",
+            "name" : "TerseWrite",
+            "path" : "thrift/annotation/thrift.thrift"
+          },
             "value" : {}
           }
         },
@@ -747,18 +747,18 @@
             "structured_annotations": {
               "hack.Adapter" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "Adapter",
-              "path" : "thrift/annotation/hack.thrift"
-            },
+                "type" : "struct",
+                "name" : "Adapter",
+                "path" : "thrift/annotation/hack.thrift"
+              },
                 "value" : {"name": "\\Adapter1"}
               },
               "cpp.Adapter" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "Adapter",
-              "path" : "thrift/annotation/cpp.thrift"
-            },
+                "type" : "struct",
+                "name" : "Adapter",
+                "path" : "thrift/annotation/cpp.thrift"
+              },
                 "value" : {"name": "::my::Adapter"}
               }
             }
@@ -772,10 +772,10 @@
             "structured_annotations": {
               "cpp.Adapter" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "Adapter",
-              "path" : "thrift/annotation/cpp.thrift"
-            },
+                "type" : "struct",
+                "name" : "Adapter",
+                "path" : "thrift/annotation/cpp.thrift"
+              },
                 "value" : {"name": "::my::Adapter"}
               }
             }
@@ -790,10 +790,10 @@
         "structured_annotations": {
           "thrift.TerseWrite" : {
             "type" : {
-          "type" : "struct",
-          "name" : "TerseWrite",
-          "path" : "thrift/annotation/thrift.thrift"
-        },
+            "type" : "struct",
+            "name" : "TerseWrite",
+            "path" : "thrift/annotation/thrift.thrift"
+          },
             "value" : {}
           }
         },
@@ -807,10 +807,10 @@
             "structured_annotations": {
               "thrift.ExceptionMessage" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "ExceptionMessage",
-              "path" : "thrift/annotation/thrift.thrift"
-            },
+                "type" : "struct",
+                "name" : "ExceptionMessage",
+                "path" : "thrift/annotation/thrift.thrift"
+              },
                 "value" : {}
               }
             }

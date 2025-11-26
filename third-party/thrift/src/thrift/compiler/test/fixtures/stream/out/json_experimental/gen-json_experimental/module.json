@@ -259,10 +259,10 @@
             "structured_annotations": {
               "cpp.ProcessInEbThreadUnsafe" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "ProcessInEbThreadUnsafe",
-              "path" : "thrift/annotation/cpp.thrift"
-            },
+                "type" : "struct",
+                "name" : "ProcessInEbThreadUnsafe",
+                "path" : "thrift/annotation/cpp.thrift"
+              },
                 "value" : {}
               }
             }

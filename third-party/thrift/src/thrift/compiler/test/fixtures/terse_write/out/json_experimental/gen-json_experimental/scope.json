@@ -126,30 +126,30 @@
         "structured_annotations": {
           "scope.Struct" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Struct"
-        },
+            "type" : "struct",
+            "name" : "Struct"
+          },
             "value" : {}
           },
           "scope.Union" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Union"
-        },
+            "type" : "struct",
+            "name" : "Union"
+          },
             "value" : {}
           },
           "scope.Exception" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Exception"
-        },
+            "type" : "struct",
+            "name" : "Exception"
+          },
             "value" : {}
           },
           "scope.Transitive" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Transitive"
-        },
+            "type" : "struct",
+            "name" : "Transitive"
+          },
             "value" : {}
           }
         },
@@ -163,23 +163,23 @@
         "structured_annotations": {
           "scope.Service" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Service"
-        },
+            "type" : "struct",
+            "name" : "Service"
+          },
             "value" : {}
           },
           "scope.Interaction" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Interaction"
-        },
+            "type" : "struct",
+            "name" : "Interaction"
+          },
             "value" : {}
           },
           "scope.Transitive" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Transitive"
-        },
+            "type" : "struct",
+            "name" : "Transitive"
+          },
             "value" : {}
           }
         },
@@ -193,44 +193,44 @@
         "structured_annotations": {
           "scope.Structured" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Structured"
-        },
+            "type" : "struct",
+            "name" : "Structured"
+          },
             "value" : {}
           },
           "scope.Interface" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Interface"
-        },
+            "type" : "struct",
+            "name" : "Interface"
+          },
             "value" : {}
           },
           "scope.Typedef" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Typedef"
-        },
+            "type" : "struct",
+            "name" : "Typedef"
+          },
             "value" : {}
           },
           "scope.Enum" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Enum"
-        },
+            "type" : "struct",
+            "name" : "Enum"
+          },
             "value" : {}
           },
           "scope.Const" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Const"
-        },
+            "type" : "struct",
+            "name" : "Const"
+          },
             "value" : {}
           },
           "scope.Transitive" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Transitive"
-        },
+            "type" : "struct",
+            "name" : "Transitive"
+          },
             "value" : {}
           }
         },
@@ -244,44 +244,44 @@
         "structured_annotations": {
           "scope.RootDefinition" : {
             "type" : {
-          "type" : "struct",
-          "name" : "RootDefinition"
-        },
+            "type" : "struct",
+            "name" : "RootDefinition"
+          },
             "value" : {}
           },
           "scope.Field" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Field"
-        },
+            "type" : "struct",
+            "name" : "Field"
+          },
             "value" : {}
           },
           "scope.Function" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Function"
-        },
+            "type" : "struct",
+            "name" : "Function"
+          },
             "value" : {}
           },
           "scope.FunctionParameter" : {
             "type" : {
-          "type" : "struct",
-          "name" : "FunctionParameter"
-        },
+            "type" : "struct",
+            "name" : "FunctionParameter"
+          },
             "value" : {}
           },
           "scope.EnumValue" : {
             "type" : {
-          "type" : "struct",
-          "name" : "EnumValue"
-        },
+            "type" : "struct",
+            "name" : "EnumValue"
+          },
             "value" : {}
           },
           "scope.Transitive" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Transitive"
-        },
+            "type" : "struct",
+            "name" : "Transitive"
+          },
             "value" : {}
           }
         },
@@ -295,9 +295,9 @@
         "structured_annotations": {
           "scope.Program" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Program"
-        },
+            "type" : "struct",
+            "name" : "Program"
+          },
             "value" : {}
           }
         },

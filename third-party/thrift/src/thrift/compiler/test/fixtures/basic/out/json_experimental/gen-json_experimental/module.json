@@ -202,10 +202,10 @@
             "structured_annotations": {
               "hack.SkipCodegen" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "SkipCodegen",
-              "path" : "thrift/annotation/hack.thrift"
-            },
+                "type" : "struct",
+                "name" : "SkipCodegen",
+                "path" : "thrift/annotation/hack.thrift"
+              },
                 "value" : {"reason": "Invalid key type"}
               }
             }
@@ -220,10 +220,10 @@
             "structured_annotations": {
               "hack.SkipCodegen" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "SkipCodegen",
-              "path" : "thrift/annotation/hack.thrift"
-            },
+                "type" : "struct",
+                "name" : "SkipCodegen",
+                "path" : "thrift/annotation/hack.thrift"
+              },
                 "value" : {"reason": "skip field codegen for deprecation"}
               }
             }
@@ -324,10 +324,10 @@
             "structured_annotations": {
               "hack.SkipCodegen" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "SkipCodegen",
-              "path" : "thrift/annotation/hack.thrift"
-            },
+                "type" : "struct",
+                "name" : "SkipCodegen",
+                "path" : "thrift/annotation/hack.thrift"
+              },
                 "value" : {"reason": "Invalid key type"}
               }
             }
@@ -399,10 +399,10 @@
             "structured_annotations": {
               "thrift.ExceptionMessage" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "ExceptionMessage",
-              "path" : "thrift/annotation/thrift.thrift"
-            },
+                "type" : "struct",
+                "name" : "ExceptionMessage",
+                "path" : "thrift/annotation/thrift.thrift"
+              },
                 "value" : {}
               }
             }
@@ -437,10 +437,10 @@
         "structured_annotations": {
           "hack.Name" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Name",
-          "path" : "thrift/annotation/hack.thrift"
-        },
+            "type" : "struct",
+            "name" : "Name",
+            "path" : "thrift/annotation/hack.thrift"
+          },
             "value" : {"name": "MyRenamedStruct"}
           }
         },
@@ -455,10 +455,10 @@
             "structured_annotations": {
               "hack.Name" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "Name",
-              "path" : "thrift/annotation/hack.thrift"
-            },
+                "type" : "struct",
+                "name" : "Name",
+                "path" : "thrift/annotation/hack.thrift"
+              },
                 "value" : {"name": "renamed_field"}
               }
             }
@@ -473,10 +473,10 @@
         "structured_annotations": {
           "hack.Name" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Name",
-          "path" : "thrift/annotation/hack.thrift"
-        },
+            "type" : "struct",
+            "name" : "Name",
+            "path" : "thrift/annotation/hack.thrift"
+          },
             "value" : {"name": "MyRenamedUnion"}
           }
         },
@@ -491,10 +491,10 @@
             "structured_annotations": {
               "hack.Name" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "Name",
-              "path" : "thrift/annotation/hack.thrift"
-            },
+                "type" : "struct",
+                "name" : "Name",
+                "path" : "thrift/annotation/hack.thrift"
+              },
                 "value" : {"name": "renamed_field"}
               }
             }
@@ -521,10 +521,10 @@
         "structured_annotations": {
           "hack.Name" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Name",
-          "path" : "thrift/annotation/hack.thrift"
-        },
+            "type" : "struct",
+            "name" : "Name",
+            "path" : "thrift/annotation/hack.thrift"
+          },
             "value" : {"name": "RenamedService"}
           }
         }
@@ -546,10 +546,10 @@
                 "structured_annotations": {
                   "hack.Name" : {
                     "type" : {
-                  "type" : "struct",
-                  "name" : "Name",
-                  "path" : "thrift/annotation/hack.thrift"
-                },
+                    "type" : "struct",
+                    "name" : "Name",
+                    "path" : "thrift/annotation/hack.thrift"
+                  },
                     "value" : {"name": "renamed_parameter"}
                   }
                 }
@@ -563,10 +563,10 @@
             "structured_annotations": {
               "hack.Name" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "Name",
-              "path" : "thrift/annotation/hack.thrift"
-            },
+                "type" : "struct",
+                "name" : "Name",
+                "path" : "thrift/annotation/hack.thrift"
+              },
                 "value" : {"name": "renamed_rpc"}
               }
             }
@@ -695,10 +695,10 @@
             "structured_annotations": {
               "hack.SkipCodegen" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "SkipCodegen",
-              "path" : "thrift/annotation/hack.thrift"
-            },
+                "type" : "struct",
+                "name" : "SkipCodegen",
+                "path" : "thrift/annotation/hack.thrift"
+              },
                 "value" : {"reason": "Invalid key type"}
               }
             }
@@ -710,10 +710,10 @@
             "structured_annotations": {
               "hack.SkipCodegen" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "SkipCodegen",
-              "path" : "thrift/annotation/hack.thrift"
-            },
+                "type" : "struct",
+                "name" : "SkipCodegen",
+                "path" : "thrift/annotation/hack.thrift"
+              },
                 "value" : {"reason": "Skip function deprecation"}
               }
             }

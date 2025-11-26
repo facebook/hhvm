@@ -70,10 +70,10 @@
             "structured_annotations": {
               "thrift.AllowUnsafeOptionalCustomDefaultValue" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "AllowUnsafeOptionalCustomDefaultValue",
-              "path" : "thrift/annotation/thrift.thrift"
-            },
+                "type" : "struct",
+                "name" : "AllowUnsafeOptionalCustomDefaultValue",
+                "path" : "thrift/annotation/thrift.thrift"
+              },
                 "value" : {}
               }
             }
@@ -89,10 +89,10 @@
             "structured_annotations": {
               "thrift.AllowUnsafeOptionalCustomDefaultValue" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "AllowUnsafeOptionalCustomDefaultValue",
-              "path" : "thrift/annotation/thrift.thrift"
-            },
+                "type" : "struct",
+                "name" : "AllowUnsafeOptionalCustomDefaultValue",
+                "path" : "thrift/annotation/thrift.thrift"
+              },
                 "value" : {}
               }
             }
@@ -111,10 +111,10 @@
             "structured_annotations": {
               "thrift.AllowUnsafeOptionalCustomDefaultValue" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "AllowUnsafeOptionalCustomDefaultValue",
-              "path" : "thrift/annotation/thrift.thrift"
-            },
+                "type" : "struct",
+                "name" : "AllowUnsafeOptionalCustomDefaultValue",
+                "path" : "thrift/annotation/thrift.thrift"
+              },
                 "value" : {}
               }
             }
@@ -133,10 +133,10 @@
             "structured_annotations": {
               "thrift.AllowUnsafeOptionalCustomDefaultValue" : {
                 "type" : {
-              "type" : "struct",
-              "name" : "AllowUnsafeOptionalCustomDefaultValue",
-              "path" : "thrift/annotation/thrift.thrift"
-            },
+                "type" : "struct",
+                "name" : "AllowUnsafeOptionalCustomDefaultValue",
+                "path" : "thrift/annotation/thrift.thrift"
+              },
                 "value" : {}
               }
             }

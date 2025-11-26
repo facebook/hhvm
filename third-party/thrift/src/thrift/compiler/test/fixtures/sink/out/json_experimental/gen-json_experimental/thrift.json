@@ -61,18 +61,18 @@
         "structured_annotations": {
           "scope.Program" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Program",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Program",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           },
           "scope.Definition" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Definition",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Definition",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           }
         },
@@ -86,18 +86,18 @@
         "structured_annotations": {
           "scope.Structured" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Structured",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Structured",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           },
           "scope.Enum" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Enum",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Enum",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           }
         },
@@ -136,17 +136,17 @@
         "structured_annotations": {
           "scope.Structured" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Structured",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Structured",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           },
           "thrift.Experimental" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Experimental"
-        },
+            "type" : "struct",
+            "name" : "Experimental"
+          },
             "value" : {}
           }
         },
@@ -170,34 +170,34 @@
         "structured_annotations": {
           "scope.Program" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Program",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Program",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           },
           "scope.Struct" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Struct",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Struct",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           },
           "scope.Exception" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Exception",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Exception",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           },
           "scope.Field" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Field",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Field",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           }
         },
@@ -211,10 +211,10 @@
         "structured_annotations": {
           "scope.Field" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Field",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Field",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           }
         },
@@ -228,10 +228,10 @@
         "structured_annotations": {
           "scope.Field" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Field",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Field",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           }
         },
@@ -245,17 +245,17 @@
         "structured_annotations": {
           "scope.Struct" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Struct",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Struct",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           },
           "thrift.Experimental" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Experimental"
-        },
+            "type" : "struct",
+            "name" : "Experimental"
+          },
             "value" : {}
           }
         },
@@ -269,10 +269,10 @@
         "structured_annotations": {
           "scope.Enum" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Enum",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Enum",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           }
         },
@@ -286,10 +286,10 @@
         "structured_annotations": {
           "scope.Field" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Field",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Field",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           }
         },
@@ -303,17 +303,17 @@
         "structured_annotations": {
           "scope.Field" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Field",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Field",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           },
           "thrift.Experimental" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Experimental"
-        },
+            "type" : "struct",
+            "name" : "Experimental"
+          },
             "value" : {}
           }
         },
@@ -327,10 +327,10 @@
         "structured_annotations": {
           "scope.Interaction" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Interaction",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Interaction",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           }
         },
@@ -344,26 +344,26 @@
         "structured_annotations": {
           "scope.Enum" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Enum",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Enum",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           },
           "scope.Service" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Service",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Service",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           },
           "scope.Structured" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Structured",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Structured",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           }
         },
@@ -386,10 +386,10 @@
         "structured_annotations": {
           "scope.Function" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Function",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Function",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           }
         },
@@ -415,10 +415,10 @@
         "structured_annotations": {
           "scope.Definition" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Definition",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Definition",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           }
         },
@@ -445,10 +445,10 @@
         "structured_annotations": {
           "scope.Definition" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Definition",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Definition",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           }
         },
@@ -462,10 +462,10 @@
         "structured_annotations": {
           "scope.Program" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Program",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Program",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           }
         },
@@ -478,10 +478,10 @@
         "structured_annotations": {
           "scope.Struct" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Struct",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Struct",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           }
         },
@@ -495,10 +495,10 @@
         "structured_annotations": {
           "scope.Typedef" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Typedef",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Typedef",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           }
         },
@@ -512,10 +512,10 @@
         "structured_annotations": {
           "scope.Field" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Field",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Field",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           }
         },
@@ -529,10 +529,10 @@
         "structured_annotations": {
           "scope.Field" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Field",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Field",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           }
         },
@@ -546,10 +546,10 @@
         "structured_annotations": {
           "scope.Field" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Field",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Field",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           }
         },
@@ -563,26 +563,26 @@
         "structured_annotations": {
           "scope.Program" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Program",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Program",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           },
           "scope.Structured" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Structured",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Structured",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           },
           "scope.Enum" : {
             "type" : {
-          "type" : "struct",
-          "name" : "Enum",
-          "path" : "thrift/annotation/scope.thrift"
-        },
+            "type" : "struct",
+            "name" : "Enum",
+            "path" : "thrift/annotation/scope.thrift"
+          },
             "value" : {}
           }
         },

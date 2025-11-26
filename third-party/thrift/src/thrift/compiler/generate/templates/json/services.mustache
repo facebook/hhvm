@@ -82,9 +82,7 @@
             {{/field:unqualified?}}
             {{#if (not (array.empty? field:structured_annotations))}},
             "structured_annotations": {
-            {{#field:structured_annotations}}
-            {{> structured_annotations}}
-            {{/field:structured_annotations}}
+              {{#partial m_partials.structured_annotations annotations=field:self.structured_annotations}}
             }
             {{/if (not (array.empty? field:structured_annotations))}}
           }{{^last?}},{{/last?}}
@@ -100,9 +98,7 @@
             "id" : {{field:id}}{{!
             }}{{#if (not (array.empty? field:structured_annotations))}},
             "structured_annotations": {
-            {{#field:structured_annotations}}
-            {{> structured_annotations}}
-            {{/field:structured_annotations}}
+              {{#partial m_partials.structured_annotations annotations=field:self.structured_annotations}}
             }{{/if (not (array.empty? field:structured_annotations))}}
           }{{^last?}},{{/last?}}
           {{/function:exceptions}}
@@ -112,9 +108,7 @@
         "lineno" : {{function:lineno}}{{!
         }}{{#if (not (array.empty? function:structured_annotations))}},
         "structured_annotations": {
-        {{#function:structured_annotations}}
-        {{> structured_annotations}}
-        {{/function:structured_annotations}}
+          {{#partial m_partials.structured_annotations annotations=function:self.structured_annotations}}
         }{{/if (not (array.empty? function:structured_annotations))}}
       }{{^last?}},{{/last?}}
       {{/service:functions}}
@@ -122,9 +116,7 @@
     }
     {{#if (not (array.empty? service:structured_annotations))}},
     "structured_annotations": {
-    {{#service:structured_annotations}}
-    {{> structured_annotations}}
-    {{/service:structured_annotations}}
+      {{#partial m_partials.structured_annotations annotations=service:self.structured_annotations}}
     }
     {{/if (not (array.empty? service:structured_annotations))}}
   }{{^last?}},{{/last?}}

@@ -89,3 +89,12 @@
 }
   {{/if value.string?}}
 {{/let partial}}
+
+{{#let export partial structured_annotations |annotations| captures |type|}}
+  {{#each (array.enumerate annotations with_last=true) as |i annot last?|}}
+"{{annot.type.true_type.scoped_name}}" : {
+  "type" : {{#partial type t=annot.type}},
+  "value" : {{annot.value.string_value_any}}
+}{{#if (not last?)}},{{/if}}
+  {{/each}}
+{{/let partial}}

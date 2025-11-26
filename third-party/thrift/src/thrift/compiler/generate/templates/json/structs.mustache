@@ -20,9 +20,7 @@
     "name" : "{{struct:name}}",
     {{#if (not (array.empty? struct:structured_annotations))}}
     "structured_annotations": {
-    {{#struct:structured_annotations}}
-    {{> structured_annotations}}
-    {{/struct:structured_annotations}}
+      {{#partial m_partials.structured_annotations annotations=struct:self.structured_annotations}}
     },
     {{/if (not (array.empty? struct:structured_annotations))}}
     {{#struct:docs?}}
@@ -53,9 +51,7 @@
         "type" : {{#partial m_partials.type t=field:self.type}}
         {{#if (not (array.empty? field:structured_annotations))}},
         "structured_annotations": {
-        {{#field:structured_annotations}}
-        {{> structured_annotations}}
-        {{/field:structured_annotations}}
+          {{#partial m_partials.structured_annotations annotations=field:self.structured_annotations}}
         }
         {{/if (not (array.empty? field:structured_annotations))}}
       }{{^last?}},{{/last?}}

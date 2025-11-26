@@ -218,21 +218,26 @@ WebTransportImpl::StreamWriteHandle::writeStreamData(
 
   impl_.sp_.refreshTimeout();
 
-  if (!bufferedWrites_.empty() && bufferedWrites_.back().fin) {
-    VLOG(4) << __func__ << " Last buffered write has FIN, ret=GENERIC_ERROR";
-    return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
-  }
-  if (!bufferedWrites_.empty() &&
-      bufferedWrites_.back().deliveryCallback == nullptr) {
-    VLOG(4) << __func__ << " Updating last buffered write";
-    if (data) {
-      bufferedWrites_.back().buf.append(std::move(data));
-    }
-    bufferedWrites_.back().deliveryCallback = deliveryCallback;
-    bufferedWrites_.back().fin = fin;
-  } else {
-    VLOG(4) << __func__ << " Emplacing new buffered write";
+  if (bufferedWrites_.empty()) {
+    VLOG(4) << __func__ << " Emplacing new buffered write (empty queue)";
     bufferedWrites_.emplace_back(std::move(data), deliveryCallback, fin);
+  } else {
+    auto& last = bufferedWrites_.back();
+    if (last.fin) {
+      VLOG(4) << __func__ << " Last buffered write has FIN, ret=GENERIC_ERROR";
+      return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
+    }
+    if (last.deliveryCallback == nullptr) {
+      VLOG(4) << __func__ << " Updating last buffered write";
+      if (data) {
+        last.buf.append(std::move(data));
+      }
+      last.deliveryCallback = deliveryCallback;
+      last.fin = fin;
+    } else {
+      VLOG(4) << __func__ << " Emplacing new buffered write";
+      bufferedWrites_.emplace_back(std::move(data), deliveryCallback, fin);
+    }
   }
 
   VLOG(4) << __func__
@@ -297,9 +302,17 @@ WebTransportImpl::StreamWriteHandle::flushBufferedWrites() {
     VLOG(4) << __func__ << " Processing frontEntry, buf.len="
             << frontEntry.buf.chainLength() << " fin=" << frontEntry.fin
             << " deliveryCallback=" << frontEntry.deliveryCallback;
-    auto bufToSend = frontEntry.buf.splitAtMost(availableSpace);
+    // Prefer move when we can send the entire buffer; avoid computing chain
+    // length
+    std::unique_ptr<folly::IOBuf> bufToSend;
+    size_t bufToSendLen = frontEntry.buf.chainLength();
+    if (availableSpace >= frontEntry.buf.chainLength()) {
+      bufToSend = frontEntry.buf.move(); // move whole buffer
+    } else {
+      bufToSendLen = availableSpace;
+      bufToSend = frontEntry.buf.splitAtMost(availableSpace); // partial send
+    }
 
-    auto bufToSendLen = bufToSend ? bufToSend->computeChainDataLength() : 0;
     VLOG(4) << __func__ << " bufToSendLen=" << bufToSendLen;
     availableSpace -= bufToSendLen;
     ByteEventCallback* sendDeliveryCallback = nullptr;

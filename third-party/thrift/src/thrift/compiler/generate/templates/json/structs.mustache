@@ -50,7 +50,7 @@
         {{#field:unqualified?}}
         "required" : "opt-in-req-out",
         {{/field:unqualified?}}
-        "type" : {{#field:type}}{{> type}}{{/field:type}}
+        "type" : {{#partial m_partials.type t=field:self.type}}
         {{#if (not (array.empty? field:structured_annotations))}},
         "structured_annotations": {
         {{#field:structured_annotations}}

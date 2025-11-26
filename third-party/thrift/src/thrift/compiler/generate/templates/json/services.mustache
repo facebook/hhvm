@@ -40,7 +40,7 @@
           {{#function:args}}
           "{{field:name}}": {
             "name" : "{{field:name}}",
-            "type" : {{#field:type}}{{> type}}{{/field:type}},
+            "type" : {{#partial m_partials.type t=field:self.type}},
             {{#field:value}}
             "default_value" : {{> const_value}},
             {{/field:value}}
@@ -74,7 +74,7 @@
           {{#function:exceptions}}
           "{{field:name}}" : {
             "name": "{{field:name}}",
-            "type" : {{#field:type}}{{> type}}{{/field:type}},
+            "type" : {{#partial m_partials.type t=field:self.type}},
             "id" : {{field:id}}{{!
             }}{{#if (not (array.empty? field:structured_annotations))}},
             "structured_annotations": {

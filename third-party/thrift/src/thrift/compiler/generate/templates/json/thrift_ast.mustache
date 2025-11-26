@@ -15,6 +15,7 @@
   limitations under the License.
 
 }}
+{{#import "partials" as m_partials}}
 {
   "__fbthrift": "@{{!}}generated",
   "thrift_module" : "{{program:name}}",
@@ -55,7 +56,7 @@
     {{#program:typedefs}}
       "{{typedef:name}}": {
         "name": "{{typedef:name}}",
-        "type": {{#typedef:type}}{{> type}}{{/typedef:type}},
+        "type": {{#partial m_partials.type t=typedef:self.resolved}},
         "is_exception": {{typedef:exception?}},
         "lineno": {{typedef:lineno}}
       }{{^last?}},{{/last?}}

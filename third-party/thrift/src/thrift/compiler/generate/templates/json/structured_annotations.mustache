@@ -17,7 +17,7 @@
 }}
 {{#constant:type.self.structured?}}{{#constant:value}}
   "{{value:type.true_type.scoped_name}}" : {
-    "type" : {{#constant:type}}{{> type}}{{/constant:type}},
+    "type" : {{#partial m_partials.type t=constant:self.type}},
     "value" : {{value:string_value_any}}
   }{{^last?}},{{/last?}}
 {{/constant:value}}{{/constant:type.self.structured?}}

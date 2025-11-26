@@ -1,0 +1,47 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+
+{{! Render a single type, with no trailing newline }}
+{{#let export partial type |t|}}
+{{#if t.void?}}"void"{{!
+}}{{#else if t.string?}}"string"{{!
+}}{{#else if t.binary?}}"binary"{{!
+}}{{#else if t.bool?}}"bool"{{!
+}}{{#else if t.byte?}}"byte"{{!
+}}{{#else if t.i16?}}"i16"{{!
+}}{{#else if t.i32?}}"i32"{{!
+}}{{#else if t.i64?}}"i64"{{!
+}}{{#else if t.double?}}"double"{{!
+}}{{#else if t.float?}}"float"{{!
+}}{{#else if (or t.enum? t.structured?)}}{
+  "type" : {{#if t.enum?}}"enum"{{#else}}"struct"{{/if}},
+  "name" : "{{t.name}}"{{#if t.external?}},
+  "path" : "{{t.path}}"{{/if t.external?}}
+}{{!
+}}{{#else if t.map?}}{
+  "type" : "map",
+  "key_type" : {{#partial type t=t.key_type}},
+  "value_type" : {{#partial type t=t.val_type}}
+}{{!
+}}{{#else if t.container?}}{
+  {{! Non-map container, i.e. list or set }}
+  "type" : {{#if t.list?}}"list"{{#else}}"set"{{/if}},
+  "inner_type" : {{#partial type t=t.elem_type}}
+}{{!
+}}{{/if t.void?}}{{!
+}}{{/let partial}}

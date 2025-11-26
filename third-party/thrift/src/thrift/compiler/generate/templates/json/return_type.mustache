@@ -15,31 +15,22 @@
   limitations under the License.
 
 }}
-{{#function:return_type}}{{!
-}}{{^function:sink_or_stream?}}{{> type}}{{/function:sink_or_stream?}}{{!
-}}{{#function:sink?}}{
+  {{#if (not function:sink_or_stream?)}}
+{{#partial m_partials.type t=function:self.return_type}}{{!
+}}{{#else if function:sink?}}{
+    {{#let sink = function:self.sink}}
   "type" : "sink",
-{{#function:sink_elem_type}}
-  "inner_type" : {{> type}},
-{{/function:sink_elem_type}}
-{{#function:sink_has_first_response?}}
-{{#function:sink_first_response_type}}
-  "first_response_type" : {{> type}},
-{{/function:sink_first_response_type}}
-{{/function:sink_has_first_response?}}
-{{#function:sink_final_response_type}}
-  "final_response_type" : {{> type}}
-{{/function:sink_final_response_type}}
-}{{/function:sink?}}{{!
-}}{{#function:stream?}}{
+  "inner_type" : {{#partial m_partials.type t=sink.elem_type}},
+    {{#if function:sink_has_first_response?}}
+  "first_response_type" : {{#partial m_partials.type t=function:self.return_type}},
+    {{/if function:sink_has_first_response?}}
+  "final_response_type" : {{#partial m_partials.type t=sink.final_response_type}}
+}{{!
+}}{{#else if function:stream?}}{
+    {{#let stream = function:self.stream}}
   "type" : "streamresponse",
-{{#function:stream_elem_type}}
-  "inner_type" : {{> type}}{{!
-}}{{/function:stream_elem_type}}{{!
-}}{{#function:stream_has_first_response?}},
-{{#function:stream_first_response_type}}
-  "first_response_type" : {{> type}}
-{{/function:stream_first_response_type}}
-{{/function:stream_has_first_response?}}
-}{{/function:stream?}}{{!
-}}{{/function:return_type}}
+  "inner_type" : {{#partial m_partials.type t=stream.elem_type}}{{!
+  }}{{#if function:stream_has_first_response?}},
+  "first_response_type" : {{#partial m_partials.type t=function:self.return_type}}
+    {{/if function:stream_has_first_response?}}
+}{{/if (not function:sink_or_stream?)}}

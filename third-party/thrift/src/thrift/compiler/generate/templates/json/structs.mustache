@@ -33,9 +33,9 @@
       {{#struct:fields}}
       "{{field:name}}" : {
         "name" : "{{field:name}}",
-        {{#field:value}}
-        "default_value" : {{> const_value}},
-        {{/field:value}}
+        {{#if (object.notnull? field:self.default_value)}}
+        "default_value" : {{#partial m_partials.const_value value=field:self.default_value}},
+        {{/if (object.notnull? field:self.default_value)}}
         {{#field:docs?}}
         "docstring" : {{field:docstring}},
         {{/field:docs?}}

@@ -45,3 +45,47 @@
 }{{!
 }}{{/if t.void?}}{{!
 }}{{/let partial}}
+
+{{! Render a single key in a const map }}
+{{#let partial const_map_key |key|}}
+{{#pragma ignore-newlines}}
+{{! TODO(T20509094): support serialization of complex keys}}
+"
+  {{#if key.string?}}
+\"{{key.string_value}}\"
+  {{#else if (or key.integer? key.enum?)}}
+{{key.integer_value}}
+  {{#else if key.double?}}
+{{key.double_value}}
+  {{#else if key.bool?}}
+{{key.bool_integer_value}}
+  {{/if key.string?}}
+"
+{{/let partial}}
+
+{{! Render a single const value}}
+{{#let export partial const_value |value| captures |const_map_key|}}
+{{#pragma ignore-newlines}}
+
+  {{#if value.string?}}
+"{{value.string_value}}"
+  {{#else if (or value.integer? value.enum?)}}
+{{value.integer_value}}
+  {{#else if value.double?}}
+{{value.double_value}}
+  {{#else if value.bool?}}
+{{value.bool_integer_value}}
+  {{#else if value.list?}}
+[
+    {{#each (array.enumerate value.list_elements with_last=true) as |i elem last?|}}
+{{#partial const_value value=elem}}{{#if (not last?)}},{{/if}}
+    {{/each}}
+]
+  {{#else if (or value.map? value.structured?)}}
+{
+    {{#each (array.enumerate value.map_elements with_last=true) as |i elem last?|}}
+{{#partial const_map_key key=elem.key}} : {{#partial const_value value=elem.value}}{{#if (not last?)}},{{/if}}
+    {{/each}}
+}
+  {{/if value.string?}}
+{{/let partial}}

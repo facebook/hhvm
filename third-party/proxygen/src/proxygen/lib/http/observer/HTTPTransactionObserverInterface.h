@@ -29,7 +29,7 @@ class HTTPTransactionObserverInterface {
 
   struct TxnBytesEvent {
     enum class Type : uint8_t {
-      REQUEST_HEADERS_COMPLETE,
+      LAST_HEADER_BYTE_READ,
       FIRST_HEADER_BYTE_WRITE,
       FIRST_BODY_BYTE_WRITE,
       FIRST_BODY_BYTE_ACK,

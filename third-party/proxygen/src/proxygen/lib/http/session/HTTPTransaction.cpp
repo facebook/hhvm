@@ -257,12 +257,11 @@ void HTTPTransaction::onIngressHeadersComplete(
 
   if (txnObserverContainer_.hasObserversForEvent<
           HTTPTransactionObserverInterface::Events::TxnBytes>()) {
-    const auto e =
-        HTTPTransactionObserverInterface::TxnBytesEvent::Builder()
-            .setTimestamp(proxygen::SteadyClock::now())
-            .setType(HTTPTransactionObserverInterface::TxnBytesEvent::Type::
-                         REQUEST_HEADERS_COMPLETE)
-            .build();
+    const auto e = HTTPTransactionObserverInterface::TxnBytesEvent::Builder()
+                       .setTimestamp(proxygen::SteadyClock::now())
+                       .setType(HTTPTransactionObserverInterface::
+                                    TxnBytesEvent::Type::LAST_HEADER_BYTE_READ)
+                       .build();
     txnObserverContainer_.invokeInterfaceMethod<
         HTTPTransactionObserverInterface::Events::TxnBytes>(
         [&e](auto observer, auto observed) {

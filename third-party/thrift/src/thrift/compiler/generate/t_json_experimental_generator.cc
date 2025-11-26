@@ -17,7 +17,7 @@
 #include <filesystem>
 
 #include <thrift/compiler/generate/json.h>
-#include <thrift/compiler/generate/t_mstch_generator.h>
+#include <thrift/compiler/generate/t_whisker_generator.h>
 
 namespace apache::thrift::compiler {
 namespace {
@@ -34,15 +34,32 @@ std::string get_filepath(
       .generic_string();
 }
 
-class t_json_experimental_generator : public t_mstch_generator {
+class t_json_experimental_generator : public t_whisker_generator {
  public:
-  using t_mstch_generator::t_mstch_generator;
+  using t_whisker_generator::t_whisker_generator;
 
   std::string template_prefix() const override { return "json"; }
 
   void generate_program() override;
 
  private:
+  whisker::map::raw globals(whisker::prototype_database& proto) const override {
+    whisker::map::raw globals = t_whisker_generator::globals(proto);
+    // By default, Whisker considers f64s to be unprintable in strict mode, as
+    // floats can have non-deterministic string results (e.g. fmt vs
+    // std::ostream). For this reason, each generator should explicitly define
+    // how its floats should be rendered.
+    globals["float_to_string"] = whisker::dsl::make_function(
+        "float_to_string",
+        [](whisker::dsl::function::context ctx) -> whisker::object {
+          ctx.declare_named_arguments({});
+          ctx.declare_arity(1);
+          return whisker::make::string(
+              fmt::format("{}", ctx.argument<whisker::f64>(0)));
+        });
+    return globals;
+  }
+
   prototype<t_const_value>::ptr make_prototype_for_const_value(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_const_value(proto);
@@ -147,10 +164,14 @@ class t_json_experimental_generator : public t_mstch_generator {
 
 void t_json_experimental_generator::generate_program() {
   out_dir_base_ = "gen-json_experimental";
-  const auto* program = get_program();
-  auto mstch_program = mstch_context_.program_factory->make_mstch_object(
-      program, mstch_context_);
-  render_to_file(mstch_program, "thrift_ast", program->name() + ".json");
+  whisker::object context = whisker::make::map({
+      {"program",
+       whisker::make::native_handle(
+           render_state().prototypes->create<t_program>(*program_))},
+  });
+  render_to_file(/*output_file=*/fmt::format("{}.json", program_->name()),
+                 /*template_file=*/"thrift_ast",
+                 /*context=*/context);
 }
 
 THRIFT_REGISTER_GENERATOR(json_experimental, "JSON_EXPERIMENTAL", "");

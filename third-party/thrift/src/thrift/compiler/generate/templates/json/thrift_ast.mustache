@@ -21,8 +21,8 @@
 {{#import "structs" as m_structs}}
 {
   "__fbthrift": "@{{!}}generated",
-  "thrift_module" : "{{program:name}}",
-  {{#each (array.enumerate program:includes with_first=true with_last=true) as |index include first? last?|}}
+  "thrift_module" : "{{program.name}}",
+  {{#each (array.enumerate program.includes with_first=true with_last=true) as |index include first? last?|}}
     {{#if first?}}
     {{! Before the first entry, open the object}}
   "includes": {
@@ -32,7 +32,7 @@
     {{! After the last entry, close the object on a new line}}
   },{{/if (not last?)}}
   {{/each}}
-  {{#each (array.enumerate (map.items program:namespaces) with_first=true with_last=true)
+  {{#each (array.enumerate (map.items program.namespaces) with_first=true with_last=true)
       as |index namespace first? last?|}}
     {{#if first?}}
   "namespaces": {
@@ -40,8 +40,8 @@
     "{{namespace.key}}": "{{namespace.value}}"{{#if (not last?)}},{{#else}}
   },{{/if (not last?)}}
   {{/each}}
-  {{#if (not program:package.empty?)}}
-  {{#let package = program:package}}
+  {{#let package = program.package}}
+  {{#if (not package.empty?)}}
   "package": {
     {{#if package.domain?}}
     "domain_prefix": "{{package.domain_prefix}}",
@@ -50,67 +50,59 @@
     {{#if (object.notnull? package.path)}}
     "path": "{{package.path}}",
     {{/if (object.notnull? package.path)}}
-    "filename": "{{program:name}}"
-  },{{/if (not program:package.empty?)}}
-  {{#program:docs?}}
-  "global_docstring": {{program:docstring}},{{/program:docs?}}{{!
-  }}{{#program:typedefs?}}
+    "filename": "{{program.name}}"
+  },{{/if (not package.empty?)}}
+  {{#if program.docs?}}
+  "global_docstring": {{program.docstring}},{{/if program.docs?}}{{!
+  }}{{#if program.typedefs?}}
   "typedefs": {
-    {{#program:typedefs}}
-      "{{typedef:name}}": {
-        "name": "{{typedef:name}}",
-        "type": {{#partial m_partials.type t=typedef:self.resolved}},
-        "is_exception": {{typedef:exception?}},
-        "lineno": {{typedef:lineno}}
-      }{{^last?}},{{/last?}}
-    {{/program:typedefs}}
-  },{{/program:typedefs?}}{{!
-  }}{{#program:constants?}}
+    {{#each (array.enumerate program.typedefs with_last=true) as |i typedef last?|}}
+      "{{typedef.name}}": {
+        "name": "{{typedef.name}}",
+        "type": {{#partial m_partials.type t=typedef.resolved}},
+        "is_exception": {{#if typedef.exception?}}true{{#else}}false{{/if}},
+        "lineno": {{typedef.lineno}}
+      }{{#if (not last?)}},{{/if}}
+    {{/each}}
+  },{{/if program.typedefs?}}{{!
+  }}{{#if program.constants?}}
   "constants": {
-      {{#program:constants}}
-      {{#constant:type}}{{#constant:value}}
-      "{{constant:name}}": {
-        "name": "{{constant:name}}",
-        "type": "{{value:type.true_type.full_name}}",
-        "value": {{value:string_value_any}},{{!
-        }}{{#constant:docs?}}
-        "docstring": {{constant:docstring}},{{/constant:docs?}}
-        "lineno": {{constant:lineno}}
-      }{{/constant:value}}{{/constant:type}}{{^last?}},{{/last?}}
-      {{/program:constants}}
-  },{{/program:constants?}}{{!
-  }}{{#program:enums?}}
+      {{#each (array.enumerate program.consts with_last=true) as |i constant last?|}}
+      "{{constant.name}}": {
+        "name": "{{constant.name}}",
+        "type": "{{constant.value.type.true_type.full_name}}",
+        "value": {{constant.value.string_value_any}},{{!
+        }}{{#if constant.docs?}}
+        "docstring": {{constant.docstring}},{{/if constant.docs?}}
+        "lineno": {{constant.lineno}}
+      }{{#if (not last?)}},{{/if}}
+      {{/each}}
+  },{{/if program.constants?}}{{!
+  }}{{#if program.enums?}}
   "enumerations" :
   {
-    {{#each (array.enumerate root_program.enums with_last=true) as |i enum last?|}}
+    {{#each (array.enumerate program.enums with_last=true) as |i enum last?|}}
     {{#partial m_enums.render_enum enum=enum trailing_comma?=(not last?)}}
     {{/each}}
   },
-  {{/program:enums?}}
-  {{#program:structs?}}
+  {{/if program.enums?}}
+  {{#if program.structs?}}
   "structs" :
   {
-    {{#each (array.enumerate root_program.structured_definitions with_last=true) as |i struct last?|}}
+    {{#each (array.enumerate program.structured_definitions with_last=true) as |i struct last?|}}
     {{#partial m_structs.render_struct struct=struct trailing_comma?=(not last?)}}
     {{/each}}
   },
-  {{/program:structs?}}
-  {{#program:services?}}
+  {{/if program.structs?}}
+  {{#if program.services?}}
   "services" :
   {
-    {{#each (array.enumerate root_program.services with_last=true) as |i service last?|}}
+    {{#each (array.enumerate program.services with_last=true) as |i service last?|}}
     {{#partial m_services.render_service service=service trailing_comma?=(not last?)}}
     {{/each}}
   },
-  {{/program:services?}}
+  {{/if program.services?}}
   {{! rearrange to avoid trailing comma issue}}
-  "source_path" : "{{program:normalized_include_prefix}}{{program:name}}",
-  {{! This explicit 'self.' will need to be removed once json_experimental
-      generator is no extending mstch generator, and extends Whisker generator
-      directly.
-      When operating through mstch_compat, when 'program:namespace_of' is resolved
-      through implicit `self` fallback, the Whisker engine will not attach the
-      self prototype handle as the parent/'this' argument for the function.
-  }}
-  "py_namespace" : "{{(program:self.namespace_of language="py")}}"
+  "source_path" : "{{program.normalized_include_prefix}}{{program.name}}",
+  "py_namespace" : "{{(program.namespace_of language="py")}}"
 }

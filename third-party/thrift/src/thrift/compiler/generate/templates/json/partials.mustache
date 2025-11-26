@@ -56,7 +56,7 @@
   {{#else if (or key.integer? key.enum?)}}
 {{key.integer_value}}
   {{#else if key.double?}}
-{{key.double_value}}
+{{(float_to_string key.double_value)}}
   {{#else if key.bool?}}
 {{key.bool_integer_value}}
   {{/if key.string?}}
@@ -72,7 +72,7 @@
   {{#else if (or value.integer? value.enum?)}}
 {{value.integer_value}}
   {{#else if value.double?}}
-{{value.double_value}}
+{{(float_to_string value.double_value)}}
   {{#else if value.bool?}}
 {{value.bool_integer_value}}
   {{#else if value.list?}}

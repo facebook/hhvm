@@ -30,7 +30,7 @@ namespace apache::thrift::compiler::codemod {
 
 inline constexpr auto kDefaultDomain = "meta.com";
 inline constexpr auto kBackwardsCompatibleNamespaceComment =
-    "// Maybe unused, see fburl.com/thrift-namespace-backwards-compatibility";
+    "// Maybe unused, see https://fburl.com/thrift-namespace-backwards-compatibility";
 
 class package_name_generator {
  public:

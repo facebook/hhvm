@@ -81,9 +81,9 @@ class ThriftPackageTest(unittest.TestCase):
 
             package "{package}"
 
-            namespace cpp2 "cpp2" // Maybe unused, see fburl.com/thrift-namespace-backwards-compatibility
-            namespace hack "" // Maybe unused, see fburl.com/thrift-namespace-backwards-compatibility
-            namespace py3 "" // Maybe unused, see fburl.com/thrift-namespace-backwards-compatibility
+            namespace cpp2 "cpp2" // Maybe unused, see https://fburl.com/thrift-namespace-backwards-compatibility
+            namespace hack "" // Maybe unused, see https://fburl.com/thrift-namespace-backwards-compatibility
+            namespace py3 "" // Maybe unused, see https://fburl.com/thrift-namespace-backwards-compatibility
 
             struct S {{
             }}
@@ -115,8 +115,8 @@ class ThriftPackageTest(unittest.TestCase):
             """\
                 package "meta.com/thrift/annotation"
 
-                namespace hack "" // Maybe unused, see fburl.com/thrift-namespace-backwards-compatibility
-                namespace py3 "" // Maybe unused, see fburl.com/thrift-namespace-backwards-compatibility
+                namespace hack "" // Maybe unused, see https://fburl.com/thrift-namespace-backwards-compatibility
+                namespace py3 "" // Maybe unused, see https://fburl.com/thrift-namespace-backwards-compatibility
                 namespace cpp2 "thrift.annotation"
 
                 include "bar.thrift"
@@ -252,7 +252,7 @@ class ThriftPackageTest(unittest.TestCase):
                 package "meta.com/thrift/annotation"
 
                 namespace cpp2 "thrift.annotation.cpp2"
-                namespace hack "" // Maybe unused, see fburl.com/thrift-namespace-backwards-compatibility
+                namespace hack "" // Maybe unused, see https://fburl.com/thrift-namespace-backwards-compatibility
                 namespace py3  "thrift.annotation"
 
                 struct foo {}
@@ -293,7 +293,7 @@ class ThriftPackageTest(unittest.TestCase):
             """\
                 package "meta.com/foo"
 
-                namespace cpp2 "cpp2" // Maybe unused, see fburl.com/thrift-namespace-backwards-compatibility
+                namespace cpp2 "cpp2" // Maybe unused, see https://fburl.com/thrift-namespace-backwards-compatibility
                 namespace hack ""
                 namespace py3  ""
 

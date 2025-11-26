@@ -334,6 +334,11 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 		}
 
 		loadMetric := s.loadFn()
+		loadMetricPtr := (*int64)(nil)
+		if metadata.IsSetLoadMetric() {
+			// SHOULD be set iff loadMetric was set in RequestRpcMetadata
+			loadMetricPtr = Pointerize(int64(loadMetric))
+		}
 		protocol.setRequestHeader(LoadHeaderKey, strconv.FormatUint(uint64(loadMetric), 10))
 
 		responseCompressionAlgo := rocket.CompressionAlgorithmFromCompressionConfig(metadata.GetCompressionConfig())
@@ -343,11 +348,13 @@ func (s *rocketServerSocket) requestResponse(msg payload.Payload) mono.Mono {
 				appException,
 				protocol.getRequestHeaders(),
 				responseCompressionAlgo,
+				loadMetricPtr,
 			)
 		} else {
 			payload, err = rocket.EncodeResponsePayload(
 				protocol.getRequestHeaders(),
 				responseCompressionAlgo,
+				loadMetricPtr,
 				protocol.Bytes(),
 			)
 		}
@@ -491,6 +498,12 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 					s.log("rocketServer requestStream sendWritableStruct error: %v", err)
 					return
 				}
+				loadMetric := s.loadFn()
+				loadMetricPtr := (*int64)(nil)
+				if metadata.IsSetLoadMetric() {
+					// SHOULD be set iff loadMetric was set in RequestRpcMetadata
+					loadMetricPtr = Pointerize(int64(loadMetric))
+				}
 				var payload payload.Payload
 				appException, isAppException := respStruct.(*types.ApplicationException)
 				if isAppException {
@@ -498,11 +511,13 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 						appException,
 						protocol.getRequestHeaders(),
 						responseCompressionAlgo,
+						loadMetricPtr,
 					)
 				} else {
 					payload, err = rocket.EncodeResponsePayload(
 						protocol.getRequestHeaders(),
 						responseCompressionAlgo,
+						loadMetricPtr,
 						protocol.Bytes(),
 					)
 				}

@@ -75,6 +75,7 @@ func DecodeResponsePayload(msg payload.Payload) (*responsePayload, error) {
 func EncodeResponsePayload(
 	headers map[string]string,
 	compression rpcmetadata.CompressionAlgorithm,
+	loadMetric *int64,
 	dataBytes []byte,
 ) (payload.Payload, error) {
 	responseMetadata := rpcmetadata.NewPayloadResponseMetadata()
@@ -84,7 +85,8 @@ func EncodeResponsePayload(
 	metadata := rpcmetadata.NewResponseRpcMetadata().
 		SetOtherMetadata(headers).
 		SetCompression(&compression).
-		SetPayloadMetadata(payloadMetadata)
+		SetPayloadMetadata(payloadMetadata).
+		SetLoad(loadMetric)
 
 	return EncodePayloadMetadataAndData(metadata, dataBytes, compression)
 }
@@ -94,6 +96,7 @@ func EncodeResponseApplicationErrorPayload(
 	appException *types.ApplicationException,
 	headers map[string]string,
 	compression rpcmetadata.CompressionAlgorithm,
+	loadMetric *int64,
 ) (payload.Payload, error) {
 	exceptionMetadata := NewPayloadExceptionMetadataBase(
 		"ApplicationException",
@@ -109,7 +112,8 @@ func EncodeResponseApplicationErrorPayload(
 	metadata := rpcmetadata.NewResponseRpcMetadata().
 		SetOtherMetadata(headers).
 		SetCompression(&compression).
-		SetPayloadMetadata(payloadMetadata)
+		SetPayloadMetadata(payloadMetadata).
+		SetLoad(loadMetric)
 
 	return EncodePayloadMetadataAndData(metadata, nil /* dataBytes */, compression)
 }

@@ -15,6 +15,8 @@
   limitations under the License.
 
 }}
+{{#import "partials" as m_partials}}
+
 {{! Render a function's return type, and possible sink/stream types }}
 {{#let partial return_type |function| captures |m_partials|}}
   {{#if (not function.sink_or_stream?)}}
@@ -36,88 +38,87 @@
   "first_response_type" : {{#partial m_partials.type t=function.return_type}}
     {{/if function.stream_has_first_response?}}
 }{{/if (not function.sink_or_stream?)}}{{!
-}}{{/let partial}}{{!
-}}{{#program:services}}{{!
-}}  "{{service:name}}" : { {{#service:extends?}}
-    {{#service:extends}}
+}}{{/let partial}}
+
+{{#let export partial render_service |service trailing_comma?| captures |m_partials return_type|}}
+{{#let parent = service.extends}}
+  "{{service.name}}" : { {{#if (object.notnull? parent)}}
     "extends" : {
-      "name" : "{{service:name}}",
-      "path" : "{{service:path}}"
-    },{{/service:extends}}{{/service:extends?}}
-    "name" : "{{service:name}}",
-    "lineno" : {{service:lineno}},
-    {{#service:docs?}}
-    "docstring" : {{service:docstring}},
-    {{/service:docs?}}
+      "name" : "{{parent.name}}",
+      "path" : "{{parent.path}}"
+    },{{/if (object.notnull? parent)}}
+    "name" : "{{service.name}}",
+    "lineno" : {{service.lineno}},
+    {{#if service.docs?}}
+    "docstring" : {{service.docstring}},
+    {{/if service.docs?}}
     "functions" : {
-      {{#service:functions?}}
-      {{#service:functions}}
-      "{{function:name}}" : {
-        "name" : "{{function:name}}",
-        {{#function:docs?}}
-        "docstring" : {{function:docstring}},
-        {{/function:docs?}}
-        {{#function:params.fields?}}
+      {{#each (array.enumerate service.functions with_last=true) as |i function last_fn?|}}
+      "{{function.name}}" : {
+        "name" : "{{function.name}}",
+        {{#if function.docs?}}
+        "docstring" : {{function.docstring}},
+        {{/if function.docs?}}
+        {{#if function.params.fields?}}
         "args" : {
-          {{#function:args}}
-          "{{field:name}}": {
-            "name" : "{{field:name}}",
-            "type" : {{#partial m_partials.type t=field:self.type}},
-            {{#if (object.notnull? field:self.default_value)}}
-            "default_value" : {{#partial m_partials.const_value value=field:self.default_value}},
-            {{/if (object.notnull? field:self.default_value)}}
-            {{#field:docs?}}
-            "docstring" : {{field:docstring}},
-            {{/field:docs?}}
-            "key" : {{field:id}},
-            "lineno" : {{field:lineno}},
-            {{#field:required?}}
+          {{#each (array.enumerate function.params.fields with_last=true) as |i arg last_arg?| }}
+          "{{arg.name}}": {
+            "name" : "{{arg.name}}",
+            "type" : {{#partial m_partials.type t=arg.type}},
+            {{#if (object.notnull? arg.default_value)}}
+            "default_value" : {{#partial m_partials.const_value value=arg.default_value}},
+            {{/if (object.notnull? arg.default_value)}}
+            {{#if arg.docs?}}
+            "docstring" : {{arg.docstring}},
+            {{/if arg.docs?}}
+            "key" : {{arg.id}},
+            "lineno" : {{arg.lineno}},
+            {{#if arg.required?}}
             "required" : "required",
-            {{/field:required?}}
-            {{#field:optional?}}
+            {{/if arg.required?}}
+            {{#if arg.optional?}}
             "required" : "optional",
-            {{/field:optional?}}
-            {{#field:unqualified?}}
+            {{/if arg.optional?}}
+            {{#if arg.unqualified?}}
             "required" : "opt-in-req-out"
-            {{/field:unqualified?}}
-            {{#if (not (array.empty? field:structured_annotations))}},
+            {{/if arg.unqualified?}}
+            {{#if (not (array.empty? arg.structured_annotations))}},
             "structured_annotations": {
-              {{#partial m_partials.structured_annotations annotations=field:self.structured_annotations}}
+              {{#partial m_partials.structured_annotations annotations=arg.structured_annotations}}
             }
-            {{/if (not (array.empty? field:structured_annotations))}}
-          }{{^last?}},{{/last?}}
-          {{/function:args}}
+            {{/if (not (array.empty? arg.structured_annotations))}}
+          }{{#if (not last_arg?)}},{{/if}}
+          {{/each}}
         },
-        {{/function:params.fields?}}
-        {{#function:exceptions?}}
+        {{/if function.params.fields?}}
+        {{#if function.exceptions?}}
         "exceptions" : {
-          {{#function:exceptions}}
-          "{{field:name}}" : {
-            "name": "{{field:name}}",
-            "type" : {{#partial m_partials.type t=field:self.type}},
-            "id" : {{field:id}}{{!
-            }}{{#if (not (array.empty? field:structured_annotations))}},
+          {{#each (array.enumerate function.exceptions with_last=true) as |i except last_exc?| }}
+          "{{except.name}}" : {
+            "name": "{{except.name}}",
+            "type" : {{#partial m_partials.type t=except.type}},
+            "id" : {{except.id}}{{!
+            }}{{#if (not (array.empty? except.structured_annotations))}},
             "structured_annotations": {
-              {{#partial m_partials.structured_annotations annotations=field:self.structured_annotations}}
-            }{{/if (not (array.empty? field:structured_annotations))}}
-          }{{^last?}},{{/last?}}
-          {{/function:exceptions}}
+              {{#partial m_partials.structured_annotations annotations=except.structured_annotations}}
+            }{{/if (not (array.empty? except.structured_annotations))}}
+          }{{#if (not last_exc?)}},{{/if}}
+          {{/each}}
         },
-        {{/function:exceptions?}}
-        "returnType" : {{#partial return_type function=function:self}},
-        "lineno" : {{function:lineno}}{{!
-        }}{{#if (not (array.empty? function:structured_annotations))}},
+        {{/if function.exceptions?}}
+        "returnType" : {{#partial return_type function=function}},
+        "lineno" : {{function.lineno}}{{!
+        }}{{#if (not (array.empty? function.structured_annotations))}},
         "structured_annotations": {
-          {{#partial m_partials.structured_annotations annotations=function:self.structured_annotations}}
-        }{{/if (not (array.empty? function:structured_annotations))}}
-      }{{^last?}},{{/last?}}
-      {{/service:functions}}
-      {{/service:functions?}}
+          {{#partial m_partials.structured_annotations annotations=function.structured_annotations}}
+        }{{/if (not (array.empty? function.structured_annotations))}}
+      }{{#if (not last_fn?)}},{{/if}}
+      {{/each}}
     }
-    {{#if (not (array.empty? service:structured_annotations))}},
+    {{#if (not (array.empty? service.structured_annotations))}},
     "structured_annotations": {
-      {{#partial m_partials.structured_annotations annotations=service:self.structured_annotations}}
+      {{#partial m_partials.structured_annotations annotations=service.structured_annotations}}
     }
-    {{/if (not (array.empty? service:structured_annotations))}}
-  }{{^last?}},{{/last?}}
-{{/program:services}}
+    {{/if (not (array.empty? service.structured_annotations))}}
+  }{{#if trailing_comma?}},{{/if}}
+{{/let partial}}

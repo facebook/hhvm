@@ -17,6 +17,7 @@
 }}
 {{#import "enums" as m_enums}}
 {{#import "partials" as m_partials}}
+{{#import "services" as m_services}}
 {
   "__fbthrift": "@{{!}}generated",
   "thrift_module" : "{{program:name}}",
@@ -94,7 +95,9 @@
   {{#program:services?}}
   "services" :
   {
-    {{> services}}
+    {{#each (array.enumerate root_program.services with_last=true) as |i service last?|}}
+    {{#partial m_services.render_service service=service trailing_comma?=(not last?)}}
+    {{/each}}
   },
   {{/program:services?}}
   {{! rearrange to avoid trailing comma issue}}

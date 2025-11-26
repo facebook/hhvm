@@ -29,6 +29,8 @@ from module.thrift_enums import (
     City as _fbthrift_City,
     Company,
     Company as _fbthrift_Company,
+    MyCompany,
+    MyCompany as _fbthrift_MyCompany,
 )
 
 class Internship(_abc.ABC):
@@ -258,7 +260,6 @@ class union2(_abc.ABC):
 
 _fbthrift_union2 = union2
 
-MyCompany = _fbthrift_Company
 MyStringIdentifier = builtins.str
 MyIntIdentifier = builtins.int
 MyMapIdentifier = _typing.Mapping[builtins.str, builtins.str]

@@ -18,10 +18,12 @@
 {{#program:typedefs?}}
 
 {{#program:typedefs}}
+{{#typedef:type}}{{^type:enum?}}
 {{typedef:name}} = {{#if typedef:has_adapter?}}{{#let adapter = typedef:adapter}}{{!
-    }}{{adapter.type_hint}}{{#if adapter.is_generic?}}[{{#typedef:type}}{{> types/python_type}}{{/typedef:type}}]{{/if}}{{!
+    }}{{adapter.type_hint}}{{#if adapter.is_generic?}}[{{> types/python_type}}]{{/if}}{{!
 }}{{#else}}{{!
-    }}{{#typedef:type}}{{> types/python_type}}{{/typedef:type}}{{!
+    }}{{> types/python_type}}{{!
 }}{{/if typedef:has_adapter?}}
+{{/type:enum?}}{{/typedef:type}}
 {{/program:typedefs}}
 {{/program:typedefs?}}

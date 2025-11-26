@@ -10,6 +10,7 @@ import builtins
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.types as _fbthrift_python_types
+import apache.thrift.fixtures.types.included.thrift_enums as _fbthrift__apache__thrift__fixtures__types__included__thrift_types
 import typing as _std_python_typing
 
 

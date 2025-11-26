@@ -10,4 +10,5 @@ import builtins
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.types as _fbthrift_python_types
+import python_module_root.my.namespacing.test.hsmodule.thrift_enums as python_module_root__my__namespacing__test__hsmodule__thrift_types
 

@@ -22,6 +22,11 @@ import thrift.python.abstract_types as _fbthrift_python_abstract_types
 import test.fixtures.enums.included_enum.thrift_abstract_types as _fbthrift__test__fixtures__enums__included_enum__thrift_abstract_types
 import test.fixtures.enums.module.thrift_abstract_types as _fbthrift__test__fixtures__enums__module__thrift_abstract_types
 
+from test.fixtures.enums.enum_typedef_only.thrift_enums import (
+    MetasyntacticTypedef,
+    MetasyntacticTypedef as _fbthrift_MetasyntacticTypedef,
+    EnumTypedefOfTypedef,
+    EnumTypedefOfTypedef as _fbthrift_EnumTypedefOfTypedef,
+)
 
-MetasyntacticTypedef = _fbthrift__test__fixtures__enums__module__thrift_abstract_types.Metasyntactic
-EnumTypedefOfTypedef = _fbthrift__test__fixtures__enums__included_enum__thrift_abstract_types.IncludedEnum
+

@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/python.thrift"
+include "thrift/lib/python/test/dependency.thrift"
 
 namespace py3 python_test
 
@@ -43,6 +44,12 @@ enum Color {
   _Color__pleurigloss = 3,
   __octarine = 4,
 }
+
+typedef Color ColorTypedef
+
+typedef dependency.Status StatusTypedef
+
+typedef dependency.ColourAlias ColourTypedefOfTypedef
 
 @python.Flags{}
 enum Perm {

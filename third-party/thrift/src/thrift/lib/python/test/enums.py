@@ -25,13 +25,18 @@ import unittest
 from enum import Flag as PyFlag, IntEnum as PyIntEnum
 from typing import cast, Type, TypeVar
 
+import python_test.enums.thrift_abstract_types as abstract_types
+import python_test.enums.thrift_enums as enums_module
 import python_test.enums.thrift_mutable_types as mutable_types
 import python_test.enums.thrift_types as immutable_types
+import testing.dependency.thrift_enums as dependency_enums
+import testing.dependency.thrift_types as dependency_types
 
 import thrift.python.mutable_serializer as mutable_serializer
 import thrift.python.serializer as immutable_serializer
 
 from parameterized import parameterized_class
+from python_test.enums.thrift_abstract_types import Color as AbstractColor
 from python_test.enums.thrift_types import (
     BadMembers,
     Color,
@@ -43,6 +48,8 @@ from python_test.enums.thrift_types import (
     OptionalFile,
     Perm,
 )
+
+from python_test.enums_typedef_only.thrift_abstract_types import ColorTypedef
 from thrift.python.mutable_types import (
     _ThriftListWrapper,
     _ThriftMapWrapper,
@@ -608,3 +615,71 @@ class TestWithStdlibEnums(unittest.TestCase):
                 self.assertIn(combined.value, x)
                 self.assertIn(0, x)
                 self.assertIn(x(0), x)
+
+
+@parameterized_class(
+    ("test_types",),
+    [
+        (abstract_types,),
+        (immutable_types,),
+        (mutable_types,),
+    ],
+)
+class TypedefedEnumsTest(unittest.TestCase):
+    """
+    Tests that enum typedefs are available from the correct modules.
+    """
+
+    def setUp(self) -> None:
+        # pyre-ignore[16]: has no attribute `test_types`
+        self.Color: Type[AbstractColor] = self.test_types.Color
+        self.is_mutable_run: bool = self.test_types.__name__.endswith(
+            "thrift_mutable_types"
+        )
+
+    def test_enum_typedef_available_from_thrift_types(self) -> None:
+        # GIVEN / WHEN
+        # pyre-ignore[16]: has no attribute `ColorTypedef`
+        typedef = self.test_types.ColorTypedef
+
+        # THEN
+        self.assertIs(typedef, self.Color)
+
+    def test_enum_typedef_available_from_enums(self) -> None:
+        # GIVEN / WHEN
+        typedef = enums_module.ColorTypedef
+
+        # THEN
+        self.assertIs(typedef, enums_module.Color)
+
+    def test_cross_file_enum_typedef_available_from_thrift_types(self) -> None:
+        # GIVEN / WHEN
+        # pyre-ignore[16]: has no attribute `StatusTypedef`
+        typedef = self.test_types.StatusTypedef
+
+        # THEN
+        self.assertIs(typedef, dependency_types.Status)
+
+    def test_cross_file_enum_typedef_available_from_enums(self) -> None:
+        # GIVEN / WHEN
+        typedef = enums_module.StatusTypedef
+
+        # THEN
+        self.assertIs(typedef, dependency_enums.Status)
+
+    def test_typedef_of_typedef_available_from_enums(self) -> None:
+        # GIVEN / WHEN
+        typedef = enums_module.ColourTypedefOfTypedef
+
+        # THEN
+        # Should resolve to IncludedColour from sub_dependency
+        self.assertIs(typedef, dependency_types.ColourAlias)
+
+    def test_enum_typedef_only(self) -> None:
+        """Test that enum typedefs can be imported from thrift_abstract_types.
+
+        A thrift file with enum typedefs must generate valid Python import syntax,
+        even when the file contains no direct enum definitions.
+        """
+        # THEN
+        self.assertIs(ColorTypedef, enums_module.Color)

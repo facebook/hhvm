@@ -10,6 +10,7 @@ import builtins
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.types as _fbthrift_python_types
+import test.fixtures.enums.included_enum.thrift_enums as _fbthrift__test__fixtures__enums__included_enum__thrift_types
 import typing as _std_python_typing
 
 
@@ -393,3 +394,4 @@ def gen_metadata_enum_MyBitmaskEnum2() -> _fbthrift_metadata.ThriftMetadata:
         _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
     )
 
+IncludedEnumAlias = _fbthrift__test__fixtures__enums__included_enum__thrift_types.IncludedEnum

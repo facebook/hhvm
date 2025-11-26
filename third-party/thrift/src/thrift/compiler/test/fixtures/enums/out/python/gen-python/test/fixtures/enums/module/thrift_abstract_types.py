@@ -36,6 +36,8 @@ from test.fixtures.enums.module.thrift_enums import (
     MyBitmaskEnum1 as _fbthrift_MyBitmaskEnum1,
     MyBitmaskEnum2,
     MyBitmaskEnum2 as _fbthrift_MyBitmaskEnum2,
+    IncludedEnumAlias,
+    IncludedEnumAlias as _fbthrift_IncludedEnumAlias,
 )
 
 class SomeStruct(_abc.ABC):
@@ -95,4 +97,3 @@ class MyStruct(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...  # type: ignore
 _fbthrift_MyStruct = MyStruct
 
-IncludedEnumAlias = _fbthrift__test__fixtures__enums__included_enum__thrift_abstract_types.IncludedEnum

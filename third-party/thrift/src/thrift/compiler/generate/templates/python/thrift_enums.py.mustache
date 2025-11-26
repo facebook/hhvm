@@ -23,6 +23,11 @@ import builtins
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import {{program:base_library_package}}.types as _fbthrift_python_types
+{{#program:include_namespaces}}
+{{#has_types?}}
+import {{included_module_path}}.thrift_enums as {{included_module_mangle}}__thrift_types
+{{/has_types?}}
+{{/program:include_namespaces}}
 {{#program:enums}}
 import typing as _std_python_typing
 
@@ -100,3 +105,11 @@ def gen_metadata_enum_{{enum:name}}() -> _fbthrift_metadata.ThriftMetadata:
     )
 
 {{/program:enums}}
+{{#program:typedefs?}}
+{{! Enum typedefs }}
+{{#program:typedefs}}
+{{#typedef:type}}{{#type:enum?}}{{#type:enum}}
+{{typedef:name}} = {{#type:need_module_path?}}{{type:module_mangle}}.{{/type:need_module_path?}}{{enum:name}}
+{{/type:enum}}{{/type:enum?}}{{/typedef:type}}
+{{/program:typedefs}}
+{{/program:typedefs?}}

@@ -28,6 +28,7 @@ from test.fixtures.enums.module.thrift_enums import (
     MyEnum4 as _fbthrift_MyEnum4,
     MyBitmaskEnum1 as _fbthrift_MyBitmaskEnum1,
     MyBitmaskEnum2 as _fbthrift_MyBitmaskEnum2,
+    IncludedEnumAlias as _fbthrift_IncludedEnumAlias,
 )
 Metasyntactic = _fbthrift_Metasyntactic
 MyEnum1 = _fbthrift_MyEnum1
@@ -36,6 +37,7 @@ MyEnum3 = _fbthrift_MyEnum3
 MyEnum4 = _fbthrift_MyEnum4
 MyBitmaskEnum1 = _fbthrift_MyBitmaskEnum1
 MyBitmaskEnum2 = _fbthrift_MyBitmaskEnum2
+IncludedEnumAlias = _fbthrift_IncludedEnumAlias
 
 
 @_typing.final
@@ -126,4 +128,3 @@ class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_ab
     def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...  # type: ignore
 _fbthrift_MyStruct = MyStruct
 
-IncludedEnumAlias = _fbthrift__test__fixtures__enums__included_enum__thrift_mutable_types.IncludedEnum

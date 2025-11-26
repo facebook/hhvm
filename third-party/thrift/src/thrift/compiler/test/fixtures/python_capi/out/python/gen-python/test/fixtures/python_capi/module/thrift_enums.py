@@ -10,6 +10,10 @@ import builtins
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.types as _fbthrift_python_types
+import apache.thrift.type.id.thrift_enums as _fbthrift__apache__thrift__type__id__thrift_types
+import apache.thrift.type.schema.thrift_enums as _fbthrift__apache__thrift__type__schema__thrift_types
+import test.fixtures.python_capi.serialized_dep.thrift_enums as _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_types
+import test.fixtures.python_capi.thrift_dep.thrift_enums as _fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types
 import typing as _std_python_typing
 
 

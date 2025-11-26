@@ -112,3 +112,4 @@ def gen_metadata_enum_HackEnum() -> _fbthrift_metadata.ThriftMetadata:
         _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
     )
 
+MyEnumAlias = MyEnum

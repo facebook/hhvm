@@ -27,6 +27,8 @@ from test.fixtures.basic.module.thrift_enums import (
     MyEnum as _fbthrift_MyEnum,
     HackEnum,
     HackEnum as _fbthrift_HackEnum,
+    MyEnumAlias,
+    MyEnumAlias as _fbthrift_MyEnumAlias,
 )
 
 class MyStruct(_abc.ABC):
@@ -241,5 +243,4 @@ class UnionToBeRenamed(_abc.ABC):
 
 _fbthrift_UnionToBeRenamed = UnionToBeRenamed
 
-MyEnumAlias = _fbthrift_MyEnum
 MyDataItemAlias = _fbthrift_MyDataItem

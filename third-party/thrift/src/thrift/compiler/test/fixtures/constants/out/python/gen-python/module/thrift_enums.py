@@ -167,3 +167,4 @@ def gen_metadata_enum_Company() -> _fbthrift_metadata.ThriftMetadata:
         _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
     )
 
+MyCompany = Company

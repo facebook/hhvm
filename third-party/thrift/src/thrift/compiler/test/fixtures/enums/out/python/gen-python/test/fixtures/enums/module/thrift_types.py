@@ -33,6 +33,8 @@ from test.fixtures.enums.module.thrift_enums import (
     MyBitmaskEnum1 as _fbthrift_MyBitmaskEnum1,
     MyBitmaskEnum2,
     MyBitmaskEnum2 as _fbthrift_MyBitmaskEnum2,
+    IncludedEnumAlias,
+    IncludedEnumAlias as _fbthrift_IncludedEnumAlias,
 )
 
 
@@ -248,4 +250,3 @@ _fbthrift_all_structs = [
 ]
 _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
 
-IncludedEnumAlias = _fbthrift__test__fixtures__enums__included_enum__thrift_types.IncludedEnum

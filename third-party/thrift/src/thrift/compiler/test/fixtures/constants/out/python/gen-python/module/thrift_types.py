@@ -22,6 +22,8 @@ from module.thrift_enums import (
     City as _fbthrift_City,
     Company,
     Company as _fbthrift_Company,
+    MyCompany,
+    MyCompany as _fbthrift_MyCompany,
 )
 
 
@@ -917,7 +919,6 @@ I2B = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_i32, _fbthrift_
 
 I2B_REF = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_bool, { 0: False, 1: True, 2: True, 3: False})
 
-MyCompany = _fbthrift_Company
 MyStringIdentifier = str
 MyIntIdentifier = int
 MyMapIdentifier = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string)

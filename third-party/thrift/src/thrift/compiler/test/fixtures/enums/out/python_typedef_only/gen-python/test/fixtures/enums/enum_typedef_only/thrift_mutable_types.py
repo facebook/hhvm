@@ -24,6 +24,13 @@ import test.fixtures.enums.included_enum.thrift_mutable_types as _fbthrift__test
 import test.fixtures.enums.module.thrift_mutable_types
 import test.fixtures.enums.module.thrift_mutable_types as _fbthrift__test__fixtures__enums__module__thrift_mutable_types
 
+from test.fixtures.enums.enum_typedef_only.thrift_enums import (
+    MetasyntacticTypedef,
+    MetasyntacticTypedef as _fbthrift_MetasyntacticTypedef,
+    EnumTypedefOfTypedef,
+    EnumTypedefOfTypedef as _fbthrift_EnumTypedefOfTypedef,
+)
+
 
 
 _fbthrift_all_enums = [
@@ -33,5 +40,3 @@ _fbthrift_all_enums = [
 _fbthrift_all_structs = [
 ]
 
-MetasyntacticTypedef = _fbthrift__test__fixtures__enums__module__thrift_mutable_types.Metasyntactic
-EnumTypedefOfTypedef = _fbthrift__test__fixtures__enums__included_enum__thrift_mutable_types.IncludedEnum

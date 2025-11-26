@@ -22,10 +22,12 @@ from module.thrift_enums import (
     EmptyEnum as _fbthrift_EmptyEnum,
     City as _fbthrift_City,
     Company as _fbthrift_Company,
+    MyCompany as _fbthrift_MyCompany,
 )
 EmptyEnum = _fbthrift_EmptyEnum
 City = _fbthrift_City
 Company = _fbthrift_Company
+MyCompany = _fbthrift_MyCompany
 
 
 @_typing.final
@@ -430,7 +432,6 @@ I2B: _typing.Mapping[builtins.int, builtins.bool] = ...
 
 I2B_REF: _typing.Mapping[builtins.int, builtins.bool] = ...
 
-MyCompany = _fbthrift_Company
 MyStringIdentifier = builtins.str
 MyIntIdentifier = builtins.int
 MyMapIdentifier = _typing.Dict[builtins.str, builtins.str]

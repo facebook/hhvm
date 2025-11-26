@@ -21,9 +21,11 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 from test.fixtures.basic.module.thrift_enums import (
     MyEnum as _fbthrift_MyEnum,
     HackEnum as _fbthrift_HackEnum,
+    MyEnumAlias as _fbthrift_MyEnumAlias,
 )
 MyEnum = _fbthrift_MyEnum
 HackEnum = _fbthrift_HackEnum
+MyEnumAlias = _fbthrift_MyEnumAlias
 
 
 @_typing.final
@@ -262,7 +264,6 @@ ASet: _typing.AbstractSet[builtins.str] = ...
 
 AMap: _typing.Mapping[builtins.str, _typing.Sequence[builtins.int]] = ...
 
-MyEnumAlias = _fbthrift_MyEnum
 MyDataItemAlias = _fbthrift_MyDataItem
 
 

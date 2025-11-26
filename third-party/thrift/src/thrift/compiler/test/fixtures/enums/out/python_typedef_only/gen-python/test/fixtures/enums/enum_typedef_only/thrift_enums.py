@@ -10,4 +10,8 @@ import builtins
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.types as _fbthrift_python_types
+import test.fixtures.enums.included_enum.thrift_enums as _fbthrift__test__fixtures__enums__included_enum__thrift_types
+import test.fixtures.enums.module.thrift_enums as _fbthrift__test__fixtures__enums__module__thrift_types
 
+MetasyntacticTypedef = _fbthrift__test__fixtures__enums__module__thrift_types.Metasyntactic
+EnumTypedefOfTypedef = _fbthrift__test__fixtures__enums__included_enum__thrift_types.IncludedEnum

@@ -10,4 +10,5 @@ import builtins
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.types as _fbthrift_python_types
+import test.fixtures.basic.module.thrift_enums as _fbthrift__test__fixtures__basic__module__thrift_types
 

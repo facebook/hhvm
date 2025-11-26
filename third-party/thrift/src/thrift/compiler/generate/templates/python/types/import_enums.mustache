@@ -23,6 +23,7 @@
 These are referenced in the generated pyi files and, for simplicity,
 need to be imported through the types modules.
 }}
+{{#program:enums?}}
 {{#program:enums}}
 {{#first?}}
 
@@ -32,10 +33,36 @@ from {{program:module_path}}.thrift_enums import (
     {{enum:name}},
 {{/python.is_source_file?}}
     {{enum:name}} as {{#partial m_common.private_alias_prefix}}{{enum:name}},
+{{/program:enums}}
+{{! Import enum typedefs from thrift_enums }}
+{{#program:typedefs}}
+{{#typedef:type}}{{#type:enum?}}{{#python.is_source_file?}}
+    {{typedef:name}},
+{{/python.is_source_file?}}
+    {{typedef:name}} as {{#partial m_common.private_alias_prefix}}{{typedef:name}},
+{{/type:enum?}}{{/typedef:type}}
+{{/program:typedefs}}
+{{#program:enums}}
 {{#last?}}
 )
 {{/last?}}
 {{/program:enums}}
+{{/program:enums?}}
+{{^program:enums?}}
+{{#program:has_enum_typedefs?}}
+
+from {{program:module_path}}.thrift_enums import (
+{{! Import enum typedefs from thrift_enums }}
+{{#program:typedefs}}
+{{#typedef:type}}{{#type:enum?}}{{#python.is_source_file?}}
+    {{typedef:name}},
+{{/python.is_source_file?}}
+    {{typedef:name}} as {{#partial m_common.private_alias_prefix}}{{typedef:name}},
+{{/type:enum?}}{{/typedef:type}}
+{{/program:typedefs}}
+)
+{{/program:has_enum_typedefs?}}
+{{/program:enums?}}
 {{!
     with
 
@@ -51,4 +78,10 @@ from {{program:module_path}}.thrift_enums import (
 {{#program:enums}}
 {{enum:name}} = {{#partial m_common.private_alias_prefix}}{{enum:name}}
 {{/program:enums}}
+{{! Type stub assignments for enum typedefs }}
+{{#program:typedefs}}
+{{#typedef:type}}{{#type:enum?}}
+{{typedef:name}} = {{#partial m_common.private_alias_prefix}}{{typedef:name}}
+{{/type:enum?}}{{/typedef:type}}
+{{/program:typedefs}}
 {{/python.is_type_stub?}}

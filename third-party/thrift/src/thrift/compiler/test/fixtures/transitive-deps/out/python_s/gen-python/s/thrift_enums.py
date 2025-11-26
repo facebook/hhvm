@@ -10,4 +10,6 @@ import builtins
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.types as _fbthrift_python_types
+import b.thrift_enums as _fbthrift__b__thrift_types
+import c.thrift_enums as _fbthrift__c__thrift_types
 

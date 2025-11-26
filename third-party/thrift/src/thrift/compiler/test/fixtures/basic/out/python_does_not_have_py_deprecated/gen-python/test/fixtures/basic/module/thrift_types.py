@@ -20,6 +20,8 @@ from test.fixtures.basic.module.thrift_enums import (
     MyEnum as _fbthrift_MyEnum,
     HackEnum,
     HackEnum as _fbthrift_HackEnum,
+    MyEnumAlias,
+    MyEnumAlias as _fbthrift_MyEnumAlias,
 )
 
 
@@ -748,7 +750,6 @@ ASet = _fbthrift_python_types.Set(_fbthrift_python_types.typeinfo_string, ("foo"
 
 AMap = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32), { "foo": _fbthrift_python_types.List(_fbthrift_python_types.typeinfo_i32, (1, 2, 3, 4, )), "bar": _fbthrift_python_types.List(_fbthrift_python_types.typeinfo_i32, (10, 32, 54, ))})
 
-MyEnumAlias = _fbthrift_MyEnum
 MyDataItemAlias = _fbthrift_MyDataItem
 
 

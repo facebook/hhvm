@@ -910,6 +910,14 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
                  self.interactions().end(),
                  service_has_any_bidi_types);
     });
+    def.property("has_enum_typedefs?", [](const t_program& self) {
+      return std::any_of(
+          self.typedefs().begin(),
+          self.typedefs().end(),
+          [](const t_typedef* td) {
+            return td->type()->get_true_type()->is<t_enum>();
+          });
+    });
     def.property("include_namespaces", [this, &proto](const t_program& self) {
       if (&self != program_) {
         throw whisker::eval_error(

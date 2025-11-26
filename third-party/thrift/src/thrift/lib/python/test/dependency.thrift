@@ -19,6 +19,14 @@ namespace py3 testing
 include "thrift/lib/python/test/sub_dependency.thrift"
 include "thrift/lib/python/test/injected_field.thrift"
 
+enum Status {
+  ACTIVE = 1,
+  INACTIVE = 2,
+  PENDING = 3,
+}
+
+typedef sub_dependency.IncludedColour ColourAlias
+
 struct IncludedStruct {
   1: sub_dependency.Basic val;
   2: sub_dependency.IncludedColour color;

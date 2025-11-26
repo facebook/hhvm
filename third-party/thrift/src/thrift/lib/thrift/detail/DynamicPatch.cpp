@@ -122,6 +122,20 @@ Value emptyValue(const Value::Type& type) {
   return value;
 }
 
+template <type::StandardProtocol Protocol, class Patch>
+std::unique_ptr<folly::IOBuf> applyToSerializedObjectImpl(
+    const Patch& patch, std::unique_ptr<folly::IOBuf> buf) {
+  using Reader = ProtocolReaderFor<Protocol>;
+  using Writer = ProtocolWriterFor<Protocol>;
+  DynamicCursorSerializationWrapper<Reader, Writer> inWrapper(std::move(buf));
+  DynamicCursorSerializationWrapper<Reader, Writer> outWrapper;
+  auto reader = inWrapper.beginRead();
+  auto writer = outWrapper.beginWrite();
+  patch.applyAllFieldsInStream(badge, reader, writer);
+  inWrapper.endRead(std::move(reader));
+  outWrapper.endWrite(std::move(writer));
+  return std::move(outWrapper).serializedData();
+}
 } // namespace
 
 namespace detail {
@@ -849,21 +863,34 @@ template <type::StandardProtocol Protocol>
 std::unique_ptr<folly::IOBuf>
 DynamicStructurePatch<IsUnion>::applyToSerializedObject(
     std::unique_ptr<folly::IOBuf> buf) const {
-  using Reader = ProtocolReaderFor<Protocol>;
-  using Writer = ProtocolWriterFor<Protocol>;
-  DynamicCursorSerializationWrapper<Reader, Writer> inWrapper(std::move(buf));
-  DynamicCursorSerializationWrapper<Reader, Writer> outWrapper;
-  auto reader = inWrapper.beginRead();
-  auto writer = outWrapper.beginWrite();
-  applyAllFieldsInStream(badge, reader, writer);
-  inWrapper.endRead(std::move(reader));
-  outWrapper.endWrite(std::move(writer));
-  return std::move(outWrapper).serializedData();
+  return applyToSerializedObjectImpl<Protocol>(*this, std::move(buf));
 }
 
 template std::unique_ptr<folly::IOBuf>
     DynamicStructurePatch<false>::applyToSerializedObject<
         type::StandardProtocol::Compact>(std::unique_ptr<folly::IOBuf>) const;
+template std::unique_ptr<folly::IOBuf>
+    DynamicStructurePatch<false>::applyToSerializedObject<
+        type::StandardProtocol::Binary>(std::unique_ptr<folly::IOBuf>) const;
+template std::unique_ptr<folly::IOBuf>
+    DynamicStructurePatch<true>::applyToSerializedObject<
+        type::StandardProtocol::Compact>(std::unique_ptr<folly::IOBuf>) const;
+template std::unique_ptr<folly::IOBuf>
+    DynamicStructurePatch<true>::applyToSerializedObject<
+        type::StandardProtocol::Binary>(std::unique_ptr<folly::IOBuf>) const;
+
+template <type::StandardProtocol Protocol>
+std::unique_ptr<folly::IOBuf> DynamicUnknownPatch::applyToSerializedObject(
+    std::unique_ptr<folly::IOBuf> buf) const {
+  return applyToSerializedObjectImpl<Protocol>(*this, std::move(buf));
+}
+
+template std::unique_ptr<folly::IOBuf>
+    DynamicUnknownPatch::applyToSerializedObject<
+        type::StandardProtocol::Compact>(std::unique_ptr<folly::IOBuf>) const;
+template std::unique_ptr<folly::IOBuf>
+    DynamicUnknownPatch::applyToSerializedObject<
+        type::StandardProtocol::Binary>(std::unique_ptr<folly::IOBuf>) const;
 
 DynamicPatch DiffVisitorBase::diff(const Object& src, const Object& dst) {
   return diffStructured(src, dst);
@@ -2057,10 +2084,18 @@ template <type::StandardProtocol Protocol>
 std::unique_ptr<folly::IOBuf>
 DynamicPatch::applyToSerializedObjectWithoutExtractingMask(
     const folly::IOBuf& buf) const {
-  protocol::Value val;
-  val.emplace_object(parseObject<ProtocolReaderFor<Protocol>>(buf));
-  apply(val);
-  return serializeObject<ProtocolWriterFor<Protocol>>(val.as_object());
+  auto p = std::make_unique<folly::IOBuf>(buf);
+  return visitPatch([&](const auto& patch) -> std::unique_ptr<folly::IOBuf> {
+    if constexpr (requires {
+                    patch.template applyToSerializedObject<Protocol>(
+                        std::move(p));
+                  }) {
+      return patch.template applyToSerializedObject<Protocol>(std::move(p));
+    } else {
+      folly::throw_exception_fmt_format<std::runtime_error>(
+          "Can not apply {} to Object", folly::pretty_name<decltype(patch)>());
+    }
+  });
 }
 
 template std::unique_ptr<folly::IOBuf> DynamicPatch::applyToSerializedObject<

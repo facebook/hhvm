@@ -115,6 +115,7 @@ void forwardOneField(
     out.writeRaw(id, type, in.readRawCursor());
   }
 }
+
 } // namespace detail
 
 class DynamicPatch;
@@ -228,6 +229,10 @@ class DynamicUnknownPatch : public DynamicPatchBase {
       thrift::detail::StructuredDynamicCursorReader<Reader, _>& in,
       thrift::detail::StructuredDynamicCursorWriter<
           typename Reader::ProtocolWriter>& out) const;
+
+  template <type::StandardProtocol Protocol>
+  std::unique_ptr<folly::IOBuf> applyToSerializedObject(
+      std::unique_ptr<folly::IOBuf> buf) const;
 
   /// Checks if it is convertible to the patch type.
   template <class Patch>

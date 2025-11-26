@@ -606,6 +606,10 @@ impl HhConfig {
                 "package_config_disable_transitivity_check",
                 default.tco_package_config_disable_transitivity_check,
             )?,
+            tco_allow_require_package_on_interface_methods: hhconfig.get_bool_or(
+                "allow_require_package_on_interface_methods",
+                default.tco_allow_require_package_on_interface_methods,
+            )?,
         };
         let mut c = Self {
             opts,

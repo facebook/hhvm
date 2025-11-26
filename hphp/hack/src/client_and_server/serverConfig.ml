@@ -518,6 +518,8 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
     ?tco_check_packages:(bool_opt "check_packages" config)
     ?tco_package_config_disable_transitivity_check:
       (bool_opt "package_config_disable_transitivity_check" config)
+    ?tco_allow_require_package_on_interface_methods:
+      (bool_opt "allow_require_package_on_interface_methods" config)
     options
 
 (** Load local config from the following sources:

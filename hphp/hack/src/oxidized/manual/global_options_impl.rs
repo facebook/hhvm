@@ -160,6 +160,7 @@ impl Default for GlobalOptions {
             tco_check_packages: true,
             fanout_strip_class_location: false,
             tco_package_config_disable_transitivity_check: false,
+            tco_allow_require_package_on_interface_methods: true,
         }
     }
 }

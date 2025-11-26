@@ -308,6 +308,8 @@ type t = {
       (** POC: @fzn, if true fanout strips class location when comparing shallow classes for minor changes *)
   tco_package_config_disable_transitivity_check: bool;
       (** POC: @fzn, if true, transitivity checks for package/deployment inclusion are disabled - for intern/prod rollout only *)
+  tco_allow_require_package_on_interface_methods: bool;
+      (** POC: @fzn, when true (default), allows __RequirePackage on interface methods *)
 }
 [@@deriving eq, show]
 
@@ -430,6 +432,7 @@ val set :
   ?tco_check_packages:bool ->
   ?fanout_strip_class_location:bool ->
   ?tco_package_config_disable_transitivity_check:bool ->
+  ?tco_allow_require_package_on_interface_methods:bool ->
   t ->
   t
 

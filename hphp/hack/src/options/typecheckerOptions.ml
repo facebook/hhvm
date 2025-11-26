@@ -293,6 +293,9 @@ let hack_warnings t = t.GlobalOptions.hack_warnings
 
 let check_packages t = t.GlobalOptions.tco_check_packages
 
+let allow_require_package_on_interface_methods t =
+  t.GlobalOptions.tco_allow_require_package_on_interface_methods
+
 let set_package_info t package_info =
   let popt = { t.GlobalOptions.po with ParserOptions.package_info } in
   { t with GlobalOptions.po = popt }

@@ -67,7 +67,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   /** Glean {"file": "thrift/compiler/test/fixtures/sync-methods-return-try/src/module.thrift", "service": "PubSubStreamingService", "function": "returnstream"} */
   virtual folly::SemiFuture<apache::thrift::ClientBufferedStream<::cpp2::StreamItem>> semifuture_returnstream(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::StreamItem& p_from, const ::cpp2::StreamItem& p_to);
   /** Glean {"file": "thrift/compiler/test/fixtures/sync-methods-return-try/src/module.thrift", "service": "PubSubStreamingService", "function": "returnstream"} */
-  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<apache::thrift::ClientBufferedStream<::cpp2::StreamItem>>> sync_complete_returnstream(
+  [[nodiscard]] [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<apache::thrift::ClientBufferedStream<::cpp2::StreamItem>>> sync_complete_returnstream(
       apache::thrift::RpcOptions&& rpcOptions,  const ::cpp2::StreamItem& p_from, const ::cpp2::StreamItem& p_to);
 
 #if FOLLY_HAS_COROUTINES
@@ -179,7 +179,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   /** Glean {"file": "thrift/compiler/test/fixtures/sync-methods-return-try/src/module.thrift", "service": "PubSubStreamingService", "function": "streamthrows"} */
   virtual folly::SemiFuture<apache::thrift::ClientBufferedStream<::cpp2::StreamItem>> semifuture_streamthrows(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::StreamItem& p_foo);
   /** Glean {"file": "thrift/compiler/test/fixtures/sync-methods-return-try/src/module.thrift", "service": "PubSubStreamingService", "function": "streamthrows"} */
-  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<apache::thrift::ClientBufferedStream<::cpp2::StreamItem>>> sync_complete_streamthrows(
+  [[nodiscard]] [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<apache::thrift::ClientBufferedStream<::cpp2::StreamItem>>> sync_complete_streamthrows(
       apache::thrift::RpcOptions&& rpcOptions,  const ::cpp2::StreamItem& p_foo);
 
 #if FOLLY_HAS_COROUTINES
@@ -291,7 +291,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   /** Glean {"file": "thrift/compiler/test/fixtures/sync-methods-return-try/src/module.thrift", "service": "PubSubStreamingService", "function": "servicethrows"} */
   virtual folly::SemiFuture<apache::thrift::ClientBufferedStream<::cpp2::StreamItem>> semifuture_servicethrows(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::StreamItem& p_foo);
   /** Glean {"file": "thrift/compiler/test/fixtures/sync-methods-return-try/src/module.thrift", "service": "PubSubStreamingService", "function": "servicethrows"} */
-  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<apache::thrift::ClientBufferedStream<::cpp2::StreamItem>>> sync_complete_servicethrows(
+  [[nodiscard]] [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<apache::thrift::ClientBufferedStream<::cpp2::StreamItem>>> sync_complete_servicethrows(
       apache::thrift::RpcOptions&& rpcOptions,  const ::cpp2::StreamItem& p_foo);
 
 #if FOLLY_HAS_COROUTINES
@@ -403,7 +403,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   /** Glean {"file": "thrift/compiler/test/fixtures/sync-methods-return-try/src/module.thrift", "service": "PubSubStreamingService", "function": "servicethrows2"} */
   virtual folly::SemiFuture<apache::thrift::ClientBufferedStream<::cpp2::StreamItem>> semifuture_servicethrows2(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::StreamItem& p_foo);
   /** Glean {"file": "thrift/compiler/test/fixtures/sync-methods-return-try/src/module.thrift", "service": "PubSubStreamingService", "function": "servicethrows2"} */
-  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<apache::thrift::ClientBufferedStream<::cpp2::StreamItem>>> sync_complete_servicethrows2(
+  [[nodiscard]] [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<apache::thrift::ClientBufferedStream<::cpp2::StreamItem>>> sync_complete_servicethrows2(
       apache::thrift::RpcOptions&& rpcOptions,  const ::cpp2::StreamItem& p_foo);
 
 #if FOLLY_HAS_COROUTINES
@@ -515,7 +515,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   /** Glean {"file": "thrift/compiler/test/fixtures/sync-methods-return-try/src/module.thrift", "service": "PubSubStreamingService", "function": "boththrows"} */
   virtual folly::SemiFuture<apache::thrift::ClientBufferedStream<::cpp2::StreamItem>> semifuture_boththrows(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::StreamItem& p_foo);
   /** Glean {"file": "thrift/compiler/test/fixtures/sync-methods-return-try/src/module.thrift", "service": "PubSubStreamingService", "function": "boththrows"} */
-  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<apache::thrift::ClientBufferedStream<::cpp2::StreamItem>>> sync_complete_boththrows(
+  [[nodiscard]] [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<apache::thrift::ClientBufferedStream<::cpp2::StreamItem>>> sync_complete_boththrows(
       apache::thrift::RpcOptions&& rpcOptions,  const ::cpp2::StreamItem& p_foo);
 
 #if FOLLY_HAS_COROUTINES
@@ -627,7 +627,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   /** Glean {"file": "thrift/compiler/test/fixtures/sync-methods-return-try/src/module.thrift", "service": "PubSubStreamingService", "function": "responseandstreamstreamthrows"} */
   virtual folly::SemiFuture<apache::thrift::ResponseAndClientBufferedStream<::cpp2::StreamItem,::std::int32_t>> semifuture_responseandstreamstreamthrows(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo);
   /** Glean {"file": "thrift/compiler/test/fixtures/sync-methods-return-try/src/module.thrift", "service": "PubSubStreamingService", "function": "responseandstreamstreamthrows"} */
-  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<apache::thrift::ResponseAndClientBufferedStream<::cpp2::StreamItem,::std::int32_t>>> sync_complete_responseandstreamstreamthrows(
+  [[nodiscard]] [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<apache::thrift::ResponseAndClientBufferedStream<::cpp2::StreamItem,::std::int32_t>>> sync_complete_responseandstreamstreamthrows(
       apache::thrift::RpcOptions&& rpcOptions,  ::std::int32_t p_foo);
 
 #if FOLLY_HAS_COROUTINES
@@ -739,7 +739,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   /** Glean {"file": "thrift/compiler/test/fixtures/sync-methods-return-try/src/module.thrift", "service": "PubSubStreamingService", "function": "responseandstreamservicethrows"} */
   virtual folly::SemiFuture<apache::thrift::ResponseAndClientBufferedStream<::cpp2::StreamItem,::std::int32_t>> semifuture_responseandstreamservicethrows(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo);
   /** Glean {"file": "thrift/compiler/test/fixtures/sync-methods-return-try/src/module.thrift", "service": "PubSubStreamingService", "function": "responseandstreamservicethrows"} */
-  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<apache::thrift::ResponseAndClientBufferedStream<::cpp2::StreamItem,::std::int32_t>>> sync_complete_responseandstreamservicethrows(
+  [[nodiscard]] [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<apache::thrift::ResponseAndClientBufferedStream<::cpp2::StreamItem,::std::int32_t>>> sync_complete_responseandstreamservicethrows(
       apache::thrift::RpcOptions&& rpcOptions,  ::std::int32_t p_foo);
 
 #if FOLLY_HAS_COROUTINES
@@ -851,7 +851,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   /** Glean {"file": "thrift/compiler/test/fixtures/sync-methods-return-try/src/module.thrift", "service": "PubSubStreamingService", "function": "responseandstreamboththrows"} */
   virtual folly::SemiFuture<apache::thrift::ResponseAndClientBufferedStream<::cpp2::StreamItem,::std::int32_t>> semifuture_responseandstreamboththrows(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo);
   /** Glean {"file": "thrift/compiler/test/fixtures/sync-methods-return-try/src/module.thrift", "service": "PubSubStreamingService", "function": "responseandstreamboththrows"} */
-  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<apache::thrift::ResponseAndClientBufferedStream<::cpp2::StreamItem,::std::int32_t>>> sync_complete_responseandstreamboththrows(
+  [[nodiscard]] [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<apache::thrift::ResponseAndClientBufferedStream<::cpp2::StreamItem,::std::int32_t>>> sync_complete_responseandstreamboththrows(
       apache::thrift::RpcOptions&& rpcOptions,  ::std::int32_t p_foo);
 
 #if FOLLY_HAS_COROUTINES

@@ -79,7 +79,7 @@
 {{/function:has_deprecated_header_client_methods}}
 {{#if (has_compiler_option? "sync_methods_return_try")}}
 {{> common/fun_docblock}}
-  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<{{> types/return_type_client}}>> sync_complete_{{function:cpp_name}}(
+  [[nodiscard]] [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<{{> types/return_type_client}}>> sync_complete_{{function:cpp_name}}(
       apache::thrift::RpcOptions&& rpcOptions{{function_comma}} {{> service_common/function_param_list_client}});
 {{/if (has_compiler_option? "sync_methods_return_try")}}
 {{/function:legacy_client_methods?}}

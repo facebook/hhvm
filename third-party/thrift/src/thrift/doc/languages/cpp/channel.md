@@ -57,11 +57,11 @@ onResponse is called for responses and declared exceptions, and passed a struct 
 ```
 class StreamClientCallback {
  public:
-  FOLLY_NODISCARD virtual bool onFirstResponse(
+  [[nodiscard]] virtual bool onFirstResponse(
       FirstResponsePayload&&, folly::EventBase*, StreamServerCallback*) = 0;
   virtual void onFirstResponseError(folly::exception_wrapper) = 0;
 
-  FOLLY_NODISCARD virtual bool onStreamNext(StreamPayload&&) = 0;
+  [[nodiscard]] virtual bool onStreamNext(StreamPayload&&) = 0;
   virtual void onStreamError(folly::exception_wrapper) = 0;
   virtual void onStreamComplete() = 0;
 

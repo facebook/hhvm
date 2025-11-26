@@ -67,7 +67,7 @@ class Client<::cpp2::DbMixedStackArguments> : public apache::thrift::GeneratedAs
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-stack-arguments/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey0"} */
   virtual folly::SemiFuture<::std::string> semifuture_getDataByKey0(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key);
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-stack-arguments/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey0"} */
-  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<::std::string>> sync_complete_getDataByKey0(
+  [[nodiscard]] [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<::std::string>> sync_complete_getDataByKey0(
       apache::thrift::RpcOptions&& rpcOptions,  const ::std::string& p_key);
 
 #if FOLLY_HAS_COROUTINES
@@ -183,7 +183,7 @@ class Client<::cpp2::DbMixedStackArguments> : public apache::thrift::GeneratedAs
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-stack-arguments/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey1"} */
   virtual folly::SemiFuture<::std::string> semifuture_getDataByKey1(apache::thrift::RpcOptions& rpcOptions, const ::std::string& p_key);
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-stack-arguments/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey1"} */
-  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<::std::string>> sync_complete_getDataByKey1(
+  [[nodiscard]] [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<::std::string>> sync_complete_getDataByKey1(
       apache::thrift::RpcOptions&& rpcOptions,  const ::std::string& p_key);
 
 #if FOLLY_HAS_COROUTINES

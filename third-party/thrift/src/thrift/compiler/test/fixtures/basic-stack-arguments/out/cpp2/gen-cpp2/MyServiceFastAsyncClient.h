@@ -69,7 +69,7 @@ class Client<::cpp2::MyServiceFast> : public apache::thrift::GeneratedAsyncClien
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-stack-arguments/src/module.thrift", "service": "MyServiceFast", "function": "hasDataById"} */
   virtual folly::SemiFuture<bool> semifuture_hasDataById(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-stack-arguments/src/module.thrift", "service": "MyServiceFast", "function": "hasDataById"} */
-  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<bool>> sync_complete_hasDataById(
+  [[nodiscard]] [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<bool>> sync_complete_hasDataById(
       apache::thrift::RpcOptions&& rpcOptions,  ::std::int64_t p_id);
 
 #if FOLLY_HAS_COROUTINES
@@ -185,7 +185,7 @@ class Client<::cpp2::MyServiceFast> : public apache::thrift::GeneratedAsyncClien
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-stack-arguments/src/module.thrift", "service": "MyServiceFast", "function": "getDataById"} */
   virtual folly::SemiFuture<::std::string> semifuture_getDataById(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id);
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-stack-arguments/src/module.thrift", "service": "MyServiceFast", "function": "getDataById"} */
-  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<::std::string>> sync_complete_getDataById(
+  [[nodiscard]] [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<::std::string>> sync_complete_getDataById(
       apache::thrift::RpcOptions&& rpcOptions,  ::std::int64_t p_id);
 
 #if FOLLY_HAS_COROUTINES
@@ -301,7 +301,7 @@ class Client<::cpp2::MyServiceFast> : public apache::thrift::GeneratedAsyncClien
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-stack-arguments/src/module.thrift", "service": "MyServiceFast", "function": "putDataById"} */
   virtual folly::SemiFuture<folly::Unit> semifuture_putDataById(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id, const ::std::string& p_data);
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-stack-arguments/src/module.thrift", "service": "MyServiceFast", "function": "putDataById"} */
-  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<void>> sync_complete_putDataById(
+  [[nodiscard]] [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<void>> sync_complete_putDataById(
       apache::thrift::RpcOptions&& rpcOptions,  ::std::int64_t p_id, const ::std::string& p_data);
 
 #if FOLLY_HAS_COROUTINES

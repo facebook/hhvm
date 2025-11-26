@@ -637,7 +637,10 @@ class ContainerDynamicCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
     DCHECK(type == nextTType());
     writeRaw(value);
   }
-  void writeRaw(folly::io::Cursor value, uint32_t len) {
+  void writeRaw(
+      folly::io::Cursor value,
+      uint32_t len = std::numeric_limits<uint32_t>::max()) {
+    DCHECK(value.isBounded() || len != std::numeric_limits<uint32_t>::max());
     checkRemaining();
     protocol_->writeRaw(value, len);
     advance();

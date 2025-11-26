@@ -243,7 +243,9 @@ TEST(DynamicCursorSerializer, UnschematizedWrite) {
       writer.beginWriteContainer(4, type::list<type::byte_t>{}, 3);
   listOfByteWriter.write(type::byte_t{}, 'f');
   listOfByteWriter.writeRaw(*serialize(o));
-  listOfByteWriter.writeRaw(*serialize(o));
+  listOfByteWriter.writeRaw(
+      folly::io::Cursor(
+          &*serialize(o), serialize(o)->computeChainDataLength()));
   writer.endWrite(std::move(listOfByteWriter));
   writer.write(
       5, type::list<type::set<type::union_t<Stringish>>>{}, {{stringish}});

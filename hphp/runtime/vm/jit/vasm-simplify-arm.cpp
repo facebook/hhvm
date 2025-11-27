@@ -166,11 +166,19 @@ int is_adjacent_vptr64(const Vptr64& a, const Vptr64& b, int32_t step, int32_t m
   return 0;
 }
 
+bool is_valid_reg_for_storepair(Env& env, Vreg s) {
+  if (s.isGP())
+    return true;
+
+  auto const op_it = env.unit.regToConst.find(s);
+  return op_it != env.unit.regToConst.end() && op_it->second.kind != Vconst::Double;
+}
+
 bool simplify(Env& env, const store& inst, Vlabel b, size_t i) {
   // store{s, d}; store{s, d} --> storepair{s0, s1, d}
   return if_inst<Vinstr::store>(env, b, i + 1, [&](const store& st) {
-    if (!inst.s.isGP()) return false;
-    if (!st.s.isGP()) return false;
+    if (!is_valid_reg_for_storepair(env, inst.s)) return false;
+    if (!is_valid_reg_for_storepair(env, st.s)) return false;
     const auto rv = is_adjacent_vptr64(inst.d, st.d, 8, -512, 504);
     if (rv != 0) {
       return simplify_impl(env, b, i, [&] (Vout& v) {
@@ -191,8 +199,8 @@ bool simplify(Env& env, const store& inst, Vlabel b, size_t i) {
 bool simplify(Env& env, const storel& inst, Vlabel b, size_t i) {
   // storel{s, d}; storel{s, d} --> storepairl{s0, s1, d}
   return if_inst<Vinstr::storel>(env, b, i + 1, [&](const storel& st) {
-    if (!inst.s.isGP()) return false;
-    if (!st.s.isGP()) return false;
+    if (!is_valid_reg_for_storepair(env, inst.s)) return false;
+    if (!is_valid_reg_for_storepair(env, st.s)) return false;
     const auto rv = is_adjacent_vptr64(inst.m, st.m, 4, -256, 252);
     if (rv != 0) {
       return simplify_impl(env, b, i, [&] (Vout& v) {

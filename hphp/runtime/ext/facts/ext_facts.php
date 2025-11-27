@@ -245,8 +245,8 @@ function supertypes(
  */
 <<__Native>>
 function types_with_attribute(
-  /* classname<\HH\ClassLikeAttribute> */ string $attribute,
-)[]: vec<string>; /* vec<classname<nonnull>> */
+  class_or_classname<\HH\ClassLikeAttribute> $attribute,
+)[]: vec<classname<nonnull>>;
 
 /**
  * Get all type aliases matching the given filters.

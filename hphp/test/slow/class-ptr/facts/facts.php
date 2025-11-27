@@ -1,8 +1,10 @@
 <?hh
 
 class C { public function __construct() { echo nameof static."\n"; }}
+<<Attr>>
 class D extends C {}
 class E extends C {}
+<<Attr>>
 class F extends D {}
 
 function v($a): void {
@@ -10,6 +12,9 @@ function v($a): void {
     new $c();
   }
 }
+
+<<Attr>>
+type G = C;
 
 <<__EntryPoint>>
 function main(): void {
@@ -24,4 +29,8 @@ function main(): void {
   echo "===== supertypes =====\n";
   $parents = HH\Facts\supertypes(F::class);
   v($parents);
+
+  echo "===== type_attributes =====\n";
+  $classes = HH\Facts\types_with_attribute(Attr::class);
+  v($classes);
 }

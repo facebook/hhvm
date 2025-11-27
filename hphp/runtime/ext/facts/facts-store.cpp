@@ -909,7 +909,7 @@ struct FactsStoreImpl final
   }
 
   Array getTypesWithAttribute(const String& attr) override {
-    return makeVecOfString(m_symbolMap.getTypesWithAttribute(*attr.get()));
+    return makeVecOfLazyClass(m_symbolMap.getTypesWithAttribute(*attr.get()));
   }
 
   Array getTypeAliasesWithAttribute(const String& attr) override {

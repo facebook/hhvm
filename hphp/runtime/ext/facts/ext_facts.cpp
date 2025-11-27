@@ -801,8 +801,9 @@ Array HHVM_FUNCTION(
       StrNR(className(derivedType)).asString(), filters);
 }
 
-Array HHVM_FUNCTION(facts_types_with_attribute, const String& attr) {
-  return Facts::getFactsOrThrow().getTypesWithAttribute(attr);
+Array HHVM_FUNCTION(facts_types_with_attribute, const TypedValue attr) {
+  return Facts::getFactsOrThrow().getTypesWithAttribute(
+      StrNR(className(attr)).asString());
 }
 
 Array HHVM_FUNCTION(facts_type_aliases_with_attribute, const String& attr) {

@@ -415,8 +415,10 @@ void HTTPClientChannel::sendRequest_(
   if (timeout.count()) {
     txn->setIdleTimeout(timeout);
   }
-  if (createTransactionObserver_) {
-    txn->addObserver(createTransactionObserver_());
+  if (transactionObserverCreator_) {
+    if (auto observer = transactionObserverCreator_->create()) {
+      txn->addObserver(std::move(observer));
+    }
   }
 
   setRequestHeaderOptions(header.get());

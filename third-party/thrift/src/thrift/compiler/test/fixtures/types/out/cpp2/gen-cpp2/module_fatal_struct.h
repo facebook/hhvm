@@ -40,8 +40,7 @@ class empty_struct_struct_traits {
   using members = ::fatal::list<
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(7419850808542508140ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -90,8 +89,7 @@ class decorated_struct_struct_traits {
       member::field
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(13385404739325801676ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -187,8 +185,7 @@ class ContainerStruct_struct_traits {
       member::fieldH
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(3474903760707401964ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -221,8 +218,7 @@ class CppTypeStruct_struct_traits {
       member::fieldA
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(7889194779953601868ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -268,8 +264,7 @@ class VirtualStruct_struct_traits {
       member::MyIntField
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(13724968379201536076ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -311,8 +306,7 @@ class MyStructWithForwardRefEnum_struct_traits {
       member::b
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(13020438871755031308ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -354,8 +348,7 @@ class TrivialNumeric_struct_traits {
       member::b
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(13240042291233619340ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -397,8 +390,7 @@ class TrivialNestedWithDefault_struct_traits {
       member::n
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(14671643653509810348ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -440,8 +432,7 @@ class ComplexString_struct_traits {
       member::b
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(14031875880679100460ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -483,8 +474,7 @@ class ComplexNestedWithDefault_struct_traits {
       member::n
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(4696534039109938636ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -553,8 +543,7 @@ class MinPadding_struct_traits {
       member::tiny
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(15544025728095240172ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -623,8 +612,7 @@ class MinPaddingWithCustomType_struct_traits {
       member::tiny
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(7684052946909757228ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -697,8 +685,7 @@ class MyStruct_struct_traits {
       member::data
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(7297685140594097580ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -735,8 +722,7 @@ class MyDataItem_struct_traits {
   using members = ::fatal::list<
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(12130458833448478092ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -769,8 +755,7 @@ class Renamed_struct_traits {
       member::bar
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(16991037874674243596ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -812,8 +797,7 @@ class AnnotatedTypes_struct_traits {
       member::list_field
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(1793176683567931084ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -855,8 +839,7 @@ class ForwardUsageRoot_struct_traits {
       member::ForwardUsageByRef
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(10538773386942393836ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -889,8 +872,7 @@ class ForwardUsageStruct_struct_traits {
       member::foo
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(18216634639574172236ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -923,8 +905,7 @@ class ForwardUsageByRef_struct_traits {
       member::foo
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(5700960773715231532ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -957,8 +938,7 @@ class IncompleteMap_struct_traits {
       member::field
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(16588713789532572172ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -982,8 +962,7 @@ class IncompleteMapDep_struct_traits {
   using members = ::fatal::list<
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(4444540283774281516ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -1016,8 +995,7 @@ class CompleteMap_struct_traits {
       member::field
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(9142601727424815244ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -1041,8 +1019,7 @@ class CompleteMapDep_struct_traits {
   using members = ::fatal::list<
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(2085767742389370668ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -1075,8 +1052,7 @@ class IncompleteList_struct_traits {
       member::field
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(9170269616021633420ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -1100,8 +1076,7 @@ class IncompleteListDep_struct_traits {
   using members = ::fatal::list<
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(4545907507200868780ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -1134,8 +1109,7 @@ class CompleteList_struct_traits {
       member::field
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(14114502851208255084ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -1159,8 +1133,7 @@ class CompleteListDep_struct_traits {
   using members = ::fatal::list<
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(2033021518320534444ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -1193,8 +1166,7 @@ class AdaptedList_struct_traits {
       member::field
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(125790966858066028ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -1227,8 +1199,7 @@ class AdaptedListDep_struct_traits {
       member::field
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(18047110259932940396ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -1261,8 +1232,7 @@ class DependentAdaptedList_struct_traits {
       member::field
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(7176728000892714092ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -1295,8 +1265,7 @@ class DependentAdaptedListDep_struct_traits {
       member::field
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(6008111321105911756ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -1396,8 +1365,7 @@ class AllocatorAware_struct_traits {
       member::aa_shared
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(435233143439422188ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -1452,8 +1420,7 @@ class AllocatorAware2_struct_traits {
       member::box_field
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(17013646540360458924ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -1504,8 +1471,7 @@ class TypedefStruct_struct_traits {
       member::UintTypedef_field
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(17342541271444691756ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 
@@ -1538,8 +1504,7 @@ class StructWithDoubleUnderscores_struct_traits {
       member::__field
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(11308628853865465068ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 

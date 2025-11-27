@@ -157,8 +157,7 @@ class containerStruct2_struct_traits {
       member::opt_fieldE
   >;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(6698051510995854220ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>
   >;
 };
 

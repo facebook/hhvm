@@ -2144,85 +2144,73 @@ class UnionWithTypedefFieldAdapter_variant_traits {
 FATAL_REGISTER_ENUM_TRAITS(
   __fbthrift_refl::union1_tenum_traits,
   ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_refl::union1_tenum_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(0ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_refl::union1_tenum_traits::annotations>
   >
 );
 FATAL_REGISTER_VARIANT_TRAITS(
   __fbthrift_refl::union1_variant_traits,
   ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_refl::union1_variant_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(15193987089687821868ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_refl::union1_variant_traits::annotations>
   >
 );
 FATAL_REGISTER_ENUM_TRAITS(
   __fbthrift_refl::union2_tenum_traits,
   ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_refl::union2_tenum_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(0ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_refl::union2_tenum_traits::annotations>
   >
 );
 FATAL_REGISTER_VARIANT_TRAITS(
   __fbthrift_refl::union2_variant_traits,
   ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_refl::union2_variant_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(7436399996138825996ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_refl::union2_variant_traits::annotations>
   >
 );
 FATAL_REGISTER_ENUM_TRAITS(
   __fbthrift_refl::union3_tenum_traits,
   ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_refl::union3_tenum_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(0ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_refl::union3_tenum_traits::annotations>
   >
 );
 FATAL_REGISTER_VARIANT_TRAITS(
   __fbthrift_refl::union3_variant_traits,
   ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_refl::union3_variant_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(12630661616538286124ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_refl::union3_variant_traits::annotations>
   >
 );
 FATAL_REGISTER_ENUM_TRAITS(
   __fbthrift_refl::unionA_tenum_traits,
   ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_refl::unionA_tenum_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(0ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_refl::unionA_tenum_traits::annotations>
   >
 );
 FATAL_REGISTER_VARIANT_TRAITS(
   __fbthrift_refl::unionA_variant_traits,
   ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_refl::unionA_variant_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(15005039916229430860ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_refl::unionA_variant_traits::annotations>
   >
 );
 FATAL_REGISTER_ENUM_TRAITS(
   __fbthrift_refl::union_with_special_names_tenum_traits,
   ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_refl::union_with_special_names_tenum_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(0ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_refl::union_with_special_names_tenum_traits::annotations>
   >
 );
 FATAL_REGISTER_VARIANT_TRAITS(
   __fbthrift_refl::union_with_special_names_variant_traits,
   ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_refl::union_with_special_names_variant_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(13162369197726992076ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_refl::union_with_special_names_variant_traits::annotations>
   >
 );
 FATAL_REGISTER_ENUM_TRAITS(
   __fbthrift_refl::UnionWithTypedefFieldAdapter_tenum_traits,
   ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_refl::UnionWithTypedefFieldAdapter_tenum_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(0ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_refl::UnionWithTypedefFieldAdapter_tenum_traits::annotations>
   >
 );
 FATAL_REGISTER_VARIANT_TRAITS(
   __fbthrift_refl::UnionWithTypedefFieldAdapter_variant_traits,
   ::apache::thrift::detail::type_common_metadata_impl<
-      ::apache::thrift::reflected_annotations<__fbthrift_refl::UnionWithTypedefFieldAdapter_variant_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(10841541077214060908ull)
+      ::apache::thrift::reflected_annotations<__fbthrift_refl::UnionWithTypedefFieldAdapter_variant_traits::annotations>
   >
 );
 } // namespace test_cpp2::cpp_reflection

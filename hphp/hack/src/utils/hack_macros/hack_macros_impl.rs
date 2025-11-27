@@ -278,7 +278,7 @@ fn prepare_hack(
         // caps[5] = args form - full capture
         // caps[6] = args form - substring
 
-        let m = caps.get(0).unwrap();
+        let m = caps.get_match();
         output.push_str(&input_str[last_match..m.start()]);
         last_match = m.end();
 

@@ -18,7 +18,6 @@ include "thrift/annotation/scope.thrift"
 include "thrift/annotation/cpp.thrift"
 include "thrift/lib/thrift/patch.thrift"
 include "thrift/annotation/thrift.thrift"
-include "thrift/lib/thrift/any.thrift"
 // @nolint used to test depending on this file
 
 package "facebook.com/thrift/test/schema"

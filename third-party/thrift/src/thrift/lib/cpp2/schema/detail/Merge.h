@@ -28,9 +28,6 @@ namespace apache::thrift::schema::detail {
 type::Schema mergeSchemas(folly::Range<const std::string_view*> schemas);
 type::Schema mergeSchemas(std::vector<type::Schema>&& schemas);
 
-// Includes omnibus schema (e.g. thrift/lib/thrift/*) if available.
-type::Schema loadBundledSchema(folly::Range<const std::string_view*> schemas);
-
 void mergeInto(
     type::Schema& dst,
     type::Schema&& src,

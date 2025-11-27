@@ -77,6 +77,7 @@ class ServiceSchemaTest : public testing::Test {
 TEST_F(ServiceSchemaTest, Programs) {
   auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
   auto programs = syntaxGraph.programs();
+  EXPECT_EQ(programs.size(), 3);
 
   auto& mainProgram = syntaxGraph.findProgramByName("syntax_graph");
   EXPECT_EQ(
@@ -106,6 +107,7 @@ TEST_F(ServiceSchemaTest, TransitivePrograms) {
   // TestService2 is in a different file, so we should have an *extra* program.
   auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService2>());
   auto programs = syntaxGraph.programs();
+  EXPECT_EQ(programs.size(), 4);
 
   auto& mainProgram = syntaxGraph.findProgramByName("syntax_graph");
   {
@@ -161,8 +163,8 @@ TEST_F(ServiceSchemaTest, Enum) {
   const EnumNode& e = testEnum->asEnum();
   EXPECT_EQ(&e.definition(), testEnum.unwrap());
   EXPECT_EQ(e.uri(), "meta.com/thrift_test/TestEnum");
-  EXPECT_EQ(e.definition().annotations().size(), 2);
-  EXPECT_EQ(e.definition().annotations()[1].value()["field1"], 3);
+  EXPECT_EQ(e.definition().annotations().size(), 1);
+  EXPECT_EQ(e.definition().annotations()[0].value()["field1"], 3);
 
   const auto& unset = e.values()[0];
   const auto& value1 = e.values()[1];
@@ -665,7 +667,7 @@ TEST_F(ServiceSchemaTest, Interaction) {
 
 void checkAnnotationsOnTestUnion(const UnionNode& node) {
   const auto& annotations = node.definition().annotations();
-  EXPECT_EQ(annotations.size(), 3);
+  EXPECT_EQ(annotations.size(), 2);
   auto& withUri =
       findAnnotationOrThrow(annotations, "TestStructuredAnnotation");
   EXPECT_EQ(
@@ -710,7 +712,7 @@ TEST_F(ServiceSchemaTest, StructuredAnnotationWithoutUri) {
       program.definitionsByName().at("TestException");
 
   const auto& annotations = testException->annotations();
-  EXPECT_EQ(annotations.size(), 3);
+  EXPECT_EQ(annotations.size(), 2);
   const auto& withoutUri =
       findAnnotationOrThrow(annotations, "TestStructuredAnnotationWithoutUri");
   EXPECT_EQ(
@@ -910,6 +912,7 @@ TEST_F(ServiceSchemaTest, asTypeSystem) {
   ASSERT_EQ(def->asStruct().uri(), uri);
 
   auto& typeSystem = syntaxGraph.asTypeSystem();
+  EXPECT_EQ(typeSystem.getKnownUris()->size(), 7);
 
   const auto& ref = typeSystem.getUserDefinedTypeOrThrow(uri);
   const type_system::StructNode& structNode = ref.asStruct();

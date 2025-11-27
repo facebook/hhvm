@@ -415,6 +415,9 @@ void HTTPClientChannel::sendRequest_(
   if (timeout.count()) {
     txn->setIdleTimeout(timeout);
   }
+  if (createTransactionObserver_) {
+    txn->addObserver(createTransactionObserver_());
+  }
 
   setRequestHeaderOptions(header.get());
   addRpcOptionHeaders(header.get(), rpcOptions);

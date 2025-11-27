@@ -46,6 +46,8 @@ class HTTPClientChannel : public ClientChannel,
  public:
   using Ptr =
       std::unique_ptr<HTTPClientChannel, folly::DelayedDestruction::Destructor>;
+  using TransactionObserverCreator = folly::Function<
+      std::shared_ptr<proxygen::HTTPTransactionObserverContainer::Observer>()>;
 
   static HTTPClientChannel::Ptr newHTTP2Channel(
       folly::AsyncTransport::UniquePtr transport,
@@ -61,6 +63,14 @@ class HTTPClientChannel : public ClientChannel,
   void setMaxPendingRequests(uint32_t num);
 
   void setProtocolId(uint16_t protocolId) { protocolId_ = protocolId; }
+
+  // Sets the factory function for creating transaction observers. When set,
+  // this creator will be invoked for each new HTTP transaction, and the
+  // resulting observer will be attached to that transaction to monitor its
+  // lifecycle events.
+  void setTransactionObserverCreator(TransactionObserverCreator creator) {
+    createTransactionObserver_ = std::move(creator);
+  }
 
   // apache::thrift::ClientChannel methods
 
@@ -194,6 +204,7 @@ class HTTPClientChannel : public ClientChannel,
   std::string httpHost_;
   std::string httpUrl_;
   std::chrono::milliseconds timeout_{kDefaultTransactionTimeout};
+  TransactionObserverCreator createTransactionObserver_;
   uint16_t protocolId_{apache::thrift::protocol::T_BINARY_PROTOCOL};
   CloseCallback* closeCallback_{nullptr};
 };

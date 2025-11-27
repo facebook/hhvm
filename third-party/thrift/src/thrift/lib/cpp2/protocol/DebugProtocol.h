@@ -225,8 +225,7 @@ std::string debugStringViaEncode(
   return debugStringViaEncode<type::infer_tag<T>>(obj, options);
 }
 
-template <typename T>
-  requires(is_thrift_class_v<T>)
+template <ThriftClass T>
 void PrintTo(const T& obj, std::ostream* os) {
   *os << debugStringViaEncode(obj);
 }

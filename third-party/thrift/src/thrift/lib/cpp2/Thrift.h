@@ -300,6 +300,9 @@ constexpr bool is_thrift_class_v =
     apache::thrift::detail::st::IsThriftClass<T>::value;
 
 template <typename T>
+concept ThriftClass = is_thrift_class_v<T>;
+
+template <typename T>
 constexpr bool is_thrift_union_v =
     apache::thrift::detail::st::IsThriftUnion<T>::value;
 

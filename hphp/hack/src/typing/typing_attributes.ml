@@ -8,7 +8,6 @@
  *)
 
 open Hh_prelude
-open Typing_reason
 open Typing_env_types
 module SN = Naming_special_names
 module MakeType = Typing_make_type
@@ -99,29 +98,11 @@ let check_implements
 
     env
   else
-    match
-      ( Typing_env.get_class env attr_name,
-        Typing_env.get_class env attr_interface )
-    with
-    | (Decl_entry.Found attr_class, Decl_entry.Found intf_class) ->
+    match Typing_env.get_class env attr_name with
+    | Decl_entry.Found attr_class ->
       (* Found matching class *)
       let attr_cid = (Cls.pos attr_class, Cls.name attr_class) in
-      (* successful exit condition: attribute class is subtype of correct interface
-       * and its args satisfy the attribute class constructor *)
-      let attr_locl_ty : Typing_defs.locl_ty =
-        MakeType.class_type
-          (witness_from_decl (Cls.pos attr_class))
-          (Cls.name attr_class)
-          []
-      in
-      let interface_locl_ty : Typing_defs.locl_ty =
-        MakeType.class_type
-          (witness_from_decl (Cls.pos intf_class))
-          (Cls.name intf_class)
-          []
-      in
-      if not (Typing_subtype.is_sub_type env attr_locl_ty interface_locl_ty)
-      then (
+      if not (Cls.has_ancestor attr_class attr_interface) then (
         Typing_error_utils.add_typing_error
           ~env
           Typing_error.(
@@ -133,7 +114,7 @@ let check_implements
                    attr_name;
                    attr_class_pos = Cls.pos attr_class;
                    attr_class_name = Cls.name attr_class;
-                   intf_name = Cls.name intf_class;
+                   intf_name = attr_interface;
                  });
         env
       ) else
@@ -142,8 +123,7 @@ let check_implements
           env
           attr_cid
           (List.map ~f:(fun e -> Aast_defs.Anormal e) params)
-    | (Decl_entry.NotYetAvailable, _)
-    | (_, Decl_entry.NotYetAvailable) ->
+    | Decl_entry.NotYetAvailable ->
       (* A retry will happen. Don't emit error to avoid error-based backtracking *)
       env
     | _ ->

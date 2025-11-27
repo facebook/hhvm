@@ -21,11 +21,11 @@ use oxidized::ast::Pos;
 use crate::prelude::*;
 
 #[derive(Copy, Clone, Default)]
-pub struct ElabCrossPackagePass {
+pub struct ElabRequirePackagePass {
     in_interface: bool,
 }
 
-impl Pass for ElabCrossPackagePass {
+impl Pass for ElabRequirePackagePass {
     fn on_ty_class__top_down(&mut self, _env: &Env, class: &mut Class_) -> ControlFlow<()> {
         self.in_interface = class.kind.is_cinterface();
         Continue(())

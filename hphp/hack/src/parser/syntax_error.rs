@@ -1285,20 +1285,6 @@ pub const module_declaration_in_module: Error =
 pub const multiple_module_declarations_per_file: Error =
     Cow::Borrowed("You cannot declare more than one module within a file");
 
-pub fn invalid_cross_package_argument(message: &str) -> Error {
-    Cow::Owned(format!(
-        "This is an invalid use of '__CrossPackage' because {}",
-        message
-    ))
-}
-
-pub fn cross_package_wrong_arity(count: usize) -> Error {
-    Cow::Owned(format!(
-        "The '__CrossPackage' attribute expects exactly 1 argument, {} given.",
-        count
-    ))
-}
-
 pub fn invalid_require_package_argument(message: &str) -> Error {
     Cow::Owned(format!(
         "This is an invalid use of '__RequirePackage' because {}",

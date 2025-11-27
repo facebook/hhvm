@@ -4,6 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 pub mod drop_unsafe_cast;
-pub mod elab_cross_package;
 pub mod elab_expr_package;
+pub mod elab_require_package;
 pub mod remove_memo_attr;

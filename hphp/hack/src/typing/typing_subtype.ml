@@ -1747,22 +1747,22 @@ end = struct
    *   variadic arity
    *  <<__Policied>> attribute
    *  Readonlyness
-   * <<__CrossPackage>> attribute
+   * <<__RequirePackage>> attribute
    *)
   and simplify_subtype_funs_attributes
       ~subtype_env (r_sub, ft_sub) (r_super, ft_super) =
     let p_sub = Reason.to_pos r_sub in
     let p_super = Reason.to_pos r_super in
-    let print_cross_pkg_reason (c : string option) (is_sub : bool) =
+    let print_require_pkg_reason (c : string option) (is_sub : bool) =
       match c with
       | Some s when is_sub ->
         Printf.sprintf
-          "This function is marked `<<__CrossPackage(%s)>>`, so it's only compatible with other functions marked `<<__CrossPackage(%s)>>`"
+          "This function is marked `<<__RequirePackage('%s')>>`, so it's only compatible with other functions marked `<<__RequirePackage('%s')>>`"
           s
           s
       | Some s ->
-        Printf.sprintf "This function is marked <<__CrossPackage(%s)>>" s
-      | None -> "This function is not cross package"
+        Printf.sprintf "This function is marked <<__RequirePackage('%s')>>" s
+      | None -> "This function does not have a __RequirePackage attribute"
     in
     let splat_super =
       match List.last ft_super.ft_params with
@@ -1846,14 +1846,14 @@ end = struct
                Typing_error.(
                  fun on_error ->
                    apply_reasons ~on_error
-                   @@ Secondary.Cross_package_mismatch
+                   @@ Secondary.Require_package_mismatch
                         {
                           pos = p_sub;
                           reason_sub =
                             lazy
                               [
                                 ( p_sub,
-                                  print_cross_pkg_reason
+                                  print_require_pkg_reason
                                     ft_sub.ft_require_package
                                     true );
                               ];
@@ -1861,7 +1861,7 @@ end = struct
                             lazy
                               [
                                 ( p_super,
-                                  print_cross_pkg_reason
+                                  print_require_pkg_reason
                                     ft_super.ft_require_package
                                     false );
                               ];

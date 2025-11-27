@@ -1686,14 +1686,6 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                     "__SafeForGlobalAccessCheck" => {
                         attributes.safe_global_variable = true;
                     }
-                    // CrossPackage is a Package V1 feature to be deprecated
-                    // after Package V2 rollout (T203287767)
-                    "__CrossPackage" => {
-                        attributes.require_package = attribute
-                            .string_literal_param
-                            .as_ref()
-                            .map(|(_, x)| Self::str_from_utf8(x).into_owned());
-                    }
                     "__RequirePackage" => {
                         attributes.require_package = attribute
                             .string_literal_param

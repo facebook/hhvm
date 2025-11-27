@@ -2,9 +2,9 @@ error: Typing[4341] The method test2 is not compatible with the overridden metho
 -> Method test2 has type (function(): void) in A [1]
 -> But it has type (function(): void) in parent IA [2]
 -> Type (function(): void) is not a subtype of (function(): void) [1]
--> Cross package mismatch [1]
--> This function is marked <<__CrossPackage(pkg1)>>, so it's only compatible with other functions marked <<__CrossPackage(pkg1)>> [1]
--> This function is marked <<__CrossPackage(pkg2)>> [2]
+-> Require package mismatch [1]
+-> This function is marked <<__RequirePackage('pkg1')>>, so it's only compatible with other functions marked <<__RequirePackage('pkg1')>> [1]
+-> This function is marked <<__RequirePackage('pkg2')>> [2]
 
 cross_package_with_requirepackage_attr_inheritance.php--a.php:14:19
      4 | interface IA {
@@ -24,9 +24,9 @@ error: Typing[4341] Some members in class B are incompatible with those declared
 -> Method test2 has type (function(): void) in B and comes from ancestor or trait A [2]
 -> But it has type (function(): void) in parent IA [3]
 -> Type (function(): void) is not a subtype of (function(): void) [2]
--> Cross package mismatch [2]
--> This function is marked <<__CrossPackage(pkg1)>>, so it's only compatible with other functions marked <<__CrossPackage(pkg1)>> [2]
--> This function is marked <<__CrossPackage(pkg2)>> [3]
+-> Require package mismatch [2]
+-> This function is marked <<__RequirePackage('pkg1')>>, so it's only compatible with other functions marked <<__RequirePackage('pkg1')>> [2]
+-> This function is marked <<__RequirePackage('pkg2')>> [3]
 
 cross_package_with_requirepackage_attr_inheritance.php--a.php:17:30
      4 | interface IA {
@@ -49,9 +49,9 @@ error: Typing[4341] Some members in class C are incompatible with those declared
 -> Method test2 has type (function(): void) in C and comes from ancestor or trait A [2]
 -> But it has type (function(): void) in parent IA [3]
 -> Type (function(): void) is not a subtype of (function(): void) [2]
--> Cross package mismatch [2]
--> This function is marked <<__CrossPackage(pkg1)>>, so it's only compatible with other functions marked <<__CrossPackage(pkg1)>> [2]
--> This function is marked <<__CrossPackage(pkg2)>> [3]
+-> Require package mismatch [2]
+-> This function is marked <<__RequirePackage('pkg1')>>, so it's only compatible with other functions marked <<__RequirePackage('pkg1')>> [2]
+-> This function is marked <<__RequirePackage('pkg2')>> [3]
 
 cross_package_with_requirepackage_attr_inheritance.php--a.php:21:30
      4 | interface IA {
@@ -76,9 +76,9 @@ error: Typing[4341] The method test is not compatible with the overridden method
 -> Method test has type (function(): void) in C [1]
 -> But it has type (function(): void) in parent B [2]
 -> Type (function(): void) is not a subtype of (function(): void) [1]
--> Cross package mismatch [1]
--> This function is marked <<__CrossPackage(pkg2)>>, so it's only compatible with other functions marked <<__CrossPackage(pkg2)>> [1]
--> This function is not cross package [2]
+-> Require package mismatch [1]
+-> This function is marked <<__RequirePackage('pkg2')>>, so it's only compatible with other functions marked <<__RequirePackage('pkg2')>> [1]
+-> This function does not have a __RequirePackage attribute [2]
 
 cross_package_with_requirepackage_attr_inheritance.php--a.php:23:19
     17 | class B extends A implements IA  {

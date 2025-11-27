@@ -1643,7 +1643,7 @@ and Secondary : sig
         reason_sub: Pos_or_decl.t Message.t list Lazy.t;
         reason_super: Pos_or_decl.t Message.t list Lazy.t;
       }
-    | Cross_package_mismatch of {
+    | Require_package_mismatch of {
         pos: Pos_or_decl.t;
         reason_sub: Pos_or_decl.t Message.t list Lazy.t;
         reason_super: Pos_or_decl.t Message.t list Lazy.t;

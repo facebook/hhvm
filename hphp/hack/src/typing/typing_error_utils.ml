@@ -6155,12 +6155,12 @@ end = struct
     in
     create ~code:Error_code.ReadonlyMismatch ~reasons ()
 
-  let cross_package_mismatch pos reason_sub reason_super =
+  let require_package_mismatch pos reason_sub reason_super =
     let reasons =
       Lazy.(
         reason_sub >>= fun reason_sub ->
         reason_super >>= fun reason_super ->
-        return (((pos, "Cross package mismatch") :: reason_sub) @ reason_super))
+        return (((pos, "Require package mismatch") :: reason_sub) @ reason_super))
     in
     create ~code:Error_code.InvalidCrossPackage ~reasons ()
 
@@ -6621,8 +6621,8 @@ end = struct
            parent_pos)
     | Readonly_mismatch { pos; kind; reason_sub; reason_super } ->
       Eval_result.single (readonly_mismatch pos kind reason_sub reason_super)
-    | Cross_package_mismatch { pos; reason_sub; reason_super } ->
-      Eval_result.single (cross_package_mismatch pos reason_sub reason_super)
+    | Require_package_mismatch { pos; reason_sub; reason_super } ->
+      Eval_result.single (require_package_mismatch pos reason_sub reason_super)
     | Typing_too_many_args { pos; decl_pos; actual; expected } ->
       Eval_result.single (typing_too_many_args pos decl_pos actual expected)
     | Typing_too_few_args { pos; decl_pos; actual; expected } ->

@@ -263,8 +263,8 @@ fn elaborate_for_codegen<T: Transform>(env: &Env, node: &mut T, opts: &CodegenOp
     if opts.textual_remove_memoize {
         passes.push(Box::<passes::remove_memo_attr::RemoveMemoAttr>::default());
     }
-    // Insert assertion that the package being cross-package accessed is loaded
-    passes.push(Box::<passes::elab_cross_package::ElabCrossPackagePass>::default());
+    // Insert assertion that the package being require-package accessed is loaded
+    passes.push(Box::<passes::elab_require_package::ElabRequirePackagePass>::default());
 
     passes.push(Box::new(passes::drop_unsafe_cast::DropUnsafeCast {
         emit_checked_unsafe_cast: opts.emit_checked_unsafe_cast,

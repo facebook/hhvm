@@ -176,6 +176,9 @@ bool tryMoveAndPairStores32(Env& env, const storel& st1, Vlabel b, size_t i) {
   // reuse of x0.
   if (!st1.s.isVirt()) return false;
 
+  // Make sure the first store is of the same class of register as the second.
+  if (env.def_insts[st1.s] != Vinstr::ldimml) return false;
+
   // Look for an intervening instruction that can be easily moved. For now, this
   // is limited to patterns like this:
   //  store %t0, ...

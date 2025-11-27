@@ -532,6 +532,12 @@ void HTTPClientChannel::setFlowControl(
   }
 }
 
+void HTTPClientChannel::setSessionWriteBufferLimit(uint32_t limit) {
+  if (httpSession_) {
+    httpSession_->setWriteBufferLimit(limit);
+  }
+}
+
 // HTTPTransactionCallback methods
 
 } // namespace apache::thrift

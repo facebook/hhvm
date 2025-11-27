@@ -169,6 +169,8 @@ class HTTPClientChannel : public ClientChannel,
       size_t receiveStreamWindowSize,
       size_t receiveSessionWindowSize);
 
+  void setSessionWriteBufferLimit(uint32_t limit);
+
  protected:
   void sendRequest_(
       const RpcOptions&,

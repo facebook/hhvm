@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7e2a4fcf677a01955ece1c3bb95e17e0>>
+// @generated SignedSource<<e417734a0f5f14255dcfcb62119632a4>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -2296,7 +2296,6 @@ impl<P: Params> NodeMut<P> for Tprim {
             Tprim::Tint => Ok(()),
             Tprim::Tbool => Ok(()),
             Tprim::Tfloat => Ok(()),
-            Tprim::Tstring => Ok(()),
             Tprim::Tresource => Ok(()),
             Tprim::Tnum => Ok(()),
             Tprim::Tarraykey => Ok(()),

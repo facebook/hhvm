@@ -10,7 +10,7 @@ Errors:
       { f_span = [3:1-42]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([3:35-39], (Hprim Tvoid))));
         f_params =
-        [{ param_annotation = (string); param_type_hint = ((string), (Some ([3:23-29], (Hprim Tstring)))); 
+        [{ param_annotation = (string); param_type_hint = ((string), (Some ([3:23-29], (Happly (([3:23-29], "\\HH\\string"), []))))); 
            param_pos = [3:30-32]; param_name = "$s"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
            param_named = None; param_user_attributes = []; param_visibility = None }
@@ -30,7 +30,7 @@ Errors:
        { f_span = [5:1-9:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([5:30-34], (Hprim Tvoid))));
          f_params =
-         [{ param_annotation = (vec<string>); param_type_hint = ((vec<string>), (Some ([5:12-18], (Hprim Tstring)))); 
+         [{ param_annotation = (vec<string>); param_type_hint = ((vec<string>), (Some ([5:12-18], (Happly (([5:12-18], "\\HH\\string"), []))))); 
             param_pos = [5:22-27]; param_name = "$args"; param_info = Param_variadic; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }

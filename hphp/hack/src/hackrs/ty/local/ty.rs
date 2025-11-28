@@ -7,6 +7,7 @@ use std::ops::Deref;
 
 use hcons::Hc;
 use im::HashSet;
+use naming_special_names_rust as naming_special_names;
 use oxidized::aast_defs::ReifyKind;
 use oxidized::ast_defs::ConstraintKind;
 use oxidized::ast_defs::Variance;
@@ -181,7 +182,15 @@ impl<R: Reason> Ty<R> {
         Self::prim(r, Prim::Tfloat)
     }
     pub fn string(r: R) -> Ty<R> {
-        Self::prim(r, Prim::Tstring)
+        let pos = r.pos().clone();
+        Self::new(
+            r,
+            Ty_::Tclass(
+                Positioned::new(pos, TypeName::new(naming_special_names::typehints::STRING)),
+                Exact::Exact,
+                vec![],
+            ),
+        )
     }
     pub fn num(r: R) -> Ty<R> {
         Self::prim(r, Prim::Tnum)

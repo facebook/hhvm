@@ -30,7 +30,9 @@
               ft_ret =
               (Rhint ([5:34-51]),
                (Tapply (([5:34-43], "\\HH\\Awaitable"),
-                  [(Rhint ([5:44-50]), (Tprim Tstring))])));
+                  [(Rhint ([5:44-50]),
+                    (Tapply (([5:44-50], "\\HH\\string"), [])))]
+                  )));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = true; generator = false; fun_kind = FAsync;
@@ -53,7 +55,8 @@
               ft_ret =
               (Rhint ([10:32-60]),
                (Tapply (([10:32-41], "\\Generator"),
-                  [(Rhint ([10:42-48]), (Tprim Tstring));
+                  [(Rhint ([10:42-48]),
+                    (Tapply (([10:42-48], "\\HH\\string"), [])));
                     (Rhint ([10:50-53]), (Tprim Tint));
                     (Rhint ([10:55-59]), (Tprim Tvoid))]
                   )));
@@ -80,7 +83,8 @@
               (Rhint ([14:45-73]),
                (Tapply (([14:45-54], "\\Generator"),
                   [(Rhint ([14:55-58]), (Tprim Tint));
-                    (Rhint ([14:60-66]), (Tprim Tstring));
+                    (Rhint ([14:60-66]),
+                     (Tapply (([14:60-66], "\\HH\\string"), [])));
                     (Rhint ([14:68-72]), (Tprim Tvoid))]
                   )));
               ft_flags =
@@ -106,7 +110,8 @@
               (Rhint ([18:35-68]),
                (Tapply (([18:35-49], "\\HH\\AsyncGenerator"),
                   [(Rhint ([18:50-53]), (Tprim Tint));
-                    (Rhint ([18:55-61]), (Tprim Tstring));
+                    (Rhint ([18:55-61]),
+                     (Tapply (([18:55-61], "\\HH\\string"), [])));
                     (Rhint ([18:63-67]), (Tprim Tvoid))]
                   )));
               ft_flags =

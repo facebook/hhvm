@@ -12,7 +12,7 @@
            param_pos = [3:21-23]; param_name = "$v"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
            param_named = None; param_user_attributes = []; param_visibility = None };
-          { param_annotation = (string); param_type_hint = ((string), (Some ([3:25-31], (Hprim Tstring)))); 
+          { param_annotation = (string); param_type_hint = ((string), (Some ([3:25-31], (Happly (([3:25-31], "\\HH\\string"), []))))); 
             param_pos = [3:32-34]; param_name = "$s"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }
@@ -36,7 +36,7 @@
             param_pos = [3:21-23]; param_name = "$v"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None };
-           { param_annotation = (string); param_type_hint = ((string), (Some ([3:25-31], (Hprim Tstring)))); 
+           { param_annotation = (string); param_type_hint = ((string), (Some ([3:25-31], (Happly (([3:25-31], "\\HH\\string"), []))))); 
              param_pos = [3:32-34]; param_name = "$s"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_named = None; param_user_attributes = []; param_visibility = None }

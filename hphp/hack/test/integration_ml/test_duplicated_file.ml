@@ -6,8 +6,8 @@ module Test = Integration_test_base
 let foo_contents =
   "<?hh //strict
     class Foo {
-        public function g(): string {
-            return 'a';
+        public function g(): int {
+            return 1;
         }
     }
 "

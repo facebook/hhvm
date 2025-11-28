@@ -236,6 +236,7 @@ let rec is_safe_mut_ty env (seen : SSet.t) ty =
   | Tdependent (_, upper) ->
     (* check upper bounds *)
     is_safe_mut_ty env seen upper
+  | Tclass ((_, id), _, _) when String.equal SN.Classes.cString id -> true
   | Tclass (_, _, tyl) when is_value_collection_ty env ty ->
     List.for_all tyl ~f:(fun l -> is_safe_mut_ty env seen l)
   | Tgeneric name ->

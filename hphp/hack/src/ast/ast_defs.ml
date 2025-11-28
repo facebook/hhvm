@@ -167,7 +167,6 @@ and tprim =
   | Tint
   | Tbool
   | Tfloat
-  | Tstring
   | Tresource
   | Tnum
   | Tarraykey

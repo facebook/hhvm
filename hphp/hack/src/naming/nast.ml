@@ -19,7 +19,6 @@ let show_tprim =
     | Tint -> int
     | Tbool -> bool
     | Tfloat -> float
-    | Tstring -> string
     | Tnum -> num
     | Tresource -> resource
     | Tarraykey -> arraykey

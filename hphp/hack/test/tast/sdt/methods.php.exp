@@ -13,7 +13,7 @@
             param_pos = [4:31-33]; param_name = "$v"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None };
-           { param_annotation = (string); param_type_hint = ((string), (Some ([4:35-41], (Hprim Tstring)))); 
+           { param_annotation = (string); param_type_hint = ((string), (Some ([4:35-41], (Happly (([4:35-41], "\\HH\\string"), []))))); 
              param_pos = [4:42-44]; param_name = "$s"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_named = None; param_user_attributes = []; param_visibility = None }
@@ -30,15 +30,15 @@
              param_pos = [8:31-33]; param_name = "$v"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_named = None; param_user_attributes = []; param_visibility = None };
-            { param_annotation = (string); param_type_hint = ((string), (Some ([8:35-41], (Hprim Tstring)))); 
+            { param_annotation = (string); param_type_hint = ((string), (Some ([8:35-41], (Happly (([8:35-41], "\\HH\\string"), []))))); 
               param_pos = [8:42-44]; param_name = "$s"; param_info = Param_required; 
               param_readonly = None; param_splat = None; param_callconv = Pnormal; 
               param_named = None; param_user_attributes = []; param_visibility = None }
             ];
           m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([9:5-15], (Return (Some ((string), [9:12-14], (Lvar ([9:12-14], $s))))))] }; 
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
-          m_ret = ((~string), (Some ([8:47-53], (Hprim Tstring)))); m_external = false; 
-          m_doc_comment = None }
+          m_ret = ((~string), (Some ([8:47-53], (Happly (([8:47-53], "\\HH\\string"), []))))); 
+          m_external = false; m_doc_comment = None }
         ];
       c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
@@ -63,7 +63,7 @@
              param_pos = [4:31-33]; param_name = "$v"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_named = None; param_user_attributes = []; param_visibility = None };
-            { param_annotation = (string); param_type_hint = ((string), (Some ([4:35-41], (Hprim Tstring)))); 
+            { param_annotation = (string); param_type_hint = ((string), (Some ([4:35-41], (Happly (([4:35-41], "\\HH\\string"), []))))); 
               param_pos = [4:42-44]; param_name = "$s"; param_info = Param_required; 
               param_readonly = None; param_splat = None; param_callconv = Pnormal; 
               param_named = None; param_user_attributes = []; param_visibility = None }
@@ -80,14 +80,14 @@
               param_pos = [8:31-33]; param_name = "$v"; param_info = Param_required; 
               param_readonly = None; param_splat = None; param_callconv = Pnormal; 
               param_named = None; param_user_attributes = []; param_visibility = None };
-             { param_annotation = (string); param_type_hint = ((string), (Some ([8:35-41], (Hprim Tstring)))); 
+             { param_annotation = (string); param_type_hint = ((string), (Some ([8:35-41], (Happly (([8:35-41], "\\HH\\string"), []))))); 
                param_pos = [8:42-44]; param_name = "$s"; param_info = Param_required; 
                param_readonly = None; param_splat = None; param_callconv = Pnormal; 
                param_named = None; param_user_attributes = []; param_visibility = None }
              ];
            m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([9:5-15], (Return (Some ((string), [9:12-14], (Lvar ([9:12-14], $s))))))] }; 
            m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
-           m_ret = ((dynamic), (Some ([8:47-53], (Hprim Tstring)))); 
+           m_ret = ((dynamic), (Some ([8:47-53], (Happly (([8:47-53], "\\HH\\string"), []))))); 
            m_external = false; m_doc_comment = None }
          ];
        c_xhp_children = []; c_xhp_attrs = [];

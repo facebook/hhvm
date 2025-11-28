@@ -4,7 +4,7 @@
        td_as_constraint = None; td_super_constraint = None;
        td_type_assignment =
        (Typing_defs.SimpleTypeDef (Transparent,
-          (Rhint ([5:19-25]), (Tprim Tstring))));
+          (Rhint ([5:19-25]), (Tapply (([5:19-25], "\\HH\\string"), [])))));
        td_is_ctx = false; td_attributes = []; td_internal = false;
        td_docs_url = None; td_package = None }));
   ("\\MyNamespace\\MyInt",
@@ -60,7 +60,8 @@
         td_as_constraint = None; td_super_constraint = None;
         td_type_assignment =
         (Typing_defs.SimpleTypeDef (Transparent,
-           (Rhint ([14:24-30]), (Tprim Tstring))));
+           (Rhint ([14:24-30]), (Tapply (([14:24-30], "\\HH\\string"), [])))
+           ));
         td_is_ctx = false; td_attributes = []; td_internal = false;
         td_docs_url = None; td_package = None }));
   ("\\MyNamespace\\InnerNamespace\\MyDoubleNamespacedType",
@@ -80,7 +81,8 @@
         td_as_constraint = None; td_super_constraint = None;
         td_type_assignment =
         (Typing_defs.SimpleTypeDef (Transparent,
-           (Rhint ([19:37-43]), (Tprim Tstring))));
+           (Rhint ([19:37-43]), (Tapply (([19:37-43], "\\HH\\string"), [])))
+           ));
         td_is_ctx = false; td_attributes = []; td_internal = false;
         td_docs_url = None; td_package = None }));
   ("\\MyNamespace\\Very\\Inner\\Namespace\\MyClass",

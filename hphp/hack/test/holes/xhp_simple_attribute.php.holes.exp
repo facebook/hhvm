@@ -6,7 +6,8 @@
       c_implements = []; c_consts = []; c_typeconsts = [];
       c_vars =
       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; cv_readonly = false; 
-         cv_visibility = Public; cv_type = ((~dict<string, dynamic>), (Some ([7:14-37], (Happly (([7:14-20], "\\HH\\dict"), [([7:21-27], (Hprim Tstring)); ([7:29-36], Hdynamic)])))));
+         cv_visibility = Public;
+         cv_type = ((~dict<string, dynamic>), (Some ([7:14-37], (Happly (([7:14-20], "\\HH\\dict"), [([7:21-27], (Happly (([7:21-27], "\\HH\\string"), []))); ([7:29-36], Hdynamic)])))));
          cv_id = ([7:38-49], "attributes"); cv_expr = None; cv_user_attributes = []; 
          cv_doc_comment = None; cv_is_static = false; cv_span = [7:38-49] };
         { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
@@ -14,7 +15,7 @@
           cv_id = ([8:30-39], "children"); cv_expr = None; cv_user_attributes = []; 
           cv_doc_comment = None; cv_is_static = false; cv_span = [8:30-39] };
         { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
-          cv_readonly = false; cv_visibility = Public; cv_type = ((string), (Some ([9:14-20], (Hprim Tstring)))); 
+          cv_readonly = false; cv_visibility = Public; cv_type = ((string), (Some ([9:14-20], (Happly (([9:14-20], "\\HH\\string"), []))))); 
           cv_id = ([9:21-26], "file"); cv_expr = None; cv_user_attributes = []; 
           cv_doc_comment = None; cv_is_static = false; cv_span = [9:21-26] };
         { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
@@ -33,7 +34,7 @@
          m_name = ([6:21-32], "__construct"); m_tparams = []; m_where_constraints = [];
          m_params =
          [{ param_annotation = (dict<string, dynamic>);
-            param_type_hint = ((dict<string, dynamic>), (Some ([7:14-37], (Happly (([7:14-20], "\\HH\\dict"), [([7:21-27], (Hprim Tstring)); ([7:29-36], Hdynamic)]))))); 
+            param_type_hint = ((dict<string, dynamic>), (Some ([7:14-37], (Happly (([7:14-20], "\\HH\\dict"), [([7:21-27], (Happly (([7:21-27], "\\HH\\string"), []))); ([7:29-36], Hdynamic)])))));
             param_pos = [7:38-49]; param_name = "$attributes"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = (Some Public) };
@@ -41,7 +42,7 @@
              param_pos = [8:30-39]; param_name = "$children"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_named = None; param_user_attributes = []; param_visibility = (Some Public) };
-           { param_annotation = (string); param_type_hint = ((string), (Some ([9:14-20], (Hprim Tstring)))); 
+           { param_annotation = (string); param_type_hint = ((string), (Some ([9:14-20], (Happly (([9:14-20], "\\HH\\string"), []))))); 
              param_pos = [9:21-26]; param_name = "$file"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_named = None; param_user_attributes = []; param_visibility = (Some Public) };
@@ -97,7 +98,7 @@
        { f_span = [14:3-17:4]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([14:48-52], (Hprim Tvoid))));
          f_params =
-         [{ param_annotation = (string); param_type_hint = ((string), (Some ([14:33-39], (Hprim Tstring)))); 
+         [{ param_annotation = (string); param_type_hint = ((string), (Some ([14:33-39], (Happly (([14:33-39], "\\HH\\string"), []))))); 
             param_pos = [14:40-45]; param_name = "$prop"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }
@@ -132,7 +133,7 @@
        c_vars =
        [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
           cv_readonly = false; cv_visibility = Public;
-          cv_type = ((~dict<string, dynamic>), (Some ([7:14-37], (Happly (([7:14-20], "\\HH\\dict"), [([7:21-27], (Hprim Tstring)); ([7:29-36], Hdynamic)]))))); 
+          cv_type = ((~dict<string, dynamic>), (Some ([7:14-37], (Happly (([7:14-20], "\\HH\\dict"), [([7:21-27], (Happly (([7:21-27], "\\HH\\string"), []))); ([7:29-36], Hdynamic)])))));
           cv_id = ([7:38-49], "attributes"); cv_expr = None; cv_user_attributes = []; 
           cv_doc_comment = None; cv_is_static = false; cv_span = [7:38-49] };
          { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
@@ -140,7 +141,7 @@
            cv_id = ([8:30-39], "children"); cv_expr = None; cv_user_attributes = []; 
            cv_doc_comment = None; cv_is_static = false; cv_span = [8:30-39] };
          { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
-           cv_readonly = false; cv_visibility = Public; cv_type = ((string), (Some ([9:14-20], (Hprim Tstring)))); 
+           cv_readonly = false; cv_visibility = Public; cv_type = ((string), (Some ([9:14-20], (Happly (([9:14-20], "\\HH\\string"), []))))); 
            cv_id = ([9:21-26], "file"); cv_expr = None; cv_user_attributes = []; 
            cv_doc_comment = None; cv_is_static = false; cv_span = [9:21-26] };
          { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
@@ -158,7 +159,8 @@
           m_static = false; m_readonly_this = false; m_visibility = Public; 
           m_name = ([6:21-32], "__construct"); m_tparams = []; m_where_constraints = [];
           m_params =
-          [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([7:14-37], (Happly (([7:14-20], "\\HH\\dict"), [([7:21-27], (Hprim Tstring)); ([7:29-36], Hdynamic)])))));
+          [{ param_annotation = (dynamic);
+             param_type_hint = ((dynamic), (Some ([7:14-37], (Happly (([7:14-20], "\\HH\\dict"), [([7:21-27], (Happly (([7:21-27], "\\HH\\string"), []))); ([7:29-36], Hdynamic)])))));
              param_pos = [7:38-49]; param_name = "$attributes"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_named = None; param_user_attributes = []; param_visibility = (Some Public) };
@@ -166,7 +168,7 @@
               param_pos = [8:30-39]; param_name = "$children"; param_info = Param_required; 
               param_readonly = None; param_splat = None; param_callconv = Pnormal; 
               param_named = None; param_user_attributes = []; param_visibility = (Some Public) };
-            { param_annotation = (string); param_type_hint = ((string), (Some ([9:14-20], (Hprim Tstring)))); 
+            { param_annotation = (string); param_type_hint = ((string), (Some ([9:14-20], (Happly (([9:14-20], "\\HH\\string"), []))))); 
               param_pos = [9:21-26]; param_name = "$file"; param_info = Param_required; 
               param_readonly = None; param_splat = None; param_callconv = Pnormal; 
               param_named = None; param_user_attributes = []; param_visibility = (Some Public) };

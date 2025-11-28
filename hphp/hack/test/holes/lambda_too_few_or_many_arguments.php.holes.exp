@@ -20,7 +20,7 @@ Errors:
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-13], "\\foo");
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_tparams = []; f_ret = ((~string), (Some ([3:22-28], (Hprim Tstring))));
+        f_readonly_ret = None; f_tparams = []; f_ret = ((~string), (Some ([3:22-28], (Happly (([3:22-28], "\\HH\\string"), [])))));
         f_params =
         [{ param_annotation = (int); param_type_hint = ((int), (Some ([3:14-17], (Hprim Tint)))); 
            param_pos = [3:18-20]; param_name = "$_"; param_info = Param_required; 
@@ -53,7 +53,7 @@ Errors:
                               hf_param_tys = [([7:30-33], (Hprim Tint))];
                               hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None; hfparam_named = None })];
                               hf_variadic_ty = None; hf_ctxs = None; 
-                              hf_return_ty = ([7:35-41], (Hlike ([7:35-41], (Hprim Tstring)))); 
+                              hf_return_ty = ([7:35-41], (Hlike ([7:35-41], (Happly (([7:35-41], "\\HH\\string"), []))))); 
                               hf_is_readonly_return = None }))
                          ]
                        )))));
@@ -106,7 +106,7 @@ Errors:
                             { hf_is_readonly = None; hf_tparams = []; 
                               hf_param_tys = []; hf_param_info = []; 
                               hf_variadic_ty = None; hf_ctxs = None; 
-                              hf_return_ty = ([9:29-35], (Hlike ([9:29-35], (Hprim Tstring)))); 
+                              hf_return_ty = ([9:29-35], (Hlike ([9:29-35], (Happly (([9:29-35], "\\HH\\string"), []))))); 
                               hf_is_readonly_return = None }))
                          ]
                        )))));
@@ -126,7 +126,7 @@ Errors:
                                [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None; hfparam_named = None });
                                  (Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None; hfparam_named = None })];
                                hf_variadic_ty = None; hf_ctxs = None; 
-                               hf_return_ty = ([9:61-67], (Hlike ([9:61-67], (Hprim Tstring)))); 
+                               hf_return_ty = ([9:61-67], (Hlike ([9:61-67], (Happly (([9:61-67], "\\HH\\string"), []))))); 
                                hf_is_readonly_return = None }))
                           ]
                         )))));
@@ -264,7 +264,7 @@ Errors:
                               hf_param_tys = [([7:30-33], (Hprim Tint))];
                               hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None; hfparam_named = None })];
                               hf_variadic_ty = None; hf_ctxs = None; 
-                              hf_return_ty = ([7:35-41], (Hlike ([7:35-41], (Hprim Tstring)))); 
+                              hf_return_ty = ([7:35-41], (Hlike ([7:35-41], (Happly (([7:35-41], "\\HH\\string"), []))))); 
                               hf_is_readonly_return = None }))
                          ]
                        )))));

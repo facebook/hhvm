@@ -4,7 +4,7 @@
        td_as_constraint = None; td_super_constraint = None;
        td_type_assignment =
        (Typing_defs.SimpleTypeDef (Transparent,
-          (Rhint ([4:35-41]), (Tprim Tstring))));
+          (Rhint ([4:35-41]), (Tapply (([4:35-41], "\\HH\\string"), [])))));
        td_is_ctx = false; td_attributes = []; td_internal = false;
        td_docs_url = None; td_package = None }));
   ("\\MyClass",
@@ -27,7 +27,7 @@
         td_as_constraint = None; td_super_constraint = None;
         td_type_assignment =
         (Typing_defs.SimpleTypeDef (Transparent,
-           (Rhint ([9:26-32]), (Tprim Tstring))));
+           (Rhint ([9:26-32]), (Tapply (([9:26-32], "\\HH\\string"), [])))));
         td_is_ctx = false; td_attributes = []; td_internal = false;
         td_docs_url = None; td_package = None }));
   ("\\MyNamespace\\MyClass",

@@ -20,7 +20,8 @@ Errors:
        cst_span = [4:1-14]; cst_emit_id = None; cst_module = None; cst_package = None });
   (Constant
      { cst_annotation = (); cst_mode = Mhhi; cst_name = ([5:14-15], "\\Y"); 
-       cst_type = (Some ([5:7-13], (Hprim Tstring))); cst_value = ((nothing), [5:14-15], Omitted);
+       cst_type = (Some ([5:7-13], (Happly (([5:7-13], "\\HH\\string"), [])))); 
+       cst_value = ((nothing), [5:14-15], Omitted);
        cst_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 

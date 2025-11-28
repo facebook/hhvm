@@ -8,7 +8,7 @@
       { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([3:65-69], (Hprim Tvoid))));
         f_params =
-        [{ param_annotation = (string); param_type_hint = ((string), (Some ([3:40-46], (Hprim Tstring)))); 
+        [{ param_annotation = (string); param_type_hint = ((string), (Some ([3:40-46], (Happly (([3:40-46], "\\HH\\string"), []))))); 
            param_pos = [3:47-50]; param_name = "$xs"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
            param_named = None; param_user_attributes = []; param_visibility = None };

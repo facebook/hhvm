@@ -481,7 +481,6 @@ pub mod typehints {
     pub static int: Lazy<TypeName> = lazy!(sn::typehints::INT);
     pub static bool: Lazy<TypeName> = lazy!(sn::typehints::BOOL);
     pub static float: Lazy<TypeName> = lazy!(sn::typehints::FLOAT);
-    pub static string: Lazy<TypeName> = lazy!(sn::typehints::STRING);
     pub static darray: Lazy<TypeName> = lazy!(sn::typehints::DARRAY);
     pub static varray: Lazy<TypeName> = lazy!(sn::typehints::VARRAY);
     pub static varray_or_darray: Lazy<TypeName> = lazy!(sn::typehints::VARRAY_OR_DARRAY);
@@ -491,6 +490,7 @@ pub mod typehints {
     pub static supportdyn: Lazy<TypeName> = lazy!(sn::typehints::SUPPORTDYN);
     pub static hh_sypportdyn: Lazy<TypeName> = lazy!(sn::typehints::HH_SUPPORTDYN);
     pub static wildcard: Lazy<TypeName> = lazy!(sn::typehints::WILDCARD);
+    pub static hh_string: Lazy<TypeName> = lazy!(sn::typehints::HH_STRING);
 
     pub static reserved_typehints: Lazy<HashSet<TypeName>> = Lazy::new(|| {
         [
@@ -508,7 +508,6 @@ pub mod typehints {
             *int,
             *bool,
             *float,
-            *string,
             *darray,
             *varray,
             *varray_or_darray,

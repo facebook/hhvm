@@ -57,7 +57,7 @@
        { f_span = [9:1-19:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([11:4-8], (Hprim Tvoid))));
          f_params =
-         [{ param_annotation = (Set<string>); param_type_hint = ((Set<string>), (Some ([10:3-14], (Happly (([10:3-6], "\\HH\\Set"), [([10:7-13], (Hprim Tstring))]))))); 
+         [{ param_annotation = (Set<string>); param_type_hint = ((Set<string>), (Some ([10:3-14], (Happly (([10:3-6], "\\HH\\Set"), [([10:7-13], (Happly (([10:7-13], "\\HH\\string"), [])))])))));
             param_pos = [10:15-17]; param_name = "$h"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }
@@ -102,7 +102,7 @@
        { f_span = [21:1-31:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([23:4-8], (Hprim Tvoid))));
          f_params =
-         [{ param_annotation = (Set<string>); param_type_hint = ((Set<string>), (Some ([22:3-14], (Happly (([22:3-6], "\\HH\\Set"), [([22:7-13], (Hprim Tstring))]))))); 
+         [{ param_annotation = (Set<string>); param_type_hint = ((Set<string>), (Some ([22:3-14], (Happly (([22:3-6], "\\HH\\Set"), [([22:7-13], (Happly (([22:7-13], "\\HH\\string"), [])))])))));
             param_pos = [22:15-17]; param_name = "$h"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }
@@ -121,8 +121,8 @@
                           ((~Set<int>), [25:5-52],
                            (Hole (((Set<string>), [25:49-51], (Lvar ([25:49-51], $h))), (Set<string>), (Set<int>),
                               (UnsafeCast
-                                 [([25:27-38], (Happly (([25:27-30], "\\HH\\Set"), [([25:31-37], (Hprim Tstring))]))); (
-                                   [25:39-47], (Happly (([25:39-42], "\\HH\\Set"), [([25:43-46], (Hprim Tint))])))])
+                                 [([25:27-38], (Happly (([25:27-30], "\\HH\\Set"), [([25:31-37], (Happly (([25:31-37], "\\HH\\string"), [])))])));
+                                   ([25:39-47], (Happly (([25:39-42], "\\HH\\Set"), [([25:43-46], (Hprim Tint))])))])
                               ))))
                         ];
                       unpacked_arg = None }))));
@@ -144,7 +144,7 @@
                            ((~Set<int>), [30:11-58],
                             (Hole (((Set<string>), [30:55-57], (Lvar ([30:55-57], $h))), (Set<string>), (Set<int>),
                                (UnsafeCast
-                                  [([30:33-44], (Happly (([30:33-36], "\\HH\\Set"), [([30:37-43], (Hprim Tstring))])));
+                                  [([30:33-44], (Happly (([30:33-36], "\\HH\\Set"), [([30:37-43], (Happly (([30:37-43], "\\HH\\string"), [])))])));
                                     ([30:45-53], (Happly (([30:45-48], "\\HH\\Set"), [([30:49-52], (Hprim Tint))])))])
                                ))))
                          ];
@@ -214,7 +214,7 @@
        { f_span = [21:1-31:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_tparams = []; f_ret = ((dynamic), (Some ([23:4-8], (Hprim Tvoid))));
          f_params =
-         [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([22:3-14], (Happly (([22:3-6], "\\HH\\Set"), [([22:7-13], (Hprim Tstring))]))))); 
+         [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([22:3-14], (Happly (([22:3-6], "\\HH\\Set"), [([22:7-13], (Happly (([22:7-13], "\\HH\\string"), [])))])))));
             param_pos = [22:15-17]; param_name = "$h"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }
@@ -233,8 +233,8 @@
                           ((~Set<int>), [25:5-52],
                            (Hole (((dynamic), [25:49-51], (Lvar ([25:49-51], $h))), (Set<string>), (Set<int>),
                               (UnsafeCast
-                                 [([25:27-38], (Happly (([25:27-30], "\\HH\\Set"), [([25:31-37], (Hprim Tstring))]))); (
-                                   [25:39-47], (Happly (([25:39-42], "\\HH\\Set"), [([25:43-46], (Hprim Tint))])))])
+                                 [([25:27-38], (Happly (([25:27-30], "\\HH\\Set"), [([25:31-37], (Happly (([25:31-37], "\\HH\\string"), [])))])));
+                                   ([25:39-47], (Happly (([25:39-42], "\\HH\\Set"), [([25:43-46], (Hprim Tint))])))])
                               ))))
                         ];
                       unpacked_arg = None }))));
@@ -256,7 +256,7 @@
                            ((~Set<int>), [30:11-58],
                             (Hole (((dynamic), [30:55-57], (Lvar ([30:55-57], $h))), (Set<string>), (Set<int>),
                                (UnsafeCast
-                                  [([30:33-44], (Happly (([30:33-36], "\\HH\\Set"), [([30:37-43], (Hprim Tstring))])));
+                                  [([30:33-44], (Happly (([30:33-36], "\\HH\\Set"), [([30:37-43], (Happly (([30:37-43], "\\HH\\string"), [])))])));
                                     ([30:45-53], (Happly (([30:45-48], "\\HH\\Set"), [([30:49-52], (Hprim Tint))])))])
                                ))))
                          ];

@@ -239,7 +239,6 @@ and type_tag_generic =
 and type_tag =
   | BoolTag
   | IntTag
-  | StringTag
   | ArraykeyTag
   | FloatTag
   | NumTag
@@ -742,7 +741,6 @@ module Pp = struct
     match tag with
     | BoolTag -> Format.pp_print_string fmt "BoolTag"
     | IntTag -> Format.pp_print_string fmt "IntTag"
-    | StringTag -> Format.pp_print_string fmt "StringTag"
     | ArraykeyTag -> Format.pp_print_string fmt "ArraykeyTag"
     | FloatTag -> Format.pp_print_string fmt "FloatTag"
     | NumTag -> Format.pp_print_string fmt "NumTag"
@@ -836,7 +834,6 @@ let type_tag_con_ordinal type_tag =
   match type_tag with
   | BoolTag -> 0
   | IntTag -> 1
-  | StringTag -> 2
   | ArraykeyTag -> 3
   | FloatTag -> 4
   | NumTag -> 5
@@ -1132,7 +1129,6 @@ and compare_type_tag tag1 tag2 =
   match (tag1, tag2) with
   | (BoolTag, BoolTag)
   | (IntTag, IntTag)
-  | (StringTag, StringTag)
   | (ArraykeyTag, ArraykeyTag)
   | (FloatTag, FloatTag)
   | (NumTag, NumTag)

@@ -601,7 +601,7 @@ let rec array_get
         (env, (ty, dflt_arr_res, Ok ty2))
       | Tdynamic -> got_dynamic ()
       | Tany _ -> (env, (ty1, dflt_arr_res, Ok ty2))
-      | Tprim Tstring ->
+      | Tclass ((_, id), _, _) when String.equal id SN.Classes.cString ->
         let ty = MakeType.string (Reason.witness expr_pos) in
         let (_, p2, _) = e2 in
         let ty1 = MakeType.int (Reason.idx (p2, r)) in
@@ -1460,7 +1460,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
       | Tprim Tnull
         when Tast.is_under_dynamic_assumptions env.Typing_env_types.checked ->
         got_dynamic ()
-      | Tprim Tstring ->
+      | Tclass ((_, id), _, _) when String.equal id SN.Classes.cString ->
         let (_, p, _) = key in
         let tk = MakeType.int (Reason.idx (p, r)) in
         let tv = MakeType.string (Reason.witness expr_pos) in

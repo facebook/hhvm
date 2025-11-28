@@ -5444,6 +5444,7 @@ dependencies = [
  "hash",
  "hcons",
  "im",
+ "naming_special_names_rust",
  "ocamlrep",
  "once_cell",
  "oxidized",

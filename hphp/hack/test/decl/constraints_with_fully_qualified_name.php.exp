@@ -13,7 +13,7 @@
         td_as_constraint = None; td_super_constraint = None;
         td_type_assignment =
         (Typing_defs.SimpleTypeDef (Transparent,
-           (Rhint ([4:11-17]), (Tprim Tstring))));
+           (Rhint ([4:11-17]), (Tapply (([4:11-17], "\\HH\\string"), [])))));
         td_is_ctx = false; td_attributes = []; td_internal = false;
         td_docs_url = None; td_package = None }));
   ("\\I",

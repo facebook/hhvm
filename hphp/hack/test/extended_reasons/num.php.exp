@@ -76,6 +76,16 @@ File num.php, line 3, character 23 - line 3, character 28:
  5 |   $x = 5 + $x;
  6 |   $x = $x + 5;
 
+which is defined here
+
+File string.hhi, line 6, character 9 - line 6, character 14:
+
+ 5 |   <<__SupportDynamicType>>
+ 6 |   class »string« {
+ 7 |   }
+ 8 | 
+ 9 | }
+
 
   Step 2 of 2                                 (here is where the error occurred) 
 
@@ -189,6 +199,16 @@ File num.php, line 3, character 23 - line 3, character 28:
  4 |   $x = 5 + $n;
  5 |   $x = 5 + $x;
  6 |   $x = $x + 5;
+
+which is defined here
+
+File string.hhi, line 6, character 9 - line 6, character 14:
+
+ 5 |   <<__SupportDynamicType>>
+ 6 |   class »string« {
+ 7 |   }
+ 8 | 
+ 9 | }
 
 
   Step 2 of 2                                 (here is where the error occurred) 

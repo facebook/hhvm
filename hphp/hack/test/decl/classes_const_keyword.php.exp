@@ -15,7 +15,9 @@
           (Rhint ([5:9-26]),
            (Tapply (([5:9-13], "\\HH\\dict"),
               [(Rhint ([5:14-17]), (Tprim Tint));
-                (Rhint ([5:19-25]), (Tprim Tstring))]
+                (Rhint ([5:19-25]),
+                 (Tapply (([5:19-25], "\\HH\\string"), [])))
+                ]
               )));
           scc_refs = []; scc_value = None };
          { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
@@ -27,7 +29,9 @@
                  (Rhint ([6:19-36]),
                   (Tapply (([6:19-23], "\\HH\\dict"),
                      [(Rhint ([6:24-27]), (Tprim Tint));
-                       (Rhint ([6:29-35]), (Tprim Tstring))]
+                       (Rhint ([6:29-35]),
+                        (Tapply (([6:29-35], "\\HH\\string"), [])))
+                       ]
                      )))
                  ]
                )));
@@ -124,7 +128,8 @@
            scc_type =
            (Rhint ([22:9-26]),
             (Tapply (([22:9-13], "\\HH\\dict"),
-               [(Rhint ([22:14-20]), (Tprim Tstring));
+               [(Rhint ([22:14-20]),
+                 (Tapply (([22:14-20], "\\HH\\string"), [])));
                  (Rhint ([22:22-25]), (Tprim Tint))]
                )));
            scc_refs = []; scc_value = None };
@@ -133,21 +138,27 @@
             scc_type =
             (Rhint ([23:9-23]),
              (Tapply (([23:9-15], "\\HH\\keyset"),
-                [(Rhint ([23:16-22]), (Tprim Tstring))])));
+                [(Rhint ([23:16-22]),
+                  (Tapply (([23:16-22], "\\HH\\string"), [])))]
+                )));
             scc_refs = []; scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([24:27-44], "CCLASSNAME_KEYSET");
             scc_type =
             (Rhint ([24:9-26]),
              (Tapply (([24:9-15], "\\HH\\keyset"),
-                [(Rhint ([24:16-25]), (Tprim Tstring))])));
+                [(Rhint ([24:16-25]),
+                  (Tapply (([24:16-25], "\\HH\\string"), [])))]
+                )));
             scc_refs = []; scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([25:21-28], "CVARRAY");
             scc_type =
             (Rhint ([25:9-20]),
              (Tapply (([25:9-12], "\\HH\\vec"),
-                [(Rhint ([25:13-19]), (Tprim Tstring))])));
+                [(Rhint ([25:13-19]),
+                  (Tapply (([25:13-19], "\\HH\\string"), [])))]
+                )));
             scc_refs = []; scc_value = None }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
@@ -176,8 +187,9 @@
             scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([31:16-23], "CSTRING");
-            scc_type = (Rhint ([31:9-15]), (Tprim Tstring)); scc_refs = [];
-            scc_value = None };
+            scc_type =
+            (Rhint ([31:9-15]), (Tapply (([31:9-15], "\\HH\\string"), [])));
+            scc_refs = []; scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([32:14-19], "CBOOL");
             scc_type = (Rhint ([32:9-13]), (Tprim Tbool)); scc_refs = [];
@@ -211,7 +223,10 @@
                      sft_ty = (Rhint ([36:22-25]), (Tprim Tint)) };
                    (Typing_defs_core.TSFlit_str ([36:27-30], "b")) ->
                    { sft_optional = false;
-                     sft_ty = (Rhint ([36:34-40]), (Tprim Tstring)) } };
+                     sft_ty =
+                     (Rhint ([36:34-40]),
+                      (Tapply (([36:34-40], "\\HH\\string"), [])))
+                     } };
                  s_unknown_value = (Rhint ([36:42-45]), Tmixed) }));
            scc_refs = []; scc_value = None }
           ];
@@ -243,7 +258,8 @@
                        (Rhint ([41:16-31]),
                         (Ttuple
                            { t_required =
-                             [(Rhint ([41:17-23]), (Tprim Tstring));
+                             [(Rhint ([41:17-23]),
+                               (Tapply (([41:17-23], "\\HH\\string"), [])));
                                (Rhint ([41:25-30]), (Tprim Tfloat))];
                              t_optional = [];
                              t_variadic = (Rhint ([41:16-31]), (Tunion [])) }))))

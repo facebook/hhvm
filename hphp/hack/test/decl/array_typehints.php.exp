@@ -11,7 +11,9 @@
              (Rhint ([3:16-35]),
               (Tapply (([3:16-22], "\\HH\\dict"),
                  [(Rhint ([3:23-26]), (Tprim Tint));
-                   (Rhint ([3:28-34]), (Tprim Tstring))]
+                   (Rhint ([3:28-34]),
+                    (Tapply (([3:28-34], "\\HH\\string"), [])))
+                   ]
                  )));
              ft_flags =
              { Typing_defs_flags.Fun.return_disposable = false;
@@ -59,7 +61,9 @@
               (Rhint ([11:16-35]),
                (Tapply (([11:16-22], "\\HH\\dict"),
                   [(Rhint ([11:23-26]), (Tprim Tint));
-                    (Rhint ([11:28-34]), (Tprim Tstring))]
+                    (Rhint ([11:28-34]),
+                     (Tapply (([11:28-34], "\\HH\\string"), [])))
+                    ]
                   )));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
@@ -107,7 +111,8 @@
               ft_ret =
               (Rhint ([19:17-46]),
                (Tvec_or_dict (Rhint ([19:34-37]), (Tprim Tint)),
-                  (Rhint ([19:39-45]), (Tprim Tstring))));
+                  (Rhint ([19:39-45]),
+                   (Tapply (([19:39-45], "\\HH\\string"), [])))));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
                 async = false; generator = false; fun_kind = FSync;

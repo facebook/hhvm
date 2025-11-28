@@ -36,7 +36,7 @@
        { f_span = [8:1-11:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([8:60-64], (Hprim Tvoid))));
          f_params =
-         [{ param_annotation = (?string); param_type_hint = ((?string), (Some ([8:45-52], (Hoption ([8:46-52], (Hprim Tstring)))))); 
+         [{ param_annotation = (?string); param_type_hint = ((?string), (Some ([8:45-52], (Hoption ([8:46-52], (Happly (([8:46-52], "\\HH\\string"), []))))))); 
             param_pos = [8:53-56]; param_name = "$xs"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }

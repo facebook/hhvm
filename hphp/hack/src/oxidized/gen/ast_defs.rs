@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0ad636831afe354a3047a7e874d62264>>
+// @generated SignedSource<<6d52eb1148b21460092dd96c701bd734>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -627,7 +627,6 @@ pub enum Tprim {
     Tint,
     Tbool,
     Tfloat,
-    Tstring,
     Tresource,
     Tnum,
     Tarraykey,

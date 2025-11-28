@@ -82,8 +82,9 @@
      { t_annotation = (); t_name = ([8:11-14], "\\CT3"); t_tparams = []; 
        t_as_constraint = (Some ([8:11-14], (Happly (([8:11-14], "\\HH\\supportdyn"), [([8:11-14], Hmixed)])))); 
        t_super_constraint = None;
-       t_assignment = (CaseType ({ tctv_hint = ([8:17-23], (Hprim Tstring)); tctv_where_constraints = [] }, [{ tctv_hint = ([8:26-30], (Hprim Tbool)); tctv_where_constraints = [] }]));
-       t_runtime_type = ([8:17-30], (Hunion [([8:17-23], (Hprim Tstring)); ([8:26-30], (Hprim Tbool))])); 
+       t_assignment =
+       (CaseType ({ tctv_hint = ([8:17-23], (Happly (([8:17-23], "\\HH\\string"), []))); tctv_where_constraints = [] }, [{ tctv_hint = ([8:26-30], (Hprim Tbool)); tctv_where_constraints = [] }]));
+       t_runtime_type = ([8:17-30], (Hunion [([8:17-23], (Happly (([8:17-23], "\\HH\\string"), []))); ([8:26-30], (Hprim Tbool))])); 
        t_user_attributes = [];
        t_file_attributes =
        [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-45], (String "case_types"))] }];

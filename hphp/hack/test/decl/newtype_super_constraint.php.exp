@@ -2,10 +2,11 @@
   (Shallow_decl_defs.Typedef
      { Typing_defs.td_module = None; td_pos = [4:9-10]; td_tparams = [];
        td_as_constraint = (Some (Rhint ([4:14-22]), (Tprim Tarraykey)));
-       td_super_constraint = (Some (Rhint ([4:29-35]), (Tprim Tstring)));
+       td_super_constraint =
+       (Some (Rhint ([4:29-35]), (Tapply (([4:29-35], "\\HH\\string"), []))));
        td_type_assignment =
        (Typing_defs.SimpleTypeDef (Opaque,
-          (Rhint ([4:38-44]), (Tprim Tstring))));
+          (Rhint ([4:38-44]), (Tapply (([4:38-44], "\\HH\\string"), [])))));
        td_is_ctx = false; td_attributes = []; td_internal = false;
        td_docs_url = None; td_package = None }));
   ("\\Y",

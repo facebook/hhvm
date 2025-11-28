@@ -73,6 +73,7 @@ type keyword_with_hover_docs =
 
 type built_in_type_hint =
   | BIprimitive of Aast_defs.tprim
+  | BIstring
   | BImixed
   | BIdynamic
   | BInothing

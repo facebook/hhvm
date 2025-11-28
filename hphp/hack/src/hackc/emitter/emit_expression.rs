@@ -3207,7 +3207,6 @@ fn hint_to_type_op(e: &Emitter, h: &ast::Hint) -> Option<IsTypeOp> {
         Hprim(Tprim::Tint) => Some(IsTypeOp::Int),
         Hprim(Tprim::Tfloat) => Some(IsTypeOp::Dbl),
         Hprim(Tprim::Tbool) => Some(IsTypeOp::Bool),
-        Hprim(Tprim::Tstring) => Some(IsTypeOp::Str),
         Happly(ast::Id(_, id), _) => match id.as_str() {
             typehints::HH_INT => Some(IsTypeOp::Int),
             typehints::HH_NULL => Some(IsTypeOp::Null),

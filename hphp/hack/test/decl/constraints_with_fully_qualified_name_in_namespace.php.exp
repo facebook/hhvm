@@ -13,7 +13,7 @@
         td_as_constraint = None; td_super_constraint = None;
         td_type_assignment =
         (Typing_defs.SimpleTypeDef (Transparent,
-           (Rhint ([5:13-19]), (Tprim Tstring))));
+           (Rhint ([5:13-19]), (Tapply (([5:13-19], "\\HH\\string"), [])))));
         td_is_ctx = false; td_attributes = []; td_internal = false;
         td_docs_url = None; td_package = None }));
   ("\\NS\\Ta",
@@ -31,7 +31,8 @@
         td_as_constraint = None; td_super_constraint = None;
         td_type_assignment =
         (Typing_defs.SimpleTypeDef (Transparent,
-           (Rhint ([10:13-19]), (Tprim Tstring))));
+           (Rhint ([10:13-19]), (Tapply (([10:13-19], "\\HH\\string"), [])))
+           ));
         td_is_ctx = false; td_attributes = []; td_internal = false;
         td_docs_url = None; td_package = None }));
   ("\\NS\\I",

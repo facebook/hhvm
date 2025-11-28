@@ -1,1 +1,1 @@
-(string | ExampleDsl)
+(ExampleDsl | string)

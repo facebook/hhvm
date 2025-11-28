@@ -393,15 +393,15 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
           (match prim with
           | Tint
           | Tbool
-          | Tfloat
-          | Tstring ->
+          | Tfloat ->
             true
           | _ -> false)
         | Tclass ((_, name), _, type_args)
         (* allow vec, keyset, and dict *)
           when String.equal name SN.Collections.cVec
                || String.equal name SN.Collections.cKeyset
-               || String.equal name SN.Collections.cDict ->
+               || String.equal name SN.Collections.cDict
+               || String.equal name SN.Classes.cString ->
           List.for_all type_args ~f:strict_allowable_types
         | _ -> false
       in

@@ -106,7 +106,9 @@
                  ft_ret =
                  (Rhint ([7:41-69]),
                   (Tapply (([7:52-61], "\\HH\\Awaitable"),
-                     [(Rhint ([7:62-68]), (Tprim Tstring))])));
+                     [(Rhint ([7:62-68]),
+                       (Tapply (([7:62-68], "\\HH\\string"), [])))]
+                     )));
                  ft_flags =
                  { Typing_defs_flags.Fun.return_disposable = false;
                    async = true; generator = false; fun_kind = FAsync;
@@ -159,7 +161,9 @@
                                [])))
                             ])))
                    };
-                 ft_ret = (Rhint ([9:44-61]), (Tprim Tstring));
+                 ft_ret =
+                 (Rhint ([9:44-61]),
+                  (Tapply (([9:55-61], "\\HH\\string"), [])));
                  ft_flags =
                  { Typing_defs_flags.Fun.return_disposable = false;
                    async = false; generator = false; fun_kind = FSync;

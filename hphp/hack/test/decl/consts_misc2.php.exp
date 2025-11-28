@@ -169,7 +169,8 @@
             (Tapply (([18:10-12], "\\HH\\MemberOf"),
                [(Rhint ([18:10-12]),
                  (Tapply (([18:10-12], "\\TestRefs2"), [])));
-                 (Rhint ([18:3-9]), (Tprim Tstring))]
+                 (Rhint ([18:3-9]), (Tapply (([18:3-9], "\\HH\\string"), [])))
+                 ]
                )));
            scc_refs = []; scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
@@ -179,7 +180,9 @@
              (Tapply (([19:10-12], "\\HH\\MemberOf"),
                 [(Rhint ([19:10-12]),
                   (Tapply (([19:10-12], "\\TestRefs2"), [])));
-                  (Rhint ([19:3-9]), (Tprim Tstring))]
+                  (Rhint ([19:3-9]),
+                   (Tapply (([19:3-9], "\\HH\\string"), [])))
+                  ]
                 )));
             scc_refs = []; scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;

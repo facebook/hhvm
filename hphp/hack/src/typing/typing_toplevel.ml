@@ -28,9 +28,6 @@ module SN = Naming_special_names
 module Profile = Typing_toplevel_profile
 module Enable = Typing_toplevel_enable
 
-let is_literal_with_trivially_inferable_type (_, _, e) =
-  Option.is_some @@ Decl_utils.infer_const e
-
 let check_if_this_def_is_the_winner ctx name_type (pos, name) : bool =
   if String.is_empty name || String.equal name "\\" then
     (* In case of some parse errors, the AST contains definitions with empty names.
@@ -376,7 +373,7 @@ let gconst_def ctx cst =
       (te, (env, ty_err_opt))
     | (None, _) ->
       (if
-       (not (is_literal_with_trivially_inferable_type value))
+       (not (Decl_utils.is_literal_with_trivially_inferable_type value))
        && not (Env.is_hhi env)
       then
         let custom_err_config =

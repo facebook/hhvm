@@ -47,6 +47,16 @@ File class_constant.php, line 4, character 9 - line 4, character 14:
  6 | 
  7 | function bar(): int {
 
+which is defined here
+
+File string.hhi, line 6, character 9 - line 6, character 14:
+
+ 5 |   <<__SupportDynamicType>>
+ 6 |   class »string« {
+ 7 |   }
+ 8 | 
+ 9 | }
+
 and flows into this class constant access expression
 
 File class_constant.php, line 8, character 8 - line 8, character 13:

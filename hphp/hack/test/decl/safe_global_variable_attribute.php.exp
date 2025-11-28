@@ -46,7 +46,8 @@
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([11:17-34], "instanceProperty");
            sp_xhp_attr = None;
-           sp_type = (Rhint ([11:10-16]), (Tprim Tstring));
+           sp_type =
+           (Rhint ([11:10-16]), (Tapply (([11:10-16], "\\HH\\string"), [])));
            sp_visibility = Public;
            sp_flags =
            { Shallow_decl_defs.PropFlags.abstract = false; const = false;

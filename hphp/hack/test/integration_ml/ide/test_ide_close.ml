@@ -16,7 +16,7 @@ let foo_name = "foo.php"
 let foo_disk_contents =
   "<?hh // strict
 
-function foo(string $x) : void {}
+function foo(bool $x) : void {}
 
 function test() : void {
   foo(4);
@@ -28,8 +28,8 @@ let foo_disk_diagnostics =
 /foo.php:
 ERROR: File \"/foo.php\", line 6, characters 7-7:
 Invalid argument (Typing[4110])
-  File \"/foo.php\", line 3, characters 14-19:
-  Expected `string`
+  File \"/foo.php\", line 3, characters 14-17:
+  Expected `bool`
   File \"/foo.php\", line 6, characters 7-7:
   But got `int`
 "

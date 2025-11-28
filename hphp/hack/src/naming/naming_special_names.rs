@@ -671,7 +671,7 @@ pub mod typehints {
     lazy_static! {
         // matches definition in Tprim
         pub static ref PRIMITIVE_TYPEHINTS: HashSet<&'static str> = vec![
-            NULL, VOID, INT, BOOL, FLOAT, STRING, RESOURCE, NUM, ARRAYKEY, NORETURN
+            NULL, VOID, INT, BOOL, FLOAT, RESOURCE, NUM, ARRAYKEY, NORETURN
         ]
         .into_iter()
         .collect();
@@ -694,7 +694,6 @@ pub mod typehints {
                 INT,
                 BOOL,
                 FLOAT,
-                STRING,
                 DARRAY,
                 VARRAY,
                 VARRAY_OR_DARRAY,
@@ -722,8 +721,8 @@ pub mod typehints {
 
     lazy_static! {
         static ref RESERVED_HH_NAMES: HashSet<&'static str> = vec![
-            VOID, NORETURN, INT, BOOL, FLOAT, NUM, STRING, RESOURCE, MIXED, ARRAYKEY, DYNAMIC,
-            WILDCARD, NULL, NONNULL, NOTHING, THIS
+            VOID, NORETURN, INT, BOOL, FLOAT, NUM, RESOURCE, MIXED, ARRAYKEY, DYNAMIC, WILDCARD,
+            NULL, NONNULL, NOTHING, THIS
         ]
         .into_iter()
         .collect();

@@ -60,12 +60,12 @@
          f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([12:4-8], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (dict<string, int>);
-            param_type_hint = ((dict<string, int>), (Some ([10:3-20], (Happly (([10:3-7], "\\HH\\dict"), [([10:8-14], (Hprim Tstring)); ([10:16-19], (Hprim Tint))]))))); 
+            param_type_hint = ((dict<string, int>), (Some ([10:3-20], (Happly (([10:3-7], "\\HH\\dict"), [([10:8-14], (Happly (([10:8-14], "\\HH\\string"), []))); ([10:16-19], (Hprim Tint))])))));
             param_pos = [10:21-24]; param_name = "$n1"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None };
            { param_annotation = (dict<int, string>);
-             param_type_hint = ((dict<int, string>), (Some ([11:3-20], (Happly (([11:3-7], "\\HH\\dict"), [([11:8-11], (Hprim Tint)); ([11:13-19], (Hprim Tstring))]))))); 
+             param_type_hint = ((dict<int, string>), (Some ([11:3-20], (Happly (([11:3-7], "\\HH\\dict"), [([11:8-11], (Hprim Tint)); ([11:13-19], (Happly (([11:13-19], "\\HH\\string"), [])))])))));
              param_pos = [11:21-24]; param_name = "$n2"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_named = None; param_user_attributes = []; param_visibility = None }
@@ -129,12 +129,12 @@
          f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([29:4-8], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (dict<string, int>);
-            param_type_hint = ((dict<string, int>), (Some ([27:3-20], (Happly (([27:3-7], "\\HH\\dict"), [([27:8-14], (Hprim Tstring)); ([27:16-19], (Hprim Tint))]))))); 
+            param_type_hint = ((dict<string, int>), (Some ([27:3-20], (Happly (([27:3-7], "\\HH\\dict"), [([27:8-14], (Happly (([27:8-14], "\\HH\\string"), []))); ([27:16-19], (Hprim Tint))])))));
             param_pos = [27:21-24]; param_name = "$n1"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None };
            { param_annotation = (dict<int, string>);
-             param_type_hint = ((dict<int, string>), (Some ([28:3-20], (Happly (([28:3-7], "\\HH\\dict"), [([28:8-11], (Hprim Tint)); ([28:13-19], (Hprim Tstring))]))))); 
+             param_type_hint = ((dict<int, string>), (Some ([28:3-20], (Happly (([28:3-7], "\\HH\\dict"), [([28:8-11], (Hprim Tint)); ([28:13-19], (Happly (([28:13-19], "\\HH\\string"), [])))])))));
              param_pos = [28:21-24]; param_name = "$n2"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_named = None; param_user_attributes = []; param_visibility = None }
@@ -153,7 +153,7 @@
                           ((~dict<int, int>), [31:5-63],
                            (Hole (((dict<string, int>), [31:59-62], (Lvar ([31:59-62], $n1))), (dict<string, int>), (dict<int, int>),
                               (UnsafeCast
-                                 [([31:27-43], (Happly (([31:27-31], "\\HH\\dict"), [([31:32-38], (Hprim Tstring)); ([31:39-42], (Hprim Tint))])));
+                                 [([31:27-43], (Happly (([31:27-31], "\\HH\\dict"), [([31:32-38], (Happly (([31:32-38], "\\HH\\string"), []))); ([31:39-42], (Hprim Tint))])));
                                    ([31:44-57], (Happly (([31:44-48], "\\HH\\dict"), [([31:49-52], (Hprim Tint)); ([31:53-56], (Hprim Tint))])))])
                               ))))
                         ];
@@ -169,7 +169,7 @@
                            ((~dict<int, int>), [33:5-63],
                             (Hole (((dict<int, string>), [33:59-62], (Lvar ([33:59-62], $n2))), (dict<int, string>), (dict<int, int>),
                                (UnsafeCast
-                                  [([33:27-43], (Happly (([33:27-31], "\\HH\\dict"), [([33:32-35], (Hprim Tint)); ([33:36-42], (Hprim Tstring))])));
+                                  [([33:27-43], (Happly (([33:27-31], "\\HH\\dict"), [([33:32-35], (Hprim Tint)); ([33:36-42], (Happly (([33:36-42], "\\HH\\string"), [])))])));
                                     ([33:44-57], (Happly (([33:44-48], "\\HH\\dict"), [([33:49-52], (Hprim Tint)); ([33:53-56], (Hprim Tint))])))])
                                ))))
                          ];
@@ -192,7 +192,7 @@
                            ((~dict<int, int>), [38:11-69],
                             (Hole (((dict<string, int>), [38:65-68], (Lvar ([38:65-68], $n1))), (dict<string, int>), (dict<int, int>),
                                (UnsafeCast
-                                  [([38:33-49], (Happly (([38:33-37], "\\HH\\dict"), [([38:38-44], (Hprim Tstring)); ([38:45-48], (Hprim Tint))])));
+                                  [([38:33-49], (Happly (([38:33-37], "\\HH\\dict"), [([38:38-44], (Happly (([38:38-44], "\\HH\\string"), []))); ([38:45-48], (Hprim Tint))])));
                                     ([38:50-63], (Happly (([38:50-54], "\\HH\\dict"), [([38:55-58], (Hprim Tint)); ([38:59-62], (Hprim Tint))])))])
                                ))))
                          ];
@@ -210,7 +210,7 @@
                            ((~dict<int, int>), [40:11-69],
                             (Hole (((dict<int, string>), [40:65-68], (Lvar ([40:65-68], $n2))), (dict<int, string>), (dict<int, int>),
                                (UnsafeCast
-                                  [([40:33-49], (Happly (([40:33-37], "\\HH\\dict"), [([40:38-41], (Hprim Tint)); ([40:42-48], (Hprim Tstring))])));
+                                  [([40:33-49], (Happly (([40:33-37], "\\HH\\dict"), [([40:38-41], (Hprim Tint)); ([40:42-48], (Happly (([40:42-48], "\\HH\\string"), [])))])));
                                     ([40:50-63], (Happly (([40:50-54], "\\HH\\dict"), [([40:55-58], (Hprim Tint)); ([40:59-62], (Hprim Tint))])))])
                                ))))
                          ];
@@ -280,11 +280,13 @@
        { f_span = [26:1-41:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_tparams = []; f_ret = ((dynamic), (Some ([29:4-8], (Hprim Tvoid))));
          f_params =
-         [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([27:3-20], (Happly (([27:3-7], "\\HH\\dict"), [([27:8-14], (Hprim Tstring)); ([27:16-19], (Hprim Tint))])))));
+         [{ param_annotation = (dynamic);
+            param_type_hint = ((dynamic), (Some ([27:3-20], (Happly (([27:3-7], "\\HH\\dict"), [([27:8-14], (Happly (([27:8-14], "\\HH\\string"), []))); ([27:16-19], (Hprim Tint))])))));
             param_pos = [27:21-24]; param_name = "$n1"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None };
-           { param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([28:3-20], (Happly (([28:3-7], "\\HH\\dict"), [([28:8-11], (Hprim Tint)); ([28:13-19], (Hprim Tstring))])))));
+           { param_annotation = (dynamic);
+             param_type_hint = ((dynamic), (Some ([28:3-20], (Happly (([28:3-7], "\\HH\\dict"), [([28:8-11], (Hprim Tint)); ([28:13-19], (Happly (([28:13-19], "\\HH\\string"), [])))])))));
              param_pos = [28:21-24]; param_name = "$n2"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_named = None; param_user_attributes = []; param_visibility = None }
@@ -303,7 +305,7 @@
                           ((~dict<int, int>), [31:5-63],
                            (Hole (((dynamic), [31:59-62], (Lvar ([31:59-62], $n1))), (dict<string, int>), (dict<int, int>),
                               (UnsafeCast
-                                 [([31:27-43], (Happly (([31:27-31], "\\HH\\dict"), [([31:32-38], (Hprim Tstring)); ([31:39-42], (Hprim Tint))])));
+                                 [([31:27-43], (Happly (([31:27-31], "\\HH\\dict"), [([31:32-38], (Happly (([31:32-38], "\\HH\\string"), []))); ([31:39-42], (Hprim Tint))])));
                                    ([31:44-57], (Happly (([31:44-48], "\\HH\\dict"), [([31:49-52], (Hprim Tint)); ([31:53-56], (Hprim Tint))])))])
                               ))))
                         ];
@@ -319,7 +321,7 @@
                            ((~dict<int, int>), [33:5-63],
                             (Hole (((dynamic), [33:59-62], (Lvar ([33:59-62], $n2))), (dict<int, string>), (dict<int, int>),
                                (UnsafeCast
-                                  [([33:27-43], (Happly (([33:27-31], "\\HH\\dict"), [([33:32-35], (Hprim Tint)); ([33:36-42], (Hprim Tstring))])));
+                                  [([33:27-43], (Happly (([33:27-31], "\\HH\\dict"), [([33:32-35], (Hprim Tint)); ([33:36-42], (Happly (([33:36-42], "\\HH\\string"), [])))])));
                                     ([33:44-57], (Happly (([33:44-48], "\\HH\\dict"), [([33:49-52], (Hprim Tint)); ([33:53-56], (Hprim Tint))])))])
                                ))))
                          ];
@@ -342,7 +344,7 @@
                            ((~dict<int, int>), [38:11-69],
                             (Hole (((dynamic), [38:65-68], (Lvar ([38:65-68], $n1))), (dict<string, int>), (dict<int, int>),
                                (UnsafeCast
-                                  [([38:33-49], (Happly (([38:33-37], "\\HH\\dict"), [([38:38-44], (Hprim Tstring)); ([38:45-48], (Hprim Tint))])));
+                                  [([38:33-49], (Happly (([38:33-37], "\\HH\\dict"), [([38:38-44], (Happly (([38:38-44], "\\HH\\string"), []))); ([38:45-48], (Hprim Tint))])));
                                     ([38:50-63], (Happly (([38:50-54], "\\HH\\dict"), [([38:55-58], (Hprim Tint)); ([38:59-62], (Hprim Tint))])))])
                                ))))
                          ];
@@ -360,7 +362,7 @@
                            ((~dict<int, int>), [40:11-69],
                             (Hole (((dynamic), [40:65-68], (Lvar ([40:65-68], $n2))), (dict<int, string>), (dict<int, int>),
                                (UnsafeCast
-                                  [([40:33-49], (Happly (([40:33-37], "\\HH\\dict"), [([40:38-41], (Hprim Tint)); ([40:42-48], (Hprim Tstring))])));
+                                  [([40:33-49], (Happly (([40:33-37], "\\HH\\dict"), [([40:38-41], (Hprim Tint)); ([40:42-48], (Happly (([40:42-48], "\\HH\\string"), [])))])));
                                     ([40:50-63], (Happly (([40:50-54], "\\HH\\dict"), [([40:55-58], (Hprim Tint)); ([40:59-62], (Hprim Tint))])))])
                                ))))
                          ];

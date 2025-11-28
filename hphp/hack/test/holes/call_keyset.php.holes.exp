@@ -57,7 +57,8 @@
        { f_span = [9:1-19:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([11:4-8], (Hprim Tvoid))));
          f_params =
-         [{ param_annotation = (keyset<string>); param_type_hint = ((keyset<string>), (Some ([10:3-17], (Happly (([10:3-9], "\\HH\\keyset"), [([10:10-16], (Hprim Tstring))])))));
+         [{ param_annotation = (keyset<string>);
+            param_type_hint = ((keyset<string>), (Some ([10:3-17], (Happly (([10:3-9], "\\HH\\keyset"), [([10:10-16], (Happly (([10:10-16], "\\HH\\string"), [])))]))))); 
             param_pos = [10:18-20]; param_name = "$f"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }
@@ -102,7 +103,8 @@
        { f_span = [21:1-31:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([23:4-8], (Hprim Tvoid))));
          f_params =
-         [{ param_annotation = (keyset<string>); param_type_hint = ((keyset<string>), (Some ([22:3-17], (Happly (([22:3-9], "\\HH\\keyset"), [([22:10-16], (Hprim Tstring))])))));
+         [{ param_annotation = (keyset<string>);
+            param_type_hint = ((keyset<string>), (Some ([22:3-17], (Happly (([22:3-9], "\\HH\\keyset"), [([22:10-16], (Happly (([22:10-16], "\\HH\\string"), [])))]))))); 
             param_pos = [22:18-20]; param_name = "$f"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }
@@ -121,7 +123,7 @@
                           ((~keyset<int>), [25:5-58],
                            (Hole (((keyset<string>), [25:55-57], (Lvar ([25:55-57], $f))), (keyset<string>), (keyset<int>),
                               (UnsafeCast
-                                 [([25:27-41], (Happly (([25:27-33], "\\HH\\keyset"), [([25:34-40], (Hprim Tstring))])));
+                                 [([25:27-41], (Happly (([25:27-33], "\\HH\\keyset"), [([25:34-40], (Happly (([25:34-40], "\\HH\\string"), [])))])));
                                    ([25:42-53], (Happly (([25:42-48], "\\HH\\keyset"), [([25:49-52], (Hprim Tint))])))])
                               ))))
                         ];
@@ -144,7 +146,7 @@
                            ((~keyset<int>), [30:11-64],
                             (Hole (((keyset<string>), [30:61-63], (Lvar ([30:61-63], $f))), (keyset<string>), (keyset<int>),
                                (UnsafeCast
-                                  [([30:33-47], (Happly (([30:33-39], "\\HH\\keyset"), [([30:40-46], (Hprim Tstring))])));
+                                  [([30:33-47], (Happly (([30:33-39], "\\HH\\keyset"), [([30:40-46], (Happly (([30:40-46], "\\HH\\string"), [])))])));
                                     ([30:48-59], (Happly (([30:48-54], "\\HH\\keyset"), [([30:55-58], (Hprim Tint))])))])
                                ))))
                          ];
@@ -214,7 +216,7 @@
        { f_span = [21:1-31:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_tparams = []; f_ret = ((dynamic), (Some ([23:4-8], (Hprim Tvoid))));
          f_params =
-         [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([22:3-17], (Happly (([22:3-9], "\\HH\\keyset"), [([22:10-16], (Hprim Tstring))]))))); 
+         [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([22:3-17], (Happly (([22:3-9], "\\HH\\keyset"), [([22:10-16], (Happly (([22:10-16], "\\HH\\string"), [])))])))));
             param_pos = [22:18-20]; param_name = "$f"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }
@@ -233,7 +235,7 @@
                           ((~keyset<int>), [25:5-58],
                            (Hole (((dynamic), [25:55-57], (Lvar ([25:55-57], $f))), (keyset<string>), (keyset<int>),
                               (UnsafeCast
-                                 [([25:27-41], (Happly (([25:27-33], "\\HH\\keyset"), [([25:34-40], (Hprim Tstring))])));
+                                 [([25:27-41], (Happly (([25:27-33], "\\HH\\keyset"), [([25:34-40], (Happly (([25:34-40], "\\HH\\string"), [])))])));
                                    ([25:42-53], (Happly (([25:42-48], "\\HH\\keyset"), [([25:49-52], (Hprim Tint))])))])
                               ))))
                         ];
@@ -256,7 +258,7 @@
                            ((~keyset<int>), [30:11-64],
                             (Hole (((dynamic), [30:61-63], (Lvar ([30:61-63], $f))), (keyset<string>), (keyset<int>),
                                (UnsafeCast
-                                  [([30:33-47], (Happly (([30:33-39], "\\HH\\keyset"), [([30:40-46], (Hprim Tstring))])));
+                                  [([30:33-47], (Happly (([30:33-39], "\\HH\\keyset"), [([30:40-46], (Happly (([30:40-46], "\\HH\\string"), [])))])));
                                     ([30:48-59], (Happly (([30:48-54], "\\HH\\keyset"), [([30:55-58], (Hprim Tint))])))])
                                ))))
                          ];

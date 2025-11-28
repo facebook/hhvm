@@ -17,7 +17,7 @@
                    { f_span = [5:3-21]; f_readonly_this = None; f_annotation = (); 
                      f_readonly_ret = None; f_tparams = []; f_ret = ((string), None);
                      f_params =
-                     [{ param_annotation = (string); param_type_hint = ((string), (Some ([5:4-10], (Hprim Tstring)))); 
+                     [{ param_annotation = (string); param_type_hint = ((string), (Some ([5:4-10], (Happly (([5:4-10], "\\HH\\string"), []))))); 
                         param_pos = [5:11-13]; param_name = "$s"; param_info = Param_required; 
                         param_readonly = None; param_splat = None; param_callconv = Pnormal; 
                         param_named = None; param_user_attributes = []; 

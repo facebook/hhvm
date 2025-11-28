@@ -187,7 +187,8 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
                 // Unfortunately, we don't make Hprim as a hint type until naming
                 // so we have to look at Happly
                 aast::Hint_::Happly(cn, _)
-                    if typehints::PRIMITIVE_TYPEHINTS.contains(cn.name()) =>
+                    if typehints::PRIMITIVE_TYPEHINTS.contains(cn.name())
+                        || cn.name() == typehints::STRING =>
                 {
                     Rty::Mutable
                 }

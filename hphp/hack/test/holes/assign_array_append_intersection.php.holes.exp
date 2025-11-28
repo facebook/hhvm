@@ -8,7 +8,7 @@
       { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([3:91-95], (Hprim Tvoid))));
         f_params =
-        [{ param_annotation = (nothing); param_type_hint = ((nothing), (Some ([3:43-57], (Hintersection [([3:44-47], (Hprim Tint)); ([3:50-56], (Hprim Tstring))])))); 
+        [{ param_annotation = (nothing); param_type_hint = ((nothing), (Some ([3:43-57], (Hintersection [([3:44-47], (Hprim Tint)); ([3:50-56], (Happly (([3:50-56], "\\HH\\string"), [])))]))));
            param_pos = [3:58-60]; param_name = "$x"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
            param_named = None; param_user_attributes = []; param_visibility = None };
@@ -39,7 +39,7 @@
        { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_tparams = []; f_ret = ((dynamic), (Some ([3:91-95], (Hprim Tvoid))));
          f_params =
-         [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([3:43-57], (Hintersection [([3:44-47], (Hprim Tint)); ([3:50-56], (Hprim Tstring))])))); 
+         [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([3:43-57], (Hintersection [([3:44-47], (Hprim Tint)); ([3:50-56], (Happly (([3:50-56], "\\HH\\string"), [])))]))));
             param_pos = [3:58-60]; param_name = "$x"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None };

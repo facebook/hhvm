@@ -728,7 +728,7 @@ fn cant_be_reserved_type_name(name: &str) -> bool {
         "callable" | "parent" | "self" => true,
         // reserved_hh_name
         "arraykey" | "bool" | "dynamic" | "float" | "int" | "mixed" | "nonnull" | "noreturn"
-        | "nothing" | "null" | "num" | "resource" | "string" | "this" | "void" | "_" => true,
+        | "nothing" | "null" | "num" | "resource" | "this" | "void" | "_" => true,
         // misc
         "darray" | "false" | "static" | "true" | "varray" => true,
         _ => false,

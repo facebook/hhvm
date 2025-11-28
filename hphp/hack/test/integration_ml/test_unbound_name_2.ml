@@ -28,7 +28,11 @@ Unbound name: `B` (an object type) (Naming[2049])
 |}
 
 let test () =
-  let env = Test.setup_server () in
+  let env =
+    Test.setup_server
+      ~hhi_files:(Hhi.get_raw_hhi_contents () |> Array.to_list)
+      ()
+  in
   let env =
     Test.setup_disk env [(a_file_name, a_contents); (b_file_name, "")]
   in

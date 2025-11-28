@@ -363,14 +363,14 @@ let autocomplete_shape_key autocomplete_context env fields id =
           (str, FileInfo.SI_Literal, Typing_defs.mk (reason, ty))
         | Typing_defs.TSFlit_str (pos, str) ->
           let reason = Typing_reason.witness_from_decl pos in
-          let ty = Typing_defs.Tprim Aast_defs.Tstring in
+          let ty = Typing_make_type.decl_string reason in
           let quote =
             if have_prefix then
               Str.first_chars prefix 1
             else
               "'"
           in
-          (quote ^ str ^ quote, FileInfo.SI_Literal, Typing_defs.mk (reason, ty))
+          (quote ^ str ^ quote, FileInfo.SI_Literal, ty)
         | Typing_defs.TSFclass_const ((pos, cid), (_, mid)) ->
           ( Printf.sprintf "%s::%s" cid mid,
             FileInfo.SI_ClassConstant,
@@ -912,7 +912,7 @@ let is_fake_arrow_ty (env : Tast_env.env) (ty : locl_ty) : bool =
     String.equal Naming_special_names.Collections.cVec name
     || String.equal Naming_special_names.Collections.cDict name
     || String.equal Naming_special_names.Collections.cKeyset name
-  | Tprim Tstring -> true
+    || String.equal Naming_special_names.Classes.cString name
   | _ -> false
 
 (** If the user is completing $v-> and $v is a vec/keyset/dict/string,
@@ -1279,10 +1279,8 @@ let unwrap_holes ((_, _, e_) as e : Tast.expr) : Tast.expr =
 let autocomplete_shape_literal_in_call
     env (ft : Typing_defs.locl_fun_type) (args : Tast.argument list) : unit =
   let add_shape_key_result pos key =
-    let ty = Tprim Aast_defs.Tstring in
     let reason = Typing_reason.witness pos in
-    let ty = mk (reason, ty) in
-
+    let ty = Typing_make_type.string reason in
     let kind = FileInfo.SI_Literal in
     let lty = Phase.locl ty in
     let complete =
@@ -1466,10 +1464,8 @@ let enum_consts (env : Tast_env.env) name : string list option =
     None
 
 let add_enum_const_result env pos replace_pos prefix const_name =
-  let ty = Tprim Aast_defs.Tstring in
   let reason = Typing_reason.witness pos in
-  let ty = mk (reason, ty) in
-
+  let ty = Typing_make_type.string reason in
   let kind = FileInfo.SI_ClassConstant in
   let lty = Phase.locl ty in
   let key = prefix ^ const_name in
@@ -1584,13 +1580,13 @@ let builtin_type_hints =
     (SymbolOccurrence.BInothing, "nothing");
     (SymbolOccurrence.BInonnull, "nonnull");
     (SymbolOccurrence.BIshape, "shape");
+    (SymbolOccurrence.BIstring, "string");
     (SymbolOccurrence.BIprimitive Aast_defs.Tnull, "null");
     (* TODO: only offer void in return positions. *)
     (SymbolOccurrence.BIprimitive Aast_defs.Tvoid, "void");
     (SymbolOccurrence.BIprimitive Aast_defs.Tint, "int");
     (SymbolOccurrence.BIprimitive Aast_defs.Tbool, "bool");
     (SymbolOccurrence.BIprimitive Aast_defs.Tfloat, "float");
-    (SymbolOccurrence.BIprimitive Aast_defs.Tstring, "string");
     (SymbolOccurrence.BIprimitive Aast_defs.Tresource, "resource");
     (SymbolOccurrence.BIprimitive Aast_defs.Tnum, "num");
     (SymbolOccurrence.BIprimitive Aast_defs.Tarraykey, "arraykey");

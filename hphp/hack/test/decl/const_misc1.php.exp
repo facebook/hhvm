@@ -35,7 +35,7 @@
            (Rhint ([5:10-11]),
             (Tapply (([5:10-11], "\\HH\\MemberOf"),
                [(Rhint ([5:10-11]), (Tapply (([5:10-11], "\\A"), [])));
-                 (Rhint ([5:3-9]), (Tprim Tstring))]
+                 (Rhint ([5:3-9]), (Tapply (([5:3-9], "\\HH\\string"), [])))]
                )));
            scc_refs = []; scc_value = None }
          ];
@@ -71,7 +71,9 @@
            scc_refs = []; scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([10:3-4], "Y");
-            scc_type = (Rwitness_from_decl ([10:7-14]), (Tprim Tstring));
+            scc_type =
+            (Rwitness_from_decl ([10:7-14]),
+             (Tapply (([10:7-14], "\\HH\\string"), [])));
             scc_refs = []; scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([11:3-4], "Z");
@@ -104,7 +106,9 @@
   ("\\T",
    (Shallow_decl_defs.Const
       { Typing_defs.cd_pos = [15:1-18];
-        cd_type = (Rwitness_from_decl ([15:14-17]), (Tprim Tstring));
+        cd_type =
+        (Rwitness_from_decl ([15:14-17]),
+         (Tapply (([15:14-17], "\\HH\\string"), [])));
         cd_value = None; cd_package = None }));
   ("\\C",
    (Shallow_decl_defs.Class
@@ -131,7 +135,9 @@
             scc_refs = []; scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([19:15-17], "TC");
-            scc_type = (Rwitness_from_decl ([19:20-23]), (Tprim Tstring));
+            scc_type =
+            (Rwitness_from_decl ([19:20-23]),
+             (Tapply (([19:20-23], "\\HH\\string"), [])));
             scc_refs = []; scc_value = None }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];

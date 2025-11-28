@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a9c2a512d9051643528c1a265ef6bb4d>>
+// @generated SignedSource<<9058946b7019801a1e392fbf880341cf>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -2296,7 +2296,6 @@ impl<P: Params> Node<P> for Tprim {
             Tprim::Tint => Ok(()),
             Tprim::Tbool => Ok(()),
             Tprim::Tfloat => Ok(()),
-            Tprim::Tstring => Ok(()),
             Tprim::Tresource => Ok(()),
             Tprim::Tnum => Ok(()),
             Tprim::Tarraykey => Ok(()),

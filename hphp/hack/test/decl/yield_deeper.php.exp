@@ -11,7 +11,8 @@
              (Rhint ([3:15-43]),
               (Tapply (([3:15-24], "\\Generator"),
                  [(Rhint ([3:25-29]), (Tprim Tbool));
-                   (Rhint ([3:31-37]), (Tprim Tstring));
+                   (Rhint ([3:31-37]),
+                    (Tapply (([3:31-37], "\\HH\\string"), [])));
                    (Rhint ([3:39-42]), (Tprim Tint))]
                  )));
              ft_flags =
@@ -99,7 +100,8 @@
               ft_ret =
               (Rhint ([26:21-52]),
                (Tapply (([26:21-39], "\\HH\\AsyncKeyedIterator"),
-                  [(Rhint ([26:40-46]), (Tprim Tstring));
+                  [(Rhint ([26:40-46]),
+                    (Tapply (([26:40-46], "\\HH\\string"), [])));
                     (Rhint ([26:48-51]), (Tprim Tint))]
                   )));
               ft_flags =

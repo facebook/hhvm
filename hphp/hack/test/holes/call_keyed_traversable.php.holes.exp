@@ -61,12 +61,16 @@
          f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([12:4-8], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (KeyedTraversable<string, int>);
-            param_type_hint = ((KeyedTraversable<string, int>), (Some ([10:3-32], (Happly (([10:3-19], "\\HH\\KeyedTraversable"), [([10:20-26], (Hprim Tstring)); ([10:28-31], (Hprim Tint))])))));
+            param_type_hint =
+            ((KeyedTraversable<string, int>),
+             (Some ([10:3-32], (Happly (([10:3-19], "\\HH\\KeyedTraversable"), [([10:20-26], (Happly (([10:20-26], "\\HH\\string"), []))); ([10:28-31], (Hprim Tint))])))));
             param_pos = [10:33-36]; param_name = "$o1"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None };
            { param_annotation = (KeyedTraversable<int, string>);
-             param_type_hint = ((KeyedTraversable<int, string>), (Some ([11:3-32], (Happly (([11:3-19], "\\HH\\KeyedTraversable"), [([11:20-23], (Hprim Tint)); ([11:25-31], (Hprim Tstring))])))));
+             param_type_hint =
+             ((KeyedTraversable<int, string>),
+              (Some ([11:3-32], (Happly (([11:3-19], "\\HH\\KeyedTraversable"), [([11:20-23], (Hprim Tint)); ([11:25-31], (Happly (([11:25-31], "\\HH\\string"), [])))])))));
              param_pos = [11:33-36]; param_name = "$o2"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_named = None; param_user_attributes = []; param_visibility = None }
@@ -150,12 +154,16 @@
          f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([29:4-8], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (KeyedTraversable<string, int>);
-            param_type_hint = ((KeyedTraversable<string, int>), (Some ([27:3-32], (Happly (([27:3-19], "\\HH\\KeyedTraversable"), [([27:20-26], (Hprim Tstring)); ([27:28-31], (Hprim Tint))])))));
+            param_type_hint =
+            ((KeyedTraversable<string, int>),
+             (Some ([27:3-32], (Happly (([27:3-19], "\\HH\\KeyedTraversable"), [([27:20-26], (Happly (([27:20-26], "\\HH\\string"), []))); ([27:28-31], (Hprim Tint))])))));
             param_pos = [27:33-36]; param_name = "$o1"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None };
            { param_annotation = (KeyedTraversable<int, string>);
-             param_type_hint = ((KeyedTraversable<int, string>), (Some ([28:3-32], (Happly (([28:3-19], "\\HH\\KeyedTraversable"), [([28:20-23], (Hprim Tint)); ([28:25-31], (Hprim Tstring))])))));
+             param_type_hint =
+             ((KeyedTraversable<int, string>),
+              (Some ([28:3-32], (Happly (([28:3-19], "\\HH\\KeyedTraversable"), [([28:20-23], (Hprim Tint)); ([28:25-31], (Happly (([28:25-31], "\\HH\\string"), [])))])))));
              param_pos = [28:33-36]; param_name = "$o2"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_named = None; param_user_attributes = []; param_visibility = None }
@@ -174,7 +182,7 @@
                           ((~KeyedTraversable<int, int>), [31:5-87],
                            (Hole (((KeyedTraversable<string, int>), [31:83-86], (Lvar ([31:83-86], $o1))), (KeyedTraversable<string, int>), (KeyedTraversable<int, int>),
                               (UnsafeCast
-                                 [([31:27-55], (Happly (([31:27-43], "\\HH\\KeyedTraversable"), [([31:44-50], (Hprim Tstring)); ([31:51-54], (Hprim Tint))])));
+                                 [([31:27-55], (Happly (([31:27-43], "\\HH\\KeyedTraversable"), [([31:44-50], (Happly (([31:44-50], "\\HH\\string"), []))); ([31:51-54], (Hprim Tint))])));
                                    ([31:56-81], (Happly (([31:56-72], "\\HH\\KeyedTraversable"), [([31:73-76], (Hprim Tint)); ([31:77-80], (Hprim Tint))])))])
                               ))))
                         ];
@@ -190,7 +198,7 @@
                            ((~KeyedTraversable<int, int>), [33:5-87],
                             (Hole (((KeyedTraversable<int, string>), [33:83-86], (Lvar ([33:83-86], $o2))), (KeyedTraversable<int, string>), (KeyedTraversable<int, int>),
                                (UnsafeCast
-                                  [([33:27-55], (Happly (([33:27-43], "\\HH\\KeyedTraversable"), [([33:44-47], (Hprim Tint)); ([33:48-54], (Hprim Tstring))])));
+                                  [([33:27-55], (Happly (([33:27-43], "\\HH\\KeyedTraversable"), [([33:44-47], (Hprim Tint)); ([33:48-54], (Happly (([33:48-54], "\\HH\\string"), [])))])));
                                     ([33:56-81], (Happly (([33:56-72], "\\HH\\KeyedTraversable"), [([33:73-76], (Hprim Tint)); ([33:77-80], (Hprim Tint))])))])
                                ))))
                          ];
@@ -214,7 +222,7 @@
                            ((~KeyedTraversable<int, int>), [38:11-93],
                             (Hole (((KeyedTraversable<string, int>), [38:89-92], (Lvar ([38:89-92], $o1))), (KeyedTraversable<string, int>), (KeyedTraversable<int, int>),
                                (UnsafeCast
-                                  [([38:33-61], (Happly (([38:33-49], "\\HH\\KeyedTraversable"), [([38:50-56], (Hprim Tstring)); ([38:57-60], (Hprim Tint))])));
+                                  [([38:33-61], (Happly (([38:33-49], "\\HH\\KeyedTraversable"), [([38:50-56], (Happly (([38:50-56], "\\HH\\string"), []))); ([38:57-60], (Hprim Tint))])));
                                     ([38:62-87], (Happly (([38:62-78], "\\HH\\KeyedTraversable"), [([38:79-82], (Hprim Tint)); ([38:83-86], (Hprim Tint))])))])
                                ))))
                          ];
@@ -233,7 +241,7 @@
                            ((~KeyedTraversable<int, int>), [40:11-93],
                             (Hole (((KeyedTraversable<int, string>), [40:89-92], (Lvar ([40:89-92], $o2))), (KeyedTraversable<int, string>), (KeyedTraversable<int, int>),
                                (UnsafeCast
-                                  [([40:33-61], (Happly (([40:33-49], "\\HH\\KeyedTraversable"), [([40:50-53], (Hprim Tint)); ([40:54-60], (Hprim Tstring))])));
+                                  [([40:33-61], (Happly (([40:33-49], "\\HH\\KeyedTraversable"), [([40:50-53], (Hprim Tint)); ([40:54-60], (Happly (([40:54-60], "\\HH\\string"), [])))])));
                                     ([40:62-87], (Happly (([40:62-78], "\\HH\\KeyedTraversable"), [([40:79-82], (Hprim Tint)); ([40:83-86], (Hprim Tint))])))])
                                ))))
                          ];
@@ -305,12 +313,14 @@
          f_readonly_ret = None; f_tparams = []; f_ret = ((dynamic), (Some ([29:4-8], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (dynamic);
-            param_type_hint = ((dynamic), (Some ([27:3-32], (Happly (([27:3-19], "\\HH\\KeyedTraversable"), [([27:20-26], (Hprim Tstring)); ([27:28-31], (Hprim Tint))]))))); 
+            param_type_hint =
+            ((dynamic), (Some ([27:3-32], (Happly (([27:3-19], "\\HH\\KeyedTraversable"), [([27:20-26], (Happly (([27:20-26], "\\HH\\string"), []))); ([27:28-31], (Hprim Tint))])))));
             param_pos = [27:33-36]; param_name = "$o1"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None };
            { param_annotation = (dynamic);
-             param_type_hint = ((dynamic), (Some ([28:3-32], (Happly (([28:3-19], "\\HH\\KeyedTraversable"), [([28:20-23], (Hprim Tint)); ([28:25-31], (Hprim Tstring))]))))); 
+             param_type_hint =
+             ((dynamic), (Some ([28:3-32], (Happly (([28:3-19], "\\HH\\KeyedTraversable"), [([28:20-23], (Hprim Tint)); ([28:25-31], (Happly (([28:25-31], "\\HH\\string"), [])))])))));
              param_pos = [28:33-36]; param_name = "$o2"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_named = None; param_user_attributes = []; param_visibility = None }
@@ -329,7 +339,7 @@
                           ((~KeyedTraversable<int, int>), [31:5-87],
                            (Hole (((dynamic), [31:83-86], (Lvar ([31:83-86], $o1))), (KeyedTraversable<string, int>), (KeyedTraversable<int, int>),
                               (UnsafeCast
-                                 [([31:27-55], (Happly (([31:27-43], "\\HH\\KeyedTraversable"), [([31:44-50], (Hprim Tstring)); ([31:51-54], (Hprim Tint))])));
+                                 [([31:27-55], (Happly (([31:27-43], "\\HH\\KeyedTraversable"), [([31:44-50], (Happly (([31:44-50], "\\HH\\string"), []))); ([31:51-54], (Hprim Tint))])));
                                    ([31:56-81], (Happly (([31:56-72], "\\HH\\KeyedTraversable"), [([31:73-76], (Hprim Tint)); ([31:77-80], (Hprim Tint))])))])
                               ))))
                         ];
@@ -345,7 +355,7 @@
                            ((~KeyedTraversable<int, int>), [33:5-87],
                             (Hole (((dynamic), [33:83-86], (Lvar ([33:83-86], $o2))), (KeyedTraversable<int, string>), (KeyedTraversable<int, int>),
                                (UnsafeCast
-                                  [([33:27-55], (Happly (([33:27-43], "\\HH\\KeyedTraversable"), [([33:44-47], (Hprim Tint)); ([33:48-54], (Hprim Tstring))])));
+                                  [([33:27-55], (Happly (([33:27-43], "\\HH\\KeyedTraversable"), [([33:44-47], (Hprim Tint)); ([33:48-54], (Happly (([33:48-54], "\\HH\\string"), [])))])));
                                     ([33:56-81], (Happly (([33:56-72], "\\HH\\KeyedTraversable"), [([33:73-76], (Hprim Tint)); ([33:77-80], (Hprim Tint))])))])
                                ))))
                          ];
@@ -369,7 +379,7 @@
                            ((~KeyedTraversable<int, int>), [38:11-93],
                             (Hole (((dynamic), [38:89-92], (Lvar ([38:89-92], $o1))), (KeyedTraversable<string, int>), (KeyedTraversable<int, int>),
                                (UnsafeCast
-                                  [([38:33-61], (Happly (([38:33-49], "\\HH\\KeyedTraversable"), [([38:50-56], (Hprim Tstring)); ([38:57-60], (Hprim Tint))])));
+                                  [([38:33-61], (Happly (([38:33-49], "\\HH\\KeyedTraversable"), [([38:50-56], (Happly (([38:50-56], "\\HH\\string"), []))); ([38:57-60], (Hprim Tint))])));
                                     ([38:62-87], (Happly (([38:62-78], "\\HH\\KeyedTraversable"), [([38:79-82], (Hprim Tint)); ([38:83-86], (Hprim Tint))])))])
                                ))))
                          ];
@@ -388,7 +398,7 @@
                            ((~KeyedTraversable<int, int>), [40:11-93],
                             (Hole (((dynamic), [40:89-92], (Lvar ([40:89-92], $o2))), (KeyedTraversable<int, string>), (KeyedTraversable<int, int>),
                                (UnsafeCast
-                                  [([40:33-61], (Happly (([40:33-49], "\\HH\\KeyedTraversable"), [([40:50-53], (Hprim Tint)); ([40:54-60], (Hprim Tstring))])));
+                                  [([40:33-61], (Happly (([40:33-49], "\\HH\\KeyedTraversable"), [([40:50-53], (Hprim Tint)); ([40:54-60], (Happly (([40:54-60], "\\HH\\string"), [])))])));
                                     ([40:62-87], (Happly (([40:62-78], "\\HH\\KeyedTraversable"), [([40:79-82], (Hprim Tint)); ([40:83-86], (Hprim Tint))])))])
                                ))))
                          ];

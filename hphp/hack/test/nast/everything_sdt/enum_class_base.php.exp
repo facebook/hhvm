@@ -20,7 +20,9 @@
          cc_span = [3:1-6:2]; cc_doc_comment = None };
         { cc_user_attributes = [];
           cc_type =
-          (Some ([5:10-13], (Happly (([5:10-13], "\\HH\\MemberOf"), [([5:10-13], (Happly (([5:10-13], "\\PessEnumClassSupportDynBound"), []))); ([5:10-13], (Hlike ([5:3-9], (Hprim Tstring))))]))));
+          (Some ([5:10-13],
+                 (Happly (([5:10-13], "\\HH\\MemberOf"),
+                    [([5:10-13], (Happly (([5:10-13], "\\PessEnumClassSupportDynBound"), []))); ([5:10-13], (Hlike ([5:3-9], (Happly (([5:3-9], "\\HH\\string"), [])))))]))));
           cc_id = ([5:10-13], "TWO"); cc_kind = (CCConcrete ((), [5:16-21], (String "two"))); 
           cc_span = [3:1-6:2]; cc_doc_comment = None }
         ];
@@ -52,7 +54,10 @@
           cc_id = ([9:7-10], "ONE"); cc_kind = (CCConcrete ((), [9:13-14], (Int "1"))); 
           cc_span = [8:1-11:2]; cc_doc_comment = None };
          { cc_user_attributes = [];
-           cc_type = (Some ([10:10-13], (Happly (([10:10-13], "\\HH\\MemberOf"), [([10:10-13], (Happly (([10:10-13], "\\PessEnumClass"), []))); ([10:10-13], (Hlike ([10:3-9], (Hprim Tstring))))]))));
+           cc_type =
+           (Some ([10:10-13],
+                  (Happly (([10:10-13], "\\HH\\MemberOf"), [([10:10-13], (Happly (([10:10-13], "\\PessEnumClass"), []))); ([10:10-13], (Hlike ([10:3-9], (Happly (([10:3-9], "\\HH\\string"), [])))))]
+                     ))));
            cc_id = ([10:10-13], "TWO"); cc_kind = (CCConcrete ((), [10:16-21], (String "two"))); 
            cc_span = [8:1-11:2]; cc_doc_comment = None }
          ];
@@ -78,8 +83,8 @@
           m_name = ([14:19-23], "name"); m_tparams = []; m_where_constraints = []; 
           m_params = []; m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [] }; 
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
-          m_ret = ((), (Some ([14:27-33], (Hprim Tstring)))); m_external = true; 
-          m_doc_comment = None }
+          m_ret = ((), (Some ([14:27-33], (Happly (([14:27-33], "\\HH\\string"), []))))); 
+          m_external = true; m_doc_comment = None }
          ];
        c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
@@ -138,7 +143,7 @@
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-       c_enum = (Some { e_base = ([22:24-30], (Hprim Tstring)); e_constraint = None; e_includes = [] }); 
+       c_enum = (Some { e_base = ([22:24-30], (Happly (([22:24-30], "\\HH\\string"), []))); e_constraint = None; e_includes = [] }); 
        c_doc_comment = None; c_emit_id = None; c_internal = false; c_module = None; 
        c_package = None });
   (Class

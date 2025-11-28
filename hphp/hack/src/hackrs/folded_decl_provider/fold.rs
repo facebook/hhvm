@@ -152,6 +152,9 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         // note(sf, 2022-02-08): c.f. Decl_folded_class.class_class_decl
         let pos = self.child.name.pos();
         let name = self.child.name.id();
+        if name == *sn::typehints::hh_string {
+            return;
+        }
         let reason = R::class_class(pos.clone(), name);
         // Examples: classname<this>, class<this>, concrete<classname<this>> ...
         let ty = {

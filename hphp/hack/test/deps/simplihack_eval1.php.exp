@@ -103,4 +103,18 @@ Type HH\Capabilities\WriteProperty -> Fun func,
                                       Type A,
                                       Type FunctionParam,
                                       Type Method
+Type HH\string -> Fun func,
+                  Fun functionParam,
+                  Fun hello,
+                  Fun prompt,
+                  Module Mod,
+                  Type A,
+                  Type ClassConstant,
+                  Type ClassField,
+                  Type ClassGeneric,
+                  Type Clazz,
+                  Type FunctionParam,
+                  Type Method,
+                  Type TypeAlias,
+                  Type TypeConstant
 Type HH\supportdyn -> Type ClassGeneric

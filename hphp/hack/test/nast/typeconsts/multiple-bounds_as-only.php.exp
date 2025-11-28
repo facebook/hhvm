@@ -9,7 +9,7 @@
          c_tconst_kind = (TCAbstract { c_atc_as_constraint = None; c_atc_super_constraint = None; c_atc_default = None }); 
          c_tconst_span = [4:3-26]; c_tconst_doc_comment = None; c_tconst_is_ctx = false };
         { c_tconst_user_attributes = []; c_tconst_name = ([5:23-25], "T1");
-          c_tconst_kind = (TCAbstract { c_atc_as_constraint = (Some ([5:29-35], (Hprim Tstring))); c_atc_super_constraint = None; c_atc_default = None }); 
+          c_tconst_kind = (TCAbstract { c_atc_as_constraint = (Some ([5:29-35], (Happly (([5:29-35], "\\HH\\string"), [])))); c_atc_super_constraint = None; c_atc_default = None });
           c_tconst_span = [5:3-36]; c_tconst_doc_comment = None; c_tconst_is_ctx = false };
         { c_tconst_user_attributes = []; c_tconst_name = ([6:23-25], "T2");
           c_tconst_kind =

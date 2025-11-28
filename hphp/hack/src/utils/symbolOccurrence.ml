@@ -67,6 +67,7 @@ type keyword_with_hover_docs =
 
 type built_in_type_hint =
   | BIprimitive of Aast_defs.tprim
+  | BIstring
   | BImixed
   | BIdynamic
   | BInothing
@@ -227,7 +228,6 @@ let built_in_type_hover (bt : built_in_type_hint) : string =
     | Aast_defs.Tint -> "A 64-bit integer."
     | Aast_defs.Tbool -> "A boolean value, `true` or `false`."
     | Aast_defs.Tfloat -> "A 64-bit floating-point number."
-    | Aast_defs.Tstring -> "A sequence of characters."
     | Aast_defs.Tresource ->
       "An external resource, such as a file handle or database connection."
     | Aast_defs.Tnum -> "An `int` or a `float`."
@@ -235,6 +235,7 @@ let built_in_type_hover (bt : built_in_type_hint) : string =
       "An `int` or a `string`. `arraykey` is a common key type for `dict`s."
     | Aast_defs.Tnoreturn ->
       "A `noreturn` function always errors or loops forever.")
+  | BIstring -> "A sequence of characters."
   | BImixed ->
     "Any value at all. It's usually better to use a more specific type, or a generic."
   | BIdynamic ->

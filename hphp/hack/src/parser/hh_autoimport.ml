@@ -54,6 +54,7 @@ let types =
     "Shapes";
     "SleepWaitHandle";
     "StaticWaitHandle";
+    "string";
     "supportdyn";
     "Traversable";
     "typename";

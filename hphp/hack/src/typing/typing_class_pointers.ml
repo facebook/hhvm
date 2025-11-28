@@ -51,7 +51,8 @@ let check_string_coercion_point env expr ty =
       | _ ->
         let check ty =
           match get_node ty with
-          | Tprim Tstring ->
+          | Tclass ((_, id), _, _)
+            when String.equal id Naming_special_names.Classes.cString ->
             error_at_cls_const_expr env pos (string_of_class_id_ cid_)
           | _ -> ()
         in

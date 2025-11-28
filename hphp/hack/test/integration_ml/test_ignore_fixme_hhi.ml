@@ -19,7 +19,7 @@ let hhi_name = "g.hhi"
 let file_contents =
   "<?hh // strict
 
-function f(): string {
+function f(): float {
   /* HH_FIXME[4110] */
   return 4;
 }
@@ -28,7 +28,7 @@ function f(): string {
 let hhi_contents = "<?hh
 
 /* HH_FIXME[4110] */
-const string C = 4;
+const float C = 4.0;
 "
 
 let hhconfig_contents = ""
@@ -37,8 +37,8 @@ let errors =
   {|
 ERROR: File "/f.php", line 5, characters 10-10:
 Invalid return type (Typing[4110])
-  File "/f.php", line 3, characters 15-20:
-  Expected `string`
+  File "/f.php", line 3, characters 15-19:
+  Expected `float`
   File "/f.php", line 5, characters 10-10:
   But got `int`
 

@@ -9,7 +9,8 @@
         f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([6:4-8], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = (KeyedContainer<string, int>);
-           param_type_hint = ((KeyedContainer<string, int>), (Some ([4:3-30], (Happly (([4:3-17], "\\HH\\KeyedContainer"), [([4:18-24], (Hprim Tstring)); ([4:26-29], (Hprim Tint))])))));
+           param_type_hint =
+           ((KeyedContainer<string, int>), (Some ([4:3-30], (Happly (([4:3-17], "\\HH\\KeyedContainer"), [([4:18-24], (Happly (([4:18-24], "\\HH\\string"), []))); ([4:26-29], (Hprim Tint))])))));
            param_pos = [4:31-34]; param_name = "$xs"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
            param_named = None; param_user_attributes = []; param_visibility = None };

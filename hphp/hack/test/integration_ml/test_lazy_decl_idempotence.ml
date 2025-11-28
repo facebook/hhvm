@@ -33,7 +33,11 @@ Please add a type hint (Naming[2035])
 |}
 
 let test () =
-  let env = Test.setup_server () in
+  let env =
+    Test.setup_server
+      ~hhi_files:(Hhi.get_raw_hhi_contents () |> Array.to_list)
+      ()
+  in
   let env =
     Test.setup_disk
       env

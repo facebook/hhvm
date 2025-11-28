@@ -31,7 +31,7 @@
                                unpacked_arg = None }))))
                       ]
                     };
-                   { sma_pat = (PRefinement { pr_pos = [6:5-14]; pr_id = None; pr_hint = ([6:8-14], (Hprim Tstring)) });
+                   { sma_pat = (PRefinement { pr_pos = [6:5-14]; pr_id = None; pr_hint = ([6:8-14], (Happly (([6:8-14], "\\HH\\string"), []))) });
                      sma_body =
                      [([6:20-39],
                        (Expr

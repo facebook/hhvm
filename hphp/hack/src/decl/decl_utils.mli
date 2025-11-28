@@ -18,7 +18,7 @@ val unwrap_class_type :
     and XHP attribute uses. *)
 val parentish_names : Shallow_decl_defs.shallow_class -> SSet.t
 
-val infer_const : ('a, 'b) Aast.expr_ -> Aast.tprim option
+val is_literal_with_trivially_inferable_type : ('a, 'b) Aast.expr -> bool
 
 val split_defs :
   FileInfo.names -> FileInfo.names -> FileInfo.names * FileInfo.names

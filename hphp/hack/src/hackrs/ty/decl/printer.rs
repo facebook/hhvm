@@ -45,7 +45,6 @@ impl<R: Reason> Display for Ty_<R> {
                 Prim::Tint => write!(f, "int"),
                 Prim::Tbool => write!(f, "bool"),
                 Prim::Tfloat => write!(f, "float"),
-                Prim::Tstring => write!(f, "string"),
                 Prim::Tresource => write!(f, "resource"),
                 Prim::Tnum => write!(f, "num"),
                 Prim::Tarraykey => write!(f, "arraykey"),
@@ -74,7 +73,11 @@ impl<R: Reason> Display for Ty_<R> {
             },
             Tapply(params) => {
                 let (name, args) = &**params;
-                write!(f, "{}", strip_ns(name.id_ref()))?;
+                let mut sname = strip_ns(name.id_ref());
+                if sname == "HH\\string" {
+                    sname = "string"
+                };
+                write!(f, "{}", sname)?;
                 if !args.is_empty() {
                     list(f, "<", ", ", ">", args.iter())?;
                 }

@@ -132,17 +132,17 @@ let split_defs defs split_if_in_defs =
     in
     (r1, r2))
 
-let infer_const expr_ =
+let is_literal_with_trivially_inferable_type (_, _, expr_) =
   match expr_ with
-  | Aast.String _ -> Some Tstring
+  | Aast.String _
   | True
-  | False ->
-    Some Tbool
-  | Int _ -> Some Tint
-  | Float _ -> Some Tfloat
-  | Null -> Some Tnull
-  | Unop ((Ast_defs.Uminus | Ast_defs.Uplus), (_, _, Int _)) -> Some Tint
-  | Unop ((Ast_defs.Uminus | Ast_defs.Uplus), (_, _, Float _)) -> Some Tfloat
+  | False
+  | Int _
+  | Float _
+  | Null
+  | Unop ((Ast_defs.Uminus | Ast_defs.Uplus), (_, _, Int _))
+  | Unop ((Ast_defs.Uminus | Ast_defs.Uplus), (_, _, Float _)) ->
+    true
   | _ ->
     (* We can't infer the type of everything here. Notably, if you
      * define a const in terms of another const, we need an annotation,
@@ -151,7 +151,7 @@ let infer_const expr_ =
      * Also note that a number of expressions are considered invalid
      * as constant initializers, even if we can infer their type; see
      * Naming.check_constant_expr. *)
-    None
+    false
 
 let coalesce_consistent parent current =
   (* If the parent's constructor is consistent via <<__ConsistentConstruct>>, then

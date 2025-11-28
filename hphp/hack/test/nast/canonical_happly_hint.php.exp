@@ -70,7 +70,7 @@ Errors:
        { f_span = [9:1-43]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([9:35-39], (Hprim Tvoid))));
          f_params =
-         [{ param_annotation = (); param_type_hint = ((), (Some ([9:23-29], (Hprim Tstring)))); 
+         [{ param_annotation = (); param_type_hint = ((), (Some ([9:23-29], (Happly (([9:23-29], "\\HH\\string"), []))))); 
             param_pos = [9:30-32]; param_name = "$x"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }
@@ -370,7 +370,7 @@ Errors:
        { f_span = [39:1-48]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([39:41-45], (Hprim Tvoid))));
          f_params =
-         [{ param_annotation = (); param_type_hint = ((), (Some ([39:26-35], (Hprim Tstring)))); 
+         [{ param_annotation = (); param_type_hint = ((), (Some ([39:26-35], (Happly (([39:26-35], "\\HH\\string"), []))))); 
             param_pos = [39:36-38]; param_name = "$x"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }

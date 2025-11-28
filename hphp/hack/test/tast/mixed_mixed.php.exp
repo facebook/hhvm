@@ -32,7 +32,7 @@
             param_pos = [6:19-21]; param_name = "$a"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None };
-           { param_annotation = (string); param_type_hint = ((string), (Some ([6:23-29], (Hprim Tstring)))); 
+           { param_annotation = (string); param_type_hint = ((string), (Some ([6:23-29], (Happly (([6:23-29], "\\HH\\string"), []))))); 
              param_pos = [6:30-32]; param_name = "$b"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_named = None; param_user_attributes = []; param_visibility = None }

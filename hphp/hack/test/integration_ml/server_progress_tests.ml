@@ -12,7 +12,7 @@ open Server_progress_test_helpers
 
 let a_php = ("a.php", "<?hh\nfunction test_a(): void {}\n")
 
-let b_php = ("b.php", "<?hh\nfunction test_b(): string {}\n")
+let b_php = ("b.php", "<?hh\nfunction test_b(): int {}\n")
 
 let loop_php =
   ("loop.php", "<?hh\nfunction test_loop(): void {hh_loop_forever();}")

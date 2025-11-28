@@ -2,10 +2,10 @@
 
 trait T1 {
   <<__LateInit>>
-  protected string $member1;
+  protected int $member1;
   <<__LateInit>>
-  protected static string $member2;
-  public function __construct(string $member1) {
+  protected static int $member2;
+  public function __construct(int $member1) {
     $this->member1 = $member1;
   }
 }
@@ -18,9 +18,9 @@ class C1 {
 
 trait T2 {
   <<__LateInit>>
-  protected string $member1;
+  protected int $member1;
   <<__LateInit>>
-  protected static string $member2;
+  protected static int $member2;
 }
 
 class C2 {

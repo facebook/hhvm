@@ -2801,6 +2801,12 @@ fn p_nameof<'a>(
         Token(_) | SimpleTypeSpecifier(_) | QualifiedName(_) => {
             let target = p_expr(&p.target, env)?;
             match &target.2 {
+                Expr_::Id(id) if special_typehints::STRING == id.name() => {
+                    Err(Error::ParsingError {
+                        message: String::from("`nameof` cannot be used with string"),
+                        pos: p_pos(&p.target, env),
+                    })
+                }
                 Expr_::Id(id) => {
                     if env.get_reification(id.name()).is_some() {
                         Err(Error::ParsingError {

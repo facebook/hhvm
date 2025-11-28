@@ -186,25 +186,27 @@ let rec from_type : env -> show_like_ty:bool -> locl_ty -> json =
       match tag with
       | BoolTag -> name "isbool"
       | IntTag -> name "isint"
-      | StringTag -> name "isstring"
       | ArraykeyTag -> name "isarraykey"
       | FloatTag -> name "isfloat"
       | NumTag -> name "isnum"
       | ResourceTag -> name "isresource"
       | NullTag -> name "isnull"
       | ClassTag (s, args) ->
-        let generic_json g =
-          match g with
-          | Filled ty ->
-            obj
-              [
-                ("generic_kind", JSON_String "filled");
-                ("type", from_type env ~show_like_ty ty);
-              ]
-          | Wildcard _ -> obj [("generic_kind", JSON_String "wildcard")]
-        in
-        let args_json = List.map args ~f:generic_json in
-        name s @ [("args", JSON_Array args_json)]
+        if String.equal SN.Classes.cString s then
+          name "isstring"
+        else
+          let generic_json g =
+            match g with
+            | Filled ty ->
+              obj
+                [
+                  ("generic_kind", JSON_String "filled");
+                  ("type", from_type env ~show_like_ty ty);
+                ]
+            | Wildcard _ -> obj [("generic_kind", JSON_String "wildcard")]
+          in
+          let args_json = List.map args ~f:generic_json in
+          name s @ [("args", JSON_Array args_json)]
     and predicate_json predicate =
       match snd predicate with
       | IsTag tag -> tag_json tag
@@ -231,7 +233,10 @@ let rec from_type : env -> show_like_ty:bool -> locl_ty -> json =
     in
     obj @@ kind p "negation" @ predicate_json predicate
   | (p, Tclass ((_, cid), e, tys)) ->
-    obj @@ kind p "class" @ name cid @ args tys @ refs e
+    if String.equal SN.Classes.cString cid then
+      obj @@ kind p "primitive" @ name "string"
+    else
+      obj @@ kind p "class" @ name cid @ args tys @ refs e
   | (p, Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fl }) ->
     let fields_known = is_nothing shape_kind in
     obj
@@ -514,21 +519,30 @@ let to_locl_ty ?(keytrace = []) (ctx : Provider_context.t) (json : Hh_json.json)
         get_string "name" (json, keytrace) >>= fun (name, keytrace) ->
         begin
           match name with
-          | "void" -> Ok Nast.Tvoid
-          | "int" -> Ok Nast.Tint
-          | "bool" -> Ok Nast.Tbool
-          | "float" -> Ok Nast.Tfloat
-          | "string" -> Ok Nast.Tstring
-          | "resource" -> Ok Nast.Tresource
-          | "num" -> Ok Nast.Tnum
-          | "arraykey" -> Ok Nast.Tarraykey
-          | "noreturn" -> Ok Nast.Tnoreturn
+          | "void" -> Ok (Tprim Nast.Tvoid)
+          | "int" -> Ok (Tprim Nast.Tint)
+          | "bool" -> Ok (Tprim Nast.Tbool)
+          | "float" -> Ok (Tprim Nast.Tfloat)
+          | "string" ->
+            let class_pos =
+              match Decl_provider.get_class ctx SN.Classes.cString with
+              | Decl_entry.Found class_ty -> Cls.pos class_ty
+              | Decl_entry.DoesNotExist
+              | Decl_entry.NotYetAvailable ->
+                (* Class may not exist (such as in non-strict modes). *)
+                Pos_or_decl.none
+            in
+            Ok (Tclass ((class_pos, name), nonexact, []))
+          | "resource" -> Ok (Tprim Nast.Tresource)
+          | "num" -> Ok (Tprim Nast.Tnum)
+          | "arraykey" -> Ok (Tprim Nast.Tarraykey)
+          | "noreturn" -> Ok (Tprim Nast.Tnoreturn)
           | _ ->
             deserialization_error
               ~message:("Unknown primitive type: " ^ name)
               ~keytrace
         end
-        >>= fun prim_ty -> ty (Tprim prim_ty)
+        >>= fun prim_ty -> ty prim_ty
       | "class" ->
         get_string "name" (json, keytrace) >>= fun (name, _name_keytrace) ->
         let class_pos =

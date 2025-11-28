@@ -877,7 +877,10 @@ and class_decl
     List.fold_left ~f:(class_const_fold c) ~init:consts c.sc_consts
   in
   let consts =
-    SMap.add SN.Members.mClass (class_class_decl ctx c.sc_name) consts
+    if not (String.equal SN.Classes.cString (snd c.sc_name)) then
+      SMap.add SN.Members.mClass (class_class_decl ctx c.sc_name) consts
+    else
+      consts
   in
   let typeconsts = inherited.Decl_inherit.ih_typeconsts in
   let (typeconsts, consts) =

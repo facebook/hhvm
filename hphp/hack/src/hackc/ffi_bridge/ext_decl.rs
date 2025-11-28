@@ -735,9 +735,13 @@ fn build_type_structure(outer_ty: &Ty) -> ExtDeclTypeStructure {
             inner
         }
 
-        Ty_::Tapply(_id, targs) => ExtDeclTypeStructure {
+        Ty_::Tapply(id, targs) => ExtDeclTypeStructure {
             type_: extract_type_name(outer_ty),
-            kind: String::from("apply"),
+            kind: if &id.1 == "\\HH\\string" {
+                String::from("primitive")
+            } else {
+                String::from("apply")
+            },
             nullable: false,
             subtypes: targs
                 .iter()

@@ -29,7 +29,9 @@
         [{ Shallow_decl_defs.sp_name = ([6:18-25], "before");
            sp_xhp_attr = None;
            sp_type =
-           (Rhint ([6:10-17]), (Toption (Rhint ([6:11-17]), (Tprim Tstring))));
+           (Rhint ([6:10-17]),
+            (Toption
+               (Rhint ([6:11-17]), (Tapply (([6:11-17], "\\HH\\string"), [])))));
            sp_visibility = Public;
            sp_flags =
            { Shallow_decl_defs.PropFlags.abstract = false; const = false;
@@ -41,7 +43,9 @@
             sp_xhp_attr = None;
             sp_type =
             (Rhint ([15:10-17]),
-             (Toption (Rhint ([15:11-17]), (Tprim Tstring))));
+             (Toption
+                (Rhint ([15:11-17]),
+                 (Tapply (([15:11-17], "\\HH\\string"), [])))));
             sp_visibility = Public;
             sp_flags =
             { Shallow_decl_defs.PropFlags.abstract = false; const = false;
@@ -96,7 +100,9 @@
             sp_xhp_attr = (Some { xa_tag = None; xa_has_default = false });
             sp_type =
             (Rhint ([11:13-28]),
-             (Toption (Rhint ([11:13-28]), (Tprim Tstring))));
+             (Toption
+                (Rhint ([11:13-28]),
+                 (Tapply (([11:19-22], "\\HH\\string"), [])))));
             sp_visibility = Public;
             sp_flags =
             { Shallow_decl_defs.PropFlags.abstract = false; const = false;

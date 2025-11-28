@@ -71,17 +71,28 @@ let eq_incompatible_types env p ty1 ty2 =
                    Reason.to_string ("This is " ^ tys2) (get_reason ty2));
            })
 
-let bad_compare_prim_to_enum ty enum_bound =
-  match get_node enum_bound with
-  | Tprim enum_bound ->
-    (match (enum_bound, ty) with
-    | (N.Tint, (N.Tint | N.Tarraykey | N.Tnum)) -> false
-    | (N.Tint, _) -> true
-    | (N.Tstring, (N.Tstring | N.Tarraykey)) -> false
-    | (N.Tstring, _) -> true
-    | (N.Tarraykey, (N.Tarraykey | N.Tint | N.Tstring | N.Tnum)) -> false
-    | (N.Tarraykey, _) -> true
-    | _ -> false)
+let bad_compare_to_enum ty enum_bound =
+  match (get_node enum_bound, ty) with
+  | (Tprim N.Tint, Tprim (N.Tint | N.Tarraykey | N.Tnum)) -> false
+  | (Tprim N.Tint, Tprim _) -> true
+  | (Tprim N.Tint, Tclass ((_, id), _, _))
+    when String.equal Naming_special_names.Classes.cString id ->
+    true
+  | (Tclass ((_, id1), _, _), Tclass ((_, id2), _, _))
+    when String.equal Naming_special_names.Classes.cString id1
+         && String.equal Naming_special_names.Classes.cString id2 ->
+    false
+  | (Tclass ((_, id), _, _), Tprim N.Tarraykey)
+    when String.equal Naming_special_names.Classes.cString id ->
+    false
+  | (Tclass ((_, id), _, _), Tprim _)
+    when String.equal Naming_special_names.Classes.cString id ->
+    true
+  | (Tprim N.Tarraykey, Tprim (N.Tarraykey | N.Tint | N.Tnum)) -> false
+  | (Tprim N.Tarraykey, Tclass ((_, id), _, _))
+    when String.equal Naming_special_names.Classes.cString id ->
+    false
+  | (Tprim N.Tarraykey, Tprim _) -> true
   | _ -> false
 
 let rec assert_nontrivial p bop env ty1 ty2 ~as_warning =
@@ -114,8 +125,12 @@ let rec assert_nontrivial p bop env ty1 ty2 ~as_warning =
     | ((_, Tprim N.Tnum), (_, Tprim (N.Tint | N.Tfloat)))
     | ((_, Tprim (N.Tint | N.Tfloat)), (_, Tprim N.Tnum)) ->
       ()
-    | ((_, Tprim N.Tarraykey), (_, Tprim (N.Tint | N.Tstring)))
-    | ((_, Tprim (N.Tint | N.Tstring)), (_, Tprim N.Tarraykey)) ->
+    | ((_, Tprim N.Tarraykey), (_, Tprim N.Tint))
+    | ((_, Tprim N.Tint), (_, Tprim N.Tarraykey)) ->
+      ()
+    | ((_, Tprim N.Tarraykey), (_, Tclass ((_, id), _, _)))
+    | ((_, Tclass ((_, id), _, _)), (_, Tprim N.Tarraykey))
+      when String.equal Naming_special_names.Classes.cString id ->
       ()
     | ((_, Tprim N.Tnull), _)
     | (_, (_, Tprim N.Tnull)) ->
@@ -141,11 +156,11 @@ let rec assert_nontrivial p bop env ty1 ty2 ~as_warning =
           wellformedness
           @@ Primary.Wellformedness.Void_usage
                { pos = p; reason = lazy (Reason.to_string "This is `void`" r) })
-    | ((_, Tprim a), (_, Tnewtype (e, _, bound)))
-      when Env.is_enum env e && bad_compare_prim_to_enum a bound ->
+    | ((_, a), (_, Tnewtype (e, _, bound)))
+      when Env.is_enum env e && bad_compare_to_enum a bound ->
       trivial_comparison_error env p bop ty1 bound trail1 trail2 ~as_warning
-    | ((_, Tnewtype (e, _, bound)), (_, Tprim a))
-      when Env.is_enum env e && bad_compare_prim_to_enum a bound ->
+    | ((_, Tnewtype (e, _, bound)), (_, a))
+      when Env.is_enum env e && bad_compare_to_enum a bound ->
       trivial_comparison_error env p bop bound ty2 trail1 trail2 ~as_warning
     | ((_, Tprim a), (_, Tprim b)) when not (Aast.equal_tprim a b) ->
       trivial_comparison_error env p bop ty1 ty2 trail1 trail2 ~as_warning
@@ -155,6 +170,16 @@ let rec assert_nontrivial p bop env ty1 ty2 ~as_warning =
       assert_nontrivial p bop env ty1 ty2 ~as_warning
     | ((_, Toption ty1), (_, Toption ty2)) ->
       assert_nontrivial p bop env ty1 ty2 ~as_warning:true
+    | ((_, Tclass ((_, id), _, _)), (_, Tprim _))
+    | ((_, Tprim _), (_, Tclass ((_, id), _, _)))
+      when String.equal Naming_special_names.Classes.cString id ->
+      trivial_comparison_error env p bop ty1 ty2 trail1 trail2 ~as_warning
+    | ((_, Toption ty1), (_, Tclass ((_, id), _, _)))
+      when String.equal Naming_special_names.Classes.cString id ->
+      assert_nontrivial p bop env ty1 ty2 ~as_warning
+    | ((_, Tclass ((_, id), _, _)), (_, Toption ty2))
+      when String.equal Naming_special_names.Classes.cString id ->
+      assert_nontrivial p bop env ty1 ty2 ~as_warning
     | ( ( _,
           ( Tany _ | Tnonnull | Tvec_or_dict _ | Tprim _ | Toption _ | Tdynamic
           | Tvar _ | Tfun _ | Tgeneric _ | Tnewtype _ | Tdependent _ | Tclass _

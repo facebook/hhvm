@@ -83,7 +83,8 @@
                              args =
                              [(Anormal
                                  ((~int), [22:9-46],
-                                  (Hole (((string), [22:43-45], (Lvar ([22:43-45], $x))), (string), (int), (UnsafeCast [([22:31-37], (Hprim Tstring)); ([22:38-41], (Hprim Tint))])))))
+                                  (Hole (((string), [22:43-45], (Lvar ([22:43-45], $x))), (string), (int),
+                                     (UnsafeCast [([22:31-37], (Happly (([22:31-37], "\\HH\\string"), []))); ([22:38-41], (Hprim Tint))])))))
                                ];
                              unpacked_arg = None }))))
                    ],

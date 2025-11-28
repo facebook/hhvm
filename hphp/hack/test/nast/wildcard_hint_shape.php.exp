@@ -49,7 +49,7 @@
                           { nsi_allows_unknown_fields = false;
                             nsi_field_map =
                             [{ sfi_optional = false; sfi_hint = ([6:25-26], Hwildcard); sfi_name = (SFlit_str ([6:18-21], "y")) };
-                              { sfi_optional = false; sfi_hint = ([6:35-41], (Hprim Tstring)); sfi_name = (SFlit_str ([6:28-31], "z")) }]
+                              { sfi_optional = false; sfi_hint = ([6:35-41], (Happly (([6:35-41], "\\HH\\string"), []))); sfi_name = (SFlit_str ([6:28-31], "z")) }]
                             }));
                       is_nullable = false; enforce_deep = true }))));
             ([7:6-38],

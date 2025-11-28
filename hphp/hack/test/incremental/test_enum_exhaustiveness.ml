@@ -46,7 +46,11 @@ let errors_to_string errors =
   @@ errors
 
 let () =
-  let env = Test.setup_server () in
+  let env =
+    Test.setup_server
+      ~hhi_files:(Hhi.get_raw_hhi_contents () |> Array.to_list)
+      ()
+  in
   (* Initially we expect no errors *)
   let (env, _) =
     Test.(

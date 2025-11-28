@@ -23,9 +23,7 @@ module SN = Naming_special_names
 let rec type_non_nullable env ty =
   let (_, ty) = Env.expand_type env ty in
   match get_node ty with
-  | Tprim
-      ( Tint | Tbool | Tfloat | Tstring | Tresource | Tnum | Tarraykey
-      | Tnoreturn )
+  | Tprim (Tint | Tbool | Tfloat | Tresource | Tnum | Tarraykey | Tnoreturn)
   | Tnonnull
   | Tfun _
   | Ttuple _
@@ -113,7 +111,9 @@ let rec truthiness env ty =
     Possibly_falsy
   | Tnewtype (id, _, _) when Env.is_enum env id -> Possibly_falsy
   | Tclass ((_, cid), _, _) ->
-    if String.equal cid SN.Classes.cStringish then
+    if String.equal cid SN.Classes.cString then
+      Possibly_falsy
+    else if String.equal cid SN.Classes.cStringish then
       Possibly_falsy
     else if String.equal cid SN.Classes.cXHPChild then
       Possibly_falsy
@@ -143,7 +143,7 @@ let rec truthiness env ty =
   | Tprim Tnull -> Always_falsy
   | Tprim Tvoid -> Always_falsy
   | Tprim Tnoreturn -> Unknown
-  | Tprim (Tint | Tbool | Tfloat | Tstring | Tnum | Tarraykey) -> Possibly_falsy
+  | Tprim (Tint | Tbool | Tfloat | Tnum | Tarraykey) -> Possibly_falsy
   | Tunion tyl -> begin
     match List.map tyl ~f:(truthiness env) with
     | [] -> Unknown
@@ -206,10 +206,11 @@ let rec find_sketchy_types env acc ty =
   let (env, ety) = Env.expand_type env ty in
   match get_node ety with
   | Toption ty -> find_sketchy_types env acc ty
-  | Tprim Tstring -> String :: acc
   | Tprim Tarraykey -> Arraykey :: acc
   | Tclass ((_, cid), _, _) ->
-    if String.equal cid SN.Classes.cStringish then
+    if String.equal cid SN.Classes.cString then
+      String :: acc
+    else if String.equal cid SN.Classes.cStringish then
       Stringish :: acc
     else if String.equal cid SN.Classes.cXHPChild then
       XHPChild :: acc

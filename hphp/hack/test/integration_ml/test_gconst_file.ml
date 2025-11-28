@@ -25,7 +25,11 @@ let foo_new_contents = "<?hh // strict
 "
 
 let test () =
-  let env = Test.setup_server () in
+  let env =
+    Test.setup_server
+      ~hhi_files:(Hhi.get_raw_hhi_contents () |> Array.to_list)
+      ()
+  in
   let (env, loop_output) =
     Test.(
       run_loop_once

@@ -18,7 +18,10 @@
          { Shallow_decl_defs.stc_name = ([15:14-16], "T2");
            stc_kind =
            (Typing_defs.TCConcrete
-              { Typing_defs.tc_type = (Rhint ([15:19-25]), (Tprim Tstring)) });
+              { Typing_defs.tc_type =
+                (Rhint ([15:19-25]),
+                 (Tapply (([15:19-25], "\\HH\\string"), [])))
+                });
            stc_enforceable = ([Pos.none], false); stc_reifiable = None;
            stc_is_ctx = false }
          ];

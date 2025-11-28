@@ -357,7 +357,6 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
         | ArraykeyTag
         | BoolTag
         | IntTag
-        | StringTag
         | FloatTag
         | NumTag
         | ResourceTag

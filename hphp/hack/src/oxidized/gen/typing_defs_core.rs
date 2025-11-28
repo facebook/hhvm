@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<36cf1d19140ddb852843b77a09b120b1>>
+// @generated SignedSource<<bc9e567de7aeb4fa167f562ff69fcb90>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -564,7 +564,6 @@ pub enum TypeTagGeneric {
 pub enum TypeTag {
     BoolTag,
     IntTag,
-    StringTag,
     ArraykeyTag,
     FloatTag,
     NumTag,

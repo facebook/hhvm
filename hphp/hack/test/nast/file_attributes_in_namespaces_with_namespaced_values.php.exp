@@ -7,7 +7,7 @@
       c_consts = []; c_typeconsts = [];
       c_vars =
       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; cv_readonly = false; 
-         cv_visibility = Public; cv_type = ((), (Some ([5:40-46], (Hprim Tstring)))); 
+         cv_visibility = Public; cv_type = ((), (Some ([5:40-46], (Happly (([5:40-46], "\\HH\\string"), []))))); 
          cv_id = ([5:47-58], "attr_value"); cv_expr = None; cv_user_attributes = []; 
          cv_doc_comment = None; cv_is_static = false; cv_span = [5:47-58] }
         ];
@@ -16,7 +16,7 @@
          m_static = false; m_readonly_this = false; m_visibility = Public; 
          m_name = ([5:21-32], "__construct"); m_tparams = []; m_where_constraints = [];
          m_params =
-         [{ param_annotation = (); param_type_hint = ((), (Some ([5:40-46], (Hprim Tstring)))); 
+         [{ param_annotation = (); param_type_hint = ((), (Some ([5:40-46], (Happly (([5:40-46], "\\HH\\string"), []))))); 
             param_pos = [5:47-58]; param_name = "$attr_value"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = (Some Public) }
@@ -59,7 +59,7 @@
        c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
        c_implements = [];
        c_consts =
-       [{ cc_user_attributes = []; cc_type = (Some ([9:11-17], (Hprim Tstring))); 
+       [{ cc_user_attributes = []; cc_type = (Some ([9:11-17], (Happly (([9:11-17], "\\HH\\string"), [])))); 
           cc_id = ([9:18-32], "MY_CLASS_CONST"); cc_kind = (CCConcrete ((), [9:35-57], (String "my class const value"))); 
           cc_span = [9:5-57]; cc_doc_comment = None }
          ];

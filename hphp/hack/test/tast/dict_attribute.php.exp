@@ -10,7 +10,7 @@
          m_name = ([6:19-30], "__construct"); m_tparams = []; m_where_constraints = [];
          m_params =
          [{ param_annotation = (dict<string, int>);
-            param_type_hint = ((dict<string, int>), (Some ([6:31-48], (Happly (([6:31-35], "\\HH\\dict"), [([6:36-42], (Hprim Tstring)); ([6:44-47], (Hprim Tint))]))))); 
+            param_type_hint = ((dict<string, int>), (Some ([6:31-48], (Happly (([6:31-35], "\\HH\\dict"), [([6:36-42], (Happly (([6:36-42], "\\HH\\string"), []))); ([6:44-47], (Hprim Tint))])))));
             param_pos = [6:49-51]; param_name = "$_"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }
@@ -550,7 +550,8 @@
           m_static = false; m_readonly_this = false; m_visibility = Public; 
           m_name = ([6:19-30], "__construct"); m_tparams = []; m_where_constraints = [];
           m_params =
-          [{ param_annotation = (dynamic); param_type_hint = ((dynamic), (Some ([6:31-48], (Happly (([6:31-35], "\\HH\\dict"), [([6:36-42], (Hprim Tstring)); ([6:44-47], (Hprim Tint))])))));
+          [{ param_annotation = (dynamic);
+             param_type_hint = ((dynamic), (Some ([6:31-48], (Happly (([6:31-35], "\\HH\\dict"), [([6:36-42], (Happly (([6:36-42], "\\HH\\string"), []))); ([6:44-47], (Hprim Tint))])))));
              param_pos = [6:49-51]; param_name = "$_"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_named = None; param_user_attributes = []; param_visibility = None }

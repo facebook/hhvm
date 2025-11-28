@@ -25,8 +25,9 @@ let check__toString m =
       Errors.add_error
         Nast_check_error.(to_user_error @@ ToString_visibility pos);
     match hint_of_type_hint m.m_ret with
-    | Some (_, Hprim Tstring)
-    | Some (_, Hlike (_, Hprim Tstring)) ->
+    | Some (_, Happly ((_, id), _))
+    | Some (_, Hlike (_, Happly ((_, id), _)))
+      when String.equal SN.Classes.cString id ->
       ()
     | Some (p, _) ->
       Errors.add_error
@@ -45,6 +46,7 @@ let rec is_stringish env ty =
   | Tdependent _ ->
     let (env, tyl) = Env.get_concrete_supertypes ~abstract_enum:true env ty in
     List.for_all ~f:(is_stringish env) tyl
+  | Tclass ((_, id), _, _) when String.equal SN.Classes.cString id -> true
   | Tclass (x, _, _) ->
     Option.is_none (Decl_entry.to_option @@ Env.get_class env (snd x))
   (* TODO akenn: error tyvar? *)
@@ -71,7 +73,8 @@ let handler =
 
     method! at_expr env (_, p, expr) =
       match expr with
-      | Cast ((_, Hprim Tstring), te) ->
+      | Cast ((_, Happly ((_, id), _)), te)
+        when String.equal SN.Classes.cString id ->
         let (ty, _, _) = te in
         if not (is_stringish env ty) then
           let Equal = Tast_env.eq_typing_env in

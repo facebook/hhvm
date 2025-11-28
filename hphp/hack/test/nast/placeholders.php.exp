@@ -84,7 +84,8 @@
        { f_span = [15:1-17:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([15:64-68], (Hprim Tvoid))));
          f_params =
-         [{ param_annotation = (); param_type_hint = ((), (Some ([15:41-57], (Happly (([15:41-45], "\\HH\\dict"), [([15:46-52], (Hprim Tstring)); ([15:53-56], (Hprim Tint))])))));
+         [{ param_annotation = ();
+            param_type_hint = ((), (Some ([15:41-57], (Happly (([15:41-45], "\\HH\\dict"), [([15:46-52], (Happly (([15:46-52], "\\HH\\string"), []))); ([15:53-56], (Hprim Tint))])))));
             param_pos = [15:58-61]; param_name = "$xs"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }
@@ -106,7 +107,8 @@
        { f_span = [19:1-21:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([19:64-68], (Hprim Tvoid))));
          f_params =
-         [{ param_annotation = (); param_type_hint = ((), (Some ([19:41-57], (Happly (([19:41-45], "\\HH\\dict"), [([19:46-52], (Hprim Tstring)); ([19:53-56], (Hprim Tint))])))));
+         [{ param_annotation = ();
+            param_type_hint = ((), (Some ([19:41-57], (Happly (([19:41-45], "\\HH\\dict"), [([19:46-52], (Happly (([19:46-52], "\\HH\\string"), []))); ([19:53-56], (Hprim Tint))])))));
             param_pos = [19:58-61]; param_name = "$xs"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }
@@ -128,7 +130,8 @@
        { f_span = [23:1-25:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([23:60-64], (Hprim Tvoid))));
          f_params =
-         [{ param_annotation = (); param_type_hint = ((), (Some ([23:37-53], (Happly (([23:37-41], "\\HH\\dict"), [([23:42-48], (Hprim Tstring)); ([23:49-52], (Hprim Tint))])))));
+         [{ param_annotation = ();
+            param_type_hint = ((), (Some ([23:37-53], (Happly (([23:37-41], "\\HH\\dict"), [([23:42-48], (Happly (([23:42-48], "\\HH\\string"), []))); ([23:49-52], (Hprim Tint))])))));
             param_pos = [23:54-57]; param_name = "$xs"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }

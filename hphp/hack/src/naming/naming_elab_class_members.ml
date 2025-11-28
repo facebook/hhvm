@@ -23,7 +23,7 @@ let exists_both p1 p2 xs =
   in
   aux (false, false) xs
 
-let xhp_attr_hint items =
+let xhp_attr_hint pos items =
   let is_int = function
     | (_, _, Aast.Int _) -> true
     | _ -> false
@@ -33,7 +33,7 @@ let xhp_attr_hint items =
   in
   match exists_both is_int is_string items with
   | (true, false) -> Aast.(Hprim Tint)
-  | (_, true) -> Aast.(Hprim Tstring)
+  | (_, true) -> Aast.Happly ((pos, SN.Classes.cString), [])
   | _ -> Aast.Hmixed
 
 let strip_like = function
@@ -87,7 +87,7 @@ let elab_xhp_attr (type_hint, cv, xhp_attr_tag_opt, enum_opt) =
     Option.value_map
       enum_opt
       ~default:(Aast.hint_of_type_hint type_hint)
-      ~f:(fun (pos, items) -> Some (pos, xhp_attr_hint items))
+      ~f:(fun (pos, items) -> Some (pos, xhp_attr_hint pos items))
   in
   let (hint_opt, req_attr_err) =
     Option.value_map

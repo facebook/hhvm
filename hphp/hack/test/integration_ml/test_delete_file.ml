@@ -6,15 +6,15 @@ module Test = Integration_test_base
 let foo_contents =
   "<?hh
     class Foo {
-        public static function g(): string {
-            return 'a';
+        public static function g(): int {
+            return 1;
         }
     }
 "
 
 let bar_contents =
   "<?hh
-        function h(): string {
+        function h(): int {
             return Foo::g();
         }
 "

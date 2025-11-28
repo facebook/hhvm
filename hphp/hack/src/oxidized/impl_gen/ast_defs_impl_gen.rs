@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5100a043c2414678621d1e4c31f559fa>>
+// @generated SignedSource<<b6c37feb04c1c31d8773c0b93c6afd9d>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -822,9 +822,6 @@ impl Tprim {
     pub fn mk_tfloat() -> Self {
         Tprim::Tfloat
     }
-    pub fn mk_tstring() -> Self {
-        Tprim::Tstring
-    }
     pub fn mk_tresource() -> Self {
         Tprim::Tresource
     }
@@ -864,12 +861,6 @@ impl Tprim {
     pub fn is_tfloat(&self) -> bool {
         match self {
             Tprim::Tfloat => true,
-            _ => false,
-        }
-    }
-    pub fn is_tstring(&self) -> bool {
-        match self {
-            Tprim::Tstring => true,
             _ => false,
         }
     }

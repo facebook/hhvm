@@ -17,8 +17,8 @@ let foo_contents = "<?hh
 
 let qux_contents =
   "<?hh
-function h(): string {
-    return 'a';
+function h(): int {
+    return 1;
 }
 
 class Foo {}

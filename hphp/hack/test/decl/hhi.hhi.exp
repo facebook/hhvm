@@ -22,7 +22,9 @@
             { ft_tparams = []; ft_where_constraints = [];
               ft_params =
               [{ fp_pos = [7:19-21]; fp_name = (Some "$s");
-                 fp_type = (Rhint ([7:12-18]), (Tprim Tstring));
+                 fp_type =
+                 (Rhint ([7:12-18]),
+                  (Tapply (([7:12-18], "\\HH\\string"), [])));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; is_optional = false; readonly = false;

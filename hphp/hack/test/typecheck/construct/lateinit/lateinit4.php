@@ -1,8 +1,6 @@
 <?hh
 
 final class C {
-  <<__LateInit>>
-  private string $foo = 'foo';
-  <<__LateInit>>
-  protected static string $bar = 'bar';
+  <<__LateInit>> private int $foo = 1;
+  <<__LateInit>> protected static int $bar = 2;
 }

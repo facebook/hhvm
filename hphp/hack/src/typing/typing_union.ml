@@ -433,7 +433,12 @@ and simplify_non_subtype_union ~approx_cancel_neg env ty1 ty2 r =
       (env, Some (MakeType.neg r (r, IsTag FloatTag)))
     | ((_, Tneg (_, IsTag ArraykeyTag)), (_, Tprim Aast.Tnum))
     | ((_, Tprim Aast.Tnum), (_, Tneg (_, IsTag ArraykeyTag))) ->
-      (env, Some (MakeType.neg r (r, IsTag StringTag)))
+      ( env,
+        Some
+          (MakeType.neg
+             r
+             (r, IsTag (ClassTag (Naming_special_names.Classes.cString, []))))
+      )
     | ((r1, Tintersection tyl1), (r2, Tintersection tyl2)) ->
       (match Typing_algebra.factorize_common_types tyl1 tyl2 with
       | ([], _, _) ->

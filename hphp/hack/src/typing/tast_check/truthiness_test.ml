@@ -59,13 +59,13 @@ let truthiness_test env ~as_lint (ty, p, e) ~not : unit =
   in
   List.iter (Tast_utils.find_sketchy_types env ty) ~f:(function
       | Tast_utils.String ->
-        let tystr = prim_to_string Aast_defs.Tstring in
+        let tystr = Typing_print.strip_ns SN.Classes.cString in
         add_warning
           env
           ~as_lint
           p
           Typing_warning.Truthiness_test.(Sketchy String)
-          tystr
+          ("a " ^ tystr)
           e
           not
       | Tast_utils.Arraykey ->

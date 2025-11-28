@@ -514,8 +514,12 @@ let rec is_denotable ty =
     true
   | Tunion [ty; ty'] -> begin
     match (get_node ty, get_node ty') with
-    | (Tprim Aast.(Tfloat | Tstring), Tprim Aast.Tint)
-    | (Tprim Aast.Tint, Tprim Aast.(Tfloat | Tstring)) ->
+    | (Tprim Aast.Tfloat, Tprim Aast.Tint)
+    | (Tprim Aast.Tint, Tprim Aast.Tfloat) ->
+      true
+    | (Tclass ((_, id), _, _), Tprim Aast.Tint)
+    | (Tprim Aast.Tint, Tclass ((_, id), _, _))
+      when String.equal Naming_special_names.Classes.cString id ->
       true
     | _ -> false
   end
@@ -696,6 +700,12 @@ let is_typeconst_type_abstract tc =
 let is_arraykey t =
   match get_node t with
   | Tprim Aast.Tarraykey -> true
+  | _ -> false
+
+let is_string t =
+  match get_node t with
+  | Tclass ((_, id), _, _) ->
+    String.equal Naming_special_names.Classes.cString id
   | _ -> false
 
 module Attributes = struct

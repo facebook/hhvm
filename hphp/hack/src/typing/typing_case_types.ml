@@ -535,7 +535,6 @@ end = struct
     | Tvoid -> Set.singleton ~reason NullData
     | Tbool -> Set.singleton ~reason BoolData
     | Tfloat -> Set.singleton ~reason FloatData
-    | Tstring -> Set.singleton ~reason StringData
     | Tresource -> Set.singleton ~reason ResourceData
     | Tnum ->
       Set.of_list ~reason:DataTypeReason.(make Nums trail) [IntData; FloatData]
@@ -592,6 +591,7 @@ end = struct
         [
           SN.Classes.cStringish;
           SN.Classes.cXHPChild;
+          SN.Classes.cString;
           SN.Collections.cTraversable;
           SN.Collections.cKeyedTraversable;
           SN.Collections.cContainer;
@@ -643,6 +643,8 @@ end = struct
           when String.equal name SN.Classes.cStringish
                || String.equal name SN.Classes.cXHPChild ->
           (env, Typing_make_type.class_type Reason.none name [])
+        | name when String.equal name SN.Classes.cString ->
+          (env, Typing_make_type.string Reason.none)
         | name ->
           failwithf
             "Unexpected special interface `%s` when determining data types"
@@ -699,6 +701,8 @@ end = struct
         |> Set.inter (default ~reason)
       in
       match cls with
+      | cls when String.equal cls SN.Classes.cString ->
+        Set.singleton ~reason StringData
       | cls when String.equal cls SN.Collections.cDict ->
         Set.singleton ~reason DictData
       | cls when String.equal cls SN.Collections.cKeyset ->
@@ -822,12 +826,14 @@ end = struct
       match tag with
       | BoolTag -> (env, Set.singleton ~reason BoolData)
       | IntTag -> (env, Set.singleton ~reason IntData)
-      | StringTag -> (env, Set.singleton ~reason StringData)
       | ArraykeyTag -> (env, Set.of_list ~reason [IntData; StringData])
       | FloatTag -> (env, Set.singleton ~reason FloatData)
       | NumTag -> (env, Set.of_list ~reason [IntData; FloatData])
       | ResourceTag -> (env, Set.singleton ~reason ResourceData)
       | NullTag -> (env, Set.singleton ~reason NullData)
+      | ClassTag (id, _)
+        when String.equal Naming_special_names.Classes.cString id ->
+        (env, Set.singleton ~reason StringData)
       | ClassTag (id, args) ->
         let generics = Tag.generics_for_class_and_tag_generic_l env id args in
         Class.to_datatypes ~safe_for_are_disjoint ~trail env id generics
@@ -989,6 +995,9 @@ end = struct
           let trail = trail_f (get_reason as_ty) name in
           cycle_handler ~env ~trail as_ty
       end
+    | Tclass ((_, cls), _, _) when String.equal cls SN.Classes.cString ->
+      let reason = DataTypeReason.(make NoSubreason trail) in
+      (env, Set.singleton ~reason StringData)
     | Tclass ((_, cls), _, args) ->
       let generics = Tag.generics_for_class_and_tyl env cls args in
       Class.to_datatypes
@@ -1222,7 +1231,6 @@ module AtomicDataTypes = struct
     match tag with
     | BoolTag -> of_ty env (Primitive Aast.Tbool)
     | IntTag -> of_ty env (Primitive Aast.Tint)
-    | StringTag -> of_ty env (Primitive Aast.Tstring)
     | ArraykeyTag -> of_ty env (Primitive Aast.Tarraykey)
     | FloatTag -> of_ty env (Primitive Aast.Tfloat)
     | NumTag -> of_ty env (Primitive Aast.Tnum)

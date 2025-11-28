@@ -57,7 +57,6 @@ pub fn prim_to_string(prim: &Tprim) -> &'static str {
         Tprim::Tint => typehints::INT,
         Tprim::Tbool => typehints::BOOL,
         Tprim::Tfloat => typehints::FLOAT,
-        Tprim::Tstring => typehints::STRING,
         Tprim::Tresource => typehints::RESOURCE,
         Tprim::Tnum => typehints::NUM,
         Tprim::Tarraykey => typehints::ARRAYKEY,

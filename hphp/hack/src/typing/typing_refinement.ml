@@ -35,7 +35,6 @@ module TyPredicate = struct
     match get_node ty with
     | Tprim Aast.Tbool -> Result.Ok (next_wildcard_id, IsTag BoolTag)
     | Tprim Aast.Tint -> Result.Ok (next_wildcard_id, IsTag IntTag)
-    | Tprim Aast.Tstring -> Result.Ok (next_wildcard_id, IsTag StringTag)
     | Tprim Aast.Tarraykey -> Result.Ok (next_wildcard_id, IsTag ArraykeyTag)
     | Tprim Aast.Tfloat -> Result.Ok (next_wildcard_id, IsTag FloatTag)
     | Tprim Aast.Tnum -> Result.Ok (next_wildcard_id, IsTag NumTag)
@@ -155,7 +154,6 @@ module TyPredicate = struct
     match tag with
     | BoolTag
     | IntTag
-    | StringTag
     | ArraykeyTag
     | FloatTag
     | NumTag
@@ -278,7 +276,6 @@ module TyPredicate = struct
       match tag with
       | BoolTag -> Typing_make_type.bool reason
       | IntTag -> Typing_make_type.int reason
-      | StringTag -> Typing_make_type.string reason
       | ArraykeyTag -> Typing_make_type.arraykey reason
       | FloatTag -> Typing_make_type.float reason
       | NumTag -> Typing_make_type.num reason
@@ -846,9 +843,7 @@ and split_ty
       (* TODO: need a bespoke DataType to model KindOfClass *)
       (env, TyPartition.mk_span ~env ~predicate ty)
     (* Types we cannot split *)
-    | Tprim
-        Aast.(
-          (Tint | Tnull | Tvoid | Tbool | Tfloat | Tstring | Tresource) as prim)
+    | Tprim Aast.((Tint | Tnull | Tvoid | Tbool | Tfloat | Tresource) as prim)
       ->
       partition_f
         DataType.(of_ty ~safe_for_are_disjoint:false env @@ Primitive prim)

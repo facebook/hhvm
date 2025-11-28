@@ -97,7 +97,8 @@ let lookup_magic_type (env : env) use_pos (class_ : locl_ty) (fname : string) :
         let (env, ty) = Env.expand_type env ty in
         let ty_opt =
           match get_node ty with
-          | Tprim Tstring -> None
+          | Tclass ((_, id), _, _) when String.equal id SN.Classes.cString ->
+            None
           | Tdynamic -> None
           | _ -> Some ty
         in
@@ -226,7 +227,10 @@ let retype_magic_func (env : env) (ft : locl_fun_type) (el : Nast.argument list)
           let (env, argl) = parse_printf_string env str pos type_arg in
           ( env,
             Some
-              ({ fp with fp_type = mk (get_reason fp_type, Tprim Tstring) }
+              ({
+                 fp with
+                 fp_type = Typing_make_type.string (get_reason fp_type);
+               }
               :: argl) )
         | (env, Left pos) ->
           Typing_error_utils.add_typing_error

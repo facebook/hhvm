@@ -1,1 +1,2 @@
 Fun NS\foo -> Fun NS\bar
+Type HH\string -> Fun foo

@@ -21,7 +21,7 @@
              { c_atc_as_constraint =
                (Some ([6:42-49],
                       (Hintersection [([6:42-49], (Happly (([6:42-49], "\\HH\\supportdyn"), [([6:42-49], Hnonnull)]))); ([6:53-58], (Happly (([6:53-58], "\\HH\\supportdyn"), [([6:53-58], Hmixed)])))])));
-               c_atc_super_constraint = (Some ([6:32-38], (Hunion [([6:32-38], (Hprim Tstring)); ([6:65-72], Hnothing)]))); 
+               c_atc_super_constraint = (Some ([6:32-38], (Hunion [([6:32-38], (Happly (([6:32-38], "\\HH\\string"), []))); ([6:65-72], Hnothing)]))); 
                c_atc_default = None });
           c_tconst_span = [6:3-73]; c_tconst_doc_comment = None; c_tconst_is_ctx = false }
         ];

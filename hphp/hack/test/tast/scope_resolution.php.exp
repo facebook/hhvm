@@ -128,7 +128,7 @@ Errors:
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([4:10-13], "\\bar");
       fd_fun =
       { f_span = [4:1-6:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_tparams = []; f_ret = ((~string), (Some ([4:17-23], (Hprim Tstring)))); 
+        f_readonly_ret = None; f_tparams = []; f_ret = ((~string), (Some ([4:17-23], (Happly (([4:17-23], "\\HH\\string"), []))))); 
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([5:3-18], (Return (Some ((string), [5:10-17], (String "class")))))] }; 
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([4:10-13], "__SupportDynamicType"); ua_params = [] }]; 
         f_external = false; f_doc_comment = None };
@@ -141,7 +141,7 @@ Errors:
        c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
        c_implements = [];
        c_consts =
-       [{ cc_user_attributes = []; cc_type = (Some ([8:9-15], (Hprim Tstring))); 
+       [{ cc_user_attributes = []; cc_type = (Some ([8:9-15], (Happly (([8:9-15], "\\HH\\string"), [])))); 
           cc_id = ([8:16-19], "bar"); cc_kind = (CCConcrete ((string), [8:22-27], (String "baz"))); 
           cc_span = [8:3-28]; cc_doc_comment = None };
          { cc_user_attributes = []; cc_type = (Some ([9:9-21], (Happly (([9:9-12], "\\HH\\vec"), [([9:13-20], Hnothing)])))); 

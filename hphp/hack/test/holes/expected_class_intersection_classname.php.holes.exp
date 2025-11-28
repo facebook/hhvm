@@ -28,7 +28,8 @@ Errors:
          [{ param_annotation = (classname<C>);
             param_type_hint =
             ((classname<C>),
-             (Some ([5:38-61], (Hintersection [([5:39-45], (Hprim Tstring)); ([5:48-60], (Happly (([5:48-57], "\\HH\\classname"), [([5:58-59], (Happly (([5:58-59], "\\C"), [])))])))]))));
+             (Some ([5:38-61],
+                    (Hintersection [([5:39-45], (Happly (([5:39-45], "\\HH\\string"), []))); ([5:48-60], (Happly (([5:48-57], "\\HH\\classname"), [([5:58-59], (Happly (([5:58-59], "\\C"), [])))])))]))));
             param_pos = [5:62-73]; param_name = "$class_name"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }

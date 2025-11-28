@@ -38,7 +38,8 @@
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
         sc_user_attributes = [];
         sc_enum_type =
-        (Some { Typing_defs.te_base = (Rhint ([6:9-15]), (Tprim Tstring));
+        (Some { Typing_defs.te_base =
+                (Rhint ([6:9-15]), (Tapply (([6:9-15], "\\HH\\string"), [])));
                 te_constraint = None; te_includes = [] });
         sc_docs_url = None; sc_package = None }))
   ]

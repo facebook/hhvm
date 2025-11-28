@@ -102,7 +102,8 @@
         td_as_constraint = None; td_super_constraint = None;
         td_type_assignment =
         (Typing_defs.SimpleTypeDef (Transparent,
-           (Rhint ([13:16-22]), (Tprim Tstring))));
+           (Rhint ([13:16-22]), (Tapply (([13:16-22], "\\HH\\string"), [])))
+           ));
         td_is_ctx = false; td_attributes = []; td_internal = false;
         td_docs_url = None; td_package = None }));
   ("\\function_with_non_primitive_args",
@@ -189,7 +190,10 @@
                 { Typing_defs_core.tp_variance = Invariant;
                   tp_name = ([22:53-55], "T2");
                   tp_constraints =
-                  [(Constraint_as, (Rhint ([22:59-65]), (Tprim Tstring)))];
+                  [(Constraint_as,
+                    (Rhint ([22:59-65]),
+                     (Tapply (([22:59-65], "\\HH\\string"), []))))
+                    ];
                   tp_reified = Erased; tp_user_attributes = [] }
                 ];
               ft_where_constraints = [];
@@ -439,7 +443,8 @@
                  fp_type =
                  (Rhint ([46:29-47]),
                   (Tapply (([46:29-33], "\\HH\\dict"),
-                     [(Rhint ([46:34-40]), (Tprim Tstring));
+                     [(Rhint ([46:34-40]),
+                       (Tapply (([46:34-40], "\\HH\\string"), [])));
                        (Rhint ([46:42-46]), (Tprim Tbool))]
                      )));
                  fp_flags =
@@ -453,7 +458,8 @@
               ft_ret =
               (Rhint ([46:53-71]),
                (Tapply (([46:53-57], "\\HH\\dict"),
-                  [(Rhint ([46:58-64]), (Tprim Tstring));
+                  [(Rhint ([46:58-64]),
+                    (Tapply (([46:58-64], "\\HH\\string"), [])));
                     (Rhint ([46:66-70]), (Tprim Tbool))]
                   )));
               ft_flags =

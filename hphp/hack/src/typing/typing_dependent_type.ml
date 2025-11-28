@@ -106,7 +106,8 @@ module ExprDepTy = struct
       | (_, Tclass ((_, x), _, _))
         when String.equal x Naming_special_names.Collections.cVec
              || String.equal x Naming_special_names.Collections.cDict
-             || String.equal x Naming_special_names.Collections.cKeyset ->
+             || String.equal x Naming_special_names.Collections.cKeyset
+             || String.equal x Naming_special_names.Classes.cString ->
         (env, ty)
       | (_, Tclass (((_, x) as c), Nonexact _, tyl)) ->
         let class_ = Env.get_class env x in

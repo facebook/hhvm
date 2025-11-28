@@ -13,11 +13,17 @@
                     sft_ty = (Rhint ([4:8-11]), (Tprim Tint)) };
                   (Typing_defs_core.TSFlit_str ([5:3-6], "s")) ->
                   { sft_optional = false;
-                    sft_ty = (Rhint ([5:10-16]), (Tprim Tstring)) };
+                    sft_ty =
+                    (Rhint ([5:10-16]),
+                     (Tapply (([5:10-16], "\\HH\\string"), [])))
+                    };
                   (Typing_defs_core.TSFclass_const (([7:3-4], "\\C"),
                      ([7:6-9], "KEY"))) ->
                   { sft_optional = false;
-                    sft_ty = (Rhint ([7:13-19]), (Tprim Tstring)) };
+                    sft_ty =
+                    (Rhint ([7:13-19]),
+                     (Tapply (([7:13-19], "\\HH\\string"), [])))
+                    };
                   (Typing_defs_core.TSFclass_const (([6:10-11], "\\C"),
                      ([6:10-11], "class"))) ->
                   { sft_optional = false;

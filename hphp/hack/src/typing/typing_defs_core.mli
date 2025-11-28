@@ -222,7 +222,6 @@ and type_tag_generic =
 and type_tag =
   | BoolTag
   | IntTag
-  | StringTag
   | ArraykeyTag
   | FloatTag
   | NumTag

@@ -22,27 +22,33 @@ let handler =
            combinations to consider. *)
         let (env, expr_ty) = Tast_env.expand_type env expr_ty in
         begin
+          let check () =
+            let Equal = Tast_env.eq_typing_env in
+            let cast =
+              "(" ^ Typing_print.full ~hide_internals:true env expr_ty ^ ")"
+            in
+            let check_status = Tast_env.get_check_status env in
+            let can_be_captured = Aast_utils.can_be_captured expr in
+            Lints_errors.redundant_cast
+              ~can_be_captured
+              ~check_status
+              cast
+              pos
+              expr_pos
+          in
           match (T.get_node expr_ty, snd hint) with
           | (T.Tprim expr_prim, A.Hprim hint_prim) -> begin
             match (expr_prim, hint_prim) with
             | (A.Tint, A.Tint)
-            | (A.Tstring, A.Tstring)
             | (A.Tbool, A.Tbool)
             | (A.Tfloat, A.Tfloat) ->
-              let Equal = Tast_env.eq_typing_env in
-              let cast =
-                "(" ^ Typing_print.full ~hide_internals:true env expr_ty ^ ")"
-              in
-              let check_status = Tast_env.get_check_status env in
-              let can_be_captured = Aast_utils.can_be_captured expr in
-              Lints_errors.redundant_cast
-                ~can_be_captured
-                ~check_status
-                cast
-                pos
-                expr_pos
+              check ()
             | _ -> ()
           end
+          | (T.Tclass ((_, id1), _, _), Happly ((_, id2), _))
+            when String.equal Naming_special_names.Classes.cString id1
+                 && String.equal Naming_special_names.Classes.cString id2 ->
+            check ()
           | _ -> ()
         end
       | _ -> ()

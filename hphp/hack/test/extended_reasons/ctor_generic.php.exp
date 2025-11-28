@@ -195,6 +195,16 @@ File ctor_generic.php, line 19, character 56 - line 19, character 61:
  22 |   }
  23 | }
 
+which is defined here
+
+File string.hhi, line 6, character 9 - line 6, character 14:
+
+ 5 |   <<__SupportDynamicType>>
+ 6 |   class »string« {
+ 7 |   }
+ 8 | 
+ 9 | }
+
 and flows into this hint
 
 File ctor_generic.php, line 15, character 18 - line 15, character 19:

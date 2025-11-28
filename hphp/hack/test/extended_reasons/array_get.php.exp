@@ -60,6 +60,16 @@ File array_get.php, line 3, character 22 - line 3, character 27:
  5 |   return $x;
  6 | }
 
+which is defined here
+
+File string.hhi, line 6, character 9 - line 6, character 14:
+
+ 5 |   <<__SupportDynamicType>>
+ 6 |   class »string« {
+ 7 |   }
+ 8 | 
+ 9 | }
+
 and flows into this expression
 
 File array_get.php, line 4, character 8 - line 4, character 12:

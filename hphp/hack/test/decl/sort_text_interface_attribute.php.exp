@@ -16,7 +16,9 @@
            (Tfun
               { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                 ft_implicit_params = { capability = (CapDefaults [6:26-32]) };
-                ft_ret = (Rhint ([6:37-43]), (Tprim Tstring));
+                ft_ret =
+                (Rhint ([6:37-43]),
+                 (Tapply (([6:37-43], "\\HH\\string"), [])));
                 ft_flags =
                 { Typing_defs_flags.Fun.return_disposable = false;
                   async = false; generator = false; fun_kind = FSync;
@@ -38,7 +40,9 @@
                { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
                  { capability = (CapDefaults [9:26-32]) };
-                 ft_ret = (Rhint ([9:37-43]), (Tprim Tstring));
+                 ft_ret =
+                 (Rhint ([9:37-43]),
+                  (Tapply (([9:37-43], "\\HH\\string"), [])));
                  ft_flags =
                  { Typing_defs_flags.Fun.return_disposable = false;
                    async = false; generator = false; fun_kind = FSync;
@@ -75,7 +79,9 @@
                { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
                  { capability = (CapDefaults [15:26-32]) };
-                 ft_ret = (Rhint ([15:37-43]), (Tprim Tstring));
+                 ft_ret =
+                 (Rhint ([15:37-43]),
+                  (Tapply (([15:37-43], "\\HH\\string"), [])));
                  ft_flags =
                  { Typing_defs_flags.Fun.return_disposable = false;
                    async = false; generator = false; fun_kind = FSync;
@@ -97,7 +103,9 @@
                 { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                   ft_implicit_params =
                   { capability = (CapDefaults [17:26-32]) };
-                  ft_ret = (Rhint ([17:37-43]), (Tprim Tstring));
+                  ft_ret =
+                  (Rhint ([17:37-43]),
+                   (Tapply (([17:37-43], "\\HH\\string"), [])));
                   ft_flags =
                   { Typing_defs_flags.Fun.return_disposable = false;
                     async = false; generator = false; fun_kind = FSync;
@@ -137,7 +145,9 @@
                { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
                  { capability = (CapDefaults [23:26-32]) };
-                 ft_ret = (Rhint ([23:37-43]), (Tprim Tstring));
+                 ft_ret =
+                 (Rhint ([23:37-43]),
+                  (Tapply (([23:37-43], "\\HH\\string"), [])));
                  ft_flags =
                  { Typing_defs_flags.Fun.return_disposable = false;
                    async = false; generator = false; fun_kind = FSync;
@@ -159,7 +169,9 @@
                 { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                   ft_implicit_params =
                   { capability = (CapDefaults [27:26-32]) };
-                  ft_ret = (Rhint ([27:37-43]), (Tprim Tstring));
+                  ft_ret =
+                  (Rhint ([27:37-43]),
+                   (Tapply (([27:37-43], "\\HH\\string"), [])));
                   ft_flags =
                   { Typing_defs_flags.Fun.return_disposable = false;
                     async = false; generator = false; fun_kind = FSync;
@@ -199,7 +211,9 @@
                { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
                  { capability = (CapDefaults [35:26-32]) };
-                 ft_ret = (Rhint ([35:37-43]), (Tprim Tstring));
+                 ft_ret =
+                 (Rhint ([35:37-43]),
+                  (Tapply (([35:37-43], "\\HH\\string"), [])));
                  ft_flags =
                  { Typing_defs_flags.Fun.return_disposable = false;
                    async = false; generator = false; fun_kind = FSync;
@@ -221,7 +235,9 @@
                 { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                   ft_implicit_params =
                   { capability = (CapDefaults [39:26-32]) };
-                  ft_ret = (Rhint ([39:37-43]), (Tprim Tstring));
+                  ft_ret =
+                  (Rhint ([39:37-43]),
+                   (Tapply (([39:37-43], "\\HH\\string"), [])));
                   ft_flags =
                   { Typing_defs_flags.Fun.return_disposable = false;
                     async = false; generator = false; fun_kind = FSync;

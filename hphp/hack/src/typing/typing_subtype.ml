@@ -534,11 +534,10 @@ module Subtype_negation = struct
         | (Tnum, Tint)
         | (Tnum, Tfloat)
         | (Tarraykey, Tint)
-        | (Tarraykey, Tstring)
         | (Tarraykey, Tnum) ->
           false
         | ( _,
-            ( Tnum | Tint | Tvoid | Tbool | Tarraykey | Tfloat | Tstring | Tnull
+            ( Tnum | Tint | Tvoid | Tbool | Tarraykey | Tfloat | Tnull
             | Tresource | Tnoreturn ) ) ->
           true)
     in
@@ -548,7 +547,7 @@ module Subtype_negation = struct
 
   (* Two classes c1 and c2 are disjoint iff there exists no c3 such that
      c3 <: c1 and c3 <: c2. *)
-  let is_class_disjoint env c1 c2 =
+  let is_class_disjoint env c1 ex1 c2 ex2 =
     let is_interface_or_trait c_def =
       Ast_defs.(
         match Cls.kind c_def with
@@ -562,6 +561,13 @@ module Subtype_negation = struct
     in
     if String.equal c1 c2 then
       false
+    else if
+      String.equal c1 SN.Classes.cString || String.equal c2 SN.Classes.cString
+    then
+      (* Strings are disjoint from other classes, except for stringish *)
+      not
+        ((String.equal c1 SN.Classes.cStringish && is_nonexact ex1)
+        || (String.equal c2 SN.Classes.cStringish && is_nonexact ex2))
     else
       match (Env.get_class env c1, Env.get_class env c2) with
       | (Decl_entry.Found c1_def, Decl_entry.Found c2_def) ->
@@ -597,7 +603,9 @@ module Subtype_negation = struct
         Some (MakeType.prim_type r Aast.Tarraykey)
       | Tneg (r, IsTag NullTag) -> Some (MakeType.null r)
       | Tnonnull -> Some (MakeType.null r)
-      | Tneg (_, IsTag (ClassTag _)) -> None
+      | Tneg (_, IsTag (ClassTag (id, _)))
+        when not (String.equal SN.Classes.cString id) ->
+        None
       | Tneg predicate ->
         Typing_refinement.TyPredicate.to_ty_without_instantiation_opt predicate
       | _ -> None
@@ -4166,8 +4174,7 @@ end = struct
     | ( ( _,
           ( Tprim
               Ast_defs.(
-                ( Tint | Tbool | Tfloat | Tstring | Tresource | Tnum | Tarraykey
-                | Tnoreturn ))
+                Tint | Tbool | Tfloat | Tresource | Tnum | Tarraykey | Tnoreturn)
           | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tclass _ | Tvec_or_dict _
           | Taccess _ | Tlabel _ | Tclass_ptr _ ) ),
         (_, Tnonnull) ) ->
@@ -4242,8 +4249,8 @@ end = struct
         | ( _,
             Tprim
               Ast_defs.(
-                ( Tint | Tbool | Tfloat | Tstring | Tnum | Tarraykey | Tvoid
-                | Tnoreturn | Tresource )) ) ->
+                ( Tint | Tbool | Tfloat | Tnum | Tarraykey | Tvoid | Tnoreturn
+                | Tresource )) ) ->
           valid env
         | (_, Tnewtype (name_sub, [_tyarg_sub], _))
           when String.equal name_sub SN.Classes.cSupportDyn ->
@@ -4587,10 +4594,16 @@ end = struct
     (* -- C-Prim-R ---------------------------------------------------------- *)
     | ((_, Tprim (Nast.Tint | Nast.Tfloat)), (_, Tprim Nast.Tnum)) -> valid env
     (* class<T> <: string because of typename's bound *)
-    | ((_, Tclass_ptr _), (_, Tprim (Nast.Tstring | Nast.Tarraykey)))
+    | ((_, Tclass_ptr _), (_, Tprim Nast.Tarraykey))
       when subtype_env.Subtype_env.class_sub_classname ->
       valid env
-    | ((_, Tprim (Nast.Tint | Nast.Tstring)), (_, Tprim Nast.Tarraykey)) ->
+    | ((_, Tclass_ptr _), (_, Tclass ((_, id), _, _)))
+      when subtype_env.Subtype_env.class_sub_classname
+           && String.equal SN.Classes.cString id ->
+      valid env
+    | ((_, Tprim Nast.Tint), (_, Tprim Nast.Tarraykey)) -> valid env
+    | ((_, Tclass ((_, id), _, _)), (_, Tprim Nast.Tarraykey))
+      when String.equal SN.Classes.cString id ->
       valid env
     | ((_, Tprim prim_sub), (_, Tprim prim_sup))
       when Aast.equal_tprim prim_sub prim_sup ->
@@ -5245,8 +5258,7 @@ end = struct
           | Tvec_or_dict _ | Tclass _ | Tnewtype _ | Tneg _
           | Tprim
               Aast.(
-                ( Tnull | Tvoid | Tint | Tbool | Tfloat | Tstring | Tresource
-                | Tnoreturn ))
+                Tnull | Tvoid | Tint | Tbool | Tfloat | Tresource | Tnoreturn)
           | Tlabel _ | Tclass_ptr _ ) ) -> begin
         match
           match get_node ty_sub with
@@ -5408,13 +5420,15 @@ end = struct
           valid env
         else
           invalid ~fail env
-      | (_, Tclass ((_, c_sub), _, _)) ->
-        if Subtype_negation.is_class_disjoint env c_sub c_super then
+      | (_, Tclass ((_, c_sub), ex, _)) ->
+        if Subtype_negation.is_class_disjoint env c_sub ex c_super nonexact then
           valid env
         else
           invalid ~fail env
       (* Functions can be instances of the Closure class *)
       | (_, Tfun _) when String.equal SN.Classes.cClosure c_super ->
+        invalid ~fail env
+      | (_, Tprim Tarraykey) when String.equal SN.Classes.cString c_super ->
         invalid ~fail env
       (* All of these are definitely disjoint from class types *)
       | (_, (Tfun _ | Ttuple _ | Tshape _ | Tprim _)) -> valid env
@@ -5584,14 +5598,20 @@ end = struct
              && String.equal class_nm_super SN.Classes.cXHPChild ->
         valid env
       (* t_prim <: XHPChild *)
-      | (_, Tprim Nast.(Tstring | Tarraykey | Tint | Tfloat | Tnum))
+      | (_, Tprim Nast.(Tarraykey | Tint | Tfloat | Tnum))
         when String.equal class_nm_super SN.Classes.cXHPChild
              && is_nonexact exact_super ->
         valid env
-      (* string <: Stringish *)
-      | (_, Tprim Nast.Tstring)
-        when String.equal class_nm_super SN.Classes.cStringish
+      | (_, Tclass ((_, id), _, _))
+        when String.equal id SN.Classes.cString
+             && String.equal class_nm_super SN.Classes.cXHPChild
              && is_nonexact exact_super ->
+        valid env
+      (* string <: Stringish *)
+      | (_, Tclass ((_, id), _, _))
+        when String.equal class_nm_super SN.Classes.cStringish
+             && is_nonexact exact_super
+             && String.equal id SN.Classes.cString ->
         valid env
       (* same as prior two cases by typename's string bound *)
       | (_, Tclass_ptr _)
@@ -6626,7 +6646,7 @@ end = struct
     | (_r_sub, Tvec_or_dict (_, tv)) ->
       let (env, tv) = maybe_pessimise_type env tv in
       is_dict_like tv env
-    | (_r_sub, Tprim Tstring) ->
+    | (_r_sub, Tclass ((_, n), _, _)) when String.equal n SN.Classes.cString ->
       let pos = get_pos ty_sub in
       let tk = MakeType.int (Reason.idx_string_from_decl pos) in
       let tv = MakeType.string reason_super in
@@ -7347,7 +7367,7 @@ end = struct
     | (_, Tprim Tnull)
       when Tast.is_under_dynamic_assumptions env.Typing_env_types.checked ->
       got_dynamic env
-    | (r_sub, Tprim Tstring) ->
+    | (r_sub, Tclass ((_, id), _, _)) when String.equal SN.Classes.cString id ->
       let tk = MakeType.int (Reason.idx (cia.cia_index_pos, r_sub)) in
       let tv = MakeType.string (Reason.witness cia.cia_expr_pos) in
       let (env, tv) = maybe_pessimise_type env tv in
@@ -8705,6 +8725,7 @@ end = struct
       | Tdynamic
       | Tprim _ ->
         true
+      | Tclass ((_, id), _, _) when String.equal SN.Classes.cString id -> true
       | Toption ty -> is_dynamic_or_supportdyn ty
       | Tunion tyl -> List.for_all tyl ~f:is_dynamic_or_supportdyn
       | Tintersection tyl -> List.exists tyl ~f:is_dynamic_or_supportdyn
@@ -11161,13 +11182,18 @@ let rec is_type_disjoint_help visited env ty1 ty2 =
   | (Tneg pred1, _) -> Typing_refinement.passes_predicate env ty2 pred1
   | (_, Tneg pred2) -> Typing_refinement.passes_predicate env ty1 pred2
   | (Tprim tp1, Tprim tp2) -> Subtype_negation.is_tprim_disjoint tp1 tp2
-  | (Tclass ((_, cname), ex, _), Tprim (Aast.Tarraykey | Aast.Tstring))
-  | (Tprim (Aast.Tarraykey | Aast.Tstring), Tclass ((_, cname), ex, _))
-    when String.equal cname SN.Classes.cStringish && is_nonexact ex ->
+  | (Tclass ((_, cname), ex, _), Tprim Aast.Tarraykey)
+  | (Tprim Aast.Tarraykey, Tclass ((_, cname), ex, _))
+    when String.equal SN.Classes.cString cname
+         || (String.equal cname SN.Classes.cStringish && is_nonexact ex) ->
     false
   (* Same as above case, runtime conflates equality of "A" === A::class *)
-  | (Tprim (Aast.Tarraykey | Aast.Tstring), Tclass_ptr _)
-  | (Tclass_ptr _, Tprim (Aast.Tarraykey | Aast.Tstring)) ->
+  | (Tprim Aast.Tarraykey, Tclass_ptr _)
+  | (Tclass_ptr _, Tprim Aast.Tarraykey) ->
+    false
+  | (Tclass ((_, id), _, _), Tclass_ptr _)
+  | (Tclass_ptr _, Tclass ((_, id), _, _))
+    when String.equal id SN.Classes.cString ->
     false
   | (Tprim _, Tclass_ptr _)
   | (Tclass_ptr _, Tprim _) ->
@@ -11184,8 +11210,8 @@ let rec is_type_disjoint_help visited env ty1 ty2 =
   | (Tfun _, Tclass _)
   | (Tclass _, Tfun _) ->
     true
-  | (Tclass ((_, c1), _, _), Tclass ((_, c2), _, _)) ->
-    Subtype_negation.is_class_disjoint env c1 c2
+  | (Tclass ((_, c1), ex1, _), Tclass ((_, c2), ex2, _)) ->
+    Subtype_negation.is_class_disjoint env c1 ex1 c2 ex2
   | (Tprim _, Tlabel _)
   | (Tlabel _, Tprim _) ->
     true

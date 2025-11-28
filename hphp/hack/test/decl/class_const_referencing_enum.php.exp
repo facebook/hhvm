@@ -16,19 +16,26 @@
        sc_consts =
        [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
           scc_name = ([4:3-6], "FOO");
-          scc_type = (Rwitness_from_decl ([4:9-14]), (Tprim Tstring));
+          scc_type =
+          (Rwitness_from_decl ([4:9-14]),
+           (Tapply (([4:9-14], "\\HH\\string"), [])));
           scc_refs = []; scc_value = None };
          { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([5:3-6], "BAR");
-           scc_type = (Rwitness_from_decl ([5:9-14]), (Tprim Tstring));
+           scc_type =
+           (Rwitness_from_decl ([5:9-14]),
+            (Tapply (([5:9-14], "\\HH\\string"), [])));
            scc_refs = []; scc_value = None }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];
        sc_user_attributes = [];
        sc_enum_type =
-       (Some { Typing_defs.te_base = (Rhint ([3:13-19]), (Tprim Tstring));
-               te_constraint = (Some (Rhint ([3:23-29]), (Tprim Tstring)));
+       (Some { Typing_defs.te_base =
+               (Rhint ([3:13-19]), (Tapply (([3:13-19], "\\HH\\string"), [])));
+               te_constraint =
+               (Some (Rhint ([3:23-29]),
+                      (Tapply (([3:23-29], "\\HH\\string"), []))));
                te_includes = [] });
        sc_docs_url = None; sc_package = None }));
   ("\\TestClassConstReferencingEnum",

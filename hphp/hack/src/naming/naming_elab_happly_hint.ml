@@ -95,8 +95,6 @@ let canonical_tycon typarams (pos, name) =
     Concrete (pos, Aast.(Hprim Tbool))
   else if String.equal name SN.Typehints.float then
     Concrete (pos, Aast.(Hprim Tfloat))
-  else if String.equal name SN.Typehints.string then
-    Concrete (pos, Aast.(Hprim Tstring))
   else if String.equal name SN.Typehints.darray then
     Darray pos
   else if String.equal name SN.Typehints.varray then
@@ -141,7 +139,6 @@ let canonical_tycon typarams (pos, name) =
       || equal name ("\\" ^ SN.Typehints.bool)
       || equal name ("\\" ^ SN.Typehints.float)
       || equal name ("\\" ^ SN.Typehints.num)
-      || equal name ("\\" ^ SN.Typehints.string)
       || equal name ("\\" ^ SN.Typehints.resource)
       || equal name ("\\" ^ SN.Typehints.mixed)
       || equal name ("\\" ^ SN.Typehints.nonnull)
@@ -229,7 +226,7 @@ let canonicalize_happly tparams hint_pos tycon hints =
       Ok ((hint_pos, hint_), None)
     | _ ->
       Ok
-        ( (hint_pos, Aast.(Hprim Tstring)),
+        ( (hint_pos, Aast.Happly ((pos, SN.Classes.cString), [])),
           Some (Err.naming @@ Naming_error.Classname_param pos) ))
   | Darray pos ->
     Ok ((hint_pos, Aast.Happly ((pos, SN.Collections.cDict), hints)), None)

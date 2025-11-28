@@ -20,7 +20,8 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([7:16-25], "\\genString");
        fd_fun =
        { f_span = [7:1-9:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_tparams = []; f_ret = ((Awaitable<~string>), (Some ([7:29-46], (Happly (([7:29-38], "\\HH\\Awaitable"), [([7:39-45], (Hprim Tstring))]))))); 
+         f_readonly_ret = None; f_tparams = [];
+         f_ret = ((Awaitable<~string>), (Some ([7:29-46], (Happly (([7:29-38], "\\HH\\Awaitable"), [([7:39-45], (Happly (([7:39-45], "\\HH\\string"), [])))]))))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([8:3-16], (Return (Some ((string), [8:10-15], (String "foo")))))] }; 
          f_fun_kind = FAsync; f_user_attributes = [{ ua_name = ([7:16-25], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };

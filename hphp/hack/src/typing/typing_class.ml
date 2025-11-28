@@ -25,9 +25,6 @@ module SN = Naming_special_names
 module Profile = Typing_toplevel_profile
 module Enable = Typing_toplevel_enable
 
-let is_literal_with_trivially_inferable_type (_, _, e) =
-  Option.is_some @@ Decl_utils.infer_const e
-
 let method_dynamically_callable env cls m params_decl_ty return =
   let env = { env with checked = Tast.CUnderDynamicAssumptions } in
   let ret_locl_ty = return.Typing_env_return_info.return_type in
@@ -1138,7 +1135,7 @@ let class_const_def ~in_enum_class c cls env cc =
         | CCAbstract (Some e (* default *))
         | CCConcrete e ->
           if
-            (not (is_literal_with_trivially_inferable_type e))
+            (not (Decl_utils.is_literal_with_trivially_inferable_type e))
             && (not (is_enum_or_enum_class c.c_kind))
             && not (Env.is_hhi env)
           then

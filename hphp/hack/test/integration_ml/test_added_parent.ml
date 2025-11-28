@@ -71,7 +71,12 @@ let test () =
   let (custom_config, _) =
     ServerConfig.load ~silent:false ~from:"" ~cli_config_overrides:[]
   in
-  let env = Test.setup_server ~custom_config () in
+  let env =
+    Test.setup_server
+      ~custom_config
+      ~hhi_files:(Hhi.get_raw_hhi_contents () |> Array.to_list)
+      ()
+  in
   let env =
     Test.setup_disk
       env

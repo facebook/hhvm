@@ -79,7 +79,7 @@ let int r = prim_type r Nast.Tint
 
 let bool r = prim_type r Nast.Tbool
 
-let string r = prim_type r Nast.Tstring
+let string r = class_type r SN.Classes.cString []
 
 (* Mirror of the classname.hhi definition. This sucks: the type of the ::class
  * constant is burned into decls at folding time so this supports the case when
@@ -178,6 +178,8 @@ let nullable : type a. a Reason.t_ -> a ty -> a ty =
   | _ -> mk (r, Toption ty)
 
 let apply r id tyl = mk (r, Tapply (id, tyl))
+
+let decl_string r = apply r (Reason.to_pos r, SN.Classes.cString) []
 
 let tuple r tyl =
   mk

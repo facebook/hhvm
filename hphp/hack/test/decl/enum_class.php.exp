@@ -90,7 +90,9 @@
              [(Rhint ([11:12-13]),
                (Tapply (([11:12-13], "\\HH\\MemberOf"),
                   [(Rhint ([11:12-13]), (Tapply (([11:12-13], "\\B"), [])));
-                    (Rhint ([11:14-20]), (Tprim Tstring))]
+                    (Rhint ([11:14-20]),
+                     (Tapply (([11:14-20], "\\HH\\string"), [])))
+                    ]
                   )))
                ]
              )))
@@ -117,7 +119,9 @@
            ua_params = []; ua_raw_val = None }
           ];
         sc_enum_type =
-        (Some { Typing_defs.te_base = (Rhint ([11:14-20]), (Tprim Tstring));
+        (Some { Typing_defs.te_base =
+                (Rhint ([11:14-20]),
+                 (Tapply (([11:14-20], "\\HH\\string"), [])));
                 te_constraint = None; te_includes = [] });
         sc_docs_url = None; sc_package = None }));
   ("\\C",

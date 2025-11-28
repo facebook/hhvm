@@ -20,7 +20,8 @@
             safe_global_variable = false; no_auto_likes = false }
           };
          { Shallow_decl_defs.sp_name = ([5:46-48], "s"); sp_xhp_attr = None;
-           sp_type = (Rhint ([5:39-45]), (Tprim Tstring));
+           sp_type =
+           (Rhint ([5:39-45]), (Tapply (([5:39-45], "\\HH\\string"), [])));
            sp_visibility = Private;
            sp_flags =
            { Shallow_decl_defs.PropFlags.abstract = false; const = false;
@@ -38,7 +39,9 @@
                    { ft_tparams = []; ft_where_constraints = [];
                      ft_params =
                      [{ fp_pos = [5:46-48]; fp_name = (Some "$s");
-                        fp_type = (Rhint ([5:39-45]), (Tprim Tstring));
+                        fp_type =
+                        (Rhint ([5:39-45]),
+                         (Tapply (([5:39-45], "\\HH\\string"), [])));
                         fp_flags =
                         { Typing_defs_flags.FunParam.accept_disposable =
                           false; inout = false; is_optional = false;

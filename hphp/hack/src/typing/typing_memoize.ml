@@ -38,8 +38,7 @@ let check_param : env -> Nast.fun_param -> unit =
       Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
       if not (Typing_utils.is_tyvar_error env ty) then
         match get_node ty with
-        | Tprim (Tnull | Tarraykey | Tbool | Tint | Tfloat | Tstring | Tnum) ->
-          ()
+        | Tprim (Tnull | Tarraykey | Tbool | Tint | Tfloat | Tnum) -> ()
         | Tnonnull
         | Tany _
         | Tdynamic
@@ -86,6 +85,9 @@ let check_param : env -> Nast.fun_param -> unit =
               (fun _ { sft_ty; _ } -> check_memoizable env sft_ty)
             end
             fdm
+        | Tclass ((_, id), _, _)
+          when String.equal Naming_special_names.Classes.cString id ->
+          ()
         | Tclass _ ->
           let env = Env.open_tyvars env pos in
           let (env, type_param) = Env.fresh_type env pos in

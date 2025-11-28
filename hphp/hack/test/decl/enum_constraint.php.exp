@@ -16,15 +16,20 @@
        sc_consts =
        [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
           scc_name = ([3:28-29], "X");
-          scc_type = (Rwitness_from_decl ([3:30-33]), (Tprim Tstring));
+          scc_type =
+          (Rwitness_from_decl ([3:30-33]),
+           (Tapply (([3:30-33], "\\HH\\string"), [])));
           scc_refs = []; scc_value = None }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];
        sc_user_attributes = [];
        sc_enum_type =
-       (Some { Typing_defs.te_base = (Rhint ([3:10-16]), (Tprim Tstring));
-               te_constraint = (Some (Rhint ([3:20-26]), (Tprim Tstring)));
+       (Some { Typing_defs.te_base =
+               (Rhint ([3:10-16]), (Tapply (([3:10-16], "\\HH\\string"), [])));
+               te_constraint =
+               (Some (Rhint ([3:20-26]),
+                      (Tapply (([3:20-26], "\\HH\\string"), []))));
                te_includes = [] });
        sc_docs_url = None; sc_package = None }));
   ("\\B",
@@ -122,7 +127,9 @@
            scc_refs = []; scc_value = None };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([11:25-26], "Y");
-            scc_type = (Rwitness_from_decl ([11:27-30]), (Tprim Tstring));
+            scc_type =
+            (Rwitness_from_decl ([11:27-30]),
+             (Tapply (([11:27-30], "\\HH\\string"), [])));
             scc_refs = []; scc_value = None }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];

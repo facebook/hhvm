@@ -125,7 +125,6 @@ let enforce_enum_class_variant =
 (* basic local mutability checks *)
 let rec is_byval_collection_or_string_or_any_type env ty =
   let check ty =
-    let open Aast in
     let (env, ty) = Env.expand_type env ty in
     match get_node ty with
     | Toption inner -> is_byval_collection_or_string_or_any_type env inner
@@ -133,10 +132,10 @@ let rec is_byval_collection_or_string_or_any_type env ty =
       String.equal x SN.Collections.cVec
       || String.equal x SN.Collections.cDict
       || String.equal x SN.Collections.cKeyset
+      || String.equal x SN.Classes.cString
     | Tvec_or_dict _
     | Ttuple _
     | Tshape _
-    | Tprim Tstring
     | Tdynamic
     | Tany _ ->
       true

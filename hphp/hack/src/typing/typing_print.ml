@@ -843,7 +843,12 @@ module Full = struct
     | Tdynamic -> (fuel, text "dynamic")
     | Tnonnull -> (fuel, text "nonnull")
     | Tvec_or_dict (x, y) -> list ~fuel "vec_or_dict<" k [x; y] ">"
-    | Tapply ((_, s), []) -> (fuel, to_doc s)
+    | Tapply ((_, s), []) ->
+      ( fuel,
+        if String.equal s SN.Classes.cString then
+          to_doc (strip_ns s)
+        else
+          to_doc s )
     | Tgeneric s -> (fuel, to_doc s)
     | Taccess (root_ty, id) ->
       let (fuel, root_ty_doc) = k ~fuel root_ty in
@@ -1056,7 +1061,7 @@ module Full = struct
           list ~fuel "<" k tyl ">"
       in
       let (fuel, with_doc) = refinements ~fuel k exact in
-      let class_doc = to_doc s ^^ targs_doc ^^ with_doc in
+      let class_doc = to_doc (strip_ns s) ^^ targs_doc ^^ with_doc in
       let class_doc =
         match exact with
         | Exact when not hide_internals ->
@@ -1271,7 +1276,6 @@ module Full = struct
       match tag with
       | BoolTag -> (fuel, text "bool")
       | IntTag -> (fuel, text "int")
-      | StringTag -> (fuel, text "string")
       | ArraykeyTag -> (fuel, text "arraykey")
       | FloatTag -> (fuel, text "float")
       | NumTag -> (fuel, text "num")
@@ -1674,7 +1678,6 @@ module ErrorString = struct
     | Nast.Tint -> "an int"
     | Nast.Tbool -> "a bool"
     | Nast.Tfloat -> "a float"
-    | Nast.Tstring -> "a string"
     | Nast.Tnum -> "a num (int | float)"
     | Nast.Tresource -> "a resource"
     | Nast.Tarraykey -> "an array key (int | string)"
@@ -1740,6 +1743,8 @@ module ErrorString = struct
       let (fuel, ty_str) = ety_to_string ety in
       (fuel, "a value of type " ^ ty_str)
     | Tdependent (dep, _cstr) -> (fuel, dependent dep)
+    | Tclass ((_, id), _, _) when String.equal SN.Classes.cString id ->
+      (fuel, "a string")
     | Tclass (_, e, _) ->
       let (fuel, ty_str) = ety_to_string ety in
       let prefix =
@@ -1756,7 +1761,6 @@ module ErrorString = struct
         match tag with
         | BoolTag -> "a bool"
         | IntTag -> "an int"
-        | StringTag -> "a string"
         | ArraykeyTag -> "an arraykey"
         | FloatTag -> "a float"
         | NumTag -> "a num"

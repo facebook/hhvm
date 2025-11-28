@@ -630,6 +630,16 @@ File workplace_shape_mismatch.php, line 19, character 19 - line 19, character 24
  21 |   ?'fifo_dedup_key' => string,
  22 |   ?'send_schedule_cats' => bool,
 
+which is defined here
+
+File string.hhi, line 6, character 9 - line 6, character 14:
+
+ 5 |   <<__SupportDynamicType>>
+ 6 |   class »string« {
+ 7 |   }
+ 8 | 
+ 9 | }
+
 The supertype didn't exist because the field was missing.
 error: Typing[4057] Invalid argument
 
@@ -1546,6 +1556,16 @@ File workplace_shape_mismatch.php, line 17, character 30 - line 17, character 35
  19 |   ?'devserver' => string,
  20 |   ?'fifo_ordering_key' => string,
 
+which is defined here
+
+File string.hhi, line 6, character 9 - line 6, character 14:
+
+ 5 |   <<__SupportDynamicType>>
+ 6 |   class »string« {
+ 7 |   }
+ 8 | 
+ 9 | }
+
 The supertype didn't exist because the field was missing.
 error: Typing[4057] Invalid argument
 
@@ -1966,6 +1986,16 @@ File workplace_shape_mismatch.php, line 21, character 24 - line 21, character 29
  22 |   ?'send_schedule_cats' => bool,
  23 | );
 
+which is defined here
+
+File string.hhi, line 6, character 9 - line 6, character 14:
+
+ 5 |   <<__SupportDynamicType>>
+ 6 |   class »string« {
+ 7 |   }
+ 8 | 
+ 9 | }
+
 The supertype didn't exist because the field was missing.
 error: Typing[4057] Invalid argument
 
@@ -2177,6 +2207,16 @@ File workplace_shape_mismatch.php, line 20, character 27 - line 20, character 32
  22 |   ?'send_schedule_cats' => bool,
  23 | );
 
+which is defined here
+
+File string.hhi, line 6, character 9 - line 6, character 14:
+
+ 5 |   <<__SupportDynamicType>>
+ 6 |   class »string« {
+ 7 |   }
+ 8 | 
+ 9 | }
+
 The supertype didn't exist because the field was missing.
 error: Typing[4057] Invalid argument
 
@@ -2387,6 +2427,16 @@ File workplace_shape_mismatch.php, line 10, character 16 - line 10, character 21
 11 |   ?'scheduling_uid' => int,
 12 |   ?'tag' => string,
 13 |   ?'retry_attempt' => int,
+
+which is defined here
+
+File string.hhi, line 6, character 9 - line 6, character 14:
+
+ 5 |   <<__SupportDynamicType>>
+ 6 |   class »string« {
+ 7 |   }
+ 8 | 
+ 9 | }
 
 The supertype didn't exist because the field was missing.
 error: Typing[4057] Invalid argument
@@ -3698,5 +3748,15 @@ File workplace_shape_mismatch.php, line 12, character 13 - line 12, character 18
  13 |   ?'retry_attempt' => int,
  14 |   ?'earlyreturn' => int,
  15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
+
+which is defined here
+
+File string.hhi, line 6, character 9 - line 6, character 14:
+
+ 5 |   <<__SupportDynamicType>>
+ 6 |   class »string« {
+ 7 |   }
+ 8 | 
+ 9 | }
 
 The supertype didn't exist because the field was missing.

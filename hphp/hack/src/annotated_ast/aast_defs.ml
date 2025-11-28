@@ -36,7 +36,6 @@ type tprim = Ast_defs.tprim =
   | Tint
   | Tbool
   | Tfloat
-  | Tstring
   | Tresource
   | Tnum
   | Tarraykey
@@ -1449,7 +1448,6 @@ let string_of_tprim prim =
   | Tint -> "int"
   | Tnum -> "num"
   | Tfloat -> "float"
-  | Tstring -> "string"
   | Tarraykey -> "arraykey"
   | Tresource -> "resource"
   | Tnoreturn -> "noreturn"

@@ -11,7 +11,6 @@
 (20,7)-(20,13) Cannot use `parent` as a type name as it is reserved
 (22,7)-(22,15) Cannot use `resource` as a type name as it is reserved
 (23,7)-(23,11) Cannot use `self` as a type name as it is reserved
-(24,7)-(24,13) Cannot use `string` as a type name as it is reserved
 (25,7)-(25,11) Cannot use `this` as a type name as it is reserved
 (26,7)-(26,11) Cannot use `true` as a type name as it is reserved
 (27,7)-(27,13) Cannot use `varray` as a type name as it is reserved

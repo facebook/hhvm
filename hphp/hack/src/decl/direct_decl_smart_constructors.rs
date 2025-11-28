@@ -502,6 +502,14 @@ fn tany() -> Ty {
     Ty(Reason::NoReason, Box::new(TANY_))
 }
 
+/// Create a Tapply for the HH\string type.
+fn mk_string_ty_(pos: Pos) -> Ty_ {
+    Ty_::Tapply(
+        (pos, naming_special_names::typehints::HH_STRING.to_string()),
+        vec![],
+    )
+}
+
 #[derive(Debug)]
 struct Modifiers {
     is_static: bool,
@@ -1459,9 +1467,7 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                         True | False => Some(Ty_::Tprim(aast::Tprim::Tbool)),
                         Int(_) => Some(Ty_::Tprim(aast::Tprim::Tint)),
                         Float(_) => Some(Ty_::Tprim(aast::Tprim::Tfloat)),
-                        String(_) => Some(Ty_::Tprim(aast::Tprim::Tstring)),
-                        String2(_) => Some(Ty_::Tprim(aast::Tprim::Tstring)),
-                        PrefixedString(_) => Some(Ty_::Tprim(aast::Tprim::Tstring)),
+                        String(_) | String2(_) | PrefixedString(_) => Some(mk_string_ty_(expr.1)),
                         Unop(box (_, expr)) => expr_to_ty(expr),
                         Hole(box (expr, _, _, _)) => expr_to_ty(expr),
 
@@ -1489,8 +1495,8 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                 Box::new(Ty_::Tprim(aast::Tprim::Tfloat)),
             )),
             Node::StringLiteral(_, pos) => Some(Ty(
-                Reason::FromWitnessDecl(WitnessDecl::WitnessFromDecl(pos)),
-                Box::new(Ty_::Tprim(aast::Tprim::Tstring)),
+                Reason::FromWitnessDecl(WitnessDecl::WitnessFromDecl(pos.clone())),
+                Box::new(mk_string_ty_(pos)),
             )),
             Node::BooleanLiteral(_, pos) => Some(Ty(
                 Reason::FromWitnessDecl(WitnessDecl::WitnessFromDecl(pos)),
@@ -2899,7 +2905,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             | TokenKind::BinaryLiteral => Node::IntLiteral(token_text(self), token_pos(self)),
             TokenKind::FloatingLiteral => Node::FloatingLiteral(token_text(self), token_pos(self)),
             TokenKind::BooleanLiteral => Node::BooleanLiteral(token_text(self), token_pos(self)),
-            TokenKind::String => self.prim_ty(aast::Tprim::Tstring, token_pos(self)),
+            TokenKind::String => self.hint_ty(token_pos(self), mk_string_ty_(token_pos(self))),
             TokenKind::Int => self.prim_ty(aast::Tprim::Tint, token_pos(self)),
             TokenKind::Float => self.prim_ty(aast::Tprim::Tfloat, token_pos(self)),
             // "double" and "boolean" are parse errors--they should be written
@@ -5560,7 +5566,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             None => return Node::Ignored(SK::ClassnameTypeSpecifier),
         };
         if gt.is_ignored() {
-            self.prim_ty(aast::Tprim::Tstring, id.0)
+            self.hint_ty(id.0.clone(), mk_string_ty_(id.0))
         } else {
             self.make_apply(
                 (id.0, self.elaborate_raw_id(&id.1).into_owned()),

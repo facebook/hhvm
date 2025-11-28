@@ -9,7 +9,8 @@
          cv_visibility = Private;
          cv_type =
          ((~dict<string, mixed>),
-          (Some ([5:39-58], (Happly (([5:39-43], "\\HH\\dict"), [([5:44-50], (Hprim Tstring)); ([5:52-57], (Happly (([5:52-57], "\\HH\\supportdyn"), [([5:52-57], Hmixed)])))])))));
+          (Some ([5:39-58],
+                 (Happly (([5:39-43], "\\HH\\dict"), [([5:44-50], (Happly (([5:44-50], "\\HH\\string"), []))); ([5:52-57], (Happly (([5:52-57], "\\HH\\supportdyn"), [([5:52-57], Hmixed)])))])))));
          cv_id = ([5:59-64], "spec"); cv_expr = None; cv_user_attributes = []; 
          cv_doc_comment = None; cv_is_static = false; cv_span = [5:59-64] }
         ];
@@ -21,7 +22,8 @@
          [{ param_annotation = (dict<string, mixed>);
             param_type_hint =
             ((dict<string, mixed>),
-             (Some ([5:39-58], (Happly (([5:39-43], "\\HH\\dict"), [([5:44-50], (Hprim Tstring)); ([5:52-57], (Happly (([5:52-57], "\\HH\\supportdyn"), [([5:52-57], Hmixed)])))])))));
+             (Some ([5:39-58],
+                    (Happly (([5:39-43], "\\HH\\dict"), [([5:44-50], (Happly (([5:44-50], "\\HH\\string"), []))); ([5:52-57], (Happly (([5:52-57], "\\HH\\supportdyn"), [([5:52-57], Hmixed)])))])))));
             param_pos = [5:59-64]; param_name = "$spec"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = (Some Private) }
@@ -61,7 +63,8 @@
          [{ param_annotation = (dict<string, mixed>);
             param_type_hint =
             ((dict<string, mixed>),
-             (Some ([8:14-33], (Happly (([8:14-18], "\\HH\\dict"), [([8:19-25], (Hprim Tstring)); ([8:27-32], (Happly (([8:27-32], "\\HH\\supportdyn"), [([8:27-32], Hmixed)])))])))));
+             (Some ([8:14-33],
+                    (Happly (([8:14-18], "\\HH\\dict"), [([8:19-25], (Happly (([8:19-25], "\\HH\\string"), []))); ([8:27-32], (Happly (([8:27-32], "\\HH\\supportdyn"), [([8:27-32], Hmixed)])))])))));
             param_pos = [8:34-37]; param_name = "$xs"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }
@@ -126,7 +129,9 @@
          [{ param_annotation = (dict<string, mixed>);
             param_type_hint =
             ((dict<string, mixed>),
-             (Some ([16:14-33], (Happly (([16:14-18], "\\HH\\dict"), [([16:19-25], (Hprim Tstring)); ([16:27-32], (Happly (([16:27-32], "\\HH\\supportdyn"), [([16:27-32], Hmixed)])))])))));
+             (Some ([16:14-33],
+                    (Happly (([16:14-18], "\\HH\\dict"), [([16:19-25], (Happly (([16:19-25], "\\HH\\string"), []))); ([16:27-32], (Happly (([16:27-32], "\\HH\\supportdyn"), [([16:27-32], Hmixed)])))]
+                       )))));
             param_pos = [16:34-37]; param_name = "$xs"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }
@@ -191,7 +196,8 @@
           cv_readonly = false; cv_visibility = Private;
           cv_type =
           ((~dict<string, mixed>),
-           (Some ([5:39-58], (Happly (([5:39-43], "\\HH\\dict"), [([5:44-50], (Hprim Tstring)); ([5:52-57], (Happly (([5:52-57], "\\HH\\supportdyn"), [([5:52-57], Hmixed)])))])))));
+           (Some ([5:39-58],
+                  (Happly (([5:39-43], "\\HH\\dict"), [([5:44-50], (Happly (([5:44-50], "\\HH\\string"), []))); ([5:52-57], (Happly (([5:52-57], "\\HH\\supportdyn"), [([5:52-57], Hmixed)])))])))));
           cv_id = ([5:59-64], "spec"); cv_expr = None; cv_user_attributes = []; 
           cv_doc_comment = None; cv_is_static = false; cv_span = [5:59-64] }
          ];
@@ -202,7 +208,9 @@
           m_params =
           [{ param_annotation = (dynamic);
              param_type_hint =
-             ((dynamic), (Some ([5:39-58], (Happly (([5:39-43], "\\HH\\dict"), [([5:44-50], (Hprim Tstring)); ([5:52-57], (Happly (([5:52-57], "\\HH\\supportdyn"), [([5:52-57], Hmixed)])))])))));
+             ((dynamic),
+              (Some ([5:39-58],
+                     (Happly (([5:39-43], "\\HH\\dict"), [([5:44-50], (Happly (([5:44-50], "\\HH\\string"), []))); ([5:52-57], (Happly (([5:52-57], "\\HH\\supportdyn"), [([5:52-57], Hmixed)])))])))));
              param_pos = [5:59-64]; param_name = "$spec"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_named = None; param_user_attributes = []; param_visibility = (Some Private) }

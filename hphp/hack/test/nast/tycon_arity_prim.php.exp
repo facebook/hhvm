@@ -3,7 +3,6 @@ Errors:
   [5:26-29] Type arguments are not expected for this type
   [7:28-33] Type arguments are not expected for this type
   [9:26-29] Type arguments are not expected for this type
-  [11:29-35] Type arguments are not expected for this type
   [13:31-39] Type arguments are not expected for this type
   [15:31-39] Type arguments are not expected for this type
   [17:28-33] Type arguments are not expected for this type
@@ -100,7 +99,7 @@ Errors:
        { f_span = [11:1-56]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([11:49-53], (Hprim Tvoid))));
          f_params =
-         [{ param_annotation = (); param_type_hint = ((), (Some ([11:29-43], (Hprim Tstring)))); 
+         [{ param_annotation = (); param_type_hint = ((), (Some ([11:29-43], (Happly (([11:29-35], "\\HH\\string"), [([11:36-42], (Happly (([11:36-42], "\\HH\\string"), [])))])))));
             param_pos = [11:44-46]; param_name = "$x"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_named = None; param_user_attributes = []; param_visibility = None }

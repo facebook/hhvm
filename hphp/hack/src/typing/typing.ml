@@ -9940,9 +9940,10 @@ end = struct
     let rec find_unsupported_tys env acc ty =
       let (env, ty) = Env.expand_type env ty in
       match get_node ty with
-      | Tprim (Tnull | Tbool | Tint | Tfloat | Tstring | Tnum | Tarraykey) ->
-        (env, acc)
+      | Tprim (Tnull | Tbool | Tint | Tfloat | Tnum | Tarraykey) -> (env, acc)
       | Tdynamic -> (env, acc)
+      | Tclass ((_, id), _, _) when String.equal id SN.Classes.cString ->
+        (env, acc)
       | Tunion tyl ->
         List.fold_left_env env tyl ~init:acc ~f:find_unsupported_tys
       | Tnewtype (name, _, _) -> begin
@@ -11596,6 +11597,26 @@ end = struct
             p
             base_ty
         in
+        let expected_class_error r =
+          let ty_err2 =
+            Some
+              Typing_error.(
+                primary
+                @@ Primary.Expected_class
+                     {
+                       suffix =
+                         Some
+                           (lazy
+                             (", but got " ^ Typing_print.error env base_ty));
+                       pos = p;
+                     })
+          in
+          let ty_nothing = MakeType.nothing Reason.none in
+          let (env, ty) = (env, MakeType.dynamic r) in
+          let ty_expect = MakeType.classname Reason.none [ty_nothing] in
+          ( (env, Option.merge ty_err1 ty_err2 ~f:Typing_error.both),
+            (ty, Result.Error (base_ty, ty_expect)) )
+        in
         match deref base_ty with
         | (_, Tnewtype (classname, [the_cls], as_ty))
           when String.equal classname SN.Classes.cClassname ->
@@ -11624,6 +11645,12 @@ end = struct
         | (_, Tclass_ptr the_cls) ->
           let wrap ty = mk (Reason.none, Tclass_ptr ty) in
           resolve_class_pointer env wrap the_cls
+        | (r, Tclass ((_, id), _, _)) when String.equal SN.Classes.cString id ->
+          if Tast.is_under_dynamic_assumptions env.checked then
+            (* We allow a call through a string in dynamic check mode, as string <:D dynamic *)
+            ((env, None), (MakeType.dynamic r, Ok (MakeType.dynamic r)))
+          else
+            expected_class_error r
         | (_, Tgeneric _)
         | (_, Tclass _) ->
           ((env, ty_err1), (ty, Ok ty))
@@ -11683,32 +11710,11 @@ end = struct
           in
           let (env, ty) = Env.fresh_type_error env p in
           ((env, Option.merge ty_err1 ty_err2 ~f:Typing_error.both), (ty, Ok ty))
-        (* We allow a call through a string in dynamic check mode, as string <:D dynamic *)
-        | (r, Tprim Tstring) when Tast.is_under_dynamic_assumptions env.checked
-          ->
-          ((env, None), (MakeType.dynamic r, Ok (MakeType.dynamic r)))
         | ( r,
             ( Tany _ | Tnonnull | Tvec_or_dict _ | Toption _ | Tprim _ | Tfun _
             | Ttuple _ | Tnewtype _ | Tdependent _ | Tshape _ | Taccess _
             | Tneg _ | Tlabel _ ) ) ->
-          let ty_err2 =
-            Some
-              Typing_error.(
-                primary
-                @@ Primary.Expected_class
-                     {
-                       suffix =
-                         Some
-                           (lazy
-                             (", but got " ^ Typing_print.error env base_ty));
-                       pos = p;
-                     })
-          in
-          let ty_nothing = MakeType.nothing Reason.none in
-          let (env, ty) = (env, MakeType.dynamic r) in
-          let ty_expect = MakeType.classname Reason.none [ty_nothing] in
-          ( (env, Option.merge ty_err1 ty_err2 ~f:Typing_error.both),
-            (ty, Error (base_ty, ty_expect)) )
+          expected_class_error r
       in
       let ((env, ty_err_opt), (result_ty, err_res)) = resolve_ety env ty in
       let ty_mismatch_opt =
@@ -11851,7 +11857,16 @@ end = struct
             | `Class ((pos, name), class_info, c_ty) ->
               let pos = Pos_or_decl.unsafe_to_raw_pos pos in
               let kind = Cls.kind class_info in
-              if
+              if String.equal SN.Classes.cString (Cls.name class_info) then
+                uninstantiable_error
+                  env
+                  p
+                  cid
+                  (Cls.pos class_info)
+                  name
+                  pos
+                  c_ty
+              else if
                 Ast_defs.is_c_trait kind
                 || Ast_defs.is_c_enum kind
                 || Ast_defs.is_c_enum_class kind

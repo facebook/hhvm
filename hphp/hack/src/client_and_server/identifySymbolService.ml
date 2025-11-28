@@ -615,6 +615,11 @@ let visitor =
               is_declaration = None;
               pos;
             }
+        | (pos, Aast.Happly ((_, name), _))
+          when String.equal SN.Classes.cString name ->
+          let name = "string" in
+          Result_set.singleton
+            { name; type_ = BuiltInType BIstring; is_declaration = None; pos }
         | (pos, Aast.Hnothing) ->
           Result_set.singleton
             {

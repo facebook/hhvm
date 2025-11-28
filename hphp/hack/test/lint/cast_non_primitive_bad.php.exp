@@ -7,7 +7,7 @@ Casting C to int: casting a non-primitive type to a primitive rarely yields a us
 File "cast_non_primitive_bad.php", line 26, characters 3-10:
 Casting (string | vec<nothing>) to int: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Lint[5652])
 File "cast_non_primitive_bad.php", line 35, characters 3-10:
-Casting (string | C) to int: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Lint[5652])
+Casting (C | string) to int: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Lint[5652])
 File "cast_non_primitive_bad.php", line 44, characters 3-10:
 Casting (C | vec<nothing>) to int: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Lint[5652])
 File "cast_non_primitive_bad.php", line 48, characters 3-13:

@@ -192,6 +192,16 @@ File workplace_contravariant.php, line 11, character 56 - line 11, character 61:
  14 |   }
  15 | }
 
+which is defined here
+
+File string.hhi, line 6, character 9 - line 6, character 14:
+
+ 5 |   <<__SupportDynamicType>>
+ 6 |   class »string« {
+ 7 |   }
+ 8 | 
+ 9 | }
+
 and flows into this hint
 
 File workplace_contravariant.php, line 7, character 18 - line 7, character 19:

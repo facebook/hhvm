@@ -406,13 +406,15 @@ let matches_locl_ty ?(env = Env.empty) t ~scrut =
     | (Prim Int, Ty.Tprim Ast_defs.Tint)
     | (Prim Bool, Ty.Tprim Ast_defs.Tbool)
     | (Prim Float, Ty.Tprim Ast_defs.Tfloat)
-    | (Prim String, Ty.Tprim Ast_defs.Tstring)
     | (Prim Resource, Ty.Tprim Ast_defs.Tresource)
     | (Prim Num, Ty.Tprim Ast_defs.Tnum)
     | (Prim Arraykey, Ty.Tprim Ast_defs.Tarraykey)
     | (Prim Noreturn, Ty.Tprim Ast_defs.Tnoreturn)
     | (Dynamic, Ty.Tdynamic)
     | (Nonnull, Ty.Tnonnull) ->
+      Match.matched env
+    | (Prim String, Ty.Tclass ((_, name), _, _))
+      when String.equal Naming_special_names.Classes.cString name ->
       Match.matched env
     (* -- Variable binding -------------------------------------------------- *)
     | (As { lbl; patt }, _) ->

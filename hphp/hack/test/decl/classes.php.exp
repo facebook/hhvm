@@ -11,7 +11,9 @@
        sc_typeconsts = [];
        sc_props =
        [{ Shallow_decl_defs.sp_name = ([5:17-34], "instanceProperty");
-          sp_xhp_attr = None; sp_type = (Rhint ([5:10-16]), (Tprim Tstring));
+          sp_xhp_attr = None;
+          sp_type =
+          (Rhint ([5:10-16]), (Tapply (([5:10-16], "\\HH\\string"), [])));
           sp_visibility = Public;
           sp_flags =
           { Shallow_decl_defs.PropFlags.abstract = false; const = false;
@@ -40,7 +42,9 @@
          ];
        sc_sprops =
        [{ Shallow_decl_defs.sp_name = ([4:25-40], "$staticProperty");
-          sp_xhp_attr = None; sp_type = (Rhint ([4:18-24]), (Tprim Tstring));
+          sp_xhp_attr = None;
+          sp_type =
+          (Rhint ([4:18-24]), (Tapply (([4:18-24], "\\HH\\string"), [])));
           sp_visibility = Private;
           sp_flags =
           { Shallow_decl_defs.PropFlags.abstract = false; const = false;
@@ -149,7 +153,9 @@
                { ft_tparams = []; ft_where_constraints = [];
                  ft_params =
                  [{ fp_pos = [15:12-17]; fp_name = (Some "$arg1");
-                    fp_type = (Rhint ([15:5-11]), (Tprim Tstring));
+                    fp_type =
+                    (Rhint ([15:5-11]),
+                     (Tapply (([15:5-11], "\\HH\\string"), [])));
                     fp_flags =
                     { Typing_defs_flags.FunParam.accept_disposable = false;
                       inout = false; is_optional = false; readonly = false;
@@ -171,7 +177,8 @@
                  (Rhint ([17:6-42]),
                   (Tapply (([17:6-23], "\\HH\\AsyncGenerator"),
                      [(Rhint ([17:24-27]), (Tprim Tint));
-                       (Rhint ([17:29-35]), (Tprim Tstring));
+                       (Rhint ([17:29-35]),
+                        (Tapply (([17:29-35], "\\HH\\string"), [])));
                        (Rhint ([17:37-41]), (Tprim Tvoid))]
                      )));
                  ft_flags =
@@ -249,7 +256,8 @@
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([29:20-28], "private");
            sp_xhp_attr = None;
-           sp_type = (Rhint ([29:13-19]), (Tprim Tstring));
+           sp_type =
+           (Rhint ([29:13-19]), (Tapply (([29:13-19], "\\HH\\string"), [])));
            sp_visibility = Private;
            sp_flags =
            { Shallow_decl_defs.PropFlags.abstract = false; const = false;
@@ -259,7 +267,8 @@
            };
           { Shallow_decl_defs.sp_name = ([30:22-32], "protected");
             sp_xhp_attr = None;
-            sp_type = (Rhint ([30:15-21]), (Tprim Tstring));
+            sp_type =
+            (Rhint ([30:15-21]), (Tapply (([30:15-21], "\\HH\\string"), [])));
             sp_visibility = Protected;
             sp_flags =
             { Shallow_decl_defs.PropFlags.abstract = false; const = false;
@@ -269,7 +278,8 @@
             };
           { Shallow_decl_defs.sp_name = ([31:19-26], "public");
             sp_xhp_attr = None;
-            sp_type = (Rhint ([31:12-18]), (Tprim Tstring));
+            sp_type =
+            (Rhint ([31:12-18]), (Tapply (([31:12-18], "\\HH\\string"), [])));
             sp_visibility = Public;
             sp_flags =
             { Shallow_decl_defs.PropFlags.abstract = false; const = false;
@@ -279,7 +289,8 @@
             };
           { Shallow_decl_defs.sp_name = ([32:19-30], "hasDefault");
             sp_xhp_attr = None;
-            sp_type = (Rhint ([32:12-18]), (Tprim Tstring));
+            sp_type =
+            (Rhint ([32:12-18]), (Tapply (([32:12-18], "\\HH\\string"), [])));
             sp_visibility = Public;
             sp_flags =
             { Shallow_decl_defs.PropFlags.abstract = false; const = false;
@@ -297,7 +308,9 @@
                     { ft_tparams = []; ft_where_constraints = [];
                       ft_params =
                       [{ fp_pos = [29:20-28]; fp_name = (Some "$private");
-                         fp_type = (Rhint ([29:13-19]), (Tprim Tstring));
+                         fp_type =
+                         (Rhint ([29:13-19]),
+                          (Tapply (([29:13-19], "\\HH\\string"), [])));
                          fp_flags =
                          { Typing_defs_flags.FunParam.accept_disposable =
                            false; inout = false; is_optional = false;
@@ -305,7 +318,9 @@
                            splat = false; named = false };
                          fp_def_value = None };
                         { fp_pos = [30:22-32]; fp_name = (Some "$protected");
-                          fp_type = (Rhint ([30:15-21]), (Tprim Tstring));
+                          fp_type =
+                          (Rhint ([30:15-21]),
+                           (Tapply (([30:15-21], "\\HH\\string"), [])));
                           fp_flags =
                           { Typing_defs_flags.FunParam.accept_disposable =
                             false; inout = false; is_optional = false;
@@ -313,7 +328,9 @@
                             splat = false; named = false };
                           fp_def_value = None };
                         { fp_pos = [31:19-26]; fp_name = (Some "$public");
-                          fp_type = (Rhint ([31:12-18]), (Tprim Tstring));
+                          fp_type =
+                          (Rhint ([31:12-18]),
+                           (Tapply (([31:12-18], "\\HH\\string"), [])));
                           fp_flags =
                           { Typing_defs_flags.FunParam.accept_disposable =
                             false; inout = false; is_optional = false;
@@ -322,7 +339,9 @@
                           fp_def_value = None };
                         { fp_pos = [32:19-30];
                           fp_name = (Some "$hasDefault");
-                          fp_type = (Rhint ([32:12-18]), (Tprim Tstring));
+                          fp_type =
+                          (Rhint ([32:12-18]),
+                           (Tapply (([32:12-18], "\\HH\\string"), [])));
                           fp_flags =
                           { Typing_defs_flags.FunParam.accept_disposable =
                             false; inout = false; is_optional = true;

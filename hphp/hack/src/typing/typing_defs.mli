@@ -408,6 +408,8 @@ val is_typeconst_type_abstract : typeconst_type -> bool
 
 val is_arraykey : locl_ty -> bool
 
+val is_string : locl_ty -> bool
+
 module Attributes : sig
   val mem : string -> user_attribute Hh_prelude.List.t -> bool
 

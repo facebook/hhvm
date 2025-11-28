@@ -4,7 +4,7 @@
        td_as_constraint = None; td_super_constraint = None;
        td_type_assignment =
        (Typing_defs.SimpleTypeDef (Transparent,
-          (Rhint ([5:28-34]), (Tprim Tstring))));
+          (Rhint ([5:28-34]), (Tapply (([5:28-34], "\\HH\\string"), [])))));
        td_is_ctx = false; td_attributes = []; td_internal = false;
        td_docs_url = None; td_package = None }));
   ("\\MyFileNamespace\\MyClass",

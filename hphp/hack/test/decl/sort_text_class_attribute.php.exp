@@ -17,7 +17,9 @@
            (Tfun
               { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                 ft_implicit_params = { capability = (CapDefaults [5:27-33]) };
-                ft_ret = (Rhint ([5:38-44]), (Tprim Tstring));
+                ft_ret =
+                (Rhint ([5:38-44]),
+                 (Tapply (([5:38-44], "\\HH\\string"), [])));
                 ft_flags =
                 { Typing_defs_flags.Fun.return_disposable = false;
                   async = false; generator = false; fun_kind = FSync;
@@ -39,7 +41,9 @@
                { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
                  { capability = (CapDefaults [9:27-33]) };
-                 ft_ret = (Rhint ([9:38-44]), (Tprim Tstring));
+                 ft_ret =
+                 (Rhint ([9:38-44]),
+                  (Tapply (([9:38-44], "\\HH\\string"), [])));
                  ft_flags =
                  { Typing_defs_flags.Fun.return_disposable = false;
                    async = false; generator = false; fun_kind = FSync;

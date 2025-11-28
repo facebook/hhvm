@@ -83,6 +83,8 @@ module Classes = struct
   let cSupportDyn = "\\HH\\supportdyn"
 
   let cFunctionRef = "\\HH\\FunctionRef"
+
+  let cString = "\\HH\\string"
 end
 
 module Collections = struct
@@ -1121,8 +1123,6 @@ module Typehints = struct
 
   let float = "float"
 
-  let string = "string"
-
   let darray = "darray"
 
   let varray = "varray"
@@ -1153,7 +1153,6 @@ module Typehints = struct
           int;
           bool;
           float;
-          string;
           darray;
           varray;
           varray_or_darray;
@@ -1176,7 +1175,6 @@ module Typehints = struct
     || String.equal x bool
     || String.equal x float
     || String.equal x num
-    || String.equal x string
     || String.equal x resource
     || String.equal x mixed
     || String.equal x arraykey

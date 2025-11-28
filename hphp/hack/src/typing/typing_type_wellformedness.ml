@@ -26,10 +26,18 @@ type env = {
 }
 
 let check_tparams_constraints env use_pos tparams targs =
-  let ety_env : expand_env =
-    { empty_expand_env with substs = Subst.make_locl tparams targs }
-  in
-  Phase.check_tparams_constraints ~use_pos ~ety_env env tparams
+  (* If there is an arity mismatch, we have already emitted an error,
+   * so let's not bother checking the constraints.
+   * E.g. what would it mean to check C<D>
+   * if definition is class C<T1 as I<T2>, T2 as J>
+   *)
+  if List.length tparams = List.length targs then
+    let ety_env : expand_env =
+      { empty_expand_env with substs = Subst.make_locl tparams targs }
+    in
+    Phase.check_tparams_constraints ~use_pos ~ety_env env tparams
+  else
+    (env, None)
 
 let loclty_of_hint unchecked_tparams env h =
   let hint_pos = fst h in

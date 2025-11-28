@@ -6,7 +6,7 @@ version = 4
 name = "aast_parser"
 version = "0.0.0"
 dependencies = [
- "bitflags 2.9.4",
+ "bitflags 2.10.0",
  "bumpalo",
  "core_utils_rust",
  "decl_mode_parser",
@@ -398,11 +398,11 @@ checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
 name = "bitflags"
-version = "2.9.4"
+version = "2.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2261d10cca569e4643e526d8dc2e62e433cc8aba21ab764233731f8d369bf394"
+checksum = "812e12b5285cc515a9c72a5c1d3b6d46a19dac5acfef5265968c166106e31dd3"
 dependencies = [
- "serde",
+ "serde_core",
 ]
 
 [[package]]
@@ -1446,7 +1446,7 @@ checksum = "48c757948c5ede0e46177b7add2e67155f70e33c07fea8284df6576da70b3719"
 name = "elab"
 version = "0.0.0"
 dependencies = [
- "bitflags 2.9.4",
+ "bitflags 2.10.0",
  "bstr",
  "elaborate_namespaces_visitor",
  "hack_macros",
@@ -1519,7 +1519,7 @@ dependencies = [
  "ast_scope",
  "bit-set",
  "bit-vec",
- "bitflags 2.9.4",
+ "bitflags 2.10.0",
  "bstr",
  "constant_folder",
  "core_utils_rust",
@@ -1585,7 +1585,7 @@ name = "env"
 version = "0.0.0"
 dependencies = [
  "ast_scope",
- "bitflags 2.9.4",
+ "bitflags 2.10.0",
  "decl_provider",
  "global_state",
  "hhbc",
@@ -2445,7 +2445,7 @@ dependencies = [
 name = "hhbc"
 version = "0.0.0"
 dependencies = [
- "bitflags 2.9.4",
+ "bitflags 2.10.0",
  "bstr",
  "emit_opcodes_macro",
  "ffi",
@@ -2467,7 +2467,7 @@ name = "hhbc-gen"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "bitflags 2.9.4",
+ "bitflags 2.10.0",
  "cc",
  "maplit",
  "once_cell",
@@ -2835,7 +2835,7 @@ version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c0ff37bd590ca25063e35af745c343cb7a0271906fb7b37e4813e8f79f00268d"
 dependencies = [
- "bitflags 2.9.4",
+ "bitflags 2.10.0",
  "libc",
  "redox_syscall 0.5.6",
 ]
@@ -3301,7 +3301,7 @@ version = "0.30.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "74523f3a35e05aba87a1d978330aef40f67b0304ac79c1c00b294c9830543db6"
 dependencies = [
- "bitflags 2.9.4",
+ "bitflags 2.10.0",
  "cfg-if 1.0.1",
  "cfg_aliases",
  "libc",
@@ -3455,7 +3455,7 @@ dependencies = [
 name = "ocamlrep_marshal"
 version = "0.1.0"
 dependencies = [
- "bitflags 2.9.4",
+ "bitflags 2.10.0",
  "cc",
  "ocamlrep",
 ]
@@ -3536,7 +3536,7 @@ dependencies = [
  "anyhow",
  "arena_deserializer",
  "arena_trait",
- "bitflags 2.9.4",
+ "bitflags 2.10.0",
  "bstr",
  "bumpalo",
  "eq_modulo_pos",
@@ -3682,7 +3682,7 @@ dependencies = [
 name = "parser_core_types"
 version = "0.0.0"
 dependencies = [
- "bitflags 2.9.4",
+ "bitflags 2.10.0",
  "bumpalo",
  "itertools",
  "line_break_map",
@@ -4122,7 +4122,7 @@ version = "0.5.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "355ae415ccd3a04315d3f8246e86d67689ea74d88d915576e1589a351062a13b"
 dependencies = [
- "bitflags 2.9.4",
+ "bitflags 2.10.0",
 ]
 
 [[package]]
@@ -4264,7 +4264,7 @@ version = "0.37.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "165ca6e57b20e1351573e3729b958bc62f0e48025386970b6e4d29e7a7e71f3f"
 dependencies = [
- "bitflags 2.9.4",
+ "bitflags 2.10.0",
  "fallible-iterator",
  "fallible-streaming-iterator",
  "hashlink",
@@ -4421,7 +4421,7 @@ version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cd15f8a2c5551a84d56efdc1cd049089e409ac19a3072d5037a17fd70719ff3e"
 dependencies = [
- "bitflags 2.9.4",
+ "bitflags 2.10.0",
  "errno",
  "libc",
  "linux-raw-sys 0.11.0",

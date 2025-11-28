@@ -1268,6 +1268,8 @@ module HH = struct
 
   module FIXME = struct
     let tPoisonMarker = "\\HH\\FIXME\\POISON_MARKER"
+
+    let tMissingTypeInHierarchy = "\\HH_FIXME\\MISSING_TYPE_IN_HIERARCHY"
   end
 end
 

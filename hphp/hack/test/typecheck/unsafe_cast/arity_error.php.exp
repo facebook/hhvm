@@ -1,10 +1,10 @@
 ERROR: File "arity_error.php", line 4, characters 10-45:
 Too few positional arguments (required 1 but got 0) (Typing[4104])
-  File "soundness.hhi", line 31, characters 10-20:
+  File "soundness.hhi", line 31, characters 12-22:
   Definition is here
 ERROR: File "arity_error.php", line 8, characters 51-53:
 Invalid argument (Typing[4110])
-  File "soundness.hhi", line 33, characters 4-28:
+  File "soundness.hhi", line 34, characters 14-38:
   Expected `HH\FormatString<nothing>`
   File "arity_error.php", line 7, characters 25-31:
   But got `dynamic`

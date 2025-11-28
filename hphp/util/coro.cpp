@@ -81,7 +81,7 @@ struct TicketQueue : BlockingQueue<CPUThreadPoolExecutor::CPUTask> {
 
   // Implement interface that CPUThreadPoolExecutor expects:
 
-  BlockingQueueAddResult add(T item) override {
+  BlockingQueueAddResult add(T&& item) override {
     return add(std::move(item), stamp());
   }
 

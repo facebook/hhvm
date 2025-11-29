@@ -7,6 +7,7 @@
  */
 
 #include <folly/logging/xlog.h>
+#include <folly/system/HardwareConcurrency.h>
 #include <proxygen/lib/http/codec/test/TestUtils.h>
 #include <proxygen/lib/http/coro/HTTPCoroSession.h>
 #include <proxygen/lib/http/coro/HTTPFixedSource.h>
@@ -273,7 +274,7 @@ TEST_P(HTTPServerTests, TestStopMultipleTimes) {
 TEST_P(HTTPServerTests, TestZeroThreadsMeansNumCPUs) {
   MockServerObserver mockObserver;
   serverConfig_.numIOThreads = 0;
-  auto cpuCount = std::thread::hardware_concurrency();
+  auto cpuCount = folly::hardware_concurrency();
   EXPECT_CALL(mockObserver, onThreadStart(_)).Times(folly::to<int>(cpuCount));
   EXPECT_CALL(mockObserver, onThreadStop(_)).Times(folly::to<int>(cpuCount));
 

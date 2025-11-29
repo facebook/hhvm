@@ -10,6 +10,7 @@
 #include "proxygen/lib/http/coro/HTTPFilterFactoryHandler.h"
 #include <folly/io/async/EventBaseManager.h>
 #include <folly/logging/xlog.h>
+#include <folly/system/HardwareConcurrency.h>
 #include <proxygen/lib/utils/Time.h>
 #include <quic/common/events/FollyQuicEventBase.h>
 #include <quic/congestion_control/ServerCongestionControllerFactory.h>
@@ -94,7 +95,7 @@ void HTTPServer::start(
     std::shared_ptr<folly::ThreadPoolExecutor::Observer> observer) {
   folly::EventBaseManager::get()->setEventBase(&eventBase_, false);
   if (config_.numIOThreads == 0) {
-    config_.numIOThreads = std::thread::hardware_concurrency();
+    config_.numIOThreads = folly::hardware_concurrency();
   }
   folly::IOThreadPoolExecutor::Options options;
   options.setWaitForAll(true);

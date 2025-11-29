@@ -19,6 +19,7 @@
 #include <folly/portability/GTest.h>
 #include <folly/ssl/OpenSSLCertUtils.h>
 #include <folly/ssl/OpenSSLPtrTypes.h>
+#include <folly/system/HardwareConcurrency.h>
 #include <folly/testing/TestUtil.h>
 #include <proxygen/httpclient/samples/curl/CurlClient.h>
 #include <proxygen/httpserver/HTTPServer.h>
@@ -213,7 +214,7 @@ TEST(HttpServerStartStop, TestZeroThreadsMeansNumCPUs) {
   // threads = 0 should start num of CPUs threads
   // each calling the handlerFactory onServerStart()
   EXPECT_CALL(*rawHandlerFactory, onServerStart(testing::_))
-      .Times(std::thread::hardware_concurrency());
+      .Times(folly::hardware_concurrency());
 
   auto server = std::make_unique<HTTPServer>(std::move(options));
   auto st = std::make_unique<WaitableServerThread>(server.get());

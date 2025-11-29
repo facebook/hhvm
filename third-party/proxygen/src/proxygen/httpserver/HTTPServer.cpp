@@ -10,6 +10,7 @@
 
 #include <folly/executors/thread_factory/NamedThreadFactory.h>
 #include <folly/io/async/EventBaseManager.h>
+#include <folly/system/HardwareConcurrency.h>
 #include <proxygen/httpserver/HTTPServerAcceptor.h>
 #include <proxygen/httpserver/SignalHandler.h>
 #include <proxygen/httpserver/filters/CompressionFilter.h>
@@ -56,7 +57,7 @@ HTTPServer::HTTPServer(HTTPServerOptions options)
     : options_(std::make_shared<HTTPServerOptions>(std::move(options))) {
 
   if (options_->threads == 0) {
-    options_->threads = std::thread::hardware_concurrency();
+    options_->threads = folly::hardware_concurrency();
   }
 
   // Insert a filter to fail all the CONNECT request, if required

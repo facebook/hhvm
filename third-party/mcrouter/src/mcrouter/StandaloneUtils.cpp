@@ -19,6 +19,7 @@
 #include <vector>
 
 #include <folly/Conv.h>
+#include <folly/system/HardwareConcurrency.h>
 
 #include "mcrouter/CarbonRouterInstance.h"
 #include "mcrouter/McrouterLogFailure.h"
@@ -459,7 +460,7 @@ void setupStandaloneMcrouter(
       standaloneOptions.updateFromDict(standaloneOptionsDict);
 
   if (standaloneOptions.core_multiplier > 0) {
-    auto c = std::thread::hardware_concurrency();
+    auto c = folly::hardware_concurrency();
     if (!standaloneOptions.core_multiplier_threshold ||
         c >= standaloneOptions.core_multiplier_threshold) {
       libmcrouterOptions.num_proxies = c * standaloneOptions.core_multiplier;

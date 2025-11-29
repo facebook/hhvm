@@ -14,6 +14,7 @@
 
 #include <folly/Conv.h>
 #include <folly/String.h>
+#include <folly/system/HardwareConcurrency.h>
 
 #include "mcrouter/Proxy.h"
 #include "mcrouter/lib/fbi/cpp/LogFailure.h"
@@ -301,7 +302,7 @@ namespace options {
 
 string substituteTemplates(string str) {
   if (str.find(kTempCpuCores) != string::npos) {
-    auto c = std::thread::hardware_concurrency();
+    auto c = folly::hardware_concurrency();
     if (c == 0) {
       LOG_FAILURE(
           "mcrouter",

@@ -178,51 +178,42 @@ FOLLY_EXPORT FOLLY_ALWAYS_INLINE enum_find<U>& enum_find_instance() {
   return impl;
 }
 
-template <typename E, typename = void>
-inline constexpr bool eligible_for_dense_enum_optimization_v = false;
-
-// Empty Thrift enums as well as empty Thrift union tag enums do NOT
-// have TEnumtraits<E>::min()/max() static methods. Instead of failing
-// the build, we will just exclude them from the dense enum optimization.
-// It is reasonable to expect few would call `enum_find_name` on an
-// empty enum. So it should not miss any major optimizations.
-// Since C++ allows `static_cast<E>()` with any value representable
-// by the underlying type, it's better to just fallback to the unoptimized
-// path instead of failing to build.
 template <typename E>
-inline constexpr bool eligible_for_dense_enum_optimization_v<
-    E,
-    folly::void_t<decltype(TEnumTraits<E>::max())>> =
-    (((folly::to_underlying(TEnumTraits<E>::max()) -
-       folly::to_underlying(TEnumTraits<E>::min())) <
-      2 * TEnumTraits<E>::size) ||
-     ((folly::to_underlying(TEnumTraits<E>::max()) -
-       folly::to_underlying(TEnumTraits<E>::min())) < 16)) &&
-    (TEnumTraits<E>::size < 10'000);
+consteval auto enum_find_name_dense_array_make() {
+  using T = TEnumTraits<E>;
+  using D = TEnumDataStorage<E>;
+  constexpr auto min = folly::to_underlying(T::min());
+  constexpr auto max = folly::to_underlying(T::max());
+  std::array<int16_t, max - min + 1> ret;
+  for (auto& e : ret) {
+    e = -1;
+  }
+  for (size_t i = 0; i < T::size; ++i) {
+    ret[folly::to_underlying(D::values[i]) - min] = i;
+  }
+  return ret;
+}
+
+template <typename E>
+inline constexpr auto enum_find_name_dense =
+    enum_find_name_dense_array_make<E>();
 
 template <typename E, typename U = std::underlying_type_t<E>>
 FOLLY_ERASE bool enum_find_name(
     E const value, std::string_view* const out) noexcept {
-  if constexpr (eligible_for_dense_enum_optimization_v<E>) {
-    static constexpr auto index = []() consteval {
-      constexpr auto min = folly::to_underlying(TEnumTraits<E>::min());
-      constexpr auto max = folly::to_underlying(TEnumTraits<E>::max());
-      constexpr auto size = TEnumTraits<E>::size;
-      std::array<std::string_view, max - min + 1> ret;
-      for (size_t i = 0; i < size; ++i) {
-        ret[folly::to_underlying(TEnumDataStorage<E>::values[i]) - min] =
-            TEnumDataStorage<E>::names[i];
-      }
-      return ret;
-    }();
+  constexpr auto sz = TEnumTraits<E>::size;
+  // excludes empty enums and empty union tag enums, but these are typically
+  // unlikely to be searched anyway
+  if constexpr (sz && sz <= 4096) {
     constexpr auto min = folly::to_underlying(TEnumTraits<E>::min());
     constexpr auto max = folly::to_underlying(TEnumTraits<E>::max());
-    const auto under = folly::to_underlying(value);
-    if (under < min || under > max) {
-      return false;
+    constexpr auto gap = max - min;
+    if constexpr (gap < 2 * sz || gap < 16) {
+      constexpr auto& index = enum_find_name_dense<E>;
+      const auto under = folly::to_underlying(value);
+      const auto idx = under < min || under > max ? -1 : index[under - min];
+      return idx >= 0 && ((*out = TEnumDataStorage<E>::names[idx]), true);
     }
-    std::string_view name = index[under - min];
-    return !name.empty() && ((*out = name), true);
   }
   const auto r = enum_find<U>::find_name(U(value), enum_find_instance<E>());
   return r && ((*out = r.result), true);

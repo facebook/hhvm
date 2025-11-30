@@ -87,21 +87,9 @@ final class ResourceConfiguration {
   static final int targetConcurrency =
       Math.max(
           numThreadsForEventLoop,
-          /* Legacy defaults for cutover purposes
-           * TODO: @Jbahr to remove after all configs after cutover
-           * Checks are done in following order
-           * -> thrift.scheduler-concurrency.count
-           *   -> thrift.executor-threads.count (legacy thread pool)
-           *     -> thrift.forkjoin-threads.count (legacy FJP)
-           *       -> (default) Runtime.getRuntime().availableProcessors() * 4
-           */
           Integer.getInteger(
               "thrift.scheduler-concurrency.count",
-              Integer.getInteger(
-                  "thrift.executor-threads.count",
-                  Integer.getInteger(
-                      "thrift.forkjoin-threads.count",
-                      Runtime.getRuntime().availableProcessors() * 4))));
+              Runtime.getRuntime().availableProcessors() * 4));
 
   /**
    * Target concurrency level for the client off loop scheduler, will cap the number of threads used
@@ -113,21 +101,9 @@ final class ResourceConfiguration {
   static final int targetClientConcurrency =
       Math.max(
           numThreadsForEventLoop,
-          /* Legacy defaults for cutover purposes
-           * TODO: @Jbahr to remove after all configs after cutover
-           * Checks are done in following order
-           * -> thrift.client-scheduler-concurrency.count
-           *   -> thrift.executor-threads.count (legacy thread pool)
-           *     -> thrift.forkjoin-client-threads.count (legacy FJP)
-           *       -> (default) Runtime.getRuntime().availableProcessors() * 4
-           */
           Integer.getInteger(
               "thrift.client-scheduler-concurrency.count",
-              Integer.getInteger(
-                  "thrift.executor-threads.count",
-                  Integer.getInteger(
-                      "thrift.forkjoin-client-threads.count",
-                      Runtime.getRuntime().availableProcessors() * 4))));
+              Runtime.getRuntime().availableProcessors() * 4));
 
   static final boolean capForkJoinThreads =
       System.getProperty("thrift.enforce-forkjoin-parallelism-limit", "true")

@@ -16,7 +16,7 @@ Illegal wildcard (`_`): generic type parameter `T2` must be specified explicitly
   Definition is here
 ERROR: File "explicit_generics.php", line 12, characters 42-42:
 Illegal wildcard (`_`): generic type parameter `Tout` must be specified explicitly (Typing[4347])
-  File "soundness.hhi", line 33, characters 20-23:
+  File "soundness.hhi", line 31, characters 78-81:
   Definition is here
 ERROR: File "explicit_generics.php", line 19, characters 12-16:
 Illegal wildcard (`_`): generic type parameter `T` must be specified explicitly (Typing[4347])

@@ -30,3 +30,8 @@ union SameType {
   1: string a;
   2: string b;
 }
+
+enum Color {
+  RED = 1,
+  GREEN = 2,
+}

@@ -229,6 +229,10 @@ template <ThriftClass T>
 void PrintTo(const T& obj, std::ostream* os) {
   *os << debugStringViaEncode(obj);
 }
+template <ThriftEnum T>
+void PrintTo(const T& obj, std::ostream* os) {
+  *os << debugStringViaEncode(obj);
+}
 
 } // namespace apache::thrift
 

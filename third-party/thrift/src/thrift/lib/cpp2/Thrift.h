@@ -19,6 +19,7 @@
 
 #include <thrift/lib/cpp/Field.h>
 #include <thrift/lib/cpp/Thrift.h>
+#include <thrift/lib/cpp/util/EnumUtils.h>
 #include <thrift/lib/cpp2/TypeClass.h>
 
 #include <utility>
@@ -313,6 +314,11 @@ constexpr bool is_thrift_exception_v =
 template <typename T>
 constexpr bool is_thrift_struct_v =
     is_thrift_class_v<T> && !is_thrift_union_v<T> && !is_thrift_exception_v<T>;
+
+using util::is_thrift_enum_v;
+
+template <typename T>
+concept ThriftEnum = is_thrift_enum_v<T>;
 
 template <typename T>
 constexpr bool is_thrift_service_tag_v = //

@@ -28,3 +28,7 @@ TEST(
   std::string debugPrint = apache::thrift::debugStringViaEncode(r);
   EXPECT_EQ(testing::PrintToString(r), debugPrint);
 }
+
+TEST(ThriftDefaultPrint, Enum_DebugPrint) {
+  EXPECT_EQ(testing::PrintToString(apache::thrift::test::Color::RED), "1");
+}

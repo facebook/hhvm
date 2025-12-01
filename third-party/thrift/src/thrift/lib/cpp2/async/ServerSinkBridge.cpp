@@ -27,7 +27,7 @@ namespace apache::thrift::detail {
 template class TwoWayBridge<
     ServerSinkBridge,
     std::variant<folly::Try<StreamPayload>, uint64_t>,
-    CoroConsumer,
+    QueueConsumer,
     folly::Try<StreamPayload>,
     ServerSinkBridge>;
 

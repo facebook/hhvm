@@ -55,14 +55,14 @@ class ServerSinkBridge;
 extern template class TwoWayBridge<
     ServerSinkBridge,
     std::variant<folly::Try<StreamPayload>, uint64_t>,
-    CoroConsumer,
+    QueueConsumer,
     folly::Try<StreamPayload>,
     ServerSinkBridge>;
 
 class ServerSinkBridge : public TwoWayBridge<
                              ServerSinkBridge,
                              std::variant<folly::Try<StreamPayload>, uint64_t>,
-                             CoroConsumer,
+                             QueueConsumer,
                              folly::Try<StreamPayload>,
                              ServerSinkBridge>,
                          public SinkServerCallback {

@@ -55,6 +55,7 @@ let hint_to_string_and_symbols ~is_ctx (hint : Aast.hint) =
     | Hvar v -> append v
     | Habstr name -> append (Typing_print.strip_ns name)
     | Happly ((_, "\\HH\\supportdyn"), [hint]) -> parse ~is_ctx hint
+    | Happly ((_, "\\HH\\string"), _) -> append "string"
     | Happly ((file_pos, cn), []) ->
       append ~annot:file_pos (Typing_print.strip_ns cn)
     | Happly ((file_pos, cn), hints) ->
@@ -268,6 +269,9 @@ let rec hint_to_angle h =
     let variadic = Option.map tup_variadic ~f:hint_to_angle in
     Hint.(Key (Tuple { req; opt; variadic }))
   | Hprim t -> Hint.(Key (Prim (Type.Key (Aast_defs.string_of_tprim t))))
+  | Happly ((_, cn), _)
+    when String.equal Naming_special_names.Classes.cString cn ->
+    Hint.(Key (Prim (Type.Key "string")))
   (* TODO(T199610905) update glean schema *)
   | Hclass_ptr (_kind, hint) -> Hint.(Key (Class_args (hint_to_angle hint)))
   | Hfun_context c -> Hint.(Key (Fun_context c))

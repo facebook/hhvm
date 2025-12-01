@@ -42,8 +42,6 @@ ERROR: File "module_newtype.php--Static.php", line 3, characters 23-24:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
 ERROR: File "module_newtype.php--Static.php", line 3, characters 26-35:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
-ERROR: File "module_newtype.php--String.php", line 3, characters 16-21:
-Cannot use `String` as a type name as it is reserved (Parsing[1002])
 ERROR: File "module_newtype.php--This.php", line 3, characters 16-19:
 Cannot use `This` as a type name as it is reserved (Parsing[1002])
 ERROR: File "module_newtype.php--True.php", line 3, characters 16-19:

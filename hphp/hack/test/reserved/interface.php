@@ -121,12 +121,6 @@ interface Static {}
 // CHECK: Static.php
 // CHECK: A name is expected here
 
-//// String.php
-<?hh
-interface String {}
-// CHECK: String.php
-// CHECK: Cannot use `String` as a type name as it is reserved
-
 //// This.php
 <?hh
 interface This {}

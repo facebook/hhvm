@@ -145,13 +145,6 @@ module newtype Static as int = int;
 // CHECK: Static.php
 // CHECK: A name is expected here
 
-//// String.php
-<?hh
-module mm;
-module newtype String as int = int;
-// CHECK: String.php
-// CHECK: Cannot use `String` as a type name as it is reserved
-
 //// This.php
 <?hh
 module mm;

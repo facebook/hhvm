@@ -34,8 +34,6 @@ ERROR: File "interface.php--Self.php", line 2, characters 11-14:
 Cannot use `Self` as a type name as it is reserved (Parsing[1002])
 ERROR: File "interface.php--Static.php", line 2, characters 11-11:
 A name is expected here. (Parsing[1002])
-ERROR: File "interface.php--String.php", line 2, characters 11-16:
-Cannot use `String` as a type name as it is reserved (Parsing[1002])
 ERROR: File "interface.php--This.php", line 2, characters 11-14:
 Cannot use `This` as a type name as it is reserved (Parsing[1002])
 ERROR: File "interface.php--True.php", line 2, characters 11-14:

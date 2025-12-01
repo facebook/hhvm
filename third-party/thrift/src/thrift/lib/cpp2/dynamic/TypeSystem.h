@@ -1363,9 +1363,9 @@ inline TypeRef TypeSystem::UserDefined(UriView uri) const {
 // TypeRef::matchKind implementation (defined after OpaqueAliasNode is complete)
 template <typename... F>
 FOLLY_ALWAYS_INLINE decltype(auto) TypeRef::matchKind(F&&... visitors) const {
-  const auto invokeWith = [&](auto tag) -> decltype(auto) {
-    return std::invoke(folly::overload(std::forward<F>(visitors)...), tag);
-  };
+  // Intentionally does not support pointer-to-member callables or &&-qualified
+  // operator() for build speed.
+  auto invokeWith = folly::overload(std::forward<F>(visitors)...);
   switch (kind()) {
     case Kind::BOOL:
       return invokeWith(KindConstant<Kind::BOOL>{});

@@ -19,6 +19,7 @@
 #include <thrift/lib/cpp2/dynamic/DynamicValue.h>
 #include <thrift/lib/cpp2/dynamic/SerializableRecord.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
+#include <thrift/lib/cpp2/dynamic/Union.h>
 #include <thrift/lib/cpp2/dynamic/detail/ConcreteList.h>
 #include <thrift/lib/cpp2/dynamic/detail/Datum.h>
 #include <thrift/lib/cpp2/dynamic/fwd.h>
@@ -90,9 +91,7 @@ void serialize(ProtocolWriter&, const Struct&);
 
 // Union
 template <typename ProtocolWriter>
-void serialize(ProtocolWriter&, const Union&) {
-  throw std::logic_error("Unimplemented: serialize(Union)");
-}
+void serialize(ProtocolWriter&, const Union&);
 
 // Null
 template <typename ProtocolWriter>
@@ -249,11 +248,7 @@ Struct deserialize(
 // Union
 template <typename ProtocolReader>
 Union deserialize(
-    ProtocolReader&,
-    const type_system::UnionNode&,
-    std::pmr::memory_resource*) {
-  throw std::logic_error("Unimplemented: deserialize(UnionNode)");
-}
+    ProtocolReader&, const type_system::UnionNode&, std::pmr::memory_resource*);
 
 // Unsupported types
 template <typename ProtocolReader>
@@ -519,6 +514,99 @@ Struct deserialize(
     }
 
     reader.readFieldEnd();
+  }
+
+  reader.readStructEnd();
+
+  return ret;
+}
+
+// ============================================================================
+// Union serialization
+// ============================================================================
+
+template <typename ProtocolWriter>
+void serialize(ProtocolWriter& writer, const Union& unionValue) {
+  const auto& unionNode = unionValue.type().asUnionUnchecked();
+
+  writer.writeStructBegin(unionNode.uri().data());
+
+  // Serialize the active field if the union is not empty
+  if (!unionValue.isEmpty()) {
+    const auto& fieldDef = *unionValue.activeFieldDef_;
+    const auto& datum = *unionValue.activeFieldData_;
+
+    writer.writeFieldBegin(
+        fieldDef.identity().name().data(),
+        fieldDef.wireType(),
+        static_cast<int16_t>(fieldDef.identity().id()));
+
+    // Serialize the field value
+    datum.visit([&](const auto& value) { serialize(writer, value); });
+
+    writer.writeFieldEnd();
+  }
+
+  writer.writeFieldStop();
+  writer.writeStructEnd();
+}
+
+template <typename ProtocolReader>
+Union deserialize(
+    ProtocolReader& reader,
+    const type_system::UnionNode& type,
+    std::pmr::memory_resource* alloc) {
+  Union ret(type, alloc);
+
+  std::string name;
+  int16_t fid;
+  protocol::TType ftype;
+
+  reader.readStructBegin(name);
+
+  // Read the first (and only) field
+  reader.readFieldBegin(name, ftype, fid);
+
+  if (ftype == protocol::T_STOP) {
+    // Empty union
+    reader.readStructEnd();
+    return ret;
+  }
+
+  // Find the field
+  Union::FieldId id{fid};
+  auto handle = type.fieldHandleFor(id);
+
+  if (handle.valid()) {
+    const auto& field = type.at(handle);
+
+    if (ftype != field.wireType()) {
+      throw std::runtime_error(
+          fmt::format(
+              "Expected field {} on union {} to have wire-type {} but got {}",
+              field.identity().name(),
+              type.uri(),
+              field.wireType(),
+              ftype));
+    }
+
+    ret.activeFieldDef_ = &field;
+    ret.activeFieldData_ = field.type().visit([&](auto&& t) {
+      return ret.makeDatumPtr(
+          detail::Datum::make(deserialize(reader, t, alloc)));
+    });
+  } else {
+    // Unknown field - skip it
+    reader.skip(ftype);
+  }
+
+  reader.readFieldEnd();
+
+  // Read field stop
+  reader.readFieldBegin(name, ftype, fid);
+  if (ftype != protocol::T_STOP) {
+    throw std::runtime_error(
+        "Union cannot have more than one field during deserialization");
   }
 
   reader.readStructEnd();

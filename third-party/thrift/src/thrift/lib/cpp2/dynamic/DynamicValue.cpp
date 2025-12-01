@@ -125,6 +125,9 @@ DynamicValue DynamicValue::makeDefault(
     case Kind::STRUCT:
       return DynamicValue(
           type, detail::Datum::make(makeStruct(type.asStructUnchecked(), mr)));
+    case Kind::UNION:
+      return DynamicValue(
+          type, detail::Datum::make(makeUnion(type.asUnionUnchecked(), mr)));
     default:
       throw std::runtime_error(
           fmt::format(

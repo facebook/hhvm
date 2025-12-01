@@ -25,6 +25,7 @@
 #include <thrift/lib/cpp2/dynamic/Struct.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystemTraits.h>
+#include <thrift/lib/cpp2/dynamic/Union.h>
 #include <thrift/lib/cpp2/dynamic/fwd.h>
 
 #include <fmt/core.h>
@@ -51,12 +52,10 @@ namespace apache::thrift::dynamic {
 class Any {};
 class Set {};
 class Map {};
-class Union {};
 
 bool operator==(const Any&, const Any&) noexcept;
 bool operator==(const Set&, const Set&) noexcept;
 bool operator==(const Map&, const Map&) noexcept;
-bool operator==(const Union&, const Union&) noexcept;
 
 struct Null final {
   friend constexpr bool operator==(const Null&, const Null&) noexcept {
@@ -621,13 +620,11 @@ inline Map fromRecord(
   throw std::logic_error("Unimplemented: fromRecord(TypeRef::Map)");
 }
 
-// Union
-inline Union fromRecord(
-    const type_system::SerializableRecord&,
-    const type_system::UnionNode&,
-    std::pmr::memory_resource*) {
-  throw std::logic_error("Unimplemented: fromRecord(UnionNode)");
-}
+// Union (defined in Union.cpp)
+Union fromRecord(
+    const type_system::SerializableRecord& r,
+    const type_system::UnionNode& unionType,
+    std::pmr::memory_resource* mr);
 
 // OpaqueAliasNode
 inline int fromRecord(

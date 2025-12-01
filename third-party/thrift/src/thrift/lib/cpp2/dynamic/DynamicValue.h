@@ -153,6 +153,7 @@ class DynamicConstRef final {
   friend std::ostream& operator<<(
       std::ostream& os, const DynamicConstRef& value);
   friend class Struct;
+  friend class Union;
   friend class detail::StructImpl;
   template <typename T>
   friend class detail::ConcreteList;
@@ -312,6 +313,7 @@ class DynamicRef final {
   friend class DynamicConstRef;
   friend class Struct;
   friend class detail::StructImpl;
+  friend class Union;
   template <typename T>
   friend class detail::ConcreteList;
 
@@ -490,6 +492,7 @@ class DynamicValue final {
   friend class detail::ConcreteList;
   friend class Struct;
   friend class detail::StructImpl;
+  friend class Union;
 
   // Friend declarations for fromRecord functions
   friend List fromRecord(

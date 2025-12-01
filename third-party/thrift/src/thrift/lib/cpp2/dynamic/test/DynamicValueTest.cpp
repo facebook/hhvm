@@ -21,6 +21,7 @@
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
 #include <thrift/lib/cpp2/dynamic/Serialization.h>
+#include <thrift/lib/cpp2/dynamic/detail/ConcreteList.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 
 #include <limits>

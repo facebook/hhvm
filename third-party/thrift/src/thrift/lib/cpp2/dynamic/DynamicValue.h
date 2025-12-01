@@ -483,6 +483,8 @@ class DynamicValue final {
 
   friend class DynamicConstRef;
   friend class DynamicRef;
+  template <typename T>
+  friend class detail::ConcreteList;
 
   // Friend declarations for fromRecord functions
   friend List fromRecord(

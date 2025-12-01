@@ -19,6 +19,7 @@
 #include <thrift/lib/cpp2/dynamic/DynamicValue.h>
 #include <thrift/lib/cpp2/dynamic/SerializableRecord.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
+#include <thrift/lib/cpp2/dynamic/detail/ConcreteList.h>
 #include <thrift/lib/cpp2/dynamic/detail/Datum.h>
 #include <thrift/lib/cpp2/dynamic/fwd.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
@@ -64,9 +65,7 @@ void serialize(ProtocolWriter&, const Any&) {
 
 // List
 template <typename ProtocolWriter>
-void serialize(ProtocolWriter&, const List&) {
-  throw std::logic_error("Unimplemented: serialize(List)");
-}
+void serialize(ProtocolWriter& writer, const List& list);
 
 // Set
 template <typename ProtocolWriter>
@@ -207,11 +206,9 @@ Any deserialize(
 // List
 template <typename ProtocolReader>
 List deserialize(
-    ProtocolReader&,
-    const type_system::TypeRef::List&,
-    std::pmr::memory_resource*) {
-  throw std::logic_error("Unimplemented: deserialize(TypeRef::List)");
-}
+    ProtocolReader& reader,
+    const type_system::TypeRef::List& type,
+    std::pmr::memory_resource* alloc);
 
 // Set
 template <typename ProtocolReader>
@@ -291,6 +288,128 @@ void serializeValue(ProtocolWriter& prot, const DynamicConstRef& v) {
   v.type().matchKind([&]<Kind k>(type_system::TypeRef::KindConstant<k>) {
     serialize(prot, v.as<k>());
   });
+}
+
+// ============================================================================
+// List serialization - needs ConcreteList to be complete
+// ============================================================================
+
+namespace detail {
+
+// Helper functions for serializing list elements
+template <typename ProtocolWriter, typename T>
+  requires(
+      ProtocolWriter::kSupportsArithmeticVectors() &&
+      !std::is_same_v<T, bool> && std::is_arithmetic_v<T>)
+void serializeListElements(
+    ProtocolWriter& writer, const ConcreteList<T>& data) {
+  writer.template writeArithmeticVector<T>(
+      data.elements().data(), data.elements().size());
+}
+
+// Specialization for bool (which uses std::byte storage)
+template <typename ProtocolWriter>
+void serializeListElements(
+    ProtocolWriter& writer, const ConcreteList<bool>& data) {
+  for (const auto& elt : data.elements()) {
+    serialize(writer, static_cast<bool>(elt));
+  }
+}
+
+template <typename ProtocolWriter, typename T>
+void serializeListElements(
+    ProtocolWriter& writer, const ConcreteList<T>& data) {
+  for (const T& elt : data.elements()) {
+    serialize(writer, elt);
+  }
+}
+
+} // namespace detail
+
+// Serialize List - overrides the placeholder in the serialize section above
+template <typename ProtocolWriter>
+void serialize(ProtocolWriter& writer, const List& list) {
+  const detail::IList* impl = list.impl_.get();
+  if (!impl) {
+    writer.writeListBegin(protocol::TType::T_VOID, 0);
+    writer.writeListEnd();
+    return;
+  }
+  impl->visit([&]<typename T>(const detail::ConcreteList<T>& data) {
+    writer.writeListBegin(
+        type_system::ToTTypeFn{}(data.elementType()),
+        folly::to_narrow(data.size()));
+    detail::serializeListElements(writer, data);
+    writer.writeListEnd();
+  });
+}
+
+// Deserialize List - overrides the placeholder in the deserialize section above
+template <typename ProtocolReader>
+List deserialize(
+    ProtocolReader& reader,
+    const type_system::TypeRef::List& type,
+    std::pmr::memory_resource* alloc) {
+  return type.elementType().matchKind(
+      [&]<type_system::TypeRef::Kind elemTypeKind>(
+          type_system::TypeRef::KindConstant<elemTypeKind>) -> List {
+        using elemDatumType = detail::type_of_type_kind<elemTypeKind>;
+        using elemStorageType = detail::storage_type_t<elemDatumType>;
+        const auto& elemTypeNode = type.elementType().asKind<elemTypeKind>();
+
+        // Allocate ConcreteList using pmr
+        auto* impl = alloc
+            ? std::pmr::polymorphic_allocator<>(alloc)
+                  .template new_object<detail::ConcreteList<elemDatumType>>(
+                      type, alloc)
+            : new detail::ConcreteList<elemDatumType>(type, alloc);
+
+        DCHECK_EQ(impl->size(), 0);
+        auto& data = impl->elements();
+
+        protocol::TType ttype;
+        uint32_t size;
+        reader.readListBegin(ttype, size);
+        if (!size) {
+          reader.readListEnd();
+          return List(detail::IList::Ptr(impl));
+        }
+
+        if (type_system::ToTTypeFn{}(type.elementType()) != ttype) {
+          throw std::runtime_error(
+              fmt::format(
+                  "type mismatch in deserialization: {} vs {}",
+                  ttype,
+                  type_system::ToTTypeFn{}(type.elementType())));
+        }
+
+        if (!apache::thrift::canReadNElements(reader, size, {ttype})) {
+          protocol::TProtocolException::throwTruncatedData();
+        }
+
+        if constexpr (
+            ProtocolReader::kSupportsArithmeticVectors() &&
+            !std::is_same_v<elemDatumType, bool> &&
+            std::is_arithmetic_v<elemStorageType>) {
+          data.resize(size);
+          reader.template readArithmeticVector<elemStorageType>(
+              data.data(), size);
+        } else if constexpr (std::is_same_v<elemDatumType, bool>) {
+          // For bool elements (stored as std::byte), deserialize and cast
+          data.reserve(size);
+          for (; size > 0; --size) {
+            bool value = deserialize(reader, elemTypeNode, alloc);
+            data.emplace_back(static_cast<std::byte>(value));
+          }
+        } else {
+          data.reserve(size);
+          for (; size > 0; --size) {
+            data.emplace_back(deserialize(reader, elemTypeNode, alloc));
+          }
+        }
+        reader.readListEnd();
+        return List(detail::IList::Ptr(impl));
+      });
 }
 
 } // namespace apache::thrift::dynamic

@@ -22,11 +22,12 @@
 #include <fmt/core.h>
 
 #include <iostream>
+#include <utility>
 
 namespace apache::thrift::dynamic {
 
 DynamicValue::DynamicValue(type_system::TypeRef type, detail::Datum datum)
-    : type_(type), datum_(datum) {
+    : type_(type), datum_(std::move(datum)) {
   auto expectedKind = type.matchKind(
       []<type_system::TypeRef::Kind k>(type_system::TypeRef::KindConstant<k>) {
         return detail::Datum::kind_of_type_kind<k>;
@@ -85,7 +86,6 @@ DynamicValue DynamicValue::makeEnum(
 DynamicValue DynamicValue::makeDefault(
     type_system::TypeRef type, std::pmr::memory_resource* mr) {
   using Kind = type_system::TypeRef::Kind;
-  (void)mr;
   switch (type.kind()) {
     case Kind::BOOL:
       return makeBool(false);
@@ -103,6 +103,9 @@ DynamicValue DynamicValue::makeDefault(
       return makeFloat(0.0f);
     case Kind::DOUBLE:
       return makeDouble(0.0);
+    case Kind::LIST:
+      return DynamicValue(
+          type, detail::Datum::make(makeList(type.asListUnchecked(), mr)));
     default:
       throw std::runtime_error(
           fmt::format(

@@ -82,9 +82,9 @@ jobs:
     - name: Fetch pcre2
       if: ${{ steps.paths.outputs.pcre2_SOURCE }}
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests pcre2
-    - name: Fetch python-setuptools
-      if: ${{ steps.paths.outputs.python-setuptools_SOURCE }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests python-setuptools
+    - name: Fetch python-setuptools-69
+      if: ${{ steps.paths.outputs.python-setuptools-69_SOURCE }}
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests python-setuptools-69
     - name: Fetch libevent
       if: ${{ steps.paths.outputs.libevent_SOURCE }}
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests libevent
@@ -402,22 +402,22 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.pcre2_INSTALL }}
        key: ${{ steps.paths.outputs.pcre2_CACHE_KEY }}-install
-    - name: Restore python-setuptools from cache
-      id: restore_python-setuptools
-      if: ${{ steps.paths.outputs.python-setuptools_SOURCE }}
+    - name: Restore python-setuptools-69 from cache
+      id: restore_python-setuptools-69
+      if: ${{ steps.paths.outputs.python-setuptools-69_SOURCE }}
       uses: actions/cache/restore@v4
       with:
-       path: ${{ steps.paths.outputs.python-setuptools_INSTALL }}
-       key: ${{ steps.paths.outputs.python-setuptools_CACHE_KEY }}-install
-    - name: Build python-setuptools
-      if: ${{ steps.paths.outputs.python-setuptools_SOURCE && ! steps.restore_python-setuptools.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests python-setuptools
-    - name: Save python-setuptools to cache
+       path: ${{ steps.paths.outputs.python-setuptools-69_INSTALL }}
+       key: ${{ steps.paths.outputs.python-setuptools-69_CACHE_KEY }}-install
+    - name: Build python-setuptools-69
+      if: ${{ steps.paths.outputs.python-setuptools-69_SOURCE && ! steps.restore_python-setuptools-69.outputs.cache-hit }}
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests python-setuptools-69
+    - name: Save python-setuptools-69 to cache
       uses: actions/cache/save@v4
-      if: ${{ steps.paths.outputs.python-setuptools_SOURCE && ! steps.restore_python-setuptools.outputs.cache-hit }}
+      if: ${{ steps.paths.outputs.python-setuptools-69_SOURCE && ! steps.restore_python-setuptools-69.outputs.cache-hit }}
       with:
-       path: ${{ steps.paths.outputs.python-setuptools_INSTALL }}
-       key: ${{ steps.paths.outputs.python-setuptools_CACHE_KEY }}-install
+       path: ${{ steps.paths.outputs.python-setuptools-69_INSTALL }}
+       key: ${{ steps.paths.outputs.python-setuptools-69_CACHE_KEY }}-install
     - name: Restore libevent from cache
       id: restore_libevent
       if: ${{ steps.paths.outputs.libevent_SOURCE }}

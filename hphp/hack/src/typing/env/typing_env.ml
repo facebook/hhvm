@@ -660,7 +660,21 @@ module M = struct
     let info = get_tcopt env |> TypecheckerOptions.package_info in
     PackageInfo.get_package info pkg_name
 
-  let is_package_loaded env package = SSet.mem package env.loaded_packages
+  let is_package_loaded env package =
+    if SSet.mem package env.loaded_packages then
+      true
+    else
+      (* Check if package is in the includes of any loaded package *)
+      let package_info = get_tcopt env |> TypecheckerOptions.package_info in
+      SSet.exists
+        (fun loaded_pkg ->
+          match PackageInfo.get_package package_info loaded_pkg with
+          | None -> false
+          | Some pkg ->
+            List.exists
+              ~f:(fun (_, included_pkg) -> String.equal included_pkg package)
+              pkg.Package.includes)
+        env.loaded_packages
 
   let check_packages env = TypecheckerOptions.check_packages @@ get_tcopt env
 

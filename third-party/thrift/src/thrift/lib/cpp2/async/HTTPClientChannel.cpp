@@ -416,7 +416,7 @@ void HTTPClientChannel::sendRequest_(
     txn->setIdleTimeout(timeout);
   }
   if (transactionObserverCreator_) {
-    if (auto observer = transactionObserverCreator_->create()) {
+    if (auto observer = transactionObserverCreator_->create(*txn, rpcOptions)) {
       txn->addObserver(std::move(observer));
     }
   }

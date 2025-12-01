@@ -34,7 +34,8 @@ class HTTPTransactionObserverCreator {
  public:
   virtual ~HTTPTransactionObserverCreator() = default;
   virtual std::shared_ptr<proxygen::HTTPTransactionObserverContainer::Observer>
-  create() const noexcept = 0;
+  create(
+      const proxygen::HTTPTransaction&, const RpcOptions&) const noexcept = 0;
 };
 
 /**

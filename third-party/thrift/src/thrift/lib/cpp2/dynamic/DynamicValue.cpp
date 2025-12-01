@@ -16,7 +16,13 @@
 
 #include <thrift/lib/cpp2/dynamic/DynamicValue.h>
 
+#include <thrift/lib/cpp2/dynamic/List.h>
+#include <thrift/lib/cpp2/dynamic/Map.h>
 #include <thrift/lib/cpp2/dynamic/Serialization.h>
+#include <thrift/lib/cpp2/dynamic/Set.h>
+#include <thrift/lib/cpp2/dynamic/Struct.h>
+#include <thrift/lib/cpp2/dynamic/Union.h>
+#include <thrift/lib/cpp2/dynamic/detail/DatumHash.h>
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 
 #include <fmt/core.h>

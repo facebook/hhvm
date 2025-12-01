@@ -15,6 +15,7 @@
  */
 
 #include <thrift/lib/cpp2/dynamic/detail/Datum.h>
+#include <thrift/lib/cpp2/dynamic/detail/DatumHash.h>
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 
 #include <fmt/core.h>

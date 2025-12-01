@@ -166,6 +166,7 @@ class DynamicConstRef final {
   friend class detail::ConcreteSet;
   template <typename K, typename V>
   friend class detail::ConcreteMap;
+  friend struct detail::DatumHash;
 
   /**
    * Variant of const pointers to all possible Thrift value types.
@@ -503,6 +504,7 @@ class DynamicValue final {
 
   friend class DynamicConstRef;
   friend class DynamicRef;
+  friend struct detail::DatumHash;
   template <typename T>
   friend class detail::ConcreteList;
   template <typename T>

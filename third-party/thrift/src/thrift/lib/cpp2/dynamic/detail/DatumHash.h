@@ -56,39 +56,25 @@ struct DatumHash {
     return folly::IOBufHash{}(value.data_);
   }
 
-  std::size_t operator()(const Any&) const {
+  std::size_t operator()(const Any& /*value*/) const {
     throw std::runtime_error("unimplemented");
   }
 
-  std::size_t operator()(const Struct&) const {
-    throw std::runtime_error("unimplemented");
-  }
+  std::size_t operator()(const Struct& value) const;
 
-  std::size_t operator()(const Union&) const {
-    throw std::runtime_error("unimplemented");
-  }
+  std::size_t operator()(const Union& value) const;
 
-  std::size_t operator()(const List&) const {
-    throw std::runtime_error("unimplemented");
-  }
+  std::size_t operator()(const List& value) const;
 
-  std::size_t operator()(const Set&) const {
-    throw std::runtime_error("unimplemented");
-  }
+  std::size_t operator()(const Set& value) const;
 
-  std::size_t operator()(const Map&) const {
-    throw std::runtime_error("unimplemented");
-  }
+  std::size_t operator()(const Map& value) const;
 
-  std::size_t operator()(const Null&) const { return 0; }
+  std::size_t operator()(const Null& /*value*/) const { return 0; }
 
-  std::size_t operator()(const Datum&) const {
-    throw std::runtime_error("unimplemented");
-  }
+  std::size_t operator()(const Datum& value) const;
 
-  std::size_t operator()(const DynamicConstRef&) const {
-    throw std::runtime_error("unimplemented");
-  }
+  std::size_t operator()(const DynamicConstRef& value) const;
 };
 
 /**

@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <cassert>
 #include <map>
 #include <memory>

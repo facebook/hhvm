@@ -38,10 +38,12 @@ struct StructTest : ::testing::Test {
   StructTest() {
     type_system::TypeSystemBuilder builder;
 
-    // Create a simple struct with three fields:
+    // Create a simple struct with five fields:
     // 1: i32 id
     // 2: i64 count
     // 3: bool active (optional)
+    // 4: string name (optional)
+    // 5: binary data (optional)
 
     builder.addType(
         "test.TestStruct",
@@ -52,6 +54,10 @@ struct StructTest : ::testing::Test {
                 def::Identity(2, "count"), def::AlwaysPresent, TypeIds::I64),
             def::Field(
                 def::Identity(3, "active"), def::Optional, TypeIds::Bool),
+            def::Field(
+                def::Identity(4, "name"), def::Optional, TypeIds::String),
+            def::Field(
+                def::Identity(5, "data"), def::Optional, TypeIds::Binary),
         }));
 
     typeSystem = std::move(builder).build();
@@ -169,6 +175,10 @@ TEST_F(StructTest, SerializationRoundTrip) {
   structValue.setField("id", DynamicValue::makeI32(42));
   structValue.setField("count", DynamicValue::makeI64(1000));
   structValue.setField("active", DynamicValue::makeBool(true));
+  structValue.setField("name", DynamicValue::makeString(String("test name")));
+  structValue.setField(
+      "data",
+      DynamicValue::makeBinary(folly::IOBuf::copyBuffer("binary test data")));
 
   // Serialize
   folly::IOBufQueue bufQueue;
@@ -189,6 +199,11 @@ TEST_F(StructTest, SerializationRoundTrip) {
   EXPECT_EQ(deserStruct.getField("id")->asI32(), 42);
   EXPECT_EQ(deserStruct.getField("count")->asI64(), 1000);
   EXPECT_EQ(deserStruct.getField("active")->asBool(), true);
+  EXPECT_EQ(deserStruct.getField("name")->asString().view(), "test name");
+  auto cursor = deserStruct.getField("data")->asBinary().cursor();
+  std::array<char, 16> data{};
+  cursor.pull(data.data(), 16);
+  EXPECT_EQ(std::string_view(data.data(), 16), "binary test data");
 }
 
 TEST_F(StructTest, SerializationWithNullFields) {

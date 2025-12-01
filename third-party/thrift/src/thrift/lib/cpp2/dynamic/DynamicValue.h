@@ -359,6 +359,9 @@ class DynamicValue final {
   static DynamicValue makeI64(int64_t value);
   static DynamicValue makeFloat(float value);
   static DynamicValue makeDouble(double value);
+  static DynamicValue makeString(
+      std::string_view sv, std::pmr::memory_resource* mr = nullptr);
+  static DynamicValue makeBinary(std::unique_ptr<folly::IOBuf> buf);
 
   /**
    * Factory method for creating enum values.

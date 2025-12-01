@@ -47,14 +47,19 @@ void serialize(ProtocolWriter& writer, T value) {
 
 // String
 template <typename ProtocolWriter>
-void serialize(ProtocolWriter&, const String&) {
-  throw std::logic_error("Unimplemented: serialize(String)");
+void serialize(ProtocolWriter& writer, const String& str) {
+  writer.writeString(str.view());
 }
 
 // Binary
 template <typename ProtocolWriter>
-void serialize(ProtocolWriter&, const Binary&) {
-  throw std::logic_error("Unimplemented: serialize(Binary)");
+void serialize(ProtocolWriter& writer, const Binary& binary) {
+  if (binary.data_) {
+    writer.writeBinary(*binary.data_);
+  } else {
+    // Empty binary
+    writer.writeBinary(folly::IOBuf());
+  }
 }
 
 // Any
@@ -183,15 +188,23 @@ int32_t deserialize(
 // String
 template <typename ProtocolReader>
 String deserialize(
-    ProtocolReader&, type_system::TypeRef::String, std::pmr::memory_resource*) {
-  throw std::logic_error("Unimplemented: deserialize(TypeRef::String)");
+    ProtocolReader& reader,
+    type_system::TypeRef::String,
+    std::pmr::memory_resource* mr) {
+  std::string temp;
+  reader.readString(temp);
+  return String(temp, mr);
 }
 
 // Binary
 template <typename ProtocolReader>
 Binary deserialize(
-    ProtocolReader&, type_system::TypeRef::Binary, std::pmr::memory_resource*) {
-  throw std::logic_error("Unimplemented: deserialize(TypeRef::Binary)");
+    ProtocolReader& reader,
+    type_system::TypeRef::Binary,
+    std::pmr::memory_resource* mr) {
+  std::unique_ptr<folly::IOBuf> buf;
+  reader.readBinary(buf);
+  return Binary(std::move(buf), mr);
 }
 
 // Any

@@ -38,6 +38,7 @@ class Struct final {
   /**
    * Get field by name.
    * Returns empty optional if the field is an unset optional field.
+   * Returned reference is invalidated if the optional field is cleared.
    * Throws:
    *   - std::out_of_range if the field doesn't exist
    */
@@ -47,6 +48,7 @@ class Struct final {
   /**
    * Get field by ID.
    * Returns empty optional if the field is an unset optional field.
+   * Returned reference is invalidated if the optional field is cleared.
    * Throws:
    *   - std::out_of_range if the field doesn't exist
    */
@@ -56,6 +58,7 @@ class Struct final {
   /**
    * Get field by handle.
    * Returns empty optional if the field is an unset optional field.
+   * Returned reference is invalidated if the optional field is cleared.
    * The handle must be valid for this struct type.
    */
   std::optional<DynamicRef> getField(type_system::FastFieldHandle handle);
@@ -98,6 +101,7 @@ class Struct final {
 
   /**
    * Clear an optional field by name.
+   * Invalidated existing references to the field.
    * Throws:
    *   - std::out_of_range if the field doesn't exist
    *   - std::runtime_error if the field is not optional
@@ -106,6 +110,7 @@ class Struct final {
 
   /**
    * Clear an optional field by ID.
+   * Invalidated existing references to the field.
    * Throws:
    *   - std::out_of_range if the field doesn't exist
    *   - std::runtime_error if the field is not optional
@@ -114,6 +119,7 @@ class Struct final {
 
   /**
    * Clear an optional field by handle.
+   * Invalidated existing references to the field.
    * The handle must be valid for this struct type.
    * Throws:
    *   - std::runtime_error if the field is not optional

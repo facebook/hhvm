@@ -18,8 +18,10 @@
 
 // Minimal includes to avoid pulling in <variant> too early
 
+#include <thrift/lib/cpp2/dynamic/Binary.h>
 #include <thrift/lib/cpp2/dynamic/List.h>
 #include <thrift/lib/cpp2/dynamic/SerializableRecord.h>
+#include <thrift/lib/cpp2/dynamic/String.h>
 #include <thrift/lib/cpp2/dynamic/Struct.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystemTraits.h>
@@ -31,6 +33,8 @@
 #include <folly/Traits.h>
 #include <folly/Utility.h>
 #include <folly/functional/Invoke.h>
+#include <folly/io/Cursor.h>
+#include <folly/io/IOBuf.h>
 #include <folly/lang/Assume.h>
 #include <folly/lang/Exception.h>
 
@@ -44,15 +48,11 @@
 
 namespace apache::thrift::dynamic {
 
-class String {};
-class Binary {};
 class Any {};
 class Set {};
 class Map {};
 class Union {};
 
-bool operator==(const String&, const String&) noexcept;
-bool operator==(const Binary&, const Binary&) noexcept;
 bool operator==(const Any&, const Any&) noexcept;
 bool operator==(const Set&, const Set&) noexcept;
 bool operator==(const Map&, const Map&) noexcept;

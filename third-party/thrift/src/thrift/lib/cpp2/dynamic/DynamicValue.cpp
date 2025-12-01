@@ -77,6 +77,18 @@ DynamicValue DynamicValue::makeDouble(double value) {
       type_system::TypeSystem::Double(), detail::Datum::makeDouble(value));
 }
 
+DynamicValue DynamicValue::makeString(
+    std::string_view sv, std::pmr::memory_resource* mr) {
+  return DynamicValue(
+      type_system::TypeSystem::String(), detail::Datum::make(String(sv, mr)));
+}
+
+DynamicValue DynamicValue::makeBinary(std::unique_ptr<folly::IOBuf> buf) {
+  return DynamicValue(
+      type_system::TypeSystem::Binary(),
+      detail::Datum::make(Binary(std::move(buf))));
+}
+
 DynamicValue DynamicValue::makeEnum(
     const type_system::EnumNode& enumType, int32_t value) {
   return DynamicValue(
@@ -103,6 +115,10 @@ DynamicValue DynamicValue::makeDefault(
       return makeFloat(0.0f);
     case Kind::DOUBLE:
       return makeDouble(0.0);
+    case Kind::STRING:
+      return makeString("", mr);
+    case Kind::BINARY:
+      return DynamicValue(type, detail::Datum::make(Binary(mr)));
     case Kind::LIST:
       return DynamicValue(
           type, detail::Datum::make(makeList(type.asListUnchecked(), mr)));

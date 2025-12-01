@@ -23,16 +23,6 @@
 namespace apache::thrift::dynamic {
 
 // Placeholder equality operators for unimplemented types
-bool operator==(const String&, const String&) noexcept {
-  folly::terminate_with<std::logic_error>(
-      "String comparison not yet implemented");
-}
-
-bool operator==(const Binary&, const Binary&) noexcept {
-  folly::terminate_with<std::logic_error>(
-      "Binary comparison not yet implemented");
-}
-
 bool operator==(const Any&, const Any&) noexcept {
   folly::terminate_with<std::logic_error>("Any comparison not yet implemented");
 }

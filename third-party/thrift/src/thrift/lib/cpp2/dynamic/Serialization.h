@@ -75,14 +75,34 @@ void serialize(ProtocolWriter& writer, const List& list);
 
 // Set
 template <typename ProtocolWriter>
-void serialize(ProtocolWriter&, const Set&) {
-  throw std::logic_error("Unimplemented: serialize(Set)");
+void serialize(ProtocolWriter& writer, const Set& set) {
+  auto elemType = set.elementType();
+  writer.writeSetBegin(
+      type_system::ToTTypeFn{}(elemType), folly::to_narrow(set.size()));
+
+  for (auto elemRef : set) {
+    serializeValue(writer, elemRef);
+  }
+
+  writer.writeSetEnd();
 }
 
 // Map
 template <typename ProtocolWriter>
-void serialize(ProtocolWriter&, const Map&) {
-  throw std::logic_error("Unimplemented: serialize(Map)");
+void serialize(ProtocolWriter& writer, const Map& map) {
+  auto keyType = map.keyType();
+  auto valueType = map.valueType();
+  writer.writeMapBegin(
+      type_system::ToTTypeFn{}(keyType),
+      type_system::ToTTypeFn{}(valueType),
+      folly::to_narrow(map.size()));
+
+  for (auto [keyRef, valueRef] : map) {
+    serializeValue(writer, keyRef);
+    serializeValue(writer, valueRef);
+  }
+
+  writer.writeMapEnd();
 }
 
 // Struct
@@ -223,19 +243,88 @@ List deserialize(
 // Set
 template <typename ProtocolReader>
 Set deserialize(
-    ProtocolReader&,
-    const type_system::TypeRef::Set&,
-    std::pmr::memory_resource*) {
-  throw std::logic_error("Unimplemented: deserialize(TypeRef::Set)");
+    ProtocolReader& reader,
+    const type_system::TypeRef::Set& type,
+    std::pmr::memory_resource* alloc) {
+  Set ret(type, alloc);
+
+  protocol::TType ttype;
+  uint32_t size;
+  reader.readSetBegin(ttype, size);
+
+  if (!size) {
+    reader.readSetEnd();
+    return ret;
+  }
+
+  if (type_system::ToTTypeFn{}(type.elementType()) != ttype) {
+    throw std::runtime_error(
+        fmt::format(
+            "type mismatch in set deserialization: {} vs {}",
+            ttype,
+            type_system::ToTTypeFn{}(type.elementType())));
+  }
+
+  if (!apache::thrift::canReadNElements(reader, size, {ttype})) {
+    protocol::TProtocolException::throwTruncatedData();
+  }
+
+  ret.reserve(size);
+  for (; size > 0; --size) {
+    ret.insert(deserializeValue(reader, type.elementType(), alloc));
+  }
+
+  reader.readSetEnd();
+  return ret;
 }
 
 // Map
 template <typename ProtocolReader>
 Map deserialize(
-    ProtocolReader&,
-    const type_system::TypeRef::Map&,
-    std::pmr::memory_resource*) {
-  throw std::logic_error("Unimplemented: deserialize(TypeRef::Map)");
+    ProtocolReader& reader,
+    const type_system::TypeRef::Map& type,
+    std::pmr::memory_resource* alloc) {
+  Map ret(type, alloc);
+
+  protocol::TType keyTType;
+  protocol::TType valueTType;
+  uint32_t size;
+  reader.readMapBegin(keyTType, valueTType, size);
+
+  if (!size) {
+    reader.readMapEnd();
+    return ret;
+  }
+
+  if (type_system::ToTTypeFn{}(type.keyType()) != keyTType) {
+    throw std::runtime_error(
+        fmt::format(
+            "type mismatch in map key deserialization: {} vs {}",
+            keyTType,
+            type_system::ToTTypeFn{}(type.keyType())));
+  }
+
+  if (type_system::ToTTypeFn{}(type.valueType()) != valueTType) {
+    throw std::runtime_error(
+        fmt::format(
+            "type mismatch in map value deserialization: {} vs {}",
+            valueTType,
+            type_system::ToTTypeFn{}(type.valueType())));
+  }
+
+  if (!apache::thrift::canReadNElements(reader, size, {keyTType, valueTType})) {
+    protocol::TProtocolException::throwTruncatedData();
+  }
+
+  ret.reserve(size);
+  for (; size > 0; --size) {
+    auto key = deserializeValue(reader, type.keyType(), alloc);
+    auto value = deserializeValue(reader, type.valueType(), alloc);
+    ret.insert(std::move(key), std::move(value));
+  }
+
+  reader.readMapEnd();
+  return ret;
 }
 
 // Struct

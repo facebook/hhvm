@@ -122,6 +122,12 @@ DynamicValue DynamicValue::makeDefault(
     case Kind::LIST:
       return DynamicValue(
           type, detail::Datum::make(makeList(type.asListUnchecked(), mr)));
+    case Kind::SET:
+      return DynamicValue(
+          type, detail::Datum::make(makeSet(type.asSetUnchecked(), mr)));
+    case Kind::MAP:
+      return DynamicValue(
+          type, detail::Datum::make(makeMap(type.asMapUnchecked(), mr)));
     case Kind::STRUCT:
       return DynamicValue(
           type, detail::Datum::make(makeStruct(type.asStructUnchecked(), mr)));

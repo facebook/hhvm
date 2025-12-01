@@ -302,7 +302,7 @@ TEST(MapTest, ConstGet) {
 }
 
 // TODO: Enable serialization tests once serialization is implemented
-TEST(MapTest, DISABLED_SerializationRoundTrip) {
+TEST(MapTest, SerializationRoundTrip) {
   // Create a map type: map<i32, string>
   type_system::TypeRef mapType = type_system::TypeRef(makeMapType(
       type_system::TypeSystem::I32(), type_system::TypeSystem::String()));
@@ -344,7 +344,7 @@ TEST(MapTest, DISABLED_SerializationRoundTrip) {
   EXPECT_EQ(val3->asString().view(), "three");
 }
 
-TEST(MapTest, DISABLED_SerializationInteroperability) {
+TEST(MapTest, SerializationInteroperability) {
   // Create map type: map<i32, string>
   auto mapType = makeMapType(
       type_system::TypeSystem::I32(), type_system::TypeSystem::String());

@@ -153,7 +153,7 @@ TEST(SetTest, TypeMismatch) {
 // TODO: Enable serialization tests once serialization is implemented
 // TEST(SetTest, SerializationRoundTrip) {
 
-TEST(SetTest, DISABLED_SerializationRoundTrip) {
+TEST(SetTest, SerializationRoundTrip) {
   // Create a set type: set<i32>
   type_system::TypeRef setType =
       type_system::TypeRef(makeSetType(type_system::TypeSystem::I32()));
@@ -186,7 +186,7 @@ TEST(SetTest, DISABLED_SerializationRoundTrip) {
   EXPECT_TRUE(deserSet.contains(DynamicValue::makeI32(3)));
 }
 
-TEST(SetTest, DISABLED_SerializationInteroperability) {
+TEST(SetTest, SerializationInteroperability) {
   // Create set type: set<i32>
   auto setType = makeSetType(type_system::TypeSystem::I32());
 

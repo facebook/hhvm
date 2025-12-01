@@ -152,6 +152,11 @@ class DynamicConstRef final {
 
   friend std::ostream& operator<<(
       std::ostream& os, const DynamicConstRef& value);
+  friend class Set;
+  friend class Set::ConstIterator;
+  friend class Map;
+  friend class Map::Iterator;
+  friend class Map::ConstIterator;
   friend class Struct;
   friend class Union;
   friend class detail::StructImpl;
@@ -315,6 +320,8 @@ class DynamicRef final {
 
   friend std::ostream& operator<<(std::ostream& os, const DynamicRef& value);
   friend class DynamicConstRef;
+  friend class Map;
+  friend class Map::Iterator;
   friend class Struct;
   friend class detail::StructImpl;
   friend class Union;

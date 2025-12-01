@@ -22,6 +22,7 @@
 #include <folly/lang/Assume.h>
 
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
+#include <thrift/lib/cpp2/dynamic/detail/ListIteratorBase.h>
 #include <thrift/lib/cpp2/dynamic/fwd.h>
 
 #include <fmt/core.h>
@@ -144,6 +145,17 @@ class List final {
   type_system::TypeRef elementType() const;
   type_system::TypeRef type() const;
 
+  // Iterator support
+  class Iterator;
+  class ConstIterator;
+
+  Iterator begin();
+  Iterator end();
+  ConstIterator begin() const;
+  ConstIterator end() const;
+  ConstIterator cbegin() const;
+  ConstIterator cend() const;
+
   friend bool operator==(const List& lhs, const List& rhs);
 
   template <typename ProtocolWriter>
@@ -163,6 +175,37 @@ class List final {
   type_system::TypeRef::List listType_;
   std::pmr::memory_resource* mr_;
   std::unique_ptr<detail::IList, detail::FreeDeleter> impl_;
+};
+
+/**
+ * Iterator for List that dereferences to DynamicRef.
+ *
+ * IMPORTANT: All iterators are invalidated by insertion or removal of elements
+ * from the container.
+ */
+class List::Iterator
+    : public detail::ListIteratorBase<Iterator, List*, DynamicRef> {
+ public:
+  using Base = detail::ListIteratorBase<Iterator, List*, DynamicRef>;
+  using Base::Base;
+
+ private:
+  friend class ConstIterator;
+};
+
+/**
+ * Const iterator for List that dereferences to DynamicConstRef.
+ *
+ * IMPORTANT: All iterators are invalidated by insertion or removal of elements
+ * from the container.
+ */
+class List::ConstIterator
+    : public detail::
+          ListIteratorBase<ConstIterator, const List*, DynamicConstRef> {
+ public:
+  using Base =
+      detail::ListIteratorBase<ConstIterator, const List*, DynamicConstRef>;
+  using Base::Base;
 };
 
 /**

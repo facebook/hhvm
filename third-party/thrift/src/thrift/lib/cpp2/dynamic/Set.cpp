@@ -131,6 +131,94 @@ type_system::TypeRef Set::type() const {
   return type_system::TypeRef(setType_);
 }
 
+// Template constructor definition - must be before begin()/end() where it's
+// used
+template <typename IterType>
+Set::ConstIterator::ConstIterator(
+    IterType&& it, const type_system::TypeRef::Set* setType)
+    : setType_(setType) {
+  concreteIt_.emplace<std::decay_t<IterType>>(std::forward<IterType>(it));
+}
+
+// Iterator implementations
+Set::ConstIterator Set::begin() const {
+  if (!impl_) {
+    // Empty set - return end iterator
+    return ConstIterator(std::byte{}, nullptr);
+  }
+
+  return withConcreteType(setType_, [this]<typename T>() -> ConstIterator {
+    auto& concreteSet = static_cast<T&>(*impl_);
+    return ConstIterator(concreteSet.elements().begin(), &this->setType_);
+  });
+}
+
+Set::ConstIterator Set::end() const {
+  if (!impl_) {
+    // Empty set - return end iterator
+    return ConstIterator(std::byte{}, nullptr);
+  }
+
+  return withConcreteType(setType_, [this]<typename T>() -> ConstIterator {
+    auto& concreteSet = static_cast<T&>(*impl_);
+    return ConstIterator(concreteSet.elements().end(), &this->setType_);
+  });
+}
+
+Set::ConstIterator Set::cbegin() const {
+  return begin();
+}
+
+Set::ConstIterator Set::cend() const {
+  return end();
+}
+
+Set::ConstIterator::ConstIterator() : setType_(nullptr) {}
+
+Set::ConstIterator::ConstIterator(const ConstIterator& other) = default;
+
+Set::ConstIterator::ConstIterator(ConstIterator&&) noexcept = default;
+
+Set::ConstIterator& Set::ConstIterator::operator=(const ConstIterator& other) =
+    default;
+
+Set::ConstIterator& Set::ConstIterator::operator=(ConstIterator&&) noexcept =
+    default;
+
+DynamicConstRef Set::ConstIterator::operator*() const {
+  return withConcreteType(*setType_, [&]<typename T>() -> DynamicConstRef {
+    using IterType = typename T::Storage::const_iterator;
+    auto& it = concreteIt_.as<IterType>();
+    return DynamicConstRef(setType_->elementType(), *it);
+  });
+}
+
+Set::ConstIterator& Set::ConstIterator::operator++() {
+  withConcreteType(*setType_, [&]<typename T>() {
+    using IterType = typename T::Storage::const_iterator;
+    ++concreteIt_.as<IterType>();
+  });
+  return *this;
+}
+
+Set::ConstIterator Set::ConstIterator::operator++(int) {
+  ConstIterator tmp = *this;
+  ++(*this);
+  return tmp;
+}
+
+bool Set::ConstIterator::operator==(const ConstIterator& other) const {
+  if (!setType_ || !other.setType_) {
+    // Nullptr is used for end iterators for empty sets
+    return setType_ == other.setType_;
+  }
+
+  return withConcreteType(*setType_, [&]<typename T>() -> bool {
+    using IterType = typename T::Storage::const_iterator;
+    return concreteIt_.as<IterType>() == other.concreteIt_.as<IterType>();
+  });
+}
+
 bool operator==(const Set& lhs, const Set& rhs) {
   if (!lhs.impl_ && !rhs.impl_) {
     return type_system::TypeRef(lhs.setType_)

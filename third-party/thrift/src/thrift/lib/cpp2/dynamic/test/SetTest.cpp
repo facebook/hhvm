@@ -246,5 +246,38 @@ TEST(SetTest, DISABLED_SerializationInteroperability) {
   }
 }
 
+TEST(SetTest, Iteration) {
+  auto set = makeSet(makeSetType(type_system::TypeSystem::I32()));
+
+  set.insert(DynamicValue::makeI32(1));
+  set.insert(DynamicValue::makeI32(2));
+  set.insert(DynamicValue::makeI32(3));
+
+  // Test iteration using range-for
+  std::set<int32_t> values;
+  for (auto ref : set) {
+    values.insert(ref.asI32());
+  }
+
+  ASSERT_EQ(values.size(), 3);
+  EXPECT_TRUE(values.count(1) > 0);
+  EXPECT_TRUE(values.count(2) > 0);
+  EXPECT_TRUE(values.count(3) > 0);
+}
+
+TEST(SetTest, IterationEmpty) {
+  auto set = makeSet(makeSetType(type_system::TypeSystem::I32()));
+
+  // Test iteration over empty set
+  int count = 0;
+  for (auto ref : set) {
+    (void)ref;
+    count++;
+  }
+
+  EXPECT_EQ(count, 0);
+  EXPECT_EQ(set.begin(), set.end());
+}
+
 } // namespace
 } // namespace apache::thrift::dynamic

@@ -156,6 +156,198 @@ type_system::TypeRef Map::type() const {
   return type_system::TypeRef(mapType_);
 }
 
+// Template constructor definitions - must be before begin()/end() where they're
+// used
+template <typename IterType>
+Map::Iterator::Iterator(IterType&& it, const type_system::TypeRef::Map* mapType)
+    : mapType_(mapType) {
+  concreteIt_.emplace<std::decay_t<IterType>>(std::forward<IterType>(it));
+}
+
+template <typename IterType>
+Map::ConstIterator::ConstIterator(
+    IterType&& it, const type_system::TypeRef::Map* mapType)
+    : mapType_(mapType) {
+  concreteIt_.emplace<std::decay_t<IterType>>(std::forward<IterType>(it));
+}
+
+// Iterator implementations
+Map::Iterator Map::begin() {
+  if (!impl_) {
+    // Empty map - return end iterator
+    return Iterator(std::byte{}, nullptr);
+  }
+
+  return withConcreteType(mapType_, [this]<typename T>() -> Iterator {
+    auto& concreteMap = static_cast<T&>(*impl_);
+    return Iterator(concreteMap.elements().begin(), &this->mapType_);
+  });
+}
+
+Map::Iterator Map::end() {
+  if (!impl_) {
+    // Empty map - return end iterator
+    return Iterator(std::byte{}, nullptr);
+  }
+
+  return withConcreteType(mapType_, [this]<typename T>() -> Iterator {
+    auto& concreteMap = static_cast<T&>(*impl_);
+    return Iterator(concreteMap.elements().end(), &this->mapType_);
+  });
+}
+
+Map::ConstIterator Map::begin() const {
+  if (!impl_) {
+    // Empty map - return end iterator
+    return ConstIterator(std::byte{}, nullptr);
+  }
+
+  return withConcreteType(mapType_, [this]<typename T>() -> ConstIterator {
+    auto& concreteMap = static_cast<T&>(*impl_);
+    // Note: F14FastMap doesn't have const_iterator, so we cast away
+    // const
+    return ConstIterator(
+        const_cast<T&>(concreteMap).elements().begin(), &this->mapType_);
+  });
+}
+
+Map::ConstIterator Map::end() const {
+  if (!impl_) {
+    // Empty map - return end iterator
+    return ConstIterator(std::byte{}, nullptr);
+  }
+
+  return withConcreteType(mapType_, [this]<typename T>() -> ConstIterator {
+    auto& concreteMap = static_cast<T&>(*impl_);
+    // Note: F14FastMap doesn't have const_iterator, so we cast away
+    // const
+    return ConstIterator(
+        const_cast<T&>(concreteMap).elements().end(), &this->mapType_);
+  });
+}
+
+Map::ConstIterator Map::cbegin() const {
+  return begin();
+}
+
+Map::ConstIterator Map::cend() const {
+  return end();
+}
+
+Map::Iterator::Iterator() : mapType_(nullptr) {}
+
+Map::Iterator::Iterator(const Iterator& other) = default;
+
+Map::Iterator::Iterator(Iterator&&) noexcept = default;
+
+Map::Iterator& Map::Iterator::operator=(const Iterator& other) = default;
+
+Map::Iterator& Map::Iterator::operator=(Iterator&&) noexcept = default;
+
+std::pair<DynamicConstRef, DynamicRef> Map::Iterator::operator*() {
+  return {key(), value()};
+}
+
+DynamicConstRef Map::Iterator::key() {
+  return withConcreteType(*mapType_, [this]<typename T>() -> DynamicConstRef {
+    using IterType = typename T::Storage::iterator;
+    auto& it = concreteIt_.as<IterType>();
+    return DynamicConstRef(mapType_->keyType(), it->first);
+  });
+}
+
+DynamicRef Map::Iterator::value() {
+  return withConcreteType(*mapType_, [this]<typename T>() -> DynamicRef {
+    using IterType = typename T::Storage::iterator;
+    auto& it = concreteIt_.as<IterType>();
+    return DynamicRef(mapType_->valueType(), it->second);
+  });
+}
+
+Map::Iterator& Map::Iterator::operator++() {
+  withConcreteType(*mapType_, [this]<typename T>() {
+    using IterType = typename T::Storage::iterator;
+    ++concreteIt_.as<IterType>();
+  });
+  return *this;
+}
+
+Map::Iterator Map::Iterator::operator++(int) {
+  Iterator tmp = *this;
+  ++(*this);
+  return tmp;
+}
+
+bool Map::Iterator::operator==(const Iterator& other) const {
+  if (!mapType_ || !other.mapType_) {
+    // Nullptr is used for end iterators for empty maps
+    return mapType_ == other.mapType_;
+  }
+
+  return withConcreteType(*mapType_, [&, this]<typename T>() -> bool {
+    using IterType = typename T::Storage::iterator;
+    return concreteIt_.as<IterType>() == other.concreteIt_.as<IterType>();
+  });
+}
+
+Map::ConstIterator::ConstIterator() : mapType_(nullptr) {}
+
+Map::ConstIterator::ConstIterator(const ConstIterator& other) = default;
+
+Map::ConstIterator::ConstIterator(ConstIterator&&) noexcept = default;
+
+Map::ConstIterator& Map::ConstIterator::operator=(const ConstIterator& other) =
+    default;
+
+Map::ConstIterator& Map::ConstIterator::operator=(ConstIterator&&) noexcept =
+    default;
+
+std::pair<DynamicConstRef, DynamicConstRef> Map::ConstIterator::operator*()
+    const {
+  return {key(), value()};
+}
+
+DynamicConstRef Map::ConstIterator::key() const {
+  return withConcreteType(*mapType_, [this]<typename T>() -> DynamicConstRef {
+    using IterType = typename T::Storage::iterator;
+    auto& it = concreteIt_.as<IterType>();
+    return DynamicConstRef(mapType_->keyType(), it->first);
+  });
+}
+
+DynamicConstRef Map::ConstIterator::value() const {
+  return withConcreteType(*mapType_, [this]<typename T>() -> DynamicConstRef {
+    using IterType = typename T::Storage::iterator;
+    auto& it = concreteIt_.as<IterType>();
+    return DynamicConstRef(mapType_->valueType(), it->second);
+  });
+}
+
+Map::ConstIterator& Map::ConstIterator::operator++() {
+  withConcreteType(*mapType_, [this]<typename T>() {
+    using IterType = typename T::Storage::iterator;
+    ++concreteIt_.as<IterType>();
+  });
+  return *this;
+}
+
+Map::ConstIterator Map::ConstIterator::operator++(int) {
+  ConstIterator tmp = *this;
+  ++(*this);
+  return tmp;
+}
+
+bool Map::ConstIterator::operator==(const ConstIterator& other) const {
+  if (!mapType_ || !other.mapType_) {
+    // Nullptr is used for end iterators for empty maps
+    return mapType_ == other.mapType_;
+  }
+  return withConcreteType(*mapType_, [&, this]<typename T>() -> bool {
+    using IterType = typename T::Storage::iterator;
+    return concreteIt_.as<IterType>() == other.concreteIt_.as<IterType>();
+  });
+}
+
 bool operator==(const Map& lhs, const Map& rhs) {
   if (!lhs.impl_ && !rhs.impl_) {
     return type_system::TypeRef(lhs.mapType_)

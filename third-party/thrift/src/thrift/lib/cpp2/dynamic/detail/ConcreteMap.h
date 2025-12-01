@@ -30,6 +30,9 @@
 
 namespace apache::thrift::dynamic::detail {
 
+// Forward declarations
+struct FreeDeleter;
+
 /**
  * Type-erased map interface.
  */

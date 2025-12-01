@@ -195,6 +195,30 @@ type_system::TypeRef List::type() const {
   return type_system::TypeRef(listType_);
 }
 
+List::Iterator List::begin() {
+  return Iterator(this, 0);
+}
+
+List::Iterator List::end() {
+  return Iterator(this, size());
+}
+
+List::ConstIterator List::begin() const {
+  return ConstIterator(this, 0);
+}
+
+List::ConstIterator List::end() const {
+  return ConstIterator(this, size());
+}
+
+List::ConstIterator List::cbegin() const {
+  return ConstIterator(this, 0);
+}
+
+List::ConstIterator List::cend() const {
+  return ConstIterator(this, size());
+}
+
 bool operator==(const List& lhs, const List& rhs) {
   if (!lhs.impl_ && !rhs.impl_) {
     return type_system::TypeRef(lhs.listType_)

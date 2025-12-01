@@ -494,5 +494,78 @@ TEST(ListTest, SerializationInteroperability) {
   }
 }
 
+TEST(ListTest, Iteration) {
+  auto list = makeList(makeListType(type_system::TypeSystem::I32()));
+
+  list.push_back(DynamicValue::makeI32(1));
+  list.push_back(DynamicValue::makeI32(2));
+  list.push_back(DynamicValue::makeI32(3));
+
+  std::vector<int32_t> values;
+  for (auto ref : list) {
+    values.push_back(ref.asI32());
+  }
+
+  ASSERT_EQ(values.size(), 3);
+  EXPECT_EQ(values[0], 1);
+  EXPECT_EQ(values[1], 2);
+  EXPECT_EQ(values[2], 3);
+}
+
+TEST(ListTest, IterationEmpty) {
+  auto list = makeList(makeListType(type_system::TypeSystem::I32()));
+
+  for (auto ref : list) {
+    (void)ref;
+    ADD_FAILURE();
+  }
+
+  EXPECT_EQ(list.begin(), list.end());
+}
+
+TEST(ListTest, IterationConst) {
+  auto list = makeList(makeListType(type_system::TypeSystem::I32()));
+
+  list.push_back(DynamicValue::makeI32(100));
+  list.push_back(DynamicValue::makeI32(200));
+
+  for (auto ref : std::as_const(list)) {
+    EXPECT_TRUE(ref.asI32() >= 100);
+  }
+}
+
+TEST(ListTest, IterationModify) {
+  auto list = makeList(makeListType(type_system::TypeSystem::I32()));
+
+  list.push_back(DynamicValue::makeI32(1));
+  list.push_back(DynamicValue::makeI32(2));
+  list.push_back(DynamicValue::makeI32(3));
+
+  // Modify values through iterator
+  for (auto ref : list) {
+    ref.asI32() *= 10;
+  }
+
+  // Verify modifications
+  EXPECT_EQ(list[0].asI32(), 10);
+  EXPECT_EQ(list[1].asI32(), 20);
+  EXPECT_EQ(list[2].asI32(), 30);
+}
+
+TEST(ListTest, StlIteration) {
+  auto list = makeList(makeListType(type_system::TypeSystem::I32()));
+
+  list.push_back(DynamicValue::makeI32(1));
+  list.push_back(DynamicValue::makeI32(2));
+  list.push_back(DynamicValue::makeI32(3));
+
+  std::vector<int32_t> values;
+  std::transform(
+      list.begin(), list.end(), std::back_inserter(values), [](auto ref) {
+        return ref.asI32();
+      });
+  EXPECT_EQ(values, (std::vector<int32_t>{1, 2, 3}));
+}
+
 } // namespace
 } // namespace apache::thrift::dynamic

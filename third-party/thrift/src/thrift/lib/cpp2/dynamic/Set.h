@@ -17,6 +17,7 @@
 #pragma once
 
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
+#include <thrift/lib/cpp2/dynamic/detail/SmallBuffer.h>
 #include <thrift/lib/cpp2/dynamic/fwd.h>
 
 #include <cstddef>
@@ -27,6 +28,7 @@ namespace apache::thrift::dynamic {
 
 namespace detail {
 class ISet;
+class ISetIterator;
 struct FreeDeleter;
 } // namespace detail
 
@@ -89,6 +91,14 @@ class Set final {
   type_system::TypeRef elementType() const;
   type_system::TypeRef type() const;
 
+  // Iterator support
+  class ConstIterator;
+
+  ConstIterator begin() const;
+  ConstIterator end() const;
+  ConstIterator cbegin() const;
+  ConstIterator cend() const;
+
   friend bool operator==(const Set& lhs, const Set& rhs);
 
   template <typename ProtocolWriter>
@@ -108,6 +118,45 @@ class Set final {
   type_system::TypeRef::Set setType_;
   std::pmr::memory_resource* mr_;
   std::unique_ptr<detail::ISet, detail::FreeDeleter> impl_;
+};
+
+/**
+ * Const iterator for Set that dereferences to DynamicConstRef.
+ *
+ * IMPORTANT: All iterators are invalidated by insertion or removal of elements
+ * from the container.
+ */
+class Set::ConstIterator {
+ public:
+  using iterator_category = std::forward_iterator_tag;
+  using value_type = DynamicConstRef;
+  using difference_type = std::ptrdiff_t;
+  using pointer = void; // Not applicable for proxy iterators
+  using reference = DynamicConstRef;
+
+  ConstIterator();
+  ConstIterator(const ConstIterator& other);
+  ConstIterator(ConstIterator&&) noexcept;
+  ConstIterator& operator=(const ConstIterator& other);
+  ConstIterator& operator=(ConstIterator&&) noexcept;
+  ~ConstIterator() = default;
+
+  DynamicConstRef operator*() const;
+  ConstIterator& operator++();
+  ConstIterator operator++(int);
+
+  bool operator==(const ConstIterator& other) const;
+
+ private:
+  // Template constructor for creating iterator with concrete iterator type.
+  // Defined in Set.cpp.
+  template <typename IterType>
+  ConstIterator(IterType&& it, const type_system::TypeRef::Set* setType);
+
+  detail::SmallBuffer<16> concreteIt_{};
+  const type_system::TypeRef::Set* setType_;
+
+  friend class Set;
 };
 
 /**

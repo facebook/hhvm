@@ -415,5 +415,89 @@ TEST(MapTest, DISABLED_SerializationInteroperability) {
   }
 }
 
+TEST(MapTest, Iteration) {
+  auto map = makeMap(makeMapType(
+      type_system::TypeSystem::I32(), type_system::TypeSystem::String()));
+
+  map.insert(DynamicValue::makeI32(1), DynamicValue::makeString("one"));
+  map.insert(DynamicValue::makeI32(2), DynamicValue::makeString("two"));
+  map.insert(DynamicValue::makeI32(3), DynamicValue::makeString("three"));
+  map.insert(DynamicValue::makeI32(4), DynamicValue::makeString("four"));
+
+  // Test iteration using iterators
+  std::map<int32_t, std::string> values;
+  for (auto [keyRef, valueRef] : map) {
+    values[keyRef.asI32()] = std::string(valueRef.asString().view());
+  }
+
+  ASSERT_EQ(values.size(), 4);
+  EXPECT_EQ(values[1], "one");
+  EXPECT_EQ(values[2], "two");
+  EXPECT_EQ(values[3], "three");
+  EXPECT_EQ(values[4], "four");
+}
+
+TEST(MapTest, IterationEmpty) {
+  auto map = makeMap(makeMapType(
+      type_system::TypeSystem::I32(), type_system::TypeSystem::String()));
+
+  // Test iteration over empty map
+  for (auto [keyRef, valueRef] : map) {
+    (void)keyRef;
+    (void)valueRef;
+    ADD_FAILURE();
+  }
+
+  EXPECT_EQ(map.begin(), map.end());
+}
+
+TEST(MapTest, IterationConst) {
+  auto map = makeMap(makeMapType(
+      type_system::TypeSystem::I32(), type_system::TypeSystem::String()));
+
+  map.insert(DynamicValue::makeI32(100), DynamicValue::makeString("hundred"));
+  map.insert(
+      DynamicValue::makeI32(200), DynamicValue::makeString("two hundred"));
+
+  const auto& constMap = map;
+
+  // Test iteration using const iterators
+  std::map<int32_t, std::string> values;
+  for (auto [keyRef, valueRef] : constMap) {
+    values[keyRef.asI32()] = std::string(valueRef.asString().view());
+  }
+
+  ASSERT_EQ(values.size(), 2);
+  EXPECT_EQ(values[100], "hundred");
+  EXPECT_EQ(values[200], "two hundred");
+}
+
+TEST(MapTest, IterationModifyValue) {
+  auto map = makeMap(makeMapType(
+      type_system::TypeSystem::I32(), type_system::TypeSystem::I32()));
+
+  map.insert(DynamicValue::makeI32(1), DynamicValue::makeI32(10));
+  map.insert(DynamicValue::makeI32(2), DynamicValue::makeI32(20));
+  map.insert(DynamicValue::makeI32(3), DynamicValue::makeI32(30));
+
+  // Modify values through mutable iterator
+  for (auto [_, valueRef] : map) {
+    valueRef.asI32() *= 10;
+  }
+
+  // Verify modifications
+  auto val1 = map.get(DynamicValue::makeI32(1));
+  ASSERT_TRUE(val1.has_value());
+  EXPECT_EQ(val1->asI32(), 100);
+
+  auto val2 = map.get(DynamicValue::makeI32(2));
+  ASSERT_TRUE(val2.has_value());
+  EXPECT_EQ(val2->asI32(), 200);
+
+  auto val3 = map.get(DynamicValue::makeI32(3));
+  ASSERT_TRUE(val3.has_value());
+  EXPECT_EQ(val3->asI32(), 300);
+}
+
 } // namespace
 } // namespace apache::thrift::dynamic

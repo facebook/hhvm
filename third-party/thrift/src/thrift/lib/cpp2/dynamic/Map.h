@@ -17,6 +17,7 @@
 #pragma once
 
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
+#include <thrift/lib/cpp2/dynamic/detail/SmallBuffer.h>
 #include <thrift/lib/cpp2/dynamic/fwd.h>
 
 #include <cstddef>
@@ -28,6 +29,7 @@ namespace apache::thrift::dynamic {
 
 namespace detail {
 class IMap;
+class IMapIterator;
 struct FreeDeleter;
 } // namespace detail
 
@@ -97,6 +99,17 @@ class Map final {
   type_system::TypeRef valueType() const;
   type_system::TypeRef type() const;
 
+  // Iterator support
+  class Iterator;
+  class ConstIterator;
+
+  Iterator begin();
+  Iterator end();
+  ConstIterator begin() const;
+  ConstIterator end() const;
+  ConstIterator cbegin() const;
+  ConstIterator cend() const;
+
   friend bool operator==(const Map& lhs, const Map& rhs);
 
   template <typename ProtocolWriter>
@@ -116,6 +129,94 @@ class Map final {
   type_system::TypeRef::Map mapType_;
   std::pmr::memory_resource* mr_;
   std::unique_ptr<detail::IMap, detail::FreeDeleter> impl_;
+};
+
+/**
+ * Iterator for Map that dereferences to std::pair<DynamicConstRef, DynamicRef>.
+ * Allows ranged for loops like: for (auto [key, value] : map)
+ *
+ * IMPORTANT: All iterators are invalidated by insertion or removal of elements
+ * from the container.
+ */
+class Map::Iterator {
+ public:
+  using iterator_category = std::forward_iterator_tag;
+  using value_type = std::pair<DynamicConstRef, DynamicRef>;
+  using difference_type = std::ptrdiff_t;
+  using pointer = void;
+  using reference = value_type;
+
+  Iterator();
+  Iterator(const Iterator& other);
+  Iterator(Iterator&&) noexcept;
+  Iterator& operator=(const Iterator& other);
+  Iterator& operator=(Iterator&&) noexcept;
+  ~Iterator() = default;
+
+  value_type operator*();
+  DynamicConstRef key();
+  DynamicRef value();
+
+  Iterator& operator++();
+  Iterator operator++(int);
+
+  bool operator==(const Iterator& other) const;
+
+ private:
+  // Template constructor for creating iterator with concrete iterator type.
+  // Defined in Map.cpp.
+  template <typename IterType>
+  Iterator(IterType&& it, const type_system::TypeRef::Map* mapType);
+
+  detail::SmallBuffer<16> concreteIt_;
+  const type_system::TypeRef::Map* mapType_;
+
+  friend class Map;
+};
+
+/**
+ * Const iterator for Map that dereferences to std::pair<DynamicConstRef,
+ * DynamicConstRef>. Allows ranged for loops like: for (auto [key, value] : map)
+ *
+ * IMPORTANT: All iterators are invalidated by insertion or removal of elements
+ * from the container.
+ */
+class Map::ConstIterator {
+ public:
+  using iterator_category = std::forward_iterator_tag;
+  using value_type = std::pair<DynamicConstRef, DynamicConstRef>;
+  using difference_type = std::ptrdiff_t;
+  using pointer = void;
+  using reference = value_type;
+
+  ConstIterator();
+  ConstIterator(const ConstIterator& other);
+  ConstIterator(ConstIterator&&) noexcept;
+  ConstIterator& operator=(const ConstIterator& other);
+  ConstIterator& operator=(ConstIterator&&) noexcept;
+  ~ConstIterator() = default;
+
+  value_type operator*() const;
+  DynamicConstRef key() const;
+  DynamicConstRef value() const;
+
+  ConstIterator& operator++();
+  ConstIterator operator++(int);
+
+  bool operator==(const ConstIterator& other) const;
+
+  bool operator==(const Iterator& other) const;
+
+ private:
+  // Template constructor for creating iterator with concrete iterator type.
+  // Defined in Map.cpp.
+  template <typename IterType>
+  ConstIterator(IterType&& it, const type_system::TypeRef::Map* mapType);
+
+  detail::SmallBuffer<16> concreteIt_{};
+  const type_system::TypeRef::Map* mapType_;
+
+  friend class Map;
 };
 
 /**

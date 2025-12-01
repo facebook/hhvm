@@ -27,10 +27,6 @@ bool operator==(const Any&, const Any&) noexcept {
   folly::terminate_with<std::logic_error>("Any comparison not yet implemented");
 }
 
-bool operator==(const Set&, const Set&) noexcept {
-  folly::terminate_with<std::logic_error>("Set comparison not yet implemented");
-}
-
 bool operator==(const Map&, const Map&) noexcept {
   folly::terminate_with<std::logic_error>("Map comparison not yet implemented");
 }

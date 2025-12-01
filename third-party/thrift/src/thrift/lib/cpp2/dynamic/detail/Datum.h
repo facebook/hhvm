@@ -21,6 +21,7 @@
 #include <thrift/lib/cpp2/dynamic/Binary.h>
 #include <thrift/lib/cpp2/dynamic/List.h>
 #include <thrift/lib/cpp2/dynamic/SerializableRecord.h>
+#include <thrift/lib/cpp2/dynamic/Set.h>
 #include <thrift/lib/cpp2/dynamic/String.h>
 #include <thrift/lib/cpp2/dynamic/Struct.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
@@ -50,11 +51,9 @@
 namespace apache::thrift::dynamic {
 
 class Any {};
-class Set {};
 class Map {};
 
 bool operator==(const Any&, const Any&) noexcept;
-bool operator==(const Set&, const Set&) noexcept;
 bool operator==(const Map&, const Map&) noexcept;
 
 struct Null final {

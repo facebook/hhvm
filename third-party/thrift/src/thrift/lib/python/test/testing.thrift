@@ -310,11 +310,13 @@ struct Optionals {
   1: optional list<string> values;
 }
 
-@python.EnableUnsafeUnconstrainedFloat32
-typedef float LegacyFloat32
+@python.ConstrainedFloat32{
+  precision_loss = python.ConstraintLevel.ALLOW_INVALID,
+}
+typedef float DeprecatedFloat32AsPythonFloat
 
 struct LegacyFloat32Struct {
-  1: LegacyFloat32 float64;
+  1: DeprecatedFloat32AsPythonFloat float64;
   2: float float32;
 }
 

@@ -52,7 +52,45 @@ class ThriftEnumWrapper(int):
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'Py3Hidden', 'PyDeprecatedHidden', 'Flags', 'Name', 'Adapter', 'UseCAPI', 'Py3EnableCppAdapter', 'MigrationBlockingAllowInheritance', 'DeprecatedSortSetOnSerialize', 'DeprecatedKeySortMapOnSerialize', 'DisableFieldCache', 'EnableUnsafeUnconstrainedFloat32']
+__all__ = ['UTF8STRINGS', 'ConstraintLevel', 'Py3Hidden', 'PyDeprecatedHidden', 'Flags', 'Name', 'Adapter', 'UseCAPI', 'Py3EnableCppAdapter', 'MigrationBlockingAllowInheritance', 'DeprecatedSortSetOnSerialize', 'DeprecatedKeySortMapOnSerialize', 'DisableFieldCache', 'ConstrainedFloat32', 'EnableUnsafeUnconstrainedFloat32']
+
+class ConstraintLevel:
+  r"""
+  An enum that specifies the constraint behavior on a field.
+  
+  In this context, "constraint" refers to any logic applied by
+  Thrift-provided types and runtime libraries on native (Python)
+  operations that do not fully comply with the Thrift Object Model,
+  but could otherwise be valid Python.
+  
+  An example of such an operation (and the first concrete use of
+  this annotation) is the handling of 32-bit floating point numbers:
+  native Python `float`s all have the same width, which is
+  typically 64 bits, whereas Thrift's `float` type is 32 bit
+  (compared to `double`, which is 64 bits). Writing a 64 bit
+  Python float to a 32-bit Thrift float is an example of a
+  potentially non-compliant operation, that may require a constraint
+  to be applied - implicitly or explicitly.
+  """
+  def __getattr__(self, name): raise AttributeError(name)
+
+  _NAMES_TO_VALUES = dict(zip((
+    "UNSPECIFIED",
+    "ALLOW_INVALID",
+    "MAP",
+    "REJECT",
+),
+(
+    0,
+    1,
+    2,
+    3,
+  )))
+  _VALUES_TO_NAMES = {}
+
+for k, v in ConstraintLevel._NAMES_TO_VALUES.items():
+    setattr(ConstraintLevel, k, v)
+    ConstraintLevel._VALUES_TO_NAMES[v] = k
 
 class Py3Hidden:
   r"""
@@ -1302,14 +1340,10 @@ class DisableFieldCache:
   def _to_py_deprecated(self):
     return self
 
-class EnableUnsafeUnconstrainedFloat32:
+class ConstrainedFloat32:
   r"""
-  UNSAFE: Enables unconstrained operations on 32-bit floating-point values.
-  
-  By default, in the absence of this annotation, thrift-python types ensure
-  that all values assigned to (or accessed from) single precision
-  floating-point (i.e., `float` in Thrift IDL) fields have the correct
-  precision, constraining them as needed.
+  Allows custom constraint on Thrift `float` fields, i.e., 32-bit floating-
+  point values, during Python thrift struct initialization or mutation.
   
   This is necessary because Python's native floating-point number type
   (`float`) may have more precision that 32 bits. Indeed, while the exact
@@ -1322,23 +1356,221 @@ class EnableUnsafeUnconstrainedFloat32:
   2. bounding them to +/-Inf if they are greater/less than the max/min
      representable 32-bit number.
   
+  By default, in the absence of this annotation, thrift-python types ensure
+  that all values assigned to (or accessed from) single precision
+  floating-point (i.e., `float` in Thrift IDL) fields have the correct
+  precision, constraining them as needed.
+  
   Note that NaN is *never* a valid Thrift floating point number, as specified
   in the [Thrift Object Model](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#primitive-types).
   The behavior of Thrift operations in presence of native Python NaN values is
   left undefined.
   
-  This annotation is STRONGLY DISCOURAGED, and is introduced merely to allow
-  existing unsafe operations to be grandfathered into the new correct behavior
-  described above.
-  
-  The presence of this annotation on a `float` field (or a collection whose
-  items have `float`) suppresses the constraining logic above. This can result
-  in unexpected behavior, including mismatching values before and after
-  serialization.
+  The behavior may be customized using each field of this struct. The defaults
+  correspond to the default behavior if this annotation is not applied to the
+  `float` type.
   
   This annotation MUST NOT be applied on fields whose [Thrift IDL Type](https://github.com/facebook/fbthrift/blob/main/thrift/doc/glossary/kinds-of-types.md#thrift-idl-types)
   is not `float`, or a container whose item type(s) are not `float` (or
   containers that satisfy this property, recursively).
+  
+  Attributes:
+   - precision_loss: - `precision_loss`: controls handling of `float` in the range
+  (-MAX_FLOAT_32, +MAX_FLOAT_32).
+  * ALLOW_INVALID: no rounding is applied at struct creation, but MAP
+    applies on serialization.
+  * MAP: rounded to the nearest valid 32-bit float according to IEEE754
+    trunctation convention.
+  * REJECT: raises `TypeError` if the type is not already a 32-bit float
+   - inf_overflow: - `inf_overflow`: controls handling of `float` outside the range
+  [-MAX_FLOAT_32, +MAX_FLOAT_32].
+  NOTE: values that are already +/- `Inf` are unaffected by this option.
+  * ALLOW_INVALID: the value is preserved on struct creation, but MAP
+    applies on serialization.
+  * MAP: rounded "up" to +/- Inf according to sign, according to IEEE754
+    convention.
+  * REJECT: raises `OverflowError` if the type is outside the range
+    [-MAX_FLOAT_32, +MAX_FLOAT_32], unless the value is already
+     +/- `Inf`, in which case it's preserved.
+   - not_a_number: - `not_a_number`: controls handling of special `NaN` values.
+  * ALLOW_INVALID: the value is preserved on struct creation and serialization.
+  * MAP: same as ALLOW_INVALID.
+  * REJECT: raises `TypeError`for `NaN` values.
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I32:
+          self.precision_loss = iprot.readI32()
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.I32:
+          self.inf_overflow = iprot.readI32()
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.I32:
+          self.not_a_number = iprot.readI32()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('ConstrainedFloat32')
+    if self.precision_loss != None:
+      oprot.writeFieldBegin('precision_loss', TType.I32, 1)
+      oprot.writeI32(self.precision_loss)
+      oprot.writeFieldEnd()
+    if self.inf_overflow != None:
+      oprot.writeFieldBegin('inf_overflow', TType.I32, 2)
+      oprot.writeI32(self.inf_overflow)
+      oprot.writeFieldEnd()
+    if self.not_a_number != None:
+      oprot.writeFieldBegin('not_a_number', TType.I32, 3)
+      oprot.writeI32(self.not_a_number)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    kwargs_copy = dict(kwargs)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', not wrap_enum_constants))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+    if 'precision_loss' in json_obj and json_obj['precision_loss'] is not None:
+      self.precision_loss = json_obj['precision_loss']
+      if not self.precision_loss in ConstraintLevel._VALUES_TO_NAMES:
+        msg = 'Integer value ''%s'' is not a recognized value of enum type ConstraintLevel' % self.precision_loss
+        if relax_enum_validation:
+            warnings.warn(msg)
+        else:
+            raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      if wrap_enum_constants:
+        self.precision_loss = ThriftEnumWrapper(ConstraintLevel, self.precision_loss)
+    if 'inf_overflow' in json_obj and json_obj['inf_overflow'] is not None:
+      self.inf_overflow = json_obj['inf_overflow']
+      if not self.inf_overflow in ConstraintLevel._VALUES_TO_NAMES:
+        msg = 'Integer value ''%s'' is not a recognized value of enum type ConstraintLevel' % self.inf_overflow
+        if relax_enum_validation:
+            warnings.warn(msg)
+        else:
+            raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      if wrap_enum_constants:
+        self.inf_overflow = ThriftEnumWrapper(ConstraintLevel, self.inf_overflow)
+    if 'not_a_number' in json_obj and json_obj['not_a_number'] is not None:
+      self.not_a_number = json_obj['not_a_number']
+      if not self.not_a_number in ConstraintLevel._VALUES_TO_NAMES:
+        msg = 'Integer value ''%s'' is not a recognized value of enum type ConstraintLevel' % self.not_a_number
+        if relax_enum_validation:
+            warnings.warn(msg)
+        else:
+            raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      if wrap_enum_constants:
+        self.not_a_number = ThriftEnumWrapper(ConstraintLevel, self.not_a_number)
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.precision_loss is not None:
+      value = pprint.pformat(self.precision_loss, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    precision_loss=%s' % (value))
+    if self.inf_overflow is not None:
+      value = pprint.pformat(self.inf_overflow, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    inf_overflow=%s' % (value))
+    if self.not_a_number is not None:
+      value = pprint.pformat(self.not_a_number, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    not_a_number=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'precision_loss',
+      'inf_overflow',
+      'not_a_number',
+    )
+
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.annotation.python.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.ConstrainedFloat32, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.python.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.ConstrainedFloat32, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.annotation.python.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.ConstrainedFloat32, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class EnableUnsafeUnconstrainedFloat32:
+  r"""
+  This is the v0 of `ConstrainedFloat32` annotation above. It is equivalent to
+  `ConstrainedFloat32` with the `precision_loss` field set to `ALLOW_INVALID`.
+  DO NOT ADD NEW USES OF THIS ANNOTATION. It will soon be removed.
   """
 
   thrift_spec = None
@@ -1589,6 +1821,34 @@ DisableFieldCache.thrift_struct_annotations = {
 }
 DisableFieldCache.thrift_field_annotations = {
 }
+
+all_structs.append(ConstrainedFloat32)
+ConstrainedFloat32.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+  (1, TType.I32, 'precision_loss', ConstraintLevel, None, 2, ), # 1
+  (2, TType.I32, 'inf_overflow', ConstraintLevel, None, 2, ), # 2
+  (3, TType.I32, 'not_a_number', ConstraintLevel, None, 2, ), # 3
+)))
+
+ConstrainedFloat32.thrift_struct_annotations = {
+}
+ConstrainedFloat32.thrift_field_annotations = {
+}
+
+def ConstrainedFloat32__init__(self, precision_loss=None, inf_overflow=None, not_a_number=None,):
+  self.precision_loss = precision_loss
+  self.inf_overflow = inf_overflow
+  self.not_a_number = not_a_number
+
+ConstrainedFloat32.__init__ = ConstrainedFloat32__init__
+
+def ConstrainedFloat32__setstate__(self, state):
+  state.setdefault('precision_loss', None)
+  state.setdefault('inf_overflow', None)
+  state.setdefault('not_a_number', None)
+  self.__dict__ = state
+
+ConstrainedFloat32.__getstate__ = lambda self: self.__dict__.copy()
+ConstrainedFloat32.__setstate__ = ConstrainedFloat32__setstate__
 
 all_structs.append(EnableUnsafeUnconstrainedFloat32)
 EnableUnsafeUnconstrainedFloat32.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((

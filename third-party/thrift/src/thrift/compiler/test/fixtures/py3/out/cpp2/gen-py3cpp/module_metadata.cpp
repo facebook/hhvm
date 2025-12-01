@@ -20,18 +20,18 @@ namespace thrift {
 namespace detail {
 template <> struct TSchemaAssociation<::py3::simple::SimpleService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 2451960936538487616;
-  static constexpr ::std::string_view definitionKey = {"\x03\xb4\x71\xc1\x48\x3d\xe3\x5c\x94\x5a\xa7\xc3\x61\x06\xed\x42", 16};
+  static constexpr int64_t programId = 6345946797339430963;
+  static constexpr ::std::string_view definitionKey = {"\xc4\x02\x1a\x14\x36\x2e\x5c\x3c\x0f\x59\xf5\x20\x45\xa9\xd2\x14", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::DerivedService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 2451960936538487616;
-  static constexpr ::std::string_view definitionKey = {"\x6b\xe0\xff\xc7\xfc\xef\x4f\x5e\xb3\x4e\xf2\x62\xc3\xe8\x1e\x36", 16};
+  static constexpr int64_t programId = 6345946797339430963;
+  static constexpr ::std::string_view definitionKey = {"\x37\x0e\xa7\x95\xe5\x86\xec\x6d\xc6\x79\x33\xcd\x63\x4f\x1c\xf7", 16};
 };
 template <> struct TSchemaAssociation<::py3::simple::RederivedService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 2451960936538487616;
-  static constexpr ::std::string_view definitionKey = {"\x53\x51\x9a\x26\x25\x25\xbb\x99\x09\x8b\xa0\x12\x70\x32\xf5\x0b", 16};
+  static constexpr int64_t programId = 6345946797339430963;
+  static constexpr ::std::string_view definitionKey = {"\x7c\x11\x07\x26\x6c\xbd\x5b\x25\x25\xbe\xfa\x9f\x63\x01\xd2\x9a", 16};
 };
 namespace md {
 using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
@@ -182,7 +182,7 @@ StructMetadata<::py3::simple::Float32Struct>::gen(ThriftMetadata& metadata) {
   DCHECK_EQ(*module_Float32Struct.is_union(), false);
   static const auto* const
   module_Float32Struct_fields = new std::array<EncodedThriftField, 4>{ {
-    { 1, "float32", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "float64", false, std::make_unique<Typedef>("module.LegacyFloat32", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("python.EnableUnsafeUnconstrainedFloat32", {  }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 3, "float_list", false, std::make_unique<List>(std::make_unique<Typedef>("module.LegacyFloat32", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("python.EnableUnsafeUnconstrainedFloat32", {  }).cv_struct(),  })), std::vector<ThriftConstStruct>{ }},    { 4, "float_map", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<List>(std::make_unique<Typedef>("module.LegacyFloat32", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("python.EnableUnsafeUnconstrainedFloat32", {  }).cv_struct(),  }))), std::vector<ThriftConstStruct>{ }},  }};
+    { 1, "float32", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "float64", false, std::make_unique<Typedef>("module.DeferredTruncationFloat", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("python.ConstrainedFloat32", { {"precision_loss", cvInteger(1) } }).cv_struct(),  }), std::vector<ThriftConstStruct>{ }},    { 3, "float_list", false, std::make_unique<List>(std::make_unique<Typedef>("module.DeferredTruncationFloat", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("python.ConstrainedFloat32", { {"precision_loss", cvInteger(1) } }).cv_struct(),  })), std::vector<ThriftConstStruct>{ }},    { 4, "float_map", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<List>(std::make_unique<Typedef>("module.DeferredTruncationFloat", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("python.ConstrainedFloat32", { {"precision_loss", cvInteger(1) } }).cv_struct(),  }))), std::vector<ThriftConstStruct>{ }},  }};
   std::size_t i = 0;
   for (const auto& f : *module_Float32Struct_fields) {
     genStructFieldMetadata<::py3::simple::Float32Struct>(module_Float32Struct.fields()[i], f, i);

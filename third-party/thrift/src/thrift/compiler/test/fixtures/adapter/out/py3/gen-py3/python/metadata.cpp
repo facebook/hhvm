@@ -14,6 +14,7 @@ namespace python {
 ::apache::thrift::metadata::ThriftMetadata python_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
+  ::apache::thrift::detail::md::EnumMetadata<ConstraintLevel>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Py3Hidden>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<PyDeprecatedHidden>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Flags>::gen(metadata);
@@ -25,6 +26,7 @@ namespace python {
   ::apache::thrift::detail::md::StructMetadata<DeprecatedSortSetOnSerialize>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<DeprecatedKeySortMapOnSerialize>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<DisableFieldCache>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<ConstrainedFloat32>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<EnableUnsafeUnconstrainedFloat32>::gen(metadata);
   return metadata;
 }

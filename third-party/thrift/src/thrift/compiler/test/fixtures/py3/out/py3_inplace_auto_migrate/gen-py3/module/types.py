@@ -39,7 +39,7 @@ from module.thrift_types import (
     ANOTHER_CONST_MAP,
     IOBufPtr,
     IOBuf,
-    LegacyFloat32,
+    DeferredTruncationFloat,
     AdaptedTypeDef,
     HiddenTypeDef,
     ImplicitlyHiddenTypeDef,

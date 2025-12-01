@@ -141,12 +141,60 @@ struct DeprecatedKeySortMapOnSerialize {}
 @scope.Struct
 struct DisableFieldCache {}
 
-/// UNSAFE: Enables unconstrained operations on 32-bit floating-point values.
+/// An enum that specifies the constraint behavior on a field.
 ///
-/// By default, in the absence of this annotation, thrift-python types ensure
-/// that all values assigned to (or accessed from) single precision
-/// floating-point (i.e., `float` in Thrift IDL) fields have the correct
-/// precision, constraining them as needed.
+/// In this context, "constraint" refers to any logic applied by
+/// Thrift-provided types and runtime libraries on native (Python)
+/// operations that do not fully comply with the Thrift Object Model,
+/// but could otherwise be valid Python.
+///
+/// An example of such an operation (and the first concrete use of
+/// this annotation) is the handling of 32-bit floating point numbers:
+/// native Python `float`s all have the same width, which is
+/// typically 64 bits, whereas Thrift's `float` type is 32 bit
+/// (compared to `double`, which is 64 bits). Writing a 64 bit
+/// Python float to a 32-bit Thrift float is an example of a
+/// potentially non-compliant operation, that may require a constraint
+/// to be applied - implicitly or explicitly.
+enum ConstraintLevel {
+  /// UNSPECIFIED: Intrinsic default value for this enum. Should never be assigned
+  /// explicitly. The actual constraint level applied on `UNSPECIFIED`
+  /// depends on the operation, and is documented below.
+  UNSPECIFIED = 0,
+
+  /// ALLOW_INVALID: applies the lowest level of validation on struct creation or
+  /// mutation. While some basic type checking may be performed,
+  /// does not fully validate that the value conforms to the
+  /// [Thrift Object Model](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#primitive-types).
+  ///
+  /// Native (Python) operations with this constraint level SHOULD NOT
+  /// immediately fail, but MAY result in non-compliant Thrift values.
+  /// Subsequent operations on these values (eg. serialization) MAY fail.
+  ALLOW_INVALID = 1,
+
+  /// MAP: maps the input value to the closest conforming value. For example,
+  /// thrift-python MAPs integer `float` values to `i64` fields.
+  ///
+  /// Native (Python) operations with this constraint level SHOULD NOT
+  /// immediately fail, and MUST produce a result that is compliant with the
+  /// Thrift Object Model. That result MAY not be the same as the originally
+  /// intended change by the user.
+  MAP = 2,
+
+  /// REJECT: applies the strictest level of validation on struct creation or
+  /// mutation. Raises an error for input types that do not exactly
+  /// conform to the Thrift Object Model. For example, integers
+  /// greater than INT64_MAX cause OverflowError when used with a Thrift
+  /// `i64` field.
+  ///
+  /// Native (Python) operations with this constraint level MAY fail. If they do
+  /// not fail, they MUST produce a result that is both (1) compliant with the
+  /// Thrift Object Model, and (2) identical to the user's intent.
+  REJECT = 3,
+}
+
+/// Allows custom constraint on Thrift `float` fields, i.e., 32-bit floating-
+/// point values, during Python thrift struct initialization or mutation.
 ///
 /// This is necessary because Python's native floating-point number type
 /// (`float`) may have more precision that 32 bits. Indeed, while the exact
@@ -159,22 +207,53 @@ struct DisableFieldCache {}
 /// 2. bounding them to +/-Inf if they are greater/less than the max/min
 ///    representable 32-bit number.
 ///
+/// By default, in the absence of this annotation, thrift-python types ensure
+/// that all values assigned to (or accessed from) single precision
+/// floating-point (i.e., `float` in Thrift IDL) fields have the correct
+/// precision, constraining them as needed.
+///
 /// Note that NaN is *never* a valid Thrift floating point number, as specified
 /// in the [Thrift Object Model](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#primitive-types).
 /// The behavior of Thrift operations in presence of native Python NaN values is
 /// left undefined.
 ///
-/// This annotation is STRONGLY DISCOURAGED, and is introduced merely to allow
-/// existing unsafe operations to be grandfathered into the new correct behavior
-/// described above.
-///
-/// The presence of this annotation on a `float` field (or a collection whose
-/// items have `float`) suppresses the constraining logic above. This can result
-/// in unexpected behavior, including mismatching values before and after
-/// serialization.
+/// The behavior may be customized using each field of this struct. The defaults
+/// correspond to the default behavior if this annotation is not applied to the
+/// `float` type.
 ///
 /// This annotation MUST NOT be applied on fields whose [Thrift IDL Type](https://github.com/facebook/fbthrift/blob/main/thrift/doc/glossary/kinds-of-types.md#thrift-idl-types)
 /// is not `float`, or a container whose item type(s) are not `float` (or
 /// containers that satisfy this property, recursively).
+@scope.Typedef
+struct ConstrainedFloat32 {
+  ///   - `precision_loss`: controls handling of `float` in the range
+  ///     (-MAX_FLOAT_32, +MAX_FLOAT_32).
+  ///     * ALLOW_INVALID: no rounding is applied at struct creation, but MAP
+  ///       applies on serialization.
+  ///     * MAP: rounded to the nearest valid 32-bit float according to IEEE754
+  ///       trunctation convention.
+  ///     * REJECT: raises `TypeError` if the type is not already a 32-bit float
+  1: ConstraintLevel precision_loss;
+  ///   - `inf_overflow`: controls handling of `float` outside the range
+  ///     [-MAX_FLOAT_32, +MAX_FLOAT_32].
+  ///     NOTE: values that are already +/- `Inf` are unaffected by this option.
+  ///     * ALLOW_INVALID: the value is preserved on struct creation, but MAP
+  ///       applies on serialization.
+  ///     * MAP: rounded "up" to +/- Inf according to sign, according to IEEE754
+  ///       convention.
+  ///     * REJECT: raises `OverflowError` if the type is outside the range
+  ///       [-MAX_FLOAT_32, +MAX_FLOAT_32], unless the value is already
+  ///        +/- `Inf`, in which case it's preserved.
+  2: ConstraintLevel inf_overflow;
+  ///   - `not_a_number`: controls handling of special `NaN` values.
+  ///     * ALLOW_INVALID: the value is preserved on struct creation and serialization.
+  ///     * MAP: same as ALLOW_INVALID.
+  ///     * REJECT: raises `TypeError`for `NaN` values.
+  3: ConstraintLevel not_a_number;
+}
+
+/// This is the v0 of `ConstrainedFloat32` annotation above. It is equivalent to
+/// `ConstrainedFloat32` with the `precision_loss` field set to `ALLOW_INVALID`.
+/// DO NOT ADD NEW USES OF THIS ANNOTATION. It will soon be removed.
 @scope.Typedef
 struct EnableUnsafeUnconstrainedFloat32 {}

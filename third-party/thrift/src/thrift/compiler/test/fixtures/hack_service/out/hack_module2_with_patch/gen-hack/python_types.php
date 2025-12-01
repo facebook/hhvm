@@ -9,6 +9,93 @@
 namespace facebook\thrift\annotation\python;
 
 /**
+ * An enum that specifies the constraint behavior on a field.
+ * 
+ * In this context, "constraint" refers to any logic applied by
+ * Thrift-provided types and runtime libraries on native (Python)
+ * operations that do not fully comply with the Thrift Object Model,
+ * but could otherwise be valid Python.
+ * 
+ * An example of such an operation (and the first concrete use of
+ * this annotation) is the handling of 32-bit floating point numbers:
+ * native Python `float`s all have the same width, which is
+ * typically 64 bits, whereas Thrift's `float` type is 32 bit
+ * (compared to `double`, which is 64 bits). Writing a 64 bit
+ * Python float to a 32-bit Thrift float is an example of a
+ * potentially non-compliant operation, that may require a constraint
+ * to be applied - implicitly or explicitly.
+ * 
+ * Original thrift enum:-
+ * ConstraintLevel
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/python/ConstraintLevel'))>>
+enum ConstraintLevel: int {
+  /**
+   * UNSPECIFIED: Intrinsic default value for this enum. Should never be assigned
+   * explicitly. The actual constraint level applied on `UNSPECIFIED`
+   * depends on the operation, and is documented below.
+   */
+  UNSPECIFIED = 0;
+  /**
+   * ALLOW_INVALID: applies the lowest level of validation on struct creation or
+   * mutation. While some basic type checking may be performed,
+   * does not fully validate that the value conforms to the
+   * [Thrift Object Model](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#primitive-types).
+   * 
+   * Native (Python) operations with this constraint level SHOULD NOT
+   * immediately fail, but MAY result in non-compliant Thrift values.
+   * Subsequent operations on these values (eg. serialization) MAY fail.
+   */
+  ALLOW_INVALID = 1;
+  /**
+   * MAP: maps the input value to the closest conforming value. For example,
+   * thrift-python MAPs integer `float` values to `i64` fields.
+   * 
+   * Native (Python) operations with this constraint level SHOULD NOT
+   * immediately fail, and MUST produce a result that is compliant with the
+   * Thrift Object Model. That result MAY not be the same as the originally
+   * intended change by the user.
+   */
+  MAP = 2;
+  /**
+   * REJECT: applies the strictest level of validation on struct creation or
+   * mutation. Raises an error for input types that do not exactly
+   * conform to the Thrift Object Model. For example, integers
+   * greater than INT64_MAX cause OverflowError when used with a Thrift
+   * `i64` field.
+   * 
+   * Native (Python) operations with this constraint level MAY fail. If they do
+   * not fail, they MUST produce a result that is both (1) compliant with the
+   * Thrift Object Model, and (2) identical to the user's intent.
+   */
+  REJECT = 3;
+}
+
+class ConstraintLevel_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
+  public static function getEnumMetadata()[]: \tmeta_ThriftEnum {
+    return \tmeta_ThriftEnum::fromShape(
+      shape(
+        "name" => "python.ConstraintLevel",
+        "elements" => dict[
+          0 => "UNSPECIFIED",
+          1 => "ALLOW_INVALID",
+          2 => "MAP",
+          3 => "REJECT",
+        ],
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TEnumAnnotations {
+    return shape(
+      'enum' => dict[],
+      'constants' => dict[
+      ],
+    );
+  }
+}
+
+/**
  * Hides in thrift-py3 only, not in thrift-python
  * Allowed for all @scope.Definition, except for @scope.FunctionParameter as that would hide part of
  * the RPC function parameters.
@@ -921,12 +1008,8 @@ class DisableFieldCache implements \IThriftSyncStruct, \IThriftStructMetadata {
 }
 
 /**
- * UNSAFE: Enables unconstrained operations on 32-bit floating-point values.
- * 
- * By default, in the absence of this annotation, thrift-python types ensure
- * that all values assigned to (or accessed from) single precision
- * floating-point (i.e., `float` in Thrift IDL) fields have the correct
- * precision, constraining them as needed.
+ * Allows custom constraint on Thrift `float` fields, i.e., 32-bit floating-
+ * point values, during Python thrift struct initialization or mutation.
  * 
  * This is necessary because Python's native floating-point number type
  * (`float`) may have more precision that 32 bits. Indeed, while the exact
@@ -939,23 +1022,202 @@ class DisableFieldCache implements \IThriftSyncStruct, \IThriftStructMetadata {
  * 2. bounding them to +/-Inf if they are greater/less than the max/min
  *    representable 32-bit number.
  * 
+ * By default, in the absence of this annotation, thrift-python types ensure
+ * that all values assigned to (or accessed from) single precision
+ * floating-point (i.e., `float` in Thrift IDL) fields have the correct
+ * precision, constraining them as needed.
+ * 
  * Note that NaN is *never* a valid Thrift floating point number, as specified
  * in the [Thrift Object Model](https://github.com/facebook/fbthrift/blob/main/thrift/doc/object-model/index.md#primitive-types).
  * The behavior of Thrift operations in presence of native Python NaN values is
  * left undefined.
  * 
- * This annotation is STRONGLY DISCOURAGED, and is introduced merely to allow
- * existing unsafe operations to be grandfathered into the new correct behavior
- * described above.
- * 
- * The presence of this annotation on a `float` field (or a collection whose
- * items have `float`) suppresses the constraining logic above. This can result
- * in unexpected behavior, including mismatching values before and after
- * serialization.
+ * The behavior may be customized using each field of this struct. The defaults
+ * correspond to the default behavior if this annotation is not applied to the
+ * `float` type.
  * 
  * This annotation MUST NOT be applied on fields whose [Thrift IDL Type](https://github.com/facebook/fbthrift/blob/main/thrift/doc/glossary/kinds-of-types.md#thrift-idl-types)
  * is not `float`, or a container whose item type(s) are not `float` (or
  * containers that satisfy this property, recursively).
+ *
+ * Original thrift struct:-
+ * ConstrainedFloat32
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/python/ConstrainedFloat32'))>>
+class ConstrainedFloat32 implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'precision_loss',
+      'type' => \TType::I32,
+      'enum' => \facebook\thrift\annotation\python\ConstraintLevel::class,
+    ),
+    2 => shape(
+      'var' => 'inf_overflow',
+      'type' => \TType::I32,
+      'enum' => \facebook\thrift\annotation\python\ConstraintLevel::class,
+    ),
+    3 => shape(
+      'var' => 'not_a_number',
+      'type' => \TType::I32,
+      'enum' => \facebook\thrift\annotation\python\ConstraintLevel::class,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'precision_loss' => 1,
+    'inf_overflow' => 2,
+    'not_a_number' => 3,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'precision_loss' => ?\facebook\thrift\annotation\python\ConstraintLevel,
+    ?'inf_overflow' => ?\facebook\thrift\annotation\python\ConstraintLevel,
+    ?'not_a_number' => ?\facebook\thrift\annotation\python\ConstraintLevel,
+  );
+
+  const int STRUCTURAL_ID = 7967781561537107582;
+  /**
+   * - `precision_loss`: controls handling of `float` in the range
+   * (-MAX_FLOAT_32, +MAX_FLOAT_32).
+   * * ALLOW_INVALID: no rounding is applied at struct creation, but MAP
+   *   applies on serialization.
+   * * MAP: rounded to the nearest valid 32-bit float according to IEEE754
+   *   trunctation convention.
+   * * REJECT: raises `TypeError` if the type is not already a 32-bit float
+   * 
+   * Original thrift field:-
+   * 1: python.ConstraintLevel precision_loss
+   */
+  public ?\facebook\thrift\annotation\python\ConstraintLevel $precision_loss;
+  /**
+   * - `inf_overflow`: controls handling of `float` outside the range
+   * [-MAX_FLOAT_32, +MAX_FLOAT_32].
+   * NOTE: values that are already +/- `Inf` are unaffected by this option.
+   * * ALLOW_INVALID: the value is preserved on struct creation, but MAP
+   *   applies on serialization.
+   * * MAP: rounded "up" to +/- Inf according to sign, according to IEEE754
+   *   convention.
+   * * REJECT: raises `OverflowError` if the type is outside the range
+   *   [-MAX_FLOAT_32, +MAX_FLOAT_32], unless the value is already
+   *    +/- `Inf`, in which case it's preserved.
+   * 
+   * Original thrift field:-
+   * 2: python.ConstraintLevel inf_overflow
+   */
+  public ?\facebook\thrift\annotation\python\ConstraintLevel $inf_overflow;
+  /**
+   * - `not_a_number`: controls handling of special `NaN` values.
+   * * ALLOW_INVALID: the value is preserved on struct creation and serialization.
+   * * MAP: same as ALLOW_INVALID.
+   * * REJECT: raises `TypeError`for `NaN` values.
+   * 
+   * Original thrift field:-
+   * 3: python.ConstraintLevel not_a_number
+   */
+  public ?\facebook\thrift\annotation\python\ConstraintLevel $not_a_number;
+
+  public function __construct(?\facebook\thrift\annotation\python\ConstraintLevel $precision_loss = null, ?\facebook\thrift\annotation\python\ConstraintLevel $inf_overflow = null, ?\facebook\thrift\annotation\python\ConstraintLevel $not_a_number = null)[] {
+    $this->precision_loss = $precision_loss;
+    $this->inf_overflow = $inf_overflow;
+    $this->not_a_number = $not_a_number;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'precision_loss'),
+      Shapes::idx($shape, 'inf_overflow'),
+      Shapes::idx($shape, 'not_a_number'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'ConstrainedFloat32';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "python.ConstrainedFloat32",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_enum" => \tmeta_ThriftEnumType::fromShape(
+                    shape(
+                      "name" => "python.ConstraintLevel",
+                    )
+                  ),
+                )
+              ),
+              "name" => "precision_loss",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_enum" => \tmeta_ThriftEnumType::fromShape(
+                    shape(
+                      "name" => "python.ConstraintLevel",
+                    )
+                  ),
+                )
+              ),
+              "name" => "inf_overflow",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 3,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_enum" => \tmeta_ThriftEnumType::fromShape(
+                    shape(
+                      "name" => "python.ConstraintLevel",
+                    )
+                  ),
+                )
+              ),
+              "name" => "not_a_number",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\Typedef' => \facebook\thrift\annotation\Typedef::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+/**
+ * This is the v0 of `ConstrainedFloat32` annotation above. It is equivalent to
+ * `ConstrainedFloat32` with the `precision_loss` field set to `ALLOW_INVALID`.
+ * DO NOT ADD NEW USES OF THIS ANNOTATION. It will soon be removed.
  *
  * Original thrift struct:-
  * EnableUnsafeUnconstrainedFloat32

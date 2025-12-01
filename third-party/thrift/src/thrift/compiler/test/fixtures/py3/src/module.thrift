@@ -59,8 +59,10 @@ struct OptionalRefStruct {
   1: optional IOBufPtr optional_blob;
 }
 
-@python.EnableUnsafeUnconstrainedFloat32
-typedef float LegacyFloat32
+@python.ConstrainedFloat32{
+  precision_loss = python.ConstraintLevel.ALLOW_INVALID,
+}
+typedef float DeferredTruncationFloat
 
 struct SimpleStruct {
   1: bool is_on;
@@ -88,9 +90,9 @@ struct SimpleStruct {
 
 struct Float32Struct {
   1: float float32;
-  2: LegacyFloat32 float64;
-  3: list<LegacyFloat32> float_list;
-  4: map<string, list<LegacyFloat32>> float_map;
+  2: DeferredTruncationFloat float64;
+  3: list<DeferredTruncationFloat> float_list;
+  4: map<string, list<DeferredTruncationFloat>> float_map;
 }
 
 @cpp.Adapter{name = "Adapter"}

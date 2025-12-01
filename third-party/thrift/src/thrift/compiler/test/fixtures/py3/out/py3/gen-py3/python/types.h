@@ -111,6 +111,22 @@ inline void reset_field<::facebook::thrift::annotation::python::DisableFieldCach
 }
 
 template<>
+inline void reset_field<::facebook::thrift::annotation::python::ConstrainedFloat32>(
+    ::facebook::thrift::annotation::python::ConstrainedFloat32& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.precision_loss_ref().copy_from(default_inst<::facebook::thrift::annotation::python::ConstrainedFloat32>().precision_loss_ref());
+      return;
+    case 1:
+      obj.inf_overflow_ref().copy_from(default_inst<::facebook::thrift::annotation::python::ConstrainedFloat32>().inf_overflow_ref());
+      return;
+    case 2:
+      obj.not_a_number_ref().copy_from(default_inst<::facebook::thrift::annotation::python::ConstrainedFloat32>().not_a_number_ref());
+      return;
+  }
+}
+
+template<>
 inline void reset_field<::facebook::thrift::annotation::python::EnableUnsafeUnconstrainedFloat32>(
     ::facebook::thrift::annotation::python::EnableUnsafeUnconstrainedFloat32& obj, uint16_t index) {
   switch (index) {
@@ -220,6 +236,16 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::python::DisableFieldCache>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::facebook::thrift::annotation::python::ConstrainedFloat32>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

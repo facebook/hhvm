@@ -18,6 +18,16 @@ __property__ = property  # sometimes `property` is used as a field name
 UTF8STRINGS: bool
 
 
+class ConstraintLevel(int):
+    UNSPECIFIED: __T.ClassVar[ConstraintLevel]
+    ALLOW_INVALID: __T.ClassVar[ConstraintLevel]
+    MAP: __T.ClassVar[ConstraintLevel]
+    REJECT: __T.ClassVar[ConstraintLevel]
+
+    _VALUES_TO_NAMES: __T.ClassVar[__T.Dict[ConstraintLevel, str]]
+    _NAMES_TO_VALUES: __T.ClassVar[__T.Dict[str, ConstraintLevel]]
+
+
 class Py3Hidden:
     thrift_spec: __T.Tuple[__T.Optional[__T.Tuple[int, int, str, __T.Any, __T.Optional[int], int]]]
     thrift_field_annotations: __T.Dict[int, __T.Dict[str, str]]
@@ -360,6 +370,50 @@ class DisableFieldCache:
     def _to_mutable_python(self) -> "facebook.thrift.annotation.python.thrift_mutable_types.DisableFieldCache": ...   # type: ignore
     def _to_py3(self) -> "facebook.thrift.annotation.python.types.DisableFieldCache": ...   # type: ignore
     def _to_py_deprecated(self) -> DisableFieldCache: ...
+
+
+class ConstrainedFloat32:
+    thrift_spec: __T.Tuple[__T.Optional[__T.Tuple[int, int, str, __T.Any, __T.Optional[int], int]]]
+    thrift_field_annotations: __T.Dict[int, __T.Dict[str, str]]
+    thrift_struct_annotations: __T.Dict[str, str]
+
+    def __init__(
+        self, *,
+        precision_loss: __T.Optional[ConstraintLevel] = ...,
+        inf_overflow: __T.Optional[ConstraintLevel] = ...,
+        not_a_number: __T.Optional[ConstraintLevel] = ...
+    ) -> None:
+        ...
+
+    @__property__
+    def precision_loss(self) -> ConstraintLevel: ...
+    @precision_loss.setter
+    def precision_loss(self, value: __T.Optional[ConstraintLevel]) -> None: ...
+    @__property__
+    def inf_overflow(self) -> ConstraintLevel: ...
+    @inf_overflow.setter
+    def inf_overflow(self, value: __T.Optional[ConstraintLevel]) -> None: ...
+    @__property__
+    def not_a_number(self) -> ConstraintLevel: ...
+    @not_a_number.setter
+    def not_a_number(self, value: __T.Optional[ConstraintLevel]) -> None: ...
+
+
+    def isUnion(self) -> bool: ...
+    def checkRequired(self) -> None: ...
+    def read(self, iprot: TProtocolBase) -> None: ...
+    @__T.overload
+    def readFromJson(self, json: __T.Dict[str, __T.Any], is_text: bool = ..., **kwargs: __T.Any) -> None: ...
+    @__T.overload
+    def readFromJson(self, json: str, is_text: bool = ..., **kwargs: __T.Any) -> None: ...
+    def write(self, oprot: TProtocolBase) -> None: ...
+    def __eq__(self, other: __T.Any) -> bool: ...
+    def __ne__(self, other: __T.Any) -> bool: ...
+    def __dir__(self) -> __T.Sequence[str]: ...
+    def _to_python(self) -> "facebook.thrift.annotation.python.thrift_types.ConstrainedFloat32": ...   # type: ignore
+    def _to_mutable_python(self) -> "facebook.thrift.annotation.python.thrift_mutable_types.ConstrainedFloat32": ...   # type: ignore
+    def _to_py3(self) -> "facebook.thrift.annotation.python.types.ConstrainedFloat32": ...   # type: ignore
+    def _to_py_deprecated(self) -> ConstrainedFloat32: ...
 
 
 class EnableUnsafeUnconstrainedFloat32:

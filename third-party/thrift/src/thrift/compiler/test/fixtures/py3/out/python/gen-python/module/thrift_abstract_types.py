@@ -450,7 +450,7 @@ _fbthrift_AdaptedTypedefFields = AdaptedTypedefFields
 
 IOBufPtr = _fbthrift_iobuf.IOBuf
 IOBuf = _fbthrift_iobuf.IOBuf
-LegacyFloat32 = builtins.float
+DeferredTruncationFloat = builtins.float
 AdaptedTypeDef = _fbthrift_SimpleStruct
 HiddenTypeDef = _fbthrift_SimpleStruct
 ImplicitlyHiddenTypeDef = _fbthrift_AdaptedUnion

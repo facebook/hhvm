@@ -917,7 +917,7 @@ _readField_float32:
   }
 _readField_float64:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, ::py3::simple::LegacyFloat32>::readWithContext(*iprot, this->__fbthrift_field_float64, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, ::py3::simple::DeferredTruncationFloat>::readWithContext(*iprot, this->__fbthrift_field_float64, _readState);
   }
  this->__isset.set(1, true);
 
@@ -931,8 +931,8 @@ _readField_float64:
 _readField_float_list:
   {
     _readState.beforeSubobject(iprot);
-    this->__fbthrift_field_float_list = ::std::vector<::py3::simple::LegacyFloat32>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<::py3::simple::LegacyFloat32>>::readWithContext(*iprot, this->__fbthrift_field_float_list, _readState);
+    this->__fbthrift_field_float_list = ::std::vector<::py3::simple::DeferredTruncationFloat>();
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<::py3::simple::DeferredTruncationFloat>>::readWithContext(*iprot, this->__fbthrift_field_float_list, _readState);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(2, true);
@@ -947,8 +947,8 @@ _readField_float_list:
 _readField_float_map:
   {
     _readState.beforeSubobject(iprot);
-    this->__fbthrift_field_float_map = ::std::map<::std::string, ::std::vector<::py3::simple::LegacyFloat32>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>>, ::std::map<::std::string, ::std::vector<::py3::simple::LegacyFloat32>>>::readWithContext(*iprot, this->__fbthrift_field_float_map, _readState);
+    this->__fbthrift_field_float_map = ::std::map<::std::string, ::std::vector<::py3::simple::DeferredTruncationFloat>>();
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>>, ::std::map<::std::string, ::std::vector<::py3::simple::DeferredTruncationFloat>>>::readWithContext(*iprot, this->__fbthrift_field_float_map, _readState);
     _readState.afterSubobject(iprot);
   }
  this->__isset.set(3, true);
@@ -1031,15 +1031,15 @@ uint32_t Float32Struct::serializedSize(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("float64", apache::thrift::protocol::T_FLOAT, 2);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, ::py3::simple::LegacyFloat32>::serializedSize<false>(*prot_, this->__fbthrift_field_float64);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, ::py3::simple::DeferredTruncationFloat>::serializedSize<false>(*prot_, this->__fbthrift_field_float64);
   }
   {
     xfer += prot_->serializedFieldSize("float_list", apache::thrift::protocol::T_LIST, 3);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<::py3::simple::LegacyFloat32>>::serializedSize<false>(*prot_, this->__fbthrift_field_float_list);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<::py3::simple::DeferredTruncationFloat>>::serializedSize<false>(*prot_, this->__fbthrift_field_float_list);
   }
   {
     xfer += prot_->serializedFieldSize("float_map", apache::thrift::protocol::T_MAP, 4);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>>, ::std::map<::std::string, ::std::vector<::py3::simple::LegacyFloat32>>>::serializedSize<false>(*prot_, this->__fbthrift_field_float_map);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>>, ::std::map<::std::string, ::std::vector<::py3::simple::DeferredTruncationFloat>>>::serializedSize<false>(*prot_, this->__fbthrift_field_float_map);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -1055,15 +1055,15 @@ uint32_t Float32Struct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("float64", apache::thrift::protocol::T_FLOAT, 2);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, ::py3::simple::LegacyFloat32>::serializedSize<false>(*prot_, this->__fbthrift_field_float64);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, ::py3::simple::DeferredTruncationFloat>::serializedSize<false>(*prot_, this->__fbthrift_field_float64);
   }
   {
     xfer += prot_->serializedFieldSize("float_list", apache::thrift::protocol::T_LIST, 3);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<::py3::simple::LegacyFloat32>>::serializedSize<false>(*prot_, this->__fbthrift_field_float_list);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<::py3::simple::DeferredTruncationFloat>>::serializedSize<false>(*prot_, this->__fbthrift_field_float_list);
   }
   {
     xfer += prot_->serializedFieldSize("float_map", apache::thrift::protocol::T_MAP, 4);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>>, ::std::map<::std::string, ::std::vector<::py3::simple::LegacyFloat32>>>::serializedSize<false>(*prot_, this->__fbthrift_field_float_map);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>>, ::std::map<::std::string, ::std::vector<::py3::simple::DeferredTruncationFloat>>>::serializedSize<false>(*prot_, this->__fbthrift_field_float_map);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -1085,21 +1085,21 @@ uint32_t Float32Struct::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 1;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_FLOAT, 2, kPrevFieldId>(*prot_, "float64", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, ::py3::simple::LegacyFloat32>::write(*prot_, this->__fbthrift_field_float64);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, ::py3::simple::DeferredTruncationFloat>::write(*prot_, this->__fbthrift_field_float64);
     xfer += prot_->writeFieldEnd();
   }
   {
     constexpr int16_t kPrevFieldId = 2;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 3, kPrevFieldId>(*prot_, "float_list", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<::py3::simple::LegacyFloat32>>::write(*prot_, this->__fbthrift_field_float_list);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<::py3::simple::DeferredTruncationFloat>>::write(*prot_, this->__fbthrift_field_float_list);
     xfer += prot_->writeFieldEnd();
   }
   {
     constexpr int16_t kPrevFieldId = 3;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_MAP, 4, kPrevFieldId>(*prot_, "float_map", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>>, ::std::map<::std::string, ::std::vector<::py3::simple::LegacyFloat32>>>::write(*prot_, this->__fbthrift_field_float_map);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>>, ::std::map<::std::string, ::std::vector<::py3::simple::DeferredTruncationFloat>>>::write(*prot_, this->__fbthrift_field_float_map);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();

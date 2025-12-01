@@ -122,7 +122,7 @@ ANOTHER_CONST_MAP = _fbthrift_types_inplace.ANOTHER_CONST_MAP
 
 IOBufPtr = _fbthrift_iobuf.IOBuf
 IOBuf = _fbthrift_iobuf.IOBuf
-LegacyFloat32 = float
+DeferredTruncationFloat = float
 AdaptedTypeDef = SimpleStruct
 foo_bar = bytes
 CustomBool = bool

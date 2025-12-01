@@ -6,6 +6,27 @@
       "path" : "thrift/annotation/scope.thrift"
     }
   },
+  "enumerations" : {
+    "ConstraintLevel" : {
+      "lineno" : 159,
+      "constants" : {
+        "UNSPECIFIED" : 0,
+        "ALLOW_INVALID" : 1,
+        "MAP" : 2,
+        "REJECT" : 3
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 159,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 194,
+          "column" : 2
+        }
+      }
+    }
+  },
   "structs" : {
     "Py3Hidden" : {
       "lineno" : 32,
@@ -277,8 +298,70 @@
         }
       }
     },
+    "ConstrainedFloat32" : {
+      "lineno" : 227,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "precision_loss" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "ConstraintLevel",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 236,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 236,
+              "column" : 37
+            }
+          }
+        },
+        "inf_overflow" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "ConstraintLevel",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 247,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 247,
+              "column" : 35
+            }
+          }
+        },
+        "not_a_number" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "ConstraintLevel",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 252,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 252,
+              "column" : 35
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 227,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 253,
+          "column" : 2
+        }
+      }
+    },
     "EnableUnsafeUnconstrainedFloat32" : {
-      "lineno" : 179,
+      "lineno" : 258,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -286,11 +369,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 179,
+          "line" : 258,
           "column" : 1
         },
         "end" : {
-          "line" : 180,
+          "line" : 259,
           "column" : 43
         }
       }

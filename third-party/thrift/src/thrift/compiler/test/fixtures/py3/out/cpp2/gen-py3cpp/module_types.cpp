@@ -556,7 +556,7 @@ Float32Struct& Float32Struct::operator=([[maybe_unused]] Float32Struct&& other) 
 }
 
 
-Float32Struct::Float32Struct(apache::thrift::FragileConstructor, float float32__arg, ::py3::simple::LegacyFloat32 float64__arg, ::std::vector<::py3::simple::LegacyFloat32> float_list__arg, ::std::map<::std::string, ::std::vector<::py3::simple::LegacyFloat32>> float_map__arg) :
+Float32Struct::Float32Struct(apache::thrift::FragileConstructor, float float32__arg, ::py3::simple::DeferredTruncationFloat float64__arg, ::std::vector<::py3::simple::DeferredTruncationFloat> float_list__arg, ::std::map<::std::string, ::std::vector<::py3::simple::DeferredTruncationFloat>> float_map__arg) :
     __fbthrift_field_float32(std::move(float32__arg)),
     __fbthrift_field_float64(std::move(float64__arg)),
     __fbthrift_field_float_list(std::move(float_list__arg)),
@@ -570,7 +570,7 @@ Float32Struct::Float32Struct(apache::thrift::FragileConstructor, float float32__
 void Float32Struct::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_float32 = float();
-  this->__fbthrift_field_float64 = ::py3::simple::LegacyFloat32();
+  this->__fbthrift_field_float64 = ::py3::simple::DeferredTruncationFloat();
   this->__fbthrift_field_float_list.clear();
   this->__fbthrift_field_float_map.clear();
   __isset = {};
@@ -601,29 +601,29 @@ float& Float32Struct::set_float32(float float32_) {
   return __fbthrift_field_float32;
 }
 
-::py3::simple::LegacyFloat32 Float32Struct::get_float64() const {
+::py3::simple::DeferredTruncationFloat Float32Struct::get_float64() const {
   return __fbthrift_field_float64;
 }
 
-::py3::simple::LegacyFloat32& Float32Struct::set_float64(::py3::simple::LegacyFloat32 float64_) {
+::py3::simple::DeferredTruncationFloat& Float32Struct::set_float64(::py3::simple::DeferredTruncationFloat float64_) {
   float64_ref() = float64_;
   return __fbthrift_field_float64;
 }
 
-const ::std::vector<::py3::simple::LegacyFloat32>& Float32Struct::get_float_list() const& {
+const ::std::vector<::py3::simple::DeferredTruncationFloat>& Float32Struct::get_float_list() const& {
   return __fbthrift_field_float_list;
 }
 
-::std::vector<::py3::simple::LegacyFloat32> Float32Struct::get_float_list() && {
-  return static_cast<::std::vector<::py3::simple::LegacyFloat32>&&>(__fbthrift_field_float_list);
+::std::vector<::py3::simple::DeferredTruncationFloat> Float32Struct::get_float_list() && {
+  return static_cast<::std::vector<::py3::simple::DeferredTruncationFloat>&&>(__fbthrift_field_float_list);
 }
 
-const ::std::map<::std::string, ::std::vector<::py3::simple::LegacyFloat32>>& Float32Struct::get_float_map() const& {
+const ::std::map<::std::string, ::std::vector<::py3::simple::DeferredTruncationFloat>>& Float32Struct::get_float_map() const& {
   return __fbthrift_field_float_map;
 }
 
-::std::map<::std::string, ::std::vector<::py3::simple::LegacyFloat32>> Float32Struct::get_float_map() && {
-  return static_cast<::std::map<::std::string, ::std::vector<::py3::simple::LegacyFloat32>>&&>(__fbthrift_field_float_map);
+::std::map<::std::string, ::std::vector<::py3::simple::DeferredTruncationFloat>> Float32Struct::get_float_map() && {
+  return static_cast<::std::map<::std::string, ::std::vector<::py3::simple::DeferredTruncationFloat>>&&>(__fbthrift_field_float_map);
 }
 
 void swap([[maybe_unused]] Float32Struct& a, [[maybe_unused]] Float32Struct& b) {

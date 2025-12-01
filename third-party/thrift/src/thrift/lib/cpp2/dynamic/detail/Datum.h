@@ -20,6 +20,7 @@
 
 #include <thrift/lib/cpp2/dynamic/Binary.h>
 #include <thrift/lib/cpp2/dynamic/List.h>
+#include <thrift/lib/cpp2/dynamic/Map.h>
 #include <thrift/lib/cpp2/dynamic/SerializableRecord.h>
 #include <thrift/lib/cpp2/dynamic/Set.h>
 #include <thrift/lib/cpp2/dynamic/String.h>
@@ -51,10 +52,8 @@
 namespace apache::thrift::dynamic {
 
 class Any {};
-class Map {};
 
 bool operator==(const Any&, const Any&) noexcept;
-bool operator==(const Map&, const Map&) noexcept;
 
 struct Null final {
   friend constexpr bool operator==(const Null&, const Null&) noexcept {

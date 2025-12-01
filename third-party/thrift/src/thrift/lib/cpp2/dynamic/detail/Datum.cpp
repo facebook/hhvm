@@ -45,11 +45,6 @@ bool operator==(const Map&, const Map&) noexcept {
   folly::terminate_with<std::logic_error>("Map comparison not yet implemented");
 }
 
-bool operator==(const Struct&, const Struct&) noexcept {
-  folly::terminate_with<std::logic_error>(
-      "Struct comparison not yet implemented");
-}
-
 bool operator==(const Union&, const Union&) noexcept {
   folly::terminate_with<std::logic_error>(
       "Union comparison not yet implemented");

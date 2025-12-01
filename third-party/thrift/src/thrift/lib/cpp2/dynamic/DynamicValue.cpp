@@ -106,6 +106,9 @@ DynamicValue DynamicValue::makeDefault(
     case Kind::LIST:
       return DynamicValue(
           type, detail::Datum::make(makeList(type.asListUnchecked(), mr)));
+    case Kind::STRUCT:
+      return DynamicValue(
+          type, detail::Datum::make(makeStruct(type.asStructUnchecked(), mr)));
     default:
       throw std::runtime_error(
           fmt::format(

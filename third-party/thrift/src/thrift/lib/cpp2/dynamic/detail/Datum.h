@@ -20,6 +20,7 @@
 
 #include <thrift/lib/cpp2/dynamic/List.h>
 #include <thrift/lib/cpp2/dynamic/SerializableRecord.h>
+#include <thrift/lib/cpp2/dynamic/Struct.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystemTraits.h>
 #include <thrift/lib/cpp2/dynamic/fwd.h>
@@ -48,7 +49,6 @@ class Binary {};
 class Any {};
 class Set {};
 class Map {};
-class Struct {};
 class Union {};
 
 bool operator==(const String&, const String&) noexcept;
@@ -56,7 +56,6 @@ bool operator==(const Binary&, const Binary&) noexcept;
 bool operator==(const Any&, const Any&) noexcept;
 bool operator==(const Set&, const Set&) noexcept;
 bool operator==(const Map&, const Map&) noexcept;
-bool operator==(const Struct&, const Struct&) noexcept;
 bool operator==(const Union&, const Union&) noexcept;
 
 struct Null final {
@@ -620,14 +619,6 @@ inline Map fromRecord(
     const type_system::TypeRef::Map&,
     std::pmr::memory_resource*) {
   throw std::logic_error("Unimplemented: fromRecord(TypeRef::Map)");
-}
-
-// Struct
-inline Struct fromRecord(
-    const type_system::SerializableRecord&,
-    type_system::StructNode const&,
-    std::pmr::polymorphic_allocator<>) {
-  throw std::logic_error("Unimplemented: fromRecord(StructNode)");
 }
 
 // Union

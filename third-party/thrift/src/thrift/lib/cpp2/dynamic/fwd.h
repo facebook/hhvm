@@ -55,6 +55,8 @@ class IList;
 template <typename T>
 class ConcreteList;
 
+class IStruct;
+
 } // namespace detail
 
 class String;

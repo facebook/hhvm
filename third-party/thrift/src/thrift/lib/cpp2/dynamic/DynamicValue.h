@@ -485,6 +485,8 @@ class DynamicValue final {
   friend class DynamicRef;
   template <typename T>
   friend class detail::ConcreteList;
+  friend class Struct;
+  friend class detail::StructImpl;
 
   // Friend declarations for fromRecord functions
   friend List fromRecord(

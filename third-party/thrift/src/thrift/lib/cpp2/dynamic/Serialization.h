@@ -81,9 +81,7 @@ void serialize(ProtocolWriter&, const Map&) {
 
 // Struct
 template <typename ProtocolWriter>
-void serialize(ProtocolWriter&, const Struct&) {
-  throw std::logic_error("Unimplemented: serialize(Struct)");
-}
+void serialize(ProtocolWriter&, const Struct&);
 
 // Union
 template <typename ProtocolWriter>
@@ -233,9 +231,7 @@ template <typename ProtocolReader>
 Struct deserialize(
     ProtocolReader&,
     const type_system::StructNode&,
-    std::pmr::memory_resource*) {
-  throw std::logic_error("Unimplemented: deserialize(StructNode)");
-}
+    std::pmr::memory_resource*);
 
 // Union
 template <typename ProtocolReader>
@@ -410,6 +406,111 @@ List deserialize(
         reader.readListEnd();
         return List(detail::IList::Ptr(impl));
       });
+}
+
+// ============================================================================
+// Struct serialization
+// ============================================================================
+
+template <typename ProtocolWriter>
+void serialize(ProtocolWriter& writer, const Struct& structValue) {
+  const auto& structNode = structValue.type().asStructUnchecked();
+  const auto& fieldDefs = structNode.fields();
+
+  writer.writeStructBegin(structNode.uri().data());
+
+  // Iterate through fields using the type system and virtual interface
+  for (size_t i = 0; i < fieldDefs.size(); ++i) {
+    const auto& fieldDef = fieldDefs[i];
+    auto handle = type_system::FastFieldHandle{static_cast<uint16_t>(i + 1)};
+
+    // Skip unset optional fields
+    if (!structValue.hasField(handle)) {
+      continue;
+    }
+
+    writer.writeFieldBegin(
+        fieldDef.identity().name().data(),
+        fieldDef.wireType(),
+        static_cast<int16_t>(fieldDef.identity().id()));
+
+    // Get the field value through the virtual interface
+    auto fieldRef = structValue.getField(handle);
+
+    // Serialize the field value through the reference
+    // We know fieldRef has a value because hasField returned true
+    serializeValue(writer, *fieldRef);
+
+    writer.writeFieldEnd();
+  }
+
+  writer.writeFieldStop();
+  writer.writeStructEnd();
+}
+
+template <typename ProtocolReader>
+Struct deserialize(
+    ProtocolReader& reader,
+    const type_system::StructNode& type,
+    std::pmr::memory_resource* alloc) {
+  Struct ret(type, alloc);
+
+  std::string name;
+  int16_t fid;
+  protocol::TType ftype;
+  uint16_t pos = 0;
+
+  reader.readStructBegin(name);
+
+  while (true) {
+    reader.readFieldBegin(name, ftype, fid);
+    if (ftype == protocol::T_STOP) {
+      break;
+    }
+
+    // Find the field
+    Struct::FieldId id{fid};
+    auto handle = [&]() {
+      // Optimize the case where fields are serialized in order.
+      for (; pos < type.fields().size(); pos++) {
+        auto& nextField = type.fields()[pos];
+        // Happy path: we read the next field
+        if (nextField.identity().id() == id) {
+          return type_system::FastFieldHandle{++pos};
+        }
+        // We might have skipped an optional/terse field, so try the next one.
+      }
+      // Unknown field or not in order
+      return type.fieldHandleFor(id);
+    }();
+
+    if (handle.valid()) {
+      const auto& field = type.at(handle);
+
+      if (ftype != field.wireType()) {
+        throw std::runtime_error(
+            fmt::format(
+                "Expected field {} on struct {} to have wire-type {} but got {}",
+                field.identity().name(),
+                type.uri(),
+                field.wireType(),
+                ftype));
+      }
+
+      // Use virtual interface to set the field
+      ret.setField(handle, deserializeValue(reader, field.type(), alloc));
+    } else {
+      // Unknown field
+      // TODO: store instead of skipping
+      reader.skip(ftype);
+    }
+
+    reader.readFieldEnd();
+  }
+
+  reader.readStructEnd();
+
+  return ret;
 }
 
 } // namespace apache::thrift::dynamic

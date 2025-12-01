@@ -61,14 +61,11 @@ pub(crate) use {{program:crate}} as client;
 {{#program:direct_dependencies?}}
 
 #[doc(hidden)]
-#[deprecated]
 pub mod __dependencies {
     {{#program:direct_dependencies}}
     #[doc(hidden)]
-    #[deprecated{{#dependency:label}} = "Please use `{{.}}-clients` directly"{{/dependency:label}}]
     pub mod {{dependency:name_unmangled}}_clients {
         #[doc(hidden)]
-        #[deprecated]
         pub use ::{{dependency:name_unmangled}}_clients::*;
     }
     {{/program:direct_dependencies}}

@@ -186,14 +186,11 @@ pub mod __constructors {
 {{#program:direct_dependencies?}}
 
 #[doc(hidden)]
-#[deprecated]
 pub mod __dependencies {
     {{#program:direct_dependencies}}
     #[doc(hidden)]
-    #[deprecated{{#dependency:label}} = "Please use `{{.}}` directly"{{/dependency:label}}]
     pub mod {{dependency:name}} {
         #[doc(hidden)]
-        #[deprecated]
         pub use ::{{dependency:name}}::*;
     }
     {{/program:direct_dependencies}}

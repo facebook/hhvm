@@ -423,14 +423,11 @@ pub(crate) use {{program:types}} as types;
 {{#program:direct_dependencies?}}
 
 #[doc(hidden)]
-#[deprecated]
 pub mod __dependencies {
     {{#program:direct_dependencies}}
     #[doc(hidden)]
-    #[deprecated{{#dependency:label}} = "Please use `{{.}}-mocks` directly"{{/dependency:label}}]
     pub mod {{dependency:name_unmangled}}_mocks {
         #[doc(hidden)]
-        #[deprecated]
         pub use ::{{dependency:name_unmangled}}_mocks::*;
     }
     {{/program:direct_dependencies}}

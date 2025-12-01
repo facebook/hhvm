@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <thrift/lib/cpp2/dynamic/fwd.h>
+
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
 
@@ -67,6 +69,8 @@ class Binary final {
 
   template <typename ProtocolWriter>
   friend void serialize(ProtocolWriter& writer, const Binary& binary);
+  friend struct detail::DatumHash;
+  friend struct detail::DatumEqual;
 };
 
 } // namespace apache::thrift::dynamic

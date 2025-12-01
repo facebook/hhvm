@@ -157,6 +157,10 @@ class DynamicConstRef final {
   friend class detail::StructImpl;
   template <typename T>
   friend class detail::ConcreteList;
+  template <typename T>
+  friend class detail::ConcreteSet;
+  template <typename K, typename V>
+  friend class detail::ConcreteMap;
 
   /**
    * Variant of const pointers to all possible Thrift value types.
@@ -316,6 +320,10 @@ class DynamicRef final {
   friend class Union;
   template <typename T>
   friend class detail::ConcreteList;
+  template <typename T>
+  friend class detail::ConcreteSet;
+  template <typename K, typename V>
+  friend class detail::ConcreteMap;
 
   /**
    * Variant of pointers to all possible Thrift value types.
@@ -490,6 +498,10 @@ class DynamicValue final {
   friend class DynamicRef;
   template <typename T>
   friend class detail::ConcreteList;
+  template <typename T>
+  friend class detail::ConcreteSet;
+  template <typename K, typename V>
+  friend class detail::ConcreteMap;
   friend class Struct;
   friend class detail::StructImpl;
   friend class Union;

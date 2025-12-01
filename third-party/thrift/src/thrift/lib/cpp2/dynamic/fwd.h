@@ -50,10 +50,18 @@ enum class DatumKind : uint8_t {
   Union = 15,
 };
 
-// List implementation types
+// Container implementation types
 class IList;
 template <typename T>
 class ConcreteList;
+class ISet;
+template <typename T>
+class ConcreteSet;
+class IMap;
+template <typename K, typename V>
+class ConcreteMap;
+struct DatumHash;
+struct DatumEqual;
 
 class IStruct;
 

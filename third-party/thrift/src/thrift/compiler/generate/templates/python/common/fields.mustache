@@ -15,6 +15,9 @@
   limitations under the License.
 
 }}
+{{#import "common/common" as m_common}}
+{{#import "common/typehints" as typehints}}
+{{#import "common/types" as m_types}}
 
 {{!
 Mangles exception field name in generated response struct, so bad user input
@@ -28,4 +31,40 @@ a dependency on mstch implicit index property.
 {{#let export partial exception_field_name |field index|}}
 {{#pragma ignore-newlines}}
 _ex{{index}}__{{field.py_name}}
+{{/let partial}}
+
+{{#let partial aliased_pep484_type |type| captures |m_common m_types typehints|}}
+{{#pragma ignore-newlines}}
+  {{#if type.has_adapter?}}
+    {{#let adapter = type.adapter}}
+{{adapter.type_hint}}{{#if adapter.is_generic?}}[{{#partial typehints.unadapted_type type=type}}]{{/if}}
+  {{#else if type.structured?}}
+    {{#let structured = type.true_type}}
+{{#if structured.need_module_path?}}{{structured.module_mangle}}.{{/if}}{{#partial m_common.private_alias_prefix}}{{structured.py_name}}
+  {{#else if type.list?}}
+{{#partial m_types.sequence}}[{{#partial aliased_pep484_type type=type.true_type.elem_type}}]
+  {{#else if type.set?}}
+{{#partial m_types.set}}[{{#partial aliased_pep484_type type=type.true_type.elem_type}}]
+  {{#else if type.map?}}
+    {{#let map = type.true_type}}
+{{#partial m_types.mapping}}[{{#partial typehints.pep484_type type=map.key_type}}, {{#partial aliased_pep484_type type=map.val_type}}]
+  {{#else if type.void?}}
+None
+  {{#else if type.enum?}}
+    {{#let enum = type.true_type}}
+{{#if enum.need_module_path?}}{{enum.module_mangle}}.{{/if}}{{#partial m_common.private_alias_prefix}}{{enum.name}}
+  {{#else}}
+{{#partial typehints.unadapted_builtin type=type}}
+  {{/if type.has_adapter?}}
+{{/let partial}}
+
+
+{{! Adapted type if field has adapter, otherwise the original type }}
+{{#let export partial aliased_or_adapted_type_pyi |type adapter| captures |aliased_pep484_type|}}
+  {{#pragma ignore-newlines}}
+  {{#if (object.notnull? adapter)}}
+{{adapter.type_hint}}{{#if adapter.is_generic?}}[{{#partial aliased_pep484_type type=type}}]{{/if}}
+  {{#else}}
+{{#partial aliased_pep484_type type=type}}
+  {{/if (object.notnull? adapter)}}
 {{/let partial}}

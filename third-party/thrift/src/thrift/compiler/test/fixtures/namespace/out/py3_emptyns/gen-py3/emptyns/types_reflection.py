@@ -20,7 +20,10 @@ from thrift.py3.reflection import (
 )
 
 
-import emptyns.types as _emptyns_types
+try:
+    import emptyns.types as _emptyns_types
+except ModuleNotFoundError:
+    import emptyns.thrift_types as _emptyns_types
 
 
 

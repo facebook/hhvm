@@ -19,9 +19,15 @@ from thrift.py3.reflection import (
     FieldSpec as __FieldSpec,
 )
 
-import test.fixtures.enums.included_enum.types as _test_fixtures_enums_included_enum_types
+try:
+    import test.fixtures.enums.included_enum.types as _test_fixtures_enums_included_enum_types
+except ModuleNotFoundError:
+    import test.fixtures.enums.included_enum.thrift_types as _test_fixtures_enums_included_enum_types
 
-import test.fixtures.enums.module.types as _test_fixtures_enums_module_types
+try:
+    import test.fixtures.enums.module.types as _test_fixtures_enums_module_types
+except ModuleNotFoundError:
+    import test.fixtures.enums.module.thrift_types as _test_fixtures_enums_module_types
 
 
 

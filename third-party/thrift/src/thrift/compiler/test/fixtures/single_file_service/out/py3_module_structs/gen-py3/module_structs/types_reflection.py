@@ -20,7 +20,10 @@ from thrift.py3.reflection import (
 )
 
 
-import module_structs.types as _module_structs_types
+try:
+    import module_structs.types as _module_structs_types
+except ModuleNotFoundError:
+    import module_structs.thrift_types as _module_structs_types
 
 
 

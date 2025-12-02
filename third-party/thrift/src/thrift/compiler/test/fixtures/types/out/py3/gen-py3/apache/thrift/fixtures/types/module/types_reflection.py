@@ -19,9 +19,15 @@ from thrift.py3.reflection import (
     FieldSpec as __FieldSpec,
 )
 
-import apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
+try:
+    import apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
+except ModuleNotFoundError:
+    import apache.thrift.fixtures.types.included.thrift_types as _apache_thrift_fixtures_types_included_types
 
-import apache.thrift.fixtures.types.module.types as _apache_thrift_fixtures_types_module_types
+try:
+    import apache.thrift.fixtures.types.module.types as _apache_thrift_fixtures_types_module_types
+except ModuleNotFoundError:
+    import apache.thrift.fixtures.types.module.thrift_types as _apache_thrift_fixtures_types_module_types
 
 
 

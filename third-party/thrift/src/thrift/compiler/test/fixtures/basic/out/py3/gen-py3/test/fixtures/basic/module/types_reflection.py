@@ -20,7 +20,10 @@ from thrift.py3.reflection import (
 )
 
 
-import test.fixtures.basic.module.types as _test_fixtures_basic_module_types
+try:
+    import test.fixtures.basic.module.types as _test_fixtures_basic_module_types
+except ModuleNotFoundError:
+    import test.fixtures.basic.module.thrift_types as _test_fixtures_basic_module_types
 
 
 

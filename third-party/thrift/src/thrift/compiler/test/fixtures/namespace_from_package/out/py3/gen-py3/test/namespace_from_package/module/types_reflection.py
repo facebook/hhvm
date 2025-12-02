@@ -20,7 +20,10 @@ from thrift.py3.reflection import (
 )
 
 
-import test.namespace_from_package.module.types as _test_namespace_from_package_module_types
+try:
+    import test.namespace_from_package.module.types as _test_namespace_from_package_module_types
+except ModuleNotFoundError:
+    import test.namespace_from_package.module.thrift_types as _test_namespace_from_package_module_types
 
 
 

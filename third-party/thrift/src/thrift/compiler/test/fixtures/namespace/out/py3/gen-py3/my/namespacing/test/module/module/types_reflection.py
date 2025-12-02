@@ -20,7 +20,10 @@ from thrift.py3.reflection import (
 )
 
 
-import my.namespacing.test.module.module.types as _my_namespacing_test_module_module_types
+try:
+    import my.namespacing.test.module.module.types as _my_namespacing_test_module_module_types
+except ModuleNotFoundError:
+    import my.namespacing.test.module.module.thrift_types as _my_namespacing_test_module_module_types
 
 
 

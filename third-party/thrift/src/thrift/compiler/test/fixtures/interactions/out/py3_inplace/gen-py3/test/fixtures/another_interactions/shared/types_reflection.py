@@ -20,7 +20,10 @@ from thrift.py3.reflection import (
 )
 
 
-import test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
+try:
+    import test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
+except ModuleNotFoundError:
+    import test.fixtures.another_interactions.shared.thrift_types as _test_fixtures_another_interactions_shared_types
 
 
 

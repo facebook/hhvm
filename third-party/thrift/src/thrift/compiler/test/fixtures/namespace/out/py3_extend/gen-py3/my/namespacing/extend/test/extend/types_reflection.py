@@ -19,9 +19,15 @@ from thrift.py3.reflection import (
     FieldSpec as __FieldSpec,
 )
 
-import my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
+try:
+    import my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
+except ModuleNotFoundError:
+    import my.namespacing.test.hsmodule.thrift_types as _my_namespacing_test_hsmodule_types
 
-import my.namespacing.extend.test.extend.types as _my_namespacing_extend_test_extend_types
+try:
+    import my.namespacing.extend.test.extend.types as _my_namespacing_extend_test_extend_types
+except ModuleNotFoundError:
+    import my.namespacing.extend.test.extend.thrift_types as _my_namespacing_extend_test_extend_types
 
 
 

@@ -20,7 +20,10 @@ from thrift.py3.reflection import (
 )
 
 
-import apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
+try:
+    import apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
+except ModuleNotFoundError:
+    import apache.thrift.fixtures.types.included.thrift_types as _apache_thrift_fixtures_types_included_types
 
 
 

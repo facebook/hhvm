@@ -20,7 +20,10 @@ from thrift.py3.reflection import (
 )
 
 
-import injected_field.types as _injected_field_types
+try:
+    import injected_field.types as _injected_field_types
+except ModuleNotFoundError:
+    import injected_field.thrift_types as _injected_field_types
 
 
 

@@ -19,9 +19,15 @@ from thrift.py3.reflection import (
     FieldSpec as __FieldSpec,
 )
 
-import test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
+try:
+    import test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
+except ModuleNotFoundError:
+    import test.fixtures.another_interactions.shared.thrift_types as _test_fixtures_another_interactions_shared_types
 
-import test.fixtures.interactions.module.types as _test_fixtures_interactions_module_types
+try:
+    import test.fixtures.interactions.module.types as _test_fixtures_interactions_module_types
+except ModuleNotFoundError:
+    import test.fixtures.interactions.module.thrift_types as _test_fixtures_interactions_module_types
 
 
 

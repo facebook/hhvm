@@ -20,7 +20,10 @@ from thrift.py3.reflection import (
 )
 
 
-import test.fixtures.enumstrict.module.types as _test_fixtures_enumstrict_module_types
+try:
+    import test.fixtures.enumstrict.module.types as _test_fixtures_enumstrict_module_types
+except ModuleNotFoundError:
+    import test.fixtures.enumstrict.module.thrift_types as _test_fixtures_enumstrict_module_types
 
 
 

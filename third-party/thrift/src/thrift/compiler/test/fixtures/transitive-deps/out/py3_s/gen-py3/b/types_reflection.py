@@ -19,9 +19,15 @@ from thrift.py3.reflection import (
     FieldSpec as __FieldSpec,
 )
 
-import c.types as _c_types
+try:
+    import c.types as _c_types
+except ModuleNotFoundError:
+    import c.thrift_types as _c_types
 
-import b.types as _b_types
+try:
+    import b.types as _b_types
+except ModuleNotFoundError:
+    import b.thrift_types as _b_types
 
 
 

@@ -20,7 +20,10 @@ from thrift.py3.reflection import (
 )
 
 
-import empty.types as _empty_types
+try:
+    import empty.types as _empty_types
+except ModuleNotFoundError:
+    import empty.thrift_types as _empty_types
 
 
 

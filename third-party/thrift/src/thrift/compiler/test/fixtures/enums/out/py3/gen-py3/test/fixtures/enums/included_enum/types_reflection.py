@@ -20,7 +20,10 @@ from thrift.py3.reflection import (
 )
 
 
-import test.fixtures.enums.included_enum.types as _test_fixtures_enums_included_enum_types
+try:
+    import test.fixtures.enums.included_enum.types as _test_fixtures_enums_included_enum_types
+except ModuleNotFoundError:
+    import test.fixtures.enums.included_enum.thrift_types as _test_fixtures_enums_included_enum_types
 
 
 

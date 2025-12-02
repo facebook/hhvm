@@ -16,20 +16,20 @@
 
 }}
 {{#pragma ignore-newlines}}
-  {{#if function:bidirectional_stream?}}
-{{#if function:stream_has_first_response?}}{{#partial typehints.pep484_type type=function:self.return_type}}, {{/if}}
+  {{#if function.bidirectional_stream?}}
+{{#if function.stream_has_first_response?}}{{#partial typehints.pep484_type type=function.return_type}}, {{/if}}
 _fbthrift_BidirectionalStream[
-{{#partial typehints.pep484_type type=function:self.sink.elem_type}}, {{!}}
-{{#partial typehints.pep484_type type=function:self.stream.elem_type}}
+{{#partial typehints.pep484_type type=function.sink.elem_type}}, {{!}}
+{{#partial typehints.pep484_type type=function.stream.elem_type}}
 ]
-  {{#else if function:stream?}}
-{{#if function:stream_has_first_response?}}{{#partial typehints.pep484_type type=function:self.return_type}}, {{/if}}
-_typing.AsyncGenerator[{{#partial typehints.pep484_type type=function:self.stream.elem_type}}, None]
-  {{#else if function:sink?}}
-{{#if function:sink_has_first_response?}}{{#partial typehints.pep484_type type=function:self.return_type}}, {{/if}}
+  {{#else if function.stream?}}
+{{#if function.stream_has_first_response?}}{{#partial typehints.pep484_type type=function.return_type}}, {{/if}}
+_typing.AsyncGenerator[{{#partial typehints.pep484_type type=function.stream.elem_type}}, None]
+  {{#else if function.sink?}}
+{{#if function.sink_has_first_response?}}{{#partial typehints.pep484_type type=function.return_type}}, {{/if}}
 _fbthrift_ClientSink[
-{{#partial typehints.pep484_type type=function:self.sink.elem_type}}, {{!}}
-{{#partial typehints.pep484_type type=function:self.sink.final_response_type}}]
+{{#partial typehints.pep484_type type=function.sink.elem_type}}, {{!}}
+{{#partial typehints.pep484_type type=function.sink.final_response_type}}]
   {{#else}}
-{{#partial typehints.pep484_type type=function:self.return_type}}
-  {{/if function:bidirectional_stream?}}
+{{#partial typehints.pep484_type type=function.return_type}}
+  {{/if function.bidirectional_stream?}}

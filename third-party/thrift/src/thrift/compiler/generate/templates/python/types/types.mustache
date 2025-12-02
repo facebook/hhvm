@@ -124,7 +124,7 @@ class {{> structs/unadapted_name}}{{!
 {{#python.generate_immutable_types?}}
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
-        return {{#if (has_compiler_option? "auto_migrate")}}True{{#else}}False{{/if}}
+        return {{(py_bool (has_compiler_option? "auto_migrate"))}}
 
     @staticmethod
     def __get_metadata__():

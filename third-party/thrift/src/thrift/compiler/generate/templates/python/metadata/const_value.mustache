@@ -17,7 +17,7 @@
 }}{{#pragma ignore-newlines}}
 _fbthrift_metadata.ThriftConstValue(
   {{#if value:bool?}}
-cv_bool={{#if value:nonzero?}}True{{#else}}False{{/if}}
+cv_bool={{(py_bool value:nonzero?)}}
   {{#else if (or value:integer? value:enum?)}}
 cv_integer={{value:integer_value}}
   {{#else if value:double?}}

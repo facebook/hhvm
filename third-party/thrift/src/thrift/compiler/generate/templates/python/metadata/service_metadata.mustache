@@ -42,7 +42,7 @@ functions = [
             {{/field:self.structured_annotations}}
         ]),
         {{/function:exceptions}}
-    ], is_oneway={{#function:oneway?}}True{{/function:oneway?}}{{^function:oneway?}}False{{/function:oneway?}}, structured_annotations=[
+    ], is_oneway={{(py_bool function:oneway?)}}, structured_annotations=[
         {{#function:self.structured_annotations}}
           {{#if constant:type.structured?}}
         {{#constant:value}}{{> metadata/const_struct }}{{/constant:value}},

@@ -649,6 +649,13 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     globals["python"] = whisker::object(
         whisker::native_handle<python_generator_context>(
             python_context_, make_prototype_for_context()));
+    globals["py_bool"] = whisker::dsl::make_function(
+        "py_bool", [](whisker::dsl::function::context ctx) -> whisker::object {
+          ctx.declare_named_arguments({});
+          ctx.declare_arity(1);
+          return whisker::make::string(
+              ctx.argument<whisker::boolean>(0) ? "True" : "False");
+        });
     globals["py_string_literal"] = whisker::dsl::make_function(
         "py_string_literal",
         [](whisker::dsl::function::context ctx) -> whisker::object {

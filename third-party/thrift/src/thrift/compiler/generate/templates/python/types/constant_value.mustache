@@ -22,7 +22,7 @@ file.
 
 }}{{#pragma ignore-newlines}}
   {{#if (or value:bool? (and value:integer? value:type.bool?))}}
-{{#if value:nonzero?}}True{{#else}}False{{/if}}
+{{(py_bool value:nonzero?)}}
   {{#else if value:integer?}}
 {{value:integer_value}}{{#if value:type.floating_point?}}.0{{/if}}
   {{#else if value:double?}}

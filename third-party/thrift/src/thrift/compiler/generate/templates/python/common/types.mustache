@@ -102,7 +102,7 @@ Whisker partial equivalent to the macro `structs/unadapted_name`.
 {{#let export partial is_primitive |type|}}
 {{#pragma ignore-newlines}}
 {{#let primitive = (and (or type.primitive? type.iobuf?) (not type.string?))}}
-{{#if primitive}}True{{#else}}False{{/if}}
+{{(py_bool primitive)}}
 {{/let partial}}
 
 {{! Pick the Thrift container wrapper type for mutable types }}

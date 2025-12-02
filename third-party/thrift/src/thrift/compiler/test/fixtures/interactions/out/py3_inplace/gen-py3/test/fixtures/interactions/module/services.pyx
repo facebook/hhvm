@@ -48,7 +48,10 @@ from thrift.python.common cimport (
     MetadataBox as __MetadataBox,
 )
 
-from thrift.py3.types cimport make_unique, deref_const
+from thrift.py3.types cimport (
+    make_unique,
+    deref_const as __deref_const,
+)
 
 cimport folly.futures
 from folly.executor cimport get_executor
@@ -1359,7 +1362,7 @@ cdef api void call_cy_BoxService_getABoxSession(
     unique_ptr[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed] req
 ) noexcept:
     cdef Promise__test_fixtures_interactions_module_cbindings_cShouldBeBoxed __promise = Promise__test_fixtures_interactions_module_cbindings_cShouldBeBoxed._fbthrift_create(cmove(cPromise))
-    arg_req = _test_fixtures_interactions_module_types.ShouldBeBoxed.from_python(_test_fixtures_interactions_module_thrift_converter.ShouldBeBoxed_from_cpp(deref_const[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed](cmove(req))))
+    arg_req = _test_fixtures_interactions_module_types.ShouldBeBoxed.from_python(_test_fixtures_interactions_module_thrift_converter.ShouldBeBoxed_from_cpp(__deref_const[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed](cmove(req))))
     __context = RequestContext._fbthrift_create(ctx)
     __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     try:

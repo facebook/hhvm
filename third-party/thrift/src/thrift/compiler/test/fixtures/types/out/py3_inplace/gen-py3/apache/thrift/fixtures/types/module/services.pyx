@@ -48,7 +48,10 @@ from thrift.python.common cimport (
     MetadataBox as __MetadataBox,
 )
 
-from thrift.py3.types cimport make_unique, deref_const
+from thrift.py3.types cimport (
+    make_unique,
+    deref_const as __deref_const,
+)
 
 cimport folly.futures
 from folly.executor cimport get_executor

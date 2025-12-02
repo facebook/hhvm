@@ -28,7 +28,10 @@ from folly.cast cimport down_cast_ptr
 from libcpp.typeinfo cimport type_info
 import thrift.py3.types
 cimport thrift.py3.types
-from thrift.py3.types cimport make_unique, deref_const
+from thrift.py3.types cimport (
+    make_unique,
+    deref_const as __deref_const,
+)
 import thrift.py3.client
 cimport thrift.py3.client
 from thrift.python.common cimport (
@@ -504,7 +507,7 @@ cdef void InteractWithShared_do_some_similar_things_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_test_fixtures_another_interactions_shared_types.DoSomethingResult.from_python(_test_fixtures_another_interactions_shared_thrift_converter.DoSomethingResult_from_cpp(deref_const[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult](result.value()))))
+            pyfuture.set_result(_test_fixtures_another_interactions_shared_types.DoSomethingResult.from_python(_test_fixtures_another_interactions_shared_thrift_converter.DoSomethingResult_from_cpp(__deref_const[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult](result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -578,7 +581,7 @@ cdef void InteractWithShared_SharedInteraction_do_something_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_test_fixtures_another_interactions_shared_types.DoSomethingResult.from_python(_test_fixtures_another_interactions_shared_thrift_converter.DoSomethingResult_from_cpp(deref_const[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult](result.value()))))
+            pyfuture.set_result(_test_fixtures_another_interactions_shared_types.DoSomethingResult.from_python(_test_fixtures_another_interactions_shared_thrift_converter.DoSomethingResult_from_cpp(__deref_const[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult](result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -604,7 +607,7 @@ cdef void BoxService_getABoxSession_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_test_fixtures_interactions_module_types.ShouldBeBoxed.from_python(_test_fixtures_interactions_module_thrift_converter.ShouldBeBoxed_from_cpp(deref_const[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed](result.value()))))
+            pyfuture.set_result(_test_fixtures_interactions_module_types.ShouldBeBoxed.from_python(_test_fixtures_interactions_module_thrift_converter.ShouldBeBoxed_from_cpp(__deref_const[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed](result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -617,7 +620,7 @@ cdef void BoxService_BoxedInteraction_getABox_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_test_fixtures_interactions_module_types.ShouldBeBoxed.from_python(_test_fixtures_interactions_module_thrift_converter.ShouldBeBoxed_from_cpp(deref_const[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed](result.value()))))
+            pyfuture.set_result(_test_fixtures_interactions_module_types.ShouldBeBoxed.from_python(_test_fixtures_interactions_module_thrift_converter.ShouldBeBoxed_from_cpp(__deref_const[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed](result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 

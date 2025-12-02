@@ -28,7 +28,10 @@ from folly.cast cimport down_cast_ptr
 from libcpp.typeinfo cimport type_info
 import thrift.py3.types
 cimport thrift.py3.types
-from thrift.py3.types cimport make_unique, deref_const
+from thrift.py3.types cimport (
+    make_unique,
+    deref_const as __deref_const,
+)
 import thrift.py3.client
 cimport thrift.py3.client
 from thrift.python.common cimport (

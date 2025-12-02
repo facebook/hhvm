@@ -46,7 +46,7 @@ to a python type.
 }}{{/program:inplace_migrate?}}{{#program:inplace_migrate?}}{{!
   }}{{> types/python_type}}.from_python({{!
   }}{{type:capi_converter_path}}.{{struct:name}}_from_cpp({{!
-  }}deref_const[{{> types/cython_cpp_type }}](result.value()))){{!
+  }}__deref_const[{{> types/cython_cpp_type }}](result.value()))){{!
 }}{{/program:inplace_migrate?}}{{/type:structured}}{{!
 }}{{#type:container?}}{{!
   }}{{> types/container_from_cpp}}(cmove(result.value())){{!

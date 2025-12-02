@@ -48,7 +48,10 @@ from thrift.python.common cimport (
     MetadataBox as __MetadataBox,
 )
 
-from thrift.py3.types cimport make_unique, deref_const
+from thrift.py3.types cimport (
+    make_unique,
+    deref_const as __deref_const,
+)
 
 cimport folly.futures
 from folly.executor cimport get_executor
@@ -1005,7 +1008,7 @@ cdef api void call_cy_SimpleService_get_value(
     unique_ptr[_module_cbindings.cSimpleStruct] simple_struct
 ) noexcept:
     cdef Promise_cint32_t __promise = Promise_cint32_t._fbthrift_create(cmove(cPromise))
-    arg_simple_struct = _module_types.SimpleStruct.from_python(_module_thrift_converter.SimpleStruct_from_cpp(deref_const[_module_cbindings.cSimpleStruct](cmove(simple_struct))))
+    arg_simple_struct = _module_types.SimpleStruct.from_python(_module_thrift_converter.SimpleStruct_from_cpp(__deref_const[_module_cbindings.cSimpleStruct](cmove(simple_struct))))
     __context = RequestContext._fbthrift_create(ctx)
     __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     try:
@@ -1365,7 +1368,7 @@ cdef api void call_cy_SimpleService_complex_sum_i32(
     unique_ptr[_module_cbindings.cComplexStruct] counter
 ) noexcept:
     cdef Promise_cint32_t __promise = Promise_cint32_t._fbthrift_create(cmove(cPromise))
-    arg_counter = _module_types.ComplexStruct.from_python(_module_thrift_converter.ComplexStruct_from_cpp(deref_const[_module_cbindings.cComplexStruct](cmove(counter))))
+    arg_counter = _module_types.ComplexStruct.from_python(_module_thrift_converter.ComplexStruct_from_cpp(__deref_const[_module_cbindings.cComplexStruct](cmove(counter))))
     __context = RequestContext._fbthrift_create(ctx)
     __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     try:
@@ -1385,7 +1388,7 @@ cdef api void call_cy_SimpleService_repeat_name(
     unique_ptr[_module_cbindings.cComplexStruct] counter
 ) noexcept:
     cdef Promise_string __promise = Promise_string._fbthrift_create(cmove(cPromise))
-    arg_counter = _module_types.ComplexStruct.from_python(_module_thrift_converter.ComplexStruct_from_cpp(deref_const[_module_cbindings.cComplexStruct](cmove(counter))))
+    arg_counter = _module_types.ComplexStruct.from_python(_module_thrift_converter.ComplexStruct_from_cpp(__deref_const[_module_cbindings.cComplexStruct](cmove(counter))))
     __context = RequestContext._fbthrift_create(ctx)
     __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     try:
@@ -1725,7 +1728,7 @@ cdef api void call_cy_SimpleService_get_binary_union_struct(
     unique_ptr[_module_cbindings.cBinaryUnion] u
 ) noexcept:
     cdef Promise__module_cbindings_cBinaryUnionStruct __promise = Promise__module_cbindings_cBinaryUnionStruct._fbthrift_create(cmove(cPromise))
-    arg_u = _module_types.BinaryUnion.from_python(_module_thrift_converter.BinaryUnion_from_cpp(deref_const[_module_cbindings.cBinaryUnion](cmove(u))))
+    arg_u = _module_types.BinaryUnion.from_python(_module_thrift_converter.BinaryUnion_from_cpp(__deref_const[_module_cbindings.cBinaryUnion](cmove(u))))
     __context = RequestContext._fbthrift_create(ctx)
     __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     try:

@@ -28,7 +28,10 @@ from folly.cast cimport down_cast_ptr
 from libcpp.typeinfo cimport type_info
 import thrift.py3.types
 cimport thrift.py3.types
-from thrift.py3.types cimport make_unique, deref_const
+from thrift.py3.types cimport (
+    make_unique,
+    deref_const as __deref_const,
+)
 import thrift.py3.client
 cimport thrift.py3.client
 from thrift.python.common cimport (
@@ -391,7 +394,7 @@ cdef void SimpleService_get_struct_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.SimpleStruct.from_python(_module_thrift_converter.SimpleStruct_from_cpp(deref_const[_module_cbindings.cSimpleStruct](result.value()))))
+            pyfuture.set_result(_module_types.SimpleStruct.from_python(_module_thrift_converter.SimpleStruct_from_cpp(__deref_const[_module_cbindings.cSimpleStruct](result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -599,7 +602,7 @@ cdef void SimpleService_get_binary_union_struct_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.BinaryUnionStruct.from_python(_module_thrift_converter.BinaryUnionStruct_from_cpp(deref_const[_module_cbindings.cBinaryUnionStruct](result.value()))))
+            pyfuture.set_result(_module_types.BinaryUnionStruct.from_python(_module_thrift_converter.BinaryUnionStruct_from_cpp(__deref_const[_module_cbindings.cBinaryUnionStruct](result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 

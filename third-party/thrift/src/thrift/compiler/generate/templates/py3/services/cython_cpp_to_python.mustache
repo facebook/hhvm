@@ -42,7 +42,7 @@ to be converted from unicode to binary representation.
 }}{{/program:inplace_migrate?}}{{#program:inplace_migrate?}}{{!
   }}{{> types/python_type}}.from_python({{!
   }}{{type:capi_converter_path}}.{{struct:name}}_from_cpp({{!
-  }}deref_const[{{> types/cython_cpp_type }}](cmove({{field:py_name}})))){{!
+  }}__deref_const[{{> types/cython_cpp_type }}](cmove({{field:py_name}})))){{!
 }}{{/program:inplace_migrate?}}{{/type:structured}}{{!
 }}{{#type:container?}}{{!
   }}{{> types/container_from_cpp}}(deref({{field:py_name}})){{!

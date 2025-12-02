@@ -28,7 +28,10 @@ from folly.cast cimport down_cast_ptr
 from libcpp.typeinfo cimport type_info
 import thrift.py3.types
 cimport thrift.py3.types
-from thrift.py3.types cimport make_unique, deref_const
+from thrift.py3.types cimport (
+    make_unique,
+    deref_const as __deref_const,
+)
 import thrift.py3.client
 cimport thrift.py3.client
 from thrift.python.common cimport (
@@ -82,7 +85,7 @@ cdef void InteractLocally_SharedInteraction_do_something_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_test_fixtures_another_interactions_shared_types.DoSomethingResult.from_python(_test_fixtures_another_interactions_shared_thrift_converter.DoSomethingResult_from_cpp(deref_const[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult](result.value()))))
+            pyfuture.set_result(_test_fixtures_another_interactions_shared_types.DoSomethingResult.from_python(_test_fixtures_another_interactions_shared_thrift_converter.DoSomethingResult_from_cpp(__deref_const[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult](result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 

@@ -81,21 +81,26 @@ std::shared_ptr<ChangeUserOperation> Connection::changeUser(
 }
 
 template <>
-std::shared_ptr<QueryOperation> Connection::beginQuery(
+std::shared_ptr<QueryOperation> Connection::beginQueryWithLoggingFuncs(
     std::unique_ptr<Connection> conn,
+    LoggingFuncsPtr logging_funcs,
     Query&& query) {
   return beginAnyQuery<QueryOperation>(
       std::make_unique<OperationBase::OwnedConnection>(std::move(conn)),
+      std::move(logging_funcs),
       std::move(query));
 }
 
 template <>
-std::shared_ptr<MultiQueryOperation> Connection::beginMultiQuery(
+std::shared_ptr<MultiQueryOperation>
+Connection::beginMultiQueryWithLoggingFuncs(
     std::unique_ptr<Connection> conn,
+    LoggingFuncsPtr logging_funcs,
     std::vector<Query>&& queries) {
   auto is_queries_empty = queries.empty();
   auto operation = beginAnyQuery<MultiQueryOperation>(
       std::make_unique<OperationBase::OwnedConnection>(std::move(conn)),
+      std::move(logging_funcs),
       std::move(queries));
   if (is_queries_empty) {
     operation->setAsyncClientError(
@@ -113,6 +118,7 @@ std::shared_ptr<MultiQueryStreamOperation> Connection::beginMultiQueryStreaming(
   auto is_queries_empty = queries.empty();
   auto operation = beginAnyQuery<MultiQueryStreamOperation>(
       std::make_unique<OperationBase::OwnedConnection>(std::move(conn)),
+      nullptr,
       std::move(queries));
   if (is_queries_empty) {
     operation->setAsyncClientError(
@@ -126,13 +132,15 @@ std::shared_ptr<MultiQueryStreamOperation> Connection::beginMultiQueryStreaming(
 template <typename QueryType, typename QueryArg>
 std::shared_ptr<QueryType> Connection::beginAnyQuery(
     std::unique_ptr<OperationBase::ConnectionProxy> conn_proxy,
+    LoggingFuncsPtr logging_funcs,
     QueryArg&& query) {
   CHECK_THROW(conn_proxy.get(), db::InvalidConnectionException);
   CHECK_THROW(conn_proxy->get()->ok(), db::InvalidConnectionException);
   conn_proxy->get()->checkOperationInProgress();
   const auto& client = conn_proxy->get()->mysql_client_;
   auto ret = std::shared_ptr<QueryType>(new QueryType(
-      client.createFetchOperationImpl(std::move(conn_proxy)),
+      client.createFetchOperationImpl(
+          std::move(conn_proxy), std::move(logging_funcs)),
       std::forward<QueryArg>(query)));
   auto& conn = ret->conn();
   Duration timeout = conn.conn_options_.getQueryTimeout();
@@ -179,11 +187,15 @@ std::shared_ptr<QueryType> Connection::beginAnyQuery(
 // A query might already be semicolon-separated, so we allow this to
 // be a MultiQuery.  Or it might just be one query; that's okay, too.
 template <>
-std::shared_ptr<MultiQueryOperation> Connection::beginMultiQuery(
+std::shared_ptr<MultiQueryOperation>
+Connection::beginMultiQueryWithLoggingFuncs(
     std::unique_ptr<Connection> conn,
+    LoggingFuncsPtr logging_funcs,
     Query&& query) {
-  return Connection::beginMultiQuery(
-      std::move(conn), std::vector<Query>{std::move(query)});
+  return Connection::beginMultiQueryWithLoggingFuncs(
+      std::move(conn),
+      std::move(logging_funcs),
+      std::vector<Query>{std::move(query)});
 }
 
 template <>
@@ -203,10 +215,8 @@ folly::SemiFuture<DbQueryResult> Connection::querySemiFuture(
     throw db::InvalidConnectionException("null connection supplied");
   }
   conn->mergePersistentQueryAttributes(options.getAttributes());
-  if (conn->connection_context_) {
-    conn->connection_context_->loggingFuncs_ = options.stealLoggingFuncs();
-  }
-  auto op = beginQuery(std::move(conn), std::move(query));
+  auto op = beginQueryWithLoggingFuncs(
+      std::move(conn), options.stealLoggingFuncs(), std::move(query));
   op->setAttributes(std::move(options.getAttributes()));
   checkForQueryTimeoutOverride(*op, options.getQueryTimeout());
   if (cb) {
@@ -224,10 +234,8 @@ folly::SemiFuture<DbMultiQueryResult> Connection::multiQuerySemiFuture(
     throw db::InvalidConnectionException("null connection supplied");
   }
   conn->mergePersistentQueryAttributes(options.getAttributes());
-  if (conn->connection_context_) {
-    conn->connection_context_->loggingFuncs_ = options.stealLoggingFuncs();
-  }
-  auto op = beginMultiQuery(std::move(conn), std::move(args));
+  auto op = beginMultiQueryWithLoggingFuncs(
+      std::move(conn), options.stealLoggingFuncs(), std::move(args));
   op->setAttributes(std::move(options.getAttributes()));
   checkForQueryTimeoutOverride(*op, options.getQueryTimeout());
   if (cb) {
@@ -245,10 +253,8 @@ folly::SemiFuture<DbMultiQueryResult> Connection::multiQuerySemiFuture(
     throw db::InvalidConnectionException("null connection supplied");
   }
   conn->mergePersistentQueryAttributes(options.getAttributes());
-  if (conn->connection_context_) {
-    conn->connection_context_->loggingFuncs_ = options.stealLoggingFuncs();
-  }
-  auto op = beginMultiQuery(std::move(conn), std::move(args));
+  auto op = beginMultiQueryWithLoggingFuncs(
+      std::move(conn), options.stealLoggingFuncs(), std::move(args));
   op->setAttributes(std::move(options.getAttributes()));
   checkForQueryTimeoutOverride(*op, options.getQueryTimeout());
   if (cb) {
@@ -265,6 +271,7 @@ DbQueryResult Connection::internalQuery(
     QueryOptions&& options) {
   auto op = beginAnyQuery<QueryOperation>(
       std::make_unique<OperationBase::ReferencedConnection>(*this),
+      options.stealLoggingFuncs(),
       std::move(query));
   mergePersistentQueryAttributes(options.getAttributes());
   op->setAttributes(std::move(options.getAttributes()));
@@ -414,6 +421,7 @@ DbMultiQueryResult Connection::internalMultiQuery(
     QueryOptions&& options) {
   auto op = beginAnyQuery<MultiQueryOperation>(
       std::make_unique<OperationBase::ReferencedConnection>(*this),
+      options.stealLoggingFuncs(),
       std::move(queries));
   mergePersistentQueryAttributes(options.getAttributes());
   op->setAttributes(std::move(options.getAttributes()));
@@ -572,6 +580,7 @@ MultiQueryStreamHandler Connection::streamMultiQuery(
   // `postOperationEnded` is called.
   auto op = beginAnyQuery<MultiQueryStreamOperation>(
       std::make_unique<OperationBase::OwnedConnection>(std::move(conn)),
+      nullptr,
       std::move(queries));
   if (attributes.size() > 0) {
     op->setAttributes(attributes);

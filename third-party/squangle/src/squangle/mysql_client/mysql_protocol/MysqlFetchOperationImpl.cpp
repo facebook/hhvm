@@ -410,6 +410,7 @@ void MysqlFetchOperationImpl::specializedCompleteOperation() {
       getTimeout(),
       num_queries_executed_,
       rendered_query_,
+      std::move(logging_funcs_),
       rows_received_,
       total_result_size_,
       connection.serverInfo(),

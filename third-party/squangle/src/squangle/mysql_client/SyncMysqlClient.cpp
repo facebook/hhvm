@@ -39,9 +39,10 @@ SyncMysqlClient::createConnectOperationImpl(
 }
 
 std::unique_ptr<FetchOperationImpl> SyncMysqlClient::createFetchOperationImpl(
-    std::unique_ptr<OperationBase::ConnectionProxy> conn) const {
+    std::unique_ptr<OperationBase::ConnectionProxy> conn,
+    LoggingFuncsPtr logging_funcs) const {
   return std::make_unique<mysql_protocol::MysqlFetchOperationImpl>(
-      std::move(conn));
+      std::move(conn), std::move(logging_funcs));
 }
 
 std::unique_ptr<SpecialOperationImpl>

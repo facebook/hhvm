@@ -135,9 +135,11 @@ std::shared_ptr<ConnectOperation> MysqlClientBase::beginConnection(
 // Helper versions of the above that take a Connection instead of a
 // ConnectionProxy
 std::unique_ptr<FetchOperationImpl> MysqlClientBase::createFetchOperationImpl(
-    std::unique_ptr<Connection> conn) const {
+    std::unique_ptr<Connection> conn,
+    LoggingFuncsPtr logging_funcs) const {
   return createFetchOperationImpl(
-      std::make_unique<OperationBase::OwnedConnection>(std::move(conn)));
+      std::make_unique<OperationBase::OwnedConnection>(std::move(conn)),
+      std::move(logging_funcs));
 }
 std::unique_ptr<SpecialOperationImpl>
 MysqlClientBase::createSpecialOperationImpl(

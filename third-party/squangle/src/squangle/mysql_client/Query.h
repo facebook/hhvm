@@ -169,23 +169,24 @@ class QueryOptions {
       const std::string& name,
       std::function<std::string()> func) {
     if (func == nullptr) {
-      loggingFuncs_.erase(name);
+      loggingFuncs_.reset();
     } else {
-      loggingFuncs_[name] = std::move(func);
+      if (!loggingFuncs_) {
+        loggingFuncs_ = std::make_shared<LoggingFuncs>();
+      }
+
+      (*loggingFuncs_)[name] = std::move(func);
     }
   }
 
-  std::unordered_map<std::string, std::function<std::string()>>
-  stealLoggingFuncs() {
-    std::unordered_map<std::string, std::function<std::string()>> funcs;
-    std::swap(funcs, loggingFuncs_);
-    return funcs;
+  LoggingFuncsPtr stealLoggingFuncs() {
+    return std::move(loggingFuncs_);
   }
 
  protected:
   QueryAttributes attributes_;
   std::optional<Duration> queryTimeoutOverride_;
-  std::unordered_map<std::string, std::function<std::string()>> loggingFuncs_;
+  LoggingFuncsPtr loggingFuncs_;
 };
 
 class Query {

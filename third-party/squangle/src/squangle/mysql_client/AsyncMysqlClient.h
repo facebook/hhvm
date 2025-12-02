@@ -275,7 +275,8 @@ class AsyncMysqlClient : public MysqlClientBase {
       std::shared_ptr<const ConnectionKey> conn_key) const override;
 
   std::unique_ptr<FetchOperationImpl> createFetchOperationImpl(
-      std::unique_ptr<OperationBase::ConnectionProxy> conn) const override;
+      std::unique_ptr<OperationBase::ConnectionProxy> conn,
+      LoggingFuncsPtr logging_funcs) const override;
 
   std::unique_ptr<SpecialOperationImpl> createSpecialOperationImpl(
       std::unique_ptr<OperationBase::ConnectionProxy> conn) const override;

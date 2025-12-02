@@ -70,7 +70,8 @@ class SyncMysqlClient : public MysqlClientBase {
       std::shared_ptr<const ConnectionKey> conn_key) const override;
 
   std::unique_ptr<FetchOperationImpl> createFetchOperationImpl(
-      std::unique_ptr<OperationBase::ConnectionProxy> conn) const override;
+      std::unique_ptr<OperationBase::ConnectionProxy> conn,
+      LoggingFuncsPtr logging_funcs) const override;
 
   std::unique_ptr<SpecialOperationImpl> createSpecialOperationImpl(
       std::unique_ptr<OperationBase::ConnectionProxy> conn) const override;
@@ -98,7 +99,7 @@ class SyncConnection : public Connection {
   std::shared_ptr<MultiQueryStreamOperation> createOperation(
       std::unique_ptr<OperationBase::ConnectionProxy> proxy,
       MultiQuery&& multi_query) override {
-    auto impl = client().createFetchOperationImpl(std::move(proxy));
+    auto impl = client().createFetchOperationImpl(std::move(proxy), nullptr);
     return MultiQueryStreamOperation::create(
         std::move(impl), std::move(multi_query));
   }

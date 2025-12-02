@@ -97,7 +97,8 @@ class FetchOperationImpl : virtual public OperationBase {
  public:
   using RespAttrs = AttributeMap;
 
-  // FetchOperationImpl() : OperationBase(nullptr) {}
+  explicit FetchOperationImpl(LoggingFuncsPtr logging_funcs)
+      : logging_funcs_(std::move(logging_funcs)) {}
   virtual ~FetchOperationImpl() override = default;
 
   std::shared_ptr<folly::fbstring> getRenderedQuery() const noexcept {
@@ -229,6 +230,8 @@ class FetchOperationImpl : virtual public OperationBase {
   // and the action that got paused gets saved so that `resume` can set it
   // properly afterwards.
   FetchAction paused_action_ = FetchAction::StartQuery;
+
+  LoggingFuncsPtr logging_funcs_;
 
  private:
   std::atomic<FetchAction> active_fetch_action_ = FetchAction::StartQuery;

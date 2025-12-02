@@ -17,8 +17,10 @@ class MysqlFetchOperationImpl : public MysqlOperationImpl,
                                 public FetchOperationImpl {
  public:
   explicit MysqlFetchOperationImpl(
-      std::unique_ptr<MysqlOperationImpl::ConnectionProxy> conn)
-      : OperationBase(std::move(conn)) {}
+      std::unique_ptr<MysqlOperationImpl::ConnectionProxy> conn,
+      LoggingFuncsPtr logging_funcs)
+      : OperationBase(std::move(conn)),
+        FetchOperationImpl(std::move(logging_funcs)) {}
 
  protected:
   void specializedRunImpl();

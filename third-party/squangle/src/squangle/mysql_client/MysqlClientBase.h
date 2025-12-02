@@ -138,14 +138,16 @@ class MysqlClientBase {
       MysqlClientBase* client,
       std::shared_ptr<const ConnectionKey> conn_key) const = 0;
   virtual std::unique_ptr<FetchOperationImpl> createFetchOperationImpl(
-      std::unique_ptr<OperationBase::ConnectionProxy> conn) const = 0;
+      std::unique_ptr<OperationBase::ConnectionProxy> conn,
+      LoggingFuncsPtr logging_funcs) const = 0;
   virtual std::unique_ptr<SpecialOperationImpl> createSpecialOperationImpl(
       std::unique_ptr<OperationBase::ConnectionProxy> conn) const = 0;
 
   // Helper versions of the above that take a Connection instead of a
   // ConnectionProxy
   std::unique_ptr<FetchOperationImpl> createFetchOperationImpl(
-      std::unique_ptr<Connection> conn) const;
+      std::unique_ptr<Connection> conn,
+      LoggingFuncsPtr logging_funcs) const;
   std::unique_ptr<SpecialOperationImpl> createSpecialOperationImpl(
       std::unique_ptr<Connection> conn) const;
 

@@ -61,7 +61,6 @@ class ConnectionContextBase {
   bool isIdentityClientCert = false;
   std::string endpointVersion;
   std::optional<size_t> certCacheSize;
-  std::unordered_map<std::string, std::function<std::string()>> loggingFuncs_;
 };
 
 class ExponentialMovingAverage {

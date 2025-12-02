@@ -165,6 +165,7 @@ struct QueryLoggingData : CommonLoggingData {
       std::optional<Duration> timeout,
       int queries,
       std::shared_ptr<folly::fbstring> queryString,
+      common::mysql_client::LoggingFuncsPtr loggingFuncs,
       int rows,
       uint64_t resultSize = 0,
       std::optional<std::string> db_version = std::nullopt,
@@ -185,6 +186,7 @@ struct QueryLoggingData : CommonLoggingData {
             totalThreadBlockTime),
         queries_executed(queries),
         query(std::move(queryString)),
+        loggingFuncs(std::move(loggingFuncs)),
         rows_received(rows),
         result_size(resultSize),
         no_index_used(noIndexUsed),
@@ -195,6 +197,7 @@ struct QueryLoggingData : CommonLoggingData {
         warnings_count(warningsCount) {}
   int queries_executed;
   std::shared_ptr<folly::fbstring> query;
+  common::mysql_client::LoggingFuncsPtr loggingFuncs;
   int rows_received;
   uint64_t result_size;
   bool no_index_used;

@@ -77,8 +77,25 @@ class Connection {
       Args&&... args);
 
   template <typename... Args>
+  [[nodiscard]] static std::shared_ptr<QueryOperation>
+  beginQueryWithLoggingFuncs(
+      std::unique_ptr<Connection> conn,
+      LoggingFuncsPtr logging_funcs,
+      Args&&... args);
+
+  template <typename... Args>
   [[nodiscard]] static std::shared_ptr<MultiQueryOperation> beginMultiQuery(
       std::unique_ptr<Connection> conn,
+      Args&&... args) {
+    return beginMultiQueryWithLoggingFuncs(
+        std::move(conn), nullptr, std::forward<Args>(args)...);
+  }
+
+  template <typename... Args>
+  [[nodiscard]] static std::shared_ptr<MultiQueryOperation>
+  beginMultiQueryWithLoggingFuncs(
+      std::unique_ptr<Connection> conn,
+      LoggingFuncsPtr logging_funcs,
       Args&&... args);
 
   [[nodiscard]] static folly::SemiFuture<DbQueryResult> querySemiFuture(
@@ -132,7 +149,7 @@ class Connection {
   createOperation(
       std::unique_ptr<OperationBase::ConnectionProxy> proxy,
       MultiQuery&& multi_query) {
-    auto impl = client().createFetchOperationImpl(std::move(proxy));
+    auto impl = client().createFetchOperationImpl(std::move(proxy), nullptr);
     return MultiQueryStreamOperation::create(
         std::move(impl), std::move(multi_query));
   }
@@ -501,6 +518,7 @@ class Connection {
   template <typename QueryType, typename QueryArg>
   [[nodiscard]] static std::shared_ptr<QueryType> beginAnyQuery(
       std::unique_ptr<OperationBase::ConnectionProxy> conn_proxy,
+      LoggingFuncsPtr logging_funcs,
       QueryArg&& query);
 
   void checkOperationInProgress() {
@@ -714,8 +732,9 @@ DbQueryResult Connection::query(Args&&... args) {
 }
 
 template <>
-std::shared_ptr<QueryOperation> Connection::beginQuery(
+std::shared_ptr<QueryOperation> Connection::beginQueryWithLoggingFuncs(
     std::unique_ptr<Connection> conn,
+    LoggingFuncsPtr logging_funcs,
     Query&& args);
 
 template <typename... Args>
@@ -723,7 +742,17 @@ std::shared_ptr<QueryOperation> Connection::beginQuery(
     std::unique_ptr<Connection> conn,
     Args&&... args) {
   Query query{std::forward<Args>(args)...};
-  return beginQuery(std::move(conn), std::move(query));
+  return beginQueryWithLoggingFuncs(std::move(conn), nullptr, std::move(query));
+}
+
+template <typename... Args>
+std::shared_ptr<QueryOperation> Connection::beginQueryWithLoggingFuncs(
+    std::unique_ptr<Connection> conn,
+    LoggingFuncsPtr logging_funcs,
+    Args&&... args) {
+  Query query{std::forward<Args>(args)...};
+  return beginQueryWithLoggingFuncs(
+      std::move(conn), std::move(logging_funcs), std::move(query));
 }
 
 // Helper class to support needing to wait on async connections - the sync

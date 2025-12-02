@@ -35,4 +35,8 @@ enum class QueryCallbackReason { RowsFetched, QueryBoundary, Failure, Success };
 // overload of operator<< for QueryCallbackReason
 std::ostream& operator<<(std::ostream& os, QueryCallbackReason reason);
 
+using LoggingFuncs =
+    std::unordered_map<std::string, std::function<std::string()>>;
+using LoggingFuncsPtr = std::shared_ptr<LoggingFuncs>;
+
 } // namespace facebook::common::mysql_client

@@ -251,7 +251,8 @@ final class FusableReconnectingRpcClientMono extends Mono<RpcClient> implements 
     return (long) Math.min(exp + jitter, MAX_TIMEOUT_MS);
   }
 
-  private class InnerSubscription extends AtomicBoolean implements Subscription {
+  private class InnerSubscription extends AtomicBoolean
+      implements Fuseable.QueueSubscription<RpcClient> {
 
     private final CoreSubscriber<? super RpcClient> actual;
 
@@ -275,5 +276,28 @@ final class FusableReconnectingRpcClientMono extends Mono<RpcClient> implements 
     public void cancel() {
       set(true);
     }
+
+    @Override
+    public int requestFusion(int requestedMode) {
+      return NONE;
+    }
+
+    @Override
+    public RpcClient poll() {
+      return null;
+    }
+
+    @Override
+    public int size() {
+      return 0;
+    }
+
+    @Override
+    public boolean isEmpty() {
+      return true;
+    }
+
+    @Override
+    public void clear() {}
   }
 }

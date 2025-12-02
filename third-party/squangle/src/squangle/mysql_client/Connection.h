@@ -127,18 +127,6 @@ class Connection {
         std::move(conn), std::move(queries), nullptr, std::move(options));
   }
 
-  // An alternate interface that allows for easier re-use of an
-  // existing query_op, moving the Connection from the old op and into
-  // the new one.  See details above for what args... are.
-  template <typename... Args>
-  static std::shared_ptr<QueryOperation> beginQuery(
-      std::shared_ptr<QueryOperation>& op,
-      Args&&... args) {
-    CHECK_THROW(op->done(), db::OperationStateException);
-    op = beginQuery(op->releaseConnection(), std::forward<Args>(args)...);
-    return op;
-  }
-
   // Experimental
   [[nodiscard]] virtual std::shared_ptr<MultiQueryStreamOperation>
   createOperation(

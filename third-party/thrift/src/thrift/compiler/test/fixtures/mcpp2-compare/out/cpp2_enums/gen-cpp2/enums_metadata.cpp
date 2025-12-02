@@ -26,7 +26,14 @@ using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t, std::size_t);
 
+inline constexpr Options kGenerateAll = {.genAnnotations = true, .genNestedTypes = true};
+
 void EnumMetadata<::facebook::ns::qwerty::AnEnumA>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::facebook::ns::qwerty::AnEnumA>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumA>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -40,6 +47,11 @@ void EnumMetadata<::facebook::ns::qwerty::AnEnumA>::gen(ThriftMetadata& metadata
   ));
 }
 void EnumMetadata<::facebook::ns::qwerty::AnEnumB>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::facebook::ns::qwerty::AnEnumB>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumB>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -53,6 +65,11 @@ void EnumMetadata<::facebook::ns::qwerty::AnEnumB>::gen(ThriftMetadata& metadata
   ));
 }
 void EnumMetadata<::facebook::ns::qwerty::AnEnumC>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::facebook::ns::qwerty::AnEnumC>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumC>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -66,6 +83,11 @@ void EnumMetadata<::facebook::ns::qwerty::AnEnumC>::gen(ThriftMetadata& metadata
   ));
 }
 void EnumMetadata<::facebook::ns::qwerty::AnEnumD>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::facebook::ns::qwerty::AnEnumD>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumD>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -79,6 +101,11 @@ void EnumMetadata<::facebook::ns::qwerty::AnEnumD>::gen(ThriftMetadata& metadata
   ));
 }
 void EnumMetadata<::facebook::ns::qwerty::AnEnumE>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::facebook::ns::qwerty::AnEnumE>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::facebook::ns::qwerty::AnEnumE>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;

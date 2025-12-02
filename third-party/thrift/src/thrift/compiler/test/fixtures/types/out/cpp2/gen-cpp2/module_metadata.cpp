@@ -31,7 +31,14 @@ using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t, std::size_t);
 
+inline constexpr Options kGenerateAll = {.genAnnotations = true, .genNestedTypes = true};
+
 void EnumMetadata<::apache::thrift::fixtures::types::has_bitwise_ops>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::apache::thrift::fixtures::types::has_bitwise_ops>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::apache::thrift::fixtures::types::has_bitwise_ops>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -45,6 +52,11 @@ void EnumMetadata<::apache::thrift::fixtures::types::has_bitwise_ops>::gen(Thrif
   ));
 }
 void EnumMetadata<::apache::thrift::fixtures::types::is_unscoped>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::apache::thrift::fixtures::types::is_unscoped>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::apache::thrift::fixtures::types::is_unscoped>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -58,6 +70,11 @@ void EnumMetadata<::apache::thrift::fixtures::types::is_unscoped>::gen(ThriftMet
   ));
 }
 void EnumMetadata<::apache::thrift::fixtures::types::MyForwardRefEnum>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::apache::thrift::fixtures::types::MyForwardRefEnum>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::apache::thrift::fixtures::types::MyForwardRefEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;

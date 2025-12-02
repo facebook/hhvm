@@ -26,7 +26,14 @@ using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t, std::size_t);
 
+inline constexpr Options kGenerateAll = {.genAnnotations = true, .genNestedTypes = true};
+
 void EnumMetadata<::test::fixtures::enumstrict::EmptyEnum>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::test::fixtures::enumstrict::EmptyEnum>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::test::fixtures::enumstrict::EmptyEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -40,6 +47,11 @@ void EnumMetadata<::test::fixtures::enumstrict::EmptyEnum>::gen(ThriftMetadata& 
   ));
 }
 void EnumMetadata<::test::fixtures::enumstrict::MyEnum>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::test::fixtures::enumstrict::MyEnum>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::test::fixtures::enumstrict::MyEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -53,6 +65,11 @@ void EnumMetadata<::test::fixtures::enumstrict::MyEnum>::gen(ThriftMetadata& met
   ));
 }
 void EnumMetadata<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -67,6 +84,11 @@ void EnumMetadata<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum>::gen(
   ));
 }
 void EnumMetadata<::test::fixtures::enumstrict::MyBigEnum>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::test::fixtures::enumstrict::MyBigEnum>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::test::fixtures::enumstrict::MyBigEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;

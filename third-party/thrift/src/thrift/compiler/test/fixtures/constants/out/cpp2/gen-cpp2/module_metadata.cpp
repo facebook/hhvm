@@ -26,7 +26,14 @@ using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t, std::size_t);
 
+inline constexpr Options kGenerateAll = {.genAnnotations = true, .genNestedTypes = true};
+
 void EnumMetadata<::cpp2::EmptyEnum>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::cpp2::EmptyEnum>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::cpp2::EmptyEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -40,6 +47,11 @@ void EnumMetadata<::cpp2::EmptyEnum>::gen(ThriftMetadata& metadata) {
   ));
 }
 void EnumMetadata<::cpp2::City>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::cpp2::City>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::cpp2::City>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -53,6 +65,11 @@ void EnumMetadata<::cpp2::City>::gen(ThriftMetadata& metadata) {
   ));
 }
 void EnumMetadata<::cpp2::Company>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::cpp2::Company>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::cpp2::Company>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;

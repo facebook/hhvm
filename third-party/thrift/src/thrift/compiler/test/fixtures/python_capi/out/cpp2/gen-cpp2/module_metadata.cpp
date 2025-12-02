@@ -26,7 +26,14 @@ using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t, std::size_t);
 
+inline constexpr Options kGenerateAll = {.genAnnotations = true, .genNestedTypes = true};
+
 void EnumMetadata<::test::fixtures::python_capi::MyEnum>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::test::fixtures::python_capi::MyEnum>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::test::fixtures::python_capi::MyEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -40,6 +47,11 @@ void EnumMetadata<::test::fixtures::python_capi::MyEnum>::gen(ThriftMetadata& me
   ));
 }
 void EnumMetadata<::test::fixtures::python_capi::NormalDecentEnum>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::test::fixtures::python_capi::NormalDecentEnum>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::test::fixtures::python_capi::NormalDecentEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;

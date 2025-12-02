@@ -41,7 +41,14 @@ using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t, std::size_t);
 
+inline constexpr Options kGenerateAll = {.genAnnotations = true, .genNestedTypes = true};
+
 void EnumMetadata<::some::valid::ns::MyEnumA>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::some::valid::ns::MyEnumA>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::some::valid::ns::MyEnumA>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -55,6 +62,11 @@ void EnumMetadata<::some::valid::ns::MyEnumA>::gen(ThriftMetadata& metadata) {
   ));
 }
 void EnumMetadata<::some::valid::ns::AnnotatedEnum>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::some::valid::ns::AnnotatedEnum>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::some::valid::ns::AnnotatedEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -70,6 +82,11 @@ void EnumMetadata<::some::valid::ns::AnnotatedEnum>::gen(ThriftMetadata& metadat
   ));
 }
 void EnumMetadata<::some::valid::ns::AnnotatedEnum2>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::some::valid::ns::AnnotatedEnum2>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::some::valid::ns::AnnotatedEnum2>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -85,6 +102,11 @@ void EnumMetadata<::some::valid::ns::AnnotatedEnum2>::gen(ThriftMetadata& metada
   ));
 }
 void EnumMetadata<::some::valid::ns::MyEnumB>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::some::valid::ns::MyEnumB>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::some::valid::ns::MyEnumB>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;

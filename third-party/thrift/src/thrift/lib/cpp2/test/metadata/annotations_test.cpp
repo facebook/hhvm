@@ -85,17 +85,22 @@ metadata::ThriftEnum expectedEnum() {
 TEST(Annotations, Enum) {
   metadata::ThriftMetadata md;
   detail::md::EnumMetadata<TestEnum>::gen(md);
-  EXPECT_EQ(md.enums()["annotations.TestEnum"], expectedEnum());
-
-  metadata::ThriftMetadata md2;
-  auto res =
-      detail::md::genEnumMetadata<TestEnum>(md2, {.genAnnotations = true});
+  auto actual = md.enums()->at("annotations.TestEnum");
+  auto expected = expectedEnum();
   auto types = detail::md::getAnnotationTypes<TestEnum>();
+
+  // Annotations require a special function to check equality.
   EXPECT_TRUE(
       detail::md::structuredAnnotationsEquality(
-          *res.metadata.structured_annotations(),
-          *expectedEnum().structured_annotations(),
+          *actual.structured_annotations(),
+          *expected.structured_annotations(),
           types));
+
+  actual.structured_annotations()->clear();
+  expected.structured_annotations()->clear();
+
+  // After excluding the annotations, other fields should be the same.
+  EXPECT_EQ(actual, expected);
 }
 
 TEST(Annotations, Normalization) {

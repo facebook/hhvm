@@ -41,7 +41,14 @@ using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t, std::size_t);
 
+inline constexpr Options kGenerateAll = {.genAnnotations = true, .genNestedTypes = true};
+
 void EnumMetadata<::py3::simple::AnEnum>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::py3::simple::AnEnum>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::py3::simple::AnEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -55,6 +62,11 @@ void EnumMetadata<::py3::simple::AnEnum>::gen(ThriftMetadata& metadata) {
   ));
 }
 void EnumMetadata<::py3::simple::AnEnumRenamed>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::py3::simple::AnEnumRenamed>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::py3::simple::AnEnumRenamed>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -68,6 +80,11 @@ void EnumMetadata<::py3::simple::AnEnumRenamed>::gen(ThriftMetadata& metadata) {
   ));
 }
 void EnumMetadata<::py3::simple::Flags>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::py3::simple::Flags>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::py3::simple::Flags>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;

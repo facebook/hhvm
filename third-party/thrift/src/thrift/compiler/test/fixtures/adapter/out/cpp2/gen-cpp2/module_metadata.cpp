@@ -36,7 +36,14 @@ using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t, std::size_t);
 
+inline constexpr Options kGenerateAll = {.genAnnotations = true, .genNestedTypes = true};
+
 void EnumMetadata<::facebook::thrift::test::Color>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::facebook::thrift::test::Color>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::facebook::thrift::test::Color>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -50,6 +57,11 @@ void EnumMetadata<::facebook::thrift::test::Color>::gen(ThriftMetadata& metadata
   ));
 }
 void EnumMetadata<::facebook::thrift::test::ThriftAdaptedEnum>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::facebook::thrift::test::ThriftAdaptedEnum>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::facebook::thrift::test::ThriftAdaptedEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;

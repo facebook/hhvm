@@ -21,9 +21,12 @@
 #include <vector>
 
 #include <folly/Portability.h>
+#include <folly/portability/GFlags.h>
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include <thrift/lib/cpp2/runtime/SchemaRegistry.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
+
+FOLLY_GFLAGS_DECLARE_bool(thrift_enable_schema_to_metadata_conversion);
 
 namespace apache::thrift::detail::md {
 

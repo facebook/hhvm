@@ -26,7 +26,14 @@ using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t, std::size_t);
 
+inline constexpr Options kGenerateAll = {.genAnnotations = true, .genNestedTypes = true};
+
 void EnumMetadata<::test::fixtures::enums::Metasyntactic>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::test::fixtures::enums::Metasyntactic>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::test::fixtures::enums::Metasyntactic>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -40,6 +47,11 @@ void EnumMetadata<::test::fixtures::enums::Metasyntactic>::gen(ThriftMetadata& m
   ));
 }
 void EnumMetadata<::test::fixtures::enums::MyEnum1>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::test::fixtures::enums::MyEnum1>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::test::fixtures::enums::MyEnum1>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -53,6 +65,11 @@ void EnumMetadata<::test::fixtures::enums::MyEnum1>::gen(ThriftMetadata& metadat
   ));
 }
 void EnumMetadata<::test::fixtures::enums::MyEnum2>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::test::fixtures::enums::MyEnum2>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::test::fixtures::enums::MyEnum2>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -66,6 +83,11 @@ void EnumMetadata<::test::fixtures::enums::MyEnum2>::gen(ThriftMetadata& metadat
   ));
 }
 void EnumMetadata<::test::fixtures::enums::MyEnum3>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::test::fixtures::enums::MyEnum3>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::test::fixtures::enums::MyEnum3>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -79,6 +101,11 @@ void EnumMetadata<::test::fixtures::enums::MyEnum3>::gen(ThriftMetadata& metadat
   ));
 }
 void EnumMetadata<::test::fixtures::enums::MyEnum4>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::test::fixtures::enums::MyEnum4>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::test::fixtures::enums::MyEnum4>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -92,6 +119,11 @@ void EnumMetadata<::test::fixtures::enums::MyEnum4>::gen(ThriftMetadata& metadat
   ));
 }
 void EnumMetadata<::test::fixtures::enums::MyBitmaskEnum1>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::test::fixtures::enums::MyBitmaskEnum1>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::test::fixtures::enums::MyBitmaskEnum1>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -106,6 +138,11 @@ void EnumMetadata<::test::fixtures::enums::MyBitmaskEnum1>::gen(ThriftMetadata& 
   ));
 }
 void EnumMetadata<::test::fixtures::enums::MyBitmaskEnum2>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::test::fixtures::enums::MyBitmaskEnum2>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::test::fixtures::enums::MyBitmaskEnum2>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;

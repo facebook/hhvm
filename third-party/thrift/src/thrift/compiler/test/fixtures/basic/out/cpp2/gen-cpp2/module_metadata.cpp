@@ -46,7 +46,14 @@ using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t, std::size_t);
 
+inline constexpr Options kGenerateAll = {.genAnnotations = true, .genNestedTypes = true};
+
 void EnumMetadata<::test::fixtures::basic::MyEnum>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::test::fixtures::basic::MyEnum>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::test::fixtures::basic::MyEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -60,6 +67,11 @@ void EnumMetadata<::test::fixtures::basic::MyEnum>::gen(ThriftMetadata& metadata
   ));
 }
 void EnumMetadata<::test::fixtures::basic::HackEnum>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::test::fixtures::basic::HackEnum>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::test::fixtures::basic::HackEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;

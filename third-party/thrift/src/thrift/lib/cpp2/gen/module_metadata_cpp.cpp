@@ -18,6 +18,11 @@
 
 #include <fmt/format.h>
 
+FOLLY_GFLAGS_DEFINE_bool(
+    thrift_enable_schema_to_metadata_conversion,
+    true,
+    "Whether to enable convert schema to metadata");
+
 namespace apache::thrift::detail::md {
 
 ThriftConstValue cvBool(bool value) {

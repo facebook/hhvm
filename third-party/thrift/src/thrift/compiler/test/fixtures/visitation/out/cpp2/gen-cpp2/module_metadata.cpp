@@ -46,7 +46,14 @@ using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&, std::size_t, std::size_t);
 
+inline constexpr Options kGenerateAll = {.genAnnotations = true, .genNestedTypes = true};
+
 void EnumMetadata<::test_cpp2::cpp_reflection::enum1>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::test_cpp2::cpp_reflection::enum1>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum1>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -60,6 +67,11 @@ void EnumMetadata<::test_cpp2::cpp_reflection::enum1>::gen(ThriftMetadata& metad
   ));
 }
 void EnumMetadata<::test_cpp2::cpp_reflection::enum2>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::test_cpp2::cpp_reflection::enum2>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum2>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -73,6 +85,11 @@ void EnumMetadata<::test_cpp2::cpp_reflection::enum2>::gen(ThriftMetadata& metad
   ));
 }
 void EnumMetadata<::test_cpp2::cpp_reflection::enum3>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::test_cpp2::cpp_reflection::enum3>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum3>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -86,6 +103,11 @@ void EnumMetadata<::test_cpp2::cpp_reflection::enum3>::gen(ThriftMetadata& metad
   ));
 }
 void EnumMetadata<::test_cpp2::cpp_reflection::enum_with_special_names>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genEnumMetadata<::test_cpp2::cpp_reflection::enum_with_special_names>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genEnumMetadata<::test_cpp2::cpp_reflection::enum_with_special_names>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;

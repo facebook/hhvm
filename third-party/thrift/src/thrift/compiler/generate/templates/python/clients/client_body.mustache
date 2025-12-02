@@ -87,7 +87,7 @@ class Async({{#service:extends}}{{!
             {{#if service:interaction?}}"{{interaction:name}}.{{function:name}}",{{#else}}"{{function:name}}",{{/if}}
             {{#partial m_functions.args_type service=service:self function=function:self}}({{#function:args}}
                 {{field:py_name}}={{field:py_name}},{{/function:args}}),
-            {{> clients/client_return_type}},
+            {{#partial m_functions.client_return_type service=service:self function=function:self}},
             qualifier = _fbthrift_FunctionQualifier.{{function:qualifier}},
             {{#function:creates_interaction?}}
             interaction_position=_fbthrift_InteractionMethodPosition.Factory,
@@ -203,7 +203,7 @@ class Sync({{#service:extends}}{{!
             "{{function:name}}",
             {{#partial m_functions.args_type service=service:self function=function:self}}({{#function:args}}
                 {{field:py_name}}={{field:py_name}},{{/function:args}}),
-            {{> clients/client_return_type}},
+            {{#partial m_functions.client_return_type service=service:self function=function:self}},
             uri_or_name={{#service:uri}}"{{service:uri}}"{{/service:uri}}{{!
                 }}{{^service:uri}}"{{service:name}}"{{/service:uri}},
             rpc_options=rpc_options,{{!

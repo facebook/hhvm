@@ -46,3 +46,17 @@ None
 {{root_program.module_mangle}}__{{#partial m_types.import_path}}._fbthrift_{{service.name}}_{{function.name}}_result_stream_elem
   {{/if function.bidirectional_stream?}}
 {{/let partial}}
+
+{{! Client return type tuple }}
+{{#let export partial client_return_type |service function| captures |m_types return_type second_return_type|}}
+{{#pragma ignore-newlines}}
+{{#if function.sink_or_stream?}}({{/if}}
+{{#partial return_type service=service function=function}}
+  {{#if function.sink_or_stream?}}
+, {{#partial second_return_type service=service function=function}}
+  {{/if function.sink_or_stream?}}
+  {{#if (and (not function.bidirectional_stream?) function.sink?)}}
+, {{root_program.module_mangle}}__{{#partial m_types.import_path}}._fbthrift_{{service.name}}_{{function.name}}_result_sink_final
+  {{/if (and (not function.bidirectional_stream?) function.sink?)}}
+{{#if function.sink_or_stream?}}){{/if}}
+{{/let partial}}

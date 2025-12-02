@@ -83,24 +83,24 @@ class {{> structs/unadapted_name}}{{!
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     {{/struct:disable_field_caching?}}
     _fbthrift_SPEC = (
-        {{#struct:fields_ordered_by_id}}
+        {{#each struct:fields_ordered_by_id as |field|}}
         _fbthrift_python_types.FieldInfo(
-            {{field:id}},  # id
-            _fbthrift_python_types.{{field:tablebased_qualifier}}, # qualifier
-            "{{field:name}}",  # name
-            "{{field:py_name}}",  # python name (from @python.Name annotation)
+            {{field.id}},  # id
+            _fbthrift_python_types.{{field.tablebased_qualifier}}, # qualifier
+            "{{field.name}}",  # name
+            "{{field.py_name}}",  # python name (from @python.Name annotation)
             {{> fields/typeinfo}},  # typeinfo
-              {{#let default_val = field:default_value}}
+              {{#let default_val = field.default_value}}
               {{#if (object.notnull? default_val)}}
-            {{#if (not field:type.type:primitive?)}}lambda: {{/if}}{{#default_val}}{{> types/constant_value }}{{/default_val}},  # default value
+            {{#if (not field.type.primitive?)}}lambda: {{/if}}{{#default_val}}{{> types/constant_value }}{{/default_val}},  # default value
               {{#else}}
             None,  # default value
               {{/if (object.notnull? default_val)}}
-            {{#partial m_common.adapter_info node=field:self}},  # adapter info
-            {{#partial m_types.is_primitive type=field:self.type}}, # field type is primitive
-            {{field:idl_type}}, # IDL type (see BaseTypeEnum)
+            {{#partial m_common.adapter_info node=field}},  # adapter info
+            {{#partial m_types.is_primitive type=field.type}}, # field type is primitive
+            {{field.idl_type}}, # IDL type (see BaseTypeEnum)
         ),
-        {{/struct:fields_ordered_by_id}}
+        {{/each}}
     ){{!
     }}{{#python.enable_abstract_types?}}{{!
     }}{{#if (or struct:union? struct:exception?)}}{{!

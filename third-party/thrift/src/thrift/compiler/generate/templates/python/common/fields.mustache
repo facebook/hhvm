@@ -68,3 +68,21 @@ None
 {{#partial aliased_pep484_type type=type}}
   {{/if (object.notnull? adapter)}}
 {{/let partial}}
+
+{{! Adapted type hint if field has adapter, otherwise the original type }}
+{{#let export partial adapted_type_pyi |type adapter| captures |typehints|}}
+  {{#pragma ignore-newlines}}
+  {{#if (object.notnull? adapter)}}
+{{adapter.type_hint}}{{#if adapter.is_generic?}}[{{#partial typehints.pep484_type type=type}}]{{/if}}
+  {{#else}}
+{{#partial typehints.pep484_type type=type}}
+  {{/if (object.notnull? adapter)}}
+{{/let partial}}
+
+{{! Generate the type hints for fields }}
+{{#let export partial field_type_pyi |field| captures |adapted_type_pyi|}}
+  {{#pragma ignore-newlines}}
+{{#if field.optional?}}_typing.Optional[{{/if}}
+{{#partial adapted_type_pyi type=field.type adapter=field.adapter}}
+{{#if field.optional?}}]{{/if}}
+{{/let partial}}

@@ -70,30 +70,30 @@ class {{> structs/unadapted_name}}({{!
         }}{{/python.enable_abstract_types?}}{{!
         }}):
     {{#python.generate_immutable_types?}}{{!
-    }}{{#struct:fields_ordered_by_id}}
-    {{field:py_name}}: _typing.Final[{{> fields/field_type_pyi}}] = ...
-    {{/struct:fields_ordered_by_id}}{{!
+    }}{{#each struct:fields_ordered_by_id as |field|}}
+    {{field.py_name}}: _typing.Final[{{#partial m_fields.field_type_pyi field=field}}] = ...
+    {{/each}}{{!
     }}{{/python.generate_immutable_types?}}{{!
     }}{{#python.generate_mutable_types?}}{{!
-    }}{{#struct:fields_ordered_by_id}}{{!
+    }}{{#each struct:fields_ordered_by_id as |field|}}{{!
     }}
     @property
-    def {{field:py_name}}(self) -> {{> fields/field_type_pyi}}: ...
-    @{{field:py_name}}.setter
-    def {{field:py_name}}(self, value: {{> fields/field_type_pyi}}{{#partial m_types.add_wrapper_if_container field=field:self}}) -> None: ...
+    def {{field.py_name}}(self) -> {{#partial m_fields.field_type_pyi field=field}}: ...
+    @{{field.py_name}}.setter
+    def {{field.py_name}}(self, value: {{#partial m_fields.field_type_pyi field=field}}{{#partial m_types.add_wrapper_if_container field=field}}) -> None: ...
 
-    {{/struct:fields_ordered_by_id}}{{!
+    {{/each}}{{!
     }}{{/python.generate_mutable_types?}}
     def __init__(
         self,{{#struct:fields?}} *{{/struct:fields?}}{{!
-        }}{{#each struct:self.fields_ordered_by_id as |field|}}{{> types/init_and_call_arg_types}}{{/each}}
+        }}{{#each struct:fields_ordered_by_id as |field|}}{{> types/init_and_call_arg_types}}{{/each}}
     ) -> None: ...
 
     {{#if struct:struct?}}
     {{! If this structured is specifically a *struct*}}
     def __call__(
         self,{{#struct:fields?}} *{{/struct:fields?}}{{!
-        }}{{#each struct:self.fields_ordered_by_id as |field|}}{{> types/init_and_call_arg_types}}{{/each}}
+        }}{{#each struct:fields_ordered_by_id as |field|}}{{> types/init_and_call_arg_types}}{{/each}}
     ) -> _typing.Self: ...
     {{/if struct:struct?}}
     {{#struct:union?}}

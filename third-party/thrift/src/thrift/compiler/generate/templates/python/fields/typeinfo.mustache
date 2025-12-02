@@ -17,10 +17,8 @@
 
 }}{{!
     Mustache template for generating typeinfo of a field in the struct field spec.
-}}{{!
-}}{{#field:type}}{{!
-    }}{{^type:primitive?}}lambda: {{/type:primitive?}}{{#partial m_types.typeinfo type=type:self}}{{!
-    }}{{#type:container?}}{{^type:list?}}{{#field:sorted_key_serialize?}}{{!
-    }}.enableKeySorted(){{!
-    }}{{/field:sorted_key_serialize?}}{{/type:list?}}{{/type:container?}}{{!
-}}{{/field:type}}
+}}
+{{#pragma ignore-newlines}}
+{{#if (not field.type.primitive?)}}lambda: {{/if}}
+{{#partial m_types.typeinfo type=field.type}}
+{{#if (and field.sorted_key_serialize? field.type.container? (not field.type.list?))}}.enableKeySorted(){{/if}}

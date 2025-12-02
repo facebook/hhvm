@@ -18,6 +18,7 @@
 Generated Python classes for abstract thrift-python types.
 }}
 {{#import "common/common" as m_common}}
+{{#import "common/fields" as m_fields}}
 {{#import "common/typehints" as typehints}}
 {{#import "common/types" as m_types}}
 
@@ -51,17 +52,17 @@ import {{module_path}}
 class {{> structs/unadapted_name}}({{!
         }}{{^struct:exception?}}_abc.ABC{{/struct:exception?}}{{!
         }}{{#struct:exception?}}_fbthrift_python_abstract_types.AbstractGeneratedError{{/struct:exception?}}):
-    {{#struct:fields_ordered_by_id}}
-    {{^field:is_invariant_type?}}
+    {{#each struct:fields_ordered_by_id as |field|}}
+      {{#if (not field.is_invariant_type?)}}
 {{!
     This (mis-)alignment is necessary to ensure that the abstract method annotation aligns with the def on the next line
     and produces no output in the cases where it should not exist (currently for exceptions).
 }}
 {{> fields/use_reserved_property_identifier}}
 {{> fields/maybe_abstract_method_annotation}}
-    def {{field:py_name}}(self) -> {{> fields/field_type_pyi}}: ...
-    {{/field:is_invariant_type?}}
-    {{/struct:fields_ordered_by_id}}
+    def {{field.py_name}}(self) -> {{#partial m_fields.field_type_pyi field=field}}: ...
+      {{/if (not field.is_invariant_type?)}}
+    {{/each}}
     {{^struct:union?}}
     {{^struct:has_invariant_field?}}
 {{> fields/maybe_abstract_method_annotation}}

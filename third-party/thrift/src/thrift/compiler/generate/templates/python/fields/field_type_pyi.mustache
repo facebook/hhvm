@@ -18,5 +18,5 @@
 Generate the type hints for fields
 }}
 {{#field:optional?}}_typing.Optional[{{/field:optional?}}{{!
-}}{{> fields/adapted_type_pyi}}{{!
+}}{{#partial m_fields.adapted_type_pyi type=field:self.type adapter=field:self.adapter}}{{!
 }}{{#field:optional?}}]{{/field:optional?}}

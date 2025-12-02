@@ -518,24 +518,6 @@ void validate_no_reserved_key_in_namespace(
   }
 }
 
-class python_mstch_struct : public mstch_struct {
- public:
-  python_mstch_struct(
-      const t_structured* s, mstch_context& ctx, mstch_element_position pos)
-      : mstch_struct(s, ctx, pos) {
-    register_methods(
-        this,
-        {
-            {"struct:fields_ordered_by_id",
-             &python_mstch_struct::fields_ordered_by_id},
-        });
-  }
-
-  mstch::node fields_ordered_by_id() {
-    return make_mstch_fields(struct_->fields_id_order());
-  }
-};
-
 // Generator-specific validator that enforces "name" and "value" are not used
 // as enum member or union field names (thrift-py3).
 namespace enum_member_union_field_names_validator {
@@ -1181,7 +1163,6 @@ class t_mstch_python_generator : public t_mstch_python_prototypes_generator {
     if (!include_prefix.empty()) {
       program_->set_include_prefix(std::move(include_prefix));
     }
-    set_mstch_factories();
     generate_types();
     generate_metadata();
     generate_clients();
@@ -1210,7 +1191,6 @@ class t_mstch_python_generator : public t_mstch_python_prototypes_generator {
   }
 
  protected:
-  void set_mstch_factories();
   void generate_file(
       const std::string& template_name,
       types_file_kind types_file_kind,
@@ -1232,10 +1212,6 @@ class t_mstch_python_generator : public t_mstch_python_prototypes_generator {
 
   std::filesystem::path generate_root_path_;
 };
-
-void t_mstch_python_generator::set_mstch_factories() {
-  mstch_context_.add<python_mstch_struct>();
-}
 
 void t_mstch_python_generator::generate_file(
     const std::string& template_name,

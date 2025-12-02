@@ -483,33 +483,6 @@ class python_generator_context {
   }
 };
 
-class python_mstch_service : public mstch_service {
- public:
-  python_mstch_service(
-      const t_service* s,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      const t_service* containing_service = nullptr)
-      : mstch_service(s, ctx, pos, containing_service) {
-    register_methods(
-        this,
-        {
-            {"service:supported_functions",
-             &python_mstch_service::supported_functions},
-        });
-  }
-
-  mstch::node supported_functions() {
-    std::vector<const t_function*> funcs;
-    for (const auto& func : service_->functions()) {
-      if (!func.is_interaction_constructor()) {
-        funcs.push_back(&func);
-      }
-    }
-    return make_mstch_functions(funcs);
-  }
-};
-
 // Generator-specific validator that enforces that a reserved key is not used
 // as a namespace component.
 void validate_no_reserved_key_in_namespace(
@@ -1261,7 +1234,6 @@ class t_mstch_python_generator : public t_mstch_python_prototypes_generator {
 };
 
 void t_mstch_python_generator::set_mstch_factories() {
-  mstch_context_.add<python_mstch_service>();
   mstch_context_.add<python_mstch_struct>();
 }
 

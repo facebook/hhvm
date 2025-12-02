@@ -64,7 +64,7 @@ class Async({{#service:extends}}{{!
     {{#else}}
         return {{program:module_mangle}}__thrift_metadata.gen_metadata_service_{{service:name}}()
     {{/if service:interaction?}}
-    {{#each service:self.supported_functions as |function|}}
+    {{#each service:supported_functions as |function|}}
 
     async def {{function.name}}(
         self{{#each function.params.fields as |field|}},
@@ -153,10 +153,10 @@ class Async({{#service:extends}}{{!
         return self.create{{interaction_name}}()
     {{/each}}
 
-{{#service:self.supported_functions}}
+{{#service:supported_functions}}
 # pyre-ignore[4]: Missing annotation.{{! Adding an annotation here would require way too much duplication }}
 {{function:name}} = Async.{{function:name}}
-{{/service:self.supported_functions}}
+{{/service:supported_functions}}
 {{#if (has_compiler_option? "auto_migrate")}}
 async def __aenter__(self) -> "{{service:name}}.Async":
     raise RuntimeError("Do not use __aenter__ directly on client, use get_client instead.")
@@ -185,7 +185,7 @@ class Sync({{#service:extends}}{{!
     {{#else}}
         return {{program:module_mangle}}__thrift_metadata.gen_metadata_service_{{service:name}}()
     {{/if service:interaction?}}
-    {{#each service:self.supported_functions as |function|}}
+    {{#each service:supported_functions as |function|}}
     {{#let async_only? = (or service:interaction? function.sink_or_stream? function.starts_interaction? function.creates_interaction?)}}
     {{#if (not async_only?)}}
 

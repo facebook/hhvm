@@ -16,113 +16,113 @@
 
 }}{{!
 The argument and result types for functions on thrift services (and interactions) for typing stub
-}}{{#service:supported_functions}}
+}}{{#each service:supported_functions as |function|}}
 
 
-class {{#partial m_functions.args_type service=service:self function=function:self}}({{#partial m_types.struct_base}}):
-    {{#function:args}}
-    {{field:py_name}}: _typing.Final[{{#partial typehints.pep484_type type=field:self.type}}] = ...
-    {{/function:args}}
+class {{#partial m_functions.args_type service=service:self function=function}}({{#partial m_types.struct_base}}):
+    {{#function.params.fields}}
+    {{field:py_name}}: _typing.Final[{{#partial typehints.pep484_type type=field:type}}] = ...
+    {{/function.params.fields}}
 
     def __init__(
-        self,{{#function:params.fields?}} *{{/function:params.fields?}}{{#function:args}}{{> types/init_and_call_arg_types}}{{/function:args}}
+        self,{{#function.params.fields?}} *{{/function.params.fields?}}{{#each function.params.fields as |field|}}{{> types/init_and_call_arg_types}}{{/each}}
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
-        _typing.Union[None{{#function:args}}, {{!
-            }}{{#partial typehints.pep484_type type=field:self.type}}{{!
-        }}{{/function:args}}]]]: ...
-{{^function:oneway?}}
+        _typing.Union[None{{#function.params.fields}}, {{!
+            }}{{#partial typehints.pep484_type type=field:type}}{{!
+        }}{{/function.params.fields}}]]]: ...
+{{^function.oneway?}}
 
 
-class _fbthrift_{{service:name}}_{{function:name}}_result({{#partial m_types.struct_base}}):
-   {{#let regular_response_type = (if function:oneway? null function:self.return_type.true_type)}}
+class _fbthrift_{{service:name}}_{{function.name}}_result({{#partial m_types.struct_base}}):
+   {{#let regular_response_type = (if function.oneway? null function.return_type.true_type)}}
    {{#if (object.notnull? regular_response_type)}}
     success: _typing.Final[{{#partial typehints.pep484_type type=regular_response_type}}]
    {{/if (object.notnull? regular_response_type)}}
-    {{#function:exceptions}}
-    {{field:py_name}}: _typing.Final[{{#partial typehints.pep484_type type=field:self.type}}]
-    {{/function:exceptions}}
+    {{#function.exceptions}}
+    {{field:py_name}}: _typing.Final[{{#partial typehints.pep484_type type=field:type}}]
+    {{/function.exceptions}}
 
     def __init__(
         self, *, success: _typing.Optional[{{#if (object.notnull? regular_response_type)}}{{#partial typehints.pep484_type type=regular_response_type}}{{/if}}] = ...{{!
-        }}{{#function:exceptions}}{{!
-        }}, {{> fields/exception_field_name }}: _typing.Optional[{{#partial typehints.pep484_type type=field:self.type}}]=...{{!
-        }}{{/function:exceptions}}
+        }}{{#each (array.enumerate function.exceptions) as |index field|}}{{!
+        }}, {{#partial m_fields.exception_field_name field=field index=index }}: _typing.Optional[{{#partial typehints.pep484_type type=field.type}}]=...{{!
+        }}{{/each}}
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
             {{#if (object.notnull? regular_response_type)}}{{#partial typehints.pep484_type type=regular_response_type}}{{/if}},
-            {{#function:exceptions}}
-            {{#partial typehints.pep484_type type=field:self.type}},
-            {{/function:exceptions}}
+            {{#function.exceptions}}
+            {{#partial typehints.pep484_type type=field:type}},
+            {{/function.exceptions}}
         ]]]: ...
-{{/function:oneway?}}
-{{#function:stream?}}
+{{/function.oneway?}}
+{{#function.stream?}}
 
 
-class _fbthrift_{{service:name}}_{{function:name}}_result_stream_elem({{!
+class _fbthrift_{{service:name}}_{{function.name}}_result_stream_elem({{!
 }}{{#if python.generate_mutable_types?}}_fbthrift_python_mutable_types._fbthrift_MutableResponseStreamResult{{/if}}{{!
 }}{{#if python.generate_immutable_types?}}_fbthrift_python_types._fbthrift_ResponseStreamResult{{/if}}{{!
-}}[{{#partial typehints.pep484_type type=function:self.stream.elem_type}}]):
-    {{#function:stream_exceptions}}
-    {{field:py_name}}: _typing.Final[{{#partial typehints.pep484_type type=field:self.type}}]
-    {{/function:stream_exceptions}}
+}}[{{#partial typehints.pep484_type type=function.stream.elem_type}}]):
+    {{#function.stream.exceptions}}
+    {{field:py_name}}: _typing.Final[{{#partial typehints.pep484_type type=field:type}}]
+    {{/function.stream.exceptions}}
 
     def __init__(
-        self, *, success: _typing.Optional[{{#partial typehints.pep484_type type=function:self.stream.elem_type}}] = ...{{!
-        }}{{#function:stream_exceptions}}{{!
-        }}, {{field:py_name}}: _typing.Optional[{{#partial typehints.pep484_type type=field:self.type}}]=...{{!
-        }}{{/function:stream_exceptions}}
+        self, *, success: _typing.Optional[{{#partial typehints.pep484_type type=function.stream.elem_type}}] = ...{{!
+        }}{{#function.stream.exceptions}}{{!
+        }}, {{field:py_name}}: _typing.Optional[{{#partial typehints.pep484_type type=field:type}}]=...{{!
+        }}{{/function.stream.exceptions}}
     ) -> None: ...
 
     {{! TODO: is this actually needed to enable typing? Delete if not. }}
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            {{#partial typehints.pep484_type type=function:self.stream.elem_type}},
-            {{#function:stream_exceptions}}
-            {{#partial typehints.pep484_type type=field:self.type}},
-            {{/function:stream_exceptions}}
+            {{#partial typehints.pep484_type type=function.stream.elem_type}},
+            {{#function.stream.exceptions}}
+            {{#partial typehints.pep484_type type=field:type}},
+            {{/function.stream.exceptions}}
         ]]]: ...
-{{/function:stream?}}
-{{#function:sink?}}
+{{/function.stream?}}
+{{#function.sink?}}
 
 
-class _fbthrift_{{service:name}}_{{function:name}}_result_sink_elem({{#partial m_types.struct_base}}):
-    success: _typing.Final[{{#partial typehints.pep484_type type=function:self.sink.elem_type}}]
-    {{#function:sink_exceptions}}
-    {{field:py_name}}: _typing.Final[{{#partial typehints.pep484_type type=field:self.type}}]
-    {{/function:sink_exceptions}}
-
-    def __init__(
-        self,
-        *,
-        success: _typing.Optional[{{#partial typehints.pep484_type type=function:self.sink.elem_type}}] = ...{{!
-        }}{{#function:sink_exceptions}}{{!
-        }}, {{field:py_name}}: _typing.Optional[{{#partial typehints.pep484_type type=field:self.type}}]=...{{!
-        }}{{/function:sink_exceptions}}
-    ) -> None: ...
-
-
-{{^function:bidirectional_stream?}}{{!
-}}class _fbthrift_{{service:name}}_{{function:name}}_result_sink_final({{#partial m_types.struct_base}}):
-    success: _typing.Final[{{#partial typehints.pep484_type type=function:self.sink.final_response_type}}]
-    {{#function:sink_final_response_exceptions}}
-    {{field:py_name}}: _typing.Final[{{#partial typehints.pep484_type type=field:self.type}}]
-    {{/function:sink_final_response_exceptions}}
+class _fbthrift_{{service:name}}_{{function.name}}_result_sink_elem({{#partial m_types.struct_base}}):
+    success: _typing.Final[{{#partial typehints.pep484_type type=function.sink.elem_type}}]
+    {{#function.sink.exceptions}}
+    {{field:py_name}}: _typing.Final[{{#partial typehints.pep484_type type=field:type}}]
+    {{/function.sink.exceptions}}
 
     def __init__(
         self,
         *,
-        success: _typing.Optional[{{#partial typehints.pep484_type type=function:self.sink.final_response_type}}] = ...{{!
-        }}{{#function:sink_final_response_exceptions}}{{!
-        }}, {{field:py_name}}: _typing.Optional[{{#partial typehints.pep484_type type=field:self.type}}]=...{{!
-        }}{{/function:sink_final_response_exceptions}}
+        success: _typing.Optional[{{#partial typehints.pep484_type type=function.sink.elem_type}}] = ...{{!
+        }}{{#function.sink.exceptions}}{{!
+        }}, {{field:py_name}}: _typing.Optional[{{#partial typehints.pep484_type type=field:type}}]=...{{!
+        }}{{/function.sink.exceptions}}
     ) -> None: ...
-{{/function:bidirectional_stream?}}
-{{/function:sink?}}
-{{/service:supported_functions}}
+
+
+{{^function.bidirectional_stream?}}{{!
+}}class _fbthrift_{{service:name}}_{{function.name}}_result_sink_final({{#partial m_types.struct_base}}):
+    success: _typing.Final[{{#partial typehints.pep484_type type=function.sink.final_response_type}}]
+    {{#function.sink.final_response_exceptions}}
+    {{field:py_name}}: _typing.Final[{{#partial typehints.pep484_type type=field:type}}]
+    {{/function.sink.final_response_exceptions}}
+
+    def __init__(
+        self,
+        *,
+        success: _typing.Optional[{{#partial typehints.pep484_type type=function.sink.final_response_type}}] = ...{{!
+        }}{{#function.sink.final_response_exceptions}}{{!
+        }}, {{field:py_name}}: _typing.Optional[{{#partial typehints.pep484_type type=field:type}}]=...{{!
+        }}{{/function.sink.final_response_exceptions}}
+    ) -> None: ...
+{{/function.bidirectional_stream?}}
+{{/function.sink?}}
+{{/each}}

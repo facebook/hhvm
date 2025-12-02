@@ -18,12 +18,12 @@
 `__init__()` and `__call__()` arguments and their types
 }}{{#python.generate_immutable_types?}}{{!
         }},
-        {{field:py_name}}: _typing.Optional[{{#partial m_fields.aliased_or_adapted_type_pyi type=field:self.type adapter=field:self.adapter}}]=...{{!
+        {{field.py_name}}: _typing.Optional[{{#partial m_fields.aliased_or_adapted_type_pyi type=field.type adapter=field.adapter}}]=...{{!
         }}{{/python.generate_immutable_types?}}{{!
         }}{{#python.generate_mutable_types?}}{{!
         }},
-        {{field:py_name}}: _typing.Optional[{{!
-        }}{{#partial m_fields.aliased_or_adapted_type_pyi type=field:self.type adapter=field:self.adapter}}{{!
-        }}{{#partial m_types.add_wrapper_if_container field=field:self}}{{!
+        {{field.py_name}}: _typing.Optional[{{!
+        }}{{#partial m_fields.aliased_or_adapted_type_pyi type=field.type adapter=field.adapter}}{{!
+        }}{{#partial m_types.add_wrapper_if_container field=field}}{{!
         }}]=...{{!
         }}{{/python.generate_mutable_types?}}

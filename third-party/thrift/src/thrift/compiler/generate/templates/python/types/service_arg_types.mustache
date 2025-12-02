@@ -42,7 +42,7 @@ _fbthrift_python_types.FieldInfo(
     {{field.idl_type}}, # IDL type (see BaseTypeEnum)
 ),
 {{/let partial}}
-{{#each service:self.supported_functions as |function|}}
+{{#each service:supported_functions as |function|}}
 
 
 class {{#partial m_functions.args_type service=service:self function=function}}(metaclass={{#partial m_types.struct_metaclass}}):

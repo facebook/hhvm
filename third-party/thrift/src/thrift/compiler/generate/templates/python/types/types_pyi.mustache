@@ -86,14 +86,14 @@ class {{> structs/unadapted_name}}({{!
     }}{{/python.generate_mutable_types?}}
     def __init__(
         self,{{#struct:fields?}} *{{/struct:fields?}}{{!
-        }}{{#struct:fields_ordered_by_id}}{{> types/init_and_call_arg_types}}{{/struct:fields_ordered_by_id}}
+        }}{{#each struct:self.fields_ordered_by_id as |field|}}{{> types/init_and_call_arg_types}}{{/each}}
     ) -> None: ...
 
     {{#if struct:struct?}}
     {{! If this structured is specifically a *struct*}}
     def __call__(
         self,{{#struct:fields?}} *{{/struct:fields?}}{{!
-        }}{{#struct:fields_ordered_by_id}}{{> types/init_and_call_arg_types}}{{/struct:fields_ordered_by_id}}
+        }}{{#each struct:self.fields_ordered_by_id as |field|}}{{> types/init_and_call_arg_types}}{{/each}}
     ) -> _typing.Self: ...
     {{/if struct:struct?}}
     {{#struct:union?}}

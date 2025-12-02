@@ -30,14 +30,14 @@ TEST(PaddedBinaryAdapterBackwardsCompatibilityTest, OldToNew) {
   std::string testChecksum = "checksum123";
 
   OldRequest oldReq;
-  oldReq.data_ref() = folly::IOBuf::copyBuffer(testData);
-  oldReq.checksum_ref() = testChecksum;
+  oldReq.data() = folly::IOBuf::copyBuffer(testData);
+  oldReq.checksum() = testChecksum;
   std::string serialized = BinarySerializer::serialize<std::string>(oldReq);
 
   NewRequest newReq = BinarySerializer::deserialize<NewRequest>(serialized);
-  EXPECT_EQ(newReq.data_ref()->buf->to<std::string>(), testData);
-  EXPECT_EQ(*newReq.checksum_ref(), testChecksum);
-  EXPECT_EQ(newReq.data_ref()->paddingBytes, 0);
+  EXPECT_EQ(newReq.data()->buf->to<std::string>(), testData);
+  EXPECT_EQ(*newReq.checksum(), testChecksum);
+  EXPECT_EQ(newReq.data()->paddingBytes, 0);
 }
 
 TEST(PaddedBinaryAdapterBackwardsCompatibilityTest, NewToOld) {
@@ -45,13 +45,13 @@ TEST(PaddedBinaryAdapterBackwardsCompatibilityTest, NewToOld) {
   std::string testChecksum = "checksum456";
 
   NewRequest newReq;
-  newReq.data_ref() = PaddedBinaryData(0, folly::IOBuf::copyBuffer(testData));
-  newReq.checksum_ref() = testChecksum;
+  newReq.data() = PaddedBinaryData(0, folly::IOBuf::copyBuffer(testData));
+  newReq.checksum() = testChecksum;
   std::string serialized = BinarySerializer::serialize<std::string>(newReq);
 
   OldRequest oldReq = BinarySerializer::deserialize<OldRequest>(serialized);
-  EXPECT_EQ((*oldReq.data_ref())->to<std::string>(), testData);
-  EXPECT_EQ(*oldReq.checksum_ref(), testChecksum);
+  EXPECT_EQ((*oldReq.data())->to<std::string>(), testData);
+  EXPECT_EQ(*oldReq.checksum(), testChecksum);
 }
 
 TEST(PaddedBinaryAdapterBackwardsCompatibilityTest, Identical) {
@@ -59,12 +59,12 @@ TEST(PaddedBinaryAdapterBackwardsCompatibilityTest, Identical) {
   std::string testChecksum = "checksum789";
 
   OldRequest oldReq;
-  oldReq.data_ref() = folly::IOBuf::copyBuffer(testData);
-  oldReq.checksum_ref() = testChecksum;
+  oldReq.data() = folly::IOBuf::copyBuffer(testData);
+  oldReq.checksum() = testChecksum;
 
   NewRequest newReq;
-  newReq.data_ref() = PaddedBinaryData(0, folly::IOBuf::copyBuffer(testData));
-  newReq.checksum_ref() = testChecksum;
+  newReq.data() = PaddedBinaryData(0, folly::IOBuf::copyBuffer(testData));
+  newReq.checksum() = testChecksum;
 
   std::string oldSerialized = BinarySerializer::serialize<std::string>(oldReq);
   std::string newSerialized = BinarySerializer::serialize<std::string>(newReq);
@@ -76,14 +76,14 @@ TEST(PaddedBinaryAdapterBackwardsCompatibilityTest, NoData) {
   std::string testChecksum = "checksumEmpty";
 
   OldRequest oldReq;
-  oldReq.data_ref() = folly::IOBuf::create(0);
-  oldReq.checksum_ref() = testChecksum;
+  oldReq.data() = folly::IOBuf::create(0);
+  oldReq.checksum() = testChecksum;
   std::string serialized = BinarySerializer::serialize<std::string>(oldReq);
 
   NewRequest newReq = BinarySerializer::deserialize<NewRequest>(serialized);
-  EXPECT_EQ(newReq.data_ref()->buf->computeChainDataLength(), 0);
-  EXPECT_EQ(*newReq.checksum_ref(), testChecksum);
-  EXPECT_EQ(newReq.data_ref()->paddingBytes, 0);
+  EXPECT_EQ(newReq.data()->buf->computeChainDataLength(), 0);
+  EXPECT_EQ(*newReq.checksum(), testChecksum);
+  EXPECT_EQ(newReq.data()->paddingBytes, 0);
 }
 
 } // namespace

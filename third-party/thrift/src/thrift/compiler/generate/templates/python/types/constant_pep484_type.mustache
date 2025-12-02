@@ -16,16 +16,17 @@
 
 }}{{!
 This is for constants PEP484 type
-}}{{#type:container?}}{{!
-    }}{{#type:list?}}_typing.Sequence[{{!
-        }}{{#type:list_elem_type}}{{> types/pep484_type}}{{/type:list_elem_type}}{{!
-    }}]{{/type:list?}}{{!
-    }}{{#type:set?}}_typing.AbstractSet[{{!
-        }}{{#type:set_elem_type}}{{> types/pep484_type}}{{/type:set_elem_type}}{{!
-    }}]{{/type:set?}}{{!
-    }}{{#type:map?}}_typing.Mapping[{{!
-        }}{{#type:key_type}}{{> types/pep484_type}}{{/type:key_type}}, {{!
-        }}{{#type:value_type}}{{> types/pep484_type}}{{/type:value_type}}{{!
-    }}]{{/type:map?}}{{!
-}}{{/type:container?}}{{!
-}}{{^type:container?}}{{> types/pep484_type}}{{/type:container?}}
+}}
+{{#pragma ignore-newlines}}
+  {{#if type:list?}}
+_typing.Sequence[{{#type:list_elem_type}}{{> types/pep484_type}}{{/type:list_elem_type}}]
+  {{#else if type:set?}}
+_typing.AbstractSet[{{#type:set_elem_type}}{{> types/pep484_type}}{{/type:set_elem_type}}]
+  {{#else if type:map?}}
+_typing.Mapping[
+{{#type:key_type}}{{> types/pep484_type}}{{/type:key_type}}, {{!}}
+{{#type:value_type}}{{> types/pep484_type}}{{/type:value_type}}
+]
+  {{#else}}
+{{> types/pep484_type}}
+  {{/if type:list?}}

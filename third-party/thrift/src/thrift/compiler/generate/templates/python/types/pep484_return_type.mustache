@@ -14,22 +14,22 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{^function:sink_or_stream?}}{{> types/pep484_type}}{{/function:sink_or_stream?}}{{!
-}}{{^function:bidirectional_stream?}}{{!
-}}{{#function:stream?}}{{#function:stream_has_first_response?}}{{#function:stream_first_response_type}}{{!
-  }}{{> types/pep484_type}}, {{/function:stream_first_response_type}}{{/function:stream_has_first_response?}}{{!
-  }}_typing.AsyncGenerator[{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}, None]{{!
-}}{{/function:stream?}}{{!
-}}{{#function:sink?}}{{#function:sink_has_first_response?}}{{#function:sink_first_response_type}}{{!
-  }}{{> types/pep484_type}}, {{/function:sink_first_response_type}}{{/function:sink_has_first_response?}}{{!
-  }}_fbthrift_ClientSink[{{!
-      }}{{#function:sink_elem_type}}{{> types/pep484_type}}{{/function:sink_elem_type}}, {{!
-      }}{{#function:sink_final_response_type}}{{> types/pep484_type}}{{/function:sink_final_response_type}}]{{!
-}}{{/function:sink?}}{{!
-}}{{/function:bidirectional_stream?}}{{!
-}}{{#function:bidirectional_stream?}}{{#function:stream_has_first_response?}}{{#function:stream_first_response_type}}{{!
-  }}{{> types/pep484_type}}, {{/function:stream_first_response_type}}{{/function:stream_has_first_response?}}{{!
-  }}_fbthrift_BidirectionalStream[{{!
-      }}{{#function:sink_elem_type}}{{> types/pep484_type}}{{/function:sink_elem_type}}, {{!
-      }}{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}]{{!
-}}{{/function:bidirectional_stream?}}
+}}
+{{#pragma ignore-newlines}}
+  {{#if function:bidirectional_stream?}}
+{{#if function:stream_has_first_response?}}{{#function:stream_first_response_type}}{{> types/pep484_type}}{{/function:stream_first_response_type}}, {{/if}}
+_fbthrift_BidirectionalStream[
+{{#function:sink_elem_type}}{{> types/pep484_type}}{{/function:sink_elem_type}}, {{!}}
+{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}
+]
+  {{#else if function:stream?}}
+{{#if function:stream_has_first_response?}}{{#function:stream_first_response_type}}{{> types/pep484_type}}{{/function:stream_first_response_type}}, {{/if}}
+_typing.AsyncGenerator[{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}, None]
+  {{#else if function:sink?}}
+{{#if function:sink_has_first_response?}}{{#function:sink_first_response_type}}{{> types/pep484_type}}{{/function:sink_first_response_type}}, {{/if}}
+_fbthrift_ClientSink[
+{{#function:sink_elem_type}}{{> types/pep484_type}}{{/function:sink_elem_type}}, {{!}}
+{{#function:sink_final_response_type}}{{> types/pep484_type}}{{/function:sink_final_response_type}}]
+  {{#else}}
+{{#function:return_type}}{{> types/pep484_type}}{{/function:return_type}}
+  {{/if function:bidirectional_stream?}}

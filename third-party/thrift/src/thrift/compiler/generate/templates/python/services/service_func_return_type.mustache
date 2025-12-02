@@ -20,27 +20,24 @@ This is to override types/pep484_type for stream return types.
 
 This is useful for typing call paterns since it allows python container types OR
 thrift-py3 specific container types.
-}}{{^function:bidirectional_stream?}}{{!
-}}{{#function:stream?}}{{!
-}}{{#function:stream_has_first_response?}}_typing.Tuple[{{#function:stream_first_response_type}}{{!
-}}{{> types/pep484_type}}, {{/function:stream_first_response_type}}{{/function:stream_has_first_response?}}{{!
-}}_typing.Awaitable[_typing.AsyncIterator[{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}]] | {{!
-}}_typing.AsyncIterator[{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}]{{!
-}}{{#function:stream_has_first_response?}}]{{/function:stream_has_first_response?}}{{!
-}}{{/function:stream?}}{{!
-}}{{#function:sink?}}{{!
-}}{{#function:sink_has_first_response?}}_typing.Tuple[{{#function:sink_first_response_type}}{{!
-}}{{> types/pep484_type}}, {{/function:sink_first_response_type}}{{/function:sink_has_first_response?}}{{!
-}}{{> services/sink_callback}}{{!
-}}{{#function:sink_has_first_response?}}]{{/function:sink_has_first_response?}}{{!
-}}{{/function:sink?}}{{!
-}}{{/function:bidirectional_stream?}}{{!
-}}{{#function:bidirectional_stream?}}{{!
-}}{{#function:stream_has_first_response?}}_typing.Tuple[{{#function:stream_first_response_type}}{{!
-}}{{> types/pep484_type}}, {{/function:stream_first_response_type}}{{/function:stream_has_first_response?}}{{!
-}}{{> services/bidi_callback}}{{!
-}}{{#function:stream_has_first_response?}}]{{/function:stream_has_first_response?}}{{!
-}}{{/function:bidirectional_stream?}}{{!
-}}{{^function:sink_or_stream?}}{{!
-  }}{{> types/pep484_type}}{{!
-}}{{/function:sink_or_stream?}}
+}}
+{{#pragma ignore-newlines}}
+  {{#if function:bidirectional_stream?}}
+{{#if function:stream_has_first_response?}}_typing.Tuple[{{#function:stream_first_response_type}}{{> types/pep484_type}}{{/function:stream_first_response_type}}, {{/if}}
+{{> services/bidi_callback}}
+{{#if function:stream_has_first_response?}}]{{/if}}
+
+  {{#else if function:stream?}}
+{{#if function:stream_has_first_response?}}_typing.Tuple[{{#function:stream_first_response_type}}{{> types/pep484_type}}{{/function:stream_first_response_type}}, {{/if}}
+_typing.Awaitable[_typing.AsyncIterator[{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}]] | {{!}}
+_typing.AsyncIterator[{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}]
+{{#if function:stream_has_first_response?}}]{{/if}}
+
+  {{#else if function:sink?}}
+{{#if function:sink_has_first_response?}}_typing.Tuple[{{#function:sink_first_response_type}}{{> types/pep484_type}}{{/function:sink_first_response_type}}, {{/if}}
+{{> services/sink_callback}}
+{{#if function:sink_has_first_response?}}]{{/if}}
+
+  {{#else}}
+{{#function:return_type}}{{> types/pep484_type}}{{/function:return_type}}
+  {{/if function:bidirectional_stream?}}

@@ -25,7 +25,7 @@ thrift-python specific container types.
   {{#if type:void?}}
 None
   {{#else if type:primitive?}}
-{{> types/unadapted_builtin_pep484_type }}
+{{#partial typehints.unadapted_builtin type=type:true_type}}
 
   {{#else if type:structured?}}
     {{#type:true_type}}

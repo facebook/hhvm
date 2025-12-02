@@ -30,3 +30,19 @@
 {{#else if type.map?}}{{#partial m_types.mapping}}{{/if type.list?}}
   {{/if python.generate_immutable_types?}}
 {{/let partial}}
+
+{{! PEP484 typing for builtin types }}
+{{#let export partial unadapted_builtin |type|}}
+{{#pragma ignore-newlines}}
+{{#if type.bool?}}builtins.bool
+{{#else if type.byte?}}builtins.int
+{{#else if type.i16?}}builtins.int
+{{#else if type.i32?}}builtins.int
+{{#else if type.i64?}}builtins.int
+{{#else if type.double?}}builtins.float
+{{#else if type.float?}}builtins.float
+{{#else if type.string?}}builtins.str
+{{#else if (and type.binary? type.iobuf?)}}_fbthrift_iobuf.IOBuf
+{{#else if type.binary?}}builtins.bytes
+{{/if type.bool?}}
+{{/let partial}}

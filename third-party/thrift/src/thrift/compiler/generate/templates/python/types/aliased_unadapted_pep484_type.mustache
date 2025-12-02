@@ -21,7 +21,7 @@ This is for pep 484 typing
 This is useful for typing call paterns since it allows python container types OR
 thrift-python specific container types.
 
-}}{{> types/unadapted_builtin_pep484_type}}{{!
+}}{{#partial typehints.unadapted_builtin type=type:self}}{{!
 }}{{#type:structured}}{{!
     }}{{#type:need_module_path?}}{{type:module_mangle}}.{{/type:need_module_path?}}{{!
   }}{{#partial m_common.private_alias_prefix}}{{struct:py_name}}{{!

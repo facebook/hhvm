@@ -5,7 +5,8 @@
 
 #![cfg(test)]
 
-use arena_deserializer::*;
+use arena_deserializer::ArenaDeserializer;
+use arena_deserializer::impl_deserialize_in_arena;
 use bumpalo::Bump;
 use serde::Deserialize;
 use serde::Serialize;

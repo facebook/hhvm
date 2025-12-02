@@ -344,6 +344,13 @@ struct SetFieldExt final {
       size_t (*writer)(const void* context, const void* val));
 };
 
+// Type information for map keys and values
+// This struct must remain standard-layout to safely cast through void*
+struct MapFieldTypeInfo {
+  const TypeInfo* keyInfo;
+  const TypeInfo* valInfo;
+};
+
 struct MapFieldExt final {
   const TypeInfo* keyInfo;
   const TypeInfo* valInfo;

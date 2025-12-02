@@ -287,31 +287,35 @@ void readThriftValue(
       WireType reportedMappedType = WireTypeInfo::defaultValue();
       iprot->readMapBegin(reportedKeyType, reportedMappedType, size);
       struct Context {
-        const TypeInfo* keyInfo;
-        const TypeInfo* valInfo;
+        MapFieldTypeInfo typeInfo; // Must be first for safe casting
         TProtocol* iprot;
-        ProtocolReaderStructReadState<TProtocol>& readState;
+        ProtocolReaderStructReadState<TProtocol>* readState;
       };
+      static_assert(
+          std::is_standard_layout_v<Context>,
+          "Context must be standard layout for safe casting through void*");
       const Context context = {
-          ext.keyInfo,
-          ext.valInfo,
+          {
+              ext.keyInfo,
+              ext.valInfo,
+          },
           iprot,
-          readState,
+          &readState,
       };
       const auto keyReader = [](const void* context, void* key) {
         const auto& typedContext = *static_cast<const Context*>(context);
         readThriftValue(
             typedContext.iprot,
-            *typedContext.keyInfo,
-            typedContext.readState,
+            *typedContext.typeInfo.keyInfo,
+            *typedContext.readState,
             key);
       };
       const auto valueReader = [](const void* context, void* val) {
         const auto& typedContext = *static_cast<const Context*>(context);
         readThriftValue(
             typedContext.iprot,
-            *typedContext.valInfo,
-            typedContext.readState,
+            *typedContext.typeInfo.valInfo,
+            *typedContext.readState,
             val);
       };
       if (iprot->kOmitsContainerSizes()) {

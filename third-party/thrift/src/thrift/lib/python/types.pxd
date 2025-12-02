@@ -319,7 +319,10 @@ cdef class Set(Container):
     cdef frozenset _fbthrift_get_elements(self)
 
 cdef class ImmutableInternalMap(dict):
-    pass
+    # Set to True by C++ code when string keys/values fail UTF-8 decode
+    # (during deserialization or C++ to Python conversion).
+    # Enables optimization to skip lazy conversion for maps with valid unicode.
+    cdef bint has_unicode_error
 
 cdef class Map(Container):
     cdef dict _fbthrift_elements

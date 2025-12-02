@@ -20,6 +20,7 @@
 #include <thrift/lib/python/types_api.h> // @manual
 
 #include <cstddef>
+#include <functional>
 #ifdef Py_GIL_DISABLED
 #include <mutex>
 #endif
@@ -1246,11 +1247,20 @@ PyObject* createUnionDataHolder() {
   return unionDataHolder.release();
 }
 
+inline bool isStringType(const detail::TypeInfo* typeInfo) {
+  return typeInfo->type == protocol::TType::T_STRING;
+}
+
 } // namespace
 
 PyObject* ImmutableInternalDict_New() {
   ensureImportOrThrow();
   return createImmutableInternalMap();
+}
+
+void ImmutableInternalDict_SetUnicodeError(PyObject* map_obj) {
+  ensureImportOrThrow();
+  setImmutableInternalMapUnicodeError(map_obj);
 }
 
 // DO_BEFORE(aristidis,20240920): For consistency, rename method to
@@ -1628,13 +1638,42 @@ void ImmutableMapHandler::read(
     readerFn(context, &obj);
     return UniquePyObjectPtr(obj);
   };
+
+  bool hasUnicodeError = false;
+  auto readStr = [=, &hasUnicodeError](auto readerFn) {
+    PyObject* obj = nullptr;
+    readerFn(context, &obj);
+    if (PyUnicode_CheckExact(obj) != 1) {
+      hasUnicodeError = true;
+    }
+    return UniquePyObjectPtr(obj);
+  };
+
+  // Access type information from context
+  const auto* typeInfo = static_cast<const detail::MapFieldTypeInfo*>(context);
+
+  const bool isKeyStringType = isStringType(typeInfo->keyInfo);
+  const bool isValStringType = isStringType(typeInfo->valInfo);
+
+  using ReaderFn =
+      std::function<UniquePyObjectPtr(void (*)(const void*, void*))>;
+  ReaderFn readKey = isKeyStringType ? ReaderFn(readStr) : ReaderFn(read);
+  ReaderFn readValue = isValStringType ? ReaderFn(readStr) : ReaderFn(read);
+
   for (std::uint32_t i = 0; i < mapSize; ++i) {
-    UniquePyObjectPtr mkey = read(keyReader);
-    UniquePyObjectPtr mvalue = read(valueReader);
+    UniquePyObjectPtr mkey = readKey(keyReader);
+    UniquePyObjectPtr mvalue = readValue(valueReader);
+
     if (PyDict_SetItem(map.get(), mkey.get(), mvalue.get()) == -1) {
       THRIFT_PY3_CHECK_ERROR();
     }
   }
+
+  // Set has_unicode_error attribute if any checks failed
+  if (hasUnicodeError) {
+    setImmutableInternalMapUnicodeError(map.get());
+  }
+
   setPyObject(objectPtr, std::move(map));
 }
 
@@ -1686,18 +1725,35 @@ void ImmutableMapHandler::consumeElem(
     void (*valueReader)(const void* context, void* val)) {
   PyObject** pyObjPtr = toPyObjectPtr(objectPtr);
   DCHECK(*pyObjPtr != nullptr);
+
+  // Access type information from context
+  const auto* typeInfo = static_cast<const detail::MapFieldTypeInfo*>(context);
+  bool hasUnicodeError = false;
+
   PyObject* mkey = nullptr;
   keyReader(context, &mkey);
   DCHECK(mkey != nullptr);
+  if (isStringType(typeInfo->keyInfo) && PyUnicode_CheckExact(mkey) != 1) {
+    hasUnicodeError = true;
+  }
+
   PyObject* mval = nullptr;
   valueReader(context, &mval);
   DCHECK(mval != nullptr);
+  if (isStringType(typeInfo->valInfo) && PyUnicode_CheckExact(mval) != 1) {
+    hasUnicodeError = true;
+  }
 
   const int setResult = PyDict_SetItem(*pyObjPtr, mkey, mval);
   Py_DECREF(mkey);
   Py_DECREF(mval);
   if (setResult == -1) {
     THRIFT_PY3_CHECK_ERROR();
+  }
+
+  // Set has_unicode_error attribute if any checks failed
+  if (hasUnicodeError) {
+    setImmutableInternalMapUnicodeError(*pyObjPtr);
   }
 }
 

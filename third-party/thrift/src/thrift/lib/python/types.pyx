@@ -910,9 +910,18 @@ cdef class MapTypeInfo(TypeInfoBase):
         inst._fbthrift_key_info = self.key_info
         inst._fbthrift_val_info = self.val_info
 
+        cdef ImmutableInternalMap internal_map = value
+
         # Elements need no conversion (e.g., int, float, double, binary):
         # Pass dict directly, no conversion needed.
         if to_map_elements_no_convert(self.key_info, self.val_info):
+            inst._fbthrift_elements = <dict>value
+            inst._fbthrift_needs_lazy_conversion = False
+            inst._fbthrift_internal_elements = None
+        # Map supports in-place validation and has no unicode errors:
+        # Pass dict directly, skip lazy validation.
+        elif (map_supports_in_place_validation(self.key_info, self.val_info) and
+                not internal_map.has_unicode_error):
             inst._fbthrift_elements = <dict>value
             inst._fbthrift_needs_lazy_conversion = False
             inst._fbthrift_internal_elements = None
@@ -2514,9 +2523,14 @@ cdef class MapTypeFactory:
 cdef public api object createImmutableInternalMap():
     return ImmutableInternalMap({})
 
+cdef public api void setImmutableInternalMapUnicodeError(object map_obj):
+    """Fast path to set has_unicode_error flag on ImmutableInternalMap."""
+    (<ImmutableInternalMap>map_obj).has_unicode_error = True
+
 @_cython__final
 cdef class ImmutableInternalMap(dict):
     def __init__(self, dict_data):
+        self.has_unicode_error = False
         self.update(dict_data)
 
     def __hash__(self):

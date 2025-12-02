@@ -225,6 +225,7 @@ struct Constructor<map<KeyT, ValT, CppT>>
     : public BaseConstructor<map<KeyT, ValT, CppT>> {
   PyObject* FOLLY_NULLABLE operator()(const CppT& cpp_map) {
     StrongRef dict(ImmutableInternalDict_New());
+    bool hasUnicodeError = false;
     if (!dict) {
       return nullptr;
     }
@@ -237,16 +238,30 @@ struct Constructor<map<KeyT, ValT, CppT>>
         // StrongRef DECREFs the dict on scope exit
         return nullptr;
       }
+      if constexpr (std::is_same_v<KeyT, FallibleString>) {
+        if (PyUnicode_CheckExact(*key) != 1) {
+          hasUnicodeError = true;
+        }
+      }
       StrongRef val(val_ctor(it->second));
       ++it;
       if (!val) {
         // StrongRef DECREFs the dict and key on scope exit
         return nullptr;
       }
+      if constexpr (std::is_same_v<ValT, FallibleString>) {
+        if (PyUnicode_CheckExact(*val) != 1) {
+          hasUnicodeError = true;
+        }
+      }
       // PyDict_SetItem borrows key and val, so we don't release them.
       if (PyDict_SetItem(*dict, *key, *val) == -1) {
         return nullptr;
       }
+    }
+
+    if (hasUnicodeError) {
+      ImmutableInternalDict_SetUnicodeError(*dict);
     }
     return std::move(dict).release();
   }

@@ -1006,6 +1006,8 @@ int16_t pyFloatIsFloat32(PyObject* obj);
 
 PyObject* ImmutableInternalDict_New();
 
+void ImmutableInternalDict_SetUnicodeError(PyObject* map_obj);
+
 namespace capi {
 /**
  * Retrieves internal _fbthrift_data from `Struct`. On import failure,

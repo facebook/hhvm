@@ -15,6 +15,7 @@
   limitations under the License.
 
 }}
+{{#import "helpers" as patch_helpers}}
 {{#import "../python/common/typehints" as typehints}}
 {{#import "../python/common/types" as m_types}}
 # @{{!}}generated
@@ -74,15 +75,15 @@ class {{struct:py_name}}Patch(
     pass
     {{#struct:fields_ordered_by_id}}{{#field:type}}{{#if (not type:contains_patch?)}}
     @property
-    def {{field:py_name}}(self) -> {{> types/field_patch_type}}[
+    def {{field:py_name}}(self) -> {{#partial patch_helpers.field_patch_type field=field:self parent=struct:self}}[
             {{#partial typehints.unadapted_type type=field:self.type}},
-            {{> ../python/types/unadapted_pep484_patch_type}}]:
+            {{#partial patch_helpers.unadapted_pep484_patch_type type=field:self.type}}]:
 
         {{! e.g., if field is an i32, this function convert DynamicPatch --> I32Patch }}
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> {{> ../python/types/unadapted_pep484_patch_type}}:
-            {{> ../python/common/thrift_patch_callback}}
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> {{#partial patch_helpers.unadapted_pep484_patch_type type=field:self.type}}:
+            {{#partial patch_helpers.callback type=field:self.type}}
 
-        return {{> types/field_patch_type}}(
+        return {{#partial patch_helpers.field_patch_type field=field:self parent=struct:self}}(
             cast_dynamic_patch_to_typed_field_patch,
             self._patch,
             {{field:id}},

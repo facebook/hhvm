@@ -15,41 +15,41 @@
   limitations under the License.
 
 }}
-  {{#if (not function:bidirectional_stream?)}}
-value = {{^function:stream?}}await {{/function:stream?}}self.{{function:name}}({{#function:args}}args_struct.{{field:py_name}},{{/function:args}})
-    {{#if function:stream?}}
-      {{#if function:stream_has_first_response?}}
+  {{#if (not function.bidirectional_stream?)}}
+value = {{^function.stream?}}await {{/function.stream?}}self.{{function.name}}({{#function.params.fields}}args_struct.{{field:py_name}},{{/function.params.fields}})
+    {{#if function.stream?}}
+      {{#if function.stream_has_first_response?}}
 value, stream = await value
       {{#else}}
 stream = value
-       {{/if function:stream_has_first_response?}}
+       {{/if function.stream_has_first_response?}}
 if not isinstance(stream, _typing.AsyncIterator):
     stream = await stream
-    {{/if function:stream?}}
-    {{#if function:sink?}}
-      {{#if function:sink_has_first_response?}}
+    {{/if function.stream?}}
+    {{#if function.sink?}}
+      {{#if function.sink_has_first_response?}}
 value, sink_callback = value
       {{#else}}
 sink_callback = value
-      {{/if function:sink_has_first_response?}}
-    {{/if function:sink?}}
-    {{#if (not function:oneway?)}}
-return_struct = {{#partial m_functions.return_type service=service:self function=function:self}}({{#if function:with_regular_response?}}success=value{{/if}})
-    {{/if (not function:oneway?)}}
-    {{#if function:stream?}}
-return_stream = self._fbthrift__stream_wrapper_{{function:name}}(stream, protocol)
-    {{/if function:stream?}}
-    {{#if function:sink?}}
-return_sink_callback = self._fbthrift__sink_wrapper_{{function:name}}(sink_callback, protocol)
-    {{/if function:sink?}}
+      {{/if function.sink_has_first_response?}}
+    {{/if function.sink?}}
+    {{#if (not function.oneway?)}}
+return_struct = {{#partial m_functions.return_type service=service:self function=function}}({{#if function.with_regular_response?}}success=value{{/if}})
+    {{/if (not function.oneway?)}}
+    {{#if function.stream?}}
+return_stream = self._fbthrift__stream_wrapper_{{function.name}}(stream, protocol)
+    {{/if function.stream?}}
+    {{#if function.sink?}}
+return_sink_callback = self._fbthrift__sink_wrapper_{{function.name}}(sink_callback, protocol)
+    {{/if function.sink?}}
   {{#else}}
-value = await self.{{function:name}}({{#function:args}}args_struct.{{field:py_name}},{{/function:args}})
-    {{#if function:stream_has_first_response?}}
+value = await self.{{function.name}}({{#function.params.fields}}args_struct.{{field:py_name}},{{/function.params.fields}})
+    {{#if function.stream_has_first_response?}}
 value, bidi_callback = value
-return_struct = {{#partial m_functions.return_type service=service:self function=function:self}}(success=value)
+return_struct = {{#partial m_functions.return_type service=service:self function=function}}(success=value)
     {{#else}}{{! Stream has first response }}
 bidi_callback = value
-return_struct = {{#partial m_functions.return_type service=service:self function=function:self}}()
-    {{/if function:stream_has_first_response?}}
-return_bidi_callback = self._fbthrift__bidi_wrapper_{{function:name}}(bidi_callback, protocol)
-  {{/if (not function:bidirectional_stream?)}}
+return_struct = {{#partial m_functions.return_type service=service:self function=function}}()
+    {{/if function.stream_has_first_response?}}
+return_bidi_callback = self._fbthrift__bidi_wrapper_{{function.name}}(bidi_callback, protocol)
+  {{/if (not function.bidirectional_stream?)}}

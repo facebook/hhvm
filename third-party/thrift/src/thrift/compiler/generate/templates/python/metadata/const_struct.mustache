@@ -14,6 +14,12 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}_fbthrift_metadata.ThriftConstStruct({{#value:type.true_type}}type={{!
-}}_fbthrift_metadata.ThriftStructType(name="{{type:program.name}}.{{> structs/unadapted_name}}"), {{/value:type.true_type}}{{!
-}}fields= { {{#value:const_struct}}"{{constant:name}}": {{#constant:value}}{{> metadata/const_value }}{{/constant:value}}, {{/value:const_struct}} })
+}}
+{{#pragma ignore-newlines}}
+_fbthrift_metadata.ThriftConstStruct({{#value:type.true_type}}type=
+_fbthrift_metadata.ThriftStructType(name="{{type:program.name}}.{{> structs/unadapted_name}}"), {{/value:type.true_type}}
+fields= { {{!}}
+  {{#each value:structured_elements as |elem|}}
+"{{elem.field.name}}": {{#elem.value}}{{> metadata/const_value }}{{/elem.value}}, {{!}}
+  {{/each}}
+ })

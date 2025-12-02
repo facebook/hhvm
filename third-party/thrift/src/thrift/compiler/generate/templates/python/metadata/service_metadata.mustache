@@ -25,40 +25,40 @@ functions = [
     _fbthrift_metadata.ThriftFunction(name="{{function:name}}", return_type={{#partial metadata.return_type function=function:self}}, arguments=[
         {{#function:args}}
         _fbthrift_metadata.ThriftField(id={{field:id}}, type={{#partial metadata.thrift_type type=field:self.type}}, name="{{field:name}}", is_optional=False, structured_annotations=[
-            {{#field:structured_annotations}}
-            {{#constant:type.self.structured?}}{{#constant:value}}
-            {{> metadata/const_struct }},
-            {{/constant:value}}{{/constant:type.self.structured?}}
-            {{/field:structured_annotations}}
+            {{#field:self.structured_annotations}}
+              {{#if constant:type.structured?}}
+            {{#constant:value}}{{> metadata/const_struct }}{{/constant:value}},
+              {{/if constant:type.structured?}}
+            {{/field:self.structured_annotations}}
         ]),
         {{/function:args}}
     ], exceptions = [
         {{#function:exceptions}}
         _fbthrift_metadata.ThriftField(id={{field:id}}, type={{#partial metadata.thrift_type type=field:self.type}}, name="{{field:name}}", is_optional=False, structured_annotations=[
-            {{#field:structured_annotations}}
-            {{#constant:type.self.structured?}}{{#constant:value}}
-            {{> metadata/const_struct }},
-            {{/constant:value}}{{/constant:type.self.structured?}}
-            {{/field:structured_annotations}}
+            {{#field:self.structured_annotations}}
+              {{#if constant:type.structured?}}
+            {{#constant:value}}{{> metadata/const_struct }}{{/constant:value}},
+              {{/if constant:type.structured?}}
+            {{/field:self.structured_annotations}}
         ]),
         {{/function:exceptions}}
     ], is_oneway={{#function:oneway?}}True{{/function:oneway?}}{{^function:oneway?}}False{{/function:oneway?}}, structured_annotations=[
-        {{#function:structured_annotations}}
-        {{#constant:type.self.structured?}}{{#constant:value}}
-        {{> metadata/const_struct }},
-        {{/constant:value}}{{/constant:type.self.structured?}}
-        {{/function:structured_annotations}}
+        {{#function:self.structured_annotations}}
+          {{#if constant:type.structured?}}
+        {{#constant:value}}{{> metadata/const_struct }}{{/constant:value}},
+          {{/if constant:type.structured?}}
+        {{/function:self.structured_annotations}}
     ]),
     {{/function:starts_interaction?}}{{/service:functions}}
 ]
 
 service_dict = dict(metadata_struct.services)
 service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions, {{#service:extends?}}{{#service:extends}}parent="{{service:program.name}}.{{service:name}}",{{/service:extends}}{{/service:extends?}} structured_annotations=[
-    {{#service:structured_annotations}}
-    {{#constant:type.self.structured?}}{{#constant:value}}
-    {{> metadata/const_struct }},
-    {{/constant:value}}{{/constant:type.self.structured?}}
-    {{/service:structured_annotations}}
+    {{#service:self.structured_annotations}}
+      {{#if constant:type.structured?}}
+    {{#constant:value}}{{> metadata/const_struct }}{{/constant:value}},
+      {{/if constant:type.structured?}}
+    {{/service:self.structured_annotations}}
 ])
 new_struct = metadata_struct(services=service_dict)
 {{#service:extends?}}{{#service:extends}}

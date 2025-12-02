@@ -87,11 +87,11 @@ def _fbthrift_gen_metadata_enum_{{enum:name}}({{!
         {{/enum:values}}
     }
     structured_annotations = [
-        {{#enum:structured_annotations}}
-        {{#constant:type.self.structured?}}{{#constant:value}}
-        {{> metadata/const_struct }},
-        {{/constant:value}}{{/constant:type.self.structured?}}
-        {{/enum:structured_annotations}}
+        {{#enum:self.structured_annotations}}
+          {{#if constant:type.structured?}}
+        {{#constant:value}}{{> metadata/const_struct }}{{/constant:value}},
+          {{/if constant:type.structured?}}
+        {{/enum:self.structured_annotations}}
     ]
     enum_dict = dict(metadata_struct.enums)
     enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)

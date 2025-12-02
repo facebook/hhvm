@@ -22,9 +22,9 @@ if qualified_name in metadata_struct.services:
 
 functions = [
     {{#service:functions}}{{^function:starts_interaction?}}
-    _fbthrift_metadata.ThriftFunction(name="{{function:name}}", return_type={{> metadata/return_type }}, arguments=[
+    _fbthrift_metadata.ThriftFunction(name="{{function:name}}", return_type={{#partial metadata.return_type function=function:self}}, arguments=[
         {{#function:args}}
-        _fbthrift_metadata.ThriftField(id={{field:id}}, type={{#field:type}}{{> metadata/thrift_type }}{{/field:type}}, name="{{field:name}}", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id={{field:id}}, type={{#partial metadata.thrift_type type=field:self.type}}, name="{{field:name}}", is_optional=False, structured_annotations=[
             {{#field:structured_annotations}}
             {{#constant:type.self.structured?}}{{#constant:value}}
             {{> metadata/const_struct }},
@@ -34,7 +34,7 @@ functions = [
         {{/function:args}}
     ], exceptions = [
         {{#function:exceptions}}
-        _fbthrift_metadata.ThriftField(id={{field:id}}, type={{#field:type}}{{> metadata/thrift_type }}{{/field:type}}, name="{{field:name}}", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id={{field:id}}, type={{#partial metadata.thrift_type type=field:self.type}}, name="{{field:name}}", is_optional=False, structured_annotations=[
             {{#field:structured_annotations}}
             {{#constant:type.self.structured?}}{{#constant:value}}
             {{> metadata/const_struct }},

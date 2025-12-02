@@ -16,6 +16,15 @@
 
 }}
 
+{{!
+Raw type name, with special prefix if directly adapted
+Whisker partial equivalent to the macro `structs/unadapted_name`.
+}}
+{{#let export partial unadapted_name |type|}}
+{{#pragma ignore-newlines}}
+{{#if type.has_adapter?}}_fbthrift_unadapted_{{/if}}{{type.py_name}}
+{{/let partial}}
+
 {{!  Import module for mutable and immutable types }}
 {{#let export partial import_path}}
 {{#pragma ignore-newlines}}
@@ -116,7 +125,7 @@ Structs and enums will be namespaced appropriately if they are either defined
 in a different thrift file, or defined in the same thrift file but this is
 in the client or server source rather than the type definition source.
 }}
-{{#let export partial typeinfo |type|}}
+{{#let export partial typeinfo |type| captures |unadapted_name|}}
   {{#pragma ignore-newlines}}
   {{#if type.has_adapter?}}
     {{! If the type has an adapter, open AdaptedTypeInfo wrapper }}
@@ -152,7 +161,7 @@ _fbthrift_python_types.EnumTypeInfo({{#if type.need_module_path?}}{{type.module_
     {{#if type.structured?}}
 _fbthrift_python_types.StructTypeInfo(
 {{#if true_type.need_module_path?}}{{true_type.module_mangle}}.{{/if}}
-{{#true_type}}{{> structs/unadapted_name}}{{/true_type}}
+{{#partial unadapted_name type=true_type}}
 )
     {{#else if type.list?}}
 _fbthrift_python_types.ListTypeInfo({{#partial typeinfo type=true_type.elem_type}})
@@ -172,7 +181,7 @@ _fbthrift_python_types.MapTypeInfo(
     {{#if type.structured?}}
 _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(
 {{#if true_type.need_module_path?}}{{true_type.module_mangle}}.{{/if}}
-{{#true_type}}{{> structs/unadapted_name}}{{/true_type}}
+{{#partial unadapted_name type=true_type}}
 )
     {{#else if type.list?}}
 _fbthrift_python_mutable_typeinfos.MutableListTypeInfo({{#partial typeinfo type=true_type.elem_type}})

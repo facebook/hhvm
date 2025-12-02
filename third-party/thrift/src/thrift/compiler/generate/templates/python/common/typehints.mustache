@@ -75,7 +75,7 @@ None
   {{#else if type.structured?}}
 {{#if type.need_module_path?}}{{type.module_mangle}}.{{/if}}
 {{#if (not (or type.need_module_path? type.true_type.has_adapter?))}}{{#partial m_common.private_alias_prefix}}{{/if}}
-{{#type.true_type}}{{> structs/unadapted_name}}{{/type.true_type}}
+{{#partial m_types.unadapted_name type=type.true_type}}
 
   {{#else if type.list?}}
 {{#partial m_types.sequence}}[{{#partial pep484_type_impl type=type.true_type.elem_type unadapted=false}}]

@@ -81,7 +81,7 @@ bool Type::isFull(
   return isFull(type_name, validate_uri);
 }
 
-void Type::checkName(const std::string& name) {
+void Type::checkName(folly::cstring_view name) {
   validateUniversalName(name);
 }
 

@@ -45,10 +45,6 @@ const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::terse_write::
 
 namespace facebook::thrift::test::terse_write::deprecated {
 
-std::string_view MyStruct::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/terse_write/deprecated/MyStruct";
-}
-
 std::string_view MyStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyStruct>::fields_names[folly::to_underlying(ord) - 1];
@@ -102,10 +98,6 @@ bool TEnumTraits<::facebook::thrift::test::terse_write::deprecated::MyUnion::Typ
 }
 }} // apache::thrift
 namespace facebook::thrift::test::terse_write::deprecated {
-
-std::string_view MyUnion::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/terse_write/deprecated/MyUnion";
-}
 
 std::string_view MyUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -177,10 +169,6 @@ void swap(MyUnion& a, MyUnion& b) {
 
 
 namespace facebook::thrift::test::terse_write::deprecated {
-
-std::string_view StructLevelTerseStruct::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/terse_write/deprecated/StructLevelTerseStruct";
-}
 
 std::string_view StructLevelTerseStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -358,10 +346,6 @@ static_assert(
 
 
 namespace facebook::thrift::test::terse_write::deprecated {
-
-std::string_view FieldLevelTerseStruct::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/terse_write/deprecated/FieldLevelTerseStruct";
-}
 
 std::string_view FieldLevelTerseStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -756,10 +740,6 @@ static_assert(
 
 namespace facebook::thrift::test::terse_write::deprecated {
 
-std::string_view CppRefStructFields::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/terse_write/deprecated/CppRefStructFields";
-}
-
 std::string_view CppRefStructFields::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<CppRefStructFields>::fields_names[folly::to_underlying(ord) - 1];
@@ -846,10 +826,6 @@ static_assert(
 
 
 namespace facebook::thrift::test::terse_write::deprecated {
-
-std::string_view DeprecatedTerseWriteWithCustomDefault::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/terse_write/deprecated/DeprecatedTerseWriteWithCustomDefault";
-}
 
 std::string_view DeprecatedTerseWriteWithCustomDefault::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1110,10 +1086,6 @@ void swap([[maybe_unused]] DeprecatedTerseWriteWithCustomDefault& a, [[maybe_unu
 
 
 namespace facebook::thrift::test::terse_write::deprecated {
-
-std::string_view DeprecatedTerseWriteWithRedundantCustomDefault::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/terse_write/deprecated/DeprecatedTerseWriteWithRedundantCustomDefault";
-}
 
 std::string_view DeprecatedTerseWriteWithRedundantCustomDefault::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }

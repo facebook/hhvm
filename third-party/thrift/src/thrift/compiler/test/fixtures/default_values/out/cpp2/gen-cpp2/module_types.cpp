@@ -16,10 +16,6 @@
 
 namespace facebook::thrift::compiler::test::fixtures::default_values {
 
-std::string_view TrivialStruct::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/compiler/test/fixtures/default_values/TrivialStruct";
-}
-
 std::string_view TrivialStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<TrivialStruct>::fields_names[folly::to_underlying(ord) - 1];
@@ -76,10 +72,6 @@ void swap([[maybe_unused]] TrivialStruct& a, [[maybe_unused]] TrivialStruct& b) 
 
 
 namespace facebook::thrift::compiler::test::fixtures::default_values {
-
-std::string_view StructWithNoCustomDefaultValues::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/compiler/test/fixtures/default_values/StructWithNoCustomDefaultValues";
-}
 
 std::string_view StructWithNoCustomDefaultValues::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -219,10 +211,6 @@ static_assert(
 
 
 namespace facebook::thrift::compiler::test::fixtures::default_values {
-
-std::string_view StructWithCustomDefaultValues::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/compiler/test/fixtures/default_values/StructWithCustomDefaultValues";
-}
 
 std::string_view StructWithCustomDefaultValues::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }

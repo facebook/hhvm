@@ -45,10 +45,6 @@ const std::vector<std::any>& TEnumTraits<::test::fixtures::basic_structured_anno
 
 namespace test::fixtures::basic_structured_annotations {
 
-std::string_view runtime_annotation::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic_structured_annotations/runtime_annotation";
-}
-
 std::string_view runtime_annotation::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<runtime_annotation>::fields_names[folly::to_underlying(ord) - 1];
@@ -89,10 +85,6 @@ void swap([[maybe_unused]] runtime_annotation& a, [[maybe_unused]] runtime_annot
 
 
 namespace test::fixtures::basic_structured_annotations {
-
-std::string_view structured_annotation_inline::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic_structured_annotations/structured_annotation_inline";
-}
 
 std::string_view structured_annotation_inline::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -178,10 +170,6 @@ void swap([[maybe_unused]] structured_annotation_inline& a, [[maybe_unused]] str
 
 namespace test::fixtures::basic_structured_annotations {
 
-std::string_view structured_annotation_with_default::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic_structured_annotations/structured_annotation_with_default";
-}
-
 std::string_view structured_annotation_with_default::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<structured_annotation_with_default>::fields_names[folly::to_underlying(ord) - 1];
@@ -249,10 +237,6 @@ void swap([[maybe_unused]] structured_annotation_with_default& a, [[maybe_unused
 
 
 namespace test::fixtures::basic_structured_annotations {
-
-std::string_view structured_annotation_recursive::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic_structured_annotations/structured_annotation_recursive";
-}
 
 std::string_view structured_annotation_recursive::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -365,10 +349,6 @@ static_assert(
 
 namespace test::fixtures::basic_structured_annotations {
 
-std::string_view structured_annotation_forward::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic_structured_annotations/structured_annotation_forward";
-}
-
 std::string_view structured_annotation_forward::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<structured_annotation_forward>::fields_names[folly::to_underlying(ord) - 1];
@@ -425,10 +405,6 @@ void swap([[maybe_unused]] structured_annotation_forward& a, [[maybe_unused]] st
 
 
 namespace test::fixtures::basic_structured_annotations {
-
-std::string_view structured_annotation_nested::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic_structured_annotations/structured_annotation_nested";
-}
 
 std::string_view structured_annotation_nested::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -516,10 +492,6 @@ static_assert(
 
 
 namespace test::fixtures::basic_structured_annotations {
-
-std::string_view MyStruct::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic_structured_annotations/MyStruct";
-}
 
 std::string_view MyStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -626,10 +598,6 @@ void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
 
 namespace test::fixtures::basic_structured_annotations {
 
-std::string_view MyException::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic_structured_annotations/MyException";
-}
-
 std::string_view MyException::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyException>::fields_names[folly::to_underlying(ord) - 1];
@@ -709,10 +677,6 @@ bool TEnumTraits<::test::fixtures::basic_structured_annotations::MyUnion::Type>:
 }
 }} // apache::thrift
 namespace test::fixtures::basic_structured_annotations {
-
-std::string_view MyUnion::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic_structured_annotations/MyUnion";
-}
 
 std::string_view MyUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }

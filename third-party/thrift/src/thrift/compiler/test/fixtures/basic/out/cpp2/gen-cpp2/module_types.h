@@ -189,9 +189,7 @@ template <> struct TEnumTraits<::test::fixtures::basic::MyEnum> {
     return "module";
   }
 
-  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
-    return "test.dev/fixtures/basic/MyEnum";
-  }
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/basic/MyEnum";
 
   static char const* findName(type value) noexcept {
     std::string_view ret;
@@ -224,9 +222,7 @@ template <> struct TEnumTraits<::test::fixtures::basic::HackEnum> {
     return "module";
   }
 
-  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
-    return "test.dev/fixtures/basic/HackEnum";
-  }
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/basic/HackEnum";
 
   static char const* findName(type value) noexcept {
     std::string_view ret;
@@ -282,7 +278,7 @@ class MyDataItem final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/basic/MyDataItem";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -364,7 +360,7 @@ class MyStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/basic/MyStruct";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -922,7 +918,7 @@ class Containers final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/basic/Containers";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -1176,7 +1172,7 @@ class MyUnion final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/basic/MyUnion";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -1661,7 +1657,7 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/basic/MyException";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -1977,7 +1973,7 @@ class FOLLY_EXPORT MyExceptionWithMessage : public virtual apache::thrift::TExce
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/basic/MyExceptionWithMessage";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -2294,7 +2290,7 @@ class ReservedKeyword final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/basic/ReservedKeyword";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -2427,7 +2423,7 @@ class UnionToBeRenamed final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/basic/UnionToBeRenamed";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>

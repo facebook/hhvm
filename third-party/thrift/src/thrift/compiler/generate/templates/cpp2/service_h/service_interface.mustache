@@ -34,9 +34,7 @@ class ServiceHandler<{{service:qualified_name}}> : {{#service:extends}}virtual p
   std::string_view getGeneratedName() const override { return "{{service:name}}"; }
 {{#service:uri}}
 
-  static std::string_view __fbthrift_thrift_uri() {
-    return "{{service:uri}}";
-  }
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "{{service:uri}}";
 {{/service:uri}}
 
   typedef {{service:qualified_name}}AsyncProcessor ProcessorType;

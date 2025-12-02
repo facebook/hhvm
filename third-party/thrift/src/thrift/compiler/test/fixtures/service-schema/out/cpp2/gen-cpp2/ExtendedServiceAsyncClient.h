@@ -50,9 +50,7 @@ class Client<::facebook::thrift::test::ExtendedService> : public ::facebook::thr
     return "ExtendedService";
   }
 
-  static std::string_view __fbthrift_thrift_uri() {
-    return "facebook.com/thrift/test/ExtendedService";
-  }
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/ExtendedService";
 
 
   /** Glean {"file": "thrift/compiler/test/fixtures/service-schema/src/module.thrift", "service": "ExtendedService", "function": "init"} */

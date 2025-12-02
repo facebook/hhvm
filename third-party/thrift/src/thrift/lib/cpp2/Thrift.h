@@ -26,6 +26,7 @@
 #include <folly/Traits.h>
 #include <folly/Utility.h>
 #include <folly/functional/Invoke.h>
+#include <folly/lang/cstring_view.h>
 
 #include <cstdint>
 #include <memory>
@@ -119,13 +120,13 @@ struct struct_private_access {
   __fbthrift_cpp2_is_runtime_annotation();
 
   template <typename T>
-  static std::string_view __fbthrift_thrift_uri() {
-    return T::__fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri() {
+    return T::__fbthrift_thrift_uri;
   }
   template <typename T, typename = void>
   struct detect_uri : std::false_type {};
   template <typename T>
-  struct detect_uri<T, folly::void_t<decltype(T::__fbthrift_thrift_uri())>>
+  struct detect_uri<T, folly::void_t<decltype(T::__fbthrift_thrift_uri)>>
       : std::true_type {};
 
   template <typename T, typename Ord>
@@ -268,20 +269,19 @@ using empty_fn = detail::st::private_access::empty_fn;
 inline static constexpr empty_fn empty{};
 
 template <typename T>
-FOLLY_EXPORT const std::string& uri() {
+constexpr folly::cstring_view uri() {
   static_assert(
       folly::is_detected_v<detail::st::detect_complete, T> ||
           folly::is_detected_v<detail::st::detect_complete, Client<T>>,
       "T must be a complete type or service tag.");
-  std::string_view uri;
   if constexpr (detail::st::private_access::detect_uri<T>::value) {
-    uri = detail::st::private_access::__fbthrift_thrift_uri<T>();
+    return detail::st::private_access::__fbthrift_thrift_uri<T>();
   } else if constexpr (detail::st::private_access::detect_uri<
                            TEnumTraits<T>>::value) {
-    uri = detail::st::private_access::__fbthrift_thrift_uri<TEnumTraits<T>>();
+    return detail::st::private_access::__fbthrift_thrift_uri<TEnumTraits<T>>();
   } else if constexpr (detail::st::private_access::detect_uri<
                            Client<T>>::value) {
-    uri = detail::st::private_access::__fbthrift_thrift_uri<Client<T>>();
+    return detail::st::private_access::__fbthrift_thrift_uri<Client<T>>();
   } else {
     // MSVC and GCC fire this assert even when we took an earlier branch...
     if constexpr (!folly::kIsWindows && !folly::kGnuc) {
@@ -289,10 +289,15 @@ FOLLY_EXPORT const std::string& uri() {
     } else {
       // This will fail to build because we checked earlier that no URI is
       // defined for this type.
-      uri = detail::st::private_access::__fbthrift_thrift_uri<T>();
+      return detail::st::private_access::__fbthrift_thrift_uri<T>();
     }
   }
-  static const auto& kUri = *new std::string(uri);
+  return "";
+}
+
+template <typename T>
+FOLLY_EXPORT std::string const& uri_string_ref() {
+  static const auto& kUri = *new std::string(uri<T>());
   return kUri;
 }
 

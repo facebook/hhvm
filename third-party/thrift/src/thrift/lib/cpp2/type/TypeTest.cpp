@@ -32,9 +32,8 @@ enum class MyEnum {};
 
 template <>
 struct TEnumTraits<type::MyEnum> {
-  constexpr static auto __fbthrift_thrift_uri() {
-    return "domain.com/my/package/MyEnum";
-  }
+  constexpr static folly::cstring_view __fbthrift_thrift_uri =
+      "domain.com/my/package/MyEnum";
 };
 
 namespace type {
@@ -118,9 +117,8 @@ TEST(TypeTest, BaseType) {
 }
 
 struct MyStruct {
-  constexpr static auto __fbthrift_thrift_uri() {
-    return "domain.com/my/package/MyStruct";
-  }
+  constexpr static folly::cstring_view __fbthrift_thrift_uri =
+      "domain.com/my/package/MyStruct";
 };
 
 struct MyAdapter {};

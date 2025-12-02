@@ -47,9 +47,7 @@ class Client<::test::fixtures::basic_structured_annotations::MyService> : public
     return "MyService";
   }
 
-  static std::string_view __fbthrift_thrift_uri() {
-    return "test.dev/fixtures/basic_structured_annotations/MyService";
-  }
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/basic_structured_annotations/MyService";
 
 
   /** Glean {"file": "thrift/compiler/test/fixtures/basic-structured-annotations/src/module.thrift", "service": "MyService", "function": "first"} */

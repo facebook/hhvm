@@ -74,10 +74,6 @@ const std::vector<std::any>& TEnumTraits<::test::fixtures::python_capi::NormalDe
 
 namespace test::fixtures::python_capi {
 
-std::string_view MyStruct::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/python_capi/MyStruct";
-}
-
 std::string_view MyStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyStruct>::fields_names[folly::to_underlying(ord) - 1];
@@ -255,10 +251,6 @@ static_assert(
 
 namespace test::fixtures::python_capi {
 
-std::string_view MyDataItem::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/python_capi/MyDataItem";
-}
-
 std::string_view MyDataItem::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyDataItem>::fields_names[folly::to_underlying(ord) - 1];
@@ -326,10 +318,6 @@ void swap([[maybe_unused]] MyDataItem& a, [[maybe_unused]] MyDataItem& b) {
 
 namespace test::fixtures::python_capi {
 
-std::string_view TransitiveDoubler::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/python_capi/TransitiveDoubler";
-}
-
 std::string_view TransitiveDoubler::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<TransitiveDoubler>::fields_names[folly::to_underlying(ord) - 1];
@@ -371,10 +359,6 @@ void swap([[maybe_unused]] TransitiveDoubler& a, [[maybe_unused]] TransitiveDoub
 
 namespace test::fixtures::python_capi {
 namespace detail {
-
-std::string_view DoubledPair::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/python_capi/DoubledPair";
-}
 
 std::string_view DoubledPair::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -459,10 +443,6 @@ void swap([[maybe_unused]] DoubledPair& a, [[maybe_unused]] DoubledPair& b) {
 
 
 namespace test::fixtures::python_capi {
-
-std::string_view StringPair::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/python_capi/StringPair";
-}
 
 std::string_view StringPair::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -552,10 +532,6 @@ void swap([[maybe_unused]] StringPair& a, [[maybe_unused]] StringPair& b) {
 
 namespace test::fixtures::python_capi {
 
-std::string_view VapidStruct::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/python_capi/EmptyStruct";
-}
-
 std::string_view VapidStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<VapidStruct>::fields_names[folly::to_underlying(ord) - 1];
@@ -596,10 +572,6 @@ void swap([[maybe_unused]] VapidStruct& a, [[maybe_unused]] VapidStruct& b) {
 
 
 namespace test::fixtures::python_capi {
-
-std::string_view PrimitiveStruct::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/python_capi/PrimitiveStruct";
-}
 
 std::string_view PrimitiveStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -881,10 +853,6 @@ static_assert(
 
 namespace test::fixtures::python_capi {
 
-std::string_view AdaptedFields::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/python_capi/AdaptedFields";
-}
-
 std::string_view AdaptedFields::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<AdaptedFields>::fields_names[folly::to_underlying(ord) - 1];
@@ -1008,10 +976,6 @@ void swap([[maybe_unused]] AdaptedFields& a, [[maybe_unused]] AdaptedFields& b) 
 
 
 namespace test::fixtures::python_capi {
-
-std::string_view ListStruct::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/python_capi/ListStruct";
-}
 
 std::string_view ListStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1189,10 +1153,6 @@ void swap([[maybe_unused]] ListStruct& a, [[maybe_unused]] ListStruct& b) {
 
 namespace test::fixtures::python_capi {
 
-std::string_view SetStruct::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/python_capi/SetStruct";
-}
-
 std::string_view SetStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<SetStruct>::fields_names[folly::to_underlying(ord) - 1];
@@ -1342,10 +1302,6 @@ void swap([[maybe_unused]] SetStruct& a, [[maybe_unused]] SetStruct& b) {
 
 
 namespace test::fixtures::python_capi {
-
-std::string_view MapStruct::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/python_capi/MapStruct";
-}
 
 std::string_view MapStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1564,10 +1520,6 @@ static_assert(
 
 
 namespace test::fixtures::python_capi {
-
-std::string_view ComposeStruct::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/python_capi/ComposeStruct";
-}
 
 std::string_view ComposeStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1815,10 +1767,6 @@ bool TEnumTraits<::test::fixtures::python_capi::Shallot::Type>::findValue(std::s
 }} // apache::thrift
 namespace test::fixtures::python_capi {
 
-std::string_view Shallot::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/python_capi/Onion";
-}
-
 std::string_view Shallot::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Shallot>::fields_names[folly::to_underlying(ord) - 1];
@@ -2021,10 +1969,6 @@ bool TEnumTraits<::test::fixtures::python_capi::SomeBinary::Type>::findValue(std
 }
 }} // apache::thrift
 namespace test::fixtures::python_capi {
-
-std::string_view SomeBinary::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/python_capi/SomeBinary";
-}
 
 std::string_view SomeBinary::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }

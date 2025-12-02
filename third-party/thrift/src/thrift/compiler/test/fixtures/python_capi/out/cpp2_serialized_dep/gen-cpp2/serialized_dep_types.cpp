@@ -16,10 +16,6 @@
 
 namespace test::fixtures::python_capi {
 
-std::string_view SerializedStruct::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/python_capi/SerializedStruct";
-}
-
 std::string_view SerializedStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<SerializedStruct>::fields_names[folly::to_underlying(ord) - 1];
@@ -135,10 +131,6 @@ bool TEnumTraits<::test::fixtures::python_capi::SerializedUnion::Type>::findValu
 }} // apache::thrift
 namespace test::fixtures::python_capi {
 
-std::string_view SerializedUnion::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/python_capi/SerializedUnion";
-}
-
 std::string_view SerializedUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<SerializedUnion>::fields_names[folly::to_underlying(ord) - 1];
@@ -231,10 +223,6 @@ void swap(SerializedUnion& a, SerializedUnion& b) {
 
 namespace test::fixtures::python_capi {
 
-std::string_view SerializedError::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/python_capi/SerializedError";
-}
-
 std::string_view SerializedError::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<SerializedError>::fields_names[folly::to_underlying(ord) - 1];
@@ -320,10 +308,6 @@ void swap([[maybe_unused]] SerializedError& a, [[maybe_unused]] SerializedError&
 
 
 namespace test::fixtures::python_capi {
-
-std::string_view MarshalStruct::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/python_capi/MarshalStruct";
-}
 
 std::string_view MarshalStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -440,10 +424,6 @@ bool TEnumTraits<::test::fixtures::python_capi::MarshalUnion::Type>::findValue(s
 }} // apache::thrift
 namespace test::fixtures::python_capi {
 
-std::string_view MarshalUnion::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/python_capi/MarshalUnion";
-}
-
 std::string_view MarshalUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MarshalUnion>::fields_names[folly::to_underlying(ord) - 1];
@@ -535,10 +515,6 @@ void swap(MarshalUnion& a, MarshalUnion& b) {
 
 
 namespace test::fixtures::python_capi {
-
-std::string_view MarshalError::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/python_capi/MarshalError";
-}
 
 std::string_view MarshalError::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }

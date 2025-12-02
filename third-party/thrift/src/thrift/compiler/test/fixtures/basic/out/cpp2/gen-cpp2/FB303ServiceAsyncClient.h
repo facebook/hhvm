@@ -44,9 +44,7 @@ class Client<::test::fixtures::basic::FB303Service> : public apache::thrift::Gen
     return "FB303Service";
   }
 
-  static std::string_view __fbthrift_thrift_uri() {
-    return "test.dev/fixtures/basic/FB303Service";
-  }
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/basic/FB303Service";
 
 
   /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "FB303Service", "function": "simple_rpc"} */

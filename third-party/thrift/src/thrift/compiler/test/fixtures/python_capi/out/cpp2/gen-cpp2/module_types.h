@@ -467,9 +467,7 @@ template <> struct TEnumTraits<::test::fixtures::python_capi::MyEnum> {
     return "module";
   }
 
-  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
-    return "test.dev/fixtures/python_capi/MyEnum";
-  }
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/python_capi/MyEnum";
 
   static char const* findName(type value) noexcept {
     std::string_view ret;
@@ -502,9 +500,7 @@ template <> struct TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum> 
     return "module";
   }
 
-  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
-    return "test.dev/fixtures/python_capi/AnnoyingEnum";
-  }
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/python_capi/AnnoyingEnum";
 
   static char const* findName(type value) noexcept {
     std::string_view ret;
@@ -588,7 +584,7 @@ class MyDataItem final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/python_capi/MyDataItem";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -734,7 +730,7 @@ class MyStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/python_capi/MyStruct";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -1248,7 +1244,7 @@ class TransitiveDoubler final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/python_capi/TransitiveDoubler";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -1331,7 +1327,7 @@ class DoubledPair final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/python_capi/DoubledPair";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -1528,7 +1524,7 @@ class StringPair final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/python_capi/StringPair";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -1713,7 +1709,7 @@ class VapidStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/python_capi/EmptyStruct";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -1795,7 +1791,7 @@ class PrimitiveStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/python_capi/PrimitiveStruct";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -2708,7 +2704,7 @@ class AdaptedFields final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/python_capi/AdaptedFields";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -2985,7 +2981,7 @@ class ListStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/python_capi/ListStruct";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -3558,7 +3554,7 @@ class SetStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/python_capi/SetStruct";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -4022,7 +4018,7 @@ class MapStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/python_capi/MapStruct";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -4653,7 +4649,7 @@ class ComposeStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/python_capi/ComposeStruct";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -5259,7 +5255,7 @@ class Shallot final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/python_capi/Onion";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -5960,7 +5956,7 @@ class SomeBinary final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/python_capi/SomeBinary";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>

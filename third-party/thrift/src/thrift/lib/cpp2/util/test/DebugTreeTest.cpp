@@ -105,7 +105,9 @@ TEST(DebugTreeTest, MyStruct) {
       expected);
 
   EXPECT_EQ(
-      to_string(debugTree(v, Uri{apache::thrift::uri<MyStruct>()})), expected);
+      to_string(
+          debugTree(v, Uri{std::string(apache::thrift::uri<MyStruct>())})),
+      expected);
 
   EXPECT_EQ(to_string(debugTree(v)), R"(<UNKNOWN STRUCT>
 ├─ FieldId(1)
@@ -208,7 +210,8 @@ TEST(DebugTreeTest, DynamicPrimitivePatch) {
   patch.patchIfSet<ident::stringVal>().append(")");
   auto dynPatch = protocol::DynamicPatch::fromObject(patch.toObject());
   EXPECT_EQ(
-      to_string(debugTree(dynPatch, Uri{apache::thrift::uri<MyStruct>()})),
+      to_string(debugTree(
+          dynPatch, Uri{std::string(apache::thrift::uri<MyStruct>())})),
       R"(<StructPatch: MyStruct (DebugTree.thrift)>
 ├─ ensure
 │  ├─ boolVal
@@ -324,7 +327,8 @@ TEST(DebugTreeTest, DynamicNestedStructPatch) {
   patch.patch<ident::structVal>().patchIfSet<ident::data1>() += ";";
   auto dynPatch = protocol::DynamicPatch::fromObject(patch.toObject());
   EXPECT_EQ(
-      to_string(debugTree(dynPatch, Uri{apache::thrift::uri<MyStruct>()})),
+      to_string(debugTree(
+          dynPatch, Uri{std::string(apache::thrift::uri<MyStruct>())})),
       R"(<StructPatch: MyStruct (DebugTree.thrift)>
 ├─ ensure
 │  ╰─ structVal
@@ -378,7 +382,8 @@ TEST(DebugTreeTest, DynamicContainerPatch) {
   auto dynPatch = protocol::DynamicPatch::fromObject(patch.toObject());
   // TODO(ytj): We knew it's a StructPatch, not UnknownPatch (from the Schema).
   EXPECT_EQ(
-      to_string(debugTree(dynPatch, Uri{apache::thrift::uri<MyStruct>()})),
+      to_string(debugTree(
+          dynPatch, Uri{std::string(apache::thrift::uri<MyStruct>())})),
       R"(UnknownPatch
 ╰─ patch
    ├─ optListVal
@@ -519,7 +524,8 @@ TEST(DebugTreeTest, StructWithTypedef) {
   auto v = protocol::asValueStruct<type::struct_t<StructWithTypedef>>(s);
 
   EXPECT_EQ(
-      to_string(debugTree(v, Uri{apache::thrift::uri<StructWithTypedef>()})),
+      to_string(debugTree(
+          v, Uri{std::string(apache::thrift::uri<StructWithTypedef>())})),
       R"(<Struct: StructWithTypedef (DebugTree.thrift)>
 ├─ field
 │  ╰─ <Struct: Def (DebugTree.thrift)>
@@ -587,7 +593,8 @@ TEST(DebugTreeTest, PatchAsProtocolObject) {
 )");
   EXPECT_EQ(
       to_string(debugTree(
-          patch.toObject(), Uri{apache::thrift::uri<MyStructPatchStruct>()})),
+          patch.toObject(),
+          Uri{std::string(apache::thrift::uri<MyStructPatchStruct>())})),
       R"(<StructPatch: MyStruct (DebugTree.thrift)>
 ├─ ensure
 │  ╰─ boolVal

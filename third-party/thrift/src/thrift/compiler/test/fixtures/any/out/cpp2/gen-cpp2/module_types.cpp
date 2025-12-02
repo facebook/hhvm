@@ -17,10 +17,6 @@
 namespace facebook::thrift::compiler::test::fixtures::any {
 namespace detail {
 
-std::string_view MyStruct::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/compiler/test/fixtures/any/MyStruct";
-}
-
 std::string_view MyStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyStruct>::fields_names[folly::to_underlying(ord) - 1];
@@ -101,10 +97,6 @@ bool TEnumTraits<::facebook::thrift::compiler::test::fixtures::any::MyUnion::Typ
 }
 }} // apache::thrift
 namespace facebook::thrift::compiler::test::fixtures::any {
-
-std::string_view MyUnion::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/compiler/test/fixtures/any/MyUnion";
-}
 
 std::string_view MyUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -188,10 +180,6 @@ void swap(MyUnion& a, MyUnion& b) {
 
 
 namespace facebook::thrift::compiler::test::fixtures::any {
-
-std::string_view MyException::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/compiler/test/fixtures/any/MyException";
-}
 
 std::string_view MyException::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }

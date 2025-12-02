@@ -45,10 +45,6 @@ const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::terse_write::
 
 namespace facebook::thrift::test::terse_write {
 
-std::string_view MyStruct::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/terse_write/MyStruct";
-}
-
 std::string_view MyStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyStruct>::fields_names[folly::to_underlying(ord) - 1];
@@ -102,10 +98,6 @@ bool TEnumTraits<::facebook::thrift::test::terse_write::MyUnion::Type>::findValu
 }
 }} // apache::thrift
 namespace facebook::thrift::test::terse_write {
-
-std::string_view MyUnion::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/terse_write/MyUnion";
-}
 
 std::string_view MyUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -313,10 +305,6 @@ static_assert(
 
 namespace facebook::thrift::test::terse_write {
 
-std::string_view MyStructWithCustomDefault::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/terse_write/MyStructWithCustomDefault";
-}
-
 std::string_view MyStructWithCustomDefault::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyStructWithCustomDefault>::fields_names[folly::to_underlying(ord) - 1];
@@ -373,10 +361,6 @@ void swap([[maybe_unused]] MyStructWithCustomDefault& a, [[maybe_unused]] MyStru
 
 
 namespace facebook::thrift::test::terse_write {
-
-std::string_view StructLevelTerseStruct::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/terse_write/StructLevelTerseStruct";
-}
 
 std::string_view StructLevelTerseStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -556,10 +540,6 @@ static_assert(
 
 
 namespace facebook::thrift::test::terse_write {
-
-std::string_view FieldLevelTerseStruct::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/terse_write/FieldLevelTerseStruct";
-}
 
 std::string_view FieldLevelTerseStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -951,10 +931,6 @@ static_assert(
 
 namespace facebook::thrift::test::terse_write {
 
-std::string_view AdaptedFields::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/terse_write/AdaptedFields";
-}
-
 std::string_view AdaptedFields::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<AdaptedFields>::fields_names[folly::to_underlying(ord) - 1];
@@ -1045,10 +1021,6 @@ void swap([[maybe_unused]] AdaptedFields& a, [[maybe_unused]] AdaptedFields& b) 
 
 
 namespace facebook::thrift::test::terse_write {
-
-std::string_view TerseException::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/terse_write/TerseException";
-}
 
 std::string_view TerseException::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }

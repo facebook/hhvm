@@ -45,10 +45,6 @@ const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::Result>::enum
 
 namespace facebook::thrift::test {
 
-std::string_view CustomException::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/CustomException";
-}
-
 std::string_view CustomException::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<CustomException>::fields_names[folly::to_underlying(ord) - 1];

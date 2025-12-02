@@ -416,9 +416,7 @@ template <> struct TEnumTraits<::facebook::thrift::test::terse_write::deprecated
     return "deprecated_terse_write";
   }
 
-  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
-    return "facebook.com/thrift/test/terse_write/deprecated/MyEnum";
-  }
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/terse_write/deprecated/MyEnum";
 
   static char const* findName(type value) noexcept {
     std::string_view ret;
@@ -495,7 +493,7 @@ class MyStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/terse_write/deprecated/MyStruct";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -577,7 +575,7 @@ class MyUnion final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/terse_write/deprecated/MyUnion";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -697,7 +695,7 @@ class StructLevelTerseStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/terse_write/deprecated/StructLevelTerseStruct";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -1381,7 +1379,7 @@ class FieldLevelTerseStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/terse_write/deprecated/FieldLevelTerseStruct";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -2915,7 +2913,7 @@ class CppRefStructFields final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/terse_write/deprecated/CppRefStructFields";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -3088,7 +3086,7 @@ class DeprecatedTerseWriteWithCustomDefault final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/terse_write/deprecated/DeprecatedTerseWriteWithCustomDefault";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -3898,7 +3896,7 @@ class DeprecatedTerseWriteWithRedundantCustomDefault final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/terse_write/deprecated/DeprecatedTerseWriteWithRedundantCustomDefault";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>

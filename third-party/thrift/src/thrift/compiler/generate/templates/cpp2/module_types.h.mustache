@@ -133,7 +133,7 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
   static constexpr bool __fbthrift_cpp2_gen_json = {{(has_compiler_option? "json")}};
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = {{struct:is_runtime_annotation?}};
   {{#struct:uri}}
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "{{struct:uri}}";
   {{/struct:uri}}
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();

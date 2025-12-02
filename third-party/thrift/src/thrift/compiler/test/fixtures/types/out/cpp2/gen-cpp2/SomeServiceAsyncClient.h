@@ -46,9 +46,7 @@ class Client<::apache::thrift::fixtures::types::SomeService> : public apache::th
     return "SomeService";
   }
 
-  static std::string_view __fbthrift_thrift_uri() {
-    return "apache.org/thrift/fixtures/types/SomeService";
-  }
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "apache.org/thrift/fixtures/types/SomeService";
 
 
   /** Glean {"file": "thrift/compiler/test/fixtures/types/src/module.thrift", "service": "SomeService", "function": "bounce_map"} */

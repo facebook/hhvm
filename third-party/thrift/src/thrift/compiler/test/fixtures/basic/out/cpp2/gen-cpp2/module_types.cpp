@@ -74,10 +74,6 @@ const std::vector<std::any>& TEnumTraits<::test::fixtures::basic::HackEnum>::enu
 
 namespace test::fixtures::basic {
 
-std::string_view MyStruct::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic/MyStruct";
-}
-
 std::string_view MyStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyStruct>::fields_names[folly::to_underlying(ord) - 1];
@@ -264,10 +260,6 @@ static_assert(
 
 namespace test::fixtures::basic {
 
-std::string_view Containers::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic/Containers";
-}
-
 std::string_view Containers::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Containers>::fields_names[folly::to_underlying(ord) - 1];
@@ -371,10 +363,6 @@ void swap([[maybe_unused]] Containers& a, [[maybe_unused]] Containers& b) {
 
 namespace test::fixtures::basic {
 
-std::string_view MyDataItem::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic/MyDataItem";
-}
-
 std::string_view MyDataItem::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyDataItem>::fields_names[folly::to_underlying(ord) - 1];
@@ -428,10 +416,6 @@ bool TEnumTraits<::test::fixtures::basic::MyUnion::Type>::findValue(std::string_
 }
 }} // apache::thrift
 namespace test::fixtures::basic {
-
-std::string_view MyUnion::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic/MyUnion";
-}
 
 std::string_view MyUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -555,10 +539,6 @@ static_assert(
 
 namespace test::fixtures::basic {
 
-std::string_view MyException::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic/MyException";
-}
-
 std::string_view MyException::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyException>::fields_names[folly::to_underlying(ord) - 1];
@@ -681,10 +661,6 @@ static_assert(
 
 
 namespace test::fixtures::basic {
-
-std::string_view MyExceptionWithMessage::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic/MyExceptionWithMessage";
-}
 
 std::string_view MyExceptionWithMessage::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -813,10 +789,6 @@ static_assert(
 
 namespace test::fixtures::basic {
 
-std::string_view ReservedKeyword::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic/ReservedKeyword";
-}
-
 std::string_view ReservedKeyword::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<ReservedKeyword>::fields_names[folly::to_underlying(ord) - 1];
@@ -886,10 +858,6 @@ bool TEnumTraits<::test::fixtures::basic::UnionToBeRenamed::Type>::findValue(std
 }
 }} // apache::thrift
 namespace test::fixtures::basic {
-
-std::string_view UnionToBeRenamed::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic/UnionToBeRenamed";
-}
 
 std::string_view UnionToBeRenamed::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }

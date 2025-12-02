@@ -58,10 +58,6 @@ const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::MyEnum>::enum
 
 namespace facebook::thrift::test {
 
-std::string_view MyAnnotation::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/MyAnnotation";
-}
-
 std::string_view MyAnnotation::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyAnnotation>::fields_names[folly::to_underlying(ord) - 1];
@@ -102,10 +98,6 @@ void swap([[maybe_unused]] MyAnnotation& a, [[maybe_unused]] MyAnnotation& b) {
 
 
 namespace facebook::thrift::test {
-
-std::string_view MyStruct::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/MyStruct";
-}
 
 std::string_view MyStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -164,10 +156,6 @@ void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
 
 namespace facebook::thrift::test {
 
-std::string_view MyUnion::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/MyUnion";
-}
-
 std::string_view MyUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyUnion>::fields_names[folly::to_underlying(ord) - 1];
@@ -224,10 +212,6 @@ void swap([[maybe_unused]] MyUnion& a, [[maybe_unused]] MyUnion& b) {
 
 
 namespace facebook::thrift::test {
-
-std::string_view MyException::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/MyException";
-}
 
 std::string_view MyException::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }

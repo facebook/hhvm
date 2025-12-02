@@ -16,10 +16,6 @@
 
 namespace facebook::thrift::compiler::test::fixtures::aliasing {
 
-std::string_view Foo::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/compiler/test/fixtures/aliasing/Foo";
-}
-
 std::string_view Foo::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Foo>::fields_names[folly::to_underlying(ord) - 1];

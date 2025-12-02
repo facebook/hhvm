@@ -16,10 +16,6 @@
 
 namespace facebook::thrift::compiler::test::fixtures::default_values_rectification {
 
-std::string_view EmptyStruct::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/compiler/test/fixtures/default_values_rectification/EmptyStruct";
-}
-
 std::string_view EmptyStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<EmptyStruct>::fields_names[folly::to_underlying(ord) - 1];
@@ -60,10 +56,6 @@ void swap([[maybe_unused]] EmptyStruct& a, [[maybe_unused]] EmptyStruct& b) {
 
 
 namespace facebook::thrift::compiler::test::fixtures::default_values_rectification {
-
-std::string_view TestStruct::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/compiler/test/fixtures/default_values_rectification/TestStruct";
-}
 
 std::string_view TestStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }

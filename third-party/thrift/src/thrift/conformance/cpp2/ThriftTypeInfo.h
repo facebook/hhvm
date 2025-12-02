@@ -42,33 +42,18 @@ inline constexpr type::hash_size_t kMinTypeHashBytes = 8;
 //
 // The first name in names is set as the primary name, and all others are added
 // as aliases.
-template <typename C = std::initializer_list<std::string_view>>
 ThriftTypeInfo createThriftTypeInfo(
-    C&& names, type::hash_size_t typeHashBytes = kTypeHashBytesNotSpecified);
+    std::span<folly::cstring_view const> uris,
+    type::hash_size_t typeHashBytes = kTypeHashBytesNotSpecified);
+
+inline ThriftTypeInfo createThriftTypeInfo(
+    std::initializer_list<folly::cstring_view> uris,
+    type::hash_size_t typeHashBytes = kTypeHashBytesNotSpecified) {
+  return createThriftTypeInfo(std::span(uris), typeHashBytes);
+}
 
 // Raises std::invalid_argument if invalid.
 void validateThriftTypeInfo(const ThriftTypeInfo& type);
-
-// Implementation
-
-template <typename R>
-ThriftTypeInfo createThriftTypeInfo(R&& uris, type::hash_size_t typeHashBytes) {
-  ThriftTypeInfo type;
-  if (typeHashBytes != kTypeHashBytesNotSpecified) {
-    type.typeHashBytes() = typeHashBytes;
-  }
-  auto itr = folly::access::begin(std::forward<R>(uris));
-  auto iend = folly::access::end(std::forward<R>(uris));
-  if (itr == iend) {
-    folly::throw_exception<std::invalid_argument>(
-        "At least one name must be provided.");
-  }
-  type.uri() = std::string{std::forward<decltype(*itr)>(*itr++)};
-  for (; itr != iend; ++itr) {
-    type.altUris()->emplace(std::string{std::forward<decltype(*itr)>(*itr++)});
-  }
-  return type;
-}
 
 template <typename T>
 const ThriftTypeInfo& getGeneratedThriftTypeInfo() {

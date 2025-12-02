@@ -30,6 +30,7 @@
 #include <folly/Utility.h>
 #include <folly/container/F14Map.h>
 #include <folly/container/F14Set.h>
+#include <folly/lang/cstring_view.h>
 #include <thrift/lib/cpp2/Adapt.h>
 #include <thrift/lib/cpp2/Adapter.h>
 #include <thrift/lib/cpp2/FieldRef.h>

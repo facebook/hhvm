@@ -45,10 +45,6 @@ const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::Enum>::enumVa
 
 namespace facebook::thrift::test {
 
-std::string_view Foo::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/Foo";
-}
-
 std::string_view Foo::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Foo>::fields_names[folly::to_underlying(ord) - 1];
@@ -105,10 +101,6 @@ void swap([[maybe_unused]] Foo& a, [[maybe_unused]] Foo& b) {
 
 
 namespace facebook::thrift::test {
-
-std::string_view Bar::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/Bar";
-}
 
 std::string_view Bar::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -184,10 +176,6 @@ void swap([[maybe_unused]] Bar& a, [[maybe_unused]] Bar& b) {
 
 
 namespace facebook::thrift::test {
-
-std::string_view Baz::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/Baz";
-}
 
 std::string_view Baz::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -277,10 +265,6 @@ void swap([[maybe_unused]] Baz& a, [[maybe_unused]] Baz& b) {
 
 
 namespace facebook::thrift::test {
-
-std::string_view OpEncodeStruct::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/OpEncodeStruct";
-}
 
 std::string_view OpEncodeStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }

@@ -43,9 +43,7 @@ class ServiceHandler<::test::fixtures::basic_structured_annotations::MyService> 
  public:
   std::string_view getGeneratedName() const override { return "MyService"; }
 
-  static std::string_view __fbthrift_thrift_uri() {
-    return "test.dev/fixtures/basic_structured_annotations/MyService";
-  }
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/basic_structured_annotations/MyService";
 
   typedef ::test::fixtures::basic_structured_annotations::MyServiceAsyncProcessor ProcessorType;
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;

@@ -16,10 +16,6 @@
 
 namespace facebook::thrift::compiler::test {
 
-std::string_view MyStruct::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/compiler/test/MyStruct";
-}
-
 std::string_view MyStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyStruct>::fields_names[folly::to_underlying(ord) - 1];

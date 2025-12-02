@@ -35,4 +35,24 @@ void validateThriftTypeInfo(const ThriftTypeInfo& type) {
   }
 }
 
+[[FOLLY_ATTR_GNU_COLD]] ThriftTypeInfo createThriftTypeInfo(
+    std::span<folly::cstring_view const> uris,
+    type::hash_size_t typeHashBytes) {
+  ThriftTypeInfo type;
+  if (typeHashBytes != kTypeHashBytesNotSpecified) {
+    type.typeHashBytes() = typeHashBytes;
+  }
+  auto itr = folly::access::begin(uris);
+  auto iend = folly::access::end(uris);
+  if (itr == iend) {
+    folly::throw_exception<std::invalid_argument>(
+        "At least one name must be provided.");
+  }
+  type.uri() = std::string{*itr++};
+  for (; itr != iend; ++itr) {
+    type.altUris()->emplace(std::string{*itr++});
+  }
+  return type;
+}
+
 } // namespace apache::thrift::conformance

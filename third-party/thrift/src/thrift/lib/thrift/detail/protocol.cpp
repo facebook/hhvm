@@ -55,20 +55,8 @@ std::string str(const apache::thrift::protocol::detail::Value& value) {
 namespace apache::thrift::protocol::detail {
 
 template <class Base>
-const char* ObjectWrapper<Base>::__fbthrift_thrift_uri() {
-  static const folly::Indestructible<std::string> ret = uri<Base>();
-  return ret->c_str();
-}
-
-template <class Base>
 bool ObjectWrapper<Base>::__fbthrift_is_empty() const {
   return empty();
-}
-
-template <class Base>
-const char* ValueWrapper<Base>::__fbthrift_thrift_uri() {
-  static const folly::Indestructible<std::string> ret = uri<Base>();
-  return ret->c_str();
 }
 
 template <class Base>
@@ -290,9 +278,7 @@ const detail::Object* into_inner_object(const Object* o) {
   return o ? &o->toThrift() : nullptr;
 }
 
-template const char* ObjectWrapper<detail::Object>::__fbthrift_thrift_uri();
 template bool ObjectWrapper<detail::Object>::__fbthrift_is_empty() const;
-template const char* ValueWrapper<detail::Value>::__fbthrift_thrift_uri();
 template bool ValueWrapper<detail::Value>::__fbthrift_is_empty() const;
 
 } // namespace apache::thrift::protocol::detail

@@ -74,10 +74,6 @@ const std::vector<std::any>& TEnumTraits<::facebook::thrift::test::ThriftAdapted
 
 namespace facebook::thrift::test {
 
-std::string_view MyAnnotation::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/MyAnnotation";
-}
-
 std::string_view MyAnnotation::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyAnnotation>::fields_names[folly::to_underlying(ord) - 1];
@@ -160,10 +156,6 @@ void swap([[maybe_unused]] MyAnnotation& a, [[maybe_unused]] MyAnnotation& b) {
 
 
 namespace facebook::thrift::test {
-
-std::string_view Foo::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/compiler/test/fixtures/adapter/src/module/Foo";
-}
 
 std::string_view Foo::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -435,10 +427,6 @@ bool TEnumTraits<::facebook::thrift::test::Baz::Type>::findValue(std::string_vie
 }} // apache::thrift
 namespace facebook::thrift::test {
 
-std::string_view Baz::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/Baz";
-}
-
 std::string_view Baz::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Baz>::fields_names[folly::to_underlying(ord) - 1];
@@ -557,10 +545,6 @@ void swap(Baz& a, Baz& b) {
 
 
 namespace facebook::thrift::test {
-
-std::string_view Bar::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/Bar";
-}
 
 std::string_view Bar::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -769,10 +753,6 @@ static_assert(
 namespace facebook::thrift::test {
 namespace detail {
 
-std::string_view DirectlyAdapted::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/DirectlyAdapted";
-}
-
 std::string_view DirectlyAdapted::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<DirectlyAdapted>::fields_names[folly::to_underlying(ord) - 1];
@@ -832,10 +812,6 @@ void swap([[maybe_unused]] DirectlyAdapted& a, [[maybe_unused]] DirectlyAdapted&
 namespace facebook::thrift::test {
 namespace detail {
 
-std::string_view IndependentDirectlyAdapted::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/IndependentDirectlyAdapted";
-}
-
 std::string_view IndependentDirectlyAdapted::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<IndependentDirectlyAdapted>::fields_names[folly::to_underlying(ord) - 1];
@@ -893,10 +869,6 @@ void swap([[maybe_unused]] IndependentDirectlyAdapted& a, [[maybe_unused]] Indep
 
 
 namespace facebook::thrift::test {
-
-std::string_view StructWithFieldAdapter::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/StructWithFieldAdapter";
-}
 
 std::string_view StructWithFieldAdapter::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1009,10 +981,6 @@ void swap([[maybe_unused]] StructWithFieldAdapter& a, [[maybe_unused]] StructWit
 
 namespace facebook::thrift::test {
 
-std::string_view TerseAdaptedFields::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/TerseAdaptedFields";
-}
-
 std::string_view TerseAdaptedFields::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<TerseAdaptedFields>::fields_names[folly::to_underlying(ord) - 1];
@@ -1114,10 +1082,6 @@ void swap([[maybe_unused]] TerseAdaptedFields& a, [[maybe_unused]] TerseAdaptedF
 
 namespace facebook::thrift::test {
 
-std::string_view B::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/B";
-}
-
 std::string_view B::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<B>::fields_names[folly::to_underlying(ord) - 1];
@@ -1197,10 +1161,6 @@ static_assert(
 
 namespace facebook::thrift::test {
 
-std::string_view A::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/A";
-}
-
 std::string_view A::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<A>::fields_names[folly::to_underlying(ord) - 1];
@@ -1241,10 +1201,6 @@ void swap([[maybe_unused]] A& a, [[maybe_unused]] A& b) {
 
 
 namespace facebook::thrift::test {
-
-std::string_view Config::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/Config";
-}
 
 std::string_view Config::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1312,10 +1268,6 @@ void swap([[maybe_unused]] Config& a, [[maybe_unused]] Config& b) {
 
 
 namespace facebook::thrift::test {
-
-std::string_view MyStruct::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/MyStruct";
-}
 
 std::string_view MyStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1414,10 +1366,6 @@ void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
 
 
 namespace facebook::thrift::test {
-
-std::string_view AdaptTestStruct::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/AdaptTestStruct";
-}
 
 std::string_view AdaptTestStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1599,10 +1547,6 @@ void swap([[maybe_unused]] AdaptTestStruct& a, [[maybe_unused]] AdaptTestStruct&
 
 
 namespace facebook::thrift::test {
-
-std::string_view AdaptTemplatedTestStruct::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/AdaptTemplatedTestStruct";
-}
 
 std::string_view AdaptTemplatedTestStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1934,10 +1878,6 @@ void swap([[maybe_unused]] AdaptTemplatedTestStruct& a, [[maybe_unused]] AdaptTe
 
 namespace facebook::thrift::test {
 
-std::string_view AdaptTemplatedNestedTestStruct::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/AdaptTemplatedNestedTestStruct";
-}
-
 std::string_view AdaptTemplatedNestedTestStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<AdaptTemplatedNestedTestStruct>::fields_names[folly::to_underlying(ord) - 1];
@@ -2025,10 +1965,6 @@ bool TEnumTraits<::facebook::thrift::test::ThriftAdaptTestUnion::Type>::findValu
 }
 }} // apache::thrift
 namespace facebook::thrift::test {
-
-std::string_view ThriftAdaptTestUnion::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/AdaptTestUnion";
-}
 
 std::string_view ThriftAdaptTestUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2122,10 +2058,6 @@ void swap(ThriftAdaptTestUnion& a, ThriftAdaptTestUnion& b) {
 
 namespace facebook::thrift::test {
 
-std::string_view ThriftAdaptedStruct::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/AdaptedStruct";
-}
-
 std::string_view ThriftAdaptedStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<ThriftAdaptedStruct>::fields_names[folly::to_underlying(ord) - 1];
@@ -2184,10 +2116,6 @@ void swap([[maybe_unused]] ThriftAdaptedStruct& a, [[maybe_unused]] ThriftAdapte
 namespace facebook::thrift::test {
 namespace detail {
 
-std::string_view DirectlyAdaptedStruct::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/DirectlyAdaptedStruct";
-}
-
 std::string_view DirectlyAdaptedStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<DirectlyAdaptedStruct>::fields_names[folly::to_underlying(ord) - 1];
@@ -2245,10 +2173,6 @@ void swap([[maybe_unused]] DirectlyAdaptedStruct& a, [[maybe_unused]] DirectlyAd
 
 
 namespace facebook::thrift::test {
-
-std::string_view StructFieldAdaptedStruct::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/StructFieldAdaptedStruct";
-}
 
 std::string_view StructFieldAdaptedStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2378,10 +2302,6 @@ static_assert(
 
 namespace facebook::thrift::test {
 
-std::string_view CircularAdaptee::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/CircularAdaptee";
-}
-
 std::string_view CircularAdaptee::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<CircularAdaptee>::fields_names[folly::to_underlying(ord) - 1];
@@ -2456,10 +2376,6 @@ static_assert(
 
 
 namespace facebook::thrift::test {
-
-std::string_view CircularStruct::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/CircularStruct";
-}
 
 std::string_view CircularStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2541,10 +2457,6 @@ static_assert(
 
 
 namespace facebook::thrift::test {
-
-std::string_view ReorderedStruct::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/ReorderedStruct";
-}
 
 std::string_view ReorderedStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2629,10 +2541,6 @@ static_assert(
 namespace facebook::thrift::test {
 namespace detail {
 
-std::string_view DeclaredAfterStruct::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/DeclaredAfterStruct";
-}
-
 std::string_view DeclaredAfterStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<DeclaredAfterStruct>::fields_names[folly::to_underlying(ord) - 1];
@@ -2674,10 +2582,6 @@ void swap([[maybe_unused]] DeclaredAfterStruct& a, [[maybe_unused]] DeclaredAfte
 
 
 namespace facebook::thrift::test {
-
-std::string_view UnderlyingRenamedStruct::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/RenamedStruct";
-}
 
 std::string_view UnderlyingRenamedStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2735,10 +2639,6 @@ void swap([[maybe_unused]] UnderlyingRenamedStruct& a, [[maybe_unused]] Underlyi
 
 
 namespace facebook::thrift::test {
-
-std::string_view UnderlyingSameNamespaceStruct::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/SameNamespaceStruct";
-}
 
 std::string_view UnderlyingSameNamespaceStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2798,10 +2698,6 @@ void swap([[maybe_unused]] UnderlyingSameNamespaceStruct& a, [[maybe_unused]] Un
 namespace facebook::thrift::test {
 namespace detail {
 
-std::string_view HeapAllocated::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/HeapAllocated";
-}
-
 std::string_view HeapAllocated::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<HeapAllocated>::fields_names[folly::to_underlying(ord) - 1];
@@ -2843,10 +2739,6 @@ void swap([[maybe_unused]] HeapAllocated& a, [[maybe_unused]] HeapAllocated& b) 
 
 
 namespace facebook::thrift::test {
-
-std::string_view MoveOnly::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/MoveOnly";
-}
 
 std::string_view MoveOnly::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2915,10 +2807,6 @@ static_assert(
 
 namespace facebook::thrift::test {
 
-std::string_view AlsoMoveOnly::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/AlsoMoveOnly";
-}
-
 std::string_view AlsoMoveOnly::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<AlsoMoveOnly>::fields_names[folly::to_underlying(ord) - 1];
@@ -2981,10 +2869,6 @@ void swap([[maybe_unused]] AlsoMoveOnly& a, [[maybe_unused]] AlsoMoveOnly& b) {
 
 namespace facebook::thrift::test {
 
-std::string_view ApplyAdapter::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/ApplyAdapter";
-}
-
 std::string_view ApplyAdapter::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<ApplyAdapter>::fields_names[folly::to_underlying(ord) - 1];
@@ -3027,10 +2911,6 @@ void swap([[maybe_unused]] ApplyAdapter& a, [[maybe_unused]] ApplyAdapter& b) {
 namespace facebook::thrift::test {
 namespace detail {
 
-std::string_view TransitiveAdapted::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/TransitiveAdapted";
-}
-
 std::string_view TransitiveAdapted::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<TransitiveAdapted>::fields_names[folly::to_underlying(ord) - 1];
@@ -3072,10 +2952,6 @@ void swap([[maybe_unused]] TransitiveAdapted& a, [[maybe_unused]] TransitiveAdap
 
 
 namespace facebook::thrift::test {
-
-std::string_view CountingStruct::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/CountingStruct";
-}
 
 std::string_view CountingStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -3184,10 +3060,6 @@ void swap([[maybe_unused]] CountingStruct& a, [[maybe_unused]] CountingStruct& b
 
 namespace facebook::thrift::test {
 
-std::string_view Person::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/Person";
-}
-
 std::string_view Person::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Person>::fields_names[folly::to_underlying(ord) - 1];
@@ -3255,10 +3127,6 @@ void swap([[maybe_unused]] Person& a, [[maybe_unused]] Person& b) {
 
 namespace facebook::thrift::test {
 
-std::string_view Person2::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/Person2";
-}
-
 std::string_view Person2::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Person2>::fields_names[folly::to_underlying(ord) - 1];
@@ -3325,10 +3193,6 @@ void swap([[maybe_unused]] Person2& a, [[maybe_unused]] Person2& b) {
 
 
 namespace facebook::thrift::test {
-
-std::string_view Renamed::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/test/RenamedStructWithStructAdapterAndFieldAdapter";
-}
 
 std::string_view Renamed::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }

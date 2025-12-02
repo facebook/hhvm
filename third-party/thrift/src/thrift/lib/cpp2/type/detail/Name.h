@@ -121,7 +121,7 @@ struct GetName<cpp_type<T, Tag>> : PrettyName<T> {};
 template <typename T>
 struct GetName<service_t<T>> {
   FOLLY_EXPORT const std::string& operator()() const {
-    return ::apache::thrift::uri<T>();
+    return ::apache::thrift::uri_string_ref<T>();
   }
 };
 

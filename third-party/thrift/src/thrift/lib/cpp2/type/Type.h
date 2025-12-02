@@ -19,6 +19,7 @@
 #include <type_traits>
 
 #include <folly/Optional.h>
+#include <folly/lang/cstring_view.h>
 
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp2/op/Get.h>
@@ -68,6 +69,16 @@ class Type : public detail::Wrap<TypeStruct> {
   Type(union_c, std::string name) : Type{makeNamed<union_c>(std::move(name))} {}
   Type(exception_c, std::string name)
       : Type{makeNamed<exception_c>(std::move(name))} {}
+
+  Type(enum_c tag, std::string_view name) : Type(tag, std::string(name)) {}
+  Type(struct_c tag, std::string_view name) : Type(tag, std::string(name)) {}
+  Type(union_c tag, std::string_view name) : Type(tag, std::string(name)) {}
+  Type(exception_c tag, std::string_view name) : Type(tag, std::string(name)) {}
+
+  Type(enum_c tag, const char* name) : Type(tag, std::string(name)) {}
+  Type(struct_c tag, const char* name) : Type(tag, std::string(name)) {}
+  Type(union_c tag, const char* name) : Type(tag, std::string(name)) {}
+  Type(exception_c tag, const char* name) : Type(tag, std::string(name)) {}
 
   // Parameterized types.
   Type(list_c, Type val) : Type(makeParamed<list_c>(std::move(val.data_))) {}
@@ -134,7 +145,7 @@ class Type : public detail::Wrap<TypeStruct> {
     return lhs.data_ < rhs.data_;
   }
 
-  static void checkName(const std::string& name);
+  static void checkName(folly::cstring_view name);
 
   template <typename CTag, typename T>
   static decltype(auto) getName(T&& result) {
@@ -152,7 +163,7 @@ class Type : public detail::Wrap<TypeStruct> {
   }
 
   template <typename CTag>
-  static TypeStruct makeNamed(std::string uri) {
+  static TypeStruct makeNamed(folly::cstring_view uri) {
     TypeStruct result;
     checkName(uri);
     getName<CTag>(result).ensure().uri_ref() = std::move(uri);

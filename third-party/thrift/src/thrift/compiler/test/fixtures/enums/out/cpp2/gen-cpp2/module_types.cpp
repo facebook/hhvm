@@ -219,10 +219,6 @@ const std::vector<std::any>& TEnumTraits<::test::fixtures::enums::MyBitmaskEnum2
 
 namespace test::fixtures::enums {
 
-std::string_view SomeStruct::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/enums/SomeStruct";
-}
-
 std::string_view SomeStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<SomeStruct>::fields_names[folly::to_underlying(ord) - 1];
@@ -345,10 +341,6 @@ void swap([[maybe_unused]] SomeStruct& a, [[maybe_unused]] SomeStruct& b) {
 
 
 namespace test::fixtures::enums {
-
-std::string_view MyStruct::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/enums/MyStruct";
-}
 
 std::string_view MyStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }

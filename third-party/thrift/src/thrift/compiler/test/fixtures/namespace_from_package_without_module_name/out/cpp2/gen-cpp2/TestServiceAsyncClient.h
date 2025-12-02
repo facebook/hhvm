@@ -43,9 +43,7 @@ class Client<::test::namespace_from_package_without_module_name::TestService> : 
     return "TestService";
   }
 
-  static std::string_view __fbthrift_thrift_uri() {
-    return "test.dev/namespace_from_package_without_module_name/TestService";
-  }
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/namespace_from_package_without_module_name/TestService";
 
 
   /** Glean {"file": "thrift/compiler/test/fixtures/namespace_from_package_without_module_name/src/module.thrift", "service": "TestService", "function": "init"} */

@@ -60,9 +60,7 @@ template <> struct TEnumTraits<::{{program:qualified_namespace}}::{{enum:cpp_nam
   }
 
   {{#enum:uri}}
-  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
-    return "{{enum:uri}}";
-  }
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "{{enum:uri}}";
 
   {{/enum:uri}}
   static char const* findName(type value) noexcept {

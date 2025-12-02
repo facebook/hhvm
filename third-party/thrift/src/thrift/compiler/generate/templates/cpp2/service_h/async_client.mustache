@@ -45,9 +45,7 @@ class Client<{{service:qualified_name}}> : public {{#service:extends}}::{{servic
   }
 {{#service:uri}}
 
-  static std::string_view __fbthrift_thrift_uri() {
-    return "{{service:uri}}";
-  }
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "{{service:uri}}";
 {{/service:uri}}
 
 {{#service:interactions}}

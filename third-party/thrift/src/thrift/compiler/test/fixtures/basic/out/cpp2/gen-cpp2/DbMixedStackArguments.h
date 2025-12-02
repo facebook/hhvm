@@ -41,9 +41,7 @@ class ServiceHandler<::test::fixtures::basic::DbMixedStackArguments> : public ap
  public:
   std::string_view getGeneratedName() const override { return "DbMixedStackArguments"; }
 
-  static std::string_view __fbthrift_thrift_uri() {
-    return "test.dev/fixtures/basic/DbMixedStackArguments";
-  }
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/basic/DbMixedStackArguments";
 
   typedef ::test::fixtures::basic::DbMixedStackArgumentsAsyncProcessor ProcessorType;
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;

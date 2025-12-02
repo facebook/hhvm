@@ -56,7 +56,7 @@ class ObjectWrapper : public ::apache::thrift::type::detail::Wrap<Base> {
 
   static_assert(std::is_same_v<Base, detail::Object>);
   friend struct ::apache::thrift::detail::st::struct_private_access;
-  static const char* __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = uri<Base>();
   bool __fbthrift_is_empty() const;
 
  public:
@@ -146,7 +146,7 @@ class ValueWrapper : public ::apache::thrift::type::detail::Wrap<Base> {
   using Type = typename Wrap::underlying_type::Type;
   using Wrap::toThrift;
 
-  static const char* __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = uri<Base>();
   bool __fbthrift_is_empty() const;
 
   static ValueWrapper fromThrift(const Base& base) {

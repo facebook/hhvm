@@ -41,9 +41,7 @@ class ServiceHandler<::facebook::thrift::test::Service> : public apache::thrift:
  public:
   std::string_view getGeneratedName() const override { return "Service"; }
 
-  static std::string_view __fbthrift_thrift_uri() {
-    return "facebook.com/thrift/test/Service";
-  }
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/Service";
 
   typedef ::facebook::thrift::test::ServiceAsyncProcessor ProcessorType;
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;

@@ -42,9 +42,7 @@ class ServiceHandler<::apache::thrift::fixtures::types::SomeService> : public ap
  public:
   std::string_view getGeneratedName() const override { return "SomeService"; }
 
-  static std::string_view __fbthrift_thrift_uri() {
-    return "apache.org/thrift/fixtures/types/SomeService";
-  }
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "apache.org/thrift/fixtures/types/SomeService";
 
   typedef ::apache::thrift::fixtures::types::SomeServiceAsyncProcessor ProcessorType;
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;

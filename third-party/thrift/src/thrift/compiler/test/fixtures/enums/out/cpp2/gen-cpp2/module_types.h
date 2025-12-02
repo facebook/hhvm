@@ -217,9 +217,7 @@ template <> struct TEnumTraits<::test::fixtures::enums::Metasyntactic> {
     return "module";
   }
 
-  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
-    return "test.dev/fixtures/enums/Metasyntactic";
-  }
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/enums/Metasyntactic";
 
   static char const* findName(type value) noexcept {
     std::string_view ret;
@@ -252,9 +250,7 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum1> {
     return "module";
   }
 
-  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
-    return "test.dev/fixtures/enums/MyEnum1";
-  }
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/enums/MyEnum1";
 
   static char const* findName(type value) noexcept {
     std::string_view ret;
@@ -287,9 +283,7 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum2> {
     return "module";
   }
 
-  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
-    return "test.dev/fixtures/enums/MyEnum2";
-  }
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/enums/MyEnum2";
 
   static char const* findName(type value) noexcept {
     std::string_view ret;
@@ -322,9 +316,7 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum3> {
     return "module";
   }
 
-  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
-    return "test.dev/fixtures/enums/MyEnum3";
-  }
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/enums/MyEnum3";
 
   static char const* findName(type value) noexcept {
     std::string_view ret;
@@ -357,9 +349,7 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum4> {
     return "module";
   }
 
-  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
-    return "test.dev/fixtures/enums/MyEnum4";
-  }
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/enums/MyEnum4";
 
   static char const* findName(type value) noexcept {
     std::string_view ret;
@@ -392,9 +382,7 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyBitmaskEnum1> {
     return "module";
   }
 
-  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
-    return "test.dev/fixtures/enums/MyBitmaskEnum1";
-  }
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/enums/MyBitmaskEnum1";
 
   static char const* findName(type value) noexcept {
     std::string_view ret;
@@ -427,9 +415,7 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyBitmaskEnum2> {
     return "module";
   }
 
-  FOLLY_ERASE static constexpr std::string_view __fbthrift_thrift_uri() noexcept {
-    return "test.dev/fixtures/enums/MyBitmaskEnum2";
-  }
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/enums/MyBitmaskEnum2";
 
   static char const* findName(type value) noexcept {
     std::string_view ret;
@@ -477,7 +463,7 @@ class SomeStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/enums/SomeStruct";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>
@@ -763,7 +749,7 @@ class MyStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
-  static std::string_view __fbthrift_thrift_uri();
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/enums/MyStruct";
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
   template <class ...>

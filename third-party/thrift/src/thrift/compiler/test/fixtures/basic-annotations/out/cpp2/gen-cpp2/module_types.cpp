@@ -255,10 +255,6 @@ void swap([[maybe_unused]] YourException& a, [[maybe_unused]] YourException& b) 
 namespace cpp2 {
 namespace detail {
 
-std::string_view YourStruct::__fbthrift_thrift_uri() {
-  return "facebook.com/thrift/compiler/test/fixtures/basic_annotations/src/module/MyStruct";
-}
-
 std::string_view YourStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<YourStruct>::fields_names[folly::to_underlying(ord) - 1];

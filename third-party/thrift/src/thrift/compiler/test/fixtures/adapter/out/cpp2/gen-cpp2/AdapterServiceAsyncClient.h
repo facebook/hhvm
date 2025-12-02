@@ -44,9 +44,7 @@ class Client<::facebook::thrift::test::AdapterService> : public apache::thrift::
     return "AdapterService";
   }
 
-  static std::string_view __fbthrift_thrift_uri() {
-    return "facebook.com/thrift/test/AdapterService";
-  }
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/test/AdapterService";
 
 
   /** Glean {"file": "thrift/compiler/test/fixtures/adapter/src/module.thrift", "service": "AdapterService", "function": "count"} */

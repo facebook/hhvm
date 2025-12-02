@@ -103,10 +103,6 @@ const std::vector<std::any>& TEnumTraits<::apache::thrift::fixtures::types::MyFo
 
 namespace apache::thrift::fixtures::types {
 
-std::string_view empty_struct::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/empty_struct";
-}
-
 std::string_view empty_struct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<empty_struct>::fields_names[folly::to_underlying(ord) - 1];
@@ -147,10 +143,6 @@ void swap([[maybe_unused]] empty_struct& a, [[maybe_unused]] empty_struct& b) {
 
 
 namespace apache::thrift::fixtures::types {
-
-std::string_view decorated_struct::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/decorated_struct";
-}
 
 std::string_view decorated_struct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -218,10 +210,6 @@ void swap([[maybe_unused]] decorated_struct& a, [[maybe_unused]] decorated_struc
 
 
 namespace apache::thrift::fixtures::types {
-
-std::string_view ContainerStruct::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/ContainerStruct";
-}
 
 std::string_view ContainerStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -396,10 +384,6 @@ void swap([[maybe_unused]] ContainerStruct& a, [[maybe_unused]] ContainerStruct&
 
 namespace apache::thrift::fixtures::types {
 
-std::string_view CppTypeStruct::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/CppTypeStruct";
-}
-
 std::string_view CppTypeStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<CppTypeStruct>::fields_names[folly::to_underlying(ord) - 1];
@@ -475,10 +459,6 @@ void swap([[maybe_unused]] CppTypeStruct& a, [[maybe_unused]] CppTypeStruct& b) 
 
 namespace apache::thrift::fixtures::types {
 
-std::string_view VirtualStruct::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/VirtualStruct";
-}
-
 std::string_view VirtualStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<VirtualStruct>::fields_names[folly::to_underlying(ord) - 1];
@@ -548,10 +528,6 @@ void swap([[maybe_unused]] VirtualStruct& a, [[maybe_unused]] VirtualStruct& b) 
 
 
 namespace apache::thrift::fixtures::types {
-
-std::string_view MyStructWithForwardRefEnum::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/MyStructWithForwardRefEnum";
-}
 
 std::string_view MyStructWithForwardRefEnum::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -623,10 +599,6 @@ void swap([[maybe_unused]] MyStructWithForwardRefEnum& a, [[maybe_unused]] MyStr
 
 namespace apache::thrift::fixtures::types {
 
-std::string_view TrivialNumeric::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/TrivialNumeric";
-}
-
 std::string_view TrivialNumeric::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<TrivialNumeric>::fields_names[folly::to_underlying(ord) - 1];
@@ -696,10 +668,6 @@ void swap([[maybe_unused]] TrivialNumeric& a, [[maybe_unused]] TrivialNumeric& b
 
 
 namespace apache::thrift::fixtures::types {
-
-std::string_view TrivialNestedWithDefault::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/TrivialNestedWithDefault";
-}
 
 std::string_view TrivialNestedWithDefault::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -775,10 +743,6 @@ static_assert(
 
 
 namespace apache::thrift::fixtures::types {
-
-std::string_view ComplexString::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/ComplexString";
-}
 
 std::string_view ComplexString::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -860,10 +824,6 @@ void swap([[maybe_unused]] ComplexString& a, [[maybe_unused]] ComplexString& b) 
 
 
 namespace apache::thrift::fixtures::types {
-
-std::string_view ComplexNestedWithDefault::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/ComplexNestedWithDefault";
-}
 
 std::string_view ComplexNestedWithDefault::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -953,10 +913,6 @@ static_assert(
 
 
 namespace apache::thrift::fixtures::types {
-
-std::string_view MinPadding::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/MinPadding";
-}
 
 std::string_view MinPadding::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1079,10 +1035,6 @@ void swap([[maybe_unused]] MinPadding& a, [[maybe_unused]] MinPadding& b) {
 
 namespace apache::thrift::fixtures::types {
 
-std::string_view MinPaddingWithCustomType::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/MinPaddingWithCustomType";
-}
-
 std::string_view MinPaddingWithCustomType::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MinPaddingWithCustomType>::fields_names[folly::to_underlying(ord) - 1];
@@ -1183,10 +1135,6 @@ void swap([[maybe_unused]] MinPaddingWithCustomType& a, [[maybe_unused]] MinPadd
 
 
 namespace apache::thrift::fixtures::types {
-
-std::string_view MyStruct::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/MyStruct";
-}
 
 std::string_view MyStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1300,10 +1248,6 @@ static_assert(
 
 namespace apache::thrift::fixtures::types {
 
-std::string_view MyDataItem::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/MyDataItem";
-}
-
 std::string_view MyDataItem::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyDataItem>::fields_names[folly::to_underlying(ord) - 1];
@@ -1338,10 +1282,6 @@ void swap([[maybe_unused]] MyDataItem& a, [[maybe_unused]] MyDataItem& b) {
 
 
 namespace apache::thrift::fixtures::types {
-
-std::string_view Renamed::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/Renaming";
-}
 
 std::string_view Renamed::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1399,10 +1339,6 @@ void swap([[maybe_unused]] Renamed& a, [[maybe_unused]] Renamed& b) {
 
 
 namespace apache::thrift::fixtures::types {
-
-std::string_view AnnotatedTypes::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/AnnotatedTypes";
-}
 
 std::string_view AnnotatedTypes::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1484,10 +1420,6 @@ void swap([[maybe_unused]] AnnotatedTypes& a, [[maybe_unused]] AnnotatedTypes& b
 
 
 namespace apache::thrift::fixtures::types {
-
-std::string_view ForwardUsageRoot::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/ForwardUsageRoot";
-}
 
 std::string_view ForwardUsageRoot::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1594,10 +1526,6 @@ static_assert(
 
 namespace apache::thrift::fixtures::types {
 
-std::string_view ForwardUsageStruct::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/ForwardUsageStruct";
-}
-
 std::string_view ForwardUsageStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<ForwardUsageStruct>::fields_names[folly::to_underlying(ord) - 1];
@@ -1676,10 +1604,6 @@ static_assert(
 
 namespace apache::thrift::fixtures::types {
 
-std::string_view ForwardUsageByRef::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/ForwardUsageByRef";
-}
-
 std::string_view ForwardUsageByRef::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<ForwardUsageByRef>::fields_names[folly::to_underlying(ord) - 1];
@@ -1757,10 +1681,6 @@ static_assert(
 
 
 namespace apache::thrift::fixtures::types {
-
-std::string_view IncompleteMap::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/IncompleteMap";
-}
 
 std::string_view IncompleteMap::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1843,10 +1763,6 @@ static_assert(
 
 namespace apache::thrift::fixtures::types {
 
-std::string_view IncompleteMapDep::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/IncompleteMapDep";
-}
-
 std::string_view IncompleteMapDep::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<IncompleteMapDep>::fields_names[folly::to_underlying(ord) - 1];
@@ -1887,10 +1803,6 @@ void swap([[maybe_unused]] IncompleteMapDep& a, [[maybe_unused]] IncompleteMapDe
 
 
 namespace apache::thrift::fixtures::types {
-
-std::string_view CompleteMap::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/CompleteMap";
-}
 
 std::string_view CompleteMap::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -1973,10 +1885,6 @@ static_assert(
 
 namespace apache::thrift::fixtures::types {
 
-std::string_view CompleteMapDep::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/CompleteMapDep";
-}
-
 std::string_view CompleteMapDep::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<CompleteMapDep>::fields_names[folly::to_underlying(ord) - 1];
@@ -2017,10 +1925,6 @@ void swap([[maybe_unused]] CompleteMapDep& a, [[maybe_unused]] CompleteMapDep& b
 
 
 namespace apache::thrift::fixtures::types {
-
-std::string_view IncompleteList::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/IncompleteList";
-}
 
 std::string_view IncompleteList::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2103,10 +2007,6 @@ static_assert(
 
 namespace apache::thrift::fixtures::types {
 
-std::string_view IncompleteListDep::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/IncompleteListDep";
-}
-
 std::string_view IncompleteListDep::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<IncompleteListDep>::fields_names[folly::to_underlying(ord) - 1];
@@ -2147,10 +2047,6 @@ void swap([[maybe_unused]] IncompleteListDep& a, [[maybe_unused]] IncompleteList
 
 
 namespace apache::thrift::fixtures::types {
-
-std::string_view CompleteList::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/CompleteList";
-}
 
 std::string_view CompleteList::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2233,10 +2129,6 @@ static_assert(
 
 namespace apache::thrift::fixtures::types {
 
-std::string_view CompleteListDep::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/CompleteListDep";
-}
-
 std::string_view CompleteListDep::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<CompleteListDep>::fields_names[folly::to_underlying(ord) - 1];
@@ -2277,10 +2169,6 @@ void swap([[maybe_unused]] CompleteListDep& a, [[maybe_unused]] CompleteListDep&
 
 
 namespace apache::thrift::fixtures::types {
-
-std::string_view AdaptedList::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/AdaptedList";
-}
 
 std::string_view AdaptedList::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2364,10 +2252,6 @@ static_assert(
 namespace apache::thrift::fixtures::types {
 namespace detail {
 
-std::string_view AdaptedListDep::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/AdaptedListDep";
-}
-
 std::string_view AdaptedListDep::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<AdaptedListDep>::fields_names[folly::to_underlying(ord) - 1];
@@ -2443,10 +2327,6 @@ static_assert(
 
 
 namespace apache::thrift::fixtures::types {
-
-std::string_view DependentAdaptedList::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/DependentAdaptedList";
-}
 
 std::string_view DependentAdaptedList::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2530,10 +2410,6 @@ static_assert(
 namespace apache::thrift::fixtures::types {
 namespace detail {
 
-std::string_view DependentAdaptedListDep::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/DependentAdaptedListDep";
-}
-
 std::string_view DependentAdaptedListDep::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<DependentAdaptedListDep>::fields_names[folly::to_underlying(ord) - 1];
@@ -2596,10 +2472,6 @@ void swap([[maybe_unused]] DependentAdaptedListDep& a, [[maybe_unused]] Dependen
 
 
 namespace apache::thrift::fixtures::types {
-
-std::string_view AllocatorAware::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/AllocatorAware";
-}
 
 std::string_view AllocatorAware::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -2796,10 +2668,6 @@ void swap([[maybe_unused]] AllocatorAware& a, [[maybe_unused]] AllocatorAware& b
 
 namespace apache::thrift::fixtures::types {
 
-std::string_view AllocatorAware2::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/AllocatorAware2";
-}
-
 std::string_view AllocatorAware2::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<AllocatorAware2>::fields_names[folly::to_underlying(ord) - 1];
@@ -2916,10 +2784,6 @@ void swap([[maybe_unused]] AllocatorAware2& a, [[maybe_unused]] AllocatorAware2&
 
 namespace apache::thrift::fixtures::types {
 
-std::string_view TypedefStruct::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/TypedefStruct";
-}
-
 std::string_view TypedefStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<TypedefStruct>::fields_names[folly::to_underlying(ord) - 1];
@@ -3019,10 +2883,6 @@ void swap([[maybe_unused]] TypedefStruct& a, [[maybe_unused]] TypedefStruct& b) 
 
 
 namespace apache::thrift::fixtures::types {
-
-std::string_view StructWithDoubleUnderscores::__fbthrift_thrift_uri() {
-  return "apache.org/thrift/fixtures/types/StructWithDoubleUnderscores";
-}
 
 std::string_view StructWithDoubleUnderscores::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }

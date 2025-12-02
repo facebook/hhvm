@@ -41,9 +41,7 @@ class ServiceHandler<::test::namespace_from_package_without_module_name::TestSer
  public:
   std::string_view getGeneratedName() const override { return "TestService"; }
 
-  static std::string_view __fbthrift_thrift_uri() {
-    return "test.dev/namespace_from_package_without_module_name/TestService";
-  }
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/namespace_from_package_without_module_name/TestService";
 
   typedef ::test::namespace_from_package_without_module_name::TestServiceAsyncProcessor ProcessorType;
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;

@@ -44,9 +44,7 @@ class Client<::test::fixtures::basic::DbMixedStackArguments> : public apache::th
     return "DbMixedStackArguments";
   }
 
-  static std::string_view __fbthrift_thrift_uri() {
-    return "test.dev/fixtures/basic/DbMixedStackArguments";
-  }
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "test.dev/fixtures/basic/DbMixedStackArguments";
 
 
   /** Glean {"file": "thrift/compiler/test/fixtures/basic/src/module.thrift", "service": "DbMixedStackArguments", "function": "getDataByKey0"} */

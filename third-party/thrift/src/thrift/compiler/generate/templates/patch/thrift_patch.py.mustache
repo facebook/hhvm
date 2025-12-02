@@ -53,59 +53,61 @@ from common.thrift.patch.detail.py_bindings.DynamicPatch import (
 import thrift.python.types as _fbthrift_python_types
 import folly.iobuf as _fbthrift_iobuf
 
-import {{program:module_path}}.thrift_types as {{program:module_mangle}}__thrift_types
-{{#if (not program:safe_patch?)}}
-import {{program:safe_patch_module_path}}.thrift_types as _fbthrift_safe_patch_types
-{{/if (not program:safe_patch?)}}
+import {{program.module_path}}.thrift_types as {{program.module_mangle}}__thrift_types
+{{#if (not program.safe_patch?)}}
+import {{program.safe_patch_module_path}}.thrift_types as _fbthrift_safe_patch_types
+{{/if (not program.safe_patch?)}}
 
-{{#program:include_namespaces}}
-{{#if has_types?}}{{#if (not is_patch?)}}{{#if needed_by_patch?}}
+{{#each program.include_namespaces as |include|}}
+{{#if (and include.has_types? (not include.is_patch?) include.needed_by_patch?)}}
 
-import {{included_module_path}}.{{#partial m_types.import_path}} as {{included_module_mangle}}__{{#partial m_types.import_path}}
-import {{included_module_path}}.thrift_patch
-{{/if needed_by_patch?}}{{/if (not is_patch?)}}{{/if has_types?}}
-{{/program:include_namespaces}}
+import {{include.included_module_path}}.{{#partial m_types.import_path}} as {{include.included_module_mangle}}__{{#partial m_types.import_path}}
+import {{include.included_module_path}}.thrift_patch
+{{/if (and include.has_types? (not include.is_patch?) include.needed_by_patch?)}}
+{{/each}}
 
-{{#program:structs}}
-{{#if struct:should_generate_patch?}}
+{{#each program.structured_definitions as |structured|}}
+{{#if structured.should_generate_patch?}}
 
-class {{struct:py_name}}Patch(
-    Base{{#if struct:union?}}Union{{#else}}Struct{{/if struct:union?}}Patch[{{program:module_mangle}}__thrift_types.{{struct:py_name}}]
+class {{structured.py_name}}Patch(
+    Base{{#if structured.union?}}Union{{#else}}Struct{{/if}}Patch[{{program.module_mangle}}__thrift_types.{{structured.py_name}}]
 ):
     pass
-    {{#struct:fields_ordered_by_id}}{{#field:type}}{{#if (not type:contains_patch?)}}
+    {{#each structured.fields_ordered_by_id as |field|}}
+      {{#if (not field.type.contains_patch?)}}
     @property
-    def {{field:py_name}}(self) -> {{#partial patch_helpers.field_patch_type field=field:self parent=struct:self}}[
-            {{#partial typehints.unadapted_type type=field:self.type}},
-            {{#partial patch_helpers.unadapted_pep484_patch_type type=field:self.type}}]:
+    def {{field.py_name}}(self) -> {{#partial patch_helpers.field_patch_type field=field parent=structured}}[
+            {{#partial typehints.unadapted_type type=field.type}},
+            {{#partial patch_helpers.unadapted_pep484_patch_type type=field.type}}]:
 
         {{! e.g., if field is an i32, this function convert DynamicPatch --> I32Patch }}
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> {{#partial patch_helpers.unadapted_pep484_patch_type type=field:self.type}}:
-            {{#partial patch_helpers.callback type=field:self.type}}
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> {{#partial patch_helpers.unadapted_pep484_patch_type type=field.type}}:
+            {{#partial patch_helpers.callback type=field.type}}
 
-        return {{#partial patch_helpers.field_patch_type field=field:self parent=struct:self}}(
+        return {{#partial patch_helpers.field_patch_type field=field parent=structured}}(
             cast_dynamic_patch_to_typed_field_patch,
             self._patch,
-            {{field:id}},
-            {{> ../python/types/typeinfo }})
-    {{/if (not type:contains_patch?)}}{{/field:type}}{{/struct:fields_ordered_by_id}}
-    {{#if (not program:safe_patch?)}}{{! If the program is already a safe patch, we should not generate to_safe_patch/from_safe_patch, otherwise it becomes a safe patch of safe patch}}
+            {{field.id}},
+            {{#field.type}}{{> ../python/types/typeinfo }}{{/field.type}})
+      {{/if (not field.type.contains_patch?)}}
+    {{/each}}
+    {{#if (not program.safe_patch?)}}{{! If the program is already a safe patch, we should not generate to_safe_patch/from_safe_patch, otherwise it becomes a safe patch of safe patch}}
 
-    def to_safe_patch(self) -> _fbthrift_safe_patch_types.{{struct:name}}SafePatch:
-        return _fbthrift_safe_patch_types.{{struct:name}}SafePatch(
+    def to_safe_patch(self) -> _fbthrift_safe_patch_types.{{structured.name}}SafePatch:
+        return _fbthrift_safe_patch_types.{{structured.name}}SafePatch(
             version=1, data=self._patch.serialize_to_compact_protocol()
         )
 
     @staticmethod
-    def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.{{struct:name}}SafePatch) -> {{struct:py_name}}Patch:
-        patch = {{struct:py_name}}Patch()
-        DynamicPatch = Dynamic{{#if struct:union?}}Union{{#else}}Struct{{/if struct:union?}}Patch
+    def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.{{structured.name}}SafePatch) -> {{structured.py_name}}Patch:
+        patch = {{structured.py_name}}Patch()
+        DynamicPatch = Dynamic{{#if structured.union?}}Union{{#else}}Struct{{/if}}Patch
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
-    {{/if (not program:safe_patch?)}}
+    {{/if (not program.safe_patch?)}}
 
-    def merge(self, other: {{struct:py_name}}Patch) -> None:
+    def merge(self, other: {{structured.py_name}}Patch) -> None:
         self._patch.merge(other._patch)
 
-{{/if struct:should_generate_patch?}}
-{{/program:structs}}
+{{/if structured.should_generate_patch?}}
+{{/each}}

@@ -1382,16 +1382,16 @@ class t_python_patch_generator : public t_mstch_python_prototypes_generator {
 
   void generate_program() override {
     out_dir_base_ = "gen-python-patch";
-
-    set_mstch_factories();
-    const auto* program = get_program();
-    auto mstch_program = mstch_context_.program_factory->make_mstch_object(
-        program, mstch_context_);
-
-    render_to_file(
-        std::move(mstch_program),
-        "thrift_patch.py",
-        program_to_path(*get_program()) / program->name() / "thrift_patch.py");
+    whisker::object context = whisker::make::map({
+        {"program",
+         whisker::make::native_handle(
+             render_state().prototypes->create<t_program>(*program_))},
+    });
+    t_whisker_generator::render_to_file(
+        /*output_file=*/program_to_path(*get_program()) / program_->name() /
+            "thrift_patch.py",
+        /*template_file=*/"thrift_patch.py",
+        /*context=*/context);
   }
 
  protected:
@@ -1402,9 +1402,6 @@ class t_python_patch_generator : public t_mstch_python_prototypes_generator {
         type_kind::immutable);
     t_mstch_python_prototypes_generator::initialize_context(visitor);
   }
-
- private:
-  void set_mstch_factories() { mstch_context_.add<python_mstch_struct>(); }
 };
 
 } // namespace

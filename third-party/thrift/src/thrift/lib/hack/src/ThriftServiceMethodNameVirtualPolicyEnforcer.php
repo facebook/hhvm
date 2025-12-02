@@ -184,6 +184,7 @@ final class ThriftServiceMethodNameVirtualPolicyEnforcer
     string $policy_enforcer_api,
     PolicyEnforcerCallerIdentity $caller,
     PolicyEnforcerContext $context,
+    mixed $response,
   ): Awaitable<void> {
     // Pending Probes PrivacyLib post-read Integration
     await self::genExecuteStandaloneProbes(

@@ -12,7 +12,6 @@ import static com.facebook.swift.service.SwiftConstants.STICKY_HASH_KEY;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.thrift.protocol.*;
 import org.apache.thrift.ClientPushMetadata;
 import org.apache.thrift.InteractionCreate;
@@ -53,15 +52,7 @@ public class ExtendedServiceReactiveClient extends com.facebook.thrift.test.Base
   }
 
   @java.lang.Override
-  public void dispose() {
-    // Child class - delegate to parent
-    super.dispose();
-  }
-
-  @java.lang.Override
-  public boolean isDisposed() {
-    return super.isDisposed();
-  }
+  public void dispose() {}
 
   private com.facebook.thrift.payload.Writer _createinitWriter(final long param0, final long param1) {
     return oprot -> {

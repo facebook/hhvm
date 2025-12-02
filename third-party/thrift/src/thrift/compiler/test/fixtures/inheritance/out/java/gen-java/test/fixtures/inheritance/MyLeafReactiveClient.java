@@ -12,7 +12,6 @@ import static com.facebook.swift.service.SwiftConstants.STICKY_HASH_KEY;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.thrift.protocol.*;
 import org.apache.thrift.ClientPushMetadata;
 import org.apache.thrift.InteractionCreate;
@@ -51,15 +50,7 @@ public class MyLeafReactiveClient extends test.fixtures.inheritance.MyNodeReacti
   }
 
   @java.lang.Override
-  public void dispose() {
-    // Child class - delegate to parent
-    super.dispose();
-  }
-
-  @java.lang.Override
-  public boolean isDisposed() {
-    return super.isDisposed();
-  }
+  public void dispose() {}
 
   private com.facebook.thrift.payload.Writer _createdoLeafWriter() {
     return oprot -> {

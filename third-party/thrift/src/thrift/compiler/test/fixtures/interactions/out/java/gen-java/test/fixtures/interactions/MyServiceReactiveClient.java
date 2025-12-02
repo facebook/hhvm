@@ -12,7 +12,6 @@ import static com.facebook.swift.service.SwiftConstants.STICKY_HASH_KEY;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.thrift.protocol.*;
 import org.apache.thrift.ClientPushMetadata;
 import org.apache.thrift.InteractionCreate;
@@ -30,36 +29,6 @@ public class MyServiceReactiveClient
   protected final reactor.core.publisher.Mono<Map<String, String>> _headersMono;
   protected final reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono;
   protected final Set<Long> _activeInteractions;
-
-  private final Set<com.facebook.thrift.client.RpcClient> _subscribedClients = ConcurrentHashMap.newKeySet();
-  private final AtomicBoolean _disposed = new AtomicBoolean(false);
-
-  private void trackRpcClientForDisposal(com.facebook.thrift.client.RpcClient rpcClient) {
-    if (!_disposed.get()) {
-      // Inexpensive lock-free check to see if already added
-      if (!_subscribedClients.contains(rpcClient)) {
-        // Locking add, winner adds subscription for removal
-        if (_subscribedClients.add(rpcClient)) {
-          // Double-check disposed flag after adding - handles race with dispose()
-          if (_disposed.get()) {
-            _subscribedClients.remove(rpcClient);
-            if (!rpcClient.isDisposed()) {
-              rpcClient.dispose();
-            }
-          } else {
-            // Auto-remove when this specific client closes
-            rpcClient.onClose().subscribe(
-              v -> {
-                _subscribedClients.remove(rpcClient);
-              },
-              e -> {
-                _subscribedClients.remove(rpcClient);
-              });
-          }
-        }
-      }
-    }
-  }
 
   private static final java.util.Map<Short, com.facebook.thrift.payload.Reader> _foo_EXCEPTION_READERS = java.util.Collections.emptyMap();
   private static final TField _interact_ARG_FIELD_DESC = new TField("arg", TType.I32, (short)1);
@@ -84,7 +53,7 @@ public class MyServiceReactiveClient
   public MyServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient) {
     
     this._protocolId = _protocolId;
-    this._rpcClient = _rpcClient.doOnNext(this::trackRpcClientForDisposal);
+    this._rpcClient = _rpcClient;
     this._headersMono = reactor.core.publisher.Mono.empty();
     this._persistentHeadersMono = reactor.core.publisher.Mono.empty();
     this._activeInteractions = ConcurrentHashMap.newKeySet();
@@ -105,34 +74,14 @@ public class MyServiceReactiveClient
   public MyServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono, AtomicLong interactionCounter, Set<Long> activeInteractions) {
     
     this._protocolId = _protocolId;
-    this._rpcClient = _rpcClient.doOnNext(this::trackRpcClientForDisposal);
+    this._rpcClient = _rpcClient;
     this._headersMono = _headersMono;
     this._persistentHeadersMono = _persistentHeadersMono;
     this._activeInteractions = activeInteractions;
   }
 
   @java.lang.Override
-  public void dispose() {
-    // Base class - dispose all tracked RpcClient instances
-    if (_disposed.compareAndSet(false, true)) {
-      _subscribedClients.forEach(rpcClient -> {
-        try {
-          if (!rpcClient.isDisposed()) {
-            rpcClient.dispose();
-          }
-        } catch (Exception e) {
-          // Swallow exception - we want to dispose all clients
-        }
-      });
-
-      _subscribedClients.clear();
-    }
-  }
-
-  @java.lang.Override
-  public boolean isDisposed() {
-    return _disposed.get();
-  }
+  public void dispose() {}
 
   private com.facebook.thrift.payload.Writer _createfooWriter() {
     return oprot -> {

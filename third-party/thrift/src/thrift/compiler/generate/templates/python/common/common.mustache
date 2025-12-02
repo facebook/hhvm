@@ -15,6 +15,7 @@
   limitations under the License.
 
 }}
+{{#import "common/types" as m_types}}
 
 {{#let export partial auto_generated_py}}
 #
@@ -36,8 +37,13 @@ A tuple of:
   1. adapter class,
   2. a lambda that returns transitive annotation (if the adapter is applied via transitive annotation, else None.)
 if the node has an adapter, else None.
+
+Must capture `m_types` because the `constant_value` macro requires it.
+`constant_value` cannot be converted to a partial because typeinfo and
+constant_value have a circular dependency on each other, and are used independently
+of each other.
 }}
-{{#let export partial adapter_info |node|}}
+{{#let export partial adapter_info |node| captures |m_types|}}
   {{#pragma ignore-newlines}}
   {{#if node.has_adapter?}}
     {{#let adapter = node.adapter}}

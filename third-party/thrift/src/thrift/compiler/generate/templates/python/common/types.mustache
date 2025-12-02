@@ -106,3 +106,97 @@
 {{#else if ftype.map?}} | _fbthrift_python_mutable_types._ThriftMapWrapper{{/if ftype.list?}}
 {{/if (and (not field.has_adapter?) ftype.container?)}}
 {{/let partial}}
+
+
+{{!
+This is used to declare a cython type that is referring to a Python value (ie,
+something that will be returned to external Python code or just used in Cython).
+
+Structs and enums will be namespaced appropriately if they are either defined
+in a different thrift file, or defined in the same thrift file but this is
+in the client or server source rather than the type definition source.
+}}
+{{#let export partial typeinfo |type|}}
+  {{#pragma ignore-newlines}}
+  {{#if type.has_adapter?}}
+    {{! If the type has an adapter, open AdaptedTypeInfo wrapper }}
+_fbthrift_python_types.AdaptedTypeInfo(
+  {{/if type.has_adapter?}}
+
+  {{! Primitives and enums }}
+  {{#if type.bool?}}
+_fbthrift_python_types.typeinfo_bool
+  {{#else if type.byte?}}
+_fbthrift_python_types.typeinfo_byte
+  {{#else if type.i16?}}
+_fbthrift_python_types.typeinfo_i16
+  {{#else if type.i32?}}
+_fbthrift_python_types.typeinfo_i32
+  {{#else if type.i64?}}
+_fbthrift_python_types.typeinfo_i64
+  {{#else if type.double?}}
+_fbthrift_python_types.typeinfo_double
+  {{#else if type.float?}}
+_fbthrift_python_types.typeinfo_float{{#if type.deferred_float32_conversion?}}_legacy{{/if}}
+  {{#else if type.string?}}
+_fbthrift_python_types.typeinfo_string
+  {{#else if type.binary?}}
+_fbthrift_python_types.typeinfo_{{#if type.iobuf?}}iobuf{{#else}}binary{{/if}}
+  {{#else if type.enum?}}
+_fbthrift_python_types.EnumTypeInfo({{#if type.need_module_path?}}{{type.module_mangle}}.{{/if}}{{type.true_type.name}})
+  {{/if type.bool?}}
+
+  {{! Immutable type for structs and containers }}
+  {{#if python.generate_immutable_types?}}
+    {{#let true_type = type.true_type}}
+    {{#if type.structured?}}
+_fbthrift_python_types.StructTypeInfo(
+{{#if true_type.need_module_path?}}{{true_type.module_mangle}}.{{/if}}
+{{#true_type}}{{> structs/unadapted_name}}{{/true_type}}
+)
+    {{#else if type.list?}}
+_fbthrift_python_types.ListTypeInfo({{#partial typeinfo type=true_type.elem_type}})
+    {{#else if type.set?}}
+_fbthrift_python_types.SetTypeInfo({{#partial typeinfo type=true_type.elem_type}})
+    {{#else if type.map?}}
+_fbthrift_python_types.MapTypeInfo(
+{{#partial typeinfo type=true_type.key_type}}, {{!}}
+{{#partial typeinfo type=true_type.val_type}}
+)
+    {{/if type.structured?}}
+  {{/if python.generate_immutable_types?}}
+
+  {{! Mutable type for structs and containers }}
+  {{#if python.generate_mutable_types?}}
+    {{#let true_type = type.true_type}}
+    {{#if type.structured?}}
+_fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(
+{{#if true_type.need_module_path?}}{{true_type.module_mangle}}.{{/if}}
+{{#true_type}}{{> structs/unadapted_name}}{{/true_type}}
+)
+    {{#else if type.list?}}
+_fbthrift_python_mutable_typeinfos.MutableListTypeInfo({{#partial typeinfo type=true_type.elem_type}})
+    {{#else if type.set?}}
+_fbthrift_python_mutable_typeinfos.MutableSetTypeInfo({{#partial typeinfo type=true_type.elem_type}})
+    {{#else if type.map?}}
+_fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(
+{{#partial typeinfo type=true_type.key_type}}, {{!}}
+{{#partial typeinfo type=true_type.val_type}}
+)
+    {{/if type.structured?}}
+  {{/if python.generate_mutable_types?}}
+
+  {{#if type.has_adapter?}}
+    {{! Close AdaptedTypeInfo wrapper }}
+    {{#let adapter = type.adapter}}
+, {{adapter.name}}, lambda: {{!}}
+    {{#if (object.notnull? adapter.transitive_annotation)}}
+      {{#adapter.transitive_annotation}}
+{{> types/constant_value }}
+      {{/adapter.transitive_annotation}}
+    {{#else}}
+None
+    {{/if (object.notnull? adapter.transitive_annotation)}}
+)
+  {{/if type.has_adapter?}}
+{{/let partial}}

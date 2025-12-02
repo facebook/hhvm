@@ -37,7 +37,7 @@ in a different thrift file, or defined in the same thrift file.
 }}{{#python.generate_mutable_types?}}{{!
   }}_fbthrift_python_mutable_containers.MutableListTypeFactory({{!
 }}{{/python.generate_mutable_types?}}{{!
-    }}{{#type:list_elem_type}}{{> types/typeinfo }}{{/type:list_elem_type}}{{!
+    }}{{#partial m_types.typeinfo type=type:true_type.elem_type}}{{!
   }}){{!
 }}{{/type:list?}}{{!
 }}{{#type:set?}}{{!
@@ -47,7 +47,7 @@ in a different thrift file, or defined in the same thrift file.
 }}{{#python.generate_mutable_types?}}{{!
   }}_fbthrift_python_mutable_containers.MutableSetTypeFactory({{!
 }}{{/python.generate_mutable_types?}}{{!
-    }}{{#type:set_elem_type}}{{> types/typeinfo }}{{/type:set_elem_type}}{{!
+    }}{{#partial m_types.typeinfo type=type:true_type.elem_type}}{{!
   }}){{!
 }}{{/type:set?}}{{!
 }}{{#type:map?}}{{!
@@ -57,8 +57,8 @@ in a different thrift file, or defined in the same thrift file.
 }}{{#python.generate_mutable_types?}}{{!
   }}_fbthrift_python_mutable_containers.MutableMapTypeFactory({{!
 }}{{/python.generate_mutable_types?}}{{!
-    }}{{#type:key_type}}{{> types/typeinfo }}{{/type:key_type}}, {{!
-    }}{{#type:value_type}}{{> types/typeinfo }}{{/type:value_type}}){{!
+    }}{{#partial m_types.typeinfo type=type:true_type.key_type}}, {{!
+    }}{{#partial m_types.typeinfo type=type:true_type.val_type}}){{!
 }}{{/type:map?}}{{!
 }}{{#type:enum}}{{!
   }}{{#type:need_module_path?}}{{type:module_mangle}}.{{/type:need_module_path?}}{{!

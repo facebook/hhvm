@@ -29,7 +29,7 @@ class {{#partial m_functions.args_type service=service:self function=function:se
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "{{field:name}}",  # name
             "{{field:py_name}}",  # python name (from @python.Name annotation)
-            {{#field:type}}{{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }}{{/field:type}},  # typeinfo
+            {{#field:type}}{{^type:primitive?}}lambda: {{/type:primitive?}}{{#partial m_types.typeinfo type=type:self}}{{/field:type}},  # typeinfo
             None,  # default value
             {{#partial m_common.adapter_info node=field:self}},  # adapter info
             {{#partial m_types.is_primitive type=field:self.type}}, # field type is primitive
@@ -51,7 +51,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result(metaclass={{#partial m
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
             "success", # name
-            {{#if (not regular_response_type.primitive?)}}lambda: {{/if}}{{> types/typeinfo }},  # typeinfo
+            {{#if (not regular_response_type.primitive?)}}lambda: {{/if}}{{#partial m_types.typeinfo type=regular_response_type}},  # typeinfo
             None,  # default value
             {{#partial m_common.adapter_info node=regular_response_type}},  # adapter info
             {{#partial m_types.is_primitive type=regular_response_type}}, # field type is primitive
@@ -64,7 +64,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result(metaclass={{#partial m
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "_ex{{field:index}}__{{field:name}}",  # name
             "{{> fields/exception_field_name}}",  # python name (from @python.Name annotation)
-            {{#field:type}}{{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }}{{/field:type}},  # typeinfo
+            {{#field:type}}{{^type:primitive?}}lambda: {{/type:primitive?}}{{#partial m_types.typeinfo type=type:self}}{{/field:type}},  # typeinfo
             None,  # default value
             {{#partial m_common.adapter_info node=field:self}},  # adapter info
             {{#partial m_types.is_primitive type=field:self.type}}, # field type is primitive
@@ -90,7 +90,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_stream_elem(metaclass=
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
             "success", # name
-            {{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }},  # typeinfo
+            {{^type:primitive?}}lambda: {{/type:primitive?}}{{#partial m_types.typeinfo type=type:self}},  # typeinfo
             None,  # default value
             {{#partial m_common.adapter_info node=type:self}},  # adapter info
             {{#partial m_types.is_primitive type=type:self}}, # field type is primitive
@@ -102,7 +102,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_stream_elem(metaclass=
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "_ex{{field:index}}__{{field:name}}",  # name
             "{{> fields/exception_field_name}}",  # python name (from @python.Name annotation)
-            {{#field:type}}{{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }}{{/field:type}},  # typeinfo
+            {{#field:type}}{{^type:primitive?}}lambda: {{/type:primitive?}}{{#partial m_types.typeinfo type=type:self}}{{/field:type}},  # typeinfo
             None,  # default value
             {{#partial m_common.adapter_info node=field:self}},  # adapter info
             {{#partial m_types.is_primitive type=field:self.type}}, # field type is primitive
@@ -128,7 +128,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_sink_elem(metaclass={{
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
             "success", # name
-            {{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }},  # typeinfo
+            {{^type:primitive?}}lambda: {{/type:primitive?}}{{#partial m_types.typeinfo type=type:self}},  # typeinfo
             None,  # default value
             {{#partial m_common.adapter_info node=type:self}},  # adapter info
             {{#partial m_types.is_primitive type=type:self}}, # field type is primitive
@@ -140,7 +140,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_sink_elem(metaclass={{
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "_ex{{field:index}}__{{field:name}}",  # name
             "{{> fields/exception_field_name}}",  # python name (from @python.Name annotation)
-            {{#field:type}}{{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }}{{/field:type}},  # typeinfo
+            {{#field:type}}{{^type:primitive?}}lambda: {{/type:primitive?}}{{#partial m_types.typeinfo type=type:self}}{{/field:type}},  # typeinfo
             None,  # default value
             {{#partial m_common.adapter_info node=field:self}},  # adapter info
             {{#partial m_types.is_primitive type=field:self.type}}, # field type is primitive
@@ -184,7 +184,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_sink_elem(metaclass={{
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
             "success", # name
-            {{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }},  # typeinfo
+            {{^type:primitive?}}lambda: {{/type:primitive?}}{{#partial m_types.typeinfo type=type:self}},  # typeinfo
             None,  # default value
             {{#partial m_common.adapter_info node=type:self}},  # adapter info
             {{#partial m_types.is_primitive type=type:self}}, # field type is primitive
@@ -196,7 +196,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_sink_elem(metaclass={{
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "_ex{{field:index}}__{{field:name}}",  # name
             "{{> fields/exception_field_name}}",  # python name (from @python.Name annotation)
-            {{#field:type}}{{^type:primitive?}}lambda: {{/type:primitive?}}{{> types/typeinfo }}{{/field:type}},  # typeinfo
+            {{#field:type}}{{^type:primitive?}}lambda: {{/type:primitive?}}{{#partial m_types.typeinfo type=type:self}}{{/field:type}},  # typeinfo
             None,  # default value
             {{#partial m_common.adapter_info node=field:self}},  # adapter info
             {{#partial m_types.is_primitive type=field:self.type}}, # field type is primitive

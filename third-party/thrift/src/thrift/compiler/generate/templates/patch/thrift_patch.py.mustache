@@ -88,7 +88,7 @@ class {{structured.py_name}}Patch(
             cast_dynamic_patch_to_typed_field_patch,
             self._patch,
             {{field.id}},
-            {{#field.type}}{{> ../python/types/typeinfo }}{{/field.type}})
+            {{#partial m_types.typeinfo type=field.type}})
       {{/if (not field.type.contains_patch?)}}
     {{/each}}
     {{#if (not program.safe_patch?)}}{{! If the program is already a safe patch, we should not generate to_safe_patch/from_safe_patch, otherwise it becomes a safe patch of safe patch}}

@@ -380,6 +380,10 @@ class DynamicValue final {
   static DynamicValue makeString(
       std::string_view sv, std::pmr::memory_resource* mr = nullptr);
   static DynamicValue makeBinary(std::unique_ptr<folly::IOBuf> buf);
+  static DynamicValue makeAny(type::AnyData anyData);
+  static DynamicValue makeAny(
+      const DynamicValue& value,
+      type::StandardProtocol protocol = type::StandardProtocol::Compact);
 
   /**
    * Factory method for creating enum values.

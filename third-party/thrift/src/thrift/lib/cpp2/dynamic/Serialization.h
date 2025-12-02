@@ -65,8 +65,9 @@ void serialize(ProtocolWriter& writer, const Binary& binary) {
 
 // Any
 template <typename ProtocolWriter>
-void serialize(ProtocolWriter&, const Any&) {
-  throw std::logic_error("Unimplemented: serialize(Any)");
+void serialize(ProtocolWriter& writer, const Any& any) {
+  // Serialize the underlying AnyData as an AnyStruct
+  op::encode<type::struct_t<type::AnyStruct>>(writer, any.data_.toThrift());
 }
 
 // List
@@ -229,8 +230,13 @@ Binary deserialize(
 // Any
 template <typename ProtocolReader>
 Any deserialize(
-    ProtocolReader&, type_system::TypeRef::Any, std::pmr::memory_resource*) {
-  throw std::logic_error("Unimplemented: deserialize(TypeRef::Any)");
+    ProtocolReader& reader,
+    type_system::TypeRef::Any,
+    std::pmr::memory_resource* mr) {
+  // Deserialize an AnyStruct from the protocol
+  type::AnyStruct anyStruct;
+  op::decode<type::struct_t<type::AnyStruct>>(reader, anyStruct);
+  return Any(type::AnyData(std::move(anyStruct)), mr);
 }
 
 // List

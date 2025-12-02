@@ -19,16 +19,6 @@
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 
 #include <fmt/core.h>
-#include <folly/lang/Exception.h>
-
-namespace apache::thrift::dynamic {
-
-// Placeholder equality operators for unimplemented types
-bool operator==(const Any&, const Any&) noexcept {
-  folly::terminate_with<std::logic_error>("Any comparison not yet implemented");
-}
-
-} // namespace apache::thrift::dynamic
 
 namespace apache::thrift::dynamic::detail {
 

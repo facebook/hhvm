@@ -95,6 +95,19 @@ DynamicValue DynamicValue::makeBinary(std::unique_ptr<folly::IOBuf> buf) {
       detail::Datum::make(Binary(std::move(buf))));
 }
 
+DynamicValue DynamicValue::makeAny(type::AnyData anyData) {
+  return DynamicValue(
+      type_system::TypeSystem::Any(),
+      detail::Datum::make(Any(std::move(anyData))));
+}
+
+DynamicValue DynamicValue::makeAny(
+    const DynamicValue& value, type::StandardProtocol protocol) {
+  return DynamicValue(
+      type_system::TypeSystem::Any(),
+      detail::Datum::make(Any::store(value, protocol)));
+}
+
 DynamicValue DynamicValue::makeEnum(
     const type_system::EnumNode& enumType, int32_t value) {
   return DynamicValue(
@@ -125,6 +138,8 @@ DynamicValue DynamicValue::makeDefault(
       return makeString("", mr);
     case Kind::BINARY:
       return DynamicValue(type, detail::Datum::make(Binary(mr)));
+    case Kind::ANY:
+      return DynamicValue(type, detail::Datum::make(Any(mr)));
     case Kind::LIST:
       return DynamicValue(
           type, detail::Datum::make(makeList(type.asListUnchecked(), mr)));

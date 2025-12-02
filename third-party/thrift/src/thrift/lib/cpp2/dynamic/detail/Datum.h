@@ -18,6 +18,7 @@
 
 // Minimal includes to avoid pulling in <variant> too early
 
+#include <thrift/lib/cpp2/dynamic/Any.h>
 #include <thrift/lib/cpp2/dynamic/Binary.h>
 #include <thrift/lib/cpp2/dynamic/List.h>
 #include <thrift/lib/cpp2/dynamic/Map.h>
@@ -50,10 +51,6 @@
 #include <variant>
 
 namespace apache::thrift::dynamic {
-
-class Any {};
-
-bool operator==(const Any&, const Any&) noexcept;
 
 struct Null final {
   friend constexpr bool operator==(const Null&, const Null&) noexcept {

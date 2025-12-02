@@ -89,6 +89,8 @@ ServiceData::CounterCallback s_counters(
     // this isn't really a counter, but whatever. we need a way for callers
     // to query if this build is limited by lowptr memory or not
     counters["mem.use-low-ptr"] = use_lowptr ? 1 : 0;
+    counters["mem.used-ptrmode"] = use_packedptr ? 3 : (use_lowptr ? 2 : 1);
+
     counters["mem.unit-size"] = MemoryStats::TotalSize(AllocKind::Unit);
     counters["mem.func-size"] = MemoryStats::TotalSize(AllocKind::Func);
     counters["mem.class-size"] = MemoryStats::TotalSize(AllocKind::Class);

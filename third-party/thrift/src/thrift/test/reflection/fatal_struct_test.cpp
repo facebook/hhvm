@@ -70,7 +70,7 @@ static_assert(!IsThriftUnion<enum1>::value);
 static_assert(!IsThriftUnion<enum2>::value);
 static_assert(!IsThriftUnion<enum3>::value);
 
-TEST(fatal_struct, struct1_sanity_check) {
+TEST(FatalStruct, Struct1SanityCheck) {
   using traits = apache::thrift::reflect_struct<struct1>;
 
   EXPECT_SAME<struct1, traits::type>();
@@ -321,7 +321,7 @@ FATAL_S(structB_annotation2v, "this is its value");
 FATAL_S(structB_annotation3k, "some.other.annotation");
 FATAL_S(structB_annotation3v, "this is its other value");
 
-TEST(fatal_struct, annotations) {
+TEST(FatalStruct, Annotations) {
   EXPECT_SAME<
       fatal::list<>,
       apache::thrift::reflect_struct<struct1>::annotations::map>();
@@ -375,7 +375,7 @@ FATAL_S(structBd_annotation1v, "another value");
 FATAL_S(structBd_annotation2k, "some.annotation");
 FATAL_S(structBd_annotation2v, "some value");
 
-TEST(fatal_struct, member_annotations) {
+TEST(FatalStruct, MemberAnnotations) {
   using info = apache::thrift::reflect_struct<structB>;
 
   EXPECT_SAME<
@@ -422,7 +422,7 @@ FATAL_S(annotated_v_s_int_map, "{\"a\": 1, \"b\": -2, \"c\": -3}");
 FATAL_S(annotated_v_s_str_map, "{\"a\": \"A\", \"b\": \"B\", \"c\": \"C\"}");
 FATAL_S(annotated_v_s_mixed_map, "{\"a\": -2, \"b\": \"B\", \"c\": 3}");
 
-TEST(fatal_struct, structured_annotations) {
+TEST(FatalStruct, StructuredAnnotations) {
   using info = apache::thrift::reflect_struct<annotated>::annotations;
 
   using bf =
@@ -481,7 +481,7 @@ FATAL_S(annotated_v_m_int_map, "{\"a\": 1, \"b\": -2, \"c\": -3}");
 FATAL_S(annotated_v_m_str_map, "{\"a\": \"A\", \"b\": \"B\", \"c\": \"C\"}");
 FATAL_S(annotated_v_m_mixed_map, "{\"a\": -2, \"b\": \"B\", \"c\": 3}");
 
-TEST(fatal_struct, set_methods) {
+TEST(FatalStruct, SetMethods) {
   using info = apache::thrift::reflect_struct<struct4>;
   using req_field = fatal::
       get<info::members, info::member::field0::name, fatal::get_type::name>;
@@ -516,7 +516,7 @@ TEST(fatal_struct, set_methods) {
   EXPECT_TRUE(ref_field::mark_set(a, true));
 }
 
-TEST(fatal_struct, field_ref_getter) {
+TEST(FatalStruct, FieldRefGetter) {
   using info = apache::thrift::reflect_struct<struct4>;
   using req_field = fatal::
       get<info::members, info::member::field0::name, fatal::get_type::name>;
@@ -571,14 +571,14 @@ TEST(fatal_struct, field_ref_getter) {
       std::is_same<std::unique_ptr<structA>&, decltype(ref(a))>::value);
 }
 
-TEST(fatal_struct, renamed_field) {
+TEST(FatalStruct, RenamedField) {
   using meta = apache::thrift::reflect_struct<struct_with_renamed_field>;
   using fmeta = meta::member::boring_cxx_name;
   auto fname = fatal::to_instance<std::string, fmeta::name>();
   EXPECT_EQ("fancy.idl.name", fname);
 }
 
-TEST(fatal_struct, StructWithAdaptedField) {
+TEST(FatalStruct, StructWithAdaptedField) {
   using info = apache::thrift::reflect_struct<StructWithAdaptedField>;
   using type_adapted_field = fatal::get<
       info::members,
@@ -624,14 +624,14 @@ TEST(fatal_struct, StructWithAdaptedField) {
           decltype(get_field_adapted(a))>);
 }
 
-TEST(fatal_struct, Terse) {
+TEST(FatalStruct, Terse) {
   using traits = apache::thrift::reflect_struct<struct2>;
   EXPECT_SAME<
       required<apache::thrift::optionality::terse>,
       fatal::get<traits::members, fieldAs, fatal::get_type::name>::optional>();
 }
 
-TEST(fatal_struct, InvokeByFieldName) {
+TEST(FatalStruct, InvokeByFieldName) {
   using apache::thrift::reflection::invokeByFieldName;
   using traits = apache::thrift::reflect_struct<struct1>;
 

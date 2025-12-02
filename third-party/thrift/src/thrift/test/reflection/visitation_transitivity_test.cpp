@@ -24,7 +24,7 @@ using namespace std;
 
 namespace test_cpp2 {
 namespace cpp_reflection {
-TEST(dep_C_struct, test_transitivity) {
+TEST(DepCStruct, TestTransitivity) {
   dep_C_struct s;
   s.i_c() = 10;
   s.d()->i_d() = 20;
@@ -36,7 +36,7 @@ TEST(dep_C_struct, test_transitivity) {
         })(*ref);
   });
 }
-TEST(union1, test_union) {
+TEST(union1, TestUnion) {
   union1 s;
   s.us() = "foo";
   visit_union(s, [](auto&&, auto&& value) {

@@ -359,7 +359,7 @@ TEST(Diff, fieldQ) {
   TEST_IMPL(pod, test_data(), "");
 }
 
-TEST(Diff, fieldG_field0) {
+TEST(Diff, FieldGField0) {
   auto pod = test_data();
   *pod.fieldG()->field0() = 12;
   TEST_IMPL(pod, test_data(), R"(
@@ -371,7 +371,7 @@ TEST(Diff, fieldG_field0) {
   TEST_IMPL(pod, test_data(), "");
 }
 
-TEST(Diff, fieldG_field1) {
+TEST(Diff, FieldGField1) {
   auto pod = test_data();
   pod.fieldG()->field1() = "should mismatch";
   TEST_IMPL(pod, test_data(), R"(
@@ -383,7 +383,7 @@ TEST(Diff, fieldG_field1) {
   TEST_IMPL(pod, test_data(), "");
 }
 
-TEST(Diff, fieldG_field2) {
+TEST(Diff, FieldGField2) {
   auto pod = test_data();
   *pod.fieldG()->field2() = enum1::field1;
   TEST_IMPL(pod, test_data(), R"(
@@ -395,7 +395,7 @@ TEST(Diff, fieldG_field2) {
   TEST_IMPL(pod, test_data(), "");
 }
 
-TEST(Diff, fieldG_field5) {
+TEST(Diff, FieldGField5) {
   auto pod = test_data();
   pod.fieldG()->field5()->set_ui_2(5);
   TEST_IMPL(pod, test_data(), R"(
@@ -430,7 +430,7 @@ TEST(Diff, fieldS) {
   )");
 }
 
-TEST(Diff, struct_binary) {
+TEST(Diff, StructBinary) {
   struct_binary lhs;
   *lhs.bi() = "hello";
   struct_binary rhs;
@@ -530,19 +530,19 @@ void ref_test() {
   )");
 }
 
-TEST(Diff, struct_ref_unique) {
+TEST(Diff, StructRefUnique) {
   ref_test<hasRefUnique, UniqueHelper>();
 }
 
-TEST(Diff, ref_shared) {
+TEST(Diff, RefShared) {
   ref_test<hasRefShared, SharedHelper>();
 }
 
-TEST(Diff, ref_shared_const) {
+TEST(Diff, RefSharedConst) {
   ref_test<hasRefSharedConst, SharedConstHelper>();
 }
 
-TEST(Diff, optional_members) {
+TEST(Diff, OptionalMembers) {
   struct1 field1Set;
   field1Set.field1() = "1";
   struct1 field1Unset;

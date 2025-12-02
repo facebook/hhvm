@@ -27,7 +27,7 @@
 
 namespace test_cpp2::cpp_reflection {
 
-TEST(FatalVariant, variant_try_get) {
+TEST(FatalVariant, VariantTryGet) {
 #define TEST_IMPL2(TYPE, FIELD, OTHER1, OTHER2, OTHER3, VALUE, ...)           \
   do {                                                                        \
     union1 u;                                                                 \
@@ -87,7 +87,7 @@ TEST(FatalVariant, variant_try_get) {
 #undef TEST_IMPL2
 }
 
-TEST(FatalVariant, variant_set) {
+TEST(FatalVariant, VariantSet) {
 #define TEST_IMPL2(TYPE, FIELD, VALUE, ...)                              \
   do {                                                                   \
     union1 u;                                                            \

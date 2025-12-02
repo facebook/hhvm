@@ -25,7 +25,7 @@
 namespace test_cpp2 {
 namespace cpp_reflection {
 
-TEST(reflection_helpers, get_struct_member_by_name) {
+TEST(ReflectionHelpers, GetStructMemberByName) {
   using traits = apache::thrift::reflect_struct<struct1>;
 
   EXPECT_SAME<
@@ -91,7 +91,7 @@ TEST(reflection_helpers, get_struct_member_by_name) {
           get_struct_member_by_name<struct1, traits::member::field5::name>>();
 }
 
-TEST(reflection_helpers, get_struct_member_by_id) {
+TEST(ReflectionHelpers, GetStructMemberById) {
   using traits = apache::thrift::reflect_struct<struct1>;
 
   EXPECT_SAME<

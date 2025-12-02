@@ -21,7 +21,7 @@
 
 #include <gtest/gtest.h>
 
-TEST(fatal_indenter, arbitrary_push_depth) {
+TEST(FatalIndenter, ArbitraryPushDepth) {
   std::ostringstream out;
   auto indenter = apache::thrift::make_indenter(out, "  ");
 
@@ -54,7 +54,7 @@ TEST(fatal_indenter, arbitrary_push_depth) {
   EXPECT_EQ(expected, actual);
 }
 
-TEST(fatal_indenter, set_margin) {
+TEST(FatalIndenter, SetMargin) {
   std::ostringstream out;
   auto indenter = apache::thrift::make_indenter(out, "  ");
 

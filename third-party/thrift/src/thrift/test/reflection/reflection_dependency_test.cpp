@@ -23,7 +23,7 @@
 namespace test_cpp2 {
 namespace cpp_reflection {
 
-TEST(reflection_deps, recursive_dependencies) {
+TEST(ReflectionDeps, RecursiveDependencies) {
   using namespace apache::thrift;
   EXPECT_SAME<
       type_class::structure,

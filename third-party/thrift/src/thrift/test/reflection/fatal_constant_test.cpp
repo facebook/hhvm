@@ -19,7 +19,7 @@
 namespace test_cpp2 {
 namespace cpp_reflection {
 
-TEST(fatal_constant, sanity_check) {}
+TEST(FatalConstant, SanityCheck) {}
 
 } // namespace cpp_reflection
 } // namespace test_cpp2

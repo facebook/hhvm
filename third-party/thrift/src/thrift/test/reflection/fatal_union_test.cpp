@@ -37,7 +37,7 @@ using udi = std::integral_constant<union1::Type, union1::Type::ud>;
 using usi = std::integral_constant<union1::Type, union1::Type::us>;
 using uei = std::integral_constant<union1::Type, union1::Type::ue>;
 
-TEST(fatal_union, variants) {
+TEST(FatalUnion, Variants) {
   using traits = fatal::variant_traits<union1>;
 
   EXPECT_SAME<union1, traits::type>();
@@ -58,7 +58,7 @@ TEST(fatal_union, variants) {
       fatal::transform<traits::descriptors, fatal::get_type::type>>();
 }
 
-TEST(fatal_union, by_id) {
+TEST(FatalUnion, ById) {
   using vtraits = fatal::variant_traits<union1>;
   using traits = vtraits::by_id;
 
@@ -142,7 +142,7 @@ TEST(fatal_union, by_id) {
   EXPECT_EQ(enum1::field1, traits::get<uei>(ur));
 }
 
-TEST(fatal_union, by_type) {
+TEST(FatalUnion, ByType) {
   using vtraits = fatal::variant_traits<union1>;
   using traits = vtraits::by_type;
 
@@ -231,7 +231,7 @@ FATAL_S(unionA_annotation1v, "some more text");
 FATAL_S(unionA_annotation2k, "sample.annotation");
 FATAL_S(unionA_annotation2v, "some text here");
 
-TEST(fatal_union, annotations) {
+TEST(FatalUnion, Annotations) {
   EXPECT_SAME<
       fatal::list<>,
       apache::thrift::reflect_variant<union2>::annotations::map>();
@@ -254,7 +254,7 @@ TEST(fatal_union, annotations) {
       actual_unionA::map>();
 }
 
-TEST(fatal_union, by_name) {
+TEST(FatalUnion, ByName) {
   using id_traits = fatal::enum_traits<union1::Type>;
   using info = apache::thrift::reflect_variant<union1>;
   using member_info = info::by_name<id_traits::member::ui::name>;
@@ -266,7 +266,7 @@ TEST(fatal_union, by_name) {
   EXPECT_EQ(10, member_info::get(u));
 }
 
-TEST(fatal_union, by_type_id) {
+TEST(FatalUnion, ByTypeId) {
   using info = apache::thrift::reflect_variant<union1>;
   using member_info = info::by_type_id<union1::Type::ui>;
 
@@ -277,7 +277,7 @@ TEST(fatal_union, by_type_id) {
   EXPECT_EQ(10, member_info::get(u));
 }
 
-TEST(fatal_union, by_field_id) {
+TEST(FatalUnion, ByFieldId) {
   using info = apache::thrift::reflect_variant<union1>;
   using member_info = info::by_field_id<1>;
 
@@ -288,7 +288,7 @@ TEST(fatal_union, by_field_id) {
   EXPECT_EQ(10, member_info::get(u));
 }
 
-TEST(fatal_struct, renamed_field) {
+TEST(FatalStruct, RenamedField) {
   using emeta = fatal::enum_traits<union_with_renamed_field::Type>;
   using vmeta = emeta::member::boring_cxx_name;
   auto vname = fatal::to_instance<std::string, vmeta::name>();

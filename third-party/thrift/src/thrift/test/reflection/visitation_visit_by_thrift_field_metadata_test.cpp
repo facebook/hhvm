@@ -35,7 +35,7 @@ auto idToThriftField(int32_t id) {
   return field;
 }
 
-TEST(struct1, modify_field) {
+TEST(struct1, ModifyField) {
   struct1 s;
   s.field4().emplace().set_us("foo");
   s.field5().emplace().set_us_2("bar");

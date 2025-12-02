@@ -53,7 +53,7 @@ static std::string adjust(std::string input) {
 
 #define TEST_IMPL(Expected, ...) TEST_IMPL_TAG(void, Expected, __VA_ARGS__)
 
-TEST(PrettyPrint, pretty_print) {
+TEST(PrettyPrint, PrettyPrint) {
   structA a1;
   *a1.a() = 99;
   *a1.b() = "abc";
@@ -695,19 +695,19 @@ void ref_test() {
   TEST_IMPL(adjust(expectedStr2), v);
 }
 
-TEST(PrettyPrint, struct_ref_unique) {
+TEST(PrettyPrint, StructRefUnique) {
   ref_test<hasRefUnique, UniqueHelper>();
 }
 
-TEST(PrettyPrint, ref_shared) {
+TEST(PrettyPrint, RefShared) {
   ref_test<hasRefShared, SharedHelper>();
 }
 
-TEST(PrettyPrint, ref_shared_const) {
+TEST(PrettyPrint, RefSharedConst) {
   ref_test<hasRefSharedConst, SharedConstHelper>();
 }
 
-TEST(PrettyPrint, optional_member) {
+TEST(PrettyPrint, OptionalMember) {
   struct1 v;
   v.field1() = 4;
 
@@ -722,7 +722,7 @@ TEST(PrettyPrint, optional_member) {
   TEST_IMPL(adjust(expectedStr), v);
 }
 
-TEST(PrettyPrint, escape_strings) {
+TEST(PrettyPrint, EscapeStrings) {
   structA s;
   s.b() = "foo\nbar";
   const char* expectedStr = R"(
@@ -733,7 +733,7 @@ TEST(PrettyPrint, escape_strings) {
   TEST_IMPL(adjust(expectedStr), s);
 }
 
-TEST(PrettyPrint, tc_binary_iobuf) {
+TEST(PrettyPrint, TcBinaryIobuf) {
   using tag = apache::thrift::type::binary_t;
   std::string x = "hello";
   std::string y = "world";

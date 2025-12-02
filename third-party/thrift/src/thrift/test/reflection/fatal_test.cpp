@@ -146,7 +146,7 @@ TEST(fatal, tags) {
 
 namespace test_cpp2::cpp_reflection {
 
-TEST(reflection, is_reflectable_struct) {
+TEST(reflection, IsReflectableStruct) {
   EXPECT_SAME<
       std::false_type,
       apache::thrift::is_reflectable_struct<reflection_tags::module>>();
@@ -216,7 +216,7 @@ TEST(reflection, is_reflectable_struct) {
           std::unordered_map<std::string, struct1>>>();
 }
 
-TEST(reflection, is_reflectable_union) {
+TEST(reflection, IsReflectableUnion) {
   EXPECT_SAME<
       std::false_type,
       apache::thrift::is_reflectable_union<reflection_tags::module>>();
@@ -286,7 +286,7 @@ TEST(reflection, is_reflectable_union) {
           std::unordered_map<std::string, struct1>>>();
 }
 
-TEST(reflection, reflect_type_class_of_thrift_class) {
+TEST(reflection, ReflectTypeClassOfThriftClass) {
   EXPECT_SAME<
       apache::thrift::type_class::unknown,
       apache::thrift::reflect_type_class_of_thrift_class<

@@ -262,7 +262,7 @@ TEST(Debug, fieldQ) {
   TEST_IMPL(pod, test_data());
 }
 
-TEST(Debug, fieldG_field0) {
+TEST(Debug, FieldGField0) {
   auto pod = test_data();
   *pod.fieldG()->field0() = 12;
   TEST_IMPL(pod, test_data(), "$.fieldG.field0");
@@ -270,7 +270,7 @@ TEST(Debug, fieldG_field0) {
   TEST_IMPL(pod, test_data());
 }
 
-TEST(Debug, fieldG_field1) {
+TEST(Debug, FieldGField1) {
   auto pod = test_data();
   pod.fieldG()->field1() = "should mismatch";
   TEST_IMPL(pod, test_data(), "$.fieldG.field1");
@@ -278,7 +278,7 @@ TEST(Debug, fieldG_field1) {
   TEST_IMPL(pod, test_data());
 }
 
-TEST(Debug, fieldG_field2) {
+TEST(Debug, FieldGField2) {
   auto pod = test_data();
   *pod.fieldG()->field2() = enum1::field1;
   TEST_IMPL(pod, test_data(), "$.fieldG.field2");
@@ -286,7 +286,7 @@ TEST(Debug, fieldG_field2) {
   TEST_IMPL(pod, test_data());
 }
 
-TEST(Debug, fieldG_field5) {
+TEST(Debug, FieldGField5) {
   auto pod = test_data();
   pod.fieldG()->field5()->set_ui_2(5);
   TEST_IMPL(
@@ -312,7 +312,7 @@ TEST(Debug, fieldS) {
       "$.fieldS[\"0x646566\"]" /* extra  */);
 }
 
-TEST(Debug, struct_binary) {
+TEST(Debug, StructBinary) {
   struct_binary lhs;
   *lhs.bi() = "hello";
   struct_binary rhs;
@@ -394,19 +394,19 @@ void ref_test() {
       "$.anOptionalUnion" /* missing */);
 }
 
-TEST(Debug, struct_ref_unique) {
+TEST(Debug, StructRefUnique) {
   ref_test<hasRefUnique, UniqueHelper>();
 }
 
-TEST(Debug, ref_shared) {
+TEST(Debug, RefShared) {
   ref_test<hasRefShared, SharedHelper>();
 }
 
-TEST(Debug, ref_shared_const) {
+TEST(Debug, RefSharedConst) {
   ref_test<hasRefSharedConst, SharedConstHelper>();
 }
 
-TEST(Debug, optional_members) {
+TEST(Debug, OptionalMembers) {
   struct1 field1Set;
   field1Set.field1() = 2;
   struct1 field1Unset;
@@ -428,7 +428,7 @@ TEST(Debug, optional_members) {
   TEST_IMPL(field1SetDefault, field1Unset, "$.field1" /* missing */);
 }
 
-TEST(Debug, tc_binary_iobuf) {
+TEST(Debug, TcBinaryIobuf) {
   using tc = apache::thrift::type::binary_t;
   std::string x = "hello";
   std::string y = "world";

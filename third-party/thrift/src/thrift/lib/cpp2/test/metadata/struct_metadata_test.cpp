@@ -37,7 +37,7 @@ TEST(City, base) {
   EXPECT_EQ(&ts, &md.structs()->at("nested_structs_test.City"));
 }
 
-TEST(City, structured_metadata) {
+TEST(City, StructuredMetadata) {
   const metadata::ThriftStruct& metadata =
       get_struct_metadata<::metadata::test::simple_structs::City>();
 

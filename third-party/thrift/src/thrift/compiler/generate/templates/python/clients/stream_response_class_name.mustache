@@ -18,7 +18,7 @@
 
 Stream response class name.
 }}{{#function:stream_has_first_response?}}_typing.Tuple[{{!
-}}{{#function:stream_first_response_type}}{{> types/pep484_type}}{{/function:stream_first_response_type}}{{!
+}}{{#partial typehints.pep484_type type=function:self.return_type}}{{!
 }}, {{/function:stream_has_first_response?}}{{!
-}}_typing.AsyncGenerator[{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}, None]{{!
+}}_typing.AsyncGenerator[{{#partial typehints.pep484_type type=function:self.stream.elem_type}}, None]{{!
 }}{{#function:stream_has_first_response?}}]{{/function:stream_has_first_response?}}

@@ -75,7 +75,7 @@ class {{struct:py_name}}Patch(
     {{#struct:fields_ordered_by_id}}{{#field:type}}{{#if (not type:contains_patch?)}}
     @property
     def {{field:py_name}}(self) -> {{> types/field_patch_type}}[
-            {{> ../python/types/unadapted_pep484_type}},
+            {{#partial typehints.unadapted_type type=field:self.type}},
             {{> ../python/types/unadapted_pep484_patch_type}}]:
 
         {{! e.g., if field is an i32, this function convert DynamicPatch --> I32Patch }}

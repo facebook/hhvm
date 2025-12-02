@@ -18,7 +18,6 @@
 Typing for a union field
 }}{{#pragma ignore-newlines}}
 _typing.Union[None
-{{#struct:fields_ordered_by_id}}, {{#field:type}}
-{{> types/pep484_type}}
-{{/field:type}}
+{{#struct:fields_ordered_by_id}}, {{!}}
+{{#partial typehints.pep484_type type=field:self.type}}
 {{/struct:fields_ordered_by_id}}]

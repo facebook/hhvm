@@ -32,14 +32,14 @@ This is for pep 484 typing for thrift patch types
   }}{{struct:py_name}}Patch{{!
 }}{{/type:structured}}{{!
 }}{{#type:list?}}ListPatch[{{!
-    }}{{#type:list_elem_type}}{{> types/unadapted_pep484_type}}{{/type:list_elem_type}}{{!
+    }}{{#partial typehints.unadapted_type type=type:true_type.elem_type}}{{!
 }}]{{/type:list?}}{{!
 }}{{#type:set?}}SetPatch[{{!
-    }}{{#type:set_elem_type}}{{> types/unadapted_pep484_type}}{{/type:set_elem_type}}{{!
+    }}{{#partial typehints.unadapted_type type=type:true_type.elem_type}}{{!
 }}]{{/type:set?}}{{!
 }}{{#type:map?}}MapPatch[{{!
-    }}{{#type:key_type}}{{> types/unadapted_pep484_type}}{{/type:key_type}}, {{!
-    }}{{#type:value_type}}{{> types/unadapted_pep484_type}}{{/type:value_type}}, {{!
+    }}{{#partial typehints.unadapted_type type=type:true_type.key_type}}, {{!
+    }}{{#partial typehints.unadapted_type type=type:true_type.val_type}}, {{!
     }}{{#type:value_type}}{{> types/unadapted_pep484_patch_type}}{{/type:value_type}}{{!
 }}]{{/type:map?}}{{!
 }}{{#type:void?}}None{{/type:void?}}{{!

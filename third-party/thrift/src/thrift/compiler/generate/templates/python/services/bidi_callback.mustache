@@ -18,5 +18,5 @@
   The typing signature of the sink callback returned by service handler method and
   converted to IOBuf callback.
 }}
-_typing.Callable[[_typing.AsyncGenerator[{{#function:sink_elem_type}}{{> types/pep484_type}}{{/function:sink_elem_type}}, None]], {{!
-}}_typing.AsyncGenerator[{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}, None]]
+_typing.Callable[[_typing.AsyncGenerator[{{#partial typehints.pep484_type type=function:self.sink.elem_type}}, None]], {{!
+}}_typing.AsyncGenerator[{{#partial typehints.pep484_type type=function:self.stream.elem_type}}, None]]

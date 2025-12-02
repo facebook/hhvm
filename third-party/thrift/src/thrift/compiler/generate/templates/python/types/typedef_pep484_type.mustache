@@ -18,19 +18,15 @@
 This is for typedef PEP484 type
 }}
 {{#pragma ignore-newlines}}
-  {{#if type:list?}}
+  {{#if (or type:list? type:set?)}}
 {{#partial typehints.typedef_container type=type:self}}[
-{{#type:list_elem_type}}{{> types/pep484_type}}{{/type:list_elem_type}}
-]
-  {{#else if type:set?}}
-{{#partial typehints.typedef_container type=type:self}}[
-{{#type:set_elem_type}}{{> types/pep484_type}}{{/type:set_elem_type}}
+{{#partial typehints.pep484_type type=type:true_type.elem_type}}
 ]
   {{#else if type:map?}}
 {{#partial typehints.typedef_container type=type:self}}[
-{{#type:key_type}}{{> types/pep484_type}}{{/type:key_type}}, {{!}}
-{{#type:value_type}}{{> types/pep484_type}}{{/type:value_type}}
+{{#partial typehints.pep484_type type=type:true_type.key_type}}, {{!}}
+{{#partial typehints.pep484_type type=type:true_type.val_type}}
 ]
   {{#else}}
-{{> types/pep484_type}}
-  {{/if type:list?}}
+{{#partial typehints.pep484_type type=type:self}}
+  {{/if (or type:list? type:set?)}}

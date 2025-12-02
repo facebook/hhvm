@@ -17,19 +17,19 @@
 }}
 {{#pragma ignore-newlines}}
   {{#if function:bidirectional_stream?}}
-{{#if function:stream_has_first_response?}}{{#function:stream_first_response_type}}{{> types/pep484_type}}{{/function:stream_first_response_type}}, {{/if}}
+{{#if function:stream_has_first_response?}}{{#partial typehints.pep484_type type=function:self.return_type}}, {{/if}}
 _fbthrift_BidirectionalStream[
-{{#function:sink_elem_type}}{{> types/pep484_type}}{{/function:sink_elem_type}}, {{!}}
-{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}
+{{#partial typehints.pep484_type type=function:self.sink.elem_type}}, {{!}}
+{{#partial typehints.pep484_type type=function:self.stream.elem_type}}
 ]
   {{#else if function:stream?}}
-{{#if function:stream_has_first_response?}}{{#function:stream_first_response_type}}{{> types/pep484_type}}{{/function:stream_first_response_type}}, {{/if}}
-_typing.AsyncGenerator[{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}, None]
+{{#if function:stream_has_first_response?}}{{#partial typehints.pep484_type type=function:self.return_type}}, {{/if}}
+_typing.AsyncGenerator[{{#partial typehints.pep484_type type=function:self.stream.elem_type}}, None]
   {{#else if function:sink?}}
-{{#if function:sink_has_first_response?}}{{#function:sink_first_response_type}}{{> types/pep484_type}}{{/function:sink_first_response_type}}, {{/if}}
+{{#if function:sink_has_first_response?}}{{#partial typehints.pep484_type type=function:self.return_type}}, {{/if}}
 _fbthrift_ClientSink[
-{{#function:sink_elem_type}}{{> types/pep484_type}}{{/function:sink_elem_type}}, {{!}}
-{{#function:sink_final_response_type}}{{> types/pep484_type}}{{/function:sink_final_response_type}}]
+{{#partial typehints.pep484_type type=function:self.sink.elem_type}}, {{!}}
+{{#partial typehints.pep484_type type=function:self.sink.final_response_type}}]
   {{#else}}
-{{#function:return_type}}{{> types/pep484_type}}{{/function:return_type}}
+{{#partial typehints.pep484_type type=function:self.return_type}}
   {{/if function:bidirectional_stream?}}

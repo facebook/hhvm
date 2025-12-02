@@ -22,7 +22,7 @@ This is useful for typing call paterns since it allows python container types OR
 thrift-python specific container types.
 
 }}{{#if type:has_adapter?}}{{#let adapter = type:adapter}}{{!
-  }}{{adapter.type_hint}}{{#if adapter.is_generic?}}[{{> types/unadapted_pep484_type}}]{{/if}}{{!
+  }}{{adapter.type_hint}}{{#if adapter.is_generic?}}[{{#partial typehints.unadapted_type type=type:self}}]{{/if}}{{!
 }}{{#else}}{{!
   }}{{> types/aliased_unadapted_pep484_type}}{{!
 }}{{/if type:has_adapter?}}

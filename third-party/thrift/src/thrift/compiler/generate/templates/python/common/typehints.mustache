@@ -15,6 +15,7 @@
   limitations under the License.
 
 }}
+{{#import "common/common" as m_common}}
 {{#import "common/types" as m_types}}
 
 {{! PEP484 type for collections }}
@@ -45,4 +46,66 @@
 {{#else if (and type.binary? type.iobuf?)}}_fbthrift_iobuf.IOBuf
 {{#else if type.binary?}}builtins.bytes
 {{/if type.bool?}}
+{{/let partial}}
+
+{{!
+This is useful for typing call patterns since it allows python container types OR
+thrift-python specific container types.
+
+Accepts a boolean parameter 'unadapted', which controls whether the adapter type
+(if present) is emitted. I.e. with `unadapted=false`, the adapter will be ignored.
+
+This `impl` template avoids a circular dependency between pep484 type (adapter
+wrapping unadapted type) and unadapted type, which renders the potentially
+adapted element types of containers.
+}}
+{{#let partial pep484_type_impl |type unadapted| captures |m_common m_types unadapted_builtin|}}
+{{#pragma ignore-newlines}}
+  {{#if (and (not unadapted) type.has_adapter?)}}
+    {{! PEP484 type with adapter }}
+    {{#let adapter = type.adapter}}
+{{adapter.type_hint}}{{#if adapter.is_generic?}}[{{#partial pep484_type_impl type=type unadapted=true}}]{{/if}}
+
+  {{! Unadapted type }}
+  {{#else if type.void?}}
+None
+  {{#else if type.primitive?}}
+{{#partial unadapted_builtin type=type}}
+
+  {{#else if type.structured?}}
+{{#if type.need_module_path?}}{{type.module_mangle}}.{{/if}}
+{{#if (not (or type.need_module_path? type.true_type.has_adapter?))}}{{#partial m_common.private_alias_prefix}}{{/if}}
+{{#type.true_type}}{{> structs/unadapted_name}}{{/type.true_type}}
+
+  {{#else if type.list?}}
+{{#partial m_types.sequence}}[{{#partial pep484_type_impl type=type.true_type.elem_type unadapted=false}}]
+
+  {{#else if type.set?}}
+{{#partial m_types.set}}[{{#partial pep484_type_impl type=type.true_type.elem_type unadapted=false}}]
+
+  {{#else if type.map?}}
+{{#partial m_types.mapping}}[
+{{#partial pep484_type_impl type=type.true_type.key_type unadapted=false}}, {{!}}
+{{#partial pep484_type_impl type=type.true_type.val_type unadapted=false}}
+]
+
+  {{#else if type.enum?}}
+    {{#if type.need_module_path?}}
+{{type.module_mangle}}.
+    {{#else}}
+{{#partial m_common.private_alias_prefix}}
+    {{/if type.need_module_path?}}
+{{type.true_type.py_name}}
+
+  {{/if (and (not unadapted) type.has_adapter?)}}
+{{/let partial}}
+
+{{#let export partial unadapted_type |type| captures |pep484_type_impl|}}
+{{#pragma ignore-newlines}}
+{{#partial pep484_type_impl type=type unadapted=true}}
+{{/let partial}}
+
+{{#let export partial pep484_type |type| captures |pep484_type_impl|}}
+{{#pragma ignore-newlines}}
+{{#partial pep484_type_impl type=type unadapted=false}}
 {{/let partial}}

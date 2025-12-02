@@ -33,7 +33,7 @@ thrift-python specific container types.
     }}{{#type:set_elem_type}}{{> types/aliased_pep484_type}}{{/type:set_elem_type}}{{!
 }}]{{/type:set?}}{{!
 }}{{#type:map?}}{{#partial m_types.mapping}}[{{!
-    }}{{#type:key_type}}{{> types/pep484_type}}{{/type:key_type}}, {{!
+    }}{{#partial typehints.pep484_type type=type:true_type.key_type}}, {{!
     }}{{#type:value_type}}{{> types/aliased_pep484_type}}{{/type:value_type}}{{!
 }}]{{/type:map?}}{{!
 }}{{#type:void?}}None{{/type:void?}}{{!

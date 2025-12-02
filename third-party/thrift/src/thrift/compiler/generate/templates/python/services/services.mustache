@@ -98,12 +98,12 @@ class {{service:name}}Interface(
 
     {{^function:bidirectional_stream?}}{{^function:stream?}}async {{/function:stream?}}{{#function:stream_has_first_response?}}async {{/function:stream_has_first_response?}}def {{function:name}}(
             self{{#function:args}},
-            {{field:py_name}}: {{#field:type}}{{> types/pep484_type}}{{/field:type}}{{/function:args}}
+            {{field:py_name}}: {{#partial typehints.pep484_type type=field:self.type}}{{/function:args}}
         ) -> {{#function:return_type}}{{> services/service_func_return_type }}{{/function:return_type}}:
         raise NotImplementedError("async def {{function:name}} is not implemented")
 
     {{#function:stream?}}
-    async def _fbthrift__stream_wrapper_{{function:name}}(self, stream_generator: _typing.AsyncIterator[{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
+    async def _fbthrift__stream_wrapper_{{function:name}}(self, stream_generator: _typing.AsyncIterator[{{#partial typehints.pep484_type type=function:self.stream.elem_type}}], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
         {{#if (array.empty? function:stream.exceptions)}}
         async for item in stream_generator:
             yield serialize_iobuf({{#partial m_functions.second_return_type service=service:self function=function:self}}(success=item), protocol)
@@ -131,7 +131,7 @@ class {{service:name}}Interface(
         async def _fbthrift_iobuf_sink_callback(
             _iobuf_agen: _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None],
         ) -> _fbthrift_iobuf.IOBuf:
-            async def _handler_agen() -> _typing.AsyncGenerator[{{#function:sink_elem_type}}{{> types/pep484_type}}{{/function:sink_elem_type}}, None]:
+            async def _handler_agen() -> _typing.AsyncGenerator[{{#partial typehints.pep484_type type=function:self.sink.elem_type}}, None]:
                 async for iobuf_item in _iobuf_agen():
                     sink_elem = deserialize(
                         {{> services/function_struct_prefix}}_result_sink_elem,
@@ -172,7 +172,7 @@ class {{service:name}}Interface(
 
     async def {{function:name}}(
             self{{#function:args}},
-            {{field:py_name}}: {{#field:type}}{{> types/pep484_type}}{{/field:type}}{{/function:args}}
+            {{field:py_name}}: {{#partial typehints.pep484_type type=field:self.type}}{{/function:args}}
         ) -> {{#function:return_type}}{{> services/service_func_return_type }}{{/function:return_type}}:
             raise NotImplementedError("async def {{function:name}} is not implemented")
 
@@ -184,7 +184,7 @@ class {{service:name}}Interface(
         async def _fbthrift_iobuf_bidi_callback(
             _iobuf_agen: _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None],
         ) -> _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]:
-            async def _handle_sink() -> _typing.AsyncGenerator[{{#function:sink_elem_type}}{{> types/pep484_type}}{{/function:sink_elem_type}}, None]:
+            async def _handle_sink() -> _typing.AsyncGenerator[{{#partial typehints.pep484_type type=function:self.sink.elem_type}}, None]:
                 async for iobuf_item in _iobuf_agen():
                     sink_elem = deserialize(
                         {{> services/function_struct_prefix}}_result_sink_elem,
@@ -204,7 +204,7 @@ class {{service:name}}Interface(
                     assert sink_elem.success is not None, "unexpected empty sink element"
                     {{/if (array.empty? function:sink.exceptions)}}
 
-            async def _handle_stream(stream_generator: _typing.AsyncIterator[{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}]) -> _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]:
+            async def _handle_stream(stream_generator: _typing.AsyncIterator[{{#partial typehints.pep484_type type=function:self.stream.elem_type}}]) -> _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]:
                 {{#if (array.empty? function:stream.exceptions)}}
                 async for item in stream_generator:
                     yield serialize_iobuf({{program:module_mangle}}__{{#partial m_types.import_path}}._fbthrift_{{service:name}}_{{function:name}}_result_stream_elem(success=item), protocol)

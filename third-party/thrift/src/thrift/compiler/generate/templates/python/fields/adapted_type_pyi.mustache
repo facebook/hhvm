@@ -17,7 +17,7 @@
 }}{{!
 Adapted type hint if field has adapter, otherwise the original type
 }}{{#if field:has_adapter?}}{{#let adapter = field:adapter}}{{!
-  }}{{adapter.type_hint}}{{#if adapter.is_generic?}}[{{#field:type}}{{> types/pep484_type}}{{/field:type}}]{{/if}}{{!
+  }}{{adapter.type_hint}}{{#if adapter.is_generic?}}[{{#partial typehints.pep484_type type=field:self.type}}]{{/if}}{{!
 }}{{#else}}{{!
-  }}{{#field:type}}{{> types/pep484_type}}{{/field:type}}{{!
+  }}{{#partial typehints.pep484_type type=field:self.type}}{{!
 }}{{/if field:has_adapter?}}

@@ -23,21 +23,21 @@ thrift-py3 specific container types.
 }}
 {{#pragma ignore-newlines}}
   {{#if function:bidirectional_stream?}}
-{{#if function:stream_has_first_response?}}_typing.Tuple[{{#function:stream_first_response_type}}{{> types/pep484_type}}{{/function:stream_first_response_type}}, {{/if}}
+{{#if function:stream_has_first_response?}}_typing.Tuple[{{#partial typehints.pep484_type type=function:self.return_type}}, {{/if}}
 {{> services/bidi_callback}}
 {{#if function:stream_has_first_response?}}]{{/if}}
 
   {{#else if function:stream?}}
-{{#if function:stream_has_first_response?}}_typing.Tuple[{{#function:stream_first_response_type}}{{> types/pep484_type}}{{/function:stream_first_response_type}}, {{/if}}
-_typing.Awaitable[_typing.AsyncIterator[{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}]] | {{!}}
-_typing.AsyncIterator[{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}]
+{{#if function:stream_has_first_response?}}_typing.Tuple[{{#partial typehints.pep484_type type=function:self.return_type}}, {{/if}}
+_typing.Awaitable[_typing.AsyncIterator[{{#partial typehints.pep484_type type=function:self.stream.elem_type}}]] | {{!}}
+_typing.AsyncIterator[{{#partial typehints.pep484_type type=function:self.stream.elem_type}}]
 {{#if function:stream_has_first_response?}}]{{/if}}
 
   {{#else if function:sink?}}
-{{#if function:sink_has_first_response?}}_typing.Tuple[{{#function:sink_first_response_type}}{{> types/pep484_type}}{{/function:sink_first_response_type}}, {{/if}}
+{{#if function:sink_has_first_response?}}_typing.Tuple[{{#partial typehints.pep484_type type=function:self.return_type}}, {{/if}}
 {{> services/sink_callback}}
 {{#if function:sink_has_first_response?}}]{{/if}}
 
   {{#else}}
-{{#function:return_type}}{{> types/pep484_type}}{{/function:return_type}}
+{{#partial typehints.pep484_type type=function:self.return_type}}
   {{/if function:bidirectional_stream?}}

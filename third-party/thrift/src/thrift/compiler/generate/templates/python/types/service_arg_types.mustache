@@ -152,9 +152,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_sink_elem(metaclass={{
     @classmethod
     async def _fbthrift__sink_elem_handler(
         cls,
-        sink_agen: _typing_AsyncGenerator[{{!
-            }}{{#function:sink_elem_type}}{{> types/pep484_type}}{{!
-            }}{{/function:sink_elem_type}}, None],
+        sink_agen: _typing_AsyncGenerator[{{#partial typehints.pep484_type type=function:self.sink.elem_type}}, None],
         protocol: _fbthrift__Protocol,
     ) -> _typing_AsyncGenerator[_fbthrift_iobuf, None]:
         {{#if (array.empty? function:sink.exceptions)}}

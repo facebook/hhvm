@@ -31,7 +31,7 @@ from testing.thrift_clients import (
     TestingServiceChild,
 )
 from testing.thrift_services import TestingServiceInterface
-from testing.thrift_types import Complex, hard, HardError, mixed, Perm
+from testing.thrift_types import Complex, hard, HardError, mixed, NestedError, Perm
 from thrift.python.metadata import (
     gen_metadata,
     ThriftExceptionProxy,
@@ -165,6 +165,19 @@ class MetadataTests(unittest.TestCase):
         self.assertEqual(fieldInstance.name, "code")
         self.assertEqual(field.is_optional, False)
         self.assertEqual(field.type.value, ThriftPrimitiveType.THRIFT_I32_TYPE)
+
+    def test_metadata_nested_exception(self) -> None:
+        meta = gen_metadata(NestedError)
+        self.assertEqual("testing.NestedError", meta.name)
+        self.assertFalse(meta.is_union)
+        fields = list(meta.fields)
+        self.assertEqual(1, len(fields))
+
+        field = fields[0]
+        self.assertEqual("val_error", field.name)
+        self.assertIsInstance(field.type, ThriftExceptionProxy)
+        field_type = typing.cast(ThriftExceptionProxy, field.type)
+        self.assertEqual(field_type.name, "testing.HardError")
 
     def test_metadata_services(self) -> None:
         meta = gen_metadata(testing.thrift_metadata)

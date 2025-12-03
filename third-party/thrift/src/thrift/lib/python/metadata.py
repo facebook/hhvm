@@ -142,7 +142,13 @@ class ThriftTypeProxy:
         elif thriftType.type is ThriftType.Type.t_struct:
             val = thriftType.value
             assert isinstance(val, ThriftStructType)
-            return ThriftStructProxy(val.name, thriftMeta)
+            try:
+                return ThriftStructProxy(val.name, thriftMeta)
+            except KeyError as ex:  # val.name not in thriftMeta.structs
+                try:
+                    return ThriftExceptionProxy(val.name, thriftMeta)
+                except Exception:
+                    raise ex
         elif thriftType.type is ThriftType.Type.t_union:
             val = thriftType.value
             assert isinstance(val, ThriftUnionType)

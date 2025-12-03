@@ -15,75 +15,86 @@
   limitations under the License.
 
 }}
-qualified_name = "{{program:name}}.{{service:name}}"
+{{#import "common/metadata" as metadata}}
+{{#import "common/types" as m_types}}
+
+{{#let export partial interface_metadata |program service| captures |m_types metadata|}}
+qualified_name = "{{program.name}}.{{service.name}}"
 
 if qualified_name in metadata_struct.services:
     return metadata_struct
 
 functions = [
-    {{#service:functions}}{{^function:starts_interaction?}}
-    _fbthrift_metadata.ThriftFunction(name="{{function:name}}", return_type={{#partial metadata.return_type function=function:self}}, arguments=[
-        {{#function:args}}
-        _fbthrift_metadata.ThriftField(id={{field:id}}, type={{#partial metadata.thrift_type type=field:self.type}}, name="{{field:name}}", is_optional=False, structured_annotations=[
-            {{#field:self.structured_annotations}}
-              {{#if constant:type.structured?}}
-            {{#constant:value}}{{> metadata/const_struct }}{{/constant:value}},
-              {{/if constant:type.structured?}}
-            {{/field:self.structured_annotations}}
+    {{#each service.functions as |function|}}
+      {{#if (not function.starts_interaction?)}}
+    _fbthrift_metadata.ThriftFunction(name="{{function.name}}", return_type={{#partial metadata.return_type function=function}}, arguments=[
+        {{#each function.params.fields as |field|}}
+        _fbthrift_metadata.ThriftField(id={{field.id}}, type={{#partial metadata.thrift_type type=field.type}}, name="{{field.name}}", is_optional=False, structured_annotations=[
+            {{#each field.structured_annotations as |annotation|}}
+              {{#if annotation.type.structured?}}
+            {{#annotation.value}}{{> metadata/const_struct }}{{/annotation.value}},
+              {{/if annotation.type.structured?}}
+            {{/each}}
         ]),
-        {{/function:args}}
+        {{/each}}
     ], exceptions = [
-        {{#function:exceptions}}
-        _fbthrift_metadata.ThriftField(id={{field:id}}, type={{#partial metadata.thrift_type type=field:self.type}}, name="{{field:name}}", is_optional=False, structured_annotations=[
-            {{#field:self.structured_annotations}}
-              {{#if constant:type.structured?}}
-            {{#constant:value}}{{> metadata/const_struct }}{{/constant:value}},
-              {{/if constant:type.structured?}}
-            {{/field:self.structured_annotations}}
+        {{#each function.exceptions as |field|}}
+        _fbthrift_metadata.ThriftField(id={{field.id}}, type={{#partial metadata.thrift_type type=field.type}}, name="{{field.name}}", is_optional=False, structured_annotations=[
+            {{#each field.structured_annotations as |annotation|}}
+              {{#if annotation.type.structured?}}
+            {{#annotation.value}}{{> metadata/const_struct }}{{/annotation.value}},
+              {{/if annotation.type.structured?}}
+            {{/each}}
         ]),
-        {{/function:exceptions}}
-    ], is_oneway={{(py_bool function:oneway?)}}, structured_annotations=[
-        {{#function:self.structured_annotations}}
-          {{#if constant:type.structured?}}
-        {{#constant:value}}{{> metadata/const_struct }}{{/constant:value}},
-          {{/if constant:type.structured?}}
-        {{/function:self.structured_annotations}}
+        {{/each}}
+    ], is_oneway={{(py_bool function.oneway?)}}, structured_annotations=[
+        {{#each function.structured_annotations as |annotation|}}
+          {{#if annotation.type.structured?}}
+        {{#annotation.value}}{{> metadata/const_struct }}{{/annotation.value}},
+          {{/if annotation.type.structured?}}
+        {{/each}}
     ]),
-    {{/function:starts_interaction?}}{{/service:functions}}
+      {{/if (not function.starts_interaction?)}}
+    {{/each}}
 ]
 
 service_dict = dict(metadata_struct.services)
-service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions, {{#service:extends?}}{{#service:extends}}parent="{{service:program.name}}.{{service:name}}",{{/service:extends}}{{/service:extends?}} structured_annotations=[
-    {{#service:self.structured_annotations}}
-      {{#if constant:type.structured?}}
-    {{#constant:value}}{{> metadata/const_struct }}{{/constant:value}},
-      {{/if constant:type.structured?}}
-    {{/service:self.structured_annotations}}
+  {{#let parent = (if service.interaction? null service.extends)}}
+  {{#let has_parent = (object.notnull? parent)}}
+service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions, {{#if has_parent}}parent="{{parent.program.name}}.{{parent.name}}",{{/if}} structured_annotations=[
+    {{#each service.structured_annotations as |annotation|}}
+      {{#if annotation.type.structured?}}
+    {{#annotation.value}}{{> metadata/const_struct }}{{/annotation.value}},
+      {{/if annotation.type.structured?}}
+    {{/each}}
 ])
 new_struct = metadata_struct(services=service_dict)
-{{#service:extends?}}{{#service:extends}}
-new_struct = {{#service:external_program?}}{{service:program.module_mangle}}__thrift_metadata.{{/service:external_program?}}_fbthrift_gen_metadata_service_{{service:name}}(new_struct)
-{{/service:extends}}{{/service:extends?}}
-{{#service:functions}}{{^function:starts_interaction?}}
+  {{#if has_parent}}
+new_struct = {{#if parent.external_program?}}{{parent.program.module_mangle}}__thrift_metadata.{{/if}}_fbthrift_gen_metadata_service_{{parent.name}}(new_struct)
+  {{/if has_parent}}
+  {{#each service.functions as |function|}}
+    {{#if (not function.starts_interaction?)}}
 
-{{#function:args}}
-{{#field:type}}{{> metadata/recursive_call }} # {{field:name}}{{/field:type}}
-{{/function:args}}
+      {{#each function.params.fields as |field|}}
+{{#field.type}}{{> metadata/recursive_call }}{{/field.type}} # {{field.name}}
+      {{/each}}
 
-{{#function:exceptions}}
-{{#field:type}}{{> metadata/recursive_call }} # {{field:name}}{{/field:type}}
-{{/function:exceptions}}
+      {{#each function.exceptions as |field|}}
+{{#field.type}}{{> metadata/recursive_call }}{{/field.type}} # {{field.name}}
+      {{/each}}
 
-{{#function:return_type}}
-{{^function:stream?}}{{> metadata/recursive_call }}{{/function:stream?}}{{!
-}}{{#function:stream?}}{{#function:stream_elem_type}}{{> metadata/recursive_call }}{{/function:stream_elem_type}} # elem
-{{#function:stream_first_response_type}}{{> metadata/recursive_call }}{{/function:stream_first_response_type}} # response {{/function:stream?}}{{!
-}}{{#function:sink?}}{{#function:sink_elem_type}}{{> metadata/recursive_call }}{{/function:sink_elem_type}} # elem
-{{#function:sink_final_response_type}}{{> metadata/recursive_call }}{{/function:sink_final_response_type}} # final response
-{{#function:sink_first_response_type}}{{> metadata/recursive_call }}{{/function:sink_first_response_type}} # first response {{/function:sink?}}{{!
+      {{#function.return_type}}
+{{#if (not function.sink_or_stream?)}}{{> metadata/recursive_call }}{{/if}}{{!
+}}{{#function.stream?}}{{#function.stream.elem_type}}{{> metadata/recursive_call }}{{/function.stream.elem_type}} # elem
+{{#if function.stream_has_first_response?}}{{> metadata/recursive_call }}{{/if}} # response {{/function.stream?}}{{!
+}}{{#function.sink?}}{{#function.sink.elem_type}}{{> metadata/recursive_call }}{{/function.sink.elem_type}} # elem
+{{#function.sink.final_response_type}}{{> metadata/recursive_call }}{{/function.sink.final_response_type}} # final response
+{{#if function.sink_has_first_response?}}{{> metadata/recursive_call }}{{/if}} # first response {{/function.sink?}}{{!
 }} # return value
-{{/function:return_type}}
+      {{/function.return_type}}
 
-{{/function:starts_interaction?}}{{/service:functions}}
+    {{/if (not function.starts_interaction?)}}
+  {{/each}}
 
 return new_struct
+{{/let partial}}

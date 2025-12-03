@@ -663,7 +663,9 @@ prototype<t_sink>::ptr t_whisker_generator::make_prototype_for_sink(
         get_elems(self.final_response_exceptions()), proto.of<t_field>());
   });
   def.property("final_response_type", [&proto](const t_sink& self) {
-    return resolve_derived_t_type(proto, self.final_response_type().deref());
+    const t_type_ref& response = self.final_response_type();
+    return response.empty() ? w::null
+                            : resolve_derived_t_type(proto, *response);
   });
   return std::move(def).make();
 }

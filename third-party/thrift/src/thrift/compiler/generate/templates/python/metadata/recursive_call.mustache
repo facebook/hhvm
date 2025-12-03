@@ -21,12 +21,16 @@
 Used to turn a thrift type into a gen_metadata call
 
 }}{{!
-}}{{#type:list?}}{{#type:list_elem_type}}{{> metadata/recursive_call }}{{/type:list_elem_type}}{{/type:list?}}{{!
-}}{{#type:set?}}{{#type:set_elem_type}}{{> metadata/recursive_call }}{{/type:set_elem_type}}{{/type:set?}}{{!
-}}{{#type:map?}}{{#type:key_type}}{{> metadata/recursive_call }}{{/type:key_type}} # key
-{{#type:value_type}}{{> metadata/recursive_call }}{{/type:value_type}} # val {{/type:map?}}{{!
-}}{{#type:structured?}}{{#type:structured}}new_struct = {{#type:external_program?}}{{type:metadata_path}}.{{/type:external_program?}}{{!
-  }}_fbthrift_gen_metadata_{{#struct:exception?}}exception{{/struct:exception?}}{{^struct:exception?}}struct{{/struct:exception?}}_{{> structs/unadapted_name}}(new_struct){{/type:structured}}{{/type:structured?}}{{!
-}}{{#type:enum?}}{{#type:enum}}new_struct = {{enum:metadata_path}}.{{!
-  }}_fbthrift_gen_metadata_enum_{{enum:name}}(new_struct){{/type:enum}}{{/type:enum?}}{{!
+}}{{#type:list?}}{{#type:true_type.elem_type}}{{> metadata/recursive_call }}{{/type:true_type.elem_type}}{{/type:list?}}{{!
+}}{{#type:set?}}{{#type:true_type.elem_type}}{{> metadata/recursive_call }}{{/type:true_type.elem_type}}{{/type:set?}}{{!
+}}{{#type:map?}}{{#type:true_type.key_type}}{{> metadata/recursive_call }}{{/type:true_type.key_type}} # key
+{{#type:true_type.val_type}}{{> metadata/recursive_call }}{{/type:true_type.val_type}} # val {{/type:map?}}{{!
+}}{{#type:structured?}}{{#let structured = type:true_type}}{{!
+  }}new_struct = {{#if structured.external_program?}}{{structured.metadata_path}}.{{/if}}{{!
+  }}_fbthrift_gen_metadata_{{#if structured.exception?}}exception{{#else}}struct{{/if}}_{{!
+  }}{{#partial m_types.unadapted_name type=structured}}(new_struct){{!
+}}{{/type:structured?}}{{!
+}}{{#type:enum?}}{{#let enum = type:true_type}}{{!
+}}new_struct = {{enum.metadata_path}}._fbthrift_gen_metadata_enum_{{enum.name}}(new_struct){{!
+}}{{/type:enum?}}{{!
 }}

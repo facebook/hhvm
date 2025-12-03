@@ -1289,7 +1289,7 @@ void t_mstch_python_generator::generate_types() {
 }
 
 void t_mstch_python_generator::generate_metadata() {
-  generate_mstch_file(
+  generate_whisker_file(
       "thrift_metadata.py", types_file_kind::source_file, type_kind::immutable);
 }
 

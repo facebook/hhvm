@@ -588,10 +588,10 @@ struct BinaryWriter {
     if (strict_write) {
       int32_t version = VERSION_1 | msgtype;
       writeI32(version);
-      writeString(method_name.data(), method_name.size());
+      writeString(method_name);
       writeI32(seqid);
     } else {
-      writeString(method_name.data(), method_name.size());
+      writeString(method_name);
       writeI8(msgtype);
       writeI32(seqid);
     }
@@ -624,10 +624,11 @@ struct BinaryWriter {
     transport.push(reinterpret_cast<const uint8_t*>(&i), 2);
   }
 
-  void writeString(const char* str, size_t len) {
-    uint32_t i = htonl(len);
-    transport.push(reinterpret_cast<const uint8_t*>(&i), 4);
-    transport.write(str, len);
+  void writeString(const String& s) {
+    auto slice = s.slice();
+    uint32_t len = htonl(slice.size());
+    transport.push(reinterpret_cast<const uint8_t*>(&len), 4);
+    transport.push((uint8_t *) slice.data(), slice.size());
   }
 
   void binary_serialize_hashtable_key(
@@ -706,7 +707,7 @@ struct BinaryWriter {
               INVALID_DATA);
         }
         String sv = value.toString();
-        writeString(sv.data(), sv.size());
+        writeString(sv);
       }
         return;
       case T_MAP: {
@@ -922,5 +923,66 @@ Variant HHVM_FUNCTION(thrift_protocol_read_binary_struct,
   return reader.readStruct(obj_typename);
 }
 
+String HHVM_FUNCTION(thrift_protocol_write_binary_struct_to_string,
+                     const Object& request_struct) {
+  
+  CoeffectsAutoGuard _;
+  // Suppress class-to-string conversion warnings that occur during
+  // serialization and deserialization.
+  SuppressClassConversionNotice suppressor;
+
+  VMRegAnchor _2;
+  String ret = String(1024, ReserveString);
+  auto iobuf = folly::IOBuf::wrapBufferAsValue(ret.mutableData(), ret.capacity());
+  iobuf.clear();
+  folly::io::Appender appender(&iobuf, 1024);
+
+  BinaryWriter<folly::io::Appender> writer(appender);
+  try {
+    writer.writeStruct(request_struct);
+
+    if (iobuf.isChained()) {
+      return ioBufToString(iobuf);
+    }
+    ret.setSize(iobuf.length());
+    return ret;
+  } catch (const Object&) {
+    throw;
+  } catch (const std::exception& e) {
+    thrift_error(e.what(), ERR_UNKNOWN);
+  } catch (...) {
+    thrift_error("Unknown error", ERR_UNKNOWN);
+  }
+}
+
+Object HHVM_FUNCTION(thrift_protocol_read_binary_struct_from_string,
+                     const String& serialized,
+                     const String& obj_typename,
+                     int64_t options) {
+  CoeffectsAutoGuard _;
+  // Suppress class-to-string conversion warnings that occur during
+  // serialization and deserialization.
+  SuppressClassConversionNotice suppressor;
+
+  VMRegAnchor _2;
+  auto iobuf = folly::IOBuf::wrapBufferAsValue(
+    serialized.data(),
+    serialized.size());
+
+  try {
+    BinaryReader<folly::io::Cursor> reader(
+      folly::io::Cursor(&iobuf),
+      options);
+    return reader.readStruct(obj_typename);
+  } catch (const Object&) {
+    throw;
+  } catch (const std::out_of_range& e) {
+    thrift_transport_error(e.what(), TTransportError::END_OF_FILE);
+  } catch (const std::exception& e) {
+    thrift_error(e.what(), ERR_UNKNOWN);
+  } catch (...) {
+    thrift_error("Unknown error", ERR_UNKNOWN);
+  }
+}
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -17,8 +17,7 @@
 #include <thrift/lib/cpp2/dynamic/detail/ConcreteMap.h>
 #include <thrift/lib/cpp2/dynamic/detail/ConcreteTypes.h>
 
-namespace apache::thrift::dynamic {
-namespace detail {
+namespace apache::thrift::dynamic::detail {
 
 #define FBTHRIFT_INSTANTIATE_CONCRETE_MAP_FOR_VALUE(ValueType) \
   template class ConcreteMap<int16_t, ValueType>;
@@ -27,5 +26,4 @@ FBTHRIFT_DATUM_CONCRETE_TYPES(FBTHRIFT_INSTANTIATE_CONCRETE_MAP_FOR_VALUE)
 
 #undef FBTHRIFT_INSTANTIATE_CONCRETE_MAP_FOR_VALUE
 
-} // namespace detail
-} // namespace apache::thrift::dynamic
+} // namespace apache::thrift::dynamic::detail

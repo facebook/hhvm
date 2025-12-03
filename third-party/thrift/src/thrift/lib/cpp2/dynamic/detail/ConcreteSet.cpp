@@ -17,8 +17,7 @@
 #include <thrift/lib/cpp2/dynamic/detail/ConcreteSet.h>
 #include <thrift/lib/cpp2/dynamic/detail/ConcreteTypes.h>
 
-namespace apache::thrift::dynamic {
-namespace detail {
+namespace apache::thrift::dynamic::detail {
 
 // Instantiate ConcreteSet for each type
 #define FBTHRIFT_INSTANTIATE_CONCRETE_SET(T) template class ConcreteSet<T>;
@@ -27,5 +26,4 @@ FBTHRIFT_DATUM_CONCRETE_TYPES(FBTHRIFT_INSTANTIATE_CONCRETE_SET)
 
 #undef FBTHRIFT_INSTANTIATE_CONCRETE_SET
 
-} // namespace detail
-} // namespace apache::thrift::dynamic
+} // namespace apache::thrift::dynamic::detail

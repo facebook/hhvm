@@ -569,9 +569,14 @@ prototype<t_program>::ptr t_whisker_generator::make_prototype_for_program(
         return self.get_namespace(*ctx.named_argument<string>("language"));
       });
 
-  def.property(
-      "structured_definitions",
-      mem_fn(&t_program::structured_definitions, proto.of<t_structured>()));
+  def.property("structured_definitions", [&](const t_program& self) {
+    array::raw result;
+    result.reserve(self.structured_definitions().size());
+    for (const t_structured* structured : self.structured_definitions()) {
+      result.emplace_back(resolve_derived_t_type(proto, *structured));
+    }
+    return array::of(std::move(result));
+  });
   def.property("services", mem_fn(&t_program::services, proto.of<t_service>()));
   def.property(
       "interactions",

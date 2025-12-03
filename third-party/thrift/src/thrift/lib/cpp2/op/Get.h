@@ -250,7 +250,10 @@ using ord_result_t =
     decltype(std::declval<F>()(type::detail::pos_to_ordinal<I>{}));
 
 template <size_t... I, typename F>
-ord_result_t<F> find_by_ordinal_impl(F&& f, std::index_sequence<I...>);
+constexpr ord_result_t<F> find_by_ordinal_impl(
+    F&& f, std::index_sequence<I...>);
+template <typename F>
+constexpr bool find_by_ordinal_impl(F&&, std::index_sequence<>);
 
 struct GetValueOrNull {
   template <typename T>
@@ -334,20 +337,13 @@ constexpr void for_each_ordinal(F&& f) {
       std::forward<F>(f), std::make_integer_sequence<size_t, num_fields<T>>{});
 }
 
-/// Calls the given function with with ordinal<1> to ordinal<N>, returing the
-/// first 'true' result produced.
-template <
-    typename T,
-    typename F,
-    std::enable_if_t<num_fields<T> != 0>* = nullptr>
-decltype(auto) find_by_ordinal(F&& f) {
+/// Calls the given function with with ordinal<1> to ordinal<N>, returning the
+/// first truthy result produced.
+/// Returns false when called on empty structs.
+template <typename T, typename F>
+constexpr decltype(auto) find_by_ordinal(F&& f) {
   return detail::find_by_ordinal_impl(
       std::forward<F>(f), std::make_integer_sequence<size_t, num_fields<T>>{});
-}
-
-template <typename T, typename F>
-std::enable_if_t<num_fields<T> == 0, bool> find_by_ordinal(F&&) {
-  return false;
 }
 
 template <typename T, typename Id>
@@ -477,7 +473,8 @@ constexpr void for_each_ordinal_impl(F&& f, std::index_sequence<I...>) {
 }
 
 template <size_t... I, typename F>
-ord_result_t<F> find_by_ordinal_impl(F&& f, std::index_sequence<I...>) {
+constexpr ord_result_t<F> find_by_ordinal_impl(
+    F&& f, std::index_sequence<I...>) {
   auto result = ord_result_t<F>();
   // TODO(afuller): Use a short circuting c++17 folding expression.
   for_each_ordinal_impl(
@@ -489,6 +486,10 @@ ord_result_t<F> find_by_ordinal_impl(F&& f, std::index_sequence<I...>) {
       },
       std::index_sequence<I...>{});
   return result;
+}
+template <typename F>
+constexpr bool find_by_ordinal_impl(F&&, std::index_sequence<>) {
+  return false;
 }
 
 template <typename Id, typename T>

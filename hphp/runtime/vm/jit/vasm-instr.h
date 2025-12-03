@@ -80,7 +80,7 @@ struct Vunit;
   _(loadzbl, loadzblpri, loadzblpi, Vreg32, 1, s) \
   _(loadzbq, loadzbqpri, loadzbqpi, Vreg64, 1, s) \
   _(loadzwq, loadzwqpri, loadzwqpi, Vreg64, 2, s) \
-  _(loadzlq, loadzlpri, loadzlpi, Vreg64, 4, s) \
+  _(loadzlq, loadzlqpri, loadzlqpi, Vreg64, 4, s) \
   _(loadsbl, loadsblpri, loadsblpi, Vreg32, 1, s) \
   _(loadsbq, loadsbqpri, loadsbqpi, Vreg64, 1, s) \
   _(loadtqb, loadtqbpri, loadtqbpi, Vreg8, 1, s) \

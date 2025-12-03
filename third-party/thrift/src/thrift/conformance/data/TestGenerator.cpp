@@ -53,9 +53,9 @@ Test createRoundTripTest(
 
     auto addTestCase = [&](auto data, auto msg) {
       roundTrip.request()->value() = registry.store(data, protocol);
-      auto& testCase = test.testCases()->emplace_back();
-      testCase.name() = msg;
-      testCase.test()->roundTrip() = roundTrip;
+      auto& currentTestCase = test.testCases()->emplace_back();
+      currentTestCase.name() = msg;
+      currentTestCase.test()->roundTrip() = roundTrip;
     };
 
     auto addStruct = [&](auto modSet, auto msg) {

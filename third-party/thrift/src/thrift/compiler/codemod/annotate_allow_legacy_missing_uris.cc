@@ -15,6 +15,7 @@
  */
 
 #include <iostream>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <fmt/core.h>
@@ -162,17 +163,25 @@ class AnnotateAllowLegacyMissingUris final {
     } else {
       // No explicit package - create empty package with annotation
 
-      const node_list_view<const t_named>& definitions = program_.definitions();
-      CHECK(!definitions.empty())
-          << "Invariant failure: program cannot require "
-          << "@thrift.AllowLegacyMissingUris annotation without any "
-          << "definition!";
+      // New package should be before any namespace, or before the first
+      // definition if there are no namespace directives.
+      const uint_least32_t new_package_offset = [&]() -> uint_least32_t {
+        if (std::optional<size_t> maybe_first_namespace_offset =
+                file_manager_.get_first_namespace_offset()) {
+          return maybe_first_namespace_offset.value();
+        }
+        const node_list_view<const t_named>& definitions =
+            program_.definitions();
+        CHECK(!definitions.empty())
+            << "Invariant failure: program cannot require "
+            << "@thrift.AllowLegacyMissingUris annotation without any "
+            << "definition!";
 
-      const uint_least32_t definitions_offset =
-          definitions.front().src_range().begin.offset();
+        return definitions.front().src_range().begin.offset();
+      }();
       file_manager_.add(
-          {.begin_pos = definitions_offset,
-           .end_pos = definitions_offset,
+          {.begin_pos = new_package_offset,
+           .end_pos = new_package_offset,
            .new_content = fmt::format("{}\npackage;\n\n", kAnnotation)});
     }
     return true;

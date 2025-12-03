@@ -88,6 +88,67 @@ class AnnotateAllowLegacyMissingUrisTest(unittest.TestCase):
             ),
         )
 
+    def test_adds_package_annotation_for_missing_uris_with_namespace(self):
+        """
+        Test that package-level annotation is added when types are missing URIs,
+        above any existing namespace.
+        """
+        write_file(
+            "foo.thrift",
+            textwrap.dedent(
+                """\
+                namespace py3 foo.bar
+
+                struct TestStruct {
+                  1: i32 a;
+                  2: i32 b;
+                }
+
+                enum TestEnum {
+                  VALUE1 = 1,
+                  VALUE2 = 2,
+                }
+
+                union TestUnion {
+                  1: i32 x;
+                  2: string y;
+                }
+                """
+            ),
+        )
+
+        binary = pkg_resources.resource_filename(__name__, "codemod")
+        run_binary(binary, "foo.thrift")
+
+        self.assertEqual(
+            read_file("foo.thrift"),
+            textwrap.dedent(
+                """\
+                include "thrift/annotation/thrift.thrift"
+
+                @thrift.AllowLegacyMissingUris
+                package;
+
+                namespace py3 foo.bar
+
+                struct TestStruct {
+                  1: i32 a;
+                  2: i32 b;
+                }
+
+                enum TestEnum {
+                  VALUE1 = 1,
+                  VALUE2 = 2,
+                }
+
+                union TestUnion {
+                  1: i32 x;
+                  2: string y;
+                }
+                """
+            ),
+        )
+
     def test_no_change_when_package_has_uri(self):
         """Test that no annotation is added when package already provides URIs."""
         write_file(

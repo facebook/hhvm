@@ -199,6 +199,12 @@ class file_manager {
    */
   size_t get_namespace_offset() const;
 
+  /**
+   * Returns the offset (in old_content_) of the first character of the first
+   * `namespace` directive - or nullopt if no such directive is found.
+   */
+  std::optional<size_t> get_first_namespace_offset() const;
+
   void remove_namespace(std::string language);
 
  private:
@@ -207,12 +213,6 @@ class file_manager {
   // to prevent overlap.
   void expand_over_whitespaces(
       size_t& begin_offset, size_t& end_offset, bool one_sided) const noexcept;
-
-  /**
-   * Returns the offset (in old_content_) of the first character of the first
-   * `namespace` directive - or nullopt if no such directive is found.
-   */
-  std::optional<size_t> get_first_namespace_offset() const;
 
   source_manager& source_mgr_;
   const t_program* program_;

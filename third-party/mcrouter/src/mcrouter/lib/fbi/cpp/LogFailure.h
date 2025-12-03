@@ -8,7 +8,6 @@
 #pragma once
 
 #include <functional>
-#include <map>
 #include <string>
 #include <utility>
 
@@ -70,7 +69,8 @@ typedef std::function<void(
     folly::StringPiece service,
     folly::StringPiece category,
     folly::StringPiece msg,
-    const std::map<std::string, std::string>& contexts)>
+    const std::map<std::string, std::string>& contexts,
+    bool skipRateLimit)>
     HandlerFunc;
 
 namespace handlers {
@@ -88,13 +88,17 @@ namespace detail {
 /**
  * Log failure according to action for given category (see @setCategoryAction).
  * If no special action is provided, default constructed one will be used.
+ *
+ * @param skipRateLimit If true, bypasses rate limiting in handlers (e.g., for
+ * Luna logs)
  */
 void log(
     folly::StringPiece file,
     int line,
     folly::StringPiece service,
     folly::StringPiece category,
-    folly::StringPiece msg);
+    folly::StringPiece msg,
+    bool skipRateLimit = false);
 
 /**
  * log overload to format messages automatically.
@@ -112,6 +116,26 @@ void log(
       service,
       category,
       folly::format(msgFormat, std::forward<Args>(args)...).str());
+}
+
+/**
+ * log overload with skipRateLimit flag to format messages automatically.
+ */
+template <typename... Args>
+void log(
+    folly::StringPiece file,
+    int line,
+    folly::StringPiece service,
+    folly::StringPiece category,
+    folly::StringPiece msgFormat,
+    bool skipRateLimit,
+    Args&&... args) {
+  log(file,
+      line,
+      service,
+      category,
+      folly::format(msgFormat, std::forward<Args>(args)...).str(),
+      skipRateLimit);
 }
 
 } // namespace detail

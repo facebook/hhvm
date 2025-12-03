@@ -287,7 +287,8 @@ void testCerts(
            folly::StringPiece,
            folly::StringPiece,
            folly::StringPiece msg,
-           const std::map<std::string, std::string>&) {
+           const std::map<std::string, std::string>&,
+           bool) {
          if (msg.contains("SSLError")) {
            loggedFailure = true;
          }

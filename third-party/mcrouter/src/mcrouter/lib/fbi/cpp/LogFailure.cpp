@@ -68,7 +68,8 @@ void vlogErrorImpl(
     folly::StringPiece service,
     folly::StringPiece category,
     folly::StringPiece msg,
-    const std::map<std::string, std::string>& contexts) {
+    const std::map<std::string, std::string>& contexts,
+    bool /* skipRateLimit */) {
   if (VLOG_IS_ON(1)) {
     google::LogMessage(
         __FILE__, google::LogMessage::kNoLogPrefix, google::GLOG_INFO)
@@ -83,7 +84,8 @@ void logToStdErrorImpl(
     folly::StringPiece service,
     folly::StringPiece category,
     folly::StringPiece msg,
-    const std::map<std::string, std::string>& contexts) {
+    const std::map<std::string, std::string>& contexts,
+    bool /* skipRateLimit */) {
   google::LogMessage(
       __FILE__, google::LogMessage::kNoLogPrefix, google::GLOG_ERROR)
           .stream()
@@ -97,7 +99,8 @@ void throwErrorImpl(
     folly::StringPiece service,
     folly::StringPiece category,
     folly::StringPiece msg,
-    const std::map<std::string, std::string>& contexts) {
+    const std::map<std::string, std::string>& contexts,
+    bool /* skipRateLimit */) {
   throw Error(createMessage(file, line, service, category, msg, contexts));
 }
 
@@ -203,7 +206,8 @@ void log(
     int line,
     folly::StringPiece service,
     folly::StringPiece category,
-    folly::StringPiece msg) {
+    folly::StringPiece msg,
+    bool skipRateLimit) {
   std::map<std::string, std::string> contexts;
   std::vector<std::pair<std::string, HandlerFunc>> handlers;
   if (auto container = containerSingleton.try_get()) {
@@ -213,7 +217,7 @@ void log(
     });
   }
   for (auto& handler : handlers) {
-    handler.second(file, line, service, category, msg, contexts);
+    handler.second(file, line, service, category, msg, contexts, skipRateLimit);
   }
 }
 

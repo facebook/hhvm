@@ -524,21 +524,19 @@ class StructuredCursorReader : detail::BaseCursorReader<ProtocolReader> {
 
   template <typename Ident, typename F, typename U>
   bool_if_optional<Ident> readField(F&& f, U& val) {
-    bool ret = [&] {
-      if (!beforeReadField<Ident>()) {
-        return false;
-      }
+    bool read = beforeReadField<Ident>();
+
+    if (read) {
       f();
       afterReadField();
-      return true;
-    }();
-    if constexpr (type::is_optional_or_union_field_v<T, Ident>) {
-      return ret;
-    } else if (ret) {
-    } else if (type::is_terse_field_v<T, Ident>) {
+    } else if constexpr (type::is_terse_field_v<T, Ident>) {
       val = copy(*op::get<Ident>(op::getIntrinsicDefault<T>()));
-    } else {
+    } else if constexpr (!type::is_optional_or_union_field_v<T, Ident>) {
       val = copy(*op::get<Ident>(op::getDefault<T>()));
+    }
+
+    if constexpr (type::is_optional_or_union_field_v<T, Ident>) {
+      return read;
     }
   }
 

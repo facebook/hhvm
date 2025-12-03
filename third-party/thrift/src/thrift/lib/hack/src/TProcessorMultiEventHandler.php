@@ -252,4 +252,134 @@ final class TProcessorMultiEventHandler extends TProcessorEventHandler {
       );
     }
   }
+
+  /**
+   * Invoked only for streaming applications.
+   * Invoked once the first response is sent and the stream has begun, but prior to generating the first data chunks.
+   */
+  <<__Override>>
+  public function postStreamStart(
+    mixed $handler_context,
+    string $fn_name,
+  ): void {
+    invariant($handler_context is Map<_, _>, 'Context is not a Map');
+    foreach ($this->handlers as $key => $handler) {
+      $handler->postStreamStart(
+        $handler_context->at(HH\FIXME\UNSAFE_CAST<
+          string,
+          HH_FIXME\UNKNOWN_TYPE_FOR_CAST,
+        >(
+          $key,
+          'FIXME[4110]: Type error revealed by type-safe instanceof feature. See https://fburl.com/instanceof',
+        )),
+        $fn_name,
+      );
+    }
+  }
+
+  /**
+   * Invoked only for streaming applications.
+   * Called after the async generator creates the next chunk.
+   */
+  <<__Override>>
+  public function postStreamPayloadGenerate(
+    mixed $handler_context,
+    string $fn_name,
+    mixed $result,
+  ): void {
+    invariant($handler_context is Map<_, _>, 'Context is not a Map');
+    foreach ($this->handlers as $key => $handler) {
+      $handler->postStreamPayloadGenerate(
+        $handler_context->at(HH\FIXME\UNSAFE_CAST<
+          string,
+          HH_FIXME\UNKNOWN_TYPE_FOR_CAST,
+        >(
+          $key,
+          'FIXME[4110]: Type error revealed by type-safe instanceof feature. See https://fburl.com/instanceof',
+        )),
+        $fn_name,
+        $result,
+      );
+    }
+  }
+
+  /**
+   * Invoked only for streaming applications.
+   * Called after the next chunk is written to the transport.
+   */
+  <<__Override>>
+  public function postStreamPayloadWrite(
+    mixed $handler_context,
+    string $fn_name,
+    mixed $payload,
+  )[leak_safe_local]: void {
+    invariant($handler_context is Map<_, _>, 'Context is not a Map');
+    foreach ($this->handlers as $key => $handler) {
+      $handler->postStreamPayloadWrite(
+        $handler_context->at(HH\FIXME\UNSAFE_CAST<
+          string,
+          HH_FIXME\UNKNOWN_TYPE_FOR_CAST,
+        >(
+          $key,
+          'FIXME[4110]: Type error revealed by type-safe instanceof feature. See https://fburl.com/instanceof',
+        )),
+        $fn_name,
+        $payload,
+      );
+    }
+  }
+
+  /**
+   * Invoked only for streaming applications.
+   * Called if (and only if) the async generator threw an unexpected exception.
+   * Note: This method is NOT called if the handler threw an
+   * exception that is declared in the thrift service specification
+   */
+  <<__Override>>
+  public function postStreamPayloadError(
+    mixed $handler_context,
+    string $fn_name,
+    Exception $exception,
+  ): void {
+    invariant($handler_context is Map<_, _>, 'Context is not a Map');
+    foreach ($this->handlers as $key => $handler) {
+      $handler->postStreamPayloadError(
+        $handler_context->at(HH\FIXME\UNSAFE_CAST<
+          string,
+          HH_FIXME\UNKNOWN_TYPE_FOR_CAST,
+        >(
+          $key,
+          'FIXME[4110]: Type error revealed by type-safe instanceof feature. See https://fburl.com/instanceof',
+        )),
+        $fn_name,
+        $exception,
+      );
+    }
+  }
+
+  /**
+   * Invoked only for streaming applications.
+   * Called if the async generator threw an expected $exception.
+   */
+  <<__Override>>
+  public function postStreamPayloadException(
+    mixed $handler_context,
+    string $fn_name,
+    Exception $exception,
+  ): void {
+    invariant($handler_context is Map<_, _>, 'Context is not a Map');
+    foreach ($this->handlers as $key => $handler) {
+      $handler->postStreamPayloadException(
+        $handler_context->at(HH\FIXME\UNSAFE_CAST<
+          string,
+          HH_FIXME\UNKNOWN_TYPE_FOR_CAST,
+        >(
+          $key,
+          'FIXME[4110]: Type error revealed by type-safe instanceof feature. See https://fburl.com/instanceof',
+        )),
+        $fn_name,
+        $exception,
+      );
+    }
+  }
 }

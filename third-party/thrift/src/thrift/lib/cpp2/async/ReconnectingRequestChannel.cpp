@@ -21,6 +21,7 @@
 #include <utility>
 
 #include <folly/ExceptionWrapper.h>
+#include <folly/io/async/Request.h>
 
 namespace apache::thrift {
 
@@ -145,6 +146,7 @@ void ReconnectingRequestChannel::sendRequestResponse(
       }
       requestQueue_.emplace_back(
           [this,
+           rctx = folly::RequestContext::saveContext(),
            options = options,
            methodMetadata = std::move(methodMetadata),
            request = std::move(request),
@@ -152,6 +154,7 @@ void ReconnectingRequestChannel::sendRequestResponse(
            cob = std::move(cob),
            frameworkMetadata =
                std::move(frameworkMetadata)](bool failRequest) mutable {
+            const folly::RequestContextScopeGuard guard{std::move(rctx)};
             if (failRequest) {
               cob.release()->onResponseError(
                   requestQueueNonEmptyAtDestructionError());
@@ -200,6 +203,7 @@ void ReconnectingRequestChannel::sendRequestNoResponse(
       }
       requestQueue_.emplace_back(
           [this,
+           rctx = folly::RequestContext::saveContext(),
            options = options,
            methodMetadata = std::move(methodMetadata),
            request = std::move(request),
@@ -207,6 +211,7 @@ void ReconnectingRequestChannel::sendRequestNoResponse(
            cob = std::move(cob),
            frameworkMetadata =
                std::move(frameworkMetadata)](bool failRequest) mutable {
+            const folly::RequestContextScopeGuard guard{std::move(rctx)};
             if (failRequest) {
               cob.release()->onResponseError(
                   requestQueueNonEmptyAtDestructionError());
@@ -253,6 +258,7 @@ void ReconnectingRequestChannel::sendRequestStream(
         return;
       }
       requestQueue_.emplace_back([this,
+                                  rctx = folly::RequestContext::saveContext(),
                                   options = options,
                                   methodMetadata = std::move(methodMetadata),
                                   request = std::move(request),
@@ -261,6 +267,7 @@ void ReconnectingRequestChannel::sendRequestStream(
                                   frameworkMetadata =
                                       std::move(frameworkMetadata)](
                                      bool failRequest) mutable {
+        const folly::RequestContextScopeGuard guard{std::move(rctx)};
         if (failRequest) {
           cob->onFirstResponseError(requestQueueNonEmptyAtDestructionError());
           return;
@@ -305,6 +312,7 @@ void ReconnectingRequestChannel::sendRequestSink(
         return;
       }
       requestQueue_.emplace_back([this,
+                                  rctx = folly::RequestContext::saveContext(),
                                   options = options,
                                   methodMetadata = std::move(methodMetadata),
                                   request = std::move(request),
@@ -313,6 +321,7 @@ void ReconnectingRequestChannel::sendRequestSink(
                                   frameworkMetadata =
                                       std::move(frameworkMetadata)](
                                      bool failRequest) mutable {
+        const folly::RequestContextScopeGuard guard{std::move(rctx)};
         if (failRequest) {
           cob->onFirstResponseError(requestQueueNonEmptyAtDestructionError());
           return;

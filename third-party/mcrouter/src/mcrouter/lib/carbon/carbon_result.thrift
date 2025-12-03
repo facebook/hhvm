@@ -45,7 +45,13 @@ enum Result {
   DEADLINE_EXCEEDED = 32,
   PERMISSION_DENIED = 33,
   HOT_KEY = 34,
+  // Indicates that the system is out of a resource that is
+  // being overused, resulting in the request being shed. Currently used for
+  // per-tenant network egress overload protection. This result does not fail over
+  // and is treated as a non-recoverable error. The specific reason
+  // for overload is communicated via the message field in the response.
+  OVERLOADED = 35,
   // Result::NUM_RESULTS indicates the size of the results array and should
   // always be updated to the end of the list
-  NUM_RESULTS = 35,
+  NUM_RESULTS = 36,
 }

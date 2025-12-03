@@ -43,6 +43,7 @@ inline int resultSeverity(carbon::Result result) {
     case carbon::Result::BAD_VALUE:
     case carbon::Result::ABORTED:
     case carbon::Result::DEADLINE_EXCEEDED:
+    case carbon::Result::OVERLOADED:
       return 6;
 
     case carbon::Result::REMOTE_ERROR:

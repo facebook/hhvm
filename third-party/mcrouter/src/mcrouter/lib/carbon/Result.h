@@ -85,6 +85,8 @@ inline const char* resultToString(const Result result) {
       return "mc_res_permission_denied";
     case Result::HOT_KEY:
       return "mc_res_hot_key";
+    case Result::OVERLOADED:
+      return "mc_res_overloaded";
     case Result::NUM_RESULTS:
       return "mc_res_unknown";
     default:

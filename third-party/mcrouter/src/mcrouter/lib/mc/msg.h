@@ -170,6 +170,7 @@ typedef enum mc_res_e {
   mc_res_permission_denied,
   /* server reports the key being requested as hot */
   mc_res_hot_key,
+  mc_res_overloaded,
   mc_nres, // placeholder
 } mc_res_t;
 
@@ -243,6 +244,8 @@ static inline const char* mc_res_to_string(const mc_res_t result) {
       return "mc_res_permission_denied";
     case mc_res_hot_key:
       return "mc_res_hot_key";
+    case mc_res_overloaded:
+      return "mc_res_overloaded";
     /* in progress -- */
     case mc_res_waiting:
       return "mc_res_waiting";

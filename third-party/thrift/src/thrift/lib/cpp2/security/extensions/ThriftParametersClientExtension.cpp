@@ -30,8 +30,7 @@ ThriftParametersClientExtension::getClientHelloExtensions() const {
   params.compressionAlgos() = compressionAlgorithms;
   params.useStopTLS() = context_->getUseStopTLS();
   params.useStopTLSV2() = context_->getUseStopTLSV2(); // Added for StopTLS V2
-  params.useStopTLSForTTLSTunnel() =
-      context_->getUseStopTLSForTTLSTunnel(); // Added for StopTLS V2
+  params.useStopTLSForTTLSTunnel() = context_->getUseStopTLSForTTLSTunnel();
   ThriftParametersExt paramsExt;
   paramsExt.params = params;
   clientExtensions.push_back(encodeThriftExtension(paramsExt));

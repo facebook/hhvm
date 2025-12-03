@@ -193,17 +193,21 @@ folly::coro::Task<void> ThriftStressTestClient::timedExecute(Fn&& fn) {
 }
 
 folly::coro::Task<void> ThriftStressTestClient::co_alignedRequestResponseEb(
-    RpcOptions& rpcOptions, AlignedResponse& resp, const AlignedRequest& req) {
+    RpcOptions& rpcOptions,
+    AlignedResponse& response,
+    const AlignedRequest& req) {
   co_await timedExecute([&]() -> folly::coro::Task<void> {
-    resp = co_await client_->co_alignedRequestResponseEb(rpcOptions, req);
+    response = co_await client_->co_alignedRequestResponseEb(rpcOptions, req);
   });
 }
 
 folly::coro::Task<void> ThriftStressTestClient::co_alignedRequestResponseTm(
-    RpcOptions& rpcOptions, AlignedResponse& resp, const AlignedRequest& req) {
+    RpcOptions& rpcOptions,
+    AlignedResponse& response,
+    const AlignedRequest& req) {
   AlignedResponse ret;
   co_await timedExecute([&]() -> folly::coro::Task<void> {
-    resp = co_await client_->co_alignedRequestResponseTm(rpcOptions, req);
+    response = co_await client_->co_alignedRequestResponseTm(rpcOptions, req);
   });
 }
 

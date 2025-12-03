@@ -127,6 +127,7 @@ class t_hack_generator : public t_concat_generator {
     mangled_services_ = option_is_set(options, "mangledsvcs", false);
     typedef_ = option_is_specified(options, "typedef");
     server_stream_ = option_is_specified(options, "server_stream");
+    skip_constants_ = option_is_specified(options, "skip_constants");
 
     union_logger_rollout_ =
         option_is_specified(options, "__union_logger_rollout");
@@ -458,6 +459,7 @@ class t_hack_generator : public t_concat_generator {
       std::ofstream& out, const t_structured* tstruct, bool asFunction);
   bool skip_codegen(const t_field* field);
   bool skip_codegen(const t_function* function);
+  bool skip_constants_codegen();
 
   bool is_valid_hack_type(const t_type* type, const t_type_ref& top_level_type);
   bool is_valid_hack_type(const t_type_ref& type) {
@@ -1243,6 +1245,11 @@ class t_hack_generator : public t_concat_generator {
 
   bool has_nested_ns;
 
+  /**
+   * True to skip generating code for constants
+   */
+  bool skip_constants_;
+
   std::map<std::string, ThriftShapishStructType> struct_async_type_;
 
   /**
@@ -1537,6 +1544,10 @@ void t_hack_generator::generate_instance_key(std::ofstream& out) {
   indent(out) << "}\n\n";
 }
 
+bool t_hack_generator::skip_constants_codegen() {
+  return skip_constants_ || program_->consts().empty();
+}
+
 /**
  * Prepares for file generation by opening up the necessary file output
  * streams.
@@ -1550,7 +1561,7 @@ void t_hack_generator::init_generator() {
       f_types_, get_out_dir() + get_program()->name() + "_types.php");
 
   // Print header.
-  if (!program_->consts().empty()) {
+  if (!skip_constants_codegen()) {
     init_codegen_file(
         f_consts_, get_out_dir() + get_program()->name() + "_constants.php");
     constants_values_.clear();
@@ -1609,7 +1620,7 @@ void t_hack_generator::close_generator() {
   // Close types file
   f_types_.close();
 
-  if (!program_->consts().empty()) {
+  if (!skip_constants_codegen()) {
     // write out the values array
     indent_up();
     f_consts_ << "\n";
@@ -1823,6 +1834,10 @@ void t_hack_generator::generate_enum(const t_enum* tenum) {
  * Generate a constant value
  */
 void t_hack_generator::generate_const(const t_const* tconst) {
+  if (skip_constants_) {
+    return;
+  }
+
   const t_type* type = tconst->type();
   const std::string& name = tconst->name();
   const t_const_value* value = tconst->value();

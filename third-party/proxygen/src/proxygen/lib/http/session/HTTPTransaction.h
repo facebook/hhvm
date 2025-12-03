@@ -1830,6 +1830,13 @@ class HTTPTransaction
     return upgraded_ || wtConnectStream_ || isExTransaction();
   }
 
+  // Whether we have bytes event observers
+  bool hasBytesEventObservers();
+
+  // Emit bytes event to all observers
+  void emitBytesEvent(
+      const HTTPTransactionObserverInterface::TxnBytesEvent& event);
+
   class RateLimitCallback : public folly::HHWheelTimer::Callback {
    public:
     explicit RateLimitCallback(HTTPTransaction& txn) : txn_(txn) {

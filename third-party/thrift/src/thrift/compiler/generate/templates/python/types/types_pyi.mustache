@@ -54,7 +54,7 @@ import {{included_module_path}}.{{#partial m_types.import_path}} as {{included_m
 {{#each program:adapter_type_hint_modules as |module_path|}}
 import {{module_path}}
 {{/each}}
-{{> types/import_enums}}
+{{#partial m_common.import_enums program=program:self}}
 {{#program:structs}}
 
 

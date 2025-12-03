@@ -134,3 +134,48 @@ An annotation without an explicitly provided value is implicitly assigned the de
 {{#pragma ignore-newlines}}
 _fbthrift_
 {{/let partial}}
+
+{{! Import enums into the modules that reference enums. }}
+{{#let export partial import_enums |program| captures |private_alias_prefix|}}
+{{#if (or program.enums? program.has_enum_typedefs?)}}
+
+from {{program.module_path}}.thrift_enums import (
+  {{#each program.enums as |enum|}}
+    {{#if python.is_source_file?}}
+    {{enum.name}},
+    {{/if python.is_source_file?}}
+    {{enum.name}} as {{#partial private_alias_prefix}}{{enum.name}},
+  {{/each}}
+{{! Import enum typedefs from thrift_enums }}
+  {{#each program.typedefs as |typedef|}}
+    {{#if typedef.enum?}}
+      {{#if python.is_source_file?}}
+    {{typedef.name}},
+      {{/if python.is_source_file?}}
+    {{typedef.name}} as {{#partial private_alias_prefix}}{{typedef.name}},
+    {{/if typedef.enum?}}
+{{/each}}
+)
+{{/if (or program.enums? program.has_enum_typedefs?)}}{{!
+    with
+
+    from module.path.thrift_enums import EnumName
+
+    type-check at the point of use of EnumName fails with
+
+    Undefined import [21]: Could not find a name `EnumName` defined in module `module.path.thrift_types`
+
+    With the assignment below, teach the type-checker what EnumName is.
+}}
+{{#if python.is_type_stub?}}
+  {{#each program.enums as |enum|}}
+{{enum.name}} = {{#partial private_alias_prefix}}{{enum.name}}
+  {{/each}}
+{{! Type stub assignments for enum typedefs }}
+  {{#each program.typedefs as |typedef|}}
+    {{#if typedef.enum?}}
+{{typedef.name}} = {{#partial private_alias_prefix}}{{typedef.name}}
+    {{/if typedef.enum?}}
+  {{/each}}
+{{/if python.is_type_stub?}}
+{{/let partial}}

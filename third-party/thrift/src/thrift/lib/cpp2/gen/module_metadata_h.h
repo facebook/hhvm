@@ -89,6 +89,7 @@ class ServiceMetadata {
  * @return ThriftStruct (https://git.io/JJQpW)
  */
 template <class T>
+[[deprecated("Use `SchemaRegistry::get().getNode<T>()` instead")]]
 const metadata::ThriftStruct& get_struct_metadata() {
   static const folly::Indestructible<metadata::ThriftStruct> data = [] {
     detail::md::ThriftMetadata meta;

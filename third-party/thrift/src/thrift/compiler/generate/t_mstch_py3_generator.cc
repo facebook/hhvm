@@ -212,7 +212,9 @@ class py3_mstch_program : public mstch_program {
   mstch::node hasContainerTypes() { return !containers_.empty(); }
 
   mstch::node needs_container_converters() {
-    return !containers_.empty() && !program_->services().empty();
+    return !containers_.empty() &&
+        (!program_->services().empty() ||
+         has_option("gen_legacy_container_converters"));
   }
 
   mstch::node hasConstants() {

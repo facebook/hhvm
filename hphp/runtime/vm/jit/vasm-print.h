@@ -34,6 +34,7 @@ struct VregSet;
 ///////////////////////////////////////////////////////////////////////////////
 
 std::string show(Vreg r);
+std::string show(VregShiftExtend se);
 std::string show(Vptr p);
 std::string show(Vconst c);
 std::string show(const VregSet&);

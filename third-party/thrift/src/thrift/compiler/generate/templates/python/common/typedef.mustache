@@ -15,15 +15,47 @@
   limitations under the License.
 
 }}
+{{#let partial python_type |type| captures |m_common m_types|}}
+{{#pragma ignore-newlines}}
+{{#if type.void?}}None
+{{#else if type.bool?}}bool
+{{#else if type.integer?}}int
+{{#else if type.floating_point?}}float
+{{#else if type.string?}}str
+  {{#else if type.binary?}}
+{{#if type.iobuf?}}_fbthrift_iobuf.IOBuf{{#else}}bytes{{/if}}
+  {{#else if type.structured?}}
+    {{#let structured = type.true_type}}
+{{#if structured.need_module_path?}}{{structured.module_mangle}}.{{#else}}{{#partial m_common.private_alias_prefix}}{{/if}}
+{{structured.py_name}}
+  {{#else if type.list?}}
+{{#if python.generate_immutable_types?}}_fbthrift_python_types.ListTypeFactory{{/if}}
+{{#if python.generate_mutable_types?}}_fbthrift_python_mutable_containers.MutableListTypeFactory{{/if}}
+({{#partial m_types.typeinfo type=type.true_type.elem_type}})
+  {{#else if type.set?}}
+{{#if python.generate_immutable_types?}}_fbthrift_python_types.SetTypeFactory{{/if}}
+{{#if python.generate_mutable_types?}}_fbthrift_python_mutable_containers.MutableSetTypeFactory{{/if}}
+({{#partial m_types.typeinfo type=type.true_type.elem_type}})
+  {{#else if type.map?}}
+    {{#let map = type.true_type}}
+{{#if python.generate_immutable_types?}}_fbthrift_python_types.MapTypeFactory{{/if}}
+{{#if python.generate_mutable_types?}}_fbthrift_python_mutable_containers.MutableMapTypeFactory{{/if}}
+({{#partial m_types.typeinfo type=map.key_type}}, {{#partial m_types.typeinfo type=map.val_type}})
+  {{#else if type.enum?}}
+    {{#let enum = type.true_type}}
+{{#if enum.need_module_path?}}{{enum.module_mangle}}.{{#else}}{{#partial m_common.private_alias_prefix}}{{/if}}{{enum.name}}
+  {{/if type.void?}}
+{{/let partial}}
 {{#program:typedefs?}}
 
 {{#program:typedefs}}
-{{#typedef:type}}{{^type:enum?}}
-{{typedef:name}} = {{#if typedef:has_adapter?}}{{#let adapter = typedef:adapter}}{{!
-    }}{{adapter.type_hint}}{{#if adapter.is_generic?}}[{{> types/python_type}}]{{/if}}{{!
-}}{{#else}}{{!
-    }}{{> types/python_type}}{{!
-}}{{/if typedef:has_adapter?}}
-{{/type:enum?}}{{/typedef:type}}
+  {{#if (not typedef:enum?)}}
+    {{#if typedef:has_adapter?}}
+      {{#let adapter = typedef:adapter}}
+{{typedef:name}} = {{adapter.type_hint}}{{#if adapter.is_generic?}}[{{#partial python_type type=typedef:resolved}}]{{/if}}
+    {{#else}}
+{{typedef:name}} = {{#partial python_type type=typedef:resolved}}
+    {{/if typedef:has_adapter?}}
+  {{/if (not typedef:enum?)}}
 {{/program:typedefs}}
 {{/program:typedefs?}}

@@ -54,7 +54,7 @@ abstract class ThriftImmutableWrapper
   }
 
   final public function createDeepCopy(): this::TThrift {
-    return SignalsPipeUtils::makeCopy($this->data);
+    return ThriftCloner::clone($this->data);
   }
 
   final public function serialize(

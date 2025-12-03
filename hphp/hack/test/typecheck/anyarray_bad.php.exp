@@ -47,7 +47,7 @@ Invalid argument (Typing[4110])
   File "anyarray_bad.php", line 29, characters 10-15:
   Expected `arraykey`
   File "anyarray_bad.php", line 31, characters 10-24:
-  But got `mixed` from the argument to this \HH\is_any_array test
+  But got `mixed` from this `is` expression test
   File "hackarray.hhi", line 22, characters 35-36:
     via this generic `Tv`
   File "interfaces.hhi", line 115, characters 23-24:

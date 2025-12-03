@@ -3,10 +3,10 @@ Invalid argument (Typing[4110])
   File "primitive_union.php", line 13, characters 26-33:
   Expected `arraykey`
   File "primitive_union.php", line 3, characters 15-19:
-  But got `?(arraykey | float | (not num & nonnull))`
+  But got `?(float | arraykey | (not num & nonnull))`
 ERROR: File "primitive_union.php", line 10, characters 14-15:
 Invalid argument (Typing[4110])
   File "primitive_union.php", line 14, characters 21-23:
   Expected `num`
   File "primitive_union.php", line 3, characters 15-19:
-  But got `?(arraykey | float | (not num & nonnull))`
+  But got `?(float | arraykey | (not num & nonnull))`

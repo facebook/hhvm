@@ -14,8 +14,8 @@ ERROR: File "shape_put_wrong.php", line 9, characters 10-152:
 Invalid return type (Typing[4110])
   File "shape_put_wrong.php", line 8, characters 33-42:
   Expected `int`
-  File "shape_put_wrong.php", line 9, characters 21-151:
-  But got `bool` because method or function was called on dynamic or like-type
+  File "expr_tree.php", line 150, characters 38-41:
+  But got `bool`
 ERROR: File "shape_put_wrong.php", line 19, characters 5-47:
 Invalid argument (Typing[4110])
   File "expr_tree.php", line 170, characters 26-34:

@@ -8161,7 +8161,7 @@ end = struct
     else
       cond_false env
 
-  and condition_dual env ((_ty, p, e) as te : Tast.expr) =
+  and condition_dual env ((ty, p, e) as te : Tast.expr) =
     let default_branch env =
       ( env,
         (fun env -> condition_single env true te),
@@ -8283,6 +8283,20 @@ end = struct
         ~reason
         ~predicate:(reason, IsTag NullTag)
     | Aast.Hole (e, _, _, _) -> condition_dual env e
+    (* Call to HH\is_any_array($x) is equivalent to $x is HH\AnyArray<_,_> *)
+    | Aast.Call
+        { func = (_, p, Aast.Id (_, f)); args = [lv]; unpacked_arg = None; _ }
+      when String.equal f SN.StdlibFunctions.is_any_array ->
+      condition_dual
+        env
+        ( ty,
+          p,
+          Aast.Is
+            ( Aast_utils.arg_to_expr lv,
+              ( p,
+                Happly
+                  ( (p, SN.Collections.cAnyArray),
+                    [(p, Hwildcard); (p, Hwildcard)] ) ) ) )
     | Aast.Is (ivar, hint) -> begin
       let ((env, ty_err_opt), hint_ty) =
         Typing_phase.localize_hint_for_refinement env hint
@@ -8357,19 +8371,6 @@ end = struct
         env
         (not tparamet)
         (ty, p, Aast.Binop { bop = op; lhs = e1; rhs = e2 })
-    | Aast.Call
-        { func = (_, p, Aast.Id (_, f)); args = [lv]; unpacked_arg = None; _ }
-      when String.equal f SN.StdlibFunctions.is_any_array ->
-      let env =
-        refine_for_is
-          ~hint_first:true
-          env
-          tparamet
-          (Aast_utils.arg_to_expr lv)
-          (Reason.predicated (p, f))
-          (p, Happly ((p, "\\HH\\AnyArray"), [(p, Hwildcard); (p, Hwildcard)]))
-      in
-      (env, { pkgs = SSet.empty })
     | Aast.Call
         {
           func =

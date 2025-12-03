@@ -3,10 +3,10 @@ Invalid argument (Typing[4110])
   File "is_any_array.php", line 18, characters 20-29:
   Expected `vec<mixed>`
   File "is_any_array.php", line 4, characters 7-21:
-  But got `AnyArray<arraykey, mixed>`
+  But got `AnyArray<arraykey, mixed>` from this `is` expression test
 ERROR: File "is_any_array.php", line 13, characters 21-22:
 Invalid argument (Typing[4110])
   File "is_any_array.php", line 17, characters 26-41:
   Expected `Container<mixed>`
   File "is_any_array.php", line 3, characters 15-19:
-  But got `not AnyArray`
+  But got `?(nonnull & not AnyArray<_, _>)`

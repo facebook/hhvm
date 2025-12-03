@@ -135,10 +135,14 @@ let locl_like r ty =
     | Tunion tys when List.exists Typing_defs.is_dynamic tys -> ty
     | _ -> mk (r, Tunion [dynamic r; ty])
 
+(* Wrap supportdyn around a type unless it's already got it
+ * or trivially supports dynamic
+ *)
 let supportdyn r ty =
   match get_node ty with
   | Tnewtype (c, _, _) when String.equal c SN.Classes.cSupportDyn -> ty
   | Tunion [] -> ty
+  | Tprim _ -> ty
   | _ -> mk (r, Tnewtype (SN.Classes.cSupportDyn, [ty], ty))
 
 let supportdyn_nonnull r = supportdyn r (nonnull r)

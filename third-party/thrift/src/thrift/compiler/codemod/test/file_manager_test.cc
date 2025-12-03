@@ -71,11 +71,11 @@ TEST_F(FileManagerTest, add_include) {
   file_manager_->add_include("some/other/file.thrift");
 
   EXPECT_THAT(file_manager_->get_new_content().data(), StrEq(R"(
+include "some/other/file.thrift"
+
 package "test.module"
 
 namespace java test.module
-
-include "some/other/file.thrift"
 
 struct Foo {
   1: optional i32 bar;

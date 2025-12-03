@@ -58,20 +58,36 @@ size_t get_first_character_of_this_line(
 } // namespace
 
 std::string file_manager::get_new_content() const {
-  size_t prev_end = 0;
-  std::string new_content;
-
   if (replacements_.empty()) {
     return old_content_;
   }
 
+  // Offset since the beginning of the OLD content string, up to which the old
+  // content string has been processed, i.e. content and replacements relevant
+  // to the substring `old_content_[0:prev_end]` have been completed (note that
+  // prev_end is excluded).
+  size_t prev_end = 0;
+
+  std::string new_content;
+
   // Perform the replacements.
-  for (const auto& r : replacements_) {
-    // Only apply replacements that are not overlapped with previous one.
+  for (const replacement& r : replacements_) {
     if (prev_end <= r.begin_pos) {
       new_content.append(old_content_, prev_end, r.begin_pos - prev_end);
       new_content += r.new_content;
       prev_end = r.end_pos;
+    } else {
+      // DO_BEFORE(aristidis,20251225): Make this a failure - i.e., fail on
+      // overlapping replacements, as the result may not be well defined (or
+      // expected).
+      fmt::print(
+          stderr,
+          "codemod/file_manager: Skipping replacement that overlaps with "
+          "previous one (range=[{}, {}), prev_end={}). This will soon be an "
+          "error.\n",
+          r.begin_pos,
+          r.end_pos,
+          prev_end);
     }
   }
 
@@ -137,23 +153,44 @@ void file_manager::expand_over_whitespaces(
   }
 }
 
-void file_manager::add_include(std::string include) {
-  if (includes_.contains(include)) {
+void file_manager::add_include(std::string thrift_include) {
+  if (includes_.contains(thrift_include)) {
     return;
   }
 
-  std::string curr_include = "include \"" + include + "\"\n";
-  includes_.insert(std::move(include));
-  size_t offset;
-  if (!program_->includes().empty()) {
-    offset = to_offset(program_->includes().back()->src_range().end) + 1;
-  } else {
-    offset = program_->definitions().empty()
-        ? 0
-        : to_offset(program_->definitions().front().src_range().begin);
-    curr_include += "\n";
-  }
-  replacements_.insert({offset, offset, curr_include, /* is_include= */ true});
+  std::string new_include_directive = "include \"" + thrift_include + "\"\n";
+  includes_.insert(std::move(thrift_include));
+
+  const size_t new_include_offset = [&]() -> size_t {
+    // If there are includes, add new include after the last one.
+    if (!program_->includes().empty()) {
+      return to_offset(program_->includes().back()->src_range().end) + 1;
+    }
+
+    // Otherwise, add the include before the first of: package, namespace or
+    // definition (if any). In any case, add an extra line return to separate.
+    new_include_directive += "\n";
+
+    if (program_->package().is_explicit()) {
+      return to_offset(program_->package().src_range().begin);
+    }
+
+    if (std::optional<size_t> maybe_first_namespace_offset =
+            get_first_namespace_offset()) {
+      return maybe_first_namespace_offset.value();
+    }
+
+    if (!program_->definitions().empty()) {
+      return to_offset(program_->definitions().front().src_range().begin);
+    }
+
+    return 0;
+  }();
+  replacements_.insert(
+      {.begin_pos = new_include_offset,
+       .end_pos = new_include_offset,
+       .new_content = new_include_directive,
+       .is_include = true});
 }
 
 void file_manager::remove_all_annotations(const t_node& node) {
@@ -213,22 +250,15 @@ void file_manager::set_namespace(
  * definitions.
  */
 size_t file_manager::get_namespace_offset() const {
-  if (!program_->namespaces().empty()) {
-    size_t min_offset = old_content_.length();
-    // Finds the offset of first namespace statement in the file.
-    for (const auto& [lang, _] : program_->namespaces()) {
-      auto ns_stmt = "namespace " + lang;
-      auto offset = old_content_.find(ns_stmt, 0);
-      if (offset != std::string::npos && min_offset > offset) {
-        min_offset = offset;
-      }
-    }
-    if (min_offset != old_content_.length()) {
-      return min_offset;
-    }
+  if (std::optional<size_t> maybe_first_namespace_offset =
+          get_first_namespace_offset()) {
+    return maybe_first_namespace_offset.value();
   }
   if (!program_->includes().empty()) {
     return to_offset(program_->includes().back()->src_range().end) + 1;
+  }
+  if (program_->package().is_explicit()) {
+    return to_offset(program_->package().src_range().end) + 1;
   }
   if (!program_->definitions().empty()) {
     return to_offset(program_->definitions().front().src_range().begin);
@@ -252,4 +282,26 @@ void file_manager::remove_namespace(std::string language) {
     add({begin_offset, end_offset, ""});
   }
 }
+
+std::optional<size_t> file_manager::get_first_namespace_offset() const {
+  if (program_->namespaces().empty()) {
+    return std::nullopt;
+  }
+
+  size_t min_offset = old_content_.length();
+  // Finds the offset of first namespace statement in the file.
+  for (const auto& [lang, _] : program_->namespaces()) {
+    const auto ns_stmt = "namespace " + lang;
+    const auto offset = old_content_.find(ns_stmt, 0);
+    if (offset != std::string::npos && min_offset > offset) {
+      min_offset = offset;
+    }
+  }
+  if (min_offset != old_content_.length()) {
+    return min_offset;
+  } else {
+    return std::nullopt;
+  }
+}
+
 } // namespace apache::thrift::compiler::codemod

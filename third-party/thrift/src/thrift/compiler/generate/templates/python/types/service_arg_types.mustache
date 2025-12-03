@@ -14,9 +14,13 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{!
-The argument and result types for functions on thrift services (and interactions)
 }}
+{{#import "common/common" as m_common}}
+{{#import "common/fields" as m_fields}}
+{{#import "common/functions" as m_functions}}
+{{#import "common/typehints" as typehints}}
+{{#import "common/types" as m_types}}
+
 {{#let partial success_result_field_info |type| captures |m_common m_types|}}
 _fbthrift_python_types.FieldInfo(
     0,  # id
@@ -42,10 +46,13 @@ _fbthrift_python_types.FieldInfo(
     {{field.idl_type}}, # IDL type (see BaseTypeEnum)
 ),
 {{/let partial}}
-{{#each service:supported_functions as |function|}}
+
+{{! The argument and result types for a function on a thrift service or interaction }}
+{{#let export partial function_arg_types |function service|
+    captures |m_common m_fields m_functions m_types typehints success_result_field_info exception_field_info|}}
 
 
-class {{#partial m_functions.args_type service=service:self function=function}}(metaclass={{#partial m_types.struct_metaclass}}):
+class {{#partial m_functions.args_type service=service function=function}}(metaclass={{#partial m_types.struct_metaclass}}):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         {{#each function.params.fields as |param|}}
@@ -62,42 +69,38 @@ class {{#partial m_functions.args_type service=service:self function=function}}(
         ),
         {{/each}}
     )
-{{^function.oneway?}}
+  {{#if (not function.oneway?)}}
 
 
-class _fbthrift_{{service:name}}_{{function.name}}_result(metaclass={{#partial m_types.struct_metaclass}}):
+class _fbthrift_{{service.name}}_{{function.name}}_result(metaclass={{#partial m_types.struct_metaclass}}):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
-        {{#let regular_response_type = (if function.oneway? null function.return_type.true_type)}}
-          {{#if (and (object.notnull? regular_response_type) (not regular_response_type.void?))}}
+        {{#let regular_response_type = function.return_type.true_type}}
+          {{#if (not regular_response_type.void?)}}
         {{#partial success_result_field_info type=regular_response_type}}
-          {{/if (and (object.notnull? regular_response_type) (not regular_response_type.void?))}}
+          {{/if (not regular_response_type.void?)}}
           {{#each (array.enumerate function.exceptions) as |index field|}}
         {{#partial exception_field_info field=field index=index}}
           {{/each}}
     )
-{{/function.oneway?}}
-{{#function.stream?}}
+  {{/if (not function.oneway?)}}
+  {{#if function.stream?}}
 
 
-class _fbthrift_{{service:name}}_{{function.name}}_result_stream_elem(metaclass={{#partial m_types.struct_metaclass}}):
+class _fbthrift_{{service.name}}_{{function.name}}_result_stream_elem(metaclass={{#partial m_types.struct_metaclass}}):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
-    {{#if function.bidirectional_stream?}}
-    _fbthrift__rpc_kind = _fbthrift__RpcKind.BIDIRECTIONAL_STREAM
-    {{#else}}
-    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE
-    {{/if function.bidirectional_stream?}}
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.{{#if function.bidirectional_stream?}}BIDIRECTIONAL_STREAM{{#else}}SINGLE_REQUEST_STREAMING_RESPONSE{{/if}}
     _fbthrift_SPEC = (
         {{#partial success_result_field_info type=function.stream.elem_type}}
           {{#each (array.enumerate function.stream.exceptions) as |index field|}}
         {{#partial exception_field_info field=field index=index}}
           {{/each}}
     )
-{{/function.stream?}}
-{{#function.sink?}}
+  {{/if function.stream?}}
+  {{#if function.sink?}}
 
 
-class _fbthrift_{{service:name}}_{{function.name}}_result_sink_elem(metaclass={{#partial m_types.struct_metaclass}}):
+class _fbthrift_{{service.name}}_{{function.name}}_result_sink_elem(metaclass={{#partial m_types.struct_metaclass}}):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     {{#if function.bidirectional_stream?}}
     _fbthrift__rpc_kind = _fbthrift__RpcKind.BIDIRECTIONAL_STREAM
@@ -135,8 +138,8 @@ class _fbthrift_{{service:name}}_{{function.name}}_result_sink_elem(metaclass={{
         {{/if (array.empty? function.sink.exceptions)}}
 
 
-{{^function.bidirectional_stream?}}{{!
-}}class _fbthrift_{{service:name}}_{{function.name}}_result_sink_final(metaclass={{#partial m_types.struct_metaclass}}):
+    {{#if (not function.bidirectional_stream?)}}
+class _fbthrift_{{service.name}}_{{function.name}}_result_sink_final(metaclass={{#partial m_types.struct_metaclass}}):
     _fbthrift_disable_field_cache_DO_NOT_USE = True
     _fbthrift_SPEC = (
         {{#partial success_result_field_info type=function.sink.final_response_type}}
@@ -144,6 +147,6 @@ class _fbthrift_{{service:name}}_{{function.name}}_result_sink_elem(metaclass={{
         {{#partial exception_field_info field=field index=index}}
           {{/each}}
     )
-{{/function.bidirectional_stream?}}
-{{/function.sink?}}
-{{/each}}
+    {{/if (not function.bidirectional_stream?)}}
+  {{/if function.sink?}}
+{{/let partial}}

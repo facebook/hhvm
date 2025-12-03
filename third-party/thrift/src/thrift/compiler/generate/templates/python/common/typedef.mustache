@@ -46,16 +46,16 @@
 {{#if enum.need_module_path?}}{{enum.module_mangle}}.{{#else}}{{#partial m_common.private_alias_prefix}}{{/if}}{{enum.name}}
   {{/if type.void?}}
 {{/let partial}}
-{{#program:typedefs?}}
+{{#if program.typedefs?}}
 
-{{#program:typedefs}}
-  {{#if (not typedef:enum?)}}
-    {{#if typedef:has_adapter?}}
-      {{#let adapter = typedef:adapter}}
-{{typedef:name}} = {{adapter.type_hint}}{{#if adapter.is_generic?}}[{{#partial python_type type=typedef:resolved}}]{{/if}}
-    {{#else}}
-{{typedef:name}} = {{#partial python_type type=typedef:resolved}}
-    {{/if typedef:has_adapter?}}
-  {{/if (not typedef:enum?)}}
-{{/program:typedefs}}
-{{/program:typedefs?}}
+  {{#each program.typedefs as |typedef|}}
+    {{#if (not typedef.enum?)}}
+      {{#if typedef.has_adapter?}}
+        {{#let adapter = typedef.adapter}}
+{{typedef.name}} = {{adapter.type_hint}}{{#if adapter.is_generic?}}[{{#partial python_type type=typedef.resolved}}]{{/if}}
+      {{#else}}
+{{typedef.name}} = {{#partial python_type type=typedef.resolved}}
+      {{/if typedef.has_adapter?}}
+    {{/if (not typedef.enum?)}}
+  {{/each}}
+{{/if program.typedefs?}}

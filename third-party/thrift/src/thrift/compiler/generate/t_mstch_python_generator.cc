@@ -1263,7 +1263,7 @@ void t_mstch_python_generator::generate_types() {
   python_context_->set_enable_abstract_types(
       !has_option("disable_abstract_types"));
 
-  generate_mstch_file(
+  generate_whisker_file(
       "thrift_types.py", types_file_kind::source_file, type_kind::immutable);
   generate_whisker_file(
       "thrift_types.pyi", types_file_kind::type_stub, type_kind::immutable);
@@ -1275,7 +1275,7 @@ void t_mstch_python_generator::generate_types() {
       types_file_kind::source_file,
       type_kind::abstract);
 
-  generate_mstch_file(
+  generate_whisker_file(
       "thrift_mutable_types.py",
       types_file_kind::source_file,
       type_kind::mutable_);

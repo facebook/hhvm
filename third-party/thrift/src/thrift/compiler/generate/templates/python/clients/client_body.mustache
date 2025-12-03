@@ -18,53 +18,60 @@
 
 Thrift python client body definition, which is shared between normal clients and interaction clients
 
-}}@staticmethod
+}}
+{{#import "common/common" as m_common}}
+{{#import "common/fields" as m_fields}}
+{{#import "common/functions" as m_functions}}
+{{#import "common/typehints" as typehints}}
+{{#import "common/types" as m_types}}
+
+{{#let export partial client_body |program service parent_service_name| captures |m_common m_fields m_functions m_types typehints|}}
+@staticmethod
 def __get_thrift_name__() -> str:
-    return "{{program:name}}.{{service:name}}"
+    return "{{program.name}}.{{service.name}}"
 
 @staticmethod
 def __get_thrift_uri__() -> _typing.Optional[str]:
-    return {{#service:uri}}"{{service:uri}}"{{/service:uri}}{{!
-        }}{{^service:uri}}None{{/service:uri}}
+    return {{#if (string.empty? service.uri)}}None{{#else}}"{{service.uri}}"{{/if}}
 
 @staticmethod
 def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
     return {
-        {{#each service:unstructured_annotations as |annot|}}
+        {{#each service.unstructured_annotations as |annot|}}
         {{#partial m_common.unstructured_annotation key=annot.key value=annot.value}}
         {{/each}}
     }
 
 @staticmethod
 def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-{{#if service:interaction?}}
-    return {{program:module_mangle}}__thrift_metadata.gen_metadata_service_{{parent_service_name}}_{{interaction:name}}()
+{{#if service.interaction?}}
+    return {{program.module_mangle}}__thrift_metadata.gen_metadata_service_{{parent_service_name}}_{{service.name}}()
 {{#else}}
-    return {{program:module_mangle}}__thrift_metadata.gen_metadata_service_{{service:name}}()
-{{/if service:interaction?}}
+    return {{program.module_mangle}}__thrift_metadata.gen_metadata_service_{{service.name}}()
+{{/if service.interaction?}}
 
-class Async({{#service:extends}}{{!
+{{#let extends_service? = (and (not service.interaction?) (object.notnull? service.extends))}}
+class Async({{#if extends_service?}}{{#service.extends}}{{!
     }}{{> services/client_module_path}}.Async{{!
-}}{{/service:extends}}{{^service:extends?}}{{!
+}}{{/service.extends}}{{#else}}{{!
     }}_fbthrift_python_AsyncClient{{!
-}}{{/service:extends?}}):
+}}{{/if extends_service?}}):
     @staticmethod
     def __get_thrift_name__() -> str:
-        return "{{program:name}}.{{service:name}}"
+        return "{{program.name}}.{{service.name}}"
 
     @staticmethod
     def __get_thrift_uri__() -> _typing.Optional[str]:
-        return {{#service:uri}}"{{service:uri}}"{{/service:uri}}{{!
-            }}{{^service:uri}}None{{/service:uri}}
+        return {{#if (string.empty? service.uri)}}None{{#else}}"{{service.uri}}"{{/if}}
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-    {{#if service:interaction?}}
-        return {{program:module_mangle}}__thrift_metadata.gen_metadata_service_{{parent_service_name}}_{{interaction:name}}()
+    {{#if service.interaction?}}
+        return {{program.module_mangle}}__thrift_metadata.gen_metadata_service_{{parent_service_name}}_{{service.name}}()
     {{#else}}
-        return {{program:module_mangle}}__thrift_metadata.gen_metadata_service_{{service:name}}()
-    {{/if service:interaction?}}
-    {{#each service:supported_functions as |function|}}
+        return {{program.module_mangle}}__thrift_metadata.gen_metadata_service_{{service.name}}()
+    {{/if service.interaction?}}
+    {{#each service.supported_functions as |function|}}
 
     async def {{function.name}}(
         self{{#each function.params.fields as |field|}},
@@ -73,32 +80,31 @@ class Async({{#service:extends}}{{!
         rpc_options: _typing.Optional[RpcOptions] = None,
     ) -> {{#function.return_type}}{{!
         }}{{#if function.returns_tuple?}}_typing.Tuple[{{/if}}{{!
-        }}{{#if function.creates_interaction?}}{{service:name}}_{{function.created_interaction.name}}.Async{{!
+        }}{{#if function.creates_interaction?}}{{service.name}}_{{function.created_interaction.name}}.Async{{!
             }}{{#if function.sink_or_stream?}}, {{> types/pep484_return_type}}{{#else if (not type:void?)}}, {{> types/pep484_return_type}}{{/if}}{{!
         }}{{#else}}{{> types/pep484_return_type}}{{/if function.creates_interaction?}}{{!
         }}{{#if function.returns_tuple?}}]{{/if}}{{!
     }}{{/function.return_type}}:
-        {{#function.creates_interaction?}}
+        {{#if function.creates_interaction?}}
         _fbthrift_interaction = self.create{{function.created_interaction.name}}()
-        {{/function.creates_interaction?}}
+        {{/if function.creates_interaction?}}
         _fbthrift_resp = await self._send_request(
-            {{#if service:interaction?}}"{{parent_service_name}}"{{#else}}"{{service:name}}"{{/if}},
-            {{#if service:interaction?}}"{{interaction:name}}.{{function.name}}",{{#else}}"{{function.name}}",{{/if}}
-            {{#partial m_functions.args_type service=service:self function=function}}({{#function.params.fields}}
-                {{field:py_name}}={{field:py_name}},{{/function.params.fields}}),
-            {{#partial m_functions.client_return_type service=service:self function=function}},
+            {{#if service.interaction?}}"{{parent_service_name}}"{{#else}}"{{service.name}}"{{/if}},
+            {{#if service.interaction?}}"{{service.name}}.{{function.name}}",{{#else}}"{{function.name}}",{{/if}}
+            {{#partial m_functions.args_type service=service function=function}}({{#each function.params.fields as |field|}}
+                {{field.py_name}}={{field.py_name}},{{/each}}),
+            {{#partial m_functions.client_return_type service=service function=function}},
             qualifier = _fbthrift_FunctionQualifier.{{function.qualifier}},
-            {{#function.creates_interaction?}}
+            {{#if function.creates_interaction?}}
             interaction_position=_fbthrift_InteractionMethodPosition.Factory,
             interaction_name="{{function.created_interaction.name}}",
             created_interaction = _fbthrift_interaction,
-            {{/function.creates_interaction?}}
-            {{#service:interaction?}}
+            {{/if function.creates_interaction?}}
+            {{#if service.interaction?}}
             interaction_position=_fbthrift_InteractionMethodPosition.Member,
-            interaction_name="{{service:name}}",
-            {{/service:interaction?}}
-            uri_or_name={{#service:uri}}"{{service:uri}}"{{/service:uri}}{{!
-                }}{{^service:uri}}"{{service:name}}"{{/service:uri}},
+            interaction_name="{{service.name}}",
+            {{/if service.interaction?}}
+            uri_or_name="{{#if (string.empty? service.uri)}}{{service.name}}{{#else}}{{service.uri}}{{/if}}",
             rpc_options=rpc_options,{{!
 }}{{#python.generate_mutable_types?}}
             is_mutable_types=True,{{!
@@ -110,7 +116,7 @@ class Async({{#service:extends}}{{!
         {{#function.early_client_return?}}
         # shortcut to success path for non-void returns
         if _fbthrift_resp.success is not None:
-            return {{#function.creates_interaction?}}_fbthrift_interaction, {{/function.creates_interaction?}}{{!
+            return {{#if function.creates_interaction?}}_fbthrift_interaction, {{/if}}{{!
           }}_fbthrift_resp.success{{#function.sink_or_stream?}}, _fbthrift_sink_or_stream{{/function.sink_or_stream?}}
         {{/function.early_client_return?}}
         {{#each (array.enumerate function.exceptions) as |index field|}}
@@ -118,31 +124,23 @@ class Async({{#service:extends}}{{!
         if (_fbthrift_ex := _fbthrift_resp.{{#partial m_fields.exception_field_name field=field index=index}}) is not None:
             raise _fbthrift_ex
         {{/each}}
-        {{^function.early_client_return?}}
-        {{^function.void?}}
-        return {{#function.creates_interaction?}}_fbthrift_interaction{{/function.creates_interaction?}}{{!
-          }}{{#function.returns_tuple?}}, {{/function.returns_tuple?}}{{!
-          }}{{#function.sink_or_stream?}}_fbthrift_sink_or_stream{{/function.sink_or_stream?}}
-        {{/function.void?}}
-        {{/function.early_client_return?}}
-        {{#function.with_regular_response?}}
+        {{#if (and (not function.early_client_return?) (not function.void?))}}
+        return {{#if function.creates_interaction?}}_fbthrift_interaction{{/if}}{{!
+          }}{{#if function.returns_tuple?}}, {{/if}}{{!
+          }}{{#if function.sink_or_stream?}}_fbthrift_sink_or_stream{{/if}}
+        {{/if (and (not function.early_client_return?) (not function.void?))}}
+        {{#if function.with_regular_response?}}
         raise _fbthrift_python_exceptions.ApplicationError(
             _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
             "Empty Response",
         )
-        {{/function.with_regular_response?}}
+        {{/if function.with_regular_response?}}
     {{/each}}
 
-    {{#each service:interactions as |interaction|}}
-      {{!
-        This template is used for both interaction and non-interaction clients.
-        If the client is an interaction client, then it won't have interactions
-        but it will have a parent_service_name.
-        If it's not an interaction client, it might have inner interactions but
-        we don't want to overwrite parent_service_name in the outer scope.
-      }}
-      {{#let parent_service_name = service:name}}
-      {{#let interaction_name = interaction.self.name}}
+    {{#if (not service.interaction?)}}
+      {{#each service.interactions as |interaction|}}
+        {{#let parent_service_name = service.name}}
+        {{#let interaction_name = interaction.name}}
     def create{{interaction_name}}(
         self #{{parent_service_name}}
     ) -> {{parent_service_name}}_{{interaction_name}}.Async:
@@ -151,42 +149,42 @@ class Async({{#service:extends}}{{!
         self #{{parent_service_name}}
     ) -> {{parent_service_name}}_{{interaction_name}}.Async:
         return self.create{{interaction_name}}()
-    {{/each}}
+      {{/each}}
+    {{/if (not service.interaction?)}}
 
-{{#service:supported_functions}}
+{{#each service.supported_functions as |function|}}
 # pyre-ignore[4]: Missing annotation.{{! Adding an annotation here would require way too much duplication }}
-{{function:name}} = Async.{{function:name}}
-{{/service:supported_functions}}
+{{function.name}} = Async.{{function.name}}
+{{/each}}
 {{#if (has_compiler_option? "auto_migrate")}}
-async def __aenter__(self) -> "{{service:name}}.Async":
+async def __aenter__(self) -> "{{service.name}}.Async":
     raise RuntimeError("Do not use __aenter__ directly on client, use get_client instead.")
 async def __aexit__(self) -> None:
     raise RuntimeError("Do not use __aexit__ directly on client, use get_client instead.")
 {{/if (has_compiler_option? "auto_migrate")}}
 
-class Sync({{#service:extends}}{{!
+class Sync({{#if extends_service?}}{{#service.extends}}{{!
     }}{{> services/client_module_path}}.Sync{{!
-}}{{/service:extends}}{{^service:extends?}}{{!
+}}{{/service.extends}}{{#else}}{{!
     }}_fbthrift_python_SyncClient{{!
-}}{{/service:extends?}}):
+}}{{/if extends_service?}}):
     @staticmethod
     def __get_thrift_name__() -> str:
-        return "{{program:name}}.{{service:name}}"
+        return "{{program.name}}.{{service.name}}"
 
     @staticmethod
     def __get_thrift_uri__() -> _typing.Optional[str]:
-        return {{#service:uri}}"{{service:uri}}"{{/service:uri}}{{!
-            }}{{^service:uri}}None{{/service:uri}}
+        return {{#if (string.empty? service.uri)}}None{{#else}}"{{service.uri}}"{{/if}}
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-    {{#if service:interaction?}}
-        return {{program:module_mangle}}__thrift_metadata.gen_metadata_service_{{parent_service_name}}_{{interaction:name}}()
+    {{#if service.interaction?}}
+        return {{program.module_mangle}}__thrift_metadata.gen_metadata_service_{{parent_service_name}}_{{service.name}}()
     {{#else}}
-        return {{program:module_mangle}}__thrift_metadata.gen_metadata_service_{{service:name}}()
-    {{/if service:interaction?}}
-    {{#each service:supported_functions as |function|}}
-    {{#let async_only? = (or service:interaction? function.sink_or_stream? function.starts_interaction? function.creates_interaction?)}}
+        return {{program.module_mangle}}__thrift_metadata.gen_metadata_service_{{service.name}}()
+    {{/if service.interaction?}}
+    {{#each service.supported_functions as |function|}}
+    {{#let async_only? = (or service.interaction? function.sink_or_stream? function.starts_interaction? function.creates_interaction?)}}
     {{#if (not async_only?)}}
 
     def {{function.name}}(
@@ -196,33 +194,33 @@ class Sync({{#service:extends}}{{!
         rpc_options: _typing.Optional[RpcOptions] = None,
     ) -> {{#function.return_type}}{{> types/pep484_return_type}}{{/function.return_type}}:
         _fbthrift_resp = self._send_request(
-            "{{service:name}}",
+            "{{service.name}}",
             "{{function.name}}",
-            {{#partial m_functions.args_type service=service:self function=function}}({{#function.params.fields}}
-                {{field:py_name}}={{field:py_name}},{{/function.params.fields}}),
-            {{#partial m_functions.client_return_type service=service:self function=function}},
-            uri_or_name={{#service:uri}}"{{service:uri}}"{{/service:uri}}{{!
-                }}{{^service:uri}}"{{service:name}}"{{/service:uri}},
+            {{#partial m_functions.args_type service=service function=function}}({{#each function.params.fields as |field|}}
+                {{field.py_name}}={{field.py_name}},{{/each}}),
+            {{#partial m_functions.client_return_type service=service function=function}},
+            uri_or_name="{{#if (string.empty? service.uri)}}{{service.name}}{{#else}}{{service.uri}}{{/if}}",
             rpc_options=rpc_options,{{!
-}}{{#python.generate_mutable_types?}}
+}}{{#if python.generate_mutable_types?}}
             is_mutable_types=True,{{!
-}}{{/python.generate_mutable_types?}}
+}}{{/if python.generate_mutable_types?}}
         )
-        {{#function.return_type}}{{^type:void?}}
+        {{#if (not function.return_type.void?)}}
         # shortcut to success path for non-void returns
         if _fbthrift_resp.success is not None:
             return _fbthrift_resp.success
-        {{/type:void?}}{{/function.return_type}}
+        {{/if (not function.return_type.void?)}}
         {{#each (array.enumerate function.exceptions) as |index field|}}
         # pyre-ignore[16]: `type(_fbthrift_resp)` has no attribute `{{#partial m_fields.exception_field_name field=field index=index}}`{{!This is an intentionally mangled name.}}
         if (_fbthrift_ex := _fbthrift_resp.{{#partial m_fields.exception_field_name field=field index=index}}) is not None:
             raise _fbthrift_ex
         {{/each}}
-        {{#function.return_type}}{{^type:void?}}
+        {{#if (not function.return_type.void?)}}
         raise _fbthrift_python_exceptions.ApplicationError(
             _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
             "Empty Response",
         )
-        {{/type:void?}}{{/function.return_type}}
+        {{/if (not function.return_type.void?)}}
     {{/if (not async_only?)}}
     {{/each}}
+{{/let partial}}

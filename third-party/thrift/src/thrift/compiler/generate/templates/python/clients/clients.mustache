@@ -18,10 +18,8 @@
 Generated Python classes for Thrift clients
 }}
 {{#import "common/common" as m_common}}
-{{#import "common/fields" as m_fields}}
-{{#import "common/functions" as m_functions}}
-{{#import "common/typehints" as typehints}}
 {{#import "common/types" as m_types}}
+{{#import "clients/client_body" as client_body}}
 {{#partial m_common.auto_generated_py}}
 import builtins
 
@@ -31,68 +29,60 @@ import types as _py_types
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import folly.iobuf as _fbthrift_iobuf
-from {{program:base_library_package}}.client import (
+from {{program.base_library_package}}.client import (
     AsyncClient as _fbthrift_python_AsyncClient,
     SyncClient as _fbthrift_python_SyncClient,
     Client as _fbthrift_python_Client,
 )
-from {{program:base_library_package}}.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition, FunctionQualifier as _fbthrift_FunctionQualifier
-{{#program:has_sink_functions?}}
-from {{program:base_library_package}}.streaming.sink import ClientSink as _fbthrift_ClientSink
-{{/program:has_sink_functions?}}
-{{#program:has_bidi_functions?}}
-from {{program:base_library_package}}.streaming.bidistream import BidirectionalStream as _fbthrift_BidirectionalStream
-{{/program:has_bidi_functions?}}
-from {{program:base_library_package}}.common import RpcOptions{{!
-}}{{#python.generate_mutable_types?}}
-import {{program:base_library_package}}.mutable_containers as _fbthrift_python_mutable_containers
-import {{program:base_library_package}}.mutable_exceptions as _fbthrift_python_mutable_exceptions
-import {{program:base_library_package}}.mutable_types as _fbthrift_python_mutable_types{{!
-}}{{/python.generate_mutable_types?}}
-import {{program:base_library_package}}.exceptions as _fbthrift_python_exceptions
-import {{program:base_library_package}}.types as _fbthrift_python_types
-import {{program:module_path}}.{{#partial m_types.import_path}} as {{program:module_mangle}}__{{#partial m_types.import_path}}
-import {{program:module_path}}.thrift_metadata as {{program:module_mangle}}__thrift_metadata
-{{#program:include_namespaces}}
-{{#has_types?}}
-import {{included_module_path}}.{{#partial m_types.import_path}} as {{included_module_mangle}}__{{#partial m_types.import_path}}
-{{/has_types?}}
-{{#has_services?}}
-{{#python.generate_immutable_types?}}
-import {{included_module_path}}.thrift_clients
-{{/python.generate_immutable_types?}}
-{{#python.generate_mutable_types?}}
-import {{included_module_path}}.thrift_mutable_clients
-{{/python.generate_mutable_types?}}
-{{/has_services?}}
-{{/program:include_namespaces}}
-{{#each program:adapter_modules as |module_path|}}
+from {{program.base_library_package}}.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition, FunctionQualifier as _fbthrift_FunctionQualifier
+{{#if program.has_sink_functions?}}
+from {{program.base_library_package}}.streaming.sink import ClientSink as _fbthrift_ClientSink
+{{/if program.has_sink_functions?}}
+{{#if program.has_bidi_functions?}}
+from {{program.base_library_package}}.streaming.bidistream import BidirectionalStream as _fbthrift_BidirectionalStream
+{{/if program.has_bidi_functions?}}
+from {{program.base_library_package}}.common import RpcOptions{{!
+}}{{#if python.generate_mutable_types?}}
+import {{program.base_library_package}}.mutable_containers as _fbthrift_python_mutable_containers
+import {{program.base_library_package}}.mutable_exceptions as _fbthrift_python_mutable_exceptions
+import {{program.base_library_package}}.mutable_types as _fbthrift_python_mutable_types{{!
+}}{{/if python.generate_mutable_types?}}
+import {{program.base_library_package}}.exceptions as _fbthrift_python_exceptions
+import {{program.base_library_package}}.types as _fbthrift_python_types
+import {{program.module_path}}.{{#partial m_types.import_path}} as {{program.module_mangle}}__{{#partial m_types.import_path}}
+import {{program.module_path}}.thrift_metadata as {{program.module_mangle}}__thrift_metadata
+{{#each program.include_namespaces as |include|}}
+  {{#if include.has_types?}}
+import {{include.included_module_path}}.{{#partial m_types.import_path}} as {{include.included_module_mangle}}__{{#partial m_types.import_path}}
+  {{/if include.has_types?}}
+  {{#if include.has_services?}}
+    {{#if python.generate_immutable_types?}}
+import {{include.included_module_path}}.thrift_clients
+    {{/if python.generate_immutable_types?}}
+    {{#if python.generate_mutable_types?}}
+import {{include.included_module_path}}.thrift_mutable_clients
+    {{/if python.generate_mutable_types?}}
+  {{/if include.has_services?}}
+{{/each}}
+{{#each program.adapter_modules as |module_path|}}
 import {{module_path}}
 {{/each}}
-{{#each program:adapter_type_hint_modules as |module_path|}}
+{{#each program.adapter_type_hint_modules as |module_path|}}
 import {{module_path}}
 {{/each}}
-{{#program:services?}}
-{{#program:services}}
+{{#each program.services as |service|}}
 
-class {{service:name}}(_fbthrift_python_Client["{{service:name}}.Async", "{{service:name}}.Sync"]):
+class {{service.name}}(_fbthrift_python_Client["{{service.name}}.Async", "{{service.name}}.Sync"]):
     annotations = _py_types.MappingProxyType({
-        {{#each service:unstructured_annotations as |annot|}}
+        {{#each service.unstructured_annotations as |annot|}}
             {{#partial m_common.unstructured_annotation key=annot.key value=annot.value}}
         {{/each}}
     })
-    {{> clients/client_body }}
+    {{#partial client_body.client_body program=program service=service parent_service_name=null}}
 
-{{!
-  For legacy reasons, in mstch, interactions also support `service:foo` fields so within
-  the loop body, `service:name` will get the interaction name so we need to capture the
-  current value. Also used by the client_body template for interactions.
-}}
-{{#let parent_service_name = service:name}}
-{{#service:interactions}}
-class {{parent_service_name}}_{{interaction:name}}(_fbthrift_python_Client["{{parent_service_name}}_{{interaction:name}}.Async", "{{parent_service_name}}_{{interaction:name}}.Sync"]):
-    {{> clients/client_body }}
+  {{#each service.interactions as |interaction|}}
+class {{service.name}}_{{interaction.name}}(_fbthrift_python_Client["{{service.name}}_{{interaction.name}}.Async", "{{service.name}}_{{interaction.name}}.Sync"]):
+    {{#partial client_body.client_body program=program service=interaction parent_service_name=service.name}}
 
-{{/service:interactions}}
-{{/program:services}}
-{{/program:services?}}
+  {{/each}}
+{{/each}}

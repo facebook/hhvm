@@ -1300,12 +1300,12 @@ void t_mstch_python_generator::generate_clients() {
     return;
   }
 
-  generate_mstch_file(
+  generate_whisker_file(
       "thrift_clients.py",
       types_file_kind::not_a_types_file,
       type_kind::immutable);
 
-  generate_mstch_file(
+  generate_whisker_file(
       "thrift_mutable_clients.py",
       types_file_kind::not_a_types_file,
       type_kind::mutable_);

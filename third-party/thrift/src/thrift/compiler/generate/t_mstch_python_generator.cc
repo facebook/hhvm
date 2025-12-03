@@ -1270,7 +1270,7 @@ void t_mstch_python_generator::generate_types() {
   generate_whisker_file(
       "thrift_enums.py", types_file_kind::source_file, type_kind::immutable);
 
-  generate_mstch_file(
+  generate_whisker_file(
       "thrift_abstract_types.py",
       types_file_kind::source_file,
       type_kind::abstract);

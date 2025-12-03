@@ -19,14 +19,14 @@ This is for typedef PEP484 type
 }}
 {{#pragma ignore-newlines}}
   {{#if (or type:list? type:set?)}}
-{{#partial typehints.typedef_container type=type:self}}[
+{{#partial typehints.typedef_container type=typedef:resolved}}[
 {{#partial typehints.pep484_type type=type:true_type.elem_type}}
 ]
   {{#else if type:map?}}
-{{#partial typehints.typedef_container type=type:self}}[
+{{#partial typehints.typedef_container type=typedef:resolved}}[
 {{#partial typehints.pep484_type type=type:true_type.key_type}}, {{!}}
 {{#partial typehints.pep484_type type=type:true_type.val_type}}
 ]
   {{#else}}
-{{#partial typehints.pep484_type type=type:self}}
+{{#partial typehints.pep484_type type=typedef:resolved}}
   {{/if (or type:list? type:set?)}}

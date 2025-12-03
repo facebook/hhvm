@@ -17,6 +17,6 @@
 }}{{!
 Add @_abc.abstractmethod where relevant
 }}
-{{^struct:exception?}}
+{{#if (not struct.exception?)}}
     @_abc.abstractmethod
-{{/struct:exception?}}
+{{/if (not struct.exception?)}}

@@ -120,7 +120,7 @@ class {{> structs/unadapted_name}}({{!
 {{/python.generate_mutable_types?}}
     {{/struct:union?}}
     {{^struct:union?}}
-    def __iter__(self) -> {{> types/iter_return_type}}: ...
+    def __iter__(self) -> {{#partial m_fields.iter_return_type fields=struct:fields_ordered_by_id}}: ...
     {{/struct:union?}}
     {{#struct:legacy_api?}}
 {{#python.generate_immutable_types?}}
@@ -154,15 +154,16 @@ class {{> structs/unadapted_name}}({{!
 {{/program:constants?}}
 {{#program:typedefs?}}
 
-{{#program:typedefs}}
-{{#typedef:type}}{{^type:enum?}}
-{{typedef:name}} = {{#if typedef:has_adapter?}}{{#let adapter = typedef:adapter}}{{!
-    }}{{adapter.type_hint}}{{#if adapter.is_generic?}}[{{> types/typedef_pep484_type}}]{{/if}}{{!
-}}{{#else}}{{!
-    }}{{> types/typedef_pep484_type}}{{!
-}}{{/if typedef:has_adapter?}}
-{{/type:enum?}}{{/typedef:type}}
-{{/program:typedefs}}
+{{#program:self.typedefs}}
+  {{#if (not typedef:enum?)}}
+    {{#if typedef:has_adapter?}}
+      {{#let adapter = typedef:adapter}}
+{{typedef:name}} = {{adapter.type_hint}}{{#if adapter.is_generic?}}[{{> types/typedef_pep484_type}}]{{/if}}
+    {{#else}}
+{{typedef:name}} = {{> types/typedef_pep484_type}}
+    {{/if typedef:has_adapter?}}
+  {{/if (not typedef:enum?)}}
+{{/program:self.typedefs}}
 {{/program:typedefs?}}
 {{#program:services?}}
 {{#program:services}}

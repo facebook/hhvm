@@ -86,3 +86,15 @@ None
 {{#partial adapted_type_pyi type=field.type adapter=field.adapter}}
 {{#if field.optional?}}]{{/if}}
 {{/let partial}}
+
+{{#let export partial iter_return_type |fields| captures |adapted_type_pyi|}}
+{{! `__iter__()` return type }}
+{{#pragma ignore-newlines}}
+_typing.Iterator[_typing.Tuple[builtins.str, _typing.Union[
+  {{#each (array.enumerate fields with_first=true) as |i field first?|}}
+{{#if (not first?)}}, {{/if}}{{#partial adapted_type_pyi type=field.type adapter=field.adapter}}
+    {{#else}}
+None
+  {{/each}}
+]]]
+{{/let partial}}

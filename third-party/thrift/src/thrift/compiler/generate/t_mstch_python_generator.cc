@@ -1317,12 +1317,12 @@ void t_mstch_python_generator::generate_services() {
     // services.
     return;
   }
-  generate_mstch_file(
+  generate_whisker_file(
       "thrift_services.py",
       types_file_kind::not_a_types_file,
       type_kind::immutable);
 
-  generate_mstch_file(
+  generate_whisker_file(
       "thrift_mutable_services.py",
       types_file_kind::not_a_types_file,
       type_kind::mutable_);

@@ -14,39 +14,45 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{!
+}}
+{{#import "common/fields" as m_fields}}
+{{#import "common/functions" as m_functions}}
+{{#import "common/typehints" as typehints}}
+{{#import "common/types" as m_types}}
+
+{{!
 The argument and result types for functions on thrift services (and interactions) for typing stub
-}}{{#each service:supported_functions as |function|}}
+}}
+{{#let export partial service_arg_types_pyi |service| captures |m_fields m_functions m_types typehints|}}
+{{#each service.supported_functions as |function|}}
 
 
-class {{#partial m_functions.args_type service=service:self function=function}}({{#partial m_types.struct_base}}):
-    {{#function.params.fields}}
-    {{field:py_name}}: _typing.Final[{{#partial typehints.pep484_type type=field:type}}] = ...
-    {{/function.params.fields}}
+class {{#partial m_functions.args_type service=service function=function}}({{#partial m_types.struct_base}}):
+    {{#each function.params.fields as |field|}}
+    {{field.py_name}}: _typing.Final[{{#partial typehints.pep484_type type=field.type}}] = ...
+    {{/each}}
 
     def __init__(
-        self,{{#function.params.fields?}} *{{/function.params.fields?}}{{#each function.params.fields as |field|}}{{> types/init_and_call_arg_types}}{{/each}}
+        self,{{#if function.params.fields?}} *{{/if}}{{#each function.params.fields as |field|}}{{> types/init_and_call_arg_types}}{{/each}}
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
-        _typing.Union[None{{#function.params.fields}}, {{!
-            }}{{#partial typehints.pep484_type type=field:type}}{{!
-        }}{{/function.params.fields}}]]]: ...
-{{^function.oneway?}}
+        _typing.Union[None{{#each function.params.fields as |field|}}, {{!
+            }}{{#partial typehints.pep484_type type=field.type}}{{!
+        }}{{/each}}]]]: ...
+  {{#if (not function.oneway?)}}
 
 
-class _fbthrift_{{service:name}}_{{function.name}}_result({{#partial m_types.struct_base}}):
-   {{#let regular_response_type = (if function.oneway? null function.return_type.true_type)}}
-   {{#if (object.notnull? regular_response_type)}}
+class _fbthrift_{{service.name}}_{{function.name}}_result({{#partial m_types.struct_base}}):
+   {{#let regular_response_type = function.return_type.true_type}}
     success: _typing.Final[{{#partial typehints.pep484_type type=regular_response_type}}]
-   {{/if (object.notnull? regular_response_type)}}
-    {{#function.exceptions}}
-    {{field:py_name}}: _typing.Final[{{#partial typehints.pep484_type type=field:type}}]
-    {{/function.exceptions}}
+    {{#each function.exceptions as |field|}}
+    {{field.py_name}}: _typing.Final[{{#partial typehints.pep484_type type=field.type}}]
+    {{/each}}
 
     def __init__(
-        self, *, success: _typing.Optional[{{#if (object.notnull? regular_response_type)}}{{#partial typehints.pep484_type type=regular_response_type}}{{/if}}] = ...{{!
+        self, *, success: _typing.Optional[{{#partial typehints.pep484_type type=regular_response_type}}] = ...{{!
         }}{{#each (array.enumerate function.exceptions) as |index field|}}{{!
         }}, {{#partial m_fields.exception_field_name field=field index=index }}: _typing.Optional[{{#partial typehints.pep484_type type=field.type}}]=...{{!
         }}{{/each}}
@@ -55,28 +61,28 @@ class _fbthrift_{{service:name}}_{{function.name}}_result({{#partial m_types.str
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            {{#if (object.notnull? regular_response_type)}}{{#partial typehints.pep484_type type=regular_response_type}}{{/if}},
-            {{#function.exceptions}}
-            {{#partial typehints.pep484_type type=field:type}},
-            {{/function.exceptions}}
+            {{#partial typehints.pep484_type type=regular_response_type}},
+            {{#each function.exceptions as |field|}}
+            {{#partial typehints.pep484_type type=field.type}},
+            {{/each}}
         ]]]: ...
-{{/function.oneway?}}
-{{#function.stream?}}
+  {{/if (not function.oneway?)}}
+  {{#if function.stream?}}
 
 
-class _fbthrift_{{service:name}}_{{function.name}}_result_stream_elem({{!
+class _fbthrift_{{service.name}}_{{function.name}}_result_stream_elem({{!
 }}{{#if python.generate_mutable_types?}}_fbthrift_python_mutable_types._fbthrift_MutableResponseStreamResult{{/if}}{{!
 }}{{#if python.generate_immutable_types?}}_fbthrift_python_types._fbthrift_ResponseStreamResult{{/if}}{{!
 }}[{{#partial typehints.pep484_type type=function.stream.elem_type}}]):
-    {{#function.stream.exceptions}}
-    {{field:py_name}}: _typing.Final[{{#partial typehints.pep484_type type=field:type}}]
-    {{/function.stream.exceptions}}
+    {{#each function.stream.exceptions as |field|}}
+    {{field.py_name}}: _typing.Final[{{#partial typehints.pep484_type type=field.type}}]
+    {{/each}}
 
     def __init__(
         self, *, success: _typing.Optional[{{#partial typehints.pep484_type type=function.stream.elem_type}}] = ...{{!
-        }}{{#function.stream.exceptions}}{{!
-        }}, {{field:py_name}}: _typing.Optional[{{#partial typehints.pep484_type type=field:type}}]=...{{!
-        }}{{/function.stream.exceptions}}
+        }}{{#each function.stream.exceptions as |field|}}{{!
+        }}, {{field.py_name}}: _typing.Optional[{{#partial typehints.pep484_type type=field.type}}]=...{{!
+        }}{{/each}}
     ) -> None: ...
 
     {{! TODO: is this actually needed to enable typing? Delete if not. }}
@@ -84,45 +90,46 @@ class _fbthrift_{{service:name}}_{{function.name}}_result_stream_elem({{!
         str,
         _typing.Union[
             {{#partial typehints.pep484_type type=function.stream.elem_type}},
-            {{#function.stream.exceptions}}
-            {{#partial typehints.pep484_type type=field:type}},
-            {{/function.stream.exceptions}}
+            {{#each function.stream.exceptions as |field|}}
+            {{#partial typehints.pep484_type type=field.type}},
+            {{/each}}
         ]]]: ...
-{{/function.stream?}}
-{{#function.sink?}}
+  {{/if function.stream?}}
+  {{#if function.sink?}}
 
 
-class _fbthrift_{{service:name}}_{{function.name}}_result_sink_elem({{#partial m_types.struct_base}}):
+class _fbthrift_{{service.name}}_{{function.name}}_result_sink_elem({{#partial m_types.struct_base}}):
     success: _typing.Final[{{#partial typehints.pep484_type type=function.sink.elem_type}}]
-    {{#function.sink.exceptions}}
-    {{field:py_name}}: _typing.Final[{{#partial typehints.pep484_type type=field:type}}]
-    {{/function.sink.exceptions}}
+    {{#each function.sink.exceptions as |field|}}
+    {{field.py_name}}: _typing.Final[{{#partial typehints.pep484_type type=field.type}}]
+    {{/each}}
 
     def __init__(
         self,
         *,
         success: _typing.Optional[{{#partial typehints.pep484_type type=function.sink.elem_type}}] = ...{{!
-        }}{{#function.sink.exceptions}}{{!
-        }}, {{field:py_name}}: _typing.Optional[{{#partial typehints.pep484_type type=field:type}}]=...{{!
-        }}{{/function.sink.exceptions}}
+        }}{{#each function.sink.exceptions as |field|}}{{!
+        }}, {{field.py_name}}: _typing.Optional[{{#partial typehints.pep484_type type=field.type}}]=...{{!
+        }}{{/each}}
     ) -> None: ...
 
 
-{{^function.bidirectional_stream?}}{{!
-}}class _fbthrift_{{service:name}}_{{function.name}}_result_sink_final({{#partial m_types.struct_base}}):
+    {{#if (not function.bidirectional_stream?)}}
+class _fbthrift_{{service.name}}_{{function.name}}_result_sink_final({{#partial m_types.struct_base}}):
     success: _typing.Final[{{#partial typehints.pep484_type type=function.sink.final_response_type}}]
-    {{#function.sink.final_response_exceptions}}
-    {{field:py_name}}: _typing.Final[{{#partial typehints.pep484_type type=field:type}}]
-    {{/function.sink.final_response_exceptions}}
+    {{#each function.sink.final_response_exceptions as |field|}}
+    {{field.py_name}}: _typing.Final[{{#partial typehints.pep484_type type=field.type}}]
+    {{/each}}
 
     def __init__(
         self,
         *,
         success: _typing.Optional[{{#partial typehints.pep484_type type=function.sink.final_response_type}}] = ...{{!
-        }}{{#function.sink.final_response_exceptions}}{{!
-        }}, {{field:py_name}}: _typing.Optional[{{#partial typehints.pep484_type type=field:type}}]=...{{!
-        }}{{/function.sink.final_response_exceptions}}
+        }}{{#each function.sink.final_response_exceptions as |field|}}{{!
+        }}, {{field.py_name}}: _typing.Optional[{{#partial typehints.pep484_type type=field.type}}]=...{{!
+        }}{{/each}}
     ) -> None: ...
-{{/function.bidirectional_stream?}}
-{{/function.sink?}}
+    {{/if (not function.bidirectional_stream?)}}
+  {{/if function.sink?}}
 {{/each}}
+{{/let partial}}

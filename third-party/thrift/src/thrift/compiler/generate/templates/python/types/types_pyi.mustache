@@ -22,60 +22,57 @@ Generated Python typestubs for Thrift types
 {{#import "common/functions" as m_functions}}
 {{#import "common/typehints" as typehints}}
 {{#import "common/types" as m_types}}
+{{#import "types/service_arg_types_pyi" as service_arg_types_pyi}}
 {{#partial m_common.auto_generated_py}}
 
 import typing as _typing
 import builtins
 
 
-{{#program:unions?}}
+  {{#if program.unions?}}
 import enum
 
-{{/program:unions?}}
+  {{/if program.unions?}}
 import folly.iobuf as _fbthrift_iobuf
-{{#python.enable_abstract_types?}}
-import {{program:module_path}}.thrift_abstract_types as _fbthrift_python_abstract_types
-{{/python.enable_abstract_types?}}
-import {{program:base_library_package}}.types as _fbthrift_python_types
-{{#python.generate_immutable_types?}}
-import {{program:base_library_package}}.exceptions as _fbthrift_python_exceptions
-{{/python.generate_immutable_types?}}
-{{#python.generate_mutable_types?}}
-import {{program:base_library_package}}.mutable_types as _fbthrift_python_mutable_types
-import {{program:base_library_package}}.mutable_exceptions as _fbthrift_python_mutable_exceptions
-import {{program:base_library_package}}.mutable_containers as _fbthrift_python_mutable_containers
-{{/python.generate_mutable_types?}}
-{{#program:include_namespaces}}
-{{#has_types?}}
+  {{#if python.enable_abstract_types?}}
+import {{program.module_path}}.thrift_abstract_types as _fbthrift_python_abstract_types
+  {{/if python.enable_abstract_types?}}
+import {{program.base_library_package}}.types as _fbthrift_python_types
+  {{#if python.generate_immutable_types?}}
+import {{program.base_library_package}}.exceptions as _fbthrift_python_exceptions
+  {{/if python.generate_immutable_types?}}
+  {{#if python.generate_mutable_types?}}
+import {{program.base_library_package}}.mutable_types as _fbthrift_python_mutable_types
+import {{program.base_library_package}}.mutable_exceptions as _fbthrift_python_mutable_exceptions
+import {{program.base_library_package}}.mutable_containers as _fbthrift_python_mutable_containers
+  {{/if python.generate_mutable_types?}}
+{{#each program.include_namespaces as |include|}}
+  {{#if include.has_types?}}
 
-import {{included_module_path}}.{{#partial m_types.import_path}} as {{included_module_mangle}}__{{#partial m_types.import_path}}
-{{/has_types?}}
-{{/program:include_namespaces}}
-{{#each program:adapter_type_hint_modules as |module_path|}}
+import {{include.included_module_path}}.{{#partial m_types.import_path}} as {{include.included_module_mangle}}__{{#partial m_types.import_path}}
+  {{/if include.has_types?}}
+{{/each}}
+{{#each program.adapter_type_hint_modules as |module_path|}}
 import {{module_path}}
 {{/each}}
-{{#partial m_common.import_enums program=program:self}}
-{{#program:structs}}
+{{#partial m_common.import_enums program=program}}
+{{#each program.structured_definitions as |struct|}}
 
 
 @_typing.final
-class {{> structs/unadapted_name}}({{!
-        }}{{#struct:union?}}{{#partial m_types.union_base }}{{/struct:union?}}{{!
-        }}{{^struct:union?}}{{!
-        }}{{#struct:exception?}}{{#partial m_types.exception_base}}{{/struct:exception?}}{{!
-        }}{{^struct:exception?}}{{#partial m_types.struct_base}}{{/struct:exception?}}{{!
-        }}{{/struct:union?}}{{!
-        }}{{#python.enable_abstract_types?}}{{!
-        }}, _fbthrift_python_abstract_types.{{> structs/unadapted_name}}{{!
-        }}{{/python.enable_abstract_types?}}{{!
+class {{#partial m_types.unadapted_name type=struct}}({{!
+        }}{{#partial m_types.structured_base type=struct}}{{!
+        }}{{#if python.enable_abstract_types?}}{{!
+        }}, _fbthrift_python_abstract_types.{{#partial m_types.unadapted_name type=struct}}{{!
+        }}{{/if python.enable_abstract_types?}}{{!
         }}):
-    {{#python.generate_immutable_types?}}{{!
-    }}{{#each struct:fields_ordered_by_id as |field|}}
+    {{#if python.generate_immutable_types?}}{{!
+    }}{{#each struct.fields_ordered_by_id as |field|}}
     {{field.py_name}}: _typing.Final[{{#partial m_fields.field_type_pyi field=field}}] = ...
     {{/each}}{{!
-    }}{{/python.generate_immutable_types?}}{{!
-    }}{{#python.generate_mutable_types?}}{{!
-    }}{{#each struct:fields_ordered_by_id as |field|}}{{!
+    }}{{/if python.generate_immutable_types?}}{{!
+    }}{{#if python.generate_mutable_types?}}{{!
+    }}{{#each struct.fields_ordered_by_id as |field|}}{{!
     }}
     @property
     def {{field.py_name}}(self) -> {{#partial m_fields.field_type_pyi field=field}}: ...
@@ -83,93 +80,88 @@ class {{> structs/unadapted_name}}({{!
     def {{field.py_name}}(self, value: {{#partial m_fields.field_type_pyi field=field}}{{#partial m_types.add_wrapper_if_container field=field}}) -> None: ...
 
     {{/each}}{{!
-    }}{{/python.generate_mutable_types?}}
+    }}{{/if python.generate_mutable_types?}}
     def __init__(
-        self,{{#struct:fields?}} *{{/struct:fields?}}{{!
-        }}{{#each struct:fields_ordered_by_id as |field|}}{{> types/init_and_call_arg_types}}{{/each}}
+        self,{{#if struct.fields?}} *{{/if}}{{!
+        }}{{#each struct.fields_ordered_by_id as |field|}}{{> types/init_and_call_arg_types}}{{/each}}
     ) -> None: ...
 
-    {{#if struct:struct?}}
+    {{#if struct.struct?}}
     {{! If this structured is specifically a *struct*}}
     def __call__(
-        self,{{#struct:fields?}} *{{/struct:fields?}}{{!
-        }}{{#each struct:fields_ordered_by_id as |field|}}{{> types/init_and_call_arg_types}}{{/each}}
+        self,{{#if struct.fields?}} *{{/if}}{{!
+        }}{{#each struct.fields_ordered_by_id as |field|}}{{> types/init_and_call_arg_types}}{{/each}}
     ) -> _typing.Self: ...
-    {{/if struct:struct?}}
-    {{#struct:union?}}
+    {{/if struct.struct?}}
+    {{#if struct.union?}}
 
-{{#python.generate_immutable_types?}}
+{{#if python.generate_immutable_types?}}
     class Type(enum.Enum):
-        EMPTY: {{> structs/unadapted_name}}.Type = ...
-    {{#struct:fields_ordered_by_id}}
-        {{field:py_name}}: {{> structs/unadapted_name}}.Type = ...
-    {{/struct:fields_ordered_by_id}}
-{{/python.generate_immutable_types?}}
+        EMPTY: {{#partial m_types.unadapted_name type=struct}}.Type = ...
+    {{#each struct.fields_ordered_by_id as |field|}}
+        {{field.py_name}}: {{#partial m_types.unadapted_name type=struct}}.Type = ...
+    {{/each}}
+{{/if python.generate_immutable_types?}}
 
 {{> structs/maybe_union_field_and_value}}
 
-{{#python.generate_immutable_types?}}
+{{#if python.generate_immutable_types?}}
     @classmethod
-    def fromValue(cls, value: {{> types/field_value_pep484_union_type}}) -> {{> structs/unadapted_name}}: ...
+    def fromValue(cls, value: {{> types/field_value_pep484_union_type}}) -> {{#partial m_types.unadapted_name type=struct}}: ...
     value: _typing.Final[{{> types/field_value_pep484_union_type}}]
     type: _typing.Final[Type]
     def get_type(self) -> Type: ...
-{{/python.generate_immutable_types?}}
-{{#python.generate_mutable_types?}}
+{{/if python.generate_immutable_types?}}
+{{#if python.generate_mutable_types?}}
     def get_type(self) -> FbThriftUnionFieldEnum: ...
-{{/python.generate_mutable_types?}}
-    {{/struct:union?}}
-    {{^struct:union?}}
-    def __iter__(self) -> {{#partial m_fields.iter_return_type fields=struct:fields_ordered_by_id}}: ...
-    {{/struct:union?}}
-    {{#struct:legacy_api?}}
-{{#python.generate_immutable_types?}}
-    def _to_python(self) -> _typing.Self: ...
-    def _to_mutable_python(self) -> "{{program:module_path}}.thrift_mutable_types.{{> structs/unadapted_name}}": ...  # type: ignore
-{{/python.generate_immutable_types?}}
-{{#python.generate_mutable_types?}}
-    def _to_python(self) -> "{{program:module_path}}.thrift_types.{{> structs/unadapted_name}}": ...  # type: ignore
-    def _to_mutable_python(self) -> _typing.Self: ...
-{{/python.generate_mutable_types?}}
-    def _to_py3(self) -> "{{program:module_path}}.types.{{> structs/unadapted_name}}": ...  # type: ignore
-    def _to_py_deprecated(self) -> "{{program:py_deprecated_module_path}}.ttypes.{{> structs/unadapted_name}}": ...  # type: ignore
-    {{/struct:legacy_api?}}
-{{#if struct:has_adapter?}}
-{{#let adapter = struct:adapter}}
-{{struct:py_name}} = {{adapter.type_hint}}{{#if adapter.is_generic?}}[{{> structs/unadapted_name}}]{{/if}}
-{{/if struct:has_adapter?}}
-{{#partial m_common.private_alias_prefix}}{{struct:py_name}} = {{struct:py_name}}{{!
-}}{{/program:structs}}
-{{#program:constants?}}
-
-{{#program:constants}}
-
-{{#if constant:has_adapter?}}_fbthrift_unadapted_{{/if}}{{constant:name}}: {{#constant:type}}{{!
-    }}{{> types/constant_pep484_type}}{{!
-}}{{/constant:type}} = ...
-{{#if constant:has_adapter?}}
-{{constant:name}}: {{constant:adapter.type_hint}} = ...
-{{/if constant:has_adapter?}}
-{{/program:constants}}
-{{/program:constants?}}
-{{#program:typedefs?}}
-
-{{#program:self.typedefs}}
-  {{#if (not typedef:enum?)}}
-    {{#if typedef:has_adapter?}}
-      {{#let adapter = typedef:adapter}}
-{{typedef:name}} = {{adapter.type_hint}}{{#if adapter.is_generic?}}[{{> types/typedef_pep484_type}}]{{/if}}
+{{/if python.generate_mutable_types?}}
     {{#else}}
-{{typedef:name}} = {{> types/typedef_pep484_type}}
-    {{/if typedef:has_adapter?}}
-  {{/if (not typedef:enum?)}}
-{{/program:self.typedefs}}
-{{/program:typedefs?}}
-{{#program:services?}}
-{{#program:services}}
-{{> types/service_arg_types_pyi}}
-{{#service:interactions}}
-{{> types/service_arg_types_pyi}}
-{{/service:interactions}}
-{{/program:services}}
-{{/program:services?}}
+    def __iter__(self) -> {{#partial m_fields.iter_return_type fields=struct.fields_ordered_by_id}}: ...
+    {{/if struct.union?}}
+    {{#if struct.legacy_api?}}
+{{#if python.generate_immutable_types?}}
+    def _to_python(self) -> _typing.Self: ...
+    def _to_mutable_python(self) -> "{{program.module_path}}.thrift_mutable_types.{{#partial m_types.unadapted_name type=struct}}": ...  # type: ignore
+{{/if python.generate_immutable_types?}}
+{{#if python.generate_mutable_types?}}
+    def _to_python(self) -> "{{program.module_path}}.thrift_types.{{#partial m_types.unadapted_name type=struct}}": ...  # type: ignore
+    def _to_mutable_python(self) -> _typing.Self: ...
+{{/if python.generate_mutable_types?}}
+    def _to_py3(self) -> "{{program.module_path}}.types.{{#partial m_types.unadapted_name type=struct}}": ...  # type: ignore
+    def _to_py_deprecated(self) -> "{{program.py_deprecated_module_path}}.ttypes.{{#partial m_types.unadapted_name type=struct}}": ...  # type: ignore
+    {{/if struct.legacy_api?}}
+  {{#if struct.has_adapter?}}
+    {{#let adapter = struct.adapter}}
+{{struct.py_name}} = {{adapter.type_hint}}{{#if adapter.is_generic?}}[{{#partial m_types.unadapted_name type=struct}}]{{/if}}
+  {{/if struct.has_adapter?}}
+{{#partial m_common.private_alias_prefix}}{{struct.py_name}} = {{struct.py_name}}{{!
+}}{{/each}}
+{{#if program.constants?}}
+
+  {{#each program.consts as |constant|}}
+
+{{#if constant.has_adapter?}}_fbthrift_unadapted_{{/if}}{{constant.name}}: {{#partial typehints.const_type type=constant.type}} = ...
+    {{#if constant.has_adapter?}}
+{{constant.name}}: {{constant.adapter.type_hint}} = ...
+    {{/if constant.has_adapter?}}
+  {{/each}}
+{{/if program.constants?}}
+{{#if program.typedefs?}}
+
+  {{#each program.typedefs as |typedef|}}
+    {{#if (not typedef.enum?)}}
+      {{#if typedef.has_adapter?}}
+        {{#let adapter = typedef.adapter}}
+{{typedef.name}} = {{adapter.type_hint}}{{#if adapter.is_generic?}}[{{> types/typedef_pep484_type}}]{{/if}}
+      {{#else}}
+{{typedef.name}} = {{> types/typedef_pep484_type}}
+      {{/if typedef.has_adapter?}}
+    {{/if (not typedef.enum?)}}
+  {{/each}}
+{{/if program.typedefs?}}
+  {{#each program.services as |service|}}
+{{#partial service_arg_types_pyi.service_arg_types_pyi service=service}}
+    {{#each service.interactions as |interaction|}}
+{{#partial service_arg_types_pyi.service_arg_types_pyi service=interaction}}
+    {{/each}}
+  {{/each}}

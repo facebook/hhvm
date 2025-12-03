@@ -91,7 +91,7 @@ class {{#partial m_types.unadapted_name type=struct}}({{!
     {{#if (not struct.has_invariant_field?)}}
 {{> fields/use_reserved_property_identifier}}
 {{> fields/maybe_abstract_method_annotation}}
-    def fbthrift_current_value(self) -> {{#struct}}{{> types/field_value_pep484_union_type}}{{/struct}}: ...
+    def fbthrift_current_value(self) -> {{> types/field_value_pep484_union_type}}: ...
     {{/if (not struct.has_invariant_field?)}}
 {{> fields/use_reserved_property_identifier}}
 {{> fields/maybe_abstract_method_annotation}}
@@ -111,9 +111,9 @@ class {{#partial m_types.unadapted_name type=struct}}({{!
     {{#if (not typedef.enum?)}}
       {{#if typedef.has_adapter?}}
         {{#let adapter = typedef.adapter}}
-{{typedef.name}} = {{adapter.type_hint}}{{#if adapter.is_generic?}}[{{#typedef}}{{> types/typedef_pep484_type}}{{/typedef}}]{{/if}}
+{{typedef.name}} = {{adapter.type_hint}}{{#if adapter.is_generic?}}[{{> types/typedef_pep484_type}}]{{/if}}
       {{#else}}
-{{typedef.name}} = {{#typedef}}{{> types/typedef_pep484_type}}{{/typedef}}
+{{typedef.name}} = {{> types/typedef_pep484_type}}
       {{/if typedef.has_adapter?}}
     {{/if (not typedef.enum?)}}
   {{/each}}

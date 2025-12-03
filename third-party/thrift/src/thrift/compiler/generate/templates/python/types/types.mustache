@@ -67,13 +67,7 @@ import {{module_path}}
 
 
 class {{> structs/unadapted_name}}{{!
-}}(metaclass={{!
-        }}{{#struct:union?}}{{#partial m_types.union_metaclass}}{{/struct:union?}}{{!
-        }}{{^struct:union?}}{{!
-        }}{{#struct:exception?}}{{#partial m_types.exception_metaclass}}{{/struct:exception?}}{{!
-        }}{{^struct:exception?}}{{#partial m_types.struct_metaclass}}{{/struct:exception?}}{{!
-        }}{{/struct:union?}}{{!
-        }}):
+}}(metaclass={{#partial m_types.structured_base type=struct:self}}Meta):
     {{#if (has_compiler_option? "auto_migrate")}}
     {{#struct:allow_inheritance?}}
     _fbthrift_allow_inheritance_DO_NOT_USE = True

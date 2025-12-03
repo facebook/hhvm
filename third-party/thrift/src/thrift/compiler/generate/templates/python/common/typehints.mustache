@@ -109,3 +109,21 @@ None
 {{#pragma ignore-newlines}}
 {{#partial pep484_type_impl type=type unadapted=false}}
 {{/let partial}}
+
+
+{{! Const PEP484 type }}
+{{#let export partial const_type |type| captures |pep484_type|}}
+{{#pragma ignore-newlines}}
+  {{#if type.list?}}
+_typing.Sequence[{{#partial pep484_type type=type.true_type.elem_type}}]
+  {{#else if type.set?}}
+_typing.AbstractSet[{{#partial pep484_type type=type.true_type.elem_type}}]
+  {{#else if type.map?}}
+_typing.Mapping[
+{{#partial pep484_type type=type.true_type.key_type}}, {{!}}
+{{#partial pep484_type type=type.true_type.val_type}}
+]
+  {{#else}}
+{{#partial pep484_type type=type}}
+  {{/if type.list?}}
+{{/let partial}}

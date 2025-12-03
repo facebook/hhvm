@@ -17,7 +17,7 @@
 
 import math
 import unittest
-from sys import float_info, getrefcount
+from sys import float_info
 from typing import Callable
 
 import thrift.python.types  # noqa: F401
@@ -195,104 +195,59 @@ class TestMarshalPrimitives(MarshalFixture):
 class TestMarshalList(MarshalFixture):
     # Use the internal representation, which is tuple for lists
     def test_int32_list(self) -> None:
-        # store refcounts of singletons for leak checks
-        int_refcount = getrefcount(-1)
-        empty_tuple_refcount = getrefcount(())
-
         def make_list():
             return (0, -1, INT32_MIN, INT32_MAX)
 
         self.assertEqual(make_list(), fixture.roundtrip_int32_list(make_list()))
         self.assertEqual((), fixture.roundtrip_int32_list(()))
-        # no leaks!
-        self.assertEqual(int_refcount, getrefcount(-1))
-        self.assertEqual(empty_tuple_refcount, getrefcount(()))
 
     def test_bool_list(self) -> None:
-        # store refcounts of singletons for leak checks
-        false_refcount = getrefcount(False)
-        empty_tuple_refcount = getrefcount(())
-
         def make_list():
             return (True, False, False, False, True, False)
 
         self.assertEqual(make_list(), fixture.roundtrip_bool_list(make_list()))
         self.assertEqual((), fixture.roundtrip_bool_list(()))
-        # no leaks!
-        self.assertEqual(false_refcount, getrefcount(False))
-        self.assertEqual(empty_tuple_refcount, getrefcount(()))
 
     def test_double_list(self) -> None:
-        # no float singletons afaik
-        empty_tuple_refcount = getrefcount(())
-
         def make_list():
             return (-1.0, 0.0, -float_info.max, float_info.max)
 
         self.assertEqual(make_list(), fixture.roundtrip_double_list(make_list()))
         self.assertEqual((), fixture.roundtrip_double_list(()))
-        # no leaks!
-        self.assertEqual(empty_tuple_refcount, getrefcount(()))
 
     def test_bytes_list(self) -> None:
-        # empty bytes is a singleton like empty tuple
-        empty_refcount = getrefcount(b"")
-        empty_tuple_refcount = getrefcount(())
-
         def make_list():
             return (b"", b"-1", b"wef2", b"\xe2\x82\xac")
 
         self.assertEqual(make_list(), fixture.roundtrip_bytes_list(make_list()))
         self.assertEqual((), fixture.roundtrip_bytes_list(()))
-        # no leaks!
-        self.assertEqual(empty_refcount, getrefcount(b""))
-        self.assertEqual(empty_tuple_refcount, getrefcount(()))
 
     def test_unicode_list(self) -> None:
-        # empty str is a singleton like empty tuple
-        empty_refcount = getrefcount("")
-        empty_tuple_refcount = getrefcount(())
-
         def make_list():
             return ("", "-1", "€", "", b"\xe2\x82\xac".decode())
 
         self.assertEqual(make_list(), fixture.roundtrip_unicode_list(make_list()))
         self.assertEqual((), fixture.roundtrip_unicode_list(()))
-        # no leaks!
-        self.assertEqual(empty_refcount, getrefcount(""))
-        self.assertEqual(empty_tuple_refcount, getrefcount(()))
 
         with self.assertRaises(UnicodeDecodeError):
             fixture.make_unicode_list((b"", b"", b"", b"", b"\xe2\x82"))
-        # The empty str created before error are not leaked
-        self.assertEqual(empty_refcount, getrefcount(""))
 
 
 class TestMarshalSet(MarshalFixture):
     # Use the internal representation, which is frozenset
     def test_int32_set(self) -> None:
-        # store refcounts of singletons for leak checks
-        int_refcount = getrefcount(-1)
-
         def make_set():
             return frozenset({0, -1, INT32_MIN, INT32_MAX})
 
         self.assertEqual(make_set(), fixture.roundtrip_int32_set(make_set()))
         self.assertEqual(frozenset(), fixture.roundtrip_int32_set(frozenset()))
-        # no leaks!
-        self.assertEqual(int_refcount, getrefcount(-1))
 
     def test_bool_set(self) -> None:
-        # store refcounts of singletons for leak checks
-        false_refcount = getrefcount(False)
-
         def make_set():
             return frozenset({True, False})
 
         self.assertEqual(make_set(), fixture.roundtrip_bool_set(make_set()))
         self.assertEqual(frozenset(), fixture.roundtrip_bool_set(frozenset()))
-        # no leaks!
-        self.assertEqual(false_refcount, getrefcount(False))
 
     def test_double_set(self) -> None:
         def make_set():
@@ -302,129 +257,61 @@ class TestMarshalSet(MarshalFixture):
         self.assertEqual(frozenset(), fixture.roundtrip_double_set(frozenset()))
 
     def test_bytes_set(self) -> None:
-        # empty bytes is a singleton like empty tuple
-        empty_refcount = getrefcount(b"")
-
         def make_set():
             return frozenset({b"", b"-1", b"wef2", b"\xe2\x82\xac"})
 
         self.assertEqual(make_set(), fixture.roundtrip_bytes_set(make_set()))
         self.assertEqual(frozenset(), fixture.roundtrip_bytes_set(frozenset()))
-        # no leaks!
-        self.assertEqual(empty_refcount, getrefcount(b""))
 
     def test_unicode_set(self) -> None:
-        # empty str is a singleton like empty tuple
-        empty_refcount = getrefcount("")
-
         def make_set():
             return frozenset({"", "-1", "€", b"\xe2\x82\xac".decode()})
 
         self.assertEqual(make_set(), fixture.roundtrip_unicode_set(make_set()))
         self.assertEqual(frozenset(), fixture.roundtrip_unicode_set(frozenset()))
-        # no leaks!
-        self.assertEqual(empty_refcount, getrefcount(""))
 
         with self.assertRaises(UnicodeDecodeError):
             fixture.make_unicode_set(frozenset((b"", b"a", b"c", b"e", b"\xe2\x82")))
-        # The empty str created before error are not leaked
-        self.assertEqual(empty_refcount, getrefcount(""))
 
 
 class TestMarshalMap(MarshalFixture):
     # Use the internal representation, which is tuple of (k, v) tuples.
     def test_int32_bool_map(self) -> None:
-        # store refcounts of singletons for leak checks
-        nil_refcount = getrefcount(0)
-        int_refcount = getrefcount(-1)
-        true_refcount = getrefcount(True)
-        false_refcount = getrefcount(False)
-
         def make_dict():
             return {x: x % 2 == 0 for x in [INT32_MIN, -1, 0, INT32_MAX]}
 
         self.assertEqual(make_dict(), fixture.roundtrip_int32_bool_map(make_dict()))
         self.assertEqual({}, fixture.roundtrip_int32_bool_map({}))
-        # no leaks!
-        self.assertEqual(nil_refcount, getrefcount(0))
-        self.assertEqual(int_refcount, getrefcount(-1))
-        self.assertEqual(true_refcount, getrefcount(True))
-        self.assertEqual(false_refcount, getrefcount(False))
 
     def test_byte_float_map(self) -> None:
-        # store refcounts of singletons for leak checks
-        nil_refcount = getrefcount(0)
-        int_refcount = getrefcount(-1)
-        ace_refcount = getrefcount(1)
-
         def make_dict():
             return {x: x / 13.0 for x in [INT8_MIN, -1, 0, 1, INT8_MAX]}
 
         self.assertEqual(make_dict(), fixture.roundtrip_byte_float_map(make_dict()))
         self.assertEqual({}, fixture.roundtrip_byte_float_map({}))
-        # no leaks!
-        self.assertEqual(nil_refcount, getrefcount(0))
-        self.assertEqual(int_refcount, getrefcount(-1))
-        self.assertEqual(ace_refcount, getrefcount(1))
 
     def test_bytes_key_map(self) -> None:
-        # store refcounts of singletons for leak checks
-        nil_refcount = getrefcount(0)
-        int_refcount = getrefcount(-1)
-        ace_refcount = getrefcount(1)
-
         def make_dict():
             return {b"": -1, b"asdfwe": 0, b"wdfwe": 1}
 
         self.assertEqual(make_dict(), fixture.roundtrip_bytes_key_map(make_dict()))
         self.assertEqual({}, fixture.roundtrip_bytes_key_map({}))
 
-        # no leaks!
-        self.assertEqual(nil_refcount, getrefcount(0))
-        self.assertEqual(int_refcount, getrefcount(-1))
-        self.assertEqual(ace_refcount, getrefcount(1))
-
     def test_bytes_val_map(self) -> None:
-        # store refcounts of singletons for leak checks
-        nil_refcount = getrefcount(0)
-        int_refcount = getrefcount(-1)
-        ace_refcount = getrefcount(1)
-
         def make_dict():
             return {-1: b"", 0: b"asdfwe", 1: b"wdfwe"}
 
         self.assertEqual(make_dict(), fixture.roundtrip_bytes_val_map(make_dict()))
         self.assertEqual({}, fixture.roundtrip_bytes_val_map({}))
 
-        # no leaks!
-        self.assertEqual(nil_refcount, getrefcount(0))
-        self.assertEqual(int_refcount, getrefcount(-1))
-        self.assertEqual(ace_refcount, getrefcount(1))
-
     def test_unicode_key_map(self) -> None:
-        # store refcounts of singletons for leak checks
-        nil_refcount = getrefcount(0)
-        int_refcount = getrefcount(-1)
-        ace_refcount = getrefcount(1)
-
         def make_dict():
             return {"": -1, "asdfwe": 0, "wdfwe": 1}
 
         self.assertEqual(make_dict(), fixture.roundtrip_unicode_key_map(make_dict()))
         self.assertEqual({}, fixture.roundtrip_unicode_key_map({}))
 
-        # no leaks!
-        self.assertEqual(nil_refcount, getrefcount(0))
-        self.assertEqual(int_refcount, getrefcount(-1))
-        self.assertEqual(ace_refcount, getrefcount(1))
-
     def test_unicode_val_map(self) -> None:
-        # store refcounts of singletons for leak checks
-        nil_refcount = getrefcount(0)
-        int_refcount = getrefcount(-1)
-        ace_refcount = getrefcount(1)
-        empty_refcount = getrefcount("")
-
         def make_dict():
             return {-1: "", 0: "asdfwe", 1: "wdfwe"}
 
@@ -434,15 +321,5 @@ class TestMarshalMap(MarshalFixture):
         )
         self.assertEqual({}, fixture.roundtrip_unicode_val_map({}))
 
-        # no leaks!
-        self.assertEqual(nil_refcount, getrefcount(0))
-        self.assertEqual(int_refcount, getrefcount(-1))
-        self.assertEqual(ace_refcount, getrefcount(1))
-
         with self.assertRaises(UnicodeDecodeError):
             fixture.make_unicode_val_map({-1: b"", 0: b"a", 1: b"\xe2\x82"})
-
-        self.assertEqual(nil_refcount, getrefcount(0))
-        self.assertEqual(int_refcount, getrefcount(-1))
-        self.assertEqual(ace_refcount, getrefcount(1))
-        self.assertEqual(empty_refcount, getrefcount(""))

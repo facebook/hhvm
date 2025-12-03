@@ -249,6 +249,11 @@ StructMetadata<::facebook::thrift::test::terse_write::TerseException>::gen(Thrif
 }
 
 void ExceptionMetadata<::facebook::thrift::test::terse_write::TerseException>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::facebook::thrift::test::terse_write::TerseException>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::facebook::thrift::test::terse_write::TerseException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;

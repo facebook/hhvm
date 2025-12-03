@@ -116,6 +116,11 @@ StructMetadata<::cpp2::ShouldBeBoxed>::gen(ThriftMetadata& metadata) {
 }
 
 void ExceptionMetadata<::cpp2::CustomException>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::cpp2::CustomException>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::cpp2::CustomException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;

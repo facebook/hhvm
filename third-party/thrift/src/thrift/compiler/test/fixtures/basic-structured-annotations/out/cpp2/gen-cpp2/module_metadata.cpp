@@ -321,6 +321,11 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyUnion>::gen(Thr
 }
 
 void ExceptionMetadata<::test::fixtures::basic_structured_annotations::MyException>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::test::fixtures::basic_structured_annotations::MyException>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::test::fixtures::basic_structured_annotations::MyException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;

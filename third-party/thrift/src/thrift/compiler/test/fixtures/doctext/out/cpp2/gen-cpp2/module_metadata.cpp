@@ -144,6 +144,11 @@ StructMetadata<::cpp2::Bang>::gen(ThriftMetadata& metadata) {
 }
 
 void ExceptionMetadata<::cpp2::Bang>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::cpp2::Bang>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::cpp2::Bang>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;

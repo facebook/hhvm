@@ -233,6 +233,11 @@ StructMetadata<::cpp2::Banal>::gen(ThriftMetadata& metadata) {
 }
 
 void ExceptionMetadata<::cpp2::Fiery>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::cpp2::Fiery>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::cpp2::Fiery>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -263,6 +268,11 @@ void ExceptionMetadata<::cpp2::Fiery>::gen(ThriftMetadata& metadata) {
   ));
 }
 void ExceptionMetadata<::cpp2::Serious>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::cpp2::Serious>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::cpp2::Serious>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -293,6 +303,11 @@ void ExceptionMetadata<::cpp2::Serious>::gen(ThriftMetadata& metadata) {
   ));
 }
 void ExceptionMetadata<::cpp2::ComplexFieldNames>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::cpp2::ComplexFieldNames>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::cpp2::ComplexFieldNames>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -323,6 +338,11 @@ void ExceptionMetadata<::cpp2::ComplexFieldNames>::gen(ThriftMetadata& metadata)
   ));
 }
 void ExceptionMetadata<::cpp2::CustomFieldNames>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::cpp2::CustomFieldNames>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::cpp2::CustomFieldNames>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -353,6 +373,11 @@ void ExceptionMetadata<::cpp2::CustomFieldNames>::gen(ThriftMetadata& metadata) 
   ));
 }
 void ExceptionMetadata<::cpp2::ExceptionWithPrimitiveField>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::cpp2::ExceptionWithPrimitiveField>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::cpp2::ExceptionWithPrimitiveField>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -383,6 +408,11 @@ void ExceptionMetadata<::cpp2::ExceptionWithPrimitiveField>::gen(ThriftMetadata&
   ));
 }
 void ExceptionMetadata<::cpp2::ExceptionWithStructuredAnnotation>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::cpp2::ExceptionWithStructuredAnnotation>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::cpp2::ExceptionWithStructuredAnnotation>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -413,6 +443,11 @@ void ExceptionMetadata<::cpp2::ExceptionWithStructuredAnnotation>::gen(ThriftMet
   ));
 }
 void ExceptionMetadata<::cpp2::Banal>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::cpp2::Banal>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::cpp2::Banal>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;

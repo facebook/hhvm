@@ -493,6 +493,11 @@ StructMetadata<::py3::simple::AdaptedTypedefFields>::gen(ThriftMetadata& metadat
 }
 
 void ExceptionMetadata<::py3::simple::SimpleException>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::py3::simple::SimpleException>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::py3::simple::SimpleException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -523,6 +528,11 @@ void ExceptionMetadata<::py3::simple::SimpleException>::gen(ThriftMetadata& meta
   ));
 }
 void ExceptionMetadata<::py3::simple::HiddenException>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::py3::simple::HiddenException>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::py3::simple::HiddenException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;

@@ -246,6 +246,11 @@ StructMetadata<::cpp2::SinkException2>::gen(ThriftMetadata& metadata) {
 }
 
 void ExceptionMetadata<::cpp2::InitialException>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::cpp2::InitialException>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::cpp2::InitialException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -276,6 +281,11 @@ void ExceptionMetadata<::cpp2::InitialException>::gen(ThriftMetadata& metadata) 
   ));
 }
 void ExceptionMetadata<::cpp2::SinkException1>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::cpp2::SinkException1>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::cpp2::SinkException1>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -306,6 +316,11 @@ void ExceptionMetadata<::cpp2::SinkException1>::gen(ThriftMetadata& metadata) {
   ));
 }
 void ExceptionMetadata<::cpp2::SinkException2>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::cpp2::SinkException2>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::cpp2::SinkException2>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;

@@ -317,6 +317,11 @@ StructMetadata<::test::fixtures::basic::UnionToBeRenamed>::gen(ThriftMetadata& m
 }
 
 void ExceptionMetadata<::test::fixtures::basic::MyException>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::test::fixtures::basic::MyException>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::test::fixtures::basic::MyException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -347,6 +352,11 @@ void ExceptionMetadata<::test::fixtures::basic::MyException>::gen(ThriftMetadata
   ));
 }
 void ExceptionMetadata<::test::fixtures::basic::MyExceptionWithMessage>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::test::fixtures::basic::MyExceptionWithMessage>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::test::fixtures::basic::MyExceptionWithMessage>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;

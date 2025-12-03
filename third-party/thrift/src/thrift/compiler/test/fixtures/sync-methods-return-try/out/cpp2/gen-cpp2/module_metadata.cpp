@@ -332,6 +332,11 @@ StructMetadata<::cpp2::StreamItem>::gen(ThriftMetadata& metadata) {
 }
 
 void ExceptionMetadata<::cpp2::FooStreamEx>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::cpp2::FooStreamEx>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::cpp2::FooStreamEx>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -346,6 +351,11 @@ void ExceptionMetadata<::cpp2::FooStreamEx>::gen(ThriftMetadata& metadata) {
   ));
 }
 void ExceptionMetadata<::cpp2::FooEx>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::cpp2::FooEx>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::cpp2::FooEx>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -360,6 +370,11 @@ void ExceptionMetadata<::cpp2::FooEx>::gen(ThriftMetadata& metadata) {
   ));
 }
 void ExceptionMetadata<::cpp2::FooEx2>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::cpp2::FooEx2>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::cpp2::FooEx2>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -374,6 +389,11 @@ void ExceptionMetadata<::cpp2::FooEx2>::gen(ThriftMetadata& metadata) {
   ));
 }
 void ExceptionMetadata<::cpp2::InitialException>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::cpp2::InitialException>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::cpp2::InitialException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -404,6 +424,11 @@ void ExceptionMetadata<::cpp2::InitialException>::gen(ThriftMetadata& metadata) 
   ));
 }
 void ExceptionMetadata<::cpp2::SinkException1>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::cpp2::SinkException1>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::cpp2::SinkException1>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -434,6 +459,11 @@ void ExceptionMetadata<::cpp2::SinkException1>::gen(ThriftMetadata& metadata) {
   ));
 }
 void ExceptionMetadata<::cpp2::SinkException2>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::cpp2::SinkException2>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::cpp2::SinkException2>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;

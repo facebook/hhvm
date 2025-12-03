@@ -566,6 +566,11 @@ StructMetadata<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct>::gen(ThriftM
 }
 
 void ExceptionMetadata<::some::valid::ns::AnException>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::some::valid::ns::AnException>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::some::valid::ns::AnException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -596,6 +601,11 @@ void ExceptionMetadata<::some::valid::ns::AnException>::gen(ThriftMetadata& meta
   ));
 }
 void ExceptionMetadata<::some::valid::ns::AnotherException>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::some::valid::ns::AnotherException>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::some::valid::ns::AnotherException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;

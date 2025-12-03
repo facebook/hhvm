@@ -217,6 +217,11 @@ StructMetadata<::test::fixtures::python_capi::MarshalError>::gen(ThriftMetadata&
 }
 
 void ExceptionMetadata<::test::fixtures::python_capi::SerializedError>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::test::fixtures::python_capi::SerializedError>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::test::fixtures::python_capi::SerializedError>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;
@@ -248,6 +253,11 @@ void ExceptionMetadata<::test::fixtures::python_capi::SerializedError>::gen(Thri
   ));
 }
 void ExceptionMetadata<::test::fixtures::python_capi::MarshalError>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::test::fixtures::python_capi::MarshalError>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::test::fixtures::python_capi::MarshalError>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;

@@ -89,6 +89,11 @@ StructMetadata<::facebook::thrift::test::CustomException>::gen(ThriftMetadata& m
 }
 
 void ExceptionMetadata<::facebook::thrift::test::CustomException>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::facebook::thrift::test::CustomException>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::facebook::thrift::test::CustomException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;

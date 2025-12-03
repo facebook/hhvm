@@ -246,6 +246,11 @@ StructMetadata<::cpp2_struct_footprint::TestUnion>::gen(ThriftMetadata& metadata
 }
 
 void ExceptionMetadata<::cpp2_struct_footprint::ExStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<::cpp2_struct_footprint::ExStruct>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<::cpp2_struct_footprint::ExStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;

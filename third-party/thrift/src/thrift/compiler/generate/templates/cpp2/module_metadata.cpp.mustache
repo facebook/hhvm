@@ -116,6 +116,11 @@ StructMetadata<{{struct:cpp_fullname}}>::gen(ThriftMetadata& metadata) {
 {{#program:structs}}
 {{#struct:exception?}}
 void ExceptionMetadata<{{struct:cpp_fullname}}>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genExceptionMetadata<{{struct:cpp_fullname}}>(metadata, kGenerateAll);
+    return;
+  }
+
   auto res = genExceptionMetadata<{{struct:cpp_fullname}}>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return;

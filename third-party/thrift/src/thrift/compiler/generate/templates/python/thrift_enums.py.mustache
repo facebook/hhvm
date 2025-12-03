@@ -22,13 +22,13 @@ Generated Python enums for Thrift types
 import builtins
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
-import {{program:base_library_package}}.types as _fbthrift_python_types
-{{#program:include_namespaces}}
-{{#has_types?}}
-import {{included_module_path}}.thrift_enums as {{included_module_mangle}}__thrift_types
-{{/has_types?}}
-{{/program:include_namespaces}}
-{{#program:enums}}
+import {{program.base_library_package}}.types as _fbthrift_python_types
+{{#each program.include_namespaces as |include|}}
+  {{#if include.has_types?}}
+import {{include.included_module_path}}.thrift_enums as {{include.included_module_mangle}}__thrift_types
+  {{/if include.has_types?}}
+{{/each}}
+{{#each program.enums as |enum|}}
 import typing as _std_python_typing
 
 {{!
@@ -36,28 +36,26 @@ import typing as _std_python_typing
 }}
 
 
-class {{enum:name}}(_fbthrift_python_types.{{!
-        }}{{#if enum:flags?}}Flag{{#else}}Enum, int{{/if}}):
-    {{#enum:values}}
-    {{enum_value:py_name}} = {{enum_value:value}}
-    {{/enum:values}}
+class {{enum.name}}(_fbthrift_python_types.{{#if enum.flags?}}Flag{{#else}}Enum, int{{/if}}):
+    {{#each enum.values as |enum_value|}}
+    {{enum_value.py_name}} = {{enum_value.value}}
+    {{/each}}
     @staticmethod
     def __get_thrift_name__() -> builtins.str:
-        return "{{program:name}}.{{enum:name}}"
+        return "{{program.name}}.{{enum.name}}"
 
     @staticmethod
     def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
-        return {{#enum:uri}}"{{enum:uri}}"{{/enum:uri}}{{!
-            }}{{^enum:uri}}None{{/enum:uri}}
+        return {{#if (string.empty? enum.uri)}}None{{#else}}"{{enum.uri}}"{{/if}}
 
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
-        return gen_metadata_enum_{{enum:name}}()
+        return gen_metadata_enum_{{enum.name}}()
 
-    def _to_python(self) -> "{{enum:name}}":
+    def _to_python(self) -> "{{enum.name}}":
         return self
 
-    def _to_py3(self) -> "{{enum:name}}":
+    def _to_py3(self) -> "{{enum.name}}":
     {{! NB: thrift-py3 now uses thrift-python enums}}
         return self
 
@@ -65,33 +63,33 @@ class {{enum:name}}(_fbthrift_python_types.{{!
         To prevent the need to import the `thrift-py-deprecated` type,
         ignore the static type check error due to the lack of the import for the type.
     }}
-    # pyre-ignore[11]: Annotation `{{program:py_deprecated_module_path}}.ttypes.{{enum:name}}` is not defined as a type.
-    def _to_py_deprecated(self) -> "{{program:py_deprecated_module_path}}.ttypes.{{enum:name}}":
+    # pyre-ignore[11]: Annotation `{{program.py_deprecated_module_path}}.ttypes.{{enum.name}}` is not defined as a type.
+    def _to_py_deprecated(self) -> "{{program.py_deprecated_module_path}}.ttypes.{{enum.name}}":
         {{!
             At run-time, `thrift-py-deprecated` enum values are just integers.
             Return the integer value.
         }}
         return self.value
-{{/program:enums}}
+{{/each}}
 
-{{#program:enums}}
-def _fbthrift_gen_metadata_enum_{{enum:name}}({{!
+{{#each program.enums as |enum|}}
+def _fbthrift_gen_metadata_enum_{{enum.name}}({{!
 }}metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
-    qualified_name = "{{program:name}}.{{enum:name}}"
+    qualified_name = "{{program.name}}.{{enum.name}}"
 
     if qualified_name in metadata_struct.enums:
         return metadata_struct
     elements = {
-        {{#enum:values}}
-        {{enum_value:value}}: "{{enum_value:name}}",
-        {{/enum:values}}
+        {{#each enum.values as |enum_value|}}
+        {{enum_value.value}}: "{{enum_value.name}}",
+        {{/each}}
     }
     structured_annotations = [
-        {{#enum:self.structured_annotations}}
-          {{#if constant:type.structured?}}
-        {{#constant:value}}{{> metadata/const_struct }}{{/constant:value}},
-          {{/if constant:type.structured?}}
-        {{/enum:self.structured_annotations}}
+        {{#each enum.structured_annotations as |annotation|}}
+          {{#if annotation.type.structured?}}
+        {{#annotation.value}}{{> metadata/const_struct }}{{/annotation.value}},
+          {{/if annotation.type.structured?}}
+        {{/each}}
     ]
     enum_dict = dict(metadata_struct.enums)
     enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
@@ -99,17 +97,18 @@ def _fbthrift_gen_metadata_enum_{{enum:name}}({{!
 
     return new_struct
 
-def gen_metadata_enum_{{enum:name}}() -> _fbthrift_metadata.ThriftMetadata:
-    return _fbthrift_gen_metadata_enum_{{enum:name}}(
+def gen_metadata_enum_{{enum.name}}() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_enum_{{enum.name}}(
         _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
     )
 
-{{/program:enums}}
-{{#program:typedefs?}}
+{{/each}}
+{{#each (array.enumerate program.typedefs with_first=true) as |i typedef first?|}}
+  {{#if first?}}
 {{! Enum typedefs }}
-{{#program:typedefs}}
-{{#typedef:type}}{{#type:enum?}}{{#type:enum}}
-{{typedef:name}} = {{#type:need_module_path?}}{{type:module_mangle}}.{{/type:need_module_path?}}{{enum:name}}
-{{/type:enum}}{{/type:enum?}}{{/typedef:type}}
-{{/program:typedefs}}
-{{/program:typedefs?}}
+  {{/if first?}}
+  {{#if typedef.enum?}}
+    {{#let enum = typedef.true_type}}
+{{typedef.name}} = {{#if enum.need_module_path?}}{{enum.module_mangle}}.{{/if}}{{enum.name}}
+  {{/if typedef.enum?}}
+{{/each}}

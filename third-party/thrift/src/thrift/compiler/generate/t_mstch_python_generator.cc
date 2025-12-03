@@ -1197,13 +1197,17 @@ class t_mstch_python_generator : public t_mstch_python_prototypes_generator {
     }
   }
 
- protected:
-  void generate_file(
+ private:
+  /** Render a template with a mstch program object as the root context */
+  void generate_mstch_file(
       const std::string& template_name,
       types_file_kind types_file_kind,
-      type_kind type_kind,
-      const std::filesystem::path& base);
-  void set_types_file(bool val);
+      type_kind type_kind);
+  /** Render a template with a Whisker program handle as the root context */
+  void generate_whisker_file(
+      const std::string& template_name,
+      types_file_kind types_file_kind,
+      type_kind type_kind);
   void generate_types();
   void generate_metadata();
   void generate_clients();
@@ -1220,11 +1224,10 @@ class t_mstch_python_generator : public t_mstch_python_prototypes_generator {
   std::filesystem::path generate_root_path_;
 };
 
-void t_mstch_python_generator::generate_file(
+void t_mstch_python_generator::generate_mstch_file(
     const std::string& template_name,
     types_file_kind types_file_kind,
-    type_kind type_kind,
-    const std::filesystem::path& base = {}) {
+    type_kind type_kind) {
   t_program* program = get_program();
   const std::string& program_name = program->name();
   python_context_->reset(types_file_kind, type_kind);
@@ -1234,8 +1237,24 @@ void t_mstch_python_generator::generate_file(
   render_to_file(
       mstch_program,
       template_name,
-      base / program_name / template_name // (output) path
+      generate_root_path_ / program_name / template_name // (output) path
   );
+}
+
+void t_mstch_python_generator::generate_whisker_file(
+    const std::string& template_name,
+    types_file_kind types_file_kind,
+    type_kind type_kind) {
+  python_context_->reset(types_file_kind, type_kind);
+  whisker::object context = whisker::make::map({
+      {"program",
+       whisker::make::native_handle(
+           render_state().prototypes->create<t_program>(*program_))},
+  });
+  t_whisker_generator::render_to_file(
+      /*output_file=*/generate_root_path_ / program_->name() / template_name,
+      /*template_file=*/template_name,
+      /*context=*/context);
 }
 
 void t_mstch_python_generator::generate_types() {
@@ -1244,49 +1263,34 @@ void t_mstch_python_generator::generate_types() {
   python_context_->set_enable_abstract_types(
       !has_option("disable_abstract_types"));
 
-  generate_file(
-      "thrift_types.py",
-      types_file_kind::source_file,
-      type_kind::immutable,
-      generate_root_path_);
-  generate_file(
-      "thrift_types.pyi",
-      types_file_kind::type_stub,
-      type_kind::immutable,
-      generate_root_path_);
-  generate_file(
-      "thrift_enums.py",
-      types_file_kind::source_file,
-      type_kind::immutable,
-      generate_root_path_);
+  generate_mstch_file(
+      "thrift_types.py", types_file_kind::source_file, type_kind::immutable);
+  generate_mstch_file(
+      "thrift_types.pyi", types_file_kind::type_stub, type_kind::immutable);
+  generate_whisker_file(
+      "thrift_enums.py", types_file_kind::source_file, type_kind::immutable);
 
-  generate_file(
+  generate_mstch_file(
       "thrift_abstract_types.py",
       types_file_kind::source_file,
-      type_kind::abstract,
-      generate_root_path_);
+      type_kind::abstract);
 
-  generate_file(
+  generate_mstch_file(
       "thrift_mutable_types.py",
       types_file_kind::source_file,
-      type_kind::mutable_,
-      generate_root_path_);
+      type_kind::mutable_);
 
-  generate_file(
+  generate_mstch_file(
       "thrift_mutable_types.pyi",
       types_file_kind::type_stub,
-      type_kind::mutable_,
-      generate_root_path_);
+      type_kind::mutable_);
 
   python_context_->set_enable_abstract_types(true);
 }
 
 void t_mstch_python_generator::generate_metadata() {
-  generate_file(
-      "thrift_metadata.py",
-      types_file_kind::source_file,
-      type_kind::immutable,
-      generate_root_path_);
+  generate_mstch_file(
+      "thrift_metadata.py", types_file_kind::source_file, type_kind::immutable);
 }
 
 void t_mstch_python_generator::generate_clients() {
@@ -1296,17 +1300,15 @@ void t_mstch_python_generator::generate_clients() {
     return;
   }
 
-  generate_file(
+  generate_mstch_file(
       "thrift_clients.py",
       types_file_kind::not_a_types_file,
-      type_kind::immutable,
-      generate_root_path_);
+      type_kind::immutable);
 
-  generate_file(
+  generate_mstch_file(
       "thrift_mutable_clients.py",
       types_file_kind::not_a_types_file,
-      type_kind::mutable_,
-      generate_root_path_);
+      type_kind::mutable_);
 }
 
 void t_mstch_python_generator::generate_services() {
@@ -1315,17 +1317,15 @@ void t_mstch_python_generator::generate_services() {
     // services.
     return;
   }
-  generate_file(
+  generate_mstch_file(
       "thrift_services.py",
       types_file_kind::not_a_types_file,
-      type_kind::immutable,
-      generate_root_path_);
+      type_kind::immutable);
 
-  generate_file(
+  generate_mstch_file(
       "thrift_mutable_services.py",
       types_file_kind::not_a_types_file,
-      type_kind::mutable_,
-      generate_root_path_);
+      type_kind::mutable_);
 }
 
 class t_python_patch_generator : public t_mstch_python_prototypes_generator {

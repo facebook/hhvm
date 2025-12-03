@@ -546,11 +546,11 @@ class StructuredCursorReader : detail::BaseCursorReader<ProtocolReader> {
   // Contains last field id read from the buffer.
   typename ProtocolReader::StructReadState readState_{};
 
-  template <typename T>
-  T copy(const T& in) {
+  // For copyable types, defer the copy until the assignment/return
+  template <std::copy_constructible T>
+  const T& copy(const T& in) {
     return in;
   }
-  folly::IOBuf copy(const folly::IOBuf& in) { return in.cloneAsValue(); }
   std::unique_ptr<folly::IOBuf> copy(const std::unique_ptr<folly::IOBuf>& in) {
     return in->clone();
   }

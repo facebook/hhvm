@@ -109,7 +109,11 @@ template <class Callback, class RequestList>
 class SnifferParser : public SnifferParserBase<Callback> {
  public:
   explicit SnifferParser(Callback& cb) noexcept;
-  ~SnifferParser() override {}
+  ~SnifferParser() override = default;
+  SnifferParser(const SnifferParser&) = delete;
+  SnifferParser& operator=(const SnifferParser&) = delete;
+  SnifferParser(SnifferParser&&) = delete;
+  SnifferParser& operator=(SnifferParser&&) = delete;
 
   void parse(folly::ByteRange data, uint32_t typeId, bool isFirstPacket)
       override {

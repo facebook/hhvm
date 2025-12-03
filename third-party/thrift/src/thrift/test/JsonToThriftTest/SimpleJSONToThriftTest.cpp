@@ -245,7 +245,7 @@ TEST(SimpleJSONToThriftTest, NegativeBoundaryCase) {
 }
 
 TEST(SimpleJSONToThriftTest, PassingWrongType) {
-  string jsonI32T("{\"a\":\"hello\"}");
+  string jsonI32T(R"({"a":"hello"})");
   myI32Struct thriftI32Obj;
   EXPECT_THROW(deserializeJSON(thriftI32Obj, jsonI32T), std::exception);
 }
@@ -339,7 +339,7 @@ TEST(SimpleJSONToThriftTest, MissingField) {
   deserializeJSON(thriftEmptyListObj, jsonEmptyListT);
 
   // checks that a map is skipped properly
-  string jsonEmptyMapT("{\"m\":{\"1\":2, \"3\":13}}");
+  string jsonEmptyMapT(R"({"m":{"1":2, "3":13}})");
   myEmptyStruct thriftEmptyMapObj;
   deserializeJSON(thriftEmptyMapObj, jsonEmptyMapT);
 
@@ -421,8 +421,8 @@ TEST(SimpleJSONToThriftTest, ComplexTypeMissingRequiredFieldInMember) {
       "{\"a\":true,\"c\":16,\"d\":32,\"e\":64,\"b\":8,"
       "\"f\":0.99,\"g\":\"Hello\"}");
   string jsonComplexT(
-      "{\"a\":" + jsonT + ",\"b\":[3,2,1],\"c\":{\"key1\":" + jsonT +
-      ",\"key2\":{\"d\":320,\"f\":0.001}}}");
+      "{\"a\":" + jsonT + R"(,"b":[3,2,1],"c":{"key1":)" + jsonT +
+      R"(,"key2":{"d":320,"f":0.001}}})");
 
   myComplexStruct thriftComplexObj;
   try {
@@ -438,8 +438,8 @@ TEST(SimpleJSONToThriftTest, ComplexTypeTest) {
       "{\"a\":true,\"c\":16,\"d\":32,\"e\":64,\"b\":8,"
       "\"f\":0.99,\"g\":\"Hello\"}");
   string jsonComplexT(
-      "{\"a\":" + jsonT + ",\"b\":[3,2,1],\"c\":{\"key1\":" + jsonT +
-      ",\"key2\":{\"c\":20, \"d\":320,\"f\":0.001}}}");
+      "{\"a\":" + jsonT + R"(,"b":[3,2,1],"c":{"key1":)" + jsonT +
+      R"(,"key2":{"c":20, "d":320,"f":0.001}}})");
 
   myComplexStruct thriftComplexObj;
   deserializeJSON(thriftComplexObj, jsonComplexT);
@@ -490,11 +490,11 @@ TEST(SimpleJSONToThriftTest, MixedStructTest) {
 }
 
 TEST(SimpleJSONToThriftTest, MapTypeTest) {
-  string stringJson("\"stringMap\": {\"a\":\"A\", \"b\":\"B\"}");
-  string boolJson("\"boolMap\": {\"true\":\"True\", \"false\":\"False\"}");
-  string byteJson("\"byteMap\": {\"1\":\"one\", \"2\":\"two\"}");
-  string doubleJson("\"doubleMap\": {\"0.1\":\"0.one\", \"0.2\":\"0.two\"}");
-  string enumJson("\"enumMap\": {\"1\":\"male\", \"2\":\"female\"}");
+  string stringJson(R"("stringMap": {"a":"A", "b":"B"})");
+  string boolJson(R"("boolMap": {"true":"True", "false":"False"})");
+  string byteJson(R"("byteMap": {"1":"one", "2":"two"})");
+  string doubleJson(R"("doubleMap": {"0.1":"0.one", "0.2":"0.two"})");
+  string enumJson(R"("enumMap": {"1":"male", "2":"female"})");
   string json = "{" + stringJson + "," + boolJson + "," + byteJson + "," +
       doubleJson + "," + enumJson + "}";
   myMapStruct mapStruct;
@@ -517,14 +517,14 @@ TEST(SimpleJSONToThriftTest, MapTypeTest) {
 }
 
 TEST(SimpleJSONToThriftTest, EmptyStringTest) {
-  string jsonT("{\"a\":\"\"}");
+  string jsonT(R"({"a":""})");
   myStringStruct thriftStringObj;
   deserializeJSON(thriftStringObj, jsonT);
   EXPECT_EQ(*thriftStringObj.a(), "");
 }
 
 TEST(SimpleJSONToThriftTest, BinaryTypeTest) {
-  string jsonT("{\"a\":\"SSBsb3ZlIEJhc2U2NCEA\"}");
+  string jsonT(R"({"a":"SSBsb3ZlIEJhc2U2NCEA"})");
   myBinaryStruct thriftBinaryObj;
   deserializeJSON(thriftBinaryObj, jsonT);
   EXPECT_EQ(*thriftBinaryObj.a(), std::string("I love Base64!\0", 15));
@@ -564,7 +564,7 @@ TEST(SimpleJSONToThriftTest, CompoundTest) {
   *stuff.m2() = {{0, {}}, {1, {"one"}}, {2, {"one", "two"}}};
   *stuff.structs() = {struct1, struct2, struct2};
   *stuff.n() = nester;
-  *stuff.s() = "hello \\u!@#$%^&*()\\r\\\\n\\'\"";
+  *stuff.s() = R"(hello \u!@#$%^&*()\r\\n\'")";
 
   testSimpleJSON(stuff);
 

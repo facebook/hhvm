@@ -30,6 +30,6 @@ function f(int $x) : void {
   $x = () ==> {
     // add a type hint for `$y`
     /*range-start*/let $y : int  = 3;/*range-end*/
-  }();
+  };
 }
 

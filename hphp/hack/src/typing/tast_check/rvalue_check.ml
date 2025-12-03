@@ -18,6 +18,7 @@ let check_valid_rvalue pos env ty =
     match tyl with
     | [] -> env
     | ty :: tyl ->
+      let (_, ty) = Tast_env.strip_supportdyn env ty in
       let (env, ety) = Env.expand_type env ty in
       (match deref ety with
       | (r, Tprim Tnoreturn) ->

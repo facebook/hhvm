@@ -1,0 +1,4 @@
+ERROR: File "use_void.php", line 12, characters 8-18:
+You are using the return value of a `void` function (Typing[4119])
+  File "use_void.php", line 12, characters 8-16:
+  A `void` function doesn't return a value. because this function does not always return a value

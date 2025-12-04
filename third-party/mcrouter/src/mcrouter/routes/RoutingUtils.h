@@ -35,7 +35,7 @@ namespace mcrouter {
 template <class RouteHandleIf>
 static bool getExptimeFromRoute(
     const std::shared_ptr<RouteHandleIf>& rh,
-    const folly::StringPiece& key,
+    const folly::StringPiece key,
     uint32_t& newExptime) {
   McMetagetRequest reqMetaget(key);
   auto warmMeta = rh->route(reqMetaget);
@@ -65,7 +65,7 @@ static bool getExptimeFromRoute(
  */
 template <class ToRequest, class Message>
 static ToRequest createRequestFromMessage(
-    const folly::StringPiece& key,
+    const folly::StringPiece key,
     const Message& message,
     uint32_t exptime) {
   ToRequest newReq(key);

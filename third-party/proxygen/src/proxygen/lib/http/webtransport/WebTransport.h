@@ -293,6 +293,12 @@ class WebTransportHandler {
   virtual void onDatagram(std::unique_ptr<folly::IOBuf> datagram) noexcept = 0;
   virtual void onSessionEnd(folly::Optional<uint32_t> error) noexcept = 0;
   virtual void onSessionDrain() noexcept = 0;
+
+  // TODO(@damlaj): hmm likely needs a non-virtual fn to unconditionally set a
+  // member WebTransportPtr here (then defer to an overridable fn, e.g.
+  // onWebTransportSessionImpl); and unsetting said member via ::onSessionEnd
+  virtual void onWebTransportSession(std::shared_ptr<WebTransport>) noexcept {
+  }
 };
 
 } // namespace proxygen

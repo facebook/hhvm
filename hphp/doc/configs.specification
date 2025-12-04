@@ -2120,6 +2120,11 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - bool Xbox.ServerInfo.LogInfo = false, UNKNOWN
 - std::string Xbox.ProcessMessageFunc = "xbox_process_message", UNKNOWN
 
+  Thread Names can be a max of 15 chars (accounting for null)
+  ThreadGroupSuffix can be safely 1 char or max 5 chars if you are not using NUMA
+
+- std::string Xbox.ServerInfo.ThreadGroupSuffix = "", UNKNOWN
+
 # Xenon
 
 - double Xenon.PeriodSeconds = 0.0, UNKNOWN, lookuppath(Xenon.Period)

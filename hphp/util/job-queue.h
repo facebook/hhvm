@@ -515,7 +515,8 @@ struct JobQueueDispatcher : IHostHealthObserver {
                      int hugeCount = 0,
                      int initThreadCount = -1,
                      unsigned hugeStackKb = 0,
-                     unsigned extraKb = 0)
+                     unsigned extraKb = 0,
+                     const std::string& threadGroupSuffix = "")
       : m_startReaperThread(maxJobQueuingMs > 0)
       , m_context(context)
       , m_maxThreadCount(maxThreadCount)
@@ -524,6 +525,7 @@ struct JobQueueDispatcher : IHostHealthObserver {
       , m_hugeThreadCount(hugeCount)
       , m_hugeStackKb(hugeStackKb)
       , m_tlExtraKb(extraKb)
+      , m_threadGroupSuffix(threadGroupSuffix)
       , m_queue(m_maxQueueCount, dropCacheTimeout, dropStack,
                 lifoSwitchThreshold, maxJobQueuingMs, numPriorities) {
     assertx(maxThreadCount >= 1);
@@ -808,6 +810,7 @@ private:
   int m_hugeThreadCount{0};
   unsigned m_hugeStackKb;
   unsigned m_tlExtraKb;
+  std::string m_threadGroupSuffix;
   JobQueue<typename TWorker::JobType,
            TWorker::Waitable,
            typename TWorker::DropCachePolicy> m_queue;
@@ -879,7 +882,8 @@ private:
                                        &TWorker::start,
                                        next_numa_node(m_prevNode),
                                        hugeStackKb,
-                                       m_tlExtraKb);
+                                       m_tlExtraKb,
+                                       m_threadGroupSuffix);
     int id = m_workers.size();
     m_workers.push_back(worker);
     m_funcs.insert(func);

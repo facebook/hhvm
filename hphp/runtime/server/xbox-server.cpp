@@ -121,7 +121,7 @@ struct XboxWorker
   : JobQueueWorker<XboxTransport*,Server*,true,false,JobQueueDropVMStack>
 {
   void abortJob(XboxTransport *job) override {
-    Logger::Warning("Job dropped by JobQueueDispatcher because of timeout in xbox.");    
+    Logger::Warning("Job dropped by JobQueueDispatcher because of timeout in xbox.");
     auto const handler = createRequestHandler();
     handler->abortRequest(job);
     destroyRequestHandler();
@@ -191,7 +191,14 @@ void XboxServer::Restart() {
          Cfg::Server::ThreadDropStack,
          nullptr,
          INT_MAX,
-         Cfg::Xbox::ServerInfoMaxJobQueuingMs);
+         Cfg::Xbox::ServerInfoMaxJobQueuingMs,
+         1,    // numPriorities default
+         0,    // hugeCount default
+         -1,   // initThreadCount default
+         0,    // hugeStackKb default
+         0,    // extraKb default
+         Cfg::Xbox::ServerInfoThreadGroupSuffix
+        );
       s_counters = new ServiceData::CounterCallback(
           [](std::map<std::string, int64_t>& counters) {
             // For the entire duration when the counters are registered, we make
@@ -207,7 +214,7 @@ void XboxServer::Restart() {
       if (Cfg::Server::TrackRequestFanout) {
         requestFanoutLimitInit(Cfg::Server::RequestFanoutLimit, Cfg::Server::ThreadCount);
       }
-      
+
     }
     if (Cfg::Xbox::ServerInfoLogInfo) {
       Logger::Info("xbox server started");
@@ -287,7 +294,7 @@ IMPLEMENT_RESOURCE_ALLOCATION(XboxTask)
 OptResource XboxServer::TaskStart(
   const String& msg,
   const String& reqInitDoc /* = "" */,
-  ServerTaskEvent<XboxServer, XboxTransport> *event /* = nullptr */, 
+  ServerTaskEvent<XboxServer, XboxTransport> *event /* = nullptr */,
   RequestId root_req_id /* = RequestId() */) {
   static auto xboxOverflowCounter =
     ServiceData::createTimeSeries("xbox_overflow",

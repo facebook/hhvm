@@ -402,6 +402,8 @@ module UserAttributes = struct
 
   let uaAsioLowPri = "__AsioLowPri"
 
+  let uaImplementedBy = "__ImplementedBy"
+
   type attr_info = {
     contexts: string list;
     doc: string;
@@ -861,6 +863,13 @@ module UserAttributes = struct
               autocomplete = false;
               doc =
                 "Marks the function as low priority. Will suspend eager execution into a low priority awaitable.";
+            } );
+          ( uaImplementedBy,
+            {
+              contexts = [mthd];
+              autocomplete = true;
+              doc =
+                "Specifies that this method is implemented by a specific top-level function. Only valid in .hhi files.";
             } );
         ])
 

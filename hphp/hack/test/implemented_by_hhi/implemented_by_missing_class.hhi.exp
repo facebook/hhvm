@@ -1,0 +1,12 @@
+ERROR: File "implemented_by_missing_class.hhi", line 5, characters 21-40:
+The method must be implemented by a function with a compatible type. (Typing[4040])
+  File "implemented_by_missing_class.hhi", line 2, characters 10-26:
+  Too few positional arguments (required 2 but got 1)
+  File "implemented_by_missing_class.hhi", line 6, characters 19-26:
+  Because of this definition
+ERROR: File "implemented_by_missing_class.hhi", line 5, characters 21-40:
+The method must be implemented by a function with a compatible type. (Typing[4110])
+  File "implemented_by_missing_class.hhi", line 2, characters 28-33:
+  Expected `string`
+  File "implemented_by_missing_class.hhi", line 6, characters 19-26:
+  But got `C`

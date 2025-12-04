@@ -139,6 +139,38 @@ let check_no_auto_dynamic env attrs =
         Nast_check_error.(to_user_error @@ Attribute_no_auto_dynamic pos)
     | _ -> ()
 
+let check_implemented_by attrs =
+  let attr = Naming_attributes.find SN.UserAttributes.uaImplementedBy attrs in
+  match attr with
+  | Some { ua_name = (pos, name); ua_params } ->
+    (* Check file extension *)
+    let filename = Pos.filename pos in
+    let path_str = Relative_path.suffix filename in
+    let is_hhi = Filename.check_suffix path_str ".hhi" in
+    if not is_hhi then
+      Errors.add_error
+        Nast_check_error.(
+          to_user_error @@ Attribute_implemented_by_only_in_hhi pos);
+    (* Check parameter count and type *)
+    (match ua_params with
+    | [] ->
+      Errors.add_error
+        Nast_check_error.(
+          to_user_error
+          @@ Attribute_too_few_arguments { pos; name; expected = 1 })
+    | [(_, _, String _)] -> () (* Valid: one string parameter *)
+    | [(_, p, _)] ->
+      Errors.add_error
+        Nast_check_error.(
+          to_user_error
+          @@ Attribute_param_type { pos = p; x = "a string literal" })
+    | _ ->
+      Errors.add_error
+        Nast_check_error.(
+          to_user_error
+          @@ Attribute_too_many_arguments { pos; name; expected = 1 }))
+  | _ -> ()
+
 let check_dynamically_referenced attrs =
   let attr =
     Naming_attributes.find SN.UserAttributes.uaDynamicallyReferenced attrs
@@ -342,6 +374,7 @@ let handler =
       check_autocomplete_valid_text m.m_user_attributes;
       check_duplicate_memoize m.m_user_attributes;
       check_no_auto_dynamic env m.m_user_attributes;
+      check_implemented_by m.m_user_attributes;
       check_no_sealed_on_constructors m;
       check_no_sealed_on_private_methods m;
       check_no_sealed_on_interface_methods env m;

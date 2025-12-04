@@ -98,3 +98,23 @@ val check_function_dynamically_callable :
   Typing_defs.decl_ty option list ->
   Typing_defs.locl_ty ->
   Typing_env_types.env * Tast.fun_param list * Tast.stmt list * Tast.ty
+
+module Fun_id : sig
+  val synth :
+    ?is_function_pointer:bool ->
+    Pos.t * string ->
+    unit Aast_defs.targ list ->
+    Typing_env_types.env ->
+    Typing_env_types.env
+    * Typing_defs.locl_ty
+    * Typing_defs.locl_ty Aast_defs.targ list
+end
+
+module Method_caller : sig
+  val synth :
+    ?for_meth_caller:bool ->
+    Pos.t ->
+    Aast_defs.class_name * Ast_defs.pstring ->
+    Typing_env_types.env ->
+    Typing_env_types.env * Tast.expr * Typing_defs.locl_ty
+end

@@ -8931,6 +8931,7 @@ end
 
 and Method_caller : sig
   val synth :
+    ?for_meth_caller:bool ->
     Pos.t ->
     Aast_defs.class_name * Ast_defs.pstring ->
     env ->
@@ -9047,7 +9048,7 @@ end = struct
                reason;
              }))
 
-  let synth pos (class_name, method_name) env =
+  let synth ?(for_meth_caller = true) pos (class_name, method_name) env =
     match Env.get_class env (snd class_name) with
     | Decl_entry.NotYetAvailable
     | Decl_entry.DoesNotExist ->
@@ -9156,8 +9157,18 @@ end = struct
                   (env, mk (get_reason ty, Tfun ft))
                 | _ -> (env, ty))
           in
-          let (env, ty) = set_capture_only_readonly env ty in
-          let ty = make_function_ref ~contains_generics:false env pos ty in
+          let (env, ty) =
+            if for_meth_caller then
+              set_capture_only_readonly env ty
+            else
+              (env, ty)
+          in
+          let ty =
+            if for_meth_caller then
+              make_function_ref ~contains_generics:false env pos ty
+            else
+              ty
+          in
           let expr = Method_caller (class_name, method_name) in
           make_result env pos expr ty
         | _ -> failwith "Expected a function type")

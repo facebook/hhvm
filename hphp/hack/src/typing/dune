@@ -212,6 +212,7 @@
  (modules
   nastInitCheck
   type_parameter_env_ops
+  typing
   typing_alias
   typing_ast_print
   typing_argument
@@ -225,6 +226,7 @@
   typing_exts
   typing_func_terminality
   typing_generic_rules
+  typing_implemented_by
   typing_lenv
   typing_local_ops
   typing_named_params
@@ -247,6 +249,7 @@
   typing_dynamic_utils
   typing_enforceability
   typing_enum
+  typing_extract_method
   typing_intersection
   typing_generic_constraint
   typing_helpers
@@ -266,6 +269,7 @@
   typing_structure
   typing_taccess
   typing_type_member
+  typing_type_wellformedness
   typing_union
   type_validator
   typing_const_reifiable
@@ -314,9 +318,7 @@
  (name typing_toplevel)
  (wrapped false)
  (modules
-  typing
   typing_class
-  typing_extract_method
   typing_memoize
   typing_toplevel
   typing_typedef
@@ -335,8 +337,7 @@
   trait_reuse_check
   typing_extends
   typing_requirements
-  typing_subtype_method
-  typing_type_wellformedness)
+  typing_subtype_method)
  (libraries
   typing
   typing_modules

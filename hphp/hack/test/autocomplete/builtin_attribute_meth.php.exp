@@ -12,6 +12,11 @@ SORT TEXT: none
   Allows this function/method to be called dynamically, based on a string of its name.  HHVM will warn or error (depending on settings) on dynamic calls to functions without this attribute.
   
   See also `HH\dynamic_fun()` and `HH\dynamic_class_meth()`.
+__ImplementedBy
+  INSERT __ImplementedBy
+  built-in attribute
+SORT TEXT: none
+  Specifies that this method is implemented by a specific top-level function. Only valid in .hhi files.
 __Memoize
   INSERT __Memoize
   built-in attribute

@@ -166,6 +166,7 @@ type t =
       x: string;
     }
   | Attribute_no_auto_dynamic of Pos.t
+  | Attribute_implemented_by_only_in_hhi of Pos.t
   | Generic_at_runtime of {
       pos: Pos.t;
       prefix: string;

@@ -1,0 +1,2 @@
+ERROR: File "implemented_by_multiple_params.hhi", line 3, characters 5-19:
+The attribute `__ImplementedBy` expects at most 1 argument (Typing[4126])

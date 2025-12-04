@@ -41,6 +41,10 @@ struct ReactiveToggleContext {
         : func(std::move(func)) {}
 
     ~CallbackNode() { DCHECK(removed); }
+    CallbackNode(const CallbackNode&) = delete;
+    CallbackNode& operator=(const CallbackNode&) = delete;
+    CallbackNode(CallbackNode&&) = delete;
+    CallbackNode& operator=(CallbackNode&&) = delete;
   };
 
   // This is used as the indicator of whether

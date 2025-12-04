@@ -95,7 +95,7 @@ static std::unique_ptr<AsyncClient> newClient(
 template <typename AsyncClient>
 class ConnectionThread : public folly::ScopedEventBaseThread {
  public:
-  ~ConnectionThread() {
+  ~ConnectionThread() override {
     getEventBase()->runInEventBaseThreadAndWait([&] { connection_.reset(); });
   }
 

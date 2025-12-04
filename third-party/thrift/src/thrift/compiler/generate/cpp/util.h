@@ -258,6 +258,9 @@ std::vector<T> topological_sort(
     // properly updated.
     iter_state(const iter_state&) = delete;
     iter_state& operator=(const iter_state&) = delete;
+    iter_state(iter_state&&) = delete;
+    iter_state& operator=(iter_state&&) = delete;
+    ~iter_state() = default;
   };
 
   std::unordered_set<T> visited;

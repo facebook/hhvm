@@ -275,7 +275,7 @@ class THeader final {
   }
 
   std::vector<TTransform>& getWriteTTransforms() { return c_.writeTrans_; }
-  [[deprecated("Use getWriteTransforms instead.")]]
+  [[deprecated("Use getWriteTTransforms instead.")]]
   std::vector<uint16_t>& getWriteTransforms() {
     static_assert(
         std::is_same_v<std::underlying_type<TTransform>::type, uint16_t>);

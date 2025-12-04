@@ -780,9 +780,15 @@ let check_abstract_overrides_concrete
 (** Why this check: It would be unsound for a class that needs concrete (`<<__NeedsConcrete>>`) to override one that does not,
   * since a __NeedsConcrete method imposes stricter requirements on its input (`static` must point to a concrete class) *)
 let check_needs_concrete_override
-    env ~parent_class_elt class_ class_elt ~class_pos ~member_name =
+    (env : Typing_env_types.env)
+    ~parent_class_elt
+    class_
+    class_elt
+    ~class_pos
+    ~member_name =
   if
-    (not (get_ce_readonly_prop_or_needs_concrete parent_class_elt))
+    TypecheckerOptions.needs_concrete env.genv.tcopt
+    && (not (get_ce_readonly_prop_or_needs_concrete parent_class_elt))
     && get_ce_readonly_prop_or_needs_concrete class_elt
   then
     let defined_in_same_class =

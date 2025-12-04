@@ -18,6 +18,7 @@
 
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/synchronization/Baton.h>
+#include <folly/system/HardwareConcurrency.h>
 #include <wangle/bootstrap/ServerBootstrap-inl.h>
 #include <wangle/channel/Pipeline.h>
 #include <iostream>
@@ -136,7 +137,7 @@ class ServerBootstrap {
           1, std::make_shared<folly::NamedThreadFactory>("Acceptor Thread"));
     }
     if (!io_group) {
-      auto threads = std::thread::hardware_concurrency();
+      auto threads = folly::hardware_concurrency();
       if (threads <= 0) {
         // Reasonable mid-point for concurrency when actual value unknown
         threads = 8;

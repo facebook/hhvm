@@ -178,6 +178,8 @@ class ThriftConstStructProxy:
     thriftType: ThriftConstStruct
     fields: Mapping[str, ThriftConstValueProxy]
     name: str
+    kind: ThriftKind
+    def __init__(self, struct: ThriftConstStruct) -> None: ...
 
 class ThriftExceptionProxy(Protocol):
     name: str

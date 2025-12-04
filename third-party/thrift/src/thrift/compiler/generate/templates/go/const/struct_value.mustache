@@ -14,19 +14,20 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{!
-
-  This template defines a default value for a field in a Thrift struct.
-
-  Produces user-defined default value for a field (if defined by user),
-  otherwise, produces the "natural default value" (as per Thrift spec).
-
 }}
-{{#field:type}}{{!
-}}{{#field:value}}{{!
-  }}{{> const/value}}{{!
-}}{{/field:value}}{{!
-}}{{^field:value}}{{!
-  }}{{> common/natural_default_value}}{{!
-}}{{/field:value}}{{!
-}}{{/field:type}}
+{{struct:go_qualified_new_func}}(){{!
+}}{{#value:structured?}}{{!
+}}{{#value:const_struct}}.
+    Set{{constant:go_name}}{{#program:compat_setters?}}NonCompat{{/program:compat_setters?}}({{!
+    }}{{#constant:type}}{{!
+    }}{{#constant:value}}{{!
+    }}{{#if value:container?}}
+        {{> const/value}},
+    {{#else}}{{!
+        }}{{> const/value}}{{!
+    }}{{/if value:container?}}{{!
+    }}{{/constant:value}}{{!
+    }}{{/constant:type}}{{!
+    }}){{!
+}}{{/value:const_struct}}{{!
+}}{{/value:structured?}}

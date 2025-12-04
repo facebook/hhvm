@@ -15,6 +15,6 @@ var _ = thrift.VOID
 var GoUnusedProtection__ int
 
 var MyStruct *MyStruct = NewMyStruct().
-    SetMajorVerNonCompat(int64(42)).
-    SetAbstractNameNonCompat("abstract").
+    SetMajorNonCompat(int64(42)).
+    SetAbstractNonCompat("abstract").
     SetMyEnumNonCompat(MyEnum_DOMAIN)

@@ -88,6 +88,10 @@ void EnumMetadata<::test::fixtures::basic::HackEnum>::gen(ThriftMetadata& metada
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::MyStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::test::fixtures::basic::MyStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::test::fixtures::basic::MyStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -118,6 +122,10 @@ StructMetadata<::test::fixtures::basic::MyStruct>::gen(ThriftMetadata& metadata)
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::Containers>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::test::fixtures::basic::Containers>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::test::fixtures::basic::Containers>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -148,6 +156,10 @@ StructMetadata<::test::fixtures::basic::Containers>::gen(ThriftMetadata& metadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::MyDataItem>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::test::fixtures::basic::MyDataItem>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::test::fixtures::basic::MyDataItem>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -165,6 +177,10 @@ StructMetadata<::test::fixtures::basic::MyDataItem>::gen(ThriftMetadata& metadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::MyUnion>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::test::fixtures::basic::MyUnion>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::test::fixtures::basic::MyUnion>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -195,6 +211,10 @@ StructMetadata<::test::fixtures::basic::MyUnion>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::MyException>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::test::fixtures::basic::MyException>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::test::fixtures::basic::MyException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -225,6 +245,10 @@ StructMetadata<::test::fixtures::basic::MyException>::gen(ThriftMetadata& metada
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::MyExceptionWithMessage>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::test::fixtures::basic::MyExceptionWithMessage>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::test::fixtures::basic::MyExceptionWithMessage>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -255,6 +279,10 @@ StructMetadata<::test::fixtures::basic::MyExceptionWithMessage>::gen(ThriftMetad
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::ReservedKeyword>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::test::fixtures::basic::ReservedKeyword>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::test::fixtures::basic::ReservedKeyword>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -286,6 +314,10 @@ StructMetadata<::test::fixtures::basic::ReservedKeyword>::gen(ThriftMetadata& me
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic::UnionToBeRenamed>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::test::fixtures::basic::UnionToBeRenamed>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::test::fixtures::basic::UnionToBeRenamed>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;

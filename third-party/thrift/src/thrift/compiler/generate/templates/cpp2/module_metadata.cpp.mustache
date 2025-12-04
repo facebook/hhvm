@@ -73,6 +73,10 @@ void EnumMetadata<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::gen(Thr
 {{#program:structs}}
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<{{struct:cpp_fullname}}>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<{{struct:cpp_fullname}}>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<{{struct:cpp_fullname}}>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;

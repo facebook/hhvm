@@ -104,6 +104,10 @@ void EnumMetadata<::test::fixtures::enumstrict::MyBigEnum>::gen(ThriftMetadata& 
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::enumstrict::MyStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::test::fixtures::enumstrict::MyStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::test::fixtures::enumstrict::MyStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;

@@ -31,6 +31,10 @@ inline constexpr Options kGenerateAll = {.genAnnotations = true, .genNestedTypes
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::NonOrderableStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::cpp2::NonOrderableStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::cpp2::NonOrderableStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -62,6 +66,10 @@ StructMetadata<::cpp2::NonOrderableStruct>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::NonOrderableUnion>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::cpp2::NonOrderableUnion>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::cpp2::NonOrderableUnion>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -93,6 +101,10 @@ StructMetadata<::cpp2::NonOrderableUnion>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::OrderableStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::cpp2::OrderableStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::cpp2::OrderableStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -123,6 +135,10 @@ StructMetadata<::cpp2::OrderableStruct>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::OrderableUnion>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::cpp2::OrderableUnion>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::cpp2::OrderableUnion>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;

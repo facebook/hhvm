@@ -77,6 +77,10 @@ void EnumMetadata<::facebook::thrift::test::ThriftAdaptedEnum>::gen(ThriftMetada
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::MyAnnotation>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::MyAnnotation>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::MyAnnotation>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -109,6 +113,10 @@ StructMetadata<::facebook::thrift::test::MyAnnotation>::gen(ThriftMetadata& meta
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::Foo>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::Foo>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::Foo>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -140,6 +148,10 @@ StructMetadata<::facebook::thrift::test::Foo>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::Baz>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::Baz>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::Baz>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -171,6 +183,10 @@ StructMetadata<::facebook::thrift::test::Baz>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::Bar>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::Bar>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::Bar>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -201,6 +217,10 @@ StructMetadata<::facebook::thrift::test::Bar>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::detail::DirectlyAdapted>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::detail::DirectlyAdapted>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::detail::DirectlyAdapted>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -233,6 +253,10 @@ StructMetadata<::facebook::thrift::test::detail::DirectlyAdapted>::gen(ThriftMet
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::detail::IndependentDirectlyAdapted>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::detail::IndependentDirectlyAdapted>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -264,6 +288,10 @@ StructMetadata<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::ge
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::StructWithFieldAdapter>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::StructWithFieldAdapter>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::StructWithFieldAdapter>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -294,6 +322,10 @@ StructMetadata<::facebook::thrift::test::StructWithFieldAdapter>::gen(ThriftMeta
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::TerseAdaptedFields>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::TerseAdaptedFields>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::TerseAdaptedFields>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -324,6 +356,10 @@ StructMetadata<::facebook::thrift::test::TerseAdaptedFields>::gen(ThriftMetadata
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::B>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::B>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::B>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -354,6 +390,10 @@ StructMetadata<::facebook::thrift::test::B>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::A>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::A>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::A>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -371,6 +411,10 @@ StructMetadata<::facebook::thrift::test::A>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::Config>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::Config>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::Config>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -405,6 +449,10 @@ StructMetadata<::facebook::thrift::test::Config>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::MyStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::MyStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::MyStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -436,6 +484,10 @@ StructMetadata<::facebook::thrift::test::MyStruct>::gen(ThriftMetadata& metadata
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::AdaptTestStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::AdaptTestStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::AdaptTestStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -466,6 +518,10 @@ StructMetadata<::facebook::thrift::test::AdaptTestStruct>::gen(ThriftMetadata& m
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::AdaptTemplatedTestStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::AdaptTemplatedTestStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::AdaptTemplatedTestStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -496,6 +552,10 @@ StructMetadata<::facebook::thrift::test::AdaptTemplatedTestStruct>::gen(ThriftMe
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -526,6 +586,10 @@ StructMetadata<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>::gen(Th
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::ThriftAdaptTestUnion>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::ThriftAdaptTestUnion>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::ThriftAdaptTestUnion>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -557,6 +621,10 @@ StructMetadata<::facebook::thrift::test::ThriftAdaptTestUnion>::gen(ThriftMetada
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::ThriftAdaptedStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::ThriftAdaptedStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::ThriftAdaptedStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -588,6 +656,10 @@ StructMetadata<::facebook::thrift::test::ThriftAdaptedStruct>::gen(ThriftMetadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::detail::DirectlyAdaptedStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::detail::DirectlyAdaptedStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::detail::DirectlyAdaptedStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -619,6 +691,10 @@ StructMetadata<::facebook::thrift::test::detail::DirectlyAdaptedStruct>::gen(Thr
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::StructFieldAdaptedStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::StructFieldAdaptedStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::StructFieldAdaptedStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -649,6 +725,10 @@ StructMetadata<::facebook::thrift::test::StructFieldAdaptedStruct>::gen(ThriftMe
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::CircularAdaptee>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::CircularAdaptee>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::CircularAdaptee>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -679,6 +759,10 @@ StructMetadata<::facebook::thrift::test::CircularAdaptee>::gen(ThriftMetadata& m
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::CircularStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::CircularStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::CircularStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -709,6 +793,10 @@ StructMetadata<::facebook::thrift::test::CircularStruct>::gen(ThriftMetadata& me
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::ReorderedStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::ReorderedStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::ReorderedStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -739,6 +827,10 @@ StructMetadata<::facebook::thrift::test::ReorderedStruct>::gen(ThriftMetadata& m
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::detail::DeclaredAfterStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::detail::DeclaredAfterStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::detail::DeclaredAfterStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -757,6 +849,10 @@ StructMetadata<::facebook::thrift::test::detail::DeclaredAfterStruct>::gen(Thrif
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::UnderlyingRenamedStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::UnderlyingRenamedStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::UnderlyingRenamedStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -788,6 +884,10 @@ StructMetadata<::facebook::thrift::test::UnderlyingRenamedStruct>::gen(ThriftMet
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::UnderlyingSameNamespaceStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::UnderlyingSameNamespaceStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::UnderlyingSameNamespaceStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -819,6 +919,10 @@ StructMetadata<::facebook::thrift::test::UnderlyingSameNamespaceStruct>::gen(Thr
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::detail::HeapAllocated>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::detail::HeapAllocated>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::detail::HeapAllocated>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -837,6 +941,10 @@ StructMetadata<::facebook::thrift::test::detail::HeapAllocated>::gen(ThriftMetad
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::MoveOnly>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::MoveOnly>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::MoveOnly>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -867,6 +975,10 @@ StructMetadata<::facebook::thrift::test::MoveOnly>::gen(ThriftMetadata& metadata
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::AlsoMoveOnly>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::AlsoMoveOnly>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::AlsoMoveOnly>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -897,6 +1009,10 @@ StructMetadata<::facebook::thrift::test::AlsoMoveOnly>::gen(ThriftMetadata& meta
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::ApplyAdapter>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::ApplyAdapter>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::ApplyAdapter>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -916,6 +1032,10 @@ StructMetadata<::facebook::thrift::test::ApplyAdapter>::gen(ThriftMetadata& meta
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::detail::TransitiveAdapted>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::detail::TransitiveAdapted>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::detail::TransitiveAdapted>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -934,6 +1054,10 @@ StructMetadata<::facebook::thrift::test::detail::TransitiveAdapted>::gen(ThriftM
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::CountingStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::CountingStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::CountingStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -964,6 +1088,10 @@ StructMetadata<::facebook::thrift::test::CountingStruct>::gen(ThriftMetadata& me
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::Person>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::Person>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::Person>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -996,6 +1124,10 @@ StructMetadata<::facebook::thrift::test::Person>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::Person2>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::Person2>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::Person2>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -1026,6 +1158,10 @@ StructMetadata<::facebook::thrift::test::Person2>::gen(ThriftMetadata& metadata)
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::Renamed>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::Renamed>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::Renamed>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;

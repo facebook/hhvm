@@ -31,6 +31,10 @@ inline constexpr Options kGenerateAll = {.genAnnotations = true, .genNestedTypes
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::A>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::test::A>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::test::A>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -61,6 +65,10 @@ StructMetadata<::apache::thrift::test::A>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::B>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::test::B>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::test::B>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;

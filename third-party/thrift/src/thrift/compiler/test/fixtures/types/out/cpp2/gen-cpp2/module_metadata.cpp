@@ -90,6 +90,10 @@ void EnumMetadata<::apache::thrift::fixtures::types::MyForwardRefEnum>::gen(Thri
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::empty_struct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::empty_struct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::empty_struct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -107,6 +111,10 @@ StructMetadata<::apache::thrift::fixtures::types::empty_struct>::gen(ThriftMetad
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::decorated_struct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::decorated_struct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::decorated_struct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -137,6 +145,10 @@ StructMetadata<::apache::thrift::fixtures::types::decorated_struct>::gen(ThriftM
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::ContainerStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::ContainerStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::ContainerStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -168,6 +180,10 @@ StructMetadata<::apache::thrift::fixtures::types::ContainerStruct>::gen(ThriftMe
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::CppTypeStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::CppTypeStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::CppTypeStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -198,6 +214,10 @@ StructMetadata<::apache::thrift::fixtures::types::CppTypeStruct>::gen(ThriftMeta
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::VirtualStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::VirtualStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::VirtualStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -228,6 +248,10 @@ StructMetadata<::apache::thrift::fixtures::types::VirtualStruct>::gen(ThriftMeta
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -258,6 +282,10 @@ StructMetadata<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::g
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::TrivialNumeric>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::TrivialNumeric>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::TrivialNumeric>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -288,6 +316,10 @@ StructMetadata<::apache::thrift::fixtures::types::TrivialNumeric>::gen(ThriftMet
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::TrivialNestedWithDefault>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::TrivialNestedWithDefault>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -318,6 +350,10 @@ StructMetadata<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::gen
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::ComplexString>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::ComplexString>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::ComplexString>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -348,6 +384,10 @@ StructMetadata<::apache::thrift::fixtures::types::ComplexString>::gen(ThriftMeta
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::ComplexNestedWithDefault>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::ComplexNestedWithDefault>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -378,6 +418,10 @@ StructMetadata<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::gen
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::MinPadding>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::MinPadding>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::MinPadding>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -409,6 +453,10 @@ StructMetadata<::apache::thrift::fixtures::types::MinPadding>::gen(ThriftMetadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::MinPaddingWithCustomType>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::MinPaddingWithCustomType>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -442,6 +490,10 @@ StructMetadata<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::gen
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::MyStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::MyStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::MyStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -472,6 +524,10 @@ StructMetadata<::apache::thrift::fixtures::types::MyStruct>::gen(ThriftMetadata&
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::MyDataItem>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::MyDataItem>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::MyDataItem>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -489,6 +545,10 @@ StructMetadata<::apache::thrift::fixtures::types::MyDataItem>::gen(ThriftMetadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::Renamed>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::Renamed>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::Renamed>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -520,6 +580,10 @@ StructMetadata<::apache::thrift::fixtures::types::Renamed>::gen(ThriftMetadata& 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::AnnotatedTypes>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::AnnotatedTypes>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::AnnotatedTypes>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -551,6 +615,10 @@ StructMetadata<::apache::thrift::fixtures::types::AnnotatedTypes>::gen(ThriftMet
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::ForwardUsageRoot>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::ForwardUsageRoot>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::ForwardUsageRoot>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -581,6 +649,10 @@ StructMetadata<::apache::thrift::fixtures::types::ForwardUsageRoot>::gen(ThriftM
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::ForwardUsageStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::ForwardUsageStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::ForwardUsageStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -611,6 +683,10 @@ StructMetadata<::apache::thrift::fixtures::types::ForwardUsageStruct>::gen(Thrif
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::ForwardUsageByRef>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::ForwardUsageByRef>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::ForwardUsageByRef>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -641,6 +717,10 @@ StructMetadata<::apache::thrift::fixtures::types::ForwardUsageByRef>::gen(Thrift
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::IncompleteMap>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::IncompleteMap>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::IncompleteMap>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -671,6 +751,10 @@ StructMetadata<::apache::thrift::fixtures::types::IncompleteMap>::gen(ThriftMeta
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::IncompleteMapDep>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::IncompleteMapDep>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::IncompleteMapDep>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -688,6 +772,10 @@ StructMetadata<::apache::thrift::fixtures::types::IncompleteMapDep>::gen(ThriftM
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::CompleteMap>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::CompleteMap>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::CompleteMap>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -719,6 +807,10 @@ StructMetadata<::apache::thrift::fixtures::types::CompleteMap>::gen(ThriftMetada
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::CompleteMapDep>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::CompleteMapDep>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::CompleteMapDep>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -736,6 +828,10 @@ StructMetadata<::apache::thrift::fixtures::types::CompleteMapDep>::gen(ThriftMet
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::IncompleteList>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::IncompleteList>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::IncompleteList>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -766,6 +862,10 @@ StructMetadata<::apache::thrift::fixtures::types::IncompleteList>::gen(ThriftMet
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::IncompleteListDep>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::IncompleteListDep>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::IncompleteListDep>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -783,6 +883,10 @@ StructMetadata<::apache::thrift::fixtures::types::IncompleteListDep>::gen(Thrift
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::CompleteList>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::CompleteList>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::CompleteList>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -813,6 +917,10 @@ StructMetadata<::apache::thrift::fixtures::types::CompleteList>::gen(ThriftMetad
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::CompleteListDep>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::CompleteListDep>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::CompleteListDep>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -830,6 +938,10 @@ StructMetadata<::apache::thrift::fixtures::types::CompleteListDep>::gen(ThriftMe
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::AdaptedList>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::AdaptedList>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::AdaptedList>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -860,6 +972,10 @@ StructMetadata<::apache::thrift::fixtures::types::AdaptedList>::gen(ThriftMetada
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::detail::AdaptedListDep>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::detail::AdaptedListDep>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::detail::AdaptedListDep>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -891,6 +1007,10 @@ StructMetadata<::apache::thrift::fixtures::types::detail::AdaptedListDep>::gen(T
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::DependentAdaptedList>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::DependentAdaptedList>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::DependentAdaptedList>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -921,6 +1041,10 @@ StructMetadata<::apache::thrift::fixtures::types::DependentAdaptedList>::gen(Thr
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -952,6 +1076,10 @@ StructMetadata<::apache::thrift::fixtures::types::detail::DependentAdaptedListDe
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::AllocatorAware>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::AllocatorAware>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::AllocatorAware>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -982,6 +1110,10 @@ StructMetadata<::apache::thrift::fixtures::types::AllocatorAware>::gen(ThriftMet
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::AllocatorAware2>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::AllocatorAware2>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::AllocatorAware2>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -1012,6 +1144,10 @@ StructMetadata<::apache::thrift::fixtures::types::AllocatorAware2>::gen(ThriftMe
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::TypedefStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::TypedefStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::TypedefStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -1042,6 +1178,10 @@ StructMetadata<::apache::thrift::fixtures::types::TypedefStruct>::gen(ThriftMeta
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;

@@ -31,6 +31,10 @@ inline constexpr Options kGenerateAll = {.genAnnotations = true, .genNestedTypes
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::SerializedStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::test::fixtures::python_capi::SerializedStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::test::fixtures::python_capi::SerializedStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -62,6 +66,10 @@ StructMetadata<::test::fixtures::python_capi::SerializedStruct>::gen(ThriftMetad
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::SerializedUnion>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::test::fixtures::python_capi::SerializedUnion>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::test::fixtures::python_capi::SerializedUnion>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -93,6 +101,10 @@ StructMetadata<::test::fixtures::python_capi::SerializedUnion>::gen(ThriftMetada
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::SerializedError>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::test::fixtures::python_capi::SerializedError>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::test::fixtures::python_capi::SerializedError>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -124,6 +136,10 @@ StructMetadata<::test::fixtures::python_capi::SerializedError>::gen(ThriftMetada
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::MarshalStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::test::fixtures::python_capi::MarshalStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::test::fixtures::python_capi::MarshalStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -155,6 +171,10 @@ StructMetadata<::test::fixtures::python_capi::MarshalStruct>::gen(ThriftMetadata
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::MarshalUnion>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::test::fixtures::python_capi::MarshalUnion>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::test::fixtures::python_capi::MarshalUnion>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -186,6 +206,10 @@ StructMetadata<::test::fixtures::python_capi::MarshalUnion>::gen(ThriftMetadata&
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::python_capi::MarshalError>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::test::fixtures::python_capi::MarshalError>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::test::fixtures::python_capi::MarshalError>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;

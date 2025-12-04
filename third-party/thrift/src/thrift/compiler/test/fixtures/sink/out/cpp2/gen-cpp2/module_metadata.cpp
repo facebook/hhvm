@@ -36,6 +36,10 @@ inline constexpr Options kGenerateAll = {.genAnnotations = true, .genNestedTypes
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::InitialResponse>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::cpp2::InitialResponse>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::cpp2::InitialResponse>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -66,6 +70,10 @@ StructMetadata<::cpp2::InitialResponse>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::FinalResponse>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::cpp2::FinalResponse>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::cpp2::FinalResponse>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -96,6 +104,10 @@ StructMetadata<::cpp2::FinalResponse>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::SinkPayload>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::cpp2::SinkPayload>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::cpp2::SinkPayload>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -126,6 +138,10 @@ StructMetadata<::cpp2::SinkPayload>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::CompatibleWithKeywordSink>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::cpp2::CompatibleWithKeywordSink>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::cpp2::CompatibleWithKeywordSink>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -156,6 +172,10 @@ StructMetadata<::cpp2::CompatibleWithKeywordSink>::gen(ThriftMetadata& metadata)
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::InitialException>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::cpp2::InitialException>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::cpp2::InitialException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -186,6 +206,10 @@ StructMetadata<::cpp2::InitialException>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::SinkException1>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::cpp2::SinkException1>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::cpp2::SinkException1>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -216,6 +240,10 @@ StructMetadata<::cpp2::SinkException1>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::SinkException2>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::cpp2::SinkException2>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::cpp2::SinkException2>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;

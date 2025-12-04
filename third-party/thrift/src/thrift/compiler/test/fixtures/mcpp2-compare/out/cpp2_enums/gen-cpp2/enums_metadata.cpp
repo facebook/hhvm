@@ -121,6 +121,10 @@ void EnumMetadata<::facebook::ns::qwerty::AnEnumE>::gen(ThriftMetadata& metadata
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::ns::qwerty::SomeStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::ns::qwerty::SomeStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::ns::qwerty::SomeStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;

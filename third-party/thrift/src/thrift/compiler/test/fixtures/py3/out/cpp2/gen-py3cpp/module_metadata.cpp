@@ -101,6 +101,10 @@ void EnumMetadata<::py3::simple::Flags>::gen(ThriftMetadata& metadata) {
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::SimpleException>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::py3::simple::SimpleException>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::py3::simple::SimpleException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -131,6 +135,10 @@ StructMetadata<::py3::simple::SimpleException>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::OptionalRefStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::py3::simple::OptionalRefStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::py3::simple::OptionalRefStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -161,6 +169,10 @@ StructMetadata<::py3::simple::OptionalRefStruct>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::SimpleStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::py3::simple::SimpleStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::py3::simple::SimpleStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -191,6 +203,10 @@ StructMetadata<::py3::simple::SimpleStruct>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::Float32Struct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::py3::simple::Float32Struct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::py3::simple::Float32Struct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -221,6 +237,10 @@ StructMetadata<::py3::simple::Float32Struct>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::HiddenTypeFieldsStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::py3::simple::HiddenTypeFieldsStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::py3::simple::HiddenTypeFieldsStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -251,6 +271,10 @@ StructMetadata<::py3::simple::HiddenTypeFieldsStruct>::gen(ThriftMetadata& metad
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::detail::AdaptedUnion>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::py3::simple::detail::AdaptedUnion>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::py3::simple::detail::AdaptedUnion>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -282,6 +306,10 @@ StructMetadata<::py3::simple::detail::AdaptedUnion>::gen(ThriftMetadata& metadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::HiddenException>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::py3::simple::HiddenException>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::py3::simple::HiddenException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -313,6 +341,10 @@ StructMetadata<::py3::simple::HiddenException>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::ComplexStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::py3::simple::ComplexStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::py3::simple::ComplexStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -343,6 +375,10 @@ StructMetadata<::py3::simple::ComplexStruct>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::BinaryUnion>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::py3::simple::BinaryUnion>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::py3::simple::BinaryUnion>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -373,6 +409,10 @@ StructMetadata<::py3::simple::BinaryUnion>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::BinaryUnionStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::py3::simple::BinaryUnionStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::py3::simple::BinaryUnionStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -403,6 +443,10 @@ StructMetadata<::py3::simple::BinaryUnionStruct>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::CustomFields>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::py3::simple::CustomFields>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::py3::simple::CustomFields>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -433,6 +477,10 @@ StructMetadata<::py3::simple::CustomFields>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::CustomTypedefFields>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::py3::simple::CustomTypedefFields>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::py3::simple::CustomTypedefFields>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -463,6 +511,10 @@ StructMetadata<::py3::simple::CustomTypedefFields>::gen(ThriftMetadata& metadata
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::AdaptedTypedefFields>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::py3::simple::AdaptedTypedefFields>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::py3::simple::AdaptedTypedefFields>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;

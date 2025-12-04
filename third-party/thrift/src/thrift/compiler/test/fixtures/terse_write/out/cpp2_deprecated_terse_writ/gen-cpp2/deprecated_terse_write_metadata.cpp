@@ -49,6 +49,10 @@ void EnumMetadata<::facebook::thrift::test::terse_write::deprecated::MyEnum>::ge
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::deprecated::MyStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::terse_write::deprecated::MyStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::MyStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -66,6 +70,10 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::MyStruct>::gen
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::deprecated::MyUnion>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::terse_write::deprecated::MyUnion>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::MyUnion>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -83,6 +91,10 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::MyUnion>::gen(
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -114,6 +126,10 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::StructLevelTer
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -144,6 +160,10 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::FieldLevelTers
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::deprecated::CppRefStructFields>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::terse_write::deprecated::CppRefStructFields>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::CppRefStructFields>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -174,6 +194,10 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::CppRefStructFi
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -204,6 +228,10 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTers
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;

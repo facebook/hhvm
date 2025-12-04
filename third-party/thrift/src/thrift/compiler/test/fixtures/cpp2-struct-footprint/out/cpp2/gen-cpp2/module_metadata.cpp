@@ -41,6 +41,10 @@ inline constexpr Options kGenerateAll = {.genAnnotations = true, .genNestedTypes
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2_struct_footprint::SimpleStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::cpp2_struct_footprint::SimpleStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::cpp2_struct_footprint::SimpleStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -71,6 +75,10 @@ StructMetadata<::cpp2_struct_footprint::SimpleStruct>::gen(ThriftMetadata& metad
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2_struct_footprint::ComplexStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::cpp2_struct_footprint::ComplexStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::cpp2_struct_footprint::ComplexStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -101,6 +109,10 @@ StructMetadata<::cpp2_struct_footprint::ComplexStruct>::gen(ThriftMetadata& meta
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2_struct_footprint::Struct1>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::cpp2_struct_footprint::Struct1>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::cpp2_struct_footprint::Struct1>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -118,6 +130,10 @@ StructMetadata<::cpp2_struct_footprint::Struct1>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2_struct_footprint::Struct2>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::cpp2_struct_footprint::Struct2>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::cpp2_struct_footprint::Struct2>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -135,6 +151,10 @@ StructMetadata<::cpp2_struct_footprint::Struct2>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2_struct_footprint::Struct3>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::cpp2_struct_footprint::Struct3>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::cpp2_struct_footprint::Struct3>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -152,6 +172,10 @@ StructMetadata<::cpp2_struct_footprint::Struct3>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2_struct_footprint::Struct4>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::cpp2_struct_footprint::Struct4>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::cpp2_struct_footprint::Struct4>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -169,6 +193,10 @@ StructMetadata<::cpp2_struct_footprint::Struct4>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2_struct_footprint::Struct5>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::cpp2_struct_footprint::Struct5>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::cpp2_struct_footprint::Struct5>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -186,6 +214,10 @@ StructMetadata<::cpp2_struct_footprint::Struct5>::gen(ThriftMetadata& metadata) 
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2_struct_footprint::ExStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::cpp2_struct_footprint::ExStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::cpp2_struct_footprint::ExStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -216,6 +248,10 @@ StructMetadata<::cpp2_struct_footprint::ExStruct>::gen(ThriftMetadata& metadata)
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2_struct_footprint::TestUnion>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::cpp2_struct_footprint::TestUnion>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::cpp2_struct_footprint::TestUnion>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;

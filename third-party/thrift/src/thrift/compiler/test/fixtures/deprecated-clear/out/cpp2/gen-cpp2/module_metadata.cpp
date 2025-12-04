@@ -49,6 +49,10 @@ void EnumMetadata<::apache::thrift::test::MyEnum>::gen(ThriftMetadata& metadata)
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::test::StructWithDefaultStruct>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::apache::thrift::test::StructWithDefaultStruct>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::apache::thrift::test::StructWithDefaultStruct>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;

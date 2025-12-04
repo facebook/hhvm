@@ -56,6 +56,10 @@ inline constexpr Options kGenerateAll = {.genAnnotations = true, .genNestedTypes
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::CustomException>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::cpp2::CustomException>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::cpp2::CustomException>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -86,6 +90,10 @@ StructMetadata<::cpp2::CustomException>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::ShouldBeBoxed>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::cpp2::ShouldBeBoxed>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::cpp2::ShouldBeBoxed>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;

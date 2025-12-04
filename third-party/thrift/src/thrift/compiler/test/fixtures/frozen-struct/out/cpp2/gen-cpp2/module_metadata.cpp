@@ -49,6 +49,10 @@ void EnumMetadata<::some::ns::EnumB>::gen(ThriftMetadata& metadata) {
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::ns::ModuleA>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::some::ns::ModuleA>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::some::ns::ModuleA>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -79,6 +83,10 @@ StructMetadata<::some::ns::ModuleA>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::ns::ModuleB>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::some::ns::ModuleB>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::some::ns::ModuleB>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -109,6 +117,10 @@ StructMetadata<::some::ns::ModuleB>::gen(ThriftMetadata& metadata) {
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::ns::detail::DirectlyAdapted>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::some::ns::detail::DirectlyAdapted>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::some::ns::detail::DirectlyAdapted>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;
@@ -140,6 +152,10 @@ StructMetadata<::some::ns::detail::DirectlyAdapted>::gen(ThriftMetadata& metadat
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::some::ns::CppRef>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::some::ns::CppRef>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::some::ns::CppRef>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;

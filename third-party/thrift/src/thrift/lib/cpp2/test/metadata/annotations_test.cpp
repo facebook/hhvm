@@ -230,25 +230,32 @@ metadata::ThriftException expectedException() {
 
 TEST(Annotations, Struct) {
   metadata::ThriftMetadata md;
-  detail::md::StructMetadata<TestStruct>::gen(md);
-  EXPECT_EQ(md.structs()["annotations.TestStruct"], expectedStruct());
+  auto actual = detail::md::StructMetadata<TestStruct>::gen(md);
+  auto expected = expectedStruct();
 
-  metadata::ThriftMetadata md2;
-  auto res =
-      detail::md::genStructMetadata<TestStruct>(md2, {.genAnnotations = true});
-  for (size_t i = 0; i < res.metadata.fields()->size(); ++i) {
+  // Annotations require a special function to check equality.
+  for (size_t i = 0; i < actual.fields()->size(); ++i) {
     EXPECT_TRUE(
         detail::md::structuredAnnotationsEquality(
-            *res.metadata.fields()[i].structured_annotations(),
-            *expectedStruct().fields()[i].structured_annotations(),
+            *actual.fields()[i].structured_annotations(),
+            *expected.fields()[i].structured_annotations(),
             detail::md::getFieldAnnotationTypes<TestStruct>(
-                i, *res.metadata.fields()[i].id())));
+                i, *actual.fields()[i].id())));
+    actual.fields()[i].structured_annotations()->clear();
+    expected.fields()[i].structured_annotations()->clear();
   }
+
   EXPECT_TRUE(
       detail::md::structuredAnnotationsEquality(
-          *res.metadata.structured_annotations(),
-          *expectedStruct().structured_annotations(),
+          *actual.structured_annotations(),
+          *expected.structured_annotations(),
           detail::md::getAnnotationTypes<TestStruct>()));
+
+  actual.structured_annotations()->clear();
+  expected.structured_annotations()->clear();
+
+  // After excluding the annotations, other fields should be the same.
+  EXPECT_EQ(actual, expected);
 }
 
 TEST(Annotations, Exception) {

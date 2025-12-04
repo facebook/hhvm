@@ -36,6 +36,10 @@ inline constexpr Options kGenerateAll = {.genAnnotations = true, .genNestedTypes
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::thrift::shared_interactions::DoSomethingResult>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::thrift::shared_interactions::DoSomethingResult>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::thrift::shared_interactions::DoSomethingResult>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;

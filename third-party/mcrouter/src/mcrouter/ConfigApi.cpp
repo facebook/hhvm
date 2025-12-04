@@ -9,7 +9,6 @@
 
 #include <memory>
 
-#include <boost/filesystem.hpp>
 #include <fmt/format.h>
 
 #include <folly/FileUtil.h>
@@ -37,11 +36,6 @@ const char* const kConfigFile = "config_file";
 const char* const kConfigImport = "config_import";
 const int kConfigReloadInterval = 60;
 
-boost::filesystem::path getBackupConfigDirectory(const McrouterOptions& opts) {
-  return boost::filesystem::path(opts.config_dump_root) / opts.service_name /
-      opts.router_name;
-}
-
 boost::filesystem::path getBackupConfigFileName(
     folly::StringPiece sourcePrefix,
     folly::StringPiece name) {
@@ -50,7 +44,26 @@ boost::filesystem::path getBackupConfigFileName(
       fmt::format("{}-{}", sourcePrefix, folly::uriEscape<std::string>(name)));
 }
 
-bool ensureConfigDirectoryExists(boost::filesystem::path directory) {
+template <class Tag>
+void logFailureEveryN(
+    const McrouterOptions& opts,
+    const char* category,
+    const std::string& msg,
+    int n) {
+  static thread_local uint64_t count = 0;
+  if ((count++ % n) == 0) {
+    MC_LOG_FAILURE(opts, category, msg);
+  }
+}
+struct DumpFileTag;
+struct TouchFileTag;
+
+} // anonymous namespace
+
+const char* const ConfigApi::kFilePrefix = "file:";
+
+bool ConfigApi::ensureConfigDirectoryExists(
+    const boost::filesystem::path& directory) {
   if (directory.empty() || boost::filesystem::exists(directory)) {
     return true;
   }
@@ -68,20 +81,46 @@ bool ensureConfigDirectoryExists(boost::filesystem::path directory) {
   return false;
 }
 
-bool setupDumpConfigToDisk(const McrouterOptions& opts) {
-  if (opts.config_dump_root.empty()) {
+std::unique_ptr<ConfigApi> ConfigApi::create(const McrouterOptions& opts) {
+  auto configApi = std::unique_ptr<ConfigApi>(new ConfigApi(opts));
+  configApi->init();
+  return configApi;
+}
+
+ConfigApi::~ConfigApi() {
+  dumpConfigToDiskExecutor_.reset();
+}
+
+ConfigApi::ConfigApi(const McrouterOptions& opts)
+    : opts_(opts), finish_(false) {}
+
+void ConfigApi::init() {
+  if (setupDumpConfigToDisk()) {
+    dumpConfigToDiskExecutor_ =
+        std::make_unique<folly::ScopedEventBaseThread>("mcrcfgdump");
+  }
+}
+
+boost::filesystem::path ConfigApi::getBackupConfigDirectory() const {
+  return backupConfigDirectory_;
+}
+
+bool ConfigApi::setupDumpConfigToDisk() {
+  if (opts_.config_dump_root.empty()) {
     return false;
   }
-  if (opts.service_name.empty() || opts.router_name.empty()) {
+  if (opts_.service_name.empty() || opts_.router_name.empty()) {
     MC_LOG_FAILURE(
-        opts,
+        opts_,
         memcache::failure::Category::kOther,
         "Service name or router name not set. Configs won't be saved to disk.");
     return false;
   }
-  if (!ensureConfigDirectoryExists(getBackupConfigDirectory(opts))) {
+  backupConfigDirectory_ = boost::filesystem::path(opts_.config_dump_root) /
+      opts_.service_name / opts_.router_name;
+  if (!ensureConfigDirectoryExists(backupConfigDirectory_)) {
     MC_LOG_FAILURE(
-        opts,
+        opts_,
         memcache::failure::Category::kOther,
         "Failed to setup directory for dumping configs. "
         "Configs won't be saved to disk.");
@@ -89,36 +128,6 @@ bool setupDumpConfigToDisk(const McrouterOptions& opts) {
   }
   return true;
 }
-
-template <class Tag>
-void logFailureEveryN(
-    const McrouterOptions& opts,
-    const char* category,
-    std::string msg,
-    int n) {
-  static thread_local uint64_t count = 0;
-  if ((count++ % n) == 0) {
-    MC_LOG_FAILURE(opts, category, msg);
-  }
-}
-struct DumpFileTag;
-struct TouchFileTag;
-
-} // anonymous namespace
-
-const char* const ConfigApi::kFilePrefix = "file:";
-
-ConfigApi::~ConfigApi() {
-  dumpConfigToDiskExecutor_.reset();
-}
-
-ConfigApi::ConfigApi(const McrouterOptions& opts)
-    : opts_(opts),
-      finish_(false),
-      dumpConfigToDiskExecutor_(
-          setupDumpConfigToDisk(opts)
-              ? std::make_unique<folly::ScopedEventBaseThread>("mcrcfgdump")
-              : nullptr) {}
 
 ConfigApi::CallbackHandle ConfigApi::subscribe(Callback callback) {
   return callbacks_.subscribe(std::move(callback));
@@ -477,7 +486,7 @@ void ConfigApi::dumpConfigSourceToDisk(
                                   name,
                                   contents = std::move(contents),
                                   md5OrVersion]() {
-    auto directory = getBackupConfigDirectory(opts_);
+    auto directory = getBackupConfigDirectory();
     auto filePath =
         (directory / getBackupConfigFileName(sourcePrefix, name)).string();
 
@@ -523,8 +532,8 @@ bool ConfigApi::readFromBackupFile(
     const std::string& sourcePrefix,
     const std::string& name,
     std::string& contents) const {
-  auto filePath = getBackupConfigDirectory(opts_) /
-      getBackupConfigFileName(sourcePrefix, name);
+  auto filePath =
+      getBackupConfigDirectory() / getBackupConfigFileName(sourcePrefix, name);
   if (!boost::filesystem::exists(filePath)) {
     LOG(WARNING) << "Backup file '" << filePath << "' not found.";
     return false;

@@ -31,7 +31,8 @@ TEST(ConfigApi, file_change) {
 
   McrouterOptions opts;
   opts.config = "file:" + path;
-  ConfigApi api(opts);
+  std::unique_ptr<ConfigApi> apiPtr = ConfigApi::create(opts);
+  ConfigApi& api = *apiPtr;
   api.startObserving();
 
   std::atomic<int> changes(0);

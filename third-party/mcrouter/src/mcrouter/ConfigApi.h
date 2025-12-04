@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <boost/filesystem.hpp>
 #include <atomic>
 #include <condition_variable>
 #include <functional>
@@ -43,7 +44,10 @@ class ConfigApi : public ConfigApiIf {
 
   static const char* const kFilePrefix;
 
-  explicit ConfigApi(const McrouterOptions& opts);
+  static std::unique_ptr<ConfigApi> create(const McrouterOptions& opts);
+
+  static bool ensureConfigDirectoryExists(
+      const boost::filesystem::path& directory);
 
   /**
    * Subscribe a callback that will be called whenever some files changed
@@ -161,9 +165,16 @@ class ConfigApi : public ConfigApiIf {
   };
 
  protected:
+  explicit ConfigApi(const McrouterOptions& opts);
+  void init();
+  virtual bool setupDumpConfigToDisk();
+  boost::filesystem::path getBackupConfigDirectory() const;
+
   const McrouterOptions& opts_;
   CallbackPool<> callbacks_;
   std::atomic<bool> tracking_;
+
+  boost::filesystem::path backupConfigDirectory_;
 
   /**
    * Informs whether this is the first time mcrouter is being configured.

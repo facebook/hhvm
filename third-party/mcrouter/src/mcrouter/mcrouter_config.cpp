@@ -44,7 +44,7 @@ bool read_standalone_flavor(
 }
 
 std::unique_ptr<ConfigApi> createConfigApi(const McrouterOptions& opts) {
-  return std::make_unique<ConfigApi>(opts);
+  return ConfigApi::create(opts);
 }
 
 std::string performOptionSubstitution(std::string str) {

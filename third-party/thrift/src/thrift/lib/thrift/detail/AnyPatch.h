@@ -19,6 +19,7 @@
 #include <vector>
 #include <fmt/format.h>
 #include <folly/container/F14Map.h>
+#include <folly/lang/Badge.h>
 #include <thrift/lib/cpp2/Adapter.h>
 #include <thrift/lib/cpp2/op/detail/BasePatch.h>
 #include <thrift/lib/cpp2/op/detail/StructPatch.h>
@@ -27,6 +28,13 @@
 #include <thrift/lib/thrift/detail/DynamicPatch.h>
 #include <thrift/lib/thrift/gen-cpp2/any_patch_detail_types.h>
 #include <thrift/lib/thrift/gen-cpp2/any_rep_types.h>
+
+namespace apache::thrift::protocol::detail {
+// Use Badge pattern to control access.
+// See thrift/lib/cpp2/patch/detail/PatchBadge.h
+struct PatchBadgeFactory;
+using Badge = folly::badge<PatchBadgeFactory>;
+} // namespace apache::thrift::protocol::detail
 
 namespace apache::thrift::op {
 namespace detail {
@@ -186,6 +194,22 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
       customVisit, customVisitImpl);
 
   void apply(type::AnyStruct& val) const;
+
+  template <type::StandardProtocol Protocol>
+  std::unique_ptr<folly::IOBuf> applyToSerializedObject(
+      std::unique_ptr<folly::IOBuf> buf) const {
+    static_assert(
+        Protocol == type::StandardProtocol::Binary ||
+            Protocol == type::StandardProtocol::Compact,
+        "Unsupported protocol");
+    using Serializer = std::conditional_t<
+        Protocol == type::StandardProtocol::Binary,
+        apache::thrift::BinarySerializer,
+        apache::thrift::CompactSerializer>;
+    auto any = Serializer::template deserialize<type::AnyStruct>(buf.get());
+    apply(any);
+    return Serializer::template serialize<folly::IOBufQueue>(any).move();
+  }
 
   /// Ensures the given type is set in Thrift Any.
   void ensureAny(type::AnyStruct ensureAny) {

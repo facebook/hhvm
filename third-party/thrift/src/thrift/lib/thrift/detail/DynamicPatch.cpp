@@ -2110,7 +2110,8 @@ DynamicPatch::applyToSerializedObjectWithoutExtractingMask(
       return patch.template applyToSerializedObject<Protocol>(std::move(p));
     } else {
       folly::throw_exception_fmt_format<std::runtime_error>(
-          "Can not apply {} to Object", folly::pretty_name<decltype(patch)>());
+          "NotImplemented: Applying {} to Object is not implemented",
+          folly::pretty_name<folly::remove_cvref_t<decltype(patch)>>());
     }
   });
 }

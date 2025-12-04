@@ -1553,6 +1553,44 @@ TEST(DynamicPatch, applyToDataFieldInsideAny) {
       "hello world");
 }
 
+TEST(DynamicPatch, applyAnyPatchToDataFieldInsideAny) {
+  MyUnion obj;
+  obj.s().emplace("123");
+
+  MyUnionPatch patch;
+  patch.patchIfSet<ident::s>() = "hello world";
+
+  // store obj in Thrift Any
+  type::AnyStruct objAny = type::AnyData::toAny(obj).toThrift();
+
+  op::AnyPatch anyPatch;
+  anyPatch.ensureAndPatch(patch);
+  type::AnyStruct anySafePatchAny =
+      type::AnyData::toAny(anyPatch.toSafePatch()).toThrift();
+
+  // apply patch
+  auto any1 = objAny, any2 = objAny, any3 = objAny;
+  anyPatch.apply(any3);
+  EXPECT_EQ(
+      type::AnyData{any3}.get<type::union_t<MyUnion>>().s().value(),
+      "hello world");
+
+  DynamicPatch dynPatch = DynamicPatch::fromSafePatch(anySafePatchAny);
+  auto outer = type::AnyData::toAny(any1);
+  dynPatch.applyToDataFieldInsideAny(outer.toThrift());
+  outer.get(any1);
+  EXPECT_EQ(
+      type::AnyData{any1}.get<type::union_t<MyUnion>>().s().value(),
+      "hello world");
+
+  outer = type::AnyData::toAny(any2);
+  dynPatch.applyObjectInAny(outer.toThrift());
+  outer.get(any2);
+  EXPECT_EQ(
+      type::AnyData{any2}.get<type::union_t<MyUnion>>().s().value(),
+      "hello world");
+}
+
 TEST(DynamicPatchTest, Any) {
   constexpr auto kAssignOp = static_cast<FieldId>(op::PatchOp::Assign);
   constexpr auto kRemoveOp = static_cast<FieldId>(op::PatchOp::Remove);

@@ -55,6 +55,10 @@ class ClientStreamBridge : public TwoWayBridge<
                            private StreamClientCallback {
  public:
   ~ClientStreamBridge() override;
+  ClientStreamBridge(const ClientStreamBridge&) = delete;
+  ClientStreamBridge& operator=(const ClientStreamBridge&) = delete;
+  ClientStreamBridge(ClientStreamBridge&&) = delete;
+  ClientStreamBridge& operator=(ClientStreamBridge&&) = delete;
 
   struct ClientDeleter : Deleter {
     void operator()(ClientStreamBridge* ptr);

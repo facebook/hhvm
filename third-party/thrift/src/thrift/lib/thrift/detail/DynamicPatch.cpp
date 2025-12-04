@@ -902,6 +902,10 @@ DynamicPatch DiffVisitorBase::diff(const Value& src, const Value& dst) {
 
 DynamicPatch DiffVisitorBase::diff(
     detail::Badge, const Value& src, const Value& dst) {
+  return diffValue(src, dst);
+}
+
+DynamicPatch DiffVisitorBase::diffValue(const Value& src, const Value& dst) {
   if (src.getType() != dst.getType()) {
     folly::throw_exception<std::runtime_error>(fmt::format(
         "Value types mismatch: {} and {}.",

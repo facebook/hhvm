@@ -1386,6 +1386,8 @@ class DiffVisitorBase {
   virtual ~DiffVisitorBase() = default;
 
  protected:
+  [[nodiscard]] virtual DynamicPatch diffValue(
+      const Value& src, const Value& dst);
   virtual op::BoolPatch diffBool(bool, bool dst);
   [[nodiscard]] virtual op::BytePatch diffByte(
       std::int8_t src, std::int8_t dst);

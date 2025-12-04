@@ -156,6 +156,28 @@ TEST_F(QuicWebTransportTest, ConnectionError) {
   eventBase_.loop();
 }
 
+// Test that onSessionEnd can safely destroy the transport (use-after-free
+// prevention). The handler callback nullifies handler_ before invocation,
+// so destroying `this` inside the callback is safe.
+TEST_F(QuicWebTransportTest, ConnectionErrorHandlerDestroysTransport) {
+  bool handlerCalled = false;
+  EXPECT_CALL(*handler_, onSessionEnd(_))
+      .WillOnce([this, &handlerCalled](const auto& err) {
+        EXPECT_EQ(*err, WT_ERROR_1);
+        handlerCalled = true;
+        // Simulate the handler destroying the transport during the callback.
+        // This would cause a use-after-free if handler_ was accessed after
+        // onSessionEnd returns, but we clear handler_ before calling.
+        transport_.reset();
+      });
+  socketDriver_.deliverConnectionError(
+      quic::QuicError(quic::ApplicationErrorCode(WT_ERROR_1), "peer close"));
+  eventBase_.loop();
+  EXPECT_TRUE(handlerCalled);
+  // transport_ is now null because the handler destroyed it
+  EXPECT_EQ(transport_, nullptr);
+}
+
 TEST_F(QuicWebTransportTest, SetPriority) {
   auto handle = webTransport()->createUniStream();
   EXPECT_TRUE(handle.hasValue());

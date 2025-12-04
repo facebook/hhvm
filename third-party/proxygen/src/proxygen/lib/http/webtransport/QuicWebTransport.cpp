@@ -70,9 +70,8 @@ void QuicWebTransport::onConnectionEndImpl(
     }
   }
   clearQuicSocket();
-  if (handler_) {
-    handler_->onSessionEnd(wtError);
-    handler_ = nullptr;
+  if (auto handler = std::exchange(handler_, nullptr)) {
+    handler->onSessionEnd(wtError);
   }
 }
 

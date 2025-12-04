@@ -394,7 +394,11 @@ void RocketServerConnection::closeIfNeeded() {
                   ErrorCode::CANCELED,
                   getPayloadSerializer()->packCompact(
                       getStreamConnectionClosingError())));
-          callback->onStreamCancel();
+          if (callback->serverCallbackReady()) {
+            // We don'cancel a stream that hasn't started or is already early
+            // cancelled
+            callback->onStreamCancel();
+          }
         },
         [](const std::unique_ptr<RocketSinkClientCallback>& callback) {
           bool state = callback->onSinkError(TApplicationException(

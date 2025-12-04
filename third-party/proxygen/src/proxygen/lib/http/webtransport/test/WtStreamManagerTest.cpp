@@ -837,4 +837,25 @@ TEST(WtStreamManager, ShutdownOpenStreams) {
   streamManager.shutdown(CloseSession{});
 }
 
+TEST(WtStreamManager, OnlyFinPending) {
+  WtConfig config{.peerMaxStreamsUni = 2};
+  WtSmEgressCb egressCb;
+  WtSmIngressCb ingressCb;
+  WtStreamManager streamManager{
+      detail::WtDir::Client, config, egressCb, ingressCb};
+
+  auto one = CHECK_NOTNULL(streamManager.createEgressHandle());
+  auto two = CHECK_NOTNULL(streamManager.createEgressHandle());
+
+  one->writeStreamData(
+      /*data*/ makeBuf(1), /*fin=*/true, /*byteEventCallback=*/nullptr);
+  // next expected writable stream is one
+  EXPECT_EQ(streamManager.nextWritable(), one);
+
+  two->writeStreamData(
+      /*data*/ nullptr, /*fin=*/true, /*byteEventCallback=*/nullptr);
+  // next expected writable stream is now two
+  EXPECT_EQ(streamManager.nextWritable(), two);
+}
+
 } // namespace proxygen::coro::test

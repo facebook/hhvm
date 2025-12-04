@@ -15,6 +15,8 @@
  */
 
 #pragma once
+
+#include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 #include <thrift/lib/cpp2/protocol/CursorBasedSerializer.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
@@ -63,6 +65,19 @@ class StructuredDynamicCursorReader : detail::BaseCursorReader<ProtocolReader> {
  public:
   protocol::TType fieldType() { return readState_.fieldType; }
   int16_t fieldId() { return readState_.fieldId; }
+
+  // Get the TypeRef for the current field (if available)
+  std::optional<type_system::TypeRef> fieldTypeRef() const {
+    if (!structuredNode_) {
+      return std::nullopt;
+    }
+    auto fieldHandle =
+        structuredNode_->fieldHandleFor(type::FieldId{readState_.fieldId});
+    if (!fieldHandle.valid()) {
+      return std::nullopt;
+    }
+    return structuredNode_->at(fieldHandle).type();
+  }
 
   template <typename Tag>
   view_type<Tag> read(Tag) {
@@ -120,8 +135,17 @@ class StructuredDynamicCursorReader : detail::BaseCursorReader<ProtocolReader> {
       folly::throw_exception<std::runtime_error>(
           "Expected T_STRUCT for structured read");
     }
+    auto fieldType = fieldTypeRef();
+    const type_system::StructuredNode* childNode = nullptr;
+    if (fieldType) {
+      if (!fieldType->isStructured()) {
+        folly::throw_exception<std::runtime_error>(
+            "TypeRef for field is not a structured type");
+      }
+      childNode = &fieldType->asStructured();
+    }
     state_ = State::Child;
-    return StructuredDynamicCursorReader(protocol_);
+    return StructuredDynamicCursorReader(protocol_, childNode);
   }
   void endRead(StructuredDynamicCursorReader&& reader) {
     checkState(State::Child);
@@ -137,8 +161,10 @@ class StructuredDynamicCursorReader : detail::BaseCursorReader<ProtocolReader> {
 
   ContainerDynamicCursorReader beginReadContainer() {
     beforeReadField();
+    auto fieldType = fieldTypeRef();
     state_ = State::Child;
-    return ContainerDynamicCursorReader(protocol_, readState_.fieldType);
+    return ContainerDynamicCursorReader(
+        protocol_, readState_.fieldType, std::move(fieldType));
   }
   void endRead(ContainerDynamicCursorReader&& reader) {
     checkState(State::Child);
@@ -159,8 +185,11 @@ class StructuredDynamicCursorReader : detail::BaseCursorReader<ProtocolReader> {
   }
 
  private:
-  explicit StructuredDynamicCursorReader(ProtocolReader* p)
-      : detail::BaseCursorReader<ProtocolReader>(p) {
+  explicit StructuredDynamicCursorReader(
+      ProtocolReader* p,
+      const type_system::StructuredNode* structuredNode = nullptr)
+      : detail::BaseCursorReader<ProtocolReader>(p),
+        structuredNode_(structuredNode) {
     readState_.readStructBegin(protocol_);
     readState_.readFieldBegin(protocol_);
   }
@@ -198,6 +227,7 @@ class StructuredDynamicCursorReader : detail::BaseCursorReader<ProtocolReader> {
   }
 
   typename ProtocolReader::StructReadState readState_{};
+  const type_system::StructuredNode* structuredNode_{};
 
   friend ContainerDynamicCursorReader;
   template <typename Reader, typename Writer>
@@ -226,11 +256,31 @@ class ContainerDynamicCursorReader : detail::BaseCursorReader<ProtocolReader> {
   protocol::TType valueType_; // includes sets
   protocol::TType containerType_;
   bool partialRead_ = false; // key has been read but not the value.
+  std::optional<type_system::TypeRef> containerTypeRef_;
+
  public:
   // Only for maps
   protocol::TType keyType() { return *keyType_; }
   protocol::TType valueType() { return valueType_; }
   uint32_t remaining() { return remaining_; }
+
+  // Get the TypeRef for the next element/key/value (if available)
+  std::optional<type_system::TypeRef> nextTypeRef() const {
+    if (!containerTypeRef_) {
+      return std::nullopt;
+    }
+    if (containerTypeRef_->isList()) {
+      return containerTypeRef_->asList().elementType();
+    } else if (containerTypeRef_->isSet()) {
+      return containerTypeRef_->asSet().elementType();
+    } else if (containerTypeRef_->isMap()) {
+      if (keyType_ && !partialRead_) {
+        return containerTypeRef_->asMap().keyType();
+      }
+      return containerTypeRef_->asMap().valueType();
+    }
+    return std::nullopt;
+  }
 
   // For maps, the caller is responsible for alternating between reading keys
   // and values.
@@ -313,8 +363,17 @@ class ContainerDynamicCursorReader : detail::BaseCursorReader<ProtocolReader> {
       folly::throw_exception<std::runtime_error>(
           "Expected T_STRUCT for structured read");
     }
+    auto elementType = nextTypeRef();
+    const type_system::StructuredNode* childNode = nullptr;
+    if (elementType) {
+      if (!elementType->isStructured()) {
+        folly::throw_exception<std::runtime_error>(
+            "TypeRef for element is not a structured type");
+      }
+      childNode = &elementType->asStructured();
+    }
     state_ = State::Child;
-    return StructuredDynamicCursorReader(protocol_);
+    return StructuredDynamicCursorReader(protocol_, childNode);
   }
   void endRead(StructuredDynamicCursorReader&& reader) {
     checkState(State::Child);
@@ -330,8 +389,10 @@ class ContainerDynamicCursorReader : detail::BaseCursorReader<ProtocolReader> {
 
   ContainerDynamicCursorReader beginReadContainer() {
     checkRemaining();
+    auto elementType = nextTypeRef();
     state_ = State::Child;
-    return ContainerDynamicCursorReader(protocol_, nextTType());
+    return ContainerDynamicCursorReader(
+        protocol_, nextTType(), std::move(elementType));
   }
   void endRead(ContainerDynamicCursorReader&& reader) {
     checkState(State::Child);
@@ -400,9 +461,13 @@ class ContainerDynamicCursorReader : detail::BaseCursorReader<ProtocolReader> {
     return valueType_;
   }
 
-  ContainerDynamicCursorReader(ProtocolReader* p, protocol::TType containerType)
+  ContainerDynamicCursorReader(
+      ProtocolReader* p,
+      protocol::TType containerType,
+      std::optional<type_system::TypeRef> containerTypeRef)
       : detail::BaseCursorReader<ProtocolReader>(p),
-        containerType_(containerType) {
+        containerType_(containerType),
+        containerTypeRef_(std::move(containerTypeRef)) {
     if (containerType == protocol::TType::T_MAP) {
       protocol_->readMapBegin(keyType_.emplace(), valueType_, remaining_);
     } else if (containerType == protocol::TType::T_SET) {
@@ -445,6 +510,18 @@ class StructuredDynamicCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
       ContainerDynamicCursorWriter<ProtocolWriter>;
 
  public:
+  // Get the TypeRef for a field (if available)
+  std::optional<type_system::TypeRef> getFieldTypeRef(int16_t fieldId) const {
+    if (!structuredNode_) {
+      return std::nullopt;
+    }
+    auto fieldHandle = structuredNode_->fieldHandleFor(type::FieldId{fieldId});
+    if (!fieldHandle.valid()) {
+      return std::nullopt;
+    }
+    return structuredNode_->at(fieldHandle).type();
+  }
+
   template <typename Tag>
   void write(int16_t fieldId, Tag, const view_type<Tag>& value) {
     beforeWriteField(fieldId, op::typeTagToTType<Tag>);
@@ -493,8 +570,17 @@ class StructuredDynamicCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
 
   StructuredDynamicCursorWriter beginWriteStructured(int16_t fieldId) {
     beforeWriteField(fieldId, protocol::TType::T_STRUCT);
+    auto fieldType = getFieldTypeRef(fieldId);
+    const type_system::StructuredNode* childNode = nullptr;
+    if (fieldType) {
+      if (!fieldType->isStructured()) {
+        folly::throw_exception<std::runtime_error>(
+            "TypeRef for field is not a structured type");
+      }
+      childNode = &fieldType->asStructured();
+    }
     state_ = State::Child;
-    return StructuredDynamicCursorWriter(protocol_);
+    return StructuredDynamicCursorWriter(protocol_, childNode);
   }
   void endWrite(StructuredDynamicCursorWriter&& writer) {
     checkState(State::Child);
@@ -529,9 +615,15 @@ class StructuredDynamicCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
       protocol::TType valueType,
       std::optional<protocol::TType> keyTypeForMap = {}) {
     beforeWriteField(fieldId, containerType);
+    auto fieldType = getFieldTypeRef(fieldId);
     state_ = State::Child;
     return ContainerDynamicCursorWriter(
-        protocol_, containerType, size, valueType, keyTypeForMap);
+        protocol_,
+        containerType,
+        size,
+        valueType,
+        keyTypeForMap,
+        std::move(fieldType));
   }
   void endWrite(ContainerDynamicCursorWriter&& writer) {
     checkState(State::Child);
@@ -546,7 +638,10 @@ class StructuredDynamicCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
   }
 
  private:
-  explicit StructuredDynamicCursorWriter(ProtocolWriter* p) : Base(p) {
+  explicit StructuredDynamicCursorWriter(
+      ProtocolWriter* p,
+      const type_system::StructuredNode* structuredNode = nullptr)
+      : Base(p), structuredNode_(structuredNode) {
     protocol_->writeStructBegin(nullptr);
   }
 
@@ -562,6 +657,8 @@ class StructuredDynamicCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
     protocol_->writeStructEnd();
     state_ = State::Done;
   }
+
+  const type_system::StructuredNode* structuredNode_;
 
   friend ContainerDynamicCursorWriter;
   template <typename Reader, typename Writer>
@@ -590,8 +687,27 @@ class ContainerDynamicCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
   protocol::TType valueType_; // includes sets
   protocol::TType containerType_;
   bool partialWrite_ = false; // key has been written but not the value.
+  std::optional<type_system::TypeRef> containerTypeRef_;
 
  public:
+  // Get the TypeRef for the next element/key/value (if available)
+  std::optional<type_system::TypeRef> nextTypeRef() const {
+    if (!containerTypeRef_) {
+      return std::nullopt;
+    }
+    if (containerTypeRef_->isList()) {
+      return containerTypeRef_->asList().elementType();
+    } else if (containerTypeRef_->isSet()) {
+      return containerTypeRef_->asSet().elementType();
+    } else if (containerTypeRef_->isMap()) {
+      if (keyType_ && !partialWrite_) {
+        return containerTypeRef_->asMap().keyType();
+      }
+      return containerTypeRef_->asMap().valueType();
+    }
+    return std::nullopt;
+  }
+
   // For maps, the caller is responsible for alternating between reading keys
   // and values.
   template <typename Tag>
@@ -648,8 +764,17 @@ class ContainerDynamicCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
 
   StructuredDynamicCursorWriter beginWriteStructured() {
     checkRemaining();
+    auto elementType = nextTypeRef();
+    const type_system::StructuredNode* childNode = nullptr;
+    if (elementType) {
+      if (!elementType->isStructured()) {
+        folly::throw_exception<std::runtime_error>(
+            "TypeRef for element is not a structured type");
+      }
+      childNode = &elementType->asStructured();
+    }
     state_ = State::Child;
-    return StructuredDynamicCursorWriter(protocol_);
+    return StructuredDynamicCursorWriter(protocol_, childNode);
   }
   void endWrite(StructuredDynamicCursorWriter&& writer) {
     checkState(State::Child);
@@ -681,9 +806,15 @@ class ContainerDynamicCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
       protocol::TType valueType,
       std::optional<protocol::TType> keyTypeForMap = {}) {
     checkRemaining();
+    auto elementType = nextTypeRef();
     state_ = State::Child;
     return ContainerDynamicCursorWriter(
-        protocol_, containerType, size, valueType, keyTypeForMap);
+        protocol_,
+        containerType,
+        size,
+        valueType,
+        keyTypeForMap,
+        std::move(elementType));
   }
   void endWrite(ContainerDynamicCursorWriter&& writer) {
     checkState(State::Child);
@@ -728,12 +859,14 @@ class ContainerDynamicCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
       protocol::TType containerType,
       uint32_t size,
       protocol::TType valueType,
-      std::optional<protocol::TType> keyType)
+      std::optional<protocol::TType> keyType,
+      std::optional<type_system::TypeRef> containerTypeRef)
       : Base(p),
         remaining_(size),
         keyType_(keyType),
         valueType_(valueType),
-        containerType_(containerType) {
+        containerType_(containerType),
+        containerTypeRef_(std::move(containerTypeRef)) {
     if (containerType == protocol::TType::T_MAP && keyType_) {
       protocol_->writeMapBegin(*keyType_, valueType_, remaining_);
     } else if (containerType == protocol::TType::T_SET && !keyType_) {
@@ -776,8 +909,13 @@ class DynamicCursorSerializationWrapper {
   DynamicCursorSerializationWrapper() = default;
 
   explicit DynamicCursorSerializationWrapper(
-      std::unique_ptr<folly::IOBuf> serialized)
-      : serializedData_(std::move(serialized)) {}
+      std::unique_ptr<folly::IOBuf> serialized,
+      std::optional<type_system::TypeRef> typeRef = std::nullopt)
+      : serializedData_(std::move(serialized)), typeRef_(typeRef) {}
+
+  explicit DynamicCursorSerializationWrapper(
+      std::optional<type_system::TypeRef> typeRef)
+      : typeRef_(typeRef) {}
 
   ~DynamicCursorSerializationWrapper() {
     DCHECK(!isActive()) << "Destroying wrapper with active read or write";
@@ -788,12 +926,14 @@ class DynamicCursorSerializationWrapper {
       DynamicCursorSerializationWrapper&& other) noexcept(false) {
     other.checkInactive("Moving wrapper during reads/writes not supported");
     serializedData_ = std::move(other.serializedData_);
+    typeRef_ = std::move(other.typeRef_);
   }
   DynamicCursorSerializationWrapper& operator=(
       DynamicCursorSerializationWrapper&& other) noexcept(false) {
     checkInactive("Moving wrapper during reads/writes not supported");
     other.checkInactive("Moving wrapper during reads/writes not supported");
     serializedData_ = std::move(other.serializedData_);
+    typeRef_ = std::move(other.typeRef_);
     return *this;
   }
 
@@ -806,7 +946,12 @@ class DynamicCursorSerializationWrapper {
    * Object write path (traditional Thrift serialization)
    * Serializes from a Thrift object.
    */
-  template <typename T>
+  template <
+      typename T,
+      typename = std::enable_if_t<
+          !std::is_same_v<std::decay_t<T>, type_system::TypeRef> &&
+          !std::
+              is_same_v<std::decay_t<T>, std::optional<type_system::TypeRef>>>>
   /* implicit */ DynamicCursorSerializationWrapper(
       const T& t, ExternalBufferSharing sharing = COPY_EXTERNAL_BUFFER) {
     CursorWriteOpts opts{.sharing = sharing};
@@ -843,7 +988,14 @@ class DynamicCursorSerializationWrapper {
       folly::throw_exception<std::runtime_error>(
           "Chained buffer passed to contiguous reader.");
     }
-    return StructuredDynamicCursorReader<ProtocolReader, Contiguous>(reader());
+    if (typeRef_ && !typeRef_->isStructured()) {
+      folly::throw_exception<std::runtime_error>(
+          "TypeRef is not a structured type");
+    }
+    const type_system::StructuredNode* structuredNode =
+        typeRef_ ? &typeRef_->asStructUnchecked() : nullptr;
+    return StructuredDynamicCursorReader<ProtocolReader, Contiguous>(
+        reader(), structuredNode);
   }
   template <bool Contiguous>
   void endRead(
@@ -868,7 +1020,14 @@ class DynamicCursorSerializationWrapper {
   StructuredDynamicCursorWriter<ProtocolWriter> beginWriteWithOpts(
       const CursorWriteOpts& opts) {
     serializedData_.reset(); // Prevent concurrent read from seeing wrong data.
-    return StructuredDynamicCursorWriter<ProtocolWriter>(writer(opts));
+    if (typeRef_ && !typeRef_->isStructured()) {
+      folly::throw_exception<std::runtime_error>(
+          "TypeRef is not a structured type");
+    }
+    const type_system::StructuredNode* structuredNode =
+        typeRef_ ? &typeRef_->asStructUnchecked() : nullptr;
+    return StructuredDynamicCursorWriter<ProtocolWriter>(
+        writer(opts), structuredNode);
   }
 
   StructuredDynamicCursorWriter<ProtocolWriter> beginWrite() {
@@ -944,6 +1103,7 @@ class DynamicCursorSerializationWrapper {
   std::unique_ptr<folly::IOBuf> serializedData_;
   folly::IOBufQueue queue_;
   std::variant<std::monostate, ProtocolReader, ProtocolWriter> protocol_;
+  std::optional<type_system::TypeRef> typeRef_;
 };
 
 } // namespace apache::thrift::detail

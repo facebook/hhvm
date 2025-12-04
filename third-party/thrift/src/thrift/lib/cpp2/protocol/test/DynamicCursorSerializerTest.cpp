@@ -18,6 +18,9 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <thrift/lib/cpp2/dynamic/TypeId.h>
+#include <thrift/lib/cpp2/dynamic/TypeSystem.h>
+#include <thrift/lib/cpp2/dynamic/TypeSystemBuilder.h>
 #include <thrift/lib/cpp2/protocol/test/gen-cpp2/cursor_types.h>
 #include <thrift/lib/cpp2/reflection/testing.h>
 #include <thrift/lib/cpp2/type/AnyDebugWriter.h>
@@ -48,6 +51,61 @@ std::string debugPrint(const folly::IOBuf& s) {
   any.protocol() = type::StandardProtocol::Binary;
   any.data() = s;
   return anyDebugString(any);
+}
+
+std::unique_ptr<type_system::TypeSystem> buildTestTypeSystem() {
+  using namespace apache::thrift::type_system;
+  using def = TypeSystemBuilder::DefinitionHelper;
+
+  TypeSystemBuilder builder;
+
+  // Define Inner union type
+  builder.addType(
+      "facebook.com/thrift/test/Inner",
+      def::Union({
+          def::Field(
+              def::Identity(1, "binary_field"), def::Optional, TypeIds::Binary),
+      }));
+
+  // Define Stringish struct type
+  builder.addType(
+      "facebook.com/thrift/test/Stringish",
+      def::Struct({
+          def::Field(
+              def::Identity(2, "binary_field"), def::Optional, TypeIds::Binary),
+      }));
+
+  // Define main Struct type with various field types
+  builder.addType(
+      "facebook.com/thrift/test/Struct",
+      def::Struct({
+          def::Field(
+              def::Identity(1, "string_field"), def::Optional, TypeIds::String),
+          def::Field(
+              def::Identity(2, "i32_field"), def::Optional, TypeIds::I32),
+          def::Field(
+              def::Identity(3, "union_field"),
+              def::Optional,
+              TypeIds::uri("facebook.com/thrift/test/Inner")),
+          def::Field(
+              def::Identity(4, "list_field"),
+              def::Optional,
+              TypeIds::list(TypeIds::Byte)),
+          def::Field(
+              def::Identity(5, "set_nested_field"),
+              def::Optional,
+              TypeIds::list(
+                  TypeIds::set(
+                      TypeIds::uri("facebook.com/thrift/test/Stringish")))),
+          def::Field(
+              def::Identity(6, "map_field"),
+              def::Optional,
+              TypeIds::map(TypeIds::Byte, TypeIds::Byte)),
+          def::Field(
+              def::Identity(7, "bool_field"), def::Optional, TypeIds::Bool),
+      }));
+
+  return std::move(builder).build();
 }
 
 TEST(DynamicCursorSerializer, UnschematizedRead) {
@@ -255,4 +313,170 @@ TEST(DynamicCursorSerializer, UnschematizedWrite) {
   wrapper.endWrite(std::move(writer));
   EXPECT_THRIFT_EQ(wrapper.deserialize<Struct>(), createStruct())
       << debugPrint(wrapper.serializedData());
+}
+
+TEST(DynamicCursorSerializer, WithTypeRef) {
+  auto typeSystem = buildTestTypeSystem();
+  auto structTypeRef =
+      typeSystem->getUserDefinedTypeOrThrow("facebook.com/thrift/test/Struct")
+          .asStruct()
+          .asRef();
+
+  // Test reading with TypeRef
+  DynamicCursorSerializationWrapper<BinaryProtocolReader, BinaryProtocolWriter>
+      wrapperWithType(
+          BinarySerializer::serialize<folly::IOBufQueue>(createStruct()).move(),
+          structTypeRef);
+
+  auto reader = wrapperWithType.beginRead();
+
+  // Verify field type information is available
+  auto stringFieldTypeRef = reader.fieldTypeRef();
+  ASSERT_TRUE(stringFieldTypeRef.has_value());
+  EXPECT_TRUE(stringFieldTypeRef->isString());
+  EXPECT_EQ(reader.read(type::string_t{}), "hello");
+
+  auto i32FieldTypeRef = reader.fieldTypeRef();
+  ASSERT_TRUE(i32FieldTypeRef.has_value());
+  EXPECT_TRUE(i32FieldTypeRef->isI32());
+  EXPECT_EQ(reader.read(type::i32_t{}), 42);
+
+  // Test nested structured read with TypeRef propagation
+  auto unionFieldTypeRef = reader.fieldTypeRef();
+  ASSERT_TRUE(unionFieldTypeRef.has_value());
+  EXPECT_TRUE(unionFieldTypeRef->isUnion());
+  auto unionReader = reader.beginReadStructured();
+  EXPECT_EQ(unionReader.fieldId(), 1);
+  auto innerFieldTypeRef = unionReader.fieldTypeRef();
+  ASSERT_TRUE(innerFieldTypeRef.has_value());
+  EXPECT_TRUE(innerFieldTypeRef->isBinary());
+  EXPECT_EQ(unionReader.read(type::binary_t{}), "world");
+  reader.endRead(std::move(unionReader));
+
+  // Test container read with TypeRef propagation
+  auto listFieldTypeRef = reader.fieldTypeRef();
+  ASSERT_TRUE(listFieldTypeRef.has_value());
+  EXPECT_TRUE(listFieldTypeRef->isList());
+  auto listReader = reader.beginReadContainer();
+  auto elementTypeRef = listReader.nextTypeRef();
+  ASSERT_TRUE(elementTypeRef.has_value());
+  EXPECT_TRUE(elementTypeRef->isByte());
+  EXPECT_EQ(listReader.read(type::byte_t{}), 'f');
+  EXPECT_EQ(listReader.read(type::byte_t{}), 'o');
+  EXPECT_EQ(listReader.read(type::byte_t{}), 'o');
+  reader.endRead(std::move(listReader));
+
+  // Test nested container with TypeRef propagation
+  auto setNestedFieldTypeRef = reader.fieldTypeRef();
+  ASSERT_TRUE(setNestedFieldTypeRef.has_value());
+  EXPECT_TRUE(setNestedFieldTypeRef->isList());
+  auto outerListReader = reader.beginReadContainer();
+  auto setTypeRef = outerListReader.nextTypeRef();
+  ASSERT_TRUE(setTypeRef.has_value());
+  EXPECT_TRUE(setTypeRef->isSet());
+  auto setReader = outerListReader.beginReadContainer();
+  auto stringishTypeRef = setReader.nextTypeRef();
+  ASSERT_TRUE(stringishTypeRef.has_value());
+  EXPECT_TRUE(stringishTypeRef->isStruct());
+  auto stringishReader = setReader.beginReadStructured();
+  EXPECT_EQ(stringishReader.fieldId(), 2);
+  auto binaryFieldTypeRef = stringishReader.fieldTypeRef();
+  ASSERT_TRUE(binaryFieldTypeRef.has_value());
+  EXPECT_TRUE(binaryFieldTypeRef->isBinary());
+  EXPECT_EQ(stringishReader.read(type::binary_t{}), "bar");
+  setReader.endRead(std::move(stringishReader));
+  outerListReader.endRead(std::move(setReader));
+  reader.endRead(std::move(outerListReader));
+
+  wrapperWithType.endRead(std::move(reader));
+
+  // Test writing with TypeRef
+  DynamicCursorSerializationWrapper<BinaryProtocolReader, BinaryProtocolWriter>
+      writeWrapper(structTypeRef);
+
+  auto writer = writeWrapper.beginWrite();
+
+  // Verify field type information during write
+  auto field1TypeRef = writer.getFieldTypeRef(1);
+  ASSERT_TRUE(field1TypeRef.has_value());
+  EXPECT_TRUE(field1TypeRef->isString());
+  writer.write(1, type::string_t{}, "hello");
+
+  auto field2TypeRef = writer.getFieldTypeRef(2);
+  ASSERT_TRUE(field2TypeRef.has_value());
+  EXPECT_TRUE(field2TypeRef->isI32());
+  writer.write(2, type::i32_t{}, 42);
+
+  auto field3TypeRef = writer.getFieldTypeRef(3);
+  ASSERT_TRUE(field3TypeRef.has_value());
+  EXPECT_TRUE(field3TypeRef->isUnion());
+  auto innerWriter = writer.beginWriteStructured(3);
+  innerWriter.write(1, type::string_t{}, "world");
+  writer.endWrite(std::move(innerWriter));
+
+  auto listWriter =
+      writer.beginWriteContainer(4, type::list<type::byte_t>{}, 3);
+  listWriter.write(type::byte_t{}, 'f');
+  listWriter.write(type::byte_t{}, 'o');
+  listWriter.write(type::byte_t{}, 'o');
+  writer.endWrite(std::move(listWriter));
+
+  Stringish stringish;
+  stringish.binary_field() =
+      folly::IOBuf::wrapBufferAsValue(folly::Range("bar"));
+  writer.write(
+      5, type::list<type::set<type::union_t<Stringish>>>{}, {{stringish}});
+  writer.write(
+      6, type::map<type::byte_t, type::byte_t>{}, {{'a', 1}, {'b', 2}});
+  writer.write(7, type::bool_t{}, true);
+
+  writeWrapper.endWrite(std::move(writer));
+  EXPECT_THRIFT_EQ(writeWrapper.deserialize<Struct>(), createStruct());
+}
+
+TEST(DynamicCursorSerializer, TypeRefValidation) {
+  using namespace apache::thrift::type_system;
+  using def = TypeSystemBuilder::DefinitionHelper;
+
+  // Build a TypeSystem with incompatible types for testing validation
+  TypeSystemBuilder builder;
+  builder.addType(
+      "facebook.com/thrift/test/TestStruct",
+      def::Struct({
+          def::Field(
+              def::Identity(1, "string_field"), def::Optional, TypeIds::String),
+          def::Field(
+              def::Identity(2, "list_field"),
+              def::Optional,
+              TypeIds::list(TypeIds::I32)),
+      }));
+
+  auto typeSystem = std::move(builder).build();
+  auto structTypeRef =
+      typeSystem
+          ->getUserDefinedTypeOrThrow("facebook.com/thrift/test/TestStruct")
+          .asStruct()
+          .asRef();
+
+  Struct s = createStruct();
+  DynamicCursorSerializationWrapper<BinaryProtocolReader, BinaryProtocolWriter>
+      wrapper(
+          BinarySerializer::serialize<folly::IOBufQueue>(s).move(),
+          structTypeRef);
+
+  auto reader = wrapper.beginRead();
+
+  // Skip string field (field 1)
+  reader.skip();
+
+  // Try to read i32_field (field 2) as structured, but TypeRef says field 2 is
+  // a list
+  try {
+    reader.beginReadStructured();
+    ADD_FAILURE() << "Expected exception";
+  } catch (const std::runtime_error&) {
+  }
+
+  // After the exception, abandon the reader to avoid destructor check failure
+  wrapper.abandonRead(std::move(reader));
 }

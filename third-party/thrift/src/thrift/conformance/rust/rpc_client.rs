@@ -176,7 +176,15 @@ async fn test(client: &dyn RPCConformanceServiceExt<thriftclient::ThriftChannel>
         sinkBasic(i) => sink_basic(client, i).await,
         sinkChunkTimeout(i) => sink_chunk_timeout(client, i).await,
         sinkInitialResponse(i) => sink_initial_response(client, i).await,
+        sinkInitialDeclaredException(i) => Err(anyhow!(
+            "sinkInitialDeclaredException not implemented: {:?}",
+            i
+        )),
         sinkDeclaredException(i) => sink_declared_exception(client, i).await,
+        sinkServerDeclaredException(i) => Err(anyhow!(
+            "sinkServerDeclaredException not implemented: {:?}",
+            i
+        )),
         sinkUndeclaredException(i) => sink_undeclared_exception(client, i).await,
         UnknownField(i) => Err(anyhow!(format!("not supported: {:?}", i))),
     }

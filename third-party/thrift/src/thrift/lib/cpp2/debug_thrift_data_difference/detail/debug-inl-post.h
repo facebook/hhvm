@@ -94,6 +94,10 @@ struct scoped_path {
     assert(path_.size() >= size_);
     path_.resize(size_);
   }
+  scoped_path(const scoped_path&) = delete;
+  scoped_path& operator=(const scoped_path&) = delete;
+  scoped_path(scoped_path&&) = delete;
+  scoped_path& operator=(scoped_path&&) = delete;
 
   static scoped_path member(std::string& path, std::string_view member) {
     return scoped_path(path, '.', member);

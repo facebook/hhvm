@@ -18,8 +18,12 @@
 #include <fizz/server/FizzServerContext.h>
 #include <fizz/server/ServerExtensions.h>
 #include <fizz/server/State.h>
+#include <fizz/util/Status.h>
 
 namespace fizz {
+
+struct InvocationContext;
+
 namespace server {
 
 class ServerStateMachine {
@@ -67,7 +71,11 @@ Actions handleError(
 Actions handleAppCloseImmediate(const State& state);
 Actions handleAppClose(const State& state);
 
-AsyncActions handleInvalidEvent(const State& state, Param& param);
+Status handleInvalidEvent(
+    const State& state,
+    Param& param,
+    InvocationContext& cxt,
+    AsyncActions& actOut);
 } // namespace detail
 
 struct ServerTypes {

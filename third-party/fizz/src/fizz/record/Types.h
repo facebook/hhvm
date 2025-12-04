@@ -414,7 +414,6 @@ class FizzException : public std::runtime_error {
  private:
   folly::Optional<AlertDescription> alert_;
 };
-
 template <class T>
 Buf encode(T&&);
 template <class T>

@@ -230,49 +230,75 @@ AsyncActions ServerStateMachine::processKeyUpdateInitiation(
 
 namespace detail {
 
+static ReportError toReportError(
+    const Error& err,
+    folly::Optional<AlertDescription>& alert) {
+  const char* msg = err.msg();
+  Error::Category errType = err.errorType();
+  alert = (errType == Error::Category::Unknown)
+      ? AlertDescription::unexpected_message
+      : err.alert();
+  switch (errType) {
+    case Error::Category::Fizz:
+    case Error::Category::Unknown:
+      return ReportError(
+          folly::make_exception_wrapper<FizzException>(msg, alert));
+    case Error::Category::Verifier:
+      return ReportError(
+          folly::make_exception_wrapper<FizzVerificationException>(msg, alert));
+  }
+}
+
 AsyncActions processEvent(const State& state, Param& param) {
   auto event = EventVisitor()(param);
   // We can have an exception directly in the handler or in a future so we need
   // to handle both types.
+  AsyncActions acts;
   try {
-    auto actions = sm::StateMachine<ServerTypes>::getHandler(
-        state.state(), event)(state, param);
-
-    return folly::variant_match(
-        actions,
-        ::fizz::detail::result_type<AsyncActions>(),
-        [&state](SemiFuture<Actions>& futureActions) -> AsyncActions {
-          if (futureActions.isReady()) {
-            // any exception thrown by get will be caught below
-            return std::move(futureActions).get();
-          }
-          return std::move(futureActions)
-              .deferError([&state](folly::exception_wrapper ew) {
-                auto ex = ew.get_exception<FizzException>();
-                if (ex) {
+    InvocationContext ctx;
+    if (sm::StateMachine<ServerTypes>::getHandler(state.state(), event)(
+            state, param, ctx, acts) == Status::Fail) {
+      folly::Optional<AlertDescription> alert;
+      ReportError rerr = toReportError(ctx.err, alert);
+      acts = detail::handleError(state, std::move(rerr), alert);
+    } else {
+      acts = folly::variant_match(
+          acts,
+          ::fizz::detail::result_type<AsyncActions>(),
+          [&state](SemiFuture<Actions>& futureActions) -> AsyncActions {
+            if (futureActions.isReady()) {
+              // any exception thrown by get will be caught below
+              return std::move(futureActions).get();
+            }
+            return std::move(futureActions)
+                .deferError([&state](folly::exception_wrapper ew) {
+                  auto ex = ew.get_exception<FizzException>();
+                  if (ex) {
+                    return detail::handleError(
+                        state, ReportError(std::move(ew)), ex->getAlert());
+                  }
                   return detail::handleError(
-                      state, ReportError(std::move(ew)), ex->getAlert());
-                }
-                return detail::handleError(
-                    state,
-                    ReportError(std::move(ew)),
-                    AlertDescription::unexpected_message);
-              });
-        },
-        [](Actions& immediateActions) -> AsyncActions {
-          return std::move(immediateActions);
-        });
+                      state,
+                      ReportError(std::move(ew)),
+                      AlertDescription::unexpected_message);
+                });
+          },
+          [](Actions& immediateActions) -> AsyncActions {
+            return std::move(immediateActions);
+          });
+    }
   } catch (const FizzException& e) {
-    return detail::handleError(
+    acts = detail::handleError(
         state,
         ReportError(folly::exception_wrapper(std::current_exception())),
         e.getAlert());
   } catch (...) {
-    return detail::handleError(
+    acts = detail::handleError(
         state,
         ReportError(folly::exception_wrapper(std::current_exception())),
         AlertDescription::unexpected_message);
   }
+  return acts;
 }
 
 Actions handleError(
@@ -345,7 +371,11 @@ Actions handleAppClose(const State& state) {
   }
 }
 
-AsyncActions handleInvalidEvent(const State& state, Param& param) {
+Status handleInvalidEvent(
+    const State& state,
+    Param& param,
+    InvocationContext& /* ctx */,
+    AsyncActions& /* actOut */) {
   auto event = EventVisitor()(param);
   if (event == Event::Alert) {
     auto& alert = *param.asAlert();
@@ -401,16 +431,18 @@ static void ensureNoUnparsedHandshakeData(const State& state, Event event) {
   }
 }
 
-AsyncActions
+Status
 EventHandler<ServerTypes, StateEnum::Uninitialized, Event::Accept>::handle(
     const State& /*state*/,
-    Param& param) {
+    Param& param,
+    InvocationContext& /* ctx */,
+    AsyncActions& actOut) {
   auto& accept = *param.asAccept();
   auto factory = accept.context->getFactory();
   auto readRecordLayer = factory->makePlaintextReadRecordLayer();
   auto writeRecordLayer = factory->makePlaintextWriteRecordLayer();
   auto handshakeLogging = std::make_unique<HandshakeLogging>();
-  return actions(
+  actOut = actions(
       MutateState([executor = accept.executor,
                    rrl = std::move(readRecordLayer),
                    wrl = std::move(writeRecordLayer),
@@ -425,6 +457,7 @@ EventHandler<ServerTypes, StateEnum::Uninitialized, Event::Accept>::handle(
         newState.extensions() = std::move(extensions);
       }),
       MutateState(&Transition<StateEnum::ExpectingClientHello>));
+  return Status::Success;
 }
 
 /**
@@ -1222,9 +1255,13 @@ static std::pair<ECHStatus, folly::Optional<ECHState>> processECH(
   return std::make_pair(echStatus, std::move(echState));
 }
 
-AsyncActions
+Status
 EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
-    handle(const State& state, Param& param) {
+    handle(
+        const State& state,
+        Param& param,
+        InvocationContext& /* ctx */,
+        AsyncActions& actOut) {
   ClientHello chlo = std::move(*param.asClientHello());
   addHandshakeLoggingPreECH(state, chlo);
 
@@ -1285,8 +1322,9 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
             std::make_unique<HandshakeLogging>(*logging);
       }
 
-      return actions(
+      actOut = actions(
           MutateState(&Transition<StateEnum::Error>), std::move(fallback));
+      return Status::Success;
     } else {
       throw FizzException(
           "supported version mismatch", AlertDescription::protocol_version);
@@ -1323,7 +1361,7 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
   using FutureResultType = std::tuple<
       folly::Try<std::pair<PskType, Optional<ResumptionState>>>,
       folly::Try<ReplayCacheResult>>;
-  return runOnCallerIfComplete(
+  actOut = runOnCallerIfComplete(
       state.executor(),
       std::move(results),
       [&state,
@@ -2032,19 +2070,29 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                   });
             });
       });
+  return Status::Success;
 }
 
-AsyncActions
+Status
 EventHandler<ServerTypes, StateEnum::AcceptingEarlyData, Event::AppData>::
-    handle(const State&, Param& param) {
+    handle(
+        const State&,
+        Param& param,
+        InvocationContext& /* ctx */,
+        AsyncActions& actOut) {
   auto& appData = *param.asAppData();
 
-  return actions(DeliverAppData{std::move(appData.data)});
+  actOut = actions(DeliverAppData{std::move(appData.data)});
+  return Status::Success;
 }
 
-AsyncActions
+Status
 EventHandler<ServerTypes, StateEnum::AcceptingEarlyData, Event::AppWrite>::
-    handle(const State& state, Param& param) {
+    handle(
+        const State& state,
+        Param& param,
+        InvocationContext& /* ctx */,
+        AsyncActions& actOut) {
   auto& appWrite = *param.asAppWrite();
 
   WriteToSocket write;
@@ -2053,13 +2101,19 @@ EventHandler<ServerTypes, StateEnum::AcceptingEarlyData, Event::AppWrite>::
       std::move(appWrite.data), appWrite.aeadOptions));
   write.flags = appWrite.flags;
 
-  return actions(std::move(write));
+  actOut = actions(std::move(write));
+  return Status::Success;
 }
 
-AsyncActions EventHandler<
+Status EventHandler<
     ServerTypes,
     StateEnum::AcceptingEarlyData,
-    Event::EndOfEarlyData>::handle(const State& state, Param& param) {
+    Event::EndOfEarlyData>::
+    handle(
+        const State& state,
+        Param& param,
+        InvocationContext& /* ctx */,
+        AsyncActions& actOut) {
   auto& eoed = *param.asEndOfEarlyData();
 
   if (state.readRecordLayer()->hasUnparsedHandshakeData()) {
@@ -2071,17 +2125,22 @@ AsyncActions EventHandler<
 
   auto readRecordLayer = std::move(state.handshakeReadRecordLayer());
 
-  return actions(
+  actOut = actions(
       MutateState([readRecordLayer =
                        std::move(readRecordLayer)](State& newState) mutable {
         newState.readRecordLayer() = std::move(readRecordLayer);
       }),
       MutateState(&Transition<StateEnum::ExpectingFinished>));
+  return Status::Success;
 }
 
-AsyncActions
+Status
 EventHandler<ServerTypes, StateEnum::ExpectingFinished, Event::AppWrite>::
-    handle(const State& state, Param& param) {
+    handle(
+        const State& state,
+        Param& param,
+        InvocationContext& /* ctx */,
+        AsyncActions& actOut) {
   auto& appWrite = *param.asAppWrite();
 
   WriteToSocket write;
@@ -2090,7 +2149,8 @@ EventHandler<ServerTypes, StateEnum::ExpectingFinished, Event::AppWrite>::
       std::move(appWrite.data), appWrite.aeadOptions));
   write.flags = appWrite.flags;
 
-  return actions(std::move(write));
+  actOut = actions(std::move(write));
+  return Status::Success;
 }
 
 static WriteToSocket writeNewSessionTicket(
@@ -2172,9 +2232,13 @@ static SemiFuture<Optional<WriteToSocket>> generateTicket(
       });
 }
 
-AsyncActions
+Status
 EventHandler<ServerTypes, StateEnum::ExpectingCertificate, Event::Certificate>::
-    handle(const State& state, Param& param) {
+    handle(
+        const State& state,
+        Param& param,
+        InvocationContext& /* ctx */,
+        AsyncActions& actOut) {
   auto certMsg = std::move(*param.asCertificateMsg());
 
   state.handshakeContext()->appendToTranscript(*certMsg.originalEncoding);
@@ -2198,29 +2262,36 @@ EventHandler<ServerTypes, StateEnum::ExpectingCertificate, Event::Certificate>::
   if (clientCerts.empty()) {
     if (state.context()->getClientAuthMode() == ClientAuthMode::Optional) {
       VLOG(6) << "Client authentication not sent";
-      return actions(
+      actOut = actions(
           MutateState([](State& newState) {
             newState.unverifiedCertChain() = folly::none;
           }),
           MutateState(&Transition<StateEnum::ExpectingFinished>));
+      return Status::Success;
     } else {
       throw FizzException(
           "certificate requested but none received",
           AlertDescription::certificate_required);
     }
   } else {
-    return actions(
+    actOut = actions(
         MutateState([certs = std::move(clientCerts)](State& newState) mutable {
           newState.unverifiedCertChain() = std::move(certs);
         }),
         MutateState(&Transition<StateEnum::ExpectingCertificateVerify>));
+    return Status::Success;
   }
 }
 
-AsyncActions EventHandler<
+Status EventHandler<
     ServerTypes,
     StateEnum::ExpectingCertificateVerify,
-    Event::CertificateVerify>::handle(const State& state, Param& param) {
+    Event::CertificateVerify>::
+    handle(
+        const State& state,
+        Param& param,
+        InvocationContext& /* ctx */,
+        AsyncActions& actOut) {
   auto certVerify = std::move(*param.asCertificateVerify());
 
   if (std::find(
@@ -2270,17 +2341,22 @@ AsyncActions EventHandler<
 
   state.handshakeContext()->appendToTranscript(*certVerify.originalEncoding);
 
-  return actions(
+  actOut = actions(
       MutateState([cert = std::move(newCert)](State& newState) {
         newState.unverifiedCertChain() = folly::none;
         newState.clientCert() = std::move(cert);
       }),
       MutateState(&Transition<StateEnum::ExpectingFinished>));
+  return Status::Success;
 }
 
-AsyncActions
+Status
 EventHandler<ServerTypes, StateEnum::ExpectingFinished, Event::Finished>::
-    handle(const State& state, Param& param) {
+    handle(
+        const State& state,
+        Param& param,
+        InvocationContext& /* ctx */,
+        AsyncActions& actOut) {
   auto& finished = *param.asFinished();
 
   auto expectedFinished = state.handshakeContext()->getFinishedData(
@@ -2329,14 +2405,14 @@ EventHandler<ServerTypes, StateEnum::ExpectingFinished, Event::Finished>::
   SecretAvailable appReadTrafficSecretAvailable(std::move(readSecret));
 
   if (!state.context()->getSendNewSessionTicket()) {
-    return actions(
+    actOut = actions(
         std::move(saveState),
         std::move(appReadTrafficSecretAvailable),
         MutateState(&Transition<StateEnum::AcceptingData>),
         ReportHandshakeSuccess());
   } else {
     auto ticketFuture = generateTicket(state, resumptionMasterSecret);
-    return runOnCallerIfComplete(
+    actOut = runOnCallerIfComplete(
         state.executor(),
         std::move(ticketFuture),
         [saveState = std::move(saveState),
@@ -2359,18 +2435,24 @@ EventHandler<ServerTypes, StateEnum::ExpectingFinished, Event::Finished>::
               ReportHandshakeSuccess());
         });
   }
+  return Status::Success;
 }
 
-AsyncActions EventHandler<
+Status EventHandler<
     ServerTypes,
     StateEnum::AcceptingData,
-    Event::WriteNewSessionTicket>::handle(const State& state, Param& param) {
+    Event::WriteNewSessionTicket>::
+    handle(
+        const State& state,
+        Param& param,
+        InvocationContext& /* ctx */,
+        AsyncActions& actOut) {
   auto& writeNewSessionTicket = *param.asWriteNewSessionTicket();
   auto ticketFuture = generateTicket(
       state,
       state.resumptionMasterSecret(),
       std::move(writeNewSessionTicket.appToken));
-  return runOnCallerIfComplete(
+  actOut = runOnCallerIfComplete(
       state.executor(),
       std::move(ticketFuture),
       [](Optional<WriteToSocket> nstWrite) {
@@ -2379,21 +2461,27 @@ AsyncActions EventHandler<
         }
         return actions(std::move(*nstWrite));
       });
+  return Status::Success;
 }
 
-AsyncActions
+Status
 EventHandler<ServerTypes, StateEnum::AcceptingData, Event::AppData>::handle(
     const State& /*state*/,
-    Param& param) {
+    Param& param,
+    InvocationContext& /* ctx */,
+    AsyncActions& actOut) {
   auto& appData = *param.asAppData();
 
-  return actions(DeliverAppData{std::move(appData.data)});
+  actOut = actions(DeliverAppData{std::move(appData.data)});
+  return Status::Success;
 }
 
-AsyncActions
+Status
 EventHandler<ServerTypes, StateEnum::AcceptingData, Event::AppWrite>::handle(
     const State& state,
-    Param& param) {
+    Param& param,
+    InvocationContext& /* ctx */,
+    AsyncActions& actOut) {
   auto& appWrite = *param.asAppWrite();
 
   WriteToSocket write;
@@ -2402,13 +2490,19 @@ EventHandler<ServerTypes, StateEnum::AcceptingData, Event::AppWrite>::handle(
       std::move(appWrite.data), appWrite.aeadOptions));
   write.flags = appWrite.flags;
 
-  return actions(std::move(write));
+  actOut = actions(std::move(write));
+  return Status::Success;
 }
 
-AsyncActions EventHandler<
+Status EventHandler<
     ServerTypes,
     StateEnum::AcceptingData,
-    Event::KeyUpdateInitiation>::handle(const State& state, Param& param) {
+    Event::KeyUpdateInitiation>::
+    handle(
+        const State& state,
+        Param& param,
+        InvocationContext& /* ctx */,
+        AsyncActions& actOut) {
   if (state.readRecordLayer()->hasUnparsedHandshakeData()) {
     throw FizzException("data after key_update", folly::none);
   }
@@ -2437,19 +2531,22 @@ AsyncActions EventHandler<
       *state.context()->getFactory(),
       *state.keyScheduler());
 
-  return actions(
+  actOut = actions(
       MutateState([wRecordLayer =
                        std::move(writeRecordLayer)](State& newState) mutable {
         newState.writeRecordLayer() = std::move(wRecordLayer);
       }),
       SecretAvailable(std::move(writeSecret)),
       std::move(write));
+  return Status::Success;
 }
 
-AsyncActions
+Status
 EventHandler<ServerTypes, StateEnum::AcceptingData, Event::KeyUpdate>::handle(
     const State& state,
-    Param& param) {
+    Param& param,
+    InvocationContext& /* ctx */,
+    AsyncActions& actOut) {
   auto& keyUpdate = *param.asKeyUpdate();
 
   if (state.readRecordLayer()->hasUnparsedHandshakeData()) {
@@ -2471,12 +2568,13 @@ EventHandler<ServerTypes, StateEnum::AcceptingData, Event::KeyUpdate>::handle(
       *state.keyScheduler());
 
   if (keyUpdate.request_update == KeyUpdateRequest::update_not_requested) {
-    return actions(
+    actOut = actions(
         MutateState([rRecordLayer =
                          std::move(readRecordLayer)](State& newState) mutable {
           newState.readRecordLayer() = std::move(rRecordLayer);
         }),
         SecretAvailable(std::move(readSecret)));
+    return Status::Success;
   }
 
   auto encodedKeyUpdated =
@@ -2500,7 +2598,7 @@ EventHandler<ServerTypes, StateEnum::AcceptingData, Event::KeyUpdate>::handle(
       *state.context()->getFactory(),
       *state.keyScheduler());
 
-  return actions(
+  actOut = actions(
       MutateState([rRecordLayer = std::move(readRecordLayer),
                    wRecordLayer =
                        std::move(writeRecordLayer)](State& newState) mutable {
@@ -2510,12 +2608,15 @@ EventHandler<ServerTypes, StateEnum::AcceptingData, Event::KeyUpdate>::handle(
       SecretAvailable(std::move(writeSecret)),
       SecretAvailable(std::move(readSecret)),
       std::move(write));
+  return Status::Success;
 }
 
-AsyncActions
+Status
 EventHandler<ServerTypes, StateEnum::AcceptingData, Event::CloseNotify>::handle(
     const State& state,
-    Param& param) {
+    Param& param,
+    InvocationContext& /* ctx */,
+    AsyncActions& actOut) {
   ensureNoUnparsedHandshakeData(state, Event::CloseNotify);
   auto& closenotify = *param.asCloseNotify();
   auto eod = EndOfData(std::move(closenotify.ignoredPostCloseData));
@@ -2528,16 +2629,21 @@ EventHandler<ServerTypes, StateEnum::AcceptingData, Event::CloseNotify>::handle(
   WriteToSocket write;
   write.contents.emplace_back(state.writeRecordLayer()->writeAlert(
       Alert(AlertDescription::close_notify)));
-  return actions(
+  actOut = actions(
       std::move(write),
       std::move(clearRecordLayers),
       MutateState(&Transition<StateEnum::Closed>),
       std::move(eod));
+  return Status::Success;
 }
 
-AsyncActions
+Status
 EventHandler<ServerTypes, StateEnum::ExpectingCloseNotify, Event::CloseNotify>::
-    handle(const State& state, Param& param) {
+    handle(
+        const State& state,
+        Param& param,
+        InvocationContext& /* ctx */,
+        AsyncActions& actOut) {
   ensureNoUnparsedHandshakeData(state, Event::CloseNotify);
   auto& closenotify = *param.asCloseNotify();
   auto eod = EndOfData(std::move(closenotify.ignoredPostCloseData));
@@ -2546,10 +2652,11 @@ EventHandler<ServerTypes, StateEnum::ExpectingCloseNotify, Event::CloseNotify>::
     newState.readRecordLayer() = nullptr;
     newState.writeRecordLayer() = nullptr;
   });
-  return actions(
+  actOut = actions(
       std::move(clearRecordLayers),
       MutateState(&Transition<StateEnum::Closed>),
       std::move(eod));
+  return Status::Success;
 }
 
 } // namespace sm

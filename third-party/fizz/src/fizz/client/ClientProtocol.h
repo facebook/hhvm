@@ -14,8 +14,12 @@
 #include <fizz/client/PskCache.h>
 #include <fizz/client/State.h>
 #include <fizz/protocol/ech/Types.h>
+#include <fizz/util/Status.h>
 
 namespace fizz {
+
+struct InvocationContext;
+
 namespace client {
 
 class ClientStateMachine {
@@ -67,7 +71,11 @@ Actions handleError(
 Actions handleAppCloseImmediate(const State& state);
 Actions handleAppClose(const State& state);
 
-Actions handleInvalidEvent(const State& state, Param& param);
+Status handleInvalidEvent(
+    const State& state,
+    Param& param,
+    InvocationContext& ctx,
+    Actions& actOut);
 } // namespace detail
 
 struct ClientTypes {

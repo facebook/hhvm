@@ -8,18 +8,25 @@
 
 #pragma once
 
+#include <fizz/util/Status.h>
 #include <array>
 #include <cstdlib>
 #include <utility>
 
 namespace fizz {
+struct InvocationContext {
+  Error err{};
+};
 namespace sm {
 
 template <typename SM>
 class StateMachine {
  public:
-  using EventHandlerFun =
-      typename SM::Actions (*)(const typename SM::State&, typename SM::Param&);
+  using EventHandlerFun = Status (*)(
+      const typename SM::State&,
+      typename SM::Param&,
+      InvocationContext&,
+      typename SM::Actions&);
 
   /**
    * Returns the appropriate event handler for event in state.

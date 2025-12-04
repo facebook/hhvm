@@ -283,13 +283,16 @@ class WebTransport {
 //  * The end of of session
 class WebTransportHandler {
  public:
-  virtual ~WebTransportHandler() = default;
+  virtual ~WebTransportHandler() noexcept = default;
 
-  virtual void onNewUniStream(WebTransport::StreamReadHandle* readHandle) = 0;
-  virtual void onNewBidiStream(WebTransport::BidiStreamHandle bidiHandle) = 0;
-  virtual void onDatagram(std::unique_ptr<folly::IOBuf> datagram) = 0;
-  virtual void onSessionEnd(folly::Optional<uint32_t> error) = 0;
-  virtual void onSessionDrain() = 0;
+  virtual void onNewUniStream(
+      WebTransport::StreamReadHandle* readHandle) noexcept = 0;
+  virtual void onNewBidiStream(
+      WebTransport::BidiStreamHandle bidiHandle) noexcept = 0;
+
+  virtual void onDatagram(std::unique_ptr<folly::IOBuf> datagram) noexcept = 0;
+  virtual void onSessionEnd(folly::Optional<uint32_t> error) noexcept = 0;
+  virtual void onSessionDrain() noexcept = 0;
 };
 
 } // namespace proxygen

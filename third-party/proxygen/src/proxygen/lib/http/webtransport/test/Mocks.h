@@ -128,20 +128,20 @@ class MockWebTransportHandler : public WebTransportHandler {
   MOCK_METHOD(void,
               onNewUniStream,
               (WebTransport::StreamReadHandle * readHandle),
-              (override));
+              (noexcept, override));
   MOCK_METHOD(void,
               onNewBidiStream,
               (WebTransport::BidiStreamHandle bidiHandle),
-              (override));
+              (noexcept, override));
   MOCK_METHOD(void,
               onDatagram,
               (std::unique_ptr<folly::IOBuf> datagram),
-              (override));
+              (noexcept, override));
   MOCK_METHOD(void,
               onSessionEnd,
               (folly::Optional<uint32_t> error),
-              (override));
-  MOCK_METHOD(void, onSessionDrain, (), (override));
+              (noexcept, override));
+  MOCK_METHOD(void, onSessionDrain, (), (noexcept, override));
 };
 
 } // namespace proxygen::test

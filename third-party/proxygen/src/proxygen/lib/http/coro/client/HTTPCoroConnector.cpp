@@ -390,6 +390,7 @@ class QuicConnectCB
       quicConnectErr(quic::QuicTransportException(
           "Connection has been cancelled",
           quic::TransportErrorCode::INTERNAL_ERROR));
+      return;
     }
     initTransportInfoFromQuic(tinfo_, *quicClient_);
 

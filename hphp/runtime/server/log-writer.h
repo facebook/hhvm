@@ -151,6 +151,10 @@ bool FieldGenerator::gen(char field, const std::string& arg, T& out) {
       }
     }
     break;
+  case 'M':
+    // current Unix timestamp in microseconds
+    out = folly::to<T>(Timer::GetCurrentTimeMicros());
+    break;
   case 'n':
     if (arg.empty()) return false;
     {

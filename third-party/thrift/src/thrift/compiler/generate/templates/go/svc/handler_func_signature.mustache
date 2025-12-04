@@ -31,7 +31,7 @@
 }}{{#else if function:sink?}}{{!
   }}NOT_IMPLEMENTED{{!
 }}{{#else if function:stream?}}{{!
-  }}({{#function:creates_interaction?}}*{{function:created_interaction.go_name}}Processor, {{/function:creates_interaction?}}{{#function:stream_first_response_type}}{{#type:structured?}}*{{/type:structured?}}{{> common/type}}, {{/function:stream_first_response_type}}func(context.Context, chan<- {{#function:stream_elem_type}}{{#type:structured?}}*{{/type:structured?}}{{> common/type}}{{/function:stream_elem_type}}) error, error){{!
+  }}({{#function:creates_interaction?}}*{{function:created_interaction.go_name}}Processor, {{/function:creates_interaction?}}{{#function:stream_first_response_type}}{{#type:structured?}}*{{/type:structured?}}{{#partial types.go_type type=type:self}}, {{/function:stream_first_response_type}}func(context.Context, chan<- {{#function:stream_elem_type}}{{#type:structured?}}*{{/type:structured?}}{{#partial types.go_type type=type:self}}{{/function:stream_elem_type}}) error, error){{!
 }}{{#else}}{{!
-  }}({{#function:creates_interaction?}}*{{function:created_interaction.go_name}}Processor, {{/function:creates_interaction?}}{{#function:return_type}}{{^type:void?}}{{#type:structured?}}*{{/type:structured?}}{{> common/type}}, {{/type:void?}}{{/function:return_type}}error){{!
+  }}({{#function:creates_interaction?}}*{{function:created_interaction.go_name}}Processor, {{/function:creates_interaction?}}{{#function:return_type}}{{^type:void?}}{{#type:structured?}}*{{/type:structured?}}{{#partial types.go_type type=type:self}}, {{/type:void?}}{{/function:return_type}}error){{!
 }}{{/if function:oneway?}}

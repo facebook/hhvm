@@ -24,11 +24,11 @@ if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
 }
 
-mapResult := make({{> common/type}}, size)
+mapResult := make({{#partial types.go_type type=type:self}}, size)
 for i := 0; i < size; i++ {
     {{! Use scopes to avoid multiple 'result' variable collisions }}
     {{#type:key_type}}
-    var key {{^type:go_comparable?}}*{{/type:go_comparable?}}{{> common/type}}
+    var key {{^type:go_comparable?}}*{{/type:go_comparable?}}{{#partial types.go_type type=type:self}}
     {
         {{> codec/decode}}
         key = {{#type:go_comparable?}}{{!
@@ -45,7 +45,7 @@ for i := 0; i < size; i++ {
     {{/type:key_type}}
 
     {{#type:value_type}}
-    var value {{#type:structured?}}*{{/type:structured?}}{{> common/type}}
+    var value {{#type:structured?}}*{{/type:structured?}}{{#partial types.go_type type=type:self}}
     {
         {{> codec/decode}}
         value = result

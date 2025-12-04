@@ -54,9 +54,9 @@
   }}{{#type:double?}}0.0{{/type:double?}}{{!
   }}{{#type:float?}}0.0{{/type:float?}}{{!
   }}{{#type:enum?}}0{{/type:enum?}}{{!
-  }}{{#type:list?}}make({{> common/type}}, 0){{/type:list?}}{{!
-  }}{{#type:set?}}make({{> common/type}}, 0){{/type:set?}}{{!
-  }}{{#type:map?}}make({{> common/type}}){{/type:map?}}{{!
+  }}{{#type:list?}}make({{#partial types.go_type type=type:self}}, 0){{/type:list?}}{{!
+  }}{{#type:set?}}make({{#partial types.go_type type=type:self}}, 0){{/type:set?}}{{!
+  }}{{#type:map?}}make({{#partial types.go_type type=type:self}}){{/type:map?}}{{!
   }}{{#type:structured?}}{{!
     }}{{#type:structured}}{{!
       }}{{struct:go_qualified_new_func}}(){{!

@@ -24,10 +24,10 @@ if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
 }
 
-listResult := make({{> common/type}}, 0, size)
+listResult := make({{#partial types.go_type type=type:self}}, 0, size)
 for i := 0; i < size; i++ {
     {{#type:list_elem_type}}
-    var elem {{#type:structured?}}*{{/type:structured?}}{{> common/type}}
+    var elem {{#type:structured?}}*{{/type:structured?}}{{#partial types.go_type type=type:self}}
     {{! Use scope to avoid multiple 'result' variable collisions }}
     {
         {{> codec/decode}}

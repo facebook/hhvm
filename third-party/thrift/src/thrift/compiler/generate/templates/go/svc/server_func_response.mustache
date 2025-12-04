@@ -36,7 +36,7 @@ func (p *{{> svc/proc_func_name}}) RunContext(ctx context.Context, reqStruct thr
         {{#function:exceptions?}}
         switch v := err.(type) {
         {{#function:exceptions}}
-        case *{{#field:type}}{{> common/type}}{{/field:type}}:
+        case *{{#field:type}}{{#partial types.go_type type=type:self}}{{/field:type}}:
             result.{{field:go_name}} = v
             return result, nil
         {{/function:exceptions}}

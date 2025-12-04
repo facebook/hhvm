@@ -16,6 +16,7 @@
 
 }}
 {{#import "common/constants" as constants}}
+{{#import "common/type" as types}}
 {{> common/auto_generated_go}}
 
 package {{program:go_pkg_name}}
@@ -42,7 +43,7 @@ var GoUnusedProtection__ int
 }}{{^constant:var?}}const {{/constant:var?}}{{!
 }}{{constant:go_name}} {{!
   }}{{#constant:type}}{{!
-    }}{{#type:structured?}}*{{/type:structured?}}{{> common/type}} = {{!
+    }}{{#type:structured?}}*{{/type:structured?}}{{#partial types.go_type type=type:self}} = {{!
     }}{{#constant:value}}{{!
       }}{{> const/value}}{{!
     }}{{/constant:value}}

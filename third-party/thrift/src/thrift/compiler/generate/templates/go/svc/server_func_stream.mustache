@@ -40,7 +40,7 @@ func (p *{{> svc/proc_func_name}}) RunStreamContext(
         {{#function:exceptions?}}
         switch v := initialErr.(type) {
         {{#function:exceptions}}
-        case *{{#field:type}}{{> common/type}}{{/field:type}}:
+        case *{{#field:type}}{{#partial types.go_type type=type:self}}{{/field:type}}:
             firstResponse.{{field:go_name}} = v
             onFirstResponse(firstResponse)
         {{/function:exceptions}}
@@ -70,7 +70,7 @@ func (p *{{> svc/proc_func_name}}) RunStreamContext(
     onFirstResponse(firstResponse)
 
     {{#function:stream_elem_type}}
-    fbthriftElemChan := make(chan {{#type:structured?}}*{{/type:structured?}}{{> common/type}}, thrift.DefaultStreamBufferSize)
+    fbthriftElemChan := make(chan {{#type:structured?}}*{{/type:structured?}}{{#partial types.go_type type=type:self}}, thrift.DefaultStreamBufferSize)
     {{/function:stream_elem_type}}
     var senderWg sync.WaitGroup
     senderWg.Add(1)
@@ -95,7 +95,7 @@ func (p *{{> svc/proc_func_name}}) RunStreamContext(
         streamWrapStruct := newStream{{service:go_name}}{{function:go_name}}()
         switch v := streamErr.(type) {
         {{#function:stream_exceptions}}
-        case *{{#field:type}}{{> common/type}}{{/field:type}}:
+        case *{{#field:type}}{{#partial types.go_type type=type:self}}{{/field:type}}:
             streamWrapStruct.{{field:go_name}} = v
             onStreamNext(streamWrapStruct)
         {{/function:stream_exceptions}}

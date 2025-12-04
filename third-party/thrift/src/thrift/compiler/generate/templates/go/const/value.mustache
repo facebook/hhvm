@@ -83,7 +83,7 @@
 
   Map constants
 }}{{#type:map?}}{{!
-  }}{{> common/type}}{
+  }}{{#partial types.go_type type=type:self}}{
 {{#value:map_elements}}
     {{#element:key}}{{!
       }}{{#type:key_type}}{{!
@@ -100,7 +100,7 @@
 
   List constants
 }}{{#type:list?}}{{!
-  }}{{> common/type}}{
+  }}{{#partial types.go_type type=type:self}}{
 {{#value:list_elements}}
     {{#type:list_elem_type}}{{!
       }}{{> const/value}},{{!
@@ -110,7 +110,7 @@
 
   Set constants
 }}{{#type:set?}}{{!
-  }}{{> common/type}}{
+  }}{{#partial types.go_type type=type:self}}{
 {{#value:list_elements}}
     {{#type:set_elem_type}}{{!
       }}{{> const/value}},{{!

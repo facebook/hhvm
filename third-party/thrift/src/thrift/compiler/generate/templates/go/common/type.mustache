@@ -14,73 +14,32 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{!
+}}
 
-  Defines a Go type.
-
-}}{{#type:typedef?}}{{!
-  }}{{#type:typedef}}{{!
-    }}{{typedef:go_qualified_name}}{{!
-  }}{{/type:typedef}}{{!
-}}{{/type:typedef?}}{{!
-}}{{^type:typedef?}}{{!
-  }}{{#type:string?}}string{{/type:string?}}{{!
-  }}{{#type:binary?}}[]byte{{/type:binary?}}{{!
-  }}{{#type:bool?}}bool{{/type:bool?}}{{!
-  }}{{#type:byte?}}int8{{/type:byte?}}{{!
-  }}{{#type:i16?}}int16{{/type:i16?}}{{!
-  }}{{#type:i32?}}int32{{/type:i32?}}{{!
-  }}{{#type:i64?}}int64{{/type:i64?}}{{!
-  }}{{#type:double?}}float64{{/type:double?}}{{!
-  }}{{#type:float?}}float32{{/type:float?}}{{!
-  }}{{#type:enum?}}{{!
-    }}{{#type:enum}}{{!
-      }}{{enum:go_qualified_name}}{{!
-    }}{{/type:enum}}{{!
-  }}{{/type:enum?}}{{!
-  }}{{#type:structured?}}{{!
-    }}{{#type:structured}}{{!
-      }}{{struct:go_qualified_name}}{{!
-    }}{{/type:structured}}{{!
-  }}{{/type:structured?}}{{!
-  }}{{#type:list?}}{{!
-    }}[]{{#type:list_elem_type}}{{!
-      }}{{#type:structured?}}{{!
-        }}*{{> common/type}}{{!
-      }}{{/type:structured?}}{{!
-      }}{{^type:structured?}}{{!
-        }}{{> common/type}}{{!
-      }}{{/type:structured?}}{{!
-    }}{{/type:list_elem_type}}{{!
-  }}{{/type:list?}}{{!
-  }}{{#type:map?}}{{!
-    }}map[{{!
-      }}{{#type:key_type}}{{!
-        }}{{#type:go_comparable?}}{{!
-          }}{{> common/type}}{{!
-        }}{{/type:go_comparable?}}{{!
-        }}{{^type:go_comparable?}}{{!
-          }}*{{> common/type}}{{!
-        }}{{/type:go_comparable?}}{{!
-      }}{{/type:key_type}}{{!
-    }}]{{!
-      }}{{#type:value_type}}{{!
-        }}{{#type:structured?}}{{!
-          }}*{{> common/type}}{{!
-        }}{{/type:structured?}}{{!
-        }}{{^type:structured?}}{{!
-          }}{{> common/type}}{{!
-        }}{{/type:structured?}}{{!
-      }}{{/type:value_type}}{{!
-  }}{{/type:map?}}{{!
-  }}{{#type:set?}}{{!
-    }}[]{{#type:set_elem_type}}{{!
-      }}{{#type:structured?}}{{!
-        }}*{{> common/type}}{{!
-      }}{{/type:structured?}}{{!
-      }}{{^type:structured?}}{{!
-        }}{{> common/type}}{{!
-      }}{{/type:structured?}}{{!
-    }}{{/type:set_elem_type}}{{!
-  }}{{/type:set?}}{{!
-}}{{/type:typedef?}}
+{{! Defines a Go type. }}
+{{#let export partial go_type |type|}}
+  {{#pragma ignore-newlines}}
+{{#if type.typedef?}}{{type.go_qualified_name}}
+{{#else if type.string?}}string
+{{#else if type.binary?}}[]byte
+{{#else if type.bool?}}bool
+{{#else if type.byte?}}int8
+{{#else if type.i16?}}int16
+{{#else if type.i32?}}int32
+{{#else if type.i64?}}int64
+{{#else if type.double?}}float64
+{{#else if type.float?}}float32
+{{#else if type.enum?}}{{type.true_type.go_qualified_name}}
+{{#else if type.structured?}}{{type.true_type.go_qualified_name}}
+  {{#else if type.map?}}
+    {{#let map = type.true_type}}
+map[
+{{#if (not map.key_type.go_comparable?)}}*{{/if}}{{#partial go_type type=map.key_type}}
+]
+{{#if map.val_type.structured?}}*{{/if}}{{#partial go_type type=map.val_type}}
+  {{#else if type.container?}}
+    {{! Non map container - i.e. list or set }}
+    {{#let elem_type = type.true_type.elem_type}}
+[]{{#if elem_type.structured?}}*{{/if}}{{#partial go_type type=elem_type}}
+  {{/if type.typedef?}}
+{{/let partial}}

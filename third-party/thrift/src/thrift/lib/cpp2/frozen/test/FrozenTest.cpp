@@ -176,7 +176,7 @@ TEST(Frozen, HashCompatibility) {
   using StrLayout = Layout<std::string>;
   using View = StrLayout::View;
 
-  auto follyHash = [](const View& v) {
+  auto follyHash = [](const View v) {
     return folly::hash::fnv64_buf_BROKEN(v.begin(), v.size());
   };
 

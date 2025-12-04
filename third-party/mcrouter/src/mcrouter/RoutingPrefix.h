@@ -38,6 +38,7 @@ class RoutingPrefix {
   RoutingPrefix(RoutingPrefix&& other) noexcept;
   RoutingPrefix& operator=(const RoutingPrefix& other) noexcept;
   RoutingPrefix& operator=(RoutingPrefix&& other) noexcept;
+  ~RoutingPrefix() = default;
 
   // Conversion to string and StringPiece
   /* implicit */ operator const std::string&() const {

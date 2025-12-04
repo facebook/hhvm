@@ -54,19 +54,6 @@ final abstract class ThriftStreamingSerializationHelpers {
           $result->setPrevious($ex);
         }
 
-        $script = RelativeScript::getMajorPath() ?? '<UNKNOWN>';
-        FBLogger($script)
-          ->consequence(
-            causes_a(#THRIFT_SERVICE, $script)
-              ->to('throw a streaming exception')
-              ->addTags(ConsequenceTag::TOTAL_FAILURE)
-              ->document(
-                "The Thrift handler threw an unexpected exception and we returned".
-                " the exception to the caller of the Thrift service.",
-              ),
-          )
-          ->event('unexpected_exception')
-          ->exception($result, 'Thrift streaming handler threw an exception');
       } else {
         if ($result is ThriftSyncStructWithResult) {
           $result->success = HH\FIXME\UNSAFE_CAST<?TStreamType, ?nothing>(

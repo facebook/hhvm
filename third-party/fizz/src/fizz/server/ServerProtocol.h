@@ -72,10 +72,10 @@ Actions handleAppCloseImmediate(const State& state);
 Actions handleAppClose(const State& state);
 
 Status handleInvalidEvent(
-    const State& state,
-    Param& param,
+    AsyncActions& ret,
     InvocationContext& cxt,
-    AsyncActions& actOut);
+    const State& state,
+    Param& param);
 } // namespace detail
 
 struct ServerTypes {

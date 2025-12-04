@@ -66,10 +66,10 @@ struct IsValidEventHandler<
       : public EventHandlerBase<sm, statename, eventname, __VA_ARGS__> { \
    public:                                                               \
     static Status handle(                                                \
-        const typename sm::State&,                                       \
-        typename sm::Param& param,                                       \
+        typename sm::Actions& ret,                                       \
         InvocationContext& ctx,                                          \
-        typename sm::Actions& actOut);                                   \
+        const typename sm::State&,                                       \
+        typename sm::Param& param);                                      \
   }
 
 template <typename SM>

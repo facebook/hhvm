@@ -169,6 +169,8 @@ class RocketClientChannel final : public ClientChannel,
 
   RocketClientChannel(const RocketClientChannel&) = delete;
   RocketClientChannel& operator=(const RocketClientChannel&) = delete;
+  RocketClientChannel(RocketClientChannel&&) = delete;
+  RocketClientChannel& operator=(RocketClientChannel&&) = delete;
 
   ~RocketClientChannel() override;
 

@@ -16,6 +16,7 @@
 
 #include <string>
 #include <fmt/core.h>
+#include <glog/logging.h>
 #include <folly/FileUtil.h>
 
 #include <thrift/compiler/codemod/file_manager.h>
@@ -72,23 +73,15 @@ std::string file_manager::get_new_content() const {
 
   // Perform the replacements.
   for (const replacement& r : replacements_) {
-    if (prev_end <= r.begin_pos) {
-      new_content.append(old_content_, prev_end, r.begin_pos - prev_end);
-      new_content += r.new_content;
-      prev_end = r.end_pos;
-    } else {
-      // DO_BEFORE(aristidis,20251225): Make this a failure - i.e., fail on
-      // overlapping replacements, as the result may not be well defined (or
-      // expected).
-      fmt::print(
-          stderr,
-          "codemod/file_manager: Skipping replacement that overlaps with "
-          "previous one (range=[{}, {}), prev_end={}). This will soon be an "
-          "error.\n",
-          r.begin_pos,
-          r.end_pos,
-          prev_end);
-    }
+    // Ensure replacement does not overlap with previous one.
+    CHECK(prev_end <= r.begin_pos)
+        << "Invalid codemod: replacement overlaps with end of previous replacement ("
+        << prev_end << "):  range [" << r.begin_pos << "," << r.end_pos
+        << "), new_content=[" << r.new_content << "]";
+
+    new_content.append(old_content_, prev_end, r.begin_pos - prev_end);
+    new_content += r.new_content;
+    prev_end = r.end_pos;
   }
 
   // Get the last part of the file.

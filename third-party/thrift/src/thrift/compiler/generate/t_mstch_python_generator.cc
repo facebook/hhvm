@@ -30,11 +30,9 @@
 #include <thrift/compiler/ast/t_service.h>
 #include <thrift/compiler/ast/uri.h>
 #include <thrift/compiler/generate/common.h>
-#include <thrift/compiler/generate/mstch_objects.h>
 #include <thrift/compiler/generate/python/util.h>
-#include <thrift/compiler/generate/t_mstch_generator.h>
+#include <thrift/compiler/generate/t_whisker_generator.h>
 #include <thrift/compiler/sema/ast_validator.h>
-#include <thrift/compiler/whisker/mstch_compat.h>
 
 using ::apache::thrift::type::BaseType;
 
@@ -94,12 +92,9 @@ const t_const* get_transitive_annotation_of_adapter_or_null(
 }
 
 std::string mangle_program_path(
-    const t_program* program,
-    const std::optional<std::string>& root_module_prefix) {
+    const t_program* program, const std::string& root_module_prefix) {
   std::string prefix =
-      !root_module_prefix.has_value() || root_module_prefix.value().empty()
-      ? std::string("_fbthrift")
-      : root_module_prefix.value();
+      root_module_prefix.empty() ? "_fbthrift" : root_module_prefix;
   boost::algorithm::replace_all(prefix, ".", "__");
   return get_py3_namespace_with_name_and_prefix(program, prefix, "__");
 }
@@ -636,16 +631,29 @@ std::filesystem::path program_to_path(const t_program& prog) {
 
 // Shared base class for Python and Python Patch generator, to provide common
 // Whisker prototype extensions.
-class t_mstch_python_prototypes_generator : public t_mstch_generator {
+class t_mstch_python_prototypes_generator : public t_whisker_generator {
  public:
-  using t_mstch_generator::t_mstch_generator;
+  using t_whisker_generator::t_whisker_generator;
 
  protected:
   std::shared_ptr<python_generator_context> python_context_;
+  /** The `root_module_prefix` compiler option, or "" if unset */
+  std::string root_module_prefix_;
+
+  void process_options(
+      const std::map<std::string, std::string>& options) override {
+    t_whisker_generator::process_options(options);
+    root_module_prefix_ =
+        std::string(get_compiler_option("root_module_prefix").value_or(""));
+
+    // Ensure cached render state and python context is initialized
+    // (render_state runs initialize_context)
+    render_state();
+  }
 
   whisker::map::raw globals(prototype_database& proto) const override {
     assert(python_context_ != nullptr);
-    whisker::map::raw globals = t_mstch_generator::globals(proto);
+    whisker::map::raw globals = t_whisker_generator::globals(proto);
     globals["python"] = whisker::object(
         whisker::native_handle<python_generator_context>(
             python_context_, make_prototype_for_context()));
@@ -665,6 +673,18 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
               python::to_python_string_literal(
                   ctx.argument<whisker::string>(0)));
         });
+    // By default, Whisker considers f64s to be unprintable in strict mode, as
+    // floats can have non-deterministic string results (e.g. fmt vs
+    // std::ostream). For this reason, each generator should explicitly define
+    // how its floats should be rendered.
+    globals["float_to_string"] = whisker::dsl::make_function(
+        "float_to_string",
+        [](whisker::dsl::function::context ctx) -> whisker::object {
+          ctx.declare_named_arguments({});
+          ctx.declare_arity(1);
+          return whisker::make::string(
+              fmt::format("{}", ctx.argument<whisker::f64>(0)));
+        });
     return globals;
   }
 
@@ -674,7 +694,7 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
 
   prototype<t_const_value>::ptr make_prototype_for_const_value(
       const prototype_database& proto) const override {
-    auto base = t_mstch_generator::make_prototype_for_const_value(proto);
+    auto base = t_whisker_generator::make_prototype_for_const_value(proto);
     auto def = whisker::dsl::prototype_builder<h_const_value>::extends(base);
 
     def.property("py3_enum_value_name", [](const t_const_value& self) {
@@ -702,8 +722,7 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
 
     def.property("metadata_path", [this](const t_enum& self) {
       return get_py3_namespace_with_name_and_prefix(
-                 self.program(),
-                 get_option("root_module_prefix").value_or("")) +
+                 self.program(), root_module_prefix_) +
           ".thrift_enums";
     });
     def.property("flags?", [](const t_enum& self) {
@@ -807,18 +826,17 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     auto def = whisker::dsl::prototype_builder<h_program>::extends(base);
 
     def.property("module_mangle", [this](const t_program& self) {
-      return mangle_program_path(&self, get_option("root_module_prefix"));
+      return mangle_program_path(&self, root_module_prefix_);
     });
     def.property("module_path", [this](const t_program& self) {
-      return get_py3_namespace_with_name_and_prefix(
-          &self, get_option("root_module_prefix").value_or(""));
+      return get_py3_namespace_with_name_and_prefix(&self, root_module_prefix_);
     });
     def.property("safe_patch?", [](const t_program& self) {
       return self.name().starts_with("gen_safe_patch_");
     });
     def.property("safe_patch_module_path", [this](const t_program& self) {
-      std::string ns = get_py3_namespace_with_name_and_prefix(
-          &self, get_option("root_module_prefix").value_or(""));
+      std::string ns =
+          get_py3_namespace_with_name_and_prefix(&self, root_module_prefix_);
       // Change the namespace from "path.to.file" to
       // "path.to.gen_safe_patch_file"
       auto pos = ns.rfind('.');
@@ -834,13 +852,15 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
       return module_path.empty() ? self.name() : module_path;
     });
     def.property("base_library_package", [this](const t_program&) {
-      std::optional<std::string> option = get_option("base_library_package");
-      return !option.has_value() || option->empty() ? "thrift.python"
-                                                    : option.value();
+      std::string_view option =
+          get_compiler_option("base_library_package").value_or("");
+      return option.empty() ? whisker::make::string("thrift.python")
+                            : whisker::make::string(option);
     });
     def.property("root_module_prefix", [this](const t_program&) {
-      std::optional<std::string> prefix = get_option("root_module_prefix");
-      return !prefix.has_value() || prefix->empty() ? "" : prefix.value() + ".";
+      return root_module_prefix_.empty()
+          ? ""
+          : fmt::format("{}.", root_module_prefix_);
     });
     def.property("has_streaming_types?", [](const t_program& self) {
       return std::any_of(
@@ -961,7 +981,7 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
           kPythonMigrationBlockingAllowInheritanceUri);
     });
     def.property("disable_field_caching?", [this](const t_structured& self) {
-      return has_option("disable_field_cache") ||
+      return has_compiler_option("disable_field_cache") ||
           self.has_structured_annotation(kPythonDisableFieldCacheUri);
     });
     def.property("should_generate_patch?", [](const t_structured& self) {
@@ -986,19 +1006,17 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     });
     def.property("module_mangle", [this](const t_type& self) {
       return mangle_program_path(
-                 get_true_type_program(self), get_option("root_module_prefix"))
+                 get_true_type_program(self), root_module_prefix_)
           .append(fmt::format("__{}", python_context_->types_import_path()));
     });
     def.property("module_name", [this](const t_type& self) {
       return get_py3_namespace_with_name_and_prefix(
-                 get_true_type_program(self),
-                 get_option("root_module_prefix").value_or(""))
+                 get_true_type_program(self), root_module_prefix_)
           .append(fmt::format(".{}", python_context_->types_import_path()));
     });
     def.property("patch_module_path", [this](const t_type& self) {
       return get_py3_namespace_with_name_and_prefix(
-                 get_true_type_program(self),
-                 get_option("root_module_prefix").value_or(""))
+                 get_true_type_program(self), root_module_prefix_)
           .append(".thrift_patch");
     });
     def.property("need_module_path?", [this](const t_type& self) {
@@ -1011,8 +1029,7 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     });
     def.property("metadata_path", [this](const t_type& self) {
       return get_py3_namespace_with_name_and_prefix(
-                 get_true_type_program(self),
-                 get_option("root_module_prefix").value_or("")) +
+                 get_true_type_program(self), root_module_prefix_) +
           ".thrift_metadata";
     });
     def.property("py3_namespace", [this](const t_type& self) {
@@ -1120,12 +1137,11 @@ class t_mstch_python_prototypes_generator : public t_mstch_generator {
     def.property(
         "included_module_path", [this](const included_program_info& self) {
           return get_py3_namespace_with_name_and_prefix(
-              self.program, get_option("root_module_prefix").value_or(""));
+              self.program, root_module_prefix_);
         });
     def.property(
         "included_module_mangle", [this](const included_program_info& self) {
-          return mangle_program_path(
-              self.program, get_option("root_module_prefix"));
+          return mangle_program_path(self.program, root_module_prefix_);
         });
     def.property("has_services?", [](const included_program_info& self) {
       return self.import_services && !self.program->services().empty();
@@ -1166,9 +1182,10 @@ class t_mstch_python_generator : public t_mstch_python_prototypes_generator {
   void generate_program() override {
     generate_root_path_ = program_to_path(*get_program());
     out_dir_base_ = "gen-python";
-    auto include_prefix = get_option("include_prefix").value_or("");
-    if (!include_prefix.empty()) {
-      program_->set_include_prefix(std::move(include_prefix));
+    if (std::string_view include_prefix =
+            get_compiler_option("include_prefix").value_or("");
+        !include_prefix.empty()) {
+      program_->set_include_prefix(std::string(include_prefix));
     }
     generate_types();
     generate_metadata();
@@ -1198,16 +1215,20 @@ class t_mstch_python_generator : public t_mstch_python_prototypes_generator {
   }
 
  private:
-  /** Render a template with a mstch program object as the root context */
-  void generate_mstch_file(
-      const std::string& template_name,
-      types_file_kind types_file_kind,
-      type_kind type_kind);
   /** Render a template with a Whisker program handle as the root context */
-  void generate_whisker_file(
+  void generate_file(
       const std::string& template_name,
       types_file_kind types_file_kind,
       type_kind type_kind);
+  strictness_options strictness() const override {
+    return strictness_options{
+        // Some templates still contain legacy boolean conditions
+        .boolean_conditional = false,
+        .printable_types = true,
+        .undefined_variables = true,
+    };
+  }
+
   void generate_types();
   void generate_metadata();
   void generate_clients();
@@ -1224,24 +1245,7 @@ class t_mstch_python_generator : public t_mstch_python_prototypes_generator {
   std::filesystem::path generate_root_path_;
 };
 
-void t_mstch_python_generator::generate_mstch_file(
-    const std::string& template_name,
-    types_file_kind types_file_kind,
-    type_kind type_kind) {
-  t_program* program = get_program();
-  const std::string& program_name = program->name();
-  python_context_->reset(types_file_kind, type_kind);
-
-  std::shared_ptr<mstch_base> mstch_program =
-      make_mstch_program_cached(program, mstch_context_);
-  render_to_file(
-      mstch_program,
-      template_name,
-      generate_root_path_ / program_name / template_name // (output) path
-  );
-}
-
-void t_mstch_python_generator::generate_whisker_file(
+void t_mstch_python_generator::generate_file(
     const std::string& template_name,
     types_file_kind types_file_kind,
     type_kind type_kind) {
@@ -1261,26 +1265,26 @@ void t_mstch_python_generator::generate_types() {
   // DO_BEFORE(satishvk, 20250130): Remove flags related to abstract types after
   // launch.
   python_context_->set_enable_abstract_types(
-      !has_option("disable_abstract_types"));
+      !has_compiler_option("disable_abstract_types"));
 
-  generate_whisker_file(
+  generate_file(
       "thrift_types.py", types_file_kind::source_file, type_kind::immutable);
-  generate_whisker_file(
+  generate_file(
       "thrift_types.pyi", types_file_kind::type_stub, type_kind::immutable);
-  generate_whisker_file(
+  generate_file(
       "thrift_enums.py", types_file_kind::source_file, type_kind::immutable);
 
-  generate_whisker_file(
+  generate_file(
       "thrift_abstract_types.py",
       types_file_kind::source_file,
       type_kind::abstract);
 
-  generate_whisker_file(
+  generate_file(
       "thrift_mutable_types.py",
       types_file_kind::source_file,
       type_kind::mutable_);
 
-  generate_whisker_file(
+  generate_file(
       "thrift_mutable_types.pyi",
       types_file_kind::type_stub,
       type_kind::mutable_);
@@ -1289,7 +1293,7 @@ void t_mstch_python_generator::generate_types() {
 }
 
 void t_mstch_python_generator::generate_metadata() {
-  generate_whisker_file(
+  generate_file(
       "thrift_metadata.py", types_file_kind::source_file, type_kind::immutable);
 }
 
@@ -1300,12 +1304,12 @@ void t_mstch_python_generator::generate_clients() {
     return;
   }
 
-  generate_whisker_file(
+  generate_file(
       "thrift_clients.py",
       types_file_kind::not_a_types_file,
       type_kind::immutable);
 
-  generate_whisker_file(
+  generate_file(
       "thrift_mutable_clients.py",
       types_file_kind::not_a_types_file,
       type_kind::mutable_);
@@ -1317,12 +1321,12 @@ void t_mstch_python_generator::generate_services() {
     // services.
     return;
   }
-  generate_whisker_file(
+  generate_file(
       "thrift_services.py",
       types_file_kind::not_a_types_file,
       type_kind::immutable);
 
-  generate_whisker_file(
+  generate_file(
       "thrift_mutable_services.py",
       types_file_kind::not_a_types_file,
       type_kind::mutable_);

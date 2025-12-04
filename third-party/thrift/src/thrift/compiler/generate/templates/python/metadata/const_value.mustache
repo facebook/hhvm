@@ -21,7 +21,7 @@ cv_bool={{(py_bool value:nonzero?)}}
   {{#else if (or value:integer? value:enum?)}}
 cv_integer={{value:integer_value}}
   {{#else if value:double?}}
-cv_double={{value:double_value}}
+cv_double={{(float_to_string value:double_value)}}
   {{#else if value:string?}}
 cv_string="{{value:string_value}}"
   {{#else if value:structured?}}

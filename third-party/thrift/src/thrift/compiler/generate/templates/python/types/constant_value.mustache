@@ -26,7 +26,7 @@ file.
   {{#else if value:integer?}}
 {{value:integer_value}}{{#if value:type.floating_point?}}.0{{/if}}
   {{#else if value:double?}}
-float({{value:double_value}})
+float({{(float_to_string value:double_value)}})
   {{#else if value:string?}}
     {{#if value:type.binary?}}
 b"{{value:string_value}}"

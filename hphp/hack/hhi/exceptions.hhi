@@ -175,6 +175,8 @@ namespace {
     use ExceptionWithPureGetMessageTrait;
   }
 
+  final class RequestFanoutLimitExceededException extends RuntimeException {}
+
 } // namespace
 
 namespace HH {

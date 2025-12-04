@@ -220,7 +220,7 @@ end = struct
       acc
 
   and find_tuple_ty
-      Typing_defs_core.{ t_required; t_extra }
+      Typing_defs_core.{ t_required; t_optional; t_extra }
       ~var
       ~update
       ~is_invariant
@@ -230,14 +230,14 @@ end = struct
     if is_invariant acc then
       acc
     else begin
-      match t_extra with
-      | Typing_defs_core.Tsplat ty ->
-        find ty ~var ~update ~is_invariant ~acc ~env
-      | Typing_defs_core.Textra { t_optional; t_variadic } -> begin
-        let acc = find_list t_optional ~var ~update ~is_invariant ~acc ~env in
-        if is_invariant acc then
-          acc
-        else
+      let acc = find_list t_optional ~var ~update ~is_invariant ~acc ~env in
+      if is_invariant acc then
+        acc
+      else begin
+        match t_extra with
+        | Typing_defs_core.Tsplat ty ->
+          find ty ~var ~update ~is_invariant ~acc ~env
+        | Typing_defs_core.Tvariadic t_variadic ->
           find t_variadic ~var ~update ~is_invariant ~acc ~env
       end
     end

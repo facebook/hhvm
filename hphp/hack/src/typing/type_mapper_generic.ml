@@ -178,10 +178,11 @@ class ['env] deep_type_mapper =
       (env, mk (r, Tintersection tyl))
 
     method! on_ttuple env r t =
-      let { t_required; t_extra } = t in
+      let { t_required; t_optional; t_extra } = t in
       let (env, t_required) = this#on_locl_ty_list env t_required in
+      let (env, t_optional) = this#on_locl_ty_list env t_optional in
       let (env, t_extra) = this#on_tuple_extra env t_extra in
-      let t = { t_required; t_extra } in
+      let t = { t_required; t_optional; t_extra } in
       (env, mk (r, Ttuple t))
 
     method private on_tuple_extra env e =
@@ -189,10 +190,9 @@ class ['env] deep_type_mapper =
       | Tsplat t_splat ->
         let (env, t_splat) = this#on_type env t_splat in
         (env, Tsplat t_splat)
-      | Textra { t_optional; t_variadic } ->
+      | Tvariadic t_variadic ->
         let (env, t_variadic) = this#on_type env t_variadic in
-        let (env, t_optional) = this#on_locl_ty_list env t_optional in
-        (env, Textra { t_optional; t_variadic })
+        (env, Tvariadic t_variadic)
 
     method! on_toption env r ty =
       let (env, ty) = this#on_type env ty in

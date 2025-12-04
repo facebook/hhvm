@@ -801,7 +801,7 @@ fn build_type_structure(outer_ty: &Ty) -> ExtDeclTypeStructure {
                 },
             ],
         },
-        Ty_::Ttuple(TupleType { required, extra: _ }) => ExtDeclTypeStructure {
+        Ty_::Ttuple(TupleType { required, .. }) => ExtDeclTypeStructure {
             type_: extract_type_name(outer_ty),
             kind: String::from("tuple"),
             nullable: false,

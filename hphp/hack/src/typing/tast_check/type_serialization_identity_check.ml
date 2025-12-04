@@ -26,18 +26,14 @@ let rec strip_ty ty =
     | Tvar _ -> ty
     | Tgeneric _ -> ty
     | Tvec_or_dict (ty1, ty2) -> Tvec_or_dict (strip_ty ty1, strip_ty ty2)
-    | Ttuple { t_required; t_extra } ->
+    | Ttuple { t_required; t_optional; t_extra } ->
       Ttuple
         {
           t_required = strip_tyl t_required;
+          t_optional = strip_tyl t_optional;
           t_extra =
             (match t_extra with
-            | Textra { t_optional; t_variadic } ->
-              Textra
-                {
-                  t_optional = strip_tyl t_optional;
-                  t_variadic = strip_ty t_variadic;
-                }
+            | Tvariadic t_variadic -> Tvariadic (strip_ty t_variadic)
             | Tsplat t_splat -> Tsplat (strip_ty t_splat));
         }
     | Toption ty -> Toption (strip_ty ty)

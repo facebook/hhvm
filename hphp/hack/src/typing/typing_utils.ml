@@ -822,14 +822,10 @@ let rec is_supportdyn ~visited_tyvars ~visited_typarams env ty =
   | Tnonnull -> false
   | Tfun ft -> get_ft_support_dynamic_type ft
   | Toption ty -> recurse ty
-  | Ttuple { t_required; t_extra } ->
+  | Ttuple { t_required; t_optional; t_extra = Tvariadic t_vs | Tsplat t_vs } ->
     List.for_all t_required ~f:recurse
-    && begin
-         match t_extra with
-         | Textra { t_optional; t_variadic } ->
-           List.for_all t_optional ~f:recurse && recurse t_variadic
-         | Tsplat t -> recurse t
-       end
+    && List.for_all t_optional ~f:recurse
+    && recurse t_vs
   | Tshape { s_origin = _; s_unknown_value; s_fields } ->
     recurse s_unknown_value
     && TShapeMap.fold

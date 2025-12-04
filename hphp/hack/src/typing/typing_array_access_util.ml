@@ -64,7 +64,7 @@ let widen_for_array_get_ci
     let ty = MakeType.keyed_container r index_ty element_ty in
     (env, Some ty)
   (* For tuples, we just freshen the element types *)
-  | (r, Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } }) ->
+  | (r, Ttuple { t_required; t_optional; t_extra = Tvariadic t_variadic }) ->
   begin
     (* requires integer literal *)
     match index_expr with
@@ -88,9 +88,8 @@ let widen_for_array_get_ci
         Some
           (mk
              ( r,
-               Ttuple
-                 { t_required; t_extra = Textra { t_optional; t_variadic } } ))
-      )
+               Ttuple { t_required; t_optional; t_extra = Tvariadic t_variadic }
+             )) )
     | _ -> (env, None)
   end
   (* Whatever the lower bound, construct an open, singleton shape type. *)

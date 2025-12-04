@@ -50,7 +50,7 @@ let check_param : env -> Nast.fun_param -> unit =
           @@ Typing_error.primary
           @@ error ty
         | Toption ty -> check_memoizable env ty
-        | Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } } ->
+        | Ttuple { t_required; t_optional; t_extra = Tvariadic t_variadic } ->
           List.iter t_required ~f:(check_memoizable env);
           List.iter t_optional ~f:(check_memoizable env);
           check_memoizable env t_variadic

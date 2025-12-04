@@ -324,7 +324,7 @@ and hint_ p env = function
     Trefinement (root_ty, class_ref)
   | Htuple { tup_required; tup_extra } ->
     let t_required = List.map tup_required ~f:(hint env) in
-    let t_extra =
+    let (t_optional, t_extra) =
       match tup_extra with
       | Hextra { tup_optional; tup_variadic } ->
         let t_optional = List.map tup_optional ~f:(hint env) in
@@ -333,10 +333,10 @@ and hint_ p env = function
           | None -> hint env (p, Hnothing)
           | Some t -> hint env t
         in
-        Textra { t_optional; t_variadic }
-      | Hsplat tup_splat -> Tsplat (hint env tup_splat)
+        (t_optional, Tvariadic t_variadic)
+      | Hsplat tup_splat -> ([], Tsplat (hint env tup_splat))
     in
-    Ttuple { t_required; t_extra }
+    Ttuple { t_required; t_optional; t_extra }
   | Hunion hl ->
     let tyl = List.map hl ~f:(hint env) in
     Tunion tyl

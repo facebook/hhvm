@@ -83,6 +83,11 @@ let rec from_type : env -> show_like_ty:bool -> locl_ty -> json =
       [("variadic_arg", from_type env ~show_like_ty ty)]
   in
   let splat_arg ty = [("splat_arg", from_type env ~show_like_ty ty)] in
+  let extra_arg t_extra =
+    match t_extra with
+    | Tvariadic t_variadic -> variadic_arg t_variadic
+    | Tsplat t_splat -> splat_arg t_splat
+  in
   let refs e =
     match e with
     | Exact -> []
@@ -145,15 +150,13 @@ let rec from_type : env -> show_like_ty:bool -> locl_ty -> json =
       | (p, Tvar _) -> obj @@ kind p "var"
       | _ -> from_type env ~show_like_ty ty
     end
-  | (p, Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } }) ->
+  | (p, Ttuple { t_required; t_optional; t_extra }) ->
     obj
     @@ kind p "tuple"
     @ is_array false
     @ args t_required
     @ optional_args t_optional
-    @ variadic_arg t_variadic
-  | (p, Ttuple { t_required; t_extra = Tsplat ty }) ->
-    obj @@ kind p "tuple" @ is_array false @ args t_required @ splat_arg ty
+    @ extra_arg t_extra
   | (p, Tany _) -> obj @@ kind p "any"
   | (p, Tnonnull) -> obj @@ kind p "nonnull"
   | (p, Tdynamic) -> obj @@ kind p "dynamic"
@@ -488,7 +491,8 @@ let to_locl_ty ?(keytrace = []) (ctx : Provider_context.t) (json : Hh_json.json)
           match splat_arg_obj_opt with
           | Some (splat_arg_obj, keytrace) ->
             aux splat_arg_obj ~keytrace >>= fun t_splat ->
-            ty (Ttuple { t_required; t_extra = Tsplat t_splat })
+            ty
+              (Ttuple { t_required; t_optional = []; t_extra = Tsplat t_splat })
           | None ->
             get_array_opt "optional_args" (json, keytrace)
             >>= fun (optional_args, optional_args_keytrace) ->
@@ -497,8 +501,7 @@ let to_locl_ty ?(keytrace = []) (ctx : Provider_context.t) (json : Hh_json.json)
             get_obj_opt "variadic_arg" (json, keytrace) >>= fun popt ->
             aux_variadic_arg popt >>= fun t_variadic ->
             ty
-              (Ttuple
-                 { t_required; t_extra = Textra { t_optional; t_variadic } })
+              (Ttuple { t_required; t_optional; t_extra = Tvariadic t_variadic })
         end
       | "nullable" ->
         get_array "args" (json, keytrace) >>= fun (args, keytrace) ->

@@ -150,12 +150,8 @@ let check_splat_hint env p h =
         Ttuple
           {
             t_required = [];
-            t_extra =
-              Textra
-                {
-                  t_optional = [];
-                  t_variadic = Typing_make_type.mixed (Reason.witness p);
-                };
+            t_optional = [];
+            t_extra = Tvariadic (Typing_make_type.mixed (Reason.witness p));
           } )
   in
   let (_env, err) =

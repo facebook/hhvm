@@ -131,7 +131,7 @@ let enum_class_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error
     | Tnonnull ->
       true
     | Toption lty -> is_valid_base lty
-    | Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } } ->
+    | Ttuple { t_required; t_optional; t_extra = Tvariadic t_variadic } ->
       List.for_all ~f:is_valid_base t_required
       && List.for_all ~f:is_valid_base t_optional
       && is_nothing t_variadic

@@ -375,15 +375,10 @@ let rec this_appears_covariantly ~contra env ty =
   in
   match get_node ty with
   | Tthis -> not contra
-  | Ttuple { t_required; t_extra } ->
+  | Ttuple { t_required; t_optional; t_extra = Tvariadic t_vs | Tsplat t_vs } ->
     List.exists t_required ~f:(this_appears_covariantly ~contra env)
-    || begin
-         match t_extra with
-         | Textra { t_optional; t_variadic } ->
-           List.exists t_optional ~f:(this_appears_covariantly ~contra env)
-           || this_appears_covariantly ~contra env t_variadic
-         | Tsplat t_splat -> this_appears_covariantly ~contra env t_splat
-       end
+    || List.exists t_optional ~f:(this_appears_covariantly ~contra env)
+    || this_appears_covariantly ~contra env t_vs
   | Tunion tyl
   | Tintersection tyl ->
     List.exists tyl ~f:(this_appears_covariantly ~contra env)

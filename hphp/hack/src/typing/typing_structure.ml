@@ -138,18 +138,13 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
       (* Required elements in a tuple type *)
       | ( TSFlit_str (_, "elem_types"),
           _,
-          (r, Ttuple { t_required; t_extra = _ }) ) ->
+          (r, Ttuple { t_required; t_optional = _; t_extra = _ }) ) ->
         let (env, t_required) = List.map_env env t_required ~f:make_ts in
         (env, acc_field_with_type (MakeType.tuple r t_required))
       (* Optional elements in a tuple type *)
       | ( TSFlit_str (_, "optional_elem_types"),
           _,
-          ( r,
-            Ttuple
-              {
-                t_required = _;
-                t_extra = Textra { t_optional; t_variadic = _ };
-              } ) )
+          (r, Ttuple { t_required = _; t_optional; t_extra = Tvariadic _ }) )
         when not (List.is_empty t_optional) ->
         let (env, t_optional) = List.map_env env t_optional ~f:make_ts in
         (env, acc_field_with_type (MakeType.tuple r t_optional))
@@ -157,10 +152,8 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
           _,
           ( _r,
             Ttuple
-              {
-                t_required = _;
-                t_extra = Textra { t_optional = _; t_variadic };
-              } ) )
+              { t_required = _; t_optional = _; t_extra = Tvariadic t_variadic }
+          ) )
         when not (is_nothing t_variadic) ->
         let (env, t_variadic) = make_ts env t_variadic in
         (env, acc_field_with_type t_variadic)

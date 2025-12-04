@@ -362,8 +362,7 @@ module AlternativeSet = struct
       (* An enum E is exhaustively switched if there is a case for all of its
          declared values (including inherited ones). *)
       of_enum_name ~is_enum_class_label:false ~bound:None env enum_name
-    | T.Ttuple
-        T.{ t_required; t_extra = Textra { t_optional = []; t_variadic } }
+    | T.Ttuple T.{ t_required; t_optional = []; t_extra = Tvariadic t_variadic }
       when is_nothing env t_variadic ->
       (* We only consider closed tuples for exhaustivity. *)
       (* A tuple (E, F) can be satisfied by tuples formed by the cartesian

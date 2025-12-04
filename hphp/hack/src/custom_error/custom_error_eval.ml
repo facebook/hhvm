@@ -396,8 +396,8 @@ let matches_locl_ty ?(env = Env.empty) t ~scrut =
     (* TODO optional and variadic fields T201398626 T201398652 *)
     | ( Tuple ts,
         Ty.(
-          Ttuple
-            { t_required; t_extra = Textra { t_optional = []; t_variadic } }) )
+          Ttuple { t_required; t_optional = []; t_extra = Tvariadic t_variadic })
+      )
       when Ty.is_nothing t_variadic ->
       aux_tuple ts t_required ~env
     (* -- Primitives & other base types ------------------------------------- *)

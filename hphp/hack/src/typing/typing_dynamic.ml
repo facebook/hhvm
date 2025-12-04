@@ -206,31 +206,25 @@ let push_like_tyargs env tyl tparams =
 
 let rec try_push_like env ty =
   match deref ty with
-  | (r, Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } }) ->
+  | (r, Ttuple { t_required; t_optional; t_extra }) ->
     let (changed, t_required) =
       List.map_env false t_required ~f:(make_like env)
     in
     let (changed, t_optional) =
       List.map_env changed t_optional ~f:(make_like env)
     in
-    let (changed, t_variadic) = make_like env changed t_variadic in
-    ( env,
-      if changed then
-        Some
-          (mk
-             ( r,
-               Ttuple
-                 { t_required; t_extra = Textra { t_optional; t_variadic } } ))
-      else
-        None )
-  | (r, Ttuple { t_required; t_extra = Tsplat t_splat }) ->
-    let (changed, t_required) =
-      List.map_env false t_required ~f:(make_like env)
+    let (changed, t_extra) =
+      match t_extra with
+      | Tvariadic t_variadic ->
+        let (changed, t_variadic) = make_like env changed t_variadic in
+        (changed, Tvariadic t_variadic)
+      | Tsplat t_splat ->
+        let (changed, t_splat) = make_like env changed t_splat in
+        (changed, Tsplat t_splat)
     in
-    let (changed, t_splat) = make_like env changed t_splat in
     ( env,
       if changed then
-        Some (mk (r, Ttuple { t_required; t_extra = Tsplat t_splat }))
+        Some (mk (r, Ttuple { t_required; t_optional; t_extra }))
       else
         None )
   | (r, Tfun ft) ->
@@ -304,23 +298,23 @@ let rec strip_covariant_like env ty =
   | (env, None) ->
     let (env, ty) = Env.expand_type env ty in
     (match deref ty with
-    | (r, Ttuple { t_required; t_extra }) ->
+    | (r, Ttuple { t_required; t_optional; t_extra }) ->
       let (env, t_required) =
         List.map_env env ~f:strip_covariant_like t_required
       in
+      let (env, t_optional) =
+        List.map_env env ~f:strip_covariant_like t_optional
+      in
       let (env, t_extra) =
         match t_extra with
-        | Textra { t_optional; t_variadic } ->
-          let (env, t_optional) =
-            List.map_env env ~f:strip_covariant_like t_optional
-          in
+        | Tvariadic t_variadic ->
           let (env, t_variadic) = strip_covariant_like env t_variadic in
-          (env, Textra { t_optional; t_variadic })
+          (env, Tvariadic t_variadic)
         | Tsplat t_splat ->
           let (env, t_splat) = strip_covariant_like env t_splat in
           (env, Tsplat t_splat)
       in
-      (env, mk (r, Ttuple { t_required; t_extra }))
+      (env, mk (r, Ttuple { t_required; t_optional; t_extra }))
     | (r, Tfun ft) ->
       let (env, ret_ty) = strip_covariant_like env ft.ft_ret in
       (env, mk (r, Tfun { ft with ft_ret = ret_ty }))

@@ -208,13 +208,13 @@ let pack_errs pos ty subtyping_errs =
      aux to subsitute the expected type where we have a type error
      then reconstruct the type in the continuation *)
   match deref ty with
-  | (r, Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } }) ->
+  | (r, Ttuple { t_required; t_optional; t_extra = Tvariadic t_variadic }) ->
     aux (subtyping_errs, t_required) ~k:(fun t_required ->
         aux (subtyping_errs, t_optional) ~k:(fun t_optional ->
             mk
               ( r,
                 Ttuple
-                  { t_required; t_extra = Textra { t_optional; t_variadic } } )))
+                  { t_required; t_optional; t_extra = Tvariadic t_variadic } )))
   | (r, Tclass (pos_id, exact, tys)) ->
     aux (subtyping_errs, tys) ~k:(fun tys ->
         mk (r, Tclass (pos_id, exact, tys)))
@@ -7396,6 +7396,7 @@ end = struct
                         Ttuple
                           {
                             t_required = remaining_actual_tys;
+                            t_optional = [];
                             t_extra = Tsplat unpacked_element_ty;
                           } ),
                     Some te,
@@ -7409,6 +7410,7 @@ end = struct
                         t_required =
                           List.map plain_params_remaining ~f:(fun (_, fp) ->
                               fp.fp_type);
+                        t_optional = [];
                         t_extra = Tsplat splat_param.fp_type;
                       } )
               in

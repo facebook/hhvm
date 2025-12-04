@@ -298,15 +298,15 @@ and intersect_ env (rec_tracker : Recursion_tracker.t) ~r ty1 ty2 =
                     Ttuple
                       {
                         t_required = t_required1;
-                        t_extra =
-                          Textra { t_optional = []; t_variadic = t_variadic1 };
+                        t_optional = [];
+                        t_extra = Tvariadic t_variadic1;
                       } ),
                   ( _,
                     Ttuple
                       {
                         t_required = t_required2;
-                        t_extra =
-                          Textra { t_optional = []; t_variadic = t_variadic2 };
+                        t_optional = [];
+                        t_extra = Tvariadic t_variadic2;
                       } ) )
                 when Int.equal
                        (List.length t_required1)
@@ -324,7 +324,8 @@ and intersect_ env (rec_tracker : Recursion_tracker.t) ~r ty1 ty2 =
                       Ttuple
                         {
                           t_required;
-                          t_extra = Textra { t_optional = []; t_variadic };
+                          t_optional = [];
+                          t_extra = Tvariadic t_variadic;
                         } ) )
               (* Runtime representation of tuples is vec, which can be observed in Hack via refinement.
                * Therefore it's sound to simplify vec<t> & (t1,...,tn) to (t & t1, ..., t & tn)
@@ -334,16 +335,12 @@ and intersect_ env (rec_tracker : Recursion_tracker.t) ~r ty1 ty2 =
               | ( ((_, Tclass ((_, cn), _, [ty])) as vty),
                   ( rt,
                     Ttuple
-                      {
-                        t_required;
-                        t_extra = Textra { t_optional; t_variadic };
-                      } ) )
+                      { t_required; t_optional; t_extra = Tvariadic t_variadic }
+                  ) )
               | ( ( rt,
                     Ttuple
-                      {
-                        t_required;
-                        t_extra = Textra { t_optional; t_variadic };
-                      } ),
+                      { t_required; t_optional; t_extra = Tvariadic t_variadic }
+                  ),
                   ((_, Tclass ((_, cn), _, [ty])) as vty) )
                 when String.equal cn Naming_special_names.Collections.cVec ->
                 let (env, t_required) =
@@ -367,7 +364,8 @@ and intersect_ env (rec_tracker : Recursion_tracker.t) ~r ty1 ty2 =
                         Ttuple
                           {
                             t_required;
-                            t_extra = Textra { t_variadic; t_optional };
+                            t_optional;
+                            t_extra = Tvariadic t_variadic;
                           } );
                   ]
               | ( ( _,

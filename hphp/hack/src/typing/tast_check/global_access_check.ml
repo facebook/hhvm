@@ -555,13 +555,12 @@ let rec has_no_object_ref_ty env (seen : SSet.t) ty =
     List.exists tyl ~f:(fun l -> has_no_object_ref_ty env seen l)
   (* Only error if there isn't a type that it could be that's primitive *)
   | Tunion tyl -> List.exists tyl ~f:(fun l -> has_no_object_ref_ty env seen l)
-  | Ttuple { t_required; t_extra } ->
+  | Ttuple { t_required; t_optional; t_extra } ->
     List.for_all t_required ~f:(fun l -> has_no_object_ref_ty env seen l)
+    && List.for_all t_optional ~f:(fun l -> has_no_object_ref_ty env seen l)
     && begin
          match t_extra with
-         | Textra { t_optional; t_variadic } ->
-           List.for_all t_optional ~f:(fun l -> has_no_object_ref_ty env seen l)
-           && has_no_object_ref_ty env seen t_variadic
+         | Tvariadic t_variadic -> has_no_object_ref_ty env seen t_variadic
          | Tsplat t_splat -> has_no_object_ref_ty env seen t_splat
        end
   | Tdependent (_, upper) ->

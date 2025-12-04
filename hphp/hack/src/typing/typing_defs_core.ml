@@ -340,14 +340,12 @@ and 'phase shape_type = {
 
 and 'phase tuple_type = {
   t_required: 'phase ty list;
+  t_optional: 'phase ty list;
   t_extra: 'phase tuple_extra;
 }
 
 and 'phase tuple_extra =
-  | Textra of {
-      t_optional: 'phase ty list;
-      t_variadic: 'phase ty;
-    }
+  | Tvariadic of 'phase ty
   | Tsplat of 'phase ty
 [@@deriving hash, transform]
 
@@ -663,12 +661,7 @@ module Pp = struct
   and pp_tuple_extra : type a. Format.formatter -> a tuple_extra -> unit =
    fun fmt extra ->
     match extra with
-    | Textra { t_optional; t_variadic } ->
-      Format.fprintf fmt "@[%s =@ " "t_optional";
-      pp_list pp_ty fmt t_optional;
-      Format.fprintf fmt "@]";
-      Format.fprintf fmt ";@ ";
-
+    | Tvariadic t_variadic ->
       Format.fprintf fmt "@[%s =@ " "t_variadic";
       pp_ty fmt t_variadic;
       Format.fprintf fmt "@]"
@@ -678,11 +671,16 @@ module Pp = struct
       Format.fprintf fmt "@]"
 
   and pp_tuple_type : type a. Format.formatter -> a tuple_type -> unit =
-   fun fmt { t_required; t_extra } ->
+   fun fmt { t_required; t_optional; t_extra } ->
     Format.fprintf fmt "@[<2>{ ";
 
     Format.fprintf fmt "@[%s =@ " "t_required";
     pp_list pp_ty fmt t_required;
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt ";@ ";
+
+    Format.fprintf fmt "@[%s =@ " "t_optional";
+    pp_list pp_ty fmt t_optional;
     Format.fprintf fmt "@]";
     Format.fprintf fmt ";@ ";
 
@@ -962,19 +960,31 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
   and tuple_extra_compare : type a. a tuple_extra -> a tuple_extra -> int =
    fun t1 t2 ->
     match (t1, t2) with
-    | (Textra _, Tsplat _) -> -1
-    | (Tsplat _, Textra _) -> 1
+    | (Tvariadic _, Tsplat _) -> -1
+    | (Tsplat _, Tvariadic _) -> 1
     | (Tsplat t_splat1, Tsplat t_splat2) -> ty_compare t_splat1 t_splat2
-    | ( Textra { t_optional = t_optional1; t_variadic = t_variadic1 },
-        Textra { t_optional = t_optional2; t_variadic = t_variadic2 } ) ->
-      chain_compare (ty_compare t_variadic1 t_variadic2) (fun _ ->
-          List.compare ty_compare t_optional1 t_optional2)
+    | (Tvariadic t_variadic1, Tvariadic t_variadic2) ->
+      ty_compare t_variadic1 t_variadic2
   and tuple_type_compare : type a. a tuple_type -> a tuple_type -> int =
    fun t1 t2 ->
-    let { t_required = t_required1; t_extra = t_extra1 } = t1 in
-    let { t_required = t_required2; t_extra = t_extra2 } = t2 in
+    let {
+      t_required = t_required1;
+      t_optional = t_optional1;
+      t_extra = t_extra1;
+    } =
+      t1
+    in
+    let {
+      t_required = t_required2;
+      t_optional = t_optional2;
+      t_extra = t_extra2;
+    } =
+      t2
+    in
     chain_compare (List.compare ty_compare t_required1 t_required2) (fun _ ->
-        tuple_extra_compare t_extra1 t_extra2)
+        chain_compare
+          (List.compare ty_compare t_optional1 t_optional2)
+          (fun _ -> tuple_extra_compare t_extra1 t_extra2))
   and user_attribute_param_compare p1 p2 =
     let dest_user_attribute_param p =
       match p with
@@ -1352,18 +1362,15 @@ module Locl_subst = struct
       ->
       ty
 
-  and apply_tuple { t_required; t_extra } ~subst ~combine_reasons =
+  and apply_tuple { t_required; t_optional; t_extra } ~subst ~combine_reasons =
     let t_required = List.map t_required ~f:(apply_ty ~subst ~combine_reasons)
+    and t_optional = List.map t_optional ~f:(apply_ty ~subst ~combine_reasons)
     and t_extra =
       match t_extra with
       | Tsplat ty -> Tsplat (apply_ty ty ~subst ~combine_reasons)
-      | Textra { t_optional; t_variadic } ->
-        let t_optional =
-          List.map t_optional ~f:(apply_ty ~subst ~combine_reasons)
-        and t_variadic = apply_ty t_variadic ~subst ~combine_reasons in
-        Textra { t_optional; t_variadic }
+      | Tvariadic ty -> Tvariadic (apply_ty ty ~subst ~combine_reasons)
     in
-    { t_required; t_extra }
+    { t_required; t_optional; t_extra }
 
   and apply_fun
       ({
@@ -1508,16 +1515,16 @@ module Find_locl = struct
     | ty :: _ when p ty -> Some ty
     | _ :: tys -> find_first_ty tys ~p
 
-  and find_tuple { t_required; t_extra } ~p =
+  and find_tuple { t_required; t_optional; t_extra } ~p =
     match find_first_ty t_required ~p with
     | None -> begin
-      match t_extra with
-      | Tsplat ty -> find_ty ty ~p
-      | Textra { t_optional; t_variadic } -> begin
-        match find_first_ty t_optional ~p with
-        | None -> find_ty t_variadic ~p
-        | res -> res
+      match find_first_ty t_optional ~p with
+      | None -> begin
+        match t_extra with
+        | Tsplat ty -> find_ty ty ~p
+        | Tvariadic ty -> find_ty ty ~p
       end
+      | res -> res
     end
     | res -> res
 
@@ -1752,18 +1759,16 @@ module Transform_top_down_decl = struct
       ft_ret;
     }
 
-  and traverse_tuple_ty { t_required; t_extra } ~on_ty ~on_rc_bound ~ctx =
+  and traverse_tuple_ty
+      { t_required; t_optional; t_extra } ~on_ty ~on_rc_bound ~ctx =
     let t_required = List.map t_required ~f:(transform ~on_ty ~on_rc_bound ~ctx)
+    and t_optional = List.map t_optional ~f:(transform ~on_ty ~on_rc_bound ~ctx)
     and t_extra =
       match t_extra with
       | Tsplat ty -> Tsplat (transform ty ~on_ty ~on_rc_bound ~ctx)
-      | Textra { t_optional; t_variadic } ->
-        let t_optional =
-          List.map t_optional ~f:(transform ~on_ty ~on_rc_bound ~ctx)
-        and t_variadic = transform t_variadic ~on_ty ~on_rc_bound ~ctx in
-        Textra { t_optional; t_variadic }
+      | Tvariadic ty -> Tvariadic (transform ty ~on_ty ~on_rc_bound ~ctx)
     in
-    { t_required; t_extra }
+    { t_required; t_optional; t_extra }
 
   and traverse_shape_ty
       { s_origin; s_unknown_value; s_fields } ~on_ty ~on_rc_bound ~ctx =

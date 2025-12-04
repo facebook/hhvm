@@ -71,19 +71,19 @@ let derive_instantiation
     | (Toption lty, Toption rty)
     | (Tclass_ptr lty, Tclass_ptr rty) ->
       derive_instantiation lty rty (env, subst_acc)
-    | ( Ttuple { t_required = ltyl; t_extra = lextra },
-        Ttuple { t_required = rtyl; t_extra = rextra } ) ->
+    | ( Ttuple { t_required = ltyl; t_optional = lopt; t_extra = lextra },
+        Ttuple { t_required = rtyl; t_optional = ropt; t_extra = rextra } ) ->
       let (env, subst_acc) =
         derive_instantiation_list ltyl rtyl (env, subst_acc)
       in
+      let (env, subst_acc) =
+        derive_instantiation_list lopt ropt (env, subst_acc)
+      in
       (match (lextra, rextra) with
-      | ( Textra { t_optional = lopt; t_variadic = lvar },
-          Textra { t_optional = ropt; t_variadic = rvar } ) ->
-        (env, subst_acc)
-        |> derive_instantiation_list lopt ropt
-        |> derive_instantiation lvar rvar
+      | (Tvariadic lvar, Tvariadic rvar) ->
+        derive_instantiation lvar rvar (env, subst_acc)
       | (Tsplat lty, Tsplat rty) -> derive_instantiation lty rty (env, subst_acc)
-      | (_, (Textra _ | Tsplat _)) -> (env, subst_acc))
+      | (_, (Tvariadic _ | Tsplat _)) -> (env, subst_acc))
     | ( Tshape
           ({ s_origin = _; s_unknown_value = lty; s_fields = lfields } :
             _ shape_type),

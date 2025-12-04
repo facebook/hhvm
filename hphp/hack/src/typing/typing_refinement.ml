@@ -41,7 +41,7 @@ module TyPredicate = struct
     | Tprim Aast.Tresource -> Result.Ok (next_wildcard_id, IsTag ResourceTag)
     | Tprim Aast.Tnull -> Result.Ok (next_wildcard_id, IsTag NullTag)
     (* TODO: optional and variadic fields T201398626 T201398652 *)
-    | Ttuple { t_required; t_extra = Textra { t_optional = []; t_variadic } }
+    | Ttuple { t_required; t_optional = []; t_extra = Tvariadic t_variadic }
       when is_nothing t_variadic -> begin
       match
         List.fold_left
@@ -298,12 +298,8 @@ module TyPredicate = struct
           Ttuple
             {
               t_required = List.map tp_required ~f:(to_ty lookup_wildcard);
-              t_extra =
-                Textra
-                  {
-                    t_optional = [];
-                    t_variadic = Typing_make_type.nothing reason;
-                  };
+              t_optional = [];
+              t_extra = Tvariadic (Typing_make_type.nothing reason);
             } )
     | (reason, IsShapeOf { sp_fields }) ->
       let map =
@@ -622,9 +618,7 @@ let rec split_ty_by_tuple
     (predicate : type_predicate) : env * TyPartition.t =
   match deref ty with
   (* TODO: optional and variadic fields T201398626 T201398652 *)
-  | ( ty_reason,
-      Ttuple
-        { t_required; t_extra = Textra { t_optional = []; t_variadic = _ } } )
+  | (ty_reason, Ttuple { t_required; t_optional = []; t_extra = Tvariadic _ })
     ->
     let predicate_ty_pairs = List.zip sub_predicates t_required in
     begin

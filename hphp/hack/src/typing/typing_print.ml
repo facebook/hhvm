@@ -512,7 +512,7 @@ module Full = struct
     in
     (fuel, tfun_doc)
 
-  let ttuple ~fuel k t_required t_extra =
+  let ttuple ~fuel k t_required t_optional t_extra =
     let tuple_elem ~fuel (is_optional, is_variadic, is_splat, ty) =
       let (fuel, doc) = k ~fuel ty in
       ( fuel,
@@ -525,25 +525,22 @@ module Full = struct
         else
           doc )
     in
+    let optional_list =
+      List.map t_optional ~f:(fun ty -> (true, false, false, ty))
+    in
     let extra =
       match t_extra with
       | Tsplat t_splat -> [(false, false, true, t_splat)]
-      | Textra { t_optional; t_variadic } ->
-        let optional =
-          List.map t_optional ~f:(fun ty -> (true, false, false, ty))
-        in
-        let variadic =
-          if Typing_defs.is_nothing t_variadic then
-            []
-          else
-            [(false, true, false, t_variadic)]
-        in
-        optional @ variadic
+      | Tvariadic t_variadic ->
+        if Typing_defs.is_nothing t_variadic then
+          []
+        else
+          [(false, true, false, t_variadic)]
     in
     let required =
       List.map t_required ~f:(fun ty -> (false, false, false, ty))
     in
-    list ~fuel "(" tuple_elem (required @ extra) ")"
+    list ~fuel "(" tuple_elem (required @ optional_list @ extra) ")"
 
   let tshape ~fuel k to_doc penv s is_open_mixed =
     let { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } = s in
@@ -892,19 +889,12 @@ module Full = struct
       let (fuel, tys_doc) = list ~fuel "<" k tyl ">" in
       let generic_doc = to_doc s ^^ tys_doc in
       (fuel, generic_doc)
-    | Ttuple { t_required; t_extra } -> ttuple ~fuel k t_required t_extra
+    | Ttuple { t_required; t_optional; t_extra } ->
+      ttuple ~fuel k t_required t_optional t_extra
     | Tunion [] -> (fuel, text "nothing")
     | Tunion tyl ->
       let (fuel, tys_doc) =
-        ttuple
-          ~fuel
-          k
-          tyl
-          (Textra
-             {
-               t_optional = [];
-               t_variadic = Typing_make_type.nothing Reason.none;
-             })
+        ttuple ~fuel k tyl [] (Tvariadic (Typing_make_type.nothing Reason.none))
       in
       let union_doc = Concat [text "|"; tys_doc] in
       (fuel, union_doc)
@@ -1103,7 +1093,8 @@ module Full = struct
       (fuel, dependent_doc)
     (* Don't strip_ns here! We want the FULL type, including the initial slash.
       *)
-    | Ttuple { t_required; t_extra } -> ttuple ~fuel k t_required t_extra
+    | Ttuple { t_required; t_optional; t_extra } ->
+      ttuple ~fuel k t_required t_optional t_extra
     | Tunion [] -> (fuel, text "nothing")
     | Tunion tyl ->
       let tyl =
@@ -1700,14 +1691,14 @@ module ErrorString = struct
     | Tintersection [] -> (fuel, "a mixed value")
     | Tintersection l -> intersection ~fuel env l
     | Tvec_or_dict _ -> (fuel, "a vec_or_dict")
-    | Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } } ->
+    | Ttuple { t_required; t_optional; t_extra = Tvariadic t_variadic } ->
       ( fuel,
         (if List.is_empty t_optional && is_nothing t_variadic then
           "a tuple of size "
         else
           "a tuple of size at least ")
         ^ string_of_int (List.length t_required) )
-    | Ttuple { t_required; t_extra = Tsplat _ } ->
+    | Ttuple { t_required; t_optional = _; t_extra = Tsplat _ } ->
       ( fuel,
         "a tuple of size at least " ^ string_of_int (List.length t_required) )
     | Tnonnull -> (fuel, "a nonnull value")

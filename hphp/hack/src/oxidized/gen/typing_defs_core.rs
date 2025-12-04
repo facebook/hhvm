@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bc9e567de7aeb4fa167f562ff69fcb90>>
+// @generated SignedSource<<2c3f5c94b0ef6f31c3ed188a23f5f994>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -1047,6 +1047,7 @@ pub struct ShapeType {
 #[repr(C)]
 pub struct TupleType {
     pub required: Vec<Ty>,
+    pub optional: Vec<Ty>,
     pub extra: TupleExtra,
 }
 
@@ -1069,10 +1070,6 @@ pub struct TupleType {
 #[rust_to_ocaml(attr = "deriving (hash, transform)")]
 #[repr(C, u8)]
 pub enum TupleExtra {
-    #[rust_to_ocaml(prefix = "t_")]
-    Textra {
-        optional: Vec<Ty>,
-        variadic: Ty,
-    },
+    Tvariadic(Ty),
     Tsplat(Ty),
 }

@@ -145,10 +145,22 @@ impl<R: Reason> ToOxidized for Ty_<R> {
             Ty_::Tprim(x) => typing_defs::Ty_::Tprim(x),
             Ty_::Tfun(x) => typing_defs::Ty_::Tfun(x.to_oxidized()),
             Ty_::Ttuple(tuple) => {
-                let box TupleType(required, extra) = tuple;
+                let box TupleType(required, optional, extra) = tuple;
                 let required = required.to_oxidized();
-                let extra = extra.to_oxidized();
-                typing_defs::Ty_::Ttuple(typing_defs::TupleType { required, extra })
+                let optional = optional.to_oxidized();
+                let extra = match extra {
+                    TupleExtra::Tvariadic(variadic) => {
+                        typing_defs::TupleExtra::Tvariadic(variadic.to_oxidized())
+                    }
+                    TupleExtra::Tsplat(splat) => {
+                        typing_defs::TupleExtra::Tsplat(splat.to_oxidized())
+                    }
+                };
+                typing_defs::Ty_::Ttuple(typing_defs::TupleType {
+                    required,
+                    optional,
+                    extra,
+                })
             }
             Ty_::Tshape(shape) => {
                 let mut shape_fields = TShapeMap::new();
@@ -197,22 +209,6 @@ impl<R: Reason> ToOxidized for RefinedConstBound<Ty<R>> {
         match self {
             Self::Exact(ty) => TRexact(ty.to_oxidized()),
             Self::Loose(bounds) => TRloose(bounds.to_oxidized()),
-        }
-    }
-}
-
-impl<R: Reason> ToOxidized for TupleExtra<R> {
-    type Output = o::typing_defs::TupleExtra;
-
-    fn to_oxidized(self) -> Self::Output {
-        use o::typing_defs::TupleExtra::Textra;
-        use o::typing_defs::TupleExtra::*;
-        match self {
-            Self::Textra(optional, variadic) => Textra {
-                optional: optional.to_oxidized(),
-                variadic: variadic.to_oxidized(),
-            },
-            Self::Tsplat(splat) => Tsplat(splat.to_oxidized()),
         }
     }
 }

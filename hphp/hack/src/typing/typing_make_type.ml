@@ -189,10 +189,8 @@ let tuple r tyl =
   mk
     ( r,
       Ttuple
-        {
-          t_required = tyl;
-          t_extra = Textra { t_optional = []; t_variadic = nothing r };
-        } )
+        { t_required = tyl; t_optional = []; t_extra = Tvariadic (nothing r) }
+    )
 
 let union r tyl =
   match tyl with

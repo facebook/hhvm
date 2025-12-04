@@ -327,10 +327,9 @@ impl<R: Reason> FromOcamlRep for ShapeType<R> {
 impl<R: Reason> ToOcamlRep for TupleExtra<R> {
     fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         match self {
-            TupleExtra::Textra(optional, variadic) => {
-                let mut block = alloc.block_with_size_and_tag(2usize, 0u8);
-                alloc.set_field(&mut block, 0, alloc.add(optional));
-                alloc.set_field(&mut block, 1, alloc.add(variadic));
+            TupleExtra::Tvariadic(variadic) => {
+                let mut block = alloc.block_with_size_and_tag(1usize, 0u8);
+                alloc.set_field(&mut block, 0, alloc.add(variadic));
                 block.build()
             }
             TupleExtra::Tsplat(splat) => {
@@ -347,11 +346,8 @@ impl<R: Reason> FromOcamlRep for TupleExtra<R> {
         let block = ocamlrep::from::expect_block(value)?;
         match block.tag() {
             0 => {
-                ocamlrep::from::expect_block_size(block, 2)?;
-                Ok(TupleExtra::Textra(
-                    ocamlrep::from::field(block, 0)?,
-                    ocamlrep::from::field(block, 1)?,
-                ))
+                ocamlrep::from::expect_block_size(block, 1)?;
+                Ok(TupleExtra::Tvariadic(ocamlrep::from::field(block, 0)?))
             }
             1 => {
                 ocamlrep::from::expect_block_size(block, 1)?;
@@ -364,20 +360,22 @@ impl<R: Reason> FromOcamlRep for TupleExtra<R> {
 
 impl<R: Reason> ToOcamlRep for TupleType<R> {
     fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
-        let Self(required, extra) = &self;
-        let mut block = alloc.block_with_size(2);
+        let Self(required, optional, extra) = &self;
+        let mut block = alloc.block_with_size(3);
         alloc.set_field(&mut block, 0, alloc.add(required));
-        alloc.set_field(&mut block, 1, alloc.add(extra));
+        alloc.set_field(&mut block, 1, alloc.add(optional));
+        alloc.set_field(&mut block, 2, alloc.add(extra));
         block.build()
     }
 }
 
 impl<R: Reason> FromOcamlRep for TupleType<R> {
     fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
-        let block = ocamlrep::from::expect_tuple(value, 2)?;
+        let block = ocamlrep::from::expect_tuple(value, 3)?;
         Ok(TupleType(
             ocamlrep::from::field(block, 0)?,
             ocamlrep::from::field(block, 1)?,
+            ocamlrep::from::field(block, 2)?,
         ))
     }
 }

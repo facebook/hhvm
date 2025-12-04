@@ -169,10 +169,10 @@ let validator =
                ( Typing_defs_core.get_reason ty,
                  "_ in a " ^ s ^ " (use `mixed` instead)" )))
 
-    method! on_ttuple acc r { t_required; t_extra } =
+    method! on_ttuple acc r { t_required; t_optional; t_extra } =
       let acc = List.fold_left t_required ~f:this#on_type ~init:acc in
       match t_extra with
-      | Textra { t_optional; t_variadic } ->
+      | Tvariadic t_variadic ->
         (* HHVM doesn't currently support is/as on open tuples, so let's reject it in Hack *)
         if (not (is_nothing t_variadic)) || not (List.is_empty t_optional) then
           this#invalid acc r

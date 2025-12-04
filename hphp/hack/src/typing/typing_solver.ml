@@ -106,19 +106,19 @@ let rec freshen_inside_ty env ty :
     let* (env, tyl) = freshen_inside_tyl env tyl in
     return (Inter.intersect_list env r tyl)
   (* Tuples are covariant *)
-  | Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } } ->
+  | Ttuple { t_required; t_optional; t_extra } ->
     let (env, t_required) = List.map_env env t_required ~f:freshen_ty in
     let (env, t_optional) = List.map_env env t_optional ~f:freshen_ty in
-    let (env, t_variadic) = freshen_ty env t_variadic in
-    Some
-      ( env,
-        mk
-          (r, Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } })
-      )
-  | Ttuple { t_required; t_extra = Tsplat t_splat } ->
-    let (env, t_required) = List.map_env env t_required ~f:freshen_ty in
-    let (env, t_splat) = freshen_ty env t_splat in
-    Some (env, mk (r, Ttuple { t_required; t_extra = Tsplat t_splat }))
+    let (env, t_extra) =
+      match t_extra with
+      | Tsplat t_splat ->
+        let (env, t_splat) = freshen_ty env t_splat in
+        (env, Tsplat t_splat)
+      | Tvariadic t_variadic ->
+        let (env, t_variadic) = freshen_ty env t_variadic in
+        (env, Tvariadic t_variadic)
+    in
+    Some (env, mk (r, Ttuple { t_required; t_optional; t_extra }))
   (* Shape data is covariant *)
   | Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } ->
     let (env, fdm) = ShapeFieldMap.map_env freshen_ty env fdm in

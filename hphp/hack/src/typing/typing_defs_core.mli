@@ -454,14 +454,12 @@ and 'phase shape_type = {
 *)
 and 'phase tuple_type = {
   t_required: 'phase ty list;
+  t_optional: 'phase ty list;
   t_extra: 'phase tuple_extra;
 }
 
 and 'phase tuple_extra =
-  | Textra of {
-      t_optional: 'phase ty list;
-      t_variadic: 'phase ty;
-    }
+  | Tvariadic of 'phase ty
   | Tsplat of 'phase ty
 [@@deriving hash, transform]
 

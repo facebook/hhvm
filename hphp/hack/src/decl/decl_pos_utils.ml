@@ -44,10 +44,11 @@ struct
     | Tvec_or_dict (ty1, ty2) -> Tvec_or_dict (ty ty1, ty ty2)
     | Tprim _ as x -> x
     | Tgeneric _ as x -> x
-    | Ttuple { t_required; t_extra } ->
+    | Ttuple { t_required; t_optional; t_extra } ->
       Ttuple
         {
           t_required = List.map t_required ~f:ty;
+          t_optional = List.map t_optional ~f:ty;
           t_extra = tuple_extra t_extra;
         }
     | Tunion tyl -> Tunion (List.map tyl ~f:ty)
@@ -66,9 +67,7 @@ struct
   and tuple_extra e =
     match e with
     | Tsplat t_splat -> Tsplat (ty t_splat)
-    | Textra { t_optional; t_variadic } ->
-      Textra
-        { t_optional = List.map t_optional ~f:ty; t_variadic = ty t_variadic }
+    | Tvariadic t_variadic -> Tvariadic (ty t_variadic)
 
   and ty_opt x = Option.map x ~f:ty
 

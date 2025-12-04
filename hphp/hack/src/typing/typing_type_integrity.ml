@@ -60,10 +60,11 @@ module Locl_Inst = struct
     | (Tvar _ | Tdynamic | Tnonnull | Tany _ | Tprim _ | Tneg _ | Tlabel _) as x
       ->
       x
-    | Ttuple { t_required; t_extra } ->
+    | Ttuple { t_required; t_optional; t_extra } ->
       let t_extra = instantiate_tuple_extra subst t_extra in
       let t_required = List.map t_required ~f:(instantiate subst) in
-      Ttuple { t_required; t_extra }
+      let t_optional = List.map t_optional ~f:(instantiate subst) in
+      Ttuple { t_required; t_optional; t_extra }
     | Tunion tyl ->
       let tyl = List.map tyl ~f:(instantiate subst) in
       Tunion tyl
@@ -143,10 +144,9 @@ module Locl_Inst = struct
 
   and instantiate_tuple_extra subst e =
     match e with
-    | Textra { t_optional; t_variadic } ->
-      let t_optional = List.map t_optional ~f:(instantiate subst) in
+    | Tvariadic t_variadic ->
       let t_variadic = instantiate subst t_variadic in
-      Textra { t_optional; t_variadic }
+      Tvariadic t_variadic
     | Tsplat t_splat ->
       let t_splat = instantiate subst t_splat in
       Tsplat t_splat
@@ -244,13 +244,10 @@ and check_type_integrity
   | Tlike ty
   | Toption ty ->
     check ty
-  | Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } } ->
+  | Ttuple { t_required; t_optional; t_extra = Tvariadic t_vs | Tsplat t_vs } ->
     List.iter t_required ~f:check;
     List.iter t_optional ~f:check;
-    check t_variadic
-  | Ttuple { t_required; t_extra = Tsplat t_splat } ->
-    List.iter t_required ~f:check;
-    check t_splat
+    check t_vs
   | Tunion tyl
   | Tintersection tyl ->
     List.iter tyl ~f:check

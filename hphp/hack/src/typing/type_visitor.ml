@@ -145,16 +145,15 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
 
     method on_taccess acc _ (root, _ids) = this#on_type acc root
 
-    method on_ttuple acc _ { t_required; t_extra } =
+    method on_ttuple acc _ { t_required; t_optional; t_extra } =
       let acc = this#on_tuple_extra acc t_extra in
+      let acc = List.fold_left t_optional ~f:this#on_type ~init:acc in
       List.fold_left t_required ~f:this#on_type ~init:acc
 
     method on_tuple_extra acc e =
       match e with
       | Tsplat t_splat -> this#on_type acc t_splat
-      | Textra { t_optional; t_variadic } ->
-        let acc = this#on_type acc t_variadic in
-        List.fold_left t_optional ~f:this#on_type ~init:acc
+      | Tvariadic t_variadic -> this#on_type acc t_variadic
 
     method on_tunion acc _ tyl = List.fold_left tyl ~f:this#on_type ~init:acc
 
@@ -295,16 +294,15 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       let acc = this#on_type acc ty in
       acc
 
-    method on_ttuple acc _ { t_required; t_extra } =
+    method on_ttuple acc _ { t_required; t_optional; t_extra } =
       let acc = this#on_tuple_extra acc t_extra in
+      let acc = List.fold_left t_optional ~f:this#on_type ~init:acc in
       List.fold_left t_required ~f:this#on_type ~init:acc
 
     method on_tuple_extra acc e =
       match e with
       | Tsplat t_splat -> this#on_type acc t_splat
-      | Textra { t_optional; t_variadic } ->
-        let acc = this#on_type acc t_variadic in
-        List.fold_left t_optional ~f:this#on_type ~init:acc
+      | Tvariadic t_variadic -> this#on_type acc t_variadic
 
     method on_tunion acc _ tyl = List.fold_left tyl ~f:this#on_type ~init:acc
 

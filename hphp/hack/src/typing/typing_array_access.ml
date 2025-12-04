@@ -132,7 +132,7 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
     let ty = MakeType.keyed_container r index_ty element_ty in
     (env, Some ty)
   (* For tuples, we just freshen the element types *)
-  | (r, Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } }) ->
+  | (r, Ttuple { t_required; t_optional; t_extra = Tvariadic t_variadic }) ->
   begin
     (* requires integer literal *)
     match index_expr with
@@ -156,9 +156,8 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
         Some
           (mk
              ( r,
-               Ttuple
-                 { t_required; t_extra = Textra { t_optional; t_variadic } } ))
-      )
+               Ttuple { t_required; t_optional; t_extra = Tvariadic t_variadic }
+             )) )
     | _ -> (env, None)
   end
   (* Whatever the lower bound, construct an open, singleton shape type. *)
@@ -610,7 +609,7 @@ let rec array_get
         in
         Option.iter ty_err1 ~f:(Typing_error_utils.add_typing_error ~env);
         (env, (ty, dflt_arr_res, idx_err_res))
-      | Ttuple { t_required; t_extra = Tsplat t_splat } -> begin
+      | Ttuple { t_required; t_optional = _; t_extra = Tsplat t_splat } -> begin
         (* requires integer literal *)
         match e2 with
         | (a, p, Int idx_str) ->
@@ -666,7 +665,7 @@ let rec array_get
           let (env, ty) = err_witness env expr_pos in
           (env, (ty, dflt_arr_res, Error (ty2, MakeType.int Reason.none)))
       end
-      | Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } } ->
+      | Ttuple { t_required; t_optional; t_extra = Tvariadic t_variadic } ->
       begin
         (* requires integer literal *)
         match e2 with
@@ -1146,7 +1145,7 @@ let widen_for_assign_array_get ~expr_pos index_expr env ty =
   match deref ty with
   (* dynamic is valid for assign array get *)
   | (_, Tdynamic) -> (env, Some ty)
-  | (r, Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } }) ->
+  | (r, Ttuple { t_required; t_optional; t_extra = Tvariadic t_variadic }) ->
   begin
     (* requires integer literal *)
     match index_expr with
@@ -1164,9 +1163,8 @@ let widen_for_assign_array_get ~expr_pos index_expr env ty =
         Some
           (mk
              ( r,
-               Ttuple
-                 { t_required; t_extra = Textra { t_optional; t_variadic } } ))
-      )
+               Ttuple { t_required; t_optional; t_extra = Tvariadic t_variadic }
+             )) )
     | _ -> (env, None)
   end
   | _ -> (env, None)
@@ -1490,9 +1488,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
           @@ merge ty_err1 ty_err2 ~f:Typing_error.both);
         (env, (ety1, Ok ety1, idx_err, err_res))
       (* TODO T201398626 T201398652 *)
-      | Ttuple
-          { t_required; t_extra = Textra { t_optional = []; t_variadic = _ } }
-        ->
+      | Ttuple { t_required; t_optional = []; t_extra = Tvariadic _ } ->
         let fail key_err reason =
           let (_, p, _) = key in
           Typing_error_utils.add_typing_error

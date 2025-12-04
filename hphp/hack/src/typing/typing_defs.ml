@@ -524,8 +524,10 @@ let rec is_denotable ty =
     | _ -> false
   end
   | Tclass (_, _, ts) -> List.for_all ~f:is_denotable ts
-  | Ttuple { t_required; t_extra } ->
-    List.for_all ~f:is_denotable t_required && tuple_extra_is_denotable t_extra
+  | Ttuple { t_required; t_optional; t_extra } ->
+    List.for_all ~f:is_denotable t_required
+    && List.for_all ~f:is_denotable t_optional
+    && tuple_extra_is_denotable t_extra
   | Tvec_or_dict (tk, tv) -> is_denotable tk && is_denotable tv
   | Taccess (ty, _) -> is_denotable ty
   | Tshape { s_origin = _; s_unknown_value = unknown_field_type; s_fields = sm }
@@ -553,9 +555,7 @@ let rec is_denotable ty =
 and tuple_extra_is_denotable e =
   match e with
   | Tsplat t -> is_denotable t
-  | Textra { t_optional; t_variadic } ->
-    List.for_all ~f:is_denotable t_optional
-    && unknown_field_type_is_denotable t_variadic
+  | Tvariadic t -> unknown_field_type_is_denotable t
 
 and unknown_field_type_is_denotable ty =
   match get_node ty with

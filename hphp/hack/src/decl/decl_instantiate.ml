@@ -70,11 +70,12 @@ and instantiate_ subst x =
   | (Tthis | Tmixed | Twildcard | Tdynamic | Tnonnull | Tany _ | Tprim _) as x
     ->
     x
-  | Ttuple { t_required; t_extra } ->
+  | Ttuple { t_required; t_optional; t_extra } ->
     let t_required = List.map t_required ~f:(instantiate subst) in
+    let t_optional = List.map t_optional ~f:(instantiate subst) in
     let t_extra = instantiate_tuple_extra subst t_extra in
 
-    Ttuple { t_required; t_extra }
+    Ttuple { t_required; t_optional; t_extra }
   | Tunion tyl ->
     let tyl = List.map tyl ~f:(instantiate subst) in
     Tunion tyl
@@ -177,10 +178,7 @@ and instantiate_ subst x =
 and instantiate_tuple_extra subst e =
   match e with
   | Tsplat t_splat -> Tsplat (instantiate subst t_splat)
-  | Textra { t_optional; t_variadic } ->
-    let t_optional = List.map t_optional ~f:(instantiate subst) in
-    let t_variadic = instantiate subst t_variadic in
-    Textra { t_optional; t_variadic }
+  | Tvariadic t_variadic -> Tvariadic (instantiate subst t_variadic)
 
 let instantiate_ce subst ({ ce_type = x; _ } as ce) =
   { ce with ce_type = lazy (instantiate subst (Lazy.force x)) }

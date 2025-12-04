@@ -2310,21 +2310,25 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                 self.convert_tapply_to_tgeneric(tk),
                 self.convert_tapply_to_tgeneric(tv),
             ),
-            Ty_::Ttuple(TupleType { required, extra }) => {
+            Ty_::Ttuple(TupleType {
+                required,
+                optional,
+                extra,
+            }) => {
                 let extra = match extra {
-                    TupleExtra::Textra { optional, variadic } => TupleExtra::Textra {
-                        optional: optional
-                            .into_iter()
-                            .map(|targ| self.convert_tapply_to_tgeneric(targ))
-                            .collect(),
-                        variadic: self.convert_tapply_to_tgeneric(variadic),
-                    },
+                    TupleExtra::Tvariadic(variadic) => {
+                        TupleExtra::Tvariadic(self.convert_tapply_to_tgeneric(variadic))
+                    }
                     TupleExtra::Tsplat(hint) => {
                         TupleExtra::Tsplat(self.convert_tapply_to_tgeneric(hint))
                     }
                 };
                 Ty_::Ttuple(TupleType {
                     required: required
+                        .into_iter()
+                        .map(|targ| self.convert_tapply_to_tgeneric(targ))
+                        .collect(),
+                    optional: optional
                         .into_iter()
                         .map(|targ| self.convert_tapply_to_tgeneric(targ))
                         .collect(),
@@ -5450,10 +5454,17 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             Some(ty) => ty,
         };
         let extra = match splat_opt {
-            None => TupleExtra::Textra { optional, variadic },
+            None => TupleExtra::Tvariadic(variadic),
             Some(hint) => TupleExtra::Tsplat(hint),
         };
-        self.hint_ty(pos, Ty_::Ttuple(TupleType { required, extra }))
+        self.hint_ty(
+            pos,
+            Ty_::Ttuple(TupleType {
+                required,
+                optional,
+                extra,
+            }),
+        )
     }
 
     fn make_tuple_or_union_or_intersection_element_type_specifier(

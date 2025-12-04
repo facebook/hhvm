@@ -2090,14 +2090,10 @@ end = struct
             Ttuple
               {
                 t_required = List.rev acc_required;
+                t_optional = List.rev acc_optional;
                 t_extra =
                   (match acc_splat with
-                  | None ->
-                    Textra
-                      {
-                        t_optional = List.rev acc_optional;
-                        t_variadic = acc_variadic;
-                      }
+                  | None -> Tvariadic acc_variadic
                   | Some t -> Tsplat t);
               } )
       | ({ fp_type; fp_pos; _ } as fn_param) :: fn_params ->
@@ -3231,7 +3227,8 @@ end = struct
     in
     match (deref ty_sub, deref ty_super) with
     (* (...t) <: t *)
-    | ((_, Ttuple { t_required = []; t_extra = Tsplat ty_sub }), _) ->
+    | ( (_, Ttuple { t_required = []; t_optional = []; t_extra = Tsplat ty_sub }),
+        _ ) ->
       env
       |> simplify
            ~subtype_env
@@ -3239,7 +3236,10 @@ end = struct
            ~lhs:{ sub_supportdyn; ty_sub }
            ~rhs:{ super_like; super_supportdyn; ty_super }
       (* t <: (...t) *)
-    | (_, (_, Ttuple { t_required = []; t_extra = Tsplat ty_super })) ->
+    | ( _,
+        ( _,
+          Ttuple { t_required = []; t_optional = []; t_extra = Tsplat ty_super }
+        ) ) ->
       env
       |> simplify
            ~subtype_env
@@ -4329,10 +4329,10 @@ end = struct
                 ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
             in
             param_props env &&& ret_prop
-        | (_, Ttuple { t_required; t_extra }) ->
+        | (_, Ttuple { t_required; t_optional; t_extra }) ->
           let extras =
             match t_extra with
-            | Textra { t_variadic; t_optional } -> t_variadic :: t_optional
+            | Tvariadic t_variadic -> t_variadic :: t_optional
             | Tsplat t_splat -> [t_splat]
           in
           List.fold_left
@@ -4733,9 +4733,20 @@ end = struct
         ~rhs:{ super_supportdyn; super_like; ty_super }
         env
       (* Tuple against tuple. *)
-    | ( (r_sub, Ttuple { t_required = t_req_sub; t_extra = t_extra_sub }),
-        (r_super, Ttuple { t_required = t_req_super; t_extra = t_extra_super })
-      ) ->
+    | ( ( r_sub,
+          Ttuple
+            {
+              t_required = t_req_sub;
+              t_optional = t_optional_sub;
+              t_extra = t_extra_sub;
+            } ),
+        ( r_super,
+          Ttuple
+            {
+              t_required = t_req_super;
+              t_optional = t_optional_super;
+              t_extra = t_extra_super;
+            } ) ) ->
       (* First test the required components of the tuples, pointwise *)
       let rec simplify_elems_req ty_subs ty_supers env =
         match (ty_subs, ty_supers) with
@@ -4746,7 +4757,12 @@ end = struct
             let tuple_super_ty =
               mk
                 ( r_super,
-                  Ttuple { t_required = ty_supers; t_extra = t_extra_super } )
+                  Ttuple
+                    {
+                      t_required = ty_supers;
+                      t_optional = t_optional_super;
+                      t_extra = t_extra_super;
+                    } )
             in
             let ty_super = Sd.liken ~super_like env tuple_super_ty in
             env
@@ -4755,7 +4771,7 @@ end = struct
                  ~this_ty:None
                  ~lhs:{ sub_supportdyn; ty_sub = t_splat_sub }
                  ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
-          | Textra _ -> invalid env ~fail
+          | Tvariadic _ -> invalid env ~fail
         end
         (* Pointwise compare sub and super *)
         | (ty_sub :: ty_subs, ty_super :: ty_supers) ->
@@ -4775,7 +4791,14 @@ end = struct
            *)
           | Tsplat t_splat_super ->
             let tuple_sub_ty =
-              mk (r_sub, Ttuple { t_required = ty_subs; t_extra = t_extra_sub })
+              mk
+                ( r_sub,
+                  Ttuple
+                    {
+                      t_required = ty_subs;
+                      t_optional = t_optional_sub;
+                      t_extra = t_extra_sub;
+                    } )
             in
             let ty_super = Sd.liken ~super_like env t_splat_super in
             env
@@ -4784,14 +4807,7 @@ end = struct
                  ~this_ty:None
                  ~lhs:{ sub_supportdyn; ty_sub = tuple_sub_ty }
                  ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
-          | Textra
-              { t_optional = t_optional_super; t_variadic = t_variadic_super }
-            -> begin
-            let t_optional_sub =
-              match t_extra_sub with
-              | Textra { t_optional; _ } -> t_optional
-              | Tsplat _ -> []
-            in
+          | Tvariadic t_variadic_super -> begin
             (* Shortcut so that error refers to whole tuple *)
             if
               List.length ty_subs + List.length t_optional_sub
@@ -4827,12 +4843,8 @@ end = struct
                             Ttuple
                               {
                                 t_required = [];
-                                t_extra =
-                                  Textra
-                                    {
-                                      t_optional = ty_supers;
-                                      t_variadic = t_variadic_super;
-                                    };
+                                t_optional = ty_supers;
+                                t_extra = Tvariadic t_variadic_super;
                               } )
                       in
                       let ty_super = Sd.liken ~super_like env tuple_super_ty in
@@ -4847,8 +4859,7 @@ end = struct
                                super_supportdyn = false;
                                ty_super;
                              }
-                    | Textra { t_optional = _; t_variadic = t_variadic_sub } ->
-                    begin
+                    | Tvariadic t_variadic_sub -> begin
                       match ty_supers with
                       | [] ->
                         let ty_super =
@@ -6801,10 +6812,11 @@ end = struct
     | (_r_sub, Tclass ((_, id), _, tup))
       when String.equal id SN.Collections.cPair ->
       do_tuple_basic tup
-    | ( _r_sub,
-        Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } } ) ->
+    | (_r_sub, Ttuple { t_required; t_optional; t_extra = Tvariadic t_variadic })
+      ->
       do_tuple_optional t_required t_optional (Some t_variadic)
-    | (_r_sub, Ttuple { t_required; t_extra = Tsplat t_splat }) ->
+    | (_r_sub, Ttuple { t_required; t_optional = _; t_extra = Tsplat t_splat })
+      ->
       do_tuple_splat t_required t_splat
     | (r_sub, Tshape ts) -> do_shape r_sub ts
     | (r_sub, Tgeneric _generic_nm) ->
@@ -7177,10 +7189,7 @@ end = struct
         &&& simplify_default ~subtype_env cia.cia_write tv
         &&& simplify_val ty_sub
       | _ -> arity_error r_sub n env)
-    | ( r_sub,
-        Ttuple
-          { t_required; t_extra = Textra { t_optional = []; t_variadic = _ } }
-      ) ->
+    | (r_sub, Ttuple { t_required; t_optional = []; t_extra = Tvariadic _ }) ->
       let fail reason =
         invalid
           ~fail:

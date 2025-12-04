@@ -23,6 +23,7 @@
 
 #include <pwd.h>
 #include <grp.h>
+#include <sys/socket.h>
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -302,7 +303,7 @@ bool SocketTransport::bindAndListenDomain(std::vector<int>& socketFds) {
   struct sockaddr_un addr;
   std::string socketPath = m_domainSocketPath;
 
-  int sockFd = socket(AF_UNIX, SOCK_STREAM, 0);
+  int sockFd = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
   if (sockFd < 0) {
     VSDebugLogger::Log(
       VSDebugLogger::LogLevelError,
@@ -360,7 +361,7 @@ bool SocketTransport::bindAndListenTCP(
   std::vector<int>& socketFds
 ) {
   int fd = socket(address->ai_family,
-                  address->ai_socktype,
+                  address->ai_socktype | SOCK_CLOEXEC,
                   address->ai_protocol);
 
   if (fd < 0) {

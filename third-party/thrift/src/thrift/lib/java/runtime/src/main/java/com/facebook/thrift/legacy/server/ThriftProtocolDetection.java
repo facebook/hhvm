@@ -112,8 +112,10 @@ public class ThriftProtocolDetection extends ByteToMessageDecoder {
   private void switchToFramed(ChannelHandlerContext context, TProtocolType protocolType) {
     ChannelPipeline pipeline = context.pipeline();
 
+    int maxFrameLengthBytes = (int) Math.min(maxFrameSize.toBytes(), Integer.MAX_VALUE);
+
     pipeline.addLast(
-        new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, Integer.BYTES, 0, Integer.BYTES),
+        new LengthFieldBasedFrameDecoder(maxFrameLengthBytes, 0, Integer.BYTES, 0, Integer.BYTES),
         new LengthFieldPrepender(Integer.BYTES),
         new SimpleFrameCodec(
             LegacyTransportType.FRAMED, protocolType, assumeClientsSupportOutOfOrderResponses),
@@ -126,8 +128,10 @@ public class ThriftProtocolDetection extends ByteToMessageDecoder {
   private void switchToHeader(ChannelHandlerContext context) {
     ChannelPipeline pipeline = context.pipeline();
 
+    Integer maxFrameLengthBytes = (int) Math.min(maxFrameSize.toBytes(), Integer.MAX_VALUE);
+
     pipeline.addLast(
-        new ThriftHeaderFrameLengthBasedDecoder(),
+        new ThriftHeaderFrameLengthBasedDecoder(maxFrameLengthBytes),
         new LengthFieldPrepender(Integer.BYTES),
         new HeaderTransportCodec(true),
         thriftServerHandler);

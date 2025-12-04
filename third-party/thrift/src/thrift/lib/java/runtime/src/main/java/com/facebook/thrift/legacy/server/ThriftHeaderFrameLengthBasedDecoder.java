@@ -56,12 +56,23 @@ public class ThriftHeaderFrameLengthBasedDecoder extends ByteToMessageDecoder {
   private static final int MAX_FRAME_LENGTH = 0x3FFFFFFF + 4;
   private static final int MAX_BIG_FRAME_LENGTH = Integer.MAX_VALUE;
   private static final long BIG_FRAME_MAGIC = 0x42494746L;
-  private int maxFrameLength;
+  private Integer maxFrameLength;
   private int frameLengthInt = -1;
   private boolean discardingTooLongFrame;
   private long bytesToDiscard;
   private int lengthFieldSize;
   private long tooLongFrameLength;
+
+  public ThriftHeaderFrameLengthBasedDecoder() {
+    this(null);
+  }
+
+  public ThriftHeaderFrameLengthBasedDecoder(Integer maxFrameLength) {
+    if (maxFrameLength != null && maxFrameLength <= 0) {
+      throw new IllegalArgumentException("maxFrameLength must be positive: " + maxFrameLength);
+    }
+    this.maxFrameLength = maxFrameLength;
+  }
 
   @Override
   protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
@@ -91,13 +102,14 @@ public class ThriftHeaderFrameLengthBasedDecoder extends ByteToMessageDecoder {
       int index = in.readerIndex();
       frameLength = in.getUnsignedInt(index);
       lengthFieldSize = 4;
-      maxFrameLength = MAX_FRAME_LENGTH;
 
       if (frameLength == BIG_FRAME_MAGIC) {
         // Big frame detected: read 8-byte length and adjust size to 12 bytes total
         frameLength = in.getLong(index + 4);
         lengthFieldSize = 12;
-        maxFrameLength = MAX_BIG_FRAME_LENGTH;
+        maxFrameLength = maxFrameLength == null ? MAX_BIG_FRAME_LENGTH : maxFrameLength;
+      } else {
+        maxFrameLength = maxFrameLength == null ? MAX_FRAME_LENGTH : maxFrameLength;
       }
 
       if (frameLength < 0) {
@@ -200,14 +212,10 @@ public class ThriftHeaderFrameLengthBasedDecoder extends ByteToMessageDecoder {
   private void fail(long frameLength) {
     if (frameLength > 0) {
       throw new TooLongFrameException(
-          "Adjusted frame length exceeds "
-              + MAX_FRAME_LENGTH
-              + ": "
-              + frameLength
-              + " - discarded");
+          "Adjusted frame length exceeds " + maxFrameLength + ": " + frameLength + " - discarded");
     } else {
       throw new TooLongFrameException(
-          "Adjusted frame length exceeds " + MAX_FRAME_LENGTH + " - discarding");
+          "Adjusted frame length exceeds " + maxFrameLength + " - discarding");
     }
   }
 

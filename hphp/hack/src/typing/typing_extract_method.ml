@@ -561,6 +561,67 @@ module Typeconst_analysis : sig
     Typing_env_types.env ->
     Typing_env_types.env * Subst.t
 end = struct
+  (** Find the intersection of a type constant definition; this is used to find
+      the implied bounds on nested type constants when the outer type constant
+      has upper and lower bounds but here we make no assumptions about
+      well-formedness of the bounds i.e. we don't assumed LB <: UB.
+      There are three cases to consider
+      - Both type constants are abstract; here we take the least upper bound
+      and greatest lower bound
+      - Both type constants are concrete; here we take the intersection of the
+      constants
+      - One is concrete and the other abstract; here we treat the concrete
+      constants as an abstract constant with equal upper and lower bound
+
+      When the bounds of the type constants _are_ subtypes, this is equivalent
+      to using the definition in the lower bound. We don't do that here since
+      lifting the method definition is just and elaboration step.
+  *)
+  let meet_typeconst reason tc1 tc2 =
+    let open Typing_defs in
+    match (tc1, tc2) with
+    | (TCConcrete { tc_type = ty1 }, TCConcrete { tc_type = ty2 }) ->
+      let tc_type = Typing_make_type.intersection reason [ty1; ty2] in
+      TCConcrete { tc_type }
+    | ( TCAbstract
+          {
+            atc_as_constraint = ub1;
+            atc_super_constraint = lb1;
+            atc_default = dflt1;
+          },
+        TCAbstract
+          {
+            atc_as_constraint = ub2;
+            atc_super_constraint = lb2;
+            atc_default = dflt2;
+          } ) ->
+      let atc_as_constraint =
+        Option.merge ub1 ub2 ~f:(fun ty1 ty2 ->
+            Typing_make_type.intersection reason [ty1; ty2])
+      and atc_super_constraint =
+        Option.merge lb1 lb2 ~f:(fun ty1 ty2 ->
+            Typing_make_type.union reason [ty1; ty2])
+      and atc_default =
+        Option.merge dflt1 dflt2 ~f:(fun ty1 ty2 ->
+            Typing_make_type.intersection reason [ty1; ty2])
+      in
+      TCAbstract { atc_as_constraint; atc_super_constraint; atc_default }
+    | ( TCAbstract { atc_as_constraint; atc_super_constraint; _ },
+        TCConcrete { tc_type } )
+    | ( TCConcrete { tc_type },
+        TCAbstract { atc_as_constraint; atc_super_constraint; _ } ) ->
+      let tc_type =
+        match (atc_as_constraint, atc_super_constraint) with
+        | (None, None) -> tc_type
+        | (Some ub, None) -> Typing_make_type.intersection reason [tc_type; ub]
+        | (None, Some lb) -> Typing_make_type.union reason [tc_type; lb]
+        | (Some ub, Some lb) ->
+          Typing_make_type.union
+            reason
+            [lb; Typing_make_type.intersection reason [tc_type; ub]]
+      in
+      TCConcrete { tc_type }
+
   (** Helper to accumulate the path of projections on a given root type *)
   let rec access_path root prefix =
     let open Typing_defs_core in
@@ -745,6 +806,25 @@ end = struct
       Option.map ~f:snd (SMap.find_opt class_name tries)
   (* -- Helpers ------------------------------------------------------------- *)
 
+  type type_for_access =
+    | Constant of Typing_defs_core.decl_ty
+    | Upper_bound of Typing_defs_core.decl_ty
+    | Lower_bound of Typing_defs_core.decl_ty
+    | Upper_and_lower_bounds of {
+        upper: Typing_defs_core.decl_ty;
+        lower: Typing_defs_core.decl_ty;
+      }
+    | No_type
+
+  let transform_type_for_access t ~f =
+    match t with
+    | Constant decl_ty -> Constant (f decl_ty)
+    | Upper_bound decl_ty -> Upper_bound (f decl_ty)
+    | Lower_bound decl_ty -> Lower_bound (f decl_ty)
+    | Upper_and_lower_bounds { upper; lower } ->
+      Upper_and_lower_bounds { upper = f upper; lower = f lower }
+    | No_type -> No_type
+
   (** When accessing a type constant through another type constant we need to
       determine the type that contains the next type constant.
       For a 'concrete' type constant this is the definition and for an 'abstract' type constant it is
@@ -752,8 +832,21 @@ end = struct
   let type_for_access typeconst =
     let open Typing_defs in
     match typeconst with
-    | TCConcrete { tc_type } -> Some tc_type
-    | TCAbstract { atc_as_constraint; _ } -> atc_as_constraint
+    | TCConcrete { tc_type } -> Constant tc_type
+    | TCAbstract { atc_as_constraint = Some ty; atc_super_constraint = None; _ }
+      ->
+      Upper_bound ty
+    | TCAbstract { atc_as_constraint = None; atc_super_constraint = Some ty; _ }
+      ->
+      (* We can't actually do anything with this but we return it explicitly
+         just in case we want to distinguish from the [No_type] case *)
+      Lower_bound ty
+    | TCAbstract
+        { atc_as_constraint = Some upper; atc_super_constraint = Some lower; _ }
+      ->
+      Upper_and_lower_bounds { upper; lower }
+    | TCAbstract { atc_as_constraint = None; atc_super_constraint = None; _ } ->
+      No_type
 
   (** Helper to convert between type constant refinement representations  *)
   let typeconst_of_refined_const Typing_defs_core.{ rc_bound; _ } ~const_pos =
@@ -871,6 +964,23 @@ end = struct
     !paths
   (* -- Core logic ---------------------------------------------------------  *)
 
+  let meet_trie_opt trie1 trie2 reason =
+    let Trie.{ base = b1; children = c1 } = trie1
+    and Trie.{ base = b2; children = c2 } = trie2 in
+    if not (SMap.is_empty c1 && SMap.is_empty c2) then
+      None
+    else
+      let base_opt =
+        match (b1, b2) with
+        | (Trie.Root, Trie.Root) -> Some b1
+        | ( Trie.Typeconst { typeconst = tc1; pos; origin },
+            Trie.Typeconst { typeconst = tc2; _ } ) ->
+          let typeconst = meet_typeconst reason tc1 tc2 in
+          Some (Trie.Typeconst { typeconst; pos; origin })
+        | _ -> None
+      in
+      Option.map base_opt ~f:(fun base -> Trie.{ base; children = c1 })
+
   (** Find the definition or bounds of the next type constant [const_name]
       when projecting from [base]. If the constant already appeared in some
       other path we can use the information stored in [children] otherwise
@@ -907,13 +1017,72 @@ end = struct
         (status, tys, analysis)
       | Trie.Typeconst { typeconst; _ } -> begin
         (* If the root is a type constant we first need to get the type we're
-           accessing through; for a 'concrete' type constant this is the definition
-           and for an 'abstract' type constant it is the upper bound *)
-        match type_for_access typeconst with
-        | None -> (Undefined, tys, analysis)
-        | Some base_ty -> access_typeconst base_ty tys const prefix analysis env
+           accessing through:
+           - for a 'concrete' type constant this is the definition;
+           - for an 'abstract' type constant it is declared bounds *)
+        let ty_access = type_for_access typeconst in
+        access_typeconsts ty_access tys const prefix analysis env
       end
     end
+
+  and access_typeconsts ty_access tys const prefix analysis env =
+    match ty_access with
+    | Constant ty ->
+      (* Concrete type constant *)
+      access_typeconst ty tys const prefix analysis env
+    | Upper_bound ty ->
+      (* Abstract type constant with an [as] bound only *)
+      access_typeconst ty tys const prefix analysis env
+    | Lower_bound _ ->
+      (* Abstract type constant with a [super] bound only; this is undefined
+         since a type constant in a lower bound doesn't require that a concrete
+         definition has such a constant *)
+      (Undefined, tys, analysis)
+    | No_type ->
+      (* Abstract type constant with no declared bounds *)
+      (Undefined, tys, analysis)
+    | Upper_and_lower_bounds { upper; lower } ->
+      (* Abstract type constant with both [as] and [super] bounds;
+         by transitivity if we have LB <: TC <: UB we must have LB <: UB
+         but we are free to declare a type constant where this isn't true.
+         Since we are only elaborating here we treat this as though the user
+         had instead declared the unsatisfiable bounds on a generic so we
+         don't generate an error
+      *)
+      let (status1, tys, analysis) =
+        access_typeconst upper tys const prefix analysis env
+      in
+      let (status2, tys, analysis) =
+        access_typeconst lower tys const prefix analysis env
+      in
+      let status =
+        match (status1, status2) with
+        | (Defined _, Undefined) ->
+          (* Defined in upper bound but not present in the lower bound - this breaks
+             the requirement that LB <: UB. We still generate a type without
+             warning since we are just elaborating the declaration. Any attempt
+             to use the function will lead to an error, though *)
+          status1
+        | (Undefined, (Defined _ | Undefined)) ->
+          (* Undefined in the upper bound and since we can't conclude it's present
+             in a type satisfying the bounds we have to say it is undefined *)
+          status1
+        | (Defined trie1, Defined trie2) ->
+          (* Defined in both upper and lower bounds; find the meet of the concrete
+             or abstract definitions. In practice any instantiable class must have
+             agreement between type constants but we can't assume that here
+             since it's possible to _declare_ a typeconstant whose upper and
+             lower bounds aren't subtypes and so allow disagreement. *)
+          let reason =
+            let (const_pos, _const_name) = const in
+            Typing_reason.witness_from_decl const_pos
+          in
+          let trie_opt = meet_trie_opt trie1 trie2 reason in
+          Option.value_map trie_opt ~default:Trie.Undefined ~f:(fun trie ->
+              Defined trie)
+      in
+
+      (status, tys, analysis)
 
   (** Access [const_name] through [base_ty] and modify occurences of `this` in the
       typeconstant definition so they are absolute with respect to [folded_class]
@@ -1020,18 +1189,81 @@ end = struct
         Option.bind status_opt ~f:(fun status ->
             match status with
             | Trie.Undefined -> None
-            | Trie.Defined { base = Root; _ } -> Some ty
+            | Trie.Defined { base = Root; _ } -> Some (Constant ty)
             | Trie.Defined { base = Typeconst { typeconst; _ }; _ } ->
-              Option.map
-                (type_for_access typeconst)
-                ~f:(replace_this_with ~replacement:ty))
+              let replace = replace_this_with ~replacement:ty in
+              Some
+                (transform_type_for_access
+                   (type_for_access typeconst)
+                   ~f:replace))
       in
       Option.value_map
         base_ty_opt
         ~default:(Trie.Undefined, tys, analysis)
         ~f:(fun base_ty ->
-          access_typeconst base_ty tys const prefix analysis env)
+          access_typeconsts base_ty tys const prefix analysis env)
     end
+    | Tintersection tys ->
+      (* For intersections, we require the type constant to be defined on at least
+         one of its elements; if it is defined on multiple we will refine each element
+         to ensure they agree *)
+      let (trie_opt, tys, analysis) =
+        List.fold_left
+          tys
+          ~init:(None, tys, analysis)
+          ~f:(fun (acc, tys, analysis) ty ->
+            match access_typeconst ty tys const prefix analysis env with
+            | (Undefined, _, _) -> (acc, tys, analysis)
+            | (Defined trie2, tys, analysis) ->
+              let reason =
+                let (const_pos, _const_name) = const in
+                Typing_reason.witness_from_decl const_pos
+              in
+              let acc =
+                match acc with
+                | None -> Some trie2
+                | Some trie1 -> meet_trie_opt trie1 trie2 reason
+              in
+              (acc, tys, analysis))
+      in
+      let status =
+        Option.value_map trie_opt ~default:Trie.Undefined ~f:(fun trie ->
+            Defined trie)
+      in
+      (status, tys, analysis)
+    | Tunion tys ->
+      (* For unions, we require the refinement to be present on all elements. If
+         it is missing on one the result is undefined *)
+      let (trie_opt_res, tys, analysis) =
+        List.fold_left
+          tys
+          ~init:(Ok None, tys, analysis)
+          ~f:(fun (acc, tys, analysis) ty ->
+            match acc with
+            | Error _ -> (acc, tys, analysis)
+            | Ok acc ->
+              (match access_typeconst ty tys const prefix analysis env with
+              | (Undefined, _, _) -> (Error (), tys, analysis)
+              | (Defined trie2, tys, analysis) ->
+                let reason =
+                  let (const_pos, _const_name) = const in
+                  Typing_reason.witness_from_decl const_pos
+                in
+                (match acc with
+                | None -> (Ok (Some trie2), tys, analysis)
+                | Some trie1 ->
+                  (match meet_trie_opt trie1 trie2 reason with
+                  | Some trie -> (Ok (Some trie), tys, analysis)
+                  | _ -> (Error (), tys, analysis)))))
+      in
+      let status =
+        match trie_opt_res with
+        | Error _ -> Trie.Undefined
+        | Ok trie_opt ->
+          Option.value_map trie_opt ~default:Trie.Undefined ~f:(fun trie ->
+              Defined trie)
+      in
+      (status, tys, analysis)
     (* We can't access type constants through any other type so return [Undefined] *)
     | _ -> (Trie.Undefined, tys, analysis)
 
@@ -1319,19 +1551,46 @@ end = struct
             Typing_defs_core.{ rc_bound = TRexact ty; rc_is_ctx = false }
             rfmts)
 
-    let refine_ty decl_ty subst path children =
+    (* Where we have intersections we don't require that all elements of that
+       intersection define a type constant for the purposes of projections.
+       However, when an element _does_ define the constant we want to refine it
+       so we have agreement. This predicate is used to check whether a given
+       constant is defined by a given class
+    *)
+    let should_refine env class_name =
+      let folded_class_opt =
+        Decl_entry.to_option (Typing_env.get_class env class_name)
+      in
+      match folded_class_opt with
+      | None -> (fun _ -> true)
+      | Some class_decl ->
+        fun const_name ->
+          Option.is_some (Typing_env.get_typeconst env class_decl const_name)
+
+    let rec root_class_name_opt decl_ty =
+      let open Typing_defs_core in
+      match get_node decl_ty with
+      | Tapply ((_, class_name), _) -> Some class_name
+      | Trefinement (inner_decl_ty, _) -> root_class_name_opt inner_decl_ty
+      | _ -> None
+
+    let rec refine_ty env decl_ty subst path children =
       let open Typing_defs_core in
       match deref decl_ty with
-      | (reason, Typing_defs_core.Tapply _) -> begin
+      | (reason, Tapply ((_, class_name), _)) -> begin
         match SMap.keys children with
         | [] -> decl_ty
         | abstr_consts ->
+          let pred = should_refine env class_name in
           let cr_consts =
             List.fold_left
               abstr_consts
               ~init:SMap.empty
               ~f:(fun rfmts const_name ->
-                add_refinement rfmts const_name ~path ~subst)
+                if pred const_name then
+                  add_refinement rfmts const_name ~path ~subst
+                else
+                  rfmts)
           in
           let class_refinements = Typing_defs_core.{ cr_consts } in
           let ty_ = Typing_defs_core.Trefinement (decl_ty, class_refinements) in
@@ -1342,18 +1601,37 @@ end = struct
         match SMap.keys children with
         | [] -> decl_ty
         | abstr_consts ->
+          let pred =
+            Option.value_map
+              (root_class_name_opt inner_decl_ty)
+              ~default:(fun _ -> true)
+              ~f:(should_refine env)
+          in
           let cr_consts =
             List.fold_left
               abstr_consts
               ~init:cr_consts
               ~f:(fun rfmts const_name ->
-                add_refinement rfmts const_name ~path ~subst)
+                if pred const_name then
+                  add_refinement rfmts const_name ~path ~subst
+                else
+                  rfmts)
           in
           let class_refinements = Typing_defs_core.{ cr_consts } in
           mk
             ( reason,
               Typing_defs_core.Trefinement (inner_decl_ty, class_refinements) )
       end
+      | (reason, Tunion tys) ->
+        let tys =
+          List.map tys ~f:(fun ty -> refine_ty env ty subst path children)
+        in
+        mk (reason, Tunion tys)
+      | (reason, Tintersection tys) ->
+        let tys =
+          List.map tys ~f:(fun ty -> refine_ty env ty subst path children)
+        in
+        mk (reason, Tintersection tys)
       | _ -> decl_ty
 
     let update acc ~key ~typeconst ~pos ~children ~path =
@@ -1376,10 +1654,10 @@ end = struct
         in
         let upper_bound =
           Option.map atc_as_constraint ~f:(fun ty ->
-              refine_ty ty subst path children)
+              refine_ty env ty subst path children)
         and lower_bound =
           Option.map atc_super_constraint ~f:(fun ty ->
-              refine_ty ty subst path children)
+              refine_ty env ty subst path children)
         in
         let generics =
           SMap.add generic_name { pos; upper_bound; lower_bound } generics

@@ -1,0 +1,29 @@
+<?hh
+<<file: __EnableUnstableFeatures('type_const_super_bound')>>
+<<file: __EnableUnstableFeatures('polymorphic_function_hints')>>
+
+abstract class BoundedTyconst {
+  abstract const type Ta as Wobble super Wibble;
+
+  public function elaborate(this::Ta $_): void {}
+}
+
+abstract class Wobble {
+}
+
+// Wibble is not a subtype of Wobble
+interface Wibble {
+}
+
+function expecting<T>(T $_): void {}
+
+function test(): void {
+  $fptr = meth_caller(BoundedTyconst::class, 'elaborate');
+  // Error! Wibble is not a subtype of Wobble
+  hh_expect<
+    HH\FunctionRef<(readonly function<Ta1 as Wobble super Wibble>(
+      BoundedTyconst with { type Ta = Ta1 },
+      Ta1,
+    ): void)>,
+  >($fptr);
+}

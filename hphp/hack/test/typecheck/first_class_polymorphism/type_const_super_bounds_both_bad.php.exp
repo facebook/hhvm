@@ -1,0 +1,22 @@
+ERROR: File "type_const_super_bounds_both_bad.php", line 20, characters 1-293:
+Incomplete position information! We couldn't find the exact line of your type error in this definition. Please run `hh rage` and post in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4323])
+  File "type_const_super_bounds_both_bad.php", line 8, characters 19-27:
+  Typing error
+  File "type_const_super_bounds_both_bad.php", line 8, characters 35-36:
+  `Ta#1` is a constrained type parameter
+  File "type_const_super_bounds_both_bad.php", line 6, characters 29-34:
+  This type constraint is violated
+  File "type_const_super_bounds_both_bad.php", line 6, characters 29-34:
+  Expected `Wobble`
+  File "type_const_super_bounds_both_bad.php", line 6, characters 42-47:
+  But got `Wibble`
+ERROR: File "type_const_super_bounds_both_bad.php", line 24, characters 20-135:
+Typing error (Typing[4323])
+  File "type_const_super_bounds_both_bad.php", line 24, characters 39-41:
+  `Ta1` is a constrained type parameter
+  File "type_const_super_bounds_both_bad.php", line 24, characters 46-51:
+  This type constraint is violated
+  File "type_const_super_bounds_both_bad.php", line 24, characters 46-51:
+  Expected `Wobble`
+  File "type_const_super_bounds_both_bad.php", line 24, characters 59-64:
+  But got `Wibble`

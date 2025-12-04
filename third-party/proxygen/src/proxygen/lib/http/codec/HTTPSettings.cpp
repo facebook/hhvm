@@ -48,6 +48,14 @@ SettingsValue HTTPSettings::getSetting(SettingsId id,
   }
 }
 
+bool HTTPSettings::setIfNotPresent(SettingsId id, SettingsValue val) noexcept {
+  if (auto* setting = getSetting(id); !setting) {
+    setSetting(id, val);
+    return true;
+  }
+  return false;
+}
+
 std::vector<HTTPSetting>::iterator HTTPSettings::getSettingIter(SettingsId id) {
   return std::find_if(settings_.begin(),
                       settings_.end(),

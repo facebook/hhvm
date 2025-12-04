@@ -50,6 +50,9 @@ class HTTPSettings {
     }
   }
   void setSetting(SettingsId id, SettingsValue val);
+  // sets id if id is not currently present; returns true if was not initially
+  // present
+  bool setIfNotPresent(SettingsId id, SettingsValue val) noexcept;
   void unsetSetting(SettingsId id);
   const HTTPSetting* getSetting(SettingsId id) const;
   SettingsValue getSetting(SettingsId id, SettingsValue defaultVal) const;

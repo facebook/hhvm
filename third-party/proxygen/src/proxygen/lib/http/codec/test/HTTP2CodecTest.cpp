@@ -2825,3 +2825,14 @@ TEST_F(HTTP2CodecTest, GenerateHeadersWithEmptyRequest) {
   EXPECT_EQ(callbacks_.streamErrors, 0);
   EXPECT_EQ(callbacks_.sessionErrors, 0);
 }
+
+TEST_F(HTTP2CodecTest, SetIfNotPresent) {
+  auto* egressSettings = CHECK_NOTNULL(downstreamCodec_.getEgressSettings());
+  // WT_MAX_SESSIONS not currently present
+  EXPECT_TRUE(egressSettings->setIfNotPresent(SettingsId::WT_MAX_SESSIONS, 1));
+  // no-op since added above
+  EXPECT_FALSE(egressSettings->setIfNotPresent(SettingsId::WT_MAX_SESSIONS, 2));
+  // expected value is 1
+  auto* wtMaxSessions = egressSettings->getSetting(SettingsId::WT_MAX_SESSIONS);
+  EXPECT_TRUE(wtMaxSessions && wtMaxSessions->value == 1);
+}

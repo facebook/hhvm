@@ -35,6 +35,7 @@ build-hack$(2):
 	dune build \
 		src/hh_server.$(1) \
 		src/hh_client.$(1) \
+		src/hh_single_ide_format.$(1) \
 		src/hh_single_type_check.$(1) \
 		src/hackfmt.$(1) \
 		src/hh_parse.$(1) \
@@ -44,6 +45,7 @@ copy-hack$(2)-files: build-hack$(2)
 	mkdir -p "$(HACK_BIN_DIR)"
 	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/hack/src/hh_server.$(1)" "$(HACK_BIN_DIR)/hh_server$(ext)"
 	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/hack/src/hh_client.$(1)" "$(HACK_BIN_DIR)/hh_client$(ext)"
+	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/hack/src/hh_single_ide_format.$(1)" "$(HACK_BIN_DIR)/hh_single_ide_format$(ext)"
 	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/hack/src/hh_single_type_check.$(1)" "$(HACK_BIN_DIR)/hh_single_type_check$(ext)"
 	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/hack/src/hackfmt.$(1)" "$(HACK_BIN_DIR)/hackfmt$(ext)"
 	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/hack/src/hh_parse.$(1)" "$(HACK_BIN_DIR)/hh_parse$(ext)"

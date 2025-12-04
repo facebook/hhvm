@@ -299,6 +299,13 @@ class t_mstch_go_generator : public t_mstch_generator {
           self.find_structured_annotation_or_null(kGoUseReflectCodecUri);
       return data_.use_reflect_codec || use_reflect_codec_annotation != nullptr;
     });
+    def.property("go_qualified_new_func", [this](const t_structured& self) {
+      return fmt::format(
+          "{}{}{}",
+          data_.go_package_alias_prefix(self.program()),
+          data_.is_req_resp_struct(self) ? "new" : "New",
+          go::munge_ident(self.name(), /*exported=*/true));
+    });
 
     return std::move(def).make();
   }
@@ -530,8 +537,6 @@ class mstch_go_struct : public mstch_struct {
         {
             {"struct:go_name", &mstch_go_struct::go_name},
             {"struct:go_qualified_name", &mstch_go_struct::go_qualified_name},
-            {"struct:go_qualified_new_func",
-             &mstch_go_struct::go_qualified_new_func},
             {"struct:req_resp?", &mstch_go_struct::is_req_resp_struct},
             {"struct:resp?", &mstch_go_struct::is_resp_struct},
             {"struct:req?", &mstch_go_struct::is_req_struct},
@@ -545,27 +550,23 @@ class mstch_go_struct : public mstch_struct {
     auto prefix = data_.go_package_alias_prefix(struct_->program());
     return prefix + go_name_();
   }
-  mstch::node go_qualified_new_func() {
-    auto prefix = data_.go_package_alias_prefix(struct_->program());
-    return prefix + go_new_func_();
-  }
   mstch::node is_req_resp_struct() {
     // Whether this is a helper request or response struct.
-    return is_req_resp_struct_();
+    return data_.is_req_resp_struct(*struct_);
   }
   mstch::node is_resp_struct() {
     // Whether this is a helper response struct.
-    return is_req_resp_struct_() &&
+    return data_.is_req_resp_struct(*struct_) &&
         boost::algorithm::starts_with(struct_->name(), "resp");
   }
   mstch::node is_req_struct() {
     // Whether this is a helper request struct.
-    return is_req_resp_struct_() &&
+    return data_.is_req_resp_struct(*struct_) &&
         boost::algorithm::starts_with(struct_->name(), "req");
   }
   mstch::node is_stream_struct() {
     // Whether this is a helper stream struct.
-    return is_req_resp_struct_() &&
+    return data_.is_req_resp_struct(*struct_) &&
         boost::algorithm::starts_with(struct_->name(), "stream");
   }
   mstch::node fields_sorted() {
@@ -585,7 +586,7 @@ class mstch_go_struct : public mstch_struct {
 
   std::string go_name_() {
     auto name = struct_->name();
-    if (is_req_resp_struct_()) {
+    if (data_.is_req_resp_struct(*struct_)) {
       // Unexported/lowercase
       return go::munge_ident(name, false);
     } else {
@@ -596,26 +597,6 @@ class mstch_go_struct : public mstch_struct {
       // Exported/uppercase
       return go::munge_ident(name, true);
     }
-  }
-
-  std::string go_new_func_() {
-    auto name = struct_->name();
-    auto go_name = go::munge_ident(struct_->name(), true);
-    if (is_req_resp_struct_()) {
-      // Unexported/lowercase
-      return "new" + go_name;
-    } else {
-      // Exported/uppercase
-      return "New" + go_name;
-    }
-  }
-
-  bool is_req_resp_struct_() {
-    return struct_->generated() &&
-        std::find(
-            data_.req_resp_structs.begin(),
-            data_.req_resp_structs.end(),
-            struct_) != data_.req_resp_structs.end();
   }
 };
 

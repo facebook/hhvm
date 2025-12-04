@@ -164,6 +164,13 @@ void codegen_data::compute_req_resp_structs() {
   }
 }
 
+bool codegen_data::is_req_resp_struct(const t_structured& structured) const {
+  return structured.generated() &&
+      std::find(
+          req_resp_structs.begin(), req_resp_structs.end(), &structured) !=
+      req_resp_structs.end();
+}
+
 void codegen_data::add_to_thrift_metadata_types(
     const t_type* type, std::set<std::string>& visited_type_names) {
   // Check if we have already visited this type.

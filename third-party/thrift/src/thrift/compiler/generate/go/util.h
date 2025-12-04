@@ -87,6 +87,8 @@ class codegen_data {
   std::string get_go_package_alias(const t_program* program) const;
   std::string go_package_alias_prefix(const t_program* program) const;
 
+  bool is_req_resp_struct(const t_structured& tstruct) const;
+
  private:
   std::string make_go_package_name_unique(const std::string& name);
   void add_to_thrift_metadata_types(

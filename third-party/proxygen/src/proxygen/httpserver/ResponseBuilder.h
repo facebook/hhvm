@@ -218,7 +218,7 @@ class ResponseBuilder {
     return *this;
   }
 
-  const HTTPMessage* getHeaders() const {
+  [[nodiscard]] const HTTPMessage* getHeaders() const {
     return headers_.get();
   }
 

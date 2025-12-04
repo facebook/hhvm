@@ -68,7 +68,8 @@ class RequestHandlerAdaptor
       PushHandler* pushHandler) noexcept override;
   ResponseHandler* newExMessage(ExMessageHandler* exHandler,
                                 bool unidirectional) noexcept override;
-  const wangle::TransportInfo& getSetupTransportInfo() const noexcept override;
+  [[nodiscard]] const wangle::TransportInfo& getSetupTransportInfo()
+      const noexcept override;
   void getCurrentTransportInfo(wangle::TransportInfo* tinfo) const override;
 
   // Helper method

@@ -135,7 +135,8 @@ class Filter
     return downstream_->newExMessage(exHandler, unidirectional);
   }
 
-  const wangle::TransportInfo& getSetupTransportInfo() const noexcept override {
+  [[nodiscard]] const wangle::TransportInfo& getSetupTransportInfo()
+      const noexcept override {
     return downstream_->getSetupTransportInfo();
   }
 

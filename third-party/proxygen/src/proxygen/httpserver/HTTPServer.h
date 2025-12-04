@@ -158,14 +158,15 @@ class HTTPServer final {
    * Get the list of addresses server is listening on. Empty if sockets are not
    * bound yet.
    */
-  std::vector<IPConfig> addresses() const {
+  [[nodiscard]] std::vector<IPConfig> addresses() const {
     return addresses_;
   }
 
   /**
    * Get the sockets the server is currently bound to.
    */
-  const std::vector<const folly::AsyncSocketBase*> getSockets() const;
+  [[nodiscard]] const std::vector<const folly::AsyncSocketBase*> getSockets()
+      const;
 
   void setSessionInfoCallback(HTTPSession::InfoCallback* cb) {
     sessionInfoCb_ = cb;
@@ -174,7 +175,7 @@ class HTTPServer final {
   /**
    * Returns a file descriptor associated with the listening socket
    */
-  int getListenSocket() const;
+  [[nodiscard]] int getListenSocket() const;
 
   /**
    * Re-reads the certificate / key pair for all SSL vips on all acceptors

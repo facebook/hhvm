@@ -75,7 +75,7 @@ class ExceptionWithStatusType : public std::exception {
   StatusType getStatusType() const {
     return statusType_;
   }
-  const char* what() const noexcept {
+  const char* what() const noexcept override {
     return getStatusTypeString(statusType_);
   }
 

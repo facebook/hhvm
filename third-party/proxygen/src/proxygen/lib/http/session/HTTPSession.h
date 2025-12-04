@@ -392,7 +392,7 @@ class HTTPSession
   size_t getCodecSendWindowSize() const;
 
   using HTTPTransaction::Transport::getHTTPPriority;
-  virtual folly::Optional<const HTTPMessage::HTTP2Priority> getHTTPPriority(
+  folly::Optional<const HTTPMessage::HTTP2Priority> getHTTPPriority(
       uint8_t) override {
     return folly::none;
   }

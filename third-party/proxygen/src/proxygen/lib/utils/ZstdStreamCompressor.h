@@ -46,12 +46,12 @@ class ZstdStreamCompressor : public StreamCompressor {
   explicit ZstdStreamCompressor(int compressionLevel,
                                 bool independentChunks = false);
 
-  virtual ~ZstdStreamCompressor() override = default;
+  ~ZstdStreamCompressor() override = default;
 
-  virtual std::unique_ptr<folly::IOBuf> compress(const folly::IOBuf*,
-                                                 bool last = true) override;
+  std::unique_ptr<folly::IOBuf> compress(const folly::IOBuf*,
+                                         bool last = true) override;
 
-  virtual bool hasError() override {
+  bool hasError() override {
     return error_;
   }
 

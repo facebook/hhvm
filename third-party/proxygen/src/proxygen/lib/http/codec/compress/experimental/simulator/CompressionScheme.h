@@ -20,7 +20,7 @@ class CompressionScheme : public folly::EventBase::LoopCallback {
  public:
   explicit CompressionScheme(CompressionSimulator* sim) : simulator_(sim) {
   }
-  virtual ~CompressionScheme() {
+  ~CompressionScheme() override {
   }
 
   /* Parent class for acks */

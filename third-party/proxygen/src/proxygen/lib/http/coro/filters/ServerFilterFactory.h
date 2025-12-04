@@ -14,7 +14,7 @@ namespace proxygen::coro {
 
 class ServerFilterFactory : public FilterFactory {
  public:
-  virtual ~ServerFilterFactory() override = default;
+  ~ServerFilterFactory() override = default;
   /**
    * Invoked in each thread server is going to handle requests
    * before we start handling requests. Can be used to setup

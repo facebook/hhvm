@@ -19,7 +19,7 @@ namespace proxygen {
 
 class MockServerPushLifecycleCallback : public ServerPushLifecycleCallback {
  public:
-  virtual ~MockServerPushLifecycleCallback() = default;
+  ~MockServerPushLifecycleCallback() override = default;
 
   MOCK_METHOD(void,
               onPushPromiseBegin,

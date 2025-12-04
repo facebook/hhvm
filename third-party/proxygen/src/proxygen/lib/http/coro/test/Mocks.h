@@ -210,7 +210,7 @@ class MockHTTPCoroSessionPool : public proxygen::coro::HTTPCoroSessionPool {
                             mockSocketAddress.getPort()) {
   }
 
-  virtual ~MockHTTPCoroSessionPool() = default;
+  ~MockHTTPCoroSessionPool() override = default;
 
   MOCK_METHOD(folly::coro::Task<coro::HTTPCoroSessionPool::GetSessionResult>,
               getSessionWithReservation,

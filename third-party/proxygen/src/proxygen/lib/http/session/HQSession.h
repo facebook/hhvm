@@ -1398,7 +1398,7 @@ class HQSession
 
     HTTPTransaction::Transport::Type getSessionType() const noexcept override;
 
-    virtual const HTTPCodec& getCodec() const noexcept override {
+    const HTTPCodec& getCodec() const noexcept override {
       return HQStreamBase::getCodec();
     }
 

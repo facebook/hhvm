@@ -28,7 +28,7 @@ class QPACKScheme : public CompressionScheme {
     server_.setMaxBlocking(maxBlocking);
   }
 
-  ~QPACKScheme() {
+  ~QPACKScheme() override {
     CHECK_EQ(server_.getQueuedBytes(), 0);
   }
 

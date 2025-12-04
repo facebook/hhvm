@@ -61,7 +61,7 @@ class TLHTTPCodecStats : public HTTPCodecStats {
   explicit TLHTTPCodecStats(const std::string& prefix);
   explicit TLHTTPCodecStats(const TLHTTPCodecStats&) = delete;
   TLHTTPCodecStats& operator=(const TLHTTPCodecStats&) = delete;
-  virtual ~TLHTTPCodecStats() override = default;
+  ~TLHTTPCodecStats() override = default;
 
   void incrementParallelConn(int64_t amount) override;
 

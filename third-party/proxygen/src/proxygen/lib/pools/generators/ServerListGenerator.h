@@ -189,7 +189,7 @@ class ServerListGenerator : public ServerListGeneratorIf {
   ServerListGenerator(ServerListGenerator&&) = default;
   ServerListGenerator& operator=(ServerListGenerator&&) = default;
 
-  virtual ~ServerListGenerator() {
+  ~ServerListGenerator() override {
     detachEventBase();
   }
 

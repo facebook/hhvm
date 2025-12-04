@@ -178,7 +178,7 @@ class QMINScheme : public CompressionScheme {
     qms_next_stream_id_to_encode = 1;
   }
 
-  ~QMINScheme() {
+  ~QMINScheme() override {
     free(qms_streams);
     qmin_enc_destroy(qms_enc);
     qmin_dec_destroy(qms_dec);

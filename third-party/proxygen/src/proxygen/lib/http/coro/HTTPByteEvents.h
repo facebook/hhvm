@@ -72,7 +72,7 @@ struct HTTPByteEvent {
 class HTTPByteEventCallback
     : public EnableWeakRefCountedPtr<HTTPByteEventCallback> {
  public:
-  virtual ~HTTPByteEventCallback() override = default;
+  ~HTTPByteEventCallback() override = default;
 
   /**
    * Invoked when the byte event has occurred.

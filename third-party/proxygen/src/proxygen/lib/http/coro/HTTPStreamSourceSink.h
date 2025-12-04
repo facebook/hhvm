@@ -45,11 +45,11 @@ class HTTPStreamSourceUpstreamSink
   HTTPSource* getEgressSource() {
     return &egressSource_;
   }
-  [[nodiscard]] virtual folly::Optional<HTTPCodec::StreamID> getStreamID()
+  [[nodiscard]] folly::Optional<HTTPCodec::StreamID> getStreamID()
       const override {
     return id_;
   }
-  [[nodiscard]] virtual CodecProtocol getCodecProtocol() const override {
+  [[nodiscard]] CodecProtocol getCodecProtocol() const override {
     return sessionCtx_->getCodecProtocol();
   }
   [[nodiscard]] folly::Optional<HTTPPriority> getHTTPPriority() const override {

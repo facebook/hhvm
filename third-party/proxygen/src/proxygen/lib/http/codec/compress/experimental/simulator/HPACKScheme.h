@@ -30,7 +30,7 @@ class HPACKScheme : public CompressionScheme {
     allowOOO_ = (tableSize == 0);
   }
 
-  ~HPACKScheme() {
+  ~HPACKScheme() override {
     CHECK_EQ(serverQueue_.getQueuedBytes(), 0);
   }
 

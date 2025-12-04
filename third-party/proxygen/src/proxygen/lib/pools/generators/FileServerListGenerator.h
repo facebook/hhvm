@@ -55,11 +55,11 @@ class FileServerListGenerator : public ServerListGenerator {
     FileGenerator(Params* params, Callback* callback)
         : params_(params), callback_(callback) {
     }
-    virtual ~FileGenerator() override {
+    ~FileGenerator() override {
     }
     virtual void readFile(std::string& filePath, std::string& content);
     virtual void run(std::chrono::milliseconds ms);
-    virtual void cancelServerListRequest() override;
+    void cancelServerListRequest() override;
 
    protected:
     Params* params_;

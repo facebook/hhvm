@@ -334,7 +334,7 @@ class HTTPTransactionHandler : public TraceEventObserver {
       folly::Optional<uint32_t> /*error*/) noexcept {
   }
 
-  virtual ~HTTPTransactionHandler() override {
+  ~HTTPTransactionHandler() override {
   }
 };
 
@@ -673,7 +673,7 @@ class HTTPTransaction
       folly::assume_unreachable();
     }
 
-    virtual folly::Expected<folly::Unit, WebTransport::ErrorCode>
+    folly::Expected<folly::Unit, WebTransport::ErrorCode>
     pauseWebTransportIngress(HTTPCodec::StreamID /*id*/) override {
       LOG(FATAL) << __func__ << " not supported";
       folly::assume_unreachable();

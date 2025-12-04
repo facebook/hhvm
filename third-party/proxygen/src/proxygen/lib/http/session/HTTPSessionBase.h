@@ -123,7 +123,7 @@ class HTTPSessionBase : public wangle::ManagedConnection {
                   const WheelTimerInstance& wheelTimer,
                   HTTPCodec::StreamID rootNodeId);
 
-  virtual ~HTTPSessionBase() override;
+  ~HTTPSessionBase() override;
 
   virtual void setHTTPSessionActivityTracker(
       std::unique_ptr<HTTPSessionActivityTracker> httpSessionActivityTracker) {

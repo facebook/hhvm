@@ -53,7 +53,7 @@ class LifecycleObserver;
 class HTTPSessionContext
     : public detail::EnableAwaitableKeepAlive<HTTPSessionContext> {
  public:
-  virtual ~HTTPSessionContext() override = default;
+  ~HTTPSessionContext() override = default;
   virtual folly::EventBase* getEventBase() const = 0;
   virtual void initiateDrain() = 0;
   virtual bool isDownstream() const = 0;
@@ -232,7 +232,7 @@ class HTTPCoroSession
       std::unique_ptr<hq::HQMultiCodec> codec,
       wangle::TransportInfo tinfo);
 
-  virtual ~HTTPCoroSession() override;
+  ~HTTPCoroSession() override;
 
   uint64_t getSessionID() const override {
     return sessionID_;

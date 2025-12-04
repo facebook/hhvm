@@ -204,7 +204,7 @@ class HQStreamBase
       HTTPCodecFilterChain& /* codecFilterChain */,
       folly::Optional<hq::UnidirectionalStreamType> streamType = folly::none);
 
-  virtual ~HQStreamBase() = default;
+  ~HQStreamBase() override = default;
 
   const HTTPCodec& getCodec() const noexcept;
 
@@ -255,7 +255,7 @@ namespace singlestream {
  */
 class SSBidir : public virtual HQStreamMapping {
  public:
-  virtual ~SSBidir() override = default;
+  ~SSBidir() override = default;
 
   explicit SSBidir(folly::Optional<quic::StreamId> streamId)
       : streamId_(streamId) {
@@ -297,7 +297,7 @@ class SSBidir : public virtual HQStreamMapping {
     streamId_ = streamId;
   }
 
-  virtual HTTPException::Direction getStreamDirection() const override {
+  HTTPException::Direction getStreamDirection() const override {
     return HTTPException::Direction::INGRESS_AND_EGRESS;
   }
 
@@ -310,7 +310,7 @@ class SSBidir : public virtual HQStreamMapping {
  */
 class SSEgress : public SSBidir {
  public:
-  virtual ~SSEgress() override = default;
+  ~SSEgress() override = default;
 
   explicit SSEgress(folly::Optional<quic::StreamId> streamId)
       : SSBidir(streamId) {
@@ -329,7 +329,7 @@ class SSEgress : public SSBidir {
     return false;
   }
 
-  virtual HTTPException::Direction getStreamDirection() const override {
+  HTTPException::Direction getStreamDirection() const override {
     return HTTPException::Direction::EGRESS;
   }
 
@@ -337,7 +337,7 @@ class SSEgress : public SSBidir {
 
 class SSIngress : public SSBidir {
  public:
-  virtual ~SSIngress() override = default;
+  ~SSIngress() override = default;
 
   explicit SSIngress(folly::Optional<quic::StreamId> streamId)
       : SSBidir(streamId) {
@@ -356,7 +356,7 @@ class SSIngress : public SSBidir {
     return false;
   }
 
-  virtual HTTPException::Direction getStreamDirection() const override {
+  HTTPException::Direction getStreamDirection() const override {
     return HTTPException::Direction::INGRESS;
   }
 
@@ -372,7 +372,7 @@ namespace composite {
  */
 class CSBidir : public virtual HQStreamMapping {
  public:
-  virtual ~CSBidir() override = default;
+  ~CSBidir() override = default;
 
   explicit CSBidir(folly::Optional<quic::StreamId> egressStreamId,
                    folly::Optional<quic::StreamId> ingressStreamId)
@@ -426,7 +426,7 @@ class CSBidir : public virtual HQStreamMapping {
     egressStreamId_ = streamId;
   }
 
-  virtual HTTPException::Direction getStreamDirection() const override {
+  HTTPException::Direction getStreamDirection() const override {
     return HTTPException::Direction::INGRESS_AND_EGRESS;
   }
 

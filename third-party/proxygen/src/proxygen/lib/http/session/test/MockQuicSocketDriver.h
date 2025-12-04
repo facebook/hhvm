@@ -1086,7 +1086,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
     EXPECT_EQ(streams_[quic::kConnectionStreamId].writeState, PAUSED);
   }
 
-  ~MockQuicSocketDriver() {
+  ~MockQuicSocketDriver() override {
     expectStreamsIdle(true);
     *deleted_ = true;
   }

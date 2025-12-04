@@ -77,20 +77,7 @@ class whisker_generator_context {
   // contains references to its fields, but t_field does not contain a
   // corresponding reverse reference to the t_struct).
   void register_visitors(
-      basic_ast_visitor<true, const_visitor_context&>& visitor) {
-    visitor.add_interface_visitor(
-        [this](const const_visitor_context&, const t_interface& node) {
-          for (const t_function& function : node.functions()) {
-            function_parents_[&function] = &node;
-          }
-        });
-    visitor.add_structured_definition_visitor(
-        [this](const const_visitor_context&, const t_structured& node) {
-          for (const t_field& field : node.fields()) {
-            field_parents_[&field] = &node;
-          }
-        });
-  }
+      basic_ast_visitor<true, const_visitor_context&>& visitor);
 
   // Get the parent structured definition (back-reference) of a field.
   // The result will always be nullptr for fields from param lists and throws
@@ -105,6 +92,12 @@ class whisker_generator_context {
     return it != function_parents_.end() ? it->second : nullptr;
   }
 
+  /** Get the expected type of a const value, or `nullptr` if indeterminate. */
+  const t_type_ref& get_const_value_type(const t_const_value& value) const {
+    auto it = const_value_types_.find(&value);
+    return it != const_value_types_.end() ? it->second : t_type_ref::none();
+  }
+
  private:
   // Field to parent back-references for fields in user-defined structured
   // definitions (i.e. struct, union, exception)
@@ -113,6 +106,18 @@ class whisker_generator_context {
   // Function to parent back-references (i.e. to a function's containing service
   // or interaction)
   std::unordered_map<const t_function*, const t_interface*> function_parents_;
+
+  /**
+   * Map from const value to the expected type of that value.
+   * t_const_value::ttype is not always populated - e.g. for nested consts
+   * (list/map elements). Instead, we must recursively infer types from a root
+   * const for such cases.
+   */
+  std::unordered_map<const t_const_value*, t_type_ref> const_value_types_;
+
+  /** Recursively visit a const value and populate `const_value_types_`. */
+  void visit_const_value(
+      const t_const_value* value, const t_type_ref& expected_type);
 };
 
 /**

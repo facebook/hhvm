@@ -371,8 +371,14 @@ t_whisker_generator::make_prototype_for_const_value(
     const prototype_database& proto) const {
   prototype_builder<h_const_value> def;
   using cv = t_const_value::t_const_value_kind;
-  def.property("type", [&proto](const t_const_value& self) {
-    return resolve_derived_t_type(proto, self.ttype().deref());
+  def.property("type", [this, &proto](const t_const_value& self) {
+    // Prioritize AST populated ttype, fallback to inferred expected type in
+    // context
+    const t_type_ref& type = self.ttype().empty()
+        ? context().get_const_value_type(self)
+        : self.ttype();
+    return type.empty() ? whisker::make::null
+                        : resolve_derived_t_type(proto, type.deref());
   });
   def.property("bool?", [](const t_const_value& self) {
     return self.kind() == cv::CV_BOOL;
@@ -501,6 +507,20 @@ t_whisker_generator::make_prototype_for_const_value(
     }
     return w::array(result);
   });
+  def.property("owner", mem_fn(&t_const_value::get_owner, proto.of<t_const>()));
+  def.function(
+      "referenceable_from?",
+      [](const t_const_value& self, function::context ctx) {
+        ctx.declare_arity(1);
+        ctx.declare_named_arguments({});
+        const t_const* from_const =
+            ctx.raw().positional_arguments()[0].is_null()
+            ? nullptr
+            : ctx.argument<whisker::native_handle<t_const>>(0).ptr().get();
+        // value can be referenced if it is not anonymous, and is being
+        // referenced from any const that's not the owner
+        return self.get_owner() != nullptr && self.get_owner() != from_const;
+      });
 
   return std::move(def).make();
 }
@@ -1093,6 +1113,75 @@ void t_whisker_generator::render_to_file(
     std::string_view template_file,
     const whisker::object& context) {
   write_to_file(output_file, render(template_file, context));
+}
+
+void whisker_generator_context::register_visitors(
+    t_whisker_generator::context_visitor& visitor) {
+  using context = t_whisker_generator::whisker_generator_visitor_context;
+  visitor.add_interface_visitor(
+      [this](const context&, const t_interface& node) {
+        for (const t_function& function : node.functions()) {
+          function_parents_[&function] = &node;
+        }
+      });
+  visitor.add_structured_definition_visitor(
+      [this](const context&, const t_structured& node) {
+        for (const t_field& field : node.fields()) {
+          field_parents_[&field] = &node;
+        }
+      });
+
+  visitor.add_const_visitor([this](const context&, const t_const& node) {
+    if (node.value() != nullptr) {
+      visit_const_value(node.value(), node.type_ref());
+    }
+  });
+  visitor.add_field_visitor([this](const context&, const t_field& node) {
+    if (node.default_value() != nullptr) {
+      visit_const_value(node.default_value(), node.type());
+    }
+  });
+  visitor.add_function_param_visitor(
+      [this](const context&, const t_field& node) {
+        if (node.default_value() != nullptr) {
+          visit_const_value(node.default_value(), node.type());
+        }
+      });
+}
+
+void whisker_generator_context::visit_const_value(
+    const t_const_value* value, const t_type_ref& expected_type) {
+  if (value == nullptr || expected_type.empty()) {
+    return;
+  }
+
+  const_value_types_[value] = expected_type;
+  if (const auto* map = expected_type->try_as<t_map>();
+      map != nullptr && value->kind() == t_const_value::CV_MAP) {
+    for (const auto& [key, val] : value->get_map()) {
+      visit_const_value(key, map->key_type());
+      visit_const_value(val, map->val_type());
+    }
+  } else if (const auto* list = expected_type->try_as<t_list>();
+             list != nullptr && value->kind() == t_const_value::CV_LIST) {
+    for (const t_const_value* val : value->get_list()) {
+      visit_const_value(val, list->elem_type());
+    }
+  } else if (const auto* set = expected_type->try_as<t_set>();
+             set != nullptr && value->kind() == t_const_value::CV_LIST) {
+    for (const t_const_value* val : value->get_list()) {
+      visit_const_value(val, set->elem_type());
+    }
+  } else if (const auto* structured = expected_type->try_as<t_structured>();
+             structured != nullptr && value->kind() == t_const_value::CV_MAP) {
+    for (const auto& [key, val] : value->get_map()) {
+      if (const t_field* field = key->kind() == t_const_value::CV_STRING
+              ? structured->get_field_by_name(key->get_string())
+              : nullptr) {
+        visit_const_value(val, field->type());
+      }
+    }
+  }
 }
 
 } // namespace apache::thrift::compiler

@@ -542,13 +542,7 @@ void WtStreamManager::onDrainSession(DrainSession) noexcept {
 }
 
 void WtStreamManager::onCloseSession(CloseSession close) noexcept {
-  shutdown_ = true;
-  auto ex = folly::make_exception_wrapper<WtException>(close.err, close.msg);
-  auto streams = std::move(streams_);
-  for (auto& [_, handle] : streams) {
-    handle->rh.cancel(ex);
-    handle->wh.cancel(ex);
-  }
+  shutdown(std::move(close));
 }
 
 Result WtStreamManager::enqueue(WtReadHandle& rh, StreamData data) noexcept {
@@ -597,9 +591,18 @@ void WtStreamManager::drain() noexcept {
   enqueueEvent(DrainSession{});
 }
 
-void WtStreamManager::shutdown(CloseSession data) noexcept {
-  onCloseSession(data);
-  enqueueEvent(std::move(data));
+void WtStreamManager::shutdown(CloseSession cs) noexcept {
+  if (shutdown_) {
+    return;
+  }
+  shutdown_ = true;
+  auto ex = folly::make_exception_wrapper<WtException>(cs.err, cs.msg);
+  auto streams = std::move(streams_);
+  for (auto& [_, handle] : streams) {
+    handle->rh.cancel(ex);
+    handle->wh.cancel(ex);
+  }
+  enqueueEvent(std::move(cs));
 }
 
 bool WtStreamManager::canCreateUni() const noexcept {

@@ -724,13 +724,17 @@ TEST(WtStreamManager, CloseWtSession) {
   for (auto& ct : cts) {
     EXPECT_TRUE(ct.isCancellationRequested());
   }
+
   // read promise should have exception set
   EXPECT_TRUE(oneRead.isReady() && oneRead.hasException());
 
-  // a locally initiated close should enqueue an event
-  streamManager.shutdown(CloseSession{0, ""});
+  // sends a CloseSession in response to a peer initiated CloseSession;
+  // this is okay wrt WebTransport rfc
   auto events = streamManager.moveEvents();
   EXPECT_TRUE(std::holds_alternative<CloseSession>(events.back()));
+
+  // a locally initiated close should enqueue an event
+  streamManager.shutdown(CloseSession{0, ""});
 }
 
 TEST(WtStreamManager, ResetStreamReliableSize) {

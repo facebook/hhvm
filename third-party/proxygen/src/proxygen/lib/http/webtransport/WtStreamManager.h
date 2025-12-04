@@ -301,7 +301,6 @@ struct WtStreamManager {
   [[nodiscard]] bool isBidi(uint64_t streamId) const;
   void enqueueEvent(Event&& ev) noexcept;
   void onStreamWritable(WtWriteHandle& wh) noexcept;
-  void shutdownImpl(uint32_t, std::string) noexcept;
   bool hasEvent() const noexcept;
   struct BidiHandle;
   friend struct BidiHandle;

@@ -3715,7 +3715,7 @@ using WtReqResult = HTTPCoroSession::WtReqResult;
  */
 bool supportsWt(std::initializer_list<const HTTPSettings*> settings) {
   constexpr auto kEnableConnectProto = SettingsId::ENABLE_CONNECT_PROTOCOL;
-  constexpr auto kEnableWtMaxSess = SettingsId::H2_WT_MAX_SESSIONS;
+  constexpr auto kEnableWtMaxSess = SettingsId::WT_MAX_SESSIONS;
   return std::all_of(settings.begin(), settings.end(), [](auto* settings) {
     return settings &&
            settings->getSetting(kEnableConnectProto, /*defaultVal=*/0) &&

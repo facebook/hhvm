@@ -15,7 +15,9 @@
 # pyre-strict
 
 import copy
+import enum
 import math
+import sys
 import types
 import unittest
 
@@ -51,6 +53,13 @@ from thrift.lib.py3.test.auto_migrate.auto_migrate_util import (
 from thrift.py3.common import Protocol
 from thrift.py3.serializer import deserialize, serialize
 from thrift.py3.types import Struct
+
+try:
+    from enum import Enum, StrEnum
+except ImportError:
+
+    class StrEnum(str, enum.Enum):
+        pass
 
 
 class StructTests(unittest.TestCase):
@@ -684,6 +693,19 @@ class NumericalConversionsTests(unittest.TestCase):
             self.assertEqual(n.float_val, 1.0)
             self.assertEqual(n.int_val, 2)
 
+    def test_string_enum(self) -> None:
+        bucket = StringBucket(one=MyStrEnum.A, two=MyStrEnumBad.B)
+        self.assertEqual(bucket.one, MyStrEnum.A.value)
+        self.assertEqual(bucket.one, MyStrEnum.A)
+        if not is_auto_migrated() or sys.version_info < (3, 11):
+            self.assertEqual(bucket.two, MyStrEnumBad.B.value)
+            self.assertEqual(bucket.two, MyStrEnumBad.B)
+        else:  # auto-migration for Python 3.11+
+            # thrift-python gets the "bad" behavior due to usage of format
+            # in StringTypeInfo.to_internal_data
+            self.assertEqual(bucket.two, "MyStrEnumBad.B")
+            self.assertNotEqual(bucket.two, MyStrEnumBad.B)
+
 
 class TestSubclass(OptionalFile):
     pass
@@ -691,3 +713,13 @@ class TestSubclass(OptionalFile):
 
 class TestSubSubclass(TestSubclass):
     pass
+
+
+class MyStrEnum(StrEnum):
+    A = "a"
+    B = "b"
+
+
+class MyStrEnumBad(str, Enum):
+    A = "a"
+    B = "b"

@@ -24,7 +24,6 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
   abstract const string THRIFT_SVC_NAME;
   protected TProcessorEventHandler $eventHandler_;
   private bool $isSubRequest = false;
-  private vec<int> $flushTimes = vec[];
 
   public function __construct(protected this::TThriftIf $handler)[] {
     $this->eventHandler_ = new TProcessorEventHandler();
@@ -155,13 +154,15 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
       php_root().
       '/flib/core/runtime/error/error_pages/thrift/handle_thrift_streaming_service_error.php',
     );
+    $payload_encoder = ThriftStreamingSerializationHelpers::encodeStreamHelper(
+      $stream_response_type,
+      $output,
+    );
+    if ($server_stream === null) {
+      // Stream was cancelled by the client.
+      return;
+    }
     try {
-      $payload_encoder =
-        $this->encodeStreamWithLatencyTracking($stream_response_type, $output);
-      if ($server_stream === null) {
-        // Stream was cancelled by the client.
-        return;
-      }
       await $this->genStream<TStreamType>(
         $server_stream,
         $stream,
@@ -171,41 +172,14 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
       );
 
     } catch (Exception $ex) {
-      $payload_encoder =
-        ThriftStreamingSerializationHelpers::encodeStreamHelper(
-          $stream_response_type,
-          $output,
-        );
       list($serialized_ex, $is_tax) = $payload_encoder(null, $ex);
-      $server_stream?->sendServerException(
+      $server_stream->sendServerException(
         $serialized_ex,
         $ex->getMessage(),
         get_class($ex),
         !$is_tax,
       );
     }
-  }
-
-  final protected function encodeStreamWithLatencyTracking<
-    TStreamPayloadType as IResultThriftStruct with {
-      type TResult = TStreamType },
-    TStreamType,
-  >(
-    class<TStreamPayloadType> $stream_response_type,
-    TProtocol $output,
-  ): (function(?TStreamType, ?Exception): (string, bool)) {
-    $payload_encoder = ThriftStreamingSerializationHelpers::encodeStreamHelper(
-      $stream_response_type,
-      $output,
-    );
-    return (?TStreamType $payload, ?\Exception $ex) ==> {
-      $this->flushTimes[] = request_stats_total_wall();
-      if (C\count($this->flushTimes) === 1) {
-        $flush0 = $this->flushTimes[0];
-        PerfMetadata::get()->setThriftFlush0Duration($flush0);
-      }
-      return $payload_encoder($payload, $ex);
-    };
   }
 
   final protected async function genStream<TStreamType>(

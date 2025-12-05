@@ -66,6 +66,13 @@ class TypeIds final {
 
   static TypeId uri(Uri value) { return std::move(value); }
 
+  // Thrift's URI is a folly::cstring_view, so convert it to a Uri
+  template <typename T>
+    requires std::constructible_from<std::string, T>
+  static TypeId uri(T&& uri) {
+    return Uri{std::forward<T>(uri)};
+  }
+
   static TypeId list(TypeId elementType) {
     return TypeId::List(std::move(elementType));
   }

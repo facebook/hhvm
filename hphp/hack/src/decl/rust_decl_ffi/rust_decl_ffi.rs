@@ -6,6 +6,7 @@
 
 use std::cell::RefCell;
 use std::path::PathBuf;
+use std::sync::OnceLock;
 
 use direct_decl_parser::ParsedFile;
 use ocamlrep::bytes_from_ocamlrep;
@@ -24,6 +25,28 @@ impl From<ParsedFileWithHashes> for OcamlParsedFileWithHashes {
     fn from(file: ParsedFileWithHashes) -> Self {
         Self(file)
     }
+}
+
+static THREAD_POOL: OnceLock<(usize, rayon::ThreadPool)> = OnceLock::new();
+
+fn get_thread_pool(requested_stack_size: usize) -> &'static rayon::ThreadPool {
+    // Running the parser requires more than the default stack size of 2MB:
+    // It's a recursive descent parser that allocates nodes on the stack as it creates them.
+    // As of December 2025, we need at least 4MB to parse the most deeply nested file in www.
+    assert!(requested_stack_size >= 4 * 1024 * 1024);
+
+    let (pool_stack_size, pool) = THREAD_POOL.get_or_init(|| {
+        let pool = rayon::ThreadPoolBuilder::new()
+            .stack_size(requested_stack_size as usize)
+            .build()
+            .expect("Failed to create thread pool for rust_decl_ffi");
+        (requested_stack_size, pool)
+    });
+    assert_eq!(
+        *pool_stack_size, requested_stack_size,
+        "Cannot use Concurrent with varying stack sizes"
+    );
+    pool
 }
 
 // NB: Must keep in sync with OCaml type `Direct_decl_parser.parsed_file_with_hashes`.
@@ -266,6 +289,8 @@ impl Concurrent {
             }
         }
 
+        let thread_pool = get_thread_pool(self.opts.stack_size as usize);
+
         // If we failed to return early, that means *either* there are some existing workitems
         // which haven't yet been returned to ocaml, *or* that we've been given more than one
         // additional workitem.
@@ -294,7 +319,7 @@ impl Concurrent {
             // exactly one result over `tx`.
             // We use `rayon::spawn`. This places the lambda into rayon's global
             // workitem queue, to be picked up by one of rayon's worker threads.
-            rayon::spawn(move || {
+            thread_pool.spawn(move || {
                 let text = match content {
                     Some(content) => content.into_bytes(),
                     None => std::fs::read(abspath).unwrap_or_default(),

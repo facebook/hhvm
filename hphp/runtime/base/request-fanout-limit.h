@@ -46,8 +46,14 @@ public:
 
     RequestFanoutData(int64_t current, int64_t max)
       : currentCount(current), maxCount(max){}
-    
-    int64_t increment();
+    /**
+    * @return True if increment succeeded, false if limit is reached
+    * and increment was not performed
+    */    
+    bool increment();
+    /**
+     * @return Decrement the currentCount and return the number before decrement
+     */
     int64_t decrement();
   };
   using RootRequestIDToThreadCnt = folly_concurrent_hash_map_simd<int64_t, std::shared_ptr<RequestFanoutData>>;

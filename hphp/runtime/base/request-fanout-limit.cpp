@@ -27,7 +27,7 @@ namespace HPHP {
 
 static std::atomic<int64_t> s_maxConcurrentFanoutCount = 0;
 
-int64_t RequestFanoutLimit::RequestFanoutData::increment() {
+bool RequestFanoutLimit::RequestFanoutData::increment() {
   /**
   * This operation is safe from operating on abandoned 
   * counter erased by other racing xbox threads, because:
@@ -43,12 +43,11 @@ int64_t RequestFanoutLimit::RequestFanoutData::increment() {
    * Check the new count is below the configured fanout limit
    */
   if (Cfg::Server::EnforceRequestFanout && newCount > Cfg::Server::RequestFanoutLimit) {
-    auto msg = folly::format("Request fanout limit exceeded.").str();
     // In enforcement mode, we will throw an exception if the limit is exceeded
     // and the request will not be queued for execution, so we need to rollback
     // the incremented counter.
     currentCount.fetch_sub(1, std::memory_order_acq_rel);
-    SystemLib::throwRequestFanoutLimitExceededExceptionObject(msg);
+    return false;
   }
 
   /**
@@ -65,7 +64,7 @@ int64_t RequestFanoutLimit::RequestFanoutData::increment() {
       // prevMax updated by compare_exchange_weak
   }
 
-  return countBeforeIncrement;
+  return true;
 }
 
 int64_t RequestFanoutLimit::RequestFanoutData::decrement() {
@@ -101,13 +100,28 @@ void RequestFanoutLimit::increment(const RequestId& id) {
   } else {
     auto counter = it->second.get();
     assertx(counter);
-    counter->increment();
+    if (!counter->increment()) {
+      if (Cfg::Server::EnableRequestFanoutLogging 
+          && StructuredLog::enabled()
+          && Cfg::Server::RequestFanoutEnforcementLoggingSampleRate != 0 
+          && id.id() % Cfg::Server::RequestFanoutEnforcementLoggingSampleRate == 0 ) {
+        StructuredLogEntry entry;
+        entry.setStr("event", "FANOUT_LIMIT_EXCEEDED");
+        entry.setInt("request_max_concurrent_fanout_count", counter->currentCount);
+        if (!counter->rootReqScriptFilename.empty()) {
+          entry.setStr("script_filename", counter->rootReqScriptFilename);
+        }
+        StructuredLog::log("hhvm_request_fanout", entry);
+      }
+      auto msg = folly::format("Request fanout limit exceeded.").str();
+      SystemLib::throwRequestFanoutLimitExceededExceptionObject(msg);
+    }
   }
 }
 
 void RequestFanoutLimit::decrement(const RequestId& id) {
   if (id.unallocated()) {
-    return; 
+    return;
   }
 
   auto it = m_map.find(id.id());
@@ -148,6 +162,7 @@ void RequestFanoutLimit::decrement(const RequestId& id) {
       // Log maxConcurrentCount of current root request to Scuba
       if (Cfg::Server::EnableRequestFanoutLogging && StructuredLog::enabled()) {
         StructuredLogEntry entry;
+        entry.setStr("event", "REQUEST_GROUP_FINISHED");
         entry.setInt("request_max_concurrent_fanout_count", currReqMax);
         if (!counter->rootReqScriptFilename.empty()) {
           entry.setStr("script_filename", counter->rootReqScriptFilename);

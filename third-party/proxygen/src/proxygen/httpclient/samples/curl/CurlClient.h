@@ -76,7 +76,7 @@ class CurlClient
              unsigned short httpMajor = 1,
              unsigned short httpMinor = 1);
 
-  virtual ~CurlClient() override = default;
+  ~CurlClient() override = default;
 
   bool saveResponseToFile(const std::string& outputFilename);
 

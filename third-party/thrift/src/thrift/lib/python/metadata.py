@@ -22,6 +22,7 @@ from types import MappingProxyType
 from typing import cast, Iterator, Mapping, Optional, Sequence, Tuple, Type, Union
 
 from apache.thrift.metadata.thrift_types import (
+    ThriftBidiType,
     ThriftConstStruct,
     ThriftConstValue,
     ThriftEnum,
@@ -59,6 +60,7 @@ class ThriftKind(enum.Enum):
     TYPEDEF = 7
     STREAM = 8
     SINK = 9
+    BIDI = 10
 
 
 class ThriftConstKind(enum.Enum):
@@ -80,6 +82,7 @@ ValidThriftTypes = Union[
     ThriftMapType,
     ThriftTypedefType,
     ThriftSinkType,
+    ThriftBidiType,
     ThriftStreamType,
 ]
 
@@ -103,6 +106,7 @@ class ThriftTypeProxy:
                 ThriftSetType,
                 ThriftMapType,
                 ThriftTypedefType,
+                ThriftBidiType,
                 ThriftSinkType,
                 ThriftStreamType,
             ),
@@ -165,6 +169,10 @@ class ThriftTypeProxy:
             val = thriftType.value
             assert isinstance(val, ThriftSinkType)
             return ThriftSinkProxy(val, thriftMeta)
+        elif thriftType.type is ThriftType.Type.t_bidi:
+            val = thriftType.value
+            assert isinstance(val, ThriftBidiType)
+            return ThriftBidiProxy(val, thriftMeta)
         val = thriftType.value
         assert isinstance(val, ThriftPrimitiveType)
         specialType = ThriftTypeProxy(val, thriftMeta)
@@ -220,6 +228,11 @@ class ThriftTypeProxy:
         if self.kind == ThriftKind.SINK:
             return cast(ThriftSinkProxy, self)
         raise TypeError("Type is not a sink")
+
+    def as_bidi(self) -> "ThriftBidiProxy":
+        if self.kind == ThriftKind.BIDI:
+            return cast(ThriftBidiProxy, self)
+        raise TypeError("Type is not a bidirectional stream")
 
 
 class ThriftSetProxy(ThriftTypeProxy):
@@ -306,6 +319,26 @@ class ThriftStreamProxy(ThriftTypeProxy):
         self.kind: ThriftKind = ThriftKind.STREAM
         self.elemType = ThriftTypeProxy._fbthrift_create(
             thriftType.elemType, self.thriftMeta
+        )
+        if thriftType.initialResponseType is not None:
+            self.initialResponseType = ThriftTypeProxy._fbthrift_create(
+                thriftType.initialResponseType, self.thriftMeta
+            )
+
+
+class ThriftBidiProxy(ThriftTypeProxy):
+    streamElemType: ThriftTypeProxy
+    sinkElemType: ThriftTypeProxy
+    initialResponseType: ThriftTypeProxy
+
+    def __init__(self, thriftType: ThriftBidiType, thriftMeta: ThriftMetadata) -> None:
+        super().__init__(thriftType, thriftMeta)
+        self.kind: ThriftKind = ThriftKind.BIDI
+        self.streamElemType = ThriftTypeProxy._fbthrift_create(
+            thriftType.streamElemType, self.thriftMeta
+        )
+        self.sinkElemType = ThriftTypeProxy._fbthrift_create(
+            thriftType.sinkElemType, self.thriftMeta
         )
         if thriftType.initialResponseType is not None:
             self.initialResponseType = ThriftTypeProxy._fbthrift_create(

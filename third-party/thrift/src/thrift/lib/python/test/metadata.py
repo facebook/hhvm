@@ -32,6 +32,7 @@ from testing.thrift_clients import (
 )
 from testing.thrift_services import TestingServiceInterface
 from testing.thrift_types import Complex, hard, HardError, mixed, NestedError, Perm
+from thrift.python.bidi_service.thrift_clients import TestBidiService
 from thrift.python.metadata import (
     gen_metadata,
     ThriftExceptionProxy,
@@ -344,3 +345,51 @@ class MetadataTests(unittest.TestCase):
         self.assertIsNotNone(meta.structs)
         self.assertIsNotNone(meta.services)
         self.assertIsNotNone(meta.exceptions)
+
+    def test_metadata_bidirectional_streaming(self) -> None:
+        bidi_service = gen_metadata(TestBidiService)
+        self.assertEqual(bidi_service.name, "bidi_service.TestBidiService")
+
+        # Get the echo function which has bidirectional streaming
+        echo_func = None
+        for func in bidi_service.functions:
+            if func.name == "echo":
+                echo_func = func
+                break
+
+        self.assertIsNotNone(echo_func, "echo function should exist")
+
+        # Test that the return type is a bidirectional stream
+        bidi_type = echo_func.return_type.as_bidi()
+
+        # Verify stream element type is string
+        self.assertEqual(
+            bidi_type.streamElemType.as_primitive(),
+            ThriftPrimitiveType.THRIFT_STRING_TYPE,
+        )
+
+        # Verify sink element type is string
+        self.assertEqual(
+            bidi_type.sinkElemType.as_primitive(),
+            ThriftPrimitiveType.THRIFT_STRING_TYPE,
+        )
+
+        # Test echoWithResponse which has an initial response
+        echo_with_response = None
+        for func in bidi_service.functions:
+            if func.name == "echoWithResponse":
+                echo_with_response = func
+                break
+
+        self.assertIsNotNone(
+            echo_with_response, "echoWithResponse function should exist"
+        )
+
+        bidi_with_response = echo_with_response.return_type.as_bidi()
+
+        # Verify it has an initial response type
+        self.assertIsNotNone(bidi_with_response.initialResponseType)
+        self.assertEqual(
+            bidi_with_response.initialResponseType.as_primitive(),
+            ThriftPrimitiveType.THRIFT_STRING_TYPE,
+        )

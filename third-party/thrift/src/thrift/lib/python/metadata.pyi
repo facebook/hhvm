@@ -28,6 +28,7 @@ from typing import (
 )
 
 from apache.thrift.metadata.thrift_types import (
+    ThriftBidiType,
     ThriftConstStruct,
     ThriftConstValue,
     ThriftEnum,
@@ -67,6 +68,7 @@ class ThriftKind(Enum):
     TYPEDEF: ThriftKind = ...
     STREAM: ThriftKind = ...
     SINK: ThriftKind = ...
+    BIDI: ThriftKind = ...
 
 class ThriftConstKind(Enum):
     CV_BOOL: ThriftConstKind = ...
@@ -90,6 +92,7 @@ class ThriftTypeProxy:
         ThriftEnum,
         ThriftStruct,
         ThriftSinkType,
+        ThriftBidiType,
         ThriftStreamType,
     ]
     thriftMeta: ThriftMetadata
@@ -104,6 +107,7 @@ class ThriftTypeProxy:
     def as_typedef(self) -> ThriftTypedefProxy: ...
     def as_stream(self) -> ThriftStreamProxy: ...
     def as_sink(self) -> ThriftSinkProxy: ...
+    def as_bidi(self) -> ThriftBidiProxy: ...
 
 class ThriftSetProxy(ThriftTypeProxy):
     thriftType: ThriftSetType
@@ -133,6 +137,11 @@ class ThriftStreamProxy(ThriftTypeProxy):
     thriftType: ThriftStreamType
     elemType: ThriftTypeProxy
     initialResponseType: Optional[ThriftTypeProxy]
+
+class ThriftBidiProxy(ThriftTypeProxy):
+    streamElemType: ThriftTypeProxy
+    sinkElemType: ThriftTypeProxy
+    initialResponseType: ThriftTypeProxy
 
 class ThriftFieldProxy(Protocol):
     id: int

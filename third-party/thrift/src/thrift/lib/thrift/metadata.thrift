@@ -147,6 +147,21 @@ struct ThriftSinkType {
   3: optional ThriftType initialResponseType;
 }
 
+struct ThriftBidiType {
+  @java.Recursive
+  @rust.Box
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional ThriftType initialResponseType;
+  @java.Recursive
+  @rust.Box
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: optional ThriftType streamElemType;
+  @java.Recursive
+  @rust.Box
+  @cpp.Ref{type = cpp.RefType.Unique}
+  3: optional ThriftType sinkElemType;
+}
+
 @hack.MigrationBlockingLegacyJSONSerialization
 union ThriftType {
   1: ThriftPrimitiveType t_primitive;
@@ -159,6 +174,7 @@ union ThriftType {
   8: ThriftTypedefType t_typedef;
   9: ThriftStreamType t_stream;
   10: ThriftSinkType t_sink;
+  11: ThriftBidiType t_bidi;
 }
 
 struct ThriftEnum {

@@ -130,13 +130,8 @@ bool CmdMachine::AttachSandbox(DebuggerClient &client,
                                const char *user /* = NULL */,
                                const char *name /* = NULL */,
                                bool force /* = false */) {
-  std::string login;
-  if (user == nullptr) {
-    user = client.getCurrentUser().c_str();
-  }
-
   DSandboxInfoPtr sandbox(new DSandboxInfo());
-  sandbox->m_user = user ? user : "";
+  sandbox->m_user = user ? user : client.getCurrentUser();
   sandbox->m_name = (name && *name) ? name : "default";
   return AttachSandbox(client, sandbox, force);
 }

@@ -34,28 +34,10 @@ class AnnotateAllowLegacyMissingUrisTest(unittest.TestCase):
         os.chdir(self.tmp)
         self.maxDiff = None
 
-    def test_adds_package_annotation_for_missing_uris(self):
-        """Test that package-level annotation is added when types are missing URIs."""
+    def _check(self, *, before: str, after: str) -> None:
         write_file(
             "foo.thrift",
-            textwrap.dedent(
-                """\
-                struct TestStruct {
-                  1: i32 a;
-                  2: i32 b;
-                }
-
-                enum TestEnum {
-                  VALUE1 = 1,
-                  VALUE2 = 2,
-                }
-
-                union TestUnion {
-                  1: i32 x;
-                  2: string y;
-                }
-                """
-            ),
+            textwrap.dedent(before),
         )
 
         binary = pkg_resources.resource_filename(__name__, "codemod")
@@ -63,130 +45,172 @@ class AnnotateAllowLegacyMissingUrisTest(unittest.TestCase):
 
         self.assertEqual(
             read_file("foo.thrift"),
-            textwrap.dedent(
-                """\
+            textwrap.dedent(after),
+        )
+
+    def test_adds_annotation_package_and_include(self):
+        self._check(
+            before="""\
+                struct S { }
+                """,
+            after="""\
+                include "thrift/annotation/thrift.thrift"
+
+
+                @thrift.AllowLegacyMissingUris
+                package;
+
+                struct S { }
+                """,
+        )
+
+    def test_adds_annotation_existing_package_no_include(self):
+        self._check(
+            before="""\
+                package;
+
+                struct S { }
+                """,
+            after="""\
                 include "thrift/annotation/thrift.thrift"
 
                 @thrift.AllowLegacyMissingUris
                 package;
 
-                struct TestStruct {
-                  1: i32 a;
-                  2: i32 b;
-                }
-
-                enum TestEnum {
-                  VALUE1 = 1,
-                  VALUE2 = 2,
-                }
-
-                union TestUnion {
-                  1: i32 x;
-                  2: string y;
-                }
-                """
-            ),
+                struct S { }
+                """,
         )
 
-    def test_adds_package_annotation_for_missing_uris_with_namespace(self):
-        """
-        Test that package-level annotation is added when types are missing URIs,
-        above any existing namespace.
-        """
-        write_file(
-            "foo.thrift",
-            textwrap.dedent(
-                """\
-                namespace py3 foo.bar
+    def test_adds_annotation_existing_package_and_other_includes(self):
+        self._check(
+            before="""\
+                include "thrift/annotation/cpp.thrift"
 
-                struct TestStruct {
-                  1: i32 a;
-                  2: i32 b;
-                }
+                package;
 
-                enum TestEnum {
-                  VALUE1 = 1,
-                  VALUE2 = 2,
-                }
-
-                union TestUnion {
-                  1: i32 x;
-                  2: string y;
-                }
-                """
-            ),
-        )
-
-        binary = pkg_resources.resource_filename(__name__, "codemod")
-        run_binary(binary, "foo.thrift")
-
-        self.assertEqual(
-            read_file("foo.thrift"),
-            textwrap.dedent(
-                """\
+                struct S { }
+                """,
+            after="""\
+                include "thrift/annotation/cpp.thrift"
                 include "thrift/annotation/thrift.thrift"
 
                 @thrift.AllowLegacyMissingUris
                 package;
 
-                namespace py3 foo.bar
+                struct S { }
+                """,
+        )
 
-                struct TestStruct {
-                  1: i32 a;
-                  2: i32 b;
-                }
+    def test_adds_annotation_existing_package_before_include(self):
+        self._check(
+            before="""\
+                package;
 
-                enum TestEnum {
-                  VALUE1 = 1,
-                  VALUE2 = 2,
-                }
+                include "thrift/annotation/cpp.thrift"
 
-                union TestUnion {
-                  1: i32 x;
-                  2: string y;
-                }
-                """
-            ),
+                struct S { }
+                """,
+            after="""\
+                @thrift.AllowLegacyMissingUris
+                package;
+
+                include "thrift/annotation/cpp.thrift"
+                include "thrift/annotation/thrift.thrift"
+
+                struct S { }
+                """,
+        )
+
+    def test_adds_annotation_with_namespaces(self):
+        self._check(
+            before="""\
+                namespace cpp2 foo
+
+                struct S { }
+                """,
+            after="""\
+                include "thrift/annotation/thrift.thrift"
+
+
+                @thrift.AllowLegacyMissingUris
+                package;
+
+                namespace cpp2 foo
+
+                struct S { }
+                """,
+        )
+
+    def test_adds_annotation_with_namespaces_and_other_include(self):
+        self._check(
+            before="""\
+                namespace cpp2 foo
+
+                include "thrift/annotation/cpp.thrift"
+
+                struct S { }
+                """,
+            after="""\
+                namespace cpp2 foo
+
+                include "thrift/annotation/cpp.thrift"
+                include "thrift/annotation/thrift.thrift"
+
+                @thrift.AllowLegacyMissingUris
+                package;
+
+
+                struct S { }
+                """,
+        )
+
+    def test_adds_annotation_with_namespaces_before_include(self):
+        self._check(
+            before="""\
+                namespace cpp2 foo
+
+                include "thrift/annotation/thrift.thrift"
+                include "thrift/annotation/cpp.thrift"
+
+                struct S { }
+                """,
+            after="""\
+                namespace cpp2 foo
+
+                include "thrift/annotation/thrift.thrift"
+                include "thrift/annotation/cpp.thrift"
+
+                @thrift.AllowLegacyMissingUris
+                package;
+
+
+                struct S { }
+                """,
         )
 
     def test_no_change_when_package_has_uri(self):
         """Test that no annotation is added when package already provides URIs."""
-        write_file(
-            "foo.thrift",
-            textwrap.dedent(
-                """\
+        self._check(
+            before="""\
                 package "facebook.com/thrift/test"
 
                 struct TestStruct {
                   1: i32 a;
                 }
-                """
-            ),
-        )
-
-        binary = pkg_resources.resource_filename(__name__, "codemod")
-        run_binary(binary, "foo.thrift")
-
-        # Should remain unchanged
-        self.assertEqual(
-            read_file("foo.thrift"),
-            textwrap.dedent(
-                """\
+                """,
+            after="""\
                 package "facebook.com/thrift/test"
 
                 struct TestStruct {
                   1: i32 a;
                 }
-                """
-            ),
+                """,
         )
 
     def test_no_change_when_annotation_already_present(self):
         """Test that no duplicate annotation is added if already present."""
-        write_file(
-            "foo.thrift",
-            textwrap.dedent(
-                """\
+        self._check(
+            before="""\
                 include "thrift/annotation/thrift.thrift"
 
                 @thrift.AllowLegacyMissingUris
@@ -195,18 +219,8 @@ class AnnotateAllowLegacyMissingUrisTest(unittest.TestCase):
                 struct TestStruct {
                   1: i32 a;
                 }
-                """
-            ),
-        )
-
-        binary = pkg_resources.resource_filename(__name__, "codemod")
-        run_binary(binary, "foo.thrift")
-
-        # Should remain unchanged
-        self.assertEqual(
-            read_file("foo.thrift"),
-            textwrap.dedent(
-                """\
+                """,
+            after="""\
                 include "thrift/annotation/thrift.thrift"
 
                 @thrift.AllowLegacyMissingUris
@@ -215,100 +229,39 @@ class AnnotateAllowLegacyMissingUrisTest(unittest.TestCase):
                 struct TestStruct {
                   1: i32 a;
                 }
-                """
-            ),
+                """,
         )
 
     def test_no_change_when_types_have_explicit_uris(self):
         """Test that no annotation is added when all types have explicit URIs."""
-        write_file(
-            "foo.thrift",
-            textwrap.dedent(
-                """\
+        self._check(
+            before="""\
                 include "thrift/annotation/thrift.thrift"
 
                 @thrift.Uri{value = "facebook.com/thrift/test/TestStruct"}
                 struct TestStruct {
                   1: i32 a;
                 }
-                """
-            ),
-        )
-
-        binary = pkg_resources.resource_filename(__name__, "codemod")
-        run_binary(binary, "foo.thrift")
-
-        # Should remain unchanged (no package annotation needed)
-        self.assertEqual(
-            read_file("foo.thrift"),
-            textwrap.dedent(
-                """\
+                """,
+            after="""\
                 include "thrift/annotation/thrift.thrift"
 
                 @thrift.Uri{value = "facebook.com/thrift/test/TestStruct"}
                 struct TestStruct {
                   1: i32 a;
                 }
-                """
-            ),
+                """,
         )
 
     def test_no_annotation_for_typedef(self):
         """Test that typedefs don't trigger package annotation (they don't need URIs)."""
-        write_file(
-            "foo.thrift",
-            textwrap.dedent(
-                """\
+        self._check(
+            before="""\
                 typedef i32 MyInt
                 typedef string MyString
-                """
-            ),
-        )
-
-        binary = pkg_resources.resource_filename(__name__, "codemod")
-        run_binary(binary, "foo.thrift")
-
-        # Should remain unchanged (typedefs don't need URIs)
-        self.assertEqual(
-            read_file("foo.thrift"),
-            textwrap.dedent(
-                """\
+                """,
+            after="""\
                 typedef i32 MyInt
                 typedef string MyString
-                """
-            ),
-        )
-
-    def test_adds_annotation_before_existing_empty_package(self):
-        """Test that annotation is added before existing empty package declaration."""
-        write_file(
-            "foo.thrift",
-            textwrap.dedent(
-                """\
-                package;
-
-                struct TestStruct {
-                  1: i32 a;
-                }
-                """
-            ),
-        )
-
-        binary = pkg_resources.resource_filename(__name__, "codemod")
-        run_binary(binary, "foo.thrift")
-
-        self.assertEqual(
-            read_file("foo.thrift"),
-            textwrap.dedent(
-                """\
-                include "thrift/annotation/thrift.thrift"
-
-                @thrift.AllowLegacyMissingUris
-                package;
-
-                struct TestStruct {
-                  1: i32 a;
-                }
-                """
-            ),
+                """,
         )

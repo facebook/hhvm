@@ -150,7 +150,8 @@ class AnnotateAllowLegacyMissingUris final {
    * @return `true` if the annotation was added, `false` otherwise
    */
   bool annotate_package() {
-    file_manager_.add_include("thrift/annotation/thrift.thrift");
+    const std::optional<size_t> maybe_new_include_offset =
+        file_manager_.add_include("thrift/annotation/thrift.thrift");
 
     const t_package& package = program_.package();
     if (package.is_explicit()) {
@@ -163,26 +164,20 @@ class AnnotateAllowLegacyMissingUris final {
     } else {
       // No explicit package - create empty package with annotation
 
-      // New package should be before any namespace, or before the first
-      // definition if there are no namespace directives.
-      const uint_least32_t new_package_offset = [&]() -> uint_least32_t {
-        if (std::optional<size_t> maybe_first_namespace_offset =
-                file_manager_.get_first_namespace_offset()) {
-          return maybe_first_namespace_offset.value();
-        }
-        const node_list_view<const t_named>& definitions =
-            program_.definitions();
-        CHECK(!definitions.empty())
-            << "Invariant failure: program cannot require "
-            << "@thrift.AllowLegacyMissingUris annotation without any "
-            << "definition!";
+      // New package should be immediately after the includes - either the newly
+      // added one above, or after the last include
 
-        return definitions.front().src_range().begin.offset();
-      }();
+      const uint_least32_t new_package_offset =
+          maybe_new_include_offset.has_value()
+          ? maybe_new_include_offset.value()
+          : file_manager_.to_offset(
+                program_.includes().back()->src_range().end) +
+              1;
+
       file_manager_.add(
           {.begin_pos = new_package_offset,
            .end_pos = new_package_offset,
-           .new_content = fmt::format("{}\npackage;\n\n", kAnnotation)});
+           .new_content = fmt::format("\n{}\npackage;\n\n", kAnnotation)});
     }
     return true;
   }

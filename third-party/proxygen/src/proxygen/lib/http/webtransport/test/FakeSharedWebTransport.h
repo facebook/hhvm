@@ -55,7 +55,7 @@ class FakeStreamHandle
       auto exwrapper =
           folly::make_exception_wrapper<WebTransport::Exception>(*writeErr_);
       return folly::makeFuture<WebTransport::StreamData>(exwrapper);
-    } else if (!buf_.empty() || fin_) {
+    } else if (!buf_.empty() || (fin_ && inflightBuf_.empty())) {
       return folly::makeFuture(WebTransport::StreamData(
           {buf_.move(), fin_ && inflightBuf_.empty()}));
     } else {
@@ -84,6 +84,9 @@ class FakeStreamHandle
 
   void deliverInflightData(size_t bytes = std::numeric_limits<size_t>::max()) {
     CHECK_GT(bytes, 0);
+    XLOG(DBG4) << "deliverInflightData bytes=" << bytes
+               << " inflightBuf_ size=" << inflightBuf_.chainLength()
+               << " fin=" << (fin_ ? "true" : "false");
     auto buf = inflightBuf_.splitAtMost(bytes);
     dataDelivered_ += buf->computeChainDataLength();
     buf_.append(std::move(buf));

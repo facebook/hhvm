@@ -26,22 +26,22 @@ using RfcParam = std::pair<bool, vector<string>>;
 class RFCRequestTest : public testing::TestWithParam<RfcParam> {
  public:
   RFCRequestTest() {
-    req1.push_back(HPACKHeader(":method", "GET"));
-    req1.push_back(HPACKHeader(":scheme", "http"));
-    req1.push_back(HPACKHeader(":path", "/"));
-    req1.push_back(HPACKHeader(":authority", "www.example.com"));
+    req1.emplace_back(":method", "GET");
+    req1.emplace_back(":scheme", "http");
+    req1.emplace_back(":path", "/");
+    req1.emplace_back(":authority", "www.example.com");
 
-    req2.push_back(HPACKHeader(":method", "GET"));
-    req2.push_back(HPACKHeader(":scheme", "http"));
-    req2.push_back(HPACKHeader(":path", "/"));
-    req2.push_back(HPACKHeader(":authority", "www.example.com"));
-    req2.push_back(HPACKHeader("cache-control", "no-cache"));
+    req2.emplace_back(":method", "GET");
+    req2.emplace_back(":scheme", "http");
+    req2.emplace_back(":path", "/");
+    req2.emplace_back(":authority", "www.example.com");
+    req2.emplace_back("cache-control", "no-cache");
 
-    req3.push_back(HPACKHeader(":method", "GET"));
-    req3.push_back(HPACKHeader(":scheme", "https"));
-    req3.push_back(HPACKHeader(":path", "/index.html"));
-    req3.push_back(HPACKHeader(":authority", "www.example.com"));
-    req3.push_back(HPACKHeader("custom-key", "custom-value"));
+    req3.emplace_back(":method", "GET");
+    req3.emplace_back(":scheme", "https");
+    req3.emplace_back(":path", "/index.html");
+    req3.emplace_back(":authority", "www.example.com");
+    req3.emplace_back("custom-key", "custom-value");
   }
 
  protected:
@@ -53,24 +53,24 @@ class RFCRequestTest : public testing::TestWithParam<RfcParam> {
 class RFCResponseTest : public testing::TestWithParam<RfcParam> {
  public:
   RFCResponseTest() {
-    resp1.push_back(HPACKHeader(":status", "302"));
-    resp1.push_back(HPACKHeader("cache-control", "private"));
-    resp1.push_back(HPACKHeader("date", "Mon, 21 Oct 2013 20:13:21 GMT"));
-    resp1.push_back(HPACKHeader("location", "https://www.example.com"));
+    resp1.emplace_back(":status", "302");
+    resp1.emplace_back("cache-control", "private");
+    resp1.emplace_back("date", "Mon, 21 Oct 2013 20:13:21 GMT");
+    resp1.emplace_back("location", "https://www.example.com");
 
-    resp2.push_back(HPACKHeader(":status", "307"));
-    resp2.push_back(HPACKHeader("cache-control", "private"));
-    resp2.push_back(HPACKHeader("date", "Mon, 21 Oct 2013 20:13:21 GMT"));
-    resp2.push_back(HPACKHeader("location", "https://www.example.com"));
+    resp2.emplace_back(":status", "307");
+    resp2.emplace_back("cache-control", "private");
+    resp2.emplace_back("date", "Mon, 21 Oct 2013 20:13:21 GMT");
+    resp2.emplace_back("location", "https://www.example.com");
 
-    resp3.push_back(HPACKHeader(":status", "200"));
-    resp3.push_back(HPACKHeader("cache-control", "private"));
-    resp3.push_back(HPACKHeader("date", "Mon, 21 Oct 2013 20:13:22 GMT"));
-    resp3.push_back(HPACKHeader("location", "https://www.example.com"));
-    resp3.push_back(HPACKHeader("content-encoding", "gzip"));
-    resp3.push_back(HPACKHeader(
+    resp3.emplace_back(":status", "200");
+    resp3.emplace_back("cache-control", "private");
+    resp3.emplace_back("date", "Mon, 21 Oct 2013 20:13:22 GMT");
+    resp3.emplace_back("location", "https://www.example.com");
+    resp3.emplace_back("content-encoding", "gzip");
+    resp3.emplace_back(
         "set-cookie",
-        "foo=ASDJKHQKBZXOQWEOPIUAXQWEOIU; max-age=3600; version=1"));
+        "foo=ASDJKHQKBZXOQWEOPIUAXQWEOIU; max-age=3600; version=1");
   }
 
  protected:

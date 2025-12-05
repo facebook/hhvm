@@ -16,8 +16,12 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from thrift.protocol.TProtocol import *
+import sys
+
 from struct import pack, unpack
+
+from thrift.protocol.TProtocol import TProtocolBase, TProtocolException
+from thrift.Thrift import TType
 
 
 class TBinaryProtocol(TProtocolBase):

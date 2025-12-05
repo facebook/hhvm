@@ -23,13 +23,11 @@ let check_method env cls_id m =
       m.m_user_attributes
   with
   | Some { ua_params = [(_, p, Aast.String impl_name)]; _ } ->
-    let (env, fun_type, _) = Typing.Fun_id.synth (p, impl_name) [] env in
+    let (env, _, fun_type) =
+      Typing.Function_pointer.synth_top_level p (p, impl_name) [] Code env
+    in
     let (env, _, meth_type) =
-      Typing.Method_caller.synth
-        ~for_meth_caller:false
-        m.m_span
-        (cls_id, m.m_name)
-        env
+      Typing.Method_caller.synth_function_type m.m_span (cls_id, m.m_name) env
     in
     let (env, ty_err_opt) =
       Typing_subtype.sub_type

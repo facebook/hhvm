@@ -3650,7 +3650,7 @@ end = struct
         make_result env p (Aast.Id id) ty)
     | Method_caller (class_name, method_name)
       when TypecheckerOptions.tco_poly_function_pointers env.genv.tcopt ->
-      Method_caller.synth p (class_name, method_name) env
+      Method_caller.synth_function_ref_type p (class_name, method_name) env
     | Method_caller (((pos, class_name) as pos_cname), meth_name) ->
       (* meth_caller(X::class, 'foo') desugars to:
        * $x ==> $x->foo()
@@ -8507,6 +8507,14 @@ and Function_pointer : sig
     * Aast_defs.function_pointer_source ->
     env ->
     env * Tast.expr * locl_ty
+
+  val synth_top_level :
+    Pos.t ->
+    Aast_defs.sid ->
+    unit Aast_defs.targ list ->
+    Aast_defs.function_pointer_source ->
+    env ->
+    env * Tast.expr * locl_ty
 end = struct
   let set_function_pointer env ty =
     Typing_utils.map_supportdyn env ty (fun env ty ->
@@ -8932,8 +8940,16 @@ end = struct
 end
 
 and Method_caller : sig
-  val synth :
-    ?for_meth_caller:bool ->
+  (** Build a stand-along function type that corresponds to the given method. *)
+  val synth_function_type :
+    Pos.t ->
+    Aast_defs.class_name * Ast_defs.pstring ->
+    env ->
+    env * Tast.expr * locl_ty
+
+  (** Build a stand-along function type that corresponds to the given method, and
+    wrap it in FunctionRef. *)
+  val synth_function_ref_type :
     Pos.t ->
     Aast_defs.class_name * Ast_defs.pstring ->
     env ->
@@ -9050,7 +9066,11 @@ end = struct
                reason;
              }))
 
-  let synth ?(for_meth_caller = true) pos (class_name, method_name) env =
+  (* Parameterised on whether we should build a function type wrapped by FunctionRef or not.
+     We can't do the wrapping outside becuase the wrapping only happens on some of the exit
+     points, and it needs to get put into the TAST as well. *)
+  let synth_function_type_help
+      ~build_function_ref_type pos (class_name, method_name) env =
     match Env.get_class env (snd class_name) with
     | Decl_entry.NotYetAvailable
     | Decl_entry.DoesNotExist ->
@@ -9159,22 +9179,31 @@ end = struct
                   (env, mk (get_reason ty, Tfun ft))
                 | _ -> (env, ty))
           in
-          let (env, ty) =
-            if for_meth_caller then
-              set_capture_only_readonly env ty
-            else
-              (env, ty)
-          in
+          let (env, ty) = set_capture_only_readonly env ty in
+          let expr = Method_caller (class_name, method_name) in
           let ty =
-            if for_meth_caller then
+            if build_function_ref_type then
               make_function_ref ~contains_generics:false env pos ty
             else
               ty
           in
-          let expr = Method_caller (class_name, method_name) in
           make_result env pos expr ty
         | _ -> failwith "Expected a function type")
     end
+
+  let synth_function_type pos (class_name, method_name) env =
+    synth_function_type_help
+      ~build_function_ref_type:false
+      pos
+      (class_name, method_name)
+      env
+
+  let synth_function_ref_type pos (class_name, method_name) env =
+    synth_function_type_help
+      ~build_function_ref_type:true
+      pos
+      (class_name, method_name)
+      env
 end
 
 and Stmt : sig

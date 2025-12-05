@@ -83,7 +83,7 @@ class CursorSerializationWrapper {
       "ProtocolReader must be BinaryProtocolReader");
   static_assert(
       std::is_same_v<ProtocolWriter, BinaryProtocolWriter>,
-      "ProtocolWriter must be BinaryProtocolReader");
+      "ProtocolWriter must be BinaryProtocolWriter");
   using Serializer = Serializer<ProtocolReader, ProtocolWriter>;
 
  public:
@@ -796,7 +796,7 @@ class ContainerCursorIterator {
   using value_type = detail::lift_view_t<
       typename detail::ContainerTraits<Tag>::ElementType,
       Contiguous>;
-  // These are non-const to allow moving the deserialzed value out.
+  // These are non-const to allow moving the deserialized value out.
   // Modifying them does not affect the underlying buffer.
   using pointer = value_type*;
   using reference = value_type&;
@@ -819,7 +819,7 @@ class ContainerCursorIterator {
   void operator++(int) { ++(*this); }
 
   // Dereference
-  // These return non-const to allow moving the deserialzed value out.
+  // These return non-const to allow moving the deserialized value out.
   // Modifying them does not affect the underlying buffer.
   reference operator*() {
     FOLLY_SAFE_DCHECK(reader_);

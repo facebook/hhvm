@@ -74,7 +74,7 @@ template <typename VTag>
 struct ContainerTraits<type::list<VTag>> {
   using ElementType = type::native_type<VTag>;
   using ElementTag = VTag;
-  // This is initializer_list becuase that's what skip_n accepts.
+  // This is initializer_list because that's what skip_n accepts.
   static constexpr std::initializer_list<protocol::TType> wireTypes = {
       op::typeTagToTType<ElementTag>};
 

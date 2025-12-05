@@ -174,12 +174,20 @@ class t_const_value {
 
   void convert_empty_map_to_list() {
     check_kind(CV_MAP);
+    if (!is_empty()) {
+      throw std::logic_error(
+          "convert_empty_map_to_list called on non-empty value");
+    }
     value_ = list_value();
     kind_ = CV_LIST;
   }
 
   void convert_empty_list_to_map() {
     check_kind(CV_LIST);
+    if (!is_empty()) {
+      throw std::logic_error(
+          "convert_empty_list_to_map called on non-empty value");
+    }
     value_ = map_value();
     kind_ = CV_MAP;
   }

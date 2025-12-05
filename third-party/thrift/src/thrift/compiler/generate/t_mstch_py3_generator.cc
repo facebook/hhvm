@@ -1076,21 +1076,9 @@ class py3_mstch_field : public mstch_field {
 
   mstch::node user_default_value() {
     const t_const_value* value = field_->default_value();
-    if (!value) {
-      return mstch::node();
-    }
-    if (value->is_empty()) {
-      auto true_type = field_->type()->get_true_type();
-      if ((true_type->is<t_list>() || true_type->is<t_set>()) &&
-          value->kind() != t_const_value::CV_LIST) {
-        const_cast<t_const_value*>(value)->convert_empty_map_to_list();
-      }
-      if (true_type->is<t_map>() && value->kind() != t_const_value::CV_MAP) {
-        const_cast<t_const_value*>(value)->convert_empty_list_to_map();
-      }
-    }
-    return context_.const_value_factory->make_mstch_object(
-        value, context_, pos_, nullptr, nullptr);
+    return value == nullptr ? mstch::node()
+                            : context_.const_value_factory->make_mstch_object(
+                                  value, context_, pos_, nullptr, nullptr);
   }
 
   mstch::node boxed_ref() {

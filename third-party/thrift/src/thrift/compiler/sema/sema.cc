@@ -384,6 +384,81 @@ void maybe_match_type_with_const_value(
   match_type_with_const_value(ctx, mctx, type, value);
 }
 
+/**
+ * Post-sema validation, match const value kind with the underlying container
+ * type for empty containers. We currently allow, but warn for, empty lists
+ * assigned to map targets and empty maps assigned to list/set targets.
+ * Recursively run through all consts and check for mismatches between the
+ * target type and the const kind, fixing them if possible.
+ * This MUST be done post validation, to ensure we still emit the warnings.
+ *   1. match_type_with_const_value (pre-validation) recursively processes all
+ *      consts
+ *   2. standard validators check and emit warnings for mistmatched initializers
+ *   3. maybe_match_const_value_container_kind (post-validation) normalizes the
+ *      const value kind to match the target type
+ */
+void maybe_match_const_value_container_kind(
+    sema_context& ctx,
+    mutator_context& mctx,
+    const t_type_ref& type,
+    t_const_value* value) {
+  if (type.empty() || value == nullptr) {
+    return;
+  }
+  const t_type* true_type = type->get_true_type();
+  if (true_type == nullptr) {
+    return;
+  }
+
+  if (const auto* map = true_type->try_as<t_map>()) {
+    if (value->kind() == t_const_value::CV_LIST && value->is_empty()) {
+      // We warn on empty list values for maps, but it is allowed
+      value->convert_empty_list_to_map();
+    } else if (value->kind() == t_const_value::CV_MAP) {
+      // Potentially non-empty map - handle inner values
+      for (auto& elem : value->get_map()) {
+        maybe_match_const_value_container_kind(
+            ctx, mctx, map->key_type(), elem.first);
+        maybe_match_const_value_container_kind(
+            ctx, mctx, map->val_type(), elem.second);
+      }
+    }
+  } else if (true_type->is<t_container>()) {
+    if (value->kind() == t_const_value::CV_MAP && value->is_empty()) {
+      // We warn on empty map values for list targets, but it is allowed
+      value->convert_empty_map_to_list();
+    } else if (value->kind() == t_const_value::CV_LIST) {
+      // Non-map container - i.e. list or set; handle nested values
+      const t_type_ref* elem_type;
+      if (const auto* list = true_type->try_as<t_list>()) {
+        elem_type = &list->elem_type();
+      } else {
+        elem_type = &true_type->as<t_set>().elem_type();
+      }
+      for (t_const_value* elem : value->get_list()) {
+        maybe_match_const_value_container_kind(ctx, mctx, *elem_type, elem);
+      }
+    }
+  } else if (const auto* structured = true_type->try_as<t_structured>();
+             structured != nullptr && value->kind() == t_const_value::CV_MAP) {
+    for (auto& elem : value->get_map()) {
+      const std::string& field_name =
+          elem.first->kind() == t_const_value::CV_IDENTIFIER
+          ? elem.first->get_identifier()
+          : elem.first->kind() == t_const_value::CV_STRING
+          ? elem.first->get_string()
+          : "";
+      const t_field* field = field_name.empty()
+          ? nullptr
+          : structured->get_field_by_name(field_name);
+      if (field != nullptr) {
+        maybe_match_const_value_container_kind(
+            ctx, mctx, field->type(), elem.second);
+      }
+    }
+  }
+}
+
 void match_const_type_with_value(
     sema_context& ctx, mutator_context& mctx, t_const& const_node) {
   maybe_match_type_with_const_value(
@@ -791,7 +866,8 @@ void add_magic_annotations(sema_context&, mutator_context&, t_struct& node) {
   }
 }
 
-std::vector<ast_mutator> standard_mutators() {
+/** Mutators which pre-process the AST before it is validated. */
+std::vector<ast_mutator> pre_validation_standard_mutators() {
   std::vector<ast_mutator> mutators;
 
   ast_mutator initial;
@@ -813,6 +889,48 @@ std::vector<ast_mutator> standard_mutators() {
   mutators.push_back(std::move(main));
 
   return mutators;
+}
+
+/**
+ * Mutators which post-process the AST after it has been validated. These
+ * mutators will only be executed if the AST does not have any errors.
+ * E.g. mutators which require the AST to be valid, or mutators which normalize
+ * the AST after validation has first emitted warnings/errors for deprecated
+ * behaviors.
+ */
+std::vector<ast_mutator> post_validation_standard_mutators() {
+  ast_mutator main;
+
+  main.add_field_visitor(
+      [](sema_context& ctx, mutator_context& mctx, t_field& node) {
+        maybe_match_const_value_container_kind(
+            ctx,
+            mctx,
+            node.type(),
+            const_cast<t_const_value*>(node.default_value()));
+      });
+  main.add_function_param_visitor(
+      [](sema_context& ctx, mutator_context& mctx, t_field& node) {
+        maybe_match_const_value_container_kind(
+            ctx,
+            mctx,
+            node.type(),
+            const_cast<t_const_value*>(node.default_value()));
+      });
+  main.add_const_visitor(
+      [](sema_context& ctx, mutator_context& mctx, t_const& node) {
+        maybe_match_const_value_container_kind(
+            ctx, mctx, node.type_ref(), node.value());
+      });
+  main.add_named_visitor(
+      [](sema_context& ctx, mutator_context& mctx, t_named& node) {
+        for (t_const& annot : node.structured_annotations()) {
+          maybe_match_const_value_container_kind(
+              ctx, mctx, annot.type_ref(), annot.value());
+        }
+      });
+
+  return std::vector<ast_mutator>{std::move(main)};
 }
 
 } // namespace
@@ -900,10 +1018,15 @@ sema::result sema::run(sema_context& ctx, t_program_bundle& bundle) {
 
   ret.unresolved_types = !resolve_all_types(ctx, bundle);
   if (!ret.unresolved_types) {
-    for (auto& mutator : standard_mutators()) {
+    for (auto& mutator : pre_validation_standard_mutators()) {
       mutator.mutate(ctx, bundle);
     }
     standard_validator()(ctx, *bundle.root_program());
+    if (!ctx.has_errors()) {
+      for (auto& mutator : post_validation_standard_mutators()) {
+        mutator.mutate(ctx, bundle);
+      }
+    }
   }
   return ret;
 }

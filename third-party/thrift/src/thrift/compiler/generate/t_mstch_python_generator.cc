@@ -1083,21 +1083,6 @@ class t_mstch_python_prototypes_generator : public t_whisker_generator {
 
   void initialize_context(context_visitor& visitor) override {
     python_context_->register_visitors(visitor);
-    // Fix fields with mismatched empty const containers
-    visitor.add_field_visitor([](const whisker_generator_visitor_context&,
-                                 const t_field& node) {
-      const t_const_value* value = node.default_value();
-      if (value != nullptr && value->is_empty()) {
-        const t_type& true_type = *node.type()->get_true_type();
-        if (value->kind() == t_const_value::CV_MAP &&
-            (true_type.is<t_list>() || true_type.is<t_set>())) {
-          const_cast<t_const_value*>(value)->convert_empty_map_to_list();
-        } else if (
-            value->kind() == t_const_value::CV_LIST && true_type.is<t_map>()) {
-          const_cast<t_const_value*>(value)->convert_empty_list_to_map();
-        }
-      }
-    });
   }
 
  private:

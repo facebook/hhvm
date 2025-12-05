@@ -145,4 +145,115 @@ TEST_F(SemaTest, transitive) {
   EXPECT_EQ(terse_field_ptr->qualifier(), t_field_qualifier::terse);
 }
 
+/**
+ * Test that empty consts with mismatched const kind (i.e. mismatched
+ * initializers) are normalized to the target type.
+ * We warn on, but allow, empty list initializers for maps and empty map
+ * initializers for lists/sets.
+ */
+TEST_F(SemaTest, empty_const_container_conversion) {
+  // Test that empty list assigned to a map field is converted to CV_MAP
+  // after post-validation mutators run
+  t_program* program = root_program();
+  t_map map_type{t_primitive_type::t_i32(), t_primitive_type::t_i32()};
+  t_list list_type{t_primitive_type::t_i32()};
+  t_set set_type{t_primitive_type::t_i32()};
+
+  auto strct = std::make_unique<t_struct>(program, "TestStruct");
+  t_field& map_field = strct->create_field(map_type, "map_field", /*id=*/1);
+  map_field.set_default_value(t_const_value::make_list());
+
+  t_field& list_field = strct->create_field(list_type, "list_field", /*id=*/2);
+  list_field.set_default_value(t_const_value::make_map());
+
+  t_field& set_field = strct->create_field(set_type, "set_field", /*id=*/3);
+  set_field.set_default_value(t_const_value::make_map());
+
+  program->add_definition(std::move(strct));
+
+  auto constant = std::make_unique<t_const>(
+      program, map_type, "map_const", t_const_value::make_list());
+  const t_const_value* constant_value = constant->value();
+  program->add_definition(std::move(constant));
+
+  // Before mutation, values are mismatched
+  EXPECT_EQ(map_field.default_value()->kind(), t_const_value::CV_LIST);
+  EXPECT_TRUE(map_field.default_value()->is_empty());
+
+  EXPECT_EQ(list_field.default_value()->kind(), t_const_value::CV_MAP);
+  EXPECT_TRUE(list_field.default_value()->is_empty());
+
+  EXPECT_EQ(set_field.default_value()->kind(), t_const_value::CV_MAP);
+  EXPECT_TRUE(set_field.default_value()->is_empty());
+
+  EXPECT_EQ(constant_value->kind(), t_const_value::CV_LIST);
+  EXPECT_TRUE(constant_value->is_empty());
+
+  mutate();
+
+  // After mutation, values should be fixed
+  EXPECT_EQ(map_field.default_value()->kind(), t_const_value::CV_MAP);
+  EXPECT_EQ(list_field.default_value()->kind(), t_const_value::CV_LIST);
+  EXPECT_EQ(set_field.default_value()->kind(), t_const_value::CV_LIST);
+  EXPECT_EQ(constant_value->kind(), t_const_value::CV_MAP);
+}
+
+TEST_F(SemaTest, non_empty_containers_not_converted) {
+  // Test that non-empty containers are not converted
+
+  t_program* program = root_program();
+  t_map map_type{t_primitive_type::t_i32(), t_primitive_type::t_i32()};
+  t_list list_type{t_primitive_type::t_i32()};
+  t_set set_type{t_primitive_type::t_i32()};
+
+  std::unique_ptr<t_struct> strct =
+      std::make_unique<t_struct>(program, "TestStruct");
+
+  t_field& map_field = strct->create_field(map_type, "map_field", /*id=*/1);
+  std::unique_ptr<t_const_value> map_default_value = t_const_value::make_list();
+  map_default_value->add_list(std::make_unique<t_const_value>(42));
+  map_field.set_default_value(std::move(map_default_value));
+
+  t_field& list_field = strct->create_field(list_type, "list_field", /*id=*/2);
+  std::unique_ptr<t_const_value> list_default_value = t_const_value::make_map();
+  list_default_value->add_map(
+      std::make_unique<t_const_value>(42), std::make_unique<t_const_value>(42));
+  list_field.set_default_value(std::move(list_default_value));
+
+  t_field& set_field = strct->create_field(set_type, "set_field", /*id=*/3);
+  std::unique_ptr<t_const_value> set_default_value = t_const_value::make_map();
+  set_default_value->add_map(
+      std::make_unique<t_const_value>(42), std::make_unique<t_const_value>(42));
+  set_field.set_default_value(std::move(set_default_value));
+
+  program->add_definition(std::move(strct));
+
+  auto constant = std::make_unique<t_const>(
+      program, map_type, "map_const", t_const_value::make_list());
+  t_const_value* constant_value = constant->value();
+  constant_value->add_list(std::make_unique<t_const_value>(42));
+  program->add_definition(std::move(constant));
+
+  // Before mutation, values are mismatched
+  EXPECT_EQ(map_field.default_value()->kind(), t_const_value::CV_LIST);
+  EXPECT_FALSE(map_field.default_value()->is_empty());
+
+  EXPECT_EQ(list_field.default_value()->kind(), t_const_value::CV_MAP);
+  EXPECT_FALSE(list_field.default_value()->is_empty());
+
+  EXPECT_EQ(set_field.default_value()->kind(), t_const_value::CV_MAP);
+  EXPECT_FALSE(set_field.default_value()->is_empty());
+
+  EXPECT_EQ(constant_value->kind(), t_const_value::CV_LIST);
+  EXPECT_FALSE(constant_value->is_empty());
+
+  mutate();
+
+  // After mutation, values should be unchanged due to being non-empty
+  EXPECT_EQ(map_field.default_value()->kind(), t_const_value::CV_LIST);
+  EXPECT_EQ(list_field.default_value()->kind(), t_const_value::CV_MAP);
+  EXPECT_EQ(set_field.default_value()->kind(), t_const_value::CV_MAP);
+  EXPECT_EQ(constant_value->kind(), t_const_value::CV_LIST);
+}
+
 } // namespace apache::thrift::compiler

@@ -274,7 +274,7 @@ TEST_P(HTTPServerTests, TestStopMultipleTimes) {
 TEST_P(HTTPServerTests, TestZeroThreadsMeansNumCPUs) {
   MockServerObserver mockObserver;
   serverConfig_.numIOThreads = 0;
-  auto cpuCount = folly::hardware_concurrency();
+  auto cpuCount = folly::available_concurrency();
   EXPECT_CALL(mockObserver, onThreadStart(_)).Times(folly::to<int>(cpuCount));
   EXPECT_CALL(mockObserver, onThreadStop(_)).Times(folly::to<int>(cpuCount));
 

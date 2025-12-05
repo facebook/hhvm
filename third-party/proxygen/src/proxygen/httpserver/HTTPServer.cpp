@@ -57,7 +57,7 @@ HTTPServer::HTTPServer(HTTPServerOptions options)
     : options_(std::make_shared<HTTPServerOptions>(std::move(options))) {
 
   if (options_->threads == 0) {
-    options_->threads = folly::hardware_concurrency();
+    options_->threads = folly::available_concurrency();
   }
 
   // Insert a filter to fail all the CONNECT request, if required

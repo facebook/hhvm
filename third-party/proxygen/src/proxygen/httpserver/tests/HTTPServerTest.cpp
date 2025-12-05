@@ -214,7 +214,7 @@ TEST(HttpServerStartStop, TestZeroThreadsMeansNumCPUs) {
   // threads = 0 should start num of CPUs threads
   // each calling the handlerFactory onServerStart()
   EXPECT_CALL(*rawHandlerFactory, onServerStart(testing::_))
-      .Times(folly::hardware_concurrency());
+      .Times(folly::available_concurrency());
 
   auto server = std::make_unique<HTTPServer>(std::move(options));
   auto st = std::make_unique<WaitableServerThread>(server.get());

@@ -95,7 +95,7 @@ void HTTPServer::start(
     std::shared_ptr<folly::ThreadPoolExecutor::Observer> observer) {
   folly::EventBaseManager::get()->setEventBase(&eventBase_, false);
   if (config_.numIOThreads == 0) {
-    config_.numIOThreads = folly::hardware_concurrency();
+    config_.numIOThreads = folly::available_concurrency();
   }
   folly::IOThreadPoolExecutor::Options options;
   options.setWaitForAll(true);

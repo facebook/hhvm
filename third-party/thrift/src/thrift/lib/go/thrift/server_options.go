@@ -79,16 +79,16 @@ func newServerConfig(options ...ServerOption) *serverConfig {
 // if special value of thrift.GoroutinePerRequest (-1) is passed, thrift will not use
 // a pool of workers and instead launch a goroutine per request.
 func WithNumWorkers(num int) ServerOption {
-	return func(server *serverConfig) {
-		server.numWorkers = num
+	return func(config *serverConfig) {
+		config.numWorkers = num
 	}
 }
 
 // WithConnContext adds connContext option
 // that specifies a function that modifies the context passed to procedures per connection.
 func WithConnContext(connContext ConnContextFunc) ServerOption {
-	return func(server *serverConfig) {
-		server.connContext = func(ctx context.Context, conn net.Conn) context.Context {
+	return func(config *serverConfig) {
+		config.connContext = func(ctx context.Context, conn net.Conn) context.Context {
 			ctx = WithConnInfo(ctx, conn)
 			return connContext(ctx, conn)
 		}
@@ -98,45 +98,45 @@ func WithConnContext(connContext ConnContextFunc) ServerOption {
 // WithLog allows you to over-ride the location that exceptional server events are logged.
 // The default is stderr.
 func WithLog(log func(format string, args ...any)) ServerOption {
-	return func(server *serverConfig) {
-		server.log = log
+	return func(config *serverConfig) {
+		config.log = log
 	}
 }
 
 // WithServerStats allows the user to provide stats for the server to update.
 func WithServerStats(serverStats *stats.ServerStats) ServerOption {
-	return func(server *serverConfig) {
-		server.serverStats = serverStats
+	return func(config *serverConfig) {
+		config.serverStats = serverStats
 	}
 }
 
 // WithProcessorStats allows the user to provide stats for the server to update for each processor function.
 func WithProcessorStats(processorStats map[string]*stats.TimingSeries) ServerOption {
-	return func(server *serverConfig) {
-		server.processorStats = processorStats
+	return func(config *serverConfig) {
+		config.processorStats = processorStats
 	}
 }
 
 // WithServerObserver allows the user to provide a custom ServerObserver for the server.
 func WithServerObserver(serverObserver ServerObserver) ServerOption {
-	return func(server *serverConfig) {
-		server.serverObserver = serverObserver
+	return func(config *serverConfig) {
+		config.serverObserver = serverObserver
 	}
 }
 
 // WithMaxRequests sets the maximum number of active requests before server rejects new ones.
 // A value of 0 disables overload protection (default behavior).
 func WithMaxRequests(maxRequests int64) ServerOption {
-	return func(server *serverConfig) {
-		server.maxRequests = maxRequests
+	return func(config *serverConfig) {
+		config.maxRequests = maxRequests
 	}
 }
 
 // WithLoadFn sets a custom load function for the server.
 // Needs to be very fast, because it is called on every request.
 func WithLoadFn(loadFn func() uint32) ServerOption {
-	return func(server *serverConfig) {
-		server.loadFn = loadFn
+	return func(config *serverConfig) {
+		config.loadFn = loadFn
 	}
 }
 

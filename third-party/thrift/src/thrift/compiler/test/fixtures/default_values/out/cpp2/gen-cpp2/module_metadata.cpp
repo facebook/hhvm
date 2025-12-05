@@ -133,6 +133,10 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::Str
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCollectionDefaultValues>::gen(ThriftMetadata& metadata) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    return genStructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCollectionDefaultValues>(metadata, kGenerateAll).metadata;
+  }
+
   auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCollectionDefaultValues>(metadata, {.genAnnotations = folly::kIsDebug});
   if (res.preExists) {
     return res.metadata;

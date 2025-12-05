@@ -38,6 +38,10 @@ class THttpClient : public THttpTransport {
   THttpClient(const std::string& host, int port, const std::string& path);
 
   ~THttpClient() override;
+  THttpClient(const THttpClient&) = delete;
+  THttpClient& operator=(const THttpClient&) = delete;
+  THttpClient(THttpClient&&) = delete;
+  THttpClient& operator=(THttpClient&&) = delete;
 
   void setUserAgent(const std::string&);
 

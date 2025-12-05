@@ -25,15 +25,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#if defined USE_FOLLY_SYMBOLIZER
-
-#include <folly/experimental/symbolizer/Symbolizer.h>
-
-#elif defined HAVE_LIBBFD
-
-#include <bfd.h>
-
-#endif
+#include <folly/debugging/symbolizer/Symbolizer.h>
 
 #include <folly/portability/Unistd.h>
 #include <folly/Demangle.h>
@@ -115,8 +107,6 @@ void DebugInfo::generatePidMapOverlay() {
   };
   std::vector<SymInfo> sorted;
 
-#if defined USE_FOLLY_SYMBOLIZER
-
   auto self = current_executable_path();
   using folly::symbolizer::ElfFile;
   ElfFile file;
@@ -140,51 +130,6 @@ void DebugInfo::generatePidMapOverlay() {
     });
     return false;
   });
-
-#elif defined HAVE_LIBBFD
-
-  auto self = current_executable_path();
-  bfd* abfd = bfd_openr(self.c_str(), nullptr);
-#ifdef BFD_DECOMPRESS
-  abfd->flags |= BFD_DECOMPRESS;
-#endif
-  SCOPE_EXIT { bfd_close(abfd); };
-  char **match = nullptr;
-  if (bfd_check_format(abfd, bfd_archive) ||
-      !bfd_check_format_matches(abfd, bfd_object, &match)) {
-    return;
-  }
-
-  long storage_needed = bfd_get_symtab_upper_bound (abfd);
-
-  if (storage_needed <= 0) return;
-
-  auto symbol_table = (asymbol**)malloc(storage_needed);
-
-  SCOPE_EXIT { free(symbol_table); free(match); };
-
-  long number_of_symbols = bfd_canonicalize_symtab(abfd, symbol_table);
-
-  for (long i = 0; i < number_of_symbols; i++) {
-    auto sym = symbol_table[i];
-    if (sym->flags &
-        (BSF_INDIRECT |
-         BSF_SECTION_SYM |
-         BSF_FILE |
-         BSF_DEBUGGING_RELOC |
-         BSF_OBJECT)) {
-      continue;
-    }
-    auto sec = sym->section;
-    if (!(sec->flags & (SEC_ALLOC|SEC_LOAD|SEC_CODE))) continue;
-    auto addr = sec->vma + sym->value;
-    if (addr < uintptr_t(pidMapOverlayStart) ||
-        addr >= uintptr_t(pidMapOverlayEnd)) {
-      continue;
-    }
-    sorted.push_back(SymInfo{sym->name, addr, 0});
-  }
-#endif // HAVE_LIBBFD
 
   std::sort(
     sorted.begin(), sorted.end(),

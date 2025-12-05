@@ -65,6 +65,8 @@ class ClientConnectionIf {
 
   ClientConnectionIf(const ClientConnectionIf&) = delete;
   ClientConnectionIf& operator=(const ClientConnectionIf&) = delete;
+  ClientConnectionIf(ClientConnectionIf&&) = delete;
+  ClientConnectionIf& operator=(ClientConnectionIf&&) = delete;
 
   // Returns a channel object for use on a single RPC.  Throws
   // TTransportException if a channel object cannot be returned.

@@ -17,7 +17,6 @@
   "dependencies": {
     "@docusaurus/core": "^3.9.2",
     "@docusaurus/preset-classic": "^3.9.2",
-    "@docusaurus/theme-mermaid": "^3.9.2",
     "@mdx-js/react": "^3.1.0",
     "clsx": "^1.2.1",
     "docusaurus-plugin-internaldocs-fb": "^1.19.1",

@@ -7,7 +7,6 @@
 const lightCodeTheme = require('prism-react-renderer').themes.github;
 const darkCodeTheme = require('prism-react-renderer').themes.vsDark;
 
-// With JSDoc @type annotations, IDEs can provide config autocompletion
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
 (module.exports = {
   title: 'Hack & HHVM Documentation',
@@ -103,6 +102,7 @@ const darkCodeTheme = require('prism-react-renderer').themes.vsDark;
           src: 'img/meta_open_source_logo.svg',
           target: '_blank',
           href: 'https://opensource.fb.com/',
+          height: 60,
         },
         links: [
           {

@@ -2,13 +2,6 @@
  * (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
  */
 
-/**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
- */
-
-/* You can override the default Infima variables here. */
 :root {
   --ifm-code-font-size: 95%;
   --ifm-color-primary: #fb721d;
@@ -50,6 +43,29 @@ html[data-theme='dark'] .main-wrapper {
   background-color: var(--ifm-navbar-background-color);
 }
 
-.footer {
+html[data-theme='dark'] .footer {
   background-color: #242424;
+}
+
+html[data-theme='light'] .footer {
+  border-top: 1px solid #d8d8d8;
+  background-color: #eaeaea;
+  background-image: url('/img/footer-bg.png');
+  color: #000;
+}
+
+html[data-theme='light'] .footer__title {
+  color: #101010;
+}
+
+html[data-theme='light'] .footer a {
+  color: #303030;
+}
+
+html[data-theme='light'] .footer__copyright {
+  color: #303030;
+}
+
+.footer__bottom > div > a {
+  opacity: 0.8;
 }

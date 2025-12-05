@@ -2,7 +2,12 @@
 <defs>
     <style>
         .meta-text {
-            fill: rgba(255, 255, 255, 0.7);
+            fill: rgba(0, 0, 0, 0.7);
+        }
+        @media (prefers-color-scheme: dark) {
+            .meta-text {
+                fill: rgba(255, 255, 255, 0.7);
+            }
         }
     </style>
   </defs>

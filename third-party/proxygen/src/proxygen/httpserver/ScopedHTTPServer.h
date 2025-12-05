@@ -116,14 +116,14 @@ class ScopedHTTPServer final {
    * Get the port the server is listening on. This is helpful if the port was
    * randomly chosen.
    */
-  int getPort() const {
+  [[nodiscard]] int getPort() const {
     return getAddresses()[0].address.getPort();
   }
 
   /**
    * Get the addresses for the server.
    */
-  std::vector<HTTPServer::IPConfig> getAddresses() const {
+  [[nodiscard]] std::vector<HTTPServer::IPConfig> getAddresses() const {
     auto addresses = server_->addresses();
     CHECK(!addresses.empty());
     return addresses;

@@ -87,12 +87,12 @@ class ResponseHandler {
   }
 
   // Accessors for Transport/Connection information
-  virtual const wangle::TransportInfo& getSetupTransportInfo()
+  [[nodiscard]] virtual const wangle::TransportInfo& getSetupTransportInfo()
       const noexcept = 0;
 
   virtual void getCurrentTransportInfo(wangle::TransportInfo* tinfo) const = 0;
 
-  HTTPTransaction* getTransaction() const noexcept {
+  [[nodiscard]] HTTPTransaction* getTransaction() const noexcept {
     return txn_;
   }
 

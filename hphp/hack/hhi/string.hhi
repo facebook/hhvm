@@ -3,7 +3,7 @@
 namespace HH {
 
   <<__SupportDynamicType>>
-  class string {
+  final class string {
   }
 
 }

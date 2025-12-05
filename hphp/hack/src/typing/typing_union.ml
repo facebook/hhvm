@@ -823,6 +823,9 @@ let normalize_union env ?on_tyvar tyl :
 let rec is_minimal env ty =
   match get_node ty with
   | Tclass (_, Exact, []) -> true
+  | Tclass ((_, name), _, _)
+    when String.equal Naming_special_names.Classes.cString name ->
+    false
   | Tclass ((_, name), _, []) -> begin
     match Env.get_class env name with
     | Decl_entry.Found cd -> Cls.final cd

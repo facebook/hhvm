@@ -8,8 +8,9 @@ newtype StrID as ID_of<string> = string;
 <?hh
 
 function f((string | StrID) $x): void {
-  // check that the union is simplified. If we make string a final class, it
-  // won't be, at least for union_list entrypoints
+  // check that the union is simplified. Even though we make string a final class, it
+  // shouldn't be consdered as such for the is_minimal helper in Typing_union, which is used in
+  // union_list entrypoints used to simplify the explicit union syntax (and other places too)
   hh_show($x);
 }
 

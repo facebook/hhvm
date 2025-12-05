@@ -197,10 +197,10 @@ File ctor_generic.php, line 19, character 56 - line 19, character 61:
 
 which is defined here
 
-File string.hhi, line 6, character 9 - line 6, character 14:
+File string.hhi, line 6, character 15 - line 6, character 20:
 
  5 |   <<__SupportDynamicType>>
- 6 |   class »string« {
+ 6 |   final class »string« {
  7 |   }
  8 | 
  9 | }

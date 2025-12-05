@@ -232,10 +232,10 @@ File optional_sub_newtype_if_unsat.php, line 7, character 15 - line 7, character
 
 which is defined here
 
-File string.hhi, line 6, character 9 - line 6, character 14:
+File string.hhi, line 6, character 15 - line 6, character 20:
 
  5 |   <<__SupportDynamicType>>
- 6 |   class »string« {
+ 6 |   final class »string« {
  7 |   }
  8 | 
  9 | }
@@ -484,10 +484,10 @@ File optional_sub_newtype_if_unsat.php, line 7, character 15 - line 7, character
 
 which is defined here
 
-File string.hhi, line 6, character 9 - line 6, character 14:
+File string.hhi, line 6, character 15 - line 6, character 20:
 
  5 |   <<__SupportDynamicType>>
- 6 |   class »string« {
+ 6 |   final class »string« {
  7 |   }
  8 | 
  9 | }
@@ -848,10 +848,10 @@ File optional_sub_newtype_if_unsat.php, line 7, character 15 - line 7, character
 
 which is defined here
 
-File string.hhi, line 6, character 9 - line 6, character 14:
+File string.hhi, line 6, character 15 - line 6, character 20:
 
  5 |   <<__SupportDynamicType>>
- 6 |   class »string« {
+ 6 |   final class »string« {
  7 |   }
  8 | 
  9 | }

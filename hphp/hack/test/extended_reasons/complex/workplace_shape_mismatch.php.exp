@@ -632,10 +632,10 @@ File workplace_shape_mismatch.php, line 19, character 19 - line 19, character 24
 
 which is defined here
 
-File string.hhi, line 6, character 9 - line 6, character 14:
+File string.hhi, line 6, character 15 - line 6, character 20:
 
  5 |   <<__SupportDynamicType>>
- 6 |   class »string« {
+ 6 |   final class »string« {
  7 |   }
  8 | 
  9 | }
@@ -1558,10 +1558,10 @@ File workplace_shape_mismatch.php, line 17, character 30 - line 17, character 35
 
 which is defined here
 
-File string.hhi, line 6, character 9 - line 6, character 14:
+File string.hhi, line 6, character 15 - line 6, character 20:
 
  5 |   <<__SupportDynamicType>>
- 6 |   class »string« {
+ 6 |   final class »string« {
  7 |   }
  8 | 
  9 | }
@@ -1988,10 +1988,10 @@ File workplace_shape_mismatch.php, line 21, character 24 - line 21, character 29
 
 which is defined here
 
-File string.hhi, line 6, character 9 - line 6, character 14:
+File string.hhi, line 6, character 15 - line 6, character 20:
 
  5 |   <<__SupportDynamicType>>
- 6 |   class »string« {
+ 6 |   final class »string« {
  7 |   }
  8 | 
  9 | }
@@ -2209,10 +2209,10 @@ File workplace_shape_mismatch.php, line 20, character 27 - line 20, character 32
 
 which is defined here
 
-File string.hhi, line 6, character 9 - line 6, character 14:
+File string.hhi, line 6, character 15 - line 6, character 20:
 
  5 |   <<__SupportDynamicType>>
- 6 |   class »string« {
+ 6 |   final class »string« {
  7 |   }
  8 | 
  9 | }
@@ -2430,10 +2430,10 @@ File workplace_shape_mismatch.php, line 10, character 16 - line 10, character 21
 
 which is defined here
 
-File string.hhi, line 6, character 9 - line 6, character 14:
+File string.hhi, line 6, character 15 - line 6, character 20:
 
  5 |   <<__SupportDynamicType>>
- 6 |   class »string« {
+ 6 |   final class »string« {
  7 |   }
  8 | 
  9 | }
@@ -3751,10 +3751,10 @@ File workplace_shape_mismatch.php, line 12, character 13 - line 12, character 18
 
 which is defined here
 
-File string.hhi, line 6, character 9 - line 6, character 14:
+File string.hhi, line 6, character 15 - line 6, character 20:
 
  5 |   <<__SupportDynamicType>>
- 6 |   class »string« {
+ 6 |   final class »string« {
  7 |   }
  8 | 
  9 | }

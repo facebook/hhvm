@@ -1,12 +1,12 @@
 ERROR: File "string_no_members.php", line 4, characters 11-15:
 No class constant `class` in `string` (Typing[4090])
-  File "string.hhi", line 6, characters 9-14:
+  File "string.hhi", line 6, characters 15-20:
   Declaration of `string` is here
 ERROR: File "string_no_members.php", line 5, characters 11-11:
 No class constant `T` in `string` (Typing[4090])
-  File "string.hhi", line 6, characters 9-14:
+  File "string.hhi", line 6, characters 15-20:
   Declaration of `string` is here
 ERROR: File "string_no_members.php", line 6, characters 11-11:
 No static method `m` in `string` (Typing[4090])
-  File "string.hhi", line 6, characters 9-14:
+  File "string.hhi", line 6, characters 15-20:
   Declaration of `string` is here

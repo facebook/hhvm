@@ -19,6 +19,7 @@ namespace default_values {
   ::apache::thrift::detail::md::StructMetadata<TrivialStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<StructWithNoCustomDefaultValues>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<StructWithCustomDefaultValues>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<StructWithCollectionDefaultValues>::gen(metadata);
   return metadata;
 }
 } // namespace facebook

@@ -48,6 +48,41 @@ var (
                 NewFunc:    func() thrift.Struct { return NewStructWithCustomDefaultValues() },
             },
     }
+    premadeCodecTypeSpec_list_i32 = &thrift.TypeSpec{
+        FullName: "list<i32>",
+        CodecListSpec:
+            &thrift.CodecListSpec{
+                ElementWireType: thrift.I32,
+                ElementTypeSpec: premadeCodecTypeSpec_i32,
+            },
+    }
+    premadeCodecTypeSpec_set_i32 = &thrift.TypeSpec{
+        FullName: "set<i32>",
+        CodecSetSpec:
+            &thrift.CodecSetSpec{
+                ElementWireType: thrift.I32,
+                ElementTypeSpec: premadeCodecTypeSpec_i32,
+            },
+    }
+    premadeCodecTypeSpec_map_i32_i32 = &thrift.TypeSpec{
+        FullName: "map<i32, i32>",
+        CodecMapSpec:
+            &thrift.CodecMapSpec{
+                KeyTypeSpec:   premadeCodecTypeSpec_i32,
+                ValueTypeSpec: premadeCodecTypeSpec_i32,
+                KeyWireType:   thrift.I32,
+                ValueWireType: thrift.I32,
+            },
+    }
+    premadeCodecTypeSpec_module_StructWithCollectionDefaultValues = &thrift.TypeSpec{
+        FullName: "module.StructWithCollectionDefaultValues",
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "module.StructWithCollectionDefaultValues",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewStructWithCollectionDefaultValues() },
+            },
+    }
 )
 
 // Premade struct specs
@@ -234,6 +269,85 @@ var (
                 "required_struct": 5,
             },
         }
+    premadeStructSpec_StructWithCollectionDefaultValues =
+        &thrift.StructSpec{
+            Name:                 "StructWithCollectionDefaultValues",
+            ScopedName:           "module.StructWithCollectionDefaultValues",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.LIST,
+                    Name:                 "list_with_list_value",
+                    ReflectIndex:         0,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_list_i32,
+                    MustBeSetToSerialize: false,
+                },
+                {
+                    ID:                   2,
+                    WireType:             thrift.SET,
+                    Name:                 "set_with_list_value",
+                    ReflectIndex:         1,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_set_i32,
+                    MustBeSetToSerialize: false,
+                },
+                {
+                    ID:                   3,
+                    WireType:             thrift.MAP,
+                    Name:                 "map_with_map_value",
+                    ReflectIndex:         2,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_map_i32_i32,
+                    MustBeSetToSerialize: false,
+                },
+                {
+                    ID:                   4,
+                    WireType:             thrift.LIST,
+                    Name:                 "list_with_map_value",
+                    ReflectIndex:         3,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_list_i32,
+                    MustBeSetToSerialize: false,
+                },
+                {
+                    ID:                   5,
+                    WireType:             thrift.SET,
+                    Name:                 "set_with_map_value",
+                    ReflectIndex:         4,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_set_i32,
+                    MustBeSetToSerialize: false,
+                },
+                {
+                    ID:                   6,
+                    WireType:             thrift.MAP,
+                    Name:                 "map_with_list_value",
+                    ReflectIndex:         5,
+                    IsOptional:           false,
+                    ValueTypeSpec:        premadeCodecTypeSpec_map_i32_i32,
+                    MustBeSetToSerialize: false,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+                2: 1,
+                3: 2,
+                4: 3,
+                5: 4,
+                6: 5,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "list_with_list_value": 0,
+                "set_with_list_value": 1,
+                "map_with_map_value": 2,
+                "list_with_map_value": 3,
+                "set_with_map_value": 4,
+                "map_with_list_value": 5,
+            },
+        }
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
@@ -242,6 +356,7 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_TrivialStruct.FullName] = premadeCodecTypeSpec_module_TrivialStruct
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StructWithNoCustomDefaultValues.FullName] = premadeCodecTypeSpec_module_StructWithNoCustomDefaultValues
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StructWithCustomDefaultValues.FullName] = premadeCodecTypeSpec_module_StructWithCustomDefaultValues
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StructWithCollectionDefaultValues.FullName] = premadeCodecTypeSpec_module_StructWithCollectionDefaultValues
     return fbthriftTypeSpecsMap
 }()
 

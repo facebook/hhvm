@@ -32,6 +32,11 @@ class StructMetadata<::facebook::thrift::compiler::test::fixtures::default_value
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
+template <>
+class StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCollectionDefaultValues> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
 } // namespace md
 } // namespace detail
 } // namespace thrift

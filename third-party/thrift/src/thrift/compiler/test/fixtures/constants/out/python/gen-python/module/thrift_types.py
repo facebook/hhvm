@@ -919,6 +919,12 @@ I2B = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_i32, _fbthrift_
 
 I2B_REF = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_bool, { 0: False, 1: True, 2: True, 3: False})
 
+map_list_initializer = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32, { })
+
+list_map_initializer = _fbthrift_python_types.List(_fbthrift_python_types.typeinfo_i32, ())
+
+set_map_initializer = _fbthrift_python_types.Set(_fbthrift_python_types.typeinfo_i32, ())
+
 MyStringIdentifier = str
 MyIntIdentifier = int
 MyMapIdentifier = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string)

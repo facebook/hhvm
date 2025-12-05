@@ -45,6 +45,35 @@ var (
                     Name: "module.StructWithCustomDefaultValues",
                 },
         }
+    premadeThriftType_list_i32 =
+        &metadata.ThriftType{
+            TList:
+                &metadata.ThriftListType{
+                    ValueType: premadeThriftType_i32,
+                },
+        }
+    premadeThriftType_set_i32 =
+        &metadata.ThriftType{
+            TSet:
+                &metadata.ThriftSetType{
+                    ValueType: premadeThriftType_i32,
+                },
+        }
+    premadeThriftType_map_i32_i32 =
+        &metadata.ThriftType{
+            TMap:
+                &metadata.ThriftMapType{
+                    KeyType:   premadeThriftType_i32,
+                    ValueType: premadeThriftType_i32,
+                },
+        }
+    premadeThriftType_module_StructWithCollectionDefaultValues =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.StructWithCollectionDefaultValues",
+                },
+        }
 )
 
 // Premade struct metadatas
@@ -148,6 +177,49 @@ var (
                 },
             },
         }
+    premadeStructMetadata_StructWithCollectionDefaultValues =
+        &metadata.ThriftStruct{
+            Name:    "module.StructWithCollectionDefaultValues",
+            IsUnion: false,
+            Fields:  []*metadata.ThriftField{
+                &metadata.ThriftField{
+                    Id:         1,
+                    Name:       "list_with_list_value",
+                    IsOptional: false,
+                    Type:       premadeThriftType_list_i32,
+                },
+                &metadata.ThriftField{
+                    Id:         2,
+                    Name:       "set_with_list_value",
+                    IsOptional: false,
+                    Type:       premadeThriftType_set_i32,
+                },
+                &metadata.ThriftField{
+                    Id:         3,
+                    Name:       "map_with_map_value",
+                    IsOptional: false,
+                    Type:       premadeThriftType_map_i32_i32,
+                },
+                &metadata.ThriftField{
+                    Id:         4,
+                    Name:       "list_with_map_value",
+                    IsOptional: false,
+                    Type:       premadeThriftType_list_i32,
+                },
+                &metadata.ThriftField{
+                    Id:         5,
+                    Name:       "set_with_map_value",
+                    IsOptional: false,
+                    Type:       premadeThriftType_set_i32,
+                },
+                &metadata.ThriftField{
+                    Id:         6,
+                    Name:       "map_with_list_value",
+                    IsOptional: false,
+                    Type:       premadeThriftType_map_i32_i32,
+                },
+            },
+        }
 )
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
@@ -156,6 +228,7 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap["module.TrivialStruct"] = premadeThriftType_module_TrivialStruct
     fbthriftThriftTypesMap["module.StructWithNoCustomDefaultValues"] = premadeThriftType_module_StructWithNoCustomDefaultValues
     fbthriftThriftTypesMap["module.StructWithCustomDefaultValues"] = premadeThriftType_module_StructWithCustomDefaultValues
+    fbthriftThriftTypesMap["module.StructWithCollectionDefaultValues"] = premadeThriftType_module_StructWithCollectionDefaultValues
     return fbthriftThriftTypesMap
 }()
 
@@ -164,6 +237,7 @@ var structMetadatas = func() []*metadata.ThriftStruct {
     fbthriftResults = append(fbthriftResults, premadeStructMetadata_TrivialStruct)
     fbthriftResults = append(fbthriftResults, premadeStructMetadata_StructWithNoCustomDefaultValues)
     fbthriftResults = append(fbthriftResults, premadeStructMetadata_StructWithCustomDefaultValues)
+    fbthriftResults = append(fbthriftResults, premadeStructMetadata_StructWithCollectionDefaultValues)
     return fbthriftResults
 }()
 

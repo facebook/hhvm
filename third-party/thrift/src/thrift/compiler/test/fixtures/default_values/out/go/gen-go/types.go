@@ -967,6 +967,638 @@ func (x *StructWithCustomDefaultValues) GetThriftStructMetadata() *metadata.Thri
     return premadeStructMetadata_StructWithCustomDefaultValues
 }
 
+type StructWithCollectionDefaultValues struct {
+    ListWithListValue []int32 `thrift:"list_with_list_value,1" json:"list_with_list_value" db:"list_with_list_value"`
+    SetWithListValue []int32 `thrift:"set_with_list_value,2" json:"set_with_list_value" db:"set_with_list_value"`
+    MapWithMapValue map[int32]int32 `thrift:"map_with_map_value,3" json:"map_with_map_value" db:"map_with_map_value"`
+    ListWithMapValue []int32 `thrift:"list_with_map_value,4" json:"list_with_map_value" db:"list_with_map_value"`
+    SetWithMapValue []int32 `thrift:"set_with_map_value,5" json:"set_with_map_value" db:"set_with_map_value"`
+    MapWithListValue map[int32]int32 `thrift:"map_with_list_value,6" json:"map_with_list_value" db:"map_with_list_value"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*StructWithCollectionDefaultValues)(nil)
+
+func NewStructWithCollectionDefaultValues() *StructWithCollectionDefaultValues {
+    return (&StructWithCollectionDefaultValues{}).setDefaults()
+}
+
+func (x *StructWithCollectionDefaultValues) GetListWithListValue() []int32 {
+    if !x.IsSetListWithListValue() {
+        return []int32{
+}
+    }
+    return x.ListWithListValue
+}
+
+func (x *StructWithCollectionDefaultValues) GetSetWithListValue() []int32 {
+    if !x.IsSetSetWithListValue() {
+        return []int32{
+}
+    }
+    return x.SetWithListValue
+}
+
+func (x *StructWithCollectionDefaultValues) GetMapWithMapValue() map[int32]int32 {
+    if !x.IsSetMapWithMapValue() {
+        return map[int32]int32{
+}
+    }
+    return x.MapWithMapValue
+}
+
+func (x *StructWithCollectionDefaultValues) GetListWithMapValue() []int32 {
+    if !x.IsSetListWithMapValue() {
+        return []int32{
+}
+    }
+    return x.ListWithMapValue
+}
+
+func (x *StructWithCollectionDefaultValues) GetSetWithMapValue() []int32 {
+    if !x.IsSetSetWithMapValue() {
+        return []int32{
+}
+    }
+    return x.SetWithMapValue
+}
+
+func (x *StructWithCollectionDefaultValues) GetMapWithListValue() map[int32]int32 {
+    if !x.IsSetMapWithListValue() {
+        return map[int32]int32{
+}
+    }
+    return x.MapWithListValue
+}
+
+func (x *StructWithCollectionDefaultValues) SetListWithListValueNonCompat(value []int32) *StructWithCollectionDefaultValues {
+    x.ListWithListValue = value
+    return x
+}
+
+func (x *StructWithCollectionDefaultValues) SetListWithListValue(value []int32) *StructWithCollectionDefaultValues {
+    x.ListWithListValue = value
+    return x
+}
+
+func (x *StructWithCollectionDefaultValues) SetSetWithListValueNonCompat(value []int32) *StructWithCollectionDefaultValues {
+    x.SetWithListValue = value
+    return x
+}
+
+func (x *StructWithCollectionDefaultValues) SetSetWithListValue(value []int32) *StructWithCollectionDefaultValues {
+    x.SetWithListValue = value
+    return x
+}
+
+func (x *StructWithCollectionDefaultValues) SetMapWithMapValueNonCompat(value map[int32]int32) *StructWithCollectionDefaultValues {
+    x.MapWithMapValue = value
+    return x
+}
+
+func (x *StructWithCollectionDefaultValues) SetMapWithMapValue(value map[int32]int32) *StructWithCollectionDefaultValues {
+    x.MapWithMapValue = value
+    return x
+}
+
+func (x *StructWithCollectionDefaultValues) SetListWithMapValueNonCompat(value []int32) *StructWithCollectionDefaultValues {
+    x.ListWithMapValue = value
+    return x
+}
+
+func (x *StructWithCollectionDefaultValues) SetListWithMapValue(value []int32) *StructWithCollectionDefaultValues {
+    x.ListWithMapValue = value
+    return x
+}
+
+func (x *StructWithCollectionDefaultValues) SetSetWithMapValueNonCompat(value []int32) *StructWithCollectionDefaultValues {
+    x.SetWithMapValue = value
+    return x
+}
+
+func (x *StructWithCollectionDefaultValues) SetSetWithMapValue(value []int32) *StructWithCollectionDefaultValues {
+    x.SetWithMapValue = value
+    return x
+}
+
+func (x *StructWithCollectionDefaultValues) SetMapWithListValueNonCompat(value map[int32]int32) *StructWithCollectionDefaultValues {
+    x.MapWithListValue = value
+    return x
+}
+
+func (x *StructWithCollectionDefaultValues) SetMapWithListValue(value map[int32]int32) *StructWithCollectionDefaultValues {
+    x.MapWithListValue = value
+    return x
+}
+
+func (x *StructWithCollectionDefaultValues) IsSetListWithListValue() bool {
+    return x != nil && x.ListWithListValue != nil
+}
+
+func (x *StructWithCollectionDefaultValues) IsSetSetWithListValue() bool {
+    return x != nil && x.SetWithListValue != nil
+}
+
+func (x *StructWithCollectionDefaultValues) IsSetMapWithMapValue() bool {
+    return x != nil && x.MapWithMapValue != nil
+}
+
+func (x *StructWithCollectionDefaultValues) IsSetListWithMapValue() bool {
+    return x != nil && x.ListWithMapValue != nil
+}
+
+func (x *StructWithCollectionDefaultValues) IsSetSetWithMapValue() bool {
+    return x != nil && x.SetWithMapValue != nil
+}
+
+func (x *StructWithCollectionDefaultValues) IsSetMapWithListValue() bool {
+    return x != nil && x.MapWithListValue != nil
+}
+
+func (x *StructWithCollectionDefaultValues) writeField1(p thrift.Encoder) error {  // ListWithListValue
+    if err := p.WriteFieldBegin("list_with_list_value", thrift.LIST, 1); err != nil {
+        return thrift.PrependError("StructWithCollectionDefaultValues write field begin error: ", err)
+    }
+
+    item := x.ListWithListValue
+    if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
+        return thrift.PrependError("error writing list begin: ", err)
+    }
+    for _, v := range item {
+        {
+            item := v
+            if err := p.WriteI32(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteListEnd(); err != nil {
+        return thrift.PrependError("error writing list end: ", err)
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("StructWithCollectionDefaultValues write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *StructWithCollectionDefaultValues) writeField2(p thrift.Encoder) error {  // SetWithListValue
+    if err := p.WriteFieldBegin("set_with_list_value", thrift.SET, 2); err != nil {
+        return thrift.PrependError("StructWithCollectionDefaultValues write field begin error: ", err)
+    }
+
+    item := x.SetWithListValue
+    if err := p.WriteSetBegin(thrift.I32, len(item)); err != nil {
+        return thrift.PrependError("error writing set begin: ", err)
+    }
+    for _, v := range item {
+        {
+            item := v
+            if err := p.WriteI32(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteSetEnd(); err != nil {
+        return thrift.PrependError("error writing set end: ", err)
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("StructWithCollectionDefaultValues write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *StructWithCollectionDefaultValues) writeField3(p thrift.Encoder) error {  // MapWithMapValue
+    if err := p.WriteFieldBegin("map_with_map_value", thrift.MAP, 3); err != nil {
+        return thrift.PrependError("StructWithCollectionDefaultValues write field begin error: ", err)
+    }
+
+    item := x.MapWithMapValue
+    if err := p.WriteMapBegin(thrift.I32, thrift.I32, len(item)); err != nil {
+        return thrift.PrependError("error writing map begin: ", err)
+    }
+    for k, v := range item {
+        {
+            item := k
+            if err := p.WriteI32(item); err != nil {
+                return err
+            }
+        }
+    
+        {
+            item := v
+            if err := p.WriteI32(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteMapEnd(); err != nil {
+        return thrift.PrependError("error writing map end: ", err)
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("StructWithCollectionDefaultValues write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *StructWithCollectionDefaultValues) writeField4(p thrift.Encoder) error {  // ListWithMapValue
+    if err := p.WriteFieldBegin("list_with_map_value", thrift.LIST, 4); err != nil {
+        return thrift.PrependError("StructWithCollectionDefaultValues write field begin error: ", err)
+    }
+
+    item := x.ListWithMapValue
+    if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
+        return thrift.PrependError("error writing list begin: ", err)
+    }
+    for _, v := range item {
+        {
+            item := v
+            if err := p.WriteI32(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteListEnd(); err != nil {
+        return thrift.PrependError("error writing list end: ", err)
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("StructWithCollectionDefaultValues write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *StructWithCollectionDefaultValues) writeField5(p thrift.Encoder) error {  // SetWithMapValue
+    if err := p.WriteFieldBegin("set_with_map_value", thrift.SET, 5); err != nil {
+        return thrift.PrependError("StructWithCollectionDefaultValues write field begin error: ", err)
+    }
+
+    item := x.SetWithMapValue
+    if err := p.WriteSetBegin(thrift.I32, len(item)); err != nil {
+        return thrift.PrependError("error writing set begin: ", err)
+    }
+    for _, v := range item {
+        {
+            item := v
+            if err := p.WriteI32(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteSetEnd(); err != nil {
+        return thrift.PrependError("error writing set end: ", err)
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("StructWithCollectionDefaultValues write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *StructWithCollectionDefaultValues) writeField6(p thrift.Encoder) error {  // MapWithListValue
+    if err := p.WriteFieldBegin("map_with_list_value", thrift.MAP, 6); err != nil {
+        return thrift.PrependError("StructWithCollectionDefaultValues write field begin error: ", err)
+    }
+
+    item := x.MapWithListValue
+    if err := p.WriteMapBegin(thrift.I32, thrift.I32, len(item)); err != nil {
+        return thrift.PrependError("error writing map begin: ", err)
+    }
+    for k, v := range item {
+        {
+            item := k
+            if err := p.WriteI32(item); err != nil {
+                return err
+            }
+        }
+    
+        {
+            item := v
+            if err := p.WriteI32(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteMapEnd(); err != nil {
+        return thrift.PrependError("error writing map end: ", err)
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("StructWithCollectionDefaultValues write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *StructWithCollectionDefaultValues) readField1(p thrift.Decoder) error {  // ListWithListValue
+    _ /* elemType */, size, err := p.ReadListBegin()
+    if err != nil {
+        return thrift.PrependError("error reading list begin: ", err)
+    }
+    
+    listResult := make([]int32, 0, size)
+    for i := 0; i < size; i++ {
+        var elem int32
+        {
+            result, err := p.ReadI32()
+            if err != nil {
+                return err
+            }
+            elem = result
+        }
+        listResult = append(listResult, elem)
+    }
+    
+    if err := p.ReadListEnd(); err != nil {
+        return thrift.PrependError("error reading list end: ", err)
+    }
+    result := listResult
+
+    x.ListWithListValue = result
+    return nil
+}
+
+func (x *StructWithCollectionDefaultValues) readField2(p thrift.Decoder) error {  // SetWithListValue
+    _ /* elemType */, size, err := p.ReadSetBegin()
+    if err != nil {
+        return thrift.PrependError("error reading set begin: ", err)
+    }
+    
+    setResult := make([]int32, 0, size)
+    for i := 0; i < size; i++ {
+        var elem int32
+        {
+            result, err := p.ReadI32()
+            if err != nil {
+                return err
+            }
+            elem = result
+        }
+        setResult = append(setResult, elem)
+    }
+    
+    if err := p.ReadSetEnd(); err != nil {
+        return thrift.PrependError("error reading set end: ", err)
+    }
+    result := setResult
+
+    x.SetWithListValue = result
+    return nil
+}
+
+func (x *StructWithCollectionDefaultValues) readField3(p thrift.Decoder) error {  // MapWithMapValue
+    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
+    if err != nil {
+        return thrift.PrependError("error reading map begin: ", err)
+    }
+    
+    mapResult := make(map[int32]int32, size)
+    for i := 0; i < size; i++ {
+        var key int32
+        {
+            result, err := p.ReadI32()
+            if err != nil {
+                return err
+            }
+            key = result
+        }
+    
+        var value int32
+        {
+            result, err := p.ReadI32()
+            if err != nil {
+                return err
+            }
+            value = result
+        }
+    
+        mapResult[key] = value
+    }
+    
+    if err := p.ReadMapEnd(); err != nil {
+        return thrift.PrependError("error reading map end: ", err)
+    }
+    result := mapResult
+
+    x.MapWithMapValue = result
+    return nil
+}
+
+func (x *StructWithCollectionDefaultValues) readField4(p thrift.Decoder) error {  // ListWithMapValue
+    _ /* elemType */, size, err := p.ReadListBegin()
+    if err != nil {
+        return thrift.PrependError("error reading list begin: ", err)
+    }
+    
+    listResult := make([]int32, 0, size)
+    for i := 0; i < size; i++ {
+        var elem int32
+        {
+            result, err := p.ReadI32()
+            if err != nil {
+                return err
+            }
+            elem = result
+        }
+        listResult = append(listResult, elem)
+    }
+    
+    if err := p.ReadListEnd(); err != nil {
+        return thrift.PrependError("error reading list end: ", err)
+    }
+    result := listResult
+
+    x.ListWithMapValue = result
+    return nil
+}
+
+func (x *StructWithCollectionDefaultValues) readField5(p thrift.Decoder) error {  // SetWithMapValue
+    _ /* elemType */, size, err := p.ReadSetBegin()
+    if err != nil {
+        return thrift.PrependError("error reading set begin: ", err)
+    }
+    
+    setResult := make([]int32, 0, size)
+    for i := 0; i < size; i++ {
+        var elem int32
+        {
+            result, err := p.ReadI32()
+            if err != nil {
+                return err
+            }
+            elem = result
+        }
+        setResult = append(setResult, elem)
+    }
+    
+    if err := p.ReadSetEnd(); err != nil {
+        return thrift.PrependError("error reading set end: ", err)
+    }
+    result := setResult
+
+    x.SetWithMapValue = result
+    return nil
+}
+
+func (x *StructWithCollectionDefaultValues) readField6(p thrift.Decoder) error {  // MapWithListValue
+    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
+    if err != nil {
+        return thrift.PrependError("error reading map begin: ", err)
+    }
+    
+    mapResult := make(map[int32]int32, size)
+    for i := 0; i < size; i++ {
+        var key int32
+        {
+            result, err := p.ReadI32()
+            if err != nil {
+                return err
+            }
+            key = result
+        }
+    
+        var value int32
+        {
+            result, err := p.ReadI32()
+            if err != nil {
+                return err
+            }
+            value = result
+        }
+    
+        mapResult[key] = value
+    }
+    
+    if err := p.ReadMapEnd(); err != nil {
+        return thrift.PrependError("error reading map end: ", err)
+    }
+    result := mapResult
+
+    x.MapWithListValue = result
+    return nil
+}
+
+
+
+func (x *StructWithCollectionDefaultValues) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("StructWithCollectionDefaultValues"); err != nil {
+        return thrift.PrependError("StructWithCollectionDefaultValues write struct begin error: ", err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+    if err := x.writeField2(p); err != nil {
+        return err
+    }
+    if err := x.writeField3(p); err != nil {
+        return err
+    }
+    if err := x.writeField4(p); err != nil {
+        return err
+    }
+    if err := x.writeField5(p); err != nil {
+        return err
+    }
+    if err := x.writeField6(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("StructWithCollectionDefaultValues write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("StructWithCollectionDefaultValues write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *StructWithCollectionDefaultValues) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("StructWithCollectionDefaultValues read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("StructWithCollectionDefaultValues field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 1 && wireType == thrift.LIST) || (id == thrift.NO_FIELD_ID && fieldName == "list_with_list_value")):  // list_with_list_value
+            fieldReadErr = x.readField1(p)
+        case ((id == 2 && wireType == thrift.SET) || (id == thrift.NO_FIELD_ID && fieldName == "set_with_list_value")):  // set_with_list_value
+            fieldReadErr = x.readField2(p)
+        case ((id == 3 && wireType == thrift.MAP) || (id == thrift.NO_FIELD_ID && fieldName == "map_with_map_value")):  // map_with_map_value
+            fieldReadErr = x.readField3(p)
+        case ((id == 4 && wireType == thrift.LIST) || (id == thrift.NO_FIELD_ID && fieldName == "list_with_map_value")):  // list_with_map_value
+            fieldReadErr = x.readField4(p)
+        case ((id == 5 && wireType == thrift.SET) || (id == thrift.NO_FIELD_ID && fieldName == "set_with_map_value")):  // set_with_map_value
+            fieldReadErr = x.readField5(p)
+        case ((id == 6 && wireType == thrift.MAP) || (id == thrift.NO_FIELD_ID && fieldName == "map_with_list_value")):  // map_with_list_value
+            fieldReadErr = x.readField6(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("StructWithCollectionDefaultValues read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *StructWithCollectionDefaultValues) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *StructWithCollectionDefaultValues) setDefaults() *StructWithCollectionDefaultValues {
+    return x.
+        SetListWithListValueNonCompat(
+              []int32{
+},
+          ).
+        SetSetWithListValueNonCompat(
+              []int32{
+},
+          ).
+        SetMapWithMapValueNonCompat(
+              map[int32]int32{
+},
+          ).
+        SetListWithMapValueNonCompat(
+              []int32{
+},
+          ).
+        SetSetWithMapValueNonCompat(
+              []int32{
+},
+          ).
+        SetMapWithListValueNonCompat(
+              map[int32]int32{
+},
+          )
+}
+
+func (x *StructWithCollectionDefaultValues) GetThriftStructMetadata() *metadata.ThriftStruct {
+    return premadeStructMetadata_StructWithCollectionDefaultValues
+}
+
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
@@ -975,5 +1607,6 @@ func RegisterTypes(registry interface {
     registry.RegisterType("facebook.com/thrift/compiler/test/fixtures/default_values/TrivialStruct", func() any { return NewTrivialStruct() })
     registry.RegisterType("facebook.com/thrift/compiler/test/fixtures/default_values/StructWithNoCustomDefaultValues", func() any { return NewStructWithNoCustomDefaultValues() })
     registry.RegisterType("facebook.com/thrift/compiler/test/fixtures/default_values/StructWithCustomDefaultValues", func() any { return NewStructWithCustomDefaultValues() })
+    registry.RegisterType("facebook.com/thrift/compiler/test/fixtures/default_values/StructWithCollectionDefaultValues", func() any { return NewStructWithCollectionDefaultValues() })
 
 }

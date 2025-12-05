@@ -131,6 +131,36 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::Str
   ));
   return res.metadata;
 }
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCollectionDefaultValues>::gen(ThriftMetadata& metadata) {
+  auto res = genStructMetadata<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCollectionDefaultValues>(metadata, {.genAnnotations = folly::kIsDebug});
+  if (res.preExists) {
+    return res.metadata;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_StructWithCollectionDefaultValues = res.metadata;
+  DCHECK_EQ(*module_StructWithCollectionDefaultValues.is_union(), false);
+  static const auto* const
+  module_StructWithCollectionDefaultValues_fields = new std::array<EncodedThriftField, 6>{ {
+    { 1, "list_with_list_value", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 2, "set_with_list_value", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 3, "map_with_map_value", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 4, "list_with_map_value", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 5, "set_with_map_value", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},    { 6, "map_with_list_value", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ }},  }};
+  std::size_t i = 0;
+  for (const auto& f : *module_StructWithCollectionDefaultValues_fields) {
+    genStructFieldMetadata<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCollectionDefaultValues>(module_StructWithCollectionDefaultValues.fields()[i], f, i);
+
+    // writeAndGenType will modify metadata, which might invalidate `field` reference
+    // We need to store the result in a separate `type` variable.
+    apache::thrift::metadata::ThriftType type;
+    f.metadata_type_interface->writeAndGenType(type, metadata);
+    module_StructWithCollectionDefaultValues.fields()[i++].type() = std::move(type);
+  }
+  [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
+  res.metadata.structured_annotations()->clear();
+  DCHECK(structuredAnnotationsEquality(
+    *res.metadata.structured_annotations(),
+    newAnnotations,
+    getAnnotationTypes<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCollectionDefaultValues>()
+  ));
+  return res.metadata;
+}
 
 } // namespace md
 } // namespace detail

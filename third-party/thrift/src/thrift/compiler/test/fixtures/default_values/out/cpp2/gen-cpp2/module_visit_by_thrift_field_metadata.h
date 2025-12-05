@@ -71,6 +71,29 @@ struct VisitByFieldId<::facebook::thrift::compiler::test::fixtures::default_valu
     }
   }
 };
+
+template <>
+struct VisitByFieldId<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCollectionDefaultValues> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).list_with_list_value_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).set_with_list_value_ref());
+    case 3:
+      return f(2, static_cast<T&&>(t).map_with_map_value_ref());
+    case 4:
+      return f(3, static_cast<T&&>(t).list_with_map_value_ref());
+    case 5:
+      return f(4, static_cast<T&&>(t).set_with_map_value_ref());
+    case 6:
+      return f(5, static_cast<T&&>(t).map_with_list_value_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::facebook::thrift::compiler::test::fixtures::default_values::StructWithCollectionDefaultValues");
+    }
+  }
+};
 } // namespace detail
 } // namespace thrift
 } // namespace apache

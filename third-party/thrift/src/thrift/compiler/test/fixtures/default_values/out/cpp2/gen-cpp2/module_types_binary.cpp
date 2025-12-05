@@ -23,4 +23,9 @@ template uint32_t StructWithCustomDefaultValues::write<>(apache::thrift::BinaryP
 template uint32_t StructWithCustomDefaultValues::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
 template uint32_t StructWithCustomDefaultValues::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
 
+template void StructWithCollectionDefaultValues::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t StructWithCollectionDefaultValues::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t StructWithCollectionDefaultValues::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t StructWithCollectionDefaultValues::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+
 } // namespace facebook::thrift::compiler::test::fixtures::default_values

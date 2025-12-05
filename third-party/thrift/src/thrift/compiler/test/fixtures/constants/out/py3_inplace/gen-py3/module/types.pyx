@@ -165,6 +165,9 @@ minNDub = _fbthrift_types_inplace.minNDub
 minNSDub = _fbthrift_types_inplace.minNSDub
 I2B = _fbthrift_types_inplace.I2B
 I2B_REF = _fbthrift_types_inplace.I2B_REF
+map_list_initializer = _fbthrift_types_inplace.map_list_initializer
+list_map_initializer = _fbthrift_types_inplace.list_map_initializer
+set_map_initializer = _fbthrift_types_inplace.set_map_initializer
 
 MyCompany = Company
 MyStringIdentifier = str

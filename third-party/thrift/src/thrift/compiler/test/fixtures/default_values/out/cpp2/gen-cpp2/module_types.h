@@ -24,6 +24,12 @@ struct required_integer;
 struct unqualified_struct;
 struct optional_struct;
 struct required_struct;
+struct list_with_list_value;
+struct set_with_list_value;
+struct map_with_map_value;
+struct list_with_map_value;
+struct set_with_map_value;
+struct map_with_list_value;
 } // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_int_value
@@ -78,6 +84,30 @@ APACHE_THRIFT_DEFINE_ACCESSOR(optional_struct);
 #define APACHE_THRIFT_ACCESSOR_required_struct
 APACHE_THRIFT_DEFINE_ACCESSOR(required_struct);
 #endif
+#ifndef APACHE_THRIFT_ACCESSOR_list_with_list_value
+#define APACHE_THRIFT_ACCESSOR_list_with_list_value
+APACHE_THRIFT_DEFINE_ACCESSOR(list_with_list_value);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_set_with_list_value
+#define APACHE_THRIFT_ACCESSOR_set_with_list_value
+APACHE_THRIFT_DEFINE_ACCESSOR(set_with_list_value);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_map_with_map_value
+#define APACHE_THRIFT_ACCESSOR_map_with_map_value
+APACHE_THRIFT_DEFINE_ACCESSOR(map_with_map_value);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_list_with_map_value
+#define APACHE_THRIFT_ACCESSOR_list_with_map_value
+APACHE_THRIFT_DEFINE_ACCESSOR(list_with_map_value);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_set_with_map_value
+#define APACHE_THRIFT_ACCESSOR_set_with_map_value
+APACHE_THRIFT_DEFINE_ACCESSOR(set_with_map_value);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_map_with_list_value
+#define APACHE_THRIFT_ACCESSOR_map_with_list_value
+APACHE_THRIFT_DEFINE_ACCESSOR(map_with_list_value);
+#endif
 } // namespace detail
 } // namespace apache::thrift
 
@@ -88,6 +118,7 @@ namespace facebook::thrift::compiler::test::fixtures::default_values {
 class TrivialStruct;
 class StructWithNoCustomDefaultValues;
 class StructWithCustomDefaultValues;
+class StructWithCollectionDefaultValues;
 } // namespace facebook::thrift::compiler::test::fixtures::default_values
 // END forward_declare
 namespace apache::thrift::detail::annotation {
@@ -1055,22 +1086,449 @@ unsigned long StructWithCustomDefaultValues::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/default_values/src/module.thrift", "name": "StructWithCollectionDefaultValues", "kind": "struct" } */
+class StructWithCollectionDefaultValues final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "facebook.com/thrift/compiler/test/fixtures/default_values/StructWithCollectionDefaultValues";
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
+  static constexpr std::size_t __fbthrift_num_fields = 6;
+
+  static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0,1,2,3,4,5,6};
+
+  using __fbthrift_reflection_idents = folly::tag_t<
+    ::apache::thrift::ident::list_with_list_value,
+    ::apache::thrift::ident::set_with_list_value,
+    ::apache::thrift::ident::map_with_map_value,
+    ::apache::thrift::ident::list_with_map_value,
+    ::apache::thrift::ident::set_with_map_value,
+    ::apache::thrift::ident::map_with_list_value
+  >;
+
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::list<::apache::thrift::type::i32_t>,
+    ::apache::thrift::type::set<::apache::thrift::type::i32_t>,
+    ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::i32_t>,
+    ::apache::thrift::type::list<::apache::thrift::type::i32_t>,
+    ::apache::thrift::type::set<::apache::thrift::type::i32_t>,
+    ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::i32_t>
+  >;
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = StructWithCollectionDefaultValues;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  StructWithCollectionDefaultValues();
+
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  StructWithCollectionDefaultValues(apache::thrift::FragileConstructor, ::std::vector<::std::int32_t> list_with_list_value__arg, ::std::set<::std::int32_t> set_with_list_value__arg, ::std::map<::std::int32_t, ::std::int32_t> map_with_map_value__arg, ::std::vector<::std::int32_t> list_with_map_value__arg, ::std::set<::std::int32_t> set_with_map_value__arg, ::std::map<::std::int32_t, ::std::int32_t> map_with_list_value__arg);
+
+  StructWithCollectionDefaultValues(StructWithCollectionDefaultValues&&) noexcept;
+
+  StructWithCollectionDefaultValues(const StructWithCollectionDefaultValues& src);
+
+
+  StructWithCollectionDefaultValues& operator=(StructWithCollectionDefaultValues&&) noexcept;
+  StructWithCollectionDefaultValues& operator=(const StructWithCollectionDefaultValues& src);
+
+  ~StructWithCollectionDefaultValues();
+
+ private:
+  ::std::vector<::std::int32_t> __fbthrift_field_list_with_list_value;
+ private:
+  ::std::set<::std::int32_t> __fbthrift_field_set_with_list_value;
+ private:
+  ::std::map<::std::int32_t, ::std::int32_t> __fbthrift_field_map_with_map_value;
+ private:
+  ::std::vector<::std::int32_t> __fbthrift_field_list_with_map_value;
+ private:
+  ::std::set<::std::int32_t> __fbthrift_field_set_with_map_value;
+ private:
+  ::std::map<::std::int32_t, ::std::int32_t> __fbthrift_field_map_with_list_value;
+ private:
+  apache::thrift::detail::isset_bitset<6, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+
+ public:
+
+  bool operator==(const StructWithCollectionDefaultValues&) const;
+  bool operator<(const StructWithCollectionDefaultValues&) const;
+
+  /** Glean { "field": "list_with_list_value" } */
+  template <typename..., typename fbthrift_T = ::std::vector<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> list_with_list_value_ref() const& {
+    return {this->__fbthrift_field_list_with_list_value, __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "list_with_list_value" } */
+  template <typename..., typename fbthrift_T = ::std::vector<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> list_with_list_value_ref() & {
+    return {this->__fbthrift_field_list_with_list_value, __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "list_with_list_value" } */
+  template <typename..., typename fbthrift_T = ::std::vector<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> list_with_list_value_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_list_with_list_value), __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "list_with_list_value" } */
+  template <typename..., typename fbthrift_T = ::std::vector<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> list_with_list_value() const& {
+    return {this->__fbthrift_field_list_with_list_value, __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "list_with_list_value" } */
+  template <typename..., typename fbthrift_T = ::std::vector<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> list_with_list_value() & {
+    return {this->__fbthrift_field_list_with_list_value, __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "list_with_list_value" } */
+  template <typename..., typename fbthrift_T = ::std::vector<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> list_with_list_value() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_list_with_list_value), __isset.at(0), __isset.bit(0)};
+  }
+
+  /** Glean { "field": "set_with_list_value" } */
+  template <typename..., typename fbthrift_T = ::std::set<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> set_with_list_value_ref() const& {
+    return {this->__fbthrift_field_set_with_list_value, __isset.at(1), __isset.bit(1)};
+  }
+
+  /** Glean { "field": "set_with_list_value" } */
+  template <typename..., typename fbthrift_T = ::std::set<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> set_with_list_value_ref() & {
+    return {this->__fbthrift_field_set_with_list_value, __isset.at(1), __isset.bit(1)};
+  }
+
+  /** Glean { "field": "set_with_list_value" } */
+  template <typename..., typename fbthrift_T = ::std::set<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> set_with_list_value_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_set_with_list_value), __isset.at(1), __isset.bit(1)};
+  }
+
+  /** Glean { "field": "set_with_list_value" } */
+  template <typename..., typename fbthrift_T = ::std::set<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> set_with_list_value() const& {
+    return {this->__fbthrift_field_set_with_list_value, __isset.at(1), __isset.bit(1)};
+  }
+
+  /** Glean { "field": "set_with_list_value" } */
+  template <typename..., typename fbthrift_T = ::std::set<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> set_with_list_value() & {
+    return {this->__fbthrift_field_set_with_list_value, __isset.at(1), __isset.bit(1)};
+  }
+
+  /** Glean { "field": "set_with_list_value" } */
+  template <typename..., typename fbthrift_T = ::std::set<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> set_with_list_value() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_set_with_list_value), __isset.at(1), __isset.bit(1)};
+  }
+
+  /** Glean { "field": "map_with_map_value" } */
+  template <typename..., typename fbthrift_T = ::std::map<::std::int32_t, ::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> map_with_map_value_ref() const& {
+    return {this->__fbthrift_field_map_with_map_value, __isset.at(2), __isset.bit(2)};
+  }
+
+  /** Glean { "field": "map_with_map_value" } */
+  template <typename..., typename fbthrift_T = ::std::map<::std::int32_t, ::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> map_with_map_value_ref() & {
+    return {this->__fbthrift_field_map_with_map_value, __isset.at(2), __isset.bit(2)};
+  }
+
+  /** Glean { "field": "map_with_map_value" } */
+  template <typename..., typename fbthrift_T = ::std::map<::std::int32_t, ::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> map_with_map_value_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_map_with_map_value), __isset.at(2), __isset.bit(2)};
+  }
+
+  /** Glean { "field": "map_with_map_value" } */
+  template <typename..., typename fbthrift_T = ::std::map<::std::int32_t, ::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> map_with_map_value() const& {
+    return {this->__fbthrift_field_map_with_map_value, __isset.at(2), __isset.bit(2)};
+  }
+
+  /** Glean { "field": "map_with_map_value" } */
+  template <typename..., typename fbthrift_T = ::std::map<::std::int32_t, ::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> map_with_map_value() & {
+    return {this->__fbthrift_field_map_with_map_value, __isset.at(2), __isset.bit(2)};
+  }
+
+  /** Glean { "field": "map_with_map_value" } */
+  template <typename..., typename fbthrift_T = ::std::map<::std::int32_t, ::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> map_with_map_value() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_map_with_map_value), __isset.at(2), __isset.bit(2)};
+  }
+
+  /** Glean { "field": "list_with_map_value" } */
+  template <typename..., typename fbthrift_T = ::std::vector<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> list_with_map_value_ref() const& {
+    return {this->__fbthrift_field_list_with_map_value, __isset.at(3), __isset.bit(3)};
+  }
+
+  /** Glean { "field": "list_with_map_value" } */
+  template <typename..., typename fbthrift_T = ::std::vector<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> list_with_map_value_ref() & {
+    return {this->__fbthrift_field_list_with_map_value, __isset.at(3), __isset.bit(3)};
+  }
+
+  /** Glean { "field": "list_with_map_value" } */
+  template <typename..., typename fbthrift_T = ::std::vector<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> list_with_map_value_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_list_with_map_value), __isset.at(3), __isset.bit(3)};
+  }
+
+  /** Glean { "field": "list_with_map_value" } */
+  template <typename..., typename fbthrift_T = ::std::vector<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> list_with_map_value() const& {
+    return {this->__fbthrift_field_list_with_map_value, __isset.at(3), __isset.bit(3)};
+  }
+
+  /** Glean { "field": "list_with_map_value" } */
+  template <typename..., typename fbthrift_T = ::std::vector<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> list_with_map_value() & {
+    return {this->__fbthrift_field_list_with_map_value, __isset.at(3), __isset.bit(3)};
+  }
+
+  /** Glean { "field": "list_with_map_value" } */
+  template <typename..., typename fbthrift_T = ::std::vector<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> list_with_map_value() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_list_with_map_value), __isset.at(3), __isset.bit(3)};
+  }
+
+  /** Glean { "field": "set_with_map_value" } */
+  template <typename..., typename fbthrift_T = ::std::set<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> set_with_map_value_ref() const& {
+    return {this->__fbthrift_field_set_with_map_value, __isset.at(4), __isset.bit(4)};
+  }
+
+  /** Glean { "field": "set_with_map_value" } */
+  template <typename..., typename fbthrift_T = ::std::set<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> set_with_map_value_ref() & {
+    return {this->__fbthrift_field_set_with_map_value, __isset.at(4), __isset.bit(4)};
+  }
+
+  /** Glean { "field": "set_with_map_value" } */
+  template <typename..., typename fbthrift_T = ::std::set<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> set_with_map_value_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_set_with_map_value), __isset.at(4), __isset.bit(4)};
+  }
+
+  /** Glean { "field": "set_with_map_value" } */
+  template <typename..., typename fbthrift_T = ::std::set<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> set_with_map_value() const& {
+    return {this->__fbthrift_field_set_with_map_value, __isset.at(4), __isset.bit(4)};
+  }
+
+  /** Glean { "field": "set_with_map_value" } */
+  template <typename..., typename fbthrift_T = ::std::set<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> set_with_map_value() & {
+    return {this->__fbthrift_field_set_with_map_value, __isset.at(4), __isset.bit(4)};
+  }
+
+  /** Glean { "field": "set_with_map_value" } */
+  template <typename..., typename fbthrift_T = ::std::set<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> set_with_map_value() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_set_with_map_value), __isset.at(4), __isset.bit(4)};
+  }
+
+  /** Glean { "field": "map_with_list_value" } */
+  template <typename..., typename fbthrift_T = ::std::map<::std::int32_t, ::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> map_with_list_value_ref() const& {
+    return {this->__fbthrift_field_map_with_list_value, __isset.at(5), __isset.bit(5)};
+  }
+
+  /** Glean { "field": "map_with_list_value" } */
+  template <typename..., typename fbthrift_T = ::std::map<::std::int32_t, ::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> map_with_list_value_ref() & {
+    return {this->__fbthrift_field_map_with_list_value, __isset.at(5), __isset.bit(5)};
+  }
+
+  /** Glean { "field": "map_with_list_value" } */
+  template <typename..., typename fbthrift_T = ::std::map<::std::int32_t, ::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> map_with_list_value_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_map_with_list_value), __isset.at(5), __isset.bit(5)};
+  }
+
+  /** Glean { "field": "map_with_list_value" } */
+  template <typename..., typename fbthrift_T = ::std::map<::std::int32_t, ::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> map_with_list_value() const& {
+    return {this->__fbthrift_field_map_with_list_value, __isset.at(5), __isset.bit(5)};
+  }
+
+  /** Glean { "field": "map_with_list_value" } */
+  template <typename..., typename fbthrift_T = ::std::map<::std::int32_t, ::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> map_with_list_value() & {
+    return {this->__fbthrift_field_map_with_list_value, __isset.at(5), __isset.bit(5)};
+  }
+
+  /** Glean { "field": "map_with_list_value" } */
+  template <typename..., typename fbthrift_T = ::std::map<::std::int32_t, ::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> map_with_list_value() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_map_with_list_value), __isset.at(5), __isset.bit(5)};
+  }
+
+  /** Glean { "field": "list_with_list_value" } */
+  [[deprecated("Use `FOO.list_with_list_value().value()` instead of `FOO.get_list_with_list_value()`")]]
+  const ::std::vector<::std::int32_t>& get_list_with_list_value() const&;
+
+  /** Glean { "field": "list_with_list_value" } */
+  [[deprecated("Use `FOO.list_with_list_value().value()` instead of `FOO.get_list_with_list_value()`")]]
+  ::std::vector<::std::int32_t> get_list_with_list_value() &&;
+
+  /** Glean { "field": "list_with_list_value" } */
+  template <typename T_StructWithCollectionDefaultValues_list_with_list_value_struct_setter = ::std::vector<::std::int32_t>>
+  [[deprecated("Use `FOO.list_with_list_value() = BAR` instead of `FOO.set_list_with_list_value(BAR)`")]]
+  ::std::vector<::std::int32_t>& set_list_with_list_value(T_StructWithCollectionDefaultValues_list_with_list_value_struct_setter&& list_with_list_value_) {
+    list_with_list_value_ref() = std::forward<T_StructWithCollectionDefaultValues_list_with_list_value_struct_setter>(list_with_list_value_);
+    return __fbthrift_field_list_with_list_value;
+  }
+
+  /** Glean { "field": "set_with_list_value" } */
+  [[deprecated("Use `FOO.set_with_list_value().value()` instead of `FOO.get_set_with_list_value()`")]]
+  const ::std::set<::std::int32_t>& get_set_with_list_value() const&;
+
+  /** Glean { "field": "set_with_list_value" } */
+  [[deprecated("Use `FOO.set_with_list_value().value()` instead of `FOO.get_set_with_list_value()`")]]
+  ::std::set<::std::int32_t> get_set_with_list_value() &&;
+
+  /** Glean { "field": "set_with_list_value" } */
+  template <typename T_StructWithCollectionDefaultValues_set_with_list_value_struct_setter = ::std::set<::std::int32_t>>
+  [[deprecated("Use `FOO.set_with_list_value() = BAR` instead of `FOO.set_set_with_list_value(BAR)`")]]
+  ::std::set<::std::int32_t>& set_set_with_list_value(T_StructWithCollectionDefaultValues_set_with_list_value_struct_setter&& set_with_list_value_) {
+    set_with_list_value_ref() = std::forward<T_StructWithCollectionDefaultValues_set_with_list_value_struct_setter>(set_with_list_value_);
+    return __fbthrift_field_set_with_list_value;
+  }
+
+  /** Glean { "field": "map_with_map_value" } */
+  [[deprecated("Use `FOO.map_with_map_value().value()` instead of `FOO.get_map_with_map_value()`")]]
+  const ::std::map<::std::int32_t, ::std::int32_t>& get_map_with_map_value() const&;
+
+  /** Glean { "field": "map_with_map_value" } */
+  [[deprecated("Use `FOO.map_with_map_value().value()` instead of `FOO.get_map_with_map_value()`")]]
+  ::std::map<::std::int32_t, ::std::int32_t> get_map_with_map_value() &&;
+
+  /** Glean { "field": "map_with_map_value" } */
+  template <typename T_StructWithCollectionDefaultValues_map_with_map_value_struct_setter = ::std::map<::std::int32_t, ::std::int32_t>>
+  [[deprecated("Use `FOO.map_with_map_value() = BAR` instead of `FOO.set_map_with_map_value(BAR)`")]]
+  ::std::map<::std::int32_t, ::std::int32_t>& set_map_with_map_value(T_StructWithCollectionDefaultValues_map_with_map_value_struct_setter&& map_with_map_value_) {
+    map_with_map_value_ref() = std::forward<T_StructWithCollectionDefaultValues_map_with_map_value_struct_setter>(map_with_map_value_);
+    return __fbthrift_field_map_with_map_value;
+  }
+
+  /** Glean { "field": "list_with_map_value" } */
+  [[deprecated("Use `FOO.list_with_map_value().value()` instead of `FOO.get_list_with_map_value()`")]]
+  const ::std::vector<::std::int32_t>& get_list_with_map_value() const&;
+
+  /** Glean { "field": "list_with_map_value" } */
+  [[deprecated("Use `FOO.list_with_map_value().value()` instead of `FOO.get_list_with_map_value()`")]]
+  ::std::vector<::std::int32_t> get_list_with_map_value() &&;
+
+  /** Glean { "field": "list_with_map_value" } */
+  template <typename T_StructWithCollectionDefaultValues_list_with_map_value_struct_setter = ::std::vector<::std::int32_t>>
+  [[deprecated("Use `FOO.list_with_map_value() = BAR` instead of `FOO.set_list_with_map_value(BAR)`")]]
+  ::std::vector<::std::int32_t>& set_list_with_map_value(T_StructWithCollectionDefaultValues_list_with_map_value_struct_setter&& list_with_map_value_) {
+    list_with_map_value_ref() = std::forward<T_StructWithCollectionDefaultValues_list_with_map_value_struct_setter>(list_with_map_value_);
+    return __fbthrift_field_list_with_map_value;
+  }
+
+  /** Glean { "field": "set_with_map_value" } */
+  [[deprecated("Use `FOO.set_with_map_value().value()` instead of `FOO.get_set_with_map_value()`")]]
+  const ::std::set<::std::int32_t>& get_set_with_map_value() const&;
+
+  /** Glean { "field": "set_with_map_value" } */
+  [[deprecated("Use `FOO.set_with_map_value().value()` instead of `FOO.get_set_with_map_value()`")]]
+  ::std::set<::std::int32_t> get_set_with_map_value() &&;
+
+  /** Glean { "field": "set_with_map_value" } */
+  template <typename T_StructWithCollectionDefaultValues_set_with_map_value_struct_setter = ::std::set<::std::int32_t>>
+  [[deprecated("Use `FOO.set_with_map_value() = BAR` instead of `FOO.set_set_with_map_value(BAR)`")]]
+  ::std::set<::std::int32_t>& set_set_with_map_value(T_StructWithCollectionDefaultValues_set_with_map_value_struct_setter&& set_with_map_value_) {
+    set_with_map_value_ref() = std::forward<T_StructWithCollectionDefaultValues_set_with_map_value_struct_setter>(set_with_map_value_);
+    return __fbthrift_field_set_with_map_value;
+  }
+
+  /** Glean { "field": "map_with_list_value" } */
+  [[deprecated("Use `FOO.map_with_list_value().value()` instead of `FOO.get_map_with_list_value()`")]]
+  const ::std::map<::std::int32_t, ::std::int32_t>& get_map_with_list_value() const&;
+
+  /** Glean { "field": "map_with_list_value" } */
+  [[deprecated("Use `FOO.map_with_list_value().value()` instead of `FOO.get_map_with_list_value()`")]]
+  ::std::map<::std::int32_t, ::std::int32_t> get_map_with_list_value() &&;
+
+  /** Glean { "field": "map_with_list_value" } */
+  template <typename T_StructWithCollectionDefaultValues_map_with_list_value_struct_setter = ::std::map<::std::int32_t, ::std::int32_t>>
+  [[deprecated("Use `FOO.map_with_list_value() = BAR` instead of `FOO.set_map_with_list_value(BAR)`")]]
+  ::std::map<::std::int32_t, ::std::int32_t>& set_map_with_list_value(T_StructWithCollectionDefaultValues_map_with_list_value_struct_setter&& map_with_list_value_) {
+    map_with_list_value_ref() = std::forward<T_StructWithCollectionDefaultValues_map_with_list_value_struct_setter>(map_with_list_value_);
+    return __fbthrift_field_map_with_list_value;
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<StructWithCollectionDefaultValues>;
+  friend void swap(StructWithCollectionDefaultValues& a, StructWithCollectionDefaultValues& b);
+};
+
+template <class Protocol_>
+unsigned long StructWithCollectionDefaultValues::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
 } // namespace facebook::thrift::compiler::test::fixtures::default_values
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 6296185559367434976;
-  static constexpr ::std::string_view definitionKey = {"\x4b\x28\xe6\xb1\xc3\x3b\xe1\xfd\x90\x8a\xd2\x29\xc6\xe9\x4d\xad", 16};
+  static constexpr int64_t programId = 8994698121574429311;
+  static constexpr ::std::string_view definitionKey = {"\xe0\x45\xe3\xc3\x99\x00\x3a\x89\xd9\x39\xfc\x55\x84\x0c\x54\x67", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::default_values::StructWithNoCustomDefaultValues, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 6296185559367434976;
-  static constexpr ::std::string_view definitionKey = {"\x46\x57\x61\x05\xad\x36\x12\xc9\x89\xb3\xcf\x94\xfb\xb1\xf7\x4a", 16};
+  static constexpr int64_t programId = 8994698121574429311;
+  static constexpr ::std::string_view definitionKey = {"\xaa\xc3\x1e\xd3\x8a\xa2\x2b\x0d\xd8\xdd\x03\x19\x46\xd6\xd0\xc0", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 6296185559367434976;
-  static constexpr ::std::string_view definitionKey = {"\x7f\x8a\x3f\x87\x74\xe4\xf6\x8a\x92\x77\xb1\xb0\x2e\x59\xfe\x74", 16};
+  static constexpr int64_t programId = 8994698121574429311;
+  static constexpr ::std::string_view definitionKey = {"\x4f\x7a\x23\x41\xc9\x20\x23\x71\x23\x0c\xf0\x95\x14\x39\x9f\x86", 16};
+};
+template <> struct TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCollectionDefaultValues, false> {
+  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static constexpr int64_t programId = 8994698121574429311;
+  static constexpr ::std::string_view definitionKey = {"\x12\x3d\x96\xfa\xc0\x79\x38\x0d\x1a\xea\x20\x09\x1a\xdc\xb9\xc6", 16};
 };
 } // namespace apache::thrift::detail

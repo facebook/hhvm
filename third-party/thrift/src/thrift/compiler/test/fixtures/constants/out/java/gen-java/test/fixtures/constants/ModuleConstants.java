@@ -447,4 +447,25 @@ public final class ModuleConstants {
         .put(3, false)
         .build();
     }
+
+    public static final Map<Integer, Integer> MAP_LIST_INITIALIZER = construct_MAP_LIST_INITIALIZER();
+
+    private static Map<Integer, Integer> construct_MAP_LIST_INITIALIZER() {
+      return ImmutableMap.<Integer, Integer>builder()
+        .build();
+    }
+
+    public static final List<Integer> LIST_MAP_INITIALIZER = construct_LIST_MAP_INITIALIZER();
+
+    private static List<Integer> construct_LIST_MAP_INITIALIZER() {
+      return ImmutableList.<Integer>builder()
+        .build();
+    }
+
+    public static final Set<Integer> SET_MAP_INITIALIZER = construct_SET_MAP_INITIALIZER();
+
+    private static Set<Integer> construct_SET_MAP_INITIALIZER() {
+      return ImmutableSet.<Integer>builder()
+        .build();
+    }
 }

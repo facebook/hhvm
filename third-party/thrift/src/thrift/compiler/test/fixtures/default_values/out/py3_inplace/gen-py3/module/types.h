@@ -79,6 +79,31 @@ inline void reset_field<::facebook::thrift::compiler::test::fixtures::default_va
 }
 
 template<>
+inline void reset_field<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCollectionDefaultValues>(
+    ::facebook::thrift::compiler::test::fixtures::default_values::StructWithCollectionDefaultValues& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.list_with_list_value_ref().copy_from(default_inst<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCollectionDefaultValues>().list_with_list_value_ref());
+      return;
+    case 1:
+      obj.set_with_list_value_ref().copy_from(default_inst<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCollectionDefaultValues>().set_with_list_value_ref());
+      return;
+    case 2:
+      obj.map_with_map_value_ref().copy_from(default_inst<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCollectionDefaultValues>().map_with_map_value_ref());
+      return;
+    case 3:
+      obj.list_with_map_value_ref().copy_from(default_inst<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCollectionDefaultValues>().list_with_map_value_ref());
+      return;
+    case 4:
+      obj.set_with_map_value_ref().copy_from(default_inst<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCollectionDefaultValues>().set_with_map_value_ref());
+      return;
+    case 5:
+      obj.map_with_list_value_ref().copy_from(default_inst<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCollectionDefaultValues>().map_with_list_value_ref());
+      return;
+  }
+}
+
+template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
@@ -101,6 +126,16 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::facebook::thrift::compiler::test::fixtures::default_values::StructWithCollectionDefaultValues>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

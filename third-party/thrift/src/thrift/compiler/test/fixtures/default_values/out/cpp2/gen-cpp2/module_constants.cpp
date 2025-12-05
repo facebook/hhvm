@@ -14,13 +14,13 @@ namespace facebook::thrift::compiler::test::fixtures::default_values {
 namespace module_constants {
 
 
-::std::string_view _fbthrift_schema_57608b685a0a42e0() {
+::std::string_view _fbthrift_schema_7cd396491e51327f() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_57608b685a0a42e0_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_7cd396491e51327f_includes() {
   return {};
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_57608b685a0a42e0_uris() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_7cd396491e51327f_uris() {
   return {};
 }
 

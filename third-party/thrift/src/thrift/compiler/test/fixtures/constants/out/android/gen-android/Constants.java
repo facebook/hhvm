@@ -454,4 +454,16 @@ public class Constants {
     I2B_REF.put(3, false);
   }
 
+  public static final Map<Integer,Integer> map_list_initializer = new HashMap<Integer,Integer>();
+  static {
+  }
+
+  public static final List<Integer> list_map_initializer = new ArrayList<Integer>();
+  static {
+  }
+
+  public static final Set<Integer> set_map_initializer = new HashSet<Integer>();
+  static {
+  }
+
 }

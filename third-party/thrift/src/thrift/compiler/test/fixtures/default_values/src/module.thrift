@@ -43,3 +43,14 @@ struct StructWithCustomDefaultValues {
   5: optional TrivialStruct optional_struct = TrivialStruct{int_value = 456};
   6: required TrivialStruct required_struct = TrivialStruct{int_value = 789};
 }
+
+struct StructWithCollectionDefaultValues {
+  1: list<i32> list_with_list_value = [];
+  2: set<i32> set_with_list_value = [];
+  3: map<i32, i32> map_with_map_value = {};
+
+  // Mixing empty list/map is a compiler warning, but allowed
+  4: list<i32> list_with_map_value = {};
+  5: set<i32> set_with_map_value = {};
+  6: map<i32, i32> map_with_list_value = [];
+}

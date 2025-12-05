@@ -94,7 +94,42 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 6> TStructDataStorage<:
   -1,
 }};
 
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCollectionDefaultValues>::name = "StructWithCollectionDefaultValues";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, 6> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCollectionDefaultValues>::fields_names = { {
+  "list_with_list_value"sv,
+  "set_with_list_value"sv,
+  "map_with_map_value"sv,
+  "list_with_map_value"sv,
+  "set_with_map_value"sv,
+  "map_with_list_value"sv,
+}};
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, 6> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCollectionDefaultValues>::fields_ids = { {
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+}};
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, 6> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCollectionDefaultValues>::fields_types = { {
+  TType::T_LIST,
+  TType::T_SET,
+  TType::T_MAP,
+  TType::T_LIST,
+  TType::T_SET,
+  TType::T_MAP,
+}};
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 6> TStructDataStorage<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCollectionDefaultValues>::isset_indexes = { {
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+}};
+
 namespace detail {
+
 
 
 

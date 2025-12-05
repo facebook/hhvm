@@ -549,3 +549,308 @@ class StructWithCustomDefaultValues implements \IThriftSyncStruct, \IThriftStruc
 
 }
 
+/**
+ * Original thrift struct:-
+ * StructWithCollectionDefaultValues
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/compiler/test/fixtures/default_values/StructWithCollectionDefaultValues'))>>
+class StructWithCollectionDefaultValues implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'list_with_list_value',
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    2 => shape(
+      'var' => 'set_with_list_value',
+      'type' => \TType::SET,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    3 => shape(
+      'var' => 'map_with_map_value',
+      'type' => \TType::MAP,
+      'ktype' => \TType::I32,
+      'vtype' => \TType::I32,
+      'key' => shape(
+        'type' => \TType::I32,
+      ),
+      'val' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    4 => shape(
+      'var' => 'list_with_map_value',
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    5 => shape(
+      'var' => 'set_with_map_value',
+      'type' => \TType::SET,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    6 => shape(
+      'var' => 'map_with_list_value',
+      'type' => \TType::MAP,
+      'ktype' => \TType::I32,
+      'vtype' => \TType::I32,
+      'key' => shape(
+        'type' => \TType::I32,
+      ),
+      'val' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'list_with_list_value' => 1,
+    'set_with_list_value' => 2,
+    'map_with_map_value' => 3,
+    'list_with_map_value' => 4,
+    'set_with_map_value' => 5,
+    'map_with_list_value' => 6,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'list_with_list_value' => ?Vector<int>,
+    ?'set_with_list_value' => ?Set<int>,
+    ?'map_with_map_value' => ?Map<int, int>,
+    ?'list_with_map_value' => ?Vector<int>,
+    ?'set_with_map_value' => ?Set<int>,
+    ?'map_with_list_value' => ?Map<int, int>,
+  );
+
+  const int STRUCTURAL_ID = 2591080175511986319;
+  /**
+   * Original thrift field:-
+   * 1: list<i32> list_with_list_value
+   */
+  public Vector<int> $list_with_list_value;
+  /**
+   * Original thrift field:-
+   * 2: set<i32> set_with_list_value
+   */
+  public Set<int> $set_with_list_value;
+  /**
+   * Original thrift field:-
+   * 3: map<i32, i32> map_with_map_value
+   */
+  public Map<int, int> $map_with_map_value;
+  /**
+   * Original thrift field:-
+   * 4: list<i32> list_with_map_value
+   */
+  public Vector<int> $list_with_map_value;
+  /**
+   * Original thrift field:-
+   * 5: set<i32> set_with_map_value
+   */
+  public Set<int> $set_with_map_value;
+  /**
+   * Original thrift field:-
+   * 6: map<i32, i32> map_with_list_value
+   */
+  public Map<int, int> $map_with_list_value;
+
+  public function __construct(?Vector<int> $list_with_list_value = null, ?Set<int> $set_with_list_value = null, ?Map<int, int> $map_with_map_value = null, ?Vector<int> $list_with_map_value = null, ?Set<int> $set_with_map_value = null, ?Map<int, int> $map_with_list_value = null)[] {
+    $this->list_with_list_value = $list_with_list_value ?? Vector {
+    };
+    $this->set_with_list_value = $set_with_list_value ?? Set {
+    };
+    $this->map_with_map_value = $map_with_map_value ?? Map {
+    };
+    $this->list_with_map_value = $list_with_map_value ?? Vector {
+    };
+    $this->set_with_map_value = $set_with_map_value ?? Set {
+    };
+    $this->map_with_list_value = $map_with_list_value ?? Map {
+    };
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'list_with_list_value'),
+      Shapes::idx($shape, 'set_with_list_value'),
+      Shapes::idx($shape, 'map_with_map_value'),
+      Shapes::idx($shape, 'list_with_map_value'),
+      Shapes::idx($shape, 'set_with_map_value'),
+      Shapes::idx($shape, 'map_with_list_value'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'StructWithCollectionDefaultValues';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.StructWithCollectionDefaultValues",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "list_with_list_value",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_set" => \tmeta_ThriftSetType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "set_with_list_value",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 3,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_map" => \tmeta_ThriftMapType::fromShape(
+                    shape(
+                      "keyType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "map_with_map_value",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 4,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "list_with_map_value",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 5,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_set" => \tmeta_ThriftSetType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "set_with_map_value",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 6,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_map" => \tmeta_ThriftMapType::fromShape(
+                    shape(
+                      "keyType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "map_with_list_value",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+

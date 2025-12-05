@@ -395,3 +395,12 @@ I2B_REF = {
   3 : False,
 }
 
+map_list_initializer = {
+}
+
+list_map_initializer = [
+]
+
+set_map_initializer = set([
+])
+

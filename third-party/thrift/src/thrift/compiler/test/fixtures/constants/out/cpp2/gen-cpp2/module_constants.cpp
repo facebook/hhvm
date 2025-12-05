@@ -309,14 +309,29 @@ namespace module_constants {
   return *instance;
 }
 
+::std::map<::std::int32_t, ::std::int32_t> const& map_list_initializer() {
+  static folly::Indestructible<::std::map<::std::int32_t, ::std::int32_t>> const instance{ std::initializer_list<::std::map<::std::int32_t, ::std::int32_t>::value_type>{  } };
+  return *instance;
+}
 
-::std::string_view _fbthrift_schema_3e52b9a9fabc0c36() {
+::std::vector<::std::int32_t> const& list_map_initializer() {
+  static folly::Indestructible<::std::vector<::std::int32_t>> const instance{ std::initializer_list<::std::int32_t>{  } };
+  return *instance;
+}
+
+::std::set<::std::int32_t> const& set_map_initializer() {
+  static folly::Indestructible<::std::set<::std::int32_t>> const instance{ std::initializer_list<::std::int32_t>{  } };
+  return *instance;
+}
+
+
+::std::string_view _fbthrift_schema_a9cd9bd2e43ed88c() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_3e52b9a9fabc0c36_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_a9cd9bd2e43ed88c_includes() {
   return {};
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_3e52b9a9fabc0c36_uris() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_a9cd9bd2e43ed88c_uris() {
   return {};
 }
 

@@ -46,6 +46,19 @@ struct ForEachField<::facebook::thrift::compiler::test::fixtures::default_values
     f(5, static_cast<T&&>(t).required_struct_ref()...);
   }
 };
+
+template <>
+struct ForEachField<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCollectionDefaultValues> {
+  template <typename F, typename... T>
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
+    f(0, static_cast<T&&>(t).list_with_list_value_ref()...);
+    f(1, static_cast<T&&>(t).set_with_list_value_ref()...);
+    f(2, static_cast<T&&>(t).map_with_map_value_ref()...);
+    f(3, static_cast<T&&>(t).list_with_map_value_ref()...);
+    f(4, static_cast<T&&>(t).set_with_map_value_ref()...);
+    f(5, static_cast<T&&>(t).map_with_list_value_ref()...);
+  }
+};
 } // namespace detail
 } // namespace thrift
 } // namespace apache

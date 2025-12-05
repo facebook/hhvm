@@ -1377,6 +1377,54 @@
           "column" : 36
         }
       }
+    },
+    "map_list_initializer" : {
+      "lineno" : 290,
+      "value" : {  },
+      "type_enum" : "MAP",
+      "spec_args" : { "key_type" : { "type_enum" : "I32", "spec_args" : null }, "val_type" : { "type_enum" : "I32", "spec_args" : null} } ,
+      "source_range" : {
+        "begin" : {
+          "line" : 290,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 290,
+          "column" : 47
+        }
+      }
+    },
+    "list_map_initializer" : {
+      "lineno" : 291,
+      "value" : [  ],
+      "type_enum" : "LIST",
+      "spec_args" : { "type_enum" : "I32", "spec_args" : null} ,
+      "source_range" : {
+        "begin" : {
+          "line" : 291,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 291,
+          "column" : 43
+        }
+      }
+    },
+    "set_map_initializer" : {
+      "lineno" : 292,
+      "value" : [  ],
+      "type_enum" : "SET",
+      "spec_args" : { "type_enum" : "I32", "spec_args" : null} ,
+      "source_range" : {
+        "begin" : {
+          "line" : 292,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 292,
+          "column" : 41
+        }
+      }
     }
   },
   "enumerations" : {

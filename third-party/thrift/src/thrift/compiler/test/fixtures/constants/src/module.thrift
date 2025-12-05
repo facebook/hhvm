@@ -285,3 +285,8 @@ const map<i32, bool> I2B = {
   3: false
 };
 const map<i32, bool> I2B_REF = I2B;
+
+// We allow but warn for these mismatched empty collection initializer
+const map<i32, i32> map_list_initializer = [];
+const list<i32> list_map_initializer = {};
+const set<i32> set_map_initializer = {};

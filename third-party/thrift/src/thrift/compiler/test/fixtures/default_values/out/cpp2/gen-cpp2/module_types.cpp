@@ -348,6 +348,151 @@ static_assert(
 
 } // namespace facebook::thrift::compiler::test::fixtures::default_values
 
+
+namespace facebook::thrift::compiler::test::fixtures::default_values {
+
+std::string_view StructWithCollectionDefaultValues::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<StructWithCollectionDefaultValues>::fields_names[folly::to_underlying(ord) - 1];
+}
+std::string_view StructWithCollectionDefaultValues::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<StructWithCollectionDefaultValues>::name;
+}
+
+StructWithCollectionDefaultValues::StructWithCollectionDefaultValues(const StructWithCollectionDefaultValues&) = default;
+StructWithCollectionDefaultValues& StructWithCollectionDefaultValues::operator=(const StructWithCollectionDefaultValues&) = default;
+StructWithCollectionDefaultValues::StructWithCollectionDefaultValues() {
+}
+
+
+StructWithCollectionDefaultValues::~StructWithCollectionDefaultValues() {}
+
+StructWithCollectionDefaultValues::StructWithCollectionDefaultValues([[maybe_unused]] StructWithCollectionDefaultValues&& other) noexcept :
+    __fbthrift_field_list_with_list_value(std::move(other.__fbthrift_field_list_with_list_value)),
+    __fbthrift_field_set_with_list_value(std::move(other.__fbthrift_field_set_with_list_value)),
+    __fbthrift_field_map_with_map_value(std::move(other.__fbthrift_field_map_with_map_value)),
+    __fbthrift_field_list_with_map_value(std::move(other.__fbthrift_field_list_with_map_value)),
+    __fbthrift_field_set_with_map_value(std::move(other.__fbthrift_field_set_with_map_value)),
+    __fbthrift_field_map_with_list_value(std::move(other.__fbthrift_field_map_with_list_value)),
+    __isset(other.__isset) {
+}
+
+StructWithCollectionDefaultValues& StructWithCollectionDefaultValues::operator=([[maybe_unused]] StructWithCollectionDefaultValues&& other) noexcept {
+    this->__fbthrift_field_list_with_list_value = std::move(other.__fbthrift_field_list_with_list_value);
+    this->__fbthrift_field_set_with_list_value = std::move(other.__fbthrift_field_set_with_list_value);
+    this->__fbthrift_field_map_with_map_value = std::move(other.__fbthrift_field_map_with_map_value);
+    this->__fbthrift_field_list_with_map_value = std::move(other.__fbthrift_field_list_with_map_value);
+    this->__fbthrift_field_set_with_map_value = std::move(other.__fbthrift_field_set_with_map_value);
+    this->__fbthrift_field_map_with_list_value = std::move(other.__fbthrift_field_map_with_list_value);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+StructWithCollectionDefaultValues::StructWithCollectionDefaultValues(apache::thrift::FragileConstructor, ::std::vector<::std::int32_t> list_with_list_value__arg, ::std::set<::std::int32_t> set_with_list_value__arg, ::std::map<::std::int32_t, ::std::int32_t> map_with_map_value__arg, ::std::vector<::std::int32_t> list_with_map_value__arg, ::std::set<::std::int32_t> set_with_map_value__arg, ::std::map<::std::int32_t, ::std::int32_t> map_with_list_value__arg) :
+    __fbthrift_field_list_with_list_value(std::move(list_with_list_value__arg)),
+    __fbthrift_field_set_with_list_value(std::move(set_with_list_value__arg)),
+    __fbthrift_field_map_with_map_value(std::move(map_with_map_value__arg)),
+    __fbthrift_field_list_with_map_value(std::move(list_with_map_value__arg)),
+    __fbthrift_field_set_with_map_value(std::move(set_with_map_value__arg)),
+    __fbthrift_field_map_with_list_value(std::move(map_with_list_value__arg)) { 
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+  __isset.set(folly::index_constant<2>(), true);
+  __isset.set(folly::index_constant<3>(), true);
+  __isset.set(folly::index_constant<4>(), true);
+  __isset.set(folly::index_constant<5>(), true);
+}
+
+void StructWithCollectionDefaultValues::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_list_with_list_value.clear();
+  this->__fbthrift_field_set_with_list_value.clear();
+  this->__fbthrift_field_map_with_map_value.clear();
+  this->__fbthrift_field_list_with_map_value.clear();
+  this->__fbthrift_field_set_with_map_value.clear();
+  this->__fbthrift_field_map_with_list_value.clear();
+  __isset = {};
+}
+
+void StructWithCollectionDefaultValues::__fbthrift_clear_terse_fields() {
+}
+
+bool StructWithCollectionDefaultValues::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool StructWithCollectionDefaultValues::operator==([[maybe_unused]] const StructWithCollectionDefaultValues& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+bool StructWithCollectionDefaultValues::operator<([[maybe_unused]] const StructWithCollectionDefaultValues& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+
+const ::std::vector<::std::int32_t>& StructWithCollectionDefaultValues::get_list_with_list_value() const& {
+  return __fbthrift_field_list_with_list_value;
+}
+
+::std::vector<::std::int32_t> StructWithCollectionDefaultValues::get_list_with_list_value() && {
+  return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_list_with_list_value);
+}
+
+const ::std::set<::std::int32_t>& StructWithCollectionDefaultValues::get_set_with_list_value() const& {
+  return __fbthrift_field_set_with_list_value;
+}
+
+::std::set<::std::int32_t> StructWithCollectionDefaultValues::get_set_with_list_value() && {
+  return static_cast<::std::set<::std::int32_t>&&>(__fbthrift_field_set_with_list_value);
+}
+
+const ::std::map<::std::int32_t, ::std::int32_t>& StructWithCollectionDefaultValues::get_map_with_map_value() const& {
+  return __fbthrift_field_map_with_map_value;
+}
+
+::std::map<::std::int32_t, ::std::int32_t> StructWithCollectionDefaultValues::get_map_with_map_value() && {
+  return static_cast<::std::map<::std::int32_t, ::std::int32_t>&&>(__fbthrift_field_map_with_map_value);
+}
+
+const ::std::vector<::std::int32_t>& StructWithCollectionDefaultValues::get_list_with_map_value() const& {
+  return __fbthrift_field_list_with_map_value;
+}
+
+::std::vector<::std::int32_t> StructWithCollectionDefaultValues::get_list_with_map_value() && {
+  return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_list_with_map_value);
+}
+
+const ::std::set<::std::int32_t>& StructWithCollectionDefaultValues::get_set_with_map_value() const& {
+  return __fbthrift_field_set_with_map_value;
+}
+
+::std::set<::std::int32_t> StructWithCollectionDefaultValues::get_set_with_map_value() && {
+  return static_cast<::std::set<::std::int32_t>&&>(__fbthrift_field_set_with_map_value);
+}
+
+const ::std::map<::std::int32_t, ::std::int32_t>& StructWithCollectionDefaultValues::get_map_with_list_value() const& {
+  return __fbthrift_field_map_with_list_value;
+}
+
+::std::map<::std::int32_t, ::std::int32_t> StructWithCollectionDefaultValues::get_map_with_list_value() && {
+  return static_cast<::std::map<::std::int32_t, ::std::int32_t>&&>(__fbthrift_field_map_with_list_value);
+}
+
+void swap([[maybe_unused]] StructWithCollectionDefaultValues& a, [[maybe_unused]] StructWithCollectionDefaultValues& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_list_with_list_value, b.__fbthrift_field_list_with_list_value);
+  swap(a.__fbthrift_field_set_with_list_value, b.__fbthrift_field_set_with_list_value);
+  swap(a.__fbthrift_field_map_with_map_value, b.__fbthrift_field_map_with_map_value);
+  swap(a.__fbthrift_field_list_with_map_value, b.__fbthrift_field_list_with_map_value);
+  swap(a.__fbthrift_field_set_with_map_value, b.__fbthrift_field_set_with_map_value);
+  swap(a.__fbthrift_field_map_with_list_value, b.__fbthrift_field_map_with_list_value);
+  swap(a.__isset, b.__isset);
+}
+
+
+} // namespace facebook::thrift::compiler::test::fixtures::default_values
+
 namespace facebook::thrift::compiler::test::fixtures::default_values { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }

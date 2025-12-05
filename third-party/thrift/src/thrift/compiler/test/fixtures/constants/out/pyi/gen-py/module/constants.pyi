@@ -94,3 +94,6 @@ minNDub: float
 minNSDub: float
 I2B: __T.Dict[int, bool]
 I2B_REF: __T.Dict[int, bool]
+map_list_initializer: __T.Dict[int, int]
+list_map_initializer: __T.List[int]
+set_map_initializer: __T.Set[int]

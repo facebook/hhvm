@@ -919,6 +919,36 @@ class module_CONSTANTS implements \IThriftConstants {
     };
   }
 
+  /**
+   * Original thrift constant:-
+   * map<i32, i32> map_list_initializer
+   */
+  <<__Memoize>>
+  public static function map_list_initializer()[write_props]: \ConstMap<int, int>{
+    return ImmMap {
+    };
+  }
+
+  /**
+   * Original thrift constant:-
+   * list<i32> list_map_initializer
+   */
+  <<__Memoize>>
+  public static function list_map_initializer()[write_props]: \ConstVector<int>{
+    return ImmVector {
+    };
+  }
+
+  /**
+   * Original thrift constant:-
+   * set<i32> set_map_initializer
+   */
+  <<__Memoize>>
+  public static function set_map_initializer()[write_props]: \ConstSet<int>{
+    return ImmSet {
+    };
+  }
+
 
   public static function getAllStructuredAnnotations()[write_props]: dict<string, dict<string, \IThriftStruct>> {
     return dict[

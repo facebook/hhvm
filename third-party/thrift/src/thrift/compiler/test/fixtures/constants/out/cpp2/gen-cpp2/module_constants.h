@@ -456,9 +456,18 @@ namespace module_constants {
   /** Glean {"constant": "I2B_REF"} */
   ::std::map<::std::int32_t, bool> const& I2B_REF();
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_3e52b9a9fabc0c36();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_3e52b9a9fabc0c36_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_3e52b9a9fabc0c36_uris();
+  /** Glean {"constant": "map_list_initializer"} */
+  ::std::map<::std::int32_t, ::std::int32_t> const& map_list_initializer();
+
+  /** Glean {"constant": "list_map_initializer"} */
+  ::std::vector<::std::int32_t> const& list_map_initializer();
+
+  /** Glean {"constant": "set_map_initializer"} */
+  ::std::set<::std::int32_t> const& set_map_initializer();
+
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_a9cd9bd2e43ed88c();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_a9cd9bd2e43ed88c_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_a9cd9bd2e43ed88c_uris();
 
 } // namespace module_constants
 } // namespace cpp2

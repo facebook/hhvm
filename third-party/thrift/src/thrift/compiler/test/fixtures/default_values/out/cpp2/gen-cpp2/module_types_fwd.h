@@ -11,5 +11,6 @@ namespace facebook::thrift::compiler::test::fixtures::default_values {
 class TrivialStruct;
 class StructWithNoCustomDefaultValues;
 class StructWithCustomDefaultValues;
+class StructWithCollectionDefaultValues;
 } // namespace facebook::thrift::compiler::test::fixtures::default_values
 // END forward_declare

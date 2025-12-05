@@ -276,3 +276,6 @@ cdef extern from "thrift/compiler/test/fixtures/constants/gen-cpp2/module_consta
     cdef double cminNSDub "::cpp2::module_constants::minNSDub"
     cdef cmap[cint32_t,cbool] cI2B "::cpp2::module_constants::I2B"()
     cdef cmap[cint32_t,cbool] cI2B_REF "::cpp2::module_constants::I2B_REF"()
+    cdef cmap[cint32_t,cint32_t] cmap_list_initializer "::cpp2::module_constants::map_list_initializer"()
+    cdef vector[cint32_t] clist_map_initializer "::cpp2::module_constants::list_map_initializer"()
+    cdef cset[cint32_t] cset_map_initializer "::cpp2::module_constants::set_map_initializer"()

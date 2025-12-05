@@ -1914,3 +1914,6 @@ minNDub = -2.2250738585072014e-308
 minNSDub = -5e-324
 I2B = Map__i32_bool( { 0: False, 1: True, 2: True, 3: False })
 I2B_REF = Map__i32_bool( { 0: False, 1: True, 2: True, 3: False })
+map_list_initializer = Map__i32_i32( {  })
+list_map_initializer = List__i32(())
+set_map_initializer = Set__i32(())

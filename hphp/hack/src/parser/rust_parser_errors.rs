@@ -1949,45 +1949,104 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             && self.methodish_contains_attribute(node, sn::user_attributes::MEMOIZE)
     }
 
-    fn check_require_package_args_are_string_literals(&mut self, node: S<'a>) {
-        let mut required_packages_count = 0;
-        if let Some(args) = self.attr_args(node) {
-            for arg in args.peekable() {
-                required_packages_count += 1;
-                if let LiteralExpression(x) = &arg.children {
-                    if let Token(t) = &x.expression.children {
-                        if t.kind() == TokenKind::SingleQuotedStringLiteral
-                            || t.kind() == TokenKind::DoubleQuotedStringLiteral
-                        {
-                            continue;
-                        }
-                    }
-                }
-                self.errors.push(make_error_from_node(
-                    arg,
-                    errors::invalid_require_package_argument(
-                        "this is not a literal string expression",
-                    ),
-                ))
-            }
-            if required_packages_count == 1 {
-                return;
-            }
+    fn is_a_literal_expression_of_kind(val: S<'_>, opts: Vec<TokenKind>) -> bool {
+        if let LiteralExpression(x) = &val.children
+            && let Some(t) = token_kind(&x.expression)
+            && opts.contains(&t)
+        {
+            true
+        } else {
+            false
         }
-        self.errors.push(make_error_from_node(
-            node,
-            errors::require_package_wrong_arity(required_packages_count),
-        ))
     }
 
-    fn check_attr_enabled(&mut self, attrs: S<'a>) {
+    fn check_require_package_arg_is_single_string_literal(&mut self, node: S<'a>) {
+        let Some(args) = self.attr_args(node) else {
+            // I'm not actually convinced this means 0, but just to be safe
+            self.errors.push(make_error_from_node(
+                node,
+                errors::require_package_wrong_arity(0),
+            ));
+            return;
+        };
+
+        match args.exactly_one() {
+            Err(arg_list) => self.errors.push(make_error_from_node(
+                node,
+                errors::require_package_wrong_arity(arg_list.count()),
+            )),
+            Ok(arg) => {
+                if !Self::is_a_literal_expression_of_kind(
+                    arg,
+                    vec![
+                        TokenKind::SingleQuotedStringLiteral,
+                        TokenKind::DoubleQuotedStringLiteral,
+                    ],
+                ) {
+                    self.errors.push(make_error_from_node(
+                        arg,
+                        errors::invalid_require_package_str_argument(),
+                    ))
+                }
+            }
+        }
+    }
+
+    fn check_soft_require_package_args(&mut self, node: S<'a>) {
+        let Some((mut args, first_arg)) = self.attr_args(node).and_then(|mut args| {
+            let first = args.next()?;
+            Some((args, first))
+        }) else {
+            self.errors.push(make_error_from_node(
+                node,
+                errors::soft_require_package_wrong_arity(0),
+            ));
+            return;
+        };
+
+        if !Self::is_a_literal_expression_of_kind(
+            first_arg,
+            vec![
+                TokenKind::SingleQuotedStringLiteral,
+                TokenKind::DoubleQuotedStringLiteral,
+            ],
+        ) {
+            self.errors.push(make_error_from_node(
+                first_arg,
+                errors::invalid_require_package_str_argument(),
+            ))
+        }
+
+        let Some(second_arg) = args.next() else {
+            // only 1 arg is fine
+            return;
+        };
+
+        if !Self::is_a_literal_expression_of_kind(second_arg, vec![TokenKind::DecimalLiteral]) {
+            self.errors.push(make_error_from_node(
+                second_arg,
+                errors::invalid_soft_require_package_int_argument(),
+            ));
+            return;
+        }
+
+        let remaining_args = args.count();
+        if remaining_args > 0 {
+            // only 1 arg is fine
+            self.errors.push(make_error_from_node(
+                node,
+                errors::soft_require_package_wrong_arity(remaining_args + 2),
+            ));
+        };
+    }
+
+    fn check_attrs(&mut self, attrs: S<'a>) {
         for node in attr_spec_to_node_list(attrs) {
-            match self.attr_name(node) {
-                Some(n) => {
-                    if sn::user_attributes::is_simplihack(n) {
-                        self.check_can_use_feature(node, &FeatureName::SimpliHack)
-                    }
-                    if (sn::user_attributes::ignore_readonly_local_errors(n)
+            if let Some(n) = self.attr_name(node) {
+                if sn::user_attributes::is_simplihack(n) {
+                    self.check_can_use_feature(node, &FeatureName::SimpliHack)
+                }
+                if (sn::user_attributes::ignore_readonly_local_errors(n)
                         || sn::user_attributes::ignore_coeffect_local_errors(n)
                         || sn::user_attributes::is_native(n))
                         && !self.env.is_systemlib()
@@ -1995,20 +2054,21 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         // allows its own testing and better error messaging.
                         // see --tco_is_systemlib
                         && !self.env.is_typechecker()
-                    {
-                        self.errors.push(make_error_from_node(
-                            node,
-                            errors::invalid_attribute_reserved,
-                        ));
-                    }
-                    if sn::user_attributes::is_require_package(n) {
-                        self.check_require_package_args_are_string_literals(node);
-                    }
-                    if sn::user_attributes::is_no_disjoint_union(n) {
-                        self.check_can_use_feature(node, &FeatureName::NoDisjointUnion);
-                    }
+                {
+                    self.errors.push(make_error_from_node(
+                        node,
+                        errors::invalid_attribute_reserved,
+                    ));
                 }
-                None => {}
+                if sn::user_attributes::is_require_package(n) {
+                    self.check_require_package_arg_is_single_string_literal(node);
+                }
+                if sn::user_attributes::is_soft_require_package(n) {
+                    self.check_soft_require_package_args(node);
+                }
+                if sn::user_attributes::is_no_disjoint_union(n) {
+                    self.check_can_use_feature(node, &FeatureName::NoDisjointUnion);
+                }
             }
         }
     }
@@ -2113,7 +2173,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             FunctionDeclaration(fd) => {
                 let function_attrs = &fd.attribute_spec;
                 let body = &fd.body;
-                self.check_attr_enabled(function_attrs);
+                self.check_attrs(function_attrs);
 
                 self.invalid_modifier_errors("Top-level functions", node, |kind| {
                     kind == TokenKind::Async
@@ -2135,7 +2195,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     .extract_function_name(&md.function_decl_header)
                     .unwrap_or("");
                 let method_attrs = &md.attribute;
-                self.check_attr_enabled(method_attrs);
+                self.check_attrs(method_attrs);
                 self.produce_error(
                     |self_, x| self_.methodish_contains_memoize(x),
                     node,
@@ -2254,7 +2314,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             syntax_to_list_no_separators(&x.parameters).for_each(|x| {
                 if let TypeParameter(x) = &x.children {
                     let tparam_attributes = &x.attribute_spec;
-                    self.check_attr_enabled(tparam_attributes);
+                    self.check_attrs(tparam_attributes);
                 }
             })
         }
@@ -3947,7 +4007,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 }
             }
 
-            self.check_attr_enabled(&cd.attribute);
+            self.check_attrs(&cd.attribute);
 
             let classish_is_sealed = self.attr_spec_contains_sealed(&cd.attribute);
 
@@ -4210,7 +4270,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     fn alias_errors(&mut self, node: S<'a>) {
         if let AliasDeclaration(ad) = &node.children {
             let attrs = &ad.attribute_spec;
-            self.check_attr_enabled(attrs);
+            self.check_attrs(attrs);
             // Module newtype errors
             if !ad.module_kw_opt.is_missing() {
                 if !self.in_module {
@@ -4260,7 +4320,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 self.check_can_use_feature(node, &FeatureName::ContextAliasDeclaration);
             }
             let attrs = &cad.attribute_spec;
-            self.check_attr_enabled(attrs);
+            self.check_attrs(attrs);
             if token_kind(&cad.keyword) == Some(TokenKind::Type) && !cad.as_constraint.is_missing()
             {
                 self.errors
@@ -4284,7 +4344,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             self.check_can_use_feature(node, &FeatureName::CaseTypes);
 
             let attrs = &ctd.attribute_spec;
-            self.check_attr_enabled(attrs);
+            self.check_attrs(attrs);
 
             self.invalid_modifier_errors("Case types", node, |kind| {
                 kind == TokenKind::Internal || kind == TokenKind::Public
@@ -5042,7 +5102,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     fn enum_decl_errors(&mut self, node: S<'a>) {
         if let EnumDeclaration(x) = &node.children {
             let attrs = &x.attribute_spec;
-            self.check_attr_enabled(attrs);
+            self.check_attrs(attrs);
             if self.attr_spec_contains_const(attrs) {
                 self.errors.push(make_error_from_node(
                     node,

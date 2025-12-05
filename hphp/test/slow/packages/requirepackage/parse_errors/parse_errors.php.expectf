@@ -1,0 +1,21 @@
+====================== 1 =======================
+
+Fatal error: The `__RequirePackage` attribute expects exactly 1 argument, 0 given in %s/requirepackage/parse_errors/parse_errors1.php.inc on line 3
+====================== 2 =======================
+
+Fatal error: The first argument to `__(Soft)RequirePackage` must be a string literal in %s/requirepackage/parse_errors/parse_errors2.php.inc on line 3
+====================== 3 =======================
+
+Fatal error: The `__RequirePackage` attribute expects exactly 1 argument, 2 given in %s/requirepackage/parse_errors/parse_errors3.php.inc on line 3
+====================== 4 =======================
+
+Fatal error: The `__SoftRequirePackage` attribute expects exactly 1 or 2 arguments, 0 given in %s/requirepackage/parse_errors/parse_errors4.php.inc on line 3
+====================== 5 =======================
+
+Fatal error: The first argument to `__(Soft)RequirePackage` must be a string literal in %s/requirepackage/parse_errors/parse_errors5.php.inc on line 3
+====================== 6 =======================
+
+Fatal error: The second argument to `__SoftRequirePackage`, if it exists, must be an integer literal in %s/requirepackage/parse_errors/parse_errors6.php.inc on line 3
+====================== 7 =======================
+
+Fatal error: The `__SoftRequirePackage` attribute expects exactly 1 or 2 arguments, 3 given in %s/requirepackage/parse_errors/parse_errors7.php.inc on line 3

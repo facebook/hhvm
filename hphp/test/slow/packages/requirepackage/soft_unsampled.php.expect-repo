@@ -6,8 +6,6 @@ f [fromPackages] noactivedeployement.php
 f [fromPackages] soft.php
 f [fromPackages] soft_sampled.php
 f [fromPackages] soft_unsampled.php
-can see bar
-
-Fatal error: Uncaught exception 'HH\InvariantException' with message 'Package bat should be loaded' in %s/requirepackage/interface.php:19
-Stack trace:
-%A
+string(9) "in A::bar"
+string(4) "in b"
+string(7) "in bMem"

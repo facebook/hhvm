@@ -616,9 +616,9 @@ pub fn error2074(call_modifier: &str) -> Error {
 pub const error2077: Error = Cow::Borrowed("Cannot use empty list");
 pub const error2078: Error = Cow::Borrowed("An expression cannot start with `=`");
 
-pub const error2079: Error = Cow::Borrowed(concat!("A splat parameter cannot also be variadic.",));
+pub const error2079: Error = Cow::Borrowed("A splat parameter cannot also be variadic.");
 
-pub const error2080: Error = Cow::Borrowed(concat!("A splat parameter cannot also be optional.",));
+pub const error2080: Error = Cow::Borrowed("A splat parameter cannot also be optional.");
 
 pub const error2081: Error = Cow::Borrowed(concat!(
     "A splat parameter `...` may only appear at the end of ",
@@ -1284,19 +1284,29 @@ pub const module_declaration_in_module: Error =
 
 pub const multiple_module_declarations_per_file: Error =
     Cow::Borrowed("You cannot declare more than one module within a file");
-
-pub fn invalid_require_package_argument(message: &str) -> Error {
+pub fn require_package_wrong_arity(count: usize) -> Error {
     Cow::Owned(format!(
-        "This is an invalid use of '__RequirePackage' because {}",
-        message
+        "The `__RequirePackage` attribute expects exactly 1 argument, {} given",
+        count
     ))
 }
 
-pub fn require_package_wrong_arity(count: usize) -> Error {
+pub fn soft_require_package_wrong_arity(count: usize) -> Error {
     Cow::Owned(format!(
-        "The '__RequirePackage' attribute expects exactly 1 argument, {} given.",
+        "The `__SoftRequirePackage` attribute expects exactly 1 or 2 arguments, {} given",
         count
     ))
+}
+
+pub fn invalid_require_package_str_argument() -> Error {
+    Cow::Owned("The first argument to `__(Soft)RequirePackage` must be a string literal".into())
+}
+
+pub fn invalid_soft_require_package_int_argument() -> Error {
+    Cow::Owned(
+        "The second argument to `__SoftRequirePackage`, if it exists, must be an integer literal"
+            .into(),
+    )
 }
 
 pub const expected_bar_or_semicolon: Error = Cow::Borrowed(

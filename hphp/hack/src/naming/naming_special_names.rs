@@ -330,6 +330,8 @@ pub mod user_attributes {
 
     pub const REQUIRE_PACKAGE: &str = "__RequirePackage";
 
+    pub const SOFT_REQUIRE_PACKAGE: &str = "__SoftRequirePackage";
+
     pub const NO_DISJOINT_UNION: &str = "__NoDisjointUnion";
 
     pub const ASIO_LOW_PRI: &str = "__AsioLowPri";
@@ -377,6 +379,10 @@ pub mod user_attributes {
 
     pub fn is_require_package(name: &str) -> bool {
         name == REQUIRE_PACKAGE
+    }
+
+    pub fn is_soft_require_package(name: &str) -> bool {
+        name == SOFT_REQUIRE_PACKAGE
     }
 
     pub fn is_no_disjoint_union(name: &str) -> bool {
@@ -591,6 +597,9 @@ pub mod std_lib_functions {
     pub const IS_PHP_ARRAY: &str = "\\HH\\is_php_array";
 
     pub const IS_ANY_ARRAY: &str = "\\HH\\is_any_array";
+
+    // if this gets a \\ prefix, the use in the emitter stops working
+    pub const TRIGGER_SAMPLED_ERROR: &str = "trigger_sampled_error";
 }
 
 pub mod typehints {

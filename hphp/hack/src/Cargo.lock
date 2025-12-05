@@ -1450,6 +1450,8 @@ dependencies = [
  "bstr",
  "elaborate_namespaces_visitor",
  "hack_macros",
+ "hhbc_string_utils",
+ "intern",
  "itertools",
  "naming_special_names_rust",
  "oxidized",

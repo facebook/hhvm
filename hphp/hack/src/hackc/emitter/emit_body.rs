@@ -37,6 +37,7 @@ use hhbc_string_utils as string_utils;
 use indexmap::IndexSet;
 use instruction_sequence::InstrSeq;
 use instruction_sequence::instr;
+use naming_special_names_rust::std_lib_functions;
 use oxidized::aast;
 use oxidized::aast_defs::DocComment;
 use oxidized::ast;
@@ -633,7 +634,7 @@ pub fn emit_deprecation_info<'a>(
                     instr::int(error_code),
                     instr::f_call_func_d(
                         FCallArgs::new(FCallArgsFlags::default(), 1, 3, vec![], vec![], None, None),
-                        hhbc::FunctionName::intern("trigger_sampled_error"),
+                        hhbc::FunctionName::intern(std_lib_functions::TRIGGER_SAMPLED_ERROR),
                     ),
                     instr::pop_c(),
                 ])

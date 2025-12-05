@@ -2111,6 +2111,58 @@ std::pair<VregSet, BlockSet> place_constants(State& state) {
 
 //////////////////////////////////////////////////////////////////////
 
+// Make every phijmp operand unique so phi lowering and penalty biasing
+// can reason about each edge independently.
+void split_phijmp_duplicates(State& state) {
+  auto& unit = state.unit;
+
+  for (auto const b : state.rpo) {
+    auto& block = unit.blocks[b];
+    if (block.code.empty()) continue;
+    auto& inst = block.code.back();
+    if (inst.op != Vinstr::phijmp) continue;
+
+    auto& uses = unit.tuples[inst.phijmp_.uses];
+    if (uses.size() < 2) continue;
+
+    VregList copySrcs;
+    VregList copyDsts;
+    jit::fast_set<Vreg> seen;
+
+    for (size_t i = 0; i < uses.size(); ++i) {
+      auto const src = uses[i];
+      if (seen.insert(src).second) continue;
+
+      auto const tmp = unit.makeReg();
+      uses[i] = tmp;
+      copySrcs.emplace_back(src);
+      copyDsts.emplace_back(tmp);
+
+      if (!src.isPhys() && src < state.regInfo.size()) {
+        auto const& infoPtr = state.regInfo[src];
+        if (infoPtr) reg_info_create(state, tmp) = *infoPtr;
+      }
+    }
+
+    if (copySrcs.empty()) continue;
+    invalidate_cached_operands(inst);
+    vmodify(
+      unit, b, block.code.size() - 1,
+      [&] (Vout& v) {
+        if (copySrcs.size() == 1) {
+          v << copy{copySrcs[0], copyDsts[0]};
+        } else {
+          v << copyargs{
+            unit.makeTuple(std::move(copySrcs)),
+            unit.makeTuple(std::move(copyDsts))
+          };
+        }
+        return 0;
+      }
+    );
+  }
+}
+
 void prepare_unit(State& state) {
   // Constant materialization requires knowing where any loops are.
   find_loops(state);
@@ -2132,6 +2184,8 @@ void prepare_unit(State& state) {
     if (!map.second.isPhys()) continue;
     reg_info_create(state, map.first);
   }
+
+  split_phijmp_duplicates(state);
 }
 
 //////////////////////////////////////////////////////////////////////

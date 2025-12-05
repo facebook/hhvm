@@ -170,7 +170,11 @@ class ThreadManager::Task {
         context_(folly::RequestContext::saveContext()),
         qpriority_(qpriority) {}
 
-  ~Task() {}
+  ~Task() = default;
+  Task(const Task&) = default;
+  Task& operator=(const Task&) = default;
+  Task(Task&&) = default;
+  Task& operator=(Task&&) = default;
 
   void run() {
     folly::RequestContextScopeGuard rctx(context_);
@@ -237,6 +241,10 @@ class ThreadManager::Impl : public ThreadManager,
         codelEnabled_(false || FLAGS_codel_enabled) {}
 
   ~Impl() override { stop(); }
+  Impl(const Impl&) = delete;
+  Impl& operator=(const Impl&) = delete;
+  Impl(Impl&&) = delete;
+  Impl& operator=(Impl&&) = delete;
 
   void start() override;
 
@@ -581,7 +589,11 @@ class ThreadManager::Impl::Worker : public Runnable, public WorkerBaseHook {
  public:
   Worker(ThreadManager::Impl* manager) : manager_(manager) {}
 
-  ~Worker() override {}
+  ~Worker() override = default;
+  Worker(const Worker&) = delete;
+  Worker& operator=(const Worker&) = delete;
+  Worker(Worker&&) = delete;
+  Worker& operator=(Worker&&) = delete;
 
   /**
    * Worker entry point
@@ -1079,6 +1091,10 @@ class PriorityThreadManager::PriorityImpl
   }
 
   ~PriorityImpl() override { joinKeepAliveOnce(); }
+  PriorityImpl(const PriorityImpl&) = delete;
+  PriorityImpl& operator=(const PriorityImpl&) = delete;
+  PriorityImpl(PriorityImpl&&) = delete;
+  PriorityImpl& operator=(PriorityImpl&&) = delete;
 
   void start() override {
     std::unique_lock<std::mutex> g(mutex_);

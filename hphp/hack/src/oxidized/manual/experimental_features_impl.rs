@@ -59,7 +59,7 @@ impl FeatureName {
             NamedParameters => Unstable,
             NamedParametersUse => Unstable,
             NullsafePipe => OngoingRelease,
-            XhpTypeConstants => Unstable,
+            XhpTypeConstants => OngoingRelease,
         }
     }
 

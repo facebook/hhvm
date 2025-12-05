@@ -125,17 +125,47 @@ ParseStatus caretParseHeader(
   const char* buf = reinterpret_cast<const char*>(buff);
   size_t encodedLength = folly::GroupVarint32::encodedSize(buf + 1);
 
+  // GroupVarint32 encoding is at most 17 bytes (1 key + 16 data bytes)
+  if (encodedLength > 17 || encodedLength < 5) {
+    return ParseStatus::MessageParseError;
+  }
+
+  // Check if we have the full encoded header (magic byte + encoded data).
   if (nbuf < encodedLength + 1) {
     return ParseStatus::NotEnoughData;
   }
 
   uint32_t additionalFields;
-  folly::GroupVarint32::decode_simple(
-      buf + 1,
-      &headerInfo.bodySize,
-      &headerInfo.typeId,
-      &headerInfo.reqId,
-      &additionalFields);
+  // GroupVarint32::decode_simple requires at least 3 extra bytes available
+  // beyond the encoded length (they may be read but ignored).
+  //
+  // To prevent buffer overflows while still allowing exact-size headers:
+  // - If we have the 3 extra bytes (nbuf >= encodedLength + 1 + 3), decode
+  // directly
+  // - Otherwise, copy to a padded buffer first to ensure safe decoding
+  if (nbuf >= encodedLength + 1 + 3) {
+    // Fast path: sufficient buffer size for safe decode_simple call
+    folly::GroupVarint32::decode_simple(
+        buf + 1,
+        &headerInfo.bodySize,
+        &headerInfo.typeId,
+        &headerInfo.reqId,
+        &additionalFields);
+  } else {
+    // Slow path: create a padded buffer to prevent buffer over-read
+    // Maximum GroupVarint32 encoding is 17 bytes (1 key + 16 data bytes).
+    // Adding 3 bytes of padding gives us 20 bytes maximum.
+    char paddedBuf[20];
+    std::memcpy(paddedBuf, buf + 1, encodedLength);
+    // Zero out the padding bytes
+    std::memset(paddedBuf + encodedLength, 0, 3);
+    folly::GroupVarint32::decode_simple(
+        paddedBuf,
+        &headerInfo.bodySize,
+        &headerInfo.typeId,
+        &headerInfo.reqId,
+        &additionalFields);
+  }
 
   folly::StringPiece range(buf, nbuf);
   range.advance(encodedLength + 1);

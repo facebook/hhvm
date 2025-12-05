@@ -16,8 +16,15 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from types import (
+    BuiltinFunctionType,
+    BuiltinMethodType,
+    FunctionType,
+    LambdaType,
+    MethodType,
+)
+
 from thrift.protocol.TProtocol import TProtocolBase
-from types import *
 
 
 class TProtocolDecorator:

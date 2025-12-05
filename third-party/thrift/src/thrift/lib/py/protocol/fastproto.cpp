@@ -531,6 +531,7 @@ static bool encode_impl(
         }
 
         int fid = static_cast<int>(AS_LONG(field));
+        Py_DECREF(field);
         PyObject* spec_tuple = PyTuple_GET_ITEM(parsedargs.spec, fid);
         if (spec_tuple != Py_None) {
           StructItemSpec parsedspec;
@@ -739,6 +740,10 @@ static bool decode_struct(
           ExceptionsModule, create_func_method_name, pValue, pFieldName, NULL);
       PyObject* thrift_decode_error_type = PyObject_Type(decode_error);
       PyErr_SetObject(thrift_decode_error_type, decode_error);
+      Py_DECREF(create_func_method_name);
+      Py_DECREF(pFieldName);
+      Py_DECREF(decode_error);
+      Py_DECREF(thrift_decode_error_type);
       Py_DECREF(pType);
       Py_DECREF(pValue);
       if (pTraceback != nullptr) {
@@ -754,27 +759,23 @@ static bool decode_struct(
         return false;
       }
       int field = (int)AS_LONG(fieldobj);
+      Py_DECREF(fieldobj);
       if (field == -1 && PyErr_Occurred()) {
         Py_DECREF(fieldval);
-        Py_DECREF(fieldobj);
         return false;
       }
       if (field != 0) {
         PyErr_SetString(PyExc_AssertionError, "field already set in union");
         Py_DECREF(fieldval);
-        Py_DECREF(fieldobj);
         return false;
       }
-      Py_DECREF(fieldobj);
 
       PyObject* valueobj = PyObject_GetAttrString(value, "value");
       if (!valueobj) {
-        Py_DECREF(fieldobj);
         return false;
       }
       if (valueobj != Py_None) {
         PyErr_SetString(PyExc_AssertionError, "value already set in union");
-        Py_DECREF(fieldval);
         Py_DECREF(valueobj);
         return false;
       }
@@ -782,6 +783,7 @@ static bool decode_struct(
 
       PyObject* tagobj = FROM_LONG(parsedspec.tag);
       if (!tagobj) {
+        Py_DECREF(fieldval);
         return false;
       }
       if (PyObject_SetAttrString(value, "value", fieldval) == -1 ||
@@ -1208,11 +1210,15 @@ struct module_state {
 
 static int fastproto_traverse(PyObject* m, visitproc visit, void* arg) {
   Py_VISIT(GETSTATE(m)->error);
+  Py_VISIT(BytesIOType);
+  Py_VISIT(ExceptionsModule);
   return 0;
 }
 
 static int fastproto_clear(PyObject* m) {
   Py_CLEAR(GETSTATE(m)->error);
+  Py_CLEAR(BytesIOType);
+  Py_CLEAR(ExceptionsModule);
   return 0;
 }
 
@@ -1255,10 +1261,10 @@ PyMODINIT_FUNC initfastproto(void)
     return nullptr;
   }
   BytesIOType = (PyTypeObject*)PyObject_Type(bio);
+  Py_DECREF(iomodule);
+  Py_DECREF(bio);
   ExceptionsModule = PyImport_ImportModule("thrift.protocol.exceptions");
   if (ExceptionsModule == nullptr) {
-    Py_DECREF(iomodule);
-    Py_DECREF(bio);
     return nullptr;
   }
   module = PyModule_Create(&ThriftFastProtoModuleDef);

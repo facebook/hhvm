@@ -146,7 +146,7 @@ class file_manager {
    * @param thrift_include Path of the (.thrift) include to add, if not already
    * present.
    */
-  void add_include(std::string thrift_path);
+  std::optional<size_t> add_include(std::string thrift_path);
 
   // Adds a replacement to remove the given element.
   void remove(const t_annotation& annotation);

@@ -146,9 +146,9 @@ void file_manager::expand_over_whitespaces(
   }
 }
 
-void file_manager::add_include(std::string thrift_include) {
+std::optional<size_t> file_manager::add_include(std::string thrift_include) {
   if (includes_.contains(thrift_include)) {
-    return;
+    return std::nullopt;
   }
 
   std::string new_include_directive = "include \"" + thrift_include + "\"\n";
@@ -174,7 +174,13 @@ void file_manager::add_include(std::string thrift_include) {
     }
 
     if (!program_->definitions().empty()) {
-      return to_offset(program_->definitions().front().src_range().begin);
+      // Add the include before the first definition - but check if there is a
+      // doc block before it.
+      const t_named& first_definition = program_->definitions().front();
+      const source_range first_definition_range = first_definition.has_doc()
+          ? first_definition.doc_range()
+          : first_definition.src_range();
+      return to_offset(first_definition_range.begin);
     }
 
     return 0;
@@ -184,6 +190,7 @@ void file_manager::add_include(std::string thrift_include) {
        .end_pos = new_include_offset,
        .new_content = new_include_directive,
        .is_include = true});
+  return new_include_offset;
 }
 
 void file_manager::remove_all_annotations(const t_node& node) {

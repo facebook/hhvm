@@ -29,9 +29,9 @@ using std::literals::string_view_literals::operator""sv;
 namespace apache::thrift::compiler::codemod {
 namespace {
 
-const std::string test_file_name = "virtual/path/file1.thrift";
+const std::string kTestFileName = "virtual/path/file1.thrift";
 
-const std::string test_file_contents = R"(
+const std::string kTestFileContents = R"(
 package "test.module"
 
 namespace java test.module
@@ -42,20 +42,44 @@ struct Foo {
 )";
 } // namespace
 
+struct Fixture final {
+  std::unique_ptr<source_manager> source_manager_;
+  source_view source_;
+  std::unique_ptr<t_program_bundle> program_bundle_;
+  std::unique_ptr<file_manager> file_manager_;
+};
+
+Fixture prepare_fixture(std::string_view contents) {
+  auto sourceManager = std::make_unique<source_manager>();
+  source_view srcView =
+      sourceManager->add_virtual_file(kTestFileName, contents);
+  diagnostics_engine diags = make_diagnostics_printer(*sourceManager);
+  std::unique_ptr<t_program_bundle> programBundle =
+      parse_ast(*sourceManager, diags, kTestFileName, {});
+
+  auto fileManager = std::make_unique<file_manager>(
+      *sourceManager, *programBundle->root_program());
+
+  return Fixture{
+      .source_manager_ = std::move(sourceManager),
+      .source_ = srcView,
+      .program_bundle_ = std::move(programBundle),
+      .file_manager_ = std::move(fileManager),
+  };
+}
+
 class FileManagerTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    source_ =
-        source_manager_.add_virtual_file(test_file_name, test_file_contents);
-    auto diags = make_diagnostics_printer(source_manager_);
-    program_bundle_ = parse_ast(source_manager_, diags, test_file_name, {});
-    ASSERT_THAT(program_bundle_, NotNull());
+    Fixture fixture = prepare_fixture(kTestFileContents);
 
-    file_manager_ = std::make_unique<file_manager>(
-        source_manager_, *program_bundle_->root_program());
+    source_manager_ = std::move(fixture.source_manager_);
+    source_ = fixture.source_;
+    program_bundle_ = std::move(fixture.program_bundle_);
+    file_manager_ = std::move(fixture.file_manager_);
   }
 
-  source_manager source_manager_;
+  std::unique_ptr<source_manager> source_manager_;
   source_view source_;
   std::unique_ptr<t_program_bundle> program_bundle_;
   std::unique_ptr<file_manager> file_manager_;
@@ -64,11 +88,11 @@ class FileManagerTest : public ::testing::Test {
 TEST_F(FileManagerTest, old_content) {
   // NOTE: comparison is done via underlying data() using StrEq because the text
   // in the source manager is explicitly null-terminated.
-  EXPECT_THAT(file_manager_->old_content().data(), StrEq(test_file_contents));
+  EXPECT_THAT(file_manager_->old_content().data(), StrEq(kTestFileContents));
 }
 
 TEST_F(FileManagerTest, add_include) {
-  file_manager_->add_include("some/other/file.thrift");
+  EXPECT_EQ(file_manager_->add_include("some/other/file.thrift"), 1);
 
   EXPECT_THAT(file_manager_->get_new_content().data(), StrEq(R"(
 include "some/other/file.thrift"
@@ -81,6 +105,86 @@ struct Foo {
   1: optional i32 bar;
 }
 )"));
+}
+
+TEST_F(FileManagerTest, add_include_no_op) {
+  Fixture fixture = prepare_fixture(R"(
+include "thrift/annotation/thrift.thrift"
+
+package "test.package"
+
+struct S {}
+)");
+
+  EXPECT_EQ(
+      fixture.file_manager_->add_include("thrift/annotation/thrift.thrift"),
+      std::nullopt);
+
+  EXPECT_EQ(fixture.file_manager_->get_new_content(), R"(
+include "thrift/annotation/thrift.thrift"
+
+package "test.package"
+
+struct S {}
+)");
+}
+
+TEST_F(FileManagerTest, add_include_no_previous_include) {
+  Fixture fixture = prepare_fixture(R"(
+package "test.package"
+
+struct S {}
+)");
+
+  EXPECT_EQ(fixture.file_manager_->add_include("some/other/file.thrift"), 1);
+
+  EXPECT_EQ(fixture.file_manager_->get_new_content(), R"(
+include "some/other/file.thrift"
+
+package "test.package"
+
+struct S {}
+)");
+}
+
+TEST_F(FileManagerTest, add_include_namespace_before_package) {
+  Fixture fixture = prepare_fixture(R"(
+namespace cpp2 "test"
+
+package "test.package"
+
+struct S {}
+)");
+
+  EXPECT_EQ(fixture.file_manager_->add_include("some/other/file.thrift"), 24);
+
+  EXPECT_EQ(fixture.file_manager_->get_new_content(), R"(
+namespace cpp2 "test"
+
+include "some/other/file.thrift"
+
+package "test.package"
+
+struct S {}
+)");
+}
+
+TEST_F(FileManagerTest, add_include_with_docblock) {
+  Fixture fixture = prepare_fixture(R"(
+// Not a docblock
+/// This comment describes the struct
+struct S {}
+)");
+
+  fixture.file_manager_->add_include("some/other/file.thrift");
+
+  EXPECT_EQ(fixture.file_manager_->get_new_content(), R"(
+// Not a docblock
+include "some/other/file.thrift"
+
+/// This comment describes the struct
+struct S {}
+)");
 }
 
 TEST_F(FileManagerTest, add) {
@@ -125,7 +229,7 @@ TEST_F(FileManagerTest, get_line_leading_whitespace) {
 
     EXPECT_EQ(leading_whitespace.begin.offset(), 65);
     EXPECT_EQ(leading_whitespace.end.offset(), 67);
-    EXPECT_EQ(source_manager_.get_text_range(leading_whitespace), "  ");
+    EXPECT_EQ(source_manager_->get_text_range(leading_whitespace), "  ");
   }
 
   {
@@ -134,7 +238,7 @@ TEST_F(FileManagerTest, get_line_leading_whitespace) {
 
     EXPECT_EQ(leading_whitespace.begin.offset(), 0);
     EXPECT_EQ(leading_whitespace.end.offset(), 0);
-    EXPECT_EQ(source_manager_.get_text_range(leading_whitespace), "");
+    EXPECT_EQ(source_manager_->get_text_range(leading_whitespace), "");
   }
 }
 

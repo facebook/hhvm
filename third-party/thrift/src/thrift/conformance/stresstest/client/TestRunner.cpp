@@ -73,6 +73,7 @@ StressTestStats TestRunner::run(std::unique_ptr<StressTestBase> test) {
   runner.run(test.get());
   // collect and print statistics
   return StressTestStats{
+      .runtimeSeconds = FLAGS_runtime_s,
       .memoryStats = runner.getMemoryStats(),
       .rpcStats = runner.getRpcStats(),
   };

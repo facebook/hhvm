@@ -254,6 +254,8 @@ class CompactProtocolReader : public detail::ProtocolBase {
 
   static constexpr bool kHasDeferredRead() { return true; }
 
+  static constexpr bool kCanReadStringView() { return true; }
+
   static constexpr bool kSupportsArithmeticVectors() {
     // Disabling on x86 due to seeing regressions in some tests
 #if FOLLY_ARM_FEATURE_NEON_SVE_BRIDGE

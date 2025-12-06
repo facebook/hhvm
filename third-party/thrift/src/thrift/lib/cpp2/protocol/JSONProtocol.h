@@ -98,6 +98,8 @@ class JSONProtocolReader : public JSONProtocolReaderCommon {
 
   static constexpr bool kHasDeferredRead() { return false; }
 
+  static constexpr bool kCanReadStringView() { return false; }
+
   static constexpr bool kSupportsArithmeticVectors() { return false; }
 
   inline void readStructBegin(std::string& name);

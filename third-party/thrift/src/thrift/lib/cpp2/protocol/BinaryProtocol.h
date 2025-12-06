@@ -212,6 +212,8 @@ class BinaryProtocolReader : public detail::ProtocolBase {
 
   static constexpr bool kHasDeferredRead() { return false; }
 
+  static constexpr bool kCanReadStringView() { return true; }
+
   static constexpr bool kSupportsArithmeticVectors() { return true; }
 
   void setStringSizeLimit(int32_t string_limit) {

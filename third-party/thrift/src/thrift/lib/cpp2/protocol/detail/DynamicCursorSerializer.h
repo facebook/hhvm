@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <fmt/format.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 #include <thrift/lib/cpp2/protocol/CursorBasedSerializer.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
@@ -32,6 +33,11 @@ class ContainerDynamicCursorWriter;
 
 template <typename Tag>
 void ensureTypesCompatible(protocol::TType nextTType) {
+  // T_VOID indicates protocol doesn't encode type information (e.g.,
+  // SimpleJSON)
+  if (nextTType == protocol::TType::T_VOID) {
+    return;
+  }
   auto nextType = type::toBaseType(nextTType);
   auto requestedType = type::base_type_v<Tag>;
   if (requestedType == type::BaseType::Union) {
@@ -58,7 +64,12 @@ class StructuredDynamicCursorReader : detail::BaseCursorReader<ProtocolReader> {
   using Base::protocol_;
   using Base::state_;
   template <typename Tag>
-  using view_type = detail::lift_view_t<type::native_type<Tag>, Contiguous>;
+  using view_type = detail::lift_view_t<
+      type::native_type<Tag>,
+      Contiguous &&
+          // It isn't possible to read json strings as string_view due to escape
+          // sequences.
+          ProtocolReader::kCanReadStringView()>;
   using ContainerDynamicCursorReader =
       ContainerDynamicCursorReader<ProtocolReader, Contiguous>;
 
@@ -192,8 +203,33 @@ class StructuredDynamicCursorReader : detail::BaseCursorReader<ProtocolReader> {
         structuredNode_(structuredNode) {
     readState_.readStructBegin(protocol_);
     readState_.readFieldBegin(protocol_);
+    resolveFieldIdentity();
   }
   StructuredDynamicCursorReader() { readState_.fieldType = TType::T_STOP; }
+
+  // For field name-based protocols, resolve field name to field ID using
+  // TypeRef
+  void resolveFieldIdentity() {
+    if constexpr (ProtocolReader::kUsesFieldNames()) {
+      if (readState_.fieldType == TType::T_STOP) {
+        return;
+      }
+      if (!structuredNode_) {
+        folly::throw_exception<std::runtime_error>(
+            "Field name-based protocol requires TypeRef for field resolution");
+      }
+      const auto& fieldName = readState_.fieldName();
+      auto fieldHandle = structuredNode_->fieldHandleFor(fieldName);
+      if (!fieldHandle.valid()) {
+        // Unknown field - set sentinel value (0) and let caller decide how to
+        // handle
+        readState_.fieldId = 0;
+        return;
+      }
+      readState_.fieldId = folly::to_underlying(
+          structuredNode_->at(fieldHandle).identity().id());
+    }
+  }
 
   void finalize() {
     checkState(State::Active);
@@ -201,6 +237,7 @@ class StructuredDynamicCursorReader : detail::BaseCursorReader<ProtocolReader> {
       protocol_->skip(readState_.fieldType);
       readState_.readFieldEnd(protocol_);
       readState_.readFieldBegin(protocol_);
+      resolveFieldIdentity();
     }
     readState_.readStructEnd(protocol_);
     state_ = State::Done;
@@ -209,6 +246,7 @@ class StructuredDynamicCursorReader : detail::BaseCursorReader<ProtocolReader> {
   void afterReadField() {
     readState_.readFieldEnd(protocol_);
     readState_.readFieldBegin(protocol_);
+    resolveFieldIdentity();
   }
 
   void beforeReadField() {
@@ -647,7 +685,23 @@ class StructuredDynamicCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
 
   void beforeWriteField(int16_t fieldId, protocol::TType type) {
     checkState(State::Active);
-    protocol_->writeFieldBegin("", type, fieldId);
+    if constexpr (ProtocolWriter::ProtocolReader::kUsesFieldNames()) {
+      if (!structuredNode_) {
+        folly::throw_exception<std::runtime_error>(
+            "Field name-based protocol requires TypeRef for field resolution");
+      }
+      auto fieldHandle =
+          structuredNode_->fieldHandleFor(type::FieldId{fieldId});
+      if (!fieldHandle.valid()) {
+        folly::throw_exception<std::runtime_error>(
+            fmt::format("Unknown field id: {}", fieldId));
+      }
+      const auto& fieldName =
+          structuredNode_->at(fieldHandle).identity().name();
+      protocol_->writeFieldBegin(fieldName.c_str(), type, fieldId);
+    } else {
+      protocol_->writeFieldBegin("", type, fieldId);
+    }
   }
   void afterWriteField() { protocol_->writeFieldEnd(); }
 
@@ -899,11 +953,6 @@ class ContainerDynamicCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
 template <typename ProtocolReader, typename ProtocolWriter>
 class DynamicCursorSerializationWrapper {
   using Serializer = Serializer<ProtocolReader, ProtocolWriter>;
-
-  static_assert(
-      !ProtocolReader::kUsesFieldNames() &&
-          !ProtocolWriter::ProtocolReader::kUsesFieldNames(),
-      "Only field id-based protocols are supported");
 
  public:
   DynamicCursorSerializationWrapper() = default;

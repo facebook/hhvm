@@ -21,6 +21,7 @@
 #include <thrift/lib/cpp2/dynamic/TypeId.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystemBuilder.h>
+#include <thrift/lib/cpp2/protocol/SimpleJSONProtocol.h>
 #include <thrift/lib/cpp2/protocol/test/gen-cpp2/cursor_types.h>
 #include <thrift/lib/cpp2/reflection/testing.h>
 #include <thrift/lib/cpp2/type/AnyDebugWriter.h>
@@ -479,4 +480,147 @@ TEST(DynamicCursorSerializer, TypeRefValidation) {
 
   // After the exception, abandon the reader to avoid destructor check failure
   wrapper.abandonRead(std::move(reader));
+}
+
+TEST(DynamicCursorSerializer, SimpleJSONWithTypeRef) {
+  using namespace apache::thrift::type_system;
+  using def = TypeSystemBuilder::DefinitionHelper;
+
+  // Build a TypeSystem for a simple struct
+  TypeSystemBuilder builder;
+  builder.addType(
+      "facebook.com/thrift/test/SimpleStruct",
+      def::Struct({
+          def::Field(
+              def::Identity(1, "string_field"), def::Optional, TypeIds::String),
+          def::Field(
+              def::Identity(2, "i32_field"), def::Optional, TypeIds::I32),
+          def::Field(
+              def::Identity(7, "bool_field"), def::Optional, TypeIds::Bool),
+      }));
+
+  auto typeSystem = std::move(builder).build();
+  auto structTypeRef =
+      typeSystem
+          ->getUserDefinedTypeOrThrow("facebook.com/thrift/test/SimpleStruct")
+          .asStruct()
+          .asRef();
+
+  // Test writing with SimpleJSON
+  DynamicCursorSerializationWrapper<
+      SimpleJSONProtocolReader,
+      SimpleJSONProtocolWriter>
+      wrapper(structTypeRef);
+
+  auto writer = wrapper.beginWrite();
+  writer.write(1, type::string_t{}, "hello");
+  writer.write(2, type::i32_t{}, 42);
+  writer.write(7, type::bool_t{}, true);
+  wrapper.endWrite(std::move(writer));
+
+  // Test reading back with SimpleJSON
+  auto reader = wrapper.beginRead();
+
+  // Verify field type information is available through TypeRef
+  auto stringFieldTypeRef = reader.fieldTypeRef();
+  ASSERT_TRUE(stringFieldTypeRef.has_value());
+  EXPECT_TRUE(stringFieldTypeRef->isString());
+  EXPECT_EQ(reader.fieldId(), 1);
+  // SimpleJSON doesn't encode types, so we use TypeRef and typed read
+  EXPECT_EQ(reader.read(type::string_t{}), "hello");
+
+  auto i32FieldTypeRef = reader.fieldTypeRef();
+  ASSERT_TRUE(i32FieldTypeRef.has_value());
+  EXPECT_TRUE(i32FieldTypeRef->isI32());
+  EXPECT_EQ(reader.fieldId(), 2);
+  EXPECT_EQ(reader.read(type::i32_t{}), 42);
+
+  auto boolFieldTypeRef = reader.fieldTypeRef();
+  ASSERT_TRUE(boolFieldTypeRef.has_value());
+  EXPECT_TRUE(boolFieldTypeRef->isBool());
+  EXPECT_EQ(reader.fieldId(), 7);
+  EXPECT_TRUE(reader.read(type::bool_t{}));
+
+  wrapper.endRead(std::move(reader));
+}
+
+TEST(DynamicCursorSerializer, SimpleJSONWithoutTypeRefThrows) {
+  // Test that SimpleJSON without TypeRef throws an exception when trying to
+  // write
+  DynamicCursorSerializationWrapper<
+      SimpleJSONProtocolReader,
+      SimpleJSONProtocolWriter>
+      wrapper;
+
+  auto writer = wrapper.beginWrite();
+  bool exceptionThrown = false;
+  try {
+    writer.write(1, type::string_t{}, "test");
+  } catch (const std::runtime_error& e) {
+    exceptionThrown = true;
+    EXPECT_THAT(
+        e.what(),
+        ::testing::HasSubstr("Field name-based protocol requires TypeRef"));
+  }
+  EXPECT_TRUE(exceptionThrown);
+  wrapper.abandonWrite(std::move(writer));
+}
+
+TEST(DynamicCursorSerializer, SimpleJSONUnknownFieldsHandled) {
+  using namespace apache::thrift::type_system;
+  using def = TypeSystemBuilder::DefinitionHelper;
+
+  // Build a TypeSystem with only 2 fields
+  TypeSystemBuilder builder;
+  builder.addType(
+      "facebook.com/thrift/test/PartialStruct",
+      def::Struct({
+          def::Field(def::Identity(1, "field1"), def::Optional, TypeIds::I32),
+          def::Field(def::Identity(3, "field3"), def::Optional, TypeIds::Bool),
+      }));
+
+  auto typeSystem = std::move(builder).build();
+  auto structTypeRef =
+      typeSystem
+          ->getUserDefinedTypeOrThrow("facebook.com/thrift/test/PartialStruct")
+          .asStruct()
+          .asRef();
+
+  // Manually create SimpleJSON with extra fields not in schema
+  folly::IOBufQueue queue;
+  SimpleJSONProtocolWriter writer;
+  writer.setOutput(&queue);
+  writer.writeStructBegin("");
+  writer.writeFieldBegin("field1", protocol::TType::T_I32, 1);
+  writer.writeI32(42);
+  writer.writeFieldEnd();
+  writer.writeFieldBegin("unknown_field", protocol::TType::T_STRING, 2);
+  writer.writeString("ignored");
+  writer.writeFieldEnd();
+  writer.writeFieldBegin("field3", protocol::TType::T_BOOL, 3);
+  writer.writeBool(true);
+  writer.writeFieldEnd();
+  writer.writeFieldStop();
+  writer.writeStructEnd();
+
+  DynamicCursorSerializationWrapper<
+      SimpleJSONProtocolReader,
+      SimpleJSONProtocolWriter>
+      wrapper(queue.move(), structTypeRef);
+
+  auto reader = wrapper.beginRead();
+
+  // Read field1
+  EXPECT_EQ(reader.fieldId(), 1);
+  EXPECT_EQ(reader.read(type::i32_t{}), 42);
+
+  // Unknown field should have sentinel value 0
+  EXPECT_EQ(reader.fieldId(), 0);
+  reader.skip(); // Skip unknown field
+
+  // Read field3
+  EXPECT_EQ(reader.fieldId(), 3);
+  EXPECT_TRUE(reader.read(type::bool_t{}));
+
+  wrapper.endRead(std::move(reader));
 }

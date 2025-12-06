@@ -207,6 +207,11 @@ void SimpleJSONProtocolReader::readFieldBegin(
   }
 }
 
+inline void SimpleJSONProtocolReader::readFieldBeginWithState(
+    StructReadState& state) {
+  readFieldBegin(state.fieldName_, state.fieldType, state.fieldId);
+}
+
 void SimpleJSONProtocolReader::readFieldEnd() {}
 
 void SimpleJSONProtocolReader::readMapBegin(

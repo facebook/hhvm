@@ -113,6 +113,8 @@ class SimpleJSONProtocolReader : public JSONProtocolReaderCommon {
 
   static constexpr bool kSupportsArithmeticVectors() { return false; }
 
+  struct StructReadState;
+
   /**
    * Reading functions
    */
@@ -134,6 +136,68 @@ class SimpleJSONProtocolReader : public JSONProtocolReaderCommon {
   inline bool peekSet();
 
   inline void skip(TType type, int depth = 0);
+
+ protected:
+  void readFieldBeginWithState(StructReadState& state);
+};
+
+struct SimpleJSONProtocolReader::StructReadState {
+  std::string fieldName_;
+  int16_t fieldId;
+  apache::thrift::protocol::TType fieldType;
+
+  constexpr static bool kAcceptsContext = false;
+
+  void readStructBegin(SimpleJSONProtocolReader* iprot) {
+    iprot->readStructBegin(fieldName_);
+  }
+
+  void readStructEnd(SimpleJSONProtocolReader* iprot) {
+    iprot->readStructEnd();
+  }
+
+  void readFieldBegin(SimpleJSONProtocolReader* iprot) {
+    iprot->readFieldBeginWithState(*this);
+  }
+
+  FOLLY_NOINLINE void readFieldBeginNoInline(SimpleJSONProtocolReader* iprot) {
+    iprot->readFieldBeginWithState(*this);
+  }
+
+  void readFieldEnd(SimpleJSONProtocolReader* iprot) { iprot->readFieldEnd(); }
+
+  /**
+   * For SimpleJSON, advanceToNextField cannot be optimized because field names
+   * must be read to determine field identity. This implementation simply reads
+   * the next field and always returns false (conservative approach).
+   */
+  FOLLY_ALWAYS_INLINE bool advanceToNextField(
+      SimpleJSONProtocolReader* iprot,
+      int16_t currFieldId,
+      int16_t /*nextFieldId*/,
+      TType /*nextFieldType*/) {
+    if (currFieldId != 0) {
+      iprot->readFieldEnd();
+    }
+    iprot->readFieldBeginWithState(*this);
+    return false;
+  }
+
+  FOLLY_ALWAYS_INLINE bool isCompatibleWithType(
+      SimpleJSONProtocolReader* /*iprot*/, TType expectedFieldType) {
+    return fieldType == expectedFieldType;
+  }
+
+  void skip(SimpleJSONProtocolReader* iprot) { iprot->skip(fieldType); }
+
+  std::string& fieldName() { return fieldName_; }
+
+  void afterAdvanceFailure(SimpleJSONProtocolReader* /*iprot*/) {}
+
+  void beforeSubobject(SimpleJSONProtocolReader* /* iprot */) {}
+  void afterSubobject(SimpleJSONProtocolReader* /* iprot */) {}
+
+  bool atStop() { return fieldType == apache::thrift::protocol::T_STOP; }
 };
 
 static_assert(usesFieldNames<SimpleJSONProtocolReader>());

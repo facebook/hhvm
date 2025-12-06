@@ -19,6 +19,7 @@
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/ProtocolReaderStructReadState.h>
+#include <thrift/lib/cpp2/protocol/SimpleJSONProtocol.h>
 #include <thrift/lib/cpp2/protocol/detail/protocol_methods.h>
 
 using namespace apache::thrift;
@@ -195,6 +196,53 @@ TEST(BinaryProtocol, advanceToNextFieldFail) {
 
 TEST(CompactProtocol, advanceToNextFieldFail) {
   testAdvanceToNextFieldSuccess<CompactProtocolReader>();
+}
+
+// SimpleJSON uses field names and cannot optimize field skipping,
+// so advanceToNextField always returns false. We test basic functionality.
+TEST(SimpleJSONProtocol, basicStructReadState) {
+  folly::IOBufQueue queue;
+  SimpleJSONProtocolWriter writer;
+  writer.setOutput(&queue);
+  writer.writeStructBegin("");
+  writer.writeFieldBegin("field1", T_BYTE, 13);
+  writer.writeByte(24);
+  writer.writeFieldEnd();
+  writer.writeFieldBegin("field2", T_I32, 23);
+  writer.writeI32(123456);
+  writer.writeFieldEnd();
+  writer.writeFieldStop();
+  writer.writeStructEnd();
+  auto input = queue.move();
+
+  SimpleJSONProtocolReader::StructReadState state;
+  SimpleJSONProtocolReader reader;
+  reader.setInput(input.get());
+
+  state.readStructBegin(&reader);
+  state.readFieldBegin(&reader);
+  EXPECT_EQ(state.fieldName(), "field1");
+  EXPECT_EQ(state.fieldType, T_VOID); // SimpleJSON infers type from value
+  {
+    int8_t value;
+    readFieldContents(reader, state, value);
+    EXPECT_EQ(value, 24);
+  }
+  state.readFieldEnd(&reader);
+
+  state.readFieldBegin(&reader);
+  EXPECT_EQ(state.fieldName(), "field2");
+  EXPECT_EQ(state.fieldType, T_VOID);
+  {
+    int32_t value;
+    readFieldContents(reader, state, value);
+    EXPECT_EQ(value, 123456);
+  }
+  state.readFieldEnd(&reader);
+
+  state.readFieldBegin(&reader);
+  EXPECT_TRUE(state.atStop());
+  state.readStructEnd(&reader);
 }
 
 } // anonymous namespace

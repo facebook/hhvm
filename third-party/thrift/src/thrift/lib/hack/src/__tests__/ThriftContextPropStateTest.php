@@ -20,6 +20,23 @@
 final class ThriftContextPropStateTest extends WWWTest {
   use ClassLevelTest;
 
+  <<__Override>>
+  public static function configPrivacy(
+    this::TIAssetConfig $config,
+  )[write_props]: void {
+    $config->zoneConfig()->policies(
+      PLGDAConfig::schema()->labels(
+        GovernableAnnotation::fromEnum(
+          GovernableAnnotation\GovernableDataAnnotation::FB_DELEGATE_PAGE_RESTRICTED_INPUT_CLOSURE,
+        ),
+        GovernableAnnotation::fromEnum(
+          GovernableAnnotation\GovernableDataAnnotation::FB_DELEGATE_PAGE_RESTRICTED_OUTPUT_CLOSURE,
+        ),
+      ),
+    );
+
+  }
+
   public static function dataProviderForInvalidUserIds(): dict<string, (int)> {
     return dict[
       'zero user id' => tuple(0),

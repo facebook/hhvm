@@ -60,7 +60,7 @@ struct ParallelWalkerContext {
 namespace {
 
 folly::Executor::KeepAlive<> createExecutor(size_t threadCountHint) {
-  size_t hwThreadCount = folly::hardware_concurrency();
+  size_t hwThreadCount = folly::available_concurrency();
   size_t threadCount = threadCountHint
       ? std::min(threadCountHint, hwThreadCount)
       : hwThreadCount;

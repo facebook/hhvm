@@ -24,6 +24,7 @@
 #include <folly/synchronization/RelaxedAtomic.h>
 #include <thrift/conformance/stresstest/client/ClientConfig.h>
 #include <thrift/conformance/stresstest/client/ClientFactory.h>
+#include <thrift/conformance/stresstest/client/ClientRunnerStats.h>
 #include <thrift/conformance/stresstest/client/PoissonLoadGenerator.h>
 #include <thrift/conformance/stresstest/client/StressTestBase.h>
 #include <thrift/conformance/stresstest/if/gen-cpp2/StressTest.h>
@@ -32,16 +33,6 @@
 namespace apache::thrift::stress {
 
 class ClientThread;
-
-struct ClientThreadMemoryStats {
-  void combine(const ClientThreadMemoryStats& other);
-  size_t threadStart{0};
-  size_t connectionsEstablished{0};
-  size_t p50{0};
-  size_t p99{0};
-  size_t p100{0};
-  size_t connectionsIdle{0};
-};
 
 class ClientRunner : public folly::AsyncSocket::ConnectCallback {
  public:

@@ -17,6 +17,7 @@
 #include <thrift/conformance/stresstest/client/ClientRunner.h>
 
 #include <folly/coro/BlockingWait.h>
+#include <thrift/conformance/stresstest/common/TimeoutCallbacks.h>
 #include <thrift/conformance/stresstest/util/Util.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RocketClient.h>
 
@@ -34,24 +35,6 @@ void ClientThreadMemoryStats::combine(const ClientThreadMemoryStats& other) {
   p100 += other.p100;
   connectionsIdle += other.connectionsIdle;
 }
-
-class TestDoneTimeout : public folly::HHWheelTimer::Callback {
- public:
-  explicit TestDoneTimeout(bool& testDone) : testDone_(testDone) {}
-  void timeoutExpired() noexcept override { testDone_ = true; }
-  bool& testDone_;
-};
-
-class WarmupDoneTimeout : public folly::HHWheelTimer::Callback {
- public:
-  explicit WarmupDoneTimeout(ClientRpcStats& stats) : stats_(stats) {}
-  void timeoutExpired() noexcept override {
-    stats_.numSuccess = 0;
-    stats_.numFailure = 0;
-    stats_.latencyHistogram.clear();
-  }
-  ClientRpcStats& stats_;
-};
 
 std::unique_ptr<folly::EventBaseBackendBase> getIOUringBackend() {
 #if FOLLY_HAS_LIBURING

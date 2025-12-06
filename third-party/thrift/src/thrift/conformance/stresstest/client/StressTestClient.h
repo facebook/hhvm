@@ -17,21 +17,12 @@
 #pragma once
 
 #include <folly/coro/Task.h>
-#include <folly/stats/Histogram.h>
+#include <thrift/conformance/stresstest/client/ClientRunnerStats.h>
 #include <thrift/conformance/stresstest/if/gen-cpp2/StressTest.h>
 
 namespace apache::thrift::stress {
 
 class ClientThread;
-
-struct ClientRpcStats {
-  ClientRpcStats();
-  void combine(const ClientRpcStats& other);
-
-  folly::Histogram<double> latencyHistogram;
-  uint64_t numSuccess{0};
-  uint64_t numFailure{0};
-};
 
 /**
  * Wrapper around the generated client to transparently collect statistics of

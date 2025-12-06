@@ -16,22 +16,15 @@
 
 #pragma once
 
-#include <unordered_map>
-
 #include <folly/executors/FunctionScheduler.h>
 
 #include <thrift/conformance/stresstest/client/ClientConfig.h>
-#include <thrift/conformance/stresstest/client/ClientRunner.h>
 #include <thrift/conformance/stresstest/client/StressTestBase.h>
+#include <thrift/conformance/stresstest/common/StressTestStats.h>
 
 namespace apache::thrift::stress {
 
-struct StressTestStats {
-  ClientThreadMemoryStats memoryStats;
-  ClientRpcStats rpcStats;
-
-  void log() const;
-};
+class ClientRunner;
 
 class TestRunner {
  public:

@@ -19,38 +19,11 @@
 #include <fmt/core.h>
 #include <gflags/gflags.h>
 
+#include <thrift/conformance/stresstest/client/ClientRunner.h>
 #include <thrift/conformance/stresstest/client/StressTestRegistry.h>
 #include <thrift/conformance/stresstest/util/Util.h>
 
 namespace apache::thrift::stress {
-
-void StressTestStats::log() const {
-  LOG(INFO) << fmt::format(
-      "Total requests:        {} ({} succeeded, {} failed)",
-      (rpcStats.numSuccess + rpcStats.numFailure),
-      rpcStats.numSuccess,
-      rpcStats.numFailure);
-  LOG(INFO) << fmt::format(
-      "Average QPS:           {:.2f}",
-      (static_cast<double>(rpcStats.numSuccess) / FLAGS_runtime_s));
-  LOG(INFO) << fmt::format(
-      "Request latency:       P50={:.2f}us, P99={:.2f}us, P100={:.2f}us",
-      rpcStats.latencyHistogram.getPercentileEstimate(.5),
-      rpcStats.latencyHistogram.getPercentileEstimate(.99),
-      rpcStats.latencyHistogram.getPercentileEstimate(1.0));
-  LOG(INFO) << "Allocated memory stats:";
-  LOG(INFO) << fmt::format(
-      "  Before test:         {} bytes", memoryStats.threadStart);
-  LOG(INFO) << fmt::format(
-      "  Clients connected:   {} bytes", memoryStats.connectionsEstablished);
-  LOG(INFO) << fmt::format(
-      "  During test:         P50={} bytes, P99={} bytes, P100={} bytes",
-      memoryStats.p50,
-      memoryStats.p99,
-      memoryStats.p100);
-  LOG(INFO) << fmt::format(
-      "  Clients idle:        {} bytes", memoryStats.connectionsIdle);
-}
 
 TestRunner::TestRunner(ClientConfig cfg)
     : cfg_(cfg), availableTests_(StressTestRegistry::getInstance().listAll()) {
@@ -142,6 +115,7 @@ void TestRunner::scheduleContinuousStats(ClientRunner& runner) {
       [&] {
         LOG(INFO) << "\nStress Test Stats:";
         auto stats = StressTestStats{
+            .runtimeSeconds = FLAGS_runtime_s,
             .memoryStats = runner.getMemoryStats(),
             .rpcStats = runner.getRpcStats(),
         };

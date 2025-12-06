@@ -29,7 +29,7 @@ void ResourcePoolSet::setResourcePool(
     std::optional<concurrency::PRIORITY> priorityHint_deprecated,
     bool joinExecutorOnStop) {
   std::lock_guard<std::mutex> lock(mutex_);
-  if (locked_) {
+  if (locked_.load(std::memory_order_relaxed)) {
     throw std::logic_error("Cannot setResourcePool() after lock()");
   }
 
@@ -58,7 +58,7 @@ ResourcePoolHandle ResourcePoolSet::addResourcePool(
     std::optional<concurrency::PRIORITY> priorityHint_deprecated,
     bool joinExecutorOnStop) {
   std::lock_guard<std::mutex> lock(mutex_);
-  if (locked_) {
+  if (locked_.load(std::memory_order_relaxed)) {
     throw std::logic_error("Cannot addResourcePool() after lock()");
   }
 
@@ -88,16 +88,21 @@ void ResourcePoolSet::setPoolSelectionFunc(PoolSelectionFunction func) {
 
 void ResourcePoolSet::lock() {
   std::lock_guard<std::mutex> lock(mutex_);
-  locked_ = true;
   // Whilst we still have ThreadManager we may lock an empty ResourcePoolSet.
   // Eventually we should make that a fatal error.
-  if (!empty()) {
+  // Note: We can't call empty() here because it would try to acquire mutex_
+  // which we already hold. We also access resourcePools_ directly before
+  // setting locked_ since the mutex provides synchronization for this write.
+  if (!resourcePools_.empty()) {
     calculatePriorityMapping();
   }
+  // Use release semantics to ensure all prior writes to resourcePools_ are
+  // visible to readers that acquire locked_ with acquire semantics.
+  locked_.store(true, std::memory_order_release);
 }
 
 size_t ResourcePoolSet::numQueued() const {
-  if (!locked_) {
+  if (!locked_.load(std::memory_order_acquire)) {
     return 0;
   }
   size_t sum = 0;
@@ -116,7 +121,7 @@ size_t ResourcePoolSet::numQueued() const {
 }
 
 size_t ResourcePoolSet::numInExecution() const {
-  if (!locked_) {
+  if (!locked_.load(std::memory_order_acquire)) {
     return 0;
   }
   size_t sum = 0;
@@ -129,7 +134,7 @@ size_t ResourcePoolSet::numInExecution() const {
 }
 
 size_t ResourcePoolSet::numPendingDeque() const {
-  if (!locked_) {
+  if (!locked_.load(std::memory_order_acquire)) {
     return 0;
   }
   size_t sum = 0;
@@ -143,8 +148,9 @@ size_t ResourcePoolSet::numPendingDeque() const {
 
 std::optional<ResourcePoolHandle> ResourcePoolSet::findResourcePool(
     std::string_view poolName) const {
-  auto guard = locked_ ? std::unique_lock<std::mutex>()
-                       : std::unique_lock<std::mutex>(mutex_);
+  auto guard = locked_.load(std::memory_order_acquire)
+      ? std::unique_lock<std::mutex>()
+      : std::unique_lock<std::mutex>(mutex_);
   for (std::size_t i = 0; i < resourcePools_.size(); ++i) {
     if (resourcePools_.at(i) && resourcePools_.at(i)->name() == poolName) {
       if (i == ResourcePoolHandle::kDefaultSyncIndex) {
@@ -159,8 +165,9 @@ std::optional<ResourcePoolHandle> ResourcePoolSet::findResourcePool(
 }
 
 bool ResourcePoolSet::hasResourcePool(const ResourcePoolHandle& handle) const {
-  auto guard = locked_ ? std::unique_lock<std::mutex>()
-                       : std::unique_lock<std::mutex>(mutex_);
+  auto guard = locked_.load(std::memory_order_acquire)
+      ? std::unique_lock<std::mutex>()
+      : std::unique_lock<std::mutex>(mutex_);
   if (handle.index() >= resourcePools_.size()) {
     return false;
   }
@@ -170,8 +177,9 @@ bool ResourcePoolSet::hasResourcePool(const ResourcePoolHandle& handle) const {
 ResourcePool& ResourcePoolSet::resourcePool(
     const ResourcePoolHandle& handle) const {
   folly::annotate_ignore_thread_sanitizer_guard g(__FILE__, __LINE__);
-  auto guard = locked_ ? std::unique_lock<std::mutex>()
-                       : std::unique_lock<std::mutex>(mutex_);
+  auto guard = locked_.load(std::memory_order_acquire)
+      ? std::unique_lock<std::mutex>()
+      : std::unique_lock<std::mutex>(mutex_);
   DCHECK_LT(handle.index(), resourcePools_.size());
   DCHECK(resourcePools_[handle.index()]);
   return *resourcePools_[handle.index()];
@@ -179,27 +187,29 @@ ResourcePool& ResourcePoolSet::resourcePool(
 
 ResourcePool& ResourcePoolSet::resourcePoolByPriority_deprecated(
     concurrency::PRIORITY priority) const {
-  auto guard = locked_ ? std::unique_lock<std::mutex>()
-                       : std::unique_lock<std::mutex>(mutex_);
+  auto guard = locked_.load(std::memory_order_acquire)
+      ? std::unique_lock<std::mutex>()
+      : std::unique_lock<std::mutex>(mutex_);
   DCHECK_LT(poolByPriority_[priority], resourcePools_.size());
   DCHECK(resourcePools_[poolByPriority_[priority]]);
   return *resourcePools_[poolByPriority_[priority]];
 }
 
 bool ResourcePoolSet::empty() const {
-  auto guard = locked_ ? std::unique_lock<std::mutex>()
-                       : std::unique_lock<std::mutex>(mutex_);
+  auto guard = locked_.load(std::memory_order_acquire)
+      ? std::unique_lock<std::mutex>()
+      : std::unique_lock<std::mutex>(mutex_);
   return resourcePools_.empty();
 }
 
 std::size_t ResourcePoolSet::workerCount() const {
-  if (!locked_) {
+  if (!locked_.load(std::memory_order_acquire)) {
     return 0;
   }
 
   std::size_t workers = 0;
   for (std::size_t i = 0; i < resourcePools_.size(); ++i) {
-    if (resourcePools_[i]->executor()) {
+    if (resourcePools_[i] && resourcePools_[i]->executor()) {
       if (auto* tpe = dynamic_cast<folly::ThreadPoolExecutor*>(
               &resourcePools_[i]->executor()->get())) {
         // Return the configured number of threads not the dynamic number.
@@ -216,13 +226,13 @@ std::size_t ResourcePoolSet::workerCount() const {
 }
 
 std::size_t ResourcePoolSet::idleWorkerCount() const {
-  if (!locked_) {
+  if (!locked_.load(std::memory_order_acquire)) {
     return 0;
   }
 
   std::size_t idle = 0;
   for (std::size_t i = 0; i < resourcePools_.size(); ++i) {
-    if (resourcePools_[i]->executor()) {
+    if (resourcePools_[i] && resourcePools_[i]->executor()) {
       if (auto* tpe = dynamic_cast<folly::ThreadPoolExecutor*>(
               &resourcePools_[i]->executor()->get())) {
         auto poolStats = tpe->getPoolStats();
@@ -241,8 +251,9 @@ std::size_t ResourcePoolSet::idleWorkerCount() const {
 }
 
 void ResourcePoolSet::stopAndJoin() {
-  auto guard = locked_ ? std::unique_lock<std::mutex>()
-                       : std::unique_lock<std::mutex>(mutex_);
+  auto guard = locked_.load(std::memory_order_acquire)
+      ? std::unique_lock<std::mutex>()
+      : std::unique_lock<std::mutex>(mutex_);
 
   for (auto& resourcePool : resourcePools_) {
     if (resourcePool) {
@@ -253,8 +264,9 @@ void ResourcePoolSet::stopAndJoin() {
 
 std::string ResourcePoolSet::describe() const {
   std::string result;
-  auto guard = locked_ ? std::unique_lock<std::mutex>()
-                       : std::unique_lock<std::mutex>(mutex_);
+  auto guard = locked_.load(std::memory_order_acquire)
+      ? std::unique_lock<std::mutex>()
+      : std::unique_lock<std::mutex>(mutex_);
 
   auto resourcePoolsString = [this]() -> std::string {
     if (resourcePools_.size() == 0) {
@@ -293,7 +305,7 @@ std::string ResourcePoolSet::describe() const {
   return fmt::format(
       "{{ResourcePoolSet resourcePools={}, locked={}, priorityMap={}}}",
       resourcePoolsString(),
-      locked_,
+      locked_.load(std::memory_order_relaxed),
       priorityMapString());
 }
 
@@ -322,10 +334,15 @@ void ResourcePoolSet::calculatePriorityMapping() {
   }
 
   // Check that NORMAL is filled - if not fill it with default async
+  // Note: We can't call hasResourcePool() here because this function is called
+  // from lock() while holding mutex_. Since locked_ is still false at that
+  // point, hasResourcePool() would try to acquire mutex_ again, causing a
+  // deadlock. Instead, we access resourcePools_ directly which is safe since we
+  // hold mutex_.
   if (poolByPriority_[concurrency::NORMAL] == sentinel) {
-    if (hasResourcePool(ResourcePoolHandle::defaultAsync())) {
-      poolByPriority_[concurrency::NORMAL] =
-          ResourcePoolHandle::defaultAsync().index();
+    auto index = ResourcePoolHandle::defaultAsync().index();
+    if (index < resourcePools_.size() && resourcePools_[index]) {
+      poolByPriority_[concurrency::NORMAL] = index;
     }
   }
 

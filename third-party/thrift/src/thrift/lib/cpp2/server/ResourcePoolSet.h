@@ -17,6 +17,7 @@
 #pragma once
 
 #include <array>
+#include <atomic>
 #include <cstdint>
 #include <mutex>
 #include <vector>
@@ -136,7 +137,7 @@ class ResourcePoolSet {
 
   std::vector<std::unique_ptr<ResourcePool>> resourcePools_;
   mutable std::mutex mutex_;
-  bool locked_{false};
+  std::atomic<bool> locked_{false};
   std::vector<std::optional<concurrency::PRIORITY>> priorities_;
   std::array<std::size_t, concurrency::N_PRIORITIES> poolByPriority_;
   PoolSelectionFunction poolSelectionFunction_{

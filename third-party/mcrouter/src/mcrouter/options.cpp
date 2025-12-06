@@ -302,7 +302,7 @@ namespace options {
 
 string substituteTemplates(string str) {
   if (str.find(kTempCpuCores) != string::npos) {
-    auto c = folly::hardware_concurrency();
+    auto c = folly::available_concurrency();
     if (c == 0) {
       LOG_FAILURE(
           "mcrouter",

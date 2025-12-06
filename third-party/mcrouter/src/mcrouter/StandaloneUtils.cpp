@@ -460,7 +460,7 @@ void setupStandaloneMcrouter(
       standaloneOptions.updateFromDict(standaloneOptionsDict);
 
   if (standaloneOptions.core_multiplier > 0) {
-    auto c = folly::hardware_concurrency();
+    auto c = folly::available_concurrency();
     if (!standaloneOptions.core_multiplier_threshold ||
         c >= standaloneOptions.core_multiplier_threshold) {
       libmcrouterOptions.num_proxies = c * standaloneOptions.core_multiplier;

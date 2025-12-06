@@ -27,7 +27,7 @@ THRIFT_FLAG_DEFINE_bool(server_reject_header_connections, false);
 namespace apache::thrift {
 
 const size_t ThriftServerConfig::T_ASYNC_DEFAULT_WORKER_THREADS =
-    folly::hardware_concurrency();
+    folly::available_concurrency();
 
 std::string ThriftServerConfig::getCPUWorkerThreadName() const {
   return poolThreadName_.get();

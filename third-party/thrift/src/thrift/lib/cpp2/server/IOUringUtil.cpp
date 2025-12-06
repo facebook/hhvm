@@ -53,7 +53,7 @@ std::shared_ptr<folly::IOThreadPoolExecutorBase> getDefaultIOUringExecutor(
     ebm.setEventBase(evb, false);
   }
   return std::make_shared<folly::IOThreadPoolExecutor>(
-      folly::hardware_concurrency(),
+      folly::available_concurrency(),
       std::make_shared<folly::NamedThreadFactory>("ThriftIO"),
       &ebm,
       folly::IOThreadPoolExecutor::Options().setEnableThreadIdCollection(

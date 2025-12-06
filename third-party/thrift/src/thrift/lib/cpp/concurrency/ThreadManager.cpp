@@ -1507,7 +1507,7 @@ ThreadManagerExecutorAdapter::ThreadManagerExecutorAdapter(
     auto& executor = executors[i];
     if (!executor) {
       auto tm = ThreadManager::newSimpleThreadManager(
-          i == PRIORITY::NORMAL ? folly::hardware_concurrency() : 2);
+          i == PRIORITY::NORMAL ? folly::available_concurrency() : 2);
       executor = tm;
       for (int j = 0; j < N_SOURCES; j++) {
         executors_[idxFromPriSrc(i, j)] =

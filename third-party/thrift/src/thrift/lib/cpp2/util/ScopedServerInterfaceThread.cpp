@@ -129,7 +129,7 @@ ScopedServerInterfaceThread::makeTestClientChannel(
   auto innerChannel = runner->runner.newChannel(
       folly::getGlobalCPUExecutor().get(),
       makeChannel,
-      folly::hardware_concurrency(),
+      folly::available_concurrency(),
       prot);
   if (injectFault || streamInjectFault) {
     runner->channel.reset(new apache::thrift::detail::FaultInjectionChannel(

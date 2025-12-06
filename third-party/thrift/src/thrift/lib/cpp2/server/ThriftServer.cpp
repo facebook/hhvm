@@ -1377,7 +1377,7 @@ void ThriftServer::ensureResourcePools() {
       if (!executor) {
         // If no executor provided for this priority create one.
         executor = std::make_shared<folly::CPUThreadPoolExecutor>(
-            i == concurrency::PRIORITY::NORMAL ? folly::hardware_concurrency()
+            i == concurrency::PRIORITY::NORMAL ? folly::available_concurrency()
                                                : 2,
             ResourcePool::kPreferredExecutorNumPriorities);
       }

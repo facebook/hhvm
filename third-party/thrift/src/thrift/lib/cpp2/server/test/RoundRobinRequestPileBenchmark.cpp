@@ -38,7 +38,7 @@ BENCHMARK(DefaultPerf) {
       {1}, RequestPileTestUtils::makePileSelectionFunction());
   RoundRobinRequestPile pile(opts);
 
-  auto numThreads = folly::hardware_concurrency();
+  auto numThreads = folly::available_concurrency();
   unsigned numRoundEachWorker = 10'000;
 
   folly::CPUThreadPoolExecutor producer(numThreads);
@@ -84,7 +84,7 @@ BENCHMARK(RoundRobinBehavior) {
 
   unsigned numBuckets = 100;
   unsigned numRoundsPerWorker = 100;
-  auto numThreads = folly::hardware_concurrency();
+  auto numThreads = folly::available_concurrency();
 
   // single bucket, unlimited request pile, with control on
   RoundRobinRequestPile::Options opts(

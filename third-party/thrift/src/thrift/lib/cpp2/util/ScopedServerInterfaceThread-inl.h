@@ -237,7 +237,7 @@ std::unique_ptr<AsyncClientT> ScopedServerInterfaceThread::newClient(
   return std::make_unique<AsyncClientT>(newChannel(
       callbackExecutor,
       std::move(makeChannel),
-      folly::hardware_concurrency(),
+      folly::available_concurrency(),
       prot));
 }
 
@@ -254,7 +254,7 @@ ScopedServerInterfaceThread::newClientWithFaultInjection(
           newChannel(
               callbackExecutor,
               std::move(makeChannel),
-              folly::hardware_concurrency(),
+              folly::available_concurrency(),
               protocol::T_BINARY_PROTOCOL),
           std::move(injectFault),
           std::move(streamInjectFault)));
@@ -271,7 +271,7 @@ ScopedServerInterfaceThread::newClientWithInterceptors(
       newChannel(
           callbackExecutor,
           std::move(makeChannel),
-          folly::hardware_concurrency(),
+          folly::available_concurrency(),
           prot),
       std::move(interceptors));
 }

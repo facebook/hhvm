@@ -166,7 +166,10 @@ void HQClient::sendRequests(bool closeSession, uint64_t numOpenableStreams) {
     auto callSendRequestsAfterADelay = [&]() {
       if (params_.migrateClient && httpPaths_.size() % 2 == 0) {
         auto newSock = std::make_unique<FollyQuicAsyncUDPSocket>(qEvb_);
-        auto bindRes = newSock->bind(folly::SocketAddress("::", 0));
+        auto bindAddress = quicClient_->getPeerAddress().getIPAddress().isV4()
+                               ? "0.0.0.0"
+                               : "::";
+        auto bindRes = newSock->bind(folly::SocketAddress(bindAddress, 0));
         CHECK(!bindRes.hasError());
         auto startProbeRes =
             quicClient_->startPathProbe(std::move(newSock), this);

@@ -167,7 +167,10 @@ type t =
       x: string;
     }
   | Attribute_no_auto_dynamic of Pos.t
-  | Attribute_implemented_by_only_in_hhi of Pos.t
+  | Attribute_implemented_by_restriction of {
+      restriction: string;
+      pos: Pos.t;
+    }
   | Generic_at_runtime of {
       pos: Pos.t;
       prefix: string;
@@ -762,10 +765,10 @@ let attribute_no_auto_dynamic pos =
     (pos, "This attribute is not yet supported in user code")
     []
 
-let attribute_implemented_by_only_in_hhi pos =
+let attribute_implemented_by_restriction ~restriction pos =
   User_error.make_err
-    Error_codes.Naming.(to_enum HhiAttributeOutsideHhi)
-    (pos, "This attribute can only be used in .hhi files")
+    Error_codes.Naming.(to_enum HhiAttributeRestriction)
+    (pos, "This attribute can only be used in " ^ restriction)
     []
 
 let generic_at_runtime p prefix =
@@ -933,8 +936,8 @@ let to_user_error t =
       attribute_not_exact_number_of_args pos name expected actual
     | Attribute_param_type { pos; x } -> attribute_param_type pos x
     | Attribute_no_auto_dynamic pos -> attribute_no_auto_dynamic pos
-    | Attribute_implemented_by_only_in_hhi pos ->
-      attribute_implemented_by_only_in_hhi pos
+    | Attribute_implemented_by_restriction { restriction; pos } ->
+      attribute_implemented_by_restriction ~restriction pos
     | Generic_at_runtime { pos; prefix } -> generic_at_runtime pos prefix
     | Generics_not_allowed pos -> generics_not_allowed pos
     | Local_variable_modified_and_used { pos; pos_useds } ->

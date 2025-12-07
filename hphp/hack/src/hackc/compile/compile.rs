@@ -568,7 +568,7 @@ fn emit_fatal_nast_check_error(err: &NastCheckError) -> Result<Unit, Error> {
         NastCheckError::MissingAssign(_) => todo!(),
         NastCheckError::CloneReturnType(_) => todo!(),
         NastCheckError::PackageExprInInvariant(_) => todo!(),
-        NastCheckError::AttributeImplementedByOnlyInHhi(_) => todo!(),
+        NastCheckError::AttributeImplementedByRestriction { .. } => todo!(),
     }
 }
 

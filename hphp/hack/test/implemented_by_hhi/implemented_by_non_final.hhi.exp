@@ -1,0 +1,4 @@
+ERROR: File "implemented_by_non_final.hhi", line 6, characters 5-19:
+This attribute can only be used in final classes (Naming[2131])
+ERROR: File "implemented_by_non_final.hhi", line 11, characters 5-19:
+This attribute can only be used in final classes (Naming[2131])

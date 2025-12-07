@@ -19,6 +19,7 @@ type env = {
   ctx: Provider_context.t;
   classish_kind: Ast_defs.classish_kind option;
   class_name: string option;
+  is_final: bool;
   function_name: Ast_defs.id option;
   file_mode: FileInfo.mode;
   function_kind: Ast_defs.fun_kind option;
@@ -52,6 +53,7 @@ let class_env env c =
     env with
     classish_kind = Some c.c_kind;
     class_name = Some (snd c.c_name);
+    is_final = c.c_final;
     file_mode = c.c_mode;
     module_ = c.c_module;
   }
@@ -63,6 +65,7 @@ let get_empty_env ctx =
     ctx;
     classish_kind = None;
     class_name = None;
+    is_final = false;
     function_name = None;
     file_mode = FileInfo.Mstrict;
     function_kind = None;

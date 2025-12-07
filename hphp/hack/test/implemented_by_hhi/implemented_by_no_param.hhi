@@ -1,5 +1,5 @@
 <?hh
-class C {
+final class C {
   <<__ImplementedBy()>>
   public function myMethod(): int;
 }

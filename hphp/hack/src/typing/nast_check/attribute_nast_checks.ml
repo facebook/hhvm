@@ -139,7 +139,7 @@ let check_no_auto_dynamic env attrs =
         Nast_check_error.(to_user_error @@ Attribute_no_auto_dynamic pos)
     | _ -> ()
 
-let check_implemented_by attrs =
+let check_implemented_by (env : Nast_check_env.env) attrs =
   let attr = Naming_attributes.find SN.UserAttributes.uaImplementedBy attrs in
   match attr with
   | Some { ua_name = (pos, name); ua_params } ->
@@ -150,7 +150,18 @@ let check_implemented_by attrs =
     if not is_hhi then
       Errors.add_error
         Nast_check_error.(
-          to_user_error @@ Attribute_implemented_by_only_in_hhi pos);
+          to_user_error
+          @@ Attribute_implemented_by_restriction
+               { restriction = ".hhi files"; pos });
+    (* Check its in a final class *)
+    (match (env.classish_kind, env.is_final) with
+    | (Some (Cclass _), true) -> ()
+    | _ ->
+      Errors.add_error
+        Nast_check_error.(
+          to_user_error
+          @@ Attribute_implemented_by_restriction
+               { restriction = "final classes"; pos }));
     (* Check parameter count and type *)
     (match ua_params with
     | [] ->
@@ -374,7 +385,7 @@ let handler =
       check_autocomplete_valid_text m.m_user_attributes;
       check_duplicate_memoize m.m_user_attributes;
       check_no_auto_dynamic env m.m_user_attributes;
-      check_implemented_by m.m_user_attributes;
+      check_implemented_by env m.m_user_attributes;
       check_no_sealed_on_constructors m;
       check_no_sealed_on_private_methods m;
       check_no_sealed_on_interface_methods env m;

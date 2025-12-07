@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4073f83a7583567cc25e4fd4e5f52da3>>
+// @generated SignedSource<<b08e9353290c9527b3c7dd744059af01>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -276,8 +276,11 @@ pub enum NastCheckError {
     },
     #[rust_to_ocaml(name = "Attribute_no_auto_dynamic")]
     AttributeNoAutoDynamic(pos::Pos),
-    #[rust_to_ocaml(name = "Attribute_implemented_by_only_in_hhi")]
-    AttributeImplementedByOnlyInHhi(pos::Pos),
+    #[rust_to_ocaml(name = "Attribute_implemented_by_restriction")]
+    AttributeImplementedByRestriction {
+        restriction: String,
+        pos: pos::Pos,
+    },
     #[rust_to_ocaml(name = "Generic_at_runtime")]
     GenericAtRuntime {
         pos: pos::Pos,

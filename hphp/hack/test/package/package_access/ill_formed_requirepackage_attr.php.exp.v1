@@ -1,4 +1,4 @@
-error: Parsing[1002] This is an invalid use of '__RequirePackage' because this is not a literal string expression [1]
+error: Parsing[1002] The first argument to __(Soft)RequirePackage must be a string literal [1]
 
 ill_formed_requirepackage_attr.php:4:34
     2 | // package pkg1

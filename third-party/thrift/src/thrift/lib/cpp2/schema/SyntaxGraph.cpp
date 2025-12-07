@@ -16,11 +16,13 @@
 
 #include <thrift/lib/cpp2/schema/SyntaxGraph.h>
 
-#include <folly/lang/SafeAssert.h>
 #include <thrift/lib/cpp/util/EnumUtils.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystem.h>
 #include <thrift/lib/cpp2/schema/detail/Resolver.h>
 #include <thrift/lib/cpp2/schema/detail/SchemaBackedResolver.h>
+
+#include <folly/String.h>
+#include <folly/lang/SafeAssert.h>
 
 #include <fmt/core.h>
 
@@ -48,8 +50,9 @@ const DefinitionNode& lookUpDefinition(
           syntaxGraph.resolver_->definitionOf(definitionKey)) {
     return *def;
   }
-  folly::throw_exception<std::out_of_range>(
-      fmt::format("Definition not found for key '{}'", definitionKey));
+  folly::throw_exception<std::out_of_range>(fmt::format(
+      "Definition not found for key '{}'",
+      folly::cEscape<std::string>(definitionKey)));
 }
 
 WithName::WithName(std::string_view name) : name_(name) {
@@ -502,8 +505,9 @@ const DefinitionNode& lazyResolve(
   if (const auto* definition = resolver.definitionOf(definitionKey)) {
     return *definition;
   }
-  folly::throw_exception<InvalidSyntaxGraphError>(
-      fmt::format("Definition key {} not found", definitionKey));
+  folly::throw_exception<InvalidSyntaxGraphError>(fmt::format(
+      "Definition key \"{}\" not found",
+      folly::cEscape<std::string>(definitionKey)));
 }
 
 } // namespace detail

@@ -76,21 +76,6 @@ public:
     : m_transport(protocol->o_invoke_few_args(s_getTransport, RuntimeCoeffects::fixme(), 0).toObject())
   {}
 
-  ~PHPOutputTransport() {
-    // Because this is a destructor, we might already be
-    // in the process of unwinding when this function is called, so we
-    // need to ensure that no exceptions can escape so that the unwinder
-    // does not terminate the process.
-    try {
-      if (buffer_used != 0) {
-        raise_warning("runtime/ext_thrift: "
-                      "Output buffer has %lu unflushed bytes", buffer_used);
-      }
-    } catch (...) {
-      handle_destructor_exception();
-    }
-  }
-
   void write(const char* data, size_t len) {
     if ((len + buffer_used) > SIZE) {
       writeBufferToTransport();

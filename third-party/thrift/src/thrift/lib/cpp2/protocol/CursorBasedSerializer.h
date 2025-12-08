@@ -170,17 +170,17 @@ class CursorSerializationWrapper {
   }
 
   /** Cursor write path */
-  StructuredCursorWriter<Tag, BinaryProtocolWriter> beginWriteWithOpts(
+  StructuredCursorWriter<Tag, ProtocolWriter> beginWriteWithOpts(
       const CursorWriteOpts& opts) {
     serializedData_.reset(); // Prevent concurrent read from seeing wrong data.
-    return StructuredCursorWriter<Tag, BinaryProtocolWriter>(writer(opts));
+    return StructuredCursorWriter<Tag, ProtocolWriter>(writer(opts));
   }
 
-  StructuredCursorWriter<Tag, BinaryProtocolWriter> beginWrite() {
+  StructuredCursorWriter<Tag, ProtocolWriter> beginWrite() {
     return beginWriteWithOpts(CursorWriteOpts{});
   }
 
-  void endWrite(StructuredCursorWriter<Tag, BinaryProtocolWriter>&& writer) {
+  void endWrite(StructuredCursorWriter<Tag, ProtocolWriter>&& writer) {
     writer.finalize();
     serializedData_ = queue_.move();
     done();
@@ -192,8 +192,7 @@ class CursorSerializationWrapper {
    * CursorSerializationWrapper dtor from throwing if the write was not
    * completed.
    */
-  void abandonWrite(
-      StructuredCursorWriter<Tag, BinaryProtocolWriter>&& writer) {
+  void abandonWrite(StructuredCursorWriter<Tag, ProtocolWriter>&& writer) {
     writer.abandon();
     queue_.reset();
     done();

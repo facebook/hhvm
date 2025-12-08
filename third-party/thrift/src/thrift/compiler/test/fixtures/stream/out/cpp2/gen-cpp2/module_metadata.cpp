@@ -522,6 +522,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingSer
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    const ThriftServiceContextRef* context = genServiceMetadataRecurse<::cpp2::PubSubStreamingService>(metadata, services);
+    DCHECK_EQ(*metadata.services()["module.PubSubStreamingService"].name(), "module.PubSubStreamingService");
+    DCHECK_EQ(*context->service_name(), "module.PubSubStreamingService");
+    DCHECK_EQ(*context->module()->name(), "module");
+    return context;
+  }
+
   ::apache::thrift::metadata::ThriftService module_PubSubStreamingService = genServiceMetadata<::cpp2::PubSubStreamingService>(metadata, {.genAnnotations = folly::kIsDebug});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen_returnstream,

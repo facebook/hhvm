@@ -1279,6 +1279,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    const ThriftServiceContextRef* context = genServiceMetadataRecurse<::apache::thrift::fixtures::types::SomeService>(metadata, services);
+    DCHECK_EQ(*metadata.services()["module.SomeService"].name(), "module.SomeService");
+    DCHECK_EQ(*context->service_name(), "module.SomeService");
+    DCHECK_EQ(*context->module()->name(), "module");
+    return context;
+  }
+
   ::apache::thrift::metadata::ThriftService module_SomeService = genServiceMetadata<::apache::thrift::fixtures::types::SomeService>(metadata, {.genAnnotations = folly::kIsDebug});
   DCHECK_EQ(*module_SomeService.uri(), "apache.org/thrift/fixtures/types/SomeService");
   static const ThriftFunctionGenerator functions[] = {

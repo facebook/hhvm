@@ -453,6 +453,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_st
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    const ThriftServiceContextRef* context = genServiceMetadataRecurse<::test::fixtures::basic_structured_annotations::MyService>(metadata, services);
+    DCHECK_EQ(*metadata.services()["module.MyService"].name(), "module.MyService");
+    DCHECK_EQ(*context->service_name(), "module.MyService");
+    DCHECK_EQ(*context->module()->name(), "module");
+    return context;
+  }
+
   ::apache::thrift::metadata::ThriftService module_MyService = genServiceMetadata<::test::fixtures::basic_structured_annotations::MyService>(metadata, {.genAnnotations = folly::kIsDebug});
   DCHECK_EQ(*module_MyService.uri(), "test.dev/fixtures/basic_structured_annotations/MyService");
   static const ThriftFunctionGenerator functions[] = {

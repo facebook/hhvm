@@ -1793,6 +1793,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    const ThriftServiceContextRef* context = genServiceMetadataRecurse<::py3::simple::SimpleService>(metadata, services);
+    DCHECK_EQ(*metadata.services()["module.SimpleService"].name(), "module.SimpleService");
+    DCHECK_EQ(*context->service_name(), "module.SimpleService");
+    DCHECK_EQ(*context->module()->name(), "module");
+    return context;
+  }
+
   ::apache::thrift::metadata::ThriftService module_SimpleService = genServiceMetadata<::py3::simple::SimpleService>(metadata, {.genAnnotations = folly::kIsDebug});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_five,
@@ -1939,6 +1947,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedServ
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    const ThriftServiceContextRef* context = genServiceMetadataRecurse<::py3::simple::DerivedService>(metadata, services);
+    DCHECK_EQ(*metadata.services()["module.DerivedService"].name(), "module.DerivedService");
+    DCHECK_EQ(*context->service_name(), "module.DerivedService");
+    DCHECK_EQ(*context->module()->name(), "module");
+    return context;
+  }
+
   ::apache::thrift::metadata::ThriftService module_DerivedService = genServiceMetadata<::py3::simple::DerivedService>(metadata, {.genAnnotations = folly::kIsDebug});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedService>>::gen_get_six,
@@ -2005,6 +2021,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedSe
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    const ThriftServiceContextRef* context = genServiceMetadataRecurse<::py3::simple::RederivedService>(metadata, services);
+    DCHECK_EQ(*metadata.services()["module.RederivedService"].name(), "module.RederivedService");
+    DCHECK_EQ(*context->service_name(), "module.RederivedService");
+    DCHECK_EQ(*context->module()->name(), "module");
+    return context;
+  }
+
   ::apache::thrift::metadata::ThriftService module_RederivedService = genServiceMetadata<::py3::simple::RederivedService>(metadata, {.genAnnotations = folly::kIsDebug});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedService>>::gen_get_seven,

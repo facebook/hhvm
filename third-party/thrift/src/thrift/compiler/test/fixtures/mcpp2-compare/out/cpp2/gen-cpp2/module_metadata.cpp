@@ -708,6 +708,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::EmptySe
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::EmptyService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    const ThriftServiceContextRef* context = genServiceMetadataRecurse<::some::valid::ns::EmptyService>(metadata, services);
+    DCHECK_EQ(*metadata.services()["module.EmptyService"].name(), "module.EmptyService");
+    DCHECK_EQ(*context->service_name(), "module.EmptyService");
+    DCHECK_EQ(*context->module()->name(), "module");
+    return context;
+  }
+
   ::apache::thrift::metadata::ThriftService module_EmptyService = genServiceMetadata<::some::valid::ns::EmptyService>(metadata, {.genAnnotations = folly::kIsDebug});
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
@@ -1105,6 +1113,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ReturnS
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    const ThriftServiceContextRef* context = genServiceMetadataRecurse<::some::valid::ns::ReturnService>(metadata, services);
+    DCHECK_EQ(*metadata.services()["module.ReturnService"].name(), "module.ReturnService");
+    DCHECK_EQ(*context->service_name(), "module.ReturnService");
+    DCHECK_EQ(*context->module()->name(), "module");
+    return context;
+  }
+
   ::apache::thrift::metadata::ThriftService module_ReturnService = genServiceMetadata<::some::valid::ns::ReturnService>(metadata, {.genAnnotations = folly::kIsDebug});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>>::gen_noReturn,
@@ -2421,6 +2437,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamSe
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    const ThriftServiceContextRef* context = genServiceMetadataRecurse<::some::valid::ns::ParamService>(metadata, services);
+    DCHECK_EQ(*metadata.services()["module.ParamService"].name(), "module.ParamService");
+    DCHECK_EQ(*context->service_name(), "module.ParamService");
+    DCHECK_EQ(*context->module()->name(), "module");
+    return context;
+  }
+
   ::apache::thrift::metadata::ThriftService module_ParamService = genServiceMetadata<::some::valid::ns::ParamService>(metadata, {.genAnnotations = folly::kIsDebug});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamService>>::gen_void_ret_i16_param,

@@ -1256,6 +1256,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::Service>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    const ThriftServiceContextRef* context = genServiceMetadataRecurse<::facebook::thrift::test::Service>(metadata, services);
+    DCHECK_EQ(*metadata.services()["module.Service"].name(), "module.Service");
+    DCHECK_EQ(*context->service_name(), "module.Service");
+    DCHECK_EQ(*context->module()->name(), "module");
+    return context;
+  }
+
   ::apache::thrift::metadata::ThriftService module_Service = genServiceMetadata<::facebook::thrift::test::Service>(metadata, {.genAnnotations = folly::kIsDebug});
   DCHECK_EQ(*module_Service.uri(), "facebook.com/thrift/test/Service");
   static const ThriftFunctionGenerator functions[] = {
@@ -1349,6 +1357,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    const ThriftServiceContextRef* context = genServiceMetadataRecurse<::facebook::thrift::test::AdapterService>(metadata, services);
+    DCHECK_EQ(*metadata.services()["module.AdapterService"].name(), "module.AdapterService");
+    DCHECK_EQ(*context->service_name(), "module.AdapterService");
+    DCHECK_EQ(*context->module()->name(), "module");
+    return context;
+  }
+
   ::apache::thrift::metadata::ThriftService module_AdapterService = genServiceMetadata<::facebook::thrift::test::AdapterService>(metadata, {.genAnnotations = folly::kIsDebug});
   DCHECK_EQ(*module_AdapterService.uri(), "facebook.com/thrift/test/AdapterService");
   static const ThriftFunctionGenerator functions[] = {

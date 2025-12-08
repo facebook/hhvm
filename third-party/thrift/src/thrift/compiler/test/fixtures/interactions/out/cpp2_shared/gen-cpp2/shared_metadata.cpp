@@ -81,6 +81,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::thrift::shared_interacti
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::thrift::shared_interactions::InteractLocally>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    const ThriftServiceContextRef* context = genServiceMetadataRecurse<::thrift::shared_interactions::InteractLocally>(metadata, services);
+    DCHECK_EQ(*metadata.services()["shared.InteractLocally"].name(), "shared.InteractLocally");
+    DCHECK_EQ(*context->service_name(), "shared.InteractLocally");
+    DCHECK_EQ(*context->module()->name(), "shared");
+    return context;
+  }
+
   ::apache::thrift::metadata::ThriftService shared_InteractLocally = genServiceMetadata<::thrift::shared_interactions::InteractLocally>(metadata, {.genAnnotations = folly::kIsDebug});
   static const ThriftFunctionGenerator functions[] = {
   };

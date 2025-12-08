@@ -248,6 +248,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    const ThriftServiceContextRef* context = genServiceMetadataRecurse<::facebook::thrift::test::PrimitivesService>(metadata, services);
+    DCHECK_EQ(*metadata.services()["module.PrimitivesService"].name(), "module.PrimitivesService");
+    DCHECK_EQ(*context->service_name(), "module.PrimitivesService");
+    DCHECK_EQ(*context->module()->name(), "module");
+    return context;
+  }
+
   ::apache::thrift::metadata::ThriftService module_PrimitivesService = genServiceMetadata<::facebook::thrift::test::PrimitivesService>(metadata, {.genAnnotations = folly::kIsDebug});
   DCHECK_EQ(*module_PrimitivesService.uri(), "facebook.com/thrift/test/PrimitivesService");
   static const ThriftFunctionGenerator functions[] = {
@@ -341,6 +349,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    const ThriftServiceContextRef* context = genServiceMetadataRecurse<::facebook::thrift::test::ExtendedService>(metadata, services);
+    DCHECK_EQ(*metadata.services()["module.ExtendedService"].name(), "module.ExtendedService");
+    DCHECK_EQ(*context->service_name(), "module.ExtendedService");
+    DCHECK_EQ(*context->module()->name(), "module");
+    return context;
+  }
+
   ::apache::thrift::metadata::ThriftService module_ExtendedService = genServiceMetadata<::facebook::thrift::test::ExtendedService>(metadata, {.genAnnotations = folly::kIsDebug});
   DCHECK_EQ(*module_ExtendedService.uri(), "facebook.com/thrift/test/ExtendedService");
   static const ThriftFunctionGenerator functions[] = {

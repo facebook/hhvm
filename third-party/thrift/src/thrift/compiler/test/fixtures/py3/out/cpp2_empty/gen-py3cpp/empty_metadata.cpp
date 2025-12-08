@@ -47,6 +47,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NullService>>::gen
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NullService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    const ThriftServiceContextRef* context = genServiceMetadataRecurse<::cpp2::NullService>(metadata, services);
+    DCHECK_EQ(*metadata.services()["empty.NullService"].name(), "empty.NullService");
+    DCHECK_EQ(*context->service_name(), "empty.NullService");
+    DCHECK_EQ(*context->module()->name(), "empty");
+    return context;
+  }
+
   ::apache::thrift::metadata::ThriftService empty_NullService = genServiceMetadata<::cpp2::NullService>(metadata, {.genAnnotations = folly::kIsDebug});
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();

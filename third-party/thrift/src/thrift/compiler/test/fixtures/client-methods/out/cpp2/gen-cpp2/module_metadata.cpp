@@ -176,6 +176,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethod
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    const ThriftServiceContextRef* context = genServiceMetadataRecurse<::cpp2::HeaderClientMethodsAnnotationOnService>(metadata, services);
+    DCHECK_EQ(*metadata.services()["module.HeaderClientMethodsAnnotationOnService"].name(), "module.HeaderClientMethodsAnnotationOnService");
+    DCHECK_EQ(*context->service_name(), "module.HeaderClientMethodsAnnotationOnService");
+    DCHECK_EQ(*context->module()->name(), "module");
+    return context;
+  }
+
   ::apache::thrift::metadata::ThriftService module_HeaderClientMethodsAnnotationOnService = genServiceMetadata<::cpp2::HeaderClientMethodsAnnotationOnService>(metadata, {.genAnnotations = folly::kIsDebug});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnService>>::gen_echo,
@@ -284,6 +292,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethod
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnFunction>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    const ThriftServiceContextRef* context = genServiceMetadataRecurse<::cpp2::HeaderClientMethodsAnnotationOnFunction>(metadata, services);
+    DCHECK_EQ(*metadata.services()["module.HeaderClientMethodsAnnotationOnFunction"].name(), "module.HeaderClientMethodsAnnotationOnFunction");
+    DCHECK_EQ(*context->service_name(), "module.HeaderClientMethodsAnnotationOnFunction");
+    DCHECK_EQ(*context->module()->name(), "module");
+    return context;
+  }
+
   ::apache::thrift::metadata::ThriftService module_HeaderClientMethodsAnnotationOnFunction = genServiceMetadata<::cpp2::HeaderClientMethodsAnnotationOnFunction>(metadata, {.genAnnotations = folly::kIsDebug});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnFunction>>::gen_echo,

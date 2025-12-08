@@ -446,6 +446,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::F
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::FooService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    const ThriftServiceContextRef* context = genServiceMetadataRecurse<::test::fixtures::basic::FooService>(metadata, services);
+    DCHECK_EQ(*metadata.services()["module.FooService"].name(), "module.FooService");
+    DCHECK_EQ(*context->service_name(), "module.FooService");
+    DCHECK_EQ(*context->module()->name(), "module");
+    return context;
+  }
+
   ::apache::thrift::metadata::ThriftService module_FooService = genServiceMetadata<::test::fixtures::basic::FooService>(metadata, {.genAnnotations = folly::kIsDebug});
   DCHECK_EQ(*module_FooService.uri(), "test.dev/fixtures/basic/FooService");
   static const ThriftFunctionGenerator functions[] = {
@@ -528,6 +536,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::F
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::FB303Service>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    const ThriftServiceContextRef* context = genServiceMetadataRecurse<::test::fixtures::basic::FB303Service>(metadata, services);
+    DCHECK_EQ(*metadata.services()["module.FB303Service"].name(), "module.FB303Service");
+    DCHECK_EQ(*context->service_name(), "module.FB303Service");
+    DCHECK_EQ(*context->module()->name(), "module");
+    return context;
+  }
+
   ::apache::thrift::metadata::ThriftService module_FB303Service = genServiceMetadata<::test::fixtures::basic::FB303Service>(metadata, {.genAnnotations = folly::kIsDebug});
   DCHECK_EQ(*module_FB303Service.uri(), "test.dev/fixtures/basic/FB303Service");
   static const ThriftFunctionGenerator functions[] = {
@@ -835,6 +851,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::M
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::MyService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    const ThriftServiceContextRef* context = genServiceMetadataRecurse<::test::fixtures::basic::MyService>(metadata, services);
+    DCHECK_EQ(*metadata.services()["module.MyService"].name(), "module.MyService");
+    DCHECK_EQ(*context->service_name(), "module.MyService");
+    DCHECK_EQ(*context->module()->name(), "module");
+    return context;
+  }
+
   ::apache::thrift::metadata::ThriftService module_MyService = genServiceMetadata<::test::fixtures::basic::MyService>(metadata, {.genAnnotations = folly::kIsDebug});
   DCHECK_EQ(*module_MyService.uri(), "test.dev/fixtures/basic/MyService");
   static const ThriftFunctionGenerator functions[] = {
@@ -958,6 +982,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::D
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::DbMixedStackArguments>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    const ThriftServiceContextRef* context = genServiceMetadataRecurse<::test::fixtures::basic::DbMixedStackArguments>(metadata, services);
+    DCHECK_EQ(*metadata.services()["module.DbMixedStackArguments"].name(), "module.DbMixedStackArguments");
+    DCHECK_EQ(*context->service_name(), "module.DbMixedStackArguments");
+    DCHECK_EQ(*context->module()->name(), "module");
+    return context;
+  }
+
   ::apache::thrift::metadata::ThriftService module_DbMixedStackArguments = genServiceMetadata<::test::fixtures::basic::DbMixedStackArguments>(metadata, {.genAnnotations = folly::kIsDebug});
   DCHECK_EQ(*module_DbMixedStackArguments.uri(), "test.dev/fixtures/basic/DbMixedStackArguments");
   static const ThriftFunctionGenerator functions[] = {

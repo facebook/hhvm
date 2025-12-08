@@ -450,6 +450,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    const ThriftServiceContextRef* context = genServiceMetadataRecurse<::extra::svc::ExtraService>(metadata, services);
+    DCHECK_EQ(*metadata.services()["extra_services.ExtraService"].name(), "extra_services.ExtraService");
+    DCHECK_EQ(*context->service_name(), "extra_services.ExtraService");
+    DCHECK_EQ(*context->module()->name(), "extra_services");
+    return context;
+  }
+
   ::apache::thrift::metadata::ThriftService extra_services_ExtraService = genServiceMetadata<::extra::svc::ExtraService>(metadata, {.genAnnotations = folly::kIsDebug});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::extra::svc::ExtraService>>::gen_simple_function,

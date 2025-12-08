@@ -127,6 +127,14 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen(:
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    const ThriftServiceContextRef* context = genServiceMetadataRecurse<::cpp2::MyService>(metadata, services);
+    DCHECK_EQ(*metadata.services()["service.MyService"].name(), "service.MyService");
+    DCHECK_EQ(*context->service_name(), "service.MyService");
+    DCHECK_EQ(*context->module()->name(), "service");
+    return context;
+  }
+
   ::apache::thrift::metadata::ThriftService service_MyService = genServiceMetadata<::cpp2::MyService>(metadata, {.genAnnotations = folly::kIsDebug});
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_query,

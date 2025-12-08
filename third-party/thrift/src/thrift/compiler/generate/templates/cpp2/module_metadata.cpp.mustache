@@ -231,6 +231,14 @@ void ServiceMetadata<::{{> service_common/service_class_name}}>::gen(::apache::t
 }
 
 const ThriftServiceContextRef* ServiceMetadata<::{{> service_common/service_class_name}}>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    const ThriftServiceContextRef* context = genServiceMetadataRecurse<{{service:qualified_name}}>(metadata, services);
+    DCHECK_EQ(*metadata.services()["{{program:name}}.{{service:name}}"].name(), "{{program:name}}.{{service:name}}");
+    DCHECK_EQ(*context->service_name(), "{{program:name}}.{{service:name}}");
+    DCHECK_EQ(*context->module()->name(), "{{program:name}}");
+    return context;
+  }
+
   ::apache::thrift::metadata::ThriftService {{service:metadata_name}} = genServiceMetadata<{{service:qualified_name}}>(metadata, {.genAnnotations = folly::kIsDebug});
   {{#if (not (string.empty? service:uri))}}
   DCHECK_EQ(*{{service:metadata_name}}.uri(), "{{service:uri}}");

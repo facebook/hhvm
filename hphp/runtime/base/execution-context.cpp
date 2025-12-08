@@ -1984,7 +1984,7 @@ void ExecutionContext::manageAPCHandle() {
 ExecutionContext::EvaluationResult
 ExecutionContext::evalPHPDebugger(StringData* code, int frame) {
   // The code has "<?hh" prepended already
-  auto unit = compile_debugger_string(code->data(), code->size(),
+  auto unit = compile_debugger_string(code->slice(),
     getRepoOptionsForFrame(frame));
   if (unit == nullptr) {
     raise_error("Syntax error");
@@ -2208,7 +2208,7 @@ const StaticString s_include("include");
 
 void ExecutionContext::enterDebuggerDummyEnv() {
   static Unit* s_debuggerDummy = compile_debugger_string(
-    "<?hh", 4, getRepoOptionsForDebuggerEval()
+    "<?hh", getRepoOptionsForDebuggerEval()
   );
   // Ensure that the VM stack is completely empty (vmfp() should be null)
   // and that we're not in a nested VM (reentrancy)

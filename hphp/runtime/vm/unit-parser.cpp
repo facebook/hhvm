@@ -359,7 +359,7 @@ std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
     HhvmDeclProvider* provider,
     CompileAbortMode mode) {
   cacheHit = false;
-  auto unitEmitter = compile_unit(m_loader.contents().data(),
+  auto unitEmitter = compile_unit(m_loader.contents(),
                                   m_codeSource,
                                   m_filename,
                                   m_loader.sha1(),

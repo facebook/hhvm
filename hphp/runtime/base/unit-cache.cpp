@@ -2198,8 +2198,7 @@ Unit* compileEvalString(const StringData* code, const char* evalFilename) {
       return AutoloadHandler::s_instance->getAutoloadMap();
     }();
     acc->second = compile_string(
-      scode->data(),
-      scode->size(),
+      scode->slice(),
       CodeSource::Eval,
       evalFilename,
       nullptr,

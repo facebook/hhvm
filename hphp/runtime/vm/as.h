@@ -48,8 +48,7 @@ struct FuncTable;
  * Minimal documentation is available in as.cpp.
  */
 std::unique_ptr<UnitEmitter> assemble_string(
-  const char* code,
-  int codeLen,
+  folly::StringPiece code,
   const char* filename,
   const SHA1&,
   const Extension*,

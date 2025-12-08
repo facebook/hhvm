@@ -16,6 +16,7 @@
 #pragma once
 
 #include <cstddef>
+#include <folly/Range.h>
 #include <memory>
 
 namespace HPHP {
@@ -49,7 +50,7 @@ Unit* compile_file(LazyUnitContentsLoader& loader,
 // forDebuggerEval is only meant to be used by debuggers, where humans may
 // enter a statement and we wish to eval it and display the resulting value,
 // if any.
-Unit* compile_string(const char* s, size_t sz,
+Unit* compile_string(folly::StringPiece s,
                      CodeSource codeSource,
                      const char* fname,
                      const Extension* extension,
@@ -58,7 +59,7 @@ Unit* compile_string(const char* s, size_t sz,
                      bool isSystemLib = false,
                      bool forDebuggerEval = false);
 
-Unit* compile_debugger_string(const char* s, size_t sz, const RepoOptions&);
+Unit* compile_debugger_string(folly::StringPiece s, const RepoOptions&);
 
 Unit* get_systemlib(const std::string& section, const Extension* extension);
 

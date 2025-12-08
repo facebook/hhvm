@@ -3254,8 +3254,7 @@ void parse(AsmState& as) {
 //////////////////////////////////////////////////////////////////////
 
 std::unique_ptr<UnitEmitter> assemble_string(
-  const char* code,
-  int codeLen,
+  folly::StringPiece code,
   const char* filename,
   const SHA1& sha1,
   const Extension* extension,
@@ -3267,11 +3266,11 @@ std::unique_ptr<UnitEmitter> assemble_string(
     [&] {
       return tracing::Props{}
         .add("filename", filename)
-        .add("code_size", codeLen);
+        .add("code_size", code.size());
     }
   };
 
-  auto const bcSha1 = SHA1{string_sha1(folly::StringPiece(code, codeLen))};
+  auto const bcSha1 = SHA1{string_sha1(code)};
   auto ue = std::make_unique<UnitEmitter>(sha1, bcSha1, packageInfo);
   StringData* sd = makeStaticString(filename);
   ue->m_filepath = sd;
@@ -3281,12 +3280,12 @@ std::unique_ptr<UnitEmitter> assemble_string(
     4,
     "==================== Assembling {} ====================\n{}\n",
     ue->m_filepath,
-    std::string(code, codeLen)
+    code
   );
 
   try {
     auto const mode = std::istringstream::binary | std::istringstream::in;
-    std::istringstream instr(std::string(code, codeLen), mode);
+    std::istringstream instr(std::string(code), mode);
     AsmState as{instr};
     as.ue = ue.get();
     parse(as);

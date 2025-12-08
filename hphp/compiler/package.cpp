@@ -230,8 +230,7 @@ createSymlinkWrapper(const std::string& fileName,
 
   auto const content = ss.str();
   return assemble_string(
-    content.data(),
-    content.size(),
+    content,
     fileName.c_str(),
     SHA1{string_sha1(content)},
     nullptr,
@@ -360,8 +359,7 @@ Package::parseRun(const std::string& content,
   try {
     if (Cfg::Eval::AllowHhas && folly::StringPiece(fileName).endsWith(".hhas")) {
       auto ue = assemble_string(
-        content.data(),
-        content.size(),
+        content,
         fileName.c_str(),
         SHA1{string_sha1(content)},
         nullptr,

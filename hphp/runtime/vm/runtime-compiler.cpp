@@ -108,8 +108,7 @@ std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
       folly::StringPiece(filename).endsWith(".hhas")) {
     auto const& contents = loader.contents();
     ue = assemble_string(
-      contents.data(),
-      contents.size(),
+      contents,
       filename,
       loader.sha1(),
       extension,
@@ -202,8 +201,7 @@ Unit* compile_file(LazyUnitContentsLoader& loader,
   )->create().release();
 }
 
-Unit* compile_string(const char* s,
-                     size_t sz,
+Unit* compile_string(folly::StringPiece s,
                      CodeSource codeSource,
                      const char* fname,
                      const Extension* extension,
@@ -216,9 +214,9 @@ Unit* compile_string(const char* s,
 
   auto const name = fname ? fname : "";
   auto const sha1 = SHA1{mangleUnitSha1(
-    string_sha1(folly::StringPiece{s, sz}), name, options.flags()
+    string_sha1(s), name, options.flags()
   )};
-  LazyUnitContentsLoader loader{sha1, {s, sz}, options.flags(), options.dir()};
+  LazyUnitContentsLoader loader{sha1, s, options.flags(), options.dir()};
   return parse(
     loader,
     codeSource,
@@ -293,7 +291,7 @@ std::unique_ptr<UnitEmitter> compile_systemlib_string_to_ue(
 }
 
 Unit* compile_debugger_string(
-  const char* s, size_t sz, const RepoOptions& options
+  folly::StringPiece s, const RepoOptions& options
 ) {
   auto const map = [] () -> AutoloadMap* {
     if (!AutoloadHandler::s_instance) {
@@ -305,7 +303,6 @@ Unit* compile_debugger_string(
 
   return compile_string(
     s,
-    sz,
     CodeSource::Debugger,
     nullptr,
     nullptr,

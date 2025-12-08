@@ -669,7 +669,7 @@ Index make_index() {
   HHBBC::parallel::final_threads = 1;
 
   std::unique_ptr<UnitEmitter> ue{assemble_string(
-    hhas.c_str(), hhas.size(),
+    hhas,
     "ignore.php",
     SHA1("1234543212345432123454321234543212345432"),
     nullptr,

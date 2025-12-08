@@ -1825,6 +1825,9 @@ let check_arity_and_names
     List.filter ft.ft_params ~f:(fun fp ->
         not (Typing_defs_core.get_fp_is_named fp))
   in
+  let optional_params =
+    List.filter ft.ft_params ~f:Typing_defs_core.get_fp_is_optional
+  in
   let check_arity () : unit =
     if arity < exp_min then
       Typing_error_utils.add_typing_error
@@ -1842,12 +1845,35 @@ let check_arity_and_names
           arity
       in
       if arity > exp_max then
+        let should_show_hint_for_convert_to_optional =
+          (* If the function has optional parameters, and the optional
+             paramaters are provided as if they are mandatory, provide a hint *)
+          arity = exp_min + List.length optional_params
+        in
+        let hint_convert_to_optional =
+          if should_show_hint_for_convert_to_optional then
+            let last_args_pos =
+              List.drop ft.ft_params exp_min
+              |> List.map ~f:(fun fp -> fp.fp_pos)
+            in
+            let first_pos = List.hd_exn last_args_pos in
+            let last_pos = List.last_exn last_args_pos in
+            Some (Pos_or_decl.merge first_pos last_pos)
+          else
+            None
+        in
         Typing_error_utils.add_typing_error
           ~env
           Typing_error.(
             primary
             @@ Primary.Typing_too_many_args
-                 { expected = exp_max; actual = arity; pos; decl_pos = pos_def })
+                 {
+                   expected = exp_max;
+                   actual = arity;
+                   pos;
+                   decl_pos = pos_def;
+                   hint_convert_to_optional;
+                 })
   in
   let check_names () : unit =
     let missing_names = SSet.diff required_names arg_names in
@@ -1910,6 +1936,9 @@ let check_lambda_arity env lambda_pos def_pos lambda_ft expected_ft =
       List.filter ft.ft_params ~f:(fun fp ->
           not (Typing_defs_core.get_fp_is_named fp))
     in
+    let optional_params_of ft =
+      List.filter ft.ft_params ~f:Typing_defs_core.get_fp_is_optional
+    in
     (* what's the most arguments this type can take (assuming no splat or variadics) *)
     let expected_max = List.length (positional_params_of expected_ft) in
     let actual_max = List.length (positional_params_of lambda_ft) in
@@ -1927,7 +1956,24 @@ let check_lambda_arity env lambda_pos def_pos lambda_ft expected_ft =
                 pos = lambda_pos;
                 decl_pos = def_pos;
               });
-    if too_many then
+    (if too_many then
+      let should_show_hint_for_convert_to_optional =
+        (* If the function has optional parameters, and the optional
+           paramaters are provided as if they are mandatory, provide a hint *)
+        actual_min = expected_min + List.length (optional_params_of expected_ft)
+      in
+      let hint_convert_to_optional =
+        if should_show_hint_for_convert_to_optional then
+          let last_args_pos =
+            List.drop lambda_ft.ft_params expected_min
+            |> List.map ~f:(fun fp -> fp.fp_pos)
+          in
+          let first_pos = List.hd_exn last_args_pos in
+          let last_pos = List.last_exn last_args_pos in
+          Some (Pos_or_decl.merge first_pos last_pos)
+        else
+          None
+      in
       Typing_error_utils.add_typing_error ~env
       @@ Typing_error.primary
            (Typing_error.Primary.Typing_too_many_args
@@ -1936,7 +1982,8 @@ let check_lambda_arity env lambda_pos def_pos lambda_ft expected_ft =
                 actual = actual_min;
                 pos = lambda_pos;
                 decl_pos = def_pos;
-              });
+                hint_convert_to_optional;
+              }));
     not (too_few || too_many)
     (* Errors.typing_too_many_args expected_min lambda_min lambda_pos def_pos *)
   | (_, _) -> true

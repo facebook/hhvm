@@ -1332,6 +1332,7 @@ module Primary = struct
         decl_pos: Pos_or_decl.t;
         actual: int;
         expected: int;
+        hint_convert_to_optional: Pos_or_decl.t option;
       }
     | Typing_too_few_args of {
         pos: Pos.t;

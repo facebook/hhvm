@@ -68,7 +68,7 @@ type t =
       last_clock: Edenfs_watcher.clock ref;
           (** Clock up to which we have gotten changes from the instance.
           Concretely, clock as of the last call to any of the following Edenfs_watcher functions:
-          init, get_all_files, get_changes_sync, get_changes_async. *)
+          init, get_changes_sync, get_changes_async. *)
     }
   | MockChanges of {
       get_changes_async: unit -> changes;
@@ -88,14 +88,13 @@ let indexer (t : t) (filter : string -> bool) : unit -> string list =
   | Watchman { wenv; num_workers; _ } ->
     let files = Watchman.get_all_files wenv in
     Bucket.make_list ~num_workers (List.filter ~f:filter files)
-  | EdenfsFileWatcher { instance; num_workers; last_clock; _ } ->
-    let (files, new_clock, _telemetry_opt) =
+  | EdenfsFileWatcher { instance; num_workers; _ } ->
+    let (files, _telemetry_opt) =
       Edenfs_watcher.get_all_files instance |> handle_edenfs_watcher_result
     in
     Hh_logger.debug
       "Edenfs_watcher.get_all_files returned %d files"
       (List.length files);
-    last_clock := new_clock;
     Bucket.make_list ~num_workers (List.filter ~f:filter files)
 
 let init

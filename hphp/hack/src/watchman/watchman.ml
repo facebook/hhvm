@@ -920,6 +920,13 @@ module Watchman_actual : Watchman_sig.S = struct
              Query
              env)
       in
+      (* WARNING:
+          Updating the clockspec to the one we got from the response above has the
+          following consequences, *but only if `subscribe_mode` is None*.
+          If any file changes happened in between the last call to `get_changes`
+          or `get_changes_synchronously` and the request above, they are
+          effectively discarded and will never be reported by subsequent calls
+          to these two functions! *)
       env.clockspec <- J.get_string_val "clock" response;
       extract_file_names env response
     with

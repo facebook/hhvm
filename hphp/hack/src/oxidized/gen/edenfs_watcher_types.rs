@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9ea3b1e5fc65ff748788d8b2e6cf8a0c>>
+// @generated SignedSource<<74b91cd2aac977e2478c98164283d609>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -134,7 +134,6 @@ pub struct InstanceGetChangesAsyncTelemetry {
 #[repr(C)]
 pub struct InstanceGetAllFilesTelemetry {
     pub duration: isize,
-    pub sync_duration: isize,
     pub eden_glob_files_duration: isize,
     pub post_processing_duration: isize,
 }

@@ -978,22 +978,22 @@ class StructuredCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
    */
 
   template <typename Ident, enable_for<type::container_c, Ident> = 0>
-  ContainerCursorWriter<type_tag<Ident>> beginWrite() {
+  ContainerCursorWriter<type_tag<Ident>, ProtocolWriter> beginWrite() {
     beforeWriteField<Ident>();
     state_ = State::Child;
-    return ContainerCursorWriter<type_tag<Ident>>{protocol_};
+    return ContainerCursorWriter<type_tag<Ident>, ProtocolWriter>{protocol_};
   }
 
-  template <typename CTag>
-  void endWrite(ContainerCursorWriter<CTag>&& child) {
+  template <typename CTag, typename PW>
+  void endWrite(ContainerCursorWriter<CTag, PW>&& child) {
     checkState(State::Child);
     child.finalize();
     afterWriteField();
     state_ = State::Active;
   }
 
-  template <typename CTag>
-  void abandonWrite(ContainerCursorWriter<CTag>&& child) {
+  template <typename CTag, typename PW>
+  void abandonWrite(ContainerCursorWriter<CTag, PW>&& child) {
     checkState(State::Child);
     child.abandon();
     state_ = State::Abandoned;
@@ -1006,22 +1006,22 @@ class StructuredCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
    */
 
   template <typename Ident, enable_for<type::structured_c, Ident> = 0>
-  StructuredCursorWriter<type_tag<Ident>> beginWrite() {
+  StructuredCursorWriter<type_tag<Ident>, ProtocolWriter> beginWrite() {
     beforeWriteField<Ident>();
     state_ = State::Child;
-    return StructuredCursorWriter<type_tag<Ident>>{protocol_};
+    return StructuredCursorWriter<type_tag<Ident>, ProtocolWriter>{protocol_};
   }
 
-  template <typename CTag>
-  void endWrite(StructuredCursorWriter<CTag>&& child) {
+  template <typename CTag, typename PW>
+  void endWrite(StructuredCursorWriter<CTag, PW>&& child) {
     checkState(State::Child);
     child.finalize();
     afterWriteField();
     state_ = State::Active;
   }
 
-  template <typename CTag>
-  void abandonWrite(StructuredCursorWriter<CTag>&& child) {
+  template <typename CTag, typename PW>
+  void abandonWrite(StructuredCursorWriter<CTag, PW>&& child) {
     checkState(State::Child);
     child.abandon();
     state_ = State::Abandoned;
@@ -1141,7 +1141,7 @@ class StructuredCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
 
   template <typename, typename>
   friend class StructuredCursorWriter;
-  template <typename>
+  template <typename, typename>
   friend class ContainerCursorWriter;
   friend class CursorSerializationWrapper<T>;
   friend struct detail::DefaultValueWriter<Tag>;
@@ -1159,9 +1159,14 @@ class StructuredCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
  *  writer.endWrite(std::move(child));
  * Note: ContainerCursorWriter does not support map type.
  */
-template <typename Tag>
-class ContainerCursorWriter
-    : detail::DelayedSizeCursorWriter<BinaryProtocolWriter> {
+template <typename Tag, typename ProtocolWriter = BinaryProtocolWriter>
+class ContainerCursorWriter : detail::DelayedSizeCursorWriter<ProtocolWriter> {
+  using Base = detail::DelayedSizeCursorWriter<ProtocolWriter>;
+  using Base::protocol_;
+  using Base::state_;
+  using State = typename Base::State;
+  using Base::checkState;
+
   using ElementType = typename detail::ContainerTraits<Tag>::ElementType;
   using ElementTag = typename detail::ContainerTraits<Tag>::ElementTag;
   template <typename CTag, typename OwnTag>
@@ -1190,14 +1195,14 @@ class ContainerCursorWriter
       typename...,
       typename U = Tag,
       enable_cursor_for<type::container_c, U> = 0>
-  ContainerCursorWriter<ElementTag> beginWrite() {
+  ContainerCursorWriter<ElementTag, ProtocolWriter> beginWrite() {
     checkState(State::Active);
     state_ = State::Child;
-    return ContainerCursorWriter<ElementTag>{protocol_};
+    return ContainerCursorWriter<ElementTag, ProtocolWriter>{protocol_};
   }
 
-  template <typename CTag>
-  void endWrite(ContainerCursorWriter<CTag>&& child) {
+  template <typename CTag, typename PW>
+  void endWrite(ContainerCursorWriter<CTag, PW>&& child) {
     checkState(State::Child);
     child.finalize();
     ++n;
@@ -1214,14 +1219,14 @@ class ContainerCursorWriter
       typename...,
       typename U = Tag,
       enable_cursor_for<type::structured_c, U> = 0>
-  StructuredCursorWriter<ElementTag> beginWrite() {
+  StructuredCursorWriter<ElementTag, ProtocolWriter> beginWrite() {
     checkState(State::Active);
     state_ = State::Child;
-    return StructuredCursorWriter<ElementTag>{protocol_};
+    return StructuredCursorWriter<ElementTag, ProtocolWriter>{protocol_};
   }
 
-  template <typename CTag>
-  void endWrite(StructuredCursorWriter<CTag>&& child) {
+  template <typename CTag, typename PW>
+  void endWrite(StructuredCursorWriter<CTag, PW>&& child) {
     checkState(State::Child);
     child.finalize();
     ++n;
@@ -1229,14 +1234,14 @@ class ContainerCursorWriter
   }
 
  private:
-  explicit ContainerCursorWriter(BinaryProtocolWriter* p);
+  explicit ContainerCursorWriter(ProtocolWriter* p);
 
   template <typename, typename>
   friend class StructuredCursorWriter;
-  template <typename>
+  template <typename, typename>
   friend class ContainerCursorWriter;
 
-  void finalize() { DelayedSizeCursorWriter::finalize(n); }
+  void finalize() { Base::finalize(n); }
 
   int32_t n = 0;
 };
@@ -1302,9 +1307,10 @@ class CursorSerializationAdapter {
 
 // End public API
 
-template <typename Tag>
-ContainerCursorWriter<Tag>::ContainerCursorWriter(BinaryProtocolWriter* p)
-    : DelayedSizeCursorWriter(p) {
+template <typename Tag, typename ProtocolWriter>
+ContainerCursorWriter<Tag, ProtocolWriter>::ContainerCursorWriter(
+    ProtocolWriter* p)
+    : Base(p) {
   if constexpr (type::is_a_v<Tag, type::list_c>) {
     protocol_->writeByte(
         op::typeTagToTType<typename detail::ContainerTraits<Tag>::ElementTag>);
@@ -1319,7 +1325,7 @@ ContainerCursorWriter<Tag>::ContainerCursorWriter(BinaryProtocolWriter* p)
   } else {
     static_assert(!sizeof(Tag), "unexpected tag");
   }
-  writeSize();
+  this->writeSize();
 }
 
 template <typename Tag, typename ProtocolReader, bool Contiguous>

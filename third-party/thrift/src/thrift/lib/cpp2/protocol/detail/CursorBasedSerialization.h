@@ -52,7 +52,7 @@ class ContainerCursorIterator;
 
 template <typename T, typename ProtocolWriter>
 class StructuredCursorWriter;
-template <typename Tag>
+template <typename Tag, typename ProtocolWriter>
 class ContainerCursorWriter;
 template <typename ProtocolWriter>
 class StringCursorWriter;

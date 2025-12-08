@@ -854,7 +854,8 @@ class ContainerCursorIterator {
  *                                uncompressedData.c_str(), maxSize, 1);
  *  writer.endWrite(std::move(child), cSize);
  */
-class StringCursorWriter : detail::DelayedSizeCursorWriter {
+class StringCursorWriter
+    : detail::DelayedSizeCursorWriter<BinaryProtocolWriter> {
  public:
   uint8_t* writeableData() {
     checkState(State::Active);
@@ -1146,7 +1147,8 @@ class StructuredCursorWriter : detail::BaseCursorWriter<BinaryProtocolWriter> {
  * Note: ContainerCursorWriter does not support map type.
  */
 template <typename Tag>
-class ContainerCursorWriter : detail::DelayedSizeCursorWriter {
+class ContainerCursorWriter
+    : detail::DelayedSizeCursorWriter<BinaryProtocolWriter> {
   using ElementType = typename detail::ContainerTraits<Tag>::ElementType;
   using ElementTag = typename detail::ContainerTraits<Tag>::ElementTag;
   template <typename CTag, typename OwnTag>

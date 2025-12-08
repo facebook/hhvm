@@ -331,28 +331,44 @@ inline constexpr FieldId increment(FieldId id) {
 
 /** Supports writing containers whose size is not known until after
  * serialization. */
-class DelayedSizeCursorWriter : public BaseCursorWriter<BinaryProtocolWriter> {
+template <typename ProtocolWriter>
+class DelayedSizeCursorWriter : public BaseCursorWriter<ProtocolWriter> {
  protected:
+  using BaseCursorWriter<ProtocolWriter>::protocol_;
+  using BaseCursorWriter<ProtocolWriter>::state_;
+  using State = typename BaseCursorWriter<ProtocolWriter>::State;
+  using BaseCursorWriter<ProtocolWriter>::checkState;
+
   void* size_;
 
-  constexpr static size_t kSizeLen = 4;
+  constexpr static size_t kSizeLen = [] {
+    if constexpr (std::is_same_v<ProtocolWriter, BinaryProtocolWriter>) {
+      return 4; // Binary protocol uses fixed 4-byte size
+    } else {
+      static_assert(
+          !sizeof(ProtocolWriter),
+          "DelayedSizeCursorWriter only supports BinaryProtocol for now");
+      return 0;
+    }
+  }();
 
-  explicit DelayedSizeCursorWriter(BinaryProtocolWriter* p)
-      : BaseCursorWriter(p) {}
+  explicit DelayedSizeCursorWriter(ProtocolWriter* p)
+      : BaseCursorWriter<ProtocolWriter>(p) {}
 
   void writeSize() {
-    static_assert(
-        std::is_same_v<decltype(protocol_), BinaryProtocolWriter*>,
-        "Using internals of binary protocol.");
     size_ = protocol_->ensure(kSizeLen);
     protocol_->advance(kSizeLen);
   }
 
   void finalize(int32_t actualSize) {
     checkState(State::Active);
-    state_ = State::Done;
-    actualSize = folly::Endian::big(actualSize);
-    memcpy(size_, &actualSize, kSizeLen);
+    this->state_ = State::Done;
+
+    if constexpr (std::is_same_v<ProtocolWriter, BinaryProtocolWriter>) {
+      // Binary protocol: write 4-byte big-endian size
+      actualSize = folly::Endian::big(actualSize);
+      memcpy(size_, &actualSize, kSizeLen);
+    }
   }
 };
 

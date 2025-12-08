@@ -148,7 +148,7 @@ JSONProtocolReaderCommon::readJSONEscapeCodePoint16Suffix() {
   char32_t cp = 0;
   char16_t c0 = readJSONEscapeCodeUnit16Suffix();
   if (folly::utf16_code_unit_is_bmp(c0)) {
-    cp = c0;
+    cp = static_cast<char32_t>(c0);
   } else if (folly::utf16_code_unit_is_high_surrogate(c0)) {
     ensureCharNoWhitespace(detail::json::kJSONBackslash);
     ensureCharNoWhitespace(detail::json::kJSONEscapeChar);

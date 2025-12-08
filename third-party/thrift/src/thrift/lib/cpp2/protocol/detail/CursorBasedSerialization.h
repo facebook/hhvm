@@ -79,7 +79,8 @@ struct ContainerTraits<type::list<VTag>> {
   static constexpr std::initializer_list<protocol::TType> wireTypes = {
       op::typeTagToTType<ElementTag>};
 
-  static void write(BinaryProtocolWriter& protocol, const ElementType& value) {
+  template <typename ProtocolWriter>
+  static void write(ProtocolWriter& protocol, const ElementType& value) {
     op::encode<VTag>(protocol, value);
   }
 };
@@ -90,7 +91,8 @@ struct ContainerTraits<type::set<KTag>> {
   static constexpr std::initializer_list<protocol::TType> wireTypes = {
       op::typeTagToTType<ElementTag>};
 
-  static void write(BinaryProtocolWriter& protocol, const ElementType& value) {
+  template <typename ProtocolWriter>
+  static void write(ProtocolWriter& protocol, const ElementType& value) {
     op::encode<KTag>(protocol, value);
   }
 };
@@ -104,7 +106,8 @@ struct ContainerTraits<type::map<KTag, VTag>> {
   static constexpr std::initializer_list<protocol::TType> wireTypes = {
       op::typeTagToTType<KeyTag>, op::typeTagToTType<ValueTag>};
 
-  static void write(BinaryProtocolWriter& protocol, const ElementType& key) {
+  template <typename ProtocolWriter>
+  static void write(ProtocolWriter& protocol, const ElementType& key) {
     op::encode<KTag>(protocol, key.first);
     op::encode<VTag>(protocol, key.second);
   }
@@ -294,12 +297,12 @@ constexpr void constexprQuickSort(
   constexprQuickSort(array, rev_idx + 1, max_idx);
 }
 
-template <typename Tag>
+template <typename Tag, typename ProtocolWriter = BinaryProtocolWriter>
 struct DefaultValueWriter {
   using T = type::native_type<Tag>;
   struct Field {
     FieldId id;
-    void (*write)(StructuredCursorWriter<Tag, BinaryProtocolWriter>&) = nullptr;
+    void (*write)(StructuredCursorWriter<Tag, ProtocolWriter>&) = nullptr;
     constexpr bool operator<(const Field& other) const { return id < other.id; }
   };
 
@@ -310,8 +313,7 @@ struct DefaultValueWriter {
       using Id = op::get_field_id<T, Ord>;
       using FTag = op::get_type_tag<T, Ord>;
       fields[type::toPosition(Ord::value)] = {
-          Id::value,
-          [](StructuredCursorWriter<Tag, BinaryProtocolWriter>& writer) {
+          Id::value, [](StructuredCursorWriter<Tag, ProtocolWriter>& writer) {
             if constexpr (type::is_optional_or_union_field_v<T, Ord>) {
               return;
             }

@@ -1125,7 +1125,8 @@ class StructuredCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
   template <FieldId MaxFieldId>
   void visitSkippedFieldsSlowPath() {
     // Slow path: iterate fields between fieldId_ and MaxFieldId.
-    const auto& fieldWriters = detail::DefaultValueWriter<Tag>::fields;
+    const auto& fieldWriters =
+        detail::DefaultValueWriter<Tag, ProtocolWriter>::fields;
     for (auto itr = std::lower_bound(
              fieldWriters.begin(),
              fieldWriters.end(),
@@ -1143,7 +1144,7 @@ class StructuredCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
   template <typename, typename>
   friend class ContainerCursorWriter;
   friend class CursorSerializationWrapper<T>;
-  friend struct detail::DefaultValueWriter<Tag>;
+  friend struct detail::DefaultValueWriter<Tag, ProtocolWriter>;
 };
 
 /**

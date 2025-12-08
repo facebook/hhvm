@@ -38,23 +38,24 @@ let log_info fmt = Hh_logger.info ~category:"FindMyTests" fmt
 
 let log_debug fmt = Hh_logger.debug ~category:"FindMyTests" fmt
 
+let get_class_decl_entry ctx class_name =
+  match Decl_provider.get_class ctx (Utils.add_ns class_name) with
+  | Decl_entry.DoesNotExist ->
+    failwith
+      (Printf.sprintf "Internal error: Could not find class %s" class_name)
+  | NotYetAvailable ->
+    failwith
+      (Printf.sprintf
+         "Internal error: Class %s is marked as not yet available"
+         class_name)
+  | Found class_ -> class_
+
 let is_test_file ctx file_path file_nast =
   let is_test_class class_name =
-    match Decl_provider.get_class ctx class_name with
-    | Decl_entry.DoesNotExist ->
-      failwith
-        (Printf.sprintf
-           "Internal error: Could not find class %s, even though we encountered it during traversal"
-           class_name)
-    | NotYetAvailable ->
-      failwith
-        (Printf.sprintf
-           "Internal error: Class %s, marked as not yet available"
-           class_name)
-    | Found class_ ->
-      let ancestors = Folded_class.all_ancestor_names class_ in
-      List.exists ancestors ~f:(fun ancestor ->
-          SSet.mem (Utils.strip_ns ancestor) supported_test_framework_classes)
+    let class_ = get_class_decl_entry ctx class_name in
+    let ancestors = Folded_class.all_ancestor_names class_ in
+    List.exists ancestors ~f:(fun ancestor ->
+        SSet.mem (Utils.strip_ns ancestor) supported_test_framework_classes)
   in
 
   match String.substr_index file_path ~pattern:"/__tests__/" with
@@ -156,15 +157,26 @@ let search_class ctx class_name genv =
   let include_defs = false in
   search ctx target include_defs ~files genv
 
+let is_enumish_kind classish_kind =
+  Ast_defs.is_c_enum classish_kind || Ast_defs.is_c_enum_class classish_kind
+
 (* Standalone module so we can pass it to Hash_set *)
 module Symbol_def = struct
   type t =
     | Method of {
-        class_name: string;
+        class_name: string;  (** Does not have leading \*)
         method_name: string;
       }
-    | Classish of { name: string }
+    | Classish of {
+        name: string;  (** Does not have leading \*)
+        kind: Ast_defs.classish_kind;
+      }
   [@@deriving show, ord, sexp, hash]
+
+  let class_from_name ctx class_name =
+    let decl = get_class_decl_entry ctx class_name in
+    let kind = Folded_class.kind decl in
+    Classish { name = class_name; kind }
 end
 
 open Symbol_def
@@ -230,7 +242,7 @@ let process_method_occurrence
   or `new C1(...)`.
 *)
 let process_class_occurrence
-    class_name (class_occurrence_pos : Pos.t) class_occurrence_nast :
+    class_name kind (class_occurrence_pos : Pos.t) class_occurrence_nast :
     Symbol_def.t option =
   let is_in_class_or_new_expr block =
     let is_our_class ci =
@@ -240,6 +252,10 @@ let process_class_occurrence
         String.equal (snd class_id) class_name
       | _ -> false
     in
+
+    (* Enums should not be handled by this function *)
+    assert (not (is_enumish_kind kind));
+
     (object (self)
        inherit [_] Aast.reduce as super
 
@@ -278,10 +294,19 @@ let process_class_occurrence
 
       method! on_method_ ctx m =
         let span = m.m_span in
+
+        let should_include_method method_body_block =
+          if is_enumish_kind kind then
+            (* If we are looking at an enum, we are very permissive:
+               Any method that mentions the enum type will be included *)
+            true
+          else
+            is_in_class_or_new_expr method_body_block
+        in
         let body_block = m.m_body.fb_ast in
         if
           Pos.contains span class_occurrence_pos
-          && is_in_class_or_new_expr body_block
+          && should_include_method body_block
         then
           (* We are seeing a method, so on_class_ must have set the class_name *)
           let class_name = snd (Option.value_exn ctx) in
@@ -353,7 +378,7 @@ let get_method_references
   List.fold_result search_results ~init:([], []) ~f:resolve_found_position
 
 let get_class_references
-    ~(ctx : Provider_context.t) ~(genv : ServerEnv.genv) ~name :
+    ~(ctx : Provider_context.t) ~(genv : ServerEnv.genv) ~name ~kind :
     (Symbol_def.t list * string list, error_msg) Result.t =
   let search_results = search_class ctx name genv in
   let resolve_found_position
@@ -375,7 +400,7 @@ let get_class_references
         ( acc_symbol_defs,
           (Pos.to_absolute referencing_pos |> Pos.filename) :: acc_files )
     ) else
-      match process_class_occurrence name referencing_pos nast with
+      match process_class_occurrence name kind referencing_pos nast with
       | Some referencing_def ->
         log_debug
           "get_class_references: found referencing def %s"
@@ -398,7 +423,7 @@ let get_references
   match symbol with
   | Method { class_name; method_name } ->
     get_method_references ~ctx ~genv ~env ~class_name ~method_name
-  | Classish { name } -> get_class_references ~ctx ~genv ~name
+  | Classish { name; kind } -> get_class_references ~ctx ~genv ~name ~kind
 
 let is_root_symbol_in_test_file ctx symbol_def =
   let check_class class_name =
@@ -419,7 +444,7 @@ let is_root_symbol_in_test_file ctx symbol_def =
   in
   match symbol_def with
   | Method { class_name; method_name = _ } -> check_class class_name
-  | Classish { name } -> check_class name
+  | Classish { name; kind = _ } -> check_class name
 
 let search
     ~(ctx : Provider_context.t)
@@ -450,7 +475,7 @@ let search
   List.iter roots ~f:(fun root_symbol ->
       match root_symbol with
       | Method { class_name; _ } ->
-        let class_symbol = Classish { name = class_name } in
+        let class_symbol = Symbol_def.class_from_name ctx class_name in
         let seen =
           Result.is_error (Hash_set.strict_add seen_symbols class_symbol)
         in
@@ -509,7 +534,8 @@ let go
     ~(genv : ServerEnv.genv)
     ~(env : ServerEnv.env)
     ~(max_distance : int)
-    (symbols : string list) : ServerCommandTypes.Find_my_tests.result =
+    (actions : ServerCommandTypes.Find_my_tests.action list) :
+    ServerCommandTypes.Find_my_tests.result =
   let open Result.Let_syntax in
   (match env.prechecked_files with
   | ServerEnv.Prechecked_files_disabled -> ()
@@ -519,18 +545,20 @@ let go
     failwith
       "FindMyTests not supported by servers with prechecked optimisation enabled");
 
-  let parse_method_def symbol =
-    match Str.split (Str.regexp "::") symbol with
-    | [class_name; method_name] ->
-      Result.Ok (Method { class_name; method_name })
-    | _ ->
-      Result.Error
-        "Invalid symbol format. Expected format: Class_name::method_name"
-  in
-
   let* roots =
-    List.fold_result symbols ~init:[] ~f:(fun acc symbol_name ->
-        let* def = parse_method_def symbol_name in
-        Result.Ok (def :: acc))
+    List.fold_result actions ~init:[] ~f:(fun acc action ->
+        let root =
+          match action with
+          | Class { class_name } ->
+            Symbol_def.class_from_name ctx (Utils.strip_ns class_name)
+          | Method { class_name; member_name } ->
+            Method
+              {
+                class_name = Utils.strip_ns class_name;
+                method_name = member_name;
+              }
+        in
+
+        Result.Ok (root :: acc))
   in
   Result.Ok (search ~ctx ~genv ~env max_distance roots)

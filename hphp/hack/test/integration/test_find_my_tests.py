@@ -44,6 +44,11 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
             ]
             + symbols
         )
+
+        print(
+            self.test_driver.get_all_logs(self.test_driver.repo_dir).current_server_log
+        )
+
         if retcode != 0:
             print("stdout: " + output)
             print("stderr: " + err)
@@ -62,9 +67,6 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
 
         expected_tests_dict = dict(absolute_expected_test_files)
 
-        print(
-            self.test_driver.get_all_logs(self.test_driver.repo_dir).current_server_log
-        )
         self.assertSetEqual(
             set(actual_tests_dict.keys()), set(expected_tests_dict.keys())
         )
@@ -218,7 +220,7 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
 
         self.check_has_tests_with_distances(
             prefix=prefix,
-            symbols=["D1::origin"],
+            symbols=["Method|D1::origin"],
             expected_test_files=[
                 ("D1_Test1.php", 2),
                 ("D1_Test2.php", 3),
@@ -227,5 +229,42 @@ class TestFindMyTests(test_case.TestCase[common_tests.CommonTestDriver]):
                 ("D1_Test5.php", 2),
                 ("D1_Test6.php", 3),
             ],
+            max_distance=10,
+        )
+
+    def test_enums(self) -> None:
+        prefix = os.path.join(self.test_driver.repo_dir, "e", "__tests__")
+
+        self.check_has_tests_with_distances(
+            prefix=prefix,
+            symbols=["Class|E1"],
+            expected_test_files=[
+                ("E1_Test1.php", 1),
+                ("E1_Test2.php", 2),
+            ],
+            max_distance=10,
+        )
+
+    def test_enum_classes1(self) -> None:
+        prefix = os.path.join(self.test_driver.repo_dir, "e", "__tests__")
+
+        self.check_has_tests_with_distances(
+            prefix=prefix,
+            symbols=["Class|E2"],
+            expected_test_files=[
+                ("E2_Test1.php", 1),
+                ("E2_Test2.php", 2),
+            ],
+            max_distance=10,
+        )
+
+    def test_enum_classes2(self) -> None:
+        prefix = os.path.join(self.test_driver.repo_dir, "e", "__tests__")
+
+        # TODO(T246671457) We would like E3_Test1.php to be found here, but it's currently not
+        self.check_has_tests_with_distances(
+            prefix=prefix,
+            symbols=["Class|E3_Super"],
+            expected_test_files=[],
             max_distance=10,
         )

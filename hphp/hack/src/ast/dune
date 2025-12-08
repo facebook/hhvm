@@ -11,6 +11,7 @@
   (pps
    ppx_deriving.std
    ppx_hash
+   ppx_sexp_conv
    ppx_transform
    ppx_yojson_conv
    visitors.ppx)))

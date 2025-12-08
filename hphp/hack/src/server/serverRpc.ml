@@ -428,9 +428,9 @@ let handle :
   | ServerCommandTypes.DEPS_IN_BATCH positions ->
     let ctx = Provider_utils.ctx_from_server_env env in
     (env, ServerDepsInBatch.go ~ctx ~genv ~env positions)
-  | ServerCommandTypes.FIND_MY_TESTS (max_distance, symbols) ->
+  | ServerCommandTypes.FIND_MY_TESTS (max_distance, actions) ->
     let ctx = Provider_utils.ctx_from_server_env env in
-    let result = ServerFindMyTests.go ~ctx ~genv ~env ~max_distance symbols in
+    let result = ServerFindMyTests.go ~ctx ~genv ~env ~max_distance actions in
     (env, result)
   | ServerCommandTypes.PACKAGE_LINT file ->
     ServerPackageLint.go_fast genv env file

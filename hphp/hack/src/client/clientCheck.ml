@@ -1025,10 +1025,41 @@ let main_internal
     List.iter results ~f:(fun s -> print_refs s ~json:true);
     Lwt.return (Exit_status.No_error, Telemetry.create ())
   | ClientEnv.MODE_FIND_MY_TESTS symbols ->
+    let open ServerCommandTypes.Find_my_tests in
+    let parse_symbol symbol =
+      let pieces = Str.split (Str.regexp "|") symbol in
+      let (kind, name) =
+        match pieces with
+        | [name] -> (None, name)
+        | [kind; name] -> (Some kind, name)
+        | _ ->
+          Printf.eprintf "Invalid input\n";
+          raise Exit_status.(Exit_with Input_error)
+      in
+      let action =
+        parse_name_or_member_id
+          ~name_and_member_action:(fun class_name member_name ->
+            match kind with
+            | Some "Method"
+            | None ->
+              Method { class_name; member_name }
+            | Some _ -> raise Exit_status.(Exit_with Input_error))
+          ~name_only_action:(fun name ->
+            match kind with
+            | Some "Class" -> Class { class_name = name }
+            | Some _
+            | None ->
+              raise Exit_status.(Exit_with Input_error))
+          name
+      in
+      action
+    in
+    let actions = List.map ~f:parse_symbol symbols in
+
     let%lwt (result, telemtry) =
       rpc args
       @@ ServerCommandTypes.FIND_MY_TESTS
-           (args.find_my_tests_max_distance, symbols)
+           (args.find_my_tests_max_distance, actions)
     in
     (match result with
     | Ok fmt_result ->

@@ -16,7 +16,8 @@ open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 (* The Abstract Syntax Tree *)
 (*****************************************************************************)
 
-type pos = (Pos.t[@visitors.opaque] [@yojson.opaque]) [@@transform.opaque]
+type pos = (Pos.t[@visitors.opaque] [@yojson.opaque] [@sexp.opaque])
+[@@transform.opaque]
 
 and id_ = string
 
@@ -189,6 +190,7 @@ and reify_kind =
     eq,
     hash,
     ord,
+    sexp,
     transform ~restart:(`Disallow `Encode_as_result),
     yojson_of,
     visitors

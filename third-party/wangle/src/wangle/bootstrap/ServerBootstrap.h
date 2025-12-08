@@ -137,7 +137,7 @@ class ServerBootstrap {
           1, std::make_shared<folly::NamedThreadFactory>("Acceptor Thread"));
     }
     if (!io_group) {
-      auto threads = folly::hardware_concurrency();
+      auto threads = folly::available_concurrency();
       if (threads <= 0) {
         // Reasonable mid-point for concurrency when actual value unknown
         threads = 8;

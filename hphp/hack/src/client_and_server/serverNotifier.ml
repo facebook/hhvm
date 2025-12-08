@@ -66,9 +66,10 @@ type t =
       root: Path.t;
       local_config: ServerLocalConfig.t;
       last_clock: Edenfs_watcher.clock ref;
-          (** Clock up to which we have gotten changes from the instance.
-          Concretely, clock as of the last call to any of the following Edenfs_watcher functions:
-          init, get_changes_sync, get_changes_async. *)
+          (** Clock as of the last time we have received changed files.
+          Concretely, clock as of the last call to get_changes_sync or get_changes_async
+          that returned a non-empty set of changes.
+          (or the initial clock, if no changes received so far *)
     }
   | MockChanges of {
       get_changes_async: unit -> changes;
@@ -482,12 +483,12 @@ let get_changes_sync (t : t) telemetry : SSet.t * clock option * Telemetry.t =
                 ~value:sync_telemetry
                 telemetry)
         in
-        last_clock := new_clock;
         let changes_set =
           List.fold_left changes ~init:SSet.empty ~f:(fun acc c ->
               SSet.union acc (convert_edenfs_watcher_changes local_config c))
         in
-        (changes_set, Some (ServerNotifierTypes.Eden new_clock), telemetry)
+        if not (SSet.is_empty changes_set) then last_clock := new_clock;
+        (changes_set, Some (ServerNotifierTypes.Eden !last_clock), telemetry)
   in
 
   if
@@ -578,12 +579,13 @@ let get_changes_async (t : t) telemetry : changes * clock option * Telemetry.t =
                 ~value:async_telemetry
                 telemetry)
         in
-        last_clock := new_clock;
+
         let changes_set =
           List.fold_left changes ~init:SSet.empty ~f:(fun acc c ->
               SSet.union acc (convert_edenfs_watcher_changes local_config c))
         in
-        (AsyncChanges changes_set, Some (Eden new_clock), telemetry)
+        if not (SSet.is_empty changes_set) then last_clock := new_clock;
+        (AsyncChanges changes_set, Some (Eden !last_clock), telemetry)
   in
 
   if Hh_logger.Level.passes_min_level Hh_logger.Level.Debug then begin

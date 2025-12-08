@@ -276,6 +276,7 @@ static ReportError toReportError(
       return ReportError(
           folly::make_exception_wrapper<FizzVerificationException>(msg, alert));
   }
+  return ReportError(folly::make_exception_wrapper<FizzException>(msg, alert));
 }
 
 Actions processEvent(const State& state, Param& param) {
@@ -1224,14 +1225,14 @@ struct NegotiatedPsk {
   std::shared_ptr<const Cert> clientCert;
 
   explicit NegotiatedPsk(
-      PskType type,
-      folly::Optional<PskKeyExchangeMode> mode = folly::none,
-      std::shared_ptr<const Cert> serverCert = nullptr,
-      std::shared_ptr<const Cert> clientCert = nullptr)
-      : type(type),
-        mode(mode),
-        serverCert(serverCert),
-        clientCert(clientCert) {}
+      PskType type_,
+      folly::Optional<PskKeyExchangeMode> mode_ = folly::none,
+      std::shared_ptr<const Cert> serverCert_ = nullptr,
+      std::shared_ptr<const Cert> clientCert_ = nullptr)
+      : type(type_),
+        mode(mode_),
+        serverCert(serverCert_),
+        clientCert(clientCert_) {}
 };
 } // namespace
 

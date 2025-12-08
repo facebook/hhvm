@@ -247,6 +247,7 @@ static ReportError toReportError(
       return ReportError(
           folly::make_exception_wrapper<FizzVerificationException>(msg, alert));
   }
+  return ReportError(folly::make_exception_wrapper<FizzException>(msg, alert));
 }
 
 AsyncActions processEvent(const State& state, Param& param) {

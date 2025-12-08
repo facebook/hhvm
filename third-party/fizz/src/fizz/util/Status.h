@@ -102,6 +102,7 @@ class Error {
       case MessageType::None:
         return nullptr;
     }
+    return nullptr;
   }
   const folly::Optional<AlertDescription>& alert() const {
     return alert_;

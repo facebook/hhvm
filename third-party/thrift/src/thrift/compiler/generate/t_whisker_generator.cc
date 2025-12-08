@@ -463,8 +463,9 @@ t_whisker_generator::make_prototype_for_const_value(
   // Each array element is a map containing a reference to the corresponding
   // field ("field") and the const value being set ("value").
   def.property("structured_elements", [&proto](const t_const_value& self) {
-    const t_structured* strct =
-        self.ttype()->get_true_type()->try_as<t_structured>();
+    const t_structured* strct = self.ttype().empty()
+        ? nullptr
+        : self.ttype()->get_true_type()->try_as<t_structured>();
     if (strct == nullptr) {
       return w::null;
     }

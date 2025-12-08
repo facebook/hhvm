@@ -45,7 +45,7 @@ var GoUnusedProtection__ int
   }}{{#constant:type}}{{!
     }}{{#type:structured?}}*{{/type:structured?}}{{#partial types.go_type type=type:self}} = {{!
     }}{{#constant:value}}{{!
-      }}{{> const/value}}{{!
+      }}{{#partial constants.const_value value=value:self root_const=constant:self}}{{!
     }}{{/constant:value}}
   {{/constant:type}}
 {{#constant:docs?}}

@@ -24,7 +24,7 @@
 }}
 {{#field:type}}{{!
 }}{{#field:value}}{{!
-  }}{{> const/value}}{{!
+  }}{{#partial constants.const_value value=value:self root_const=null}}{{!
 }}{{/field:value}}{{!
 }}{{^field:value}}{{!
   }}{{> common/natural_default_value}}{{!

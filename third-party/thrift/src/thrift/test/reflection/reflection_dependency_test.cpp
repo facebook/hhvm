@@ -20,8 +20,7 @@
 
 #include <gtest/gtest.h>
 
-namespace test_cpp2 {
-namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 TEST(ReflectionDeps, RecursiveDependencies) {
   using namespace apache::thrift;
@@ -48,5 +47,4 @@ TEST(ReflectionDeps, RecursiveDependencies) {
       reflect_type_class_of_thrift_class<d_type>>();
 }
 
-} // namespace cpp_reflection
-} // namespace test_cpp2
+} // namespace test_cpp2::cpp_reflection

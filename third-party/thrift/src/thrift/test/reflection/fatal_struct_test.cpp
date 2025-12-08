@@ -45,8 +45,7 @@ template <apache::thrift::optionality Optionality>
 using required =
     std::integral_constant<apache::thrift::optionality, Optionality>;
 
-namespace test_cpp2 {
-namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 using apache::thrift::detail::st::IsThriftClass;
 using apache::thrift::detail::st::IsThriftUnion;
@@ -657,5 +656,4 @@ TEST(FatalStruct, InvokeByFieldName) {
   EXPECT_FALSE(found);
 }
 
-} // namespace cpp_reflection
-} // namespace test_cpp2
+} // namespace test_cpp2::cpp_reflection

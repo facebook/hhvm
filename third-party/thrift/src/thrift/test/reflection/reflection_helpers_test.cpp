@@ -22,8 +22,7 @@
 
 #include <gtest/gtest.h>
 
-namespace test_cpp2 {
-namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 TEST(ReflectionHelpers, GetStructMemberByName) {
   using traits = apache::thrift::reflect_struct<struct1>;
@@ -163,5 +162,4 @@ TEST(ReflectionHelpers, GetStructMemberById) {
           traits::member::field5::id::value>>();
 }
 
-} // namespace cpp_reflection
-} // namespace test_cpp2
+} // namespace test_cpp2::cpp_reflection

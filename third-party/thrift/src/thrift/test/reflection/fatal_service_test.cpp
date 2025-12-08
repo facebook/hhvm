@@ -16,10 +16,8 @@
 
 #include <gtest/gtest.h>
 
-namespace test_cpp2 {
-namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 TEST(FatalService, SanityCheck) {}
 
-} // namespace cpp_reflection
-} // namespace test_cpp2
+} // namespace test_cpp2::cpp_reflection

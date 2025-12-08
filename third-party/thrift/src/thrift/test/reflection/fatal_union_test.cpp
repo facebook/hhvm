@@ -23,8 +23,7 @@
 
 #include <fatal/type/transform.h>
 
-namespace test_cpp2 {
-namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 FATAL_S(union1s, "union1");
 FATAL_S(uis, "ui");
@@ -301,5 +300,4 @@ TEST(FatalStruct, RenamedField) {
   EXPECT_EQ("fancy.idl.name", fname);
 }
 
-} // namespace cpp_reflection
-} // namespace test_cpp2
+} // namespace test_cpp2::cpp_reflection

@@ -22,8 +22,7 @@
 using namespace apache::thrift;
 using namespace std;
 
-namespace test_cpp2 {
-namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 TEST(DepCStruct, TestTransitivity) {
   dep_C_struct s;
   s.i_c() = 10;
@@ -45,5 +44,4 @@ TEST(union1, TestUnion) {
         [](auto&&) { EXPECT_TRUE(false); })(value);
   });
 }
-} // namespace cpp_reflection
-} // namespace test_cpp2
+} // namespace test_cpp2::cpp_reflection

@@ -522,7 +522,7 @@ struct SSLSessionReadCallback
       socket->setReadCB(nullptr);
     }
   }
-  folly::ssl::SSLSessionUniquePtr getSSLSession(
+  [[nodiscard]] folly::ssl::SSLSessionUniquePtr getSSLSession(
       const std::string&) const noexcept override {
     return nullptr;
   }

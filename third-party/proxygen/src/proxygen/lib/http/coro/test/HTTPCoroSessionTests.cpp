@@ -14,6 +14,11 @@
 using namespace testing;
 using namespace proxygen;
 
+namespace {
+void initSelfCodec(HTTPCodec &) {
+}
+} // namespace
+
 namespace proxygen::coro::test {
 
 std::string paramsToTestName(const testing::TestParamInfo<TestParams> &info) {
@@ -30,7 +35,13 @@ std::string paramsToTestName(const testing::TestParamInfo<TestParams> &info) {
   }
 }
 
-void HTTPCoroSessionTest::initCodec() {
+HTTPCoroSessionTest::HTTPCoroSessionTest(TransportDirection direction)
+    : direction_(direction) {
+  initSelfCodec_ = initSelfCodec;
+  initPeerCodec();
+}
+
+void HTTPCoroSessionTest::initPeerCodec() {
   if (isHQ()) {
     auto codec = std::make_unique<hq::HQMultiCodec>(oppositeDirection());
     multiCodec_ = codec.get();
@@ -82,6 +93,7 @@ void HTTPCoroSessionTest::setUp(std::shared_ptr<HTTPHandler> handler) {
             ->getSetting(SettingsId::_HQ_QPACK_BLOCKED_STREAMS)
             ->value);
     codec_ = codec.get();
+    initSelfCodec_(*codec_);
     if (handler) {
       session_ =
           HTTPCoroSession::makeDownstreamCoroSession(muxTransport_->getSocket(),
@@ -99,6 +111,7 @@ void HTTPCoroSessionTest::setUp(std::shared_ptr<HTTPHandler> handler) {
     auto codec =
         HTTPCodecFactory::getCodec(GetParam().codecProtocol, direction_);
     codec_ = codec.get();
+    initSelfCodec_(*codec_);
     if (handler) {
       session_ = HTTPCoroSession::makeDownstreamCoroSession(
           std::move(transport), handler, std::move(codec), std::move(tinfo));

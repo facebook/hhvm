@@ -216,16 +216,13 @@ class MockLifecycleObserver : public LifecycleObserver {
 
 class HTTPCoroSessionTest : public testing::TestWithParam<TestParams> {
  protected:
-  explicit HTTPCoroSessionTest(TransportDirection direction)
-      : direction_(direction) {
-    initCodec();
-  }
+  HTTPCoroSessionTest(TransportDirection direction);
 
   folly::DrivableExecutor *getExecutor() {
     return &evb_;
   }
 
-  void initCodec();
+  void initPeerCodec();
 
   void run() {
     evb_.loop();
@@ -348,6 +345,7 @@ class HTTPCoroSessionTest : public testing::TestWithParam<TestParams> {
   testing::NiceMock<MockLifecycleObserver> lifecycleObs_;
   std::unique_ptr<HTTPCodec> peerCodec_;
   HTTPCodec *codec_{nullptr}; // self codec
+  std::function<void(HTTPCodec &)> initSelfCodec_;
   hq::HQMultiCodec *multiCodec_{nullptr};
   testing::NiceMock<MockHTTPCodecCallback> callbacks_;
   folly::IOBufQueue writeBuf_{folly::IOBufQueue::cacheChainLength()};

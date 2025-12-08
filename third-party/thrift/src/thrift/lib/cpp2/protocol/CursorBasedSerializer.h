@@ -170,16 +170,17 @@ class CursorSerializationWrapper {
   }
 
   /** Cursor write path */
-  StructuredCursorWriter<Tag> beginWriteWithOpts(const CursorWriteOpts& opts) {
+  StructuredCursorWriter<Tag, BinaryProtocolWriter> beginWriteWithOpts(
+      const CursorWriteOpts& opts) {
     serializedData_.reset(); // Prevent concurrent read from seeing wrong data.
-    return StructuredCursorWriter<Tag>(writer(opts));
+    return StructuredCursorWriter<Tag, BinaryProtocolWriter>(writer(opts));
   }
 
-  StructuredCursorWriter<Tag> beginWrite() {
+  StructuredCursorWriter<Tag, BinaryProtocolWriter> beginWrite() {
     return beginWriteWithOpts(CursorWriteOpts{});
   }
 
-  void endWrite(StructuredCursorWriter<Tag>&& writer) {
+  void endWrite(StructuredCursorWriter<Tag, BinaryProtocolWriter>&& writer) {
     writer.finalize();
     serializedData_ = queue_.move();
     done();
@@ -191,7 +192,8 @@ class CursorSerializationWrapper {
    * CursorSerializationWrapper dtor from throwing if the write was not
    * completed.
    */
-  void abandonWrite(StructuredCursorWriter<Tag>&& writer) {
+  void abandonWrite(
+      StructuredCursorWriter<Tag, BinaryProtocolWriter>&& writer) {
     writer.abandon();
     queue_.reset();
     done();
@@ -876,7 +878,7 @@ class StringCursorWriter
 
   uint8_t* data_;
 
-  template <typename T>
+  template <typename T, typename PW>
   friend class StructuredCursorWriter;
 };
 
@@ -884,8 +886,14 @@ class StringCursorWriter
  * Cursor serializer for Thrift structs and unions.
  * Typically constructed from a CursorSerializationWrapper.
  */
-template <typename Tag>
-class StructuredCursorWriter : detail::BaseCursorWriter<BinaryProtocolWriter> {
+template <typename Tag, typename ProtocolWriter = BinaryProtocolWriter>
+class StructuredCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
+  using Base = detail::BaseCursorWriter<ProtocolWriter>;
+  using Base::protocol_;
+  using Base::state_;
+  using State = typename Base::State;
+  using Base::checkState;
+
   static_assert(
       type::is_a_v<Tag, type::structured_c>, "T must be a thrift class");
   using T = type::native_type<Tag>;
@@ -1037,8 +1045,7 @@ class StructuredCursorWriter : detail::BaseCursorWriter<BinaryProtocolWriter> {
   }
 
  private:
-  explicit StructuredCursorWriter(BinaryProtocolWriter* p)
-      : BaseCursorWriter(p) {
+  explicit StructuredCursorWriter(ProtocolWriter* p) : Base(p) {
     protocol_->writeStructBegin(nullptr);
   }
 
@@ -1126,7 +1133,7 @@ class StructuredCursorWriter : detail::BaseCursorWriter<BinaryProtocolWriter> {
 
   FieldId fieldId_{0};
 
-  template <typename>
+  template <typename, typename>
   friend class StructuredCursorWriter;
   template <typename>
   friend class ContainerCursorWriter;
@@ -1218,7 +1225,7 @@ class ContainerCursorWriter
  private:
   explicit ContainerCursorWriter(BinaryProtocolWriter* p);
 
-  template <typename>
+  template <typename, typename>
   friend class StructuredCursorWriter;
   template <typename>
   friend class ContainerCursorWriter;

@@ -50,7 +50,7 @@ class ContainerCursorReader;
 template <typename Tag, typename ProtocolReader, bool Contiguous>
 class ContainerCursorIterator;
 
-template <typename T>
+template <typename T, typename ProtocolWriter>
 class StructuredCursorWriter;
 template <typename Tag>
 class ContainerCursorWriter;
@@ -298,7 +298,7 @@ struct DefaultValueWriter {
   using T = type::native_type<Tag>;
   struct Field {
     FieldId id;
-    void (*write)(StructuredCursorWriter<Tag>&) = nullptr;
+    void (*write)(StructuredCursorWriter<Tag, BinaryProtocolWriter>&) = nullptr;
     constexpr bool operator<(const Field& other) const { return id < other.id; }
   };
 
@@ -309,7 +309,8 @@ struct DefaultValueWriter {
       using Id = op::get_field_id<T, Ord>;
       using FTag = op::get_type_tag<T, Ord>;
       fields[type::toPosition(Ord::value)] = {
-          Id::value, [](StructuredCursorWriter<Tag>& writer) {
+          Id::value,
+          [](StructuredCursorWriter<Tag, BinaryProtocolWriter>& writer) {
             if constexpr (type::is_optional_or_union_field_v<T, Ord>) {
               return;
             }

@@ -17,13 +17,13 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from ThriftTest import ThriftTest
-from ThriftTest.ttypes import *
 import unittest
 
 from thrift.protocol import TBinaryProtocol
 from thrift.transport import TTransport
 from thrift.transport.THeaderTransport import THeaderTransport
+
+from ThriftTest.ttypes import Xtruct
 
 
 class TestEof(unittest.TestCase):
@@ -74,7 +74,7 @@ class TestEof(unittest.TestCase):
 def suite():
     suite = unittest.TestSuite()
     loader = unittest.TestLoader()
-    suite.addTest(loader.loadTestsFromTestCase(TestHeaderTransportFeatures))
+    suite.addTest(loader.loadTestsFromTestCase(TestEof))
     return suite
 
 

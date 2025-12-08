@@ -24,8 +24,6 @@
 #include <thrift/lib/cpp2/dynamic/Union.h>
 #include <thrift/lib/cpp2/dynamic/detail/Datum.h>
 
-#include <folly/Hash.h>
-
 namespace apache::thrift::dynamic::detail {
 
 std::size_t DatumHash::operator()(const Datum& d) const {

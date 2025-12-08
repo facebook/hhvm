@@ -19,7 +19,6 @@
 #include <thrift/lib/cpp2/patch/DynamicPatch.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
-#include <thrift/lib/cpp2/protocol/Serializer.h>
 
 using namespace folly;
 using namespace std;

@@ -17,7 +17,6 @@
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 #include <thrift/lib/cpp2/util/gtest/Printer.h>
 #include <thrift/lib/cpp2/util/gtest/test/gen-cpp2/Matcher_types.h>
-#include <thrift/lib/cpp2/util/gtest/test/gen-cpp2/Matcher_types_custom_protocol.h>
 
 #include <gtest/gtest.h>
 

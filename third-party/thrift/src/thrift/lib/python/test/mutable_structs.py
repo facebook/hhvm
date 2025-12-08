@@ -34,6 +34,7 @@ from thrift.python.mutable_types import (
     to_thrift_map,
     to_thrift_set,
 )
+from thrift.python.test_helpers import round_thrift_to_float32
 
 from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
     TestComplexContainersStruct,
@@ -604,7 +605,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual(s1, s2)
 
     def test_deepcopy_floating_point(self) -> None:
-        p = 3.14159265359
+        p = round_thrift_to_float32(3.14159265359)
         s1 = TestStructWithFloatingPointMutable(float_field=p, double_field=p)
 
         self.assertEqual(s1.float_field, p)
@@ -614,8 +615,9 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
 
         self.assertEqual(s2.double_field, p)
 
-        # In Python, runtime floating-point numbers are double precision;
-        # however, during a deepcopy, the object goes through a serialization
-        # cycle, and the Thrift float field is truncated to its 'real' value
-        # that can be held by a single precision floating field
-        self.assertNotEqual(s2.float_field, p)
+        # Historically, `float` fields were stored as 64-bit Python `float`.
+        # Then on deep copy, serialization would round to 32-bit.
+        # Since deepcopy relied on serialization, it was not a true copy.
+
+        # But now they're rounded to 32-bit `float`
+        self.assertEqual(s2.float_field, p)

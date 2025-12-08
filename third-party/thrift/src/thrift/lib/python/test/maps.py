@@ -58,6 +58,7 @@ from thrift.python.mutable_types import (
     to_thrift_list,
     to_thrift_map,
 )
+from thrift.python.test_helpers import round_thrift_to_float32
 
 ListT = TypeVar("ListT")
 MapKey = TypeVar("MapKey")
@@ -316,7 +317,9 @@ class MapTests(unittest.TestCase):
         self.assertEqual(s.i16Map, {4: 4, 5: 5, 6: 6})
         self.assertEqual(s.i64Map, {7: 7, 8: 8, 9: 9})
         self.assertEqual(s.doubleMap, {1.23: 1.23, 4.56: 4.56})
-        self.assertEqual(s.floatMap, {7.89: 7.89, 10.11: 10.11})
+        self.assertEqual(
+            s.floatMap, round_thrift_to_float32({7.89: 7.89, 10.11: 10.11})
+        )
         self.assertEqual(s.stringMap, {"foo": "foo", "bar": "bar"})
         self.assertEqual(s.byteMap, {1: 1, 2: 2, 3: 3})
         self.assertEqual(s.binaryMap, {b"foo": b"foo", b"bar": b"bar"})

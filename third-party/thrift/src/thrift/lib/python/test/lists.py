@@ -44,6 +44,7 @@ from python_test.lists.thrift_types import (
 )
 from thrift.lib.python.test.testing_utils import Untruthy
 from thrift.python.mutable_types import _ThriftListWrapper, to_thrift_list
+from thrift.python.test_helpers import round_thrift_to_float32
 
 ListT = TypeVar("ListT")
 
@@ -347,7 +348,7 @@ class ListTests(unittest.TestCase):
         self.assertEqual(s.i16List, [4, 5, 6])
         self.assertEqual(s.i64List, [7, 8, 9])
         self.assertEqual(s.doubleList, [1.23, 4.56])
-        self.assertEqual(s.floatList, [7.89, 10.11])
+        self.assertEqual(s.floatList, round_thrift_to_float32([7.89, 10.11]))
         self.assertEqual(s.stringList, ["foo", "bar"])
         self.assertEqual(s.binaryList, [b"foo", b"bar"])
         self.assertEqual(s.iobufList, [IOBuf(b"foo"), IOBuf(b"bar")])

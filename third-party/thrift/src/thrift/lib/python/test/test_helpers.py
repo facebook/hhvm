@@ -160,7 +160,9 @@ class RoundToFloat32NonThriftTest(unittest.TestCase):
         self,
     ) -> None:
         self.assertNotEqual(round_thrift_to_float32(1.1), 1.1)
-        self.assertEqual(round_thrift_float32_if_rollout(1.1), 1.1)
+        self.assertEqual(
+            round_thrift_float32_if_rollout(1.1), round_thrift_to_float32(1.1)
+        )
 
 
 @parameterized_class(

@@ -411,7 +411,7 @@ typeinfo_i16 = IntegerTypeInfo.create(i16TypeInfo, -1<<15, (1<<15)-1, "typeinfo_
 typeinfo_i32 = IntegerTypeInfo.create(i32TypeInfo, -1<<31, (1<<31)-1, "typeinfo_i32")
 typeinfo_i64 = IntegerTypeInfo.create(i64TypeInfo, -1<<63, (1<<63)-1, "typeinfo_i64")
 typeinfo_double = TypeInfo.create(doubleTypeInfo, pfloat, (pint,), "typeinfo_double")
-typeinfo_float = TypeInfo.create(floatTypeInfo, pfloat, (pint,), "typeinfo_float")
+typeinfo_float = Float32TypeInfo.create(floatTypeInfo, "typeinfo_float")
 # legacy float typeinfo, where Thrift float was represented with 64-bit python float
 # WARNING: when legacy float type info is removed, the below should read
 # `typeinfo_float_legacy = typeinfo_float` for compatibility with pickled and stored data

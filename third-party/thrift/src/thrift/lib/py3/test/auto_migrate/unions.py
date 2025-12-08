@@ -159,8 +159,9 @@ class UnionTests(unittest.TestCase):
     def test_complexunion_fromValue(self) -> None:
         tiny = 2**7 - 1
         large = 2**63 - 1
-        afloat = 3.141592025756836  # Hand crafted to be representable as float
         adouble = 3.14159265358
+        # afloat is adouble rounded to 32-bit float
+        afloat = 3.1415927410125732
         union = ComplexUnion.fromValue(tiny)
         self.assertEqual(union.type, ComplexUnion.Type.tiny)
         union = ComplexUnion.fromValue(large)
@@ -169,14 +170,15 @@ class UnionTests(unittest.TestCase):
         self.assertEqual(union.value, afloat)
         self.assertEqual(union.type, ComplexUnion.Type.float_val)
         union = ComplexUnion.fromValue(adouble)
-        self.assertEqual(union.value, adouble)
         # thrift-python has no mechanism to distinguish between float and double
-        adouble_arm = (
-            ComplexUnion.Type.float_val
+        # TODO(T243911644): resolve thrift-py3 vs thrift-python behavior
+        u_arm, u_val = (
+            (ComplexUnion.Type.float_val, afloat)
             if is_auto_migrated()
-            else ComplexUnion.Type.double_val
+            else (ComplexUnion.Type.double_val, adouble)
         )
-        self.assertEqual(union.type, adouble_arm)
+        self.assertEqual(union.value, u_val)
+        self.assertEqual(union.type, u_arm)
         union = ComplexUnion.fromValue(Color.red)
         self.assertEqual(union.type, ComplexUnion.Type.color)
         union = ComplexUnion.fromValue(easy())
@@ -207,7 +209,6 @@ class UnionTests(unittest.TestCase):
             self.assertEqual(u.type, Misordered.Type.s1)
             self.assertEqual(u.s1, "31")
 
-    @brokenInAutoMigrate()
     def test_float32_field(self) -> None:
         # thrift-py3 rounds to float32 via cython. We want to eventually
         # remove this behavior and update tests that expect float32 rounding.

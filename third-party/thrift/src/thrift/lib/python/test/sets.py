@@ -43,6 +43,7 @@ from python_test.sets.thrift_types import (
 )
 from thrift.lib.python.test.testing_utils import Untruthy
 from thrift.python.mutable_types import _ThriftSetWrapper, to_thrift_set
+from thrift.python.test_helpers import round_thrift_to_float32
 
 SetT = TypeVar("SetT")
 
@@ -256,7 +257,7 @@ class SetTests(unittest.TestCase):
         self.assertEqual(s.i16Set, {4, 5, 6})
         self.assertEqual(s.i64Set, {7, 8, 9})
         self.assertEqual(s.doubleSet, {1.23, 4.56})
-        self.assertEqual(s.floatSet, {7.89, 10.11})
+        self.assertEqual(s.floatSet, round_thrift_to_float32({7.89, 10.11}))
         self.assertEqual(s.stringSet, {"foo", "bar"})
         self.assertEqual(s.binarySet, {b"foo", b"bar"})
         self.assertEqual(s.iobufSet, {IOBuf(b"foo"), IOBuf(b"bar")})

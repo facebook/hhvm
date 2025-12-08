@@ -1783,6 +1783,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleServi
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genServiceMetadataResponse<::py3::simple::SimpleService>(response);
+    DCHECK_EQ(*response.context()->module()->name(), "module");
+    DCHECK_EQ(*response.context()->service_info()->name(), "module.SimpleService");
+    return;
+  }
+
   const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
   DCHECK(self != nullptr);
   // TODO(praihan): Remove ThriftServiceContext from response. But in the meantime, we need to fill the field with the result of looking up in ThriftMetadata.
@@ -1937,6 +1944,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedServ
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::DerivedService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genServiceMetadataResponse<::py3::simple::DerivedService>(response);
+    DCHECK_EQ(*response.context()->module()->name(), "module");
+    DCHECK_EQ(*response.context()->service_info()->name(), "module.DerivedService");
+    return;
+  }
+
   const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
   DCHECK(self != nullptr);
   // TODO(praihan): Remove ThriftServiceContext from response. But in the meantime, we need to fill the field with the result of looking up in ThriftMetadata.
@@ -2011,6 +2025,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedSe
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genServiceMetadataResponse<::py3::simple::RederivedService>(response);
+    DCHECK_EQ(*response.context()->module()->name(), "module");
+    DCHECK_EQ(*response.context()->service_info()->name(), "module.RederivedService");
+    return;
+  }
+
   const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
   DCHECK(self != nullptr);
   // TODO(praihan): Remove ThriftServiceContext from response. But in the meantime, we need to fill the field with the result of looking up in ThriftMetadata.

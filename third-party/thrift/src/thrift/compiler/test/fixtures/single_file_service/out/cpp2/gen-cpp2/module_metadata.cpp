@@ -97,6 +97,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::A>>::gen_foo([[may
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::A>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genServiceMetadataResponse<::cpp2::A>(response);
+    DCHECK_EQ(*response.context()->module()->name(), "module");
+    DCHECK_EQ(*response.context()->service_info()->name(), "module.A");
+    return;
+  }
+
   const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
   DCHECK(self != nullptr);
   // TODO(praihan): Remove ThriftServiceContext from response. But in the meantime, we need to fill the field with the result of looking up in ThriftMetadata.
@@ -214,6 +221,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen_sink_stuf
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::B>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genServiceMetadataResponse<::cpp2::B>(response);
+    DCHECK_EQ(*response.context()->module()->name(), "module");
+    DCHECK_EQ(*response.context()->service_info()->name(), "module.B");
+    return;
+  }
+
   const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
   DCHECK(self != nullptr);
   // TODO(praihan): Remove ThriftServiceContext from response. But in the meantime, we need to fill the field with the result of looking up in ThriftMetadata.
@@ -276,6 +290,13 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genServiceMetadataResponse<::cpp2::C>(response);
+    DCHECK_EQ(*response.context()->module()->name(), "module");
+    DCHECK_EQ(*response.context()->service_info()->name(), "module.C");
+    return;
+  }
+
   const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
   DCHECK(self != nullptr);
   // TODO(praihan): Remove ThriftServiceContext from response. But in the meantime, we need to fill the field with the result of looking up in ThriftMetadata.

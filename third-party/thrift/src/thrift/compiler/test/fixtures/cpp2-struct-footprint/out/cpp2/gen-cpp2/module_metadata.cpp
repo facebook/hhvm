@@ -623,6 +623,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::F
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::FootprintTestService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genServiceMetadataResponse<::cpp2_struct_footprint::FootprintTestService>(response);
+    DCHECK_EQ(*response.context()->module()->name(), "module");
+    DCHECK_EQ(*response.context()->service_info()->name(), "module.FootprintTestService");
+    return;
+  }
+
   const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
   DCHECK(self != nullptr);
   // TODO(praihan): Remove ThriftServiceContext from response. But in the meantime, we need to fill the field with the result of looking up in ThriftMetadata.
@@ -719,6 +726,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::E
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2_struct_footprint::ExtendedFootprintService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genServiceMetadataResponse<::cpp2_struct_footprint::ExtendedFootprintService>(response);
+    DCHECK_EQ(*response.context()->module()->name(), "module");
+    DCHECK_EQ(*response.context()->service_info()->name(), "module.ExtendedFootprintService");
+    return;
+  }
+
   const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
   DCHECK(self != nullptr);
   // TODO(praihan): Remove ThriftServiceContext from response. But in the meantime, we need to fill the field with the result of looking up in ThriftMetadata.

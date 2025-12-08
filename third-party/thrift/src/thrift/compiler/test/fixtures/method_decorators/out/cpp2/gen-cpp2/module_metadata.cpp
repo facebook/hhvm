@@ -361,6 +361,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genServiceMetadataResponse<::cpp2::DecoratedService>(response);
+    DCHECK_EQ(*response.context()->module()->name(), "module");
+    DCHECK_EQ(*response.context()->service_info()->name(), "module.DecoratedService");
+    return;
+  }
+
   const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
   DCHECK(self != nullptr);
   // TODO(praihan): Remove ThriftServiceContext from response. But in the meantime, we need to fill the field with the result of looking up in ThriftMetadata.
@@ -639,6 +646,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genServiceMetadataResponse<::cpp2::UndecoratedService>(response);
+    DCHECK_EQ(*response.context()->module()->name(), "module");
+    DCHECK_EQ(*response.context()->service_info()->name(), "module.UndecoratedService");
+    return;
+  }
+
   const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
   DCHECK(self != nullptr);
   // TODO(praihan): Remove ThriftServiceContext from response. But in the meantime, we need to fill the field with the result of looking up in ThriftMetadata.
@@ -723,6 +737,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_E
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genServiceMetadataResponse<::cpp2::DecoratedService_ExtendsUndecoratedService>(response);
+    DCHECK_EQ(*response.context()->module()->name(), "module");
+    DCHECK_EQ(*response.context()->service_info()->name(), "module.DecoratedService_ExtendsUndecoratedService");
+    return;
+  }
+
   const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
   DCHECK(self != nullptr);
   // TODO(praihan): Remove ThriftServiceContext from response. But in the meantime, we need to fill the field with the result of looking up in ThriftMetadata.
@@ -798,6 +819,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_E
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsDecoratedService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genServiceMetadataResponse<::cpp2::DecoratedService_ExtendsDecoratedService>(response);
+    DCHECK_EQ(*response.context()->module()->name(), "module");
+    DCHECK_EQ(*response.context()->service_info()->name(), "module.DecoratedService_ExtendsDecoratedService");
+    return;
+  }
+
   const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
   DCHECK(self != nullptr);
   // TODO(praihan): Remove ThriftServiceContext from response. But in the meantime, we need to fill the field with the result of looking up in ThriftMetadata.
@@ -873,6 +901,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::UndecoratedService_ExtendsDecoratedService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genServiceMetadataResponse<::cpp2::UndecoratedService_ExtendsDecoratedService>(response);
+    DCHECK_EQ(*response.context()->module()->name(), "module");
+    DCHECK_EQ(*response.context()->service_info()->name(), "module.UndecoratedService_ExtendsDecoratedService");
+    return;
+  }
+
   const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
   DCHECK(self != nullptr);
   // TODO(praihan): Remove ThriftServiceContext from response. But in the meantime, we need to fill the field with the result of looking up in ThriftMetadata.
@@ -959,6 +994,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_E
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genServiceMetadataResponse<::cpp2::DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService>(response);
+    DCHECK_EQ(*response.context()->module()->name(), "module");
+    DCHECK_EQ(*response.context()->service_info()->name(), "module.DecoratedService_ExtendsUndecoratedService_ExtendsDecoratedService");
+    return;
+  }
+
   const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
   DCHECK(self != nullptr);
   // TODO(praihan): Remove ThriftServiceContext from response. But in the meantime, we need to fill the field with the result of looking up in ThriftMetadata.

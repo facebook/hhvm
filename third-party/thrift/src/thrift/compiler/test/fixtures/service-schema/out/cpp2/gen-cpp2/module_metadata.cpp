@@ -238,6 +238,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::PrimitivesService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genServiceMetadataResponse<::facebook::thrift::test::PrimitivesService>(response);
+    DCHECK_EQ(*response.context()->module()->name(), "module");
+    DCHECK_EQ(*response.context()->service_info()->name(), "module.PrimitivesService");
+    return;
+  }
+
   const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
   DCHECK(self != nullptr);
   // TODO(praihan): Remove ThriftServiceContext from response. But in the meantime, we need to fill the field with the result of looking up in ThriftMetadata.
@@ -339,6 +346,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::ExtendedService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
+    genServiceMetadataResponse<::facebook::thrift::test::ExtendedService>(response);
+    DCHECK_EQ(*response.context()->module()->name(), "module");
+    DCHECK_EQ(*response.context()->service_info()->name(), "module.ExtendedService");
+    return;
+  }
+
   const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
   DCHECK(self != nullptr);
   // TODO(praihan): Remove ThriftServiceContext from response. But in the meantime, we need to fill the field with the result of looking up in ThriftMetadata.

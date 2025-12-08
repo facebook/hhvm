@@ -265,7 +265,7 @@ void XenonRequestLocalData::log(Xenon::SampleType t,
                              .fromWaitHandle(wh)
                              .withMetadata()
                              .ignoreArgs());
-  
+
   auto const obj = *ImplicitContext::activeCtx;
   auto const context = Native::data<ImplicitContext>(obj);
   auto& existing_m_map = context->m_map;

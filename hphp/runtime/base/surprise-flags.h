@@ -105,6 +105,22 @@ enum SurpriseFlag : size_t {
     PendingPerfEventFlag,
 
   NonSafepointFlags = ~SafepointFlags & kSurpriseFlagMask,
+
+  /*
+   * Profiling and monitoring flags that should be masked during debugger
+   * stepping. This ensures that Xenon sampling doesn't interfere with
+   * debugger functionality.
+   */
+  ProfilingMonitoringFlags =
+    XenonSignalFlag |
+    HeapSamplingFlag |
+    IntervalTimerFlag,
+
+  /*
+   * Flags that should be processed during debugger stepping. Excludes
+   * profiling/monitoring to avoid stepping into Xenon serialization.
+   */
+  DebuggerSteppingFlags = kSurpriseFlagMask & ~ProfilingMonitoringFlags,
 };
 
 //////////////////////////////////////////////////////////////////////

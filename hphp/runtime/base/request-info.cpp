@@ -349,6 +349,25 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
       pendingException = generate_memory_exceeded_exception(wh);
     }
   }
+  if (debugging && p.getDebuggerStepIntr()) {
+    // we'll disable specific flags to make sure Xenon (or other)
+    // re-entrant code doesn't interfere with debugging.
+    if (flags & XenonSignalFlag) {
+      if (StickyFlags & XenonSignalFlag) {
+        clearSurpriseFlag(XenonSignalFlag);
+      }
+    }
+    if (flags & HeapSamplingFlag) {
+      if (StickyFlags & HeapSamplingFlag) {
+        clearSurpriseFlag(HeapSamplingFlag);
+      }
+    }
+    if (flags & IntervalTimerFlag) {
+      if (StickyFlags & IntervalTimerFlag) {
+        clearSurpriseFlag(IntervalTimerFlag);
+      }
+    }
+  }
   if (flags & CLIClientTerminated) {
     if (pendingException) {
       setSurpriseFlag(CLIClientTerminated);

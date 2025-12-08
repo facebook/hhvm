@@ -54,6 +54,7 @@ template <typename T, typename ProtocolWriter>
 class StructuredCursorWriter;
 template <typename Tag>
 class ContainerCursorWriter;
+template <typename ProtocolWriter>
 class StringCursorWriter;
 class ManagedStringViewWithConversions;
 

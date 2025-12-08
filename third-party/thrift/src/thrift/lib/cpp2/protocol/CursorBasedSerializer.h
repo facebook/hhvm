@@ -856,8 +856,14 @@ class ContainerCursorIterator {
  *                                uncompressedData.c_str(), maxSize, 1);
  *  writer.endWrite(std::move(child), cSize);
  */
-class StringCursorWriter
-    : detail::DelayedSizeCursorWriter<BinaryProtocolWriter> {
+template <typename ProtocolWriter = BinaryProtocolWriter>
+class StringCursorWriter : detail::DelayedSizeCursorWriter<ProtocolWriter> {
+  using Base = detail::DelayedSizeCursorWriter<ProtocolWriter>;
+  using Base::protocol_;
+  using Base::state_;
+  using State = typename Base::State;
+  using Base::checkState;
+
  public:
   uint8_t* writeableData() {
     checkState(State::Active);
@@ -865,14 +871,13 @@ class StringCursorWriter
   }
 
  private:
-  StringCursorWriter(BinaryProtocolWriter* p, int32_t maxSize)
-      : DelayedSizeCursorWriter(p) {
-    writeSize();
+  StringCursorWriter(ProtocolWriter* p, int32_t maxSize) : Base(p) {
+    this->writeSize();
     data_ = protocol_->ensure(maxSize);
   }
 
   void finalize(int32_t actualSize) {
-    DelayedSizeCursorWriter::finalize(actualSize);
+    Base::finalize(actualSize);
     protocol_->advance(actualSize);
   }
 
@@ -937,14 +942,15 @@ class StructuredCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
    */
 
   template <typename Ident, enable_for<type::string_c, Ident> = 0>
-  StringCursorWriter beginWrite(int32_t maxSize) {
+  StringCursorWriter<ProtocolWriter> beginWrite(int32_t maxSize) {
     beforeWriteField<Ident>();
     state_ = State::Child;
-    StringCursorWriter child{protocol_, maxSize};
+    StringCursorWriter<ProtocolWriter> child{protocol_, maxSize};
     return child;
   }
 
-  void endWrite(StringCursorWriter&& child, int32_t actualSize) {
+  void endWrite(
+      StringCursorWriter<ProtocolWriter>&& child, int32_t actualSize) {
     checkState(State::Child);
     child.finalize(actualSize);
     afterWriteField();

@@ -90,6 +90,8 @@
 
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 
+#include <limits>
+
 TRACE_SET_MOD(vasm)
 
 namespace HPHP::jit {
@@ -256,7 +258,27 @@ struct Vgen {
   void emit(const ldimmw& i);
   void emit(const ldundefq& /*i*/) {}
   void emit(const load& i);
+#define DECL_LOAD_UPDATE_SINGLE(name, pre, post, reg, size, ptr) \
+  void emit(const pre&); \
+  void emit(const post&);
+  VASM_LOAD_UPDATE_SINGLE_LIST(DECL_LOAD_UPDATE_SINGLE)
+#undef DECL_LOAD_UPDATE_SINGLE
+#define DECL_LOAD_UPDATE_PAIR(name, pre, post, reg, size, lanes, ptr) \
+  void emit(const pre&); \
+  void emit(const post&);
+  VASM_LOAD_UPDATE_PAIR_LIST(DECL_LOAD_UPDATE_PAIR)
+#undef DECL_LOAD_UPDATE_PAIR
   void emit(const store& i);
+#define DECL_STORE_UPDATE_SINGLE(name, pre, post, reg, size, ptr) \
+  void emit(const pre&); \
+  void emit(const post&);
+  VASM_STORE_UPDATE_SINGLE_LIST(DECL_STORE_UPDATE_SINGLE)
+#undef DECL_STORE_UPDATE_SINGLE
+#define DECL_STORE_UPDATE_PAIR(name, pre, post, reg, size, lanes, ptr) \
+  void emit(const pre&); \
+  void emit(const post&);
+  VASM_STORE_UPDATE_PAIR_LIST(DECL_STORE_UPDATE_PAIR)
+#undef DECL_STORE_UPDATE_PAIR
   void emit(const mcprep& i);
 
   // native function abi
@@ -458,6 +480,56 @@ struct Vgen {
   void emit_nop() { a->Nop(); }
 
 private:
+  static bool validSimpleUpdateOffset(int32_t offset) {
+    return offset >= -256 && offset <= 255;
+  }
+
+  static bool validPairUpdateOffset(int32_t offset, int laneSize) {
+    if (laneSize <= 0 || (offset % laneSize) != 0) return false;
+    auto const scaled = offset / laneSize;
+    return scaled >= -64 && scaled <= 63;
+  }
+
+  static int32_t checkedSimpleOffset(Immed imm) {
+    auto const value = imm.l();
+    always_assert_flog(
+      value >= std::numeric_limits<int32_t>::min() &&
+      value <= std::numeric_limits<int32_t>::max(),
+      "Immediate {} out of 32-bit range for simple update", value
+    );
+    auto const offset = static_cast<int32_t>(value);
+    always_assert_flog(
+      validSimpleUpdateOffset(offset),
+      "Immediate {} out of range for simple pre/post-index update", value
+    );
+    return offset;
+  }
+
+  static int32_t checkedPairOffset(Immed imm, int laneSize) {
+    auto const value = imm.l();
+    always_assert_flog(
+      value >= std::numeric_limits<int32_t>::min() &&
+      value <= std::numeric_limits<int32_t>::max(),
+      "Immediate {} out of 32-bit range for pair update", value
+    );
+    auto const offset = static_cast<int32_t>(value);
+    always_assert_flog(
+      validPairUpdateOffset(offset, laneSize),
+      "Immediate {} out of range for pair pre/post-index update with lane {}",
+      value, laneSize
+    );
+    return offset;
+  }
+
+  template<class EmitFn>
+  void emitMemUpdate(Vreg64 s, Vreg64 base, int32_t offset,
+                     AddrMode mode, EmitFn emit_fn) {
+    auto const baseReg = X(s);
+    auto const mem = MemOperand(baseReg, offset, mode);
+    emit_fn(mem);
+    if (base != s) a->Mov(X(base), baseReg);
+  }
+
   CodeBlock& frozen() { return env.text.frozen().code; }
   static void recordAddressImmediate(Venv& env, TCA addr) {
     env.meta.addressImmediates.insert(addr);
@@ -819,6 +891,96 @@ void Vgen::emit(const load& i) {
   }
 }
 
+#define VASM_LOAD_UPDATE_SINGLE_BODY_load(mem, inst)                \
+  do {                                                              \
+    if ((inst).d.isGP()) {                                          \
+      a->Ldr(X((inst).d), (mem));                                   \
+    } else {                                                        \
+      a->Ldr(D((inst).d), (mem));                                   \
+    }                                                               \
+  } while (false)
+#define VASM_LOAD_UPDATE_SINGLE_BODY_loadb(mem, inst) \
+  a->Ldrb(W((inst).d), (mem))
+#define VASM_LOAD_UPDATE_SINGLE_BODY_loadw(mem, inst) \
+  a->Ldrh(W((inst).d), (mem))
+#define VASM_LOAD_UPDATE_SINGLE_BODY_loadl(mem, inst) \
+  a->Ldr(W((inst).d), (mem))
+#define VASM_LOAD_UPDATE_SINGLE_BODY_loadsd(mem, inst) \
+  a->Ldr(D((inst).d), (mem))
+#define VASM_LOAD_UPDATE_SINGLE_BODY_loadzbl(mem, inst) \
+  a->Ldrb(W((inst).d), (mem))
+#define VASM_LOAD_UPDATE_SINGLE_BODY_loadzbq(mem, inst) \
+  a->Ldrb(W((inst).d), (mem))
+#define VASM_LOAD_UPDATE_SINGLE_BODY_loadzwq(mem, inst) \
+  a->Ldrh(W((inst).d), (mem))
+#define VASM_LOAD_UPDATE_SINGLE_BODY_loadzlq(mem, inst) \
+  a->Ldr(W((inst).d), (mem))
+#define VASM_LOAD_UPDATE_SINGLE_BODY_loadsbl(mem, inst) \
+  a->Ldrsb(W((inst).d), (mem))
+#define VASM_LOAD_UPDATE_SINGLE_BODY_loadsbq(mem, inst) \
+  a->Ldrsb(X((inst).d), (mem))
+#define VASM_LOAD_UPDATE_SINGLE_BODY_loadtqb(mem, inst) \
+  a->Ldrb(W((inst).d), (mem))
+#define VASM_LOAD_UPDATE_SINGLE_BODY_loadtql(mem, inst) \
+  a->Ldr(W((inst).d), (mem))
+
+#define VASM_LOAD_UPDATE_PAIR_BODY_loadpair(mem, inst) \
+  a->Ldp(X((inst).d0), X((inst).d1), (mem))
+#define VASM_LOAD_UPDATE_PAIR_BODY_loadpairl(mem, inst) \
+  a->Ldp(W((inst).d0), W((inst).d1), (mem))
+
+#define DEFINE_LOAD_UPDATE_SINGLE(name, pre, post, reg, size, ptr)             \
+void Vgen::emit(const pre& i) {                                           \
+  auto const offset = checkedSimpleOffset(i.s0);                          \
+  emitMemUpdate(i.s, i.base, offset, PreIndex,                      \
+                [&](const MemOperand& mem) {                              \
+                  VASM_LOAD_UPDATE_SINGLE_BODY_##name(mem, i);            \
+                });                                                       \
+}                                                                         \
+void Vgen::emit(const post& i) {                                          \
+  auto const offset = checkedSimpleOffset(i.s0);                          \
+  emitMemUpdate(i.s, i.base, offset, PostIndex,                     \
+                [&](const MemOperand& mem) {                              \
+                  VASM_LOAD_UPDATE_SINGLE_BODY_##name(mem, i);            \
+                });                                                       \
+}
+VASM_LOAD_UPDATE_SINGLE_LIST(DEFINE_LOAD_UPDATE_SINGLE)
+#undef DEFINE_LOAD_UPDATE_SINGLE
+
+#define DEFINE_LOAD_UPDATE_PAIR(name, pre, post, reg, laneSize, lanes, ptr)    \
+void Vgen::emit(const pre& i) {                                           \
+  auto const offset = checkedPairOffset(i.s0, laneSize);                  \
+  emitMemUpdate(i.s, i.base, offset, PreIndex,                      \
+                [&](const MemOperand& mem) {                              \
+                  VASM_LOAD_UPDATE_PAIR_BODY_##name(mem, i);              \
+                });                                                       \
+}                                                                         \
+void Vgen::emit(const post& i) {                                          \
+  auto const offset = checkedPairOffset(i.s0, laneSize);                  \
+  emitMemUpdate(i.s, i.base, offset, PostIndex,                     \
+                [&](const MemOperand& mem) {                              \
+                  VASM_LOAD_UPDATE_PAIR_BODY_##name(mem, i);              \
+                });                                                       \
+}
+VASM_LOAD_UPDATE_PAIR_LIST(DEFINE_LOAD_UPDATE_PAIR)
+#undef DEFINE_LOAD_UPDATE_PAIR
+
+#undef VASM_LOAD_UPDATE_SINGLE_BODY_load
+#undef VASM_LOAD_UPDATE_SINGLE_BODY_loadb
+#undef VASM_LOAD_UPDATE_SINGLE_BODY_loadw
+#undef VASM_LOAD_UPDATE_SINGLE_BODY_loadl
+#undef VASM_LOAD_UPDATE_SINGLE_BODY_loadsd
+#undef VASM_LOAD_UPDATE_SINGLE_BODY_loadzbl
+#undef VASM_LOAD_UPDATE_SINGLE_BODY_loadzbq
+#undef VASM_LOAD_UPDATE_SINGLE_BODY_loadzwq
+#undef VASM_LOAD_UPDATE_SINGLE_BODY_loadzlq
+#undef VASM_LOAD_UPDATE_SINGLE_BODY_loadsbl
+#undef VASM_LOAD_UPDATE_SINGLE_BODY_loadsbq
+#undef VASM_LOAD_UPDATE_SINGLE_BODY_loadtqb
+#undef VASM_LOAD_UPDATE_SINGLE_BODY_loadtql
+#undef VASM_LOAD_UPDATE_PAIR_BODY_loadpair
+#undef VASM_LOAD_UPDATE_PAIR_BODY_loadpairl
+
 void Vgen::emit(const store& i) {
   if (i.s.isGP()) {
     if (i.s == arm::rsp()) {
@@ -831,6 +993,77 @@ void Vgen::emit(const store& i) {
     a->Str(D(i.s), M(i.d));
   }
 }
+
+#define VASM_STORE_UPDATE_SINGLE_BODY_store(mem, inst)                    \
+  do {                                                                    \
+    if ((inst).v.isGP()) {                                                \
+      if ((inst).v == arm::rsp()) {                                       \
+        a->Mov(rAsm, X((inst).v));                                        \
+        a->Str(rAsm, (mem));                                              \
+      } else {                                                            \
+        a->Str(X((inst).v), (mem));                                       \
+      }                                                                   \
+    } else {                                                              \
+      a->Str(D((inst).v), (mem));                                         \
+    }                                                                     \
+  } while (false)
+#define VASM_STORE_UPDATE_SINGLE_BODY_storeb(mem, inst) \
+  a->Strb(W((inst).v), (mem))
+#define VASM_STORE_UPDATE_SINGLE_BODY_storew(mem, inst) \
+  a->Strh(W((inst).v), (mem))
+#define VASM_STORE_UPDATE_SINGLE_BODY_storel(mem, inst) \
+  a->Str(W((inst).v), (mem))
+#define VASM_STORE_UPDATE_SINGLE_BODY_storesd(mem, inst) \
+  a->Str(D((inst).v), (mem))
+
+#define VASM_STORE_UPDATE_PAIR_BODY_storepair(mem, inst) \
+  a->Stp(X((inst).v0), X((inst).v1), (mem))
+#define VASM_STORE_UPDATE_PAIR_BODY_storepairl(mem, inst) \
+  a->Stp(W((inst).v0), W((inst).v1), (mem))
+
+#define DEFINE_STORE_UPDATE_SINGLE(name, pre, post, reg, size, ptr)            \
+void Vgen::emit(const pre& i) {                                           \
+  auto const offset = checkedSimpleOffset(i.s0);                          \
+  emitMemUpdate(i.s, i.base, offset, PreIndex,                      \
+                [&](const MemOperand& mem) {                              \
+                  VASM_STORE_UPDATE_SINGLE_BODY_##name(mem, i);           \
+                });                                                       \
+}                                                                         \
+void Vgen::emit(const post& i) {                                          \
+  auto const offset = checkedSimpleOffset(i.s0);                          \
+  emitMemUpdate(i.s, i.base, offset, PostIndex,                     \
+                [&](const MemOperand& mem) {                              \
+                  VASM_STORE_UPDATE_SINGLE_BODY_##name(mem, i);           \
+                });                                                       \
+}
+VASM_STORE_UPDATE_SINGLE_LIST(DEFINE_STORE_UPDATE_SINGLE)
+#undef DEFINE_STORE_UPDATE_SINGLE
+
+#define DEFINE_STORE_UPDATE_PAIR(name, pre, post, reg, laneSize, lanes, ptr)   \
+void Vgen::emit(const pre& i) {                                           \
+  auto const offset = checkedPairOffset(i.s0, laneSize);                  \
+  emitMemUpdate(i.s, i.base, offset, PreIndex,                      \
+                [&](const MemOperand& mem) {                              \
+                  VASM_STORE_UPDATE_PAIR_BODY_##name(mem, i);             \
+                });                                                       \
+}                                                                         \
+void Vgen::emit(const post& i) {                                          \
+  auto const offset = checkedPairOffset(i.s0, laneSize);                  \
+  emitMemUpdate(i.s, i.base, offset, PostIndex,                     \
+                [&](const MemOperand& mem) {                              \
+                  VASM_STORE_UPDATE_PAIR_BODY_##name(mem, i);             \
+                });                                                       \
+}
+VASM_STORE_UPDATE_PAIR_LIST(DEFINE_STORE_UPDATE_PAIR)
+#undef DEFINE_STORE_UPDATE_PAIR
+
+#undef VASM_STORE_UPDATE_SINGLE_BODY_store
+#undef VASM_STORE_UPDATE_SINGLE_BODY_storeb
+#undef VASM_STORE_UPDATE_SINGLE_BODY_storew
+#undef VASM_STORE_UPDATE_SINGLE_BODY_storel
+#undef VASM_STORE_UPDATE_SINGLE_BODY_storesd
+#undef VASM_STORE_UPDATE_PAIR_BODY_storepair
+#undef VASM_STORE_UPDATE_PAIR_BODY_storepairl
 
 ///////////////////////////////////////////////////////////////////////////////
 

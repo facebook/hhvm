@@ -16,16 +16,22 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from thrift.transport.TSocket import *
-from thrift.transport.TTransport import *
-
 # workaround for a python bug.  see http://bugs.python.org/issue8484
 import hashlib
 import logging
+
+import os
 import socket
 import ssl
 import sys
 import traceback
+
+from thrift.transport.TSocket import TServerSocket, TSocket
+from thrift.transport.TTransport import TTransportException
+
+# Python 2/3 compatibility
+if sys.version_info[0] >= 3:
+    unicode = str
 
 
 def _detect_legacy_ssl() -> bool:

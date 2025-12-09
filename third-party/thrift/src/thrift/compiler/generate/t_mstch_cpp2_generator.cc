@@ -432,7 +432,6 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
   void generate_program() override;
   void fill_validator_visitors(ast_validator&) const override;
   static std::string get_cpp2_namespace(const t_program* program);
-  static std::string get_cpp2_unprefixed_namespace(const t_program* program);
   static mstch::array cpp_includes(const t_program* program);
   static mstch::node include_prefix(
       const t_program* program, const compiler_options_map& options);
@@ -496,8 +495,7 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_program(proto);
     auto def = whisker::dsl::prototype_builder<h_program>::extends(base);
-    def.property(
-        "cpp_qualified_namespace", &cpp2::get_gen_unprefixed_namespace);
+    def.property("qualified_namespace", &cpp2::get_gen_unprefixed_namespace);
     return std::move(def).make();
   }
 
@@ -516,6 +514,10 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     auto base = t_whisker_generator::make_prototype_for_type(proto);
     auto def = whisker::dsl::prototype_builder<h_type>::extends(base);
 
+    def.property("qualified_namespace", [](const t_type& type) {
+      return cpp2::get_gen_unprefixed_namespace(*type.program());
+    });
+
     def.property("cpp_qualified_underlying_name", [this](const t_type& type) {
       return cpp_context_->resolver().get_underlying_namespaced_name(type);
     });
@@ -530,6 +532,12 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
 
     def.property("cpp_standard_type", [&](const t_type& type) {
       return cpp_context_->resolver().get_standard_type(type);
+    });
+
+    def.property("cpp_adapter", [](const t_type& type) {
+      const std::string* adapter = cpp_name_resolver::find_first_adapter(type);
+      return adapter == nullptr ? whisker::make::null
+                                : whisker::make::string(*adapter);
     });
 
     return std::move(def).make();
@@ -620,6 +628,26 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     return std::move(def).make();
   }
 
+  prototype<t_field>::ptr make_prototype_for_field(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_field(proto);
+    auto def = whisker::dsl::prototype_builder<h_field>::extends(base);
+
+    def.property("cpp_adapter", [](const t_field& self) {
+      const std::string* adapter =
+          cpp_name_resolver::find_structured_adapter_annotation(self);
+      return adapter == nullptr ? whisker::make::null
+                                : whisker::make::string(*adapter);
+    });
+    def.property("cpp_first_adapter", [](const t_field& self) {
+      const std::string* adapter = cpp_name_resolver::find_first_adapter(self);
+      return adapter == nullptr ? whisker::make::null
+                                : whisker::make::string(*adapter);
+    });
+
+    return std::move(def).make();
+  }
+
   prototype<t_function>::ptr make_prototype_for_function(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_function(proto);
@@ -682,6 +710,12 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     def.property("external?", [this](const t_const& self) {
       return self.program() != program_;
     });
+    def.property("cpp_adapter", [this](const t_const& self) {
+      const std::string* adapter =
+          cpp_context_->resolver().find_structured_adapter_annotation(self);
+      return adapter == nullptr ? whisker::make::null
+                                : whisker::make::string(*adapter);
+    });
     return std::move(def).make();
   }
 
@@ -717,8 +751,6 @@ class cpp_mstch_program : public mstch_program {
     register_methods(
         this,
         {{"program:cpp_includes", &cpp_mstch_program::cpp_includes},
-         {"program:qualified_namespace",
-          &cpp_mstch_program::qualified_namespace},
          {"program:include_prefix", &cpp_mstch_program::include_prefix},
          {"program:cpp_declare_hash?", &cpp_mstch_program::cpp_declare_hash},
          {"program:thrift_includes", &cpp_mstch_program::thrift_includes},
@@ -829,9 +861,6 @@ class cpp_mstch_program : public mstch_program {
           });
     }
     return mstch::map{{"fatal_strings:items", a}};
-  }
-  mstch::node qualified_namespace() {
-    return t_mstch_cpp2_generator::get_cpp2_unprefixed_namespace(program_);
   }
   mstch::node cpp_includes() {
     mstch::array includes = t_mstch_cpp2_generator::cpp_includes(program_);
@@ -1182,8 +1211,6 @@ class cpp_mstch_service : public mstch_service {
             {"service:autogen_path", &cpp_mstch_service::autogen_path},
             {"service:include_prefix", &cpp_mstch_service::include_prefix},
             {"service:thrift_includes", &cpp_mstch_service::thrift_includes},
-            {"service:qualified_namespace",
-             &cpp_mstch_service::qualified_namespace},
             {"service:oneway_functions", &cpp_mstch_service::oneway_functions},
             {"service:oneways?", &cpp_mstch_service::has_oneway},
             {"service:cpp_includes", &cpp_mstch_service::cpp_includes},
@@ -1231,10 +1258,6 @@ class cpp_mstch_service : public mstch_service {
       a.emplace_back(make_mstch_program_cached(program, context_));
     }
     return a;
-  }
-  mstch::node qualified_namespace() {
-    return t_mstch_cpp2_generator::get_cpp2_unprefixed_namespace(
-        service_->program());
   }
   mstch::node oneway_functions() {
     std::vector<const t_function*> oneway_functions;
@@ -1431,10 +1454,8 @@ class cpp_mstch_type : public mstch_type {
              &cpp_mstch_type::transitively_refers_to_struct},
             {"type:cpp_fullname", &cpp_mstch_type::cpp_fullname},
             {"type:cpp_standard_type", &cpp_mstch_type::cpp_standard_type},
-            {"type:cpp_adapter", &cpp_mstch_type::cpp_adapter},
             {"type:string_or_binary?", &cpp_mstch_type::is_string_or_binary},
             {"type:non_empty_struct?", &cpp_mstch_type::is_non_empty_struct},
-            {"type:qualified_namespace", &cpp_mstch_type::qualified_namespace},
             {"type:cpp_declare_hash", &cpp_mstch_type::cpp_declare_hash},
             {"type:cpp_declare_equal_to",
              &cpp_mstch_type::cpp_declare_equal_to},
@@ -1514,12 +1535,6 @@ class cpp_mstch_type : public mstch_type {
   mstch::node cpp_standard_type() {
     return cpp_context_->resolver().get_standard_type(*type_);
   }
-  mstch::node cpp_adapter() {
-    if (const auto* adapter = cpp_name_resolver::find_first_adapter(*type_)) {
-      return *adapter;
-    }
-    return {};
-  }
   mstch::node is_string_or_binary() {
     return resolved_type_->is_string_or_binary();
   }
@@ -1542,10 +1557,6 @@ class cpp_mstch_type : public mstch_type {
   mstch::node is_non_empty_struct() {
     auto as_struct = resolved_type_->try_as<t_structured>();
     return as_struct && as_struct->has_fields();
-  }
-  mstch::node qualified_namespace() {
-    return t_mstch_cpp2_generator::get_cpp2_unprefixed_namespace(
-        type_->program());
   }
   mstch::node type_class() { return cpp2::get_gen_type_class(*resolved_type_); }
   mstch::node type_tag() {
@@ -2212,8 +2223,6 @@ class cpp_mstch_field : public mstch_field {
             {"field:cpp_ref_shared_const?",
              &cpp_mstch_field::cpp_ref_shared_const},
             {"field:cpp_ref_not_boxed?", &cpp_mstch_field::cpp_ref_not_boxed},
-            {"field:cpp_adapter", &cpp_mstch_field::cpp_adapter},
-            {"field:cpp_first_adapter", &cpp_mstch_field::cpp_first_adapter},
             {"field:cpp_exactly_one_adapter?",
              &cpp_mstch_field::cpp_exactly_one_adapter},
             {"field:cpp_field_interceptor",
@@ -2367,13 +2376,6 @@ class cpp_mstch_field : public mstch_field {
         ref_type != gen::cpp::reference_type::boxed &&
         ref_type != gen::cpp::reference_type::boxed_intern;
   }
-  mstch::node cpp_first_adapter() {
-    if (const std::string* adapter =
-            cpp_name_resolver::find_first_adapter(*field_)) {
-      return *adapter;
-    }
-    return {};
-  }
   mstch::node cpp_exactly_one_adapter() {
     bool hasFieldAdapter =
         cpp_name_resolver::find_structured_adapter_annotation(*field_);
@@ -2400,15 +2402,6 @@ class cpp_mstch_field : public mstch_field {
       }
     }
     return "FOLLY_ERASE";
-  }
-
-  mstch::node cpp_adapter() {
-    // Only find a structured adapter on the field.
-    if (const std::string* adapter =
-            cpp_name_resolver::find_structured_adapter_annotation(*field_)) {
-      return *adapter;
-    }
-    return {};
   }
   mstch::node cpp_noncopyable() {
     return field_->type().get_type()->has_unstructured_annotation(
@@ -2585,34 +2578,12 @@ class cpp_mstch_const : public mstch_const {
     register_methods(
         this,
         {
-            {"constant:enum_value", &cpp_mstch_const::enum_value},
-            {"constant:cpp_adapter", &cpp_mstch_const::cpp_adapter},
             {"constant:cpp_type", &cpp_mstch_const::cpp_type},
             {"constant:has_extra_arg?", &cpp_mstch_const::has_extra_arg},
             {"constant:extra_arg", &cpp_mstch_const::extra_arg},
             {"constant:extra_arg_type", &cpp_mstch_const::extra_arg_type},
             {"constant:outline_init?", &cpp_mstch_const::outline_init},
         });
-  }
-  mstch::node enum_value() {
-    if (const_->type()->is<t_enum>()) {
-      const auto* enm = static_cast<const t_enum*>(const_->type());
-      const auto* enum_val = enm->find_value(const_->value()->get_integer());
-      if (enum_val) {
-        return enum_val->name();
-      } else {
-        return std::to_string(const_->value()->get_integer());
-      }
-    }
-    return mstch::node();
-  }
-  mstch::node cpp_adapter() {
-    if (const std::string* adapter =
-            cpp_context_->resolver().find_structured_adapter_annotation(
-                *const_)) {
-      return *adapter;
-    }
-    return {};
   }
   mstch::node cpp_type() {
     return cpp_context_->resolver().get_native_type(*const_);
@@ -2649,43 +2620,12 @@ class cpp_mstch_const_value : public mstch_const_value {
       mstch_element_position pos,
       const t_const* current_const,
       const t_type* expected_type)
-      : mstch_const_value(cv, ctx, pos, current_const, expected_type) {
-    register_methods(
-        this,
-        {
-            {"value:default_construct?",
-             &cpp_mstch_const_value::default_construct},
-            {"value:enum_value_cpp_name",
-             &cpp_mstch_const_value::enum_value_cpp_name},
-        });
-  }
+      : mstch_const_value(cv, ctx, pos, current_const, expected_type) {}
 
  private:
-  mstch::node default_construct() {
-    return is_empty_container() &&
-        !cpp_name_resolver::find_first_adapter(
-               *const_value_->get_owner()->type());
-  }
-
-  mstch::node enum_value_cpp_name() {
-    // reference: mstch_const_value::enum_value_name
-    if (type_ == cv::CV_INTEGER && const_value_->is_enum() &&
-        const_value_->get_enum_value() != nullptr) {
-      return cpp2::get_name(const_value_->get_enum_value());
-    }
-    return mstch::node();
-  }
-
   bool same_type_as_expected() const override {
     return const_value_->get_owner() &&
         same_types(expected_type_, const_value_->get_owner()->type());
-  }
-
-  bool is_empty_container() const {
-    return (const_value_->kind() == cv::CV_MAP &&
-            const_value_->get_map().empty()) ||
-        (const_value_->kind() == cv::CV_LIST &&
-         const_value_->get_list().empty());
   }
 };
 
@@ -2973,11 +2913,6 @@ void t_mstch_cpp2_generator::generate_inline_services(
 std::string t_mstch_cpp2_generator::get_cpp2_namespace(
     const t_program* program) {
   return cpp2::get_gen_namespace(*program);
-}
-
-/* static */ std::string t_mstch_cpp2_generator::get_cpp2_unprefixed_namespace(
-    const t_program* program) {
-  return cpp2::get_gen_unprefixed_namespace(*program);
 }
 
 mstch::array t_mstch_cpp2_generator::cpp_includes(const t_program* program) {

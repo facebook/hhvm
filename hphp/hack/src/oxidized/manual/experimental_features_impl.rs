@@ -23,7 +23,7 @@ impl FeatureName {
             ContextAliasDeclaration => Unstable,
             ContextAliasDeclarationShort => Preview,
             TypeConstMultipleBounds => Preview,
-            TypeConstSuperBound => Unstable,
+            TypeConstSuperBound => Preview,
             ClassConstDefault => Migration,
             MethodTraitDiamond => OngoingRelease,
             UpcastExpression => Unstable,

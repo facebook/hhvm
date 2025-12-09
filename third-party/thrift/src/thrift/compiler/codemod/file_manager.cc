@@ -193,6 +193,11 @@ std::optional<size_t> file_manager::add_include(std::string thrift_include) {
   return new_include_offset;
 }
 
+bool file_manager::has_thrift_include(
+    const std::string& thrift_include_path) const {
+  return includes_.contains(thrift_include_path);
+}
+
 void file_manager::remove_all_annotations(const t_node& node) {
   size_t begin_offset = SIZE_MAX;
   size_t end_offset = 0;

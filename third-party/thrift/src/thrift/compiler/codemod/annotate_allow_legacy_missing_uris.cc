@@ -150,8 +150,7 @@ class AnnotateAllowLegacyMissingUris final {
    * @return `true` if the annotation was added, `false` otherwise
    */
   bool annotate_package() {
-    const std::optional<size_t> maybe_new_include_offset =
-        file_manager_.add_include("thrift/annotation/thrift.thrift");
+    const std::optional<size_t> maybe_new_include_offset = maybe_add_include();
 
     const t_package& package = program_.package();
     if (package.is_explicit()) {
@@ -180,6 +179,23 @@ class AnnotateAllowLegacyMissingUris final {
            .new_content = fmt::format("\n{}\npackage;\n\n", kAnnotation)});
     }
     return true;
+  }
+
+  /**
+   * Adds any (thrift) include required for the annotation type to be available.
+   *
+   * Returns the offset at which the new include was inserted (if needed), or
+   * nullopt of no new include was added.
+   */
+  std::optional<size_t> maybe_add_include() {
+    // In www, the include path is sometimes preceded by "fbcode", handle that
+    // special case here to avoid introducing a duplicate.
+    if (file_manager_.has_thrift_include(
+            "fbcode/thrift/annotation/thrift.thrift")) {
+      return std::nullopt;
+    }
+
+    return file_manager_.add_include("thrift/annotation/thrift.thrift");
   }
 };
 

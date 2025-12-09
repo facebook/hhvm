@@ -148,6 +148,13 @@ class file_manager {
    */
   std::optional<size_t> add_include(std::string thrift_path);
 
+  /**
+   * Returns true iff the given path corresponds to a thrift include that
+   * was either present in the underlying program at file_manager construction
+   * time, or added via `add_include`.
+   */
+  bool has_thrift_include(const std::string& thrift_include_path) const;
+
   // Adds a replacement to remove the given element.
   void remove(const t_annotation& annotation);
 

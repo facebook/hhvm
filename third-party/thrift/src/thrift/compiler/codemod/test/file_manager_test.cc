@@ -187,6 +187,24 @@ struct S {}
 )");
 }
 
+TEST_F(FileManagerTest, has_thrift_include) {
+  Fixture fixture = prepare_fixture(R"(
+include "thrift/annotation/thrift.thrift"
+
+package "test.package"
+
+struct S {}
+)");
+
+  EXPECT_TRUE(fixture.file_manager_->has_thrift_include(
+      "thrift/annotation/thrift.thrift"));
+  EXPECT_FALSE(fixture.file_manager_->has_thrift_include(
+      "thrift/annotation/cpp.thrift"));
+  fixture.file_manager_->add_include("thrift/annotation/cpp.thrift");
+  EXPECT_TRUE(fixture.file_manager_->has_thrift_include(
+      "thrift/annotation/cpp.thrift"));
+}
+
 TEST_F(FileManagerTest, add) {
   file_manager_->add({/* .begin_pos= */ 52,
                       /* .end_pos= */ 52 + "struct"sv.size(),

@@ -42,6 +42,9 @@ struct CompactTestStruct {
   13: i16 i16_test;
   14: i32 i32_test;
   15: byte byte_test;
+  16: map<i32, string> empty_map;
+  17: map<i32, string> null_map;
+  18: map<i32, map<i32, string>> map_to_map;
   3681: string s;
 }
 

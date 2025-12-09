@@ -64,6 +64,9 @@ final class SerializationTest extends WWWTest {
     $v->i32_test = 3;
     $v->byte_test = 4;
     $v->s = 'xyz';
+    $v->empty_map = dict[];
+    $v->null_map = null;
+    $v->map_to_map = dict[1 => dict[2 => "3"], 2 => dict[2 => ""]];
 
     $this->testValue = $v;
 
@@ -75,6 +78,11 @@ final class SerializationTest extends WWWTest {
     $this->compactSerializedNoExtension =
       TCompactSerializer::serialize($v, null, true);
     $this->binarySerializedNoExtension = TBinarySerializer::serialize($v, true);
+  }
+
+  public function testToFromShape(): void {
+    expect(CompactTestStruct::__fromShape($this->testValue->__toShape()))
+      ->toBePHPEqual($this->testValue);
   }
 
   public function testCompactSerialize(): void {
@@ -411,5 +419,100 @@ final class SerializationTest extends WWWTest {
 
     expect($bytes1)->toBePHPEqual($bytes2);
     expect(Str\length($bytes1) + 1)->toBePHPEqual(Str\length($bytes3));
+  }
+
+  public function testDeserializeCompactMapData(): void {
+    foreach (vec[true, false] as $disable_hphp_extension) {
+      // Test deserialization of a map with one element (key: 1, value: "a")
+      $start = "0";
+      $type_code = "b";
+      $field_id = "20";
+      $length = "01";
+      $map_key_type = "5";
+      $map_value_type = "8";
+      $key1 = "02";
+      $value1_length = "01";
+      $value1_payload = "61";
+      $stop = "00";
+
+      $encoded_single_element_map = $start.
+        $type_code.
+        $field_id.
+        $length.
+        $map_key_type.
+        $map_value_type.
+        $key1.
+        $value1_length.
+        $value1_payload.
+        $stop;
+
+      $serialized_single_element_map =
+        PHP\pack('H*', $encoded_single_element_map);
+      $result = TCompactSerializer::deserialize(
+        $serialized_single_element_map,
+        CompactTestStruct::withDefaultValues(),
+        null,
+        $disable_hphp_extension,
+      );
+      expect(($result->empty_map as nonnull)[1])->toEqual("a");
+
+      // Test deserialization of an empty map (length: 0)
+      $zero_length = "00";
+      $encoded_empty_map = $start.$type_code.$field_id.$zero_length.$stop;
+      $serialized_empty_map = PHP\pack('H*', $encoded_empty_map);
+      $result_empty = TCompactSerializer::deserialize(
+        $serialized_empty_map,
+        CompactTestStruct::withDefaultValues(),
+        null,
+        $disable_hphp_extension,
+      );
+      expect($result_empty->empty_map)->toNotBeNull();
+    }
+  }
+
+  public function testDeserializeBinaryMapData(): void {
+    foreach (vec[true, false] as $disable_hphp_extension) {
+      // Test deserialization of a map with one element (key: 1, value: "a")
+      $type_code = "0d";
+      $field_id = "0010";
+      $length = "00000001";
+      $map_key_type = "08";
+      $map_value_type = "0b";
+      $key1 = "00000001";
+      $value1_length = "00000001";
+      $value1_payload = "61";
+      $stop = "00";
+
+      $encoded_single_element_map = $type_code.
+        $field_id.
+        $map_key_type.
+        $map_value_type.
+        $length.
+        $key1.
+        $value1_length.
+        $value1_payload.
+        $stop;
+
+      $serialized_single_element_map =
+        PHP\pack('H*', $encoded_single_element_map);
+      $result = TBinarySerializer::deserialize(
+        $serialized_single_element_map,
+        CompactTestStruct::withDefaultValues(),
+        $disable_hphp_extension,
+      );
+      expect(($result->empty_map as nonnull)[1])->toEqual("a");
+
+      // Test deserialization of an empty map (length: 0)
+      $zero_length = "00000000";
+      $encoded_empty_map =
+        $type_code.$field_id.$map_key_type.$map_value_type.$zero_length.$stop;
+      $serialized_empty_map = PHP\pack('H*', $encoded_empty_map);
+      $result_empty = TBinarySerializer::deserialize(
+        $serialized_empty_map,
+        CompactTestStruct::withDefaultValues(),
+        $disable_hphp_extension,
+      );
+      expect($result_empty->empty_map)->toNotBeNull();
+    }
   }
 }

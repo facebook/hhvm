@@ -17,7 +17,7 @@ class C {
   // CHECK:   n2: *HackMixed = load &$c
   // CHECK:   n3: *HackMixed = load &$this
   // CHECK:   n4 = n3.?.myfn2(n0, n1, n2)
-  // CHECK:   ret n4
+  // CHECK:   ret none n4
   // CHECK: }
 
   // TEST-CHECK-BAL: define .wrapper C.myfn2
@@ -34,7 +34,7 @@ class C {
   // CHECK:   n2: *HackMixed = load &$c
   // CHECK:   n3: *HackMixed = load &$this
   // CHECK:   n4 = n3.?.myfn2(n0, n1, n2)
-  // CHECK:   ret n4
+  // CHECK:   ret none n4
   // CHECK: }
 
   // TEST-CHECK-BAL: define C.myfn2
@@ -49,7 +49,7 @@ class C {
   // CHECK: // .column 5
   // CHECK:   n3 = $root.printf(null, $builtins.hack_string("%d %d %d\n"), n0, n1, n2)
   // CHECK: // .column 4
-  // CHECK:   ret null
+  // CHECK:   ret none null
   // CHECK: }
   public function myfn2(int $a, int $b = 1, int $c = 2): void {
     printf("%d %d %d\n", $a, $b, $c);
@@ -71,7 +71,7 @@ class C {
 // CHECK:   n1: *HackMixed = load &$b
 // CHECK:   n2: *HackMixed = load &$c
 // CHECK:   n3 = $root.myfn(null, n0, n1, n2)
-// CHECK:   ret n3
+// CHECK:   ret none n3
 // CHECK: }
 
 // TEST-CHECK-BAL: define .wrapper $root.myfn
@@ -87,7 +87,7 @@ class C {
 // CHECK:   n1: *HackMixed = load &$b
 // CHECK:   n2: *HackMixed = load &$c
 // CHECK:   n3 = $root.myfn(null, n0, n1, n2)
-// CHECK:   ret n3
+// CHECK:   ret none n3
 // CHECK: }
 
 // TEST-CHECK-BAL: define $root.myfn
@@ -102,7 +102,7 @@ class C {
 // CHECK: // .column 3
 // CHECK:   n3 = $root.printf(null, $builtins.hack_string("%d %d %d\n"), n0, n1, n2)
 // CHECK: // .column 2
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 function myfn(int $a, int $b = 1, int $c = 2): void {
   printf("%d %d %d\n", $a, $b, $c);

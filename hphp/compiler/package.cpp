@@ -221,7 +221,7 @@ createSymlinkWrapper(const std::string& fileName,
          << "  FCallFuncD <> 0 1 \"\" \"\" - \"\" \"" << escapedName << "\"\n"
          << "  PopC\n"
          << "  Null\n"
-         << "  RetC\n"
+         << "  RetC None\n"
          << "}\n\n";
       break;
     }

@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/jit/irgen-types.h"
 
 #include "hphp/util/configs/hhir.h"
 
@@ -234,7 +235,21 @@ IRSPRelOffset offsetToReturnSlot(IRGS& env) {
   return *fpOff + kArRetOff / int32_t{sizeof(TypedValue)};
 }
 
-void emitRetC(IRGS& env) {
+void emitVerify(IRGS& env, HPHP::VerifyKind kind, int32_t ind) {
+  switch(kind) {
+    case HPHP::VerifyKind::All:
+      verifyRetType(env, TypeConstraint::ReturnId, ind, false);
+      break;
+    case HPHP::VerifyKind::NonNull:
+      verifyRetType(env, TypeConstraint::ReturnId, ind, true);
+      break;
+    case HPHP::VerifyKind::None:
+      return;
+  }
+}
+
+void emitRetC(IRGS& env, HPHP::VerifyKind kind) {
+  emitVerify(env, kind, 0);
   if (isInlining(env)) {
     assertx(resumeMode(env) == ResumeMode::None);
     retFromInlined(env);
@@ -243,11 +258,12 @@ void emitRetC(IRGS& env) {
   }
 }
 
-void emitRetM(IRGS& env, uint32_t nvals) {
+void emitRetM(IRGS& env, uint32_t nvals, HPHP::VerifyKind kind) {
   assertx(resumeMode(env) == ResumeMode::None);
   assertx(!curFunc(env)->isResumable());
   assertx(nvals > 1);
 
+  emitVerify(env, kind, nvals - 1);
   if (isInlining(env)) {
     retFromInlined(env);
     return;

@@ -20,7 +20,7 @@ class D {
   // CHECK: // .column 5
   // CHECK:   n5 = $builtins.hhbc_verify_type_pred(n3, n4)
   // CHECK: // .column 5
-  // CHECK:   ret n3
+  // CHECK:   ret none n3
   // CHECK: }
   public function mop_baseh_querym_pt(): int {
     return $this->foo;
@@ -39,7 +39,7 @@ class D {
   // CHECK: // .column 5
   // CHECK:   n4 = $builtins.hhbc_verify_type_pred(n2, n3)
   // CHECK: // .column 5
-  // CHECK:   ret n2
+  // CHECK:   ret none n2
   // CHECK: }
   public function mop_basesc_querym_pt(): int {
     return D::$bar->foo;
@@ -58,7 +58,7 @@ class D {
 // CHECK: // .column 3
 // CHECK:   n3 = $builtins.hhbc_verify_type_pred(n1, n2)
 // CHECK: // .column 3
-// CHECK:   ret n1
+// CHECK:   ret none n1
 // CHECK: }
 function mop_basec_querym_pc(): int {
   return ret_c()->foo;
@@ -81,7 +81,7 @@ function mop_basec_querym_pc(): int {
 // CHECK: // .column 3
 // CHECK:   n7 = $builtins.hhbc_verify_type_pred(n5, n6)
 // CHECK: // .column 3
-// CHECK:   ret n5
+// CHECK:   ret none n5
 // CHECK: }
 function mop_basel_querym_ei(vec<int> $a): int {
   return $a[5];
@@ -105,7 +105,7 @@ function mop_basel_querym_ei(vec<int> $a): int {
 // CHECK: // .column 3
 // CHECK:   n8 = $builtins.hhbc_verify_type_pred(n6, n7)
 // CHECK: // .column 3
-// CHECK:   ret n6
+// CHECK:   ret none n6
 // CHECK: }
 function mop_basel_querym_ei_isset(vec<int> $a): bool {
   return isset($a[5]);
@@ -124,7 +124,7 @@ function mop_basel_querym_ei_isset(vec<int> $a): bool {
 // CHECK: // .column 3
 // CHECK:   n4 = $builtins.hhbc_verify_type_pred(n2, n3)
 // CHECK: // .column 3
-// CHECK:   ret n2
+// CHECK:   ret none n2
 // CHECK: }
 function mop_basel_querym_pc(C $a): int {
   return $a->{ret_str()};
@@ -145,7 +145,7 @@ function mop_basel_querym_pc(C $a): int {
 // CHECK: // .column 3
 // CHECK:   n4 = $builtins.hhbc_verify_type_pred(n2, n3)
 // CHECK: // .column 3
-// CHECK:   ret n2
+// CHECK:   ret none n2
 // CHECK: }
 function mop_basel_querym_pl(C $a): int {
   $b = "hello";
@@ -170,7 +170,7 @@ function mop_basel_querym_pl(C $a): int {
 // CHECK: // .column 3
 // CHECK:   n7 = $builtins.hhbc_verify_type_pred(n5, n6)
 // CHECK: // .column 3
-// CHECK:   ret n5
+// CHECK:   ret none n5
 // CHECK: }
 function mop_basel_querym_el(vec<int> $a, int $b): int {
   return $a[$b];
@@ -193,7 +193,7 @@ function mop_basel_querym_el(vec<int> $a, int $b): int {
 // CHECK: // .column 3
 // CHECK:   n7 = $builtins.hhbc_verify_type_pred(n5, n6)
 // CHECK: // .column 3
-// CHECK:   ret n5
+// CHECK:   ret none n5
 // CHECK: }
 function mop_basel_querym_et(dict<string, int> $a): int {
   return $a["hello"];
@@ -210,7 +210,7 @@ function mop_basel_querym_et(dict<string, int> $a): int {
 // CHECK: // .column 3
 // CHECK:   n3 = $builtins.hhbc_verify_type_pred(n1, n2)
 // CHECK: // .column 3
-// CHECK:   ret n1
+// CHECK:   ret none n1
 // CHECK: }
 function mop_basel_querym_pt(C $a): int {
   return $a->foo;
@@ -242,7 +242,7 @@ function mop_basel_querym_pt(C $a): int {
 // CHECK: // .column 3
 // CHECK:   n5 = $builtins.hhbc_verify_type_pred(n1, n4)
 // CHECK: // .column 3
-// CHECK:   ret n1
+// CHECK:   ret none n1
 // CHECK: }
 function mop_basel_querym_qt(?C $a): ?int {
   return $a?->foo;
@@ -262,7 +262,7 @@ function mop_basel_querym_qt(?C $a): ?int {
 // CHECK:   n5 = $builtins.hack_array_cow_append(n4, n3)
 // CHECK:   store &$a <- n5: *HackMixed
 // CHECK: // .column 2
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 function mop_basel_setm_w(vec<int> $a): void {
   $a[] = 5;
@@ -289,7 +289,7 @@ function mop_basel_setm_w(vec<int> $a): void {
 // CHECK: // .column 3
 // CHECK:   n10 = $builtins.hhbc_verify_type_pred(n5, n9)
 // CHECK: // .column 3
-// CHECK:   ret n5
+// CHECK:   ret none n5
 // CHECK: }
 function mop_basel_incdec_ei(vec<int> $a): int {
   /* HH_FIXME[1002] Assignment as expression */
@@ -310,7 +310,7 @@ function mop_basel_incdec_ei(vec<int> $a): int {
 // CHECK:   n5 = $builtins.hack_array_cow_unset(n4, n3)
 // CHECK:   store &$a <- n5: *HackMixed
 // CHECK: // .column 2
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 function mop_basel_unset_ei(dict<int, int> $a): void {
   unset($a[5]);
@@ -323,7 +323,7 @@ function mop_basel_unset_ei(dict<int, int> $a): void {
 // CHECK:   n0: *HackMixed = load &$a
 // CHECK:   store n0.?.foo <- null: *HackMixed
 // CHECK: // .column 2
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 function mop_basel_unset_pt(C $a): void {
   /* HH_FIXME[4135] Allow unset */
@@ -347,7 +347,7 @@ function mop_basel_unset_pt(C $a): void {
 // CHECK: // .column 3
 // CHECK:   n7 = $builtins.hhbc_verify_type_pred(n5, n6)
 // CHECK: // .column 3
-// CHECK:   ret n5
+// CHECK:   ret none n5
 // CHECK: }
 function mop_basec_querym_cget(dict<string, int> $d): int {
   return $d['k'];
@@ -387,7 +387,7 @@ function mop_basec_querym_cget(dict<string, int> $d): int {
 // CHECK: // .column 3
 // CHECK:   n10 = $builtins.hhbc_verify_type_pred(n8, n9)
 // CHECK: // .column 3
-// CHECK:   ret n8
+// CHECK:   ret none n8
 // CHECK: }
 function mop_basec_querym_cgetquiet(dict<string, int> $d): int {
   return $d['k'] ?? 42;

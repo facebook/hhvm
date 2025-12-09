@@ -29,7 +29,7 @@
 // CHECK: // .column 12
 // CHECK:   store &$0 <- null: *HackMixed
 // CHECK: // .column 3
-// CHECK:   ret n4
+// CHECK:   ret none n4
 // CHECK: }
 
 // TEST-CHECK-BAL: define Closure$basic1232.__construct
@@ -41,7 +41,7 @@
 // CHECK:   n2: *HackMixed = load &b
 // CHECK:   n3: *HackMixed = load &$this
 // CHECK:   store n3.?.b <- n2: *HackMixed
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 function basic1(A $b): mixed {
   return A`${$b}`;

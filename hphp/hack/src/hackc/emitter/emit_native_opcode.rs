@@ -13,6 +13,7 @@ use hhbc::Body;
 use hhbc::Coeffects;
 use hhbc::Local;
 use hhbc::ParamEntry;
+use hhbc::VerifyKind;
 use instruction_sequence::InstrSeq;
 use instruction_sequence::instr;
 use oxidized::aast;
@@ -128,7 +129,10 @@ fn emit_generator_method(name: &str, params: &[ast::FunParam]) -> Result<InstrSe
             ));
         }
     };
-    Ok(InstrSeq::gather(vec![instrs, instr::ret_c()]))
+    Ok(InstrSeq::gather(vec![
+        instrs,
+        instr::ret_c(VerifyKind::None),
+    ]))
 }
 
 fn get_first_param_local(params: &[ast::FunParam]) -> Result<Local> {

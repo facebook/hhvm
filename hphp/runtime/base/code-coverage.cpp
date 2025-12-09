@@ -377,9 +377,7 @@ bool CodeCoverage::isCoverable(Op op) {
     case Op::VerifyOutType:
     case Op::VerifyParamType:
     case Op::VerifyParamTypeTS:
-    case Op::VerifyRetTypeC:
     case Op::VerifyRetTypeTS:
-    case Op::VerifyRetNonNullC:
     case Op::VerifyTypeTS:
     case Op::CheckClsReifiedGenericMismatch:
     case Op::CheckClsRGSoft:

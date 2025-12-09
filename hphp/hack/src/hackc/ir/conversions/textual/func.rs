@@ -27,6 +27,7 @@ use ir::MethodName;
 use ir::SpecialClsRef;
 use ir::StringId;
 use ir::ValueId;
+use ir::VerifyKind;
 use ir::instr::HasLoc;
 use ir::instr::HasLocals;
 use ir::instr::Hhbc;
@@ -342,7 +343,9 @@ fn split_default_func(orig_func: &Func, func_info: &FuncInfo<'_>) -> Option<Vec<
             };
             let iid = func.repr.alloc_instr(instr);
             block.iids.push(iid);
-            let iid = func.repr.alloc_instr(Instr::ret(iid.into(), loc));
+            let iid = func
+                .repr
+                .alloc_instr(Instr::ret(iid.into(), VerifyKind::None, loc));
             block.iids.push(iid);
 
             func.repr.alloc_bid(block)
@@ -575,7 +578,7 @@ fn write_instance_stub(
                 .try_collect()?;
 
             let call = fb.call(&target, params)?;
-            fb.ret(call)?;
+            fb.ret(call, VerifyKind::None)?;
             Ok(())
         },
     )?;
@@ -936,9 +939,9 @@ fn write_terminator(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
             // This should have been lowered.
             unreachable!();
         }
-        Terminator::Ret(vid, _) => {
+        Terminator::Ret(vid, kind, _) => {
             let sid = state.lookup_vid(vid);
-            state.fb.ret(sid)?;
+            state.fb.ret(sid, kind)?;
         }
         Terminator::Unreachable => {
             state.fb.unreachable()?;

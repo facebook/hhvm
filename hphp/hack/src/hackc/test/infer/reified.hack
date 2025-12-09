@@ -51,7 +51,7 @@ function rr_vv_nd<reify T>(int $a, int... $b): void {
 // CHECK:   n0: *HackMixed = load &$a
 // CHECK:   n1: *HackMixed = load &$b
 // CHECK:   n2 = $root.nr_nv_dd(null, n0, n1)
-// CHECK:   ret n2
+// CHECK:   ret none n2
 // CHECK: }
 
 // TEST-CHECK-1: define $root.nr_nv_dd
@@ -74,7 +74,7 @@ function nr_nv_dd(int $a, int $b = 5): void {
 // CHECK:   n1: *HackMixed = load &$b
 // CHECK:   n2: *HackMixed = load &$0ReifiedGenerics
 // CHECK:   n3 = $root.rr_nv_dd(null, n0, n1, n2)
-// CHECK:   ret n3
+// CHECK:   ret none n3
 // CHECK: }
 
 // TEST-CHECK-1: define $root.rr_nv_dd
@@ -99,7 +99,7 @@ function rr_nv_dd<reify T>(int $a, int $b = 5): void {
 // CHECK:   n2: *HackMixed = load &$b
 // CHECK:   n3: *HackMixed = load &$c
 // CHECK:   n4 = $root.nr_vv_dd(null, n1, n2, n3)
-// CHECK:   ret n4
+// CHECK:   ret none n4
 // CHECK: }
 
 // TEST-CHECK-1: define $root.nr_vv_dd
@@ -125,7 +125,7 @@ function nr_vv_dd(int $a, int $b = 5, int... $c): void {
 // CHECK:   n3: *HackMixed = load &$c
 // CHECK:   n4: *HackMixed = load &$0ReifiedGenerics
 // CHECK:   n5 = $root.rr_vv_dd(null, n1, n2, n3, n4)
-// CHECK:   ret n5
+// CHECK:   ret none n5
 // CHECK: }
 
 // TEST-CHECK-1: define $root.rr_vv_dd

@@ -4,7 +4,7 @@
 // CHECK: define $root.no_locals($this: *void, $a: .notnull *HackInt) : *void {
 // CHECK: #b0:
 // CHECK: // .column 2
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 function no_locals(int $a) : void {
 }
@@ -18,7 +18,7 @@ function no_locals(int $a) : void {
 // CHECK: // .column 3
 // CHECK:   store &$b <- $builtins.hack_int(2): *HackMixed
 // CHECK: // .column 2
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 function only_locals() : void {
   $a = 1;
@@ -34,7 +34,7 @@ function only_locals() : void {
 // CHECK: // .column 3
 // CHECK:   store &$c <- $builtins.hack_int(2): *HackMixed
 // CHECK: // .column 2
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 function params_and_locals(int $a) : void {
   $b = 1;
@@ -135,7 +135,7 @@ function params_and_locals(int $a) : void {
 // CHECK: // .column 3
 // CHECK:   store &$0 <- null: *HackMixed
 // CHECK: // .column 2
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 function locals_for_iter(dict<int, int> $d) : void {
   foreach ($d as $k => $v) {

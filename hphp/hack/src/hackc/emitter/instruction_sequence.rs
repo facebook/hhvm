@@ -206,6 +206,7 @@ pub mod instr {
     use hhbc::TypeStructEnforceKind;
     use hhbc::TypeStructResolveOp;
     use hhbc::TypedValue;
+    use hhbc::VerifyKind;
 
     use crate::InstrSeq;
 

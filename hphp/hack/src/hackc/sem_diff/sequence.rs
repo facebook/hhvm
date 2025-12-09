@@ -263,7 +263,7 @@ fn is_cow_instr(instr: &NodeInstr) -> bool {
             | Opcode::Nop
             | Opcode::JmpNZ(..)
             | Opcode::JmpZ(..)
-            | Opcode::RetC
+            | Opcode::RetC(..)
             | Opcode::RetCSuspended
             | Opcode::RetM(..)
             | Opcode::SSwitch { .. }
@@ -358,8 +358,6 @@ fn is_cow_instr(instr: &NodeInstr) -> bool {
             Opcode::VerifyOutType(..)
             | Opcode::VerifyParamType(..)
             | Opcode::VerifyParamTypeTS(..)
-            | Opcode::VerifyRetNonNullC
-            | Opcode::VerifyRetTypeC
             | Opcode::VerifyRetTypeTS
             | Opcode::VerifyTypeTS,
         ) => false,

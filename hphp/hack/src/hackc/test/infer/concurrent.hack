@@ -49,7 +49,7 @@ namespace Concurrent {
   // CHECK: // .column 5
   // CHECK:   n10 = $builtins.hhbc_verify_type_pred(n8, n9)
   // CHECK: // .column 5
-  // CHECK:   ret n8
+  // CHECK:   ret none n8
   // CHECK: }
   async function genTest1(): Awaitable<string> {
     concurrent {
@@ -71,7 +71,7 @@ namespace Concurrent {
   // CHECK:   n2 = $root.Concurrent::genVoid2(null)
   // CHECK:   n3 = $builtins.hhbc_await(n2)
   // CHECK: // .column 4
-  // CHECK:   ret null
+  // CHECK:   ret none null
   // CHECK: }
   async function genTest2(): Awaitable<void> {
     concurrent {
@@ -135,7 +135,7 @@ namespace Concurrent {
   // CHECK: // .column 5
   // CHECK:   n17 = $builtins.hhbc_verify_type_pred(n15, n16)
   // CHECK: // .column 5
-  // CHECK:   ret n15
+  // CHECK:   ret none n15
   // CHECK: }
   async function genTest3(): Awaitable<int> {
     concurrent {
@@ -195,7 +195,7 @@ namespace Concurrent {
   // CHECK: // .column 5
   // CHECK:   n11 = $builtins.hhbc_verify_type_pred(n9, n10)
   // CHECK: // .column 5
-  // CHECK:   ret n9
+  // CHECK:   ret none n9
   // CHECK: }
   async function genTest4(): Awaitable<string> {
     concurrent {

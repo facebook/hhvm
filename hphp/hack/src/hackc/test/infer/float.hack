@@ -32,7 +32,7 @@
 // CHECK: // .column 3
 // CHECK:   n14 = $root.printf(null, $builtins.hack_string("%f\n"), $builtins.hack_float(-5e-324))
 // CHECK: // .column 2
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 function basic(): void {
   // Some "named" floats.

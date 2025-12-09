@@ -217,7 +217,7 @@ impl LocalInfo {
             | Opcode::ResolveRClsMethodD(..)
             | Opcode::ResolveRClsMethodS(..)
             | Opcode::ResolveRFunc(..)
-            | Opcode::RetC
+            | Opcode::RetC(..)
             | Opcode::RetCSuspended
             | Opcode::RetM(..)
             | Opcode::SSwitch { .. }
@@ -247,8 +247,6 @@ impl LocalInfo {
             | Opcode::VerifyOutType(..)
             | Opcode::VerifyParamType(..)
             | Opcode::VerifyParamTypeTS(..)
-            | Opcode::VerifyRetNonNullC
-            | Opcode::VerifyRetTypeC
             | Opcode::VerifyRetTypeTS
             | Opcode::VerifyTypeTS
             | Opcode::WHResult

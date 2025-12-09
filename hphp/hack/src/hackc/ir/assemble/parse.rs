@@ -48,6 +48,7 @@ use ir_core::TypeInfo;
 use ir_core::TypeStructEnforceKind;
 use ir_core::TypeStructResolveOp;
 use ir_core::TypedValue;
+use ir_core::VerifyKind;
 use ir_core::Visibility;
 use parse_macro_ir::parse;
 
@@ -844,6 +845,17 @@ pub(crate) fn parse_visibility(tokenizer: &mut Tokenizer<'_>) -> Result<Visibili
         _ => vis1,
     };
     Ok(vis)
+}
+
+pub(crate) fn parse_verify_kind(tokenizer: &mut Tokenizer<'_>) -> Result<VerifyKind> {
+    parse_enum(tokenizer, "VerifyKind", |id| {
+        Some(match id {
+            "none" => VerifyKind::None,
+            "all" => VerifyKind::All,
+            "nonnull" => VerifyKind::NonNull,
+            _ => return None,
+        })
+    })
 }
 
 fn str_to_visibility_fn() -> impl FnOnce(&str) -> Option<Visibility> {

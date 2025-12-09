@@ -9,7 +9,7 @@
 // CHECK: #b0:
 // CHECK:   n0 = __sil_allocate(<E>)
 // CHECK:   n1 = E._86pinit(n0)
-// CHECK:   ret n0
+// CHECK:   ret none n0
 // CHECK: }
 
 // TEST-CHECK-BAL: define E$static._86constinit
@@ -19,7 +19,7 @@
 // CHECK:   n1 = HH::BuiltinEnumClass$static._86constinit(n0)
 // CHECK:   n2 = $builtins.hhbc_class_get_c($builtins.hack_string("E"))
 // CHECK:   n3 = $builtins.hack_set_static_prop($builtins.hack_string("E"), $builtins.hack_string("A"), $builtins.hack_int(42))
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 
 // TEST-CHECK-BAL: define E._86pinit
@@ -27,7 +27,7 @@
 // CHECK: #b0:
 // CHECK:   n0: *E = load &$this
 // CHECK:   n1 = HH::BuiltinEnumClass._86pinit(n0)
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 
 // TEST-CHECK-BAL: define E$static._86sinit
@@ -38,7 +38,7 @@
 // CHECK:   n2: *E$static = load &$this
 // CHECK:   n3 = E$static._86constinit(n2)
 // CHECK:   n4 = $builtins.hhbc_class_get_c($builtins.hack_string("E"))
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 
 enum class E: int {
@@ -80,7 +80,7 @@ enum class E: int {
 // CHECK:   jmp b3
 // CHECK: #b3:
 // CHECK: // .column 2
-// CHECK:   ret null
+// CHECK:   ret none null
 // CHECK: }
 function foo(\HH\EnumClass\Label<E, int> $label): void {
   if ($label === E#A) {

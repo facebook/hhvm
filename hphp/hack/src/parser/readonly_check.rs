@@ -345,7 +345,6 @@ fn is_special_builtin(f_name: &str) -> bool {
         specifically, these:
         "array_key_exists" => Some((2, IMisc(AKExists))),
         "intval" => Some((1, IOp(CastInt))),
-        "boolval" => Some((1, IOp(CastBool))),
         "strval" => Some((1, IOp(CastString))),
         "floatval" | "doubleval" => Some((1, IOp(CastDouble))),
         "HH\\global_get" => Some((1, IGet(CGetG))),

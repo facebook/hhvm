@@ -3118,7 +3118,6 @@ fn get_call_builtin_func_info(e: &mut Emitter, id: impl AsRef<str>) -> Option<(u
         "array_key_exists" => Some((2, Instruct::Opcode(Opcode::AKExists))),
         "hphp_array_idx" => Some((3, Instruct::Opcode(Opcode::ArrayIdx))),
         "intval" => Some((1, Instruct::Opcode(Opcode::CastInt))),
-        "boolval" => Some((1, Instruct::Opcode(Opcode::CastBool))),
         "HH\\legacy_is_truthy" => Some((1, Instruct::Opcode(Opcode::CastBool))),
         "strval" => Some((1, Instruct::Opcode(Opcode::CastString))),
         "floatval" | "doubleval" => Some((1, Instruct::Opcode(Opcode::CastDouble))),

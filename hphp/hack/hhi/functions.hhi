@@ -71,8 +71,6 @@ namespace {
   function floatval(HH\FIXME\MISSING_PARAM_TYPE $v)[]: float;
   <<__PHPStdLib>>
   function strval(HH\FIXME\MISSING_PARAM_TYPE $v)[]: string;
-  <<__PHPStdLib>>
-  function boolval(HH\FIXME\MISSING_PARAM_TYPE $v)[]: bool;
 
   <<__PHPStdLib>>
   function get_class_constants(string $class_name)[]: darray<string, mixed>;

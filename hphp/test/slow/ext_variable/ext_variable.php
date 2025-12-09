@@ -103,18 +103,6 @@ function main_ext_variable() :mixed{
 
   VS(strval(123), "123");
 
-  VS(boolval(0), false);
-  VS(boolval(42), true);
-  VS(boolval(0.0), false);
-  VS(boolval(4.2), true);
-  VS(boolval(""), false);
-  VS(boolval("string"), true);
-  VS(boolval("0"), false);
-  VS(boolval("1"), true);
-  VS(boolval(vec[1, 2]), true);
-  VS(boolval(vec[]), false);
-  VS(boolval(new stdClass), true);
-
   $obj = new stdClass;
   $obj->name = "value";
   VS(serialize($obj), "O:8:\"stdClass\":1:{s:4:\"name\";s:5:\"value\";}");

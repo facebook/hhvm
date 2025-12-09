@@ -90,9 +90,6 @@ function gettype(readonly mixed $v)[]: string;
 <<__IsFoldable, __Native>>
 function get_resource_type(resource $handle)[]: string;
 
-<<__IsFoldable, __Native>>
-function boolval(mixed $var)[]: bool;
-
 /* Returns the integer value of var, using the specified base for the
  * conversion (the default is base 10). intval() should not be used on
  * objects, as doing so will emit an E_NOTICE level error and return 1.

@@ -28,7 +28,7 @@ function test_protocol_version(): int {
   return intval(getenv("LDAP_TEST_OPT_PROTOCOL_VERSION") ?: "3");
 }
 function test_skip_on_bind_failure(): bool {
-  return boolval(getenv("LDAP_TEST_SKIP_BIND_FAILURE") ?: "1");
+  return HH\legacy_is_truthy(getenv("LDAP_TEST_SKIP_BIND_FAILURE") ?: "1");
 }
 
 function ldap_connect_and_bind(

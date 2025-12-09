@@ -69,10 +69,6 @@ String HHVM_FUNCTION(get_resource_type, const OptResource& handle) {
   return handle->o_getResourceName();
 }
 
-bool HHVM_FUNCTION(boolval, const Variant& v) {
-  return v.toBoolean();
-}
-
 int64_t HHVM_FUNCTION(intval, const Variant& v, int64_t base /* = 10 */) {
   return v.toInt64(base);
 }
@@ -704,7 +700,6 @@ void StandardExtension::registerNativeVariable() {
   HHVM_FALIAS(HH\\is_meth_caller, HH_is_meth_caller);
   HHVM_FE(is_object);
   HHVM_FE(is_resource);
-  HHVM_FE(boolval);
   HHVM_FE(intval);
   HHVM_FE(floatval);
   HHVM_FALIAS(doubleval, floatval);

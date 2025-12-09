@@ -194,3 +194,178 @@ TEST_F(CAresResolverTest, TestParseTxtRecords) {
   res = proxygen::detail::parseTxtRecords(&GARBAGE[0], sizeof(GARBAGE));
   EXPECT_TRUE(res.hasError());
 }
+
+// Mock resolver that simulates the CNAME path where:
+// 1. First query returns a CNAME response (triggers checkForCName)
+// 2. Second query (the recursive CNAME lookup) completes synchronously,
+//    causing the Query to be deleted
+// This tests the fix for the heap-use-after-free bug where we accessed
+// self->resolver_ after self was deleted in checkForCName.
+class CNameMockResolver : public CAresResolver {
+ public:
+  using CAresResolver::CAresResolver;
+
+  void query(const std::string& /*name*/,
+             RecordType /*type*/,
+             ares_callback cb,
+             void* data) override {
+    queryCount_++;
+    if (queryCount_ == 1) {
+      // First query: return a CNAME response.
+      // This is a minimal valid A record response with a CNAME but no A
+      // records. The response has h_name = "cname.example.com" which differs
+      // from the original query, triggering checkForCName.
+      cb(data, ARES_SUCCESS, 0, cnameResponse_, sizeof(cnameResponse_));
+    } else {
+      // Second query (from checkForCName): return ARES_ENODATA.
+      // This triggers succeed({}) which deletes the Query object.
+      // After this callback returns, checkForCName tries to access
+      // self->resolver_ which is the bug we're testing.
+      cb(data, ARES_ENODATA, 0, nullptr, 0);
+    }
+  }
+
+  void queryFinished() override {
+    queryFinishedCount_++;
+  }
+
+  int queryFinishedCount() const {
+    return queryFinishedCount_;
+  }
+
+ private:
+  ~CNameMockResolver() override = default;
+
+  int queryCount_ = 0;
+  int queryFinishedCount_ = 0;
+
+  // Minimal DNS A record response with CNAME but no A records.
+  // This is crafted to make ares_parse_a_reply return:
+  // - status = ARES_SUCCESS
+  // - nttls = 0 (no A records)
+  // - host->h_name = "cname.example.com" (different from query name)
+  //
+  // DNS Response format:
+  // - Header (12 bytes)
+  // - Question section
+  // - Answer section with CNAME record only (no A records)
+  //
+  // Transaction ID: 0x1234
+  // Flags: 0x8180 (standard response, no error)
+  // Questions: 1, Answers: 1, Authority: 0, Additional: 0
+  unsigned char cnameResponse_[78] = {
+      // Header
+      0x12,
+      0x34, // Transaction ID
+      0x81,
+      0x80, // Flags: Standard response, no error
+      0x00,
+      0x01, // Questions: 1
+      0x00,
+      0x01, // Answer RRs: 1 (CNAME record)
+      0x00,
+      0x00, // Authority RRs: 0
+      0x00,
+      0x00, // Additional RRs: 0
+
+      // Question: original.example.com, type A, class IN
+      0x08,
+      'o',
+      'r',
+      'i',
+      'g',
+      'i',
+      'n',
+      'a',
+      'l', // "original"
+      0x07,
+      'e',
+      'x',
+      'a',
+      'm',
+      'p',
+      'l',
+      'e', // "example"
+      0x03,
+      'c',
+      'o',
+      'm',  // "com"
+      0x00, // null terminator
+      0x00,
+      0x01, // Type: A
+      0x00,
+      0x01, // Class: IN
+
+      // Answer: CNAME record pointing to cname.example.com
+      0xc0,
+      0x0c, // Name: pointer to offset 12 (original.example.com)
+      0x00,
+      0x05, // Type: CNAME (5)
+      0x00,
+      0x01, // Class: IN
+      0x00,
+      0x00,
+      0x0e,
+      0x10, // TTL: 3600
+      0x00,
+      0x13, // Data length: 19 bytes
+
+      // CNAME target: cname.example.com
+      0x05,
+      'c',
+      'n',
+      'a',
+      'm',
+      'e', // "cname"
+      0x07,
+      'e',
+      'x',
+      'a',
+      'm',
+      'p',
+      'l',
+      'e', // "example"
+      0x03,
+      'c',
+      'o',
+      'm', // "com"
+      0x00 // null terminator
+  };
+};
+
+// Test the CNAME path that had the UAF bug.
+// When checkForCName issues a recursive query and that query completes
+// synchronously (deleting self), we must not access self->resolver_ afterward.
+TEST_F(CAresResolverTest, CheckForCNameSynchronousCallbackNoUAF) {
+  // Create a resolver that simulates the CNAME scenario
+  std::unique_ptr<CNameMockResolver, DelayedDestruction::Destructor>
+      cnameResolver(new CNameMockResolver());
+
+  TraceEvent te(TraceEventType::DnsResolution);
+  TimeUtil timeUtil;
+  auto cb = std::make_unique<MockResolutionCallback>();
+
+  // Create a Query for an A record lookup with the name that matches
+  // the question in our crafted CNAME response.
+  auto* query = new MockQuery(cnameResolver.get(),
+                              CAresResolver::RecordType::kA,
+                              "original.example.com",
+                              false,
+                              std::move(te),
+                              &timeUtil,
+                              std::move(teContext));
+
+  // Call resolve with timeout=0 to skip timeout scheduling.
+  // This triggers:
+  // 1. query() -> first callback with CNAME response
+  // 2. queryCallback() parses response, sees nttls=0, calls checkForCName()
+  // 3. checkForCName() calls query() for CNAME target
+  // 4. Second query() -> callback with ARES_ENODATA -> succeed() -> delete this
+  // 5. checkForCName() tries to access self->resolver_ (the bug!)
+  //
+  // The test passes if we get here without ASAN detecting a use-after-free.
+  query->resolve(cb.get(), std::chrono::milliseconds(0));
+
+  // Verify queryFinished was called twice (once for each query)
+  EXPECT_EQ(cnameResolver->queryFinishedCount(), 2);
+}

@@ -212,10 +212,12 @@ void CAresResolver::Query::checkForCName(Query* self, hostent* host) {
       return;
     }
 
+    // Copy the resolver pointer before calling query() since self may be been
+    // destructed synchronously
     // Issue a recursive query for the cname host
-    self->resolver_->query(
-        host->h_name, self->type_, Query::queryCallback, self);
-    self->resolver_->queryFinished();
+    auto* resolver = self->resolver_;
+    resolver->query(host->h_name, self->type_, Query::queryCallback, self);
+    resolver->queryFinished();
     return;
   }
 

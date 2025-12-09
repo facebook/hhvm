@@ -457,18 +457,22 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
 
   whisker::map::raw globals(prototype_database& proto) const override {
     whisker::map::raw globals = t_mstch_generator::globals(proto);
-    // Provide global default for cpp_enable_same_program_const_referencing?
-    // Only the template for module_types.h overrides this, setting it to FALSE
+    // Global accessor for `cpp_enable_same_program_const_referencing_`.
+    // Only the template for module_types.h overrides this, setting it to FALSE,
+    // it is defaulted to TRUE for all other templates.
     // Controls whether references to consts in the current Thrift file can be
     // emitted as references, or must be inlined. By default, we can emit all
     // const usage as references.
-    // module_types.h is an exception, because module_constants.h (where const
-    // accessors are declared) depends on module_types.h, so module_types.h
-    // cannot include module_constants.h without a circular dependency.
-    // This restriction only applies within the same program - module_types.h
-    // CAN include and reference consts from other programs.
+    // See comment on render_to_file for module_types.h for more details.
     globals["cpp_enable_same_program_const_referencing?"] =
-        whisker::make::true_value;
+        whisker::dsl::make_function(
+            "cpp_enable_same_program_const_referencing?",
+            [this](whisker::dsl::function::context ctx) -> whisker::object {
+              ctx.declare_named_arguments({});
+              ctx.declare_arity(0);
+              return whisker::make::boolean(
+                  cpp_enable_same_program_const_referencing_);
+            });
     globals["cpp_fatal_string_id"] = whisker::dsl::make_function(
         "cpp_fatal_string_id",
         [](whisker::dsl::function::context ctx) -> whisker::object {
@@ -685,6 +689,7 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
 
   std::shared_ptr<cpp2_generator_context> cpp_context_;
   std::unordered_map<std::string, int32_t> client_name_to_split_count_;
+  bool cpp_enable_same_program_const_referencing_ = true;
 };
 
 class cpp_mstch_program : public mstch_program {
@@ -2778,7 +2783,17 @@ void t_mstch_cpp2_generator::generate_structs(const t_program* program) {
 
   render_to_file(prog, "module_data.h", name + "_data.h");
   render_to_file(prog, "module_data.cpp", name + "_data.cpp");
+
+  // module_types.h is an exception to same program const referencing, because
+  // module_constants.h (where const accessors are declared) depends on
+  // module_types.h, so module_types.h cannot include module_constants.h without
+  // a circular dependency. This restriction only applies within the same
+  // program - module_types.h CAN include and reference consts from other
+  // programs.
+  cpp_enable_same_program_const_referencing_ = false;
   render_to_file(prog, "module_types.h", name + "_types.h");
+  cpp_enable_same_program_const_referencing_ = true;
+
   render_to_file(prog, "module_types_fwd.h", name + "_types_fwd.h");
   render_to_file(prog, "module_types.tcc", name + "_types.tcc");
 

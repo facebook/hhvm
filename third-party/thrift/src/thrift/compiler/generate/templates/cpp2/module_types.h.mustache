@@ -16,14 +16,6 @@
 
 }}
 {{#import "types/schema_association" as schema_association}}
-{{! Disable const referencing for consts defined within this program.
-
-  module_constants.h (where const accessors are declared) depends on
-  module_types.h, so module_types.h cannot include module_constants.h without a
-  circular dependency. Consts declared in this program's module_constants.h must
-  therefore be inlined within module_types.h
-}}
-{{#let cpp_enable_same_program_const_referencing? = false}}
 {{> Autogen}}
 
 #pragma once

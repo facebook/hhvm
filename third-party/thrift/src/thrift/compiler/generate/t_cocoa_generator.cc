@@ -222,7 +222,7 @@ class t_cocoa_generator : public t_concat_generator {
   std::string cocoa_thrift_imports();
   std::string custom_thrift_marker();
   std::string type_name(const t_type* ttype, bool class_ref = false);
-  std::string base_type_name(t_primitive_type* tbase);
+  std::string base_type_name(const t_primitive_type& tbase);
   std::string declare_field(const t_field* tfield);
   std::string declare_property(const t_field* tfield);
   std::string function_signature(const t_function* tfunction) {
@@ -2665,7 +2665,7 @@ std::string t_cocoa_generator::type_name(const t_type* ttype, bool class_ref) {
 
   std::string result;
   if (auto* primitive = ttype->try_as<t_primitive_type>()) {
-    return base_type_name(const_cast<t_primitive_type*>(primitive));
+    return base_type_name(*primitive);
   } else if (ttype->is<t_map>()) {
     result = "TBaseStructDictionary";
   } else if (ttype->is<t_set>()) {
@@ -2690,8 +2690,8 @@ std::string t_cocoa_generator::type_name(const t_type* ttype, bool class_ref) {
  *
  * @param tbase The base type
  */
-std::string t_cocoa_generator::base_type_name(t_primitive_type* type) {
-  switch (type->primitive_type()) {
+std::string t_cocoa_generator::base_type_name(const t_primitive_type& type) {
+  switch (type.primitive_type()) {
     case t_primitive_type::type::t_void:
       return "void";
     case t_primitive_type::type::t_string:
@@ -2712,7 +2712,7 @@ std::string t_cocoa_generator::base_type_name(t_primitive_type* type) {
       return "double";
     default:
       throw std::runtime_error(
-          "compiler error: no Objective-C name for base type " + type->name());
+          "compiler error: no Objective-C name for base type " + type.name());
   }
 }
 

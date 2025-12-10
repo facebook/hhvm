@@ -3540,8 +3540,7 @@ string t_java_deprecated_generator::type_name(
   string prefix;
 
   if (auto* primitive = ttype->try_as<t_primitive_type>()) {
-    return base_type_name(
-        const_cast<t_primitive_type*>(primitive), in_container);
+    return base_type_name(*primitive, in_container);
   } else if (const t_map* map = ttype->try_as<t_map>()) {
     const t_map* tmap = map;
     if (in_init) {
@@ -3596,9 +3595,9 @@ string t_java_deprecated_generator::type_name(
  * @param container Is it going in a Java container?
  */
 string t_java_deprecated_generator::base_type_name(
-    t_primitive_type* type, bool in_container) {
+    const t_primitive_type& type, bool in_container) {
   bool boxedPrimitive = in_container || generate_boxed_primitive;
-  switch (type->primitive_type()) {
+  switch (type.primitive_type()) {
     case t_primitive_type::type::t_void:
       return "void";
     case t_primitive_type::type::t_string:
@@ -3621,7 +3620,7 @@ string t_java_deprecated_generator::base_type_name(
       return (boxedPrimitive ? "Float" : "float");
     default:
       throw std::runtime_error(
-          "compiler error: no C++ name for base type " + type->name());
+          "compiler error: no C++ name for base type " + type.name());
   }
 }
 

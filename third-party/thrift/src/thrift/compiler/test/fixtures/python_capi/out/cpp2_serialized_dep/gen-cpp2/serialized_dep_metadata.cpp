@@ -57,11 +57,6 @@ StructMetadata<::test::fixtures::python_capi::SerializedStruct>::gen(ThriftMetad
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   serialized_dep_SerializedStruct.structured_annotations()->push_back(*cvStruct("python.UseCAPI", { {"serialize", cvBool(true) } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::python_capi::SerializedStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -92,11 +87,6 @@ StructMetadata<::test::fixtures::python_capi::SerializedUnion>::gen(ThriftMetada
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   serialized_dep_SerializedUnion.structured_annotations()->push_back(*cvStruct("python.UseCAPI", { {"serialize", cvBool(true) } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::python_capi::SerializedUnion>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -127,11 +117,6 @@ StructMetadata<::test::fixtures::python_capi::SerializedError>::gen(ThriftMetada
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   serialized_dep_SerializedError.structured_annotations()->push_back(*cvStruct("python.UseCAPI", { {"serialize", cvBool(true) } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::python_capi::SerializedError>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -162,11 +147,6 @@ StructMetadata<::test::fixtures::python_capi::MarshalStruct>::gen(ThriftMetadata
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   serialized_dep_MarshalStruct.structured_annotations()->push_back(*cvStruct("python.UseCAPI", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::python_capi::MarshalStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -197,11 +177,6 @@ StructMetadata<::test::fixtures::python_capi::MarshalUnion>::gen(ThriftMetadata&
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   serialized_dep_MarshalUnion.structured_annotations()->push_back(*cvStruct("python.UseCAPI", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::python_capi::MarshalUnion>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -232,11 +207,6 @@ StructMetadata<::test::fixtures::python_capi::MarshalError>::gen(ThriftMetadata&
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   serialized_dep_MarshalError.structured_annotations()->push_back(*cvStruct("python.UseCAPI", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::python_capi::MarshalError>()
-  ));
   return res.metadata;
 }
 
@@ -270,11 +240,6 @@ void ExceptionMetadata<::test::fixtures::python_capi::SerializedError>::gen(Thri
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   serialized_dep_SerializedError.structured_annotations()->push_back(*cvStruct("python.UseCAPI", { {"serialize", cvBool(true) } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::python_capi::SerializedError>()
-  ));
 }
 void ExceptionMetadata<::test::fixtures::python_capi::MarshalError>::gen(ThriftMetadata& metadata) {
   if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
@@ -306,11 +271,6 @@ void ExceptionMetadata<::test::fixtures::python_capi::MarshalError>::gen(ThriftM
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   serialized_dep_MarshalError.structured_annotations()->push_back(*cvStruct("python.UseCAPI", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::python_capi::MarshalError>()
-  ));
 }
 } // namespace md
 } // namespace detail

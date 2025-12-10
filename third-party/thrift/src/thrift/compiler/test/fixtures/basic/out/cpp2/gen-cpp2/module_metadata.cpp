@@ -60,11 +60,6 @@ void EnumMetadata<::test::fixtures::basic::MyEnum>::gen(ThriftMetadata& metadata
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::basic::MyEnum>()
-  ));
 }
 void EnumMetadata<::test::fixtures::basic::HackEnum>::gen(ThriftMetadata& metadata) {
   if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
@@ -79,11 +74,6 @@ void EnumMetadata<::test::fixtures::basic::HackEnum>::gen(ThriftMetadata& metada
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   res.metadata.structured_annotations()->push_back(*cvStruct("hack.Name", { {"name", cvString("RenamedEnum") } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::basic::HackEnum>()
-  ));
 }
 
 const ::apache::thrift::metadata::ThriftStruct&
@@ -113,11 +103,6 @@ StructMetadata<::test::fixtures::basic::MyStruct>::gen(ThriftMetadata& metadata)
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::basic::MyStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -147,11 +132,6 @@ StructMetadata<::test::fixtures::basic::Containers>::gen(ThriftMetadata& metadat
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::basic::Containers>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -168,11 +148,6 @@ StructMetadata<::test::fixtures::basic::MyDataItem>::gen(ThriftMetadata& metadat
   DCHECK_EQ(*module_MyDataItem.is_union(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::basic::MyDataItem>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -202,11 +177,6 @@ StructMetadata<::test::fixtures::basic::MyUnion>::gen(ThriftMetadata& metadata) 
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::basic::MyUnion>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -236,11 +206,6 @@ StructMetadata<::test::fixtures::basic::MyException>::gen(ThriftMetadata& metada
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::basic::MyException>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -270,11 +235,6 @@ StructMetadata<::test::fixtures::basic::MyExceptionWithMessage>::gen(ThriftMetad
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::basic::MyExceptionWithMessage>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -305,11 +265,6 @@ StructMetadata<::test::fixtures::basic::ReservedKeyword>::gen(ThriftMetadata& me
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_ReservedKeyword.structured_annotations()->push_back(*cvStruct("hack.Name", { {"name", cvString("MyRenamedStruct") } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::basic::ReservedKeyword>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -340,11 +295,6 @@ StructMetadata<::test::fixtures::basic::UnionToBeRenamed>::gen(ThriftMetadata& m
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_UnionToBeRenamed.structured_annotations()->push_back(*cvStruct("hack.Name", { {"name", cvString("MyRenamedUnion") } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::basic::UnionToBeRenamed>()
-  ));
   return res.metadata;
 }
 
@@ -377,11 +327,6 @@ void ExceptionMetadata<::test::fixtures::basic::MyException>::gen(ThriftMetadata
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::basic::MyException>()
-  ));
 }
 void ExceptionMetadata<::test::fixtures::basic::MyExceptionWithMessage>::gen(ThriftMetadata& metadata) {
   if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
@@ -412,11 +357,6 @@ void ExceptionMetadata<::test::fixtures::basic::MyExceptionWithMessage>::gen(Thr
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::basic::MyExceptionWithMessage>()
-  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::FooService>>::gen_simple_rpc([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -428,11 +368,6 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::F
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::test::fixtures::basic::FooService>(schemaIndex)
-  ));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::FooService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -486,11 +421,6 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   [[maybe_unused]] auto module_FooServiceAnnotations = std::move(*module_FooService.structured_annotations());
   module_FooService.structured_annotations()->clear();
   module_FooService.structured_annotations()->push_back(*cvStruct("hack.Name", { {"name", cvString("RenamedService") } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *module_FooService.structured_annotations(),
-    module_FooServiceAnnotations,
-    getAnnotationTypes<::test::fixtures::basic::FooService>()
-  ));
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.FooService", std::move(module_FooService));
   context.service_name() = "module.FooService";
@@ -515,21 +445,11 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::F
   });
   auto module_FB303Service_simple_rpc_int_parameter_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   module_FB303Service_simple_rpc_int_parameter_1_type->writeAndGenType(*module_FB303Service_simple_rpc_int_parameter_1.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_FB303Service_simple_rpc_int_parameter_1.structured_annotations(),
-    module_FB303Service_simple_rpc_int_parameter_1Annotations,
-    getArgumentAnnotationTypes<::test::fixtures::basic::FB303Service>(schemaIndex, argumentIndex - 1, *func.name(), *module_FB303Service_simple_rpc_int_parameter_1.name())
-  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
   func.structured_annotations()->push_back(*cvStruct("hack.Name", { {"name", cvString("renamed_rpc") } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::test::fixtures::basic::FB303Service>(schemaIndex)
-  ));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::FB303Service>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -582,11 +502,6 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   services.emplace_back();
   [[maybe_unused]] auto module_FB303ServiceAnnotations = std::move(*module_FB303Service.structured_annotations());
   module_FB303Service.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *module_FB303Service.structured_annotations(),
-    module_FB303ServiceAnnotations,
-    getAnnotationTypes<::test::fixtures::basic::FB303Service>()
-  ));
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.FB303Service", std::move(module_FB303Service));
   context.service_name() = "module.FB303Service";
@@ -605,11 +520,6 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::M
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::test::fixtures::basic::MyService>(schemaIndex)
-  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::MyService>>::gen_getRandomData([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -621,11 +531,6 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::M
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::test::fixtures::basic::MyService>(schemaIndex)
-  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::MyService>>::gen_sink([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -640,20 +545,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::M
   DCHECK_EQ(*module_MyService_sink_sink_1.name(), "sink");
   auto module_MyService_sink_sink_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_MyService_sink_sink_1_type->writeAndGenType(*module_MyService_sink_sink_1.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_MyService_sink_sink_1.structured_annotations(),
-    module_MyService_sink_sink_1Annotations,
-    getArgumentAnnotationTypes<::test::fixtures::basic::MyService>(schemaIndex, argumentIndex - 1, *func.name(), *module_MyService_sink_sink_1.name())
-  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::test::fixtures::basic::MyService>(schemaIndex)
-  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::MyService>>::gen_putDataById([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -668,11 +563,6 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::M
   DCHECK_EQ(*module_MyService_putDataById_id_1.name(), "id");
   auto module_MyService_putDataById_id_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_MyService_putDataById_id_1_type->writeAndGenType(*module_MyService_putDataById_id_1.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_MyService_putDataById_id_1.structured_annotations(),
-    module_MyService_putDataById_id_1Annotations,
-    getArgumentAnnotationTypes<::test::fixtures::basic::MyService>(schemaIndex, argumentIndex - 1, *func.name(), *module_MyService_putDataById_id_1.name())
-  ));
   ::apache::thrift::metadata::ThriftField &module_MyService_putDataById_data_2 = func.arguments()[argumentIndex++];
   [[maybe_unused]] auto module_MyService_putDataById_data_2Annotations = std::move(*module_MyService_putDataById_data_2.structured_annotations());
   module_MyService_putDataById_data_2.structured_annotations()->clear();
@@ -680,20 +570,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::M
   DCHECK_EQ(*module_MyService_putDataById_data_2.name(), "data");
   auto module_MyService_putDataById_data_2_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   module_MyService_putDataById_data_2_type->writeAndGenType(*module_MyService_putDataById_data_2.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_MyService_putDataById_data_2.structured_annotations(),
-    module_MyService_putDataById_data_2Annotations,
-    getArgumentAnnotationTypes<::test::fixtures::basic::MyService>(schemaIndex, argumentIndex - 1, *func.name(), *module_MyService_putDataById_data_2.name())
-  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::test::fixtures::basic::MyService>(schemaIndex)
-  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::MyService>>::gen_hasDataById([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -708,20 +588,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::M
   DCHECK_EQ(*module_MyService_hasDataById_id_1.name(), "id");
   auto module_MyService_hasDataById_id_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_MyService_hasDataById_id_1_type->writeAndGenType(*module_MyService_hasDataById_id_1.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_MyService_hasDataById_id_1.structured_annotations(),
-    module_MyService_hasDataById_id_1Annotations,
-    getArgumentAnnotationTypes<::test::fixtures::basic::MyService>(schemaIndex, argumentIndex - 1, *func.name(), *module_MyService_hasDataById_id_1.name())
-  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::test::fixtures::basic::MyService>(schemaIndex)
-  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::MyService>>::gen_getDataById([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -736,20 +606,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::M
   DCHECK_EQ(*module_MyService_getDataById_id_1.name(), "id");
   auto module_MyService_getDataById_id_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_MyService_getDataById_id_1_type->writeAndGenType(*module_MyService_getDataById_id_1.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_MyService_getDataById_id_1.structured_annotations(),
-    module_MyService_getDataById_id_1Annotations,
-    getArgumentAnnotationTypes<::test::fixtures::basic::MyService>(schemaIndex, argumentIndex - 1, *func.name(), *module_MyService_getDataById_id_1.name())
-  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::test::fixtures::basic::MyService>(schemaIndex)
-  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::MyService>>::gen_deleteDataById([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -764,20 +624,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::M
   DCHECK_EQ(*module_MyService_deleteDataById_id_1.name(), "id");
   auto module_MyService_deleteDataById_id_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_MyService_deleteDataById_id_1_type->writeAndGenType(*module_MyService_deleteDataById_id_1.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_MyService_deleteDataById_id_1.structured_annotations(),
-    module_MyService_deleteDataById_id_1Annotations,
-    getArgumentAnnotationTypes<::test::fixtures::basic::MyService>(schemaIndex, argumentIndex - 1, *func.name(), *module_MyService_deleteDataById_id_1.name())
-  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::test::fixtures::basic::MyService>(schemaIndex)
-  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::MyService>>::gen_lobDataById([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -792,11 +642,6 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::M
   DCHECK_EQ(*module_MyService_lobDataById_id_1.name(), "id");
   auto module_MyService_lobDataById_id_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_MyService_lobDataById_id_1_type->writeAndGenType(*module_MyService_lobDataById_id_1.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_MyService_lobDataById_id_1.structured_annotations(),
-    module_MyService_lobDataById_id_1Annotations,
-    getArgumentAnnotationTypes<::test::fixtures::basic::MyService>(schemaIndex, argumentIndex - 1, *func.name(), *module_MyService_lobDataById_id_1.name())
-  ));
   ::apache::thrift::metadata::ThriftField &module_MyService_lobDataById_data_2 = func.arguments()[argumentIndex++];
   [[maybe_unused]] auto module_MyService_lobDataById_data_2Annotations = std::move(*module_MyService_lobDataById_data_2.structured_annotations());
   module_MyService_lobDataById_data_2.structured_annotations()->clear();
@@ -804,20 +649,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::M
   DCHECK_EQ(*module_MyService_lobDataById_data_2.name(), "data");
   auto module_MyService_lobDataById_data_2_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   module_MyService_lobDataById_data_2_type->writeAndGenType(*module_MyService_lobDataById_data_2.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_MyService_lobDataById_data_2.structured_annotations(),
-    module_MyService_lobDataById_data_2Annotations,
-    getArgumentAnnotationTypes<::test::fixtures::basic::MyService>(schemaIndex, argumentIndex - 1, *func.name(), *module_MyService_lobDataById_data_2.name())
-  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), true);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::test::fixtures::basic::MyService>(schemaIndex)
-  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::MyService>>::gen_invalid_return_for_hack([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -830,11 +665,6 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::M
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
   func.structured_annotations()->push_back(*cvStruct("hack.SkipCodegen", { {"reason", cvString("Invalid key type") } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::test::fixtures::basic::MyService>(schemaIndex)
-  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::MyService>>::gen_rpc_skipped_codegen([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -847,11 +677,6 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::M
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
   func.structured_annotations()->push_back(*cvStruct("hack.SkipCodegen", { {"reason", cvString("Skip function deprecation") } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::test::fixtures::basic::MyService>(schemaIndex)
-  ));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::MyService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -922,11 +747,6 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   services.emplace_back();
   [[maybe_unused]] auto module_MyServiceAnnotations = std::move(*module_MyService.structured_annotations());
   module_MyService.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *module_MyService.structured_annotations(),
-    module_MyServiceAnnotations,
-    getAnnotationTypes<::test::fixtures::basic::MyService>()
-  ));
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.MyService", std::move(module_MyService));
   context.service_name() = "module.MyService";
@@ -948,20 +768,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::D
   DCHECK_EQ(*module_DbMixedStackArguments_getDataByKey0_key_1.name(), "key");
   auto module_DbMixedStackArguments_getDataByKey0_key_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   module_DbMixedStackArguments_getDataByKey0_key_1_type->writeAndGenType(*module_DbMixedStackArguments_getDataByKey0_key_1.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_DbMixedStackArguments_getDataByKey0_key_1.structured_annotations(),
-    module_DbMixedStackArguments_getDataByKey0_key_1Annotations,
-    getArgumentAnnotationTypes<::test::fixtures::basic::DbMixedStackArguments>(schemaIndex, argumentIndex - 1, *func.name(), *module_DbMixedStackArguments_getDataByKey0_key_1.name())
-  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::test::fixtures::basic::DbMixedStackArguments>(schemaIndex)
-  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::DbMixedStackArguments>>::gen_getDataByKey1([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -976,20 +786,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::D
   DCHECK_EQ(*module_DbMixedStackArguments_getDataByKey1_key_1.name(), "key");
   auto module_DbMixedStackArguments_getDataByKey1_key_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   module_DbMixedStackArguments_getDataByKey1_key_1_type->writeAndGenType(*module_DbMixedStackArguments_getDataByKey1_key_1.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_DbMixedStackArguments_getDataByKey1_key_1.structured_annotations(),
-    module_DbMixedStackArguments_getDataByKey1_key_1Annotations,
-    getArgumentAnnotationTypes<::test::fixtures::basic::DbMixedStackArguments>(schemaIndex, argumentIndex - 1, *func.name(), *module_DbMixedStackArguments_getDataByKey1_key_1.name())
-  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::test::fixtures::basic::DbMixedStackArguments>(schemaIndex)
-  ));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::DbMixedStackArguments>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -1044,11 +844,6 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   services.emplace_back();
   [[maybe_unused]] auto module_DbMixedStackArgumentsAnnotations = std::move(*module_DbMixedStackArguments.structured_annotations());
   module_DbMixedStackArguments.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *module_DbMixedStackArguments.structured_annotations(),
-    module_DbMixedStackArgumentsAnnotations,
-    getAnnotationTypes<::test::fixtures::basic::DbMixedStackArguments>()
-  ));
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.DbMixedStackArguments", std::move(module_DbMixedStackArguments));
   context.service_name() = "module.DbMixedStackArguments";

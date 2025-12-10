@@ -40,11 +40,6 @@ void EnumMetadata<::facebook::thrift::test::Enum>::gen(ThriftMetadata& metadata)
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::Enum>()
-  ));
 }
 
 const ::apache::thrift::metadata::ThriftStruct&
@@ -74,11 +69,6 @@ StructMetadata<::facebook::thrift::test::Foo>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::Foo>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -109,11 +99,6 @@ StructMetadata<::facebook::thrift::test::Bar>::gen(ThriftMetadata& metadata) {
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_Bar.structured_annotations()->push_back(*cvStruct("cpp.UseOpEncode", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::Bar>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -143,11 +128,6 @@ StructMetadata<::facebook::thrift::test::Baz>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::Baz>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -178,11 +158,6 @@ StructMetadata<::facebook::thrift::test::OpEncodeStruct>::gen(ThriftMetadata& me
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_OpEncodeStruct.structured_annotations()->push_back(*cvStruct("cpp.UseOpEncode", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::OpEncodeStruct>()
-  ));
   return res.metadata;
 }
 

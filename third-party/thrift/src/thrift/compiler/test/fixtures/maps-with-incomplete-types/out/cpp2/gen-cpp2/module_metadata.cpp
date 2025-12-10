@@ -56,11 +56,6 @@ StructMetadata<::apache::thrift::test::A>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::test::A>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -90,11 +85,6 @@ StructMetadata<::apache::thrift::test::B>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::test::B>()
-  ));
   return res.metadata;
 }
 

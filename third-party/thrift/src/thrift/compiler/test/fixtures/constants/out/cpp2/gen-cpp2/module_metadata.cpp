@@ -40,11 +40,6 @@ void EnumMetadata<::cpp2::EmptyEnum>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::EmptyEnum>()
-  ));
 }
 void EnumMetadata<::cpp2::City>::gen(ThriftMetadata& metadata) {
   if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
@@ -58,11 +53,6 @@ void EnumMetadata<::cpp2::City>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::City>()
-  ));
 }
 void EnumMetadata<::cpp2::Company>::gen(ThriftMetadata& metadata) {
   if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
@@ -76,11 +66,6 @@ void EnumMetadata<::cpp2::Company>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::Company>()
-  ));
 }
 
 const ::apache::thrift::metadata::ThriftStruct&
@@ -110,11 +95,6 @@ StructMetadata<::cpp2::Internship>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::Internship>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -144,11 +124,6 @@ StructMetadata<::cpp2::Range>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::Range>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -178,11 +153,6 @@ StructMetadata<::cpp2::struct1>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::struct1>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -212,11 +182,6 @@ StructMetadata<::cpp2::struct2>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::struct2>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -246,11 +211,6 @@ StructMetadata<::cpp2::struct3>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::struct3>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -280,11 +240,6 @@ StructMetadata<::cpp2::struct4>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::struct4>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -314,11 +269,6 @@ StructMetadata<::cpp2::union1>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::union1>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -348,11 +298,6 @@ StructMetadata<::cpp2::union2>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::union2>()
-  ));
   return res.metadata;
 }
 

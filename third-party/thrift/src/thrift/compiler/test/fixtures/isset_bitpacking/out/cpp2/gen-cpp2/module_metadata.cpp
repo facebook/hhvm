@@ -57,11 +57,6 @@ StructMetadata<::cpp2::Default>::gen(ThriftMetadata& metadata) {
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_Default.structured_annotations()->push_back(*cvStruct("cpp.PackIsset", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::Default>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -92,11 +87,6 @@ StructMetadata<::cpp2::NonAtomic>::gen(ThriftMetadata& metadata) {
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_NonAtomic.structured_annotations()->push_back(*cvStruct("cpp.PackIsset", { {"atomic", cvBool(false) } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::NonAtomic>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -127,11 +117,6 @@ StructMetadata<::cpp2::Atomic>::gen(ThriftMetadata& metadata) {
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_Atomic.structured_annotations()->push_back(*cvStruct("cpp.PackIsset", { {"atomic", cvBool(true) } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::Atomic>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -162,11 +147,6 @@ StructMetadata<::cpp2::AtomicFoo>::gen(ThriftMetadata& metadata) {
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_AtomicFoo.structured_annotations()->push_back(*cvStruct("cpp.PackIsset", { {"atomic", cvBool(true) } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::AtomicFoo>()
-  ));
   return res.metadata;
 }
 

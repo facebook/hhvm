@@ -40,11 +40,6 @@ void EnumMetadata<::some::ns::EnumB>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::some::ns::EnumB>()
-  ));
 }
 
 const ::apache::thrift::metadata::ThriftStruct&
@@ -74,11 +69,6 @@ StructMetadata<::some::ns::ModuleA>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::some::ns::ModuleA>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -108,11 +98,6 @@ StructMetadata<::some::ns::ModuleB>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::some::ns::ModuleB>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -143,11 +128,6 @@ StructMetadata<::some::ns::detail::DirectlyAdapted>::gen(ThriftMetadata& metadat
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_DirectlyAdapted.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter") } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::some::ns::detail::DirectlyAdapted>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -177,11 +157,6 @@ StructMetadata<::some::ns::CppRef>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::some::ns::CppRef>()
-  ));
   return res.metadata;
 }
 

@@ -40,11 +40,6 @@ void EnumMetadata<::test::fixtures::tablebased::ExampleEnum>::gen(ThriftMetadata
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::tablebased::ExampleEnum>()
-  ));
 }
 
 const ::apache::thrift::metadata::ThriftStruct&
@@ -74,11 +69,6 @@ StructMetadata<::test::fixtures::tablebased::TrivialTypesStruct>::gen(ThriftMeta
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::tablebased::TrivialTypesStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -108,11 +98,6 @@ StructMetadata<::test::fixtures::tablebased::ContainerStruct>::gen(ThriftMetadat
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::tablebased::ContainerStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -142,11 +127,6 @@ StructMetadata<::test::fixtures::tablebased::ExampleUnion>::gen(ThriftMetadata& 
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::tablebased::ExampleUnion>()
-  ));
   return res.metadata;
 }
 

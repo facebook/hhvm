@@ -61,11 +61,6 @@ StructMetadata<::cpp2::BiDiSinkException>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::BiDiSinkException>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -95,11 +90,6 @@ StructMetadata<::cpp2::BiDiStreamException>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::BiDiStreamException>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -129,11 +119,6 @@ StructMetadata<::cpp2::BiDiMethodException>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::BiDiMethodException>()
-  ));
   return res.metadata;
 }
 
@@ -166,11 +151,6 @@ void ExceptionMetadata<::cpp2::BiDiSinkException>::gen(ThriftMetadata& metadata)
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::BiDiSinkException>()
-  ));
 }
 void ExceptionMetadata<::cpp2::BiDiStreamException>::gen(ThriftMetadata& metadata) {
   if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
@@ -201,11 +181,6 @@ void ExceptionMetadata<::cpp2::BiDiStreamException>::gen(ThriftMetadata& metadat
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::BiDiStreamException>()
-  ));
 }
 void ExceptionMetadata<::cpp2::BiDiMethodException>::gen(ThriftMetadata& metadata) {
   if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
@@ -236,11 +211,6 @@ void ExceptionMetadata<::cpp2::BiDiMethodException>::gen(ThriftMetadata& metadat
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::BiDiMethodException>()
-  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen_simple([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -252,11 +222,6 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::cpp2::BiDiService>(schemaIndex)
-  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen_response([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -268,11 +233,6 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::cpp2::BiDiService>(schemaIndex)
-  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen_canThrow([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -288,20 +248,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen
   DCHECK_EQ(*module_BiDiService_canThrow_ex_1.name(), "ex");
   auto module_BiDiService_canThrow_ex_1_type = std::make_unique<Struct<::cpp2::BiDiMethodException>>("module.BiDiMethodException");
   module_BiDiService_canThrow_ex_1_type->writeAndGenType(*module_BiDiService_canThrow_ex_1.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_BiDiService_canThrow_ex_1.structured_annotations(),
-    module_BiDiService_canThrow_ex_1Annotations,
-    getExceptionAnnotationTypes<::cpp2::BiDiService>(schemaIndex, exceptionIndex - 1, *func.name(), *module_BiDiService_canThrow_ex_1.name())
-  ));
   ExceptionMetadata<::cpp2::BiDiMethodException>::gen(metadata);
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::cpp2::BiDiService>(schemaIndex)
-  ));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BiDiService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -357,11 +307,6 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   services.emplace_back();
   [[maybe_unused]] auto module_BiDiServiceAnnotations = std::move(*module_BiDiService.structured_annotations());
   module_BiDiService.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *module_BiDiService.structured_annotations(),
-    module_BiDiServiceAnnotations,
-    getAnnotationTypes<::cpp2::BiDiService>()
-  ));
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.BiDiService", std::move(module_BiDiService));
   context.service_name() = "module.BiDiService";

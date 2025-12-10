@@ -57,11 +57,6 @@ StructMetadata<::cpp2::Foo>::gen(ThriftMetadata& metadata) {
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_Foo.structured_annotations()->push_back(*cvStruct("thrift.SerializeInFieldIdOrder", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::Foo>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -91,11 +86,6 @@ StructMetadata<::cpp2::Foo2>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::Foo2>()
-  ));
   return res.metadata;
 }
 

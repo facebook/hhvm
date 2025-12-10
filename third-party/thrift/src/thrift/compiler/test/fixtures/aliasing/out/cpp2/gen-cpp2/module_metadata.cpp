@@ -56,11 +56,6 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::aliasing::Foo>::gen
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::compiler::test::fixtures::aliasing::Foo>()
-  ));
   return res.metadata;
 }
 

@@ -40,11 +40,6 @@ void EnumMetadata<::apache::thrift::test::MyEnum>::gen(ThriftMetadata& metadata)
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::test::MyEnum>()
-  ));
 }
 
 const ::apache::thrift::metadata::ThriftStruct&
@@ -74,11 +69,6 @@ StructMetadata<::apache::thrift::test::StructWithDefaultStruct>::gen(ThriftMetad
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::test::StructWithDefaultStruct>()
-  ));
   return res.metadata;
 }
 

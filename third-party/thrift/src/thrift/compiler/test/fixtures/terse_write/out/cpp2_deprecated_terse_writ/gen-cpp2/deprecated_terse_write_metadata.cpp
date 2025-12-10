@@ -40,11 +40,6 @@ void EnumMetadata<::facebook::thrift::test::terse_write::deprecated::MyEnum>::ge
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::terse_write::deprecated::MyEnum>()
-  ));
 }
 
 const ::apache::thrift::metadata::ThriftStruct&
@@ -61,11 +56,6 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::MyStruct>::gen
   DCHECK_EQ(*deprecated_terse_write_MyStruct.is_union(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::terse_write::deprecated::MyStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -82,11 +72,6 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::MyUnion>::gen(
   DCHECK_EQ(*deprecated_terse_write_MyUnion.is_union(), true);
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::terse_write::deprecated::MyUnion>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -117,11 +102,6 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::StructLevelTer
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   deprecated_terse_write_StructLevelTerseStruct.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -151,11 +131,6 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::FieldLevelTers
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -185,11 +160,6 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::CppRefStructFi
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::terse_write::deprecated::CppRefStructFields>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -219,11 +189,6 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTers
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -253,11 +218,6 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTers
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault>()
-  ));
   return res.metadata;
 }
 

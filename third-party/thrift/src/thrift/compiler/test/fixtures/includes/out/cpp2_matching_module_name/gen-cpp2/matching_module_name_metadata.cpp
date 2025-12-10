@@ -56,11 +56,6 @@ StructMetadata<::matching_module_name::MyStruct>::gen(ThriftMetadata& metadata) 
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::matching_module_name::MyStruct>()
-  ));
   return res.metadata;
 }
 

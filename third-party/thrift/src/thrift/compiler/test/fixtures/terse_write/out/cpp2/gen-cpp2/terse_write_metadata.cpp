@@ -40,11 +40,6 @@ void EnumMetadata<::facebook::thrift::test::terse_write::MyEnum>::gen(ThriftMeta
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::terse_write::MyEnum>()
-  ));
 }
 
 const ::apache::thrift::metadata::ThriftStruct&
@@ -61,11 +56,6 @@ StructMetadata<::facebook::thrift::test::terse_write::MyStruct>::gen(ThriftMetad
   DCHECK_EQ(*terse_write_MyStruct.is_union(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::terse_write::MyStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -95,11 +85,6 @@ StructMetadata<::facebook::thrift::test::terse_write::MyUnion>::gen(ThriftMetada
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::terse_write::MyUnion>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -129,11 +114,6 @@ StructMetadata<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -164,11 +144,6 @@ StructMetadata<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::g
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   terse_write_StructLevelTerseStruct.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::terse_write::StructLevelTerseStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -198,11 +173,6 @@ StructMetadata<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::ge
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -233,11 +203,6 @@ StructMetadata<::facebook::thrift::test::terse_write::AdaptedFields>::gen(Thrift
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   terse_write_AdaptedFields.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::terse_write::AdaptedFields>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -268,11 +233,6 @@ StructMetadata<::facebook::thrift::test::terse_write::TerseException>::gen(Thrif
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   terse_write_TerseException.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::terse_write::TerseException>()
-  ));
   return res.metadata;
 }
 
@@ -306,11 +266,6 @@ void ExceptionMetadata<::facebook::thrift::test::terse_write::TerseException>::g
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   terse_write_TerseException.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::terse_write::TerseException>()
-  ));
 }
 } // namespace md
 } // namespace detail

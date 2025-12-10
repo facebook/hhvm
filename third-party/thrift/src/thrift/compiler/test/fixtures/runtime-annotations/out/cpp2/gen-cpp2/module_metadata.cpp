@@ -41,11 +41,6 @@ void EnumMetadata<::facebook::thrift::test::MyEnum>::gen(ThriftMetadata& metadat
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   res.metadata.structured_annotations()->push_back(*cvStruct("module.MyAnnotation", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::MyEnum>()
-  ));
 }
 
 const ::apache::thrift::metadata::ThriftStruct&
@@ -64,11 +59,6 @@ StructMetadata<::facebook::thrift::test::MyAnnotation>::gen(ThriftMetadata& meta
   res.metadata.structured_annotations()->clear();
   module_MyAnnotation.structured_annotations()->push_back(*cvStruct("scope.Definition", {  }).cv_struct());
   module_MyAnnotation.structured_annotations()->push_back(*cvStruct("thrift.RuntimeAnnotation", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::MyAnnotation>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -99,11 +89,6 @@ StructMetadata<::facebook::thrift::test::MyStruct>::gen(ThriftMetadata& metadata
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_MyStruct.structured_annotations()->push_back(*cvStruct("module.MyAnnotation", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::MyStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -134,11 +119,6 @@ StructMetadata<::facebook::thrift::test::MyUnion>::gen(ThriftMetadata& metadata)
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_MyUnion.structured_annotations()->push_back(*cvStruct("module.MyAnnotation", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::MyUnion>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -169,11 +149,6 @@ StructMetadata<::facebook::thrift::test::MyException>::gen(ThriftMetadata& metad
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_MyException.structured_annotations()->push_back(*cvStruct("module.MyAnnotation", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::MyException>()
-  ));
   return res.metadata;
 }
 
@@ -207,11 +182,6 @@ void ExceptionMetadata<::facebook::thrift::test::MyException>::gen(ThriftMetadat
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_MyException.structured_annotations()->push_back(*cvStruct("module.MyAnnotation", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::MyException>()
-  ));
 }
 } // namespace md
 } // namespace detail

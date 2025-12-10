@@ -45,11 +45,6 @@ void EnumMetadata<::cpp2::B>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::B>()
-  ));
 }
 
 const ::apache::thrift::metadata::ThriftStruct&
@@ -79,11 +74,6 @@ StructMetadata<::cpp2::A>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::A>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -113,11 +103,6 @@ StructMetadata<::cpp2::U>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::U>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -147,11 +132,6 @@ StructMetadata<::cpp2::Bang>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::Bang>()
-  ));
   return res.metadata;
 }
 
@@ -184,11 +164,6 @@ void ExceptionMetadata<::cpp2::Bang>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::Bang>()
-  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::gen_f([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -200,11 +175,6 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::gen_f([[maybe
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::cpp2::C>(schemaIndex)
-  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::gen_numbers([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -216,11 +186,6 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::gen_numbers([
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::cpp2::C>(schemaIndex)
-  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::gen_thing([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -235,11 +200,6 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::gen_thing([[m
   DCHECK_EQ(*module_C_thing_a_1.name(), "a");
   auto module_C_thing_a_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   module_C_thing_a_1_type->writeAndGenType(*module_C_thing_a_1.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_C_thing_a_1.structured_annotations(),
-    module_C_thing_a_1Annotations,
-    getArgumentAnnotationTypes<::cpp2::C>(schemaIndex, argumentIndex - 1, *func.name(), *module_C_thing_a_1.name())
-  ));
   ::apache::thrift::metadata::ThriftField &module_C_thing_b_2 = func.arguments()[argumentIndex++];
   [[maybe_unused]] auto module_C_thing_b_2Annotations = std::move(*module_C_thing_b_2.structured_annotations());
   module_C_thing_b_2.structured_annotations()->clear();
@@ -247,11 +207,6 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::gen_thing([[m
   DCHECK_EQ(*module_C_thing_b_2.name(), "b");
   auto module_C_thing_b_2_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   module_C_thing_b_2_type->writeAndGenType(*module_C_thing_b_2.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_C_thing_b_2.structured_annotations(),
-    module_C_thing_b_2Annotations,
-    getArgumentAnnotationTypes<::cpp2::C>(schemaIndex, argumentIndex - 1, *func.name(), *module_C_thing_b_2.name())
-  ));
   ::apache::thrift::metadata::ThriftField &module_C_thing_c_3 = func.arguments()[argumentIndex++];
   [[maybe_unused]] auto module_C_thing_c_3Annotations = std::move(*module_C_thing_c_3.structured_annotations());
   module_C_thing_c_3.structured_annotations()->clear();
@@ -259,11 +214,6 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::gen_thing([[m
   DCHECK_EQ(*module_C_thing_c_3.name(), "c");
   auto module_C_thing_c_3_type = std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE));
   module_C_thing_c_3_type->writeAndGenType(*module_C_thing_c_3.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_C_thing_c_3.structured_annotations(),
-    module_C_thing_c_3Annotations,
-    getArgumentAnnotationTypes<::cpp2::C>(schemaIndex, argumentIndex - 1, *func.name(), *module_C_thing_c_3.name())
-  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   ::apache::thrift::metadata::ThriftField &module_C_thing_bang_1 = func.exceptions()[exceptionIndex++];
   [[maybe_unused]] auto module_C_thing_bang_1Annotations = std::move(*module_C_thing_bang_1.structured_annotations());
@@ -272,20 +222,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::gen_thing([[m
   DCHECK_EQ(*module_C_thing_bang_1.name(), "bang");
   auto module_C_thing_bang_1_type = std::make_unique<Struct<::cpp2::Bang>>("module.Bang");
   module_C_thing_bang_1_type->writeAndGenType(*module_C_thing_bang_1.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_C_thing_bang_1.structured_annotations(),
-    module_C_thing_bang_1Annotations,
-    getExceptionAnnotationTypes<::cpp2::C>(schemaIndex, exceptionIndex - 1, *func.name(), *module_C_thing_bang_1.name())
-  ));
   ExceptionMetadata<::cpp2::Bang>::gen(metadata);
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::cpp2::C>(schemaIndex)
-  ));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::C>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -341,11 +281,6 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   services.emplace_back();
   [[maybe_unused]] auto module_CAnnotations = std::move(*module_C.structured_annotations());
   module_C.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *module_C.structured_annotations(),
-    module_CAnnotations,
-    getAnnotationTypes<::cpp2::C>()
-  ));
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.C", std::move(module_C));
   context.service_name() = "module.C";

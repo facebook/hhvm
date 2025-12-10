@@ -61,11 +61,6 @@ StructMetadata<::test::namespace_from_package_without_module_name::Foo>::gen(Thr
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::namespace_from_package_without_module_name::Foo>()
-  ));
   return res.metadata;
 }
 
@@ -82,20 +77,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::namespace_from_pac
   DCHECK_EQ(*module_TestService_init_int1_1.name(), "int1");
   auto module_TestService_init_int1_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_TestService_init_int1_1_type->writeAndGenType(*module_TestService_init_int1_1.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_TestService_init_int1_1.structured_annotations(),
-    module_TestService_init_int1_1Annotations,
-    getArgumentAnnotationTypes<::test::namespace_from_package_without_module_name::TestService>(schemaIndex, argumentIndex - 1, *func.name(), *module_TestService_init_int1_1.name())
-  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::test::namespace_from_package_without_module_name::TestService>(schemaIndex)
-  ));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::test::namespace_from_package_without_module_name::TestService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -148,11 +133,6 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   services.emplace_back();
   [[maybe_unused]] auto module_TestServiceAnnotations = std::move(*module_TestService.structured_annotations());
   module_TestService.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *module_TestService.structured_annotations(),
-    module_TestServiceAnnotations,
-    getAnnotationTypes<::test::namespace_from_package_without_module_name::TestService>()
-  ));
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.TestService", std::move(module_TestService));
   context.service_name() = "module.TestService";

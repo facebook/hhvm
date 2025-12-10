@@ -56,11 +56,6 @@ StructMetadata<::apache::thrift::test::TerseFoo>::gen(ThriftMetadata& metadata) 
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::test::TerseFoo>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -90,11 +85,6 @@ StructMetadata<::apache::thrift::test::TerseLazyFoo>::gen(ThriftMetadata& metada
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::test::TerseLazyFoo>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -124,11 +114,6 @@ StructMetadata<::apache::thrift::test::TerseOptionalFoo>::gen(ThriftMetadata& me
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::test::TerseOptionalFoo>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -158,11 +143,6 @@ StructMetadata<::apache::thrift::test::TerseOptionalLazyFoo>::gen(ThriftMetadata
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::test::TerseOptionalLazyFoo>()
-  ));
   return res.metadata;
 }
 

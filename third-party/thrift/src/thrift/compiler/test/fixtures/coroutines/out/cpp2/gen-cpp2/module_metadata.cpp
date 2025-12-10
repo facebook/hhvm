@@ -45,11 +45,6 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_p
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::cpp2::MyService>(schemaIndex)
-  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_getRandomData([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -61,11 +56,6 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_g
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::cpp2::MyService>(schemaIndex)
-  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_hasDataById([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -80,20 +70,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_h
   DCHECK_EQ(*module_MyService_hasDataById_id_1.name(), "id");
   auto module_MyService_hasDataById_id_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_MyService_hasDataById_id_1_type->writeAndGenType(*module_MyService_hasDataById_id_1.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_MyService_hasDataById_id_1.structured_annotations(),
-    module_MyService_hasDataById_id_1Annotations,
-    getArgumentAnnotationTypes<::cpp2::MyService>(schemaIndex, argumentIndex - 1, *func.name(), *module_MyService_hasDataById_id_1.name())
-  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::cpp2::MyService>(schemaIndex)
-  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_getDataById([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -108,21 +88,11 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_g
   DCHECK_EQ(*module_MyService_getDataById_id_1.name(), "id");
   auto module_MyService_getDataById_id_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_MyService_getDataById_id_1_type->writeAndGenType(*module_MyService_getDataById_id_1.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_MyService_getDataById_id_1.structured_annotations(),
-    module_MyService_getDataById_id_1Annotations,
-    getArgumentAnnotationTypes<::cpp2::MyService>(schemaIndex, argumentIndex - 1, *func.name(), *module_MyService_getDataById_id_1.name())
-  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
   func.structured_annotations()->push_back(*cvStruct("cpp.ProcessInEbThreadUnsafe", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::cpp2::MyService>(schemaIndex)
-  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_putDataById([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -137,11 +107,6 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_p
   DCHECK_EQ(*module_MyService_putDataById_id_1.name(), "id");
   auto module_MyService_putDataById_id_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_MyService_putDataById_id_1_type->writeAndGenType(*module_MyService_putDataById_id_1.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_MyService_putDataById_id_1.structured_annotations(),
-    module_MyService_putDataById_id_1Annotations,
-    getArgumentAnnotationTypes<::cpp2::MyService>(schemaIndex, argumentIndex - 1, *func.name(), *module_MyService_putDataById_id_1.name())
-  ));
   ::apache::thrift::metadata::ThriftField &module_MyService_putDataById_data_2 = func.arguments()[argumentIndex++];
   [[maybe_unused]] auto module_MyService_putDataById_data_2Annotations = std::move(*module_MyService_putDataById_data_2.structured_annotations());
   module_MyService_putDataById_data_2.structured_annotations()->clear();
@@ -149,20 +114,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_p
   DCHECK_EQ(*module_MyService_putDataById_data_2.name(), "data");
   auto module_MyService_putDataById_data_2_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   module_MyService_putDataById_data_2_type->writeAndGenType(*module_MyService_putDataById_data_2.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_MyService_putDataById_data_2.structured_annotations(),
-    module_MyService_putDataById_data_2Annotations,
-    getArgumentAnnotationTypes<::cpp2::MyService>(schemaIndex, argumentIndex - 1, *func.name(), *module_MyService_putDataById_data_2.name())
-  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::cpp2::MyService>(schemaIndex)
-  ));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -222,11 +177,6 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   services.emplace_back();
   [[maybe_unused]] auto module_MyServiceAnnotations = std::move(*module_MyService.structured_annotations());
   module_MyService.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *module_MyService.structured_annotations(),
-    module_MyServiceAnnotations,
-    getAnnotationTypes<::cpp2::MyService>()
-  ));
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.MyService", std::move(module_MyService));
   context.service_name() = "module.MyService";

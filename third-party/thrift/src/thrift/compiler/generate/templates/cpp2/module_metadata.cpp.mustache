@@ -62,11 +62,6 @@ void EnumMetadata<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::gen(Thr
   res.metadata.structured_annotations()->push_back({{> metadata/const_struct}});
 {{/constant:type.self.structured?}}
 {{/enum:structured_annotations}}
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::{{program:qualified_namespace}}::{{enum:cpp_name}}>()
-  ));
 }
 {{/program:enums}}
 
@@ -108,11 +103,6 @@ StructMetadata<{{struct:cpp_fullname}}>::gen(ThriftMetadata& metadata) {
   {{struct:metadata_name}}.structured_annotations()->push_back({{> metadata/const_struct}});
 {{/constant:type.self.structured?}}
 {{/struct:structured_annotations}}
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<{{struct:cpp_fullname}}>()
-  ));
   return res.metadata;
 }
 {{/program:structs}}
@@ -158,11 +148,6 @@ void ExceptionMetadata<{{struct:cpp_fullname}}>::gen(ThriftMetadata& metadata) {
   {{struct:metadata_name}}.structured_annotations()->push_back({{> metadata/const_struct}});
 {{/constant:type.self.structured?}}
 {{/struct:structured_annotations}}
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<{{struct:cpp_fullname}}>()
-  ));
 }
 {{/struct:exception?}}
 {{/program:structs}}
@@ -181,11 +166,6 @@ void ServiceMetadata<::{{> service_common/service_class_name}}>::gen_{{function:
   [[maybe_unused]] auto {{> metadata/func_field_name}}Annotations = std::move(*{{> metadata/func_field_name}}.structured_annotations());
   {{> metadata/func_field_name}}.structured_annotations()->clear();
   {{> metadata/func_field_gen}}
-  DCHECK(structuredAnnotationsEquality(
-    *{{> metadata/func_field_name}}.structured_annotations(),
-    {{> metadata/func_field_name}}Annotations,
-    getArgumentAnnotationTypes<{{service:qualified_name}}>(schemaIndex, argumentIndex - 1, *func.name(), *{{> metadata/func_field_name}}.name())
-  ));
 {{/function:args}}
   [[maybe_unused]] std::size_t exceptionIndex = 0;
 {{#function:exceptions}}
@@ -193,11 +173,6 @@ void ServiceMetadata<::{{> service_common/service_class_name}}>::gen_{{function:
   [[maybe_unused]] auto {{> metadata/func_field_name}}Annotations = std::move(*{{> metadata/func_field_name}}.structured_annotations());
   {{> metadata/func_field_name}}.structured_annotations()->clear();
   {{> metadata/func_field_gen}}
-  DCHECK(structuredAnnotationsEquality(
-    *{{> metadata/func_field_name}}.structured_annotations(),
-    {{> metadata/func_field_name}}Annotations,
-    getExceptionAnnotationTypes<{{service:qualified_name}}>(schemaIndex, exceptionIndex - 1, *func.name(), *{{> metadata/func_field_name}}.name())
-  ));
 {{#field:type}}
 {{#type:structured?}}
   ExceptionMetadata<{{type:cpp_fullname}}>::gen(metadata);
@@ -212,11 +187,6 @@ void ServiceMetadata<::{{> service_common/service_class_name}}>::gen_{{function:
   func.structured_annotations()->push_back({{> metadata/const_struct}});
 {{/constant:type.self.structured?}}
 {{/function:structured_annotations}}
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<{{service:qualified_name}}>(schemaIndex)
-  ));
 }
 {{/function:starts_interaction?}}{{/service:functions}}
 
@@ -293,11 +263,6 @@ const ThriftServiceContextRef* ServiceMetadata<::{{> service_common/service_clas
   {{service:metadata_name}}.structured_annotations()->push_back({{> metadata/const_struct}});
 {{/constant:type.self.structured?}}
 {{/service:structured_annotations}}
-  DCHECK(structuredAnnotationsEquality(
-    *{{service:metadata_name}}.structured_annotations(),
-    {{service:metadata_name}}Annotations,
-    getAnnotationTypes<{{service:qualified_name}}>()
-  ));
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("{{program:name}}.{{service:name}}", std::move({{service:metadata_name}}));
   context.service_name() = "{{program:name}}.{{service:name}}";

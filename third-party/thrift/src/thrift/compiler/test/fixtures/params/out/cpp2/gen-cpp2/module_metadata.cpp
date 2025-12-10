@@ -48,20 +48,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NestedContainers>>
   DCHECK_EQ(*module_NestedContainers_mapList_foo_1.name(), "foo");
   auto module_NestedContainers_mapList_foo_1_type = std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)));
   module_NestedContainers_mapList_foo_1_type->writeAndGenType(*module_NestedContainers_mapList_foo_1.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_NestedContainers_mapList_foo_1.structured_annotations(),
-    module_NestedContainers_mapList_foo_1Annotations,
-    getArgumentAnnotationTypes<::cpp2::NestedContainers>(schemaIndex, argumentIndex - 1, *func.name(), *module_NestedContainers_mapList_foo_1.name())
-  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::cpp2::NestedContainers>(schemaIndex)
-  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NestedContainers>>::gen_mapSet([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -76,20 +66,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NestedContainers>>
   DCHECK_EQ(*module_NestedContainers_mapSet_foo_1.name(), "foo");
   auto module_NestedContainers_mapSet_foo_1_type = std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)));
   module_NestedContainers_mapSet_foo_1_type->writeAndGenType(*module_NestedContainers_mapSet_foo_1.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_NestedContainers_mapSet_foo_1.structured_annotations(),
-    module_NestedContainers_mapSet_foo_1Annotations,
-    getArgumentAnnotationTypes<::cpp2::NestedContainers>(schemaIndex, argumentIndex - 1, *func.name(), *module_NestedContainers_mapSet_foo_1.name())
-  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::cpp2::NestedContainers>(schemaIndex)
-  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NestedContainers>>::gen_listMap([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -104,20 +84,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NestedContainers>>
   DCHECK_EQ(*module_NestedContainers_listMap_foo_1.name(), "foo");
   auto module_NestedContainers_listMap_foo_1_type = std::make_unique<List>(std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)));
   module_NestedContainers_listMap_foo_1_type->writeAndGenType(*module_NestedContainers_listMap_foo_1.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_NestedContainers_listMap_foo_1.structured_annotations(),
-    module_NestedContainers_listMap_foo_1Annotations,
-    getArgumentAnnotationTypes<::cpp2::NestedContainers>(schemaIndex, argumentIndex - 1, *func.name(), *module_NestedContainers_listMap_foo_1.name())
-  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::cpp2::NestedContainers>(schemaIndex)
-  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NestedContainers>>::gen_listSet([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -132,20 +102,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NestedContainers>>
   DCHECK_EQ(*module_NestedContainers_listSet_foo_1.name(), "foo");
   auto module_NestedContainers_listSet_foo_1_type = std::make_unique<List>(std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)));
   module_NestedContainers_listSet_foo_1_type->writeAndGenType(*module_NestedContainers_listSet_foo_1.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_NestedContainers_listSet_foo_1.structured_annotations(),
-    module_NestedContainers_listSet_foo_1Annotations,
-    getArgumentAnnotationTypes<::cpp2::NestedContainers>(schemaIndex, argumentIndex - 1, *func.name(), *module_NestedContainers_listSet_foo_1.name())
-  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::cpp2::NestedContainers>(schemaIndex)
-  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NestedContainers>>::gen_turtles([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -160,20 +120,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NestedContainers>>
   DCHECK_EQ(*module_NestedContainers_turtles_foo_1.name(), "foo");
   auto module_NestedContainers_turtles_foo_1_type = std::make_unique<List>(std::make_unique<List>(std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE))))));
   module_NestedContainers_turtles_foo_1_type->writeAndGenType(*module_NestedContainers_turtles_foo_1.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_NestedContainers_turtles_foo_1.structured_annotations(),
-    module_NestedContainers_turtles_foo_1Annotations,
-    getArgumentAnnotationTypes<::cpp2::NestedContainers>(schemaIndex, argumentIndex - 1, *func.name(), *module_NestedContainers_turtles_foo_1.name())
-  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::cpp2::NestedContainers>(schemaIndex)
-  ));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::NestedContainers>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -233,11 +183,6 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   services.emplace_back();
   [[maybe_unused]] auto module_NestedContainersAnnotations = std::move(*module_NestedContainers.structured_annotations());
   module_NestedContainers.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *module_NestedContainers.structured_annotations(),
-    module_NestedContainersAnnotations,
-    getAnnotationTypes<::cpp2::NestedContainers>()
-  ));
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.NestedContainers", std::move(module_NestedContainers));
   context.service_name() = "module.NestedContainers";

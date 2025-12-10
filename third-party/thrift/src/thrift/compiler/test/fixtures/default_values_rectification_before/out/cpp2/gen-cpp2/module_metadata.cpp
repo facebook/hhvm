@@ -43,11 +43,6 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values_rect
   DCHECK_EQ(*module_EmptyStruct.is_union(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -77,11 +72,6 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::default_values_rect
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::compiler::test::fixtures::default_values_rectification::TestStruct>()
-  ));
   return res.metadata;
 }
 

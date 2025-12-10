@@ -56,11 +56,6 @@ StructMetadata<::cpp2::Fields>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::Fields>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -91,11 +86,6 @@ StructMetadata<::cpp2::FieldsInjectedToEmptyStruct>::gen(ThriftMetadata& metadat
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_FieldsInjectedToEmptyStruct.structured_annotations()->push_back(*cvStruct("internal.InjectMetadataFields", { {"type", cvString("Fields") } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::FieldsInjectedToEmptyStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -126,11 +116,6 @@ StructMetadata<::cpp2::FieldsInjectedToStruct>::gen(ThriftMetadata& metadata) {
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_FieldsInjectedToStruct.structured_annotations()->push_back(*cvStruct("internal.InjectMetadataFields", { {"type", cvString("Fields") } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::FieldsInjectedToStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -161,11 +146,6 @@ StructMetadata<::cpp2::FieldsInjectedWithIncludedStruct>::gen(ThriftMetadata& me
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_FieldsInjectedWithIncludedStruct.structured_annotations()->push_back(*cvStruct("internal.InjectMetadataFields", { {"type", cvString("foo.Fields") } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::FieldsInjectedWithIncludedStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -196,11 +176,6 @@ StructMetadata<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct>::gen(ThriftMe
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_FieldsInjectedWithFieldsWithIncludedStruct.structured_annotations()->push_back(*cvStruct("internal.InjectMetadataFields", { {"type", cvString("foo.FieldsWithIncludedStruct") } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct>()
-  ));
   return res.metadata;
 }
 

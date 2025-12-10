@@ -68,11 +68,6 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   services.emplace_back();
   [[maybe_unused]] auto empty_NullServiceAnnotations = std::move(*empty_NullService.structured_annotations());
   empty_NullService.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *empty_NullService.structured_annotations(),
-    empty_NullServiceAnnotations,
-    getAnnotationTypes<::cpp2::NullService>()
-  ));
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("empty.NullService", std::move(empty_NullService));
   context.service_name() = "empty.NullService";

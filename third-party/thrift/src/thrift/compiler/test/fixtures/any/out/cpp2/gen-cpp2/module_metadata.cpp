@@ -57,11 +57,6 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::any::detail::MyStru
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_MyStruct.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::my::Adapter1") } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::compiler::test::fixtures::any::detail::MyStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -91,11 +86,6 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyUnion>::gen(
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::compiler::test::fixtures::any::MyUnion>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -125,11 +115,6 @@ StructMetadata<::facebook::thrift::compiler::test::fixtures::any::MyException>::
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::compiler::test::fixtures::any::MyException>()
-  ));
   return res.metadata;
 }
 
@@ -162,11 +147,6 @@ void ExceptionMetadata<::facebook::thrift::compiler::test::fixtures::any::MyExce
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::compiler::test::fixtures::any::MyException>()
-  ));
 }
 } // namespace md
 } // namespace detail

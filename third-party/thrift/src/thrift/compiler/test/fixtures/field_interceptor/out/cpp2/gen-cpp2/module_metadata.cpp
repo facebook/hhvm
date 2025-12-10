@@ -56,11 +56,6 @@ StructMetadata<::facebook::thrift::test::InterceptedFields>::gen(ThriftMetadata&
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::facebook::thrift::test::InterceptedFields>()
-  ));
   return res.metadata;
 }
 

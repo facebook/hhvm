@@ -40,11 +40,6 @@ void EnumMetadata<::test::fixtures::python_capi::MyEnum>::gen(ThriftMetadata& me
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::python_capi::MyEnum>()
-  ));
 }
 void EnumMetadata<::test::fixtures::python_capi::NormalDecentEnum>::gen(ThriftMetadata& metadata) {
   if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
@@ -59,11 +54,6 @@ void EnumMetadata<::test::fixtures::python_capi::NormalDecentEnum>::gen(ThriftMe
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   res.metadata.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("NormalDecentEnum") } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::python_capi::NormalDecentEnum>()
-  ));
 }
 
 const ::apache::thrift::metadata::ThriftStruct&
@@ -93,11 +83,6 @@ StructMetadata<::test::fixtures::python_capi::MyStruct>::gen(ThriftMetadata& met
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::python_capi::MyStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -127,11 +112,6 @@ StructMetadata<::test::fixtures::python_capi::MyDataItem>::gen(ThriftMetadata& m
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::python_capi::MyDataItem>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -150,11 +130,6 @@ StructMetadata<::test::fixtures::python_capi::TransitiveDoubler>::gen(ThriftMeta
   res.metadata.structured_annotations()->clear();
   module_TransitiveDoubler.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("::thrift::test::lib::StructDoubler") } }).cv_struct());
   module_TransitiveDoubler.structured_annotations()->push_back(*cvStruct("scope.Transitive", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::python_capi::TransitiveDoubler>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -185,11 +160,6 @@ StructMetadata<::test::fixtures::python_capi::detail::DoubledPair>::gen(ThriftMe
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_DoubledPair.structured_annotations()->push_back(*cvStruct("module.TransitiveDoubler", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::python_capi::detail::DoubledPair>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -219,11 +189,6 @@ StructMetadata<::test::fixtures::python_capi::StringPair>::gen(ThriftMetadata& m
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::python_capi::StringPair>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -241,11 +206,6 @@ StructMetadata<::test::fixtures::python_capi::VapidStruct>::gen(ThriftMetadata& 
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_EmptyStruct.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("VapidStruct") } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::python_capi::VapidStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -275,11 +235,6 @@ StructMetadata<::test::fixtures::python_capi::PrimitiveStruct>::gen(ThriftMetada
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::python_capi::PrimitiveStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -309,11 +264,6 @@ StructMetadata<::test::fixtures::python_capi::AdaptedFields>::gen(ThriftMetadata
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::python_capi::AdaptedFields>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -343,11 +293,6 @@ StructMetadata<::test::fixtures::python_capi::ListStruct>::gen(ThriftMetadata& m
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::python_capi::ListStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -378,11 +323,6 @@ StructMetadata<::test::fixtures::python_capi::SetStruct>::gen(ThriftMetadata& me
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_SetStruct.structured_annotations()->push_back(*cvStruct("cpp.EnableCustomTypeOrdering", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::python_capi::SetStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -413,11 +353,6 @@ StructMetadata<::test::fixtures::python_capi::MapStruct>::gen(ThriftMetadata& me
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_MapStruct.structured_annotations()->push_back(*cvStruct("cpp.EnableCustomTypeOrdering", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::python_capi::MapStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -447,11 +382,6 @@ StructMetadata<::test::fixtures::python_capi::ComposeStruct>::gen(ThriftMetadata
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::python_capi::ComposeStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -482,11 +412,6 @@ StructMetadata<::test::fixtures::python_capi::Shallot>::gen(ThriftMetadata& meta
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_Onion.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("Shallot") } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::python_capi::Shallot>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -516,11 +441,6 @@ StructMetadata<::test::fixtures::python_capi::SomeBinary>::gen(ThriftMetadata& m
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::python_capi::SomeBinary>()
-  ));
   return res.metadata;
 }
 

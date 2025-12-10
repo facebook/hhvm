@@ -55,11 +55,6 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyRoot>>::gen_do_r
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::cpp2::MyRoot>(schemaIndex)
-  ));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyRoot>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -111,11 +106,6 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   services.emplace_back();
   [[maybe_unused]] auto module_MyRootAnnotations = std::move(*module_MyRoot.structured_annotations());
   module_MyRoot.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *module_MyRoot.structured_annotations(),
-    module_MyRootAnnotations,
-    getAnnotationTypes<::cpp2::MyRoot>()
-  ));
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.MyRoot", std::move(module_MyRoot));
   context.service_name() = "module.MyRoot";
@@ -134,11 +124,6 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyNode>>::gen_do_m
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::cpp2::MyNode>(schemaIndex)
-  ));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyNode>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -192,11 +177,6 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyRoot>>::genRecurse(metadata, services);
   [[maybe_unused]] auto module_MyNodeAnnotations = std::move(*module_MyNode.structured_annotations());
   module_MyNode.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *module_MyNode.structured_annotations(),
-    module_MyNodeAnnotations,
-    getAnnotationTypes<::cpp2::MyNode>()
-  ));
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.MyNode", std::move(module_MyNode));
   context.service_name() = "module.MyNode";
@@ -215,11 +195,6 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyLeaf>>::gen_do_l
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::cpp2::MyLeaf>(schemaIndex)
-  ));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyLeaf>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -273,11 +248,6 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyNode>>::genRecurse(metadata, services);
   [[maybe_unused]] auto module_MyLeafAnnotations = std::move(*module_MyLeaf.structured_annotations());
   module_MyLeaf.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *module_MyLeaf.structured_annotations(),
-    module_MyLeafAnnotations,
-    getAnnotationTypes<::cpp2::MyLeaf>()
-  ));
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.MyLeaf", std::move(module_MyLeaf));
   context.service_name() = "module.MyLeaf";

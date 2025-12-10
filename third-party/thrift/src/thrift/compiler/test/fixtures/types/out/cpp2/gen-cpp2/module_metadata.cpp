@@ -45,11 +45,6 @@ void EnumMetadata<::apache::thrift::fixtures::types::has_bitwise_ops>::gen(Thrif
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::has_bitwise_ops>()
-  ));
 }
 void EnumMetadata<::apache::thrift::fixtures::types::is_unscoped>::gen(ThriftMetadata& metadata) {
   if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
@@ -63,11 +58,6 @@ void EnumMetadata<::apache::thrift::fixtures::types::is_unscoped>::gen(ThriftMet
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::is_unscoped>()
-  ));
 }
 void EnumMetadata<::apache::thrift::fixtures::types::MyForwardRefEnum>::gen(ThriftMetadata& metadata) {
   if (FLAGS_thrift_enable_schema_to_metadata_conversion) {
@@ -81,11 +71,6 @@ void EnumMetadata<::apache::thrift::fixtures::types::MyForwardRefEnum>::gen(Thri
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::MyForwardRefEnum>()
-  ));
 }
 
 const ::apache::thrift::metadata::ThriftStruct&
@@ -102,11 +87,6 @@ StructMetadata<::apache::thrift::fixtures::types::empty_struct>::gen(ThriftMetad
   DCHECK_EQ(*module_empty_struct.is_union(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::empty_struct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -136,11 +116,6 @@ StructMetadata<::apache::thrift::fixtures::types::decorated_struct>::gen(ThriftM
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::decorated_struct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -171,11 +146,6 @@ StructMetadata<::apache::thrift::fixtures::types::ContainerStruct>::gen(ThriftMe
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_ContainerStruct.structured_annotations()->push_back(*cvStruct("cpp.EnableCustomTypeOrdering", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::ContainerStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -205,11 +175,6 @@ StructMetadata<::apache::thrift::fixtures::types::CppTypeStruct>::gen(ThriftMeta
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::CppTypeStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -239,11 +204,6 @@ StructMetadata<::apache::thrift::fixtures::types::VirtualStruct>::gen(ThriftMeta
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::VirtualStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -273,11 +233,6 @@ StructMetadata<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::g
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -307,11 +262,6 @@ StructMetadata<::apache::thrift::fixtures::types::TrivialNumeric>::gen(ThriftMet
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::TrivialNumeric>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -341,11 +291,6 @@ StructMetadata<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::gen
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::TrivialNestedWithDefault>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -375,11 +320,6 @@ StructMetadata<::apache::thrift::fixtures::types::ComplexString>::gen(ThriftMeta
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::ComplexString>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -409,11 +349,6 @@ StructMetadata<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::gen
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::ComplexNestedWithDefault>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -444,11 +379,6 @@ StructMetadata<::apache::thrift::fixtures::types::MinPadding>::gen(ThriftMetadat
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_MinPadding.structured_annotations()->push_back(*cvStruct("cpp.MinimizePadding", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::MinPadding>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -481,11 +411,6 @@ StructMetadata<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::gen
   module_MinPaddingWithCustomType.structured_annotations()->push_back(*cvStruct("thrift.Experimental", {  }).cv_struct());
   module_MinPaddingWithCustomType.structured_annotations()->push_back(*cvStruct("cpp.MinimizePadding", {  }).cv_struct());
   module_MinPaddingWithCustomType.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::MinPaddingWithCustomType>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -515,11 +440,6 @@ StructMetadata<::apache::thrift::fixtures::types::MyStruct>::gen(ThriftMetadata&
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::MyStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -536,11 +456,6 @@ StructMetadata<::apache::thrift::fixtures::types::MyDataItem>::gen(ThriftMetadat
   DCHECK_EQ(*module_MyDataItem.is_union(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::MyDataItem>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -571,11 +486,6 @@ StructMetadata<::apache::thrift::fixtures::types::Renamed>::gen(ThriftMetadata& 
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_Renaming.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("Renamed") } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::Renamed>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -606,11 +516,6 @@ StructMetadata<::apache::thrift::fixtures::types::AnnotatedTypes>::gen(ThriftMet
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_AnnotatedTypes.structured_annotations()->push_back(*cvStruct("cpp.EnableCustomTypeOrdering", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::AnnotatedTypes>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -640,11 +545,6 @@ StructMetadata<::apache::thrift::fixtures::types::ForwardUsageRoot>::gen(ThriftM
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::ForwardUsageRoot>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -674,11 +574,6 @@ StructMetadata<::apache::thrift::fixtures::types::ForwardUsageStruct>::gen(Thrif
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::ForwardUsageStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -708,11 +603,6 @@ StructMetadata<::apache::thrift::fixtures::types::ForwardUsageByRef>::gen(Thrift
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::ForwardUsageByRef>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -742,11 +632,6 @@ StructMetadata<::apache::thrift::fixtures::types::IncompleteMap>::gen(ThriftMeta
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::IncompleteMap>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -763,11 +648,6 @@ StructMetadata<::apache::thrift::fixtures::types::IncompleteMapDep>::gen(ThriftM
   DCHECK_EQ(*module_IncompleteMapDep.is_union(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::IncompleteMapDep>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -798,11 +678,6 @@ StructMetadata<::apache::thrift::fixtures::types::CompleteMap>::gen(ThriftMetada
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_CompleteMap.structured_annotations()->push_back(*cvStruct("cpp.EnableCustomTypeOrdering", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::CompleteMap>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -819,11 +694,6 @@ StructMetadata<::apache::thrift::fixtures::types::CompleteMapDep>::gen(ThriftMet
   DCHECK_EQ(*module_CompleteMapDep.is_union(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::CompleteMapDep>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -853,11 +723,6 @@ StructMetadata<::apache::thrift::fixtures::types::IncompleteList>::gen(ThriftMet
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::IncompleteList>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -874,11 +739,6 @@ StructMetadata<::apache::thrift::fixtures::types::IncompleteListDep>::gen(Thrift
   DCHECK_EQ(*module_IncompleteListDep.is_union(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::IncompleteListDep>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -908,11 +768,6 @@ StructMetadata<::apache::thrift::fixtures::types::CompleteList>::gen(ThriftMetad
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::CompleteList>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -929,11 +784,6 @@ StructMetadata<::apache::thrift::fixtures::types::CompleteListDep>::gen(ThriftMe
   DCHECK_EQ(*module_CompleteListDep.is_union(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::CompleteListDep>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -963,11 +813,6 @@ StructMetadata<::apache::thrift::fixtures::types::AdaptedList>::gen(ThriftMetada
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::AdaptedList>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -998,11 +843,6 @@ StructMetadata<::apache::thrift::fixtures::types::detail::AdaptedListDep>::gen(T
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_AdaptedListDep.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("IdentityAdapter<detail::AdaptedListDep>") }, {"adaptedType", cvString("detail::AdaptedListDep") } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::detail::AdaptedListDep>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -1032,11 +872,6 @@ StructMetadata<::apache::thrift::fixtures::types::DependentAdaptedList>::gen(Thr
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::DependentAdaptedList>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -1067,11 +902,6 @@ StructMetadata<::apache::thrift::fixtures::types::detail::DependentAdaptedListDe
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_DependentAdaptedListDep.structured_annotations()->push_back(*cvStruct("cpp.Adapter", { {"name", cvString("IdentityAdapter<detail::DependentAdaptedListDep>") } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -1101,11 +931,6 @@ StructMetadata<::apache::thrift::fixtures::types::AllocatorAware>::gen(ThriftMet
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::AllocatorAware>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -1135,11 +960,6 @@ StructMetadata<::apache::thrift::fixtures::types::AllocatorAware2>::gen(ThriftMe
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::AllocatorAware2>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -1169,11 +989,6 @@ StructMetadata<::apache::thrift::fixtures::types::TypedefStruct>::gen(ThriftMeta
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::TypedefStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -1203,11 +1018,6 @@ StructMetadata<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>()
-  ));
   return res.metadata;
 }
 
@@ -1224,20 +1034,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures
   DCHECK_EQ(*module_SomeService_bounce_map_m_1.name(), "m");
   auto module_SomeService_bounce_map_m_1_type = std::make_unique<Typedef>("included.SomeMap", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("thrift.AllowLegacyTypedefUri", {  }).cv_struct(), *cvStruct("cpp.Type", { {"template", cvString("std::unordered_map") } }).cv_struct(),  });
   module_SomeService_bounce_map_m_1_type->writeAndGenType(*module_SomeService_bounce_map_m_1.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_SomeService_bounce_map_m_1.structured_annotations(),
-    module_SomeService_bounce_map_m_1Annotations,
-    getArgumentAnnotationTypes<::apache::thrift::fixtures::types::SomeService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SomeService_bounce_map_m_1.name())
-  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::apache::thrift::fixtures::types::SomeService>(schemaIndex)
-  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>>::gen_binary_keyed_map([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -1252,20 +1052,10 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures
   DCHECK_EQ(*module_SomeService_binary_keyed_map_r_1.name(), "r");
   auto module_SomeService_binary_keyed_map_r_1_type = std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE));
   module_SomeService_binary_keyed_map_r_1_type->writeAndGenType(*module_SomeService_binary_keyed_map_r_1.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_SomeService_binary_keyed_map_r_1.structured_annotations(),
-    module_SomeService_binary_keyed_map_r_1Annotations,
-    getArgumentAnnotationTypes<::apache::thrift::fixtures::types::SomeService>(schemaIndex, argumentIndex - 1, *func.name(), *module_SomeService_binary_keyed_map_r_1.name())
-  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::apache::thrift::fixtures::types::SomeService>(schemaIndex)
-  ));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -1320,11 +1110,6 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   services.emplace_back();
   [[maybe_unused]] auto module_SomeServiceAnnotations = std::move(*module_SomeService.structured_annotations());
   module_SomeService.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *module_SomeService.structured_annotations(),
-    module_SomeServiceAnnotations,
-    getAnnotationTypes<::apache::thrift::fixtures::types::SomeService>()
-  ));
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.SomeService", std::move(module_SomeService));
   context.service_name() = "module.SomeService";

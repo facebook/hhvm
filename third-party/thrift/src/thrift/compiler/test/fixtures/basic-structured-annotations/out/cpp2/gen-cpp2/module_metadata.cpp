@@ -46,11 +46,6 @@ void EnumMetadata<::test::fixtures::basic_structured_annotations::MyEnum>::gen(T
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   res.metadata.structured_annotations()->push_back(*cvStruct("module.structured_annotation_inline", { {"count", cvInteger(4) } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::basic_structured_annotations::MyEnum>()
-  ));
 }
 
 const ::apache::thrift::metadata::ThriftStruct&
@@ -68,11 +63,6 @@ StructMetadata<::test::fixtures::basic_structured_annotations::runtime_annotatio
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_runtime_annotation.structured_annotations()->push_back(*cvStruct("thrift.RuntimeAnnotation", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::basic_structured_annotations::runtime_annotation>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -102,11 +92,6 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::basic_structured_annotations::structured_annotation_inline>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -136,11 +121,6 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::basic_structured_annotations::structured_annotation_with_default>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -170,11 +150,6 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -204,11 +179,6 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::basic_structured_annotations::structured_annotation_forward>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -238,11 +208,6 @@ StructMetadata<::test::fixtures::basic_structured_annotations::structured_annota
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::basic_structured_annotations::structured_annotation_nested>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -278,11 +243,6 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyStruct>::gen(Th
   module_MyStruct.structured_annotations()->push_back(*cvStruct("included.structured_annotation_included", { {"name", cvString("aba") } }).cv_struct());
   module_MyStruct.structured_annotations()->push_back(*cvStruct("namespaced.structured_annotation_with_namespace", { {"name", cvString("bac") } }).cv_struct());
   module_MyStruct.structured_annotations()->push_back(*cvStruct("module.runtime_annotation", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::basic_structured_annotations::MyStruct>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -313,11 +273,6 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyException>::gen
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_MyException.structured_annotations()->push_back(*cvStruct("module.structured_annotation_nested", { {"name", cvString("nesty") } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::basic_structured_annotations::MyException>()
-  ));
   return res.metadata;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -348,11 +303,6 @@ StructMetadata<::test::fixtures::basic_structured_annotations::MyUnion>::gen(Thr
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_MyUnion.structured_annotations()->push_back(*cvStruct("module.structured_annotation_nested", { {"name", cvString("nesty") }, {"nest", cvStruct("module.structured_annotation_with_default", {  }) } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::basic_structured_annotations::MyUnion>()
-  ));
   return res.metadata;
 }
 
@@ -386,11 +336,6 @@ void ExceptionMetadata<::test::fixtures::basic_structured_annotations::MyExcepti
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
   module_MyException.structured_annotations()->push_back(*cvStruct("module.structured_annotation_nested", { {"name", cvString("nesty") } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::test::fixtures::basic_structured_annotations::MyException>()
-  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>>::gen_first([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -403,11 +348,6 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_st
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
   func.structured_annotations()->push_back(*cvStruct("module.structured_annotation_with_default", {  }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::test::fixtures::basic_structured_annotations::MyService>(schemaIndex)
-  ));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>>::gen_second([[maybe_unused]] ThriftMetadata& metadata, ThriftService& service, std::size_t index, [[maybe_unused]] std::size_t schemaIndex) {
   ::apache::thrift::metadata::ThriftFunction& func = service.functions()[index];
@@ -425,21 +365,11 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_st
   });
   auto module_MyService_second_count_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
   module_MyService_second_count_1_type->writeAndGenType(*module_MyService_second_count_1.type(), metadata);
-  DCHECK(structuredAnnotationsEquality(
-    *module_MyService_second_count_1.structured_annotations(),
-    module_MyService_second_count_1Annotations,
-    getArgumentAnnotationTypes<::test::fixtures::basic_structured_annotations::MyService>(schemaIndex, argumentIndex - 1, *func.name(), *module_MyService_second_count_1.name())
-  ));
   [[maybe_unused]] std::size_t exceptionIndex = 0;
   DCHECK_EQ(*func.is_oneway(), false);
   [[maybe_unused]] auto newAnnotations = std::move(*func.structured_annotations());
   func.structured_annotations()->clear();
   func.structured_annotations()->push_back(*cvStruct("module.structured_annotation_inline", { {"count", cvInteger(2) } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *func.structured_annotations(),
-    newAnnotations,
-    getFunctionAnnotationTypes<::test::fixtures::basic_structured_annotations::MyService>(schemaIndex)
-  ));
 }
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic_structured_annotations::MyService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
@@ -495,11 +425,6 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   [[maybe_unused]] auto module_MyServiceAnnotations = std::move(*module_MyService.structured_annotations());
   module_MyService.structured_annotations()->clear();
   module_MyService.structured_annotations()->push_back(*cvStruct("module.structured_annotation_inline", { {"count", cvInteger(3) } }).cv_struct());
-  DCHECK(structuredAnnotationsEquality(
-    *module_MyService.structured_annotations(),
-    module_MyServiceAnnotations,
-    getAnnotationTypes<::test::fixtures::basic_structured_annotations::MyService>()
-  ));
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.MyService", std::move(module_MyService));
   context.service_name() = "module.MyService";

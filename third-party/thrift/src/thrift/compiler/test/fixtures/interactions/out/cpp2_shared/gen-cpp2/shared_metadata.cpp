@@ -61,11 +61,6 @@ StructMetadata<::thrift::shared_interactions::DoSomethingResult>::gen(ThriftMeta
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::thrift::shared_interactions::DoSomethingResult>()
-  ));
   return res.metadata;
 }
 
@@ -118,11 +113,6 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   services.emplace_back();
   [[maybe_unused]] auto shared_InteractLocallyAnnotations = std::move(*shared_InteractLocally.structured_annotations());
   shared_InteractLocally.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *shared_InteractLocally.structured_annotations(),
-    shared_InteractLocallyAnnotations,
-    getAnnotationTypes<::thrift::shared_interactions::InteractLocally>()
-  ));
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("shared.InteractLocally", std::move(shared_InteractLocally));
   context.service_name() = "shared.InteractLocally";

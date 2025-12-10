@@ -56,11 +56,6 @@ StructMetadata<::some::ns::IncludedA>::gen(ThriftMetadata& metadata) {
   }
   [[maybe_unused]] auto newAnnotations = std::move(*res.metadata.structured_annotations());
   res.metadata.structured_annotations()->clear();
-  DCHECK(structuredAnnotationsEquality(
-    *res.metadata.structured_annotations(),
-    newAnnotations,
-    getAnnotationTypes<::some::ns::IncludedA>()
-  ));
   return res.metadata;
 }
 

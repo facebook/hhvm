@@ -455,10 +455,10 @@ GenMetadataResult<metadata::ThriftStruct> genStructMetadata(
 }
 
 void genStructFieldMetadata(
-    const syntax_graph::StructuredNode& node,
+    const syntax_graph::StructuredNode&,
     metadata::ThriftField& field,
     const EncodedThriftField& f,
-    size_t index) {
+    size_t) {
   DCHECK_EQ(*field.id(), f.id);
   DCHECK_EQ(*field.name(), f.name);
   DCHECK_EQ(*field.is_optional(), f.is_optional);
@@ -466,11 +466,6 @@ void genStructFieldMetadata(
   auto newAnnotations = std::move(*field.structured_annotations());
   field.structured_annotations().emplace().assign(
       f.structured_annotations.begin(), f.structured_annotations.end());
-
-  DCHECK(structuredAnnotationsEquality(
-      *field.structured_annotations(),
-      newAnnotations,
-      getFieldAnnotationTypes(node, index, static_cast<std::int16_t>(f.id))));
 }
 
 GenMetadataResult<metadata::ThriftException> genExceptionMetadata(
@@ -575,99 +570,6 @@ metadata::ThriftService genServiceMetadata(
         genStructuredAnnotations(node.definition().annotations());
   }
   return ret;
-}
-
-std::vector<syntax_graph::TypeRef> getAnnotationTypes(
-    folly::span<const syntax_graph::Annotation> annotations) {
-  std::vector<syntax_graph::TypeRef> ret;
-  ret.reserve(annotations.size());
-  for (auto& annotation : annotations) {
-    ret.push_back(annotation.type());
-  }
-  return ret;
-}
-
-std::vector<syntax_graph::TypeRef> getFieldAnnotationTypes(
-    const syntax_graph::StructuredNode& node,
-    size_t position,
-    std::int16_t id) {
-  DCHECK_LT(position, node.fields().size());
-  const auto& field = node.fields()[position];
-  DCHECK_EQ(static_cast<std::int16_t>(field.id()), id);
-  return getAnnotationTypes(field.annotations());
-}
-
-namespace {
-// In ThriftConstValue, `set`/`map` are stored as list.
-// This function sort `set`/`map` so that we can do equality comparison.
-void normalizeThriftConstValue(
-    ThriftConstValue& t, const syntax_graph::TypeRef& type);
-
-void normalizeThriftConstStruct(
-    ThriftConstStruct& t, const syntax_graph::TypeRef& type) {
-  std::unordered_map<std::string, syntax_graph::TypeRef> fieldType;
-  for (auto& field : type.trueType().asStructured().fields()) {
-    fieldType.emplace(field.name(), field.type());
-  }
-  for (auto& [name, value] : *t.fields()) {
-    normalizeThriftConstValue(value, fieldType.at(name));
-  }
-}
-void normalizeThriftConstValue(
-    ThriftConstValue& t, const syntax_graph::TypeRef& ref) {
-  const auto& type = ref.trueType();
-  if (type.isList()) {
-    for (auto& i : *t.cv_list()) {
-      normalizeThriftConstValue(i, type.asList().elementType());
-    }
-  }
-
-  if (type.isSet()) {
-    for (auto& i : *t.cv_list()) {
-      normalizeThriftConstValue(i, type.asSet().elementType());
-    }
-    std::sort(t.cv_list()->begin(), t.cv_list()->end());
-  }
-
-  if (type.isMap()) {
-    auto keyType = type.asMap().keyType();
-    auto valueType = type.asMap().valueType();
-    for (auto& i : *t.cv_map()) {
-      normalizeThriftConstValue(*i.key(), keyType);
-      normalizeThriftConstValue(*i.value(), valueType);
-    }
-    std::sort(t.cv_map()->begin(), t.cv_map()->end());
-  }
-
-  if (type.isStructured()) {
-    normalizeThriftConstStruct(*t.cv_struct(), type);
-  }
-}
-
-// This function will sort structured annotations, as well as sorting
-// `set`/`map` inside annotations so that we can do equality comparison.
-std::vector<ThriftConstStruct> normalizeStructuredAnnotations(
-    std::vector<ThriftConstStruct> annotations,
-    const std::unordered_map<std::string, syntax_graph::TypeRef>& nameToType) {
-  for (auto& i : annotations) {
-    normalizeThriftConstStruct(i, nameToType.at(*i.type()->name()));
-  }
-  std::sort(annotations.begin(), annotations.end());
-  return annotations;
-}
-} // namespace
-
-bool structuredAnnotationsEquality(
-    std::vector<ThriftConstStruct> lhsAnnotations,
-    std::vector<ThriftConstStruct> rhsAnnotations,
-    const std::vector<syntax_graph::TypeRef>& annotationTypes) {
-  std::unordered_map<std::string, syntax_graph::TypeRef> nameToType;
-  for (const auto& i : annotationTypes) {
-    nameToType.emplace(getName(i.trueType().asStructured()), i);
-  }
-  return normalizeStructuredAnnotations(
-             std::move(lhsAnnotations), nameToType) ==
-      normalizeStructuredAnnotations(std::move(rhsAnnotations), nameToType);
 }
 
 const ThriftServiceContextRef* genServiceMetadataRecurse(

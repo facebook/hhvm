@@ -24,6 +24,127 @@
 namespace apache::thrift::test {
 
 using metadata::detail::LimitedVector;
+using namespace apache::thrift::detail::md;
+using namespace apache::thrift::metadata;
+
+std::vector<syntax_graph::TypeRef> getAnnotationTypes(
+    folly::span<const syntax_graph::Annotation> annotations);
+
+template <class T>
+auto getAnnotationTypes() {
+  return getAnnotationTypes(
+      SchemaRegistry::get().getDefinitionNode<T>().annotations());
+}
+
+std::vector<syntax_graph::TypeRef> getFieldAnnotationTypes(
+    const syntax_graph::StructuredNode& node, size_t position, std::int16_t id);
+
+template <class T>
+auto getFieldAnnotationTypes(size_t position, std::int16_t id) {
+  return getFieldAnnotationTypes(
+      SchemaRegistry::get().getNode<T>(), position, id);
+}
+
+std::vector<syntax_graph::TypeRef> getAnnotationTypes(
+    folly::span<const syntax_graph::Annotation> annotations) {
+  std::vector<syntax_graph::TypeRef> ret;
+  ret.reserve(annotations.size());
+  for (auto& annotation : annotations) {
+    ret.push_back(annotation.type());
+  }
+  return ret;
+}
+
+std::vector<syntax_graph::TypeRef> getFieldAnnotationTypes(
+    const syntax_graph::StructuredNode& node,
+    size_t position,
+    std::int16_t id) {
+  DCHECK_LT(position, node.fields().size());
+  const auto& field = node.fields()[position];
+  DCHECK_EQ(static_cast<std::int16_t>(field.id()), id);
+  return getAnnotationTypes(field.annotations());
+}
+
+// In ThriftConstValue, `set`/`map` are stored as list.
+// This function sort `set`/`map` so that we can do equality comparison.
+void normalizeThriftConstValue(
+    ThriftConstValue& t, const syntax_graph::TypeRef& type);
+
+void normalizeThriftConstStruct(
+    ThriftConstStruct& t, const syntax_graph::TypeRef& type) {
+  std::unordered_map<std::string, syntax_graph::TypeRef> fieldType;
+  for (auto& field : type.trueType().asStructured().fields()) {
+    fieldType.emplace(field.name(), field.type());
+  }
+  for (auto& [name, value] : *t.fields()) {
+    normalizeThriftConstValue(value, fieldType.at(name));
+  }
+}
+void normalizeThriftConstValue(
+    ThriftConstValue& t, const syntax_graph::TypeRef& ref) {
+  const auto& type = ref.trueType();
+  if (type.isList()) {
+    for (auto& i : *t.cv_list()) {
+      normalizeThriftConstValue(i, type.asList().elementType());
+    }
+  }
+
+  if (type.isSet()) {
+    for (auto& i : *t.cv_list()) {
+      normalizeThriftConstValue(i, type.asSet().elementType());
+    }
+    std::sort(t.cv_list()->begin(), t.cv_list()->end());
+  }
+
+  if (type.isMap()) {
+    auto keyType = type.asMap().keyType();
+    auto valueType = type.asMap().valueType();
+    for (auto& i : *t.cv_map()) {
+      normalizeThriftConstValue(*i.key(), keyType);
+      normalizeThriftConstValue(*i.value(), valueType);
+    }
+    std::sort(t.cv_map()->begin(), t.cv_map()->end());
+  }
+
+  if (type.isStructured()) {
+    normalizeThriftConstStruct(*t.cv_struct(), type);
+  }
+}
+
+// This function will sort structured annotations, as well as sorting
+// `set`/`map` inside annotations so that we can do equality comparison.
+std::vector<ThriftConstStruct> normalizeStructuredAnnotations(
+    std::vector<ThriftConstStruct> annotations,
+    const std::unordered_map<std::string, syntax_graph::TypeRef>& nameToType) {
+  for (auto& i : annotations) {
+    normalizeThriftConstStruct(i, nameToType.at(*i.type()->name()));
+  }
+  std::sort(annotations.begin(), annotations.end());
+  return annotations;
+}
+
+template <class Node>
+static std::string getName(const Node& node) {
+  const auto& def = node.definition();
+  return fmt::format("{}.{}", def.program().name(), def.name());
+}
+
+// A Helper function to check whether two list of structured annotations have
+// same data. We can not rely on `std::vector::operator==` directly since
+// Annotations' order, as well as the order of `set`/`map` in the annotation
+// fields might not be preserved.
+bool structuredAnnotationsEquality(
+    std::vector<ThriftConstStruct> lhsAnnotations,
+    std::vector<ThriftConstStruct> rhsAnnotations,
+    const std::vector<syntax_graph::TypeRef>& annotationTypes) {
+  std::unordered_map<std::string, syntax_graph::TypeRef> nameToType;
+  for (const auto& i : annotationTypes) {
+    nameToType.emplace(getName(i.trueType().asStructured()), i);
+  }
+  return normalizeStructuredAnnotations(
+             std::move(lhsAnnotations), nameToType) ==
+      normalizeStructuredAnnotations(std::move(rhsAnnotations), nameToType);
+}
 
 LimitedVector<metadata::ThriftConstStruct> expectedAnnotations() {
   LimitedVector<metadata::ThriftConstStruct> ret;
@@ -84,17 +205,16 @@ metadata::ThriftEnum expectedEnum() {
 
 TEST(Annotations, Enum) {
   metadata::ThriftMetadata md;
-  detail::md::EnumMetadata<TestEnum>::gen(md);
+  EnumMetadata<TestEnum>::gen(md);
   auto actual = md.enums()->at("annotations.TestEnum");
   auto expected = expectedEnum();
-  auto types = detail::md::getAnnotationTypes<TestEnum>();
+  auto types = getAnnotationTypes<TestEnum>();
 
   // Annotations require a special function to check equality.
-  EXPECT_TRUE(
-      detail::md::structuredAnnotationsEquality(
-          *actual.structured_annotations(),
-          *expected.structured_annotations(),
-          types));
+  EXPECT_TRUE(structuredAnnotationsEquality(
+      *actual.structured_annotations(),
+      *expected.structured_annotations(),
+      types));
 
   actual.structured_annotations()->clear();
   expected.structured_annotations()->clear();
@@ -115,7 +235,7 @@ TEST(Annotations, Normalization) {
     std::vector<metadata::ThriftConstStruct> rhs = {lhs[1], lhs[0]};
     std::vector<syntax_graph::TypeRef> types = {annotationType, fooType};
 
-    EXPECT_TRUE(detail::md::structuredAnnotationsEquality(lhs, rhs, types));
+    EXPECT_TRUE(structuredAnnotationsEquality(lhs, rhs, types));
   }
   {
     metadata::ThriftConstStruct lhs;
@@ -126,9 +246,7 @@ TEST(Annotations, Normalization) {
     rhs.type()->name() = "annotations.Annotation";
     rhs.fields()["boolField"].cv_bool() = true;
 
-    EXPECT_FALSE(
-        detail::md::structuredAnnotationsEquality(
-            {lhs}, {rhs}, {annotationType}));
+    EXPECT_FALSE(structuredAnnotationsEquality({lhs}, {rhs}, {annotationType}));
   }
   {
     metadata::ThriftConstStruct lhs;
@@ -143,9 +261,7 @@ TEST(Annotations, Normalization) {
     rhs.fields()["listField"].cv_list()->emplace_back().cv_integer() = 1;
     rhs.fields()["listField"].cv_list()->emplace_back().cv_integer() = 2;
 
-    EXPECT_FALSE(
-        detail::md::structuredAnnotationsEquality(
-            {lhs}, {rhs}, {annotationType}));
+    EXPECT_FALSE(structuredAnnotationsEquality({lhs}, {rhs}, {annotationType}));
   }
   {
     metadata::ThriftConstStruct lhs;
@@ -160,9 +276,7 @@ TEST(Annotations, Normalization) {
     rhs.fields()["setField"].cv_list()->emplace_back().cv_integer() = 1;
     rhs.fields()["setField"].cv_list()->emplace_back().cv_integer() = 2;
 
-    EXPECT_TRUE(
-        detail::md::structuredAnnotationsEquality(
-            {lhs}, {rhs}, {annotationType}));
+    EXPECT_TRUE(structuredAnnotationsEquality({lhs}, {rhs}, {annotationType}));
   }
   {
     metadata::ThriftConstStruct lhs;
@@ -185,17 +299,15 @@ TEST(Annotations, Normalization) {
     rhs.fields()["mapField"].cv_map()->back().key()->cv_integer() = 2;
     rhs.fields()["mapField"].cv_map()->back().value()->cv_string() = "20";
 
-    EXPECT_TRUE(
-        detail::md::structuredAnnotationsEquality(
-            {lhs}, {rhs}, {annotationType}));
+    EXPECT_TRUE(structuredAnnotationsEquality({lhs}, {rhs}, {annotationType}));
   }
 }
 
 TEST(Annotations, TestFloat) {
   metadata::ThriftMetadata md1, md2, md3;
-  const auto& t1 = detail::md::StructMetadata<TestFloat1>::gen(md1);
-  const auto& t2 = detail::md::StructMetadata<TestFloat2>::gen(md2);
-  const auto& t3 = detail::md::StructMetadata<TestFloat3>::gen(md3);
+  const auto& t1 = StructMetadata<TestFloat1>::gen(md1);
+  const auto& t2 = StructMetadata<TestFloat2>::gen(md2);
+  const auto& t3 = StructMetadata<TestFloat3>::gen(md3);
   EXPECT_EQ(t1.structured_annotations(), t2.structured_annotations());
   EXPECT_NE(t1.structured_annotations(), t3.structured_annotations());
 }
@@ -230,26 +342,23 @@ metadata::ThriftException expectedException() {
 
 TEST(Annotations, Struct) {
   metadata::ThriftMetadata md;
-  auto actual = detail::md::StructMetadata<TestStruct>::gen(md);
+  auto actual = StructMetadata<TestStruct>::gen(md);
   auto expected = expectedStruct();
 
   // Annotations require a special function to check equality.
   for (size_t i = 0; i < actual.fields()->size(); ++i) {
-    EXPECT_TRUE(
-        detail::md::structuredAnnotationsEquality(
-            *actual.fields()[i].structured_annotations(),
-            *expected.fields()[i].structured_annotations(),
-            detail::md::getFieldAnnotationTypes<TestStruct>(
-                i, *actual.fields()[i].id())));
+    EXPECT_TRUE(structuredAnnotationsEquality(
+        *actual.fields()[i].structured_annotations(),
+        *expected.fields()[i].structured_annotations(),
+        getFieldAnnotationTypes<TestStruct>(i, *actual.fields()[i].id())));
     actual.fields()[i].structured_annotations()->clear();
     expected.fields()[i].structured_annotations()->clear();
   }
 
-  EXPECT_TRUE(
-      detail::md::structuredAnnotationsEquality(
-          *actual.structured_annotations(),
-          *expected.structured_annotations(),
-          detail::md::getAnnotationTypes<TestStruct>()));
+  EXPECT_TRUE(structuredAnnotationsEquality(
+      *actual.structured_annotations(),
+      *expected.structured_annotations(),
+      getAnnotationTypes<TestStruct>()));
 
   actual.structured_annotations()->clear();
   expected.structured_annotations()->clear();
@@ -260,16 +369,15 @@ TEST(Annotations, Struct) {
 
 TEST(Annotations, Exception) {
   metadata::ThriftMetadata md;
-  detail::md::ExceptionMetadata<TestException>::gen(md);
+  ExceptionMetadata<TestException>::gen(md);
   auto actual = md.exceptions()->at("annotations.TestException");
   auto expected = expectedException();
 
   // Annotations require a special function to check equality.
-  EXPECT_TRUE(
-      detail::md::structuredAnnotationsEquality(
-          *actual.structured_annotations(),
-          *expected.structured_annotations(),
-          detail::md::getAnnotationTypes<TestException>()));
+  EXPECT_TRUE(structuredAnnotationsEquality(
+      *actual.structured_annotations(),
+      *expected.structured_annotations(),
+      getAnnotationTypes<TestException>()));
 
   actual.structured_annotations()->clear();
   expected.structured_annotations()->clear();
@@ -280,8 +388,7 @@ TEST(Annotations, Exception) {
 
 TEST(Annotations, Service) {
   metadata::ThriftMetadata md;
-  auto service =
-      detail::md::genServiceMetadata<TestService>(md, {.genAnnotations = true});
+  auto service = genServiceMetadata<TestService>(md, {.genAnnotations = true});
   EXPECT_EQ(
       service.structured_annotations()->begin()->fields()["baz"].cv_string(),
       "0");

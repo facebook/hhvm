@@ -341,31 +341,6 @@ metadata::ThriftService genServiceMetadata(
       getDefinitionNodeWithLock<Tag>().asService(), md, options);
 }
 
-std::vector<syntax_graph::TypeRef> getAnnotationTypes(
-    folly::span<const syntax_graph::Annotation> annotations);
-
-template <class T>
-auto getAnnotationTypes() {
-  return getAnnotationTypes(getDefinitionNodeWithLock<T>().annotations());
-}
-
-std::vector<syntax_graph::TypeRef> getFieldAnnotationTypes(
-    const syntax_graph::StructuredNode& node, size_t position, std::int16_t id);
-
-template <class T>
-auto getFieldAnnotationTypes(size_t position, std::int16_t id) {
-  return getFieldAnnotationTypes(getNodeWithLock<T>(), position, id);
-}
-
-// A Helper function to check whether two list of structured annotations have
-// same data. We can not rely on `std::vector::operator==` directly since
-// Annotations' order, as well as the order of `set`/`map` in the annotation
-// fields might not be preserved.
-bool structuredAnnotationsEquality(
-    std::vector<ThriftConstStruct> lhsAnnotations,
-    std::vector<ThriftConstStruct> rhsAnnotations,
-    const std::vector<syntax_graph::TypeRef>& annotationTypes);
-
 const ThriftServiceContextRef* genServiceMetadataRecurse(
     const syntax_graph::ServiceNode& node,
     ThriftMetadata& metadata,

@@ -37,6 +37,10 @@ class ClientCallbackStapler : public BiDiClientCallback,
     explicit DeletionGuard(ClientCallbackStapler* self) : self_(self) {
       self_->depth_++;
     }
+    DeletionGuard(const DeletionGuard&) = delete;
+    DeletionGuard& operator=(const DeletionGuard&) = delete;
+    DeletionGuard(DeletionGuard&&) = delete;
+    DeletionGuard& operator=(DeletionGuard&&) = delete;
     ~DeletionGuard() {
       self_->depth_--;
       if (self_->depth_ == 0 && !self_->sink_ && !self_->stream_) {

@@ -535,7 +535,7 @@ let to_locl_ty ?(keytrace = []) (ctx : Provider_context.t) (json : Hh_json.json)
                 (* Class may not exist (such as in non-strict modes). *)
                 Pos_or_decl.none
             in
-            Ok (Tclass ((class_pos, name), nonexact, []))
+            Ok (Tclass ((class_pos, SN.Classes.cString), nonexact, []))
           | "resource" -> Ok (Tprim Nast.Tresource)
           | "num" -> Ok (Tprim Nast.Tnum)
           | "arraykey" -> Ok (Tprim Nast.Tarraykey)

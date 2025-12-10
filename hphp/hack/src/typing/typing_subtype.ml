@@ -3212,6 +3212,18 @@ end = struct
         ~ty_sub:(LoclType ty_sub)
         ~ty_super:(LoclType ty_super)
     in
+    let simplify_splat_vec env ty =
+      let (env, ty) = Env.expand_type env ty in
+      match deref ty with
+      | (r, Tclass ((_, n), _, [ty])) when String.equal n SN.Collections.cVec ->
+        ( env,
+          mk
+            ( r,
+              Ttuple
+                { t_required = []; t_optional = []; t_extra = Tvariadic ty } )
+        )
+      | _ -> (env, ty)
+    in
     let (env, ty_sub) =
       if subtype_env.Subtype_env.ignore_likes then
         let (env, ty_opt) =
@@ -3229,6 +3241,7 @@ end = struct
     (* (...t) <: t *)
     | ( (_, Ttuple { t_required = []; t_optional = []; t_extra = Tsplat ty_sub }),
         _ ) ->
+      let (env, ty_sub) = simplify_splat_vec env ty_sub in
       env
       |> simplify
            ~subtype_env
@@ -3240,6 +3253,7 @@ end = struct
         ( _,
           Ttuple { t_required = []; t_optional = []; t_extra = Tsplat ty_super }
         ) ) ->
+      let (env, ty_sub) = simplify_splat_vec env ty_sub in
       env
       |> simplify
            ~subtype_env

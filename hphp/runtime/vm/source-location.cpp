@@ -130,7 +130,7 @@ LineInfo getLineInfo(const LineTable& table, Offset pc) {
     if (line > 0) {
       auto const pastOff = it->pastOffset();
       auto const baseOff = it == begin(table) ?
-        pc : std::prev(it)->pastOffset();
+        0 : std::prev(it)->pastOffset();
       assertx(baseOff <= pc && pc < pastOff);
       return { { baseOff, pastOff }, line };
     }

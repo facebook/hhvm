@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include <folly/Conv.h>
 #include <folly/portability/GFlags.h>
+#include <folly/system/HardwareConcurrency.h>
 
 #include <glog/logging.h>
 
@@ -978,7 +979,7 @@ void TransportCompatibilityTest::TestOneway_ServerQueueTimeout() {
   // requests.
   connectToServer(
       [this](std::unique_ptr<TestServiceAsyncClient> client) mutable {
-        int32_t numCores = sysconf(_SC_NPROCESSORS_ONLN);
+        int32_t numCores = folly::available_concurrency();
         int callCount = numCores + 1; // more than the core count!
 
         // TODO: fixme T22871783: Oneway tasks don't get cancelled

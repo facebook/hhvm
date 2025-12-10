@@ -18,6 +18,7 @@
 
 #include <folly/init/Init.h>
 #include <folly/portability/GFlags.h>
+#include <folly/system/HardwareConcurrency.h>
 
 #include <proxygen/httpserver/HTTPServerOptions.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
@@ -58,7 +59,7 @@ std::unique_ptr<HTTP2RoutingHandler> createHTTP2RoutingHandler(
 int main(int argc, char** argv) {
   const folly::Init init(&argc, &argv);
 
-  int32_t numCores = sysconf(_SC_NPROCESSORS_ONLN);
+  int32_t numCores = folly::available_concurrency();
   if (FLAGS_io_threads == 0) {
     FLAGS_io_threads = numCores;
   }

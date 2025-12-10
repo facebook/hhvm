@@ -34,6 +34,7 @@
 #include <folly/portability/GFlags.h>
 #include <folly/portability/Unistd.h>
 #include <folly/synchronization/LifoSem.h>
+#include <folly/system/HardwareConcurrency.h>
 
 #include <thrift/lib/cpp/concurrency/FunctionRunner.h>
 #include <thrift/lib/cpp/concurrency/PosixThreadFactory.h>
@@ -397,7 +398,7 @@ class PriorityThreadManager : public ThreadManager {
    *          to the number of CPUs on the system
    */
   static std::shared_ptr<PriorityThreadManager> newPriorityThreadManager(
-      size_t normalThreadsCount = sysconf(_SC_NPROCESSORS_ONLN));
+      size_t normalThreadsCount = folly::available_concurrency());
 
   class PriorityImpl;
 };

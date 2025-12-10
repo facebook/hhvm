@@ -17,6 +17,7 @@
 #include <thrift/lib/cpp2/transport/util/ConnectionManager.h>
 
 #include <folly/portability/GFlags.h>
+#include <folly/system/HardwareConcurrency.h>
 
 #include <folly/Singleton.h>
 
@@ -40,7 +41,7 @@ std::shared_ptr<ConnectionManager> ConnectionManager::getInstance() {
 
 ConnectionManager::ConnectionManager() {
   if (FLAGS_num_client_connections == 0) {
-    FLAGS_num_client_connections = sysconf(_SC_NPROCESSORS_ONLN);
+    FLAGS_num_client_connections = folly::available_concurrency();
   }
   for (int32_t i = 0; i < FLAGS_num_client_connections; ++i) {
     threads_.push_back(std::make_unique<ConnectionThread>());

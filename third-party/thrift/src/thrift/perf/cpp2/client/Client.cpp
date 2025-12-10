@@ -15,6 +15,7 @@
  */
 
 #include <algorithm>
+#include <folly/system/HardwareConcurrency.h>
 #include <thrift/perf/cpp2/if/gen-cpp2/StreamBenchmark.h>
 #include <thrift/perf/cpp2/util/Operation.h>
 #include <thrift/perf/cpp2/util/QPSStats.h>
@@ -63,7 +64,7 @@ DEFINE_uint32(batch_size, 16, "Flow control batch size");
 int main(int argc, char** argv) {
   const folly::Init init(&argc, &argv);
   if (FLAGS_num_clients == 0) {
-    int32_t numCores = sysconf(_SC_NPROCESSORS_ONLN);
+    int32_t numCores = folly::available_concurrency();
     FLAGS_num_clients = numCores;
   }
 

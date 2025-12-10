@@ -108,7 +108,7 @@ TEST_F(SchemaTest, linked) {
 TEST_F(SchemaTest, static_schema) {
   auto static_schema = schema::detail::mergeSchemas(
       facebook::thrift::test::schema::schema_constants::
-          _fbthrift_schema_3199f28ddfae7bfa_includes());
+          _fbthrift_schema_b303fc86e3a41852_includes());
   const type::Program* static_program = nullptr;
   for (const auto& program : *static_schema.programs()) {
     if (program.path() == "thrift/test/schema.thrift") {
@@ -131,7 +131,7 @@ TEST_F(SchemaTest, static_schema) {
 
 TEST_F(SchemaTest, merged_schema_add_after_access) {
   auto data = facebook::thrift::test::schema::schema_constants::
-      _fbthrift_schema_3199f28ddfae7bfa();
+      _fbthrift_schema_b303fc86e3a41852();
 
   BaseSchemaRegistry base;
   SchemaRegistry registry(base);
@@ -156,6 +156,19 @@ TEST_F(SchemaTest, service_schema) {
   EXPECT_EQ(service.functions()[0].name(), "noParamsNoReturnNoEx");
   EXPECT_EQ(
       service.functions()[0].returnType()->baseType(), type::BaseType::Void);
+
+  // thrift/lib/thrift/* is included using the omnibus bundle.
+  auto syntaxGraph = SyntaxGraph::fromSchema(std::move(metadata->schema));
+  const syntax_graph::ProgramNode& program =
+      syntaxGraph.findProgramByPath("thrift/lib/thrift/any.thrift");
+  EXPECT_EQ(
+      program.definitionsByName()
+          .at("Any")
+          ->asTypedef()
+          .targetType()
+          .asStruct()
+          .uri(),
+      "facebook.com/thrift/type/Any");
 }
 
 TEST_F(SchemaTest, schema_data_traits) {

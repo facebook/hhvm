@@ -21,6 +21,14 @@
 #include <folly/compression/Compression.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 
+#if __has_include(<thrift/facebook/schema/omnibus_schema_header.h>)
+#include <thrift/facebook/schema/omnibus_schema_header.h>
+#else
+namespace {
+constexpr std::string_view __fbthrift_omnibus_schema;
+}
+#endif
+
 namespace apache::thrift::schema::detail {
 std::optional<type::Schema> readSchema(std::string_view data) {
   if (data.empty()) {
@@ -102,6 +110,31 @@ type::Schema mergeSchemas(std::vector<type::Schema>&& schemas) {
 
   return mergedSchema;
 }
+
+type::Schema loadBundledSchema(folly::Range<const std::string_view*> schemas) {
+  type::Schema mergedSchema;
+  std::unordered_set<type::ProgramId> includedPrograms;
+
+  if (auto schema = readSchema(__fbthrift_omnibus_schema)) {
+    mergeInto(
+        mergedSchema,
+        std::move(*schema),
+        includedPrograms,
+        /*allowDuplicateDefinitionKeys*/ false);
+  }
+  for (const auto& data : schemas) {
+    if (auto schema = readSchema(data)) {
+      mergeInto(
+          mergedSchema,
+          std::move(*schema),
+          includedPrograms,
+          /*allowDuplicateDefinitionKeys*/ false);
+    }
+  }
+
+  return mergedSchema;
+}
+
 } // namespace apache::thrift::schema::detail
 
 #endif

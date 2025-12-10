@@ -11,13 +11,6 @@
  * SinkService
  */
 interface SinkServiceAsyncIf extends \IThriftAsyncIf {
-}
-
-/**
- * Original thrift service:-
- * SinkService
- */
-interface SinkServiceAsyncClientIf extends SinkServiceAsyncIf {
   /**
    * Original thrift definition:-
    * void, sink<SinkPayload, FinalResponse>
@@ -67,6 +60,13 @@ interface SinkServiceAsyncClientIf extends SinkServiceAsyncIf {
    *   methodFast();
    */
   public function methodFast(): Awaitable<\ResponseAndClientSink<null, SinkPayload, FinalResponse>>;
+}
+
+/**
+ * Original thrift service:-
+ * SinkService
+ */
+interface SinkServiceAsyncClientIf extends SinkServiceAsyncIf {
 }
 
 /**
@@ -266,6 +266,158 @@ class SinkServiceClient extends \ThriftClientBase implements SinkServiceClientIf
 
   const string THRIFT_SVC_NAME = SinkServiceStaticMetadata::THRIFT_SVC_NAME;
 
+}
+
+abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
+  use \GetThriftServiceMetadata;
+  abstract const type TThriftIf as SinkServiceAsyncIf;
+  const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = SinkServiceStaticMetadata::class;
+  const string THRIFT_SVC_NAME = SinkServiceStaticMetadata::THRIFT_SVC_NAME;
+
+  protected async function process_method(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
+    $handler_ctx = $this->eventHandler_->getHandlerContext('method');
+    $reply_type = \TMessageType::REPLY;
+    $result = SinkService_method_FirstResponse::withDefaultValues();
+    try {
+      $args = $this->readHelper(SinkService_method_args::class, $input, 'method', $handler_ctx);
+      $this->eventHandler_->preExec($handler_ctx, 'SinkService', 'method', $args);
+      $response_and_sink = await $this->handler->method();
+      $this->eventHandler_->postExec($handler_ctx, 'method', $result);
+      $this->writeHelper($result, 'method', $seqid, $handler_ctx, $output, $reply_type);
+      await $this->genExecuteSink($response_and_sink->genSink, SinkService_method_SinkPayload::class, SinkService_method_FinalResponse::class, $input, $output, 'method', $handler_ctx);
+      return;
+    } catch (\Exception $ex) {
+      $reply_type = \TMessageType::EXCEPTION;
+      $this->eventHandler_->handlerError($handler_ctx, 'method', $ex);
+      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+    }
+    $this->writeHelper($result, 'method', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  protected async function process_methodAndReponse(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
+    $handler_ctx = $this->eventHandler_->getHandlerContext('methodAndReponse');
+    $reply_type = \TMessageType::REPLY;
+    $result = SinkService_methodAndReponse_FirstResponse::withDefaultValues();
+    try {
+      $args = $this->readHelper(SinkService_methodAndReponse_args::class, $input, 'methodAndReponse', $handler_ctx);
+      $this->eventHandler_->preExec($handler_ctx, 'SinkService', 'methodAndReponse', $args);
+      $response_and_sink = await $this->handler->methodAndReponse();
+      $result->success = $response_and_sink->response;
+      $this->eventHandler_->postExec($handler_ctx, 'methodAndReponse', $result);
+      $this->writeHelper($result, 'methodAndReponse', $seqid, $handler_ctx, $output, $reply_type);
+      await $this->genExecuteSink($response_and_sink->genSink, SinkService_methodAndReponse_SinkPayload::class, SinkService_methodAndReponse_FinalResponse::class, $input, $output, 'methodAndReponse', $handler_ctx);
+      return;
+    } catch (\Exception $ex) {
+      $reply_type = \TMessageType::EXCEPTION;
+      $this->eventHandler_->handlerError($handler_ctx, 'methodAndReponse', $ex);
+      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+    }
+    $this->writeHelper($result, 'methodAndReponse', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  protected async function process_methodThrow(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
+    $handler_ctx = $this->eventHandler_->getHandlerContext('methodThrow');
+    $reply_type = \TMessageType::REPLY;
+    $result = SinkService_methodThrow_FirstResponse::withDefaultValues();
+    try {
+      $args = $this->readHelper(SinkService_methodThrow_args::class, $input, 'methodThrow', $handler_ctx);
+      $this->eventHandler_->preExec($handler_ctx, 'SinkService', 'methodThrow', $args);
+      $response_and_sink = await $this->handler->methodThrow();
+      $this->eventHandler_->postExec($handler_ctx, 'methodThrow', $result);
+      $this->writeHelper($result, 'methodThrow', $seqid, $handler_ctx, $output, $reply_type);
+      await $this->genExecuteSink($response_and_sink->genSink, SinkService_methodThrow_SinkPayload::class, SinkService_methodThrow_FinalResponse::class, $input, $output, 'methodThrow', $handler_ctx);
+      return;
+    } catch (\Exception $ex) {
+      if ($result->setException($ex)) {
+        $this->eventHandler_->handlerException($handler_ctx, 'methodThrow', $ex);
+      } else {
+        $reply_type = \TMessageType::EXCEPTION;
+        $this->eventHandler_->handlerError($handler_ctx, 'methodThrow', $ex);
+        $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+      }
+    }
+    $this->writeHelper($result, 'methodThrow', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  protected async function process_methodSinkThrow(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
+    $handler_ctx = $this->eventHandler_->getHandlerContext('methodSinkThrow');
+    $reply_type = \TMessageType::REPLY;
+    $result = SinkService_methodSinkThrow_FirstResponse::withDefaultValues();
+    try {
+      $args = $this->readHelper(SinkService_methodSinkThrow_args::class, $input, 'methodSinkThrow', $handler_ctx);
+      $this->eventHandler_->preExec($handler_ctx, 'SinkService', 'methodSinkThrow', $args);
+      $response_and_sink = await $this->handler->methodSinkThrow();
+      $this->eventHandler_->postExec($handler_ctx, 'methodSinkThrow', $result);
+      $this->writeHelper($result, 'methodSinkThrow', $seqid, $handler_ctx, $output, $reply_type);
+      await $this->genExecuteSink($response_and_sink->genSink, SinkService_methodSinkThrow_SinkPayload::class, SinkService_methodSinkThrow_FinalResponse::class, $input, $output, 'methodSinkThrow', $handler_ctx);
+      return;
+    } catch (\Exception $ex) {
+      $reply_type = \TMessageType::EXCEPTION;
+      $this->eventHandler_->handlerError($handler_ctx, 'methodSinkThrow', $ex);
+      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+    }
+    $this->writeHelper($result, 'methodSinkThrow', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  protected async function process_methodFinalThrow(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
+    $handler_ctx = $this->eventHandler_->getHandlerContext('methodFinalThrow');
+    $reply_type = \TMessageType::REPLY;
+    $result = SinkService_methodFinalThrow_FirstResponse::withDefaultValues();
+    try {
+      $args = $this->readHelper(SinkService_methodFinalThrow_args::class, $input, 'methodFinalThrow', $handler_ctx);
+      $this->eventHandler_->preExec($handler_ctx, 'SinkService', 'methodFinalThrow', $args);
+      $response_and_sink = await $this->handler->methodFinalThrow();
+      $this->eventHandler_->postExec($handler_ctx, 'methodFinalThrow', $result);
+      $this->writeHelper($result, 'methodFinalThrow', $seqid, $handler_ctx, $output, $reply_type);
+      await $this->genExecuteSink($response_and_sink->genSink, SinkService_methodFinalThrow_SinkPayload::class, SinkService_methodFinalThrow_FinalResponse::class, $input, $output, 'methodFinalThrow', $handler_ctx);
+      return;
+    } catch (\Exception $ex) {
+      $reply_type = \TMessageType::EXCEPTION;
+      $this->eventHandler_->handlerError($handler_ctx, 'methodFinalThrow', $ex);
+      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+    }
+    $this->writeHelper($result, 'methodFinalThrow', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  protected async function process_methodBothThrow(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
+    $handler_ctx = $this->eventHandler_->getHandlerContext('methodBothThrow');
+    $reply_type = \TMessageType::REPLY;
+    $result = SinkService_methodBothThrow_FirstResponse::withDefaultValues();
+    try {
+      $args = $this->readHelper(SinkService_methodBothThrow_args::class, $input, 'methodBothThrow', $handler_ctx);
+      $this->eventHandler_->preExec($handler_ctx, 'SinkService', 'methodBothThrow', $args);
+      $response_and_sink = await $this->handler->methodBothThrow();
+      $this->eventHandler_->postExec($handler_ctx, 'methodBothThrow', $result);
+      $this->writeHelper($result, 'methodBothThrow', $seqid, $handler_ctx, $output, $reply_type);
+      await $this->genExecuteSink($response_and_sink->genSink, SinkService_methodBothThrow_SinkPayload::class, SinkService_methodBothThrow_FinalResponse::class, $input, $output, 'methodBothThrow', $handler_ctx);
+      return;
+    } catch (\Exception $ex) {
+      $reply_type = \TMessageType::EXCEPTION;
+      $this->eventHandler_->handlerError($handler_ctx, 'methodBothThrow', $ex);
+      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+    }
+    $this->writeHelper($result, 'methodBothThrow', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  protected async function process_methodFast(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
+    $handler_ctx = $this->eventHandler_->getHandlerContext('methodFast');
+    $reply_type = \TMessageType::REPLY;
+    $result = SinkService_methodFast_FirstResponse::withDefaultValues();
+    try {
+      $args = $this->readHelper(SinkService_methodFast_args::class, $input, 'methodFast', $handler_ctx);
+      $this->eventHandler_->preExec($handler_ctx, 'SinkService', 'methodFast', $args);
+      $response_and_sink = await $this->handler->methodFast();
+      $this->eventHandler_->postExec($handler_ctx, 'methodFast', $result);
+      $this->writeHelper($result, 'methodFast', $seqid, $handler_ctx, $output, $reply_type);
+      await $this->genExecuteSink($response_and_sink->genSink, SinkService_methodFast_SinkPayload::class, SinkService_methodFast_FinalResponse::class, $input, $output, 'methodFast', $handler_ctx);
+      return;
+    } catch (\Exception $ex) {
+      $reply_type = \TMessageType::EXCEPTION;
+      $this->eventHandler_->handlerError($handler_ctx, 'methodFast', $ex);
+      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+    }
+    $this->writeHelper($result, 'methodFast', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
+    $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, SinkServiceStaticMetadata::class);
+  }
+}
+class SinkServiceAsyncProcessor extends SinkServiceAsyncProcessorBase {
+  const type TThriftIf = SinkServiceAsyncIf;
 }
 
 // HELPER FUNCTIONS AND STRUCTURES

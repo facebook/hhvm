@@ -242,6 +242,26 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
     }
   }
 
+  final protected async function genExecuteSink<
+    TSinkPayloadType as IResultThriftStruct with { type TResult = TSinkType },
+    TSinkType,
+    TSinkFinalResponseType as IResultThriftStruct with {
+      type TResult = TSinkFinalType },
+    TSinkFinalType,
+  >(
+    (function(
+      HH\AsyncGenerator<null, TSinkType, void>,
+    ): Awaitable<TSinkFinalType>) $sink,
+    class<TSinkPayloadType> $sink_payload_type,
+    class<TSinkFinalResponseType> $sink_final_type,
+    TProtocol $input,
+    TProtocol $output,
+    string $request_name = '',
+    mixed $handler_ctx = null,
+  ): Awaitable<void> {
+    throw new NotImplementedException('genExecuteSink is not implemented');
+  }
+
   final public function isSupportedMethod(string $fname_with_prefix)[]: bool {
     return PHP\method_exists($this, $fname_with_prefix);
   }

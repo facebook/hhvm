@@ -127,6 +127,7 @@ class t_hack_generator : public t_concat_generator {
     mangled_services_ = option_is_set(options, "mangledsvcs", false);
     typedef_ = option_is_specified(options, "typedef");
     server_stream_ = option_is_specified(options, "server_stream");
+    server_sink_ = option_is_specified(options, "server_sink");
     skip_constants_ = option_is_specified(options, "skip_constants");
 
     union_logger_rollout_ =
@@ -1080,11 +1081,14 @@ class t_hack_generator : public t_concat_generator {
     if (client) {
       return true;
     }
-    if (func->is_interaction_constructor() || func->sink()) {
+    if (func->is_interaction_constructor()) {
       return false;
     }
     if (func->stream()) {
       return server_stream_ && async;
+    }
+    if (func->sink()) {
+      return server_sink_ && async;
     }
     return true;
   }
@@ -1240,6 +1244,11 @@ class t_hack_generator : public t_concat_generator {
    * True to generate service code for streaming methods
    */
   bool server_stream_;
+
+  /**
+   * True to generate service code for sink methods
+   */
+  bool server_sink_;
 
   bool has_hack_namespace;
 
@@ -5773,6 +5782,7 @@ void t_hack_generator::generate_process_function(
   indent_up();
 
   auto is_stream = tfunction->stream() != nullptr;
+  auto is_sink = tfunction->sink() != nullptr;
 
   std::string service_name = hack_name(tservice);
   std::string argsname = generate_function_helper_name(
@@ -5780,8 +5790,8 @@ void t_hack_generator::generate_process_function(
   std::string resultname = generate_function_helper_name(
       tservice,
       tfunction,
-      is_stream ? PhpFunctionNameSuffix::FIRST_RESPONSE
-                : PhpFunctionNameSuffix::RESULT);
+      is_stream || is_sink ? PhpFunctionNameSuffix::FIRST_RESPONSE
+                           : PhpFunctionNameSuffix::RESULT);
   const std::string& fn_name = find_hack_name(tfunction);
 
   f_service_ << indent()
@@ -5809,6 +5819,8 @@ void t_hack_generator::generate_process_function(
   auto is_void = tfunction->return_type()->is_void();
   if (is_stream) {
     f_service_ << "$response_and_stream = ";
+  } else if (is_sink) {
+    f_service_ << "$response_and_sink = ";
   } else if (
       tfunction->qualifier() != t_function_qualifier::oneway && !is_void) {
     f_service_ << "$result->success = ";
@@ -5837,6 +5849,25 @@ void t_hack_generator::generate_process_function(
                << indent()
                << "await $this->genExecuteStream($response_and_stream->stream, "
                << stream_response_type << "::class, $output, '" << fn_name
+               << "', $handler_ctx);\n"
+               << indent() << "return;\n";
+  } else if (is_sink) {
+    if (!is_void) {
+      f_service_ << indent()
+                 << "$result->success = $response_and_sink->response;\n";
+    }
+    std::string sink_payload_type = generate_function_helper_name(
+        tservice, tfunction, PhpFunctionNameSuffix::SINK_PAYLOAD);
+    std::string sink_final_response_type = generate_function_helper_name(
+        tservice, tfunction, PhpFunctionNameSuffix::SINK_FINAL_RESPONSE);
+    f_service_ << indent() << "$this->eventHandler_->postExec($handler_ctx, '"
+               << fn_name << "', $result);\n"
+               << indent() << "$this->writeHelper($result, '" << fn_name
+               << "', $seqid, $handler_ctx, $output, $reply_type);\n"
+               << indent()
+               << "await $this->genExecuteSink($response_and_sink->genSink, "
+               << sink_payload_type << "::class, " << sink_final_response_type
+               << "::class, $input, $output, '" << fn_name
                << "', $handler_ctx);\n"
                << indent() << "return;\n";
   } else if (tfunction->qualifier() != t_function_qualifier::oneway) {

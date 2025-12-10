@@ -24,7 +24,7 @@ void ServerWorkerPool::registerEventBase(folly::EventBase& evb) {
   auto worker = acceptorFactory_->newAcceptor(&evb);
   {
     std::unique_lock holder(workersMutex_);
-    workers_->push_back({&evb, worker});
+    workers_->emplace_back(&evb, worker);
   }
 
   for (const auto& socket : *sockets_) {

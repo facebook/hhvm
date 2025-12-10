@@ -64,11 +64,10 @@ query_result_type! {
 
 // Skip cookies when diffing.
 fn is_cookie<T: AsRef<Path>>(name: T) -> bool {
-    return name
-        .as_ref()
+    name.as_ref()
         .file_name()
         .and_then(|s| s.to_str())
-        .map_or(false, |s| s.starts_with(".watchman-cookie-"));
+        .map_or(false, |s| s.starts_with(".watchman-cookie-"))
 }
 
 #[cfg(windows)]

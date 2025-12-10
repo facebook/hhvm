@@ -262,6 +262,7 @@ void HTTPTransaction::onIngressHeadersComplete(
             .setTimestamp(proxygen::SteadyClock::now())
             .setType(HTTPTransactionObserverInterface::TxnBytesEvent::Type::
                          LAST_HEADER_BYTE_READ)
+            .setHeaders(*msg)
             .setNumBytes(size.compressed ? size.compressed : size.uncompressed)
             .build();
     emitBytesEvent(e);

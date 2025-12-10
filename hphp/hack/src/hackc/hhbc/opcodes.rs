@@ -52,7 +52,6 @@ use crate::Targets;
 use crate::TypeStructEnforceKind;
 use crate::TypeStructResolveOp;
 use crate::TypedValue;
-use crate::VerifyKind;
 
 #[emit_opcodes_macro::emit_opcodes]
 #[derive(Clone, Debug, Targets, Hash, Eq, PartialEq, Serialize, Flow, Locals)]

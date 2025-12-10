@@ -40,5 +40,5 @@ printer:   Print
            Throw
          }
 endfor:  Int 1
-         RetC None
+         RetC
 }

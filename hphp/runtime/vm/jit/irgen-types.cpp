@@ -1400,7 +1400,9 @@ void raiseClsmethCompatTypeHint(
   }
 }
 
-void verifyRetType(IRGS& env, int32_t id, int32_t ind,
+namespace {
+
+void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
                        bool onlyCheckNullability) {
   auto const func = curFunc(env);
   auto const verifyFunc = [&] (const TypeConstraint& tc, SSATmp* inputVal) -> SSATmp* {
@@ -1479,6 +1481,7 @@ void verifyRetType(IRGS& env, int32_t id, int32_t ind,
     gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), updatedVal);
     env.irb->exceptionStackBoundary();
   }
+}
 }
 
 void verifyParamType(IRGS& env, const Func* func, int32_t id,
@@ -1654,6 +1657,10 @@ SSATmp* verifyPropType(IRGS& env,
   return updatedVal;
 }
 
+void emitVerifyRetTypeC(IRGS& env) {
+  verifyRetTypeImpl(env, TypeConstraint::ReturnId, 0, false);
+}
+
 void emitVerifyRetTypeTS(IRGS& env) {
   auto const ts = popC(env);
   auto const cell = topC(env);
@@ -1681,8 +1688,12 @@ void emitVerifyTypeTS(IRGS& env) {
   popDecRef(env);
 }
 
+void emitVerifyRetNonNullC(IRGS& env) {
+  verifyRetTypeImpl(env, TypeConstraint::ReturnId, 0, true);
+}
+
 void emitVerifyOutType(IRGS& env, int32_t paramId) {
-  verifyRetType(env, paramId, 0, false);
+  verifyRetTypeImpl(env, paramId, 0, false);
 }
 
 void emitVerifyParamType(IRGS& env, int32_t paramId) {

@@ -11,7 +11,7 @@
 // CHECK:   n1 = HH::BuiltinEnum$static._86constinit(n0)
 // CHECK:   n2 = $builtins.hhbc_class_get_c($builtins.hack_string("A"))
 // CHECK:   n3 = $builtins.hack_set_static_prop($builtins.hack_string("A"), $builtins.hack_string("V"), $builtins.hack_int(1))
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 
 // TEST-CHECK-BAL: define A$static._86sinit
@@ -22,7 +22,7 @@
 // CHECK:   n2: *A$static = load &$this
 // CHECK:   n3 = A$static._86constinit(n2)
 // CHECK:   n4 = $builtins.hhbc_class_get_c($builtins.hack_string("A"))
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 
 enum A: int {
@@ -51,7 +51,7 @@ enum A: int {
 // CHECK: // .column 3
 // CHECK:   n9 = $builtins.hhbc_print($builtins.hack_string("\n"))
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 function main(): void {
   echo "A::V = ", A::V, "\n";

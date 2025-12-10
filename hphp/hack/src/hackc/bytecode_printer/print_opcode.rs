@@ -50,7 +50,6 @@ use hhbc::SwitchKind;
 use hhbc::TypeStructEnforceKind;
 use hhbc::TypeStructResolveOp;
 use hhbc::TypedValue;
-use hhbc::VerifyKind;
 use hhbc_string_utils::float;
 use print_opcode::PrintOpcode;
 use print_opcode::PrintOpcodeTypes;
@@ -196,7 +195,6 @@ print_with_debug!(print_set_range_op, SetRangeOp);
 print_with_debug!(print_special_cls_ref, SpecialClsRef);
 print_with_debug!(print_switch_kind, SwitchKind);
 print_with_debug!(print_type_struct_resolve_op, TypeStructResolveOp);
-print_with_debug!(print_verify_kind, VerifyKind);
 print_with_debug!(print_type_struct_enforce_kind, TypeStructEnforceKind);
 print_with_debug!(
     print_as_type_struct_exception_kind,

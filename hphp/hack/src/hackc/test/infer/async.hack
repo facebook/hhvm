@@ -46,7 +46,7 @@
 // CHECK: // .column 3
 // CHECK:   n12 = $builtins.hhbc_verify_type_pred(n10, n11)
 // CHECK: // .column 3
-// CHECK:   ret none n10
+// CHECK:   ret n10
 // CHECK: }
 async function test_async(): Awaitable<int> {
   $a = await bar();

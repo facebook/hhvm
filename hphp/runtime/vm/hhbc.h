@@ -464,7 +464,6 @@ const char* subopToName(MOpMode);
 const char* subopToName(QueryMOp);
 const char* subopToName(SetRangeOp);
 const char* subopToName(TypeStructResolveOp);
-const char* subopToName(VerifyKind);
 const char* subopToName(TypeStructEnforceKind);
 const char* subopToName(AsTypeStructExceptionKind);
 const char* subopToName(ContCheckOp);
@@ -534,9 +533,9 @@ constexpr bool instrIsControlFlow(Op opcode) {
 }
 
 constexpr bool isAwait(Op opcode) {
-  return
-    opcode == Op::Await ||
-    opcode == Op::AwaitAll ||
+  return 
+    opcode == Op::Await || 
+    opcode == Op::AwaitAll || 
     opcode == Op::AwaitLowPri;
 }
 
@@ -718,7 +717,7 @@ inline MOpMode finalMemberOpMode(Op op) {
 // true if the opcode body can set pc=0 to halt the interpreter.
 constexpr bool instrCanHalt(Op op) {
   return isAwait(op) || op == OpRetC || op == OpNativeImpl ||
-         op == OpCreateCont || op == OpYield || op == OpYieldK ||
+         op == OpCreateCont || op == OpYield || op == OpYieldK || 
          op == OpRetM || op == OpRetCSuspended;
 }
 

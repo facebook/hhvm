@@ -12,7 +12,7 @@ class ReturnType {
   // CHECK: // .column 5
   // CHECK:   n2 = $builtins.hhbc_verify_type_pred(n0, n1)
   // CHECK: // .column 5
-  // CHECK:   ret none n0
+  // CHECK:   ret n0
   // CHECK: }
   public function f(): this {
     return $this;

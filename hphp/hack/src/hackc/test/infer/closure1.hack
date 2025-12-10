@@ -18,7 +18,7 @@ abstract class Base {
 // CHECK: // .column 5
 // CHECK:   n5 = $root.helper(null, n2)
 // CHECK: // .column 4
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 
   public function checkInstance0(int $arg1, int $zarg1): void {
@@ -43,7 +43,7 @@ abstract class Base {
 // CHECK: // .column 5
 // CHECK:   n5 = $root.helper(null, n2)
 // CHECK: // .column 4
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 
   public function checkInstance1(int $arg1, int $zarg1): void {
@@ -68,7 +68,7 @@ abstract class Base {
 // CHECK: // .column 5
 // CHECK:   n5 = $root.helper(null, n2)
 // CHECK: // .column 4
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 
   public static function checkStatic0(int $arg1, int $zarg1): void {
@@ -93,7 +93,7 @@ abstract class Base {
 // CHECK: // .column 5
 // CHECK:   n5 = $root.helper(null, n2)
 // CHECK: // .column 4
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 
   public static function checkStatic1(int $arg1, int $zarg1): void {
@@ -118,7 +118,7 @@ abstract class Base {
 // CHECK: // .column 5
 // CHECK:   n5 = $root.helper(null, n2)
 // CHECK: // .column 4
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 
   public function checkNested(int $arg1, int $zarg1): void {
@@ -152,7 +152,7 @@ abstract class Base {
 // CHECK:   n4: *HackMixed = load &arg1
 // CHECK:   n5: *HackMixed = load &$this
 // CHECK:   store n5.?.arg1 <- n4: *HackMixed
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 
 // TEST-CHECK-BAL: "define Closure$Base::checkInstance0.__invoke"
@@ -177,7 +177,7 @@ abstract class Base {
 // CHECK: // .column 16
 // CHECK:   n9 = $root.helper(null, n6, n7, n8)
 // CHECK: // .column 9
-// CHECK:   ret none n9
+// CHECK:   ret n9
 // CHECK: }
 
 // TEST-CHECK-BAL: "type Closure$Base::checkInstance1 "
@@ -199,7 +199,7 @@ abstract class Base {
 // CHECK:   n4: *HackMixed = load &arg1
 // CHECK:   n5: *HackMixed = load &$this
 // CHECK:   store n5.?.arg1 <- n4: *HackMixed
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 
 // TEST-CHECK-BAL: "define Closure$Base::checkInstance1.__invoke"
@@ -222,7 +222,7 @@ abstract class Base {
 // CHECK: // .column 16
 // CHECK:   n8 = $root.helper(null, n6, n7)
 // CHECK: // .column 9
-// CHECK:   ret none n8
+// CHECK:   ret n8
 // CHECK: }
 
 // TEST-CHECK-BAL: "type Closure$Base::checkStatic0 "
@@ -244,7 +244,7 @@ abstract class Base {
 // CHECK:   n4: *HackMixed = load &arg1
 // CHECK:   n5: *HackMixed = load &$this
 // CHECK:   store n5.?.arg1 <- n4: *HackMixed
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 
 // TEST-CHECK-BAL: "define Closure$Base::checkStatic0.__invoke"
@@ -268,7 +268,7 @@ abstract class Base {
 // CHECK:   n8: *Closure$Base::checkStatic0 = load &$this
 // CHECK:   n9 = n8.?.helper(n6, n7)
 // CHECK: // .column 9
-// CHECK:   ret none n9
+// CHECK:   ret n9
 // CHECK: }
 
 // TEST-CHECK-BAL: "type Closure$Base::checkStatic1 "
@@ -290,7 +290,7 @@ abstract class Base {
 // CHECK:   n4: *HackMixed = load &arg1
 // CHECK:   n5: *HackMixed = load &$this
 // CHECK:   store n5.?.arg1 <- n4: *HackMixed
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 
 // TEST-CHECK-BAL: "define Closure$Base::checkStatic1.__invoke"
@@ -313,7 +313,7 @@ abstract class Base {
 // CHECK: // .column 16
 // CHECK:   n8 = $root.helper(null, n6, n7)
 // CHECK: // .column 9
-// CHECK:   ret none n8
+// CHECK:   ret n8
 // CHECK: }
 
   // TEST-CHECK-BAL: "type Closure$Base::checkNested232 "
@@ -335,7 +335,7 @@ abstract class Base {
 // CHECK:   n4: *HackMixed = load &arg1
 // CHECK:   n5: *HackMixed = load &$this
 // CHECK:   store n5.?.arg1 <- n4: *HackMixed
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 
 // TEST-CHECK-BAL: "define Closure$Base::checkNested232.__invoke"
@@ -362,7 +362,7 @@ abstract class Base {
 // CHECK: // .column 16
 // CHECK:   n11 = $root.helper(null, n8)
 // CHECK: // .column 9
-// CHECK:   ret none n11
+// CHECK:   ret n11
 // CHECK: }
 
 // TEST-CHECK-BAL: "type Closure$Base::checkNested "
@@ -384,7 +384,7 @@ abstract class Base {
 // CHECK:   n4: *HackMixed = load &arg1
 // CHECK:   n5: *HackMixed = load &$this
 // CHECK:   store n5.?.arg1 <- n4: *HackMixed
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 
 // TEST-CHECK-BAL: "define Closure$Base::checkNested.__invoke"
@@ -409,7 +409,7 @@ abstract class Base {
 // CHECK: // .column 20
 // CHECK:   n9 = $root.helper(null, n6, n7, n8)
 // CHECK: // .column 13
-// CHECK:   ret none n9
+// CHECK:   ret n9
 // CHECK: }
 }
 
@@ -426,7 +426,7 @@ abstract class Base {
 // CHECK: // .column 3
 // CHECK:   n4 = $root.helper(null, n2)
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 
 // TEST-CHECK-BAL: "type Closure$checkFunc "
@@ -448,7 +448,7 @@ abstract class Base {
 // CHECK:   n4: *HackMixed = load &arg1
 // CHECK:   n5: *HackMixed = load &$this
 // CHECK:   store n5.?.arg1 <- n4: *HackMixed
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 
 // TEST-CHECK-BAL: "define Closure$checkFunc.__invoke"
@@ -471,7 +471,7 @@ abstract class Base {
 // CHECK: // .column 14
 // CHECK:   n8 = $root.helper(null, n6, n7)
 // CHECK: // .column 7
-// CHECK:   ret none n8
+// CHECK:   ret n8
 // CHECK: }
 
 function checkFunc(int $arg1, int $zarg1): void {

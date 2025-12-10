@@ -36,8 +36,8 @@ notice(Closure$main#2): Implicit Class to string conversion for property b
 notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
@@ -48,8 +48,8 @@ string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
@@ -91,8 +91,8 @@ notice(Closure$main#2): Implicit Class to string conversion for property b
 notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
@@ -103,8 +103,8 @@ string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
@@ -146,8 +146,8 @@ notice(Closure$main#2): Implicit Class to string conversion for property b
 notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
@@ -158,8 +158,8 @@ string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
@@ -201,8 +201,8 @@ notice(Closure$main#2): Implicit Class to string conversion for property b
 notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
@@ -213,8 +213,8 @@ string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
@@ -256,8 +256,8 @@ notice(Closure$main#2): Implicit Class to string conversion for property b
 notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
@@ -268,8 +268,8 @@ string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
@@ -311,8 +311,8 @@ notice(Closure$main#2): Implicit Class to string conversion for property b
 notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
@@ -323,8 +323,8 @@ string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
@@ -366,8 +366,8 @@ notice(Closure$main#2): Implicit Class to string conversion for property b
 notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
@@ -378,8 +378,8 @@ string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
@@ -421,8 +421,8 @@ notice(Closure$main#2): Implicit Class to string conversion for property b
 notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
@@ -433,8 +433,8 @@ string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
@@ -476,8 +476,8 @@ notice(Closure$main#2): Implicit Class to string conversion for property b
 notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
@@ -488,8 +488,8 @@ string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
@@ -531,8 +531,8 @@ notice(Closure$main#2): Implicit Class to string conversion for property b
 notice(main): Implicit Class to string conversion for argument 1 passed to io()
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"
@@ -543,8 +543,8 @@ string(3) "foo"
 string(3) "foo"
 string(3) "foo"
 class(foo)
-notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 notice(io): Implicit Class to string conversion for return of io()
+notice(io): Implicit Class to string conversion for argument 1 returned from io() as an inout parameter
 string(3) "foo"
 string(3) "foo"
 string(3) "foo"

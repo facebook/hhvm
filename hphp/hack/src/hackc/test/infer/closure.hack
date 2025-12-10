@@ -14,7 +14,7 @@
 // CHECK: // .column 10
 // CHECK:   n3: *HackMixed = load &$y
 // CHECK: // .column 3
-// CHECK:   ret none n3
+// CHECK:   ret n3
 // CHECK: }
 
 // TEST-CHECK-BAL: define Closure$closure1.__construct
@@ -26,7 +26,7 @@
 // CHECK:   n2: *HackMixed = load &x
 // CHECK:   n3: *HackMixed = load &$this
 // CHECK:   store n3.?.x <- n2: *HackMixed
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 
 // TEST-CHECK-BAL: define Closure$closure1.__invoke
@@ -44,7 +44,7 @@
 // CHECK: // .column 15
 // CHECK:   n5 = $builtins.hhbc_print(n4)
 // CHECK: // .column 15
-// CHECK:   ret none n5
+// CHECK:   ret n5
 // CHECK: }
 
 function closure1(string $x): mixed {
@@ -80,7 +80,7 @@ class C {
 // CHECK:   n6: *Closure$C::main = load &$this
 // CHECK:   n7 = Closure$C::main.closure(n6, n4, n5)
 // CHECK: // .column 23
-// CHECK:   ret none n7
+// CHECK:   ret n7
 // CHECK: }
 
 // // Closure$C::main.closure ==> this is wrong! It should be C$static::closure

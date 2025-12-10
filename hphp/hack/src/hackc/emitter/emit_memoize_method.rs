@@ -31,7 +31,6 @@ use hhbc::StringId;
 use hhbc::TParamInfo;
 use hhbc::TypeInfo;
 use hhbc::TypedValue;
-use hhbc::VerifyKind;
 use hhbc::Visibility;
 use hhbc_string_utils::reified;
 use instruction_sequence::InstrSeq;
@@ -410,15 +409,12 @@ fn make_memoize_method_with_params_code<'a>(
         if args.flags.contains(Flags::IS_ASYNC) {
             InstrSeq::gather(vec![
                 instr::memo_get_eager(notfound, suspended_get, local_range),
-                instr::ret_c(VerifyKind::None),
+                instr::ret_c(),
                 instr::label(suspended_get),
                 instr::ret_c_suspended(),
             ])
         } else {
-            InstrSeq::gather(vec![
-                instr::memo_get(notfound, local_range),
-                instr::ret_c(VerifyKind::None),
-            ])
+            InstrSeq::gather(vec![instr::memo_get(notfound, local_range), instr::ret_c()])
         },
         instr::label(notfound),
         if args.method.static_ {
@@ -452,10 +448,10 @@ fn make_memoize_method_with_params_code<'a>(
                 instr::label(eager_set),
                 instr::memo_set_eager(local_range),
                 emit_memoize_helpers::ic_restore(ic_stash_local, should_make_ic_inaccessible),
-                instr::ret_c(VerifyKind::None),
+                instr::ret_c(),
             ])
         } else {
-            instr::ret_c(VerifyKind::None)
+            instr::ret_c()
         },
         default_value_setters,
     ]);
@@ -504,14 +500,14 @@ fn make_memoize_method_no_params_code<'a>(
         if args.flags.contains(Flags::IS_ASYNC) {
             InstrSeq::gather(vec![
                 instr::memo_get_eager(notfound, suspended_get, LocalRange::EMPTY),
-                instr::ret_c(VerifyKind::None),
+                instr::ret_c(),
                 instr::label(suspended_get),
                 instr::ret_c_suspended(),
             ])
         } else {
             InstrSeq::gather(vec![
                 instr::memo_get(notfound, LocalRange::EMPTY),
-                instr::ret_c(VerifyKind::None),
+                instr::ret_c(),
             ])
         },
         instr::label(notfound),
@@ -544,10 +540,10 @@ fn make_memoize_method_no_params_code<'a>(
                 instr::label(eager_set),
                 instr::memo_set_eager(LocalRange::EMPTY),
                 emit_memoize_helpers::ic_restore(ic_stash_local, should_make_ic_inaccessible),
-                instr::ret_c(VerifyKind::None),
+                instr::ret_c(),
             ])
         } else {
-            instr::ret_c(VerifyKind::None)
+            instr::ret_c()
         },
     ]);
     Ok((instrs, Vec::new()))

@@ -27,7 +27,7 @@
 // CHECK: // .column 3
 // CHECK:   n6 = $root.call(null, n0, n1, n0)
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 function check1(mixed $a, mixed $b, mixed $c): void {
   call($a,$b,$c);
@@ -53,7 +53,7 @@ function check1(mixed $a, mixed $b, mixed $c): void {
 // CHECK: // .column 3
 // CHECK:   n3 = $root.call(null, n2)
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 function check2(int $c): void  {
   $a = 2;
@@ -81,7 +81,7 @@ function check2(int $c): void  {
 // CHECK: // .column 3
 // CHECK:   n5 = $root.call(null, n4)
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 function check3(): void {
   $a = vec[];

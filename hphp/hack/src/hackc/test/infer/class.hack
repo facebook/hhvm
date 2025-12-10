@@ -20,7 +20,7 @@
 // CHECK: #b0:
 // CHECK:   n0 = __sil_allocate(<C>)
 // CHECK:   n1 = C._86pinit(n0)
-// CHECK:   ret none n0
+// CHECK:   ret n0
 // CHECK: }
 
 // TEST-CHECK-BAL: define C$static._86constinit
@@ -28,7 +28,7 @@
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hhbc_class_get_c($builtins.hack_string("C"))
 // CHECK:   n1 = $builtins.hack_set_static_prop($builtins.hack_string("C"), $builtins.hack_string("MY_CONSTANT"), $builtins.hack_int(7))
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 
 // TEST-CHECK-BAL: define C._86pinit
@@ -53,7 +53,7 @@
 // CHECK:   n10: *HackMixed = load &$this
 // CHECK:   store n10.?.prop5 <- n9: *HackMixed
 // CHECK: // .column 1
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 
 // TEST-CHECK-BAL: define C$static._86sinit
@@ -64,7 +64,7 @@
 // CHECK:   n2 = $builtins.hhbc_class_get_c($builtins.hack_string("C"))
 // CHECK:   n3 = $builtins.hack_set_static_prop($builtins.hack_string("C"), $builtins.hack_string("prop3"), $builtins.hack_float(3.14))
 // CHECK:   n4 = $builtins.hack_set_static_prop($builtins.hack_string("C"), $builtins.hack_string("prop4"), null)
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 
 <<__ConsistentConstruct>>
@@ -85,7 +85,7 @@ class C {
   // CHECK: define C.__construct($this: .notnull *C, $a: .notnull *HackInt, $b: .notnull *HackString, $c: .notnull *HackInt) : *HackMixed {
   // CHECK: #b0:
   // CHECK: // .column 4
-  // CHECK:   ret none null
+  // CHECK:   ret null
   // CHECK: }
 
   public function __construct(int $a, string $b, int $c) {
@@ -148,7 +148,7 @@ class C {
   // CHECK: // .column 5
   // CHECK:   store &$a <- n9: *HackMixed
   // CHECK: // .column 4
-  // CHECK:   ret none null
+  // CHECK:   ret null
   // CHECK: }
   public function cons_static(): void {
     $a = new static(1, "x", 3);
@@ -204,7 +204,7 @@ class C {
   // CHECK: // .column 5
   // CHECK:   store &$a <- n6: *HackMixed
   // CHECK: // .column 4
-  // CHECK:   ret none null
+  // CHECK:   ret null
   // CHECK: }
   public function cons_self(): void {
     $a = new self(1, "x", 3);
@@ -260,7 +260,7 @@ class C {
   // CHECK: // .column 5
   // CHECK:   store &$a <- n6: *HackMixed
   // CHECK: // .column 4
-  // CHECK:   ret none null
+  // CHECK:   ret null
   // CHECK: }
   public function cons_inst(): void {
     $a = new C(1, "x", 3);
@@ -293,7 +293,7 @@ class C {
   // CHECK:   jmp b3
   // CHECK: #b3:
   // CHECK: // .column 4
-  // CHECK:   ret none null
+  // CHECK:   ret null
   // CHECK: }
 
   // TEST-CHECK-BAL: define .wrapper C.static_signature
@@ -305,7 +305,7 @@ class C {
   // CHECK:   n2: *HackMixed = load &$a
   // CHECK:   n3: *HackMixed = load &$b
   // CHECK:   n4 = C$static.static_signature(n1, n2, n3)
-  // CHECK:   ret none n4
+  // CHECK:   ret n4
   // CHECK: }
   public static function static_signature(mixed $a, mixed $b): void {
     if ($a == $b) {
@@ -325,7 +325,7 @@ class C {
   // CHECK: // .column 5
   // CHECK:   store &$x <- n1: *HackMixed
   // CHECK: // .column 4
-  // CHECK:   ret none null
+  // CHECK:   ret null
   // CHECK: }
   public final function test_const(): void {
     $x = C::MY_CONSTANT;
@@ -356,7 +356,7 @@ trait T0 {
   // CHECK:   n0: *T0 = load &$this
   // CHECK:   n1 = __parent__.test_const(n0)
   // CHECK: // .column 4
-  // CHECK:   ret none null
+  // CHECK:   ret null
   // CHECK: }
   public function trait_parent_caller(): void {
     /* HH_FIXME[4074] This isn't valid Hack but actually occurs in www */
@@ -378,7 +378,7 @@ trait T0 {
   // CHECK:   n1: *HackMixed = load &$opt2
   // CHECK:   n2: *HackMixed = load &$this
   // CHECK:   n3 = n2.?.with_optional_argument(n0, n1)
-  // CHECK:   ret none n3
+  // CHECK:   ret n3
   // CHECK: }
   // TEST-CHECK-BAL: define .wrapper T0.with_optional_argument
   // CHECK: define .wrapper T0.with_optional_argument($this: .notnull *T0, self: *HackMixed) : *void {
@@ -387,7 +387,7 @@ trait T0 {
   // CHECK:   n0: *T0 = load &$this
   // CHECK:   n1 = $builtins.hack_get_static_class(n0)
   // CHECK:   n2 = T0$static.with_optional_argument(n1)
-  // CHECK:   ret none n2
+  // CHECK:   ret n2
   // CHECK: }
   // TEST-CHECK-BAL: define .wrapper T0$static.with_optional_argument
   // CHECK: define .wrapper T0$static.with_optional_argument($this: .notnull *T0$static, $opt1: .notnull *HackInt, self: *HackMixed) : *void {
@@ -402,7 +402,7 @@ trait T0 {
   // CHECK:   n1: *HackMixed = load &$opt2
   // CHECK:   n2: *HackMixed = load &$this
   // CHECK:   n3 = n2.?.with_optional_argument(n0, n1)
-  // CHECK:   ret none n3
+  // CHECK:   ret n3
   // CHECK: }
   // TEST-CHECK-BAL: define .wrapper T0.with_optional_argument
   // CHECK: define .wrapper T0.with_optional_argument($this: .notnull *T0, $opt1: .notnull *HackInt, self: *HackMixed) : *void {
@@ -412,13 +412,13 @@ trait T0 {
   // CHECK:   n1 = $builtins.hack_get_static_class(n0)
   // CHECK:   n2: *HackInt = load &$opt1
   // CHECK:   n3 = T0$static.with_optional_argument(n1, n2)
-  // CHECK:   ret none n3
+  // CHECK:   ret n3
   // CHECK: }
   // TEST-CHECK-BAL: define T0$static.with_optional_argument
   // CHECK: define T0$static.with_optional_argument($this: .notnull *T0$static, $opt1: .notnull *HackInt, $opt2: .notnull *HackInt, self: *HackMixed) : *void {
   // CHECK: #b0:
   // CHECK: // .column 4
-  // CHECK:   ret none null
+  // CHECK:   ret null
   // CHECK: }
   // TEST-CHECK-BAL: define .wrapper T0.with_optional_argument
   // CHECK: define .wrapper T0.with_optional_argument($this: .notnull *T0, $opt1: .notnull *HackInt, $opt2: .notnull *HackInt, self: *HackMixed) : *void {
@@ -429,7 +429,7 @@ trait T0 {
   // CHECK:   n2: *HackInt = load &$opt1
   // CHECK:   n3: *HackInt = load &$opt2
   // CHECK:   n4 = T0$static.with_optional_argument(n1, n2, n3)
-  // CHECK:   ret none n4
+  // CHECK:   ret n4
   // CHECK: }
   public static function with_optional_argument(int $opt1=0, int $opt2=1): void {
   }
@@ -445,7 +445,7 @@ trait T1 {
   // CHECK:   n0: *T1 = load &$this
   // CHECK:   n1 = __parent__.test_const(n0)
   // CHECK: // .column 4
-  // CHECK:   ret none null
+  // CHECK:   ret null
   // CHECK: }
   public function trait_parent_caller(): void {
     parent::test_const();
@@ -458,7 +458,7 @@ trait T1 {
   // CHECK:   n0: *T1 = load &$this
   // CHECK:   n1 = __parent__.test_static(n0)
   // CHECK: // .column 4
-  // CHECK:   ret none null
+  // CHECK:   ret null
   // CHECK: }
   public function trait_parent_static_caller(): void {
     parent::test_static();
@@ -473,7 +473,7 @@ trait T2 {
   // CHECK:   n0: *T2$static = load &$this
   // CHECK:   n1 = __self__$static.f(n0)
   // CHECK: // .column 4
-  // CHECK:   ret none null
+  // CHECK:   ret null
   // CHECK: }
 
   // TEST-CHECK-BAL: define .wrapper T2.trait_self_caller
@@ -483,7 +483,7 @@ trait T2 {
   // CHECK:   n0: *T2 = load &$this
   // CHECK:   n1 = $builtins.hack_get_static_class(n0)
   // CHECK:   n2 = T2$static.trait_self_caller(n1)
-  // CHECK:   ret none n2
+  // CHECK:   ret n2
   // CHECK: }
   public static function trait_self_caller(): void {
     self::f();
@@ -503,7 +503,7 @@ trait T3 {
   // CHECK:   n2: *T3 = load &$this
   // CHECK:   n3 = __self__.g(n2)
   // CHECK: // .column 4
-  // CHECK:   ret none null
+  // CHECK:   ret null
   // CHECK: }
   public function trait_self_caller(): void {
     self::f();
@@ -524,7 +524,7 @@ trait T3 {
 // CHECK:   n1 = $builtins.hhbc_class_get_c($builtins.hack_string("T4"))
 // CHECK:   n2 = $builtins.hack_set_static_prop($builtins.hack_string("T4"), $builtins.hack_string("MY_CONSTANT"), $builtins.hack_int(42))
 // CHECK:   n3 = $builtins.hack_set_static_prop($builtins.hack_string("T4"), $builtins.hack_string("T"), n0)
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 trait T4 {
   const int MY_CONSTANT = 42;
@@ -543,7 +543,7 @@ trait T4 {
 // CHECK: // .column 3
 // CHECK:   n3 = $builtins.hhbc_print(n2)
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 function dynamic_const(C $c): void {
   echo $c::MY_CONSTANT;
@@ -559,7 +559,7 @@ function dynamic_const(C $c): void {
 // CHECK: // .column 3
 // CHECK:   n2 = $root.sink(null, n1)
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 function cgets(): void {
   sink(C::$prop3);
@@ -592,7 +592,7 @@ function cgets(): void {
 // CHECK: // .column 3
 // CHECK:   store n1.?.prop3 <- n4: *HackMixed
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: #b2:
 // CHECK: // .column 15
 // CHECK:   prune ! $builtins.hack_is_true(n3)
@@ -660,7 +660,7 @@ class TestFieldNamesWithKeywordsAndConflicts {
 // CHECK:   n7: *HackMixed = load &$this
 // CHECK:   store n7.?.t <- n6: *HackMixed
 // CHECK: // .column 4
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 class Box<T> {}
 

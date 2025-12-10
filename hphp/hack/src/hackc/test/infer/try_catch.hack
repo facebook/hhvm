@@ -39,7 +39,7 @@
 // CHECK: // .column 3
 // CHECK:   n5 = $root.a(null, $builtins.hack_int(3))
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 function main(): void {
   a(0);
@@ -83,7 +83,7 @@ function main(): void {
 // CHECK:   jmp b4
 // CHECK: #b4:
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 function main2(): void {
   try {

@@ -18,7 +18,6 @@ use anyhow::Error;
 use bstr::ByteSlice;
 use hash::IndexMap;
 use ir::LocalId;
-use ir::VerifyKind;
 use itertools::Itertools;
 use log::trace;
 use naming_special_names_rust::special_idents;
@@ -291,7 +290,7 @@ impl ClassState<'_, '_> {
                     obj.into(),
                     (),
                 )?;
-                fb.ret(obj, VerifyKind::None)?;
+                fb.ret(obj)?;
                 Ok(())
             },
         )

@@ -35,7 +35,7 @@
   PopC
 
   True
-  RetC None
+  RetC
 }
 
 .function ["__EntryPoint"("""y:0:{}""")] N main() {
@@ -85,7 +85,7 @@
   PopC
 
   Null
-  RetC None
+  RetC
 
 unset_label:  String "win\n"
               Print
@@ -104,5 +104,5 @@ unset_label:  String "win\n"
               PopC
 
               Null
-              RetC None
+              RetC
 }

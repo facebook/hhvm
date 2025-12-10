@@ -25,7 +25,7 @@ class A {
 // CHECK: // .column 5
 // CHECK:   n4 = $builtins.hhbc_verify_type_pred($builtins.hack_string("default"), n3)
 // CHECK: // .column 5
-// CHECK:   ret none $builtins.hack_string("default")
+// CHECK:   ret $builtins.hack_string("default")
 // CHECK: #b2:
 // CHECK: // .column 7
 // CHECK:   prune $builtins.hack_is_true(n2)
@@ -37,7 +37,7 @@ class A {
 // CHECK: // .column 5
 // CHECK:   n8 = $builtins.hhbc_verify_type_pred(n6, n7)
 // CHECK: // .column 5
-// CHECK:   ret none n6
+// CHECK:   ret n6
 // CHECK: }
 function f1_nonnull(?A $arg): string {
   if ($arg is nonnull) {
@@ -67,7 +67,7 @@ function f1_nonnull(?A $arg): string {
 // CHECK: // .column 5
 // CHECK:   n5 = $builtins.hhbc_verify_type_pred(n3, n4)
 // CHECK: // .column 5
-// CHECK:   ret none n3
+// CHECK:   ret n3
 // CHECK: #b2:
 // CHECK: // .column 7
 // CHECK:   prune $builtins.hack_is_true(n1)
@@ -76,7 +76,7 @@ function f1_nonnull(?A $arg): string {
 // CHECK: // .column 5
 // CHECK:   n7 = $builtins.hhbc_verify_type_pred($builtins.hack_string("default"), n6)
 // CHECK: // .column 5
-// CHECK:   ret none $builtins.hack_string("default")
+// CHECK:   ret $builtins.hack_string("default")
 // CHECK: }
 function f2_null(?A $arg): string {
   if ($arg is null) {
@@ -117,7 +117,7 @@ function f2_null(?A $arg): string {
 // CHECK: // .column 3
 // CHECK:   n7 = $builtins.hhbc_verify_type_pred(n5, n6)
 // CHECK: // .column 3
-// CHECK:   ret none n5
+// CHECK:   ret n5
 // CHECK: #b2:
 // CHECK: // .column 11
 // CHECK:   prune ! $builtins.hack_is_true(n3)

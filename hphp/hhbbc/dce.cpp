@@ -1701,6 +1701,8 @@ void dce(Env& env, const bc::UnsetG& op) { no_dce(env, op); }
 void dce(Env& env, const bc::VerifyOutType& op) { no_dce(env, op); }
 void dce(Env& env, const bc::VerifyParamType& op) { no_dce(env, op); }
 void dce(Env& env, const bc::VerifyParamTypeTS& op) { no_dce(env, op); }
+void dce(Env& env, const bc::VerifyRetNonNullC& op) { no_dce(env, op); }
+void dce(Env& env, const bc::VerifyRetTypeC& op) { no_dce(env, op); }
 void dce(Env& env, const bc::VerifyRetTypeTS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::VerifyTypeTS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::WHResult& op) { no_dce(env, op); }

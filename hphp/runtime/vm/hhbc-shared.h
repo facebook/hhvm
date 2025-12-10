@@ -127,17 +127,6 @@ enum class TypeStructResolveOp : uint8_t {
 #undef OP
 };
 
-#define VERIFY_KIND \
-  OP(None) \
-  OP(All) \
-  OP(NonNull)
-
-enum class VerifyKind : uint8_t {
-#define OP(name) name,
-  VERIFY_KIND
-#undef OP
-};
-
 #define TYPE_STRUCT_ENFORCE_KINDS \
   KIND(Deep)                      \
   KIND(Shallow)

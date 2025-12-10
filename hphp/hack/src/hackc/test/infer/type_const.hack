@@ -24,7 +24,7 @@ abstract class C {
   // CHECK: // .column 5
   // CHECK:   n4 = $builtins.hhbc_verify_type_pred(n2, n3)
   // CHECK: // .column 5
-  // CHECK:   ret none n2
+  // CHECK:   ret n2
   // CHECK: }
   public static function check2(mixed $a): bool {
     return $a is self::TMyShape;
@@ -48,7 +48,7 @@ class D extends C {
   // CHECK: define D$static.check3($this: .notnull *D$static, $shape: .const_type="self::TMyShape" *HackMixed) : *void {
   // CHECK: #b0:
   // CHECK: // .column 4
-  // CHECK:   ret none null
+  // CHECK:   ret null
   // CHECK: }
   public static function check3(self::TMyShape $shape)[]: void {
   }
@@ -68,7 +68,7 @@ class D extends C {
 // CHECK: // .column 3
 // CHECK:   n4 = $builtins.hhbc_verify_type_pred(n2, n3)
 // CHECK: // .column 3
-// CHECK:   ret none n2
+// CHECK:   ret n2
 // CHECK: }
 function check1(mixed $a): bool {
   return $a is D::TMyShape;
@@ -99,7 +99,7 @@ function check1(mixed $a): bool {
 // CHECK: // .column 3
 // CHECK:   n4 = $builtins.hhbc_verify_type_pred(n3, $builtins.hack_bool(true))
 // CHECK: // .column 3
-// CHECK:   ret none n3
+// CHECK:   ret n3
 // CHECK: #b2:
 // CHECK: // .column 10
 // CHECK:   prune ! $builtins.hack_is_true(n2)
@@ -124,7 +124,7 @@ function check2(): D::TMyShape {
 // CHECK:   n1 = __sil_lazy_class_initialize(<D>)
 // CHECK:   n2 = D$static.check2(n1, $builtins.hack_int(5))
 // CHECK: // .column 2
-// CHECK:   ret none null
+// CHECK:   ret null
 // CHECK: }
 <<__EntryPoint>>
 function main(): void {

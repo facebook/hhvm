@@ -750,7 +750,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
 
       auto blk         = php::Block{};
       blk.exnNodeId    = NoExnNodeId;
-      blk.hhbcs = {gen_constant(it->second), bc::RetC {HPHP::VerifyKind::None}};
+      blk.hhbcs = {gen_constant(it->second), bc::RetC {}};
 
       auto mf = php::WideFunc::create(*ret);
       mf.blocks().emplace_back(std::move(blk));

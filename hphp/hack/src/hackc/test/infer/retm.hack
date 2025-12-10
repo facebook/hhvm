@@ -8,19 +8,19 @@
 // CHECK: // .column 3
 // CHECK:   store &$a <- $builtins.hack_int(7): *HackMixed
 // CHECK: // .column 3
-// CHECK:   n0: *HackMixed = load &$a
+// CHECK:   n0 = $builtins.hhbc_is_type_int($builtins.hack_int(5))
 // CHECK: // .column 3
-// CHECK:   n1 = $builtins.hhbc_is_type_int(n0)
+// CHECK:   n1 = $builtins.hhbc_verify_type_pred($builtins.hack_int(5), n0)
 // CHECK: // .column 3
-// CHECK:   n2 = $builtins.hhbc_verify_type_pred(n0, n1)
+// CHECK:   n2: *HackMixed = load &$a
 // CHECK: // .column 3
-// CHECK:   n3 = $builtins.hhbc_is_type_int($builtins.hack_int(5))
+// CHECK:   n3 = $builtins.hhbc_is_type_int(n2)
 // CHECK: // .column 3
-// CHECK:   n4 = $builtins.hhbc_verify_type_pred($builtins.hack_int(5), n3)
+// CHECK:   n4 = $builtins.hhbc_verify_type_pred(n2, n3)
 // CHECK: // .column 3
-// CHECK:   n5 = $builtins.hhbc_new_vec($builtins.hack_int(5), n0)
+// CHECK:   n5 = $builtins.hhbc_new_vec($builtins.hack_int(5), n2)
 // CHECK: // .column 3
-// CHECK:   ret none n5
+// CHECK:   ret n5
 // CHECK: }
 function multi_ret(inout int $a): int {
   $a = 7;
@@ -33,7 +33,7 @@ function multi_ret(inout int $a): int {
 // CHECK: // .column 3
 // CHECK:   n0 = $builtins.hhbc_verify_type_pred($builtins.hack_string("hello"), $builtins.hack_bool(true))
 // CHECK: // .column 3
-// CHECK:   ret none $builtins.hack_string("hello")
+// CHECK:   ret $builtins.hack_string("hello")
 // CHECK: }
 function softReturn(): <<__Soft>> string {
   return "hello";

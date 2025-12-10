@@ -179,12 +179,6 @@ assemble_imm_for_enum!(
         TypeStructResolveOp::Resolve,
     ]
 );
-
-assemble_imm_for_enum!(
-    hhbc::VerifyKind,
-    [VerifyKind::None, VerifyKind::All, VerifyKind::NonNull,]
-);
-
 assemble_imm_for_enum!(
     hhbc::TypeStructEnforceKind,
     [TypeStructEnforceKind::Deep, TypeStructEnforceKind::Shallow]

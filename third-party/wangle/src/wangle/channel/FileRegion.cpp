@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <folly/system/HardwareConcurrency.h>
 #include <wangle/channel/FileRegion.h>
 
 #ifdef SPLICE_F_NONBLOCK
@@ -25,7 +26,7 @@ struct FileRegionReadPool {};
 
 Singleton<IOThreadPoolExecutor, FileRegionReadPool> readPool([] {
   return new IOThreadPoolExecutor(
-      sysconf(_SC_NPROCESSORS_ONLN),
+      folly::available_concurrency(),
       std::make_shared<NamedThreadFactory>("FileRegionReadPool"));
 });
 

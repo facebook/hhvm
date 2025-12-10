@@ -110,7 +110,7 @@ class DNSResolver : public folly::DelayedDestruction {
    public:
     Exception(ResolutionStatus statusVal, const std::string& message)
         : std::runtime_error(message), status_(statusVal) {}
-    ResolutionStatus status() const { return status_; }
+    [[nodiscard]] ResolutionStatus status() const { return status_; }
 
    private:
     const ResolutionStatus status_;
@@ -439,12 +439,12 @@ class DNSResolver : public folly::DelayedDestruction {
    */
   virtual void setStatsCollector(
    DNSResolver::StatsCollector* statsCollector) = 0;
-  virtual DNSResolver::StatsCollector* getStatsCollector() const = 0;
+  [[nodiscard]] virtual DNSResolver::StatsCollector* getStatsCollector() const = 0;
 
   /*
    * Return pre-configured resolver addresses that match the hostname
    */
-  virtual std::list<folly::SocketAddress> getResolverAddresses(
+  [[nodiscard]] virtual std::list<folly::SocketAddress> getResolverAddresses(
       const std::string& /* hostname */) const {
     return {};
   }

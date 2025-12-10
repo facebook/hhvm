@@ -38,7 +38,7 @@ class HeadersRateLimiter : public RateLimiter {
     }
   }
 
-  uint32_t getMaxEventsPerInvervalLowerBound() const override {
+  [[nodiscard]] uint32_t getMaxEventsPerInvervalLowerBound() const override {
     return kMaxEventsPerIntervalLowerBound;
   }
 };

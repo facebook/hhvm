@@ -72,7 +72,7 @@ class HQConnector : public HQSession::ConnectCallback {
 
   std::chrono::microseconds timeElapsed();
 
-  bool isBusy() const {
+  [[nodiscard]] bool isBusy() const {
     return (session_ != nullptr);
   }
 

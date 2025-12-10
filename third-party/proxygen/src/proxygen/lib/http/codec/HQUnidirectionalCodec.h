@@ -84,18 +84,18 @@ class HQUnidirectionalCodec {
   virtual ~HQUnidirectionalCodec() {
   }
 
-  StreamDirection getStreamDirection() const {
+  [[nodiscard]] StreamDirection getStreamDirection() const {
     return streamDir_;
   }
 
-  UnidirectionalStreamType getStreamType() const {
+  [[nodiscard]] UnidirectionalStreamType getStreamType() const {
     return streamType_;
   }
 
-  bool isIngress() const {
+  [[nodiscard]] bool isIngress() const {
     return streamDir_ == StreamDirection::INGRESS;
   }
-  bool isEgress() const {
+  [[nodiscard]] bool isEgress() const {
     return streamDir_ == StreamDirection::EGRESS;
   }
 

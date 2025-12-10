@@ -144,7 +144,7 @@ class HTTPConnector : protected folly::AsyncSocket::ConnectCallback {
    * @returns true iff this connector is busy setting up a connection. If
    * this is false, it is safe to call connect() or connectSSL() on it again.
    */
-  bool isBusy() const {
+  [[nodiscard]] bool isBusy() const {
     return socket_.get();
   }
 

@@ -116,7 +116,8 @@ class FakeDNSResolver : public DNSResolver {
     });
   }
 
-  DNSResolver::StatsCollector* getStatsCollector() const override {
+  [[nodiscard]] DNSResolver::StatsCollector* getStatsCollector()
+      const override {
     return statsCollector_;
   }
 

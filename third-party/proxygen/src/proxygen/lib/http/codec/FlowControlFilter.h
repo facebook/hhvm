@@ -76,11 +76,11 @@ class FlowControlFilter : public PassThroughHTTPCodecFilter {
   /**
    * @returns the number of bytes available in the connection-level send window
    */
-  uint32_t getAvailableSend() const;
+  [[nodiscard]] uint32_t getAvailableSend() const;
 
   // Filter functions
 
-  bool isReusable() const override;
+  [[nodiscard]] bool isReusable() const override;
 
   void onBody(StreamID stream,
               std::unique_ptr<folly::IOBuf> chain,
@@ -98,11 +98,11 @@ class FlowControlFilter : public PassThroughHTTPCodecFilter {
                               StreamID stream,
                               uint32_t delta) override;
 
-  const Window& getSendWindow() const {
+  [[nodiscard]] const Window& getSendWindow() const {
     return sendWindow_;
   }
 
-  const Window& getRecvWindow() const {
+  [[nodiscard]] const Window& getRecvWindow() const {
     return recvWindow_;
   }
 

@@ -178,7 +178,7 @@ class CAresResolver : public DNSResolver {
   void setResolveSRVOnly(bool resolve) {
     resolveSRVRecord_ = resolve;
   }
-  bool resolveSRVOnly() const {
+  [[nodiscard]] bool resolveSRVOnly() const {
     return resolveSRVRecord_;
   }
 
@@ -203,9 +203,9 @@ class CAresResolver : public DNSResolver {
                            std::chrono::milliseconds timeout =
                                std::chrono::milliseconds(100)) override;
   void setStatsCollector(DNSResolver::StatsCollector* statsCollector) override;
-  DNSResolver::StatsCollector* getStatsCollector() const override;
+  [[nodiscard]] DNSResolver::StatsCollector* getStatsCollector() const override;
 
-  const TimeUtil* getTimeUtilPtr() const {
+  [[nodiscard]] const TimeUtil* getTimeUtilPtr() const {
     return &timeUtil_;
   }
 

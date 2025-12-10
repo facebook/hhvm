@@ -332,7 +332,7 @@ class HTTPCodec {
      * Parallel codecs with a maximum number of streams will invoke this
      * to determine if a new stream exceeds the limit.
      */
-    virtual uint32_t numOutgoingStreams() const {
+    [[nodiscard]] virtual uint32_t numOutgoingStreams() const {
       return 0;
     }
 
@@ -341,7 +341,7 @@ class HTTPCodec {
      * Parallel codecs with a maximum number of streams will invoke this
      * to determine if a new stream exceeds the limit.
      */
-    virtual uint32_t numIncomingStreams() const {
+    [[nodiscard]] virtual uint32_t numIncomingStreams() const {
       return 0;
     }
 
@@ -381,7 +381,7 @@ class HTTPCodec {
    * Gets both the egress and ingress header table size, bytes stored in header
    * table, and the number of headers stored in the header table
    **/
-  virtual CompressionInfo getCompressionInfo() const {
+  [[nodiscard]] virtual CompressionInfo getCompressionInfo() const {
     static CompressionInfo defaultCompressionInfo;
     return defaultCompressionInfo;
   }
@@ -390,7 +390,7 @@ class HTTPCodec {
    * Gets the session protocol currently used by the codec. This can be
    * mapped to a string for logging and diagnostic use.
    */
-  virtual CodecProtocol getProtocol() const = 0;
+  [[nodiscard]] virtual CodecProtocol getProtocol() const = 0;
 
   /**
    * Gets the user agent string of the client. Thus, it is only meaningful for a
@@ -398,26 +398,26 @@ class HTTPCodec {
    * onHeadersComplete().  It can help in diagnosing the interactions between
    * different codec implementation.
    */
-  virtual const std::string& getUserAgent() const = 0;
+  [[nodiscard]] virtual const std::string& getUserAgent() const = 0;
 
   /**
    * Get the transport direction of this codec:
    * DOWNSTREAM if the codec receives requests from clients or
    * UPSTREAM if the codec sends requests to servers.
    */
-  virtual TransportDirection getTransportDirection() const = 0;
+  [[nodiscard]] virtual TransportDirection getTransportDirection() const = 0;
 
   /**
    * Returns true iff this codec supports per stream flow control
    */
-  virtual bool supportsStreamFlowControl() const {
+  [[nodiscard]] virtual bool supportsStreamFlowControl() const {
     return false;
   }
 
   /**
    * Returns true iff this codec supports session level flow control
    */
-  virtual bool supportsSessionFlowControl() const {
+  [[nodiscard]] virtual bool supportsSessionFlowControl() const {
     return false;
   }
 
@@ -437,7 +437,7 @@ class HTTPCodec {
    * Check whether the codec still has at least one HTTP
    * stream to parse.
    */
-  virtual bool isBusy() const = 0;
+  [[nodiscard]] virtual bool isBusy() const = 0;
 
   /**
    * Pause or resume the ingress parser
@@ -448,7 +448,7 @@ class HTTPCodec {
   /**
    * Return true if the parser is paused
    */
-  virtual bool isParserPaused() const = 0;
+  [[nodiscard]] virtual bool isParserPaused() const = 0;
 
   /**
    * Parse ingress data.
@@ -482,7 +482,7 @@ class HTTPCodec {
    *       interleaved requests, or "upon completion of the current
    *       stream" for codecs that do not.
    */
-  virtual bool isReusable() const = 0;
+  [[nodiscard]] virtual bool isReusable() const = 0;
 
   /**
    * Returns true if this codec is in a state where it accepting new
@@ -490,31 +490,31 @@ class HTTPCodec {
    * HTTP/2, this is true when the first GOAWAY NO_ERROR is sent during
    * graceful shutdown.
    */
-  virtual bool isWaitingToDrain() const = 0;
+  [[nodiscard]] virtual bool isWaitingToDrain() const = 0;
 
   /**
    * Checks whether the socket needs to be closed when EOM is sent. This is used
    * during CONNECT when EOF needs to be sent after upgrade to notify the server
    */
-  virtual bool closeOnEgressComplete() const = 0;
+  [[nodiscard]] virtual bool closeOnEgressComplete() const = 0;
 
   /**
    * Check whether the codec supports the processing of multiple
    * requests in parallel.
    */
-  virtual bool supportsParallelRequests() const = 0;
+  [[nodiscard]] virtual bool supportsParallelRequests() const = 0;
 
   /**
    * Check whether the codec supports pushing resources from server to
    * client.
    */
-  virtual bool supportsPushTransactions() const = 0;
+  [[nodiscard]] virtual bool supportsPushTransactions() const = 0;
 
   /**
    * Check whether the codec supports bidirectional communications between
    * server and client.
    */
-  virtual bool supportsExTransactions() const {
+  [[nodiscard]] virtual bool supportsExTransactions() const {
     return false;
   }
 
@@ -764,7 +764,7 @@ class HTTPCodec {
     return nullptr;
   }
 
-  virtual const HTTPSettings* getIngressSettings() const {
+  [[nodiscard]] virtual const HTTPSettings* getIngressSettings() const {
     return nullptr;
   }
 
@@ -787,21 +787,22 @@ class HTTPCodec {
   /**
    * Get the identifier of the last stream started by the remote.
    */
-  virtual StreamID getLastIncomingStreamID() const {
+  [[nodiscard]] virtual StreamID getLastIncomingStreamID() const {
     return 0;
   }
 
   /**
    * Get the default size of flow control windows for this protocol
    */
-  virtual uint32_t getDefaultWindowSize() const {
+  [[nodiscard]] virtual uint32_t getDefaultWindowSize() const {
     return 0;
   }
 
   /**
    * Map the parent back to the priority, -1 if this doesn't make sense.
    */
-  virtual int8_t mapDependencyToPriority(StreamID /* parent */) const {
+  [[nodiscard]] virtual int8_t mapDependencyToPriority(
+      StreamID /* parent */) const {
     return -1;
   }
 };

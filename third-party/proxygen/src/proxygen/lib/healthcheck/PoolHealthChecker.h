@@ -57,7 +57,7 @@ class PoolHealthChecker {
 
   virtual void removeServer(const folly::SocketAddress& address) = 0;
 
-  virtual std::chrono::milliseconds getCheckInterval() const = 0;
+  [[nodiscard]] virtual std::chrono::milliseconds getCheckInterval() const = 0;
 
   /**
    * If external health checking is used, set last update time here to

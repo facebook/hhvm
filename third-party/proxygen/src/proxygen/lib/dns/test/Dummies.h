@@ -73,7 +73,8 @@ class DummyDNSResolver : public DNSResolver {
       DNSResolver::StatsCollector* /*statsCollector*/) override {
   }
 
-  DNSResolver::StatsCollector* getStatsCollector() const override {
+  [[nodiscard]] DNSResolver::StatsCollector* getStatsCollector()
+      const override {
     return nullptr;
   }
 

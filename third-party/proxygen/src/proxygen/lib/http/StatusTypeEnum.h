@@ -69,13 +69,13 @@ class ExceptionWithStatusType : public std::exception {
   ExceptionWithStatusType(int statusCode, StatusType statusType)
       : statusCode_(statusCode), statusType_(statusType) {
   }
-  int getStatusCode() const {
+  [[nodiscard]] int getStatusCode() const {
     return statusCode_;
   }
-  StatusType getStatusType() const {
+  [[nodiscard]] StatusType getStatusType() const {
     return statusType_;
   }
-  const char* what() const noexcept override {
+  [[nodiscard]] const char* what() const noexcept override {
     return getStatusTypeString(statusType_);
   }
 

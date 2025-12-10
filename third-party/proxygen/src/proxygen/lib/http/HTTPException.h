@@ -52,22 +52,22 @@ class HTTPException : public proxygen::Exception {
    * intended for debugging and logging only. For the true exception
    * string, use what()
    */
-  std::string describe() const;
+  [[nodiscard]] std::string describe() const;
 
-  Direction getDirection() const {
+  [[nodiscard]] Direction getDirection() const {
     return dir_;
   }
 
-  bool isIngressException() const {
+  [[nodiscard]] bool isIngressException() const {
     return dir_ == Direction::INGRESS || dir_ == Direction::INGRESS_AND_EGRESS;
   }
 
-  bool isEgressException() const {
+  [[nodiscard]] bool isEgressException() const {
     return dir_ == Direction::EGRESS || dir_ == Direction::INGRESS_AND_EGRESS;
   }
 
   // Accessors for HTTP error codes
-  bool hasHttpStatusCode() const {
+  [[nodiscard]] bool hasHttpStatusCode() const {
     return (httpStatusCode_ != 0);
   }
 
@@ -75,39 +75,39 @@ class HTTPException : public proxygen::Exception {
     httpStatusCode_ = statusCode;
   }
 
-  uint32_t getHttpStatusCode() const {
+  [[nodiscard]] uint32_t getHttpStatusCode() const {
     return httpStatusCode_;
   }
 
   // Accessors for HTTP3 error codes
-  bool hasHttp3ErrorCode() const {
+  [[nodiscard]] bool hasHttp3ErrorCode() const {
     return http3ErrorCode_.has_value();
   }
   void setHttp3ErrorCode(HTTP3::ErrorCode errorCode) {
     http3ErrorCode_ = errorCode;
   }
-  HTTP3::ErrorCode getHttp3ErrorCode() const;
+  [[nodiscard]] HTTP3::ErrorCode getHttp3ErrorCode() const;
 
   // Accessors for Codec specific status codes
-  bool hasCodecStatusCode() const {
+  [[nodiscard]] bool hasCodecStatusCode() const {
     return codecStatusCode_.has_value();
   }
   void setCodecStatusCode(ErrorCode statusCode) {
     codecStatusCode_ = statusCode;
   }
-  ErrorCode getCodecStatusCode() const {
+  [[nodiscard]] ErrorCode getCodecStatusCode() const {
     CHECK(hasCodecStatusCode());
     return *codecStatusCode_;
   }
 
   // Accessors for errno
-  bool hasErrno() const {
+  [[nodiscard]] bool hasErrno() const {
     return (errno_ != 0);
   }
   void setErrno(uint32_t e) {
     errno_ = e;
   }
-  uint32_t getErrno() const {
+  [[nodiscard]] uint32_t getErrno() const {
     return errno_;
   }
 
@@ -127,12 +127,12 @@ class HTTPException : public proxygen::Exception {
     return std::move(partialMsg_);
   }
 
-  HTTPMessage* getPartialMsg() const {
+  [[nodiscard]] HTTPMessage* getPartialMsg() const {
     return partialMsg_.get();
   }
 
  private:
-  HTTP3::ErrorCode inferHTTP3ErrorCode() const;
+  [[nodiscard]] HTTP3::ErrorCode inferHTTP3ErrorCode() const;
 
   Direction dir_;
   uint32_t httpStatusCode_{0};

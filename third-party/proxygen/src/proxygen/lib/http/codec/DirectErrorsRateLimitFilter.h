@@ -34,7 +34,7 @@ class DirectErrorsRateLimiter : public RateLimiter {
     // rate limit in an interval
   }
 
-  uint32_t getMaxEventsPerInvervalLowerBound() const override {
+  [[nodiscard]] uint32_t getMaxEventsPerInvervalLowerBound() const override {
     return kMaxEventsPerIntervalLowerBound;
   }
 };

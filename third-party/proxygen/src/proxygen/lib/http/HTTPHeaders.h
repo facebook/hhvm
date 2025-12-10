@@ -161,8 +161,8 @@ class HTTPHeaders {
   /**
    * Do we have an instance of the given header?
    */
-  bool exists(folly::StringPiece name) const;
-  bool exists(HTTPHeaderCode code) const;
+  [[nodiscard]] bool exists(folly::StringPiece name) const;
+  [[nodiscard]] bool exists(HTTPHeaderCode code) const;
   bool rawExists(std::string& name) const {
     return exists(name);
   }
@@ -226,15 +226,15 @@ class HTTPHeaders {
    */
   template <typename T> // either uint8_t or string
   const std::string& getSingleOrEmpty(const T& nameOrCode) const;
-  const std::string rawGet(const std::string& header) const {
+  [[nodiscard]] const std::string rawGet(const std::string& header) const {
     return getSingleOrEmpty(header);
   }
 
   /**
    * Get the number of values corresponding to a given header name.
    */
-  size_t getNumberOfValues(HTTPHeaderCode code) const;
-  size_t getNumberOfValues(folly::StringPiece name) const;
+  [[nodiscard]] size_t getNumberOfValues(HTTPHeaderCode code) const;
+  [[nodiscard]] size_t getNumberOfValues(folly::StringPiece name) const;
 
   /**
    * Process the ordered list of values for the given header name:
@@ -290,7 +290,7 @@ class HTTPHeaders {
   /**
    * Get the total number of headers.
    */
-  size_t size() const;
+  [[nodiscard]] size_t size() const;
 
   /**
    * Copy all headers from this to hdrs.
@@ -311,7 +311,7 @@ class HTTPHeaders {
 
   void copyFrom(const HTTPHeaders& hdrs);
 
-  HTTPHeaderCode* codes() const {
+  [[nodiscard]] HTTPHeaderCode* codes() const {
     return codes(memory_.get(), capacity_);
   }
 
@@ -320,7 +320,7 @@ class HTTPHeaders {
                                                   sizeof(std::string)));
   }
 
-  std::string** names() const {
+  [[nodiscard]] std::string** names() const {
     return names(memory_.get(), capacity_);
   }
 
@@ -328,7 +328,7 @@ class HTTPHeaders {
     return (std::string**)(memory + capacity * sizeof(std::string));
   }
 
-  std::string* values() const {
+  [[nodiscard]] std::string* values() const {
     return values(memory_.get(), capacity_);
   }
 

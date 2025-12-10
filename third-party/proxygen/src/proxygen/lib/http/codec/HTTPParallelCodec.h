@@ -30,24 +30,24 @@ class HTTPParallelCodec : public HTTPCodec {
  public:
   explicit HTTPParallelCodec(TransportDirection direction);
 
-  TransportDirection getTransportDirection() const override {
+  [[nodiscard]] TransportDirection getTransportDirection() const override {
     return transportDirection_;
   }
 
   StreamID createStream() override;
-  bool isBusy() const override {
+  [[nodiscard]] bool isBusy() const override {
     return false;
   }
-  bool supportsStreamFlowControl() const override {
+  [[nodiscard]] bool supportsStreamFlowControl() const override {
     return true;
   }
-  bool supportsSessionFlowControl() const override {
+  [[nodiscard]] bool supportsSessionFlowControl() const override {
     return true;
   }
-  bool supportsParallelRequests() const override {
+  [[nodiscard]] bool supportsParallelRequests() const override {
     return true;
   }
-  bool closeOnEgressComplete() const override {
+  [[nodiscard]] bool closeOnEgressComplete() const override {
     return false;
   }
   void setCallback(Callback* callback) override {
@@ -55,14 +55,14 @@ class HTTPParallelCodec : public HTTPCodec {
   }
   void setParserPaused(bool /* paused */) override {
   }
-  bool isParserPaused() const override {
+  [[nodiscard]] bool isParserPaused() const override {
     return false;
   }
   void onIngressEOF() override {
   }
-  bool isReusable() const override;
-  bool isWaitingToDrain() const override;
-  StreamID getLastIncomingStreamID() const override {
+  [[nodiscard]] bool isReusable() const override;
+  [[nodiscard]] bool isWaitingToDrain() const override;
+  [[nodiscard]] StreamID getLastIncomingStreamID() const override {
     return lastStreamID_;
   }
   void enableDoubleGoawayDrain() override;
@@ -78,7 +78,7 @@ class HTTPParallelCodec : public HTTPCodec {
     }
   }
 
-  bool isInitiatedStream(StreamID stream) const {
+  [[nodiscard]] bool isInitiatedStream(StreamID stream) const {
     return isInitiatedStream(transportDirection_, stream);
   }
 
@@ -88,7 +88,7 @@ class HTTPParallelCodec : public HTTPCodec {
     return (odd && upstream) || (!odd && !upstream);
   }
 
-  bool isStreamIngressEgressAllowed(StreamID stream) const {
+  [[nodiscard]] bool isStreamIngressEgressAllowed(StreamID stream) const {
     bool isInitiated = isInitiatedStream(stream);
     return (isInitiated && stream <= ingressGoawayAck_) ||
            (!isInitiated && stream <= egressGoawayAck_);

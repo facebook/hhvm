@@ -180,7 +180,7 @@ class HTTPRequestVerifier {
     hasAuthority_ = hasAuthority;
   }
 
-  bool hasAuthority() const {
+  [[nodiscard]] bool hasAuthority() const {
     return hasAuthority_;
   }
 

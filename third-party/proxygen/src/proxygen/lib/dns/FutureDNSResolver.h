@@ -51,10 +51,10 @@ class FutureDNSResolver {
       const std::string& domain,
       std::chrono::milliseconds timeout = kDefaultTimeout());
 
-  virtual DNSResolver::StatsCollector* getStatsCollector() const;
+  [[nodiscard]] virtual DNSResolver::StatsCollector* getStatsCollector() const;
   virtual void setStatsCollector(DNSResolver::StatsCollector* collector);
 
-  folly::EventBase* getEventBase() const {
+  [[nodiscard]] folly::EventBase* getEventBase() const {
     return evb_;
   }
 

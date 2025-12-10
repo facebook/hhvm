@@ -78,11 +78,12 @@ class CachingDNSResolver : public DNSResolver {
     resolver_->setStatsCollector(statsCollector);
   }
 
-  DNSResolver::StatsCollector* getStatsCollector() const override {
+  [[nodiscard]] DNSResolver::StatsCollector* getStatsCollector()
+      const override {
     return statsCollector_;
   }
 
-  std::list<folly::SocketAddress> getResolverAddresses(
+  [[nodiscard]] std::list<folly::SocketAddress> getResolverAddresses(
       const std::string& hostname) const override {
     return resolver_->getResolverAddresses(hostname);
   }

@@ -45,7 +45,7 @@ class HeaderDecodeInfo {
 
   void onHeadersComplete(HTTPHeaderSize decodedSize);
 
-  bool hasStatus() const;
+  [[nodiscard]] bool hasStatus() const;
 
   // Change this to a map of decoded header blocks when we decide
   // to concurrently decode partial header blocks

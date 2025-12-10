@@ -101,32 +101,32 @@ class PassThroughHTTPCodecFilter : public HTTPCodecFilter {
   void onCertificate(uint16_t certId,
                      std::unique_ptr<folly::IOBuf> authenticator) override;
 
-  uint32_t numOutgoingStreams() const override;
+  [[nodiscard]] uint32_t numOutgoingStreams() const override;
 
-  uint32_t numIncomingStreams() const override;
+  [[nodiscard]] uint32_t numIncomingStreams() const override;
 
   // HTTPCodec methods
-  CompressionInfo getCompressionInfo() const override;
+  [[nodiscard]] CompressionInfo getCompressionInfo() const override;
 
-  CodecProtocol getProtocol() const override;
+  [[nodiscard]] CodecProtocol getProtocol() const override;
 
-  const std::string& getUserAgent() const override;
+  [[nodiscard]] const std::string& getUserAgent() const override;
 
-  TransportDirection getTransportDirection() const override;
+  [[nodiscard]] TransportDirection getTransportDirection() const override;
 
-  bool supportsStreamFlowControl() const override;
+  [[nodiscard]] bool supportsStreamFlowControl() const override;
 
-  bool supportsSessionFlowControl() const override;
+  [[nodiscard]] bool supportsSessionFlowControl() const override;
 
   StreamID createStream() override;
 
   void setCallback(HTTPCodec::Callback* callback) override;
 
-  bool isBusy() const override;
+  [[nodiscard]] bool isBusy() const override;
 
   void setParserPaused(bool paused) override;
 
-  bool isParserPaused() const override;
+  [[nodiscard]] bool isParserPaused() const override;
 
   size_t onIngress(const folly::IOBuf& buf) override;
 
@@ -134,15 +134,15 @@ class PassThroughHTTPCodecFilter : public HTTPCodecFilter {
 
   bool onIngressUpgradeMessage(const HTTPMessage& msg) override;
 
-  bool isReusable() const override;
+  [[nodiscard]] bool isReusable() const override;
 
-  bool isWaitingToDrain() const override;
+  [[nodiscard]] bool isWaitingToDrain() const override;
 
-  bool closeOnEgressComplete() const override;
+  [[nodiscard]] bool closeOnEgressComplete() const override;
 
-  bool supportsParallelRequests() const override;
+  [[nodiscard]] bool supportsParallelRequests() const override;
 
-  bool supportsPushTransactions() const override;
+  [[nodiscard]] bool supportsPushTransactions() const override;
 
   size_t generateConnectionPreface(folly::IOBufQueue& writeBuf) override;
 
@@ -239,7 +239,7 @@ class PassThroughHTTPCodecFilter : public HTTPCodecFilter {
 
   HTTPSettings* getEgressSettings() override;
 
-  const HTTPSettings* getIngressSettings() const override;
+  [[nodiscard]] const HTTPSettings* getIngressSettings() const override;
 
   void setHeaderCodecStats(HeaderCodec::Stats* stats) override;
 
@@ -247,11 +247,11 @@ class PassThroughHTTPCodecFilter : public HTTPCodecFilter {
 
   void disableDoubleGoawayDrain() override;
 
-  HTTPCodec::StreamID getLastIncomingStreamID() const override;
+  [[nodiscard]] HTTPCodec::StreamID getLastIncomingStreamID() const override;
 
-  uint32_t getDefaultWindowSize() const override;
+  [[nodiscard]] uint32_t getDefaultWindowSize() const override;
 
-  int8_t mapDependencyToPriority(StreamID parent) const override;
+  [[nodiscard]] int8_t mapDependencyToPriority(StreamID parent) const override;
 };
 
 using HTTPCodecFilterChain = FilterChain<HTTPCodec,

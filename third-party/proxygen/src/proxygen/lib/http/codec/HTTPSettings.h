@@ -54,10 +54,11 @@ class HTTPSettings {
   // present
   bool setIfNotPresent(SettingsId id, SettingsValue val) noexcept;
   void unsetSetting(SettingsId id);
-  const HTTPSetting* getSetting(SettingsId id) const;
-  SettingsValue getSetting(SettingsId id, SettingsValue defaultVal) const;
+  [[nodiscard]] const HTTPSetting* getSetting(SettingsId id) const;
+  [[nodiscard]] SettingsValue getSetting(SettingsId id,
+                                         SettingsValue defaultVal) const;
   // Note: this does not count disabled settings
-  std::size_t getNumSettings() const {
+  [[nodiscard]] std::size_t getNumSettings() const {
     return settings_.size();
   }
   const std::vector<HTTPSetting>& getAllSettings() {
@@ -71,7 +72,7 @@ class HTTPSettings {
   // Returns the specified type of iterator to the setting associated with the
   // specified id
   std::vector<HTTPSetting>::iterator getSettingIter(SettingsId id);
-  std::vector<HTTPSetting>::const_iterator getSettingConstIter(
+  [[nodiscard]] std::vector<HTTPSetting>::const_iterator getSettingConstIter(
       SettingsId id) const;
 
   // TODO: evaluate whether using a list or default initializing vector with

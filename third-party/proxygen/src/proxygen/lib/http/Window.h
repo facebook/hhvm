@@ -30,27 +30,27 @@ class Window {
    * window. This could become a negative number if the initial window is
    * set to a smaller number.
    */
-  int32_t getSize() const;
+  [[nodiscard]] int32_t getSize() const;
 
   /**
    * Returns the number of bytes available to be consumed in this
    * window. If that number went negative somehow, this function clamps
    * the return value to zero.
    */
-  uint32_t getNonNegativeSize() const;
+  [[nodiscard]] uint32_t getNonNegativeSize() const;
 
   /**
    * Returns the size of the initial window. That is, the total number of
    * bytes allowed to be outstanding on this window.
    */
-  uint32_t getCapacity() const;
+  [[nodiscard]] uint32_t getCapacity() const;
 
   /**
    * Returns the number of bytes reserved in this window. If multiple
    * calls to free() caused this number to go negative, this function
    * returns 0.
    */
-  uint32_t getOutstanding() const;
+  [[nodiscard]] uint32_t getOutstanding() const;
 
   /**
    * @param amount The amount to reduce the window size by. Increases

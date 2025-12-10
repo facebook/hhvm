@@ -413,6 +413,7 @@ add_library(
   util/Checksum.cpp
   util/DebugString.cpp
   util/EmptyAsyncProcessor.cpp
+  util/SchemaToMetadata.cpp
   util/ScopedServerInterfaceThread.cpp
   util/ScopedServerThread.cpp
   visitation/visit_by_thrift_field_metadata.cpp
